@@ -10,7 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology5Script';
 import {
   K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry,
-  carry, STONE,
+  carry, STONE, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -102,7 +102,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology5'));
 
-export default function Epistemology5Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Epistemology5Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -118,7 +118,7 @@ export default function Epistemology5Scene({ clock, bt, bi, i, picked, onPick, d
 
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
-      fig: pose(s, FIG_X, 500, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, 500, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // R7b — the seam brightens the star. Slide toward BORN WITH IT and the spark
       // Aristotle says everybody starts with burns harder; slide to TAUGHT IT and it
       // dims to whatever a schoolroom put there.

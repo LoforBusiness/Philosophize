@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics20Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
@@ -81,7 +81,7 @@ const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics20'));
 
-export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -101,7 +101,7 @@ export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick, d
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       outer: carry(cv, 1, n, OUTER[p], OUTER[n], tr),
       // R7b — the knob runs the simulations. Drag from none are ever built toward
       // billions and the inner grid fills with them, so the reader builds the very
@@ -131,6 +131,7 @@ export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick, d
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, outStyle]}>
         <View style={styles.outer} pointerEvents="none" />
         <Text style={styles.outCap}>BASE REALITY</Text>

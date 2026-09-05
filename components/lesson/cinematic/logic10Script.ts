@@ -74,16 +74,16 @@ export const BEATS: Logic10Beat[] = [
   {
     p: 21, x: 158, arg: 1, slot: 1, hid: 2,
     interact: {
-      prompt: 'Set the lever to when a missing premise is actually a fallacy.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'always', reads: 'always, whatever is left unsaid' },
-          { id: 'false', reads: 'only when the unsaid premise is false', correct: true },
-          { id: 'never', reads: 'never, everybody leaves things out' },
+      prompt: 'When does a missing premise actually break an argument?',
+      sort: {
+        chip: 'a hidden premise',
+        bins: [
+          { id: 'always', label: 'always', reads: 'always, whatever is left unsaid' },
+          { id: 'false', label: 'only when false', reads: 'only when the unsaid premise is false', correct: true },
+          { id: 'never', label: 'never', reads: 'never, everybody leaves things out' },
         ],
       },
-      explain: 'The middle. Hidden sounds like dishonest and usually is not: almost every real argument leaves something out, and nobody says all men are mortal out loud. It only fails when the thing left unsaid would not survive being said.',
+      explain: 'Only when false. Hidden sounds like dishonest and usually is not: almost every real argument leaves something out, and nobody says all men are mortal out loud. It only fails when the thing left unsaid would not survive being said.',
       xp: 5,
     },
     dur: 1.0,

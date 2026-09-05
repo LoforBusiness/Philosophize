@@ -94,16 +94,16 @@ export const BEATS: Pol2Beat[] = [
   {
     r: 16, sub: 19, podium: true, chart: 2, ledger: true,
     interact: {
-      prompt: 'Set the lever to what makes their commands binding.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'person', reads: 'the person, who is magnetic' },
-          { id: 'custom', reads: 'the way it has always been done' },
-          { id: 'office', reads: 'the lawful office they now hold', correct: true },
+      prompt: 'Where does the mayor’s authority actually come from?',
+      sort: {
+        chip: 'the mayor',
+        bins: [
+          { id: 'person', label: 'the person', reads: 'the person, who is magnetic' },
+          { id: 'custom', label: 'tradition', reads: 'the way it has always been done' },
+          { id: 'office', label: 'the office', reads: 'the lawful office they now hold', correct: true },
         ],
       },
-      explain: 'The far setting. Charisma may well have won the vote, and it is not what makes an order binding afterwards: that flows from the office. Real leaders blend all three, so the question is always which one is doing the work.',
+      explain: 'The office. Charisma may well have won the vote, and it is not what makes an order binding afterwards: that flows from the office. Real leaders blend all three, so the question is always which one is doing the work.',
       xp: 5,
     },
     dur: 1.0,

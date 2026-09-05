@@ -100,16 +100,16 @@ export const BEATS: Strong4Beat[] = [
   {
     p: 4, fill: 0.78, dice: 1, verdict: 1, lens: 2,
     interact: {
-      prompt: 'Set the lever to the right verdict on a strong inductive argument.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'invalid', reads: 'invalid: it did not guarantee the conclusion' },
-          { id: 'weak', reads: 'weak: the evidence does not do very much' },
-          { id: 'wrong', reads: 'neither, validity is the wrong test', correct: true },
+      prompt: 'What is the right verdict on a strong inductive argument?',
+      sort: {
+        chip: 'a strong inductive argument',
+        bins: [
+          { id: 'invalid', label: 'invalid', reads: 'invalid: it did not guarantee the conclusion' },
+          { id: 'weak', label: 'weak', reads: 'weak: the evidence does not do very much' },
+          { id: 'wrong', label: 'wrong test entirely', reads: 'neither, validity is the wrong test', correct: true },
         ],
       },
-      explain: 'The far setting. Validity is a deductive word, and induction never set out to be valid. It promised likelihood and delivered likelihood. Calling that a failure is like calling a hammer a bad screwdriver.',
+      explain: 'Wrong test entirely. Validity is a deductive word, and induction never set out to be valid. It promised likelihood and delivered likelihood. Calling that a failure is like calling a hammer a bad screwdriver.',
       xp: 5,
     },
     dur: 1.0,

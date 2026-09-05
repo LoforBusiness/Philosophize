@@ -10,7 +10,7 @@ import {
 // exactly rig's and mean what they always did, 100+ reach moves.ts (see emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic11Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -117,7 +117,7 @@ function stepOp(k: number, p: number, n: number, grow: number) {
   return STEPS[p] > k ? 1 : grow;
 }
 
-export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -158,7 +158,7 @@ export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick, dra
     const lift = a * ease01(seg(qv.value, 0.58, 1.0));
 
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       base: carry(cv, 1, n, BASEV[p], BASEV[n], tr, baseFade ? grow : 1),
       // R7b — the knob draws the chain of support. Drag toward IT PROVES THE
       // CONCLUSION and the stubs down the stack's left appear — and the reader can see

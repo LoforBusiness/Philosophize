@@ -83,19 +83,16 @@ export const BEATS: L9Beat[] = [
   {
     a: 4, d: 12, dx: 264,
     interact: {
-      prompt: 'Place the token on a terrible argument that the sun will rise.',
-      field: {
-        xLo: 'THE REASONING IS BAD', xHi: 'THE REASONING IS GOOD',
-        yLo: 'THE CONCLUSION IS FALSE', yHi: 'THE CONCLUSION IS TRUE',
-        start: [0.76, 0.24],
-        quads: [
-          { id: 'luck', x: 0, y: 1, reads: 'bad reasoning, true conclusion: this happens constantly', correct: true },
-          { id: 'best', x: 1, y: 1, reads: 'good reasoning, true conclusion: the best case there is' },
-          { id: 'odd', x: 1, y: 0, reads: 'good reasoning, false conclusion: a premise was false' },
-          { id: 'worst', x: 0, y: 0, reads: 'bad reasoning, false conclusion: nothing here at all' },
+      prompt: 'A terrible argument that the sun will rise. Which is it?',
+      poll: {
+        options: [
+          { id: 'luck', reads: 'bad reasoning, true conclusion: this happens constantly', correct: true },
+          { id: 'best', reads: 'good reasoning, true conclusion: the best case there is' },
+          { id: 'odd', reads: 'good reasoning, false conclusion: a premise was false' },
+          { id: 'worst', reads: 'bad reasoning, false conclusion: nothing here at all' },
         ],
       },
-      explain: 'Top left, and that corner is crowded. A fallacy tells you the reasoning does not support the conclusion. It says nothing about whether the conclusion is true. Assuming it does has its own name: the fallacy fallacy.',
+      explain: 'Bad reasoning, true conclusion, and that answer is crowded. A fallacy tells you the reasoning does not support the conclusion. It says nothing about whether the conclusion is true. Assuming it does has its own name: the fallacy fallacy.',
     },
     dur: 4.6,
   },

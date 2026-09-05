@@ -17,8 +17,9 @@
 // out of a local SHOTS table and applies its own `camStyle`. Those bypass the
 // player entirely, so the guarantee does not reach them, and any of them with a
 // scene-answered question has to be checked by hand.
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
+import { readScript, decomment, beatsBody, beatChunks } from './lib/gestures.mjs';
 
 const DIR = 'components/lesson/cinematic';
 const scenes = readdirSync(DIR).filter((f) => f.endsWith('Scene.tsx')).sort();
@@ -47,6 +48,53 @@ for (const f of scenes) {
   rows.push(`  ${f.replace('Scene.tsx', '')}`);
 }
 
+// ── ONE SHOT PER BEAT ────────────────────────────────────────────────────────
+//
+// A hand-written SHOTS table is indexed BY BEAT, and nothing was comparing its
+// length to how many beats the lesson has. J12's segmenting pass then cut the
+// packed beats of ethics-ethics-8 in two — 11 → 18 — and the whole list slid one
+// place per split: 1.62 on the first half of a sentence and 1.0 on the second,
+// then 1.24 where the arc wanted 1.0. The reader saw the camera pull back and
+// push in on alternate taps, and reported it as the lesson "resetting".
+//
+// It could not fail. The splitter copies every CHANNEL verbatim so the picture
+// holds still, and a shot is not a channel — it lives in the scene, not on the
+// beat. `make:tours` and `measure:must` both re-derive per beat and were re-run;
+// this one table was hand-written and stayed eleven long. Beats past the end are
+// CLAMPED to the last shot rather than throwing, which is why the tail of the
+// lesson merely held wide instead of crashing.
+//
+// The general form is the one §21 keeps recording: when something changes how
+// many beats a lesson has, everything indexed by beat must be re-derived — and
+// what is hand-written needs a checker, because it has no generator to re-run.
+const SHOT_RE = /const SHOTS[^=]*=\s*\[([\s\S]*?)\n\];/;
+const mismatched = [];
+let withShots = 0;
+for (const f of scenes) {
+  const src = readFileSync(path.join(DIR, f), 'utf8').replace(/\r\n/g, '\n');
+  const m = SHOT_RE.exec(src);
+  if (!m) continue;
+  const script = path.join(DIR, f.replace('Scene.tsx', 'Script.ts'));
+  if (!existsSync(script)) continue;
+  const body = beatsBody(decomment(readScript(script)));
+  if (!body) continue;
+  withShots++;
+  const beats = beatChunks(body).length;
+  const shots = (m[1].match(/\{\s*cx:/g) || []).length;
+  if (shots !== beats) mismatched.push(`  ${f.replace('Scene.tsx', '')}: ${shots} shots for ${beats} beats`);
+}
+
+console.log('\nONE SHOT PER BEAT\n');
+console.log(`  ${withShots} scene(s) carry a hand-written shot list`);
+if (!mismatched.length) {
+  console.log('  ok    every shot list has exactly one entry per beat.\n');
+} else {
+  console.log(`\n  FAIL  ${mismatched.length} shot list(s) are indexed against the wrong beat count:\n`);
+  console.log(mismatched.join('\n'));
+  console.log('\n  A shot list is indexed BY BEAT. Repeat a beat\'s shot for each piece it was');
+  console.log('  split into, or the arc plays against the wrong sentences.\n');
+}
+
 console.log('\nTAPPABLE THINGS INSIDE THE SHOT\n');
 console.log(`  ${scenes.length} scenes scanned`);
 console.log('  player-owned cameras are guaranteed by needsBox + containShot (CinematicPlayer.tsx)');
@@ -58,3 +106,5 @@ if (!rows.length) {
   console.log(rows.join('\n'));
   console.log('');
 }
+
+if (mismatched.length || rows.length) process.exit(1);

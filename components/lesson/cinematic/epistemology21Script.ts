@@ -88,7 +88,7 @@ export const BEATS: Epi21Beat[] = [
   {
     p: 4, x: 124, dial: 1, will: 1, ev: 1,
     interact: {
-      prompt: 'Drag to how much of what you believe is up to you.',
+      prompt: 'How much of what you believe is up to you?',
       drag: {
         lo: 'NONE OF IT',
         hi: 'YOU SIMPLY DECIDE',

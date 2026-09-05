@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics24Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -72,7 +72,7 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics24'));
 
-export default function Aesthetics24Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Aesthetics24Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -91,7 +91,7 @@ export default function Aesthetics24Scene({ clock, bt, bi, i, picked, onPick }: 
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       panel: carry(cv, 1, n, PANEL[p], PANEL[n], tr),
       copies: carry(cv, 2, n, COPIES[p], COPIES[n], tr),
       plates: carry(cv, 3, n, PLATES[p], PLATES[n], tr),
@@ -110,6 +110,7 @@ export default function Aesthetics24Scene({ clock, bt, bi, i, picked, onPick }: 
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, panStyle]} pointerEvents="none">
         <View style={styles.frame} />
         <View style={styles.mount} />

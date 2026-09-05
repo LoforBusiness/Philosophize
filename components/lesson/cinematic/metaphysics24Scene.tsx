@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics24Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -87,7 +87,7 @@ const LAMP = BEATS.map((b) => b.lamp ?? 0);
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
-export default function Metaphysics24Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics24Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -110,7 +110,7 @@ export default function Metaphysics24Scene({ clock, bt, bi, i, picked, onPick, d
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       // Fractional so grains leave one at a time across the transition rather than
       // the pile jumping between two counts.
       left: carry(cv, 1, n, GRAINS[p], GRAINS[n], grow),
@@ -129,6 +129,7 @@ export default function Metaphysics24Scene({ clock, bt, bi, i, picked, onPick, d
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <View style={styles.counter} pointerEvents="none">
         <Text style={styles.counterText} numberOfLines={1}>GRAINS LEFT · {shown}</Text>
       </View>

@@ -88,13 +88,13 @@ export const BEATS: Eth24Beat[] = [
   {
     p: 41, x: 268, slab: 1, names: 1, gone: 1,
     interact: {
-      prompt: 'Framing one innocent man would stop a riot. Which view permits it?',
-      lever: {
-        start: 1,
-        stops: [
-          { id: 'deter', reads: 'deterrence alone would allow it', correct: true },
-          { id: 'desert', reads: 'desert would allow it' },
-          { id: 'neither', reads: 'neither could allow it' },
+      prompt: 'Which theory would allow punishing someone innocent?',
+      sort: {
+        chip: 'punishing an innocent',
+        bins: [
+          { id: 'deter', label: 'deterrence', reads: 'deterrence alone would allow it', correct: true },
+          { id: 'desert', label: 'desert', reads: 'desert would allow it' },
+          { id: 'neither', label: 'neither', reads: 'neither could allow it' },
         ],
       },
       explain: 'Deterrence on its own. If the point of punishing is the effect on everybody else, an innocent man will serve as well as a guilty one when nobody knows. Desert forbids it outright, because he has nothing coming. That is why almost nobody holds either theory alone.',

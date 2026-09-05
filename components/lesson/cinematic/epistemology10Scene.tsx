@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology10Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -68,7 +68,7 @@ const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 // Where the shaded band starts, per state: nothing · the last sliver · most of it.
 const BAND_L = [0.98, 0.93, 0.34];
 
-export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -96,7 +96,7 @@ export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick, 
 
     const bl = lerp(BAND_L[BAND[p]], BAND_L[BAND[n]], tr);
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       gauge: carry(cv, 1, n, GAUGE[p], GAUGE[n], tr, gaugeFade ? grow : 1),
       bandL: SC_L + bl * SC_W,
       bandW: Math.max(0, SC_W * (1 - bl)),
@@ -128,6 +128,7 @@ export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick, 
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* ── the gauge ──────────────────────────────────────────────────────── */}
       <Animated.View style={[styles.gaugeWrap, gaugeStyle]} pointerEvents="none">
         <Text style={[styles.endCap, styles.endL]}>A GUESS</Text>

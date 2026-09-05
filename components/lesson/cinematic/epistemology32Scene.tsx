@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology32Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -80,7 +80,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology32'));
 
-export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cur = BEATS[i];
@@ -98,7 +98,7 @@ export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick, 
     const draw = ease01(bt.value / 1.1);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // R7c — the four panels ARE the detail the drag is about, so they fill and empty
       // under the reader's thumb: almost nothing at one end, the thing itself at the
       // other.

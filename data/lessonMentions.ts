@@ -141,6 +141,7 @@ export const LESSON_MENTIONS: Record<string, readonly Mention[]> = {
   'metaphysics-being-19': [['john-locke', 3], ['aristotle', 1], ['david-hume', 1]],
   'metaphysics-being-2': [['parmenides', 3], ['gottfried-leibniz', 1]],
   'metaphysics-being-20': [['george-berkeley', 1], ['rene-descartes', 1]],
+  'metaphysics-being-21': [['willard-van-orman-quine', 1]],
   'metaphysics-being-22': [['jean-paul-sartre', 3], ['jean-buridan', 1]],
   'metaphysics-being-23': [['heraclitus', 1]],
   'metaphysics-being-24': [['bertrand-russell', 3]],

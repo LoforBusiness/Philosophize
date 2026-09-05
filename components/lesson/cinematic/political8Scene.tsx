@@ -13,7 +13,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 // he fetches comes from these two — see the header of interact.ts.
 import { carryHands, gripAt } from './interact';
 import { BEATS } from './political8Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -132,9 +132,18 @@ const EYEV = BEATS.map((b) => b.eyeline ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
 
-export default function Political8Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// the spare crates stay stacked where the shares are IDENTICAL
+const POLL_PILE = [1, 0, 1, 0];
+// the badges matter where SOMEBODY STILL CANNOT SEE
+const POLL_MARKS = [1, 0, 0, 1];
+
+export default function Political8Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(8);
@@ -179,17 +188,17 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick, drag
     const rest = n <= 2 ? PILE_PT : DROP_PT;
 
     return {
-      fig: pose(s, fx, GROUND, K_FIG, dir, 1),
+      fig: lookPose(s, fx, GROUND, K_FIG, dir, 1, gazeX.value, gazeY.value, gazeOn.value),
       // Between its resting place and his hands. Never an opacity.
       crateX: lerp(rest.x, grip.x, held),
       crateY: lerp(rest.y, grip.y, held),
       // R7b — the pad IS the crates. Across, toward identical shares, the spare boxes
       // stay stacked where they are instead of going to whoever needs them.
-      pile: carry(cv, 2, n, PILEV[p], reacting ? dragPos.value : PILEV[n], tr),
+      pile: carry(cv, 2, n, PILEV[p], reacting ? pickAt(POLL_PILE, pickPos.value) : PILEV[n], tr),
       // And up, toward someone still cannot see, the badges come out over the three.
       // The corner the reader is looking for has identical shares AND somebody still
       // facing a plank, which is the difference between equal and fair.
-      marks: carry(cv, 3, n, MARKV[p], reacting ? dragPos2.value : MARKV[n], tr, modeFade ? grow : 1),
+      marks: carry(cv, 3, n, MARKV[p], reacting ? pickAt(POLL_MARKS, pickPos.value) : MARKV[n], tr, modeFade ? grow : 1),
       eye: carry(cv, 4, n, EYEV[p], EYEV[n], tr),
       // Crate counts lerp, so an onlooker RISES smoothly as a crate slides under
       // them and the crate itself fades in beneath their feet.

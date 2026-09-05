@@ -8,7 +8,7 @@ import { clamp01, ease01, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics14Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -73,7 +73,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics14'));
 
-export default function Aesthetics14Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Aesthetics14Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -97,7 +97,7 @@ export default function Aesthetics14Scene({ clock, bt, bi, i, picked, onPick, dr
       carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr,
     ));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // R7c — how many verdicts still stand IS the question. Every verdict equal and
       // all three stay pinned; one right answer and two come down.
       board: carry(cv, 0, n, BOARD[p], reacting ? 3 - dragPos.value * 2 : BOARD[n], grow),

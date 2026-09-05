@@ -81,7 +81,7 @@ export const BEATS: Log14Beat[] = [
     g: 41, lines: 3, mark: 1, gloss: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Slide the seam to divide the blame.',
+      prompt: 'How should the blame divide?',
       split: {
         left: 'THE FORM', right: 'THE WORDS',
         start: 1,

@@ -10,7 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology6Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  useCarry, carry, STONE,
+  useCarry, carry, STONE, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -80,10 +80,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology6'));
 
-export default function Epistemology6Scene({ clock, bt, bi, dragPos, i }: SceneApi) {
+export default function Epistemology6Scene({ clock, bt, bi, pickPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -94,12 +94,12 @@ export default function Epistemology6Scene({ clock, bt, bi, dragPos, i }: SceneA
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       bal: carry(cv, 0, n, BAL[p], BAL[n], tr),
       // R7b — the arm cracks the block. The far setting says the claim asserts what
       // it denies, and the block carrying that claim splits as the reader arrives at
       // it: the sentence coming apart is the argument.
-      crack: carry(cv, 1, n, CRACK[p], reacting ? dragPos.value : CRACK[n], tr),
+      crack: carry(cv, 1, n, CRACK[p], reacting ? pickPos.value : CRACK[n], tr),
       route: carry(cv, 2, n, ROUTE[p], ROUTE[n], tr),
       // the beam quivers a hair but never commits — suspended judgment
       tilt: Math.sin(t * 1.1) * 2,

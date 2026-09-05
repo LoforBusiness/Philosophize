@@ -7,7 +7,7 @@ import { clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type Bundle } 
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics35Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -88,7 +88,7 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics35'));
 
-export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -117,7 +117,7 @@ export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPic
     ));
 
     return {
-      fig: pose(figS, x, GROUND, K_FIG, dir, 1),
+      fig: lookPose(figS, x, GROUND, K_FIG, dir, 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       lineOn: carry(cv, 1, n, LINE[p], LINE[n], tr),
       arcOn: carry(cv, 2, n, ARC_ON[p], ARC_ON[n], tr),

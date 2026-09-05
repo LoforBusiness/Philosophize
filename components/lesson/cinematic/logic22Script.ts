@@ -70,13 +70,13 @@ export const BEATS: Logic22Beat[] = [
   {
     p: 4, x: 124, claim: 1, field: 1, odd: 1, dead: 1,
     interact: {
-      prompt: 'Which single fact proves "All cats are black" false?',
-      lever: {
-        start: 2,
-        stops: [
-          { id: 'one', reads: 'one cat that is not black', correct: true },
-          { id: 'many', reads: 'a good many cats that are not' },
-          { id: 'all', reads: 'prove that no cat is black' },
+      prompt: 'What does it take to refute "all cats are black"?',
+      sort: {
+        chip: '"all cats are black"',
+        bins: [
+          { id: 'one', label: 'one exception', reads: 'one cat that is not black', correct: true },
+          { id: 'many', label: 'a good many', reads: 'a good many cats that are not' },
+          { id: 'all', label: 'prove the negative', reads: 'prove that no cat is black' },
         ],
       },
       explain: 'The trap is reaching for the sweeping opposite, "No cats are black" — a much stronger and separate claim. The contradictory of "all are" is only "some are not". One cat does it.',

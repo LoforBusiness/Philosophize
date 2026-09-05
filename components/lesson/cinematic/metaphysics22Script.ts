@@ -89,16 +89,16 @@ export const BEATS: Met22Beat[] = [
   {
     p: 41, x: 268, track: 1, runs: 1, open: 1,
     interact: {
-      prompt: 'Set the lever to what compatibilism means by could have.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'never', reads: 'could not have done otherwise' },
-          { id: 'wanted', reads: 'would have, had you wanted to', correct: true },
-          { id: 'full', reads: 'could have, with the past exactly the same' },
+      prompt: 'What does "could have done otherwise" have to mean?',
+      sort: {
+        chip: '"could have done otherwise"',
+        bins: [
+          { id: 'never', label: 'never could', reads: 'could not have done otherwise' },
+          { id: 'wanted', label: 'if you had wanted', reads: 'would have, had you wanted to', correct: true },
+          { id: 'full', label: 'same past, other choice', reads: 'could have, with the past exactly the same' },
         ],
       },
-      explain: 'The middle. Compatibilism keeps the replay and rereads the phrase: you were free if nothing stopped you acting on what you wanted. The far setting is the libertarian one. It has to answer why a replay that could go either way is not just luck.',
+      explain: 'If you had wanted. Compatibilism keeps the replay and rereads the phrase: you were free if nothing stopped you acting on what you wanted. The far setting is the libertarian one. It has to answer why a replay that could go either way is not just luck.',
       xp: 5,
     },
     dur: 1.0,

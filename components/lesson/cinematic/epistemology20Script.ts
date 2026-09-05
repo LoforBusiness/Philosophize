@@ -91,19 +91,16 @@ export const BEATS: Epi20Beat[] = [
   {
     p: 41, x: 268, voices: 1, agree: 0.32, wires: 1,
     interact: {
-      prompt: 'Place the token on the report that is actually worth something.',
-      field: {
-        xLo: 'REPEATS WHAT IT HEARD', xHi: 'COULD HAVE SAID NO',
-        yLo: 'NOBODY HAS HEARD OF THEM', yHi: 'A VERY BIG NAME',
-        start: [0.24, 0.76],
-        quads: [
-          { id: 'real', x: 1, y: 0, reads: 'checked it themselves, and unknown', correct: true },
-          { id: 'reach', x: 0, y: 1, reads: 'a big name, just passing it on' },
-          { id: 'both', x: 1, y: 1, reads: 'a big name, and checked it themselves' },
-          { id: 'noise', x: 0, y: 0, reads: 'unknown, and just passing it on' },
+      prompt: 'Whose report is actually worth something?',
+      poll: {
+        options: [
+          { id: 'real', reads: 'checked it themselves, and unknown', correct: true },
+          { id: 'reach', reads: 'a big name, just passing it on' },
+          { id: 'both', reads: 'a big name, and checked it themselves' },
+          { id: 'noise', reads: 'unknown, and just passing it on' },
         ],
       },
-      explain: 'The bottom right, and the point is that the axis going up does nothing. What makes a second report count is that it had its own way of checking and might have come out differently. A big name repeating a post adds reach, and reach is what feels like evidence.',
+      explain: 'Checked it themselves, and unknown. The point is that fame does nothing. What makes a second report count is that it had its own way of checking and might have come out differently. A big name repeating a post adds reach, and reach is what feels like evidence.',
       xp: 5,
     },
     dur: 1.0,

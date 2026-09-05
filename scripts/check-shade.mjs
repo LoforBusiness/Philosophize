@@ -67,14 +67,66 @@ const files = fs.readdirSync(DIR).filter((f) => f.endsWith('Scene.tsx')).sort();
 /** Strip comments, for the reason L8 gives: a comment that quotes a fill is not a fill. */
 const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
 
+/**
+ * Every style entry in the file's StyleSheet, with its own braces balanced.
+ *
+ * A regex cannot do this: a style value may itself be an object
+ * (`shadowOffset: { width, height }`), so `\{[^{}]*\}` stops at the wrong brace.
+ */
+function sheetEntries(sheet) {
+  const out = [];
+  const re = /^\s{2}([A-Za-z_][A-Za-z0-9_]*):\s*\{/gm;
+  let m;
+  while ((m = re.exec(sheet))) {
+    let depth = 1;
+    let i = re.lastIndex;
+    while (i < sheet.length && depth > 0) {
+      const c = sheet[i];
+      if (c === '{') depth += 1;
+      else if (c === '}') depth -= 1;
+      i += 1;
+    }
+    out.push({ name: m[1], text: sheet.slice(m.index, i) });
+  }
+  return out;
+}
+
 const rows = [];
 const softOnTone = [];
+/** Styles that declare a mass and are never rendered — see the DEAD MASS section. */
+const deadMass = [];
 for (const f of files) {
   const src = strip(fs.readFileSync(path.join(DIR, f), 'utf8'));
+
+  // ── A DECLARED FILL IS NOT A DRAWN FILL, AND FOR 87 SCENES IT WAS NEITHER ──
+  //
+  // This counted `backgroundColor: STONE` anywhere in the file, which includes
+  // the StyleSheet — so a style that nothing renders counted exactly like one on
+  // the stage. The tonal pass that drove this ratchet to zero added a `floor:`
+  // entry to 111 scenes and the matching <View> to 24 of them; the other 87 were
+  // reported as fixed and were unchanged on screen. A reader could see it and
+  // this file could not.
+  //
+  // So the count is now what the RENDER BODY reaches. The body is everything
+  // before StyleSheet.create; a style counts only if `styles.<name>` appears in
+  // it, and a fill written inline in the body counts on sight.
+  const at = src.indexOf('StyleSheet.create(');
+  const body = at < 0 ? src : src.slice(0, at);
+  const sheet = at < 0 ? '' : src.slice(at);
+
   const used = new Map();
-  for (const m of src.matchAll(/backgroundColor:\s*([A-Z_][A-Z_0-9]*)/g)) {
+  for (const e of sheetEntries(sheet)) {
+    const drawn = new RegExp(`styles\\.${e.name}\\b`).test(body);
+    for (const m of e.text.matchAll(/backgroundColor:\s*([A-Z_][A-Z_0-9]*)/g)) {
+      if (!MASSES.includes(m[1])) continue;
+      if (drawn) used.set(m[1], (used.get(m[1]) ?? 0) + 1);
+      else deadMass.push(`${f}  ${e.name} is ${m[1]} and nothing renders it`);
+    }
+  }
+  for (const m of body.matchAll(/backgroundColor:\s*([A-Z_][A-Z_0-9]*)/g)) {
     if (MASSES.includes(m[1])) used.set(m[1], (used.get(m[1]) ?? 0) + 1);
   }
+
   const fills = [...used.values()].reduce((a, b) => a + b, 0);
   rows.push({ id: f.replace('Scene.tsx', ''), fills, tones: used.size, used });
 
@@ -147,9 +199,21 @@ console.log(softOnTone.length
   ? '  SOFT is 3.26:1 on STONE and 2.10:1 on SHADE. Type on a tone is INK.'
   : '  ok    no SOFT type sits on a tone it cannot be read against');
 
+// ── A STYLE THAT DECLARES A MASS AND IS NEVER DRAWN ─────────────────────────
+//
+// Zero, and it stays zero. This is not a tidiness rule about dead code: it is
+// the rule that makes the count above mean anything. While it was unchecked,
+// 87 scenes carried a `floor` nothing rendered and this file called every one of
+// them fixed.
+for (const m of deadMass.slice(0, 14)) console.log(`  FAIL  ${m}`);
+if (deadMass.length > 14) console.log(`  FAIL  … and ${deadMass.length - 14} more`);
+console.log(deadMass.length
+  ? '  a declared fill is not a drawn fill. Render it or delete it.'
+  : '  ok    every style that declares a tonal fill is actually rendered');
+
 const over = flat.length > FLAT_BUDGET;
 console.log(`  ${over ? 'FAIL' : 'ok  '}  the flat count is a high-water mark  ${flat.length} of ${FLAT_BUDGET}`);
 if (over) console.log('\n  a scene got flatter, or a new one arrived with one tone. Give it masses (see cinematicKit).');
 else if (flat.length < FLAT_BUDGET) console.log(`\n  lower FLAT_BUDGET to ${flat.length} in scripts/check-shade.mjs — a budget that still says the old number is a debt.`);
 console.log('');
-process.exit(over || softOnTone.length ? 1 : 0);
+process.exit(over || softOnTone.length || deadMass.length ? 1 : 0);

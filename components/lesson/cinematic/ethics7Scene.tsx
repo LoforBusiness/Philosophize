@@ -11,7 +11,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics7Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import { cue } from '@/lib/feedback';
@@ -70,9 +70,16 @@ const CB = BEATS.map((b) => b.carB ?? -70);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
 
-export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick, dragPos, dragPos2 }: SceneApi) {
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// the badge sits over BOTH cars only where the choices were identical
+const POLL_GLANCE = [1, 1, 0, 0];
+
+export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
@@ -138,7 +145,7 @@ export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick, 
     const xb = carry(cv, 0, n, CB[p], CB[n], tr);
 
     return {
-      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       laneA: laneAOn ? (laneAFade ? grow : 1) : 0,
       laneB: laneBOn ? (laneBFade ? grow : 1) : 0,
       kid: kidOn ? (kidFade ? grow : 1) : 0,
@@ -146,7 +153,7 @@ export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick, 
       // R7c — the pad's x axis is whether the two drivers CHOSE the same thing, and
       // the glance badge over both cars is what says they did. Slide right and the
       // second badge is drawn; slide left and only one driver was looking away.
-      glance: (glanceOn ? (glanceFade ? grow : 1) : 0) * (reacting ? 1 - (1 - dragPos.value) * tr : 1),
+      glance: (glanceOn ? (glanceFade ? grow : 1) : 0) * (reacting ? pickAt(POLL_GLANCE, pickPos.value) : 1),
       xa,
       xb,
       // Wheels spin off DISTANCE, not time, so a parked car's wheels are still.

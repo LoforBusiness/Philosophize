@@ -83,13 +83,13 @@ export const BEATS: Pol24Beat[] = [
   {
     p: 41, x: 268, signs: 1, pub: 0,
     interact: {
-      prompt: 'Set the lever to what would keep those bars standing.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'same', reads: 'treat everyone identically, ignore it' },
-          { id: 'tolerate', reads: 'let them keep it to themselves' },
-          { id: 'public', reads: 'give it a place in public life', correct: true },
+      prompt: 'Which policy would have kept those bars full?',
+      sort: {
+        chip: 'a minority culture',
+        bins: [
+          { id: 'same', label: 'treat all alike', reads: 'treat everyone identically, ignore it' },
+          { id: 'tolerate', label: 'tolerate privately', reads: 'let them keep it to themselves' },
+          { id: 'public', label: 'a place in public', reads: 'give it a place in public life', correct: true },
         ],
       },
       explain: 'Public use. Equal dignity says treat everyone the same, and that is the setting that emptied the bars. Tolerance at home was already there and did not help. The tension is real: treating people identically can erase them, and treating them differently can divide them.',

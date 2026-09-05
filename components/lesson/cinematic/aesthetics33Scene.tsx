@@ -8,7 +8,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics33Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -53,7 +53,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics33'));
 
-export default function Aesthetics33Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
+export default function Aesthetics33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -66,7 +66,7 @@ export default function Aesthetics33Scene({ clock, bt, bi, i, dragPos }: SceneAp
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P[p], t)), emoteLive(P[n], t, bt.value), tr));
     const wipe = ease01(bt.value / 1.2);
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       clean: live ? dragPos.value : carry(cv, 0, n, CLEAN[p], CLEAN[n], wipe),
       layers: carry(cv, 1, n, LAYERED[p], LAYERED[n], tr),
     };

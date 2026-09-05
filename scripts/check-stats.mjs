@@ -453,5 +453,125 @@ function counterZeros(src) {
     bad.length ? bad.join(', ') : `${seen} counters start true and only move when the figure does`);
 }
 
+
+// ── nothing on this tab overshoots ──────────────────────────────────────────
+//
+//   > "for the pie chart and the boxes above that, and when you click on one of
+//   > the who you read most and the other one, one thing I have noticed for all
+//   > of these is that they 'bounce', this looks cheap and ai looking."
+//
+// IT WAS NOT ONE BAD BOUNCE, WHICH IS WHY THIS IS ARITHMETIC AND NOT A LIST.
+// Eight springs drove this screen and every one of them was underdamped, at
+// eight different amplitudes — so the reader was not reacting to one loud
+// animation, they were reacting to a screen on which nothing settled without
+// going past itself first. Fixing the loudest would have left seven.
+//
+// A spring's damping ratio is `damping / (2 * sqrt(stiffness * mass))`, and the
+// height of its first overshoot is `exp(-pi * z / sqrt(1 - z*z))`. At z >= 1 it
+// is critically damped: it reaches its target as fast as it can WITHOUT ever
+// passing it. As it stood:
+//
+//     the row that grew            z 0.29   overshoot 39%
+//     a ghost target extending     z 0.35   overshoot 31%
+//     a discovery card opening     z 0.51   overshoot 16%
+//     the league rows sweeping     z 0.55   overshoot 12%
+//     the era bars sweeping        z 0.56   overshoot 12%
+//     a metric cell arriving       z 0.58   overshoot 11%
+//     a dial piece being chosen    z 0.65   overshoot  7%
+//     the calm entrance sweep      z 0.68   overshoot  6%
+//
+// AND ON THIS SCREEN OVERSHOOT IS NOT A MATTER OF TASTE. A bar is a number
+// drawn as a length. A bar that springs 39% past its own value and comes back
+// is, for a fifth of a second, showing a figure that is not true — on the one
+// row the reader just moved, which is the row they are looking hardest at.
+// Apple's guidance draws the line where it settles: start critically damped,
+// and add overshoot only where the GESTURE carried momentum. Nothing on this
+// tab is thrown. Every motion here is an arrival or the answer to a tap.
+//
+// So: no spring under z = 1 anywhere on the tab, and no bounce or elastic
+// easing. A named curve is exempt by construction — `EASE_REVEAL` is a cubic
+// bezier whose control points are inside the unit square, so it cannot pass
+// its target however it is used.
+const ANIM_FILES = [
+  'components/stats/InsightBoard.tsx',
+  'components/stats/Instrument.tsx',
+  'components/stats/Dial.tsx',
+  'components/stats/reveal.tsx',
+  'app/(app)/stats/index.tsx',
+];
+
+/** Every spring in a source, with its damping ratio. Comments stripped first. */
+function springRatios(src) {
+  const s = strip(src);
+  const out = [];
+  const at = [];
+  for (const re of [/withSpring\s*\(/g, /type\s*:\s*['"]spring['"]/g]) {
+    let m;
+    while ((m = re.exec(s))) at.push(m.index);
+  }
+  for (const i of at) {
+    const win = s.slice(i, i + 300);
+    const num = (key) => {
+      const m = win.match(new RegExp(key + '\\s*:\\s*([0-9]*\\.?[0-9]+)'));
+      return m ? Number(m[1]) : null;
+    };
+    const damping = num('damping');
+    const stiffness = num('stiffness');
+    const mass = num('mass') ?? 1;
+    // A spring with no configuration is Reanimated's default, which is
+    // underdamped — so an unreadable one counts against, never for.
+    if (damping == null || stiffness == null) { out.push({ zeta: 0, damping, stiffness, mass }); continue; }
+    out.push({ zeta: damping / (2 * Math.sqrt(stiffness * mass)), damping, stiffness, mass });
+  }
+  return out;
+}
+
+/** Overshoot of a second-order step response, as a fraction of the target. */
+const overshoot = (z) => (z >= 1 ? 0 : Math.exp((-Math.PI * z) / Math.sqrt(1 - z * z)));
+
+{
+  // COUNTER-TEST. Every one of the eight goes back in and must be seen, plus the
+  // two shapes that are not `withSpring` at all.
+  const old = `
+    withSpring(to, { damping: 7.5, stiffness: 190, mass: 0.9 });
+    withSpring(1, { damping: 16, stiffness: 155, mass: 0.9 });
+    transition={{ type: 'spring', damping: 9, stiffness: 170 }}
+  `;
+  const bare = 'grow.value = withSpring(1);';
+  const critical = 'withSpring(1, { damping: 26, stiffness: 155, mass: 0.9 });';
+  const commented = '// withSpring(1, { damping: 7.5, stiffness: 190, mass: 0.9 })';
+  const clean = 'withTiming(1, { duration: 320, easing: EASE_REVEAL });';
+
+  const soft = (src) => springRatios(src).filter((r) => r.zeta < 1).length;
+  ok(springRatios(old).length === 3, 'the spring detector finds all three shapes', `${springRatios(old).length} found`);
+  ok(soft(old) === 3, 'and calls every one of them underdamped');
+  ok(soft(bare) === 1, 'and an unconfigured spring counts against, because the default bounces');
+  ok(soft(critical) === 0, 'and holds its fire on a critically damped one', `z ${springRatios(critical)[0].zeta.toFixed(2)}`);
+  ok(soft(commented) === 0, 'and reads the code rather than the comments about it');
+  ok(soft(clean) === 0, 'and a named curve is not a spring at all');
+  // The arithmetic itself, against the two figures quoted in reveal.tsx.
+  ok(Math.abs(overshoot(0.287) - 0.39) < 0.01, 'the overshoot formula agrees with the 39% in the source');
+  ok(overshoot(1) === 0 && overshoot(1.4) === 0, 'and says a critically damped spring never passes its target');
+}
+
+{
+  const soft = [];
+  const easings = [];
+  for (const f of ANIM_FILES) {
+    const src = readFileSync(path.join(REPO, f), 'utf8');
+    for (const r of springRatios(src)) {
+      if (r.zeta < 1) soft.push(`${f}: z ${r.zeta.toFixed(2)} (+${Math.round(overshoot(r.zeta) * 100)}%)`);
+    }
+    const e = strip(src).match(/Easing\.(bounce|elastic)/g);
+    if (e) easings.push(`${f}: ${e.join(', ')}`);
+  }
+  ok(soft.length === 0,
+    'no spring on the Insights tab settles by going past its own value',
+    soft.length ? soft.join(', ') : `${ANIM_FILES.length} files, every motion critically damped or a curve`);
+  ok(easings.length === 0,
+    'and nothing on it eases with a bounce or an elastic',
+    easings.length ? easings.join(', ') : 'no Easing.bounce, no Easing.elastic');
+}
+
 console.log(fails ? `\n${fails} problem(s).\n` : '\nall clear.\n');
 process.exit(fails ? 1 : 0);

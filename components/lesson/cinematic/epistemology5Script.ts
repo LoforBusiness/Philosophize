@@ -95,7 +95,7 @@ export const BEATS: Epi5Beat[] = [
   {
     p: 25, star: 1, rungs: 5,
     interact: {
-      prompt: 'Slide the seam to where Aristotle puts the wanting to know.',
+      prompt: 'Where does Aristotle put the wanting to know?',
       split: {
         left: 'BORN WITH IT', right: 'TAUGHT IT',
         start: 0.04,

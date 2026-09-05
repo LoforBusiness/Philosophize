@@ -12,7 +12,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics10Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  facing, useCarry, carry, STONE,
+  facing, useCarry, carry, STONE, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -112,7 +112,7 @@ const LINKV = BEATS.map((b) => b.link ?? 0);
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 
-export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -140,7 +140,7 @@ export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick, dr
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       film: carry(cv, 1, n, FILM[p], FILM[n], tr, filmFade ? grow : 1),
       panel: carry(cv, 2, n, PANELV[p], PANELV[n], tr, panelFade ? grow : 1),
       // The shutter runs over the LAST 60% of the transition, so on the beat he

@@ -94,16 +94,16 @@ export const BEATS: Pol21Beat[] = [
   {
     p: 41, x: 268, map: 1, claimed: 1, exit: 1,
     interact: {
-      prompt: 'Set the lever to what would make staying count as agreeing.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'know', reads: 'knowing that the law exists' },
-          { id: 'stay', reads: 'staying put rather than leaving' },
-          { id: 'refuse', reads: 'having a refusal you could actually take', correct: true },
+      prompt: 'What would real consent to the state have to involve?',
+      sort: {
+        chip: 'consent to the state',
+        bins: [
+          { id: 'know', label: 'knowing the law', reads: 'knowing that the law exists' },
+          { id: 'stay', label: 'staying put', reads: 'staying put rather than leaving' },
+          { id: 'refuse', label: 'a refusal you could take', reads: 'having a refusal you could actually take', correct: true },
         ],
       },
-      explain: 'The far setting. Consent gets its force from the alternative being genuinely open, which is why a signature under threat binds nobody. The first setting describes being informed, and being informed of a demand is not the same as accepting it.',
+      explain: 'A refusal you could take. Consent gets its force from the alternative being genuinely open, which is why a signature under threat binds nobody. "knowing the law" describes being informed, and being informed of a demand is not the same as accepting it.',
       xp: 5,
     },
     dur: 1.0,

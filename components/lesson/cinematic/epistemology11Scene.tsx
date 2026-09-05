@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology11Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -75,6 +75,8 @@ const HOUR_LEN = 26;
 const MIN_LEN = 36;                   // tip 8 units inside the rim
 const HOUR_W = 3.5;
 const MIN_W = 2.5;
+const SEC_LEN = 39;                   // longer than the minute hand, tip 5 inside the rim
+const SEC_W = 1.5;
 
 // The hallway clock is stopped at 3:00: hour hand a quarter turn (right), minute
 // hand straight up. These are the only two literal angles in the file — every other
@@ -128,7 +130,7 @@ const DIR = dirsFrom(X, 1);
 const REAL = BEATS.map((b) => b.real ?? 180);
 const LINKV = BEATS.map((b) => b.link ?? 0);
 
-export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -158,9 +160,19 @@ export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick }
     const mins = carry(cv, 0, n, REAL[p], REAL[n], tr);
 
     return {
-      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       hour: mins * 0.5,
       minute: mins * 6,
+      // ── THE ONE THING THAT SAYS IT IS RUNNING ─────────────────────────────
+      //
+      // The hour and minute hands are driven by the BEAT, deliberately, so the
+      // readings are exact rather than free-running — and the cost of that is
+      // that between two taps this dial is as motionless as the stopped one
+      // beside it. The whole lesson is that one of these clocks is going and the
+      // other is not, and for most of the time on screen the reader could not
+      // tell which. A second hand is the field mark: it costs the exactness
+      // nothing, because it never carries a reading.
+      sec: (t * 6) % 360,
       // A plain previous→current blend, not the grow pattern: this value only ever
       // goes 1 → 0, and multiplying a falling lerp by a rising `grow` would blink
       // it out on the first frame of the beat and then bulge back (C20c/H58).
@@ -175,11 +187,13 @@ export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick }
 
   const hourStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.hour}deg` }] }));
   const minStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.minute}deg` }] }));
+  const secStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.sec}deg` }] }));
   const linkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.link }));
   const pickStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pick }));
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* ── captions ────────────────────────────────────────────────────────── */}
       <Text style={[styles.cap, styles.capL]} pointerEvents="none">HALLWAY CLOCK · STOPPED</Text>
       <Text style={[styles.cap, styles.capR]} pointerEvents="none">REAL TIME</Text>
@@ -233,6 +247,10 @@ export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick }
       />
       <Animated.View
         style={[styles.hand, styles.minHand, { left: RIGHT_CX - MIN_W / 2 }, minStyle]}
+        pointerEvents="none"
+      />
+      <Animated.View
+        style={[styles.hand, styles.secHand, { left: RIGHT_CX - SEC_W / 2 }, secStyle]}
         pointerEvents="none"
       />
       <View style={[styles.pin, { left: RIGHT_CX - 3.5 }]} pointerEvents="none" />
@@ -308,6 +326,9 @@ const styles = StyleSheet.create({
   hand: { position: 'absolute', backgroundColor: INK, borderRadius: 2, transformOrigin: '50% 100%' },
   hourHand: { top: DIAL_CY - HOUR_LEN, width: HOUR_W, height: HOUR_LEN },
   minHand: { top: DIAL_CY - MIN_LEN, width: MIN_W, height: MIN_LEN },
+  // Thinner and longer than the minute hand, the way a real one is, so the two
+  // are never mistaken for each other at a glance.
+  secHand: { top: DIAL_CY - SEC_LEN, width: SEC_W, height: SEC_LEN },
   pin: { position: 'absolute', top: DIAL_CY - 3.5, width: 7, height: 7, borderRadius: 3.5, backgroundColor: INK },
 
   // The frozen reading, printed inside the lower half of the hallway dial. The box

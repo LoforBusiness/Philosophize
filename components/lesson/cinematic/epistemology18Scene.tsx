@@ -8,7 +8,7 @@ import { dirsFrom, clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundl
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology18Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -78,7 +78,7 @@ const LIVE_D = BEATS.map((b) => (b.live_d ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology18'));
 
-export default function Epistemology18Scene({ clock, bt, bi, dragPos }: SceneApi) {
+export default function Epistemology18Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -98,7 +98,7 @@ export default function Epistemology18Scene({ clock, bt, bi, dragPos }: SceneApi
 
     const scripted = carry(cv, 1, n, EV[p], EV[n], tr);
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       rails: carry(cv, 2, n, RAILS[p], RAILS[n], tr),
       grip: carry(cv, 3, n, GRIPV[p], GRIPV[n], tr),
       ev: LIVE_D[n] === 1 ? clamp01(dragPos.value) : scripted,

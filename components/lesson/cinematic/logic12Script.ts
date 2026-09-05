@@ -71,13 +71,13 @@ export const BEATS: Logic12Beat[] = [
     g: 11, lit: 1,
     dur: 1.0,
     interact: {
-      prompt: 'So when is an either/or fair?',
-      lever: {
-        start: 2,
-        stops: [
-          { id: 'exhaustive', reads: 'fair when the two doors are the only doors', correct: true },
-          { id: 'popular', reads: 'fair when most people accept the two' },
-          { id: 'never', reads: 'never fair, every either-or is a trick' },
+      prompt: 'When is an either-or fair rather than false?',
+      sort: {
+        chip: 'an either-or',
+        bins: [
+          { id: 'exhaustive', label: 'only two doors', reads: 'fair when the two doors are the only doors', correct: true },
+          { id: 'popular', label: 'most accept it', reads: 'fair when most people accept the two' },
+          { id: 'never', label: 'always a trick', reads: 'never fair, every either-or is a trick' },
         ],
       },
       explain: 'The other card over-corrects, and the light switch refutes it: on or off leaves nothing out and is perfectly good reasoning. What makes a disjunction legitimate is that its options are exhaustive — not how they are offered, or by whom.',

@@ -10,7 +10,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology14Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -63,10 +63,19 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// TWO worlds rather than one
+const POLL_VAT = [1, 1, 0, 0];
+// ONE experience across them, which is what the leap spans
+const POLL_LEAP = [1, 0, 1, 0];
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology14'));
 
-export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
@@ -83,13 +92,13 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, 
     const grow = ease01(bt.value / 0.9);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // R7b — the pad decides what is behind the screen. Up the y axis, from one
       // world to two, the real world becomes a vat.
-        vat: carry(cv, 0, n, VAT[p], reacting ? dragPos2.value : VAT[n], swap),
+        vat: carry(cv, 0, n, VAT[p], reacting ? pickAt(POLL_VAT, pickPos.value) : VAT[n], swap),
       // And across: the more the two experiences match, the further the leap between
       // them has to be drawn. Both axes move something, which is what a pad is for.
-      leap: carry(cv, 1, n, LEAP[p], reacting ? dragPos.value : LEAP[n], grow),
+      leap: carry(cv, 1, n, LEAP[p], reacting ? pickAt(POLL_LEAP, pickPos.value) : LEAP[n], grow),
     };
   });
 

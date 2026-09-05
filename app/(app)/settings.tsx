@@ -1058,11 +1058,16 @@ function SubscriptionSection() {
             width={certW}
             title="THE SCHOLAR’S PASS"
             // A TERSER INSCRIPTION ON A SMALLER OBJECT, which is what a pocket
-            // copy of anything does. The tab's line — "Admits the bearer to the
-            // whole library, without limit" — wraps to two at this width, and the
-            // motto is the certificate's voice rather than one of its claims, so
+            // copy of anything does. The tab's line — "This pass admits you to
+            // the whole library." — wraps to two at this width, and the motto is
+            // the certificate's voice rather than one of its claims, so
             // shortening it costs nothing that check-pass is holding.
-            motto="The whole library, without limit"
+            //
+            // IT STILL HAS TO BE A WHOLE SENTENCE. The line here used to read
+            // "The whole library, without limit" — no verb, no full stop — and a
+            // reader met it as a sentence that stopped halfway. check-pass §10
+            // now holds both copies to a finished sentence and to a clean break.
+            motto="It opens the whole library."
             holder={displayName || 'Philosopher'}
             seal={
               <RankSeal
@@ -1093,7 +1098,7 @@ function SubscriptionSection() {
             variant="free"
             width={certW}
             title="THE DAY PASS"
-            motto="Free — one sitting at a time"
+            motto="It is free for as long as you like."
             holder={displayName || 'Philosopher'}
             seal={
               <RankSeal

@@ -7,7 +7,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics37Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -69,7 +69,7 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics37'));
 
-export default function Aesthetics37Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Aesthetics37Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -91,7 +91,7 @@ export default function Aesthetics37Scene({ clock, bt, bi, i, picked, onPick, dr
     // beat clock — and held after, so it never un-plays itself between beats.
     const arriving = PLAYED[n] > 0 && PLAYED[p] === 0;
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       stavesOn: carry(cv, 1, n, STAVES[p], STAVES[n], tr),
       scoreOn: carry(cv, 2, n, SCORE[p], SCORE[n], tr),

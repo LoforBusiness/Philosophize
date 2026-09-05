@@ -76,6 +76,25 @@ interface UIStore {
    */
   remindersNonce: number;
   bumpReminders: () => void;
+  // ── THE CONFERRAL ─────────────────────────────────────────────────────────
+  //
+  // The Scholar's Pass being handed over, shown globally over everything for the
+  // same reason the reward is: it has to survive the screen that raised it going
+  // away. A purchase can be made from the Pass tab, from the post-lesson sheet,
+  // from the daily-limit gate or from Settings, and three of those four dismiss
+  // themselves the moment `isPro` flips — so a ceremony owned by any of them
+  // would be unmounted mid-animation by its own success.
+  //
+  // It is fired from `subscriptionStore` rather than from the four call sites,
+  // which is the whole point: there is one place a reader becomes a Scholar, so
+  // there is one place the ceremony starts and it cannot be forgotten at a fifth.
+  //
+  // `seq` forces a fresh mount, exactly as `rewardSeq` does — somebody who
+  // trials, lapses and then buys must see it play from the beginning.
+  conferral: 'trial' | 'purchase' | null;
+  conferralSeq: number;
+  showConferral: (kind: 'trial' | 'purchase') => void;
+  dismissConferral: () => void;
   // Lesson-complete reward, shown globally over everything. Set on completion,
   // cleared on "Continue". `rewardSeq` forces a fresh mount per completion.
   reward: RewardInfo | null;
@@ -141,6 +160,10 @@ export const useUIStore = create<UIStore>((set) => ({
   closePaywall: () => set({ paywallOpen: false }),
   remindersNonce: 0,
   bumpReminders: () => set((s) => ({ remindersNonce: s.remindersNonce + 1 })),
+  conferral: null,
+  conferralSeq: 0,
+  showConferral: (kind) => set((s) => ({ conferral: kind, conferralSeq: s.conferralSeq + 1 })),
+  dismissConferral: () => set({ conferral: null }),
   reward: null,
   rewardSeq: 0,
   showReward: (r) => set((s) => ({ reward: r, rewardSeq: s.rewardSeq + 1 })),

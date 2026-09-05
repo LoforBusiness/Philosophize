@@ -72,7 +72,7 @@ export const BEATS: Metaphysics11Beat[] = [
   {
     p: 8, c: 31, tok: 1,
     interact: {
-      prompt: 'Slide the seam to where Locke hangs the person.',
+      prompt: 'Where does Locke hang the person?',
       split: {
         left: 'MEMORY REACHING BACK', right: 'THE SAME BODY',
         start: 0.04,

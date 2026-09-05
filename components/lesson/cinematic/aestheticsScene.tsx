@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './aestheticsScript';
 import {
   clamp01, ease01, emoteHold, emoteLive, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, SIGH, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, SIGH, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -158,7 +158,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics'));
 
-export default function AestheticsScene({ clock, bt, bi, qv, dragPos, i }: SceneApi) {
+export default function AestheticsScene({ clock, bt, bi, qv, dragPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFigS = useHeld();
   const cv = useCarry(4);
@@ -175,7 +175,7 @@ export default function AestheticsScene({ clock, bt, bi, qv, dragPos, i }: Scene
     const glowOn = carry(cv, 1, n, GLOW[p], GLOW[n], tr, Q1[n] === 1 ? 1 + 0.4 * ease01(q) : 1);
 
     return {
-      fig: pose(figS, FIG_X, GROUND, K_FIG, -1, 1),
+      fig: lookPose(figS, FIG_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
       appleOn, glowOn, t,
       // R7b — the seam summons the crowd. Give the bar to EVERYBODY and the other
       // eight appear behind the judgement; give it back to ONLY YOURSELF and they go,

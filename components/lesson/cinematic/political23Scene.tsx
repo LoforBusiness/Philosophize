@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political23Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -78,7 +78,7 @@ const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political23'));
 
-export default function Political23Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Political23Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -98,7 +98,7 @@ export default function Political23Scene({ clock, bt, bi, i, picked, onPick, dra
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       tags: carry(cv, 1, n, TAGS[p], TAGS[n], tr),
       strip: carry(cv, 2, n, STRIP[p], STRIP[n], tr),
       box: carry(cv, 3, n, BOX[p], BOX[n], tr),
@@ -121,6 +121,7 @@ export default function Political23Scene({ clock, bt, bi, i, picked, onPick, dra
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, capStyle]} pointerEvents="none">
         <Text style={styles.tagCap}>WHAT YOU ARE</Text>
       </Animated.View>

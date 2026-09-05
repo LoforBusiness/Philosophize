@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political19Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -74,7 +74,7 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political19'));
 
-export default function Political19Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Political19Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -93,7 +93,7 @@ export default function Political19Scene({ clock, bt, bi, i, picked, onPick }: S
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       axis: carry(cv, 1, n, AXIS[p], AXIS[n], tr),
       cost: carry(cv, 2, n, COSTV[p], COSTV[n], tr),
       pull: carry(cv, 3, n, PULLV[p], PULLV[n], tr),
@@ -111,6 +111,7 @@ export default function Political19Scene({ clock, bt, bi, i, picked, onPick }: S
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, axisStyle]} pointerEvents="none">
         {/* EACH PANEL RIDES WITH ITS OWN TARGET (E39). */}
         {PAN_TOP.map((ty, k) => (

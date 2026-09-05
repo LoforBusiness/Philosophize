@@ -8,7 +8,7 @@ import {
   WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, stand, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
-import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
+import { emoteAny as emoteHold, emoteAnyLive as emoteLive, gazeAt, pointAt } from './moves';
 import { BEATS } from './ethics10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
 } from './cinematicKit';
@@ -80,6 +80,20 @@ const FACTORS = [
 
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? 88);
+/** How far he is reaching for the near child on each beat (see the script). */
+const REACH = BEATS.map((b) => b.reach ?? 0);
+/**
+ * WHERE HE REACHES: the near child's own body, not a point beside it.
+ *
+ * The child is 57 units tall with its crown at 443, so its middle is about 470.
+ * `pointAt` lays the arm along the line to a target and stops just inside arm's
+ * length, so a target 68 units away — which is twice what an arm can cover — comes
+ * out as a straight arm aimed at the child rather than a stretched one touching
+ * it. That is the honest picture: he has waded in and is reaching, and he does not
+ * have hold of it yet.
+ */
+const CHILD_REACH_X = NEAR_X - 4;
+const CHILD_REACH_Y = 470;
 // The camera, from the staging: it follows the figure this track describes,
 // pulls back to scale 1 on every graded beat so a tap lands where it is aimed,
 // and leans in on the quote. See followMoves in ./camera.ts.
@@ -88,7 +102,7 @@ const DIR = dirsFrom(X, 1);
 
 export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(1);
+  const cv = useCarry(2);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -119,8 +133,28 @@ export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: Scen
     const nearS = emoteHold(24, t + 2.1);
     const farS = stand(t + 5.6);
 
+    // ── HE REACHES FOR THE CHILD, AND LOOKS AT IT ─────────────────────────────
+    //
+    // Blended rather than switched: `reach` carries across the beat like every
+    // other channel, so the arm goes out as he wades in and comes most of the way
+    // back over the quote instead of snapping between two poses (L1).
+    const fx = carry(cv, 0, n, X[p], X[n], tr);
+    const dir = facing(DIR[p], DIR[n], bt.value);
+    const rv = carry(cv, 1, n, REACH[p], REACH[n], tr);
+    let sr = s;
+    if (rv > 0.001) {
+      const pt = pointAt(s, fx, GROUND, K_FIG, dir, CHILD_REACH_X, CHILD_REACH_Y);
+      // A point without a look reads as a person gesturing at something behind
+      // them — moves.ts says so in pointAt's own header, so the two go together.
+      const g = gazeAt(s, fx, GROUND, K_FIG, dir, CHILD_REACH_X, CHILD_REACH_Y, rv);
+      sr = {
+        ...g,
+        fistR: { x: lerp(s.fistR.x, pt.fistR.x, rv), y: lerp(s.fistR.y, pt.fistR.y, rv) },
+      };
+    }
+
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: pose(sr, fx, GROUND, K_FIG, dir, 1),
       near: pose(nearS, NEAR_X, GROUND, NEAR_K, -1, 1),
       far: pose(farS, FAR_X, FAR_G, FAR_K, 1, farOn ? (farFade ? grow : 1) : 0),
       farOn: farOn ? (farFade ? grow : 1) : 0,

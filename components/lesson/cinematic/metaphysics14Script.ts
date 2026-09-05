@@ -88,19 +88,16 @@ export const BEATS: Met14Beat[] = [
     g: 41, rows: 4, marks: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Place the token on water being H2O.',
-      field: {
-        xLo: 'YOU COULD DOUBT IT', xHi: 'YOU COULD NOT DOUBT IT',
-        yLo: 'FALSE IN SOME WORLD', yHi: 'TRUE IN EVERY WORLD',
-        start: [0.76, 0.24],
-        quads: [
-          { id: 'water', x: 0, y: 1, reads: 'doubted for centuries, and true in every world', correct: true },
-          { id: 'obvious', x: 1, y: 1, reads: 'nobody doubts it, and true in every world' },
-          { id: 'sure', x: 1, y: 0, reads: 'nobody doubts the fact, and it could have differed' },
-          { id: 'open', x: 0, y: 0, reads: 'doubtable, and it could have gone otherwise' },
+      prompt: 'What kind of truth is "water is H₂O"?',
+      poll: {
+        options: [
+          { id: 'water', reads: 'doubted for centuries, and true in every world', holders: ['Kripke'], correct: true },
+          { id: 'obvious', reads: 'nobody doubts it, and true in every world' },
+          { id: 'sure', reads: 'nobody doubts the fact, and it could have differed' },
+          { id: 'open', reads: 'doubtable, and it could have gone otherwise' },
         ],
       },
-      explain: 'Top left, and the two axes are the whole lesson. One of them measures the world and the other measures you. Water was H2O in every world while people doubted it for centuries, and plenty of things nobody doubts could easily have gone another way.',
+      explain: 'Doubted for centuries, and true in every world. Two different things are being measured: one is the world, the other is us. Water was H2O in every world while people doubted it for centuries, and plenty of things nobody doubts could easily have gone another way.',
       xp: 5,
     },
   },

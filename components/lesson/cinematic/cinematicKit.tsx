@@ -5,11 +5,13 @@ import Animated, {
   makeMutable, Easing, FadeInDown, LinearTransition, runOnJS, type SharedValue,
 } from 'react-native-reanimated';
 import SketchIcon from '@/components/shared/SketchIcon';
+import AnswerOption, { type AnswerState } from '@/components/shared/AnswerOption';
 import QuotePlate from '@/components/shared/QuotePlate';
 import { eraGroupOfDate } from '@/data/philosophers';
 import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import { C, RADIUS, LIP } from '@/constants/design';
-import { ease01, seg, type Stance } from './rig';
+import { ease01, pose, seg, type Bundle, type Stance } from './rig';
+import { gazeAt } from './moves';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared kit for cinematic lessons — the parts that are identical across every
@@ -342,6 +344,80 @@ export interface SplitBlock {
   zones: SplitZone[];
 }
 
+// ── THE POLL AND THE SORT, AND WHY THE LEVER AND THE PAD ARE GONE ───────────
+//
+// A reader worked through the corpus and named both: the four-box pad is "always
+// really difficult … it takes a long time to understand what is actually being
+// said", and the lever "is kind of confusing as well, and also doesn't look very
+// good, and it really isn't that different from the line you drag back and
+// forth."
+//
+// Reading all 72 of their questions says they were right, and for one reason:
+// NEITHER WAS EVER A QUANTITY. Every lever beat is a pick among three or four
+// named CLAIMS — "the fear is faked · the fun is faked · the fear is real with
+// the consequences taken out" — dressed as a setting on a scale. A pick wearing a
+// slider is exactly as confusing as it sounds, and it is why it read as a second
+// drag rail. The pad is the same fault in two dimensions: its four corners are
+// named positions, but the reader has to derive them from two axis labels before
+// they can answer, which is a puzzle sitting in front of the question.
+//
+// So the answer shape is kept and the CONTROL is replaced, twice:
+//
+//   POLL — a ballot of named positions. You pick the one you would defend, and
+//          answering reveals WHO ELSE DID: real thinkers, named, under each. That
+//          is the reader's own suggestion, and it turns a question with one right
+//          answer into a place you stand relative to the tradition.
+//
+//   SORT — one named thing and two or three labelled bins. "Where does testimony
+//          belong: direct, or second-hand?" A classification, which is what the
+//          lever's questions were really asking, phrased as what it is.
+//
+// NO INVENTED STATISTICS, EVER. The obvious version of a poll shows percentages,
+// and there is no honest source for "68% of philosophers say X" inside this app.
+// So `PollOption` has no share field to type one into: the bar under a position
+// is drawn from how many NAMED holders it lists, and a position with no holders
+// draws no bar. A made-up number on a screen that teaches philosophy is worse
+// than no number, and a type that cannot express it is the only reliable guard.
+
+/** One position on a `poll` ballot. */
+export interface PollOption {
+  id: string;
+  /** The position in the reader's own words — lesson copy, under group J. */
+  reads: string;
+  /**
+   * Who actually held it. Named thinkers only, and only where the lesson or the
+   * record supports the attribution; leave it out rather than guess. The bar is
+   * drawn from the LENGTH of this list, so it is a count of named people and
+   * never a statistic.
+   */
+  holders?: string[];
+  correct?: boolean;
+}
+
+/** A graded question answered by choosing one of several named positions. */
+export interface PollBlock {
+  /**
+   * Two to four positions, in the order the lesson argues them. The order shown
+   * is NOT this one -- PollBallot permutes it per question (see orderFor), so
+   * there is no authored position for an answer to sit in.
+   */
+  options: PollOption[];
+}
+
+/** One bin a `sort` chip can be dropped into. */
+export interface SortBin {
+  id: string;
+  /** The bin's name, on its lip. One to three words. */ label: string;
+  /** What dropping the chip here commits you to — the readout. */ reads: string;
+  correct?: boolean;
+}
+
+/** A graded question answered by putting one named thing in the right category. */
+export interface SortBlock {
+  /** The thing being classified, named. Two or three words. */ chip: string;
+  /** Two or three bins, left to right. */ bins: SortBin[];
+}
+
 /** One quadrant of a `field`, named by which half of each axis it occupies. */
 export interface FieldQuad {
   id: string;
@@ -377,14 +453,31 @@ export interface InteractBlock {
    * `cards` in practice — a question is either "which of these" or "how much".
    */
   drag?: DragBlock;
-  /** An arm swung into a named slot (see ./LeverPick). */
+  /**
+   * An arm swung into a named slot (see ./LeverPick).
+   *
+   * RETIRED — nothing declares one, and nothing new may. Every one of its fifty
+   * questions was a pick among named claims wearing a slider, which is why a
+   * reader could not tell it from the drag rail. Use `sort` for "where does this
+   * belong" and `poll` for "which position would you defend". The type stays so
+   * an old branch still compiles; `check:rotation` fails on a new one.
+   */
   lever?: LeverBlock;
   /** A curve the reader draws across columns (see ./ShapePlot). */
   plot?: PlotBlock;
   /** One bar divided between two sides (see ./SplitBar). */
   split?: SplitBlock;
-  /** A token placed on a two-axis pad (see ./FieldPick). */
+  /**
+   * A token placed on a two-axis pad (see ./FieldPick).
+   *
+   * RETIRED for the same reason, one dimension up: its corners are named
+   * positions the reader has to derive from two axis labels first. Use `poll`.
+   */
   field?: FieldBlock;
+  /** A ballot of named positions, with who held each (see ./PollBallot). */
+  poll?: PollBlock;
+  /** One named thing dropped into a labelled bin (see ./SortBins). */
+  sort?: SortBlock;
 }
 
 /** Every lesson's Beat extends this; the shell reads only these common fields. */
@@ -598,6 +691,81 @@ export function carry(
   return v;
 }
 
+/**
+ * WHAT THE SCENE LOOKS LIKE AT THE OPTION THE READER IS INDICATING.
+ *
+ * `SceneApi.pickPos` is 0..1 across a `poll`'s or a `sort`'s options in the
+ * AUTHOR's order, so `u * (n - 1)` is an option index — and between two options
+ * it is a real fraction, because the control eases rather than snapping. This
+ * reads the scene's per-option table at that fraction, so the picture TRAVELS
+ * from one named position to the next instead of cutting.
+ *
+ * That is the whole reason these tables are worth having. Four options are four
+ * settings of one machine, and sliding between them is the lesson: the reader
+ * watches the mouth close as the answer moves from "hears everything" to "the
+ * dogmatist", which is a thing four separate pictures could never say.
+ *
+ * The table must have one entry per option, in the same order as the block.
+ */
+export function pickAt(table: readonly number[], u: number): number {
+  'worklet';
+  const n = table.length;
+  if (n === 0) return 0;
+  if (n === 1) return table[0];
+  const c = u < 0 ? 0 : u > 1 ? 1 : u;
+  const f = c * (n - 1);
+  const k = Math.floor(f);
+  const j = k >= n - 1 ? n - 1 : k;
+  const a = table[j];
+  const b = table[j >= n - 1 ? n - 1 : j + 1];
+  return a + (b - a) * (f - j);
+}
+
+/**
+ * `pose`, with the head turned toward what the beat is about.
+ *
+ * A ONE-FOR-ONE SUBSTITUTION, which is the whole point. Every scene ends its
+ * figure with the same call —
+ *
+ *     pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(...), 1)
+ *
+ * — and applying a gaze by hand would mean hoisting `x` and `dir` out of it in
+ * 186 files, because `gazeAt` needs both and so does `pose`. This takes the same
+ * six arguments and three more, so wiring a scene is a substitution rather than a
+ * refactor.
+ *
+ * `gx`/`gy` come from `SceneApi`, generated per beat by `npm run make:gaze`; `w`
+ * is `gazeOn`, which is 0 on a beat with no target and eases in on a beat change
+ * so the neck never cuts.
+ *
+ * A scene with its own idea of where he should look should call `moves.gazeAt`
+ * directly and keep `pose` — the table is a floor, not a ceiling.
+ */
+export function lookPose(
+  s: Stance, x: number, groundY: number, k: number, dir: number, opacity: number,
+  gx: number, gy: number, w: number,
+): Bundle {
+  'worklet';
+  if (w <= 0) return pose(s, x, groundY, k, dir, opacity);
+  const g = gazeAt(s, x, groundY, k, dir, gx, gy, w);
+  // ── AND THE LEAN, BECAUSE A HEAD MOVE IS NOT A MOVE (N12) ─────────────────
+  //
+  // The rule book already records this against the four "looking" actions in
+  // moves.ts: `U.head` is 16, so a neck angle pivots the head centre about five
+  // units against a head forty across, and three of those four actions drew a
+  // figure standing perfectly still. This figure has no face — a turned head on a
+  // plain disc is invisible from the side — so attention has to be written on the
+  // SPINE, which is 33 units and carries the torso with it.
+  //
+  // `gazeAt` tilts the chest by a tenth of the gaze angle, which is the right
+  // direction and not enough to see. Taking the lean from how far the neck
+  // actually turned keeps the two locked together and costs no second solve: the
+  // total comes to about 0.6 of the gaze angle, so a figure craning up at a
+  // machine above him moves his head some sixteen units rather than five.
+  const lean = (g.neck - s.neck) * 0.5;
+  return pose({ ...g, tilt: g.tilt + lean }, x, groundY, k, dir, opacity);
+}
+
 // ── beat-to-beat transition (SEQUENTIAL) ──────────────────────────────────────
 // Fade the deck fully out, swap content while invisible, fade back in. `render`
 // (not children) produces content only when it changes: a beat change (`trigger`)
@@ -805,46 +973,32 @@ export function Reveal({ correct, graded, explain }: {
 
 /** One option row, with the chunk. Its own press state, because the lip has to
  *  drop under the finger that is on it and not under the other three. */
+// THE SAME ROW THE THINKER'S QUIZ USES, and that is the point of it being here.
+//
+// The reader asked for the quiz to be brought up to scratch and then for the same
+// look and interaction to be in the lessons. The lesson's row already had the
+// ledge; the quiz's was a flat box that dimmed. Rather than copy the good one
+// into the other file and leave two of them to drift, both now render
+// `components/shared/AnswerOption` — which is this row, extracted, plus the two
+// small movements the reader asked for (the press becomes a 90ms drop rather than
+// a jump, and the row that turns out to be the answer settles once).
+//
+// The lesson deck passes NO badge, so its rows stay unlettered. That is J9: 27
+// explanations once said "the trap is B" after the lettered deck had been
+// replaced, and every one of those letters named nothing.
 function Opt({ o, answered, reveal, chosen, onPick }: {
   o: Choice; answered: boolean; reveal: boolean; chosen: boolean;
   onPick: (id: string, correct: boolean) => void;
 }) {
-  const [down, setDown] = useState(false);
-  // No lip once answered: the row has stopped being a button, and a ledge under
-  // a thing that cannot be pressed is an affordance that lies.
-  const lip = answered ? 0 : LIP.button;
+  const state: AnswerState = !answered
+    ? 'idle'
+    : reveal ? 'right' : chosen ? 'wrong' : 'dim';
   return (
-    <Pressable
-      style={styles.optSlot}
-      disabled={answered}
-      accessibilityRole="button"
-      accessibilityLabel={o.text}
+    <AnswerOption
+      label={o.text}
+      state={state}
       onPress={() => onPick(o.id, o.correct)}
-      onPressIn={() => setDown(true)}
-      onPressOut={() => setDown(false)}
-    >
-      <View style={{ paddingBottom: lip }}>
-        {lip > 0 ? <View pointerEvents="none" style={[styles.optLip, { top: lip }]} /> : null}
-        <View
-          style={[
-            styles.opt,
-            reveal && styles.optRight,
-            chosen && !o.correct && styles.optWrong,
-            { transform: [{ translateY: down && !answered ? lip : 0 }] },
-          ]}
-        >
-          <Text
-            style={[
-              styles.optText,
-              reveal && styles.optRightText,
-              chosen && !o.correct && styles.optWrongText,
-            ]}
-          >
-            {o.text}
-          </Text>
-        </View>
-      </View>
-    </Pressable>
+    />
   );
 }
 

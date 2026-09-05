@@ -44,7 +44,7 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Script.ts')).sort(
       // ANY of the six controls counts, not just the deck: `drag`, `lever`,
       // `plot`, `split` and `field` all draw their labels and their live readout
       // directly under the art, which is the whole basis of the exemption.
-      const cards = /\n\s{6}(?:cards|drag|lever|plot|split|field):\s*[[{]/.test(src.slice(m.index, m.index + 1400));
+      const cards = /\n\s{6}(?:cards|drag|sort|poll|plot|split|lever|field):\s*[[{]/.test(src.slice(m.index, m.index + 1400));
       rows.push({ name, kind, prompt: m[2], cards });
     }
   }
@@ -76,6 +76,13 @@ const long = rows.filter((r) => words(r.prompt) > MAX_WORDS);
 // a live sentence above the seam, which is MORE on screen than a deck offers, and
 // two perfectly followable prompts were reported as pointing at nothing. When the
 // lessons gain a new way to answer, the rule about prompts gains one too (L7).
+//
+// AND IT HAPPENED AGAIN THE VERY NEXT TIME, exactly as that sentence predicts.
+// `sort` prints its bins directly under the prompt and `poll` prints the whole
+// ballot, so both put MORE in front of the reader than the deck does — and with
+// the list left unchanged, "Which case breaks the idea that laughter needs a
+// victim?" was reported as pointing at nothing while its three cases sat on the
+// screen underneath it. The list is the thing to update, not the prompt.
 const vague = rows.filter(
   (r) => r.kind === 'interact' && !r.cards && VAGUE.test(r.prompt) && !CONCRETE.test(r.prompt),
 );

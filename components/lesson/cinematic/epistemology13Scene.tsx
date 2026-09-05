@@ -12,7 +12,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology13Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  facing, useCarry, carry,
+  facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -87,7 +87,7 @@ const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 function cellLeft(k: number) { return GRID_L + (k % COLS) * (CELL_W + CELL_GX); }
 function cellTop(k: number) { return GRID_T + Math.floor(k / COLS) * (CELL_H + CELL_GY); }
 
-export default function Epistemology13Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Epistemology13Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -113,7 +113,7 @@ export default function Epistemology13Scene({ clock, bt, bi, i, picked, onPick, 
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       grid: carry(cv, 1, n, GRIDV[p], GRIDV[n], tr, gridFade ? grow : 1),
       // How far the strike-through has spread, 0…2, so a cell can read its own share.
       // R7b — the drawn curve strikes the tickets out. The higher the reader draws
@@ -133,6 +133,7 @@ export default function Epistemology13Scene({ clock, bt, bi, i, picked, onPick, 
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* ── the draw ────────────────────────────────────────────────────────── */}
       <Animated.View style={[styles.grid, gridStyle]} pointerEvents="none">
         {TICKETS.map((num, k) => (

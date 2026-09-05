@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic25Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -77,7 +77,7 @@ const FAKE = BEATS.map((b) => b.fake ?? 0);
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 
-export default function Logic25Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Logic25Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -101,7 +101,7 @@ export default function Logic25Scene({ clock, bt, bi, i, picked, onPick, dragPos
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       result: carry(cv, 1, n, RES[p], RES[n], tr, resFade ? grow : 1),
       real: carry(cv, 2, n, REAL[p], REAL[n], realFade ? grow : tr),
       // R7b — the seam grows the false-positive bar. The more of the population the

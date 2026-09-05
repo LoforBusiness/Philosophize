@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology19Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -72,7 +72,7 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology19'));
 
-export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -91,7 +91,7 @@ export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick }
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       doors: carry(cv, 1, n, DOORS[p], DOORS[n], tr),
       chip: carry(cv, 2, n, CHIP[p], CHIP[n], tr),
       stray: carry(cv, 3, n, STRAY[p], STRAY[n], tr),
@@ -123,6 +123,7 @@ export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick }
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, doorsStyle]}>
         {/* THE DOOR IS THE TARGET, not a hit-box laid over one.
             These were two loops — the art and its caption drawn here, an empty

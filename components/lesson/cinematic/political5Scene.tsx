@@ -10,7 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political5Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  useCarry, carry, STONE,
+  useCarry, carry, STONE, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -116,10 +116,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political5'));
 
-export default function Political5Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Political5Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -134,12 +134,12 @@ export default function Political5Scene({ clock, bt, bi, i, picked, onPick, drag
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       city: carry(cv, 0, n, CITY[p], CITY[n], tr),
       // R7b — the arm draws the veil. Only the far setting is what the veil is for,
       // and it comes down over the figure as the reader reaches it: the device appears
       // when its reason does.
-      veil: carry(cv, 1, n, VEIL[p], reacting ? dragPos.value : VEIL[n], tr),
+      veil: carry(cv, 1, n, VEIL[p], reacting ? pickPos.value : VEIL[n], tr),
       link: carry(cv, 2, n, LINK[p], LINK[n], tr),
     };
   });

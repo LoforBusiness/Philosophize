@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics20Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -66,7 +66,7 @@ const LIVE_D = BEATS.map((b) => (b.live_d ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics20'));
 
-export default function Ethics20Scene({ clock, bt, bi, dragPos }: SceneApi) {
+export default function Ethics20Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -86,7 +86,7 @@ export default function Ethics20Scene({ clock, bt, bi, dragPos }: SceneApi) {
 
     const scripted = carry(cv, 1, n, RATE[p], RATE[n], tr);
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       blocks: carry(cv, 2, n, BLOCKS[p], BLOCKS[n], tr),
       // One value, two sources, and the picture never disagrees with whichever
       // is in charge: the reader's thumb on its own beat, the script's track
@@ -102,6 +102,7 @@ export default function Ethics20Scene({ clock, bt, bi, dragPos }: SceneApi) {
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap} pointerEvents="none">THE SAME HARM, SEVEN TIMES</Text>
       <View style={styles.horizon} pointerEvents="none" />
       {blocks.map((k) => <Harm key={k} S={SCENE} index={k} />)}

@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic33Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -79,7 +79,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic33'));
 
-export default function Logic33Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
+export default function Logic33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -92,7 +92,7 @@ export default function Logic33Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P[p], t)), emoteLive(P[n], t, bt.value), tr));
     const grow = ease01(bt.value / 1.0);
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       bend: live ? dragPos.value : carry(cv, 0, n, BEND[p], BEND[n], grow),
       next: carry(cv, 1, n, NEXTD[p], NEXTD[n], tr),
     };

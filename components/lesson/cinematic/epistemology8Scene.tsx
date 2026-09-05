@@ -12,7 +12,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology8Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  facing, useCarry, carry,
+  facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -89,7 +89,7 @@ const HOLD = BEATS.map((b) => b.hold ?? 0);
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
-export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -121,7 +121,7 @@ export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick, d
     ));
     const fx = carry(cv, 0, n, X[p], X[n], tr);
     return {
-      fig: pose(s, fx, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, fx, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       // The carried block rides in front of the figure and only appears / vanishes
       // in the last stretch of the travel — picked up on arrival, set down on
       // arrival — so it is visible for the whole walk across. Its offset swings
@@ -160,6 +160,7 @@ export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick, d
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* ── the spare blocks waiting on the ground, stage-left ───────────────── */}
       <Text style={styles.pileLabel} pointerEvents="none">REASONS</Text>
       {PILE_TOPS.map((top, k) => (

@@ -78,7 +78,7 @@ export const BEATS: Pol18Beat[] = [
     g: 41, lanes: 2, bikes: 1, ride: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Drag to what the same pay has really bought them.',
+      prompt: 'What has the same pay really bought them?',
       drag: {
         lo: 'THEY ARE NOW EQUAL',
         hi: 'INCOME SAYS NOTHING AT ALL',

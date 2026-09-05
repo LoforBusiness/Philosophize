@@ -76,16 +76,16 @@ export const BEATS: P9Beat[] = [
   {
     vote: 0, tally: true, advance: true, rights: true, one: 163,
     interact: {
-      prompt: 'Set the lever to who the tyrant is here.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'one', reads: 'one ruler pressing down on everybody' },
-          { id: 'outside', reads: 'an outside power imposing its will' },
-          { id: 'many', reads: 'the many closing in on the few', correct: true },
+      prompt: 'Which danger is Mill actually warning about?',
+      sort: {
+        chip: 'the danger Mill fears',
+        bins: [
+          { id: 'one', label: 'one ruler', reads: 'one ruler pressing down on everybody' },
+          { id: 'outside', label: 'an outside power', reads: 'an outside power imposing its will' },
+          { id: 'many', label: 'the many', reads: 'the many closing in on the few', correct: true },
         ],
       },
-      explain: 'The far setting, and that is what makes it so hard to see. A tyrant is the picture the word brings up, and this tyrant is the electorate. No coup, no soldiers — just a majority pressing on a minority, and every vote counted properly.',
+      explain: 'The many, and that is what makes it so hard to see. A tyrant is the picture the word brings up, and this tyrant is the electorate. No coup, no soldiers — just a majority pressing on a minority, and every vote counted properly.',
     },
     dur: 4.6,
   },

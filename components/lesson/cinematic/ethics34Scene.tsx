@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics34Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -52,7 +52,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics34'));
 
-export default function Ethics34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
+export default function Ethics34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -66,7 +66,7 @@ export default function Ethics34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
     const grow = ease01(bt.value / 1.1);
     const u = live ? dragPos.value : carry(cv, 0, n, POP[p], POP[n], grow);
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       pop: u,
       // TOTAL = count × quality, and it has to RISE across the whole drag or the
       // lesson's claim is false. 10→40 lives against quality 1→0.30 gives 10→12,
@@ -82,6 +82,7 @@ export default function Ethics34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.kicker} numberOfLines={1}>EACH BAR IS ONE LIFE</Text>
 
       {Array.from({ length: COLS * ROWS }, (_, k) => <Tally key={k} k={k} SCENE={SCENE} />)}

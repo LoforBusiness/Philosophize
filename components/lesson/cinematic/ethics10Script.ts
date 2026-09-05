@@ -19,6 +19,17 @@ export interface Et10Beat extends BaseBeat {
   /** Narrator gesture (emote code). */ p?: number;
   /** Narrator mark on the ground. */ x?: number;
   /** He is standing IN the water, not beside it. */ wading?: boolean;
+  /**
+   * He REACHES for the near child, 0…1.
+   *
+   * The app's own ad reel of this lesson has him wade in and lift the child out,
+   * and the lesson had him stand in the water beside it with his arms at his
+   * sides — which is what a reader was comparing when they said the ads' objects
+   * "interact with the stickman in a very clean and actual good looking way".
+   * The narration on that beat is "So you are in the water, shoes and all", and
+   * A1 says the picture has to do what the words say.
+   */
+  reach?: number;
   /** The far child, the dotted line and its label are on. */ far?: boolean;
   /** The three factors for the tap question. */ factors?: boolean;
 }
@@ -41,12 +52,12 @@ export const BEATS: Et10Beat[] = [
     dur: 3,
   },
   {
-    p: 395, x: 268, wading: true,
+    p: 395, x: 268, wading: true, reach: 1,
     text: 'So you are in the water, shoes and all. Now Singer asks the awkward question: which part of that reasoning was about the child being NEAR you?',
     dur: 4.4,
   },
   {
-    p: 137, x: 268, wading: true,
+    p: 137, x: 268, wading: true, reach: 0.55,
     quote: {
       id: 'lq-ethics-ethics-10-1',
       text: 'If it is in our power to prevent something bad from happening, without thereby sacrificing anything of comparable moral importance, then we ought, morally, to do it.',
@@ -81,7 +92,7 @@ export const BEATS: Et10Beat[] = [
   {
     p: 8, x: 268, wading: true, far: true,
     interact: {
-      prompt: 'Drag to how much you must accept for the argument to work.',
+      prompt: 'How much must you accept for the argument to work?',
       drag: {
         lo: 'ONE MODEST PREMISE',
         hi: 'ALL OF SINGER’S ETHICS',

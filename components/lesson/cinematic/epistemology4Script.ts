@@ -102,7 +102,7 @@ export const BEATS: Epi4Beat[] = [
   {
     e: 0, r: 4, glow: 1, bridge: 1,
     interact: {
-      prompt: 'Drag to how much a rationalist says comes before experience.',
+      prompt: 'How much does a rationalist say comes before experience?',
       drag: {
         lo: 'NONE OF IT',
         hi: 'ALL OF IT',

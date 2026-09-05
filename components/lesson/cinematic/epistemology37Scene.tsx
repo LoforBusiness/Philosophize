@@ -8,7 +8,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology37Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -72,7 +72,7 @@ const SAFE = BEATS.map((b) => (b.safe ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology37'));
 
-export default function Epistemology37Scene({ clock, bt, bi, dragPos }: SceneApi) {
+export default function Epistemology37Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
@@ -95,9 +95,18 @@ export default function Epistemology37Scene({ clock, bt, bi, dragPos }: SceneApi
     const quiet = LIVE_D[n] === 1 ? clamp01(dragPos.value) : carry(cv, 0, n, QUIET[p], QUIET[n], tr);
 
     return {
-      fig: pose(figS, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       hullOn: carry(cv, 2, n, HULL[p], HULL[n], tr),
+      // ── SHE FLOATS ────────────────────────────────────────────────────────
+      //
+      // The hull sat on a 260x2 line without moving, so between taps this was a
+      // photograph of a boat rather than a boat. Two slow sines on the monotonic
+      // clock — never on `bt`, which resets every beat and would restart the
+      // rocking on every tap (L1) — and their periods are deliberately coprime
+      // (7.4s and 10.1s) so the pair never repeats inside a lesson.
+      bob: Math.sin(t * 0.85) * 2.4,
+      roll: Math.sin(t * 0.62) * 0.9,
       // A HIGHER BAR MEANS MORE DOUBT SURVIVES. The rail runs from "a feeling will
       // do" to "survey every plank", so sliding RIGHT should leave the cracks in —
       // which is why this is 1 - quiet on the drag beat and quiet everywhere else,
@@ -111,6 +120,12 @@ export default function Epistemology37Scene({ clock, bt, bi, dragPos }: SceneApi
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const hullStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.hullOn }));
+  // THE ORIGIN HAS TO BE THE SHIP, NOT THE STAGE. This rides an absoluteFill, so
+  // a bare rotate would swing the hull about the middle of the 400x560 design
+  // space and throw it off the water.
+  const shipStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: SCENE.value.bob }, { rotate: `${SCENE.value.roll}deg` }],
+  }));
   const wakeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.sailedOn }));
   const cardStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.verdictOn }));
   const safeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.safeOn }));
@@ -121,10 +136,12 @@ export default function Epistemology37Scene({ clock, bt, bi, dragPos }: SceneApi
 
       <Animated.View style={[StyleSheet.absoluteFill, hullStyle]} pointerEvents="none">
         <View style={styles.water} />
-        <View style={styles.hull} />
-        <View style={styles.deck} />
-        <View style={styles.mast} />
-        {CRACK_X.map((cx, k) => <Crack key={cx} S={SCENE} left={cx} index={k} />)}
+        <Animated.View style={[styles.ship, shipStyle]}>
+          <View style={styles.hull} />
+          <View style={styles.deck} />
+          <View style={styles.mast} />
+          {CRACK_X.map((cx, k) => <Crack key={cx} S={SCENE} left={cx} index={k} />)}
+        </Animated.View>
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, wakeStyle]} pointerEvents="none">
@@ -166,6 +183,11 @@ const styles = StyleSheet.create({
   },
 
   water: { position: 'absolute', left: 128, top: WATER_Y, width: 260, height: 2, backgroundColor: INK },
+  /** Everything that floats, pivoting about the waterline amidships. */
+  ship: {
+    position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H,
+    transformOrigin: `${HULL_X + HULL_W / 2}px ${WATER_Y}px`,
+  },
   hull: {
     position: 'absolute', left: HULL_X, top: HULL_Y, width: HULL_W, height: HULL_H,
     borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,

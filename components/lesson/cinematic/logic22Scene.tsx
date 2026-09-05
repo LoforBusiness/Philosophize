@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic22Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -66,7 +66,7 @@ const FIELD = BEATS.map((b) => b.field ?? 0);
 function dotLeft(k: number) { return BD_L + (k % COLS) * (DOT + DOT_GX); }
 function dotTop(k: number) { return FIELD_T + Math.floor(k / COLS) * (DOT + DOT_GY); }
 
-export default function Logic22Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Logic22Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -92,7 +92,7 @@ export default function Logic22Scene({ clock, bt, bi, i, picked, onPick }: Scene
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       claim: carry(cv, 1, n, CLAIM[p], CLAIM[n], tr, claimFade ? grow : 1),
       field: carry(cv, 2, n, FIELD[p], FIELD[n], tr, fieldFade ? grow : 1),
       odd: oddOn ? (oddFade ? grow : 1) : 0,
@@ -113,6 +113,7 @@ export default function Logic22Scene({ clock, bt, bi, i, picked, onPick }: Scene
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[styles.claim, claimStyle]} pointerEvents="none">
         <Text style={styles.claimText} numberOfLines={1}>ALL CATS ARE BLACK</Text>
         <Animated.View style={[styles.strike, strikeStyle]} />

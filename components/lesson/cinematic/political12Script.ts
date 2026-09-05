@@ -75,16 +75,16 @@ export const BEATS: Pol12Beat[] = [
   {
     p: 4, x: 124, door: 1, open: 1, neg: 1, posi: 1,
     interact: {
-      prompt: 'Set the lever to the freedom the regime is claiming.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'neg', reads: 'negative liberty: nobody standing in your way' },
-          { id: 'none', reads: 'no freedom at all, just force' },
-          { id: 'pos', reads: 'positive liberty: being your own master', correct: true },
+      prompt: 'Nobody is stopping him, and he cannot stop. Which freedom is missing?',
+      sort: {
+        chip: 'the addict',
+        bins: [
+          { id: 'neg', label: 'negative liberty', reads: 'negative liberty: nobody standing in your way' },
+          { id: 'none', label: 'no freedom at all', reads: 'no freedom at all, just force' },
+          { id: 'pos', label: 'positive liberty', reads: 'positive liberty: being your own master', correct: true },
         ],
       },
-      explain: 'The far setting, and the comfortable answer is the middle. Berlin point is sharper and nastier than that: the claim is coherent. Once somebody else gets to define your real self, they can shrink your choices in the name of freedom and mean it.',
+      explain: 'Positive liberty, and the comfortable answer is the middle. Berlin point is sharper and nastier than that: the claim is coherent. Once somebody else gets to define your real self, they can shrink your choices in the name of freedom and mean it.',
       xp: 5,
     },
     dur: 1.0,

@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic16Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -84,11 +84,20 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// how many mornings the option claims
+const POLL_DAWNS = [5, 1, 5, 1];
+// the CROW → SUN arrow, drawn only where the option says CAUSE
+const POLL_ARROW = [0, 0, 1, 1];
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic16'));
 
-export default function Logic16Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+export default function Logic16Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -108,14 +117,14 @@ export default function Logic16Scene({ clock, bt, bi, i, picked, onPick, dragPos
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       // R7b — the pad plays the mornings. Up the y axis, from seen once to seen five
       // times, the strip fills in one dawn at a time.
-      dawns: carry(cv, 1, n, DAWNS[p], reacting ? dragPos2.value * 6 : DAWNS[n], tr),
+      dawns: carry(cv, 1, n, DAWNS[p], reacting ? pickAt(POLL_DAWNS, pickPos.value) : DAWNS[n], tr),
       // And across: the CROW → SUN arrow only appears as the token moves right, from
       // they merely pair up to one makes the other happen. The reader can pile up
       // mornings without ever earning the arrow, which is the whole lesson.
-      arrow: carry(cv, 2, n, ARROW[p], reacting ? dragPos.value : ARROW[n], tr),
+      arrow: carry(cv, 2, n, ARROW[p], reacting ? pickAt(POLL_ARROW, pickPos.value) : ARROW[n], tr),
       cands: carry(cv, 3, n, CANDS[p], CANDS[n], tr),
       silent: carry(cv, 4, n, SILENT[p], SILENT[n], tr),
       t,
@@ -136,6 +145,7 @@ export default function Logic16Scene({ clock, bt, bi, i, picked, onPick, dragPos
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* THE CLAIM. The only assertion on the stage; everything below it is a
           record of what happened. */}
       <Animated.View style={[StyleSheet.absoluteFill, arrowStyle]} pointerEvents="none">

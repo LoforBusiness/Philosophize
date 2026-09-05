@@ -7,7 +7,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics36Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -74,7 +74,7 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics36'));
 
-export default function Metaphysics36Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics36Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -102,7 +102,7 @@ export default function Metaphysics36Scene({ clock, bt, bi, i, picked, onPick, d
     const move = LIVE_D[n] === 1 ? (d < 0.6 ? d / 0.6 : 1 + (d - 0.6) / 0.4) : scripted;
 
     return {
-      fig: pose(figS, carry(cv, 2, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 2, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       hotelOn: carry(cv, 3, n, HOTEL[p], HOTEL[n], tr),
       move,
@@ -119,6 +119,7 @@ export default function Metaphysics36Scene({ clock, bt, bi, i, picked, onPick, d
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap}>EVERY ROOM TAKEN</Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, hotelStyle]}>

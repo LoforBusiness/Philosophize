@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MotiView, AnimatePresence } from 'moti';
-import { Easing } from 'react-native-reanimated';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { C, LIP } from '@/constants/design';
 import { getPhilosopherById, type Philosopher } from '@/data/philosophers';
 import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
 import { hasQuiz, getQuizPronoun } from '@/data/philosopherQuizzes';
@@ -308,25 +309,13 @@ export default function PhilosopherSheet() {
 
                 {/* Quiz CTA — only for thinkers with an authored quiz */}
                 {quizAvailable && (
-                  <Pressable
+                  <QuizCta
+                    mastered={mastered}
+                    line={mastered
+                      ? `Best ${score!.best}/${score!.total} · play again`
+                      : `A 30-second quiz on ${phil.name.split(' ')[0]}`}
                     onPress={() => setQuizOpen(true)}
-                    style={({ pressed }) => [styles.quizCta, pressed && { opacity: 0.9 }]}
-                  >
-                    <View style={styles.quizIcon}>
-                      <SketchIcon name={mastered ? 'star-filled' : 'grad'} size={20} color={Paper} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.quizTitle}>{mastered ? 'Quiz mastered' : 'Test yourself'}</Text>
-                      <Text style={styles.quizSub}>
-                        {mastered
-                          ? `Best ${score!.best}/${score!.total} · play again`
-                          : `A 30-second quiz on ${phil.name.split(' ')[0]}`}
-                      </Text>
-                    </View>
-                    <View style={styles.quizChev}>
-                      <SketchIcon name="back" size={14} color={Paper} />
-                    </View>
-                  </Pressable>
+                  />
                 )}
 
                 {/* Bio, opening sentence set as a standfirst. */}
@@ -467,6 +456,56 @@ function SectionHeading({ label }: { label: string }) {
   );
 }
 
+/**
+ * THE ONE DOOR ON THIS PAGE, AND IT WAS THE FLATTEST THING ON IT.
+ *
+ *   "I want you to make the button look a little bit more of depth instead of the
+ *    current look right now. It doesn't look very good."
+ *
+ * It was an ink rectangle that dropped to 0.9 opacity when pressed — which is the
+ * one press feedback this app does not use anywhere else. Everything else with a
+ * face sits on a LEDGE: a slab of `C.HUE` behind it, offset down by the lip's own
+ * height, so 4px of the slab shows along the bottom at rest and pressing slides
+ * the face down by exactly that much and covers it. `components/ui/Button` is
+ * where that is worked out, including why the slab is absolutely positioned and
+ * why only `translateY` animates.
+ *
+ * Not `Button` itself, because this is not a label: it is an icon, a title, a
+ * line of detail and a chevron. What it borrows is the ledge and the drop.
+ */
+function QuizCta({ mastered, line, onPress }: {
+  mastered: boolean; line: string; onPress: () => void;
+}) {
+  const down = useSharedValue(0);
+  const face = useAnimatedStyle(() => ({ transform: [{ translateY: down.value * LIP.button }] }));
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={mastered ? 'Quiz mastered, play again' : 'Test yourself'}
+      onPressIn={() => { down.value = withTiming(1, { duration: 90 }); }}
+      onPressOut={() => { down.value = withTiming(0, { duration: 140 }); }}
+      style={styles.quizSlot}
+    >
+      <View style={{ paddingBottom: LIP.button }}>
+        <View pointerEvents="none" style={[styles.quizLip, { top: LIP.button }]} />
+        <Animated.View style={[styles.quizCta, face]}>
+          <View style={styles.quizIcon}>
+            <SketchIcon name={mastered ? 'star-filled' : 'grad'} size={20} color={Paper} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.quizTitle}>{mastered ? 'Quiz mastered' : 'Test yourself'}</Text>
+            <Text style={styles.quizSub}>{line}</Text>
+          </View>
+          <View style={styles.quizChev}>
+            <SketchIcon name="back" size={14} color={Paper} />
+          </View>
+        </Animated.View>
+      </View>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   backdrop: {
     position: 'absolute',
@@ -580,6 +619,11 @@ const styles = StyleSheet.create({
   lessonBranch: { fontFamily: 'Inter_400Regular', fontSize: 11.5, color: InkSoft, marginTop: 2 },
   lessonChev: { transform: [{ scaleX: -1 }] },
 
+  quizSlot: { marginTop: 20 },
+  quizLip: {
+    position: 'absolute', left: 0, right: 0, bottom: 0,
+    borderRadius: 16, backgroundColor: C.HUE,
+  },
   quizCta: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -588,7 +632,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 15,
     paddingHorizontal: 16,
-    marginTop: 20,
   },
   quizIcon: {
     width: 40,

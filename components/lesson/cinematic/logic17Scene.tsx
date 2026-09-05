@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic17Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -79,7 +79,7 @@ const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic17'));
 
-export default function Logic17Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Logic17Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(6);
@@ -99,7 +99,7 @@ export default function Logic17Scene({ clock, bt, bi, i, picked, onPick, dragPos
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       pair: carry(cv, 1, n, PAIR[p], PAIR[n], tr),
       marks: carry(cv, 2, n, MARKS[p], MARKS[n], tr),
       slur: carry(cv, 3, n, SLUR[p], SLUR[n], tr),
@@ -132,6 +132,7 @@ export default function Logic17Scene({ clock, bt, bi, i, picked, onPick, dragPos
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, pairStyle]}>
         {/* THE PLINTHS AND THE MAN ON THEM — the part the insult can reach. */}
         {COL_X.map((cx) => (

@@ -2,13 +2,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import { useSharedValue } from 'react-native-reanimated';
+import {
+  useSharedValue, withTiming, withDelay, withSequence,
+} from 'react-native-reanimated';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import {
-  Ledger, RankedBars, ThinkerLeague, DiscoveryCard, bounceTo,
+  Ledger, RankedBars, ThinkerLeague, DiscoveryCard,
   type LedgerItem, type BarRow, type LeagueRow,
 } from '@/components/stats/InsightBoard';
+import { revealTo, EASE_REVEAL, EASE_SETTLE, D_WIPE } from '@/components/stats/reveal';
 import Dial from '@/components/stats/Dial';
 import {
   Instrument, PanelHead, PanelRule, Legend, SparkLine, MetricStrip, type Metric,
@@ -272,21 +275,42 @@ export default function StatsScreen() {
     }, [fingerprint, seenFingerprint, markStatsSeen]),
   );
 
-  // The dial squeezes and bounces on every ARRIVAL that has news, which is what
-  // makes reaching the tab feel like reaching a scoreboard. One transform on one
-  // wrapper — the SVG under it never animates.
+  // THE DIAL IS SET, PIECE BY PIECE, ON AN ARRIVAL WITH NEWS.
   //
-  // On a reaction it moves only if the thing it draws moved. The dial is lessons
-  // by branch, and meeting a thinker is not a lesson, so the commonest reaction
-  // in the tab leaves it perfectly still — which is the difference between
-  // feedback and a screen that twitches whenever it is touched.
-  const branchGrew = useMemo(() => areaRows.some((r) => grown.has(r.key)), [areaRows, grown]);
-  const dialPop = useSharedValue(1);
+  // It used to squeeze the whole disc to 0.82 and spring it 39% past itself —
+  // the loudest motion on the tab and the first thing the reader named. It is
+  // six struck pieces in a socket, so it arrives the way it is built: each one
+  // settles home from a little way out, clockwise from twelve. See Dial's Props.
+  //
+  // On a REACTION it moves only if the thing it draws moved, and then only the
+  // piece that moved. The dial is lessons by branch, and meeting a thinker is
+  // not a lesson, so the commonest reaction in the tab leaves it perfectly
+  // still — which is the difference between feedback and a screen that twitches
+  // whenever it is touched.
+  const grewBranch = useMemo(
+    () => areaRows.find((r) => grown.has(r.key))?.key ?? null,
+    [areaRows, grown],
+  );
+  const dialEnter = useSharedValue(1);
+  const dialNudge = useSharedValue(0);
+  const dialPlayed = useRef<number | null>(null);
   useEffect(() => {
-    if (!animate || (!entrance && !branchGrew)) { dialPop.value = 1; return; }
-    dialPop.value = 1;
-    dialPop.value = bounceTo(1, entrance ? 60 : 20, true);
-  }, [playToken, animate, entrance, branchGrew, dialPop]);
+    const newPlay = dialPlayed.current !== playToken;
+    dialPlayed.current = playToken;
+    if (!animate || !newPlay) return;
+    if (entrance) {
+      dialEnter.value = 0;
+      dialEnter.value = revealTo(1, 60, D_WIPE);
+      return;
+    }
+    // A reaction never re-sets the disc — it is on screen and being read.
+    dialEnter.value = 1;
+    if (!grewBranch) { dialNudge.value = 0; return; }
+    dialNudge.value = withSequence(
+      withTiming(1, { duration: 260, easing: EASE_REVEAL }),
+      withDelay(220, withTiming(0, { duration: 480, easing: EASE_SETTLE })),
+    );
+  }, [playToken, animate, entrance, grewBranch, dialEnter, dialNudge]);
 
   // ── the discovery pool ────────────────────────────────────────────────────
   const candidates: Candidate[] = useMemo(() => ALL_PHILOSOPHERS.map((p) => ({
@@ -394,7 +418,9 @@ export default function StatsScreen() {
                 totalLabel="LESSONS"
                 selected={dialSel}
                 onSelect={dialPick}
-                pop={dialPop}
+                enter={dialEnter}
+                nudge={dialNudge}
+                nudgeKey={grewBranch}
               />
               <Legend
                 rows={areaRows}

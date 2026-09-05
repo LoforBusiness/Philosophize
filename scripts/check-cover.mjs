@@ -494,6 +494,7 @@ function allIds() {
       `(() => { const clip = document.getElementById('stage-clip');
         const below = clip ? clip.getBoundingClientRect().bottom : 0;
         const b = [...document.querySelectorAll('[role="button"],[tabindex]')].find((e) => {
+        if (e.getAttribute('data-testid') === 'thinker-name') return false;
           const r = e.getBoundingClientRect();
           return r.top > below && r.width > 150 && r.height >= 20 && r.height <= 90;
         });

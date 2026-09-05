@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -94,10 +94,17 @@ const X = BEATS.map((b) => b.x ?? 202);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// the tears are REAL ones
+const POLL_FELT = [1, 0, 1, 0];
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics2'));
 
-export default function Aesthetics2Scene({ clock, bt, bi, dragPos, dragPos2, i }: SceneApi) {
+export default function Aesthetics2Scene({ clock, bt, bi, pickPos, i }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldArtistS = useHeld();
   const cv = useCarry(2);
@@ -122,7 +129,7 @@ export default function Aesthetics2Scene({ clock, bt, bi, dragPos, dragPos2, i }
       // R7b — the pad lights the viewer's chest. Up the y axis, from the tears are
       // pretend to the tears are real, the feeling arrives in the person watching —
       // and the x axis can say the people never existed while it does.
-      felt: carry(cv, 0, n, FELT[p], reacting ? dragPos2.value : FELT[n], tr),
+      felt: carry(cv, 0, n, FELT[p], reacting ? pickAt(POLL_FELT, pickPos.value) : FELT[n], tr),
       // A single continuous 1→3 value: panel j fills as it crosses j + 1.
       chain: carry(cv, 1, n, CHAIN[p], CHAIN[n], tr),
       t,

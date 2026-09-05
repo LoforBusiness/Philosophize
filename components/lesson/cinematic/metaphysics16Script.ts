@@ -84,16 +84,16 @@ export const BEATS: Met16Beat[] = [
     g: 41, panels: 2, crave: 1, second: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Set the lever to what Frankfurt adds to being free.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'uncaused', reads: 'free means the choice had no cause at all' },
-          { id: 'unforced', reads: 'free means nobody held a gun to your head' },
-          { id: 'endorsed', reads: 'free means wanting your own desire', correct: true },
+      prompt: 'What does calling a choice free actually mean?',
+      sort: {
+        chip: 'a free choice',
+        bins: [
+          { id: 'uncaused', label: 'no cause at all', reads: 'free means the choice had no cause at all' },
+          { id: 'unforced', label: 'nobody forced you', reads: 'free means nobody held a gun to your head' },
+          { id: 'endorsed', label: 'wanting your own want', reads: 'free means wanting your own desire', correct: true },
         ],
       },
-      explain: 'The far setting. The first swaps Frankfurt for an easier opponent: he is a compatibilist, so every desire here can be fully caused and he does not mind. What he adds is a second question — not where a desire came from, but whether you stand behind it.',
+      explain: 'Wanting your own want. The first swaps Frankfurt for an easier opponent: he is a compatibilist, so every desire here can be fully caused and he does not mind. What he adds is a second question — not where a desire came from, but whether you stand behind it.',
       xp: 5,
     },
   },

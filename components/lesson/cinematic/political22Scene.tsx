@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political22Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
@@ -100,8 +100,7 @@ const PULL = BEATS.map((b) => (b.interact?.field ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political22'));
 
 export default function Political22Scene({
-  clock, bt, bi, i, picked, onPick, dragPos, dragPos2,
-}: SceneApi) {
+  clock, bt, bi, i, picked, onPick, dragPos, dragPos2, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
   const pulling = PULL[i] === 1;
@@ -121,7 +120,7 @@ export default function Political22Scene({
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       // Through `carry` so the pad takes over across the transition rather than
       // on one frame — see metaphysics21Scene for why that matters.
       sw: carry(cv, 1, n, SW[p], pulling ? 1 - 0.82 * dragPos2.value : SW[n], tr),
@@ -155,6 +154,7 @@ export default function Political22Scene({
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, tileStyle]} pointerEvents="none">
         {T_X.map((tx, k) => (
           <View key={tx}>

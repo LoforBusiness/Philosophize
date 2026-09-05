@@ -87,10 +87,10 @@ const X = BEATS.map((b) => b.x ?? 174);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political2'));
 
-export default function Political2Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Political2Scene({ clock, bt, bi, i, picked, onPick, pickPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldRulerS = useHeld();
   const cv = useCarry(2);
@@ -119,7 +119,7 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick, drag
       // R7c — the AUTHORITY row is what the lever is about. Magnetism and habit fill
       // the POWER row and leave this one empty; the lawful office is the only stop that
       // writes anything here.
-      rowA: lerp(clamp01(CHART[p] - 1), reacting ? dragPos.value : clamp01(CHART[n] - 1), tr),
+      rowA: lerp(clamp01(CHART[p] - 1), reacting ? pickPos.value : clamp01(CHART[n] - 1), tr),
     };
   });
 

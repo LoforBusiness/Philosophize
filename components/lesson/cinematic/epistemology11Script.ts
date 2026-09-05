@@ -95,14 +95,14 @@ export const BEATS: Epistemology11Beat[] = [
   {
     p: 4, x: 226, real: 350,
     interact: {
-      prompt: 'Set the lever to the condition the stopped clock breaks.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'belief', reads: 'belief: you did not really believe it' },
-          { id: 'truth', reads: 'truth: the time on the wall was wrong' },
-          { id: 'reason', reads: 'justification: a broken clock is no reason' },
-          { id: 'none', reads: 'none of them, all three are met', correct: true },
+      prompt: 'Which of the three conditions does the stopped clock actually break?',
+      sort: {
+        chip: 'the stopped clock',
+        bins: [
+          { id: 'belief', label: 'belief', reads: 'belief: you did not really believe it' },
+          { id: 'truth', label: 'truth', reads: 'truth: the time on the wall was wrong' },
+          { id: 'reason', label: 'the reason', reads: 'justification: a broken clock is no reason' },
+          { id: 'none', label: 'none of them', reads: 'none of them, all three are met', correct: true },
         ],
       },
       explain: 'None of them, and that is the whole of Gettier. A broken clock feels like a broken condition and it is not. You believed it, it was true, and a clock on a wall is an ordinary reason to trust. All three met, and still not knowledge.',

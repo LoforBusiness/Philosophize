@@ -78,7 +78,7 @@ export const BEATS: Ethics6Beat[] = [
   {
     d: 4, str: 0, tx: 180, card: 2, stamp: 1,
     interact: {
-      prompt: 'Slide the seam to what actually changed between the two cases.',
+      prompt: 'What actually changed between the two cases?',
       split: {
         left: 'HE IS USED AS A TOOL', right: 'THE NUMBER WHO DIE',
         start: 0.04,

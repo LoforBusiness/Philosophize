@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political13Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -62,9 +62,16 @@ const NSTEPS = BEATS.map((b) => b.steps ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
 
-export default function Political13Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// a setback that nobody consented to — harm rather than offence
+const POLL_TAG = [1, 0, 0, 0];
+
+export default function Political13Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
@@ -89,12 +96,12 @@ export default function Political13Scene({ clock, bt, bi, i, picked, onPick, dra
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       fill: carry(cv, 1, n, NSTEPS[p], NSTEPS[n], grow),
       // R7c — the OFFENCE IS NOT HARM tag belongs to exactly one corner of the pad:
       // a great many object (x high) and nobody is set back (y low). The reader finds
       // it by moving there rather than by being told.
-      tag: reacting ? dragPos.value * (1 - dragPos2.value) * tr : tagOn ? (tagFade ? grow : 1) : 0,
+      tag: reacting ? pickAt(POLL_TAG, pickPos.value) : tagOn ? (tagFade ? grow : 1) : 0,
     };
   });
 
@@ -109,6 +116,7 @@ export default function Political13Scene({ clock, bt, bi, i, picked, onPick, dra
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.head} numberOfLines={1} pointerEvents="none">THE TOWN&apos;S ARGUMENT</Text>
 
       {STEPS.map((s, k) => (

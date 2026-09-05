@@ -8,7 +8,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './ethicsScript';
 import {
   clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -185,7 +185,7 @@ function hLive(code: number, t: number, bt: number): Stance {
 const X = BEATS.map((b) => b.x ?? HUMAN_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics'));
 
-export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
+export default function EthicsScene({ clock, bt, bi, qv, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldHumanS = useHeld();
   const cv = useCarry(3);
   const SCENE = useDerivedValue(() => {
@@ -223,7 +223,7 @@ export default function EthicsScene({ clock, bt, bi, qv }: SceneApi) {
 
     return {
       cam: { s: lerp(prv.s, cur.s, tr), cx: lerp(prv.cx, cur.cx, tr), cy: lerp(prv.cy, cur.cy, tr) },
-      human: pose(humanS, HUMAN_X, GROUND, K_FIG, -1, 1),
+      human: lookPose(humanS, HUMAN_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
       scaleOn: conOn,
       tip: Math.sin(t * 1.2) * 4 * conOn * (1 - (n === 6 ? q : 0)),  // settles level on a considered Q1
       critOn,

@@ -86,16 +86,16 @@ export const BEATS: Ethics36Beat[] = [
   {
     p: 160, x: 130, book: 1, struck: 1, gift: 1,
     interact: {
-      prompt: 'Set the lever to why there can be no duty to forgive.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'feel', reads: 'feelings can never be duties' },
-          { id: 'time', reads: 'forgiving takes time, and duties fall due at once' },
-          { id: 'take', reads: 'the wrongdoer could then take it for himself', correct: true },
+      prompt: 'What is the strongest objection to a duty to forgive?',
+      sort: {
+        chip: 'a duty to forgive',
+        bins: [
+          { id: 'feel', label: 'feelings are not duties', reads: 'feelings can never be duties' },
+          { id: 'time', label: 'it takes time', reads: 'forgiving takes time, and duties fall due at once' },
+          { id: 'take', label: 'he could demand it', reads: 'the wrongdoer could then take it for himself', correct: true },
         ],
       },
-      explain: 'The far setting. Plenty of duties reach feelings: you can be obliged to stop nursing a grudge. The trouble is ownership. If the right apology forced the outcome, the wrongdoer could help himself to it, and the person wronged would be left holding nothing of their own.',
+      explain: 'He could demand it. Plenty of duties reach feelings: you can be obliged to stop nursing a grudge. The trouble is ownership. If the right apology forced the outcome, the wrongdoer could help himself to it, and the person wronged would be left holding nothing of their own.',
       xp: 5,
     },
     dur: 1.0,

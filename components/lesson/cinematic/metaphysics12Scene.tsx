@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics12Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -68,7 +68,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics12'));
 
-export default function Metaphysics12Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics12Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
@@ -82,7 +82,7 @@ export default function Metaphysics12Scene({ clock, bt, bi, i, picked, onPick, d
     const grow = ease01(bt.value / 0.9);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       flow: (t * SPEED) % SPAN,
       // R7b — the knob draws the owner's box. Drag toward ONE UNCHANGING SOUL and a
       // container appears behind the stream of experiences; drag back and it goes,
@@ -108,6 +108,7 @@ export default function Metaphysics12Scene({ clock, bt, bi, i, picked, onPick, d
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* the perceptions, running */}
       <Target id={'stream'} correct={true} picked={picked} onPick={onPick}
               style={styles.stream} disabled={!live || answered}>

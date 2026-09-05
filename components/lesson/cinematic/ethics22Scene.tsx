@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics22Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -76,7 +76,7 @@ const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics22'));
 
-export default function Ethics22Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Ethics22Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
@@ -96,7 +96,7 @@ export default function Ethics22Scene({ clock, bt, bi, i, picked, onPick, dragPo
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       // R7b — the drawn curve raises the five wants. `pos` on a plot is the MEAN
       // height of what the reader drew (see ShapePlot), so the columns on stage rise
       // and fall with their own line: they are drawing the wants, not a graph of them.
@@ -116,6 +116,7 @@ export default function Ethics22Scene({ clock, bt, bi, i, picked, onPick, dragPo
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, tankStyle]} pointerEvents="none">
         <View style={styles.tank} />
         <Text style={styles.tankText}>THE MACHINE</Text>

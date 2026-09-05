@@ -90,19 +90,16 @@ export const BEATS: Log21Beat[] = [
   {
     p: 41, x: 268, chips: 1, bench: 1, under: 1,
     interact: {
-      prompt: 'Place a match in petrol on the two tests.',
-      field: {
-        xLo: 'NOT REQUIRED', xHi: 'REQUIRED',
-        yLo: 'NOT ENOUGH', yHi: 'ENOUGH ALONE',
-        start: [0.72, 0.24],
-        quads: [
-          { id: 'neither', x: 0, y: 0, reads: 'beside the point' },
-          { id: 'nec', x: 1, y: 0, reads: 'needed, and not enough' },
-          { id: 'suf', x: 0, y: 1, reads: 'enough, and not the only way', correct: true },
-          { id: 'both', x: 1, y: 1, reads: 'the whole story' },
+      prompt: 'For the fire, is a lit match needed, enough, both, or neither?',
+      poll: {
+        options: [
+          { id: 'neither', reads: 'beside the point' },
+          { id: 'nec', reads: 'needed, and not enough' },
+          { id: 'suf', reads: 'enough, and not the only way', correct: true },
+          { id: 'both', reads: 'the whole story' },
         ],
       },
-      explain: 'Top left. It is enough on its own, so it is sufficient. It is not required, because a spark or a hot surface would have started the same fire. Being sufficient says nothing at all about being necessary, and that is the confusion the two axes take apart.',
+      explain: 'Enough on its own, so it is sufficient. It is not required, because a spark or a hot surface would have started the same fire. Being sufficient says nothing at all about being necessary, and that is the confusion this question takes apart.',
       xp: 5,
     },
     dur: 1.0,

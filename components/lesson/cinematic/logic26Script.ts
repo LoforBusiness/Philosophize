@@ -77,16 +77,16 @@ export const BEATS: Logic26Beat[] = [
   {
     p: 4, x: 124, links: 4, snap: 1,
     interact: {
-      prompt: 'Set the lever to what a contradiction actually proves.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'nothing', reads: 'nothing, the argument collapsed' },
-          { id: 'step', reads: 'one of the steps along the way was wrong' },
-          { id: 'assume', reads: 'what you started from was false', correct: true },
+      prompt: 'The reasoning held and the end is absurd. What has been shown?',
+      sort: {
+        chip: 'a false conclusion',
+        bins: [
+          { id: 'nothing', label: 'nothing', reads: 'nothing, the argument collapsed' },
+          { id: 'step', label: 'a step was wrong', reads: 'one of the steps along the way was wrong' },
+          { id: 'assume', label: 'the start was false', reads: 'what you started from was false', correct: true },
         ],
       },
-      explain: 'The far setting, and the contradiction is the goal rather than the wreckage. If every step from your assumption was valid, the assumption is the only thing left to blame. The first setting is the instinct this whole method is built to overturn.',
+      explain: 'The start was false, and the contradiction is the goal rather than the wreckage. If every step from your assumption was valid, the assumption is the only thing left to blame. "nothing" is the instinct this whole method is built to overturn.',
       xp: 5,
     },
     dur: 1.0,

@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './epistemologyScript';
 import {
   clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -111,7 +111,7 @@ const X = BEATS.map((b) => b.x ?? SEEKER_X);
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology'));
 
-export default function EpistemologyScene({ clock, bt, bi, qv, i, picked, dragPos }: SceneApi) {
+export default function EpistemologyScene({ clock, bt, bi, qv, i, picked, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldSeekerS = useHeld();
   const cv = useCarry(4);
@@ -158,7 +158,7 @@ export default function EpistemologyScene({ clock, bt, bi, qv, i, picked, dragPo
     const w3 = clamp01((k3 - 0.5) * 6 + 0.5);          // reasons turned
 
     return {
-      seeker: pose(seekerS, SEEKER_X, GROUND, K_FIG, -1, 1),
+      seeker: lookPose(seekerS, SEEKER_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
       k1, k2, k3, know,
       wKnow: both * w3,                      // justified true belief
       wLuck: both * (1 - w3),                // true + believed, no reasons
@@ -183,6 +183,7 @@ export default function EpistemologyScene({ clock, bt, bi, qv, i, picked, dragPo
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <View style={styles.ground} pointerEvents="none" />
       <Gate S={SCENE} />
       <Verdict S={SCENE} />

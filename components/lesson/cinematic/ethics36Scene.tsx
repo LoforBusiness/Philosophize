@@ -8,7 +8,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics36Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -77,11 +77,11 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics36'));
 
-export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -105,7 +105,7 @@ export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick, dr
     // a cancellation that un-cancelled itself between beats would be nonsense.
     const scripted = carry(cv, 0, n, STRUCK[p], STRUCK[n], tr);
     return {
-      fig: pose(figS, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       bookOn: carry(cv, 2, n, BOOK[p], BOOK[n], tr),
       strike: LIVE[n] === 1 && STRUCK[n] === 0 ? ease01(q) : scripted,
@@ -113,7 +113,7 @@ export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick, dr
       // R7b — the arm hands the gift over. Move it to the far setting and the thing
       // that was the wronged person's to give appears in somebody else's hand, which
       // is the whole objection.
-      giftOn: carry(cv, 4, n, GIFT[p], reacting ? dragPos.value : GIFT[n], tr),
+      giftOn: carry(cv, 4, n, GIFT[p], reacting ? pickPos.value : GIFT[n], tr),
     };
   });
 

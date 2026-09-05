@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics21Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -81,8 +81,7 @@ const PULL = BEATS.map((b) => (b.interact?.field ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics21'));
 
 export default function Metaphysics21Scene({
-  clock, bt, bi, i, picked, onPick, dragPos, dragPos2,
-}: SceneApi) {
+  clock, bt, bi, i, picked, onPick, dragPos, dragPos2, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
   const pulling = PULL[i] === 1;
@@ -102,7 +101,7 @@ export default function Metaphysics21Scene({
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       line: carry(cv, 1, n, LINE[p], LINE[n], tr),
       // Through `carry`, not around it: a bare `pulling ? drag : carry` swaps the
       // value on the single frame the beat changes, which is the same pop L1/L5
@@ -123,6 +122,7 @@ export default function Metaphysics21Scene({
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, lineStyle]} pointerEvents="none">
         <View style={styles.rule} />
         <Text style={[styles.label, { left: LINE_L + 4 }]}>THE PAST</Text>

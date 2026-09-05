@@ -12,7 +12,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics9Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  facing, useCarry, carry, STONE,
+  facing, useCarry, carry, STONE, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -86,9 +86,9 @@ const CROSS = BEATS.map((b) => (b.cross ?? 0));
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
-export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -123,7 +123,7 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick, dr
     const reach = carry(cv, 0, n, CROSS[p], CROSS[n], tr) * ease01(clamp01(bt.value / 1.5)) * 0.86;
 
     return {
-      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       // Carried (L5). Out of the codemod's reach because the endpoints are
       // DERIVED from the track rather than being the track — same defect, same
       // fix, and the multiplier goes inside so what is remembered is the value
@@ -132,7 +132,7 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick, dr
       // R7b — the arm parts the two panels. The settings run from the mind IS the
       // brain to the mind is a second kind of thing, and MIND and BODY come apart on
       // stage as the reader travels between them.
-      shut: carry(cv, 3, n, PANELS[p] === 2 ? 1 : 0, reacting ? dragPos.value : (PANELS[n] === 2 ? 1 : 0), tr),
+      shut: carry(cv, 3, n, PANELS[p] === 2 ? 1 : 0, reacting ? pickPos.value : (PANELS[n] === 2 ? 1 : 0), tr),
       reach,
       t,
     };

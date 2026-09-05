@@ -63,7 +63,7 @@ export const BEATS: Aes16Beat[] = [
   {
     p: 4, x: 124, canvas: 1, facts: 3,
     interact: {
-      prompt: 'Drag to what learning it actually changed.',
+      prompt: 'What did learning it actually change?',
       drag: {
         lo: 'THE PAINTING IS RUINED',
         hi: 'IT CHANGES NOTHING AT ALL',

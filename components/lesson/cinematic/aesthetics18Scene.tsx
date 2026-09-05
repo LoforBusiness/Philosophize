@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics18Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
@@ -84,7 +84,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics18'));
 /** y of value v inside a panel. */
 const rowY = (v: number) => PAN_Y + 9 + (1 - v) * (PAN_H - 26);
 
-export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -104,7 +104,7 @@ export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick, dr
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       curve: carry(cv, 1, n, CURVE[p], CURVE[n], tr),
       // R7c — the seam is the LISTENER's share, and the posture panel is the listener.
       // Slide it their way and the shoulder that does the feeling is drawn in.
@@ -137,6 +137,7 @@ export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick, dr
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* THE MUSIC. Nine bars, one per value. */}
       <Animated.View style={[StyleSheet.absoluteFill, curveStyle, musRise]} pointerEvents="none">
         <Text style={[styles.cap, { left: MUS_X, width: MUS_W }]}>THE MUSIC</Text>

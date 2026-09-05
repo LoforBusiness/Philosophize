@@ -111,7 +111,7 @@ export const BEATS: EpistBeat[] = [
     locks: [1, 1, 0],
     qkey: 'q2',
     interact: {
-      prompt: 'Drag to what turns a true belief into knowledge.',
+      prompt: 'What turns a true belief into knowledge?',
       drag: {
         lo: 'NO REASONS AT ALL',
         hi: 'REASONS ANYONE COULD CHECK',

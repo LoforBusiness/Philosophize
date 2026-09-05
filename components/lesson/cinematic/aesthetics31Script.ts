@@ -74,19 +74,16 @@ export const BEATS: Aes31Beat[] = [
     g: 11, strings: 1, playing: 0, clapA: 1, clapB: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Place the token on a performance that is difficult and says nothing.',
-      field: {
-        xLo: 'EASY TO PLAY', xHi: 'VERY HARD TO PLAY',
-        yLo: 'NOTHING TO SAY', yHi: 'SOMETHING TO SAY',
-        start: [0.24, 0.76],
-        quads: [
-          { id: 'stunt', x: 1, y: 0, reads: 'hard, and it says nothing', correct: true },
-          { id: 'great', x: 1, y: 1, reads: 'hard, and it says something' },
-          { id: 'gift', x: 0, y: 1, reads: 'easy, and it says something' },
-          { id: 'dull', x: 0, y: 0, reads: 'easy, and it says nothing' },
+      prompt: 'Where does sheer difficulty, on its own, land?',
+      poll: {
+        options: [
+          { id: 'stunt', reads: 'hard, and it says nothing', correct: true },
+          { id: 'great', reads: 'hard, and it says something' },
+          { id: 'gift', reads: 'easy, and it says something' },
+          { id: 'dull', reads: 'easy, and it says nothing' },
         ],
       },
-      explain: 'Bottom right, and it is a real place: difficulty with nothing to show for it. Strict formalism says the making never mattered, and the spliced recording embarrasses it — if that were true, finding out would change nothing. The two axes are separate, and neither alone is the work.',
+      explain: 'Hard, and it says nothing: a real place, and difficulty with nothing to show for it. Strict formalism says the making never mattered, and the spliced recording embarrasses it. If that were true, finding out would change nothing. Difficulty and meaning are separate.',
       xp: 5,
     },
   },

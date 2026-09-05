@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics17Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -77,7 +77,7 @@ const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics17'));
 
-export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
@@ -97,7 +97,7 @@ export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPo
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       maxim: carry(cv, 1, n, MAXIM[p], MAXIM[n], tr),
       copies: carry(cv, 2, n, COPIES[p], COPIES[n], tr),
       // R7b — the seam fills the BEING BELIEVED bar. Slide toward ON THE MURDERER
@@ -119,6 +119,7 @@ export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPo
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* THE MAXIM, and the first target. */}
       <Animated.View style={[StyleSheet.absoluteFill, maximStyle]}>
         <Target

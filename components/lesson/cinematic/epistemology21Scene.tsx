@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology21Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -80,7 +80,7 @@ const EVV = BEATS.map((b) => b.ev ?? 0);
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 
-export default function Epistemology21Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Epistemology21Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -103,7 +103,7 @@ export default function Epistemology21Scene({ clock, bt, bi, i, picked, onPick, 
     ));
     const ev = carry(cv, 0, n, EVV[p], EVV[n], grow);
     return {
-      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       dial: carry(cv, 2, n, DIALV[p], DIALV[n], tr, dialFade ? grow : 1),
       // R7b — the knob loads the WILL tray. Drag toward you simply decide and the
       // effort piles on — and the needle does not move, which is the point: you
@@ -127,6 +127,7 @@ export default function Epistemology21Scene({ clock, bt, bi, i, picked, onPick, 
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[styles.gauge, dialStyle]} pointerEvents="none">
         <Text style={[styles.end, { left: GA_L, textAlign: 'left' }]} numberOfLines={1}>DOUBT</Text>
         <Text style={[styles.end, { left: GA_L, width: GA_W, textAlign: 'right' }]} numberOfLines={1}>BELIEF</Text>

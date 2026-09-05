@@ -108,7 +108,7 @@ export const BEATS: Metaphysics7Beat[] = [
   {
     p: 12, x: 200, line: 1, solid: 1,
     interact: {
-      prompt: 'Drag to how much change the block leaves standing.',
+      prompt: 'How much change does the block leave standing?',
       drag: {
         lo: 'NOTHING CHANGES',
         hi: 'A SPOTLIGHT SWEEPS THE LINE',

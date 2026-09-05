@@ -74,7 +74,7 @@ export const BEATS: Eth16Beat[] = [
     g: 41, causes: 1, knife: 0, money: 1, repaid: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Suppose every choice you make was already fixed by earlier causes. Drag to how much blame survives.',
+      prompt: 'Suppose every choice you make was already fixed by earlier causes. How much blame survives?',
       drag: {
         lo: 'NO BLAME LEFT',
         hi: 'BLAME STILL HOLDS',

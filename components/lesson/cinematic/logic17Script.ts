@@ -97,7 +97,7 @@ export const BEATS: Log17Beat[] = [
   {
     p: 41, x: 268, pair: 1, marks: 1, lift: 1, falls: 1,
     interact: {
-      prompt: 'Slide the seam to divide what you are leaning on.',
+      prompt: 'What are you leaning on?',
       split: {
         left: 'WHO IS SPEAKING', right: 'THE REASONS GIVEN',
         start: 0.04,

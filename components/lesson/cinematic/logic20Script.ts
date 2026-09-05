@@ -91,13 +91,13 @@ export const BEATS: Log20Beat[] = [
   {
     p: 41, x: 268, boards: 1, struts: 1, strike: 1,
     interact: {
-      prompt: 'Throw the lever to the version you should be arguing with.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'weak', reads: 'you beat a view nobody holds' },
-          { id: 'said', reads: 'you answer what they actually said' },
-          { id: 'strong', reads: 'you take on the best case there is', correct: true },
+      prompt: 'What does it mean to take on the strongest version?',
+      sort: {
+        chip: 'the strong version',
+        bins: [
+          { id: 'weak', label: 'a view nobody holds', reads: 'you beat a view nobody holds' },
+          { id: 'said', label: 'what they said', reads: 'you answer what they actually said' },
+          { id: 'strong', label: 'the best case', reads: 'you take on the best case there is', correct: true },
         ],
       },
       explain: 'The strongest one. Answering what they said is honest and still not enough, because a poorly put case can be repaired and the repair is what you will meet next. Beat the best version and every weaker one falls with it.',

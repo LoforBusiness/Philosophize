@@ -25,7 +25,11 @@ import path from 'node:path';
 const DIR = 'components/lesson/cinematic';
 
 /** Below the figure: the deck and the five analogue controls. */
-const BELOW = ['cards', 'drag', 'lever', 'plot', 'split', 'field'];
+// `lever` and `field` are retired (R10) and no lesson declares one. They stay in
+// the list so a revert or an old branch is still counted rather than silently
+// dropping out of the rotation -- a control that stops being counted looks like
+// variety improving.
+const BELOW = ['cards', 'drag', 'sort', 'poll', 'plot', 'split', 'lever', 'field'];
 
 /**
  * The deck is right sometimes and not most of the time.
@@ -88,7 +92,7 @@ const say = (ok, label, detail) => { if (!ok) bad += 1; console.log(`  ${ok ? 'o
 
 console.log('\nHOW THE THUMB IS ASKED TO MOVE\n');
 console.log(`  ${rows.length} lessons · ${total} graded questions`);
-const order = ['stage', 'cards', 'drag', 'lever', 'plot', 'split', 'field'];
+const order = ['stage', 'cards', 'drag', 'sort', 'poll', 'plot', 'split', 'lever', 'field'];
 console.log('  ' + order.map((k) => `${k} ${tally.get(k) ?? 0}`).join(' · ') + '\n');
 
 const deck = (tally.get('cards') ?? 0) / total;

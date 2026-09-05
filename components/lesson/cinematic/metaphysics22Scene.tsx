@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics22Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
@@ -78,11 +78,11 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics22'));
 
-export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
@@ -102,13 +102,13 @@ export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick, d
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       track: carry(cv, 1, n, TRACK[p], TRACK[n], tr),
       runs: carry(cv, 2, n, RUNS[p], RUNS[n], tr),
       // R7b — the arm fades the untaken branch. Each setting is a different account of
       // what could have happened, and the road nobody went down grows fainter or
       // firmer as the reader travels between them.
-      open: carry(cv, 3, n, OPEN[p], reacting ? dragPos.value : OPEN[n], tr),
+      open: carry(cv, 3, n, OPEN[p], reacting ? pickPos.value : OPEN[n], tr),
       t,
     };
   });
@@ -131,6 +131,7 @@ export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick, d
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, trackStyle]} pointerEvents="none">
         <Animated.View style={beforeRise} pointerEvents="none">
           <View style={styles.runup} />

@@ -80,7 +80,7 @@ export const BEATS: Log15Beat[] = [
     g: 41, crowd: 1, sample: 1, leap: 1, claim: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Drag to what would actually fix this argument.',
+      prompt: 'What would actually fix this argument?',
       drag: {
         lo: 'BE SURER ABOUT THE TWO',
         hi: 'ASK MANY CHOSEN FAIRLY',

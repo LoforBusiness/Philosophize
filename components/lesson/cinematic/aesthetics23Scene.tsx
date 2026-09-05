@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics23Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -86,11 +86,11 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics23'));
 
-export default function Aesthetics23Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Aesthetics23Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -110,14 +110,14 @@ export default function Aesthetics23Scene({ clock, bt, bi, i, picked, onPick, dr
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       stave: carry(cv, 1, n, STAVE[p], STAVE[n], tr),
       plates: carry(cv, 2, n, PLATES[p], PLATES[n], tr),
       point: carry(cv, 3, n, POINT[p], POINT[n], tr),
       // R7c — the lever's three stops ARE the three plates, so the arrow travels to
       // whichever one the reader is standing on. `AIM` is already a stage x, not an
       // index, so the reaction interpolates between the outer two plate mid-points.
-      aim: carry(cv, 4, n, AIM[p], reacting ? PL_MID[0] + (PL_MID[2] - PL_MID[0]) * dragPos.value : AIM[n], tr),
+      aim: carry(cv, 4, n, AIM[p], reacting ? PL_MID[0] + (PL_MID[2] - PL_MID[0]) * pickPos.value : AIM[n], tr),
       t,
     };
   });
@@ -138,6 +138,7 @@ export default function Aesthetics23Scene({ clock, bt, bi, i, picked, onPick, dr
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, stStyle]} pointerEvents="none">
         {ST_Y.map((y) => <View key={y} style={[styles.staveLine, { top: y }]} />)}
         {notes.map((k) => (

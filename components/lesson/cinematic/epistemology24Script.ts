@@ -90,13 +90,13 @@ export const BEATS: Epi24Beat[] = [
   {
     p: 41, x: 268, ladder: 1, sure: 1, hand: 1, give: 1,
     interact: {
-      prompt: 'The steps are valid and the conclusion is false. What follows?',
-      lever: {
-        start: 2,
-        stops: [
-          { id: 'premise', reads: 'at least one premise has to go', correct: true },
-          { id: 'valid', reads: 'the reasoning must be invalid' },
-          { id: 'accept', reads: 'you have to accept the conclusion' },
+      prompt: 'Valid reasoning, and the conclusion is false. What follows?',
+      sort: {
+        chip: 'a false conclusion',
+        bins: [
+          { id: 'premise', label: 'a premise goes', reads: 'at least one premise has to go', correct: true },
+          { id: 'valid', label: 'the logic failed', reads: 'the reasoning must be invalid' },
+          { id: 'accept', label: 'accept it', reads: 'you have to accept the conclusion' },
         ],
       },
       explain: 'A premise has to go. Validity means true premises cannot give you a false conclusion, so a false conclusion out of a valid argument proves something went in that was not true. Which premise is a separate fight, and it is the one Moore leaves open.',

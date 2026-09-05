@@ -10,7 +10,7 @@ import { WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, strideStance, typ
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics5Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -121,7 +121,7 @@ const FORK = BEATS.map((b) => b.fork ?? 0);
 const BAL = BEATS.map((b) => b.balance ?? 0);
 const CHART = BEATS.map((b) => b.chart ?? 0);
 
-export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldSocS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -153,7 +153,7 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick }: S
     const bx = carry(cv, 0, n, X[p], X[n], tr) + dx;
 
     return {
-      soc: pose(socS, bx, GROUND, K_FIG, 1, 1),
+      soc: lookPose(socS, bx, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       fork: carry(cv, 1, n, FORK[p], FORK[n], tr),
       balance: carry(cv, 2, n, BAL[p], BAL[n], tr),
       chart: carry(cv, 3, n, CHART[p], CHART[n], tr),

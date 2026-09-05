@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political32Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -72,7 +72,7 @@ const LAB = BEATS.map((b) => b.labels ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political32'));
 
-export default function Political32Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Political32Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
@@ -89,7 +89,7 @@ export default function Political32Scene({ clock, bt, bi, i, picked, onPick }: S
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     const fill = carry(cv, 0, n, FILL[p], FILL[n], run);
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       fillA: fill,
       // The second pile lands a little behind the first, so the two rows read as two
       // counts rather than one shutter opening.
@@ -122,6 +122,7 @@ export default function Political32Scene({ clock, bt, bi, i, picked, onPick }: S
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* the two piles */}
       <Text style={[styles.rowLabel, { top: 324 }]} numberOfLines={1}>FOR</Text>
       {Array.from({ length: A_N }, (_, j) => (

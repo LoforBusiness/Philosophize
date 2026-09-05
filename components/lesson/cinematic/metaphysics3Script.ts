@@ -89,7 +89,7 @@ export const BEATS: Meta3Beat[] = [
   {
     p: 4, shadow: 0.15, form: 1, apple: 1,
     interact: {
-      prompt: 'Slide the seam to where Plato puts the reality.',
+      prompt: 'Where does Plato put the reality?',
       split: {
         left: 'THE FORM', right: 'THE APPLE',
         start: 0.5,

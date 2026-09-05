@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './knowHowScript';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -75,7 +75,7 @@ const DIR = dirsFrom(X, 1);
 const NSTEPS = BEATS.map((b) => b.steps ?? 0);
 const DONE = BEATS.map((b) => b.done ?? 0);
 
-export default function KnowHowScene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function KnowHowScene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -99,7 +99,7 @@ export default function KnowHowScene({ clock, bt, bi, i, picked, onPick }: Scene
     ));
     const done = carry(cv, 0, n, DONE[p], DONE[n], doneFade ? grow : tr);
     return {
-      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       fill: carry(cv, 2, n, NSTEPS[p], NSTEPS[n], grow),
       done,
       // The column recedes as the box fills — the two are one movement, so the
@@ -118,6 +118,7 @@ export default function KnowHowScene({ clock, bt, bi, i, picked, onPick }: Scene
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* ── the instructions ────────────────────────────────────────────────── */}
       <Animated.View style={[styles.column, columnStyle]} pointerEvents="none">
         {STEPS.map((s, k) => (

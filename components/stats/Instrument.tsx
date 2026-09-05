@@ -2,11 +2,13 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, useAnimatedProps, useDerivedValue,
-  runOnJS, withTiming, withDelay, withSpring, Easing,
+  runOnJS, withTiming, Easing,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { touch } from '@/lib/feedback';
-import { bounceTo } from '@/components/stats/InsightBoard';
+import {
+  Underscore, revealTo, EASE_REVEAL, D_WIPE, D_RISE, LEAD, STEP,
+} from '@/components/stats/reveal';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Circle, Line as SvgLine, Defs, LinearGradient as SvgGrad, Stop } from 'react-native-svg';
 import ACounter, { counterStyle } from '@/components/shared/ACounter';
@@ -117,7 +119,7 @@ export function Legend({ rows, total, selected, onSelect, grown, playToken, anim
 /**
  * ONE LEGEND ROW, AND IT IS ITS OWN COMPONENT FOR THE REASON §17'S RULE 1 GIVES.
  *
- * Each row needs its own `useAnimatedStyle` to carry its own bounce, and calling
+ * Each row needs its own `useAnimatedStyle` to carry its own reveal, and calling
  * the hook inside the `.map()` would be a hook in a loop. It would even work
  * today, because there are always exactly six branches — which is precisely the
  * "fine until it isn't" the rule is about.
@@ -130,13 +132,14 @@ function LegendLine({ row: r, index, count, total, on, pop, playToken, animate, 
   const g = glow(r.hue);
   const frac = total > 0 ? r.value / total : 0;
 
-  // THE ROW THAT GREW SQUEEZES AND OVERSHOOTS; the rest sweep in.
+  // THE ROW THAT GREW IS MARKED; the rest sweep in and nothing overshoots.
   //
-  // This nearly went missing in the move to the instrument. The branch bars used
-  // to carry the bounce, and when they became legend rows their fill became a
-  // WIDTH rather than a transform — so the one row the reader had actually moved
-  // stopped reacting, and only the dial popped. Measured in a browser: every
-  // fill sat at a flat 0 to 1 through a real growth event.
+  // The distinction nearly went missing in the move to the instrument — the
+  // branch bars used to carry the feedback, and when they became legend rows
+  // their fill became a WIDTH rather than a transform, so the one row the reader
+  // had actually moved stopped reacting and only the dial popped. It is kept,
+  // and it is now an underscore rather than a 39% overshoot on a measured share.
+  // See components/stats/reveal.tsx.
   const grow = useSharedValue(animate && entrance ? 0 : 1);
   const playedToken = useRef<number | null>(null);
   useEffect(() => {
@@ -148,13 +151,14 @@ function LegendLine({ row: r, index, count, total, on, pop, playToken, animate, 
     // currently free — which is the point of making it uniform. The one that did
     // have a figure in its dependencies is the one that shipped the bug.
     if (!newPlay) return;
-    if (pop) { grow.value = 1; grow.value = bounceTo(1, entrance ? 300 : 40, true); return; }
-    // A ROW THAT DID NOT MOVE DOES NOT MOVE. On a reaction the untouched rows
-    // hold exactly where they are — sweeping all six in again would say "here is
-    // your reading" when the reader asked "what did that do".
+    // A ROW THAT DID NOT MOVE DOES NOT MOVE — and now neither does the one that
+    // did. On a reaction every measure holds exactly where it is; sweeping all
+    // six in again would say "here is your reading" when the reader asked "what
+    // did that do", and springing one of them past its own share would answer
+    // with a number that is not true.
     if (!entrance) { grow.value = 1; return; }
     grow.value = 0;
-    grow.value = bounceTo(1, 120 + (index / Math.max(1, count)) * 260, false);
+    grow.value = revealTo(1, LEAD + (index / Math.max(1, count)) * 260, D_WIPE);
   }, [playToken, animate, entrance, pop, index, count, grow]);
 
   const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: grow.value }] }));
@@ -192,6 +196,16 @@ function LegendLine({ row: r, index, count, total, on, pop, playToken, animate, 
                 ]}
               />
             </View>
+            {/* The branch whose reading moved, marked in its own jewel tone.
+                It sits in the 9pt gap below the row and lines up with the
+                measure above it. */}
+            <Underscore
+              hue={g.mark}
+              playToken={playToken}
+              on={animate && pop}
+              delay={entrance ? LEAD + D_WIPE * 0.6 : 60}
+              style={{ bottom: -5, left: 15 }}
+            />
           </Pressable>
   );
 }
@@ -380,7 +394,11 @@ export function SparkLine({
     // have a figure in its dependencies is the one that shipped the bug.
     if (!newPlay) return;
     reveal.value = 0;
-    reveal.value = withDelay(260, withTiming(1, { duration: 900, easing: Easing.out(Easing.cubic) }));
+    // THE CURTAIN IS THE MODEL THE REST OF THE TAB NOW FOLLOWS, so it moved onto
+    // the shared curve with them. `Easing.out(Easing.cubic)` and emphasized
+    // decelerate are the same idea — enter fast, stop dead — and having one
+    // named curve is what stops six files drifting apart again.
+    reveal.value = revealTo(1, 260, 900);
   }, [playToken, animate, entrance, reveal]);
 
   const curtain = useAnimatedStyle(() => ({ transform: [{ translateX: reveal.value * width }] }));
@@ -510,11 +528,11 @@ function MetricCell({ metric, index, playToken, animate, entrance, last }: {
     if (newPlay && entrance) {
       n.value = metric.value;
       rise.value = 0;
-      rise.value = withDelay(360 + index * 80, withSpring(1, { damping: 15, stiffness: 170 }));
+      rise.value = revealTo(1, 360 + index * STEP, D_RISE);
       return;
     }
     // Roll from what is on screen to the new figure.
-    n.value = withTiming(metric.value, { duration: 460, easing: Easing.out(Easing.cubic) });
+    n.value = withTiming(metric.value, { duration: 460, easing: EASE_REVEAL });
   }, [playToken, animate, entrance, metric.value, index, n, rise]);
   const props = useAnimatedProps(() => ({ text: `${Math.round(n.value)}` }) as never);
   const cell = useAnimatedStyle(() => ({

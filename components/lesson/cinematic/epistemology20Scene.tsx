@@ -8,7 +8,7 @@ import { dirsFrom, clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundl
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology20Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -80,11 +80,18 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// the source is JUST PASSING IT ON, so the wires show
+const POLL_WIRES = [0, 1, 0, 1];
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology20'));
 
-export default function Epistemology20Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+export default function Epistemology20Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
@@ -104,14 +111,14 @@ export default function Epistemology20Scene({ clock, bt, bi, i, picked, onPick, 
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       voices: carry(cv, 1, n, VOICES[p], VOICES[n], tr),
       agree: carry(cv, 2, n, AGREE[p], AGREE[n], tr),
       // R7b — the pad draws the wires. Left along the x axis is a source repeating
       // what it heard, and the wiring behind the four appears: four voices, one
       // origin. The y axis is deliberately left dead, because it is the axis that
       // does nothing — a big name adds reach, not evidence.
-      wires: carry(cv, 3, n, WIRES[p], reacting ? 1 - dragPos.value : WIRES[n], tr),
+      wires: carry(cv, 3, n, WIRES[p], reacting ? pickAt(POLL_WIRES, pickPos.value) : WIRES[n], tr),
       t,
     };
   });

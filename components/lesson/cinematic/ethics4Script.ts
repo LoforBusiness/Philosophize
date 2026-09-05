@@ -96,7 +96,7 @@ export const BEATS: Ethics4Beat[] = [
   {
     a: 21, b: 0, floor: 1, rows: 3,
     interact: {
-      prompt: 'Drag to what this kind of relativism claims.',
+      prompt: 'What does this kind of relativism claim?',
       drag: {
         lo: 'CULTURES SIMPLY DIFFER',
         hi: 'NOTHING IS RIGHT OR WRONG',

@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics19Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -80,7 +80,7 @@ const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics19'));
 
-export default function Ethics19Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Ethics19Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -100,7 +100,7 @@ export default function Ethics19Scene({ clock, bt, bi, i, picked, onPick, dragPo
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       doc: carry(cv, 1, n, DOC[p], DOC[n], tr),
       rows: carry(cv, 2, n, ROWSV[p], ROWSV[n], tr),
       affects: carry(cv, 3, n, AFFECTS[p], AFFECTS[n], tr),
@@ -120,6 +120,7 @@ export default function Ethics19Scene({ clock, bt, bi, i, picked, onPick, dragPo
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, docStyle]}>
         <View style={styles.headRule} pointerEvents="none" />
         <Text style={[styles.head, { left: COL_DEC, width: 150 }]}>DECISION</Text>

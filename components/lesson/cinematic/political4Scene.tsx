@@ -10,7 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political4Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  useCarry, carry, STONE,
+  useCarry, carry, STONE, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -98,7 +98,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political4'));
 
-export default function Political4Scene({ clock, bt, bi, dragPos, i }: SceneApi) {
+export default function Political4Scene({ clock, bt, bi, dragPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -110,7 +110,7 @@ export default function Political4Scene({ clock, bt, bi, dragPos, i }: SceneApi)
 
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       walls: carry(cv, 0, n, WALLS[p], WALLS[n], tr),
       harm: carry(cv, 1, n, HARM[p], HARM[n], tr),
       test: carry(cv, 2, n, TEST[p], TEST[n], tr),

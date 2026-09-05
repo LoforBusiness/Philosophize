@@ -90,7 +90,7 @@ export const BEATS: Met18Beat[] = [
   {
     p: 41, x: 268, shelf: 1, aim: 1, hang: 1, beyond: 1,
     interact: {
-      prompt: 'Drag to how much contact a number outside space can make with you.',
+      prompt: 'How much contact can a number outside space make with you?',
       drag: {
         lo: 'NONE AT ALL',
         hi: 'AS MUCH AS A STONE',

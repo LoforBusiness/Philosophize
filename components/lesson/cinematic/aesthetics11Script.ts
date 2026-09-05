@@ -78,16 +78,16 @@ export const BEATS: Aes11Beat[] = [
   {
     p: 4, x: 124, frames: 1, plaques: 1, same: 1,
     interact: {
-      prompt: 'Set the lever to what the human maker adds.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'nothing', reads: 'nothing, the surfaces are identical' },
-          { id: 'toil', reads: 'the hours it took out of a life' },
-          { id: 'feeling', reads: 'a feeling that was had, and then passed on', correct: true },
+      prompt: 'What does a human maker add that the surface does not show?',
+      sort: {
+        chip: 'the human maker',
+        bins: [
+          { id: 'nothing', label: 'nothing', reads: 'nothing, the surfaces are identical' },
+          { id: 'toil', label: 'hours spent', reads: 'the hours it took out of a life' },
+          { id: 'feeling', label: 'a feeling', reads: 'a feeling that was had, and then passed on', correct: true },
         ],
       },
-      explain: 'The far setting. Identical objects, identical value sounds strict, and it quietly assumes a work is only its surface. Tolstoy asks something else. Was a feeling carried across? Carrying one takes a person who had the feeling first.',
+      explain: 'A feeling. Identical objects, identical value sounds strict, and it quietly assumes a work is only its surface. Tolstoy asks something else. Was a feeling carried across? Carrying one takes a person who had the feeling first.',
       xp: 5,
     },
     dur: 1.0,

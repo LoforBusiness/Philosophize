@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics18Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -82,7 +82,7 @@ const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics18'));
 
-export default function Metaphysics18Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics18Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -102,7 +102,7 @@ export default function Metaphysics18Scene({ clock, bt, bi, i, picked, onPick, d
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       shelf: carry(cv, 1, n, SHELF[p], SHELF[n], tr),
       aim: carry(cv, 2, n, AIM[p], AIM[n], tr),
       // R7b — the knob closes the fourth arrow's gap. Drag toward AS MUCH AS A STONE
@@ -126,6 +126,7 @@ export default function Metaphysics18Scene({ clock, bt, bi, i, picked, onPick, d
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap} pointerEvents="none">POINT AT IT</Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, shelfStyle]}>

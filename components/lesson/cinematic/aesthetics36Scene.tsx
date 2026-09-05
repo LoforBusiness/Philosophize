@@ -7,7 +7,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics36Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -77,7 +77,7 @@ const PRINTS = BEATS.map((b) => (b.prints ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics36'));
 
-export default function Aesthetics36Scene({ clock, bt, bi, dragPos }: SceneApi) {
+export default function Aesthetics36Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -96,7 +96,7 @@ export default function Aesthetics36Scene({ clock, bt, bi, dragPos }: SceneApi) 
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       squareOn: carry(cv, 1, n, SQUARE[p], SQUARE[n], tr),
       // The reader's thumb on the drag beat, the script's track everywhere else.
@@ -115,6 +115,7 @@ export default function Aesthetics36Scene({ clock, bt, bi, dragPos }: SceneApi) 
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap}>ONE SQUARE, ONE AFTERNOON</Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, squareStyle]} pointerEvents="none">

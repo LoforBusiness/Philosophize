@@ -96,19 +96,16 @@ export const BEATS: Log16Beat[] = [
   {
     p: 41, x: 250, dawns: 6, silent: 1,
     interact: {
-      prompt: 'Place the token on what five mornings have established.',
-      field: {
-        xLo: 'THEY MERELY PAIR UP', xHi: 'ONE MAKES THE OTHER HAPPEN',
-        yLo: 'SEEN ONCE', yHi: 'SEEN FIVE TIMES',
-        start: [0.76, 0.24],
-        quads: [
-          { id: 'pattern', x: 0, y: 1, reads: 'five times, and still only a pattern', correct: true },
-          { id: 'once', x: 0, y: 0, reads: 'once, which is not even a pattern yet' },
-          { id: 'cause5', x: 1, y: 1, reads: 'five times, so one of them causes the other' },
-          { id: 'cause1', x: 1, y: 0, reads: 'once, and already calling it a cause' },
+      prompt: 'What have five mornings actually established?',
+      poll: {
+        options: [
+          { id: 'pattern', reads: 'five times, and still only a pattern', correct: true },
+          { id: 'once', reads: 'once, which is not even a pattern yet' },
+          { id: 'cause5', reads: 'five times, so one of them causes the other' },
+          { id: 'cause1', reads: 'once, and already calling it a cause' },
         ],
       },
-      explain: 'Top left. Going up the pad is real progress: one morning is an anecdote, five is a pattern. Going right is a different claim altogether, and no amount of repetition carries you across. Here the dawn light wakes the bird, so the arrow points the other way.',
+      explain: 'Five times, and still only a pattern. Repetition is real progress: one morning is an anecdote, five is a pattern. But a cause is a different claim altogether, and no amount of repetition carries you across. Here the dawn light wakes the bird, so the arrow points the other way.',
       xp: 5,
     },
     dur: 1.0,

@@ -19,9 +19,16 @@ import type { BaseBeat } from './cinematicKit';
 //   · beat 3  SCENE TARGETS — three parts, tap the one that does the throwing
 //     out. The mouth is the tempting answer because it is the one people mean
 //     when they say "open-minded" (H66).
-//   · beat 7  a FIELD — the reader places the good thinker on the two settings.
-//     Four quadrants, four recognisable characters, and the pad is what makes
-//     open and careful visibly independent.
+//   · beat 7  a POLL — four recognisable characters, one per corner of the pad
+//     this question used to be. The ballot replaced the pad when the pad was
+//     retired (its corners had to be rebuilt from two axis labels before the
+//     reader could even read the question), and the four options below are still
+//     those corners, in the same order. The SCENE reads them back: each option
+//     has a mouth setting and a mesh setting in `epistemology23Scene`, so
+//     choosing a character drives the machine to that character's settings and
+//     the reader watches the mouth close as they move from "hears everything" to
+//     "the dogmatist". That is what keeps `open` and `careful` visibly
+//     independent now that there is no pad to show it.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Epi23Beat extends BaseBeat {
@@ -86,19 +93,16 @@ export const BEATS: Epi23Beat[] = [
   {
     p: 41, x: 268, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1,
     interact: {
-      prompt: 'Place the good thinker on the two settings.',
-      field: {
-        xLo: 'HEARS LITTLE', xHi: 'HEARS EVERYTHING',
-        yLo: 'CHECKS LOOSELY', yHi: 'CHECKS HARD',
-        start: [0.24, 0.24],
-        quads: [
-          { id: 'shut', x: 0, y: 0, reads: 'incurious, and easily sold' },
-          { id: 'crank', x: 1, y: 0, reads: 'the crank: all in, all kept' },
-          { id: 'dogma', x: 0, y: 1, reads: 'the dogmatist: nothing gets a hearing' },
-          { id: 'good', x: 1, y: 1, reads: 'hears everything, keeps almost none of it', correct: true },
+      prompt: 'Which of these is the good thinker?',
+      poll: {
+        options: [
+          { id: 'shut', reads: 'incurious, and easily sold' },
+          { id: 'crank', reads: 'the crank: all in, all kept' },
+          { id: 'dogma', reads: 'the dogmatist: nothing gets a hearing' },
+          { id: 'good', reads: 'hears everything, keeps almost none of it', correct: true },
         ],
       },
-      explain: 'Top right, and the two corners next to it are the interesting ones. Wide and loose is the crank, who has heard every theory and believes them all. Narrow and tight is the dogmatist, whose standards are impeccable and never get used on anything new.',
+      explain: 'Hears everything, keeps almost none of it. The two near misses are the interesting ones: the crank has heard every theory and believes them all, and the dogmatist has impeccable standards that never get used on anything new.',
       xp: 5,
     },
     dur: 1.0,

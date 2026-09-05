@@ -94,7 +94,7 @@ export const BEATS: Epi15Beat[] = [
     g: 41, cells: 4, dealt: 3, sum: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Slide the seam to divide where twelve comes from.',
+      prompt: 'Where does twelve come from?',
       split: {
         left: 'ALREADY INSIDE SEVEN AND FIVE', right: 'SOMETHING GENUINELY NEW',
         start: 1,

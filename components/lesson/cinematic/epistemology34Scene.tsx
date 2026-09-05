@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology34Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -56,7 +56,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology34'));
 
-export default function Epistemology34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
+export default function Epistemology34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -70,7 +70,7 @@ export default function Epistemology34Scene({ clock, bt, bi, i, dragPos }: Scene
     const grow = ease01(bt.value / 1.0);
     const c = live ? dragPos.value : carry(cv, 0, n, CLAIM[p], CLAIM[n], grow);
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       claim: c,
       // Normalised so a coin flip sits at the bottom of the bar rather than
       // halfway up it — the reader is watching the GAP, not the absolute rate.
@@ -90,6 +90,7 @@ export default function Epistemology34Scene({ clock, bt, bi, i, dragPos }: Scene
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.kicker} numberOfLines={2}>WHAT YOU SAY   ·   WHAT HOLDS</Text>
 
       <Animated.View style={[styles.claim, claimStyle]} pointerEvents="none" />

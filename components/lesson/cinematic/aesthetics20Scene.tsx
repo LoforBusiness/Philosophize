@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics20Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, STONE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -71,7 +71,7 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics20'));
 
-export default function Aesthetics20Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Aesthetics20Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -90,7 +90,7 @@ export default function Aesthetics20Scene({ clock, bt, bi, i, picked, onPick }: 
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       uses: carry(cv, 1, n, USES[p], USES[n], tr),
       swaps: carry(cv, 2, n, SWAPS[p], SWAPS[n], tr),
       struck: carry(cv, 3, n, STRUCK[p], STRUCK[n], tr),

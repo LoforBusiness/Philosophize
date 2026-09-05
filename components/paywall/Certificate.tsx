@@ -83,6 +83,20 @@ function dressing(variant: CertVariant) {
 }
 
 // ── the frame ────────────────────────────────────────────────────────────────
+//
+// THE THREE ENGRAVED PARTS ARE EXPORTED, AND TAKE COLOURS RATHER THAN A VARIANT.
+//
+// `Frame`, `Guilloche` and `Rosette` are the app's whole vocabulary for "this is
+// a struck document", and the Learn tab's masthead needs the same vocabulary in a
+// different material -- ink and the six branch hues, where this is paper and
+// gold. Taking a `variant` would have meant giving that file an opinion about
+// certificates; taking colours means the geometry is shared and the MATERIAL is
+// the caller's, which is the same split the rank pins already use: one build,
+// eight metals.
+//
+// They stay in this file because this is where they were solved. Moving them to
+// `shared/` would put the certificate's own parts a directory away from the
+// certificate for the sake of one other caller.
 
 /**
  * A DOUBLE RULE WITH CUT CORNERS, drawn as one path rather than styled.
@@ -96,8 +110,11 @@ function dressing(variant: CertVariant) {
  * this one never redraws, which is the whole reason the frame is allowed to be
  * SVG while every moving thing in the app is a View.
  */
-function Frame({ w, h, variant }: { w: number; h: number; variant: CertVariant }) {
-  const d = dressing(variant);
+export function Frame({ w, h, outer, inner }: {
+  w: number; h: number;
+  /** The heavy rule. */ outer: string;
+  /** The light rule inside it. */ inner: string;
+}) {
   // The notch scales, so a wide certificate does not get a token corner cut.
   const notch = Math.max(9, Math.round(w * 0.036));
   const o = 2.5;               // outer rule inset
@@ -114,8 +131,8 @@ function Frame({ w, h, variant }: { w: number; h: number; variant: CertVariant }
 
   return (
     <Svg width={w} height={h} style={StyleSheet.absoluteFill} pointerEvents="none">
-      <Path d={cut(o, notch)} fill="none" stroke={d.outer} strokeWidth={1.8} />
-      <Path d={cut(o + gap, Math.max(4, notch - gap))} fill="none" stroke={d.inner} strokeWidth={0.9} />
+      <Path d={cut(o, notch)} fill="none" stroke={outer} strokeWidth={1.8} />
+      <Path d={cut(o + gap, Math.max(4, notch - gap))} fill="none" stroke={inner} strokeWidth={0.9} />
     </Svg>
   );
 }
@@ -147,8 +164,28 @@ function Frame({ w, h, variant }: { w: number; h: number; variant: CertVariant }
  * own against texture. The trains are laid out in the upper `BAND` of the head
  * and fade out below it, so the motto sits on clean paper.
  */
-function Guilloche({ w, h, variant }: { w: number; h: number; variant: CertVariant }) {
-  const d = dressing(variant);
+export function Guilloche({
+  w, h, stroke, band = 0.68, cycles = 3, amp = 1, opacity = 0.5,
+}: {
+  w: number; h: number;
+  /** The line colour. On paper this is a tint of the frame; on ink, a lift off it. */
+  stroke: string;
+  /** How much of the height the weave occupies, as a fraction. */
+  band?: number;
+  /** How many times the slower of the two trains crosses the width. */
+  cycles?: number;
+  /**
+   * How tall each wave is, as a multiple of the tabled amplitudes.
+   *
+   * A SEPARATE AXIS FROM `band`, and it has to be. The amplitudes are stated as
+   * fractions of the band, so a caller who wants the weave to run the full
+   * height of a taller object gets waves scaled up with it -- on a 178pt plate
+   * that came out at 23pt peak-to-mid, which is not an engraved ground, it is
+   * bunting. Extent and height are independent and the API now says so.
+   */
+  amp?: number;
+  opacity?: number;
+}) {
   const paths = useMemo(() => {
     const out: string[] = [];
     const STEP = 4;
@@ -156,27 +193,27 @@ function Guilloche({ w, h, variant }: { w: number; h: number; variant: CertVaria
     // the interference read as woven rather than as stripes.
     // The title and its rule occupy the top ~68% of the head; the motto has the
     // rest. Everything below BAND is left bare.
-    const BAND = h * 0.68;
-    for (const [freq, amp, phase] of [[1.0, 0.30, 0], [1.618, 0.22, Math.PI / 3]] as const) {
+    const BAND = h * band;
+    for (const [freq, a, phase] of [[1.0, 0.30, 0], [1.618, 0.22, Math.PI / 3]] as const) {
       for (let k = -1; k <= 1; k++) {
         const mid = BAND / 2 + k * (BAND * 0.26);
         const pts: string[] = [];
         for (let x = 0; x <= w; x += STEP) {
-          const u = (x / w) * Math.PI * 2 * 3 * freq + phase;
-          const y = mid + Math.sin(u) * (BAND * amp * 0.5);
+          const u = (x / w) * Math.PI * 2 * cycles * freq + phase;
+          const y = mid + Math.sin(u) * (BAND * a * amp * 0.5);
           pts.push(`${x.toFixed(1)} ${y.toFixed(1)}`);
         }
         out.push(`M ${pts.join(' L ')}`);
       }
     }
     return out;
-  }, [w, h]);
+  }, [w, h, band, cycles, amp]);
 
   return (
     <Svg width={w} height={h} style={StyleSheet.absoluteFill} pointerEvents="none">
-      <G opacity={0.5}>
+      <G opacity={opacity}>
         {paths.map((p, i) => (
-          <Path key={i} d={p} fill="none" stroke={d.ground} strokeWidth={0.5} />
+          <Path key={i} d={p} fill="none" stroke={stroke} strokeWidth={0.5} />
         ))}
       </G>
     </Svg>
@@ -192,7 +229,7 @@ function Guilloche({ w, h, variant }: { w: number; h: number; variant: CertVaria
  * cannot: it says the edge is DECORATED rather than merely drawn. Twelve lobes
  * out of one polyline, so it stays a line drawing at any size.
  */
-function Rosette({ size, color }: { size: number; color: string }) {
+export function Rosette({ size, color }: { size: number; color: string }) {
   const d = useMemo(() => {
     const r = size / 2;
     const pts: string[] = [];
@@ -341,7 +378,7 @@ export default function Certificate({
 
         {/* ── the head ─────────────────────────────────────────────────────── */}
         <View style={[s.head, compact && s.headSm, { minHeight: headMin }]} onLayout={onHead}>
-          <Guilloche w={width - 2} h={headH} variant={variant} />
+          <Guilloche w={width - 2} h={headH} stroke={d.ground} />
           <View style={[s.corners, compact && s.cornersSm]} pointerEvents="none">
             <Rosette size={compact ? 12 : 16} color={d.inner} />
             <Rosette size={compact ? 12 : 16} color={d.inner} />
@@ -404,7 +441,7 @@ export default function Certificate({
           only once the height is known, so it never appears at the wrong size. */}
       {h > 0 ? (
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <Frame w={width} h={h} variant={variant} />
+          <Frame w={width} h={h} outer={d.outer} inner={d.inner} />
         </View>
       ) : null}
     </View>

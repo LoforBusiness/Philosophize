@@ -7,7 +7,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political37Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -78,7 +78,7 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political37'));
 
-export default function Political37Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Political37Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -99,7 +99,7 @@ export default function Political37Scene({ clock, bt, bi, i, picked, onPick, dra
     // Reader's thumb on the drag beat, the script's own track everywhere else.
     const cap = LIVE_D[n] === 1 ? clamp01(dragPos.value) : carry(cv, 0, n, CAP[p], CAP[n], tr);
     return {
-      fig: pose(figS, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       pairOn: carry(cv, 2, n, PAIR[p], PAIR[n], tr),
       hornsOn: carry(cv, 3, n, HORNS[p], HORNS[n], tr),
@@ -130,6 +130,7 @@ export default function Political37Scene({ clock, bt, bi, i, picked, onPick, dra
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap}>ELECTION DAY</Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, hornsStyle]} pointerEvents="none">

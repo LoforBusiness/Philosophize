@@ -72,19 +72,16 @@ export const BEATS: Epis14Beat[] = [
     g: 11, vat: 1, leap: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Place the token where the vat scenario is built.',
-      field: {
-        xLo: 'THE EXPERIENCES DIFFER', xHi: 'THE EXPERIENCES MATCH',
-        yLo: 'ONE WORLD', yHi: 'TWO DIFFERENT WORLDS',
-        start: [0.24, 0.24],
-        quads: [
-          { id: 'vat', x: 1, y: 1, reads: 'two worlds, one experience: nothing can tell them apart', correct: true },
-          { id: 'easy', x: 0, y: 1, reads: 'two worlds that feel different: easy to tell apart' },
-          { id: 'same', x: 1, y: 0, reads: 'one world, one experience: nothing to decide' },
-          { id: 'odd', x: 0, y: 0, reads: 'one world felt two ways: a different puzzle entirely' },
+      prompt: 'What has to be true for the vat scenario to work at all?',
+      poll: {
+        options: [
+          { id: 'vat', reads: 'two worlds, one experience: nothing can tell them apart', correct: true },
+          { id: 'easy', reads: 'two worlds that feel different: easy to tell apart' },
+          { id: 'same', reads: 'one world, one experience: nothing to decide' },
+          { id: 'odd', reads: 'one world felt two ways: a different puzzle entirely' },
         ],
       },
-      explain: 'Top right, and it is built there on purpose. Every piece of evidence you could ever collect is explained equally well by both worlds, so evidence cannot separate them. Common sense is no help: a simulation would fake the pinch too.',
+      explain: 'Two worlds, one experience, and it is built that way on purpose. Every piece of evidence you could ever collect is explained equally well by both worlds, so evidence cannot separate them. Common sense is no help: a simulation would fake the pinch too.',
       xp: 5,
     },
   },

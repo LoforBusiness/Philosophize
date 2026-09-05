@@ -97,7 +97,7 @@ export const BEATS: Political11Beat[] = [
   {
     p: 4, x: 120, dial: 1, set: 3, built: 3,
     interact: {
-      prompt: 'Slide the seam to which one comes first.',
+      prompt: 'Which one comes first?',
       split: {
         left: 'THE READING OF HUMAN NATURE', right: 'THE GOVERNMENT WANTED',
         start: 0.04,

@@ -74,18 +74,18 @@ export const BEATS: Meta5Beat[] = [
   {
     p: 4, stars: 1, q: 0.4, psr: 1, dasein: 1,
     interact: {
-      prompt: 'Set the lever to where Heidegger says this question starts.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'doubt', reads: 'doubt: can I trust anything I see?' },
-          { id: 'wonder', reads: 'wonder: why is any of this here at all?', correct: true },
-          { id: 'measure', reads: 'how much is here?' },
+      prompt: 'What kind of question is "why is there anything at all"?',
+      sort: {
+        chip: 'Leibniz\'s question',
+        bins: [
+          { id: 'doubt', label: 'doubt', reads: 'doubt: can I trust anything I see?' },
+          { id: 'wonder', label: 'wonder', reads: 'wonder: why is any of this here at all?', correct: true },
+          { id: 'measure', label: 'measurement', reads: 'how much is here?' },
         ],
       },
       // Was "the leap is Kierkegaard's, the absurd is Camus's" — a leftover list of
       // two options that no longer exist, naming two thinkers for nothing.
-      explain: 'The middle setting. Amazement that there is anything, rather than suspicion about what you are looking at. Doubt is Descartes at the first setting, and it asks something else entirely: not whether the world is here, but whether your eyes are telling the truth about it.',
+      explain: 'Wonder. Amazement that there is anything, rather than suspicion about what you are looking at. Doubt is Descartes at "doubt", and it asks something else entirely: not whether the world is here, but whether your eyes are telling the truth about it.',
       xp: 5,
     },
     dur: 1.0,

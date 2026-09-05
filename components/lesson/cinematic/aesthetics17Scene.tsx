@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics17Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -60,11 +60,11 @@ const FRAME = BEATS.map((b) => b.frame ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics17'));
 
-export default function Aesthetics17Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Aesthetics17Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -85,12 +85,12 @@ export default function Aesthetics17Scene({ clock, bt, bi, i, picked, onPick, dr
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       shape: carry(cv, 1, n, SHAPE[p], SHAPE[n], grow),
       // R7b — the arm sets the fear meter. The far setting says the fear is real with
       // the consequences taken out, and the meter stands up as the reader reaches it:
       // the frame stays, and the reading climbs anyway.
-      fear: carry(cv, 2, n, FEAR[p], reacting ? dragPos.value : FEAR[n], grow),
+      fear: carry(cv, 2, n, FEAR[p], reacting ? pickPos.value : FEAR[n], grow),
       frame: carry(cv, 3, n, FRAME[p], FRAME[n], grow),
     };
   });
@@ -112,6 +112,7 @@ export default function Aesthetics17Scene({ clock, bt, bi, i, picked, onPick, dr
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* ── WHAT HAPPENS NEXT ────────────────────────────────────────────── */}
       <Panel
         id="follows" correct top={CONSEQ_T}

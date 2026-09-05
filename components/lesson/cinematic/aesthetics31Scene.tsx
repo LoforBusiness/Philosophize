@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics31Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, STONE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, STONE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -82,10 +82,17 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// strings left: HARD leaves one, EASY leaves four
+const POLL_STR = [1, 1, 4, 4];
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics31'));
 
-export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -99,14 +106,14 @@ export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick, dr
     const grow = ease01(bt.value / 0.9);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // The playhead rides the MONOTONIC clock, not the beat clock, so tapping
       // through a beat never restarts the phrase mid-bar.
       play: (t * 0.385) % 1,
       playing: carry(cv, 0, n, PLAY[p], PLAY[n], grow),
       // R7c — the pad's x axis is how hard it is to play, and the instrument is what
       // makes it hard: strings drop away as the reader moves the token right.
-      strings: carry(cv, 1, n, STR[p], reacting ? 4 - dragPos.value * 3 : STR[n], grow),
+      strings: carry(cv, 1, n, STR[p], reacting ? pickAt(POLL_STR, pickPos.value) : STR[n], grow),
       clapA: carry(cv, 2, n, CA[p], CA[n], grow),
       clapB: carry(cv, 3, n, CB[p], CB[n], grow),
     };

@@ -86,16 +86,16 @@ export const BEATS: Logic37Beat[] = [
   {
     p: 35, x: 128, boxes: 1, barber: 1, sets: 1,
     interact: {
-      prompt: 'Set the lever to why nobody could shrug at the set.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'hard', reads: 'sets are simply harder to think about than barbers' },
-          { id: 'words', reads: 'just a trick of language' },
-          { id: 'axioms', reads: 'the rules said this set must exist', correct: true },
+      prompt: 'Why is the set paradox worse than the barber?',
+      sort: {
+        chip: 'Russell\'s set',
+        bins: [
+          { id: 'hard', label: 'harder to picture', reads: 'sets are simply harder to think about than barbers' },
+          { id: 'words', label: 'a trick of language', reads: 'just a trick of language' },
+          { id: 'axioms', label: 'the rules required it', reads: 'the rules said this set must exist', correct: true },
         ],
       },
-      explain: 'The far setting. With the barber you say there is no such man and walk away. The axioms of the day said any condition you can state determines a set, so this one was a legal object — and it was sitting inside the foundation of arithmetic.',
+      explain: 'The rules required it. With the barber you say there is no such man and walk away. The axioms of the day said any condition you can state determines a set, so this one was a legal object — and it was sitting inside the foundation of arithmetic.',
       xp: 5,
     },
     dur: 1.0,

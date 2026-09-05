@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics33Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -51,7 +51,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics33'));
 
-export default function Metaphysics33Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
+export default function Metaphysics33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -65,7 +65,7 @@ export default function Metaphysics33Scene({ clock, bt, bi, i, dragPos }: SceneA
     // A tower takes a moment to go over — 1.1s, so the fall is watchable (C17).
     const drop = ease01(bt.value / 1.1);
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // ON THE DRAG BEAT THE READER IS THE ANIMATION. Everywhere else the script
       // drives it. One value, two sources, and the picture never disagrees with
       // whichever is in charge.

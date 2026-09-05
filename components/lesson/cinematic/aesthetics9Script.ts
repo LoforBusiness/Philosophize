@@ -81,13 +81,13 @@ export const BEATS: A9Beat[] = [
   {
     p: 3, x: 208, boxes: true, stands: true,
     interact: {
-      prompt: 'So where does beauty stand now — required, or optional?',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'must', reads: 'a work must be beautiful to count' },
-          { id: 'may', reads: 'a work may be beautiful, and need not be', correct: true },
-          { id: 'never', reads: 'beauty was thrown out altogether' },
+      prompt: 'So where does beauty stand now?',
+      sort: {
+        chip: 'beauty',
+        bins: [
+          { id: 'must', label: 'required', reads: 'a work must be beautiful to count' },
+          { id: 'may', label: 'optional', reads: 'a work may be beautiful, and need not be', correct: true },
+          { id: 'never', label: 'discarded', reads: 'beauty was thrown out altogether' },
         ],
       },
       explain: 'An option, not a condition. The trap is hearing "dethroned" as "banned." A work can still be beautiful, it just no longer has to be, because what made it art was never the beauty.',

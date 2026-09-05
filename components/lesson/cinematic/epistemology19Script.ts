@@ -88,16 +88,16 @@ export const BEATS: Epi19Beat[] = [
   {
     p: 41, x: 268, doors: 1, split: 1,
     interact: {
-      prompt: 'Set the lever to what the disagreement really shows.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'guess', reads: 'nobody knows, pick either' },
-          { id: 'loud', reads: 'follow whichever one sounds the most certain' },
-          { id: 'weight', reads: 'count who is on each side, and why', correct: true },
+      prompt: 'Two experts disagree. What should you actually do?',
+      sort: {
+        chip: 'two experts disagree',
+        bins: [
+          { id: 'guess', label: 'pick either', reads: 'nobody knows, pick either' },
+          { id: 'loud', label: 'the confident one', reads: 'follow whichever one sounds the most certain' },
+          { id: 'weight', label: 'weigh the sides', reads: 'count who is on each side, and why', correct: true },
         ],
       },
-      explain: 'The far setting. Disagreement at the edge of a field is normal and does not touch its settled middle. The first setting is how a real debate gets used to sell a false one: hold up one dissenter, call the whole subject unsettled.',
+      explain: 'Weigh the sides. Disagreement at the edge of a field is normal and does not touch its settled middle. "pick either" is how a real debate gets used to sell a false one: hold up one dissenter, call the whole subject unsettled.',
       xp: 5,
     },
     dur: 1.0,

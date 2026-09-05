@@ -125,7 +125,7 @@ export const BEATS: EthicsBeat[] = [
     judge: true,
     weigh: 'q2',
     interact: {
-      prompt: 'Drag to how much of a conscience the apes already have.',
+      prompt: 'How much of a conscience do the apes already have?',
       drag: {
         lo: 'NONE OF IT',
         hi: 'THE WHOLE THING',

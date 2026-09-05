@@ -88,19 +88,16 @@ export const BEATS: Valid3Beat[] = [
   {
     p: 4, link: 1, stamp: 0, flaw: 0, form: 0,
     interact: {
-      prompt: 'Place the token on grass is green, so the sky is blue.',
-      field: {
-        xLo: 'THE FORM IS BROKEN', xHi: 'THE FORM IS GOOD',
-        yLo: 'THE CONCLUSION IS FALSE', yHi: 'THE CONCLUSION IS TRUE',
-        start: [0.76, 0.24],
-        quads: [
-          { id: 'luck', x: 0, y: 1, reads: 'broken form, true conclusion', correct: true },
-          { id: 'valid', x: 1, y: 1, reads: 'good form, true conclusion' },
-          { id: 'premise', x: 1, y: 0, reads: 'good form, false conclusion' },
-          { id: 'bad', x: 0, y: 0, reads: 'broken form, false conclusion' },
+      prompt: '"Grass is green, so the sky is blue." What is wrong with it?',
+      poll: {
+        options: [
+          { id: 'luck', reads: 'broken form, true conclusion', correct: true },
+          { id: 'valid', reads: 'good form, true conclusion' },
+          { id: 'premise', reads: 'good form, false conclusion' },
+          { id: 'bad', reads: 'broken form, false conclusion' },
         ],
       },
-      explain: 'Top left. Both halves of that sentence are true and neither has anything to do with the other, so the conclusion is true and the link is missing. The axis going up cannot decide validity: a true conclusion is something an argument can arrive at by accident.',
+      explain: 'Broken form, true conclusion. Both halves of that sentence are true and neither has anything to do with the other, so the conclusion is true and the link is missing. A true conclusion cannot decide validity: it is something an argument can arrive at by accident.',
       xp: 5,
     },
     dur: 1.0,

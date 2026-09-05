@@ -108,7 +108,7 @@ export const BEATS: MetaBeat[] = [
     chain: true,
     qregress: 'q2',
     interact: {
-      prompt: 'Drag to how far back the Big Bang story actually explains.',
+      prompt: 'How far back does the Big Bang story actually explain?',
       drag: {
         lo: 'LAST TUESDAY',
         hi: 'WHY ANYTHING AT ALL',

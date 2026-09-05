@@ -109,16 +109,16 @@ export const BEATS: Political7Beat[] = [
   {
     p: 4, x: 262, stone: 1, charter: 1, tear: 1,
     interact: {
-      prompt: 'Set the lever to what follows if a right is only what the law writes down.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'clean', reads: 'nothing awkward, the law is everything' },
-          { id: 'custom', reads: 'custom can still correct the law from outside' },
-          { id: 'nothing', reads: 'then no law could ever be called unjust', correct: true },
+      prompt: 'If law is all there is, what follows?',
+      sort: {
+        chip: 'law is everything',
+        bins: [
+          { id: 'clean', label: 'nothing awkward', reads: 'nothing awkward, the law is everything' },
+          { id: 'custom', label: 'custom corrects it', reads: 'custom can still correct the law from outside' },
+          { id: 'nothing', label: 'no law is unjust', reads: 'then no law could ever be called unjust', correct: true },
         ],
       },
-      explain: 'The far setting, and it is the whole natural-rights reply. No law, no right sounds hard-headed, and Bentham argued exactly that. But if a right is only what the law grants, then a law that takes one away breaks no standard. There is none left above it.',
+      explain: 'No law is unjust, and it is the whole natural-rights reply. No law, no right sounds hard-headed, and Bentham argued exactly that. But if a right is only what the law grants, then a law that takes one away breaks no standard. There is none left above it.',
       xp: 5,
     },
     dur: 1.0,

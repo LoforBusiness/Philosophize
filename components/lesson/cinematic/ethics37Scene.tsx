@@ -7,7 +7,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics37Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
@@ -76,7 +76,7 @@ const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics37'));
 
-export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(6);
@@ -99,7 +99,7 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
     // obligation that faded in would be a picture of something gradual.
     const arriving = CORD[n] === 1 && CORD[p] === 0;
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       postsOn: carry(cv, 1, n, POSTS[p], POSTS[n], tr),
       cord: arriving ? ease01((bt.value - 0.25) / 0.7) : carry(cv, 2, n, CORD[p], CORD[n], tr),
@@ -130,6 +130,7 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap}>AN ORDINARY TUESDAY</Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, postsStyle]}>

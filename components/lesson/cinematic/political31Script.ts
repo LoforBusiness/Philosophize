@@ -79,13 +79,13 @@ export const BEATS: Pol31Beat[] = [
     g: 11, grass: 0.22, herd: 4, sums: 1,
     dur: 1.0,
     interact: {
-      prompt: 'So what actually fixes it?',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'ask', reads: 'ask each herder to take less' },
-          { id: 'shame', reads: 'shame the ones who take too much' },
-          { id: 'rules', reads: 'change what taking too much costs', correct: true },
+      prompt: 'What actually stops the pasture being stripped?',
+      sort: {
+        chip: 'the common pasture',
+        bins: [
+          { id: 'ask', label: 'ask them', reads: 'ask each herder to take less' },
+          { id: 'shame', label: 'shame them', reads: 'shame the ones who take too much' },
+          { id: 'rules', label: 'change the cost', reads: 'change what taking too much costs', correct: true },
         ],
       },
       explain: 'The other card fails on its own terms. Whoever complies simply loses, and the field dies anyway. Despair was Hardin\'s own guess. Elinor Ostrom won a Nobel for commons that never collapsed, each binding its users to a limit they helped set.',

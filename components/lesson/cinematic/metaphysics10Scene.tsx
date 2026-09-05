@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics10Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -51,9 +51,12 @@ import Target from './Target';
 //     to go left, which flips his facing away from the shelf he is talking about
 //     and snaps him to a mirrored copy in one frame (C18). He gets his variety
 //     from the gesture instead — nine beats, nine silhouettes.
-//   · THE ROSE IS A DISC ON A STEM. At 40 units tall a stroked flower closes into
-//     a blob (B16c), so all three objects are drawn FILLED and simple, and the
-//     plank face names them — a labelled plate beats an ambiguous shape.
+//   · THE ROSE IS A ROSETTE ON A STEM. The constraint that put a plain disc here
+//     first is real — at 40 units tall a STROKED flower closes into a blob (B16c)
+//     — but the conclusion was wrong: a disc on a stick is a lollipop, and letting
+//     the plank's label carry the meaning is the cheese finding (§13). Five FILLED
+//     petals round a paper eye is the heraldic rose, it contains no line to close
+//     up, and it reads at 22 units.
 
 // ── the three candidate homes ────────────────────────────────────────────────
 const SLOT_L = 192;
@@ -83,6 +86,8 @@ const PLANK_H = 20;
 const OBJ_T = 364;                                // objects stand in y 364…404
 const OBJ_X = [236, 287, 338];                    // rose · ruby · flag centres
 const OBJ_NAMES = ['ROSE', 'RUBY', 'FLAG'];
+/** Five petal centres on a 6-unit ring, from straight up, clockwise. */
+const ROSE_PETALS: [number, number][] = [[0.00, -6.00], [5.71, -1.85], [3.53, 4.85], [-3.53, 4.85], [-5.71, -1.85]];
 const TAG_W = 36;
 const TAG_H = 22;                                 // 22, not 20: 4 units of slack for Android font padding (D29)
 const TAG_T = 336;                                // tag 336…358, pin 358…364, object top 364
@@ -116,7 +121,7 @@ const CARD_TOP = (() => {
   return out;
 })();
 
-export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -153,7 +158,7 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick }:
     const was = CARDV[p] > 0;
 
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       frame: (frameOn ? 1 : 0) * (frameFade ? grow : 1),
       tags: (tagsOn ? 1 : 0) * (tagsFade ? grow : 1),
       str: (strOn ? 1 : 0) * (strFade ? grow : 1),
@@ -191,8 +196,15 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick }:
         </Text>
       ))}
 
-      {/* the rose: a filled head on a stem, with two leaves */}
-      <View style={styles.roseHead} pointerEvents="none" />
+      {/* the rose: five petals round a paper eye, on a stem, with two leaves */}
+      {ROSE_PETALS.map(([dx, dy], k) => (
+        <View
+          key={`petal${k}`}
+          style={[styles.rosePetal, { left: OBJ_X[0] + dx - 5, top: OBJ_T + 12 + dy - 5 }]}
+          pointerEvents="none"
+        />
+      ))}
+      <View style={styles.roseEye} pointerEvents="none" />
       <View style={styles.roseStem} pointerEvents="none" />
       <View style={[styles.leaf, styles.leafL]} pointerEvents="none" />
       <View style={[styles.leaf, styles.leafR]} pointerEvents="none" />
@@ -277,7 +289,20 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
-  roseHead: { position: 'absolute', left: OBJ_X[0] - 11, top: OBJ_T + 1, width: 22, height: 22, borderRadius: 11, backgroundColor: INK },
+  // ── A ROSE IS A ROSETTE, NOT A DISC ───────────────────────────────────────
+  //
+  // This was one 22-unit filled circle on a 2.5-unit stem, which is a lollipop —
+  // the label under it was doing all the work, and a labelled shape that is not
+  // the thing is the cheese finding (§13). The header's constraint is real and
+  // still holds: at this size a STROKED flower closes into a blob (B16c). What it
+  // missed is that a FILLED one need not — five overlapping petals round a paper
+  // eye is how heraldry has drawn a rose for eight hundred years, and it survives
+  // being 22 units across precisely because nothing in it is a line.
+  rosePetal: { position: 'absolute', width: 10, height: 10, borderRadius: 5, backgroundColor: INK },
+  roseEye: {
+    position: 'absolute', left: OBJ_X[0] - 3, top: OBJ_T + 9, width: 6, height: 6,
+    borderRadius: 3, backgroundColor: PAPER,
+  },
   roseStem: { position: 'absolute', left: OBJ_X[0] - 1.25, top: OBJ_T + 21, width: 2.5, height: 19, backgroundColor: INK },
   leaf: { position: 'absolute', top: OBJ_T + 24, width: 11, height: 4, borderRadius: 2, backgroundColor: INK },
   leafL: { left: OBJ_X[0] - 12, transform: [{ rotate: '-24deg' }] },

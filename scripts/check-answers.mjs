@@ -141,5 +141,61 @@ if (sided.length) {
   for (const s of sided.slice(0, 6)) console.log(`        ${s}`);
 } else ok('no explanation names a side (J9)');
 
+// ── AND EVERY OTHER CONTROL WITH SLOTS, WHICH NOTHING WAS LOOKING AT ─────────
+//
+// This file was written the day all 130 two-card questions turned out to put the
+// true card on the left, and for its whole life it measured ONLY the deck. The
+// lever and the pad carried the identical fault the entire time, worse and
+// unwatched: the lever's answer was its LAST stop in 35 of 50 questions (70%) and
+// the pad's was its FIRST quadrant in 15 of 22 (68%). Nothing failed, because
+// nothing looked — the same shape as every other blind spot §21 records.
+//
+// Both are retired and their questions now run through `orderFor`, read out of
+// ChoiceCards below rather than reimplemented here. What this adds is the
+// MEASUREMENT, so the next control with slots cannot repeat it.
+const orderSrc = src.match(/export function orderFor\([^)]*\): number\[\] \{([\s\S]*?)\n\}/);
+if (!orderSrc) {
+  bad('orderFor is not in ChoiceCards.tsx — the multi-slot shuffle has been renamed or removed');
+} else {
+  // eslint-disable-next-line no-new-func
+  const orderFor = new Function('seed', 'n', orderSrc[1]);
+  const slotted = { poll: [], sort: [] };
+  for (const [id, comp] of comps) {
+    const found = beatsOf(comp);
+    if (!found) continue;
+    for (const ch of found.chunks) {
+      for (const kind of ['poll', 'sort']) {
+        if (!new RegExp(`\\n\\s{6}${kind}:`).test(ch)) continue;
+        const its = [...ch.matchAll(/\{[^{}]*?reads:[^{}]*?\}/g)].map((x) => x[0]);
+        const authored = its.findIndex((x) => /correct:\s*true/.test(x));
+        if (authored < 0 || its.length < 2) continue;
+        // Seeded exactly as the player seeds it — on the question's own words,
+        // which for a poll is its first position and for a sort is its chip.
+        const firstRe = /reads:\s*'((?:[^'\\]|\\.)*)'/;
+        const chipRe = /chip:\s*'((?:[^'\\]|\\.)*)'/;
+        const first = kind === 'poll'
+          ? (its[0].match(firstRe) || [, ''])[1]
+          : (ch.match(chipRe) || [, ''])[1];
+        const shown = orderFor(seedFor(id, [{ text: first }]), its.length);
+        slotted[kind].push(shown.indexOf(authored) / (its.length - 1));
+      }
+    }
+  }
+  for (const kind of ['poll', 'sort']) {
+    const xs = slotted[kind];
+    if (!xs.length) continue;
+    const mean = xs.reduce((a, b) => a + b, 0) / xs.length;
+    // 0 = always the first slot, 1 = always the last. A control whose answer
+    // reliably sits at one end is one a reader can score without reading.
+    if (mean >= 0.3 && mean <= 0.7) {
+      ok(`${kind}: the answer sits ${(mean * 100).toFixed(0)}% of the way along, on average`,
+        `${xs.length} questions · no end to guess at`);
+    } else {
+      bad(`${kind}: the answer sits ${(mean * 100).toFixed(0)}% of the way along, on average`,
+        `${xs.length} questions · a reader can guess by position`);
+    }
+  }
+}
+
 console.log(fails ? `\n${fails} failing.\n` : '\nall clear.\n');
 process.exit(fails ? 1 : 0);

@@ -328,18 +328,50 @@ const styles = StyleSheet.create({
 // Q1 IS DELIBERATELY AT SCALE 1, which is the identity transform — the three
 // cards are Pressables, and a tap must not have to survive a camera offset to
 // land. The move into that beat finishes before the cards matter.
+//
+// ── ONE SHOT PER BEAT, AND THE SPLIT IS WHY THAT NEEDS SAYING ───────────────
+//
+// This list is indexed BY BEAT. It was written when the lesson had eleven of
+// them, and J12's segmenting pass then cut the packed beats in two — 11 → 18 —
+// copying every channel verbatim so the picture would hold still while the words
+// advanced. It could not copy this, because a shot is not a channel: it lives
+// out here in the scene, not on the beat.
+//
+// So every shot after the first split slid one place, and the reader got the
+// arc played against the wrong sentences: 1.62 on the first half of the opening
+// line and 1.0 on the second (a pull-back mid-sentence), then 1.24 on a beat
+// meant to be wide, then 1.0 again. Tap, zoom out, tap, zoom in — which is
+// exactly what it was reported as: *"it's like it resets and zooms back in."*
+//
+// The pieces of one original beat therefore REPEAT its shot, so the camera holds
+// through a sentence and moves only where the staging does. A repeat carries a
+// short `tr` rather than the original's: from and to are the same point so
+// nothing travels, but `containShot` loosens each beat against its OWN must-box,
+// and where two pieces measured slightly differently that correction should be a
+// quick settle rather than a slow drift.
+//
+// `check:camera` now holds the count, because nothing did: the splitter changed
+// how many beats there are and no instrument compared the two.
+const HOLD = 0.5;
 const SHOTS: Shot[] = [
-  { cx: 132, cy: 404, s: 1.62, tr: 0 },
-  { cx: 200, cy: 280, s: 1.0, tr: 1.5 },
-  { cx: 236, cy: 352, s: 1.24, tr: 1.2 },
-  { cx: 236, cy: 392, s: 1.42, tr: 1.6 },
-  { cx: 200, cy: 280, s: 1.0, tr: 0.9 },
-  { cx: 238, cy: 384, s: 1.34, tr: 1.0 },
-  { cx: 224, cy: 358, s: 1.18, tr: 0.9 },
-  { cx: 205, cy: 380, s: 1.45, tr: 1.0 },
-  { cx: 200, cy: 340, s: 1.12, tr: 1.2 },
-  { cx: 200, cy: 280, s: 1.0, tr: 0.9 },
-  { cx: 200, cy: 280, s: 1.0, tr: 0.6 },
+  { cx: 132, cy: 404, s: 1.62, tr: 0 },      //  0  old 0 — portrait, alone in the room
+  { cx: 132, cy: 404, s: 1.62, tr: HOLD },   //  1  old 0, second half
+  { cx: 200, cy: 280, s: 1.0, tr: 1.5 },     //  2  old 1 — pull back as the tidy boxes appear
+  { cx: 200, cy: 280, s: 1.0, tr: HOLD },    //  3  old 1, second half
+  { cx: 236, cy: 352, s: 1.24, tr: 1.2 },    //  4  old 2 — drift right on "then you look up"
+  { cx: 236, cy: 352, s: 1.24, tr: HOLD },   //  5  old 2, second half
+  { cx: 236, cy: 392, s: 1.42, tr: 1.6 },    //  6  old 3 — travel with the walk and tighten
+  { cx: 236, cy: 392, s: 1.42, tr: HOLD },   //  7  old 3, second half
+  { cx: 200, cy: 280, s: 1.0, tr: 0.9 },     //  8  old 4 — Q1 at the identity transform
+  { cx: 238, cy: 384, s: 1.34, tr: 1.0 },    //  9  old 5 — two-shot for the different voice
+  { cx: 238, cy: 384, s: 1.34, tr: HOLD },   // 10  old 5, second half
+  { cx: 224, cy: 358, s: 1.18, tr: 0.9 },    // 11  old 6 — ease off to hold the quote
+  { cx: 205, cy: 380, s: 1.45, tr: 1.0 },    // 12  old 7 — the closest push of the lesson
+  { cx: 200, cy: 340, s: 1.12, tr: 1.2 },    // 13  old 8 — widen as the method is laid out
+  { cx: 200, cy: 340, s: 1.12, tr: HOLD },   // 14  old 8, second half
+  { cx: 200, cy: 280, s: 1.0, tr: 0.9 },     // 15  old 9 — full frame for the critics
+  { cx: 200, cy: 280, s: 1.0, tr: HOLD },    // 16  old 9, second half
+  { cx: 200, cy: 280, s: 1.0, tr: 0.6 },     // 17  old 10 — neutral; the stage is hidden anyway
 ];
 
 // The section header "RULES · RIGHTS · TOTALS" sits at y = 46, above the old band

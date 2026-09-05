@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political24Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -77,8 +77,7 @@ const PULL = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political24'));
 
 export default function Political24Scene({
-  clock, bt, bi, i, picked, onPick, dragPos,
-}: SceneApi) {
+  clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(3);
   const pulling = PULL[i] === 1;
@@ -98,7 +97,7 @@ export default function Political24Scene({
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       signs: carry(cv, 1, n, SIGNS[p], SIGNS[n], tr),
       // Through `carry` so the arm takes over across the transition rather than
       // on one frame — see metaphysics21Scene for why that matters.
@@ -118,6 +117,7 @@ export default function Political24Scene({
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, signStyle]} pointerEvents="none">
         {PL_X.map((px, k) => (
           <View key={px}>

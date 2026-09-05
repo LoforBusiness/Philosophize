@@ -10,7 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics5Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  useCarry, carry, STONE,
+  useCarry, carry, STONE, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -73,10 +73,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics5'));
 
-export default function Metaphysics5Scene({ clock, bt, bi, dragPos, i }: SceneApi) {
+export default function Metaphysics5Scene({ clock, bt, bi, pickPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -87,12 +87,12 @@ export default function Metaphysics5Scene({ clock, bt, bi, dragPos, i }: SceneAp
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       stars: carry(cv, 0, n, STARB[p], STARB[n], tr),
       // R7b — the arm raises the question mark. Only one of the three settings opens
       // this question at all, and the great ? between NOTHING and SOMETHING grows as
       // the reader arrives at it.
-      q: carry(cv, 1, n, QB[p], reacting ? dragPos.value : QB[n], tr),
+      q: carry(cv, 1, n, QB[p], reacting ? pickPos.value : QB[n], tr),
       dasein: carry(cv, 2, n, DAS[p], DAS[n], tr),
       psr: carry(cv, 3, n, PSR[p], PSR[n], tr),
       t,

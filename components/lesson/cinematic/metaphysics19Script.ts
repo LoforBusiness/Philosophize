@@ -91,13 +91,13 @@ export const BEATS: Met19Beat[] = [
   {
     p: 41, x: 268, props: 1, peg: 0.4, twin: 1,
     interact: {
-      prompt: 'Set the lever to how many things are standing there.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'one', reads: 'one thing, counted twice' },
-          { id: 'two', reads: 'two things, with nothing telling them apart', correct: true },
-          { id: 'never', reads: 'no such case could happen' },
+      prompt: 'Two things exactly alike. What is the case?',
+      sort: {
+        chip: 'the two spheres',
+        bins: [
+          { id: 'one', label: 'one, counted twice', reads: 'one thing, counted twice' },
+          { id: 'two', label: 'two, identical', reads: 'two things, with nothing telling them apart', correct: true },
+          { id: 'never', label: 'impossible', reads: 'no such case could happen' },
         ],
       },
       explain: 'Two, plainly, and that is the bill bundle theory has to pay. If a thing simply is its properties, two with all the same properties are one thing. Saying they are two means something beyond the properties is counting — the peg the theory threw away.',

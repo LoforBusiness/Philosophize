@@ -95,7 +95,7 @@ export const BEATS: Logic8Beat[] = [
   {
     p: 21, x: 152, wet: 1, rule: 1, trap: 2, spr: 1,
     interact: {
-      prompt: 'Drag to what no rain actually tells you about the streets.',
+      prompt: 'Suppose it never rained. What follows about the streets?',
       drag: {
         lo: 'STREETS MUST BE DRY',
         hi: 'STREETS MUST BE WET',

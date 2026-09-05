@@ -10,7 +10,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics6Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -85,10 +85,19 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// the mountain is OVERWHELMING
+const POLL_VAST = [1, 0, 1, 0];
+// the flower stands where there is NOTHING TO FEAR
+const POLL_FLOWER = [0, 1, 1, 0];
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics6'));
 
-export default function Aesthetics6Scene({ clock, bt, bi, dragPos, dragPos2, i }: SceneApi) {
+export default function Aesthetics6Scene({ clock, bt, bi, pickPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -99,14 +108,14 @@ export default function Aesthetics6Scene({ clock, bt, bi, dragPos, dragPos2, i }
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // R7b — the pad raises the mountain. Across, from soothing to overwhelming, the
       // vastness grows over the stage.
-      vast: carry(cv, 0, n, VAST[p], reacting ? dragPos.value : VAST[n], tr),
+      vast: carry(cv, 0, n, VAST[p], reacting ? pickAt(POLL_VAST, pickPos.value) : VAST[n], tr),
       // And down the y axis, where there is nothing to fear, the little flower is
       // there instead. Two axes, two of Burke's categories, and the reader finds the
       // corner where the two are furthest apart.
-      flower: carry(cv, 1, n, FLOWER[p], reacting ? 1 - dragPos2.value : FLOWER[n], tr),
+      flower: carry(cv, 1, n, FLOWER[p], reacting ? pickAt(POLL_FLOWER, pickPos.value) : FLOWER[n], tr),
       split: carry(cv, 2, n, SPLIT[p], SPLIT[n], tr),
       mind: carry(cv, 3, n, MIND[p], MIND[n], tr),
       t,

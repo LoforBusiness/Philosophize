@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './strong4Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerSpent } from './Target';
@@ -84,10 +84,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('strong4'));
 
-export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -111,12 +111,12 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, dragPos
     const v = carry(cv, 1, n, VERD[p], VERD[n], tr);
     const lens = carry(cv, 2, n, LENS[p], LENS[n], tr);
     return {
-      fig: pose(s, FIG_X, GROUND, K, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       fill: carry(cv, 3, n, FILL[p], FILL[n], tr),
       // R7b — the arm asks for a guarantee, and the lock answers. At the first
       // setting the verdict demands certainty and the lock is shut; move away and it
       // opens, because likelihood was never trying to lock anything.
-      lock: carry(cv, 4, n, LOCK[p], reacting ? 1 - dragPos.value : LOCK[n], tr),
+      lock: carry(cv, 4, n, LOCK[p], reacting ? 1 - pickPos.value : LOCK[n], tr),
       dice,
       banner: clamp01(v),
       likely: clamp01(v) - clamp01(v - 1),
@@ -151,6 +151,7 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, dragPos
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <View style={styles.ground} pointerEvents="none" />
 
       {/* ── the certainty gauge ─────────────────────────────────────────────── */}

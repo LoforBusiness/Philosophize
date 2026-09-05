@@ -109,7 +109,7 @@ export const BEATS: Pol3Beat[] = [
   {
     sub: 4, r: 0, scroll: 1, pair: 2, flow: 1, seal: 1,
     interact: {
-      prompt: 'Drag to how close a majority vote gets to the general will.',
+      prompt: 'How close does a majority vote get to the general will?',
       drag: {
         lo: 'THEY ARE THE SAME THING',
         hi: 'A VOTE NEVER REACHES IT',

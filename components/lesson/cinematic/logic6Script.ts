@@ -73,7 +73,7 @@ export const BEATS: Logic6Beat[] = [
   {
     p: 4, link: 1, table: 1,
     interact: {
-      prompt: 'Slide the seam to divide what accepting a conditional commits you to.',
+      prompt: 'What does accepting a conditional commit you to?',
       split: {
         left: 'THE LINK ONLY', right: 'THE IF AS WELL',
         start: 0.04,

@@ -69,7 +69,7 @@ export const BEATS: Meta15Beat[] = [
   {
     p: 4, x: 124, balls: 1, gap: 1, found: 2,
     interact: {
-      prompt: 'Drag to how much of the cause you actually see.',
+      prompt: 'How much of the cause do you actually see?',
       drag: {
         lo: 'ONE THING THEN ANOTHER',
         hi: 'THE PUSH ITSELF',

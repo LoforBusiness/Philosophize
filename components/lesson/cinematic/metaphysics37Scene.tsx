@@ -8,7 +8,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics37Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -75,7 +75,7 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics37'));
 
-export default function Metaphysics37Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics37Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
@@ -97,7 +97,7 @@ export default function Metaphysics37Scene({ clock, bt, bi, i, picked, onPick, d
     // so it never re-swings behind the reader; the ward is the same.
     const swinging = SWING[n] > 0 && SWING[p] === 0;
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       shelfOn: carry(cv, 1, n, SHELF[p], SHELF[n], tr),
       hammerOn: carry(cv, 2, n, HAMMER[p], HAMMER[n], tr),

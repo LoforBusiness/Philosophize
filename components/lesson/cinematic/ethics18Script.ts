@@ -78,16 +78,16 @@ export const BEATS: Ethics18Beat[] = [
   {
     p: 4, x: 124, line: 1, test: 2, wide: 1,
     interact: {
-      prompt: 'Set the lever to the test Singer says decides it.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'reason', reads: 'whether it can reason' },
-          { id: 'speak', reads: 'whether it can talk to us' },
-          { id: 'suffer', reads: 'whether it can suffer', correct: true },
+      prompt: 'What decides whether something counts morally?',
+      sort: {
+        chip: 'moral standing',
+        bins: [
+          { id: 'reason', label: 'can it reason', reads: 'whether it can reason' },
+          { id: 'speak', label: 'can it talk', reads: 'whether it can talk to us' },
+          { id: 'suffer', label: 'can it suffer', reads: 'whether it can suffer', correct: true },
         ],
       },
-      explain: 'The far setting, and Bentham got there first. The first is the old test and it does not even follow: reasoning has nothing to do with being hurt. Infants cannot reason either, and nobody proposes leaving them out.',
+      explain: 'Can it suffer, and Bentham got there first. "can it reason" is the old test and it does not even follow: reasoning has nothing to do with being hurt. Infants cannot reason either, and nobody proposes leaving them out.',
       xp: 5,
     },
     dur: 1.0,

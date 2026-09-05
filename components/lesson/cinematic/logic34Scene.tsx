@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic34Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -60,7 +60,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic34'));
 
-export default function Logic34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
+export default function Logic34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -75,7 +75,7 @@ export default function Logic34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
     const u = live ? dragPos.value : carry(cv, 0, n, N[p], N[n], grow);
     const bias = carry(cv, 1, n, BIAS[p], BIAS[n], tr);
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // Half-width in fractions of the span, clamped so a tiny sample cannot draw
       // a bracket wider than the scale it sits on.
       hw: Math.min(halfWidth(u), 0.5),
@@ -97,6 +97,7 @@ export default function Logic34Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.kicker} numberOfLines={1}>WHAT FRACTION ARE DARK?</Text>
 
       <View style={styles.axis} pointerEvents="none" />

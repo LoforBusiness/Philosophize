@@ -8,7 +8,7 @@ import { clamp01, ease01, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic15Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -77,7 +77,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic15'));
 
-export default function Logic15Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Logic15Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -98,7 +98,7 @@ export default function Logic15Scene({ clock, bt, bi, i, picked, onPick, dragPos
       carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr,
     ));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       crowd: carry(cv, 0, n, CROWD[p], CROWD[n], grow),
       sample: carry(cv, 1, n, SAMPLE[p], SAMPLE[n], grow),
       // R7b — the knob closes the leap. At the near end the reader is only being
@@ -118,6 +118,7 @@ export default function Logic15Scene({ clock, bt, bi, i, picked, onPick, dragPos
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.label} numberOfLines={1}>ONE COUNTRY, EVERY PERSON IN IT</Text>
 
       {/* ── THE CLAIM ────────────────────────────────────────────────────── */}

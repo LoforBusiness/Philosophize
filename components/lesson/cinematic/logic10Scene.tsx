@@ -12,7 +12,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic10Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  facing, useCarry, carry, STONE,
+  facing, useCarry, carry, STONE, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -108,7 +108,7 @@ const SLOTV = BEATS.map((b) => b.slot ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 // Where the missing premise sits, and how solid it is, on every beat. A beat that
 // does not show it CARRIES FORWARD the last position and solidity, so it fades out
@@ -129,7 +129,7 @@ const HIDSOL: number[] = [];
   }
 }
 
-export default function Logic10Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Logic10Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -161,14 +161,14 @@ export default function Logic10Scene({ clock, bt, bi, i, picked, onPick, dragPos
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       arg: argFade ? grow : 1,
       slot: carry(cv, 1, n, SLOTV[p], SLOTV[n], tr, slotFade ? grow : 1),
       rise: carry(cv, 2, n, HIDTOP[p], HIDTOP[n], tr) - HID_T,
       // R7b — the arm hauls the unsaid premise up. It runs from absent, through
       // dashed below the line, to sitting in the socket: the reader drags the thing
       // nobody said into the open, which is the only way to check whether it is true.
-      hid: carry(cv, 3, n, HIDOP[p], reacting ? dragPos.value * 2 : HIDOP[n], tr),
+      hid: carry(cv, 3, n, HIDOP[p], reacting ? pickPos.value * 2 : HIDOP[n], tr),
       sol: carry(cv, 4, n, HIDSOL[p], HIDSOL[n], cross),
     };
   });

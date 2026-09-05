@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology12Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -155,9 +155,9 @@ const TOK = BEATS.map((b) => b.token ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
-export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -175,7 +175,7 @@ export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick, 
     // R7c — the lever's three stops ARE the three pipes, so it lays and lifts them:
     // one for the world reaching you directly, three for the world reaching somebody
     // else first. The route the reader picks is the route the tank is fed by.
-    const pv = carry(cv, 0, n, PIPES[p], reacting ? 1 + dragPos.value * 2 : PIPES[n], tr);
+    const pv = carry(cv, 0, n, PIPES[p], reacting ? 1 + pickPos.value * 2 : PIPES[n], tr);
     const perc = clamp01(pv);
     const mem = clamp01(pv - 1);
     const test = clamp01(pv - 2);
@@ -186,7 +186,7 @@ export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick, 
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       perc,
       mem,
       test,

@@ -9,7 +9,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './valid3Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerSpent } from './Target';
@@ -109,10 +109,19 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// VALID is stamped on the options that say GOOD FORM
+const POLL_STAMP = [0, 1, 1, 0];
+// the ✗ shows on the options that say FALSE CONCLUSION
+const POLL_FLAW = [0, 0, 1, 1];
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('valid3'));
 
-export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldInsp = useHeld();
   const cv = useCarry(3);
@@ -138,15 +147,15 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, dragPos,
 
     const insp = keepHeld(heldInsp, mixStance(carryFrom(heldInsp, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
-      fig: pose(insp, FIG_X, GROUND, K, 1, 1),
+      fig: lookPose(insp, FIG_X, GROUND, K, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       link: carry(cv, 0, n, LINK[p], LINK[n], tr),
       // R7b — the pad stamps the argument. Across, from a broken form to a good one,
       // the VALID stamp comes down.
-      stamp: carry(cv, 1, n, STAMP[p], reacting ? dragPos.value : STAMP[n], tr),
+      stamp: carry(cv, 1, n, STAMP[p], reacting ? pickAt(POLL_STAMP, pickPos.value) : STAMP[n], tr),
       // And down the y axis, toward a false conclusion, the false-premise mark
       // appears: good form with a false ending has to have a bad premise somewhere.
       // Two axes, and the reader finds the corner where truth and validity come apart.
-      flaw: carry(cv, 2, n, FLAW[p], reacting ? 1 - dragPos2.value : FLAW[n], tr),
+      flaw: carry(cv, 2, n, FLAW[p], reacting ? pickAt(POLL_FLAW, pickPos.value) : FLAW[n], tr),
       words: swapped ? grow : 1,
       // The form and the ballot cross-fade: the form dissolves as the cards land,
       // and fades back in on the beat after, so neither ever pops.
@@ -190,6 +199,7 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, dragPos,
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <View style={styles.ground} pointerEvents="none" />
 
       {/* ── the argument, pinned up as a form ───────────────────────────────── */}

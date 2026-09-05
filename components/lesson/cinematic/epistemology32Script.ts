@@ -80,7 +80,7 @@ export const BEATS: Epis32Beat[] = [
     g: 10, maps: 4,
     dur: 1.0,
     interact: {
-      prompt: 'Drag to how much detail a good model keeps.',
+      prompt: 'How much detail does a good model keep?',
       drag: {
         lo: 'ALMOST NONE',
         hi: 'EVERY LAST THING',

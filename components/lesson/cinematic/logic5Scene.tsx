@@ -11,7 +11,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic5Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  useCarry, carry, STONE,
+  useCarry, carry, STONE, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -125,7 +125,7 @@ const CHUTE = BEATS.map((b) => b.chute ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic5'));
 
-export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(6);
   const cur = BEATS[i];
@@ -144,7 +144,7 @@ export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick }: Sc
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n,stanceOf(p, climbPrev, false)), stanceOf(n, climbNow, true), tr));
 
     return {
-      fig: pose(s, lerp(climbPrev ? LADDER_X : FIG_X, climbNow ? LADDER_X : FIG_X, tr), GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, lerp(climbPrev ? LADDER_X : FIG_X, climbNow ? LADDER_X : FIG_X, tr), GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       machine: carry(cv, 0, n, MACHINE[p], MACHINE[n], tr),
       run: carry(cv, 1, n, RUN[p], RUN[n], tr),
       chain: carry(cv, 2, n, CHAIN[p], CHAIN[n], tr),

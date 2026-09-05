@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic13Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -66,10 +66,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic13'));
 
-export default function Logic13Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Logic13Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -93,12 +93,12 @@ export default function Logic13Scene({ clock, bt, bi, i, picked, onPick, dragPos
     ));
     return {
       // He faces LEFT, up the hill he is being told he will fall down.
-      fig: pose(s, FIG_X, GROUND, K_FIG, -1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
       steps: carry(cv, 0, n, STEPN[p], STEPN[n], fall),
       // R7b — the arm opens the joins. The far setting says the fault is a step
       // asserted with no reason, and the gaps between the steps yawn as the reader
       // reaches it: the defect is drawn rather than named.
-      joins: carry(cv, 1, n, JOINS[p], reacting ? dragPos.value : JOINS[n], grow),
+      joins: carry(cv, 1, n, JOINS[p], reacting ? pickPos.value : JOINS[n], grow),
       honest: carry(cv, 2, n, HONEST[p], HONEST[n], grow),
     };
   });

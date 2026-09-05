@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './metaphysicsScript';
 import {
   clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -119,7 +119,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics'));
 
-export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, i }: SceneApi) {
+export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFigS = useHeld();
   const cv = useCarry(3);
@@ -134,7 +134,7 @@ export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, i }: Scen
     const erase = carry(cv, 0, n, ERASE[p], ERASE[n], tr);
 
     return {
-      fig: pose(figS, FIG_X, GROUND, K_FIG, -1, 1),
+      fig: lookPose(figS, FIG_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
       erase,
       // The stamp only lands once the sky is genuinely empty.
       voidStamp: clamp01((erase - 0.55) / 0.25),
@@ -170,6 +170,7 @@ export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, i }: Scen
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Sky S={SCENE} />
       <Rule S={SCENE} />
       <Nothing S={SCENE} />

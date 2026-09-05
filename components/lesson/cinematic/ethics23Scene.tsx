@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics23Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -71,7 +71,7 @@ const FAR = BEATS.map((b) => b.far ?? 0);
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
-export default function Ethics23Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Ethics23Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -95,7 +95,7 @@ export default function Ethics23Scene({ clock, bt, bi, i, picked, onPick, dragPo
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       board: carry(cv, 1, n, GAUGES[p], GAUGES[n], tr, gFade ? grow : 1),
       near: carry(cv, 2, n, NEAR[p], NEAR[n], nFade ? grow : tr),
       // R7b — the drawn curve fills the FAR gauge. The plot asks what happens to the
@@ -115,6 +115,7 @@ export default function Ethics23Scene({ clock, bt, bi, i, picked, onPick, dragPo
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[styles.board, boardStyle]} pointerEvents="none">
         <Text style={styles.head} numberOfLines={1}>WHAT YOU OWE</Text>
 

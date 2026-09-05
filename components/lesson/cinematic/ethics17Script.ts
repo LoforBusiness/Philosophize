@@ -94,7 +94,7 @@ export const BEATS: Eth17Beat[] = [
   {
     p: 41, x: 268, maxim: 1, copies: 1, trust: 0.06,
     interact: {
-      prompt: 'Slide the seam to where Kant puts the death.',
+      prompt: 'Where does Kant put the death?',
       split: {
         left: 'ON THE MURDERER', right: 'ON YOU, FOR ANSWERING',
         start: 0.04,

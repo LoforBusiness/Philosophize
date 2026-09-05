@@ -104,7 +104,7 @@ export const BEATS: Epistemology36Beat[] = [
   {
     p: 45, x: 128, shelf: 1, clash: 1,
     interact: {
-      prompt: 'Slide the seam to divide what the experiment actually takes.',
+      prompt: 'What does the experiment actually take?',
       split: {
         left: 'WHY YOU DID IT', right: 'WHAT YOU FEEL',
         start: 0.04,

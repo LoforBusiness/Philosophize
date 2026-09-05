@@ -12,7 +12,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics9Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  facing, useCarry, carry, STONE,
+  facing, useCarry, carry, STONE, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -74,7 +74,7 @@ const X = BEATS.map((b) => b.x ?? 96);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 // The camera, from the staging: it follows the figure this track describes,
 // pulls back to scale 1 on every graded beat so a tap lands where it is aimed,
 // and leans in on the quote. See followMoves in ./camera.ts.
@@ -93,7 +93,7 @@ function BrilloBox({ left }: { left: number }) {
   );
 }
 
-export default function Aesthetics9Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Aesthetics9Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(1);
@@ -123,13 +123,13 @@ export default function Aesthetics9Scene({ clock, bt, bi, i, picked, onPick, dra
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       boxes: (boxesOn ? 1 : 0) * (boxesFade ? grow : 1),
       stands: (standsOn ? 1 : 0) * (standsFade ? grow : 1),
       // R7c — the crown over the left box is beauty while it still ruled, and the
       // lever is asking whether it still does. It sits back on at 'a work must be
       // beautiful' and is gone by 'thrown out altogether'.
-      crown: reacting ? (1 - dragPos.value) * tr : (crownOn ? 1 : 0) * (crownFade ? grow : 1),
+      crown: reacting ? (1 - pickPos.value) * tr : (crownOn ? 1 : 0) * (crownFade ? grow : 1),
       t,
     };
   });

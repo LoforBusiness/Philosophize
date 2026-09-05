@@ -85,16 +85,16 @@ export const BEATS: Ethics9Beat[] = [
   {
     p: 4, x: 124, notes: 1, taken: 2, owed: 1,
     interact: {
-      prompt: 'Set the lever to what the untroubled man has missed.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'nothing', reads: 'nothing, he chose rightly' },
-          { id: 'third', reads: 'a third way out that he never looked for' },
-          { id: 'duty', reads: 'a real duty went unmet', correct: true },
+      prompt: 'He chose the better option. Was anything still lost?',
+      sort: {
+        chip: 'the tragic choice',
+        bins: [
+          { id: 'nothing', label: 'nothing', reads: 'nothing, he chose rightly' },
+          { id: 'third', label: 'a third way', reads: 'a third way out that he never looked for' },
+          { id: 'duty', label: 'a real duty', reads: 'a real duty went unmet', correct: true },
         ],
       },
-      explain: 'The far setting. If choosing rightly cancelled the loss, regret would be irrational — and yet we distrust anyone who walks away untroubled. Something real was owed and was not paid. Williams called what is left over moral residue.',
+      explain: 'A real duty. If choosing rightly cancelled the loss, regret would be irrational — and yet we distrust anyone who walks away untroubled. Something real was owed and was not paid. Williams called what is left over moral residue.',
       xp: 5,
     },
     dur: 1.0,

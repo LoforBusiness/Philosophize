@@ -27,6 +27,11 @@ import {
   grave, channels, reachesCatalogue, branchOf, cueFits,
 } from './lib/liveliness.mjs';
 import { decomment, readScript } from './lib/gestures.mjs';
+import fs from 'node:fs';
+import path from 'node:path';
+
+/** Where the scenes live, for the attention rule at the foot of this file. */
+const SCENE_DIR = 'components/lesson/cinematic';
 
 let fails = 0;
 const ok = (m, d) => console.log(`  ok    ${m}${d ? `  ${d}` : ''}`);
@@ -262,6 +267,39 @@ if (COMIC.length >= SHELF_FLOOR) {
 }
 const noCue = COMIC.filter((c) => !c.fits);
 if (noCue.length) bad(`${noCue.length} gag(s) carry no cue, so nothing can place them aptly (N9)`);
+
+// ── 10 · he looks at what the beat is about (N12) ────────────────────────────
+//
+// `moves.gazeAt` and `moves.pointAt` have existed since the rig was written and
+// were called ZERO times across 184 scenes: the figure narrated a diagram he
+// never once looked at. `interact.ts` was the same story one level out — 14 of
+// its 17 exports, the whole vocabulary for holding, reaching, passing objects
+// and shaking hands, also called zero times.
+//
+// A scene wires it by using `lookPose` in place of `pose`, which takes the beat's
+// generated target off SceneApi. A scene posing TWO figures is exempt: which of
+// them is the narrator is a judgement, and `check:turn` records that guessing it
+// from the first `pose()` in a file misreported 101 lessons.
+//
+// A high-water mark like every other budget here.
+const LOOK_BUDGET = 0;
+const sceneFiles = fs.readdirSync(SCENE_DIR).filter((f) => f.endsWith('Scene.tsx')).sort();
+const blind = [];
+let twoFigure = 0;
+for (const f of sceneFiles) {
+  const src = decomment(fs.readFileSync(path.join(SCENE_DIR, f), 'utf8'));
+  if (/\blookPose\b/.test(src)) continue;
+  const poses = (src.match(/(?<![A-Za-z0-9_])pose\(/g) || []).length;
+  if (poses > 1) { twoFigure += 1; continue; }
+  blind.push(f.replace('Scene.tsx', ''));
+}
+if (blind.length <= LOOK_BUDGET) {
+  ok(`${sceneFiles.length - blind.length - twoFigure} scenes turn the figure toward the beat's own subject`,
+    `${twoFigure} pose two figures and are exempt · ${blind.length} still blind, budget ${LOOK_BUDGET}`);
+  if (blind.length < LOOK_BUDGET) console.log(`        lower LOOK_BUDGET to ${blind.length} to lock it in`);
+} else {
+  bad(`${blind.length} scene(s) never look at anything, budget ${LOOK_BUDGET}`, blind.slice(0, 8).join(', '));
+}
 
 console.log(fails ? `\n${fails} failing.\n` : '\nall clear.\n');
 process.exit(fails ? 1 : 0);

@@ -22,7 +22,7 @@ import { mustStamp } from './lib/muststamp.mjs';
 
 const DIR = 'components/lesson/cinematic';
 const ROUTE = 'app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx';
-const { checkTour } = await loadTs(path.join(DIR, 'camera.ts'));
+const { checkTour, tourStartShots } = await loadTs(path.join(DIR, 'camera.ts'));
 
 let fails = 0;
 const bad = (msg, detail) => { fails++; console.log(`  FAIL  ${msg}${detail ? `  ${detail}` : ''}`); };
@@ -127,6 +127,40 @@ for (const [id, per] of Object.entries(TOURS)) {
 }
 if (geomBad) { fails++; console.log(`  FAIL  ${geomBad} station(s) break the geometry rules (K3/K5/K8)`); }
 else ok(`${nStations} stations across ${nTours} tours are legal and contain their own subject (K3, K5, K8)`);
+
+// ── K8 · THE TRAVEL TIME MUST REACH THE CAMERA ─────────────────────────────
+//
+// Every rule above validates a number in the table. This asks the only question
+// that matters about it: does the PLAYER ever see it?
+//
+// For most of this system's life it did not. `shotAt` reads the travel off the
+// shot it is moving to, defaulting to `tr ?? 0.8`, and `tourStartShots` spread
+// `tr` onto its result only on the FOLLOW branch — a static station came back
+// bare. 197 of 201 stations are static, so the generator's travel time was
+// decorative and every push in every lesson took a flat 0.8s however far it went.
+// K8's 0.35–1.2s window was being enforced on a value nothing read.
+//
+// Nothing could catch it by reading the table, because the table was correct. It
+// took measuring a push in a browser — 0.79s against a table saying 1.2 — after a
+// change to the generator made no difference to the render at all. So the check
+// is against the FUNCTION, with a station of each kind put through it.
+{
+  const band = [42, 512];
+  const stat = [{ box: { x: 120, y: 300, w: 160, h: 140 }, tr: 1.15, dwell: 9 }];
+  const foll = [{
+    box: { x: 120, y: 300, w: 160, h: 140 },
+    to: { x: 200, y: 300, w: 160, h: 140 }, tr: 0.65, dwell: 2,
+  }];
+  const gotStatic = tourStartShots(stat, band, 470)[0]?.tr;
+  const gotFollow = tourStartShots(foll, band, 470)[0]?.tr;
+  if (gotStatic !== 1.15 || gotFollow !== 0.65) {
+    bad('a station travel time does not reach the camera (K8)',
+      `static ${gotStatic === undefined ? 'DROPPED' : gotStatic}, follow ${gotFollow === undefined ? 'DROPPED' : gotFollow}`
+      + ' — shotAt then falls back to 0.8s and every push takes the same time whatever its distance');
+  } else {
+    ok('every station travel time survives tourStartShots and reaches shotAt (K8)');
+  }
+}
 
 // ── K6 · nothing gradeable, draggable or final may be toured ────────────────
 //

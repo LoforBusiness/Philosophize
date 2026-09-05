@@ -113,7 +113,7 @@ export const BEATS: Aesthetics7Beat[] = [
   {
     p: 4, x: 160, q: 39, art: 1, capt: 3, marks: 1,
     interact: {
-      prompt: 'Slide the seam to where Hume leaves beauty.',
+      prompt: 'Where does Hume leave beauty?',
       split: {
         left: 'IN THE RESPONSE', right: 'IN THE PAINT',
         start: 0.04,

@@ -70,7 +70,7 @@ export const BEATS: Meta13Beat[] = [
   {
     p: 4, x: 124, track: 1, fork: 1, both: 1, stuck: 1,
     interact: {
-      prompt: 'Slide the seam to divide you between the two of them.',
+      prompt: 'How do you divide between the two of them?',
       split: {
         left: 'THE ONE WHO WOKE UP', right: 'THE ONE ON EARTH',
         start: 0.04,

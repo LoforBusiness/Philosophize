@@ -80,16 +80,16 @@ export const BEATS: Logic32Beat[] = [
     a: 35, b: 21, q: 1, hidden: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Set the lever to the only reply that concedes nothing.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'yes', reads: 'answer yes, and admit the whole thing' },
-          { id: 'no', reads: 'say no, and you still admit the act' },
-          { id: 'split', reads: 'refuse the package and take the hidden claim first', correct: true },
+      prompt: 'How do you answer a question with a claim buried in it?',
+      sort: {
+        chip: 'a loaded question',
+        bins: [
+          { id: 'yes', label: 'answer yes', reads: 'answer yes, and admit the whole thing' },
+          { id: 'no', label: 'answer no', reads: 'say no, and you still admit the act' },
+          { id: 'split', label: 'split it apart', reads: 'refuse the package and take the hidden claim first', correct: true },
         ],
       },
-      explain: 'The far setting. Answering no feels like the safe reply and it is the worse one: no to have you stopped means you have not stopped. Both plain answers hand over the smuggled claim. Splitting the question is the only move that gives away nothing.',
+      explain: 'Split it apart. Answering no feels like the safe reply and it is the worse one: no to have you stopped means you have not stopped. Both plain answers hand over the smuggled claim. Splitting the question is the only move that gives away nothing.',
       xp: 5,
     },
   },

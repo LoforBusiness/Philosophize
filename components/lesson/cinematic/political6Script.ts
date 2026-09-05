@@ -65,7 +65,7 @@ export const BEATS: Pol6Beat[] = [
   {
     p: 4, bars: 1, prin: 1,
     interact: {
-      prompt: 'Slide the seam to how Rawls orders the two.',
+      prompt: 'How does Rawls order the two?',
       split: {
         left: 'LIBERTIES SETTLED FIRST', right: 'TRADED FOR THE POOREST',
         start: 0.04,

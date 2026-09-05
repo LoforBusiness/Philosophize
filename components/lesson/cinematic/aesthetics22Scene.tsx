@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics22Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -81,8 +81,7 @@ const PULL = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics22'));
 
 export default function Aesthetics22Scene({
-  clock, bt, bi, i, picked, onPick, dragPos,
-}: SceneApi) {
+  clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
   const pulling = PULL[i] === 1;
@@ -102,7 +101,7 @@ export default function Aesthetics22Scene({
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       screen: carry(cv, 1, n, SCREEN[p], SCREEN[n], tr),
       slime: carry(cv, 2, n, SLIME[p], SLIME[n], tr),
       meters: carry(cv, 3, n, METERS[p], METERS[n], tr),
@@ -131,6 +130,7 @@ export default function Aesthetics22Scene({
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, scStyle]} pointerEvents="none">
         <View style={styles.screen} />
       </Animated.View>

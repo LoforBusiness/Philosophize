@@ -74,16 +74,16 @@ export const BEATS: Pol17Beat[] = [
     g: 41, well: 1, turns: 4, blank: 1, taken: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Set the lever to where the duty comes from.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'sign', reads: 'nowhere; without a signature there is no duty' },
-          { id: 'quiet', reads: 'from consenting quietly, by staying put' },
-          { id: 'benefit', reads: 'from taking the benefit, signature or not', correct: true },
+      prompt: 'Nobody signed anything. Where could the obligation come from?',
+      sort: {
+        chip: 'your obligation',
+        bins: [
+          { id: 'sign', label: 'a signature', reads: 'nowhere, nobody ever signed' },
+          { id: 'quiet', label: 'staying put', reads: 'from consenting quietly, by staying put' },
+          { id: 'benefit', label: 'taking the benefit', reads: 'from taking the benefit, signature or not', correct: true },
         ],
       },
-      explain: 'The far setting. The first assumes consent is the only place a duty could come from, and that assumption is exactly what fair play drops. Hume had already shown consent could not carry the weight, because nobody was ever offered a genuine choice to refuse.',
+      explain: 'Taking the benefit. The first assumes consent is the only place a duty could come from, and that assumption is exactly what fair play drops. Hume had already shown consent could not carry the weight, because nobody was ever offered a genuine choice to refuse.',
       xp: 5,
     },
   },

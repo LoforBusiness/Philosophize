@@ -69,7 +69,7 @@ export const BEATS: Ethics32Beat[] = [
     a: 35, b: 24, reasons: 3, card: 2, fresh: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Drag to how much weight another person can carry here.',
+      prompt: 'How much weight can another person carry here?',
       drag: {
         lo: 'WORK IT OUT ALONE',
         hi: 'JUST TAKE THEIR WORD',

@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics11Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, STONE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, STONE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -77,7 +77,7 @@ const FRAMES = BEATS.map((b) => b.frames ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 function Canvas({ left }: { left: number }) {
   return (
@@ -89,7 +89,7 @@ function Canvas({ left }: { left: number }) {
   );
 }
 
-export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
@@ -115,13 +115,13 @@ export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick, dr
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       frames: carry(cv, 1, n, FRAMES[p], FRAMES[n], tr, framesFade ? grow : 1),
       plaques: plaqOn ? (plaqFade ? grow : 1) : 0,
       // R7c — the IDENTICAL tag across both frames is the claim the lever answers.
       // At 'nothing; identical surfaces, identical works' it stays struck; it lifts as
       // the reader says the maker put something in.
-      same: (sameOn ? (sameFade ? grow : 1) : 0) * (reacting ? 1 - dragPos.value * tr : 1),
+      same: (sameOn ? (sameFade ? grow : 1) : 0) * (reacting ? 1 - pickPos.value * tr : 1),
     };
   });
 

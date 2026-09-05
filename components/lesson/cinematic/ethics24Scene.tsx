@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics24Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -77,11 +77,11 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics24'));
 
-export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
@@ -101,13 +101,13 @@ export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick, dragPo
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       slab: carry(cv, 1, n, SLAB[p], SLAB[n], tr),
       names: carry(cv, 2, n, NAMES[p], NAMES[n], tr),
       // R7b — the arm takes the pillars away. Each setting is a different account of
       // what punishment is for, and the test case knocks out whichever pillars that
       // account cannot hold up, so the reader watches the cost of each answer.
-      gone: carry(cv, 3, n, GONE[p], reacting ? dragPos.value : GONE[n], tr),
+      gone: carry(cv, 3, n, GONE[p], reacting ? pickPos.value : GONE[n], tr),
       t,
     };
   });
@@ -130,6 +130,7 @@ export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick, dragPo
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap} pointerEvents="none">WHAT IS IT FOR?</Text>
 
       <Animated.View style={[styles.slab, slabStyle]} pointerEvents="none">

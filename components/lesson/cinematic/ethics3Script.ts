@@ -103,7 +103,7 @@ export const BEATS: Ethics3Beat[] = [
   {
     d: 21, tx: 196, lens: 0,
     interact: {
-      prompt: 'Slide the seam to what a consequentialist actually weighs.',
+      prompt: 'What does a consequentialist actually weigh?',
       split: {
         left: 'WHAT HAPPENS NEXT', right: 'THE RULE YOU FOLLOWED',
         start: 0.04,

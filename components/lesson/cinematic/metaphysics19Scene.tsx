@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics19Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -77,11 +77,11 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics19'));
 
-export default function Metaphysics19Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics19Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -101,14 +101,14 @@ export default function Metaphysics19Scene({ clock, bt, bi, i, picked, onPick, d
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       props: carry(cv, 1, n, PROPS[p], PROPS[n], tr),
       strip: carry(cv, 2, n, STRIP[p], STRIP[n], tr),
       peg: carry(cv, 3, n, PEG[p], PEG[n], tr),
       // R7b — the arm makes the second apple. It peaks at the middle setting, because
       // that is the one that says there are two of them; at either end there is one
       // thing, or no case at all.
-      twin: carry(cv, 4, n, TWIN[p], reacting ? 1 - Math.abs(dragPos.value * 2 - 1) : TWIN[n], tr),
+      twin: carry(cv, 4, n, TWIN[p], reacting ? 1 - Math.abs(pickPos.value * 2 - 1) : TWIN[n], tr),
       t,
     };
   });

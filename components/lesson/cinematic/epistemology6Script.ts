@@ -85,16 +85,16 @@ export const BEATS: Epi6Beat[] = [
   {
     p: 4, crack: 1, route: 3,
     interact: {
-      prompt: 'Set the lever to what is wrong with saying it.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'fine', reads: 'nothing, the claim is fine' },
-          { id: 'bold', reads: 'too strong to be true' },
-          { id: 'eats', reads: 'it asserts the very thing it denies', correct: true },
+      prompt: 'What is wrong with saying nothing is certain?',
+      sort: {
+        chip: '"nothing is certain"',
+        bins: [
+          { id: 'fine', label: 'nothing', reads: 'nothing, the claim is fine' },
+          { id: 'bold', label: 'too strong', reads: 'too strong to be true' },
+          { id: 'eats', label: 'it eats itself', reads: 'it asserts the very thing it denies', correct: true },
         ],
       },
-      explain: 'The far setting, and it is the trap the whole school walks into. Knowing for certain that nobody can know anything is itself a certain piece of knowledge. Pyrrho avoids it by claiming nothing at all — which is why he suspends rather than argues.',
+      explain: 'It eats itself, and it is the trap the whole school walks into. Knowing for certain that nobody can know anything is itself a certain piece of knowledge. Pyrrho avoids it by claiming nothing at all — which is why he suspends rather than argues.',
       xp: 5,
     },
     dur: 1.0,

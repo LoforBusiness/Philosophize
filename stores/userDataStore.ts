@@ -326,6 +326,23 @@ interface UserDataState {
    */
   notifyAsked: boolean;
   /**
+   * THE RATING ASK, WHICH IS A CADENCE RATHER THAN A LATCH -- one raise per
+   * calendar day until they answer. See lib/utils/rateCadence.ts for why it is
+   * a calendar day and not a rolling twenty-four hours.
+   *
+   * `rateSettled` is the one field that IS a latch: somebody who submitted a
+   * rating has answered the question, and no counter applies to them again.
+   *
+   * A daily cadence only ever needs the LAST ask, so this is one number rather
+   * than the pruned array it used to be -- an array would have grown by an entry
+   * a day, forever, inside a snapshot that is persisted and cloud-synced.
+   */
+  rateSettled: boolean;
+  /** When the sheet was last raised. Epoch ms; 0 for never. */
+  rateAskedAt: number;
+  /** How many times it has been raised, ever. Sent as `ask_number`. */
+  rateAsks: number;
+  /**
    * Which version of the analytics notice this install has been shown, and the
    * guard on the one-time flip that goes with it.
    *
@@ -432,6 +449,10 @@ interface UserDataState {
   completeOnboarding: (slug: string | null, version: number) => void;
   /** Spend the one out-of-Settings reminder ask, whatever the answer was. */
   markNotifyAsked: () => void;
+  /** Record that the sheet was raised. Called as it OPENS, not as it closes. */
+  noteRateAsk: () => void;
+  /** They gave a rating. Never ask again. */
+  markRateSettled: () => void;
   markInstallReported: () => void;
   recomputeBadges: () => void;
   setShowcase: (ids: string[]) => void;
@@ -725,6 +746,9 @@ export const useUserDataStore = create<UserDataState>()(
       startingBranch: null,
       onboardingVersion: 0,
       notifyAsked: false,
+      rateSettled: false,
+      rateAskedAt: 0,
+      rateAsks: 0,
       analyticsNoticeVersion: 0,
       installReported: false,
       joinedAt: null,
@@ -981,6 +1005,9 @@ export const useUserDataStore = create<UserDataState>()(
       },
 
       markNotifyAsked: () => set({ notifyAsked: true }),
+      noteRateAsk: () =>
+        set((st) => ({ rateAskedAt: Date.now(), rateAsks: st.rateAsks + 1 })),
+      markRateSettled: () => set({ rateSettled: true }),
       markInstallReported: () => set({ installReported: true }),
 
       // Union the currently-qualifying badges into the persisted set so earned
@@ -1074,6 +1101,9 @@ export const useUserDataStore = create<UserDataState>()(
           // the next reader inherits nothing).
           onboardingVersion: 0,
           notifyAsked: false,
+          rateSettled: false,
+          rateAskedAt: 0,
+          rateAsks: 0,
           // NOT reset to 0: the notice belongs to the INSTALL, not the person, and
           // re-running the flip would silently re-enable analytics for someone who
           // had turned them off before signing out.
@@ -1130,6 +1160,9 @@ export const useUserDataStore = create<UserDataState>()(
           // the next reader inherits nothing).
           onboardingVersion: 0,
           notifyAsked: false,
+          rateSettled: false,
+          rateAskedAt: 0,
+          rateAsks: 0,
           // NOT reset to 0: the notice belongs to the INSTALL, not the person, and
           // re-running the flip would silently re-enable analytics for someone who
           // had turned them off before signing out.
@@ -1202,6 +1235,9 @@ export const useUserDataStore = create<UserDataState>()(
         startingBranch: state.startingBranch,
         onboardingVersion: state.onboardingVersion,
         notifyAsked: state.notifyAsked,
+        rateSettled: state.rateSettled,
+        rateAskedAt: state.rateAskedAt,
+        rateAsks: state.rateAsks,
         analyticsNoticeVersion: state.analyticsNoticeVersion,
         installReported: state.installReported,
         joinedAt: state.joinedAt,

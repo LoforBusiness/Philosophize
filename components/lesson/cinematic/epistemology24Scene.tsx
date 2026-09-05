@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology24Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
@@ -84,11 +84,11 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology24'));
 
-export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -108,14 +108,14 @@ export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick, 
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       ladder: carry(cv, 1, n, LADDER[p], LADDER[n], tr),
       sure: carry(cv, 2, n, SURE[p], SURE[n], tr),
       hand: carry(cv, 3, n, HAND[p], HAND[n], tr),
       // R7b — the arm marks the rung that gives way. Each setting is a different
       // thing to give up when a valid argument reaches a conclusion you cannot accept,
       // and the mark travels to whichever rung the reader is naming.
-      give: carry(cv, 4, n, GIVE[p], reacting ? dragPos.value : GIVE[n], tr),
+      give: carry(cv, 4, n, GIVE[p], reacting ? pickPos.value : GIVE[n], tr),
       t,
     };
   });
@@ -136,6 +136,7 @@ export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick, 
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, ladStyle]} pointerEvents="none">
         <View style={styles.conc} />
         <Text style={styles.concText} numberOfLines={2}>THE SCEPTIC&apos;S CONCLUSION</Text>

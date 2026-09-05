@@ -83,19 +83,16 @@ export const BEATS: Meta32Beat[] = [
     g: 11, orbs: 1, tether: 1, tag: 0,
     dur: 1.0,
     interact: {
-      prompt: 'Place the token where the two spheres actually sit.',
-      field: {
-        xLo: 'THEY DIFFER SOMEHOW', xHi: 'EVERY PROPERTY THE SAME',
-        yLo: 'THE SAME PLACE', yHi: 'DIFFERENT PLACES',
-        start: [0.24, 0.24],
-        quads: [
-          { id: 'one', x: 1, y: 0, reads: 'the same, sharing one place' },
-          { id: 'two', x: 1, y: 1, reads: 'the same, in different places', correct: true },
-          { id: 'easy', x: 0, y: 1, reads: 'different, and in different places' },
-          { id: 'odd', x: 0, y: 0, reads: 'different, sharing one place' },
+      prompt: 'Where do the two spheres actually sit?',
+      poll: {
+        options: [
+          { id: 'one', reads: 'the same, sharing one place' },
+          { id: 'two', reads: 'the same, in different places', correct: true },
+          { id: 'easy', reads: 'different, and in different places' },
+          { id: 'odd', reads: 'different, sharing one place' },
         ],
       },
-      explain: 'Top right, and the pad is the argument. They are plainly two, so the bottom row is ruled out by the setup. The only thing holding them apart is the axis going up: where each one is. If space is real, being here is a second fact about a sphere.',
+      explain: 'The same, in different places, and that is the argument. They are plainly two, so anything calling them one is ruled out by the setup. The only thing holding them apart is where each one is. If space is real, being here is a second fact about a sphere.',
       xp: 5,
     },
   },

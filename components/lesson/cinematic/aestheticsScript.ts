@@ -180,7 +180,7 @@ export const BEATS: AestheticsBeat[] = [
     critics: true,
     weigh: 'q2',
     interact: {
-      prompt: 'Slide the seam to divide who a judgement of taste speaks for.',
+      prompt: 'Who does a judgement of taste speak for?',
       split: {
         left: 'EVERYBODY', right: 'ONLY YOURSELF',
         start: 0.04,

@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics13Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -78,7 +78,7 @@ const BOTH = BEATS.map((b) => b.both ?? 0);
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 
-export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -104,7 +104,7 @@ export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick, d
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       track: carry(cv, 1, n, TRACK[p], TRACK[n], tr, trFade ? grow : 1),
       fork: carry(cv, 2, n, FORK[p], FORK[n], fkFade ? grow : tr),
       // R7b — the seam fills the two branches, and it peaks in the MIDDLE. Push it to
@@ -131,6 +131,7 @@ export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick, d
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[styles.layer, trackStyle]} pointerEvents="none">
         <View style={styles.tok}>
           <Text style={styles.tokText} numberOfLines={1}>YOU</Text>

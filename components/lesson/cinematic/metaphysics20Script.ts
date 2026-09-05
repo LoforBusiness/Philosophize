@@ -96,7 +96,7 @@ export const BEATS: Met20Beat[] = [
   {
     p: 41, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
     interact: {
-      prompt: 'Drag to the count that stops this argument.',
+      prompt: 'What count stops this argument?',
       drag: {
         lo: 'NONE ARE EVER BUILT',
         hi: 'BILLIONS OF THEM RUN',

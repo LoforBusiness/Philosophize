@@ -173,6 +173,31 @@ export const EVENTS = {
     props: ['reason', 'branch_slug', 'lesson_id', 'gated_by_pro'],
     where: 'components/paywall/LessonLocked.tsx',
   },
+  rate_prompt_shown: {
+    note: 'The rating sheet was raised. `ask_number` is 1 for the onboarding ask and counts up from there -- the cadence is ONE raise per local calendar day until the reader answers, so somebody who never rates will climb. Two of these inside one local day means lib/utils/rateCadence.ts has been broken.',
+    props: ['ask_number'],
+    where: 'components/shared/RatePrompt.tsx',
+  },
+  rate_prompt_answered: {
+    note: 'They picked stars and submitted. `went_to_store` is a SECOND event on the same rating, sent only if they then opened Play -- so stars alone is the in-app feedback and the pair is the store conversion. Note the stars are what THEY said in our sheet, not what they left on Play, which no app can see.',
+    props: ['stars', 'went_to_store', 'ask_number'],
+    where: 'components/shared/RatePrompt.tsx',
+  },
+  trial_offered: {
+    note: 'The three-day trial was put in front of a free reader, after a lesson and before the ad. Paired with `trial_started` it is the only conversion rate this offer has -- there is no separate decline event, because offered-minus-started IS the decline.',
+    props: ['source', 'lessons_left'],
+    where: 'components/paywall/TrialOffer.tsx',
+  },
+  trial_started: {
+    note: 'They took it. Granted by the app, not by the store -- nobody was charged and nothing will convert, so this is NOT a revenue event and must never be given a `$revenue` property.',
+    props: ['days', 'source'],
+    where: 'stores/subscriptionStore.ts',
+  },
+  trial_ended: {
+    note: 'The three days ran out. Sent by the clock in subscriptionStore, so it arrives on whichever foreground notices -- it dates the expiry, not the moment of sending.',
+    props: ['days'],
+    where: 'stores/subscriptionStore.ts',
+  },
   subscribe_clicked: {
     note: 'The purchase sheet was opened.',
     props: ['plan', 'billing', 'source'],

@@ -129,16 +129,16 @@ export const BEATS: Aes8Beat[] = [
   {
     p: 45, x: 148, mode: 2, lens: 2, modeAns: 3,
     interact: {
-      prompt: 'Set the lever to what to say about the two theories.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'form', reads: 'formalism is right and expression is wrong' },
-          { id: 'expr', reads: 'expression is right and formalism is wrong' },
-          { id: 'both', reads: 'they are answering two different questions', correct: true },
+      prompt: 'So what should be said about the two theories?',
+      sort: {
+        chip: 'formalism and expression',
+        bins: [
+          { id: 'form', label: 'formalism wins', reads: 'formalism is right and expression is wrong' },
+          { id: 'expr', label: 'expression wins', reads: 'expression is right and formalism is wrong' },
+          { id: 'both', label: 'different questions', reads: 'they are answering two different questions', correct: true },
         ],
       },
-      explain: 'The far setting. Rival theories sound like a fight, so it feels as though somebody has to win. Formalism asks how a work is put together. Expression asks what got carried across. Same canvas, different questions — which is why good critics use both in a paragraph.',
+      explain: 'Different questions. Rival theories sound like a fight, so it feels as though somebody has to win. Formalism asks how a work is put together. Expression asks what got carried across. Same canvas, different questions — which is why good critics use both in a paragraph.',
       xp: 5,
     },
     dur: 1.0,

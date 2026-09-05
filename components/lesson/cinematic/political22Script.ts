@@ -89,19 +89,16 @@ export const BEATS: Pol22Beat[] = [
   {
     p: 41, x: 268, switchOn: 1, tiles: 1, reach: 1,
     interact: {
-      prompt: 'Place the servant with the kind employer.',
-      field: {
-        xLo: 'BEING INTERFERED WITH', xHi: 'LEFT ALONE',
-        yLo: 'AT HIS WHIM', yHi: 'NOBODY CAN',
-        start: [0.24, 0.24],
-        quads: [
-          { id: 'bossed', x: 0, y: 0, reads: 'ordered about, by someone who may' },
-          { id: 'servant', x: 1, y: 0, reads: 'undisturbed, and still not free', correct: true },
-          { id: 'taxed', x: 0, y: 1, reads: 'taxed by a law you can challenge' },
-          { id: 'free', x: 1, y: 1, reads: 'free on both counts at once' },
+      prompt: 'A servant with a kind master. Free, or not?',
+      poll: {
+        options: [
+          { id: 'bossed', reads: 'ordered about, by someone who may' },
+          { id: 'servant', reads: 'undisturbed, and still not free', holders: ['Pettit', 'Skinner'], correct: true },
+          { id: 'taxed', reads: 'taxed by a law you can challenge' },
+          { id: 'free', reads: 'free on both counts at once' },
         ],
       },
-      explain: 'Left alone, and still at his whim. The sideways axis on its own calls her free, and that is the reading being argued with. Notice the other odd cell: a citizen taxed by a law they can vote on is interfered with and not dominated.',
+      explain: 'Undisturbed, and still not free. Non-interference on its own calls her free, and that is the reading being argued with. Notice the other odd case: a citizen taxed by a law they can vote on is interfered with and not dominated.',
       xp: 5,
     },
     dur: 1.0,

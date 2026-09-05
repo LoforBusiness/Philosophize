@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics12Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -115,7 +115,7 @@ const BV = NV.map((n) => (n >= 3 ? 1 : 0));
 const C1V = NV.map((n) => (n >= 6 ? 1 : 0));
 const C2V = NV.map((n) => (n >= 12 ? 1 : 0));
 
-export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(5);
   const cur = BEATS[i];
@@ -160,7 +160,7 @@ export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick }: 
     const growB = ease01(clamp01((bt.value - 1.8) / 0.9));
 
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       // Sequential, never a cross-fade: the board is fully gone before the three
       // maxims start arriving on the same marks (C22).
       field: pickOn ? (pickFade ? 1 - ease01(clamp01(bt.value / 0.3)) : 0) : 1,

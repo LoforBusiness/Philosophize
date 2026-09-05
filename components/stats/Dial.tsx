@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet, type GestureResponderEvent } from 'react-native';
 import Animated, {
-  useAnimatedStyle, useDerivedValue, withSpring, type SharedValue,
+  useAnimatedStyle, useDerivedValue, withTiming, type SharedValue,
 } from 'react-native-reanimated';
+import { EASE_REVEAL } from '@/components/stats/reveal';
 import Svg, { Path, Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { PANEL_BASE, disc, mix } from '@/components/shared/tone';
 import { C } from '@/constants/design';
@@ -93,7 +94,27 @@ interface Props {
   size?: number;
   selected?: string | null;
   onSelect?: (key: string) => void;
-  pop: SharedValue<number>;
+  /**
+   * THE ARRIVAL, 0 to 1, driven by the screen.
+   *
+   * The whole disc used to squeeze to 0.82 and spring 39% past itself on every
+   * visit with news, which is the loudest thing that was on this tab and the
+   * first thing the reader named. A rosette is SIX PIECES SET IN A RING — the
+   * file says so at length a hundred lines up — so it arrives the way it is
+   * built: each piece settles into its socket from a little way out, clockwise
+   * from twelve, and stops. Nothing is ever the wrong size, which on a chart of
+   * shares is not a stylistic preference.
+   */
+  enter: SharedValue<number>;
+  /** 0→1→0, the reaction: one piece lifts and comes home. See `nudgeKey`. */
+  nudge: SharedValue<number>;
+  /**
+   * Which piece the reaction is about — the branch whose lesson count moved.
+   * The lift is the dial's OWN vocabulary for "this one": it is exactly what
+   * being chosen does, held for a moment and then let go, so the tab gained no
+   * new motion to learn.
+   */
+  nudgeKey?: string | null;
 }
 
 /** The socket the rosette is set into, drawn outside it. */
@@ -209,7 +230,7 @@ function cutFace(
 }
 
 export default function Dial({
-  segments, total, totalLabel, size = 132, selected, onSelect, pop,
+  segments, total, totalLabel, size = 132, selected, onSelect, enter, nudge, nudgeKey,
 }: Props) {
   const sum = segments.reduce((a, x) => a + x.value, 0);
 
@@ -277,8 +298,6 @@ export default function Dial({
       ?? wedges.reduce((a, b) => (b.frac > a.frac ? b : a));
   }, [wedges, selected]);
 
-  const popStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
-
   // A thumb outside the socket means "none of them", not "the nearest one". The
   // arithmetic is in lib/utils/dialHit.ts, zero-import and checked offline —
   // because the version that lived here read `locationX`, which react-native-web
@@ -299,7 +318,10 @@ export default function Dial({
             `#beat-progress` and `#drag-strip`) — document.querySelector on the
             tag stopped being good enough the moment this panel had more than
             one surface. */}
-        <Animated.View nativeID="dial" style={[{ width: size, height }, popStyle]}>
+        {/* NO TRANSFORM ON THE WHOLE DISC ANY MORE. Every arrival and every
+            reaction now belongs to a PIECE, so the object itself never changes
+            size — see the note on `enter` in Props. */}
+        <View nativeID="dial" style={{ width: size, height }}>
           <Svg width={size} height={height} style={StyleSheet.absoluteFill} pointerEvents="none">
             <Defs>
               {/* THE POOL OF LIGHT the disc sits on. The reference sets its pies
@@ -355,18 +377,23 @@ export default function Dial({
             ) : null}
           </Svg>
 
-          {wedges.map((w) => (
+          {wedges.map((w, i) => (
             <Piece
               key={w.key}
               w={w}
               size={size}
               height={height}
+              index={i}
+              count={wedges.length}
               chosen={selected === w.key}
               dimmed={!!selected && selected !== w.key}
+              marked={nudgeKey === w.key}
+              enter={enter}
+              nudge={nudge}
               lift={r * LIFT}
             />
           ))}
-        </Animated.View>
+        </View>
       </Pressable>
 
       {/* THE FIGURE, printed rather than hubbed. A solid disc has no hole to put
@@ -390,35 +417,73 @@ export default function Dial({
 }
 
 function Piece({
-  w, size, height, chosen, dimmed, lift,
+  w, size, height, index, count, chosen, dimmed, marked, enter, nudge, lift,
 }: {
   w: {
     key: string; mid: number; face: string; bevel: string;
     cuts: readonly string[]; cutTone: readonly string[];
     lit: string; base: string; deep: string; edgeLit: string; edgeDim: string;
   };
-  size: number; height: number; chosen: boolean; dimmed: boolean; lift: number;
+  size: number; height: number; index: number; count: number;
+  chosen: boolean; dimmed: boolean; marked: boolean;
+  enter: SharedValue<number>; nudge: SharedValue<number>; lift: number;
 }) {
   // THE ONLY THING THAT MOVES IS A TRANSFORM. §17's rule 7 is about the cost of
   // repainting an SVG surface every frame; a translate on the View around it is
   // composited and repaints nothing.
-  const out = useDerivedValue(() => withSpring(chosen ? 1 : 0, {
-    damping: 15, stiffness: 190, mass: 0.7,
+  //
+  // BEING CHOSEN IS AN ANSWER TO A TAP, SO IT DOES NOT OVERSHOOT. It used to
+  // spring at damping 15 / stiffness 190 / mass 0.7 — a ratio of 0.65, so the
+  // piece slid 7% too far out and came back every single time one was picked.
+  // A tap carries no momentum for a spring to spend; a flick does, and there
+  // are none on this screen.
+  const out = useDerivedValue(() => withTiming(chosen ? 1 : 0, {
+    duration: 320, easing: EASE_REVEAL,
   }), [chosen]);
-  const slide = useAnimatedStyle(() => ({
-    // STRAIGHT OUT ALONG ITS OWN BISECTOR, and the y is not scaled by anything.
-    // That is the whole difference from the tipped version: every piece travels
-    // the same distance, so being chosen means the same thing at 12 o'clock as
-    // at 6, and nothing is nearer the reader than anything else.
-    transform: [
-      { translateX: Math.cos(rad(w.mid)) * lift * out.value },
-      { translateY: Math.sin(rad(w.mid)) * lift * out.value },
-    ],
-    // Dimmed, not drained: below about 0.6 the unchosen pieces lose their hue
-    // and the disc reads grey the moment anything is picked, which is the
-    // dullness this was rebuilt to fix.
-    opacity: dimmed ? 0.66 : 1,
-  }));
+
+  const slide = useAnimatedStyle(() => {
+    // ITS OWN WINDOW ON THE SHARED ARRIVAL. Clockwise from twelve, each piece
+    // takes the same length of time and starts a little later than the one
+    // before it — a stagger of about 90ms across six, inside the published
+    // 50–100ms band, and self-scaling if a branch is ever added or removed.
+    const lead = (index / Math.max(1, count)) * 0.55;
+    const e = Math.min(1, Math.max(0, (enter.value - lead) / (1 - lead)));
+
+    // Three sources, one distance along the bisector, and they simply add:
+    // the piece SETTLING IN from outside its socket, the piece being CHOSEN,
+    // and the piece being MARKED because its branch is what moved. All three
+    // are the same gesture at different amplitudes, which is why the disc reads
+    // as one object with one behaviour rather than three animations.
+    // 2.2 lifts and 1.0 lifts, and both were picked off the geometry rather
+    // than by feel. A LIFT is 8.5% of the radius -- about 5px on the 132px
+    // disc -- which is right for "this one is chosen" and far too small to
+    // read as a piece arriving, so the entrance travels a little over two of
+    // them. The MARK is exactly one, because being marked and being chosen are
+    // the same statement about the same piece and the dial should not have two
+    // amplitudes for it. The piece furthest out is also the most transparent,
+    // so nothing ever draws visibly outside the socket on the way in.
+    const d = lift * (
+      (1 - e) * 2.2
+      + out.value
+      + (marked ? nudge.value : 0)
+    );
+
+    return {
+      // STRAIGHT OUT ALONG ITS OWN BISECTOR, and the y is not scaled by
+      // anything. That is the whole difference from the tipped version: every
+      // piece travels the same distance, so being chosen means the same thing
+      // at 12 o'clock as at 6, and nothing is nearer the reader than anything
+      // else.
+      transform: [
+        { translateX: Math.cos(rad(w.mid)) * d },
+        { translateY: Math.sin(rad(w.mid)) * d },
+      ],
+      // Dimmed, not drained: below about 0.6 the unchosen pieces lose their hue
+      // and the disc reads grey the moment anything is picked, which is the
+      // dullness this was rebuilt to fix.
+      opacity: (dimmed ? 0.66 : 1) * e,
+    };
+  });
 
   return (
     <Animated.View

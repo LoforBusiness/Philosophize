@@ -75,19 +75,16 @@ export const BEATS: Pol32Beat[] = [
     g: 11, fill: 1, result: 1, mark: 1, labels: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Place the token on why voting is still rational.',
-      field: {
-        xLo: 'YOUR VOTE WILL NOT DECIDE IT', xHi: 'YOUR VOTE MIGHT DECIDE IT',
-        yLo: 'A MARK DOES NOTHING ELSE', yHi: 'A MARK DOES OTHER THINGS',
-        start: [0.76, 0.24],
-        quads: [
-          { id: 'yes', x: 0, y: 1, reads: 'never decides, still worth doing', correct: true },
-          { id: 'no', x: 0, y: 0, reads: 'never decides, and worth nothing' },
-          { id: 'lucky', x: 1, y: 1, reads: 'might decide, and worth doing anyway' },
-          { id: 'thin', x: 1, y: 0, reads: 'might decide, and nothing more' },
+      prompt: 'Your vote will not decide it. Why is voting still rational?',
+      poll: {
+        options: [
+          { id: 'yes', reads: 'never decides, still worth doing', correct: true },
+          { id: 'no', reads: 'never decides, and worth nothing' },
+          { id: 'lucky', reads: 'might decide, and worth doing anyway' },
+          { id: 'thin', reads: 'might decide, and nothing more' },
         ],
       },
-      explain: 'Top left. The classic slip is but what if nobody voted: what everyone else does is already fixed, so that was never the choice in front of you. Deciding the result is one thing a mark can do, and it was never the only one.',
+      explain: 'Never decides, still worth doing. The classic slip is but what if nobody voted: what everyone else does is already fixed, so that was never the choice in front of you. Deciding the result is one thing a mark can do, and it was never the only one.',
       xp: 5,
     },
   },

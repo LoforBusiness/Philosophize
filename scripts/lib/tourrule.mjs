@@ -123,6 +123,51 @@ export const PACE = {
   2: { tr: 0.7, dwell: 1.6 },
 };
 
+// ── A TRAVEL TAKES AS LONG AS ITS DISTANCE NEEDS (K8) ───────────────────────
+//
+// Every station shipped at a FLAT 0.7s, whatever it was travelling. That is the
+// same defect §17 records for the walk, in the same words: "a FIXED length,
+// whatever the distance ... 145 walking beats, every one too fast", where
+// `rig.moveTr` already existed to derive it. The camera had no equivalent.
+//
+// A push to the 1.72× ceiling and a nudge to 1.05× are not the same move, and at
+// 0.7s the big one arrives as a snap — which is what a reader called the screen
+// "resetting", and why their own suggestion was that it "needs to be held out
+// longer". Measured frame by frame it was never discontinuous; it was just fast.
+//
+// So the duration is interpolated across the station's own scale, between a floor
+// that is not a jump-cut and K8's own ceiling. Both ends are the numbers
+// `checkTour` already enforces (0.35 and 1.2), so this cannot generate a tour that
+// its own validator rejects: the ceiling is the rule, not a taste.
+const TR_MIN = 0.55;      // K8 calls anything under 0.35 a jump-cut; this keeps room
+const TR_MAX = 1.2;       // K8's ceiling exactly
+// CAP (1.72, camera.ts SCALE.tight) is already declared above and is reused here.
+
+/** The scale a station would settle at — camera.ts's own `stationShot` rule. */
+function scaleOf(box, band) {
+  const bandH = band[1] - band[0];
+  const w = Math.max(Array.isArray(box) ? box[2] : box.w, 1);
+  const h = Math.max(Array.isArray(box) ? box[3] : box.h, 1);
+  return Math.max(1, Math.min(CAP, Math.min(400 / w, bandH / h)));
+}
+
+/**
+ * How long a travel should take, from how far it actually goes.
+ *
+ * THE DISTANCE IS THE RATIO, NOT THE DESTINATION. The first draft scored the
+ * station's own scale, which gets the push right and the PULL-OUT exactly
+ * backwards: coming home to the whole stage is scale 1, so a 1.72× → 1.0 retreat
+ * — the same distance as the push that set it up, and the half a reader actually
+ * calls "it reset" — would have been given the shortest travel in the table.
+ */
+export function stationTr(box, band, from = null) {
+  const to = scaleOf(box, band);
+  const at = from ? scaleOf(from, band) : 1;
+  const r = Math.max(to / at, at / to);
+  const t = TR_MIN + (TR_MAX - TR_MIN) * Math.min(1, Math.log(r) / Math.log(CAP));
+  return Math.round(Math.max(TR_MIN, Math.min(TR_MAX, t)) * 100) / 100;
+}
+
 export const union = (items) => {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   for (const it of items) {
@@ -402,7 +447,7 @@ export function lessonTours(beats, band, ground) {
     }
     if (followed) {
       const hold = Math.max(1.6, Math.min(4.2, dur || 2.6));
-      out.push([{ box: followed.near, to: followed.far, tr: 0.7, dwell: hold }]);
+      out.push([{ box: followed.near, to: followed.far, tr: stationTr(followed.near, band, held), dwell: hold }]);
       held = followed.far;
       continue;
     }
@@ -431,7 +476,7 @@ export function lessonTours(beats, band, ground) {
       // Already framing exactly this — hold. This is the line that kills the bounce:
       // a run of beats about one subject is ONE move, not a move per beat.
       if (sameBox(box, held)) { out.push(null); continue; }
-      out.push([{ box, tr: 0.7, dwell: 9 }]);
+      out.push([{ box, tr: stationTr(box, band, held), dwell: 9 }]);
       held = box;
       continue;
     }
@@ -439,7 +484,7 @@ export function lessonTours(beats, band, ground) {
     // stay — otherwise come back to the whole stage, which always contains it.
     if (inWindow(need, heldWindow())) { out.push(null); continue; }
     if (held === null) { out.push(null); continue; }
-    out.push([{ box: WHOLE, tr: 0.7, dwell: 9 }]);
+    out.push([{ box: WHOLE, tr: stationTr(WHOLE, band, held), dwell: 9 }]);
     held = null;
   }
   return out;

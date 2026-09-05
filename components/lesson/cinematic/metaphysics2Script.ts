@@ -158,16 +158,16 @@ export const BEATS: Meta2Beat[] = [
   {
     e: 178, x: 236, gone: 0.95, pr: 1,
     interact: {
-      prompt: 'Set the lever to the view that makes Leibniz ask his question.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'never', reads: 'nothing was never possible' },
-          { id: 'lost', reads: 'nothing was possible, and something won anyway', correct: true },
-          { id: 'must', reads: 'something had to exist' },
+      prompt: 'Why is there something rather than nothing?',
+      sort: {
+        chip: 'nothing at all',
+        bins: [
+          { id: 'never', label: 'never possible', reads: 'nothing was never possible' },
+          { id: 'lost', label: 'possible, and lost', reads: 'nothing was possible, and something won anyway', correct: true },
+          { id: 'must', label: 'something had to be', reads: 'something had to exist' },
         ],
       },
-      explain: 'The middle setting. Leibniz asks why something won, so nothing had to be a real option for it to beat. Parmenides sits at the first setting: nothing was never on the table, so being never had a rival and the question never opens.',
+      explain: 'Possible, and lost. Leibniz asks why something won, so nothing had to be a real option for it to beat. Parmenides sits at "never possible": nothing was never on the table, so being never had a rival and the question never opens.',
       xp: 5,
     },
     dur: 1.0,

@@ -1,8 +1,9 @@
-import { View, Text, ScrollView, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ImageBackground, useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import ScreenTransition from '@/components/shared/ScreenTransition';
+import LearnPlate from '@/components/learn/LearnPlate';
 import PressableScale from '@/components/shared/PressableScale';
 import { getBranchBySlug } from '@/data';
 import {
@@ -14,9 +15,6 @@ const Page = '#F1EEE7';
 const Paper = '#FFFFFF';
 const Ink = '#1A1A1A';
 const InkSoft = '#6B6B6B';
-const Rule = '#E4E1D9';
-const Cream = '#F4F1EA';
-const Gold = '#A8A49A';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 
@@ -38,7 +36,12 @@ const PRES: BranchPres[] = [
   { slug: 'political-philosophy', desc: 'Society, power, justice & political systems' },
 ];
 
+const PAD = 20;
+/** The display order, shared with the plate's shelf so the two cannot disagree. */
+const SLUGS = PRES.map((p) => p.slug);
+
 export default function LearnScreen() {
+  const { width: winW } = useWindowDimensions();
   const cards = PRES.map((p) => {
     const branch = getBranchBySlug(p.slug);
     const units = branch?.paths ?? [];
@@ -55,12 +58,10 @@ export default function LearnScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Dark masthead */}
-        <View style={styles.masthead}>
-          <Text style={styles.mastKicker}>YOUR LEARNING PATH</Text>
-          <Text style={styles.mastTitle}>LEARN</Text>
-          <Text style={styles.mastSub}>The branches of philosophy · Start anywhere</Text>
-        </View>
+        {/* The frontispiece. See components/learn/LearnPlate.tsx -- it was a
+            flat black rectangle with three centred lines, and it was the one
+            object on this screen with no light on it. */}
+        <LearnPlate width={winW - PAD * 2} slugs={SLUGS} />
 
         {/* Branch cards */}
         {cards.map((c, i) => {
@@ -126,19 +127,7 @@ const styles = StyleSheet.create({
   brand: { fontFamily: 'Inter_500Medium', fontSize: 11, color: InkSoft, letterSpacing: 2 },
   dots: { fontSize: 9, color: '#C9C5BB', letterSpacing: 2 },
 
-  scroll: { paddingHorizontal: 20, paddingBottom: 40 },
-
-  // Masthead
-  masthead: {
-    backgroundColor: Ink,
-    borderRadius: 6,
-    paddingVertical: 26,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-  },
-  mastKicker: { fontFamily: 'Inter_500Medium', fontSize: 10, color: Gold, letterSpacing: 4 },
-  mastTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 44, color: Cream, letterSpacing: 1, marginTop: 8 },
-  mastSub: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13, color: '#A8A49A', marginTop: 8 },
+  scroll: { paddingHorizontal: PAD, paddingBottom: 40 },
 
   // Open-curriculum note
   noteCard: {

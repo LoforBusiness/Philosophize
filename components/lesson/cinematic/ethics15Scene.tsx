@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics15Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -71,10 +71,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics15'));
 
-export default function Ethics15Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Ethics15Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -94,7 +94,7 @@ export default function Ethics15Scene({ clock, bt, bi, i, picked, onPick, dragPo
       carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr,
     ));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       plain: carry(cv, 0, n, PLAIN[p], PLAIN[n], grow),
       moral: carry(cv, 1, n, MORAL[p], MORAL[n], grow),
       // Tracked like everything else even though every beat sets it to zero: a
@@ -105,7 +105,7 @@ export default function Ethics15Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // and the question mark under the balance grows: a boo cannot be weighed, so
       // the instrument itself comes into question. The beam's tilt stays at 0 —
       // that is the scene's own point and the control does not touch it.
-      doubt: carry(cv, 3, n, DOUBT[p], reacting ? dragPos.value : DOUBT[n], grow),
+      doubt: carry(cv, 3, n, DOUBT[p], reacting ? pickPos.value : DOUBT[n], grow),
       boards: carry(cv, 4, n, PICKV[p], PICKV[n], grow),
     };
   });
@@ -119,6 +119,7 @@ export default function Ethics15Scene({ clock, bt, bi, i, picked, onPick, dragPo
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.label} numberOfLines={1}>THIS BALANCE WEIGHS FACTS</Text>
 
       {/* ── THE THREE ANSWERS, ON THE GRADED BEAT ONLY ───────────────────── */}

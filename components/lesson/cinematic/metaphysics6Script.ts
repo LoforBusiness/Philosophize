@@ -91,7 +91,7 @@ export const BEATS: Meta6Beat[] = [
   {
     p: 5, swap: 0.4, two: 1, orig: 0,
     interact: {
-      prompt: 'Slide the seam to divide the claim between the two ships.',
+      prompt: 'How does the claim divide between the two ships?',
       split: {
         left: 'UNBROKEN USE', right: 'THE ORIGINAL PLANKS',
         start: 0.04,

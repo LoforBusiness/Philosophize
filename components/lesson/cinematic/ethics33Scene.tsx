@@ -7,7 +7,7 @@ import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics33Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -47,7 +47,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics33'));
 
-export default function Ethics33Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
+export default function Ethics33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -60,7 +60,7 @@ export default function Ethics33Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P[p], t)), emoteLive(P[n], t, bt.value), tr));
     const slide = ease01(bt.value / 1.1);
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       give: live ? dragPos.value : carry(cv, 0, n, GIVE[p], GIVE[n], slide),
       more: carry(cv, 1, n, MORE[p], MORE[n], tr),
     };
@@ -71,6 +71,7 @@ export default function Ethics33Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.kicker} numberOfLines={1}>YOURS            THEIRS</Text>
 
       {Array.from({ length: TOTAL }, (_, k) => <Coin key={k} k={k} SCENE={SCENE} />)}

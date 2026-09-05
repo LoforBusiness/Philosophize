@@ -79,19 +79,16 @@ export const BEATS: Aes2Beat[] = [
   {
     a: 0, v: 22, felt: true, chain: 3,
     interact: {
-      prompt: 'Place the token on what happens at a film.',
-      field: {
-        xLo: 'THE PEOPLE ARE REAL', xHi: 'THE PEOPLE NEVER EXISTED',
-        yLo: 'THE TEARS ARE PRETEND', yHi: 'THE TEARS ARE REAL',
-        start: [0.24, 0.24],
-        quads: [
-          { id: 'puzzle', x: 1, y: 1, reads: 'made-up people, and real tears', correct: true },
-          { id: 'tidy', x: 1, y: 0, reads: 'made-up people, and pretend tears' },
-          { id: 'plain', x: 0, y: 1, reads: 'real people, and real tears' },
-          { id: 'odd', x: 0, y: 0, reads: 'real people, and pretend tears' },
+      prompt: 'You cry at a film you know is invented. What is actually happening?',
+      poll: {
+        options: [
+          { id: 'puzzle', reads: 'made-up people, and real tears', correct: true },
+          { id: 'tidy', reads: 'made-up people, and pretend tears' },
+          { id: 'plain', reads: 'real people, and real tears' },
+          { id: 'odd', reads: 'real people, and pretend tears' },
         ],
       },
-      explain: 'Top right, and nothing sits comfortably there. Fake people, so fake tears is the tidy corner and it is simply untrue: the tears are real, which is exactly the difficulty. Radford called it the paradox of fiction and nobody has settled it since.',
+      explain: 'Made-up people, and real tears, and nothing sits comfortably there. Fake people, so fake tears is the tidy answer and it is simply untrue: the tears are real, which is exactly the difficulty. Radford called it the paradox of fiction and nobody has settled it since.',
       xp: 5,
     },
     dur: 1.0,

@@ -104,16 +104,16 @@ export const BEATS: Aes4Beat[] = [
   {
     a: 0, v: 8, test: 3, verdict: 1, signed: 1, art: 1,
     interact: {
-      prompt: 'Set the lever to what it takes to make a chosen object art.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'label', reads: 'anything, if you say the word' },
-          { id: 'skill', reads: 'only what took real skill to make' },
-          { id: 'world', reads: 'the art world taking it up', correct: true },
+      prompt: 'What turns a chosen object into art?',
+      sort: {
+        chip: 'a chosen object',
+        bins: [
+          { id: 'label', label: 'saying so', reads: 'anything, if you say the word' },
+          { id: 'skill', label: 'real skill', reads: 'only what took real skill to make' },
+          { id: 'world', label: 'the art world', reads: 'the art world taking it up', correct: true },
         ],
       },
-      explain: 'The far setting. The first is the anything goes reading and it is not what Dickie or Danto said. It took theory, history and an artworld for the choice to register at all — which is why the identical urinal in a plumbing shop stayed plumbing.',
+      explain: 'The art world. "saying so" is the anything goes reading and it is not what Dickie or Danto said. It took theory, history and an artworld for the choice to register at all — which is why the identical urinal in a plumbing shop stayed plumbing.',
       xp: 5,
     },
     dur: 1.0,

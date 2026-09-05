@@ -75,7 +75,7 @@ export const BEATS: Aes19Beat[] = [
   {
     p: 4, x: 124, row: 1, frame: 3, verdict: 2, know: 1,
     interact: {
-      prompt: 'Drag to what Carlson says a marsh needs from you.',
+      prompt: 'What does Carlson say a marsh needs from you?',
       drag: {
         lo: 'A PRETTY GLANCE',
         hi: 'KNOWING WHAT IT IS',

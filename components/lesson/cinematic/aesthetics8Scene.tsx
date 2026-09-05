@@ -12,7 +12,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics8Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -99,7 +99,7 @@ const DIR = dirsFrom(X, 1);
 const M0 = BEATS[0].mode ?? 0;
 const L0 = BEATS[0].lens ?? 0;
 
-export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(1);
   const cur = BEATS[i];
@@ -154,7 +154,7 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick }: S
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
-    return { fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1) };
+    return { fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value) };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);

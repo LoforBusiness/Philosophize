@@ -80,7 +80,7 @@ export const BEATS: Met17Beat[] = [
     g: 41, wall: 1, door: 1, card: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Slide the seam to divide what there is to know about red.',
+      prompt: 'What is there to know about red?',
       split: {
         left: 'THE PHYSICAL FACTS', right: 'WHAT IT IS LIKE',
         start: 1,

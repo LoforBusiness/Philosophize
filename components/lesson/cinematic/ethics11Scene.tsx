@@ -9,7 +9,7 @@ import { clamp01, WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics11Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -135,7 +135,7 @@ const LEDV = BEATS.map((b) => (b.led === 2 ? 0.3 : b.led === 1 ? 1 : 0));
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 
-export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -161,7 +161,7 @@ export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick, dr
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       tok: carry(cv, 1, n, TOKV[p], TOKV[n], tr),
       shelf: carry(cv, 2, n, SHELFV[p], SHELFV[n], tr),
       led: carry(cv, 3, n, LEDV[p], LEDV[n], tr),

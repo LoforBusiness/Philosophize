@@ -59,7 +59,7 @@ export const BEATS: Aes5Beat[] = [
   {
     p: 19, bird: 1, ego: 0, self: 0.06,
     interact: {
-      prompt: 'Slide the seam to divide who does the unselfing.',
+      prompt: 'Who does the unselfing?',
       split: {
         left: 'IT HAPPENS TO YOU', right: 'YOU DO IT',
         start: 0.04,

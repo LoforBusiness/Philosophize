@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology31Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -70,7 +70,7 @@ const G = BEATS.map((b) => b.g ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology31'));
 
-export default function Epistemology31Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Epistemology31Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
@@ -88,7 +88,7 @@ export default function Epistemology31Scene({ clock, bt, bi, i, picked, onPick }
     const slide = ease01(bt.value / 0.9);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, -1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
       open: lerp(prevOpen, shownOpen, slide),
     };
   });
@@ -100,6 +100,7 @@ export default function Epistemology31Scene({ clock, bt, bi, i, picked, onPick }
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.kicker} numberOfLines={1}>WHAT I REMEMBER</Text>
       <View style={styles.cabinet} pointerEvents="none" />
 

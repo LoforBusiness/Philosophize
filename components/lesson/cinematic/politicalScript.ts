@@ -92,7 +92,7 @@ export const BEATS: PoliticalBeat[] = [
     auth: 1,
     weigh: 'q2',
     interact: {
-      prompt: 'Drag to how much right to resist Hobbes allows.',
+      prompt: 'How much right to resist does Hobbes allow?',
       drag: {
         lo: 'NONE AT ALL',
         hi: 'WHENEVER HE RULES BADLY',

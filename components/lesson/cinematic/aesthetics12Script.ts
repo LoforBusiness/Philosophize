@@ -73,7 +73,7 @@ export const BEATS: Aes12Beat[] = [
   {
     p: 20, r: 4, rx: 224, ticks: 5, box: 1,
     interact: {
-      prompt: 'Slide the seam to where the meaning lives.',
+      prompt: 'Where does the meaning live?',
       split: {
         left: 'IN THE POEM', right: 'IN THE POET',
         start: 0.04,

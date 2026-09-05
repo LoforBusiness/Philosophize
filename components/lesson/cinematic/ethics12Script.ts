@@ -71,16 +71,16 @@ export const BEATS: Ethics12Beat[] = [
   {
     p: 4, x: 124, n: 12, word: 1,
     interact: {
-      prompt: 'Set the lever to the one that is really just counting outcomes.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'means', reads: 'never use another person merely as a means' },
-          { id: 'law', reads: 'act only on a rule everyone could follow' },
-          { id: 'happy', reads: 'break it when more people end up happy', correct: true },
+      prompt: 'Which principle would let you break the promise?',
+      sort: {
+        chip: 'breaking a promise',
+        bins: [
+          { id: 'means', label: 'never a means', reads: 'never use another person merely as a means' },
+          { id: 'law', label: 'a universal rule', reads: 'act only on a rule everyone could follow' },
+          { id: 'happy', label: 'more people happy', reads: 'break it when more people end up happy', correct: true },
         ],
       },
-      explain: 'The far setting, and it sounds like plain decency, which is what hides it. That is Mill counting, not Kant testing. Kant never adds the happiness up. He asks one thing: does the rule survive being handed to everybody at once?',
+      explain: 'More people happy, and it sounds like plain decency, which is what hides it. That is Mill counting, not Kant testing. Kant never adds the happiness up. He asks one thing: does the rule survive being handed to everybody at once?',
       xp: 5,
     },
     dur: 1.0,

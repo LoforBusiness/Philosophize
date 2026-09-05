@@ -79,16 +79,16 @@ export const BEATS: Logic7Beat[] = [
   {
     p: 4, x: 124, rule: 1, fact: 2,
     interact: {
-      prompt: 'Set the lever to what dry streets tell you about the rain.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'nothing', reads: 'nothing yet, look at the sky' },
-          { id: 'likely', reads: 'the rain probably never came' },
-          { id: 'certain', reads: 'the rain never came, for certain', correct: true },
+      prompt: 'The pavement is dry. What does that tell you about the rain?',
+      sort: {
+        chip: 'a dry pavement',
+        bins: [
+          { id: 'nothing', label: 'nothing yet', reads: 'nothing yet, look at the sky' },
+          { id: 'likely', label: 'probably not', reads: 'the rain probably never came' },
+          { id: 'certain', label: 'certainly not', reads: 'the rain never came, for certain', correct: true },
         ],
       },
-      explain: 'The far setting, and no sky needed. The rule promised that rain ALWAYS brings wet streets. So a dry street is not weak evidence about the rain — it rules it out completely, because a rainy night with dry streets would break the rule.',
+      explain: 'Certainly not, and no sky needed. The rule promised that rain ALWAYS brings wet streets. So a dry street is not weak evidence about the rain — it rules it out completely, because a rainy night with dry streets would break the rule.',
       xp: 5,
     },
     dur: 1.0,

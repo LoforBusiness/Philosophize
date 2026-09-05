@@ -106,7 +106,7 @@ export const BEATS: Metaphysics35Beat[] = [
   {
     p: 35, x: 210, line: 1, branch: 1,
     interact: {
-      prompt: 'Drag to what is actually stopping you.',
+      prompt: 'What is actually stopping you?',
       drag: {
         lo: 'NOTHING IS STOPPING YOU',
         hi: 'SOMETHING PUSHES BACK',

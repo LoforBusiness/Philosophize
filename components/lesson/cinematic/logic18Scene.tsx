@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic18Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -97,7 +97,7 @@ const LIVE_D = BEATS.map((b) => (b.live_d ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic18'));
 
-export default function Logic18Scene({ clock, bt, bi, dragPos }: SceneApi) {
+export default function Logic18Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -121,7 +121,7 @@ export default function Logic18Scene({ clock, bt, bi, dragPos }: SceneApi) {
     const turn = LIVE_D[n] === 1 ? clamp01(dragPos.value) : crowd;
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       crowd,
       turn,
       gap: carry(cv, 2, n, GAP[p], GAP[n], tr),
@@ -148,6 +148,7 @@ export default function Logic18Scene({ clock, bt, bi, dragPos }: SceneApi) {
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap} pointerEvents="none">HOW MANY SAY SO</Text>
       {crowd.map((c) => <Tick key={c} S={SCENE} index={c} />)}
 

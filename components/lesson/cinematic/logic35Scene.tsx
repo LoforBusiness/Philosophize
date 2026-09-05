@@ -7,7 +7,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic35Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -91,7 +91,7 @@ const CLIMB = RISE.map((v, k) => (v > 0 && (k === 0 || RISE[k - 1] === 0) ? 1 : 
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic35'));
 
-export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -112,7 +112,7 @@ export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dra
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       // Climbing on their own beat, held everywhere after it.
       grow: CLIMB[n] === 1 ? ease01((bt.value - 0.2) / 1.5) : carry(cv, 1, n, RISE[p], RISE[n], tr),
@@ -137,6 +137,7 @@ export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dra
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap}>MEASURED ALL SUMMER</Text>
 
       <View style={styles.baseLine} pointerEvents="none" />

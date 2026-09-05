@@ -87,16 +87,16 @@ export const BEATS: Epis31Beat[] = [
     g: 11, open: 3,
     dur: 1.0,
     interact: {
-      prompt: 'Set the lever to how you should hold a memory.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'prove', reads: 'prove it first, against something outside memory' },
-          { id: 'trust', reads: 'trust it until you get a reason not to', correct: true },
-          { id: 'doubt', reads: 'treat every memory as suspect until it is confirmed' },
+      prompt: 'How should you treat your own memory?',
+      sort: {
+        chip: 'your own memory',
+        bins: [
+          { id: 'prove', label: 'prove it first', reads: 'prove it first, against something outside memory' },
+          { id: 'trust', label: 'trust it', reads: 'trust it until you get a reason not to', correct: true },
+          { id: 'doubt', label: 'suspect it', reads: 'treat every memory as suspect until it is confirmed' },
         ],
       },
-      explain: 'The middle. The first setting cannot be carried out: nothing outside memory is available to you, because any check you make is itself remembered a moment later. Memory is a floor to stand on rather than a conclusion to prove.',
+      explain: 'Trust it. "prove it first" cannot be carried out: nothing outside memory is available to you, because any check you make is itself remembered a moment later. Memory is a floor to stand on rather than a conclusion to prove.',
       xp: 5,
     },
   },

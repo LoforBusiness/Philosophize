@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics8Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -79,7 +79,16 @@ const MARKV = BEATS.map((b) => b.mark ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// the run holds where the option says EVERY LINK HOLDS
+const POLL_CHAIN = [0, 1, 1, 0];
+// YOUR CHOICE stands where the option leaves people FREE
+const POLL_MARK = [1, 0, 1, 0];
 
 /**
  * One domino. It reads the shared topple FRONT and works out its own angle, so
@@ -106,7 +115,7 @@ function Domino({
   );
 }
 
-export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -134,18 +143,18 @@ export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick, dr
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       // R7b — the pad IS the two questions. Across: the further right, the more of
       // the domino run is there, because that axis runs from the chain breaks to
       // every link holds.
-      chain: carry(cv, 1, n, CHAINV[p], reacting ? dragPos.value : CHAINV[n], tr, chainFade ? grow : 1),
+      chain: carry(cv, 1, n, CHAINV[p], reacting ? pickAt(POLL_CHAIN, pickPos.value) : CHAINV[n], tr, chainFade ? grow : 1),
       // ONE number for the whole cascade: every domino at or right of it is down.
       wave: carry(cv, 2, n, FRONTV[p], FRONTV[n], tr),
       tags: carry(cv, 3, n, TAGSV[p], TAGSV[n], tr),
       // And up: the YOUR CHOICE tag over domino three lights as the token rises
       // toward people are free. The reader can put the tag on a chain that is
       // complete, which is the compatibilist corner and the whole lesson.
-      mark: carry(cv, 4, n, MARKV[p], reacting ? dragPos2.value : MARKV[n], tr),
+      mark: carry(cv, 4, n, MARKV[p], reacting ? pickAt(POLL_MARK, pickPos.value) : MARKV[n], tr),
     };
   });
 

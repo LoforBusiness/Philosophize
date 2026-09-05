@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
 import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
+import { RatePromptHost } from '@/components/shared/RatePrompt';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import AddWidgetSheet from '@/components/shared/AddWidgetSheet';
 import StickmanStroll from '@/components/home/StickmanStroll';
@@ -201,6 +202,12 @@ export default function HomeScreen() {
       </ScrollView>
 
       <AddWidgetSheet visible={addWidgetOpen} onClose={() => setAddWidgetOpen(false)} />
+      {/* The one rating ask, raised on the reader's first arrival here after
+          onboarding and never again. It owns its own timing -- see the host in
+          RatePrompt.tsx. Mounted HERE rather than at the root because Home is
+          the only screen it may appear over, and the Add-Widget sheet above is
+          user-triggered, so the two can never be up together. */}
+      <RatePromptHost />
     </SafeAreaView>
     </ScreenTransition>
   );

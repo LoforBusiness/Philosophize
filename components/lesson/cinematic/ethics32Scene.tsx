@@ -158,6 +158,7 @@ export default function Ethics32Scene({ clock, bt, bi, i, picked, onPick, dragPo
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {/* the new case, waiting between them */}
       <Animated.View style={[styles.newCase, freshStyle]} pointerEvents="none">
         <Text style={styles.newCaseKicker} numberOfLines={1}>A NEW CASE</Text>

@@ -107,19 +107,16 @@ export const BEATS: Metaphysics8Beat[] = [
   {
     p: 12, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
     interact: {
-      prompt: 'Place the token where the third camp actually stands.',
-      field: {
-        xLo: 'THE CHAIN BREAKS', xHi: 'EVERY LINK HOLDS',
-        yLo: 'NOBODY IS FREE', yHi: 'PEOPLE ARE FREE',
-        start: [0.24, 0.24],
-        quads: [
-          { id: 'gap', x: 0, y: 1, reads: 'the chain breaks, and freedom lives in the gap' },
-          { id: 'hard', x: 1, y: 0, reads: 'every link holds, so nobody is free' },
-          { id: 'compat', x: 1, y: 1, reads: 'every link holds, and people are free anyway', correct: true },
-          { id: 'lost', x: 0, y: 0, reads: 'the chain breaks and nobody is free either' },
+      prompt: 'Where does the third camp actually stand?',
+      poll: {
+        options: [
+          { id: 'gap', reads: 'the chain breaks, and freedom lives in the gap', holders: ['Kane'] },
+          { id: 'hard', reads: 'every link holds, so nobody is free', holders: ['d\'Holbach'] },
+          { id: 'compat', reads: 'every link holds, and people are free anyway', holders: ['Hume', 'Frankfurt'], correct: true },
+          { id: 'lost', reads: 'the chain breaks and nobody is free either' },
         ],
       },
-      explain: 'Top right, and the pad is the point: these are two questions, not one. Compatible with free will sounds like something was rescued from the causes. Nothing was. Every domino still falls. The camp only changed the test from was it uncaused to was it forced.',
+      explain: 'Every link holds, and people are free anyway. These are two questions, not one. Compatible with free will sounds like something was rescued from the causes. Nothing was. Every domino still falls. The camp only changed the test from was it uncaused to was it forced.',
       xp: 5,
     },
     dur: 1.0,

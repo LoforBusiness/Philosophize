@@ -7,7 +7,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political35Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -77,7 +77,7 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political35'));
 
-export default function Political35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+export default function Political35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
   const SCENE = useDerivedValue(() => {
@@ -96,7 +96,7 @@ export default function Political35Scene({ clock, bt, bi, qv, i, picked, onPick,
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       chairsOn: carry(cv, 1, n, CHAIRS[p], CHAIRS[n], tr),
       // The reader's thumb on its own beat, the script's track everywhere else.
@@ -114,6 +114,7 @@ export default function Political35Scene({ clock, bt, bi, qv, i, picked, onPick,
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={[styles.plate, { left: COL_X[0] - 8 }]}>NOW</Text>
       <Text style={[styles.plate, { left: COL_X[0] - 8, top: CAP_T + 72 }]}>2100 AND AFTER</Text>
 

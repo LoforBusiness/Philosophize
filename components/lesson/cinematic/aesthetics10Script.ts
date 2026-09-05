@@ -85,7 +85,7 @@ export const BEATS: Aes10Beat[] = [
   {
     p: 9, x: 110, film: 1, panel: 1, shut: 0, verdict: 2, link: 1,
     interact: {
-      prompt: 'Drag to what Plato put first.',
+      prompt: 'Beauty and the city pull apart. Which one does Plato let go?',
       drag: {
         lo: 'BEAUTY ABOVE ALL',
         hi: 'THE CITY ABOVE ALL',

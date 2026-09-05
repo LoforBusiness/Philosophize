@@ -7,7 +7,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political36Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -89,7 +89,7 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political36'));
 
-export default function Political36Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Political36Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
@@ -108,7 +108,7 @@ export default function Political36Scene({ clock, bt, bi, i, picked, onPick, dra
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       streetOn: carry(cv, 1, n, STREET[p], STREET[n], tr),
       // Reader's thumb on the drag beat, the script's track everywhere else.
@@ -137,6 +137,7 @@ export default function Political36Scene({ clock, bt, bi, i, picked, onPick, dra
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap}>EVERY LIT WINDOW IS SOMETHING LEGAL</Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, lampStyle]} pointerEvents="none">

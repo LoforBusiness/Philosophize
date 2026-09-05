@@ -71,7 +71,7 @@ export const BEATS: Logic11Beat[] = [
   {
     p: 4, x: 116, steps: 4, base: 1, spine: 1,
     interact: {
-      prompt: 'Drag to how much support a circle actually gives.',
+      prompt: 'How much support does a circle actually give?',
       drag: {
         lo: 'NONE AT ALL',
         hi: 'IT PROVES THE CONCLUSION',

@@ -85,7 +85,7 @@ export const BEATS: Epi7Beat[] = [
   {
     p: 8, days: 4, twist: 1,
     interact: {
-      prompt: 'Drag to what Hume says we should do about induction.',
+      prompt: 'What does Hume say we should do about induction?',
       drag: {
         lo: 'STOP USING IT',
         hi: 'CALL IT PROVED',

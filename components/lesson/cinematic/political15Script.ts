@@ -62,16 +62,13 @@ export const BEATS: Pol15Beat[] = [
   {
     p: 4, x: 124, stages: 4, night: 1,
     interact: {
-      prompt: 'A protester smashes windows by night and hides from the police. Civil disobedience?',
-      field: {
-        xLo: 'HIDDEN', xHi: 'DONE IN THE OPEN',
-        yLo: 'TAKES THE PENALTY', yHi: 'RUNS FROM IT',
-        start: [0.24, 0.24],
-        quads: [
-          { id: 'crime', x: 0, y: 0, reads: 'hidden, and no penalty taken: a crime' },
-          { id: 'open', x: 1, y: 0, reads: 'open, and the penalty accepted', correct: true },
-          { id: 'riot', x: 0, y: 1, reads: 'hidden, and running: still just a crime' },
-          { id: 'stunt', x: 1, y: 1, reads: 'open, yet dodging the cost' },
+      prompt: 'Smashing windows by night, then hiding. Is that civil disobedience?',
+      poll: {
+        options: [
+          { id: 'crime', reads: 'hidden, and no penalty taken: a crime' },
+          { id: 'open', reads: 'open, and the penalty accepted', holders: ['Rawls', 'King'], correct: true },
+          { id: 'riot', reads: 'hidden, and running: still just a crime' },
+          { id: 'stunt', reads: 'open, yet dodging the cost' },
         ],
       },
       explain: 'The trap is the other card, which is how the phrase is usually used. King and Rawls set a much narrower bar: public, nonviolent, penalty-accepting. Strip those and what is left is ordinary crime with a motive.',

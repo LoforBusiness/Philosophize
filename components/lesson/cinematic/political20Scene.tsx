@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political20Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -78,7 +78,7 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political20'));
 
-export default function Political20Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Political20Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -97,7 +97,7 @@ export default function Political20Scene({ clock, bt, bi, i, picked, onPick }: S
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       stacks: carry(cv, 1, n, STACKS[p], STACKS[n], tr),
       cands: carry(cv, 2, n, CANDS[p], CANDS[n], tr),
       shelf: carry(cv, 3, n, SHELF[p], SHELF[n], tr),
@@ -122,6 +122,7 @@ export default function Political20Scene({ clock, bt, bi, i, picked, onPick }: S
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, stackStyle]} pointerEvents="none">
         {STACK_X.map((sx, side) => (
           <View key={`s${sx}`}>

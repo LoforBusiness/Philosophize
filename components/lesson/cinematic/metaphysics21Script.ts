@@ -94,19 +94,16 @@ export const BEATS: Met21Beat[] = [
   {
     p: 41, x: 268, line: 1, past: 1, future: 1,
     interact: {
-      prompt: 'Place eternalism on the two questions.',
-      field: {
-        xLo: 'PAST: GONE', xHi: 'PAST: REAL',
-        yLo: 'FUTURE: OPEN', yHi: 'FUTURE: REAL',
-        start: [0.24, 0.24],
-        quads: [
-          { id: 'presentism', x: 0, y: 0, reads: 'presentism: only now' },
-          { id: 'block', x: 1, y: 0, reads: 'the growing block' },
-          { id: 'shrink', x: 0, y: 1, reads: 'the shrinking tree, and almost nobody holds it' },
-          { id: 'eternal', x: 1, y: 1, reads: 'eternalism: all of it', correct: true },
+      prompt: 'Which one says every moment is equally real?',
+      poll: {
+        options: [
+          { id: 'presentism', reads: 'presentism: only now', holders: ['Prior'] },
+          { id: 'block', reads: 'the growing block', holders: ['Broad'] },
+          { id: 'shrink', reads: 'the shrinking tree, and almost nobody holds it' },
+          { id: 'eternal', reads: 'eternalism: all of it', holders: ['Smart', 'Quine'], correct: true },
         ],
       },
-      explain: 'Top right: both halves furnished. The corner nobody expects is the other diagonal — a real future and a gone past — and it is a position, just an unpopular one. Seeing that it exists is what the two axes are for.',
+      explain: 'Eternalism: both halves furnished. The position nobody expects is the shrinking tree, a real future and a gone past, and it is a position, just an unpopular one. Seeing that it exists is what the four answers are for.',
       xp: 5,
     },
     dur: 1.0,

@@ -85,7 +85,7 @@ export const BEATS: Epi17Beat[] = [
     g: 41, facts: 1, frame: 1, odd: 3, shift: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Drag to what it takes to end a paradigm.',
+      prompt: 'What does it take to end a paradigm?',
       drag: {
         lo: 'ONE DECISIVE RESULT',
         hi: 'YEARS OF THEM PILING UP',

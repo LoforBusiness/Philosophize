@@ -8,7 +8,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics35Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -67,7 +67,7 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics35'));
 
-export default function Aesthetics35Scene({ clock, bt, bi, qv, i, picked, onPick }: SceneApi) {
+export default function Aesthetics35Scene({ clock, bt, bi, qv, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -92,7 +92,7 @@ export default function Aesthetics35Scene({ clock, bt, bi, qv, i, picked, onPick
     const runNow = RUN[n] > 0 && RUN[p] === 0 ? ease01((bt.value - 0.2) / 1.3) : carry(cv, 0, n, RUN[p], RUN[n], tr);
 
     return {
-      fig: pose(figS, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       trackOn: carry(cv, 2, n, TRACK[p], TRACK[n], tr),
       splitOn: carry(cv, 3, n, SPLIT[p], SPLIT[n], tr),
@@ -117,6 +117,7 @@ export default function Aesthetics35Scene({ clock, bt, bi, qv, i, picked, onPick
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap}>ONE SETUP, TWO READINGS</Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, trackStyle]} pointerEvents="none">

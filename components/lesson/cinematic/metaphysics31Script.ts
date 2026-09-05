@@ -84,7 +84,7 @@ export const BEATS: Meta31Beat[] = [
     g: 8, holes: 1, ticks: 3, chips: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Drag to how often rewording can make a hole go away.',
+      prompt: 'How often can rewording make a hole go away?',
       drag: {
         lo: 'ALWAYS',
         hi: 'NEVER',

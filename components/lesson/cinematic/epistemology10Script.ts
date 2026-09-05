@@ -87,7 +87,7 @@ export const BEATS: E10Beat[] = [
   {
     p: 21, x: 228, gauge: 1, band: 2, needle: 0.78,
     interact: {
-      prompt: 'Drag to how firmly a fallibilist actually holds it.',
+      prompt: 'How firmly does a fallibilist actually hold it?',
       drag: {
         lo: 'BARELY AT ALL',
         hi: 'BEYOND ANY QUESTION',

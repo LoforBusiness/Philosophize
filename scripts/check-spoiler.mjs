@@ -183,6 +183,7 @@ const ANSWER = `(() => {
   const drove = ${ANSWER_CONTROL};
   if (drove) return drove;
   const b = [...document.querySelectorAll('[role="button"],[tabindex]')].find((e) => {
+        if (e.getAttribute('data-testid') === 'thinker-name') return false;
     const r = e.getBoundingClientRect();
     return r.width > 60 && r.height > 30 && r.top > innerHeight * 0.3;
   });

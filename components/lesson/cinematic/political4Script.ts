@@ -90,7 +90,7 @@ export const BEATS: Pol4Beat[] = [
   {
     p: 4, walls: 0, harm: 0, panel: 2,
     interact: {
-      prompt: 'Slide the seam to what Berlin actually guards.',
+      prompt: 'What does Berlin actually guard?',
       split: {
         left: 'A CORE OF NEGATIVE LIBERTY', right: 'POSITIVE LIBERTY',
         start: 0.04,

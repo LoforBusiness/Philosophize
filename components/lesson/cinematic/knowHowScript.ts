@@ -77,7 +77,7 @@ export const BEATS: KnowHowBeat[] = [
   {
     p: 4, x: 124, steps: 3, done: 1,
     interact: {
-      prompt: 'Slide the seam to divide what memorising actually gave you.',
+      prompt: 'What did memorising actually give you?',
       split: {
         left: 'THE FACTS', right: 'THE SKILL',
         start: 0.04,

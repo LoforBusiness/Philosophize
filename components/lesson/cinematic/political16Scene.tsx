@@ -8,7 +8,7 @@ import { clamp01, ease01, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political16Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -63,7 +63,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political16'));
 
-export default function Political16Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Political16Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -86,7 +86,7 @@ export default function Political16Scene({ clock, bt, bi, i, picked, onPick, dra
       carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr,
     ));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       cords: carry(cv, 0, n, CORDN[p], CORDN[n], grow),
       // R7b — the seam cuts the cords. Give the bar to OWNERSHIP AND CONTROL and the
       // four severings open one after another; give it to the wage and they close, and
@@ -101,6 +101,7 @@ export default function Political16Scene({ clock, bt, bi, i, picked, onPick, dra
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.label} numberOfLines={1}>WHAT THE WORK JOINS YOU TO</Text>
 
       <Animated.View style={[styles.trunk, trunk]} pointerEvents="none" />

@@ -36,9 +36,22 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const DIR = 'components/lesson/cinematic';
-const ANALOGUE = ['drag', 'lever', 'plot', 'split', 'field'];
+// `lever` and `field` are retired — kept here so a scene still naming one is
+// recognised as a control rather than skipped, which is how 51 dead flags stayed
+// invisible. `sort` and `poll` are the controls that replaced them, and leaving
+// them out meant every lesson carrying one was passed over by this whole file:
+// the reader works them with a thumb exactly like the others.
+const ANALOGUE = ['drag', 'lever', 'plot', 'split', 'field', 'sort', 'poll'];
 
-/** Lessons whose analogue beat leaves the stage still. DOWN ONLY. */
+/**
+ * Lessons whose analogue beat leaves the stage still. DOWN ONLY.
+ *
+ * THE DENOMINATOR CHANGED UNDER THIS NUMBER, so do not read it against the old
+ * one. `sort` and `poll` were missing from ANALOGUE, so this file used to see 110
+ * lessons and now sees 182; the 15 it once reported were 15 of the lessons it
+ * could see, not 15 of the lessons that have a control. 33 is the first honest
+ * count, and it happens to equal the budget that was already here.
+ */
 const DEAD_BUDGET = 33;
 
 const route = fs.readFileSync('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx', 'utf8');
@@ -61,6 +74,8 @@ const fileFor = (comp, kind) => {
 const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 const rows = [];
+/** Scenes whose reaction flag names a control the lesson does not ship. */
+const deadFlag = [];
 for (const { id, comp } of wired) {
   const sf = fileFor(comp, 'script');
   const cf = fileFor(comp, 'scene');
@@ -75,7 +90,27 @@ for (const { id, comp } of wired) {
   }
   if (!controls.length) continue;
 
-  const reads = /\bdragPos2?\b/.test(scene);
+  const reads = /\b(dragPos2?|pickPos)\b/.test(scene);
+
+  // ── AND THE FLAG HAS TO BE ABLE TO FIRE ────────────────────────────────────
+  //
+  // `reads` above only asks whether the scene MENTIONS the value. That was true
+  // of 51 scenes whose reaction had been dead for as long as the controls had
+  // been converted: they derive
+  //
+  //     const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+  //
+  // and no script has shipped a `lever` or a `field` since both were retired into
+  // `sort` and `poll`. So `reacting` was permanently false, the stage held still
+  // under the reader's thumb, and this file printed that the picture moved —
+  // because the wiring is all present, and only the current through it is not.
+  //
+  // A flag naming a control the lesson does not have is worse than no flag: it is
+  // the shape of a wired scene, so nobody looks again.
+  const flag = /const REACT\s*=\s*BEATS\.map\(\(b\) => \(b\.interact\?\.([a-z]+) \? 1 : 0\)\);/.exec(scene);
+  if (flag && !controls.includes(flag[1])) {
+    deadFlag.push(`${id.padEnd(30)} reacts to interact.${flag[1]}, which this lesson does not have (it has ${controls.join('+')})`);
+  }
   // What the scene has to offer: the tracks it already interpolates. A reaction is
   // almost always one of these handed the control's value on its own beat, rather
   // than new art — which is what makes wiring one a small job.
@@ -117,5 +152,14 @@ if (dead.length) {
   console.log('        node scripts/check-react.mjs --list   — each one with the tracks it could use');
 }
 if (ok && dead.length < DEAD_BUDGET) console.log(`        ${dead.length} now — lower DEAD_BUDGET to ${dead.length} to lock it in`);
-console.log(ok ? '\nthe reader moves the picture, not a widget beside it.\n' : '\na control with a dead stage is a slider with a lesson printed next to it.\n');
-process.exit(ok ? 0 : 1);
+
+for (const d of deadFlag.slice(0, 12)) console.log(`  FAIL  ${d}`);
+if (deadFlag.length > 12) console.log(`  FAIL  … and ${deadFlag.length - 12} more`);
+console.log(deadFlag.length
+  ? '  a flag that cannot fire is the SHAPE of a wired scene, which is why nobody looked at it again.'
+  : '  ok    every reaction flag names a control its own lesson actually ships');
+
+console.log(ok && !deadFlag.length
+  ? '\nthe reader moves the picture, not a widget beside it.\n'
+  : '\na control with a dead stage is a slider with a lesson printed next to it.\n');
+process.exit(ok && !deadFlag.length ? 0 : 1);

@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics13Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -70,7 +70,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics13'));
 
-export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
@@ -92,7 +92,7 @@ export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick, dr
     // reveal, so nothing is given away before they choose.
     const base = carry(cv, 0, n, POS[p], reacting ? dragPos.value * 4 : POS[n], slide);
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // On the question beat the marker waits at the far end and only travels to the
       // mean once the reader has answered — so the picture never gives it away.
       pos: revealing ? lerp(base, MEAN, qv.value) : base,
@@ -117,6 +117,7 @@ export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick, dr
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.kicker} numberOfLines={1}>HOW MUCH FEAR?</Text>
 
       <View style={styles.rail} pointerEvents="none" />

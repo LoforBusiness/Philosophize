@@ -11,7 +11,7 @@ import {
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
-import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useCarry, carry,
+import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -101,7 +101,7 @@ const CLAIM_W = 112;
 const CLAIM_GAP = 12;
 const CLAIM_L = (STAGE_W - (CLAIM_W * 3 + CLAIM_GAP * 2)) / 2;
 
-export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const cv = useCarry(3);
   const cur = BEATS[i];
 
@@ -117,7 +117,7 @@ export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick }: 
       : mixStance(emoteHold(E[p], t), emoteLive(E[n], t, bt.value), tr);
 
     return {
-      trav: pose(travS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      trav: lookPose(travS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       gone: carry(cv, 1, n, GONE[p], GONE[n], tr),
       pr: carry(cv, 2, n, PR[p], PR[n], tr),
       t,

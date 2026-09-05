@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics15Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -73,7 +73,7 @@ const FOUND = BEATS.map((b) => b.found ?? 0);
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 
-export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -99,7 +99,7 @@ export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick, d
     ));
     const f = carry(cv, 0, n, FOUND[p], FOUND[n], fFade ? grow : tr);
     return {
-      fig: pose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       balls: carry(cv, 2, n, BALLS[p], BALLS[n], tr, bFade ? grow : 1),
       // R7b — the knob searches the gap. Drag toward THE PUSH ITSELF, PLAINLY and the
       // space between the two balls is marked and hunted through — and nothing is ever
@@ -122,6 +122,7 @@ export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick, d
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[styles.layer, ballStyle]} pointerEvents="none">
         <Text style={styles.head} numberOfLines={1}>WHAT YOU ACTUALLY SEE</Text>
         <View style={[styles.ball, { left: BALL_LX }]} />

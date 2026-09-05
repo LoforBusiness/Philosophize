@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic19Script';
 import {
   facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -70,7 +70,7 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic19'));
 
-export default function Logic19Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Logic19Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   // The beat the seven turns on. Its back is the REVEAL, so it is not mounted
   // before then — an opacity-0 <Text> is invisible and still readable, which is
   // exactly what check:spoiler exists to catch (group O).
@@ -93,7 +93,7 @@ export default function Logic19Scene({ clock, bt, bi, i, picked, onPick }: Scene
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       rule: carry(cv, 1, n, RULEV[p], RULEV[n], tr),
       cards: carry(cv, 2, n, CARDS[p], CARDS[n], tr),
       reach: carry(cv, 3, n, REACH[p], REACH[n], tr),
@@ -110,6 +110,7 @@ export default function Logic19Scene({ clock, bt, bi, i, picked, onPick }: Scene
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, ruleStyle]} pointerEvents="none">
         <View style={styles.plate} />
         <Text style={styles.plateText}>A VOWEL ON THE FRONT MEANS AN EVEN NUMBER ON THE BACK</Text>

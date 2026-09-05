@@ -443,14 +443,26 @@ console.log('\nthe herald (Pass tab)\n');
     const chinLo = lo - headR, chinHi = hi - headR;      // above the band's bottom
     const tail = marginBottom + tailBottom + tailH / 2;
 
-    // It must land on the HEAD — anywhere from the chin to the crown reads as
-    // speech; below the chin is a man with a bubble at his chest.
-    if (tail >= chinLo && tail <= hi + headR) {
-      ok('the bubble tail points at his head',
-        `tail ${tail.toFixed(1)} above the band bottom, chin ${chinLo.toFixed(1)}..${chinHi.toFixed(1)}, head centre ${lo.toFixed(1)}..${hi.toFixed(1)}`);
+    // IT MUST LAND ON THE FACE, NOT MERELY ON THE HEAD.
+    //
+    // The first version of this rule accepted anywhere from chin to crown, and
+    // that is how the tail came to sit at 68.5 -- one point above the chin, the
+    // lowest value that passed. The reader read the result exactly as it was
+    // built: a pointer on "the lower part of the left side", wanting to be
+    // "closer in parallel to the face".
+    //
+    // So the target is the head's MIDDLE THIRD. A range that admits the jaw is a
+    // range that will be satisfied at the jaw, because the layout constraints all
+    // push downward -- the shortest bubble, the rounded corner, the band's
+    // height. A rule has to be as tight as the thing it is protecting.
+    const faceLo = lo - headR / 3;
+    const faceHi = hi + headR / 3;
+    if (tail >= faceLo && tail <= faceHi) {
+      ok('the bubble tail points at his face',
+        `tail ${tail.toFixed(1)} above the band bottom, face ${faceLo.toFixed(1)}..${faceHi.toFixed(1)}, chin ${chinLo.toFixed(1)}`);
     } else {
-      bad('the bubble tail does not come out of his head',
-        `tail ${tail.toFixed(1)}, but the chin is ${chinLo.toFixed(1)} and the crown ${(hi + headR).toFixed(1)} — move bubbleWrap's marginBottom`);
+      bad('the bubble tail is not level with his face',
+        `tail ${tail.toFixed(1)}, face is ${faceLo.toFixed(1)}..${faceHi.toFixed(1)} (chin ${chinLo.toFixed(1)}, crown ${(hi + headR).toFixed(1)}) — move bubbleWrap's marginBottom AND the tail's bottom together`);
     }
 
     // AND IT HAS TO SIT ON THE STRAIGHT PART OF THE EDGE. The corners are round,

@@ -107,7 +107,7 @@ export const BEATS: Aes3Beat[] = [
   {
     p: 3, modes: 1, cut: 1, will: 1,
     interact: {
-      prompt: 'Drag to what Plato actually did about music.',
+      prompt: 'Plato feared what music does to people. How far did that take him?',
       drag: {
         lo: 'LEFT IT ALONE',
         hi: 'BANNED EVERY NOTE',

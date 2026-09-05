@@ -133,6 +133,7 @@ Philosophize/
 │   │   ├── interactions/        # MultipleChoice, TrueFalse, SortItems (3 live)
 │   │   ├── cinematic/           # THE BIG ONE — 132 wired cinematic lessons, the
 │   │   │                        #   shared rig.ts, Stickman.tsx, CinematicPlayer,
+│   │   │                        #   NarrationText + ThinkerPeek (the marked deck),
 │   │   │                        #   per-lesson *Scene.tsx + *Script.ts (§17)
 │   │   ├── feedback/            # CorrectFeedback, IncorrectFeedback (built, unwired)
 │   │   ├── scenes/ inkScenes    # per-branch illustration art
@@ -166,6 +167,10 @@ Philosophize/
 │   ├── extra-philosophers/      # ancient/eastern/medieval/modern/contemporary/
 │   │                            #   expansion, expansion2a/2b/3/4 (+ *-facts)
 │   ├── philosopherFacts.ts      # "Did you know?" facts, 3 per philosopher
+│   ├── lessonNames.ts           # GENERATED — which words in which lesson's
+│   │                            #   narration are philosophers (make:names)
+│   ├── lessonFocus.ts           # AUTHORED — one maxim per lesson, struck in
+│   │                            #   the deck (make:focus proposes, a person picks)
 │   ├── ranks.ts                 # 40 ranks in 8 orders of 5; rankForXP(),
 │   │                            #   awardedRank(), rankOrder(), rankDegree()
 │   ├── rankLore.ts              # the 8 Circles + a one-line epithet per rank
@@ -872,6 +877,8 @@ Both are required. Get them from your Supabase project → Settings → API.
    band and a header stating the composition in numbers (H56)
 8. Add the id → component entry to `CINEMATIC` in
    `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx`, then run
+   `npm run make:names` (the deck colours philosopher names off a generated
+   index, and a new lesson naming somebody is invisible to it until you do) and
    `npm run check`
 
 **Where a lesson lands changes what it means.** Units are contiguous slices of a
@@ -908,7 +915,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **forty-five** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **forty-nine** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -917,8 +924,13 @@ followed:
 `check-camera` · `check-tour` · `check-space` · `check-controls` · `check-shade` · `check-lift` · `check-fits` ·
 `check-plainwords` · `check-streak` · `check-quips` ·
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
+`check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-rotation` · `check-react` · `check-smooth` · `check-turn` · `check-moves` · `check-life`. It exits 0 today, so anything any of them prints is yours. (Several
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-turn` · `check-moves` · `check-life`. It does NOT exit 0 today, and the two that fail are not this section's:
+`check-clear` (untracked, and failing at 72 against a budget of 11) and `check-plain`
+(20 pieces against a budget of 18) are both measuring lesson prose that is being
+rewritten in another session's working tree. Everything else is green, so anything
+the other forty-seven print is yours. (Several
 carry high-water budgets rather than zeroes — `check-scale` allows 18 oversized
 figures and 6 hand-built ones, and `check-moves` 6 head-clearance defects. A budget
 line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 222 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
@@ -983,6 +995,10 @@ they belong to, so the rule book has them and this file did not:
   and every lesson but two has one (the two ask both their questions on the stage
   instead). **149 of those 182 move the picture as the reader moves the control**
   (R7c, §17). Animated `LessonReward` with XP count-up, streak and rank-up.
+  **The narration deck marks two things**: a philosopher's name, in their era's
+  colour and tappable for a one-line snapshot (78 lessons, 153 name forms), and
+  one maxim a lesson, struck on a band — 162 of 186, with 24 carrying none on
+  purpose (§17).
 - **Gamification:** 70 badges in 5 tiers, **48 ranks in 8 coloured orders, each
   order struck in a better material and six worked shapes cycling inside every
   one of them** (§7), a conferred-rank ceremony that shows
@@ -1074,7 +1090,8 @@ they belong to, so the rule book has them and this file did not:
 > picture · the figure · motion · nothing hidden · questions · writing · engine · the
 > house shape · being followable · the words · the tour · teleporting · the narrator ·
 > the vocabulary · answer-before-reveal · held objects · not repeating yourself ·
-> **answers that are a quantity rather than a pick**), an
+> **answers that are a quantity rather than a pick** · **the two marked words in
+the paragraph**), an
 > authoring checklist, and the exact verification checks. Groups A–G each exist because
 > a real lesson broke that rule and it was caught on a real phone; group **H** is the
 > reverse — the conventions the built lessons already share, counted out of the source,
@@ -1179,6 +1196,91 @@ they belong to, so the rule book has them and this file did not:
 > the three reverts above and five scenes where the fill was right and the caption
 > on it was `SOFT` — 3.26:1 on STONE, under the floor, which is the trap §19
 > records three separate marks falling into.
+
+> **AND THE CHEESE HAD FOUR SIBLINGS, FOUND BY SHORTLISTING AND THEN LOOKING.**
+> The reader asked for the rest of the corpus to be held to the same rule —
+> *"if there's a bird on screen, it looks like a bird … look online for good
+> reference and then fix it in the lesson if it does not look like this"* — and
+> the shape of the job is worth recording, because half of it cannot be a checker.
+>
+> **What IS countable is the shortlist.** Every style whose NAME is a real-world
+> object, with what it is actually built from: **105 named objects across 69
+> scenes, 31 of them built only from square, un-rotated rectangles.** Then render
+> and look. Most of the 31 were fine — a wall IS a rectangle, and so are a door, a
+> canvas and a table top — and **four were not**, with no static rule separating
+> them:
+>
+> - **`aesthetics5`'s kestrel was a scarecrow.** Uniform rounded bars for wings
+>   and a narrow bar hanging straight down for a tail, beating BELOW the
+>   horizontal on every frame so it read as falling. The reference says the same
+>   two things everywhere: *"long, POINTED wings … a delicate, dagger-like form"*
+>   and *"they extend the tips of their wings and FAN their tail feathers —
+>   nearly always shows a fan-shaped tail-band when hovering."* Two field marks,
+>   two shapes.
+> - **`metaphysics10`'s rose was a lollipop**, and its header had already reasoned
+>   its way there: *"at 40 units a stroked flower closes into a blob (B16c) … a
+>   labelled plate beats an ambiguous shape."* The constraint is true and the
+>   conclusion was wrong — a FILLED shape need not be a featureless one. Five
+>   petals round a paper eye is the heraldic rose, contains no line to close up,
+>   and reads at 22 units.
+> - **`epistemology35`'s zebra was a barcode** — a rounded rectangle with five
+>   bars, with ZEBRA printed underneath doing all the work. It is a barrel, a neck
+>   at an angle, a head, four legs and a tail now, and both pens still draw from
+>   the same styles so they stay indistinguishable by construction.
+> - **`political17`'s well was a counter.** One post under a beam is a T; a well
+>   frame has an upright each side with the rope down the middle, and the mouth
+>   has to be a HOLE — the lip was laid on top of a solid drum, which is a plinth.
+>
+> **THE FIRST INVENTORY WAS WRONG IN THE DIRECTION THAT WASTES A DAY.** It matched
+> `borderRadius:` against a literal, so `borderRadius: SUN_R` counted as a bare
+> rectangle and it reported the sun, the coin and the eye as the cheese shape. It
+> never looked at `borderBottomLeftRadius` (the cup, the bowl) or at a CSS
+> triangle, which has no radius at all and is not a rectangle (the horn). **Check
+> a shortlist against the objects whose answer you already know before spending
+> anything on it.**
+>
+> **Two things cost a render each, both about pivots.** A neck rotated about its
+> own centre swings BOTH ends, so the zebra's head floated clear of a barrel the
+> neck no longer reached; `transformOrigin: '50% 100%'` pins the shoulder. And a
+> CSS triangle has a ZERO-SIZE box, so a percentage origin on it resolves against
+> nothing — the kestrel's wing is a tapered triangle inside a sized wrapper that
+> carries the flap.
+>
+> **And `check:scale` could not tell an animal from a person.** Its PEOPLE NOT
+> DRAWN BY THE RIG rule looks for a rounded `*head*` beside a `*body*`, which is
+> the right shape to look for and blind to what the creature is: four of the seven
+> it reported were a bird, a hen, a zebra and a cow, all correct as drawn, all
+> sitting inside a budget of 6 where they hid the three that are real. Exempting
+> them by stem took the budget DOWN to 3.
+
+> **AND THE PICTURE IS A PHOTOGRAPH BETWEEN TAPS — MEASURED IN PIXELS, NOT GREP.**
+> Counted from the source, 166 of 184 scenes read the monotonic clock for nothing
+> but the figure. That number finds candidates and is not the measurement: a grep
+> cannot tell an idle wobble that is visible from one multiplied by zero, and
+> `epistemology11`'s new second hand proves it — the source test still calls that
+> scene dead and the pixels say ALIVE.
+>
+> **`npm run check:alive <lesson-id> …`** takes two screenshots from ONE page load
+> a couple of seconds apart and differences them, with the stickman's box excluded
+> (he has had ambient life since group N and would mask everything). **One page
+> load is the whole trick**: the scene clock starts at 0 on every load, so two runs
+> at the same delay reproduce the same frame and would report the entire app as
+> dead. It carries no budget on purpose — a scene about a thing that is
+> deliberately still SHOULD come back a photograph, and only a person can say
+> which those are. Measured this way, `political7` — the lesson the reader holds up
+> as the standard — is one.
+>
+> **AND THE CANDIDATES DO NOT COME FROM THE NARRATION.** `logic7` says "rain is
+> falling" more than any other script and its stage is an argument BOARD; putting
+> rain there would be adding art the composition has not got, to satisfy a word.
+> The two done are the two whose DRAWN subject moves by nature —
+> `epistemology11`'s running clock, which contrasts with a stopped one and was
+> equally motionless, so the whole point of the lesson could not be seen; and
+> `epistemology37`'s hull, which stood on a 260×2 line without moving. Both ride
+> the monotonic clock and never `bt`, which resets every beat and would restart the
+> motion on every tap (L1), and both needed `transformOrigin` in px at the object —
+> on an `absoluteFill` a bare rotate swings about the middle of the design space
+> and throws the ship off its own water.
 
 > **The tap targets got their own check, and it is cheap.** `npm run check:shape`
 > holds two things the cheese rebuild turned up, both invisible everywhere else
@@ -1752,6 +1854,62 @@ The flag is derived from the beat itself (`b.interact?.lever ? 1 : 0`) rather th
 declared as a channel, so it cannot fall out of step with the control and it costs
 `check:echo` nothing.
 
+> **AND THAT LAST SENTENCE WAS WRONG ABOUT 51 SCENES, WHICH IS THE WHOLE POINT.**
+> A flag derived from the beat cannot disagree with the beat — but it does not
+> survive **the control being retired**. `lever` became `sort` and `field` became
+> `poll` across the corpus, and no script has shipped either since, so in 51
+> scenes `reacting` was permanently false and the stage held perfectly still under
+> the reader's thumb. A reader found it from the outside: *"the animations aren't
+> very smooth … it's not very gamified."*
+>
+> **`check:react` counted every one of them as wired**, because its test was
+> `/\bdragPos2?\b/.test(scene)` — whether the scene MENTIONS the value — and they
+> all still did, inside a branch that could never run. It also had `sort` and
+> `poll` missing from its `ANALOGUE` list, so every lesson carrying one was
+> skipped by the entire file: 110 counted where there are 182. A flag that cannot
+> fire is worse than no flag, because it is the SHAPE of a wired scene and nobody
+> looks again.
+>
+> **THE RENAME IS ONLY HALF, AND THE OTHER HALF WOULD HAVE BEEN A WORSE BUG.** A
+> lever's value was 0..1 along its stops and a sort's is 0..1 along its bins in
+> the same authored order, so those 34 are a rename. Pointing the other 17 at
+> `dragPos` would have been the confident kind of wrong: **`poll` and `sort`
+> PERMUTE their options** through `ChoiceCards.orderFor`, the fairness device
+> added because the lever put its answer in the last slot 70% of the time. On
+> those two, `dragPos` is DISPLAY space — *which row*, *how far the chip has
+> travelled* — so a scene animated off it would move its art in an order a
+> shuffle decided. That is A1 broken in exactly the lessons where the shuffle
+> happened to be interesting, and it would have looked like polish.
+>
+> Hence **`SceneApi.pickPos`**: the same reading in the QUESTION's own space, 0..1
+> across the options as the AUTHOR wrote them, eased so a scene track cannot cover
+> a whole step in one frame. `pickAt(table, pickPos)` reads a per-option table, so
+> the picture TRAVELS between the named positions instead of cutting between four
+> stills — the reader watches the mouth close as their answer moves from *hears
+> everything* to *the dogmatist*, which four separate pictures could never say.
+> A `field` was two axes where a `poll` is one, so those 17 could not be renamed
+> at all; each got a table per driven track, and **every row is read off the
+> option's own words against the track's own doc comment**, with that sentence in
+> the comment above it. That is what makes a table of magic numbers checkable.
+
+> **AND THE OTHER RATCHET HAD REACHED ZERO THE SAME WAY: 87 SCENES DECLARED A
+> FLOOR AND DREW NOTHING.** §13 records the tonal pass that took the flat-scene
+> count 111 → 0 and names the floor — *"one View, `top: GROUND, bottom: 0`, drawn
+> first"* — as the single thing that lifted the most scenes off the list. It added
+> the `floor:` entry to 111 StyleSheets and the matching `<View>` to 24 of them.
+> `check:shade` counts `backgroundColor: RULE` **inside the StyleSheet** and never
+> asked whether the style was used, so 87 scenes were recorded as fixed and were
+> pixel-identical; counting only what the render body reaches, 17 were still below
+> the three-mass floor the ratchet exists to enforce. Both checks measure the
+> current now, and both were counter-tested by putting the defect back.
+>
+> **One measurement was wrong before it was right.** After the codemod, three
+> scenes drew the floor and two did not, from byte-identical source — which reads
+> exactly like a half-failed codemod. Metro had served a stale bundle for the two;
+> restarted with `--clear`, all three drew a 390×59 floor with 12 units inside the
+> band. A result that differs between files whose source is identical is a fact
+> about the instrument (§21).
+
 > **AND THE BOX THE READER WAS ASKED TO TAP WAS TWO THIRDS EMPTY (S11).**
 >
 > > *"there are three boxes on the right, and they're just blank boxes, and
@@ -1868,6 +2026,57 @@ declared as a channel, so it cannot fall out of step with the control and it cos
 > the scenes that actually import it. `cinematicKit.tsx` would be more correct still
 > and is deliberately left out: it is the highest-traffic file in the repo, and a
 > ratchet that goes red on most working days is a ratchet nobody runs.
+
+> **AND S11 HAD A SECOND HALF NOBODY HAD CHECKED: THE WORD BESIDE THE BOX.**
+> `epistemology23` was the lesson a reader named — *"a lot of the words are
+> covered or the shading is bad, so you cannot quite clearly tell what is being
+> said above the stickman"* — and rendered beat by beat it was four faults, none
+> of which any check could see.
+>
+> **A CAPTION WITH THE MACHINE'S OWN RAIL THROUGH IT.** `THE MOUTH` was printed at
+> `MOUTH_Y − 7` and the mouth's rail runs at `MOUTH_Y`, so a 2-unit ink line
+> crossed the middle of the word on every beat of the lesson. Four checks passed
+> it and each was right about what it measures: `check:readable`'s STRIKE looks
+> for something painted ON TOP of a word and the caption was painted last;
+> `check:fits` asks whether a word fits its box, and it did; `check:shade` asks
+> what tone it sits on; `check:frame` asks what the CAMERA cuts. **The gap all
+> four leave is a word that is legible as a set of glyphs and unreadable as a
+> word.** `check:cover` DOES own this class — it reads ink across a word and takes
+> a `nativeID` beginning `strike` or `crossout` as a declaration that the mark is
+> deliberate — and it is **not in `npm run check`**, because it needs Metro and a
+> browser. That is §11's warning about `check:moves` arriving in a second place.
+>
+> An offline version was built out of the recorded must-boxes and then DELETED:
+> the side file records no ids, so it cannot tell a declared strike from an
+> accident, and a detector that cannot tell the design from the defect is the
+> boxiness metric again. Two of the twenty lessons it named were deliberate
+> annotations, including one whose own comment explains why.
+>
+> The other three: the twelve falling claims came to rest **on** those captions;
+> the graded beat offered **three identical 203-unit blank bars**, stacked, each
+> covering the label of the part it stood for; and the machine **stopped** — a
+> scene introduced with *"claims arrive all day"* moved `fall` 0→1 on beat 1 and
+> pinned it there for six more.
+>
+> **Every fix is general.** The part names moved to the MARGIN on hairline
+> leaders, which is what a labelled instrument looks like and means nothing can be
+> printed across a word because no word is printed across the picture; each name
+> is the CONTENT of its own target, which is S11's own remedy; the chute, throat
+> and tray are filled and rimmed rather than two hairlines and nine ticks; and the
+> claims run a continuous loop off `clock`, each disc on its own phase. That last
+> one is the cheapest thing on the list that reads as *game* rather than *slide* —
+> secondary motion is what tells a reader the world is running whether or not they
+> are touching it.
+>
+> **`npm run sheet:beats <lesson-id>` is what found all four**, and it is the axis
+> `sheet:lessons` does not have: ONE lesson at EVERY beat, rather than many
+> lessons at one. A complaint about a sequence — *"it's kinda difficult to
+> understand what's really going on"* — cannot be answered by a single frame. Its
+> own two traps are the ones §21 lists: taking the first `[role=button]` in the
+> DOCUMENT presses the header's BACK ARROW, so the run leaves the lesson and
+> photographs six frames of a different one while reporting nine clean beats (it
+> scopes to `stage-clip` now); and a beat that cannot be answered parks the run,
+> so every later frame is a copy of the one it stuck on.
 
 > **THE READER COULD NOT MOVE THE LEVER FAR ENOUGH, AND THE CAUSE WAS THE GAIN.**
 > `DragScale`, `SplitBar` and `LeverPick` all integrated `translationX / width`,
@@ -2147,6 +2356,192 @@ Three things worth carrying:
   worth expecting a third: when a defect spreads by imitation it looks like craft
   while it does it.
 
+### The camera reset on a tap, and three separate things were wrong
+
+> *"in the ethics of care … a lot of the time after I tap the screen, it's like it
+>  resets and zooms back in … it used to be very smooth."*
+
+Measured frame by frame in a browser at three tap rates — `npm run sheet:cam` —
+that lesson's camera had **no discontinuity at all**: every move is a continuous
+ramp, worst single frame 10.8 units. `check:smooth`, `check:tour` and
+`check:camera` were all green and all correct about what they measure. The fault
+was in three things none of them looked at, and each is the same shape: a number
+that is generated, validated, written to a table, and then not used.
+
+- **A HAND-WRITTEN SHOT LIST IS INDEXED BY BEAT, AND J12 CHANGED HOW MANY BEATS
+  THERE ARE.** `ethics8Scene` is the only lesson with an authored `SHOTS` table.
+  It was written for 11 beats; the segmenting pass cut the packed ones in two and
+  made it 18, and every shot after the first split slid one place — 1.62 on the
+  first half of the opening line and 1.0 on the second, then 1.24 where the arc
+  wanted 1.0. **Tap, zoom out, tap, zoom in**, which is exactly what was reported.
+  The splitter copies every CHANNEL verbatim so the picture holds still, and a
+  shot is not a channel; `make:tours` and `measure:must` both re-derive per beat
+  and had been re-run. Only the hand-written table was left behind, and beats past
+  its end are CLAMPED rather than throwing, so the tail merely held wide.
+  `check:camera` now holds one shot per beat.
+
+- **THE TRAVEL TIME NEVER REACHED THE CAMERA — 197 STATIONS OF 201.** `shotAt`
+  reads the travel off the shot it is moving to, defaulting to `tr ?? 0.8`, and
+  `tourStartShots` spread `tr` onto its result **only on the follow branch**; a
+  static station came back bare. So every push in every lesson took a flat 0.8
+  seconds however far it went, and K8's 0.35–1.2s window was being enforced on a
+  value nothing read. Nothing could catch it by reading the table, because the
+  table was right — it took measuring a push at **0.79s against a table saying
+  1.2** after a change to the generator made no difference to the render at all.
+  `check:tour` now puts a station of each kind through the real function.
+
+- **AND A ONE-STATION TOUR FAST-FORWARDED INTO A HARD CUT.** `tourSkip` is
+  documented as "the start of the last travel … not the end of the tour: landing
+  the reader ON the final shot would make an impatient tap a hard cut." With ONE
+  station `tourEnd - trs[last]` comes out as that station's own dwell, which is
+  past the only travel there is — so the warp produced precisely the hard cut the
+  rule exists to prevent. **Every tour in the app is a single station now** (201
+  of them, 1.00 per toured beat); the shape changed when the lap was removed and
+  the expression kept answering for the old one. A reader tapping while the camera
+  was still travelling saw it jump the rest of the way and pull straight back out.
+
+**THE FIXED TRAVEL TIME WAS THE SAME DEFECT THE WALK ALREADY HAD.** Every station
+shipped at 0.7s whatever it was travelling, which is §17's *"a FIXED length,
+whatever the distance … 145 walking beats, every one too fast"* one system over —
+and `rig.moveTr` had existed for the walk all along. `stationTr` in
+`scripts/lib/tourrule.mjs` derives it from the distance actually covered, between
+K8's own floor and ceiling so the generator cannot emit a tour its validator
+rejects. **The distance is the RATIO, not the destination**: the first draft
+scored the station's own scale, which gets the push right and the pull-OUT exactly
+backwards, since coming home to the whole stage is scale 1 and would have been
+given the shortest travel in the table. Measured after: the push 0.79 → 1.17s,
+worst frame 10.9 → 8.6 units.
+
+> **AND THE AUTHORED ARC IN THAT LESSON HAS BEEN DEAD SINCE MUST-BOXES EXISTED.**
+> Re-measured, all 17 of its beats report a subject that spans the whole stage, so
+> `containShot` pins every shot to ~1.0 and the eleven-shot arc the file's header
+> describes cannot happen. `measure-must` prints the finding itself — *"a
+> near-full-stage box is a beat whose subject already spans it — the camera there
+> was pushing past its own labels, and holding wide is the correct answer."* The
+> shot list is repaired and one-per-beat, but what a reader sees in that lesson is
+> the tour, and the arc is decoration until the scene draws something smaller.
+
+> **One thing measured and NOT explained, recorded rather than tidied away.**
+> `epistemology-knowledge-31` still completes a 1.15× push in 0.16s where its
+> table says 0.55, with a peak of 13.8 units in a frame. It is not the shot list
+> (that lesson has none), not the station `tr` (fixed above and verified on the
+> same run), and not a verb — the slowest entry in `MOVE` is 0.5s and the fastest
+> that is not `snap` is 0.55. Whatever shortens it is a fourth thing. `npm run
+> sheet:cam -- epistemology-knowledge-31` reproduces it in a minute.
+
+### Two things in the paragraph are no longer ordinary words
+
+> *"when there are certain philosophers names … in the wording for the quotes,
+>  but just for the words that are said … their name will also show up in that
+>  colour … and if the user pushes on their name, a very small slide down shows up
+>  … a quick snapshot."* and *"highlight certain information … like the maxim or
+>  the big punchline."*
+
+The deck was one flat `<Text>`: 1,364 beats in which every word arrived at exactly
+the same weight, including the two kinds that carry more than the rest.
+
+- **A NAME.** These lessons name people constantly, and a name is the one word on
+  the screen a reader might want to stop and ask about. It is drawn in its ERA's
+  colour — `ERA` in `constants/design.ts`, the app's licensed "one place a hue
+  means something", already used on every quote plate — with a rule under it, and
+  it opens `ThinkerPeek`: name, dates and the `oneLiner` the roster already keeps
+  for all 322. **Nothing new had to be written for any thinker**, which is the
+  whole reason this was cheap.
+- **A MAXIM.** One phrase per lesson, struck on a band. 162 of 186 lessons carry
+  one and **24 deliberately carry none** — the floor in `make-focus` exists
+  because a highlighter on a merely-acceptable sentence tells the reader that a
+  prop in the story is the thing to carry away, which is worse than no mark.
+
+`npm run check:names` and `npm run check:focus` hold both, counter-tested nine
+ways by `scripts/countertest-focus.mjs` — including the one direction that must
+stay SILENT, since a lesson with no maxim is a decision rather than a defect.
+
+**THE MAXIM LIVES IN A TABLE AND NOT ON THE BEAT, for a reason that is nothing to
+do with design.** It was `BaseBeat.focus` first, which is the obvious home. But
+`muststamp` hashes each lesson's SCRIPT so that a scene edited without
+re-measuring is a build error rather than a silent crop — so writing a maxim into
+186 scripts marks all 186 must-box measurements stale and demands a full
+`measure:must` sweep, hours of browser time, to record something that never
+touches the stage. The stamp is right to be conservative and weakening it would
+be the wrong trade, so the content moved to `data/lessonFocus.ts` instead. The
+cost is that a rewritten beat can orphan its own maxim, which is exactly J9's
+stale "the trap is B" — hence `check:focus` re-derives every phrase against the
+beat it claims to sit in.
+
+**THREE TRAPS, AND THE THIRD ONE IS THE GENERAL LESSON.**
+
+- **React Native Web renders a pressable nested `<Text>` as a real `<button>`.**
+  Every probe in this repo selects `div,span`, so four successive measurements
+  reported "no coloured name reached in 30 beats" while the name was rendering
+  perfectly at `rgb(106, 92, 47)` with an underline. That is §21's *"selecting on
+  `[role=button]` alone finds half the buttons in this app"* arriving upside down.
+  It also made the names **dangerous**: six harnesses answer a two-card question
+  by taking the first `[role="button"],[tabindex]` below the stage that is wide
+  enough, and check-spoiler's guard is `width > 60` — a 70-unit name matches it
+  outright. Every name now carries `testID="thinker-name"` and all six skip it.
+- **The press has to stop at the name.** The deck sits inside the player's body
+  `Pressable`, whose `onPress` is `advance`, and `advance` calls `setPeek(null)`.
+  On a device the two would never collide, because a Text with `onPress` claims
+  the touch responder; it is react-native-web turning it into a `<button>` whose
+  click bubbles. So the defect exists only on the one platform this project can
+  actually look at, which is the reverse of §21's usual blind spot and just as
+  expensive.
+- **`Fade` HOLDS THE DECK IN STATE, so a state the deck draws must be named in
+  its `revision` or it is never shown.** This is the one worth carrying. The
+  handler fired, `setPeek` ran, React re-rendered the player — and the paragraph
+  on screen stayed the one `Fade` had built before any of it, because `peek` was
+  in neither `trigger` nor `revision`. Nothing throws and nothing logs. Measured
+  from outside it is **indistinguishable from an `onPress` that was never wired**,
+  and three separate hypotheses were tested against it before the instrument was
+  good enough to tell them apart: a counter inside the handler, and the button's
+  own background, which changes only when the open name re-renders.
+
+> **THE SNAPSHOT DRAWS ITSELF IN, AND THE TIMING IS MEASURED RATHER THAN FELT.**
+> A leader hairline draws DOWN from under the tapped name, and the card unfurls
+> beneath it — so it reads as pulled out of that word rather than as a panel that
+> appeared. The line lives in a `TETHER`-tall strip BELOW the paragraph, which is
+> empty by construction, because a leader drawn from the name's own baseline would
+> cross every line of narration between it and the card (group S).
+>
+> **ONE LINEAR DRIVER, AND THE EXIT IS THE ENTRANCE READ BACKWARDS.** Every stage
+> is a slice of the same 0→1 value, so the close undoes the open in the order it
+> arrived: words, then card, then line. Two things were learned by measuring:
+> putting Material 3's `emphasized decelerate` on the DRIVER made the leader draw
+> its full 15 units in **10 milliseconds** — that curve is so front-loaded that a
+> stage occupying the first 42% of the value occupies almost none of the time, so
+> a stage window is only honest on a linear driver. And with the easing moved into
+> each stage, `1 - (1-u)³` run forwards is a decelerate and the identical
+> expression read backwards is an accelerate — M3's entrance/exit pair for free.
+> Measured: leader 97ms, card 249ms in; card 149ms then leader 68ms out, 217ms
+> against 346ms, which is their "exits are shorter" rule.
+>
+> **AND `onLayout` ON A NESTED PRESSABLE TEXT FIRES SOMETIMES.** The leader needs
+> the name's x, and the obvious tool does not work: react-native-web fired it ONCE
+> across a whole lesson in one case and NEVER in another, so the line landed under
+> the right word in `aesthetics3` and at the margin in `political4`. A callback
+> that fires sometimes is worse than one that never does, because it looks correct
+> wherever you happen to check. It is `measureInWindow` at press time now — asked
+> of a view that is on screen and attached, which is the one condition §21 records
+> it needing — and `sheet:peek` asserts the line is within 6 units of the name's
+> centre.
+>
+> **The card also had to be taught to outlive its own close.** It rendered from
+> `id`, under a comment claiming it was kept mounted so the exit could play; the
+> moment `id` went null the subtree unmounted and the card vanished instead of
+> retracting. The comment described the intention and the line did the opposite,
+> which is why measuring it rather than reading it is what found it.
+
+> **The four names the general rule refuses.** `make-names` believes a bare
+> surname only when exactly one philosopher has it, it is over three characters,
+> and it is not an ordinary English word — the right defaults, and they refuse
+> **Mill, Bacon, Moore and Sen**, which this corpus uses across twelve lessons.
+> Aristotle tappable in one lesson and Mill plain text in the next reads as a bug.
+> So there is an `OVERRIDE`, and it was **measured rather than assumed**: all
+> sixteen sentences using those four were printed and read, and not one is the
+> ordinary word. `check:names` re-derives each id against the roster, and holds
+> that the shared `COMMON` list has not drifted apart from `make-mentions` — one
+> rule, two readers, asserted rather than commented.
+
 **Rules that keep biting, in rough order of how often:**
 
 1. **Every hook must sit above `if (done) return null`.** All three players carry
@@ -2284,6 +2679,67 @@ caught a bug that would have shipped:** `VARIANTS` reached for the comic shelf f
 six of its rows, so the variant pass was placing gags without checking fit,
 gravity or rotation — ten about nothing, three in grave lessons, six told twice
 within three lessons. `liveliness.mjs` now throws on that at import.
+
+### And he was alive but not PRESENT — he never once looked at the lesson
+
+> *"look at the new ads … I like how the objects interact with the stickman in a
+>  very clean and, like, actual good looking way … I want the stickman more
+>  interactive with objects and lessons and reacts in better ways and acts in
+>  better ways. That is more entertaining and more real."*
+
+The reader is comparing the lessons with this app's own ad reels, where he walks
+to a shelf, takes a book down, sits and reads it (DEMO-11), and where he wades
+into a pond and lifts a child out (DEMO-9). **Counted, the machinery for all of
+that already existed and nothing called it** — group N's finding one library
+along, and the third time this file has recorded the shape.
+
+`interact.ts` is a thousand lines of the figure's relationship to what is outside
+it. Across 184 scenes: `gripAt` 1 · `carryHands` 1 · `propAct` 1 · **the other
+fourteen exports 0**. `moves.gazeAt` **0**. `moves.pointAt` **0**. Three calls in
+total, in two files, and one of those two is `political8` — the lesson the reader
+already holds up as the standard, which is the only one that puts an object in
+his hands.
+
+**AND THE REASON NOBODY EVER CALLED `gazeAt` IS THAT ON ITS OWN IT DOES NOTHING.**
+N12 already says it about the four "looking" actions in `moves.ts` — `U.head` is
+16, so a neck angle pivots the head centre about five units against a head forty
+across — and **this figure has no face**, so a turned head on a plain disc is
+invisible from the side. Measured on the real rig (`scripts/sheet-gaze.mjs`, plain
+Node, no browser): the neck alone moves the head **3.4–7.4** units; carried by the
+SPINE as N12 says attention must be, **7.3–16.0**. `lookPose` takes the lean from
+how far the neck actually turned, so the two cannot drift apart, and 164 scenes
+use it in place of `pose` — one substitution, because `gazeAt` needs the same `x`
+and `dir` that every scene writes inline inside its own `pose(...)` call.
+
+**The target is the PICTURE, not a guess at the beat's subject.** `npm run
+make:gaze` derives it from `mustBoxes.ts.json` — the area-weighted centre of
+everything a beat draws that is not the figure. Aiming at what CHANGED since the
+previous beat was tried first and is not reliable: on a beat where six things move
+it picks one arbitrarily, and where nothing moves it has no answer. The picture's
+centre is never wrong in an embarrassing way, and when a prop enters on one side
+the centre shifts and he follows it — the reaction without the guesswork. Re-run
+it beside `make:tours`.
+
+> **HE CANNOT TOUCH ANYTHING, AND THAT IS THE COMPOSITION'S FAULT — WHICH IS WHY
+> ATTENTION IS THE PART THAT GENERALISES.** Of the 60 scenes with a sized, filled
+> prop, **41 stage every prop entirely above his head**: his crown is 397, a
+> hanging hand is 450, and the median lowest prop edge is 256. So `propAct` and
+> `gripAt` cannot be wired without moving something, and contact is per-lesson
+> staging rather than a pass. A look works at any distance; a hand does not.
+>
+> **The first instrument said something different and was wrong.** `mustBoxes`
+> records only LEAF elements, so a labelled plate — a bordered View with a `<Text>`
+> child, which is half the props here — is invisible to it as art. A reach metric
+> built on that reported `political8`, the one scene that DOES put a crate in his
+> hands, as no nearer its props than the median. Measure staging from the source.
+>
+> `ethics10` is the worked contact example and it is deliberately the lesson the
+> ad covers: he wades into Singer's pond and used to stand in the water beside the
+> child with his arms at his sides. `pointAt` lays the arm along the line to a
+> target and stops inside arm's length, so a child 68 units away — twice what an
+> arm covers — reads as a straight arm AIMED at it rather than a stretched one
+> touching it, which is the honest picture of someone who has waded in and not got
+> hold of it yet.
 
 ### The branch road — the same rig, outside a lesson
 

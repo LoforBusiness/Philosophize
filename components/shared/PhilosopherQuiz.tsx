@@ -3,6 +3,8 @@ import { Modal, View, Text, Pressable, ScrollView, StyleSheet, useWindowDimensio
 import { MotiView, AnimatePresence } from 'moti';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SketchIcon from './SketchIcon';
+import AnswerOption, { type AnswerState } from './AnswerOption';
+import Button from '@/components/ui/Button';
 import { getQuiz, type QuizQuestion } from '@/data/philosopherQuizzes';
 import { useUserDataStore } from '@/stores/userDataStore';
 
@@ -176,12 +178,16 @@ export default function PhilosopherQuiz({ open, philosopherId, philosopherName, 
                   {/* Options */}
                   {isAttribution ? (
                     <View style={styles.yesNoRow}>
-                      <AttribButton
+                      <AnswerOption
+                        compact
+                        style={{ flex: 1 }}
                         label={`Yes, ${pronoun} did`}
                         state={optionState(0, picked, correctIndex)}
                         onPress={() => choose(0)}
                       />
-                      <AttribButton
+                      <AnswerOption
+                        compact
+                        style={{ flex: 1 }}
                         label={`No, ${pronoun} didn't`}
                         state={optionState(1, picked, correctIndex)}
                         onPress={() => choose(1)}
@@ -190,9 +196,9 @@ export default function PhilosopherQuiz({ open, philosopherId, philosopherName, 
                   ) : (
                     <View style={{ marginTop: 6 }}>
                       {q.options.map((opt, i) => (
-                        <OptionRow
+                        <AnswerOption
                           key={i}
-                          letter={String.fromCharCode(65 + i)}
+                          badge={String.fromCharCode(65 + i)}
                           label={opt}
                           state={optionState(i, picked, correctIndex)}
                           onPress={() => choose(i)}
@@ -214,9 +220,13 @@ export default function PhilosopherQuiz({ open, philosopherId, philosopherName, 
                         </Text>
                         <Text style={styles.explainText}>{q.explain}</Text>
                       </View>
-                      <Pressable onPress={next} style={({ pressed }) => [styles.nextBtn, pressed && { opacity: 0.85 }]}>
-                        <Text style={styles.nextText}>{idx + 1 >= total ? 'See results →' : 'Next →'}</Text>
-                      </Pressable>
+                      <View style={{ marginTop: 12 }}>
+                        <Button
+                          label={idx + 1 >= total ? 'See results →' : 'Next →'}
+                          onPress={next}
+                          size="lg"
+                        />
+                      </View>
                     </MotiView>
                   )}
                 </MotiView>
@@ -233,63 +243,11 @@ export default function PhilosopherQuiz({ open, philosopherId, philosopherName, 
   );
 }
 
-type OptState = 'idle' | 'correct' | 'wrong' | 'dim';
-function optionState(i: number, picked: number | null, correctIndex: number): OptState {
+function optionState(i: number, picked: number | null, correctIndex: number): AnswerState {
   if (picked === null) return 'idle';
-  if (i === correctIndex) return 'correct';
+  if (i === correctIndex) return 'right';
   if (i === picked) return 'wrong';
   return 'dim';
-}
-
-function OptionRow({
-  letter,
-  label,
-  state,
-  onPress,
-}: {
-  letter: string;
-  label: string;
-  state: OptState;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={state !== 'idle'}
-      style={({ pressed }) => [
-        styles.option,
-        state === 'correct' && styles.optionCorrect,
-        state === 'wrong' && styles.optionWrong,
-        state === 'dim' && styles.optionDim,
-        pressed && state === 'idle' && { backgroundColor: '#EFEBE2' },
-      ]}
-    >
-      <View style={[styles.optionLetter, state === 'correct' && styles.letterCorrect, state === 'wrong' && styles.letterWrong]}>
-        <Text style={[styles.optionLetterText, (state === 'correct' || state === 'wrong') && { color: Paper }]}>
-          {state === 'correct' ? '✓' : state === 'wrong' ? '✕' : letter}
-        </Text>
-      </View>
-      <Text style={[styles.optionText, state === 'dim' && { color: InkSoft }]}>{label}</Text>
-    </Pressable>
-  );
-}
-
-function AttribButton({ label, state, onPress }: { label: string; state: OptState; onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={state !== 'idle'}
-      style={({ pressed }) => [
-        styles.attrib,
-        state === 'correct' && styles.optionCorrect,
-        state === 'wrong' && styles.optionWrong,
-        state === 'dim' && styles.optionDim,
-        pressed && state === 'idle' && { backgroundColor: '#EFEBE2' },
-      ]}
-    >
-      <Text style={[styles.attribText, state === 'dim' && { color: InkSoft }]}>{label}</Text>
-    </Pressable>
-  );
 }
 
 function Results({

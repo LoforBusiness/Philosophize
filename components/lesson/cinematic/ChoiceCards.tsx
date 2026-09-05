@@ -121,6 +121,41 @@ export function swapFor(seed: string): boolean {
   return (h & 1) === 1;
 }
 
+/**
+ * A seeded permutation of `n` items — the same rule as `swapFor`, for a list
+ * longer than two.
+ *
+ * IT EXISTS BECAUSE THE LEVER AND THE PAD HAD THE FAULT `swapFor` WAS WRITTEN TO
+ * FIX, AND NOTHING WAS MEASURING THEM. Counted across the corpus before the poll
+ * and the sort replaced them: the lever's answer was its LAST stop in 35 of 50
+ * questions (70%) and the pad's was its first quadrant in 15 of 22 (68%). On an
+ * arc and a two-axis pad that is half hidden by the geometry. In a ballot it is
+ * "always tap the top row", and in a row of bins it is "always throw it to the
+ * far end" — a reader who noticed could clear two thirds of the app without
+ * reading a word, which is the whole lesson format defeated exactly as
+ * `check-answers` describes.
+ *
+ * Fisher-Yates off the same Murmur finaliser, re-hashed each step so successive
+ * draws are not correlated. Exported so `check:answers` permutes exactly as the
+ * player does rather than keeping a second copy of the rule.
+ */
+export function orderFor(seed: string, n: number): number[] {
+  const out = Array.from({ length: n }, (_, i) => i);
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  const next = () => {
+    h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b) >>> 0;
+    h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35) >>> 0;
+    h ^= h >>> 16;
+    return h >>> 0;
+  };
+  for (let i = n - 1; i > 0; i--) {
+    const j = next() % (i + 1);
+    const t = out[i]; out[i] = out[j]; out[j] = t;
+  }
+  return out;
+}
+
 /** How long the loser takes to crumple, and the winner to lift. */
 const REACT = 460;
 

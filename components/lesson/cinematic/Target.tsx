@@ -88,6 +88,9 @@ import { INK, PAPER, RIGHT, WRONG } from './cinematicKit';
 // can now only touch if the two targets themselves overlap — which is a layout
 // fault the audit should report, not something the affordance should cause.
 const RING_INSET = 0;
+const HALO = 3;
+const HALO_W = 2;
+const PIP = 6;
 const RING_W = 2;
 const BREATH_MS = 1100;
 /** How long the reaction takes. The same 460ms ChoiceCards uses, so the two
@@ -228,6 +231,8 @@ export function AnswerLift({
 interface Registry {
   add: (key: string) => void;
   remove: (key: string) => void;
+  /** This target's position in mount order — the opening cue sweeps along it. */
+  order?: (key: string) => number;
   /** Where this target actually is, in SCENE coordinates. See `measure` below. */
   report?: (key: string, box: { x: number; y: number; w: number; h: number }) => void;
   /** The camera view a target measures itself against. */
@@ -259,6 +264,11 @@ export function TargetCountProvider({
     };
     return {
       add: (k: string) => { keys.add(k); onCount(keys.size); },
+      // WHICH TARGET THIS IS, in mount order. A Set keeps insertion order, so
+      // this is stable for a given beat -- and it is what lets the opening cue
+      // run ACROSS the options one after another instead of flashing them all at
+      // once. All-at-once reads as a glitch; a sweep reads as a list.
+      order: (k: string) => [...keys].indexOf(k),
       remove: (k: string) => {
         keys.delete(k); boxes.delete(k);
         onCount(keys.size);
@@ -320,12 +330,26 @@ export default function Target({
     reg?.add(key);
     return () => reg?.remove(key);
   }, [reg, key]);
+  // Mount order, used only to stagger the opening cue. A ref rather than state:
+  // this must not re-render a target that is sitting on a moving stage.
+  const ordRef = useRef(0);
+  if (reg?.order) ordRef.current = Math.max(0, reg.order(key));
+  const ord = ordRef.current;
 
   const breath = useSharedValue(0);
+  // THE OPENING SWEEP. A reader told us they could not tell which things were
+  // available to touch -- and a ring that is always breathing does not announce
+  // itself, it just becomes more scenery. So when a question opens, every live
+  // target flares ONCE, one after another, in mount order. A sweep across the
+  // options reads as "these are your choices"; the same flare on all of them at
+  // the same instant reads as a rendering glitch, which is why it is staggered.
+  const cue = useSharedValue(0);
   useEffect(() => {
     if (answered) {
       cancelAnimation(breath);
+      cancelAnimation(cue);
       breath.value = withTiming(0, { duration: 180 });
+      cue.value = withTiming(0, { duration: 180 });
       return;
     }
     breath.value = 0;
@@ -334,12 +358,31 @@ export default function Target({
       -1,
       true,
     );
-    return () => cancelAnimation(breath);
-  }, [answered]);
+    cue.value = 0;
+    cue.value = withDelay(240 + ord * 110, withSequence(
+      withTiming(1, { duration: 190, easing: Easing.out(Easing.cubic) }),
+      withTiming(0, { duration: 340, easing: Easing.in(Easing.quad) }),
+    ));
+    return () => { cancelAnimation(breath); cancelAnimation(cue); };
+  }, [answered, ord]);
 
   // Opacity only. A ring that also SCALED would drift off a target whose own art
   // is moving, and every one of these sits on a stage where something is walking.
-  const ring = useAnimatedStyle(() => ({ opacity: 0.35 + breath.value * 0.65 }));
+  //
+  // The floor is 0.55 rather than 0.35: at a third of full ink on a page already
+  // full of hairlines, the bottom of the breath was indistinguishable from the
+  // scenery it is drawn over.
+  const ring = useAnimatedStyle(() => ({
+    opacity: Math.min(1, 0.55 + breath.value * 0.45 + cue.value * 0.4),
+  }));
+  // A HALO, which is the part no scene draws. Every lesson is ink lines on paper,
+  // so one more ink line is camouflage; a soft wide ring outside the hard one is
+  // a shape the art never makes, and it is what actually separates a button from
+  // a box somebody drew.
+  const halo = useAnimatedStyle(() => ({
+    opacity: 0.10 + breath.value * 0.10 + cue.value * 0.5,
+    transform: [{ scale: 1 + 0.02 * cue.value }],
+  }));
 
   // ── THE REACTION ──────────────────────────────────────────────────────────
   //
@@ -495,6 +538,35 @@ export default function Target({
           ]}
         />
       ) : null}
+      {!answered && !rest.disabled ? (
+        <>
+          {/* THE HALO, drawn OUTSIDE the hard ring. Not named `target-ring`,
+              because check-blank and the lesson audit count rings and two per
+              target would double every reading. */}
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                top: -HALO, left: -HALO, right: -HALO, bottom: -HALO,
+                borderWidth: HALO_W,
+                borderColor: INK,
+                borderRadius: radius + HALO,
+              },
+              halo,
+            ]}
+          />
+          {/* THE PIP. One filled dot in the same corner of every tappable thing
+              in the app — the single most useful part of this, because it is a
+              MARK rather than an outline, and an outline is what all the scenery
+              already is. It sits inside the bounds so the camera, which frames
+              the target's own box, can never crop it. */}
+          <Animated.View
+            pointerEvents="none"
+            style={[styles.pip, { borderRadius: PIP }, ring]}
+          />
+        </>
+      ) : null}
     </Pressable>
   );
 }
@@ -565,6 +637,24 @@ const styles = StyleSheet.create({
   // with a definite height hands its spare height to the art, and a target with
   // no height of its own still takes the art's.
   art: { flexGrow: 1 },
+  // THE PIP — one filled dot in the top-right of every tappable thing.
+  //
+  // The rings were always there and a reader still could not tell what was
+  // available to touch, because a scene IS ink outlines on paper: one more
+  // outline is camouflage. A small SOLID mark is not — nothing in the corpus's
+  // art draws a filled disc that size — so this is the part that actually
+  // answers "which of these can I press".
+  //
+  // Inside the bounds, because the camera frames a target's own box and anything
+  // hung outside it can be cropped. Ringed in paper so it survives landing on
+  // dark art: on STONE or INK a bare ink dot disappears, which is §19's tone-on-
+  // tone trap, and the app has now walked into it five times.
+  pip: {
+    position: 'absolute', top: 3, right: 3,
+    width: PIP, height: PIP,
+    backgroundColor: INK,
+    borderWidth: 1.5, borderColor: PAPER,
+  },
 
   // Same mark, same size and same colours as the deck's (./ChoiceCards) — a second
   // tick drawn differently would read as a different app congratulating you — but

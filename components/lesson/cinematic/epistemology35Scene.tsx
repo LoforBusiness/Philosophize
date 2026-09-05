@@ -7,7 +7,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology35Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -62,7 +62,11 @@ const PEN_H = 104;
 const PEN_X = [116, 260];
 const PEN_W = 120;
 const ANIMAL_Y = 356;
-const STRIPES = [0, 16, 32, 48, 64];
+// Stripes on the BARREL only — a stripe running down a leg or across the neck at
+// this size closes the gap and the animal turns back into a grille.
+const STRIPES = [48, 57, 66, 75];
+/** Fore pair, hind pair. */
+const LEG_X = [44, 54, 74, 82];
 
 const FENCE_LO = 96;
 const FENCE_HI = 392;
@@ -85,7 +89,7 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology35'));
 
-export default function Epistemology35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+export default function Epistemology35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
@@ -110,7 +114,7 @@ export default function Epistemology35Scene({ clock, bt, bi, qv, i, picked, onPi
     const scan = SCAN[n] === 1 ? clamp01(dragPos.value) : 0;
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       pensOn: carry(cv, 1, n, PENS[p], PENS[n], tr),
       plaqOn: carry(cv, 2, n, PLAQUES[p], PLAQUES[n], tr),
@@ -137,6 +141,7 @@ export default function Epistemology35Scene({ clock, bt, bi, qv, i, picked, onPi
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap}>THE SAME LOOK, TWICE</Text>
 
       <Chain S={SCENE} picked={picked} onPick={onPick} answered={answered} live={live} />
@@ -144,9 +149,14 @@ export default function Epistemology35Scene({ clock, bt, bi, qv, i, picked, onPi
       <Animated.View style={[StyleSheet.absoluteFill, pensStyle]} pointerEvents="none">
         {PEN_X.map((px) => (
           <View key={px} style={[styles.pen, { left: px }]}>
+            {LEG_X.map((lx) => <View key={`leg${lx}`} style={[styles.leg, { left: lx }]} />)}
+            <View style={styles.tail} />
             <View style={styles.animalBody} />
+            <View style={styles.neck} />
+            <View style={styles.head} />
+            <View style={styles.ear} />
             {STRIPES.map((sx) => (
-              <View key={sx} style={[styles.stripe, { left: 26 + sx }]} />
+              <View key={sx} style={[styles.stripe, { left: sx }]} />
             ))}
           </View>
         ))}
@@ -243,11 +253,51 @@ const styles = StyleSheet.create({
     position: 'absolute', top: PEN_Y, width: PEN_W, height: PEN_H,
     borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
+  // ── IT HAS TO BE AN ANIMAL ────────────────────────────────────────────────
+  //
+  // This was a 76x46 rounded rectangle with five vertical bars through it, and the
+  // plaque underneath said ZEBRA. Rendered, it is a barcode — or a radiator — and
+  // the label was carrying the entire meaning, which is §13's cheese finding
+  // exactly. The lesson still turns on the two pens being INDISTINGUISHABLE, and
+  // they are: both are drawn from these same styles by construction, so there is
+  // no artist to disagree with themselves.
+  //
+  // A quadruped needs four things before stripes are worth adding: a barrel, a
+  // neck at an angle, a head at the end of it, and legs under it. All of it fits
+  // the 76x46 the composition already allowed, with the legs reaching down into
+  // the pen's own floor space.
   animalBody: {
-    position: 'absolute', left: 22, top: ANIMAL_Y - PEN_Y, width: 76, height: 46,
-    borderRadius: 10, borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    position: 'absolute', left: 40, top: ANIMAL_Y - PEN_Y + 4, width: 46, height: 22,
+    borderRadius: 9, borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
   },
-  stripe: { position: 'absolute', top: ANIMAL_Y - PEN_Y + 6, width: 5, height: 34, backgroundColor: INK, borderRadius: 2 },
+  // THE PIVOT IS AT THE SHOULDER, NOT THE MIDDLE. Rotating a neck about its own
+  // centre swings BOTH ends, so the first build left the head floating twenty
+  // units clear of a barrel the neck no longer reached. Pinning the origin to the
+  // bottom edge means the end that is buried in the barrel stays buried whatever
+  // the angle, and only the head end travels.
+  neck: {
+    position: 'absolute', left: 38, top: ANIMAL_Y - PEN_Y - 2, width: 11, height: 20,
+    borderRadius: 4, borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    transformOrigin: '50% 100%', transform: [{ rotate: '-30deg' }],
+  },
+  head: {
+    position: 'absolute', left: 18, top: ANIMAL_Y - PEN_Y - 5, width: 21, height: 11,
+    borderRadius: 5, borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    transform: [{ rotate: '-14deg' }],
+  },
+  ear: {
+    position: 'absolute', left: 33, top: ANIMAL_Y - PEN_Y - 9, width: 5, height: 8,
+    borderRadius: 2, backgroundColor: INK, transform: [{ rotate: '-16deg' }],
+  },
+  leg: { position: 'absolute', top: ANIMAL_Y - PEN_Y + 24, width: 5, height: 20, backgroundColor: INK },
+  // A TAIL HANGS. Pivoted at its own top so it swings back and DOWN off the rump;
+  // rotated about its centre it stood up over the barrel and read as a second ear.
+  tail: {
+    position: 'absolute', left: 84, top: ANIMAL_Y - PEN_Y + 10, width: 3.5, height: 18,
+    borderRadius: 2, backgroundColor: INK,
+    transformOrigin: '50% 0%', transform: [{ rotate: '24deg' }],
+  },
+  stripe: { position: 'absolute', top: ANIMAL_Y - PEN_Y + 6, width: 4.5, height: 18, backgroundColor: INK, borderRadius: 1.5 },
 
   plaque: {
     position: 'absolute', top: 440, width: PEN_W, textAlign: 'center',

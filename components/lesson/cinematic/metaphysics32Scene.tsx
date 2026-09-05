@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics32Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -73,10 +73,19 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// two spheres stand apart only where the option says DIFFERENT PLACES
+const POLL_ORBS = [0, 1, 1, 0];
+// the label sticks only where the option says they are DIFFERENT
+const POLL_TAG = [0, 0, 1, 1];
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics32'));
 
-export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -90,16 +99,16 @@ export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick, d
     const grow = ease01(bt.value / 0.9);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       theta: t * 0.28,
       // R7b — the pad puts the second sphere in the universe. Up the y axis, from one
       // place to two, the pair appears.
-      orbs: carry(cv, 0, n, ORBS[p], reacting ? dragPos2.value : ORBS[n], grow),
+      orbs: carry(cv, 0, n, ORBS[p], reacting ? pickAt(POLL_ORBS, pickPos.value) : ORBS[n], grow),
       tether: carry(cv, 1, n, TETHER[p], TETHER[n], grow),
       // And across: drag left, toward they differ somehow, and a label goes on one of
       // them — which is the move the case forbids. Both axes, and the interesting
       // corner is the one where the tag is gone and there are still two.
-      tag: carry(cv, 2, n, TAG[p], reacting ? 1 - dragPos.value : TAG[n], grow),
+      tag: carry(cv, 2, n, TAG[p], reacting ? pickAt(POLL_TAG, pickPos.value) : TAG[n], grow),
     };
   });
 
@@ -138,6 +147,7 @@ export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick, d
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.kicker} numberOfLines={1}>A UNIVERSE, AND NOTHING ELSE IN IT</Text>
       <View style={styles.universe} pointerEvents="none" />
 

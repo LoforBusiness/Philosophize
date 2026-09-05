@@ -4,13 +4,15 @@ import {
   type StyleProp, type ViewStyle,
 } from 'react-native';
 import Animated, {
-  useSharedValue, useAnimatedStyle, useAnimatedProps,
-  withSpring, withTiming, withDelay, withSequence, Easing,
+  useSharedValue, useAnimatedStyle, useAnimatedProps, withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
 import { MotiView } from 'moti';
 import { LinearGradient } from 'expo-linear-gradient';
 import ACounter, { counterStyle } from '@/components/shared/ACounter';
+import {
+  Underscore, revealTo, stepDelay, EASE_REVEAL, D_WIPE, D_RISE, D_ROLL, LEAD, STEP,
+} from '@/components/stats/reveal';
 import { StruckBar, StruckTile, StruckPanel, EMBOSS } from '@/components/profile/Struck';
 import {
   INK, PAPER_LIT, MID, PANEL_BASE, ramp, mix, glow, METAL,
@@ -30,23 +32,29 @@ import { cue } from '@/lib/feedback';
 // parallel set — the whole argument for one light is that it never moves, and
 // two files drawing the same object is how it starts moving.
 //
-// ── THE BOUNCE, AND WHY IT IS NOT ON EVERYTHING ─────────────────────────────
+// ── THE REVEAL, AND WHY NOTHING BOUNCES ANY MORE ────────────────────────────
 //
-//   > "I want cool animations, like when the graphs gets updated becuase of
-//   > something the user did ... the information in the graph squezzes in and
-//   > then bounces out further because of the change of the graph. I want a
-//   > smooth gamified bouncy animation for this."
+// It used to. A row that grew squeezed back to 0.82 and then sprang 39% past
+// its new length before settling, and every other animated part of the tab did
+// a milder version of the same thing.
 //
-// `bounceTo` is that motion, and it has two modes on purpose. A row that GREW
-// since the reader last looked squeezes back first and then springs past its
-// new length before settling — anticipation, then overshoot, which is the whole
-// of why a bounce reads as a thing reacting rather than a thing appearing. Every
-// other row just springs in.
+//   > "for the pie chart and the boxes above that, and when you click on one of
+//   > the who you read most and the other one ... all of these ... 'bounce',
+//   > this looks cheap and ai looking. I want a smooth reveal for the
+//   > information."
 //
-// The distinction is the point. A bounce that plays on every row every visit is
-// decoration and stops meaning anything by the third visit; a bounce on the one
-// row the reader moved is feedback. `grownKeys` in statsMilestone.ts is what
-// knows which, and it gets it out of the fingerprint the tab already stores.
+// They are right, and `components/stats/reveal.tsx` carries the full argument
+// and the measurements. The short of it: eight springs drove this screen and
+// every one was underdamped, so nothing settled without going past itself
+// first — and on a BAR, going past yourself means drawing a number that is not
+// true for a fifth of a second, on the one row the reader is looking hardest at.
+//
+// WHAT SURVIVES IS THE DISTINCTION, WHICH WAS ALWAYS THE GOOD HALF. A row that
+// grew since the reader last looked still says so; it just no longer says it by
+// changing size. `grownKeys` in statsMilestone.ts still decides which, out of
+// the fingerprint the tab already stores, and the answer is now an UNDERSCORE:
+// a rule in the row's own colour, struck along it and then faded. Feedback with
+// its own object, so the data is never the thing being distorted.
 //
 // ── AN ARRIVAL IS NOT A REACTION, AND CONFUSING THEM WAS A BUG ──────────────
 //
@@ -70,10 +78,10 @@ import { cue } from '@/lib/feedback';
 //
 // So every animated part now takes `entrance`, and the two modes are:
 //
-//   entrance  — the reader has just arrived. Sweep in from nothing.
-//   reaction  — they were already here. NOTHING resets. Numbers roll from the
-//               value on screen to the new one, and only the rows that actually
-//               grew move at all.
+//   entrance  — the reader has just arrived. Wipe in from nothing.
+//   reaction  — they were already here. NOTHING resets and nothing moves.
+//               Numbers roll from the value on screen to the new one, and the
+//               rows that actually grew are marked with a rule.
 //
 // The screen decides which from whether the play landed on FOCUS or while
 // already focused; see app/(app)/stats/index.tsx. `scripts/check-stats.mjs`
@@ -84,8 +92,7 @@ import { cue } from '@/lib/feedback';
 //
 // Bars draw against `max × 1.3`, not `max`. If the leader sat at 100% of its
 // track there would be nowhere for its ghost — so tapping the biggest bar, the
-// one a reader taps first, would be the one tap that showed nothing. It also
-// leaves room for the overshoot above to travel into instead of clipping.
+// one a reader taps first, would be the one tap that showed nothing.
 //
 // It is a CONSTANT: re-scaling on selection would move every bar at once, which
 // is the camera cut §17's group L is about.
@@ -95,32 +102,10 @@ import { cue } from '@/lib/feedback';
 export const HEADROOM = 1.3;
 export const MIN_GHOST = 8 / 144;
 
-/**
- * SQUEEZE IN, THEN BOUNCE OUT FURTHER.
- *
- * Built on the JS thread and assigned to a shared value, so it deliberately is
- * NOT a worklet — which also keeps it clear of §17's rule 2, the trap where a
- * worklet calling a worklet declared below it throws at import.
- *
- * `damping: 7.5` is what makes the spring overshoot; anything over about 12
- * settles without ever passing the target and the bounce disappears. The 0.82
- * squeeze is small enough to read as a wind-up rather than as the bar breaking.
- */
-export function bounceTo(to: number, delay: number, pop: boolean) {
-  if (pop) {
-    return withDelay(delay, withSequence(
-      withTiming(to * 0.82, { duration: 150, easing: Easing.out(Easing.quad) }),
-      withSpring(to, { damping: 7.5, stiffness: 190, mass: 0.9 }),
-    ));
-  }
-  // THE SWEEP IS CALM ON PURPOSE, and this number was measured rather than
-  // picked. At damping 11 the entrance overshot to 1.19 — every untouched row
-  // springing a fifth past its own value, every visit, which is both springier
-  // than a premium readout should be and slightly untrue about the data. At 16
-  // it lands around 1.05. The strong squeeze-and-overshoot stays for the ONE row
-  // the reader actually moved, which is the whole point of having two modes.
-  return withDelay(delay, withSpring(to, { damping: 16, stiffness: 155, mass: 0.9 }));
-}
+// The reveal itself lives in reveal.tsx, so the tab has one vocabulary rather
+// than one per file. Re-exported because three files drive this screen and a
+// second import path is how two of them end up on different curves.
+export { revealTo } from '@/components/stats/reveal';
 
 // ── the ledger ───────────────────────────────────────────────────────────────
 
@@ -179,14 +164,6 @@ function LedgerTile({ item, index, playToken, animate, entrance, pop }: {
   // NEVER ZERO. See the note above the component.
   const n = useSharedValue(item.value);
   const rise = useSharedValue(animate && entrance ? 0 : 1);
-  // TWO SCALES, MULTIPLIED, because they are two different statements and one
-  // shared value cannot make both. `rise` is the arrival and runs 0.72→1 — a
-  // tile settling into place. `beat` is the FEEDBACK and runs 0.82→1.07 about
-  // whatever `rise` has reached — a squeeze and an overshoot, which is the
-  // motion the reader asked for and only means anything on the one tile whose
-  // number just moved. Folding the beat into the rise flattened it to 0.95→1.02,
-  // measured, which is not a bounce.
-  const beat = useSharedValue(1);
 
   // AN ENTRANCE BELONGS TO A PLAY, AND A PLAY HAPPENS ONCE.
   //
@@ -212,27 +189,31 @@ function LedgerTile({ item, index, playToken, animate, entrance, pop }: {
       // ARRIVING. The TILE rises; the figure on it is already true.
       n.value = item.value;
       rise.value = 0;
-      rise.value = bounceTo(1, index * 70, pop);
+      rise.value = revealTo(1, stepDelay(index), D_RISE);
       return;
     }
 
     // REACTING, or simply following a figure that moved between plays. Either
     // way the reader is looking straight at these numbers, so they never leave
-    // the screen: the tile holds its size and its opacity, and the digits ROLL
-    // from whatever is displayed to the new total. A tile whose number did not
-    // move does not move either.
-    if (newPlay && pop) beat.value = bounceTo(1, 40, true);
-    n.value = withTiming(item.value, { duration: 460, easing: Easing.out(Easing.cubic) });
-  }, [playToken, animate, entrance, item.value, index, pop, n, rise, beat]);
+    // the screen: the tile does not move AT ALL, and the digits roll from
+    // whatever is displayed to the new total. The tile whose number moved is
+    // marked by its underscore instead — see the note in reveal.tsx. A rolling
+    // numeral is already the clearest statement a counter can make; the old
+    // squeeze around it was the screen saying the same thing twice, once by
+    // distorting the object carrying it.
+    n.value = withTiming(item.value, { duration: D_ROLL, easing: EASE_REVEAL });
+  }, [playToken, animate, entrance, item.value, index, n, rise]);
 
   const props = useAnimatedProps(() => ({ text: `${Math.round(n.value)}` }) as never);
-  // FROM 0.72, NOT FROM 0. A tile that grows out of a speck reads as being
-  // BUILT, which is half of what "it goes blank" meant; from 0.72 it reads as
-  // settling into place, and a mistimed one is barely noticeable rather than
-  // alarming. The opacity still runs the full fade, so the arrival is not lost.
+  // IT RISES; IT DOES NOT GROW. The tile used to scale from 0.72 to 1, and a
+  // thing that grows into place reads as INFLATING however small the range —
+  // the same note the streak seal got when it sprang from 0.4 ("it popped
+  // rather than landing"). Ten points of travel and a fade says "settling into
+  // place" without the object ever being the wrong size, which on a tile
+  // carrying a figure is the whole point.
   const style = useAnimatedStyle(() => ({
     opacity: Math.min(1, rise.value * 1.6),
-    transform: [{ scale: (0.72 + rise.value * 0.28) * beat.value }],
+    transform: [{ translateY: (1 - rise.value) * 10 }],
   }));
 
   return (
@@ -249,6 +230,15 @@ function LedgerTile({ item, index, playToken, animate, entrance, pop }: {
           />
           <Text style={s.ledgerLabel} numberOfLines={1}>{item.label}</Text>
         </View>
+        {/* THE ONE TILE WHOSE FIGURE MOVED, said with a rule rather than with a
+            squeeze. It waits for the arrival to finish so the two are never
+            competing for the same moment. */}
+        <Underscore
+          hue={r.base}
+          playToken={playToken}
+          on={animate && pop}
+          delay={entrance ? stepDelay(index) + D_RISE : 60}
+        />
       </StruckTile>
     </Animated.View>
   );
@@ -315,7 +305,7 @@ export function RankedBars({
     // have a figure in its dependencies is the one that shipped the bug.
     if (!newPlay) return;
     grow.value = 0;
-    grow.value = withDelay(140, withSpring(1, { damping: 13, stiffness: 150, mass: 0.9 }));
+    grow.value = revealTo(1, LEAD, D_WIPE);
   }, [playToken, animate, entrance, reduce, grow]);
 
   const max = rows.reduce((a, r) => (r.value > a ? r.value : a), 0);
@@ -385,23 +375,17 @@ function BarLine({
   const r = ramp(row.hue);
   const pct = row.value / scale;
 
-  // A row that GREW gets its own squeeze-and-overshoot, on its own clock; the
-  // rest ride the shared stagger. Two sources, one property — so the grown row
-  // opts out of `grow` entirely rather than fighting it.
-  // STARTS AT ITS CURRENT LENGTH, not at zero. A grown row should squeeze IN
-  // from where it already was and then spring out past its new length — reset it
-  // to 0 first and what the reader sees is the bar being rebuilt, which reads as
-  // a reload rather than as a reaction to what they just did.
-  const solo = useSharedValue(1);
-  useEffect(() => {
-    if (!pop) return;
-    if (!animate || reduce) { solo.value = 1; return; }
-    // On a reaction there is no sweep to wait behind, so the row answers at once.
-    solo.value = bounceTo(1, entrance ? 260 + index * 60 : 40, true);
-  }, [playToken, animate, entrance, reduce, pop, index, solo]);
-
+  // EVERY ROW RIDES THE ONE SWEEP NOW, grown or not.
+  //
+  // The grown row used to opt out of `grow` and run its own squeeze-and-
+  // overshoot instead — which meant the row the reader cared about was the one
+  // row whose LENGTH stopped being its value for a fifth of a second. It is
+  // marked by an underscore below it instead: the measure is only ever the
+  // measure, and the feedback is its own object. See reveal.tsx.
+  //
+  // The stagger stays a PROPORTION of the sweep rather than a delay per row, so
+  // the whole panel still finishes together however many rows it has.
   const fillStyle = useAnimatedStyle(() => {
-    if (pop) return { transform: [{ scaleX: solo.value }] };
     const lead = (index / Math.max(1, count)) * 0.35;
     const t = Math.min(1, Math.max(0, (grow.value - lead) / (1 - lead)));
     return { transform: [{ scaleX: t }] };
@@ -447,9 +431,13 @@ function BarLine({
         {ghost > 0 ? (
           <MotiView
             pointerEvents="none"
-            from={{ opacity: 0, scaleX: 0.4 }}
+            // A GHOST IS A MEASURE, SO IT WIPES. It used to spring in at damping
+            // 9 — a 31% overshoot on a dashed run whose whole job is to say
+            // exactly how much further there is to go. It now extends from its
+            // own left edge and stops, like everything else with a length.
+            from={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ type: 'spring', damping: 9, stiffness: 170 }}
+            transition={{ type: 'timing', duration: 420, easing: EASE_REVEAL }}
             style={[
               s.ghost,
               {
@@ -465,6 +453,16 @@ function BarLine({
           </MotiView>
         ) : null}
       </View>
+
+      {/* THE ROW WHOSE FIGURE MOVED. It lands on the row's own hairline, so what
+          the reader sees is the rule under this one row being struck in its
+          colour — a mark in a ledger, which is what this panel is. */}
+      <Underscore
+        hue={r.base}
+        playToken={playToken}
+        on={animate && !reduce && pop}
+        delay={entrance ? LEAD + D_WIPE * 0.6 : 60}
+      />
     </Pressable>
   );
 }
@@ -493,18 +491,45 @@ export function DiscoveryCard({ d, hue, sub, onOpen, dark }: {
         name: C.paper, meta: C.dim, body: C.paper, sub: C.dim, cta: C.paper, arrow: g.mark }
     : { rule: r.base, bg: 'transparent', kicker: r.shade,
         name: INK, meta: C.inkSoft, body: INK, sub: C.inkSoft, cta: r.shade, arrow: r.base };
+  // THE TAP REVEAL, AND IT IS THE ONE THE READER NAMED.
+  //
+  // It used to spring in at damping 14 — a 16% overshoot — while also scaling
+  // from 0.97 and sliding down from -6, so a card the reader had just summoned
+  // arrived by three motions at once and then wobbled. That is the "cheap and ai
+  // looking" in its purest form: motion applied to a thing rather than motion
+  // that IS the thing arriving.
+  //
+  // So it is struck instead, in the order a printed card is made: the RULE draws
+  // down first, then the type is set into it. Two motions, both on the reveal
+  // curve, both stopping dead on their target. The whole thing is over in 400ms
+  // and it reads as one gesture rather than three.
   return (
     <MotiView
       key={`${d.kicker}-${d.name ?? ''}-${d.body.slice(0, 12)}`}
-      from={{ opacity: 0, translateY: -6, scale: 0.97 }}
-      animate={{ opacity: 1, translateY: 0, scale: 1 }}
-      transition={{ type: 'spring', damping: 14, stiffness: 190 }}
+      from={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ type: 'timing', duration: 180, easing: EASE_REVEAL }}
       style={[
         s.card,
-        { borderLeftColor: t.rule, backgroundColor: t.bg },
+        { backgroundColor: t.bg },
         !dark && s.cardPaper,
       ]}
     >
+      {/* The rule is a drawn OBJECT rather than a border, so it can be struck.
+          `s.card` carries the matching paddingLeft and `overflow: hidden` so it
+          sits inside the card's own radius exactly as the border did. */}
+      <MotiView
+        pointerEvents="none"
+        from={{ scaleY: 0 }}
+        animate={{ scaleY: 1 }}
+        transition={{ type: 'timing', duration: 260, easing: EASE_REVEAL }}
+        style={[s.cardRule, { backgroundColor: t.rule }]}
+      />
+      <MotiView
+        from={{ opacity: 0, translateY: 8 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'timing', duration: 340, delay: 110, easing: EASE_REVEAL }}
+      >
       <Text style={[s.cardKicker, { color: t.kicker }]} numberOfLines={1}>{d.kicker}</Text>
 
       {d.name ? (
@@ -535,6 +560,7 @@ export function DiscoveryCard({ d, hue, sub, onOpen, dark }: {
           <Text style={[s.cardCtaText, { color: t.arrow }]}>→</Text>
         </Pressable>
       ) : null}
+      </MotiView>
     </MotiView>
   );
 }
@@ -586,7 +612,7 @@ export function ThinkerLeague({
     // have a figure in its dependencies is the one that shipped the bug.
     if (!newPlay) return;
     grow.value = 0;
-    grow.value = withDelay(220, withSpring(1, { damping: 14, stiffness: 160 }));
+    grow.value = revealTo(1, LEAD + STEP, D_WIPE);
   }, [playToken, animate, entrance, grow]);
 
   const max = rows.reduce((a, r) => (r.score > a ? r.score : a), 0) || 1;
@@ -634,16 +660,9 @@ function LeagueLine({
 }) {
   const r = ramp(row.hue);
 
-  // See BarLine: a grown row squeezes from its current length, never from zero.
-  const solo = useSharedValue(1);
-  useEffect(() => {
-    if (!pop) return;
-    if (!animate) { solo.value = 1; return; }
-    solo.value = bounceTo(1, entrance ? 320 + place * 60 : 40, true);
-  }, [playToken, animate, entrance, pop, place, solo]);
-
+  // See BarLine: every row rides the one sweep, and the row that grew is marked
+  // by a rule rather than by its own measure going somewhere it does not belong.
   const fillStyle = useAnimatedStyle(() => {
-    if (pop) return { transform: [{ scaleX: solo.value }] };
     const lead = (place / Math.max(1, count)) * 0.4;
     const t = Math.min(1, Math.max(0, (grow.value - lead) / (1 - lead)));
     return { transform: [{ scaleX: t }] };
@@ -696,6 +715,14 @@ function LeagueLine({
         </View>
         {parts.length ? <Text style={s.leagueParts}>{parts.join('  ·  ')}</Text> : null}
       </View>
+
+      {/* The one name whose reading moved since the last visit. */}
+      <Underscore
+        hue={r.base}
+        playToken={playToken}
+        on={animate && pop}
+        delay={entrance ? LEAD + STEP + D_WIPE * 0.6 : 60}
+      />
     </Pressable>
   );
 }
@@ -757,7 +784,18 @@ const s = StyleSheet.create({
   // card was one of the things that made the tab read as cheap — a wash of
   // colour behind prose is decoration, and the rule already says which row it
   // belongs to.
-  card: { borderLeftWidth: 3, borderRadius: 6, paddingHorizontal: 13, paddingVertical: 11, marginTop: 6 },
+  // THE LEFT RULE IS DRAWN, NOT A BORDER — see the note on DiscoveryCard. The
+  // 16 is the old 13 of padding plus the 3 the border used to occupy, so the
+  // type sits exactly where it did; `overflow` keeps the drawn rule inside the
+  // card's own radius, which is the one thing the border did for free.
+  card: {
+    borderRadius: 6, overflow: 'hidden',
+    paddingLeft: 16, paddingRight: 13, paddingVertical: 11, marginTop: 6,
+  },
+  cardRule: {
+    position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
+    transformOrigin: 'top',
+  },
   cardPaper: { borderTopWidth: 1, borderRightWidth: 1, borderBottomWidth: 1, borderColor: C.hairline },
   cardKicker: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.5 },
   cardWho: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', gap: 8, marginTop: 7 },

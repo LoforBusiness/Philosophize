@@ -92,7 +92,7 @@ export const BEATS: Metaphysics10Beat[] = [
   {
     p: 4, x: 124, frame: 1, str: 1,
     interact: {
-      prompt: 'Drag to where Aristotle puts redness.',
+      prompt: 'Where does Aristotle put redness?',
       drag: {
         lo: 'ONLY A WORD WE USE',
         hi: 'IN ITS OWN REALM',

@@ -73,7 +73,7 @@ export const BEATS: Logic25Beat[] = [
   {
     p: 4, x: 124, result: 1, real: 1, fake: 1,
     interact: {
-      prompt: 'Slide the seam to divide the shy, tidy people between the two jobs.',
+      prompt: 'How do the shy, tidy people divide between the two jobs?',
       split: {
         left: 'FARMERS', right: 'LIBRARIANS',
         start: 0.04,

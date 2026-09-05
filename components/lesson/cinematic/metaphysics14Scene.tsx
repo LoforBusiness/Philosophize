@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics14Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -60,10 +60,17 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// the world marks fill in where the option says TRUE IN EVERY WORLD
+const POLL_MARKS = [1, 1, 0, 0];
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics14'));
 
-export default function Metaphysics14Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+export default function Metaphysics14Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -86,12 +93,12 @@ export default function Metaphysics14Scene({ clock, bt, bi, i, picked, onPick, d
       carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr,
     ));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       rows: carry(cv, 0, n, ROWS[p], ROWS[n], grow),
       // R7b — the pad fills the world marks. Up the y axis, from false in some world
       // to true in every world, the marks beside each claim fill in. The x axis is
       // about the reader rather than the worlds, and it deliberately moves nothing.
-      marks: carry(cv, 1, n, MARKS[p], reacting ? dragPos2.value : MARKS[n], fill),
+      marks: carry(cv, 1, n, MARKS[p], reacting ? pickAt(POLL_MARKS, pickPos.value) : MARKS[n], fill),
       pick: carry(cv, 2, n, PICKV[p], PICKV[n], grow),
     };
   });
@@ -100,6 +107,7 @@ export default function Metaphysics14Scene({ clock, bt, bi, i, picked, onPick, d
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.head} numberOfLines={2}>FIVE WAYS THE WORLD COULD HAVE GONE</Text>
 
       {CLAIMS.map((c, k) => (

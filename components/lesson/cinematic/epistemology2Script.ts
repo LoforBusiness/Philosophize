@@ -89,16 +89,16 @@ export const BEATS: Epi2Beat[] = [
   {
     d: 16, m: 15, doubt: 1.0, glow: true,
     interact: {
-      prompt: 'Set the lever to what the demon cannot reach.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'all', reads: 'nothing at all is safe' },
-          { id: 'sums', reads: 'arithmetic is safe' },
-          { id: 'doubter', reads: 'the one being fooled is safe', correct: true },
+      prompt: 'With the demon deceiving you about everything, what is still safe?',
+      sort: {
+        chip: 'the demon',
+        bins: [
+          { id: 'all', label: 'nothing at all', reads: 'nothing at all is safe' },
+          { id: 'sums', label: 'arithmetic', reads: 'arithmetic is safe' },
+          { id: 'doubter', label: 'the doubter', reads: 'the one being fooled is safe', correct: true },
         ],
       },
-      explain: 'The far setting. To be fooled you have to exist to be fooled, so the harder the demon works the more certain the doubter becomes. Arithmetic is not safe — Descartes lets the demon have the sums. Only the doubter survives.',
+      explain: 'The doubter. To be fooled you have to exist to be fooled, so the harder the demon works the more certain the doubter becomes. Arithmetic is not safe — Descartes lets the demon have the sums. Only the doubter survives.',
       xp: 5,
     },
     dur: 1.0,

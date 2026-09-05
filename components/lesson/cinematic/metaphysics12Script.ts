@@ -83,7 +83,7 @@ export const BEATS: Meta12Beat[] = [
     g: 11, owner: 1, none: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Drag to what is left of the self once the owner goes.',
+      prompt: 'What is left of the self once the owner goes?',
       drag: {
         lo: 'NOTHING AT ALL',
         hi: 'ONE UNCHANGING SOUL',

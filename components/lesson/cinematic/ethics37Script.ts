@@ -59,7 +59,7 @@ export const BEATS: Ethics37Beat[] = [
   {
     p: 4, x: 54, posts: 1, cord: 1, lean: 1,
     interact: {
-      prompt: 'Slide the seam to where the wrong actually lands.',
+      prompt: 'Where does the wrong actually land?',
       split: {
         left: 'ON YOUR FRIEND', right: 'ON THE PRACTICE',
         start: 0.04,

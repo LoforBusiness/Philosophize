@@ -58,16 +58,16 @@ export const BEATS: Pol5Beat[] = [
   {
     p: 4, veil: 1,
     interact: {
-      prompt: 'Set the lever to what the veil is for.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'equal', reads: 'to make everybody come out equal' },
-          { id: 'rich', reads: 'to make the society as a whole richer' },
-          { id: 'fair', reads: 'to keep the rules fair', correct: true },
+      prompt: 'What is the difference principle for?',
+      sort: {
+        chip: 'the difference principle',
+        bins: [
+          { id: 'equal', label: 'equal outcomes', reads: 'to make everybody come out equal' },
+          { id: 'rich', label: 'a richer society', reads: 'to make the society as a whole richer' },
+          { id: 'fair', label: 'fair rules', reads: 'to keep the rules fair', correct: true },
         ],
       },
-      explain: 'The far setting. The veil hides your race, your class and your talents, so you cannot write the rules to suit the person you turn out to be. Equal liberties for everyone, and a gap in wealth only where the gap helps the worst off.',
+      explain: 'Fair rules. The veil hides your race, your class and your talents, so you cannot write the rules to suit the person you turn out to be. Equal liberties for everyone, and a gap in wealth only where the gap helps the worst off.',
       xp: 5,
     },
     dur: 1.0,

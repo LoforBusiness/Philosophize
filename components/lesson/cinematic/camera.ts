@@ -626,13 +626,30 @@ export function tourEndShots(
   });
 }
 
-/** The near end of every station, re-framed to match its follow partner's scale. */
+/**
+ * The near end of every station, re-framed to match its follow partner's scale.
+ *
+ * ── EVERY STATION CARRIES ITS OWN `tr`, AND THE STATIC ONES DID NOT ─────────
+ *
+ * `shotAt` reads the travel time off the shot it is travelling TO, defaulting to
+ * `tr ?? 0.8`. The follow branch below has always spread `tr` onto its result;
+ * the static branch returned `stationShot`'s shot bare — so for 197 of the app's
+ * 201 stations the generator's travel time was never read at all, and every push
+ * in every lesson took a flat 0.8 seconds however far it went.
+ *
+ * That is the shape this file already records one line up: *"generated,
+ * validated, written to the table, and dropped here."* `check:tour` enforces K8's
+ * 0.35–1.2s window on a number the player could not see, and `make:tours` was
+ * free to write anything into that column without changing what a reader watched.
+ * It was found by measuring the push in a browser — 0.79s against a table saying
+ * 1.2 — after a change to the generator made no difference to the render at all.
+ */
 export function tourStartShots(
   tour: Tour, band: [number, number], ground?: number, cap = STATION_CAP,
 ): Shot[] {
   return tour.map((st) => {
     const a = stationShot(st.box, band, ground, cap);
-    if (!st.to) return a;
+    if (!st.to) return { ...a, tr: st.tr };
     const b = stationShot(st.to, band, ground, cap);
     const s = Math.min(a.s, b.s);
     const at: [number, number] = [st.box.x + st.box.w / 2, st.box.y + st.box.h / 2];

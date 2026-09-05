@@ -108,7 +108,7 @@ export const BEATS: Ethics8Beat[] = [
   {
     p: 4, x: 112, grid: 0.34, oth: 1, thread: 1,
     interact: {
-      prompt: 'Drag to what caring actually is here.',
+      prompt: 'What does caring actually amount to here?',
       drag: {
         lo: 'A WARM FEELING',
         hi: 'A METHOD WITH STANDARDS',

@@ -9,7 +9,7 @@ import {
 // See ethics2Scene: identity for codes under 100, and it opens the catalogue.
 import { emoteAny as emoteHold } from './moves';
 import { BEATS } from './ethics31Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -85,10 +85,19 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.field ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). This question used to
+// be a pad, and its options are still that pad's corners written out as
+// sentences, so each row below is read straight off one option's own words.
+// how far it reaches: COULD NOT is short, COULD HAVE is tall enough
+const POLL_LADDER = [1, 1, 2, 2];
+// the lamp is lit wherever you are still ANSWERABLE
+const POLL_DUTY = [1, 0, 1, 1];
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics31'));
 
-export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick, dragPos, dragPos2 }: SceneApi) {
+export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -118,18 +127,18 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick, dragPo
       climb(travelled * PHASE_PER_RUNG),
       moving));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // The rungs slide by exactly the distance the legs walked, then wrap — every
       // rung is identical, so the wrap is invisible and the climb never ends.
       scroll: (travelled * RUNG_SP) % RUNG_SP,
       // R7b — the pad IS the ladder and the lamp. Across: the further right the
       // token goes, the less of a ladder there is, because that axis runs from you
       // could have done it to you genuinely could not.
-      ladder: carry(cv, 1, n, LADDER[p], reacting ? (1 - dragPos.value) * 2 : LADDER[n], tr, ladderFade ? grow : 1),
+      ladder: carry(cv, 1, n, LADDER[p], reacting ? pickAt(POLL_LADDER, pickPos.value) : LADDER[n], tr, ladderFade ? grow : 1),
       // And up: the DUTY lamp stays lit as the token rises toward you brought it on
       // yourself. Both axes drive something, which is what a pad is for — the reader
       // finds the corner where the ladder is gone and the lamp is still burning.
-      duty: carry(cv, 2, n, DUTY[p], reacting ? dragPos2.value : DUTY[n], dutyFade ? grow : tr),
+      duty: carry(cv, 2, n, DUTY[p], reacting ? pickAt(POLL_DUTY, pickPos.value) : DUTY[n], dutyFade ? grow : tr),
     };
   });
 

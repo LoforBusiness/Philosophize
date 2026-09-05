@@ -77,16 +77,16 @@ export const BEATS: Log13Beat[] = [
     g: 41, steps: 4, joins: 1, honest: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Set the lever to what makes a slope a fallacy.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'ending', reads: 'the ending is too far-fetched to take seriously' },
-          { id: 'length', reads: 'the chain simply has too many steps in it' },
-          { id: 'joins', reads: 'a step is asserted with no reason given', correct: true },
+      prompt: 'What is actually wrong with a slippery-slope argument?',
+      sort: {
+        chip: 'the slippery slope',
+        bins: [
+          { id: 'ending', label: 'too far-fetched', reads: 'the ending is too far-fetched to take seriously' },
+          { id: 'length', label: 'too many steps', reads: 'the chain simply has too many steps in it' },
+          { id: 'joins', label: 'an unargued step', reads: 'a step is asserted with no reason given', correct: true },
         ],
       },
-      explain: 'The far setting. The first is the one most people pick, and it is why the fallacy keeps working. An alarming ending is fine if every step to it is argued, and a modest ending is still a slope if they are not. The fault lives in the joins.',
+      explain: 'An unargued step. "too far-fetched" is the one most people pick, and it is why the fallacy keeps working. An alarming ending is fine if every step to it is argued, and a modest ending is still a slope if they are not. The fault lives in the joins.',
       xp: 5,
     },
   },

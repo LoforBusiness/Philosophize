@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political31Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -94,10 +94,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political31'));
 
-export default function Political31Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Political31Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -114,10 +114,10 @@ export default function Political31Scene({ clock, bt, bi, i, picked, onPick, dra
     const grow = ease01(bt.value / 0.9);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // R7c — the field is the answer. A remedy that asks nicely leaves it bare; one
       // that changes what taking too much COSTS grows it back under the reader's thumb.
-      grass: carry(cv, 0, n, GRASS[p], reacting ? 0.18 + 0.82 * dragPos.value : GRASS[n], fall),
+      grass: carry(cv, 0, n, GRASS[p], reacting ? 0.18 + 0.82 * pickPos.value : GRASS[n], fall),
       // A living field: every blade leans on its own two frequencies, so the mass
       // never reads as one shape breathing (H67).
       sway: t,
@@ -138,6 +138,7 @@ export default function Political31Scene({ clock, bt, bi, i, picked, onPick, dra
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {BLADE.map((h, j) => (
         <Blade key={j} j={j} h={h} SCENE={SCENE} />
       ))}

@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic26Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -59,7 +59,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic26'));
 const DIR = dirsFrom(X, 1);
 const NLINKS = BEATS.map((b) => b.links ?? 0);
 
-export default function Logic26Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Logic26Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -83,7 +83,7 @@ export default function Logic26Scene({ clock, bt, bi, i, picked, onPick }: Scene
       tr, WALK,
     ));
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       fill: carry(cv, 1, n, NLINKS[p], NLINKS[n], grow),
       snap: snapOn ? (snapFade ? grow : 1) : 0,
     };
@@ -100,6 +100,7 @@ export default function Logic26Scene({ clock, bt, bi, i, picked, onPick }: Scene
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       {LINKS.map((l, k) => (
         <Link key={l} index={k} label={l} shown={shown} prevShown={prevShown} SCENE={SCENE} />
       ))}

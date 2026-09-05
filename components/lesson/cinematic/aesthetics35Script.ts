@@ -100,16 +100,16 @@ export const BEATS: Aesthetics35Beat[] = [
   {
     p: 45, x: 128, track: 1, split: 1, spoil: 1,
     interact: {
-      prompt: 'Set the lever to what sinks the idea that laughing needs a victim.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'alone', reads: 'people laugh with nobody there to look down on' },
-          { id: 'kind', reads: 'some people never laugh at anyone at all' },
-          { id: 'pun', reads: 'a pun is funny and humiliates nobody', correct: true },
+      prompt: 'Which case breaks the idea that laughter needs a victim?',
+      sort: {
+        chip: 'laughter needs a victim',
+        bins: [
+          { id: 'alone', label: 'laughing alone', reads: 'people laugh with nobody there to look down on' },
+          { id: 'kind', label: 'people who never mock', reads: 'some people never laugh at anyone at all' },
+          { id: 'pun', label: 'a pun', reads: 'a pun is funny and humiliates nobody', correct: true },
         ],
       },
-      explain: 'The far setting. Laughing alone is no trouble for the theory: you can feel superior with nobody watching. The pun is the problem. It is funny with nobody beneath anybody, and a theory of humour has to cover the whole range or it is a theory of something narrower.',
+      explain: 'A pun. Laughing alone is no trouble for the theory: you can feel superior with nobody watching. The pun is the problem. It is funny with nobody beneath anybody, and a theory of humour has to cover the whole range or it is a theory of something narrower.',
       xp: 5,
     },
     dur: 1.0,

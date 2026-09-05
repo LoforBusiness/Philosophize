@@ -94,7 +94,7 @@ export const BEATS: Aes22Beat[] = [
   {
     p: 41, x: 268, screen: 1, slime: 1, meters: 1, heart: 1,
     interact: {
-      prompt: 'Slide the seam to the verdict make-believe gives on that heart reading.',
+      prompt: 'What verdict does make-believe give on that heart reading?',
       split: {
         left: 'MAKE-BELIEVE', right: 'REAL FEAR',
         start: 0.16,

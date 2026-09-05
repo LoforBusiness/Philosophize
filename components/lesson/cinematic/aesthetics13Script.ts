@@ -79,19 +79,16 @@ export const BEATS: Aes13Beat[] = [
     g: 11, art: 1, chain: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Place the token on the forgery.',
-      field: {
-        xLo: 'THE FORMS DIFFER', xHi: 'THE FORMS ARE IDENTICAL',
-        yLo: 'THE SAME HAND', yHi: 'DIFFERENT HANDS',
-        start: [0.24, 0.24],
-        quads: [
-          { id: 'forge', x: 1, y: 1, reads: 'same to look at, different painters', correct: true },
-          { id: 'twin', x: 1, y: 0, reads: 'same to look at, same painter' },
-          { id: 'pair', x: 0, y: 1, reads: 'different to look at, different painters' },
-          { id: 'two', x: 0, y: 0, reads: 'different to look at, same painter' },
+      prompt: 'What makes something a forgery?',
+      poll: {
+        options: [
+          { id: 'forge', reads: 'same to look at, different painters', correct: true },
+          { id: 'twin', reads: 'same to look at, same painter' },
+          { id: 'pair', reads: 'different to look at, different painters' },
+          { id: 'two', reads: 'different to look at, same painter' },
         ],
       },
-      explain: 'Top right, and the formalist refuses to let the axis going up matter. Judging a work by where it came from is the genetic fallacy, and the refusal cuts both ways: if the visible form is identical, so is the value. Most people find they cannot go along with it.',
+      explain: 'Same to look at, different painters. The formalist will not let the second half matter. Judging a work by where it came from is the genetic fallacy. The refusal cuts both ways: if the form is identical, so is the value. Most people cannot go along with it.',
       xp: 5,
     },
   },

@@ -93,7 +93,7 @@ export const BEATS: Aes21Beat[] = [
   {
     p: 41, x: 268, works: 1, burn: 1, gone: 1,
     interact: {
-      prompt: 'Slide the seam to divide a photograph between the two kinds.',
+      prompt: 'How does a photograph divide between the two kinds?',
       split: {
         left: 'LIKE A NOVEL', right: 'LIKE A PAINTING',
         start: 0.04,

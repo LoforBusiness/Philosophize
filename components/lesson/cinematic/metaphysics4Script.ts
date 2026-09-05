@@ -89,7 +89,7 @@ export const BEATS: Meta4Beat[] = [
   {
     p: 13, tokens: 3, barred: 1, frozen: 1,
     interact: {
-      prompt: 'Drag to how empty a physicist\'s vacuum really is.',
+      prompt: 'How empty is a physicist\'s vacuum, really?',
       drag: {
         lo: 'FULL OF STUFF',
         hi: 'ABSOLUTELY NOTHING',

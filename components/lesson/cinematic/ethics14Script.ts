@@ -83,7 +83,7 @@ export const BEATS: Eth14Beat[] = [
     g: 41, built: 5, door: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Slide the seam to where the real disagreement sits.',
+      prompt: 'Where does the real disagreement sit?',
       split: {
         left: 'MAY YOU EVER RESIST IT', right: 'SHOULD IT EXIST AT ALL',
         start: 0.04,

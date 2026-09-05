@@ -90,7 +90,7 @@ export const BEATS: Eth19Beat[] = [
   {
     p: 41, x: 268, doc: 1, rows: 1, affects: 1,
     interact: {
-      prompt: 'Drag to what the harm principle actually allows here.',
+      prompt: 'What does the harm principle actually allow here?',
       drag: {
         lo: 'THE REFUSAL STANDS',
         hi: 'SAVE THEM ANYWAY',

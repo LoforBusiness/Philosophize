@@ -12,7 +12,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics7Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  facing, useCarry, carry, STONE,
+  facing, useCarry, carry, STONE, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -78,7 +78,7 @@ const SPOT = BEATS.map((b) => b.spot ?? 0);
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 
-export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -102,7 +102,7 @@ export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dr
     ));
     const fx = carry(cv, 0, n, X[p], X[n], tr);
     return {
-      fig: pose(s, fx, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(s, fx, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       fx,
       line: carry(cv, 1, n, LINE[p], LINE[n], tr, lineFade ? grow : 1),
       solid: carry(cv, 2, n, SOLID[p], SOLID[n], tr),

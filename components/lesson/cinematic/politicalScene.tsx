@@ -164,6 +164,7 @@ export default function PoliticalScene({ clock, bt, bi, qv, dragPos, i }: SceneA
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Headline S={SCENE} />
       <Ledger S={SCENE} />
       <Flow S={SCENE} />

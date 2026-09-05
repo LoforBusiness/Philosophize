@@ -96,7 +96,7 @@ export const BEATS: Political10Beat[] = [
   {
     p: 21, x: 108, tape: 1, ptr: 4, ruler: 1,
     interact: {
-      prompt: 'Drag to how much Locke lets you take from the common land.',
+      prompt: 'How much does Locke let you take from the common land?',
       drag: {
         lo: 'NOTHING AT ALL',
         hi: 'ALL YOU CAN REACH',

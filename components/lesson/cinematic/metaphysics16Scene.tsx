@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics16Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -57,10 +57,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics16'));
 
-export default function Metaphysics16Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Metaphysics16Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -80,13 +80,13 @@ export default function Metaphysics16Scene({ clock, bt, bi, i, picked, onPick, d
       carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr,
     ));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       panels: carry(cv, 0, n, PANELN[p], PANELN[n], grow),
       crave: carry(cv, 1, n, CRAVE[p], CRAVE[n], grow),
       // R7b — the arm raises the second-order arrows. The far setting is exactly the
       // question Frankfurt adds on top of the wanting, so the reader draws it in by
       // arriving at it.
-      second: carry(cv, 2, n, SECOND[p], reacting ? dragPos.value : SECOND[n], grow),
+      second: carry(cv, 2, n, SECOND[p], reacting ? pickPos.value : SECOND[n], grow),
       pick: carry(cv, 3, n, PICKV[p], PICKV[n], grow),
     };
   });

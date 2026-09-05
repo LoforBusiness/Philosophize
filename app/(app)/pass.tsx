@@ -143,7 +143,7 @@ export default function PassTab() {
             variant="scholar"
             width={contentW}
             title="THE SCHOLAR’S PASS"
-            motto="Admits the bearer to the whole library, without limit"
+            motto="This pass admits you to the whole library."
             holder={displayName || 'Philosopher'}
             holderNote={`${rank.current.name} · ${totalXP.toLocaleString()} XP`}
             seal={
@@ -228,7 +228,7 @@ export default function PassTab() {
             variant="free"
             width={contentW}
             title="THE DAY PASS"
-            motto="Free, for as long as you like — one sitting at a time"
+            motto="This pass is free for as long as you like."
             holder={displayName || 'Philosopher'}
             holderNote={isPro ? 'Superseded by your Scholar’s Pass' : 'Your current tier'}
             seal={

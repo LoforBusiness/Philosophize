@@ -28,7 +28,18 @@ const FAT = 0.38;
 // shortens its reach, so any scene where a hand meets a prop has to be looked at.
 // Recording them stops the problem GROWING while they are worked through.
 const SCALE_BUDGET = 18;      // scenes where one figure owns >38% of its band
-const HANDBUILT_BUDGET = 6;   // scenes drawing a person out of plain Views
+const HANDBUILT_BUDGET = 3;   // scenes drawing a PERSON out of plain Views
+
+/** Style stems that name a creature the rig was never going to draw. */
+const ANIMAL_STEM = /(bird|hen|animal|cow|cattle|dog|cat|horse|sheep|fish|zebra|beast|goat|mule)/i;
+/**
+ * Scenes whose creature is named nowhere in its style names — both of these call
+ * the parts `head` and `body` outright, so only the file can say what they are.
+ * Each was read before being listed, the way check:names records its OVERRIDE.
+ */
+const ANIMAL_SCENE = new Set([
+  'political31Scene.tsx',   // "four animals ... cattle on a common are eating it"
+]);
 
 const files = readdirSync(DIR).filter((f) => f.endsWith('Scene.tsx')).sort();
 
@@ -51,7 +62,17 @@ for (const f of files) {
   const bodies = [...src.matchAll(/^\s{2}(\w*(?:[Bb]ody|[Tt]orso)\w*):\s*\{/gm)].map((m) => m[1]);
   if (styles.length && bodies.length) {
     const stem = styles[0].replace(/[Hh]ead.*/, '');
-    fake.push({ f, stem: stem || styles[0], head: styles[0], body: bodies[0] });
+    // ── A HEN IS NOT A PERSON ───────────────────────────────────────────────
+    //
+    // This section is headed PEOPLE NOT DRAWN BY THE RIG, and the rig draws
+    // bipeds. A head-plus-body pair is the right shape to look for and it cannot
+    // by itself tell a hand-built human from a hand-built ANIMAL — so four of the
+    // seven it was reporting were a bird, a hen, a zebra and a cow, all correct
+    // as drawn and all sitting inside the budget where they hid the three that
+    // are real. Exempting them lets the budget come DOWN from 6 to 3.
+    const named = `${stem}${styles[0]}${bodies[0]}`;
+    const beast = ANIMAL_STEM.test(named) || ANIMAL_SCENE.has(f);
+    if (!beast) fake.push({ f, stem: stem || styles[0], head: styles[0], body: bodies[0] });
   }
 }
 

@@ -117,16 +117,16 @@ export const BEATS: Ethics2Beat[] = [
   {
     p: 8, x: 262, g: -1, named: 1, lens: 3,
     interact: {
-      prompt: 'Set the lever to what most people doing it proves.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'common', reads: 'common, so it must be fine' },
-          { id: 'legal', reads: 'legal, so it must be fine' },
-          { id: 'neither', reads: 'neither one settles whether it is right', correct: true },
+      prompt: 'Does being common or being legal settle whether it is right?',
+      sort: {
+        chip: 'common and legal',
+        bins: [
+          { id: 'common', label: 'common settles it', reads: 'common, so it must be fine' },
+          { id: 'legal', label: 'legal settles it', reads: 'legal, so it must be fine' },
+          { id: 'neither', label: 'neither does', reads: 'neither one settles whether it is right', correct: true },
         ],
       },
-      explain: 'The far setting. This is the gap Hume pointed at in 1739: a description of what people do never turns by itself into a claim about what they ought to do. Both of the other settings quietly cross it and hope nobody notices.',
+      explain: 'Neither does. This is the gap Hume pointed at in 1739: a description of what people do never turns by itself into a claim about what they ought to do. Both of the other settings quietly cross it and hope nobody notices.',
       xp: 5,
     },
     dur: 1.0,

@@ -8,7 +8,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political17Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry,
+  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, SHADE,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -68,10 +68,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political17'));
 
-export default function Political17Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Political17Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -92,14 +92,14 @@ export default function Political17Scene({ clock, bt, bi, i, picked, onPick, dra
       carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr,
     ));
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       well: carry(cv, 0, n, WELL[p], WELL[n], grow),
       turns: carry(cv, 1, n, TURNS[p], TURNS[n], slow),
       blank: carry(cv, 2, n, BLANK[p], BLANK[n], grow),
       // R7b — the arm fills his cup. The far setting says taking the benefit is what
       // binds you, and the cup fills as the reader reaches it: the duty and the
       // drinking arrive together, with no signature anywhere.
-      taken: carry(cv, 3, n, TAKEN[p], reacting ? dragPos.value : TAKEN[n], slow),
+      taken: carry(cv, 3, n, TAKEN[p], reacting ? pickPos.value : TAKEN[n], slow),
       boards: carry(cv, 4, n, PICKV[p], PICKV[n], grow),
     };
   });
@@ -111,6 +111,7 @@ export default function Political17Scene({ clock, bt, bi, i, picked, onPick, dra
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.label} numberOfLines={1}>THE VILLAGE WELL, AND WHO HAULS</Text>
 
       {BOARDS.map((b, k) => (
@@ -119,10 +120,13 @@ export default function Political17Scene({ clock, bt, bi, i, picked, onPick, dra
 
       {/* ── THE WELL ─────────────────────────────────────────────────────── */}
       <Animated.View style={[styles.wellWrap, well]} pointerEvents="none">
-        <View style={styles.post} />
+        <View style={styles.postL} />
+        <View style={styles.postR} />
         <View style={styles.beam} />
+        <View style={styles.rope} />
         <View style={styles.drum} />
         <View style={styles.rim} />
+        <View style={styles.mouth} />
       </Animated.View>
       <Animated.View style={[styles.cup, cup]} pointerEvents="none" />
 
@@ -211,8 +215,24 @@ const styles = StyleSheet.create({
   },
 
   wellWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
-  post: { position: 'absolute', left: 170, top: 344, width: 6, height: 46, backgroundColor: INK },
-  beam: { position: 'absolute', left: 132, top: 344, width: 86, height: 6, backgroundColor: INK, borderRadius: 3 },
+  // ── TWO POSTS, A ROPE, AND A HOLE ─────────────────────────────────────────
+  //
+  // It was ONE post under a beam, which is a T — a signpost standing behind a
+  // stone counter. A well frame has an upright on each side of the mouth, and the
+  // rope hangs down the middle between them; that triangle of post-beam-post is
+  // the whole reason a well reads as a well from across a room.
+  //
+  // AND THE MOUTH HAS TO BE A HOLE. The lip was a SOFT bar laid on top of the
+  // drum, so the drum read as solid — a plinth. A darker opening inset inside the
+  // lip is what says there is water down there, and it costs one View.
+  postL: { position: 'absolute', left: 132, top: 340, width: 6, height: 50, backgroundColor: INK },
+  postR: { position: 'absolute', left: 212, top: 340, width: 6, height: 50, backgroundColor: INK },
+  beam: { position: 'absolute', left: 126, top: 336, width: 98, height: 6, backgroundColor: INK, borderRadius: 3 },
+  rope: { position: 'absolute', left: 174, top: 342, width: 2, height: 20, backgroundColor: INK },
+  mouth: {
+    position: 'absolute', left: WELL_L + 8, top: WELL_T - 2, width: WELL_W - 16, height: 7,
+    borderRadius: 3.5, backgroundColor: SHADE,
+  },
   drum: {
     position: 'absolute', left: WELL_L, top: WELL_T, width: WELL_W, height: 470 - WELL_T,
     borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
@@ -221,8 +241,9 @@ const styles = StyleSheet.create({
     position: 'absolute', left: WELL_L - 6, top: WELL_T - 4, width: WELL_W + 12, height: 10,
     borderRadius: 5, backgroundColor: SOFT,
   },
+  // The bucket hangs on the rope, between the posts — not off to one side of them.
   cup: {
-    position: 'absolute', left: 196, top: 362, width: 26, height: 22,
+    position: 'absolute', left: 162, top: 360, width: 26, height: 22,
     borderWidth: 2, borderColor: INK, borderBottomLeftRadius: 4, borderBottomRightRadius: 4,
     backgroundColor: INK,
   },

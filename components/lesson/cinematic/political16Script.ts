@@ -82,7 +82,7 @@ export const BEATS: Pol16Beat[] = [
     g: 41, cords: 4, cut: 4,
     dur: 1.0,
     interact: {
-      prompt: 'Slide the seam to what alienation is actually about.',
+      prompt: 'What is alienation actually about?',
       split: {
         left: 'OWNERSHIP AND CONTROL', right: 'THE SIZE OF THE WAGE',
         start: 0.04,

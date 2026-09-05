@@ -92,16 +92,16 @@ export const BEATS: Aes20Beat[] = [
   {
     p: 41, x: 268, uses: 1, swaps: 1, struck: 1,
     interact: {
-      prompt: 'Set the lever to what crossing three out has done.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'proved', reads: 'the last one is proved' },
-          { id: 'nothing', reads: 'nothing at all' },
-          { id: 'narrow', reads: 'the field is narrower, and nothing is proved', correct: true },
+      prompt: 'You cross out three of the four. What has that done?',
+      sort: {
+        chip: 'crossing three out',
+        bins: [
+          { id: 'proved', label: 'proves the last', reads: 'the last one is proved' },
+          { id: 'nothing', label: 'changes nothing', reads: 'nothing at all' },
+          { id: 'narrow', label: 'narrows the field', reads: 'the field is narrower, and nothing is proved', correct: true },
         ],
       },
-      explain: 'The far setting. Crossing answers out shows which reasons cannot be the whole story, and it never makes the survivor true. Art may well teach and decorate and record. The question was what art does that nothing cheaper already does.',
+      explain: 'Narrows the field. Crossing answers out shows which reasons cannot be the whole story, and it never makes the survivor true. Art may well teach and decorate and record. The question was what art does that nothing cheaper already does.',
       xp: 5,
     },
     dur: 1.0,

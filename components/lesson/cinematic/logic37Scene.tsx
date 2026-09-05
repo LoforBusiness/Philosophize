@@ -7,7 +7,7 @@ import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic37Script';
 import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -75,11 +75,11 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic37'));
 
-export default function Logic37Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Logic37Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -99,7 +99,7 @@ export default function Logic37Scene({ clock, bt, bi, i, picked, onPick, dragPos
     ));
 
     return {
-      fig: pose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       boxesOn: carry(cv, 1, n, BOXES[p], BOXES[n], tr),
       sorted: carry(cv, 2, n, SORTED[p], SORTED[n], tr),
@@ -107,7 +107,7 @@ export default function Logic37Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // R7b — the arm brings the sets in. The far setting is the one that says the
       // axioms of the day made this object legal, and the set-theoretic version of the
       // barber assembles as the reader arrives there.
-      setsOn: carry(cv, 4, n, SETS[p], reacting ? dragPos.value : SETS[n], tr),
+      setsOn: carry(cv, 4, n, SETS[p], reacting ? pickPos.value : SETS[n], tr),
       // THE WALL CLOCK, NOT THE BEAT CLOCK. The barber has to keep failing to
       // settle for as long as he is on stage — a swing that finished would be a
       // picture of an answer arriving.
@@ -131,6 +131,7 @@ export default function Logic37Scene({ clock, bt, bi, i, picked, onPick, dragPos
 
   return (
     <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap}>ONE RULE, EVERY MAN IN THE VILLAGE</Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, boxesStyle]}>

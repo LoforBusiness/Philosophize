@@ -13,7 +13,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { propAct } from './interact';
 import { BEATS } from './logic12Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -77,10 +77,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic12'));
 
-export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos }: SceneApi) {
+export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(1);
@@ -125,11 +125,11 @@ export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick, dra
 
     keepHeld(heldS, s);
     return {
-      fig: pose(s, fx, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, fx, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // R7b — the arm lights the doors nobody offered. At the first setting the two on
       // the table really are the only two and the others stay dark; move away and they
       // come up, which is the false dilemma appearing.
-      lit: carry(cv, 0, n, LIT[p], reacting ? dragPos.value : LIT[n], grow),
+      lit: carry(cv, 0, n, LIT[p], reacting ? pickPos.value : LIT[n], grow),
       // The leaf now waits for the hand: nothing moves until he has arrived.
       swing: act,
     };

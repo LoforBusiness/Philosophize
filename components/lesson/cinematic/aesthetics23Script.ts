@@ -96,16 +96,16 @@ export const BEATS: Aes23Beat[] = [
   {
     p: 41, x: 268, stave: 1, plates: 1, point: 1, aim: 2,
     interact: {
-      prompt: 'Set the lever to what most instrumental music does.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'nothing', reads: 'no mood, no object, only shape' },
-          { id: 'mood', reads: 'has a mood, points at nothing', correct: true },
-          { id: 'objects', reads: 'names things the way words do' },
+      prompt: 'Where does most instrumental music belong?',
+      sort: {
+        chip: 'instrumental music',
+        bins: [
+          { id: 'nothing', label: 'no mood', reads: 'no mood, no object, only shape' },
+          { id: 'mood', label: 'mood, no object', reads: 'has a mood, points at nothing', correct: true },
+          { id: 'objects', label: 'names things', reads: 'names things the way words do' },
         ],
       },
-      explain: 'The middle setting, and it is two jobs rather than one. A slow line sounds sorrowful without being about anything. Naming an object takes a title, and once you notice that, the title is doing the pointing.',
+      explain: 'Mood, no object, and it is two jobs rather than one. A slow line sounds sorrowful without being about anything. Naming an object takes a title, and once you notice that, the title is doing the pointing.',
       xp: 5,
     },
     dur: 1.0,

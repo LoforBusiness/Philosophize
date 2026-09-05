@@ -99,7 +99,7 @@ export const BEATS: Logic35Beat[] = [
   {
     p: 45, x: 130, rise: 1, under: 1, cut: 1,
     interact: {
-      prompt: 'Drag to what actually cuts the hidden causes.',
+      prompt: 'What actually cuts the hidden causes?',
       drag: {
         lo: 'MAKE THE STUDY BIGGER',
         hi: 'LET A COIN DECIDE',

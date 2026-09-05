@@ -3105,11 +3105,15 @@ the wrong one is the mistake this group exists to stop.
 | The claim is… | Control | It reads |
 |---|---|---|
 | one quantity on a scale | `drag` | `DragScale` — a knob on a rail |
-| one of a few NAMED settings on a ladder | `lever` | `LeverPick` — an arm with detents |
+| what CATEGORY a named thing belongs to | `sort` | `SortBins` — a chip, and labelled bins |
+| which POSITION you would defend | `poll` | `PollBallot` — a ballot, then who held each |
 | what happens to a thing AS another changes | `plot` | `ShapePlot` — a curve you draw |
 | how one thing DIVIDES between two | `split` | `SplitBar` — a seam in one bar |
-| two INDEPENDENT yes/no questions | `field` | `FieldPick` — a token on a pad |
 | anything else, including most of them | `cards` | two `ChoiceCards` |
+
+`lever` and `field` used to be the second and fifth rows. Both are **retired** —
+see R10, which is the most useful rule in this group because it is the one that
+was got wrong for fifty and twenty-two lessons respectively.
 
 Read the middle column as a set of tests, not a menu:
 
@@ -4426,6 +4430,160 @@ scene's layout.**
 lines, an unlabelled prop the narration points at, a bar that fills — none of those
 carry text, so none of them are in the table. If a beat's text names something the
 scene draws without words, give that beat a `must` by hand.
+
+### R10 · A pick is not a quantity, and dressing one as the other is the whole defect
+
+The reader again, naming both of the controls this group has now lost:
+
+> *"The most is the box with the four squares, and you drag the circle to one of
+> the four boxes. That one's always really difficult. It makes a long time to
+> understand what is actually being said."*
+>
+> *"The lever is kind of confusing as well, and also doesn't look very good, and
+> it really isn't that different from the line you drag back and forth."*
+
+The last clause is the diagnosis, and reading all fifty lever questions confirms
+it: **not one of them was a quantity.** Every one names a subject and offers three
+or four candidate claims about it — "the fear is faked · the fun is faked · the
+fear is real, with the consequences taken out". That is a pick. A pick wearing a
+slider is indistinguishable from a slider, because a slider is what the thumb is
+doing; it looked like the drag rail because it *was* the drag rail with the
+numbers filed off.
+
+The pad is the same fault one dimension up. Its four corners are named positions,
+but the reader has to reconstruct them from two axis labels before they can read
+the question — a puzzle sitting in front of the question, which earns nothing when
+you solve it.
+
+So the answer SHAPE was kept and the control replaced. `sort` asks "where does
+this belong", which is what the lever's questions were really asking. `poll` lists
+the positions and then shows who held each, which is what the pad's corners were.
+
+**Neither replacement changed a single `reads` string.** That is the test for
+whether a control was wrong rather than a question: if the question survives the
+control being swapped, the control was the problem.
+
+### R11 · A control with an order has a positional tell, and it must be shuffled
+
+`check-answers` has existed since the day all 130 two-card questions were found to
+put the true card on the left — and it only ever looked at the deck. Measured the
+day the lever and the pad were retired:
+
+| | correct answer sat at | share |
+|---|---|---|
+| `lever` | the LAST stop | **35 of 50 · 70%** |
+| `field` | the FIRST quadrant | **15 of 22 · 68%** |
+
+On an arc and a two-axis pad that is half hidden by geometry. In a ballot it is
+"always tap the top row"; in a row of bins it is "always throw it to the far end".
+A reader who noticed could clear two thirds of the app without reading a word.
+
+`ChoiceCards.orderFor(seed, n)` is the fix, and both new controls permute through
+it — same Murmur finaliser, seeded on the QUESTION's own words so re-cutting the
+narration cannot re-roll it. **Any future control with more than one slot goes
+through it too**, and `check:answers` measures the real distribution rather than
+trusting that sentence.
+
+`poll` has no authored opening row at all, which removes the other place an answer
+could sit by accident.
+
+### R12 · A prompt is a question, not a description of the widget
+
+Counted across the app on the day this was written: **132 of 368 graded prompts
+named the control instead of asking anything.** "Drag to what Plato put first."
+"Slide the seam to where the meaning lives." "Set the lever to what the human
+maker adds." "Place the token on the forgery."
+
+A reader who has followed the lesson perfectly still has to translate that into a
+question before they can answer it, and the one sentence that could have carried
+the question was spent on furniture they can already see.
+
+The rule: **a prompt is a question the reader could answer out loud.** If it
+cannot end in a question mark it is probably an instruction.
+
+**And the exception matters as much as the rule.** "Drag the swab across. Stop
+where you would put it down." and "Slide the viewfinder." stay exactly as they
+are: the swab and the viewfinder are objects the SCENE draws, and telling the
+reader to move one is telling them about the lesson — the picture and the sentence
+agreeing, which is A1. The first detector written for this flagged both, and the
+difference between it and the second is the difference between finding a defect
+and finding a pattern.
+
+### R13 · Converting the control leaves the EXPLANATION pointing at nothing
+
+Twenty of the twenty-two converted pad questions had explanations that opened by
+naming a corner: *"Top right, and the formalist refuses to let the axis going up
+matter."* Several went on to reason about "the two axes", "the bottom row",
+"diagonally opposite".
+
+That is J9 exactly — the rule written when 27 explanations still said "the trap is
+B" after the lettered options had become two unlabelled cards. Nothing fails: a
+stale sentence still typechecks and still renders. **When a control changes, the
+`explain` is part of the change**, and it names the position in its own words,
+which is also what the reader now has in front of them.
+
+---
+
+### R14 · An answer control is a STRUCK object, not an outline
+
+The reader, on the two controls that had just replaced the lever and the pad:
+
+> *"They're pretty boring and not very cool. Not very gamified."*
+
+They were four bordered rectangles and a bordered rectangle over three dashed
+ones — and the identity already had the answer, used on the rank pins, the
+badges, the certificates, the streak calendar and the profile's tiles. §19
+records the quote plate being *"the one object in the app still drawn as an
+outline while every button, card and rank pin sat on a lip"*. The answer controls
+were the next ones.
+
+So: **a thing you press is a raised face; a thing you press it INTO is a recess.**
+A poll row is a plate that sinks when taken; a sort chip is a tile that lifts and
+casts further while held, and its bins are sockets whose floors are the same
+gradient run backwards. That inversion is the only thing that says cut-in rather
+than raised, and getting it backwards on one element stops the set being a set.
+
+**AND A WIDE SURFACE BARELY SHADES — §19 HAD ALREADY MEASURED THIS AND IT WAS NOT
+READ.** `StruckTile` runs `PAPER_LIT → PAPER → PAPER_SHADE` across about 80dp and
+reads as a lit face. The same three stops across a 350dp poll row came back as a
+**tan stain down the right-hand half**, which is word for word what §19 says
+happened to the profile's panels. A third of the fall-off, running mostly DOWN
+rather than across, plus a lit top rim and the shadow it sits on. The depth of a
+big flat thing is in its EDGES.
+
+**Emphasis is added to the live one, never taken from the others.** The first
+socket pass dimmed every un-hovered bin to 0.35, which made the labels harder to
+read than before the redesign — the exact opposite of the other half of the same
+request. A resting state must stay fully legible.
+
+### R15 · A tappable thing needs a MARK, not another outline
+
+The other half of the same report:
+
+> *"Sometimes it is difficult to know exactly which box or which thing to tap …
+> sometimes that can be confusing."*
+
+`Target` had drawn a breathing 2px ink ring since the day the affordance was
+added, and the reader still could not tell. The reason is structural and it is
+worth stating plainly: **a cinematic scene IS ink outlines on paper.** One more
+ink outline is camouflage, however slowly it breathes. Three things fix it, and
+the middle one does most of the work:
+
+- **A halo.** A soft wide ring outside the hard one — a shape the art never makes.
+- **A PIP**: one small filled disc in the top-right of every live target, ringed
+  in paper so it survives landing on dark art. A filled mark of that size appears
+  nowhere in the corpus's art, which is exactly why it reads as a control. It
+  sits INSIDE the bounds, because the camera frames a target's own box and
+  anything hung outside it can be cropped.
+- **An opening sweep.** Every live target flares once, one after another, in mount
+  order. A sweep across the options reads as "these are your choices"; the same
+  flare on all of them at the same instant reads as a dropped frame, which is why
+  it is staggered rather than simultaneous.
+
+**Changing `Target` re-measures the whole corpus.** Its StyleSheet is in
+`muststamp`'s SHARED list, so a style added here marks 148 lessons stale at once
+— by design, since this component decides how big a scene's art is. Budget the
+sweep before starting.
 
 ---
 
@@ -5835,3 +5993,666 @@ group must not cross a brace: `([^}]*?)`.
 the §21 trap that makes `validate-cinematic` see ZERO beats in a file and report
 it clean. Normalise back to LF after any `git restore` in this repo, and check
 with `file` rather than assuming.
+
+---
+
+## Group W — two things in the paragraph are not ordinary words
+
+The deck under the figure used to be one flat `<Text>`. Every word of every beat
+arrived at the same weight, including the two kinds that carry more than the rest:
+the name of a person the reader might want to ask about, and the one sentence the
+lesson wants them to leave with.
+
+Both are now marked, and both are checked. `npm run check:names` and
+`npm run check:focus`; `node scripts/countertest-focus.mjs` puts each defect back.
+
+## W1 · A philosopher's name is drawn in their ERA's colour, and nothing else is
+
+`ERA` in `constants/design.ts` is the app's licensed "one place a hue means
+something" — five groups, already used on every quote plate. A name in the deck
+takes the same hue as that thinker's plate, so by the time a reader meets *Hume*
+in oxblood here they have seen oxblood on his quotations.
+
+**Do not add a colour, and do not colour anything else.** The mark is the hue in
+the TEXT plus a rule under it — an edge and a mark, per §19's finding that what
+makes a screen look cheap is AREA and not palette. A filled chip behind every name
+would put six saturated blocks in a paragraph.
+
+The table is generated: **`npm run make:names` after any narration edit**, and
+`check:names` fails the build if it is stale. Nothing about this is authored per
+lesson.
+
+## W2 · The name index refuses ambiguous surnames, and the four exceptions were read
+
+A bare surname is believed only when exactly one philosopher has it, it is longer
+than three characters, and it is not an ordinary English word — "Moore", "Bacon",
+"James", "Price", "Church", "Day" and "Long" all appear in these lessons meaning
+something else.
+
+Those defaults refuse **Mill, Bacon, Moore and Sen**, which this corpus uses across
+twelve lessons, and a reader meeting Aristotle tappable and Mill plain in the next
+lesson sees a bug. So `OVERRIDE` in `make-names.mjs` resolves those four — and it
+was **measured, not assumed**: all sixteen sentences using them were printed and
+read, and not one is the ordinary word.
+
+**If you add an override, print the sentences first.** And the shared `COMMON`
+list must stay identical to `make-mentions`' — one rule, two readers — which
+`check:names` asserts rather than trusts to a comment.
+
+## W3 · One maxim per lesson, and a lesson may have none
+
+`data/lessonFocus.ts` names one phrase per lesson to strike. 162 of 186 lessons
+carry one; **24 carry none on purpose.**
+
+That floor is the rule, not a shortfall. A highlighter on a merely-acceptable
+sentence tells the reader that a prop in the story is the thing to carry away,
+which is worse than no mark at all — so where nothing in a lesson generalises,
+nothing is marked. `check:focus` deliberately stays SILENT on an absent maxim, and
+`countertest-focus` asserts that silence, because a checker that could not tell an
+absent mark from a broken one would force a bad highlight into every lesson.
+
+What the mark must be:
+
+- **A literal substring** of that beat's own `text`, character for character. The
+  scripts use curly apostrophes; `'` and `’` do not compare equal.
+- **Four to fourteen words.** Below four is not a claim; above fourteen is a
+  paragraph wearing a highlighter, which marks nothing.
+- **Never on a beat carrying a question, a quote or the summary.** A quote is
+  already a struck object, a summary is already the list of points, and marking
+  half a prompt tells the reader which part of the question to answer.
+- **Never over a philosopher's name.** The name already carries its era colour and
+  its tap. Two marks on one span is not more emphasis, it is a collision of the
+  two meanings the reader has just been taught to tell apart.
+
+## W4 · A maxim is a claim, not a moment in the story
+
+`npm run make:focus` prints a shortlist and **a person picks from it.** It ranks;
+it does not judge — the same stance `survey-lessons.mjs` takes. Three drafts of
+the scorer are worth knowing, because each one produced confident nonsense:
+
+- **Cutting after every comma and conjunction** gave "and never saw a thing", "the
+  other says it is not", "is a name for socially approved habits" — ordinary
+  English inside their sentence and gibberish with a highlighter round them. A
+  span has to survive being taken out of the sentence it came from.
+- **Narrative sentences kept winning.** "You glance outside and rain is falling",
+  "On road B the child is there", "Then they meet, and you are born". Every one is
+  a fine sentence and none is a maxim. The separator is measurable: a maxim is
+  present-tense and unanchored; a narration beat is past-tense, or pinned to a
+  moment (*now*, *then*, *here*), or to a labelled thing on the stage (*road B*,
+  *trap two*).
+- **Questions passed the no-questions rule**, because the terminal punctuation is
+  stripped to make the span and the test then ran on the stripped copy. "Why is
+  there something rather than nothing?" arrived as a confident proposal. Judge the
+  sentence before you cut it.
+
+The signal that actually works is the lesson's own summary: **its points are three
+authored one-liners saying what it was about**, so a narration sentence that
+restates one is the sentence they were drawn from. It costs nothing — the text is
+already in the file.
+
+## W5 · The maxim lives in a table because the stamp hashes the script
+
+It was `BaseBeat.focus` first. `muststamp` hashes each lesson's SCRIPT so a scene
+edited without re-measuring is a build error rather than a silent crop — so
+writing a maxim into 186 scripts marks all 186 must-box measurements stale and
+demands a full `measure:must` sweep to record something that never touches the
+stage.
+
+**Do not weaken the stamp to make authoring convenient.** Move the content. The
+price is that a rewritten beat can orphan its own maxim, which is J9's stale
+letters exactly, and `check:focus` is what makes that a build failure instead of a
+sentence that quietly stops being marked.
+
+## W6 · A tappable name is a `<button>`, and every harness has to know
+
+React Native Web renders a nested `<Text>` carrying an `onPress` as a real
+`<button>` — not a span. Two consequences, and both cost a debugging pass:
+
+- **Every probe here selects `div,span`.** Four successive measurements reported
+  "no coloured name reached in 30 beats" while the name was rendering perfectly.
+  This is §21's *"selecting on `[role=button]` alone finds half the buttons in
+  this app"* arriving upside down.
+- **Six harnesses answer a two-card question** by taking the first
+  `[role="button"],[tabindex]` below the stage that is wide enough, and
+  `check-spoiler`'s guard is `width > 60` — a 70-unit name matches it outright, so
+  a sweep could answer a lesson by pressing a philosopher. Every name carries
+  `testID="thinker-name"` and all six skip it.
+
+**When a lesson gains a new kind of tappable element, the harnesses gain one too,
+in the same commit.** That is the same rule as L7 and R6, on a third axis.
+
+## W7 · The press stops at the name, and the deck must be told the peek changed
+
+Two failures that both look exactly like a handler that was never wired:
+
+- **The deck sits inside the player's body `Pressable`**, whose `onPress` is
+  `advance`, and `advance` calls `setPeek(null)`. Without `e.stopPropagation()`
+  the card opens and closes in the same gesture while moving the reader off the
+  sentence they were asking about. On a device the two never collide — a Text with
+  `onPress` claims the touch responder — so this defect exists **only** on the
+  platform this project can look at.
+- **`Fade` holds the deck's elements in STATE** and rebuilds them only when the
+  beat changes or its `revision` string does. A state the deck draws that is named
+  in neither is a state the deck never shows: the handler fires, `setPeek` runs,
+  React re-renders the player, and the paragraph on screen stays the one `Fade`
+  built before any of it. Nothing throws and nothing logs.
+
+The general form, and it is the one to carry: **anything the deck renders from
+React state must appear in `Fade`'s `revision`.** Three hypotheses were tested
+before an instrument existed that could tell these apart — a counter inside the
+handler, and the button's own background, which changes only when the open name
+re-renders.
+
+---
+
+## K11 · Anything indexed BY BEAT is re-derived when the beat count changes
+
+A hand-written `SHOTS` table is a list with one entry per beat. J12's segmenting
+pass cut over-packed beats in two — corpus-wide, 872 beats became 1,291 — and it
+copies every CHANNEL verbatim so the picture holds still while the words advance.
+A shot is not a channel: it lives in the scene, not on the beat, so nothing
+copied it.
+
+`ethics8Scene` was the only lesson with one, written for 11 beats and left at 11
+when the lesson became 18. Every shot after the first split slid one place, and
+the reader got the arc played against the wrong sentences: a pull-back mid-line,
+then a push where the arc wanted wide. Tap, zoom out, tap, zoom in.
+
+**Repeat a beat's shot for each piece it was split into.** `check:camera` holds
+one entry per beat. Beats past the end of the list are CLAMPED to the last shot
+rather than throwing, which is why the tail of that lesson merely held wide
+instead of crashing — a silent failure, not a loud one.
+
+The general form, and it is the third time this file records it: **what is
+DERIVED re-derives, what is HAND-WRITTEN needs a checker.** 183 lessons build
+their camera with `followMoves(X, BEATS.map(kindOf), …)` and could not go out of
+step; the one that was typed out did.
+
+## K12 · A station's travel time has to reach the camera
+
+`shotAt` reads the travel off the shot it is moving TO, defaulting to `tr ?? 0.8`.
+`tourStartShots` spread `tr` onto its result only on the FOLLOW branch — a static
+station came back bare — and 197 of the app's 201 stations are static.
+
+So for the whole life of the tour system the generator's travel time was
+decorative: every push in every lesson took a flat 0.8 seconds however far it
+went, and K8's 0.35–1.2s window was enforced on a number the player never saw.
+
+Nothing could catch this by reading the table, because the table was correct. It
+took measuring a push in a browser — **0.79s against a table saying 1.2** — after
+a deliberate change to the generator made no difference to the render at all.
+`check:tour` now puts a static and a follow station through the real function and
+asserts both come back carrying their `tr`.
+
+**When a generated value stops changing what you see, check that it is being
+read before you tune it further.**
+
+## K13 · A travel takes as long as its distance needs
+
+Every station shipped at `tr: 0.7` whatever it was travelling. A push to the
+1.72× ceiling and a nudge to 1.05× are not the same move, and at 0.7s the big one
+arrives as a snap — which a reader reported as the screen "resetting", and whose
+own suggestion was that it "needs to be held out longer".
+
+This is §17's walking rule one system over, in the same words: *"a FIXED length,
+whatever the distance … 145 walking beats, every one too fast"*, where `moveTr`
+had existed all along. `stationTr` in `scripts/lib/tourrule.mjs` is the camera's
+`moveTr`.
+
+**The distance is the RATIO, not the destination.** The first draft scored the
+station's own scale, which gets the push right and the pull-OUT exactly backwards:
+coming home to the whole stage is scale 1, so a 1.72× → 1.0 retreat — the same
+distance as the push that set it up, and the half a reader actually calls "it
+reset" — would have been given the shortest travel in the table.
+
+Both ends of the range are K8's own numbers (0.35 floor, 1.2 ceiling), so the
+generator cannot emit a tour its validator rejects.
+
+## K14 · A one-station tour has nothing to fast-forward
+
+`tourSkip` warps the tour clock on a tap so an impatient reader still gets one
+tap, one advance. Its target is documented as *"the start of the last travel …
+not the end of the tour: landing the reader ON the final shot would make an
+impatient tap a hard cut."*
+
+`tourEnd - trs[last]` is the start of the closing travel only while something
+comes before it. With ONE station it evaluates to that station's own dwell, which
+is past the only travel there is — so the warp produced exactly the hard cut the
+rule exists to prevent.
+
+**Every tour in the app is a single station now** (201 of them, 1.00 per toured
+beat). The shape changed when the lap was removed; the expression kept computing
+an answer for the old shape. There is no later station holding content back, so
+there is nothing to resolve and nothing to skip — the beat advances and `camFrom`
+carries the camera from wherever it had got to, which is smooth for free.
+
+This is the same staleness `tourData` records one screen up, where a `raw.length
+< 2` guard silently discarded 300 tours after the rule that justified it was
+removed: **a condition whose meaning depends on a rule elsewhere goes stale
+without ever failing.**
+
+## K15 · Measure the DURATION of a move, not its worst frame
+
+`npm run sheet:cam -- <lesson-id>` samples the stage's real transform every frame
+and reports both. Read the durations.
+
+The worst single-frame delta is nearly useless for judging a travel: easing puts
+the peak in the middle of the ramp, so stretching a move over more frames lowers
+the average while barely touching the peak. 0.7s and 1.2s reported **the same
+worst frame to three significant figures**, which is what made a real fix look
+like no fix at all and sent the search off in the wrong direction for an hour.
+
+Two more traps in that instrument, both of which produced confident nonsense:
+
+- **The progress bar is not the beat index.** It fills CONTINUOUSLY through a
+  beat, so grouping frames by it interleaves the ones either side of an edge and
+  mis-orders the trace. §17 records the same trap catching `stamp()`.
+- **Watch every axis, not the width.** A tour that pans down to a thin strip
+  barely changes the picture's SIZE while moving it hundreds of units, so a
+  width-only threshold reported a 0.55s travel as 0.15s and made an ordinary move
+  look like one cut short.
+
+## W8 · The snapshot draws itself in, and the close is that reversed
+
+A leader hairline draws DOWN from under the tapped name; the card unfurls beneath
+it; the words arrive last. Tapping the same name again undoes exactly that, in
+reverse. `npm run sheet:peek -- <lesson-id>` measures both and asserts five
+properties of the result.
+
+**The leader lives in a strip of its own, below the paragraph.** A line drawn from
+the name's baseline would cross every line of narration between it and the card,
+and group S has one unbreakable rule. The strip is empty by construction, and the
+line still points at the name because it takes the name's own x.
+
+**One LINEAR driver, with the easing inside each stage.** Two findings, both from
+the rendered page:
+
+- Putting Material 3's `emphasized decelerate` (0.05, 0.7, 0.1, 1.0) on the
+  DRIVER made the leader draw its full 15 units in **10 milliseconds**. That curve
+  is enormously front-loaded, so a stage occupying the first 42% of the VALUE
+  occupies almost none of the TIME. A stage window is only honest on a linear
+  driver.
+- With the easing moved into each stage, the entrance/exit pair comes free:
+  `1 - (1-u)³` run forwards is a decelerate (fast, then settling) and the
+  identical expression read BACKWARDS is an accelerate (barely moving, then
+  gone). One expression, both M3 curves, and "the close is the open reversed"
+  becomes true of the feel and not just of the order.
+
+The asymmetry that remains is duration, which is M3's too: the exit is shorter,
+because a reader dismissing something is already looking at what they want next.
+
+**An exit needs something left to animate.** The card rendered from `id`, under a
+comment claiming it was kept mounted so the exit could play. It was not: the
+moment `id` went null the subtree unmounted and the card vanished. Hold the last
+thing SHOWN and let the animation decide what is visible.
+
+## W9 · `onLayout` on a nested pressable Text fires sometimes
+
+The leader needs the name's x. `onLayout` is the obvious tool and it is not
+reliable: measured, react-native-web fired it ONCE across a whole lesson in one
+case and NEVER in another, so the line hung under the right word in one lesson and
+at the margin in the next.
+
+**A callback that fires sometimes is worse than one that never fires**, because it
+looks correct wherever you happen to check — the first lesson tested was the one
+where it worked, and the feature was called done.
+
+Use `measureInWindow` at press time. The view is on screen and attached, which is
+the one condition §21 records that call needing, and it gives the name's own box
+rather than the touch point — so pressing the last letter of "Wittgenstein" still
+hangs the line under the middle of the word.
+
+## Group X — a ratchet can reach zero without the screens changing
+
+Two of this project's high-water marks had reported success on work that never
+reached a pixel, and a reader found both from the outside: *"the visuals above
+the stickman are clunky and not like a game … it's not very gamified."* Neither
+checker was lying about what it measured. Both were measuring the WIRING and not
+the current through it.
+
+## X1 · A declared fill is not a drawn fill
+
+`check:shade` counted `backgroundColor: STONE` anywhere in the scene file, which
+includes the StyleSheet. The tonal pass that drove its flat-scene count 111 → 0
+added a `floor:` entry to 111 StyleSheets and the matching `<View>` to 24 of
+them. **87 scenes were recorded as fixed and were pixel-identical**, and 17 of
+those were still below the three-mass floor the ratchet exists to enforce.
+
+A fill now counts only if the RENDER BODY — everything before
+`StyleSheet.create` — reaches its style by name, or paints it inline. A style
+that declares a tonal fill and is never rendered is a build failure, and the
+budget for that is zero. It is not a tidiness rule about dead code: it is the
+rule that makes the count mean anything.
+
+## X2 · A reaction flag must name a control the lesson actually ships
+
+R7c's flag is derived from the beat so that it cannot desynchronise:
+
+```ts
+const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+```
+
+It reads the beat, so it cannot disagree with the beat. What it cannot survive is
+the CONTROL BEING RETIRED. `lever` became `sort` and `field` became `poll` across
+the whole corpus and no script has shipped either since — so in **51 scenes**
+`reacting` was permanently false and the stage held still under the reader's
+thumb.
+
+`check:react`'s test was `/\bdragPos2?\b/.test(scene)`: whether the scene MENTIONS
+the value. They all did, inside a branch that could never run. It also had `sort`
+and `poll` missing from its `ANALOGUE` list, so every lesson carrying one was
+skipped by the entire file — 110 lessons counted where there are 182.
+
+**A flag that cannot fire is worse than no flag**, because it is the shape of a
+wired scene and nobody looks again.
+
+## X3 · `poll` and `sort` are permuted, so a scene reads `pickPos` and never `dragPos`
+
+Both controls shuffle their options through `ChoiceCards.orderFor` — the fairness
+device added because the lever put its answer in its last slot 70% of the time.
+So on those two, `dragPos` is DISPLAY space: *which row*, *how far the chip has
+travelled across the pad*.
+
+A scene animated off that would move its art in an order a shuffle decided. That
+is A1 broken in exactly the lessons where the shuffle happened to be interesting,
+and it would have looked like polish.
+
+`SceneApi.pickPos` is the same reading in the QUESTION's own space: 0..1 across
+the options as the AUTHOR wrote them, eased on the UI thread so a scene track
+cannot cover a whole step in one frame. Read it with `pickAt(table, pickPos)`,
+which takes a per-option table and interpolates — so the picture TRAVELS between
+the named positions rather than cutting between stills. Four options are four
+settings of one machine, and sliding between them is the lesson.
+
+**Every row of such a table is read off the option's own `reads` string against
+the track's own doc comment.** `valid3`'s STAMP is "VALID stamp shown (0/1)" and
+its options say *good form* or *broken form*, so the table is exactly which
+options say good. Write the sentence it came from in the comment above it, or the
+table is a set of magic numbers nobody can check.
+
+## X4 · A word with a line through it is not a covered word, and only one check sees it
+
+`epistemology23` printed `THE MOUTH` at `MOUTH_Y − 7` while the mouth's own rail
+runs at `MOUTH_Y`, so a 2-unit ink line crossed the middle of the word on every
+beat of the lesson. Four checks passed it and each was right about what it
+measures:
+
+- `check:readable`'s STRIKE looks for something painted ON TOP of a word. The
+  caption was painted last, so nothing was on top of it.
+- `check:fits` asks whether a word fits its own box. It did.
+- `check:shade` asks what tone a word sits on. It was fine.
+- `check:frame` asks what the CAMERA cuts. The camera cut nothing.
+
+The gap all four leave is a word that is legible as a set of glyphs and
+unreadable as a word. **`check:cover` owns this class** — it reads ink across a
+word and takes a `nativeID` beginning `strike` or `crossout` as a declaration
+that the mark is deliberate — and it is not in `npm run check`, because it needs
+Metro and a browser. Run it when you move type near a scene's own frame.
+
+An offline version was built out of the recorded must-boxes and then deleted: the
+side file has no ids, so it cannot tell a declared strike from an accident, and a
+detector that cannot tell the design from the defect is the boxiness metric
+again. Two of the twenty lessons it named were deliberate annotations.
+
+## X5 · A part name belongs in the margin, on a leader
+
+The general fix for X4, and it is also what a labelled instrument looks like.
+`epistemology23` had `THE MOUTH` and `THE MESH` inside the machine, where the
+rail crossed one and the falling claims came to rest on the other. They now sit
+in a column at x 6…88 — a region nothing else draws in — each joined to its part
+by a hairline. Nothing can be printed across a word if no word is printed across
+the picture.
+
+**And the label is the CONTENT of its own target.** That is S11's own remedy: the
+graded beat used to offer three identical 203-unit blank rectangles, stacked,
+each also covering the label of the part it stood for. A thing and the word for
+it ride together.
+
+## X6 · A machine that is introduced as always running must always run
+
+`epistemology23`'s first line is *"claims arrive all day"*. Its `fall` channel
+went 0→1 on beat 1 and was pinned at 1 for the other seven, so twelve discs fell
+once and the picture froze for six beats.
+
+An ambient loop off `clock` — each element on its own phase, gated by a channel
+so a beat can still turn it off — costs one `useAnimatedStyle` and is the
+difference between a diagram of a machine and a machine. It is also the cheapest
+thing on the list that reads as *game* rather than as *slide*: secondary motion is
+what tells a reader the world is running whether or not they are touching it.
+
+## Group Y — the figure and the world it is standing in
+
+A reader compared the lessons with the app's own ad reels — where the stickman
+walks to a shelf, takes a book, sits and reads it; where he wades into a pond and
+lifts a child out — and asked for the same thing in the lessons:
+
+> *"I want the stickman more interactive with objects and lessons and reacts in
+>  better ways and acts in better ways. That is more entertaining and more real."*
+
+Counted, the machinery for all of it already existed and nothing called it.
+
+## Y1 · The interaction library was written and never used
+
+`interact.ts` is a thousand lines of the figure's relationship to what is outside
+it — `handAt`, `gripAt`, `carryHands`, `headStage`, `reachHandTo`, `canReach`,
+`carryMode`, `propAct`, `faceEachOther`, `betweenThem`, `handSpan`,
+`canShakeHands`, `handshake`, `passObject`, `converse`, `leanToward`,
+`pairPosture`. Across 184 scenes:
+
+```
+gripAt 1 · carryHands 1 · propAct 1 · the other fourteen 0
+moves.gazeAt 0 · moves.pointAt 0
+```
+
+Three calls in total, in two files. This is the same shape §17 already records
+for `moves.ts` — *"the door had been built and nobody walked through it … a
+catalogue is not a vocabulary until something puts it into the scripts"* — and it
+had happened again, one library along.
+
+## Y2 · A head move is not a move, so the look rides the SPINE
+
+N12 says it about the four "looking" actions in `moves.ts` and it is the reason
+`gazeAt` was never worth calling on its own: `U.head` is 16, so a neck angle
+pivots the head centre about five units against a head forty across. **This figure
+has no face.** A turned head on a plain disc is invisible from the side.
+
+Measured on the real rig (`node --import ./scripts/lib/register.mjs
+scripts/sheet-gaze.mjs`):
+
+| | neck alone | with the spine |
+|---|---|---|
+| standing under it, looking up | 6.6 | **14.2** |
+| stage left, looking up and right | 7.4 | **16.0** |
+| stage right, looking up and back | 4.5 | **9.8** |
+| something at his own height | 3.4 | **7.3** |
+
+`lookPose` takes the lean from how far the neck actually turned (×0.5), so the
+two cannot drift apart and it costs no second solve.
+
+## Y3 · Use `lookPose` instead of `pose`
+
+One substitution, and it has to be one: `gazeAt` needs the same `x` and `dir`
+that every scene writes INLINE inside its `pose(...)` call, so applying a gaze by
+hand means hoisting both out in every file. `lookPose` takes the same six
+arguments plus `gazeX.value, gazeY.value, gazeOn.value` off `SceneApi`.
+
+A scene with its own idea of where he should look calls `moves.gazeAt` directly
+and keeps `pose` — the table is a floor, not a ceiling. `check:life` §10 holds
+the count and its budget is 0.
+
+## Y4 · The target is the PICTURE, not a guess at the subject
+
+`npm run make:gaze` derives it per beat from `mustBoxes.ts.json`: the
+area-weighted centre of everything the beat draws that is not the figure, by the
+square root of area so one large panel does not drag the look off the six small
+things sitting on it.
+
+Aiming at the thing that CHANGED since the previous beat was tried first. It is
+the more interesting behaviour and it is not reliable — on a beat where six things
+move it picks one arbitrarily, and on a beat where nothing moves it has no answer.
+The picture's centre is never wrong in an embarrassing way: a presenter looks at
+his diagram, and when a prop enters on one side the centre shifts and he follows
+it, which is the reaction without the guesswork.
+
+Re-run it beside `make:tours` whenever the must-boxes are re-measured.
+
+## Y5 · He cannot touch anything, and that is the composition's fault
+
+Measured two ways, because the first instrument was wrong. `mustBoxes` records
+only LEAF elements, so a labelled plate — a bordered View with a `<Text>` child,
+which is half the props in this corpus — is invisible to it as art; a metric built
+on that duly reported `political8`, the one scene that actually puts a crate in
+the figure's hands, as no nearer its props than the median.
+
+From the source instead: of the 60 scenes with a sized, filled prop, **41 stage
+every prop entirely above his head**. His crown is 397 and a hanging hand is 450;
+the median lowest prop edge is 256.
+
+**So `propAct` and `gripAt` cannot be wired without moving something.** Contact is
+per-lesson staging work, not a pass. Attention (Y2–Y4) is what generalises,
+because a look works at any distance.
+
+## Y6 · A reach at a target it cannot cover still reads as a reach
+
+`pointAt` lays the arm along the line to a stage point and stops just inside arm's
+length, so a target twice as far as an arm comes out as a straight arm AIMED at
+the thing rather than a stretched one touching it. That is the honest picture when
+the figure has waded in and has not got hold of it yet.
+
+`ethics10` is the worked example, and it is the lesson the app's own ad reel
+covers: he wades into the pond and, until now, stood in the water beside the child
+with his arms at his sides. It blends on a `reach` channel like any other, so the
+arm goes out as he wades in and comes most of the way back over the quote instead
+of snapping between two poses (L1) — and it is paired with a `gazeAt` on the same
+point, because `pointAt`'s own header says a point without a look reads as a
+person gesturing at something behind them.
+
+## Group Z — the drawing has to be the thing it names
+
+§13 already records this once, as the cheese: `metaphysics31` drew cheese as a
+paper rectangle with an ink border and five horizontal rules, and A1 was satisfied
+the whole time, because A1 asks that the picture DO what the words say and not
+that it BE what they name. A reader asked for the rest of the corpus to be held
+to the second thing:
+
+> *"if there's a bird on screen, it looks like a bird. If there's any type of
+>  imagery … look online for good reference and then fix it in the lesson if it
+>  does not look like this."*
+
+## Z1 · A label is not a drawing
+
+Every one of the four failures found was a shape whose CAPTION carried the whole
+meaning: a disc on a stem under the word ROSE, five bars in a box under the word
+ZEBRA, a stone counter under THE VILLAGE WELL. Remove the label and nothing
+identifies any of them. That is the test.
+
+## Z2 · Inventory by NAME, judge by RENDER
+
+`scripts` has no checker for this and should not: whether a drawing reads as a
+bird is not countable. What is countable is the SHORTLIST — every style whose name
+is a real-world object, with what it is actually built from. 105 named objects
+across 69 scenes; 31 of them built only from square, un-rotated rectangles.
+
+**Then render and look.** Of those 31 most were fine — a wall IS a rectangle, and
+so are a door, a canvas and a table top. Four were not, and no static rule
+separated them from the rest.
+
+**And the first inventory was wrong in the direction that wastes a day.** It
+matched `borderRadius:` against a literal, so `borderRadius: SUN_R` counted as a
+bare rectangle and the sun, the coin and the eye were reported as the cheese
+shape. It also never looked at `borderBottomLeftRadius` (the cup, the bowl) or at
+a CSS triangle, which has no radius at all and is not a rectangle (the horn).
+Check a shortlist against the objects whose answer you already know before
+spending anything on it.
+
+## Z3 · At small sizes, FILL rather than stroke — but fill the right shape
+
+`metaphysics10`'s header had already reasoned its way to the disc: "at 40 units
+tall a stroked flower closes into a blob (B16c), so all three objects are drawn
+FILLED and simple, and the plank face names them — a labelled plate beats an
+ambiguous shape."
+
+The constraint is true and the conclusion was wrong. A filled shape need not be a
+featureless one: five overlapping petals round a paper eye is how heraldry has
+drawn a rose for eight hundred years, it contains no line to close up, and it
+reads at 22 units. The escape from "a stroke will not survive this size" is a
+better FILLED silhouette, never a plainer one plus a caption.
+
+## Z4 · Rotate about the joint, not the middle
+
+Both animal rebuilds needed this and neither worked without it. A neck rotated
+about its own centre swings BOTH ends, so the zebra's head floated twenty units
+clear of a barrel the neck no longer reached; `transformOrigin: '50% 100%'` pins
+the shoulder end and only the head travels. The same for a tail — pivoted at its
+top it hangs, pivoted at its centre it stands up over the rump and reads as a
+second ear.
+
+**And a CSS triangle has a zero-size box**, so a percentage `transformOrigin` on
+the triangle itself resolves against nothing. The kestrel's wing is a tapered
+triangle inside a sized WRAPPER that carries the flap; put the rotation on the
+triangle and the beat collapses to a corner spin.
+
+## Z5 · Take the field mark from the reference, not from memory
+
+The bird is Murdoch's hovering kestrel, and every reference says the same two
+things: "long, POINTED wings … a delicate, dagger-like form", and "to maintain
+position without dropping they extend the tips of their wings and FAN their tail
+feathers — nearly always shows a fan-shaped tail-band when hovering." The old
+drawing had uniform rounded bars for wings and a narrow bar hanging straight down
+for a tail, which is a scarecrow. Two field marks, two shapes, and the thing reads.
+
+It also beat BELOW the horizontal on every frame of its cycle (−34°…−2°), so the
+bird read as falling. A hover is worked for: the upstroke carries the tips above
+the body.
+
+## Z6 · An animal is not a person, and a checker that cannot tell will hide both
+
+`check:scale`'s PEOPLE NOT DRAWN BY THE RIG looks for a rounded `*head*` style
+beside a `*body*` one, which is the right shape to look for and cannot tell a
+hand-built human from a hand-built animal. Four of the seven it reported were a
+bird, a hen, a zebra and a cow — all correct as drawn, all sitting inside a budget
+of 6 where they hid the three that are real. Exempting them by stem took the
+budget DOWN to 3.
+
+## Z7 · A source grep cannot tell you whether the picture moves
+
+166 of 184 scenes read the monotonic clock for nothing but the figure, counted
+from the source. That number was useful for finding candidates and is not the
+measurement: a grep cannot tell an idle wobble that is visible from one multiplied
+by zero, and it misses a scene that moves by some other route. `epistemology11`'s
+new second hand is the worked example — the source test still called that scene
+dead, and the pixels say ALIVE.
+
+`npm run check:alive <lesson-id> …` takes two screenshots from ONE page load a
+couple of seconds apart and differences them, with the stickman's own box excluded
+because he has had ambient life since group N and would mask everything else.
+
+**One page load is the whole trick.** The scene clock starts at 0 on every load,
+so two runs sampled at the same delay reproduce the same frame exactly and would
+report every lesson in the app as dead.
+
+It carries no budget, and should not. A scene about a thing that is deliberately
+still SHOULD come back a photograph.
+
+## Z8 · Ambient motion belongs where the SUBJECT moves, not where the words do
+
+The obvious way to pick candidates is to grep the narration, and it is wrong.
+`logic7` says "rain is falling" more than any other script and its stage is an
+argument BOARD — rule, fact, conclusion. Adding rain there would be adding art the
+composition does not have, to satisfy a word.
+
+The two that were done are the two where the drawn subject is in motion by nature:
+
+- **`epistemology11`** contrasts a STOPPED hallway clock with REAL TIME, and both
+  dials were equally motionless between taps — so the one thing the lesson is
+  about could not be seen. The hour and minute hands are driven by the BEAT
+  deliberately, for exact readings; a SECOND hand costs that nothing because it
+  never carries a reading, and it is the field mark that says this clock is going.
+- **`epistemology37`** stood a hull on a 260×2 line without moving. Two slow sines
+  on the monotonic clock — never on `bt`, which resets every beat and would
+  restart the rocking on every tap (L1) — with deliberately coprime periods so the
+  pair never repeats inside a lesson.
+
+**And the origin has to be the object.** Both ride an `absoluteFill`, so a bare
+`rotate` swings about the middle of the 400×560 design space and throws the ship
+off its own water. `transformOrigin` in px, at the waterline amidships.

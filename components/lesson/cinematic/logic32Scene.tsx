@@ -89,10 +89,10 @@ const X = BEATS.map((b) => b.x ?? 191);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic32'));
 
-export default function Logic32Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Logic32Scene({ clock, bt, bi, i, picked, onPick, pickPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldSb = useHeld();
   const cv = useCarry(1);
@@ -125,7 +125,7 @@ export default function Logic32Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // R7c — refusing the package is what brings the smuggled claim into view, so the
       // line under the sentence surfaces as the lever travels to 'take the hidden claim
       // first' and sinks again at either answer that concedes it.
-      hidden: (hidOn ? (hidFade ? grow : 1) : 0) * (reacting ? 1 - (1 - dragPos.value) * tr : 1),
+      hidden: (hidOn ? (hidFade ? grow : 1) : 0) * (reacting ? 1 - (1 - pickPos.value) * tr : 1),
       tried: tried > 0 ? (triedFade ? grow : 1) : 0,
     };
   });
@@ -168,6 +168,7 @@ export default function Logic32Scene({ clock, bt, bi, i, picked, onPick, dragPos
 
   return (
     <Animated.View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[styles.layer, qStyle]}>
         {renderRow(ROW1, ROW1_L, ROW1_T)}
         {renderRow(ROW2, ROW2_L, ROW2_T)}

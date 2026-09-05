@@ -151,12 +151,30 @@ const st = StyleSheet.create({
     // to within ±8 of the bubble's own centre whatever else happens. To put the
     // tail at his chin the BUBBLE has to be at his chin.
     //
-    // 50 puts the tail's centre at 68.5, inside the chin's range at every pose
-    // and every phase of the breath, and still on the straight part of the edge
-    // for a one-, two- or three-row bubble. `check:quips` re-derives all of it
-    // from the rig, so a change to the figure's scale or the bubble's radius
-    // fails the build rather than quietly pointing at his knees again.
-    marginBottom: 50,
+    // ── AND THE CHIN WAS THE WRONG TARGET. SECOND ROUND. ──────────────────
+    //
+    // 50 put the tail at 68.5, which cleared the chin at 67.5 by a single point
+    // -- the lowest it could sit and still pass. The reader came back: the tail
+    // is "on the lower part of the left side ... I need it higher up so it is
+    // closer in parallel to the [stickman's] face."
+    //
+    // They are right, and the first fix aimed one head too low. The FACE is the
+    // head's centre, 87.1..92.3 above the band's bottom; the chin is where the
+    // head STOPS. A tail at the chin reads as a bubble resting on his shoulder,
+    // and on a two-row quip -- where the bubble is 70 tall -- it sat 26% up from
+    // the bottom, which is exactly the "lower part of the left side" described.
+    //
+    // BOTH NUMBERS MOVE, and that is the point the first round got right and
+    // then under-applied. Raising the tail alone runs it into the bubble's
+    // rounded corner; raising the bubble alone drags the tail up with it and
+    // leaves it low ON the bubble. 62 + 20 puts the tail at 87.5 -- dead in the
+    // face's range -- while keeping it 8 points clear of both corners on the
+    // SHORTEST bubble, which is the case that binds.
+    //
+    // `check:quips` re-derives all of it from the rig, and now requires the
+    // middle third of the head rather than anywhere between chin and crown --
+    // so this cannot quietly slide back down to his jaw a third time.
+    marginBottom: 62,
     marginLeft: -6,
   },
   tail: {
@@ -164,7 +182,10 @@ const st = StyleSheet.create({
     // wraps, so a tail measured from the top would climb with it and end up
     // above his head on a three-row day; measured from the bottom it stays put
     // relative to the ground, exactly as the figure does.
-    position: 'absolute', left: -4, bottom: 13,
+    // 20, not 13: with the bubble at 62 this lands the tail's centre at 87.5,
+    // level with the face. See the note on `marginBottom` above -- the pair is
+    // solved together, and check:quips holds both halves.
+    position: 'absolute', left: -4, bottom: 20,
     width: 11, height: 11,
     backgroundColor: PAPER_LIT,
     borderLeftWidth: 1, borderBottomWidth: 1,

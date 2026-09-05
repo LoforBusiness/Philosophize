@@ -90,7 +90,7 @@ export const BEATS: Pol23Beat[] = [
   {
     p: 41, x: 268, tags: 1, strip: 1, box: 1,
     interact: {
-      prompt: 'Slide the seam to how the situated view splits what you are.',
+      prompt: 'How does the situated view split what you are?',
       split: {
         left: 'HANDED TO YOU', right: 'CHOSEN BY YOU',
         start: 0.18,

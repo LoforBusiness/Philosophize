@@ -78,16 +78,16 @@ export const BEATS: Aes17Beat[] = [
     g: 41, x: 160, shape: 1, fear: 0.86, frame: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Set the lever to what is actually going on at a horror film.',
-      lever: {
-        start: 0,
-        stops: [
-          { id: 'nofear', reads: 'the fear is faked' },
-          { id: 'nofun', reads: 'the fun is faked' },
-          { id: 'real', reads: 'the fear is real, with the consequences taken out', correct: true },
+      prompt: 'At a horror film, what is actually going on?',
+      sort: {
+        chip: 'a horror film',
+        bins: [
+          { id: 'nofear', label: 'the fear is fake', reads: 'the fear is faked' },
+          { id: 'nofun', label: 'the fun is fake', reads: 'the fun is faked' },
+          { id: 'real', label: 'the fear is real', reads: 'the fear is real, with the consequences taken out', correct: true },
         ],
       },
-      explain: 'The far setting. The first two are a pair of doors you are invited to pick between, and there is a third. The fear is genuine and something has been removed from it — which is what every serious answer to this puzzle has in common.',
+      explain: 'The fear is real. The first two are a pair of doors you are invited to pick between, and there is a third. The fear is genuine and something has been removed from it — which is what every serious answer to this puzzle has in common.',
       xp: 5,
     },
   },

@@ -99,7 +99,7 @@ export const BEATS: Aes15Beat[] = [
     g: 41, rose: 1, tags: 5, cut: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Slide the seam to what survives being disinterested.',
+      prompt: 'What survives being disinterested?',
       split: {
         left: 'THE DELIGHT', right: 'YOUR STAKE IN IT',
         start: 0.04,

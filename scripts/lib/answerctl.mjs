@@ -36,7 +36,14 @@
  * button branch firing first clicks something inert, reports success, and leaves
  * the lesson stuck on that beat forever. Analogue first, buttons after.
  */
-export const CONTROL_IDS = ['drag-strip', 'lever-arc', 'split-bar', 'shape-plot', 'field-pad'];
+export const CONTROL_IDS = [
+  'drag-strip', 'split-bar', 'shape-plot', 'sort-bins', 'poll-ballot',
+  // RETIRED, and listed anyway. `lever-arc` and `field-pad` no longer appear in
+  // any lesson, but a harness that stops knowing how to drive them cannot audit
+  // an older branch or a revert -- and the cost of keeping two ids in a list is
+  // nothing against a sweep that silently measures less (21).
+  'lever-arc', 'field-pad',
+];
 
 /**
  * A JS expression string that answers whichever analogue control is on the beat.
@@ -52,6 +59,23 @@ export const ANSWER_CONTROL = `(() => {
     if (!el) continue;
     const r = el.getBoundingClientRect();
     if (!(r.width > 20 && r.height > 4)) continue;
+
+    // A POLL IS TAPPED, NOT DRAGGED, and it is the first control here that is.
+    // Its rows are real buttons, so the pointer sequence below would press
+    // whichever row happens to sit under the drag's start point -- which works by
+    // accident and stops working the moment the ballot is laid out differently.
+    // Press a row outright instead, and never the first: the ballot opens on a row
+    // that is deliberately not the answer, and a harness that always took row 0
+    // would answer correctly by luck in exactly the lessons where it opens there.
+    if (id === 'poll-ballot') {
+      try {
+        const rows = el.querySelectorAll('[role="button"]');
+        if (!rows.length) continue;
+        const row = rows[rows.length > 1 ? 1 : 0];
+        row.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
+        return id;
+      } catch (e) { return ''; }
+    }
 
     // Where to press and where to end up. A field pad is the only two-dimensional
     // one, so it is the only one that moves in y as well.

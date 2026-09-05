@@ -10,7 +10,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics5Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -113,7 +113,7 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics5'));
 
-export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -130,7 +130,7 @@ export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick, dra
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     const leaf = carry(cv, 0, n, LEAF[p], LEAF[n], tr);
     return {
-      fig: pose(s, FIG_X, GROUND, K_FIG, 1, 1),
+      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       bird: carry(cv, 1, n, BIRD[p], BIRD[n], tr),
       ego: carry(cv, 2, n, EGO[p], EGO[n], tr),
       leaf,
@@ -159,8 +159,12 @@ export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick, dra
     opacity: SCENE.value.bird,
     transform: [{ translateY: SCENE.value.hover }],
   }));
-  const wingL = useAnimatedStyle(() => ({ transform: [{ rotate: `${-18 - SCENE.value.flap}deg` }] }));
-  const wingR = useAnimatedStyle(() => ({ transform: [{ rotate: `${18 + SCENE.value.flap}deg` }] }));
+  // THE BEAT GOES ABOVE THE HORIZONTAL. It used to run -34deg..-2deg, so both tips
+  // were BELOW the shoulder on every frame of the cycle and the bird read as
+  // falling rather than holding station. A hover is worked for: the upstroke
+  // carries the tips well above the body and the downstroke barely dips under it.
+  const wingL = useAnimatedStyle(() => ({ transform: [{ rotate: `${10 - SCENE.value.flap}deg` }] }));
+  const wingR = useAnimatedStyle(() => ({ transform: [{ rotate: `${-10 + SCENE.value.flap}deg` }] }));
   const leafStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.leaf,
     transform: [{ rotate: `${SCENE.value.sway}deg` }],
@@ -211,8 +215,12 @@ export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick, dra
 
       {/* ── the hovering kestrel ─────────────────────────────────────────────── */}
       <Animated.View style={[styles.bird, birdStyle]} pointerEvents="none">
-        <Animated.View style={[styles.wing, styles.wingLeft, wingL]} />
-        <Animated.View style={[styles.wing, styles.wingRight, wingR]} />
+        <Animated.View style={[styles.wing, styles.wingLeft, wingL]}>
+          <View style={styles.wingTipL} />
+        </Animated.View>
+        <Animated.View style={[styles.wing, styles.wingRight, wingR]}>
+          <View style={styles.wingTipR} />
+        </Animated.View>
         <View style={styles.birdTail} />
         <View style={styles.birdBody} />
         <View style={styles.birdHead} />
@@ -350,19 +358,55 @@ const styles = StyleSheet.create({
   birdBody: { position: 'absolute', left: 42, top: 20, width: 24, height: 36, borderRadius: 12, backgroundColor: INK },
   birdHead: { position: 'absolute', left: 43, top: 2, width: 22, height: 22, borderRadius: 11, backgroundColor: INK },
   birdEye: { position: 'absolute', left: 47, top: 9, width: 4.5, height: 4.5, borderRadius: 2.25, backgroundColor: PAPER },
+  // ANGLED DOWN, because that is what the bird is DOING. The reference: "while
+  // hovering, kestrels keep their head still and their eyes fixed on the ground."
+  // A beak level with the horizon is a bird looking for nothing.
   birdBeak: {
-    position: 'absolute', left: 34, top: 10, width: 0, height: 0,
-    borderTopWidth: 4.5, borderBottomWidth: 4.5, borderRightWidth: 9,
+    position: 'absolute', left: 33, top: 13, width: 0, height: 0,
+    borderTopWidth: 4, borderBottomWidth: 4, borderRightWidth: 10,
     borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+    transform: [{ rotate: '26deg' }],
   },
+  // ── THE TAIL IS A FAN, AND THAT IS THE FIELD MARK ─────────────────────────
+  //
+  // It was a 12x24 rounded bar hanging straight down, which reads as a leg. The
+  // reference is unambiguous about the one thing a hovering kestrel always shows:
+  // "to maintain position without dropping, they extend the tips of their wings
+  // and FAN their tail feathers ... nearly always shows fan-shaped tail-band when
+  // hovering." A triangle whose apex is hidden behind the body comes out as the
+  // spread trapezoid a fanned tail actually is.
   birdTail: {
-    position: 'absolute', left: 48, top: 52, width: 12, height: 24, backgroundColor: INK,
-    borderBottomLeftRadius: 5, borderBottomRightRadius: 5,
+    position: 'absolute', left: 37, top: 34, width: 0, height: 0,
+    borderLeftWidth: 17, borderRightWidth: 17, borderBottomWidth: 44,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: INK,
   },
-  // Wings pivot at the body, so the flap sweeps the tips instead of sliding the bar.
-  wing: { position: 'absolute', top: 24, width: 42, height: 11, borderRadius: 5.5, backgroundColor: INK },
+  // ── A FALCON'S WING IS POINTED ────────────────────────────────────────────
+  //
+  // This was a uniform rounded bar, and a uniform bar sticking out of a body at a
+  // shallow angle is an ARM — which, with the old straight-down tail, is why the
+  // whole thing read as a scarecrow rather than a bird. Every reference for this
+  // bird says the same two words: "long, pointed wings ... a delicate, dagger-like
+  // form", which is what separates a falcon from a broad-winged hawk.
+  //
+  // THE PIVOT LIVES ON A WRAPPER, and it has to. A CSS triangle is a zero-size box
+  // with borders, so a percentage `transformOrigin` on the triangle itself resolves
+  // against nothing and collapses the flap to a corner spin. The wrapper carries
+  // the real 42x13 and the rotation; the triangle inside it is the shape.
+  // AT THE SHOULDER, NOT THE NECK. At top 22 the wings left the body immediately
+  // under the head and read as ears.
+  wing: { position: 'absolute', top: 29, width: 42, height: 13 },
   wingLeft: { left: 2, transformOrigin: '100% 50%' },
   wingRight: { left: 64, transformOrigin: '0% 50%' },
+  wingTipL: {
+    position: 'absolute', left: 0, top: 0, width: 0, height: 0,
+    borderTopWidth: 6.5, borderBottomWidth: 6.5, borderRightWidth: 42,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+  },
+  wingTipR: {
+    position: 'absolute', left: 0, top: 0, width: 0, height: 0,
+    borderTopWidth: 6.5, borderBottomWidth: 6.5, borderLeftWidth: 42,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
+  },
 
   // ── Ruskin's leaf ───────────────────────────────────────────────────────────
   leaf: { position: 'absolute', left: LEAF_L, top: LEAF_T, width: LEAF_W, height: LEAF_H, transformOrigin: '50% 100%' },
