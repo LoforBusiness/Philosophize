@@ -52,7 +52,7 @@ export const BEATS: Political33Beat[] = [
   },
   {
     p: 160, x: 52, open: 0.1, threat: 1,
-    text: 'A society that decides in advance which arguments may be heard. That society is the very thing you were trying not to become.',
+    text: 'A society deciding in advance which arguments may be heard has become what you set out to prevent.',
     dur: 3.3,
   },
   {

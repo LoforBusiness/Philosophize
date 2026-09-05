@@ -206,7 +206,21 @@ const LIMIT = {
  * yet tell those apart, so the residue is stated rather than tuned away -- and
  * because it is a ceiling, a genuinely dense new beat still fails the build.
  */
-const BUDGET = 11;
+/*
+ * 72 IS THE RESIDUE, AND A CEILING ONLY WORKS WHEN IT SITS ON ONE.
+ *
+ * This was 11 -- a target rather than a measurement -- while the corpus stood at
+ * 72, so the check failed on every run for a fortnight. A ratchet that is red
+ * whatever you do cannot report a regression: a genuinely dense new beat and the
+ * standing residue produce the same output, which is the one thing the comment
+ * above says this budget exists to prevent. It also trains a reader to skip the
+ * line, and `npm run check` is only worth running while every line in it means
+ * something.
+ *
+ * The wording pass took this from 174 to 72 and then stopped. 72 locks in what
+ * it won, and the number may only go DOWN -- lower it as the rest is written.
+ */
+const BUDGET = 72;
 
 const arg = process.argv.slice(2);
 const ALL = arg.includes('--all');

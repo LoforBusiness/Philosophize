@@ -75,7 +75,7 @@ export const BEATS: Aes6Beat[] = [
   },
   {
     p: 160, vast: 1, split: 3, mind: 1,
-    text: 'But the real jolt, Kant says, is your mind finding that it can hold something that big. The mountain is not the sublime thing.',
+    text: 'But the real jolt, Kant says, is your mind finding room for something so vast. The mountain is not the sublime thing.',
     dur: 3.2,
   },
   {
