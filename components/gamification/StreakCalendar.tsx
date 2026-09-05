@@ -1,6 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
-import { MotiView } from 'moti';
+import { useFocusEffect } from 'expo-router';
+import Animated, {
+  useSharedValue, useAnimatedStyle, withTiming, withRepeat, cancelAnimation, Easing,
+  type SharedValue,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { GILT, GILT_DEEP, GILT_SOFT, SLATE, STREAK_MILESTONES } from '@/constants/streak';
@@ -16,6 +20,27 @@ const INK = '#1A1A1A';
 const INK_SOFT = '#6B6B6B';
 const PAPER = '#FAFAF7';
 const FAINT = '#E4E1D8';
+
+// ── THE GRID ARRIVES ON FOCUS, AND IT IS ONE SHARED VALUE ───────────────────
+//
+// Both of these were Moti: the cells carried `from={{ scale: 0.8, opacity: 0 }}`
+// and today's ring carried a looping `animate`. Moti's `from` fires on MOUNT,
+// and a tab screen mounts once -- so the bloom played on the first visit and
+// never again, and once this screen joined the warm-up it played at startup
+// behind the launch animation instead. The loop was worse: nothing stopped it,
+// so a ring nobody could see went on breathing on the UI thread for the rest of
+// the session. That is the defect StreakMascot's frame callback already names --
+// "a small cost and a permanent one, which is the worse kind".
+//
+// Reanimated rather than a focus-flag prop, because `freezeOnBlur` suspends a
+// blurred screen's RENDERS: a state change made on the way out is not committed
+// until the way back in, by which time it has been overwritten. A shared value
+// is set imperatively and does not need a render to happen at all.
+const BLOOM_STEP = 8;      // ms between one cell and the next
+const BLOOM_HOLD = 240;    // where the last cell starts, however long the month
+const BLOOM_CELL = 200;    // how long one cell takes
+const BLOOM_MS = BLOOM_HOLD + BLOOM_CELL;
+const PULSE_MS = 1800;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE STREAK MONTH.
@@ -211,6 +236,25 @@ export default function StreakCalendar({ activeDays, restDays, today, since, siz
   const pitch = gridW > 0 ? gridW / 7 : 0;
   const railH = Math.round(size * 0.3);
 
+  // See the note by BLOOM_STEP. Cancelled on the way out so the repeat cannot
+  // outlive the visit.
+  const bloom = useSharedValue(0);
+  const pulse = useSharedValue(0);
+  useFocusEffect(
+    useCallback(() => {
+      bloom.value = 0;
+      bloom.value = withTiming(1, { duration: BLOOM_MS, easing: Easing.linear });
+      pulse.value = 0;
+      pulse.value = withRepeat(
+        withTiming(1, { duration: PULSE_MS, easing: Easing.linear }), -1, false,
+      );
+      return () => {
+        cancelAnimation(bloom);
+        cancelAnimation(pulse);
+      };
+    }, [bloom, pulse]),
+  );
+
   return (
     <View>
       <View style={styles.head}>
@@ -317,6 +361,8 @@ export default function StreakCalendar({ activeDays, restDays, today, since, siz
                     size={size}
                     index={r * 7 + i}
                     milestone={!!c.key && milestone.has(c.key)}
+                    bloom={bloom}
+                    pulse={pulse}
                   />
                 </View>
               ))}
@@ -354,10 +400,28 @@ function Legend({ fill, rim, label }: { fill: string; rim?: string; label: strin
 }
 
 function Cell({
-  cell, size, index, milestone,
+  cell, size, index, milestone, bloom, pulse,
 }: {
   cell: CalendarDay; size: number; index: number; milestone: boolean;
+  bloom: SharedValue<number>; pulse: SharedValue<number>;
 }) {
+  // HOOKS ABOVE THE EARLY RETURN. A blank cell returns null, and a hook below
+  // that line changes the hook count between renders -- §17's first rule, and
+  // the one that took down a whole route tree the last time it was broken.
+  const start = Math.min(index * BLOOM_STEP, BLOOM_HOLD) / BLOOM_MS;
+  const span = BLOOM_CELL / BLOOM_MS;
+  const inStyle = useAnimatedStyle(() => {
+    const raw = (bloom.value - start) / span;
+    const u = raw < 0 ? 0 : raw > 1 ? 1 : raw;
+    const k = 1 - u;
+    const e = 1 - k * k * k;                 // decelerate, the app's entrance curve
+    return { opacity: e, transform: [{ scale: 0.8 + 0.2 * e }] };
+  });
+  const ringStyle = useAnimatedStyle(() => ({
+    opacity: 0.5 * (1 - pulse.value),
+    transform: [{ scale: 1 + 0.26 * pulse.value }],
+  }));
+
   if (cell.key === null) return null;
 
   const lit = cell.state === 'done';
@@ -372,11 +436,11 @@ function Cell({
   // reader comes to feel good about days they already did.
 
   return (
-    <MotiView
-      from={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ type: 'timing', duration: 200, delay: Math.min(index * 8, 240) }}
-      style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}
+    <Animated.View
+      style={[
+        { width: size, height: size, alignItems: 'center', justifyContent: 'center' },
+        inStyle,
+      ]}
     >
       {/* THE COLLAR — a milestone landed on this day. Struck OUTSIDE the token,
           for the reason §7 gives about the rank pin's own collar: the part of a
@@ -400,18 +464,19 @@ function Cell({
           the only moving thing on the screen — which is what makes it read as an
           invitation rather than as one more empty ring. */}
       {isToday ? (
-        <MotiView
-          from={{ scale: 1, opacity: 0.5 }}
-          animate={{ scale: 1.26, opacity: 0 }}
-          transition={{ type: 'timing', duration: 1800, loop: true, repeatReverse: false }}
-          style={{
-            position: 'absolute',
-            width: size,
-            height: size,
-            borderRadius: size / 2,
-            borderWidth: 2,
-            borderColor: GILT,
-          }}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            {
+              position: 'absolute',
+              width: size,
+              height: size,
+              borderRadius: size / 2,
+              borderWidth: 2,
+              borderColor: GILT,
+            },
+            ringStyle,
+          ]}
         />
       ) : null}
 
@@ -460,7 +525,7 @@ function Cell({
           </Text>
         </View>
       )}
-    </MotiView>
+    </Animated.View>
   );
 }
 

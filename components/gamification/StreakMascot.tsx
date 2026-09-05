@@ -73,11 +73,29 @@ export default function StreakMascot({ mood, alive, delay = 0 }: Props) {
   }, false);
   const frameRef = useRef<{ setActive: (v: boolean) => void } | null>(null);
   frameRef.current = frame;
+
+  const inV = useSharedValue(0);
+  const say = useSharedValue(0);
+
+  // THE ENTRANCE RIDES ALONG, AND IT USED TO BE KEYED ON MOUNT. A tab screen is
+  // mounted once and never unmounted, so `useEffect(..., [])` meant the walk-in
+  // played on the FIRST visit and on no visit after it -- and once this screen
+  // joined the warm-up (see app/(app)/_layout.tsx) that one showing moved to
+  // startup, where the reader is looking at Home and cannot see it. Warming a
+  // screen spends every entrance it keys on mount; the entrance has to belong to
+  // the ARRIVAL instead, which is what this effect already is.
+  //
+  // Set to 0 first: these are shared values on a mounted tree, so they hold
+  // whatever the last visit left them at.
   useFocusEffect(
     useCallback(() => {
       frameRef.current?.setActive(true);
+      inV.value = 0;
+      say.value = 0;
+      inV.value = withDelay(delay, withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) }));
+      say.value = withDelay(delay + 460, withTiming(1, { duration: 380, easing: Easing.out(Easing.cubic) }));
       return () => frameRef.current?.setActive(false);
-    }, []),
+    }, [delay, inV, say]),
   );
 
   // THE POSE CROSSES ON A SHARED VALUE, NOT A PROP. `emoteAnyLive` takes the gesture
@@ -90,13 +108,6 @@ export default function StreakMascot({ mood, alive, delay = 0 }: Props) {
   const D = useDerivedValue<Bundle>(() =>
     pose(emoteAnyLive(code.value, clock.value, clock.value), FIG_X, GROUND, K, 1, 1),
   );
-
-  const inV = useSharedValue(0);
-  const say = useSharedValue(0);
-  useEffect(() => {
-    inV.value = withDelay(delay, withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) }));
-    say.value = withDelay(delay + 460, withTiming(1, { duration: 380, easing: Easing.out(Easing.cubic) }));
-  }, []);
 
   const figStyle = useAnimatedStyle(() => ({
     opacity: inV.value,

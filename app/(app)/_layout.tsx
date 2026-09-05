@@ -56,7 +56,30 @@ import { useUIStore } from '@/stores/uiStore';
  * out means the one tab a reader is certain to press next is the one still
  * unbuilt. It is first for the same reason.
  */
-const WARM = ['index', 'branches', 'philosophers', 'stats', 'pass', 'profile'] as const;
+/**
+ * AND A HIDDEN ROUTE CAN NEED IT MORE THAN A TAB DOES. `streak` is pushed from
+ * the count on Home and the count on Profile, so it is one tap from the two
+ * screens a reader is on most -- and it was the only such route left lazy, which
+ * means every reader paid for its whole tree INSIDE the 340ms cross-dissolve
+ * that was supposed to be showing it to them. That is the "it doesn't open
+ * cleanly the first time" report, and it is the same defect `lazy: false` was
+ * introduced to fix for tabs.
+ *
+ * `settings`, `paywall` and `devlessons` stay lazy on purpose. Settings is two
+ * taps in behind a gear nobody presses twice a day; the paywall's expensive half
+ * is `PaywallContent`, which the Pass tab already builds; and devlessons is a
+ * tester. Warming is not free -- every entry is one more tree mounted for the
+ * session -- so it is spent on the route a reader actually opens from a place
+ * they are already standing.
+ *
+ * AND IT GOES THIRD, NOT LAST. Every step is 420ms, so the tail of this list
+ * is not built until about 3.7s after the launch screen lifts -- warming a
+ * screen into a slot the reader has already walked past is the weakest
+ * version of the fix. Streak is the one entry here that is not a tab: every
+ * other destination costs a deliberate press on the bar first, and this one
+ * is a box on the screen the reader is already standing on.
+ */
+const WARM = ['index', 'branches', 'streak', 'philosophers', 'stats', 'pass', 'profile'] as const;
 
 // `launchDone` fires when the launch screen starts to LIFT, not when it leaves:
 // its own art still has a 520ms dissolve to run, and Home's arrival stagger
@@ -244,7 +267,7 @@ export default function AppLayout() {
           to outrank Learn to matter, and it is already one tap from every screen
           that shows the count. (The bar does now carry six; see the Pass note
           above for why that one earned the room and this one does not.) */}
-      <Tabs.Screen name="streak" options={{ href: null }} />
+      <Tabs.Screen name="streak" options={{ href: null, lazy: !built('streak') }} />
       {/* The lesson tester. Hidden from the tab bar AND gated inside the screen —
           a route can always be reached by URL, so the tab config is not the lock. */}
       <Tabs.Screen name="devlessons" options={{ href: null }} />

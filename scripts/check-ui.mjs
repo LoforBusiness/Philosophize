@@ -1227,5 +1227,102 @@ function stripJs(src) {
   ok(H.pressPoint({}) === null, 'and a press with no point at all is not a press');
 }
 
+// -- 12 · WARMING A SCREEN SPENDS ANY ENTRANCE IT KEYS ON MOUNT ---------------
+//
+// app/(app)/_layout.tsx builds screens before the reader asks for them, so the
+// first visit is instant instead of paying for a whole tree inside a 340ms
+// cross-dissolve. The price is that MOUNT stops meaning ARRIVAL, and three
+// things break quietly when it does:
+//
+//   · `useEffect(..., [])` and Moti's `from` now fire at startup, behind the
+//     launch animation, where nobody can see them.
+//   · A tab screen is mounted once and never unmounted, so that one showing is
+//     the only one there will ever be -- the entrance is not merely mistimed,
+//     it is spent.
+//   · An unbounded repeat is worse again: nothing stops it, so it animates on
+//     the UI thread for the rest of the session on a screen nobody is on. That
+//     is StreakMascot's own note -- "a small cost and a permanent one, which is
+//     the worse kind".
+//
+// `freezeOnBlur` cannot save any of it, because it suspends RENDERS and all
+// three of these are animations.
+//
+// SCOPED TO WARMED **HIDDEN** ROUTES AND THE COMPONENTS ONLY THEY DRAW. A tab
+// has been warmed since the warm-up existed, so its authors already had to
+// think about this; a hidden route was lazy until somebody put it in the list,
+// and its entrances were written when mount and arrival were the same event.
+// `streak` is the first, and the next one is caught the day it is added.
+{
+  const stripc = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+
+  const walk = (dir, out = []) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (e.name === 'node_modules' || e.name.startsWith('.')) continue;
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) walk(full, out);
+      else if (/\.tsx?$/.test(e.name)) out.push(full);
+    }
+    return out;
+  };
+  const SRC = [...walk(path.join(REPO, 'app')), ...walk(path.join(REPO, 'components'))];
+
+  const layout = stripc(fs.readFileSync('app/(app)/_layout.tsx', 'utf8'));
+  const warm = [...(/const WARM = \[([^\]]*)\]/.exec(layout)?.[1] ?? '').matchAll(/'([a-z]+)'/g)]
+    .map((m) => m[1]);
+  ok(warm.length >= 6, 'the warm list was read out of the layout', warm.join(' · '));
+
+  // A NAME IN THE LIST DOES NOTHING ON ITS OWN. `lazy` is read per screen off
+  // the descriptor on every render, so a screen added to WARM and never given
+  // `lazy: !built(...)` is warmed in the comment and lazy in the app. Nothing
+  // else would ever say so.
+  const screens = [...layout.matchAll(/<Tabs\.Screen\s+name="([a-z]+)"\s+options=\{\{([\s\S]*?)\}\}/g)]
+    .reduce((m, x) => m.set(x[1], x[2]), new Map());
+  const unwired = warm.filter((w) => !(screens.get(w) ?? '').includes("lazy: !built('" + w + "')"));
+  ok(unwired.length === 0,
+    'every warmed screen actually reads its lazy flag',
+    unwired.length ? unwired.join(', ') : warm.length + ' wired');
+
+  const hidden = warm.filter((w) => (screens.get(w) ?? '').includes('href: null'));
+  ok(hidden.length >= 1, 'and at least one warmed route is one a tab cannot reach',
+    hidden.join(' · ') || 'none');
+
+  for (const h of hidden) {
+    const screenRel = path.join('app', '(app)', h + '.tsx');
+    if (!fs.existsSync(screenRel)) { ok(false, h + ': the screen file exists', screenRel); continue; }
+
+    // The screen, plus the components ONLY it draws. A shared component is left
+    // alone deliberately: it is warmed by half the app already, and flagging it
+    // here would be reporting somebody else's screen through this one.
+    const own = [screenRel];
+    for (const m of fs.readFileSync(screenRel, 'utf8').matchAll(/from '@\/(components\/[^']+)'/g)) {
+      const file = path.join(REPO, m[1] + '.tsx');
+      if (!fs.existsSync(file)) continue;
+      const users = SRC.filter((f) => f !== path.join(REPO, screenRel)
+        && new RegExp("from '@/" + m[1] + "'").test(fs.readFileSync(f, 'utf8')));
+      if (users.length === 0) own.push(path.relative(REPO, file));
+    }
+
+    for (const rel of own) {
+      const t = stripc(fs.readFileSync(rel, 'utf8'));
+      const name = path.basename(rel);
+
+      ok(!/\bfrom=\{/.test(t), name + ': no Moti entrance keyed on mount',
+        "`from` fires once, at mount, which is now startup");
+
+      const mounted = [...t.matchAll(/useEffect\(\s*\(\)\s*=>\s*\{([\s\S]*?)\}\s*,\s*\[\s*\]\s*\)/g)]
+        .filter((m) => /\bwith(Timing|Spring|Delay|Repeat|Sequence)\(/.test(m[1]));
+      ok(mounted.length === 0, name + ': no animation started from an empty-deps effect',
+        mounted.length ? mounted.length + ' found' : 'the entrance belongs to the arrival');
+
+      // A repeat has to be turned off by the same thing that turned it on.
+      if (/\bwithRepeat\(/.test(t)) {
+        ok(/useFocusEffect\(/.test(t) && /cancelAnimation\(/.test(t),
+          name + ': its repeat is started on focus and cancelled on blur',
+          'nothing else stops one on a screen that never unmounts');
+      }
+    }
+  }
+}
+
 console.log(bad === 0 ? '\nui system: all clear.' : `\n${bad} ui check(s) failed.`);
 process.exit(bad === 0 ? 0 : 1);
