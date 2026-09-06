@@ -356,14 +356,20 @@ export default function StreakCalendar({ activeDays, restDays, today, since, siz
                   key={i}
                   style={[styles.slot, pitch > 0 ? { width: pitch } : { flex: 1 }]}
                 >
-                  <Cell
-                    cell={c}
-                    size={size}
-                    index={r * 7 + i}
-                    milestone={!!c.key && milestone.has(c.key)}
-                    bloom={bloom}
-                    pulse={pulse}
-                  />
+                  {/* The SLOT is what holds the column; a blank day draws
+                      nothing, so it does not need a component to draw it. Eleven
+                      of the forty-two on an average month were mounting one and
+                      registering its hooks to return null. */}
+                  {c.key === null ? null : (
+                    <Cell
+                      cell={c}
+                      size={size}
+                      index={r * 7 + i}
+                      milestone={milestone.has(c.key)}
+                      bloom={bloom}
+                      pulse={pulse}
+                    />
+                  )}
                 </View>
               ))}
             </View>
@@ -399,6 +405,48 @@ function Legend({ fill, rim, label }: { fill: string; rim?: string; label: strin
   );
 }
 
+/**
+ * TODAY, UNFED, BREATHES -- AND IT IS A COMPONENT SO THAT ONE RING COSTS ONE
+ * MAPPER.
+ *
+ * This style used to be declared in `Cell` and rendered by one cell in
+ * forty-two, which is a whole frame's work for nothing: `useAnimatedStyle`
+ * registers its mapper in an UNCONDITIONAL effect (react-native-reanimated,
+ * hook/useAnimatedStyle.js -- `startMapper(fun, inputs)`), so it re-runs
+ * whenever the values it reads change whether or not the style was ever
+ * attached to a view. `pulse` is a `withRepeat(..., -1)` and never stops, and
+ * `buildMonth` returns "always 42 cells so the grid never reflows". So the
+ * breathing ring was running forty-two worklets a frame, forty-one of them into
+ * an empty descriptor set, allocating a style object each time -- on the UI
+ * thread, which is the thread Android scrolls with.
+ *
+ * The rule, and it is not about this ring: a style driven by an animation that
+ * never ends belongs in the component that renders it UNCONDITIONALLY. Declared
+ * one level up and rendered behind a `?`, it costs the branch that was not taken.
+ */
+function TodayRing({ size, pulse }: { size: number; pulse: SharedValue<number> }) {
+  const ringStyle = useAnimatedStyle(() => ({
+    opacity: 0.5 * (1 - pulse.value),
+    transform: [{ scale: 1 + 0.26 * pulse.value }],
+  }));
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        {
+          position: 'absolute',
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          borderWidth: 2,
+          borderColor: GILT,
+        },
+        ringStyle,
+      ]}
+    />
+  );
+}
+
 function Cell({
   cell, size, index, milestone, bloom, pulse,
 }: {
@@ -408,6 +456,10 @@ function Cell({
   // HOOKS ABOVE THE EARLY RETURN. A blank cell returns null, and a hook below
   // that line changes the hook count between renders -- §17's first rule, and
   // the one that took down a whole route tree the last time it was broken.
+  //
+  // `bloom` settles at 1 and stops, so this mapper goes idle with it. That is
+  // the whole reason it is allowed to live here and the ring's is not -- see
+  // TodayRing.
   const start = Math.min(index * BLOOM_STEP, BLOOM_HOLD) / BLOOM_MS;
   const span = BLOOM_CELL / BLOOM_MS;
   const inStyle = useAnimatedStyle(() => {
@@ -417,11 +469,6 @@ function Cell({
     const e = 1 - k * k * k;                 // decelerate, the app's entrance curve
     return { opacity: e, transform: [{ scale: 0.8 + 0.2 * e }] };
   });
-  const ringStyle = useAnimatedStyle(() => ({
-    opacity: 0.5 * (1 - pulse.value),
-    transform: [{ scale: 1 + 0.26 * pulse.value }],
-  }));
-
   if (cell.key === null) return null;
 
   const lit = cell.state === 'done';
@@ -464,20 +511,7 @@ function Cell({
           the only moving thing on the screen — which is what makes it read as an
           invitation rather than as one more empty ring. */}
       {isToday ? (
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            {
-              position: 'absolute',
-              width: size,
-              height: size,
-              borderRadius: size / 2,
-              borderWidth: 2,
-              borderColor: GILT,
-            },
-            ringStyle,
-          ]}
-        />
+        <TodayRing size={size} pulse={pulse} />
       ) : null}
 
       {lit ? (

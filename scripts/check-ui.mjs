@@ -1320,6 +1320,67 @@ function stripJs(src) {
           name + ': its repeat is started on focus and cancelled on blur',
           'nothing else stops one on a screen that never unmounts');
       }
+
+      // -- A FRAME CALLBACK NEEDS A WAY OUT --------------------------------
+      //
+      // `useFrameCallback` runs its worklet EVERY frame for as long as the
+      // component is mounted, and these screens scroll: the streak mascot is
+      // 150 units at the top of a page about twice the viewport, driving a rig
+      // solve and twenty-four view transforms, and `useFocusEffect` can only
+      // say whether the SCREEN is the one on the glass -- not whether the part
+      // of it he stands in still is. That is the same "one level too coarse"
+      // `useInView`'s own header records for the rank chart, and it is charged
+      // to the UI thread, which is the thread the scroll is drawn on.
+      //
+      // So the worklet has to be able to give a frame back. The test is the
+      // guard's SHAPE rather than its name: what it reads is the caller's
+      // business, and only that there IS a way out is this file's.
+      for (const m of t.matchAll(/useFrameCallback\(\([\s\S]*?\n\s*\},\s*(?:true|false)\)/g)) {
+        ok(/\breturn;/.test(m[0]),
+          name + ': its frame callback can decline a frame',
+          'nothing else stops one on a screen the reader has scrolled past');
+      }
+
+      // ── AND A STYLE THAT NEVER RESTS MUST BELONG TO WHAT IT DRAWS ────────
+      //
+      // `useAnimatedStyle` registers its mapper in an UNCONDITIONAL effect --
+      // react-native-reanimated/lib/module/hook/useAnimatedStyle.js, where
+      // `startMapper(fun, inputs)` sits in a plain useEffect -- so it re-runs
+      // whenever the values it reads change, WHETHER OR NOT the style was ever
+      // attached to a view. A style whose inputs come to rest goes idle with
+      // them and costs nothing. One driven by an endless `withRepeat` never
+      // does.
+      //
+      // So declaring it one level up and rendering it behind a `?` charges the
+      // branch that was not taken, once per instance, every frame, forever. The
+      // streak grid is "always 42 cells so the grid never reflows", and its
+      // breathing today-ring was declared in the cell: forty-two worklets a
+      // frame for one ring, forty-one of them writing into an empty descriptor
+      // set, on the thread Android scrolls with.
+      //
+      // The test is deliberately blunt: a component that owns such a style may
+      // not branch in its return. It is not that branching is wrong -- it is
+      // that a component with branches is a component drawing several things,
+      // and a never-ending style belongs to the one thing it draws.
+      {
+        const endless = [...t.matchAll(/(\w+)\.value\s*=\s*withRepeat\(([\s\S]{0,240}?)\)\s*;/g)]
+          .filter((m) => /,\s*-1\b/.test(m[2]))
+          .map((m) => m[1]);
+        // Top-level functions only, which is every component in these files.
+        const bodies = t.split(/\n(?=(?:export default )?function \w)/);
+        for (const b of bodies) {
+          const fn = /^(?:export default )?function (\w+)/.exec(b.trim());
+          if (!fn) continue;
+          const styles = [...b.matchAll(/=\s*useAnimatedStyle\(\(\)\s*=>\s*([\s\S]*?)\n\s*\}\)\);/g)];
+          const drivesForever = styles.some((m) =>
+            endless.some((e) => new RegExp('\\b' + e + '\\.value\\b').test(m[1])));
+          if (!drivesForever) continue;
+          const ret = b.slice(b.indexOf('return ('));
+          ok(!/\?|&&/.test(ret),
+            name + ': ' + fn[1] + ' draws one thing, so its endless style costs one mapper',
+            'a branch here means the style is charged where it is not drawn');
+        }
+      }
     }
   }
 }

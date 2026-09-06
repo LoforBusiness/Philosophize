@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import SketchIcon from '@/components/shared/SketchIcon';
@@ -114,6 +115,33 @@ export default function StreakScreen() {
 
   const toNext = next ? next.at - shown : 0;
 
+  // ── HE STOPS WHEN HE HAS BEEN SCROLLED PAST ───────────────────────────────
+  //
+  // The mascot runs a rig solve and twenty-four view transforms every frame, and
+  // `useFocusEffect` only ever knew whether this SCREEN was the one on the glass
+  // — not whether the part of it he stands in still was. See the note in
+  // StreakMascot.
+  //
+  // It is an animated scroll handler and a shared value rather than `onScroll`
+  // and state, for the reason `useInView`'s header spells out at length: the
+  // measure is never the cost, the re-render is, and a re-render timed to land
+  // mid-flick is the worst moment there is. This writes on the UI thread and
+  // never renders anything.
+  //
+  // `heroBottom` starts effectively infinite so he animates until something has
+  // actually been measured. A watcher that has not reported yet must not be able
+  // to freeze him.
+  const offStage = useSharedValue(false);
+  const heroBottom = useSharedValue(Number.MAX_SAFE_INTEGER);
+  const onHeroLayout = useCallback((e: LayoutChangeEvent) => {
+    const { y, height } = e.nativeEvent.layout;
+    heroBottom.value = y + height;
+  }, [heroBottom]);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    const gone = e.contentOffset.y > heroBottom.value;
+    if (gone !== offStage.value) offStage.value = gone;
+  });
+
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScreenTransition>
@@ -125,13 +153,18 @@ export default function StreakScreen() {
           <View style={styles.back} />
         </View>
 
-        <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+        <Animated.ScrollView
+          contentContainerStyle={styles.body}
+          showsVerticalScrollIndicator={false}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+        >
           {/* ── THE HERO ────────────────────────────────────────────────────
               The count is the loudest thing on the screen and it takes the ember
               when it is alive and the ash when it is not. That is the one colour
               §19 and constants/streak.ts allow, in the one place they allow it. */}
-          <View style={styles.hero}>
-            <StreakMascot mood={mood} alive={alive} />
+          <View style={styles.hero} onLayout={onHeroLayout}>
+            <StreakMascot mood={mood} alive={alive} offStage={offStage} />
             <Text style={[styles.count, { color: alive ? GILT : SLATE }]}>{shown}</Text>
             <Text style={styles.countWord}>
               {alive ? `DAY${shown === 1 ? '' : 'S'} RUNNING` : 'STREAK LAPSED'}
@@ -216,7 +249,7 @@ export default function StreakScreen() {
               costs you nothing. You earn one every {restEarnEvery(isPro)} days.
             </Text>
           </View>
-        </ScrollView>
+        </Animated.ScrollView>
       </ScreenTransition>
     </SafeAreaView>
   );

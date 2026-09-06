@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import Animated, {
   useSharedValue, useDerivedValue, useFrameCallback, useAnimatedStyle,
-  withTiming, withDelay, Easing,
+  withTiming, withDelay, Easing, type SharedValue,
 } from 'react-native-reanimated';
 import Stickman from '@/components/lesson/cinematic/Stickman';
 import { pose, type Bundle } from '@/components/lesson/cinematic/rig';
@@ -47,9 +47,15 @@ interface Props {
   alive: boolean;
   /** Play the entrance. Off for a mascot that is already on screen. */
   delay?: number;
+  /**
+   * True while he has been scrolled up out of the viewport. Optional, and
+   * ABSENT MEANS VISIBLE -- a mascot with no watcher animates, rather than one
+   * with a broken watcher freezing.
+   */
+  offStage?: SharedValue<boolean>;
 }
 
-export default function StreakMascot({ mood, alive, delay = 0 }: Props) {
+export default function StreakMascot({ mood, alive, delay = 0, offStage }: Props) {
   const clock = useSharedValue(0);
 
   // AUTOSTART OFF, AND STOPPED WHEN THIS IS NOT THE SCREEN YOU ARE ON.
@@ -65,8 +71,23 @@ export default function StreakMascot({ mood, alive, delay = 0 }: Props) {
   // and the same one `HomeHeader` had to be given after it shipped without it —
   // its comment is the one worth reading: "It is a small cost and it is a
   // permanent one, which is the worse kind."
+  //
+  // AND FOCUS WAS ONE LEVEL TOO COARSE, which is exactly what `useInView`'s own
+  // header records happening to the rank chart: being on the streak SCREEN is
+  // not being at the part of it he stands in. He is 150 units tall at the very
+  // top of a page about twice the viewport, so for most of the scroll he is
+  // gone — and a rig solve feeding twenty-four transforms went on running, on
+  // the UI thread, which is the thread the scroll is being drawn by.
+  //
+  // Stopping the CLOCK is what stops all of it: `D` is derived from it, and the
+  // twenty-four styles are derived from `D`, so a clock that does not advance
+  // costs one early return a frame instead of twenty-six worklets and
+  // twenty-four native prop writes. Nothing jumps on the way back, because the
+  // paused frames are never accumulated — `dt` is taken from the frame that
+  // actually ran.
   const frame = useFrameCallback((f) => {
     'worklet';
+    if (offStage?.value) return;
     let dt = (f.timeSincePreviousFrame ?? 16) / 1000;
     if (dt > 0.05) dt = 0.05;
     clock.value += dt;
