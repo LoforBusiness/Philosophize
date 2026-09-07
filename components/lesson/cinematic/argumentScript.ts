@@ -239,7 +239,7 @@ export const BEATS: Beat[] = [
   {
     act: 4,
     vol: 3, reasons: 0,
-    text: 'So let us give our two fighters the same disagreement — and reasons this time.',
+    text: 'So give the two fighters the same disagreement — and reasons this time.',
     dur: 3.6,
   },
   {

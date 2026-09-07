@@ -26,7 +26,7 @@ export interface Aes12Beat extends BaseBeat {
 
 export const BEATS: Aes12Beat[] = [
   {
-    p: 35, r: 0, rx: 456, ticks: 0, box: 0,
+    p: 383, r: 0, rx: 456, ticks: 0, box: 0,
     text: 'A poem hangs where anyone can read it. The poet stands across the square and says every reader has got the poem wrong.',
     dur: 4.2,
   },
@@ -42,7 +42,7 @@ export const BEATS: Aes12Beat[] = [
     dur: 1.8,
   },
   {
-    p: 22, r: 21, rx: 224, ticks: 3, box: 1,
+    p: 170, r: 21, rx: 224, ticks: 3, box: 1,
     text: 'Every reader who stops adds another mark, and every mark says the same word. Sealed inside the poet’s head is whatever he actually meant.',
     cite: 'Two places meaning could live',
     dur: 4.8,
@@ -71,7 +71,7 @@ export const BEATS: Aes12Beat[] = [
     dur: 1.8,
   },
   {
-    p: 20, r: 4, rx: 224, ticks: 5, box: 1,
+    p: 384, r: 4, rx: 224, ticks: 5, box: 1,
     interact: {
       prompt: 'Where does the meaning live?',
       split: {
@@ -89,7 +89,7 @@ export const BEATS: Aes12Beat[] = [
     dur: 1.0,
   },
   {
-    p: 30, r: 5, rx: 224, ticks: 5, box: 1, pick: 1,
+    p: 169, r: 5, rx: 224, ticks: 5, box: 1, pick: 1,
     interact: {
       prompt: 'The poet says the line was a joke. Tap what actually settles the poem’s meaning.',
       explain: 'The trap: the box feels like the source, so it feels authoritative. But nobody can open it, and an intention nobody can inspect settles nothing. The poem on the board is the one thing every reader can actually check.',

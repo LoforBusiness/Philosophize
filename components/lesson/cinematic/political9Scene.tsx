@@ -10,7 +10,8 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political9Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER } from './cinematicKit';
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, reactPose,
+} from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -131,7 +132,7 @@ export default function Political9Scene({ clock, bt, bi, i, picked, onPick }: Sc
 
     return {
       c0: member(0), c1: member(1), c2: member(2), c3: member(3),
-      one: pose(oneS, ONE_X, GROUND, K, -1, 1),
+      one: reactPose(oneS, ONE_X, GROUND, K, -1, 1),
       tally: (tallyOn ? 1 : 0) * (tallyFade ? grow : 1),
       // The line is DRAWN, downward, on the beat it arrives — it is the one thing on
       // this stage that answers the advance, so it gets to be the thing that moves.
@@ -200,10 +201,10 @@ export default function Political9Scene({ clock, bt, bi, i, picked, onPick }: Sc
         })}
 
       <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={C0} k={K} />
-      <Stickman D={C1} k={K} />
-      <Stickman D={C2} k={K} />
-      <Stickman D={C3} k={K} />
+      <Stickman role="crowd" D={C0} k={K} />
+      <Stickman role="crowd" D={C1} k={K} />
+      <Stickman role="crowd" D={C2} k={K} />
+      <Stickman role="crowd" D={C3} k={K} />
       <Stickman D={OF} k={K} />
     </Animated.View>
   );

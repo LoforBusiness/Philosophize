@@ -23,7 +23,7 @@ export interface Political34Beat extends BaseBeat {
 
 export const BEATS: Political34Beat[] = [
   {
-    p: 25, x: 50, level: 0, reach: 0,
+    p: 172, x: 50, level: 0, reach: 0,
     text: 'Five rings, from you in the middle out to everybody. Every political question has to be answered in one of them.',
     dur: 3.8,
   },
@@ -40,7 +40,7 @@ export const BEATS: Political34Beat[] = [
     dur: 4.6,
   },
   {
-    p: 4, x: 50, level: 1, reach: 0.2,
+    p: 457, x: 50, level: 1, reach: 0.2,
     text: 'And it goes wrong the other way too. A distant office setting one school’s timetable has all the authority and none of the knowledge.',
     cite: 'And the other way',
     dur: 4.8,
@@ -59,7 +59,7 @@ export const BEATS: Political34Beat[] = [
     dur: 4.0,
   },
   {
-    p: 160, x: 50, level: 0, reach: 0.72, live: 1,
+    p: 455, x: 50, level: 0, reach: 0.72, live: 1,
     interact: {
       prompt: 'The dashed ring is how far the effects reach. Drag the deciding ring to match it.',
       drag: {
@@ -89,7 +89,7 @@ export const BEATS: Political34Beat[] = [
     dur: 1.8,
   },
   {
-    p: 45, x: 50, level: 0.72, reach: 0.72,
+    p: 447, x: 50, level: 0.72, reach: 0.72,
     interact: {
       prompt: 'Someone says every choice should be made as locally as possible. Wrong how?',
       cards: [

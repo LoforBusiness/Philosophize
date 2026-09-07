@@ -32,17 +32,17 @@ export interface Aesthetics37Beat extends BaseBeat {
 
 export const BEATS: Aesthetics37Beat[] = [
   {
-    p: 25, x: 54, staves: 1, score: 1,
+    p: 379, x: 54, staves: 1, score: 1,
     text: 'Two performances tonight. The top one is a written piece — every note existed before anybody walked on.',
     dur: 3.8,
   },
   {
-    p: 2, x: 54, staves: 1, score: 1, played: 1,
+    p: 384, x: 54, staves: 1, score: 1, played: 1,
     text: 'The bottom line is a solo. Watch the line arrive with nothing above it and nothing to compare it against.',
     dur: 4.2,
   },
   {
-    p: 4, x: 54, staves: 1, score: 1, played: 1, live: 1,
+    p: 165, x: 54, staves: 1, score: 1, played: 1, live: 1,
     interact: {
       prompt: 'Tap the row with nothing standing behind it.',
       explain: 'The lower one. The written piece has something the performance is a performance OF, so a wrong note is a mistake. There is nothing for the solo to be wrong about, because the playing and the making are the same act.',
@@ -56,7 +56,7 @@ export const BEATS: Aesthetics37Beat[] = [
     dur: 4.8,
   },
   {
-    p: 47, x: 54, staves: 1, score: 1, played: 1,
+    p: 386, x: 54, staves: 1, score: 1, played: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-37-1',
       text: 'The improviser makes the work in the act of performing it.',
@@ -73,7 +73,7 @@ export const BEATS: Aesthetics37Beat[] = [
     dur: 4.8,
   },
   {
-    p: 160, x: 54, staves: 1, score: 1, played: 1, live_d: 1, live: 1,
+    p: 457, x: 54, staves: 1, score: 1, played: 1, live_d: 1, live: 1,
     interact: {
       prompt: 'Transcribe it. Slide the solo up onto the stave.',
       drag: {

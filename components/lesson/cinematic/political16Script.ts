@@ -24,34 +24,34 @@ export interface Pol16Beat extends BaseBeat {
 
 export const BEATS: Pol16Beat[] = [
   {
-    g: 164, cords: 4,
+    g: 462, cords: 4,
     dur: 2.3,
     text: 'You fit the same bolt all day. Four things are wired to that work.',
   },
   {
-    g: 164, cords: 4,
+    g: 462, cords: 4,
     dur: 2.5,
     text: 'The thing you make, the doing of it, what you could be, everyone beside you.',
   },
   {
-    g: 159, cords: 4, cut: 2,
+    g: 465, cords: 4, cut: 2,
     dur: 4.2,
     text: 'The car goes to the company and you could not afford one. The line sets the pace and you cannot stop it.',
     cite: 'Product and process',
   },
   {
-    g: 159, cords: 4, cut: 2,
+    g: 465, cords: 4, cut: 2,
     dur: 1.8,
     text: 'Two cords gone.',
   },
   {
-    g: 13, cords: 4, cut: 4,
+    g: 168, cords: 4, cut: 4,
     dur: 5.0,
     text: 'The other two follow. Nothing you could have made is being made, and the people beside you are competitors for the same shift.',
     cite: 'And the other two',
   },
   {
-    g: 137, cords: 4, cut: 4,
+    g: 139, cords: 4, cut: 4,
     dur: 3.8,
     quote: {
       id: 'lq-political-political-16-1',
@@ -79,7 +79,7 @@ export const BEATS: Pol16Beat[] = [
     },
   },
   {
-    g: 41, cords: 4, cut: 4,
+    g: 383, cords: 4, cut: 4,
     dur: 1.0,
     interact: {
       prompt: 'What is alienation actually about?',

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Platform, type LayoutChangeEvent } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -153,11 +153,52 @@ export default function StreakScreen() {
           <View style={styles.back} />
         </View>
 
+        {/* ── MEASURED ON A REAL S24 ULTRA, ANDROID 16, 120Hz ──────────────────
+            The reader: "it is always laggy now ... when you try scroll down or
+            up, it's extremely slow and really bad."
+
+            They were right, and it is two faults with two different answers.
+
+            OVERSCROLLING WAS 98.91% JANKY, and that half is the platform. Android
+            12+ does not stop at the end of a list, it applies a StretchEffect --
+            a RenderEffect that has to capture the scrolling content into an
+            offscreen buffer so a shader can distort it, every frame of the
+            bounce. Proven rather than assumed: with the phone's animator scale
+            set to 0, so the stretch cannot play, Profile's identical symptom went
+            from 67% janky to 9% and `Slow bitmap uploads` from 101 to 0.
+            `overScrollMode` is the switch for it, and the app loses nothing it
+            was using -- the ends of this list were never a gesture surface.
+
+            ORDINARY SCROLLING WAS 71% JANKY, and that half is NOT the stretch:
+            the same animator-scale test moved it 71.30% -> 71.91%, which is to
+            say not at all. It is this screen being too expensive to draw. The
+            render thread's own trace, five seconds of scrolling:
+
+              syncFrameState                    23.94 ms/frame
+              allocateImageMemory               5,851 calls   (~44 a frame)
+              vkFreeMemory                      4,223 calls
+              Texture upload(...)               3,092 calls
+
+            Allocated and freed and re-uploaded, every frame. That is a GPU
+            resource cache over its budget, and the cache dump says so: this
+            screen sits at 112-176 MB with **0 bytes purgeable**, where Home sits
+            at 70 MB with 35 MB it is free to evict. Nothing can be thrown away,
+            so Skia throws away things it still needs and fetches them back.
+
+            `removeClippedSubviews` is the lever that fits: the month card is the
+            heaviest thing here -- 42 day tokens, ~26 CircularRRectOps a frame --
+            and for most of this screen's height it is not on screen at all.
+            Unlike Profile's (§19, where the flag sat on a ScrollView with two
+            children and could never reach anything) this content container has
+            FOUR direct children and the big one is a whole card, so the pass has
+            something real to detach. */}
         <Animated.ScrollView
           contentContainerStyle={styles.body}
           showsVerticalScrollIndicator={false}
           onScroll={onScroll}
           scrollEventThrottle={16}
+          overScrollMode="never"
+          removeClippedSubviews={Platform.OS === 'android'}
         >
           {/* ── THE HERO ────────────────────────────────────────────────────
               The count is the loudest thing on the screen and it takes the ember

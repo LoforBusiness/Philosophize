@@ -35,12 +35,12 @@ export interface Epistemology35Beat extends BaseBeat {
 
 export const BEATS: Epistemology35Beat[] = [
   {
-    p: 25, x: 58, pens: 1,
+    p: 172, x: 58, pens: 1,
     text: 'A zoo, a pen, a striped animal. You know what that is, and you knew it before you finished looking.',
     dur: 3.6,
   },
   {
-    p: 4, x: 58, pens: 1, plaques: 1, scan: 1, live: 1,
+    p: 467, x: 58, pens: 1, plaques: 1, scan: 1, live: 1,
     interact: {
       prompt: 'Slide the fence out to where an alternative stops being worth ruling out.',
       drag: {
@@ -53,7 +53,7 @@ export const BEATS: Epistemology35Beat[] = [
           { id: 'mad', upto: 1, reads: 'and a hologram, and a dream' },
         ],
       },
-      explain: 'Everyone slides to roughly the same place, and nobody can say why it stops there. Push the fence out far enough and you know nothing at all. Pull it in and a painted mule is suddenly your problem. The middle is where we live and it has no marked edge.',
+      explain: 'Everyone slides to roughly the same place, and nobody can say why it stops there. Push the fence out far enough and you know nothing at all. Pull it in and a painted mule is suddenly your problem. The middle is where you live, and it has no marked edge.',
       xp: 5,
     },
     dur: 1.0,
@@ -105,7 +105,7 @@ export const BEATS: Epistemology35Beat[] = [
     dur: 2.6,
   },
   {
-    p: 47, x: 130, pens: 1, plaques: 1, chain: 1,
+    p: 386, x: 130, pens: 1, plaques: 1, chain: 1,
     text: 'One way out says the mule was never a live option. Far-fetched enough, and your ordinary looking already counts as ruling it out.',
     dur: 4.6,
   },

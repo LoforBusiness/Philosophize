@@ -741,12 +741,66 @@ export function pickAt(table: readonly number[], u: number): number {
  * A scene with its own idea of where he should look should call `moves.gazeAt`
  * directly and keep `pose` — the table is a floor, not a ceiling.
  */
+/**
+ * DID THE READER JUST ANSWER, AND WERE THEY RIGHT? −1 … 0 … +1.
+ *
+ * A MODULE-LEVEL shared value, written by `CinematicPlayer` and read by
+ * `lookPose` — so the figure reacts to the reader in all 164 scenes that already
+ * route through `lookPose`, with no scene edited at all. A per-scene prop would
+ * have been 164 mechanical edits to files whose every byte is inside
+ * `muststamp`, which is 164 chances to move a prop and force a re-measure.
+ *
+ * A singleton is safe here because exactly one lesson plays at a time; if two
+ * players are ever mounted together this has to become a context, like the
+ * wardrobe next door.
+ *
+ * It is driven with `withTiming`, so it is CONTINUOUS: group L's whole finding is
+ * that anything which steps between two frames reads as a glitch, and a reaction
+ * that snapped on would be one.
+ */
+export const REACT = makeMutable(0);
+
+/**
+ * The reader's answer, written into the figure's own stance.
+ *
+ * A reader asked for the mascot to look like he is *"learning with you"*. He was
+ * not: 149 scenes reference `picked` and NOT ONE of them changed his pose, so at
+ * the one moment the reader has done something, the only thing on screen that
+ * moved was a card. He nods when they are right and draws back when they are not.
+ *
+ * On the SPINE, not the head — N12. `U.head` is 16 against a head 40 across, so a
+ * neck-only nod moves the crown about five units and reads as nothing; carrying
+ * it on `tilt` as well is what makes it visible. The wrong-answer move is smaller
+ * than the right-answer one on purpose: this is a mascot who is pleased for you,
+ * not one who is disappointed in you (§7 — he needles ATTENDANCE, never ABILITY).
+ */
+function reacted(s: Stance, r: number): Stance {
+  'worklet';
+  if (!r) return s;
+  // RADIANS. `solve` uses these as `Math.PI + tilt` and `Math.cos(tilt)`, so a
+  // value written as if it were degrees is a catastrophe rather than a
+  // miscalibration: the first draft used 9 and 5, which is 515° and 286°, and the
+  // measured head travel on answering was 87px where a nod is about twelve. The
+  // bisect is what settled it — with the reaction switched off the same tap moved
+  // the head 0.2px, so the movement was unambiguously this function's.
+  // NEGATIVE TILT IS FORWARD, and the first version had it backwards — a wrong
+  // answer bowed him and a right one leant him away. Read off the render rather
+  // than off `solve`: a wrong answer was captured against its resting frame and
+  // the figure was plainly dipping toward the reader.
+  const NOD = 0.46;    // ~26°
+  const LEAN = 0.28;   // ~16°
+  return r > 0
+    ? { ...s, neck: s.neck - NOD * r, tilt: s.tilt - LEAN * r, bob: s.bob - 3.5 * r }
+    : { ...s, neck: s.neck - 0.15 * r, tilt: s.tilt - 0.10 * r };
+}
+
 export function lookPose(
   s: Stance, x: number, groundY: number, k: number, dir: number, opacity: number,
   gx: number, gy: number, w: number,
 ): Bundle {
   'worklet';
-  if (w <= 0) return pose(s, x, groundY, k, dir, opacity);
+  const r = REACT.value;
+  if (w <= 0) return pose(reacted(s, r), x, groundY, k, dir, opacity);
   const g = gazeAt(s, x, groundY, k, dir, gx, gy, w);
   // ── AND THE LEAN, BECAUSE A HEAD MOVE IS NOT A MOVE (N12) ─────────────────
   //
@@ -763,7 +817,38 @@ export function lookPose(
   // total comes to about 0.6 of the gaze angle, so a figure craning up at a
   // machine above him moves his head some sixteen units rather than five.
   const lean = (g.neck - s.neck) * 0.5;
-  return pose({ ...g, tilt: g.tilt + lean }, x, groundY, k, dir, opacity);
+  return pose(reacted({ ...g, tilt: g.tilt + lean }, r), x, groundY, k, dir, opacity);
+}
+
+/**
+ * THE ANSWER REACTION WITHOUT THE GAZE — for the scenes that stage two figures.
+ *
+ * 20 scenes are exempt from the gaze rule on purpose: `make:gaze` aims at the
+ * area-weighted centre of everything a beat draws that is not the figure, and
+ * with two figures on stage there is no single answer to "which of them is the
+ * narrator". So they stayed on plain `pose()`.
+ *
+ * The exemption was about the GAZE and it silently took the REACTION with it,
+ * because `lookPose` carries both — so in those 20 lessons, and in the two that
+ * predate the shared player, answering a question moved no figure at all. That is
+ * the whole of AA5 missing from 22 lessons, and no source check could see it: no
+ * scene mentions `REACT` by name, which is exactly why the shared value reached
+ * 164 scenes without editing any of them.
+ *
+ * `w <= 0` already means "no gaze" inside `lookPose`. This is that call with a
+ * name on it, so a scene reads as declaring what it wants rather than passing
+ * three zeroes nobody can interpret later.
+ *
+ * DECLARED AFTER `lookPose` DELIBERATELY. The babel plugin rewrites a worklet
+ * into a `const` and builds every closure at module scope, so a worklet calling
+ * one declared further down the file hits its temporal dead zone and throws AT
+ * IMPORT — taking down the whole route tree rather than one animation (§17).
+ */
+export function reactPose(
+  s: Stance, x: number, groundY: number, k: number, dir: number, opacity: number,
+): Bundle {
+  'worklet';
+  return lookPose(s, x, groundY, k, dir, opacity, 0, 0, 0);
 }
 
 // ── beat-to-beat transition (SEQUENTIAL) ──────────────────────────────────────

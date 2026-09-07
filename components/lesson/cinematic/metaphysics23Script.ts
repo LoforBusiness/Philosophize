@@ -37,7 +37,7 @@ export const BEATS: Met23Beat[] = [
     dur: 4.8,
   },
   {
-    p: 2, x: 200, ships: 1, swap: 1,
+    p: 443, x: 200, ships: 1, swap: 1,
     text: 'Do that long enough and no original plank is left. Same name, same berth, same crew, no old wood.',
     cite: 'The repaired ship',
     dur: 4.6,
@@ -48,7 +48,7 @@ export const BEATS: Met23Beat[] = [
     dur: 4.6,
   },
   {
-    p: 4, x: 132, ships: 1, swap: 1, built: 1, live: 1,
+    p: 457, x: 132, ships: 1, swap: 1, built: 1, live: 1,
     interact: {
       prompt: 'Tap the ship made of the wood that first went to sea.',
       explain: 'The one on the right, built from the cast-offs. Notice how little that settles. The left hull kept the name, the berth and the crew, and none of those are wood, which is exactly the split the puzzle is prising open.',
@@ -57,18 +57,18 @@ export const BEATS: Met23Beat[] = [
     dur: 1.0,
   },
   {
-    p: 176, x: 132, ships: 1, swap: 1, built: 1,
+    p: 467, x: 132, ships: 1, swap: 1, built: 1,
     text: 'Two tests that normally agree. Unbroken use points left.',
     cite: 'Two readings of same',
     dur: 1.9,
   },
   {
-    p: 176, x: 132, ships: 1, swap: 1, built: 1,
+    p: 467, x: 132, ships: 1, swap: 1, built: 1,
     text: 'Original wood points right. Nothing on the stage decides between the two.',
     dur: 2.5,
   },
   {
-    p: 137, x: 268, ships: 1, swap: 1, built: 1,
+    p: 139, x: 268, ships: 1, swap: 1, built: 1,
     quote: {
       id: 'lq-metaphysics-being-23-2',
       text: 'One side held that the ship remained the same, and the other contended that it was not the same.',

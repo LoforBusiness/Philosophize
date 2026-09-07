@@ -26,7 +26,7 @@ export interface Epi16Beat extends BaseBeat {
 
 export const BEATS: Epi16Beat[] = [
   {
-    g: 25, results: 5,
+    g: 379, results: 5,
     dur: 4.6,
     text: 'Here is every answer the 1919 eclipse could have come back with. Starlight bends by this much, or that much, or not at all.',
   },
@@ -48,7 +48,7 @@ export const BEATS: Epi16Beat[] = [
     text: 'That is usually said as a boast.',
   },
   {
-    g: 137, results: 5, bars: 3,
+    g: 456, results: 5, bars: 3,
     dur: 3.8,
     quote: {
       id: 'lq-epistemology-knowledge-16-1',
@@ -67,7 +67,7 @@ export const BEATS: Epi16Beat[] = [
     cite: 'May 1919',
   },
   {
-    g: 4, results: 5, bars: 3, found: 1, pick: 1,
+    g: 165, results: 5, bars: 3, found: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap the theory that nothing could ever have refuted.',
@@ -76,7 +76,7 @@ export const BEATS: Epi16Beat[] = [
     },
   },
   {
-    g: 41, results: 5, bars: 3, found: 1,
+    g: 442, results: 5, bars: 3, found: 1,
     dur: 1.0,
     interact: {
       prompt: 'A theory that fits every possible outcome. Strength or flaw?',

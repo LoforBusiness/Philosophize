@@ -63,7 +63,7 @@ export const BEATS: Ethics6Beat[] = [
     dur: 1.8,
   },
   {
-    d: 0, str: 0, tx: 180, card: 2, stamp: 1,
+    d: 462, str: 0, tx: 180, card: 2, stamp: 1,
     quote: {
       id: 'lq-ethics-ethics-6-1',
       text: 'It takes more to justify an interference than to justify the withholding of goods and service.',
@@ -76,7 +76,7 @@ export const BEATS: Ethics6Beat[] = [
     dur: 3.4,
   },
   {
-    d: 4, str: 0, tx: 180, card: 2, stamp: 1,
+    d: 165, str: 0, tx: 180, card: 2, stamp: 1,
     interact: {
       prompt: 'What actually changed between the two cases?',
       split: {
@@ -94,7 +94,7 @@ export const BEATS: Ethics6Beat[] = [
     dur: 1.0,
   },
   {
-    d: 21, str: 0, tx: 180, card: 2, stamp: 1,
+    d: 177, str: 0, tx: 180, card: 2, stamp: 1,
     interact: {
       prompt: 'A strict utilitarian must judge the lever and footbridge cases exactly alike. True?',
       cards: [

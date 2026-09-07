@@ -10,7 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology4Script';
 import {
   K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry,
-  carry, STONE,
+  carry, STONE, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -94,7 +94,7 @@ export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick, d
     const e = keepHeld(heldE, mixStance(carryFrom(heldE, n, emoteHold(E_CODE[p], t)), emoteLive(E_CODE[n], t, bt.value), tr));
     const r = keepHeld(heldR, mixStance(carryFrom(heldR, n, emoteHold(R_CODE[p], t)), emoteLive(R_CODE[n], t, bt.value), tr));
     return {
-      e: pose(e, E_X, 500, K_FIG, 1, 1),
+      e: reactPose(e, E_X, 500, K_FIG, 1, 1),
       r: pose(r, R_X, 500, K_FIG, -1, 1),
       fill: carry(cv, 0, n, FILL[p], FILL[n], tr),
       // R7b — the knob raises the innate glow. The rail runs from none of it comes
@@ -160,7 +160,7 @@ export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick, d
       {/* ── the two arguers ───────────────────────────────────────────────── */}
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DE} k={K_FIG} />
-      <Stickman D={DR} k={K_FIG} />
+      <Stickman role="second" D={DR} k={K_FIG} />
 
       {/* ── Q1 answered in the scene: tap the blank-slate thinker ─────────── */}
       {asking && (

@@ -42,23 +42,23 @@ export interface Epi23Beat extends BaseBeat {
 
 export const BEATS: Epi23Beat[] = [
   {
-    p: 25, x: 200, sieve: 1, mouth: 0.35, mesh: 0.3,
+    p: 462, x: 200, sieve: 1, mouth: 0.35, mesh: 0.3,
     text: 'Claims arrive all day. What you end up believing is whatever is left in the tray.',
     dur: 4.0,
   },
   {
-    p: 2, x: 200, sieve: 1, mouth: 0.9, mesh: 0.3, fall: 1,
+    p: 384, x: 200, sieve: 1, mouth: 0.9, mesh: 0.3, fall: 1,
     text: 'Open the mouth and more gets a hearing. Nothing about that decides how much you keep.',
     cite: 'Two settings, not one',
     dur: 4.4,
   },
   {
-    p: 45, x: 132, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1,
+    p: 447, x: 132, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1,
     text: 'Tighten the mesh and most of it goes through the sides. The mouth has not moved.',
     dur: 4.0,
   },
   {
-    p: 4, x: 132, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1, live: 1,
+    p: 457, x: 132, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1, live: 1,
     interact: {
       prompt: 'Tap the part that decides how much gets thrown out.',
       explain: 'The mesh. The mouth decides what gets a hearing and the mesh decides what survives it, and people run the two together — "open-minded" is used for both, which is how somebody ends up proud of believing everything they were told.',
@@ -73,7 +73,7 @@ export const BEATS: Epi23Beat[] = [
     dur: 4.8,
   },
   {
-    p: 137, x: 268, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1,
+    p: 144, x: 268, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1,
     quote: {
       id: 'lq-epistemology-knowledge-23-2',
       text: 'It is the mark of an educated mind to be able to entertain a thought without accepting it.',
@@ -86,7 +86,7 @@ export const BEATS: Epi23Beat[] = [
     dur: 3.8,
   },
   {
-    p: 13, x: 268, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1,
+    p: 383, x: 268, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1,
     text: 'So the virtue is a pair of settings held at once, and neither one on its own is worth having.',
     dur: 4.2,
   },

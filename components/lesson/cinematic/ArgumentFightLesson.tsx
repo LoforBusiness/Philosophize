@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Animated, {
   useSharedValue, useDerivedValue, useAnimatedStyle, useFrameCallback,
-  withTiming, Easing, FadeInDown, LinearTransition, runOnJS, type SharedValue,
+  withTiming, withSequence, withDelay, Easing, FadeInDown, LinearTransition, runOnJS, type SharedValue,
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import { getLessonById } from '@/data';
@@ -20,7 +20,7 @@ import SyllogismChart from './illustrations/SyllogismChart';
 import LoudnessChart from './illustrations/LoudnessChart';
 import TwoRoadsChart from './illustrations/TwoRoadsChart';
 import { BEATS, gates, type Beat, type BoardKey } from './argumentScript';
-import { Bubble, CORRECT_LABEL } from './cinematicKit';
+import { Bubble, CORRECT_LABEL, REACT, reactPose } from './cinematicKit';
 import {
   BLANK, MOVE_ADV, WALK, boxMove, clamp01, dirsFrom, ease01, easeOutBack, headAt, life2, lerp,
   mixStance, moveTr, narratorHold, narratorLive, pose, stand, travelStance,
@@ -595,7 +595,12 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
       bxs: 200 + cs * (bx - headAt(blueS.tilt, blueS.neck).x - ccx),
       red: rOn > 0.002 ? pose(redS, rx, GROUND, K_FIG, 1, rOn) : BLANK,
       blue: bOn > 0.002 ? pose(blueS, bx, GROUND, K_FIG, -1, bOn) : BLANK,
-      narr: nOn > 0.002 ? pose(narrS, nx, GROUND, K_FIG, NARR_DIR[n], nOn) : BLANK,
+      // THE NARRATOR ANSWERS BACK (AA5). He is the mascot in this scene — the two
+      // boxers are the argument — so he is the one who nods when the reader is
+      // right and draws back when they are not. The other two keep plain `pose`:
+      // a fighter agreeing with your answer would be the picture disagreeing with
+      // the lesson.
+      narr: nOn > 0.002 ? reactPose(narrS, nx, GROUND, K_FIG, NARR_DIR[n], nOn) : BLANK,
     };
   });
 
@@ -668,6 +673,16 @@ export default function ArgumentFightLesson({ lesson }: { lesson: Lesson }) {
       setAsked((n) => n + 1);
       if (isCorrect) setCorrect((n) => n + 1);
     }
+    // AA5, and this player had to be told separately. It predates CinematicPlayer
+    // and keeps its own copy of the loop, so the reaction that reached 164 scenes
+    // through one shared value reached neither of the two oldest lessons in the
+    // app — logic-arguments-1 and -2, which are among the first a reader meets.
+    // Same sequence and the same timings as the shared player, because a mascot
+    // who nods differently in two lessons is two mascots.
+    REACT.value = withSequence(
+      withTiming(isCorrect ? 1 : -1, { duration: 220, easing: Easing.out(Easing.quad) }),
+      withDelay(260, withTiming(0, { duration: 420, easing: Easing.inOut(Easing.quad) })),
+    );
   }, [picked]);
 
   const onStage = useCallback((e: LayoutChangeEvent) => {

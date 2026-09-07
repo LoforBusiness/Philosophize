@@ -22,12 +22,12 @@ export interface Aes11Beat extends BaseBeat {
 
 export const BEATS: Aes11Beat[] = [
   {
-    p: 164, x: 70,
+    p: 462, x: 70,
     text: 'A gallery hangs two pictures. One was painted by a person over four months.',
     dur: 2.7,
   },
   {
-    p: 164, x: 70,
+    p: 462, x: 70,
     text: 'One was generated in about nine seconds.',
     dur: 1.8,
   },
@@ -67,7 +67,7 @@ export const BEATS: Aes11Beat[] = [
     dur: 4.8,
   },
   {
-    p: 6, x: 124, frames: 1, plaques: 1, same: 1, pick: 1,
+    p: 383, x: 124, frames: 1, plaques: 1, same: 1, pick: 1,
     interact: {
       prompt: 'The canvases match exactly. Tap the only thing that actually differs.',
       explain: 'Nothing on the surface. The premise rules a visible tell out — if one brushstroke differed, the case would be easy and uninteresting. What differs is the history behind the paint.',
@@ -76,7 +76,7 @@ export const BEATS: Aes11Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, x: 124, frames: 1, plaques: 1, same: 1,
+    p: 165, x: 124, frames: 1, plaques: 1, same: 1,
     interact: {
       prompt: 'What does a human maker add that the surface does not show?',
       sort: {

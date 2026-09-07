@@ -45,13 +45,13 @@ export const BEATS: Aes3Beat[] = [
   },
   {
     p: 22, arc: 0.5, mask: 1,
-    text: 'Tragedy hurts, and we go anyway. Aristotle says it raises pity and fear in you, then works them back out of you.',
+    text: 'Tragedy hurts, and you go anyway. Aristotle says it raises pity and fear in you, then works them back out of you.',
     cite: 'Catharsis',
     dur: 3.1,
   },
   {
     p: 22, arc: 0.5, mask: 1,
-    text: 'Aristotle called that katharsis, and he never quite says what it is.',
+    text: 'Aristotle named the effect katharsis. He never quite says what katharsis is.',
     dur: 1.8,
   },
   {
@@ -66,7 +66,7 @@ export const BEATS: Aes3Beat[] = [
     dur: 2.9,
   },
   {
-    p: 4, arc: 1, mask: 1,
+    p: 165, arc: 1, mask: 1,
     interact: {
       prompt: 'You leave a tragedy wrung out and somehow lighter. Tap Aristotle’s word for that.',
       cards: [
@@ -105,7 +105,7 @@ export const BEATS: Aes3Beat[] = [
     dur: 3.4,
   },
   {
-    p: 3, modes: 1, cut: 1, will: 1,
+    p: 168, modes: 1, cut: 1, will: 1,
     interact: {
       prompt: 'Plato feared what music does to people. How far did that take him?',
       drag: {

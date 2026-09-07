@@ -26,12 +26,12 @@ export interface Eth16Beat extends BaseBeat {
 
 export const BEATS: Eth16Beat[] = [
   {
-    g: 47, causes: 1, knife: 1, money: 1,
+    g: 435, causes: 1, knife: 1, money: 1,
     dur: 4.4,
     text: 'A knife at your back, and you hand over the wallet. Nobody has ever thought you did that freely.',
   },
   {
-    g: 25, causes: 1, knife: 0, money: 1, repaid: 1,
+    g: 379, causes: 1, knife: 0, money: 1, repaid: 1,
     dur: 4.8,
     text: 'A week later you hand a friend the same notes, repaying a loan. Same hand, same money, same causes running back forever.',
     cite: 'And again, without the knife',
@@ -43,7 +43,7 @@ export const BEATS: Eth16Beat[] = [
     cite: 'One answer, and its cost',
   },
   {
-    g: 137, causes: 1, knife: 0, money: 1, repaid: 1,
+    g: 456, causes: 1, knife: 0, money: 1, repaid: 1,
     dur: 3.8,
     quote: {
       id: 'lq-ethics-ethics-16-1',
@@ -62,7 +62,7 @@ export const BEATS: Eth16Beat[] = [
     cite: 'A smaller freedom',
   },
   {
-    g: 4, causes: 1, knife: 0, money: 1, repaid: 1, pick: 1,
+    g: 165, causes: 1, knife: 0, money: 1, repaid: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Both hand-overs are drawn the same. Tap the one thing missing from the second.',
@@ -71,7 +71,7 @@ export const BEATS: Eth16Beat[] = [
     },
   },
   {
-    g: 41, causes: 1, knife: 0, money: 1, repaid: 1,
+    g: 442, causes: 1, knife: 0, money: 1, repaid: 1,
     dur: 1.0,
     interact: {
       prompt: 'Suppose every choice you make was already fixed by earlier causes. How much blame survives?',

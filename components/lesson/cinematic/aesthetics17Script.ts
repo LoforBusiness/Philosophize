@@ -25,7 +25,7 @@ export interface Aes17Beat extends BaseBeat {
 
 export const BEATS: Aes17Beat[] = [
   {
-    g: 47, x: 74, shape: 1, fear: 0.86,
+    g: 440, x: 74, shape: 1, fear: 0.86,
     dur: 4.4,
     text: 'A shape in the dark. Your heart goes, your skin goes cold, and every part of you wants to be somewhere else.',
   },
@@ -42,7 +42,7 @@ export const BEATS: Aes17Beat[] = [
     cite: 'The fear is the same fear',
   },
   {
-    g: 137, x: 160, shape: 1, fear: 0.86, frame: 1,
+    g: 465, x: 160, shape: 1, fear: 0.86, frame: 1,
     dur: 3.8,
     quote: {
       id: 'lq-aesthetics-aesthetics-17-1',
@@ -66,7 +66,7 @@ export const BEATS: Aes17Beat[] = [
     text: 'The fear is converted by the telling. The fear is the fee you pay to find out.',
   },
   {
-    g: 4, x: 160, shape: 1, fear: 0.86, frame: 1, pick: 1,
+    g: 165, x: 160, shape: 1, fear: 0.86, frame: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'The frame left two of these exactly as they were. Tap the one it changed.',

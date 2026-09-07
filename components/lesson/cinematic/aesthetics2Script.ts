@@ -73,7 +73,7 @@ export const BEATS: Aes2Beat[] = [
   },
   {
     a: 20, v: 17, wave: true, felt: true, chain: 3,
-    text: 'Almost nothing else we build does that.',
+    text: 'Almost nothing else anybody builds does that.',
     dur: 1.8,
   },
   {

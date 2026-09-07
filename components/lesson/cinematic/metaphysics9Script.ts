@@ -24,7 +24,7 @@ export interface M9Beat extends BaseBeat {
 
 export const BEATS: M9Beat[] = [
   {
-    p: 25, x: 96, panels: 0,
+    p: 379, x: 96, panels: 0,
     text: 'Your brain weighs about three pounds and takes up space. Does the thought you are having right now weigh anything at all?',
     dur: 3.6,
   },
@@ -75,7 +75,7 @@ export const BEATS: M9Beat[] = [
     dur: 2.7,
   },
   {
-    p: 4, x: 232, panels: 2,
+    p: 380, x: 232, panels: 2,
     interact: {
       prompt: 'What is the dualist actually claiming about the mind?',
       sort: {
@@ -91,7 +91,7 @@ export const BEATS: M9Beat[] = [
     dur: 4.4,
   },
   {
-    p: 47, x: 232, panels: 2, cards: true,
+    p: 440, x: 232, panels: 2, cards: true,
     interact: {
       prompt: '"I think, therefore I am." Tap the label for what that sentence really establishes.',
       explain:

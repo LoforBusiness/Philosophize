@@ -22,7 +22,7 @@ export interface Epi4Beat extends BaseBeat {
 
 export const BEATS: Epi4Beat[] = [
   {
-    e: 8, r: 4, fill: 0, glow: 0, bridge: 0,
+    e: 173, r: 4, fill: 0, glow: 0, bridge: 0,
     text: 'Blank mind at birth, or already primed? Two camps — empiricists and rationalists — and they have never once stopped arguing about it.',
     dur: 3.4,
   },
@@ -44,7 +44,7 @@ export const BEATS: Epi4Beat[] = [
     dur: 4.6,
   },
   {
-    e: 20, r: 0, fill: 0.85,
+    e: 424, r: 0, fill: 0.85,
     quote: {
       id: 'lq-epistemology-knowledge-4-1',
       text: 'Let us suppose the mind to be white paper, void of all characters, without any ideas. How comes it to be furnished?',
@@ -100,7 +100,7 @@ export const BEATS: Epi4Beat[] = [
     dur: 2.6,
   },
   {
-    e: 0, r: 4, glow: 1, bridge: 1,
+    e: 460, r: 4, glow: 1, bridge: 1,
     interact: {
       prompt: 'How much does a rationalist say comes before experience?',
       drag: {

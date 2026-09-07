@@ -16,7 +16,7 @@ export interface Pol5Beat extends BaseBeat {
 
 export const BEATS: Pol5Beat[] = [
   {
-    p: 2, city: 1, veil: 0,
+    p: 443, city: 1, veil: 0,
     text: 'What makes a whole society just? Plato asked it roughly 2,400 years ago — and we are still arguing.',
     dur: 3.4,
   },
@@ -45,7 +45,7 @@ export const BEATS: Pol5Beat[] = [
     dur: 3.0,
   },
   {
-    p: 160, city: 0, veil: 1,
+    p: 467, city: 0, veil: 1,
     text: 'Rawls asks it another way. What rules would you pick if you did not know who you were going to be?',
     cite: 'Rawls’ veil of ignorance',
     dur: 2.9,
@@ -56,7 +56,7 @@ export const BEATS: Pol5Beat[] = [
     dur: 2.5,
   },
   {
-    p: 4, veil: 1,
+    p: 165, veil: 1,
     interact: {
       prompt: 'What is the difference principle for?',
       sort: {
@@ -94,7 +94,7 @@ export const BEATS: Pol5Beat[] = [
     // reader picks what "justice" meant instead of reading four sentences.
     interact: {
       prompt: 'Plato’s just city sounds fair — so what did he mean by "justice"?',
-      explain: 'The trap: "fair" tempts us toward equal wealth. But for Plato justice is harmony — each class doing its own work — not equal shares or majority rule.',
+      explain: 'The trap: "fair" tempts you toward equal wealth. But for Plato justice is harmony — each class doing its own work — not equal shares or majority rule.',
       xp: 5,
     },
     dur: 1.0,

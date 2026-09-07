@@ -201,7 +201,71 @@ export const VARIANTS = {
   40: [A(84), L(69)],               // write on board  make the point · counting the points
   42: [A(5), L(59)],                // carry a load    put something down · weight shift
   137: [hold(29), hold(45), hold(40)],
+
+  // ── THE SIX MOST-REPEATED GESTURES IN THE APP HAD NO ROW AT ALL ────────────
+  //
+  // Counted across the corpus: 1,993 gesture calls, and these six carry 519 of
+  // them — 26% of every gesture in the product — with nothing to vary them. Pass
+  // 1 can only swap a pose it has an alternative FOR, so a code with no row here
+  // is a code that repeats for ever however many times the codemod runs. That is
+  // the whole of the reader's complaint, and it was invisible: `check:life`
+  // measures the top-ten share and reports it truthfully, and the number cannot
+  // say WHY it is stuck.
+  //
+  // 0 is the worst of them and the simplest to explain: it falls through
+  // `emoteHold` to a bare `stand(t)`. One hundred and seventy-eight beats of this
+  // app are the figure standing there, identically, and every one of them was
+  // spelled the same way.
+  //
+  // The replacements are all CALM. A neutral beat is neutral because the
+  // narration is doing the work, so the variants for it are idles that keep him
+  // alive without making a claim — A1 is not suspended just because the pose
+  // means nothing in particular.
+  0: [A(161), L(59), A(163), L(63)],   // neutral       waiting · weight shift · looking off · hands behind
+  164: [A(163), L(73), A(80)],         // gazing up     looking off · up on the toes · the idea
+  167: [A(160), L(69), A(84)],         // hands talking explaining · counting · make the point
+  159: [A(164), L(78), A(161)],        // listening     nodding along · leaning in close · waiting, watching
+  160: [A(158), A(156), A(168)],       // chin in hand  thinking it over · sitting with it · weighing endlessly
+  176: [A(168), A(154), A(81)],        // weighing      endlessly · weigh two and look between · weigh it up
 };
+
+// ── AND THE SECOND SHELF IS WIRED INTO THE ROWS THAT ALREADY EXISTED ────────
+//
+// Written as a merge rather than by editing the rows above, so that what the
+// second shelf ADDS is legible as its own list — and so that removing it is one
+// deletion rather than an archaeology exercise across thirty rows.
+//
+// Every entry is the same meaning in another body, which is the only rule pass 1
+// needs to stay safe (A1): nothing here can falsify a sentence, because none of
+// these scripts says which arm moved.
+const SECOND_SHELF = {
+  0: [A(162)],                  // neutral        → pacing on the spot
+  1: [A(160)],                  // explain        → explaining, hands never quite stop
+  3: [A(139)],                  // count          → count it off on the fingers
+  2: [A(144), A(167)],          // present up     → hand it over · one hand out, still offering
+  4: [A(158), A(168), A(162)],  // think          → thinking it over · weighing endlessly · pacing
+  5: [A(134), A(141)],          // sweep          → sweep across · both hands to the board
+  8: [A(145)],                  // shrug          → the waggle
+  9: [A(146)],                  // hand on hip    → not convinced
+  10: [A(165), A(159)],         // arms crossed   → arms folded one finger going · unconvinced
+  13: [A(133), A(135)],         // point forward  → point and hold · draw a line in the air
+  14: [A(155)],                 // reach out      → take it back
+  20: [A(125)],                 // hold up        → hold it up to the light
+  21: [A(154), A(168), A(149)], // weigh          → weigh two and look between · endlessly · on the other hand
+  25: [A(163)],                 // gaze up        → looking off
+  29: [A(150)],                 // press outward  → hold on, one flat palm stopping it
+  36: [A(143), A(137), A(126)], // sign / write   → underline twice · cross out · trace the line
+  38: [A(147)],                 // gesture down   → concede the point
+  40: [A(136), A(138)],         // write on board → circle it · tick it
+  41: [A(143), A(138)],         // tap high       → underline it twice · tick it
+  44: [A(142)],                 // hands behind   → step back and survey
+  45: [A(148)],                 // double take    → almost object
+  47: [A(134), A(136), A(141)], // frame it up    → sweep across · circle it · both hands to the board
+  137: [A(157), A(166)],        // rest / quote   → reading · holding the page, listening
+};
+for (const [code, extra] of Object.entries(SECOND_SHELF)) {
+  VARIANTS[code] = [...(VARIANTS[code] || []), ...extra];
+}
 /** Every code the variant table can produce. */
 export const VARIANT_CODES = new Set(Object.values(VARIANTS).flat());
 
@@ -352,3 +416,97 @@ export function reachesCatalogue(comp) {
 
 /** Branch slug from a lesson id: `ethics-ethics-13` → `ethics`. */
 export const branchOf = (id) => id.split('-')[0];
+
+// ── A RUN IS ONE MOVEMENT, AND IT NEED NOT BE THE SAME ONE EVERY TIME (N14) ──
+//
+// `LIVING_RUN` maps each frozen pose to ONE living twin, so every split run in
+// the corpus that started life as `think` became `chin in hand` — 445 beats, the
+// single largest block of repetition left after the spread, and the reason codes
+// 164 and 167 stayed at the top of the table when everything around them came
+// down. A run has to be ONE movement all the way through (N7); nothing says it
+// has to be the same movement in lesson twelve as in lesson eleven.
+//
+// EVERY CODE HERE IS CLOCK-DRIVEN, which is the whole of the safety argument and
+// is measured rather than asserted: `check-moves` sweeps `u` at fixed `t` and
+// fails if any act named here moves a joint. That is what makes a PLAYED code
+// legal in a run's middle — N7 bans those because a one-shot reads `u` off `bt`
+// and `bt` resets on every piece of the sentence, and an act that ignores `u`
+// cannot replay however often `bt` restarts. The rule was right about the band it
+// was written for and over-broad for a shelf that did not exist yet.
+export const RUN_VARIANTS = {
+  158: [play(161), play(163)],   // weight shift      → waiting, watching · looking off
+  159: [play(164), play(166)],   // listening         → nodding along · holding the page
+  160: [play(158), play(168)],   // chin in hand      → thinking it over · weighing endlessly
+  161: [play(165), play(159)],   // arms folded       → one finger going · unconvinced
+  162: [play(161)],              // hands behind back → waiting for the answer
+  163: [play(159)],              // hands on hips     → unconvinced, and staying that way
+  164: [play(163)],              // gazing up         → looking off
+  167: [play(160)],              // talking with hands→ explaining, never quite stopping
+  168: [play(160), play(157)],   // counting          → explaining · reading
+  173: [play(159)],              // slouched on a hip → unconvinced
+  176: [play(168)],              // weighing slowly   → weighing endlessly
+};
+
+// ── THE TWO PAGE-NAMED ACTS WERE AUDITED HERE AND KEPT, WHICH IS THE FINDING ─
+//
+// 157 READING and 166 HOLDING THE PAGE, LISTENING land on 14 runs, and a run is a
+// whole SENTENCE (J12) — so whatever the figure does there he does for the entire
+// thought, which is where an arbitrary prop mime would be most exposed. Read
+// against their own sentences, four of them are apt (a report, a principle of
+// Leibniz's, Sen and Nussbaum answering differently) and the rest are not
+// obviously about reading at all: "You can count holes", "Here is the machinery".
+//
+// They stay, because **the name is for the author and the POSE is what a reader
+// sees**, and there is no book in either. Rendered at lesson size
+// (`npm run sheet:moves 157 168`), 157 is both hands forward at chest height with
+// the head down and 166 is one arm out with the head inclined: an attentive idle
+// and a listening idle. Nothing in the drawing claims a page, so nothing in the
+// sentence can contradict one — which is A1 asked of the picture rather than of
+// the identifier, and the identifier is the only place the book exists.
+//
+// The general form, and it is why this note is here rather than a change: **an
+// evocative name is not a claim on the stage.** Judge a variant by rendering it,
+// not by reading what it is called — the opposite mistake to §19's `GP.point`,
+// where a render was explained using code the screen does not run.
+
+/**
+ * The acts that read `t` and ignore `u`, so a PLAYED code carrying one may sit in
+ * a split run's middle without replaying per piece (N7's exception).
+ *
+ * Stated here and checked in `check-moves` against the real maths, rather than
+ * commented — one rule, two readers, the same discipline `make-names` applies to
+ * its COMMON list.
+ */
+export const CLOCK_ACTS = new Set([
+  ...Array.from({ length: 20 }, (_, i) => 59 + i),    // the first living shelf
+  ...Array.from({ length: 12 }, (_, i) => 157 + i),   // the second
+]);
+
+/** Codes that may hold a run: a living hold, or a played act that ignores `u`. */
+export function holdsARun(code) {
+  if (code >= 300) return CLOCK_ACTS.has(code - 299);
+  if (code >= 100 && code < 200) return CLOCK_ACTS.has(code - 99);
+  return false;
+}
+
+// A RUN VARIANT THAT IS NOT CLOCK-DRIVEN IS A TIC, AND THIS THROWS AT IMPORT.
+//
+// The same guard the comic shelf has, for the same reason: `check:life` WOULD
+// catch it, at the corpus level, after the codemod had already written it into
+// every run of that pose — so the error arrives as a list of broken lessons
+// rather than as the one-line mistake it is. A one-shot on a run replays on every
+// piece of the sentence (N7), which is the exact defect the run rotation exists
+// inside, and it is one careless `play(143)` away at any time.
+{
+  const tics = [];
+  for (const [from, opts] of Object.entries(RUN_VARIANTS)) {
+    for (const code of opts) if (!holdsARun(code)) tics.push(`${from} → ${code}`);
+  }
+  if (tics.length) {
+    throw new Error(
+      `RUN_VARIANTS offers a code that does not ignore \`u\` (${tics.join(', ')}). `
+      + 'A run is one sentence in pieces and `bt` resets at every piece, so a one-shot '
+      + 'there replays once per piece. Pick an act from CLOCK_ACTS.',
+    );
+  }
+}

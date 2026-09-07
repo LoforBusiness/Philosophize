@@ -41,7 +41,7 @@ export const BEATS: Epistemology36Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 56, shelf: 1, live: 1,
+    p: 461, x: 56, shelf: 1, live: 1,
     interact: {
       prompt: 'Pick one. There is no wrong pair — take whichever you want.',
       explain: 'You took the one on the right, and so did four shoppers in five. Nothing about it is better. It was last in line, and last is what a hand reaches for after looking at all four.',
@@ -75,7 +75,7 @@ export const BEATS: Epistemology36Beat[] = [
     dur: 2.2,
   },
   {
-    p: 47, x: 56, shelf: 1, given: 1, real: 1, clash: 1,
+    p: 385, x: 56, shelf: 1, given: 1, real: 1, clash: 1,
     quote: {
       id: 'lq-epistemology-knowledge-36-1',
       text: 'People may have little ability to report accurately on their own cognitive processes.',

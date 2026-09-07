@@ -23,7 +23,7 @@ export interface Logic11Beat extends BaseBeat {
 
 export const BEATS: Logic11Beat[] = [
   {
-    p: 25, x: 48, steps: 1,
+    p: 379, x: 48, steps: 1,
     text: 'A proof has to rest on something outside itself. Watch this proof stop doing so, without a single step going wrong.',
     dur: 3.8,
   },
@@ -69,7 +69,7 @@ export const BEATS: Logic11Beat[] = [
     dur: 2.1,
   },
   {
-    p: 4, x: 116, steps: 4, base: 1, spine: 1,
+    p: 380, x: 116, steps: 4, base: 1, spine: 1,
     interact: {
       prompt: 'How much support does a circle actually give?',
       drag: {
@@ -88,7 +88,7 @@ export const BEATS: Logic11Beat[] = [
     dur: 1.0,
   },
   {
-    p: 45, x: 116, steps: 4, base: 1, spine: 1, pick: 1, arc: 1,
+    p: 447, x: 116, steps: 4, base: 1, spine: 1, pick: 1, arc: 1,
     interact: {
       prompt: 'Tap the step that assumes the very thing the argument is meant to prove.',
       explain: 'The trap: step 3 looks like extra support, so the proof seems to be doing more work. It is doing less. Step 1 leans on God; step 3 leans on the book. The loop closes, and no evidence from outside ever gets in.',

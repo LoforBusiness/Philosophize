@@ -32,7 +32,7 @@ export interface Met22Beat extends BaseBeat {
 
 export const BEATS: Met22Beat[] = [
   {
-    p: 25, x: 200, track: 1,
+    p: 462, x: 200, track: 1,
     text: 'A moment, drawn as a set of points. The track runs in, and there are two ways out of it.',
     dur: 4.4,
   },
@@ -48,12 +48,12 @@ export const BEATS: Met22Beat[] = [
     dur: 2.3,
   },
   {
-    p: 45, x: 132, track: 1, runs: 1, open: 1,
+    p: 447, x: 132, track: 1, runs: 1, open: 1,
     text: 'Hard determinism stops there. The other branch was never a live option, so nobody deserves blame for missing it.',
     dur: 4.8,
   },
   {
-    p: 4, x: 132, track: 1, runs: 1, open: 1, live: 1,
+    p: 380, x: 132, track: 1, runs: 1, open: 1, live: 1,
     interact: {
       prompt: 'Tap what would have to differ for the other branch to be taken.',
       explain: 'Something earlier. Given the laws, a different outcome needs a different run-up, which is why people locate their freedom at the junction and cannot find it there. The junction is where the branch is, not where the difference would have to be.',
@@ -68,7 +68,7 @@ export const BEATS: Met22Beat[] = [
     dur: 4.8,
   },
   {
-    p: 137, x: 268, track: 1, runs: 1, open: 1,
+    p: 144, x: 268, track: 1, runs: 1, open: 1,
     quote: {
       id: 'lq-metaphysics-being-22-1',
       text: 'Man is condemned to be free; because once thrown into the world, he is responsible for everything he does.',
@@ -81,7 +81,7 @@ export const BEATS: Met22Beat[] = [
     dur: 4.2,
   },
   {
-    p: 13, x: 268, track: 1, runs: 1, open: 1,
+    p: 383, x: 268, track: 1, runs: 1, open: 1,
     text: 'Libertarians want a replay that really could go the other way. But then nothing about you settles which branch the run takes.',
     cite: 'The luck problem',
     dur: 4.8,

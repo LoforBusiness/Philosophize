@@ -12,7 +12,7 @@ import {
 // means the script CAN now reach the 120 actions and the living holds (group N).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -104,7 +104,7 @@ export default function Ethics2Scene({ clock, bt, bi }: SceneApi) {
     const gx = carry(cv, 2, n, GX[p], GX[n], tr);
 
     return {
-      finder: pose(finderS, fx, GROUND, K_FIG, -1, 1),
+      finder: reactPose(finderS, fx, GROUND, K_FIG, -1, 1),
       guide: gOn > 0.02 ? pose(guideS, gx, GROUND, K_FIG, 1, gOn) : BLANK,
       named: carry(cv, 3, n, NAMED[p], NAMED[n], tr),
       // One continuous 0→3 value drives all three rows: row k lights as it crosses k.
@@ -142,7 +142,7 @@ export default function Ethics2Scene({ clock, bt, bi }: SceneApi) {
       </View>
       <View style={styles.walletCard} />
 
-      <Stickman D={DG} k={K_FIG} />
+      <Stickman role="second" D={DG} k={K_FIG} />
       <Stickman D={DF} k={K_FIG} />
     </Animated.View>
   );

@@ -33,7 +33,7 @@ export const BEATS: Log14Beat[] = [
     text: 'Both lines are ones you would nod at.',
   },
   {
-    g: 45, lines: 3,
+    g: 447, lines: 3,
     dur: 4.6,
     text: 'So a ham sandwich beats eternal happiness. That is a valid shape applied to two true premises, and the answer is a joke.',
     cite: 'And therefore',
@@ -45,7 +45,7 @@ export const BEATS: Log14Beat[] = [
     cite: 'So look inside a line',
   },
   {
-    g: 137, lines: 3, mark: 1,
+    g: 144, lines: 3, mark: 1,
     dur: 3.8,
     quote: {
       id: 'lq-logic-arguments-14',
@@ -58,7 +58,7 @@ export const BEATS: Log14Beat[] = [
     },
   },
   {
-    g: 4, lines: 3, mark: 1, pick: 1,
+    g: 461, lines: 3, mark: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'One word here means two different things. Tap it.',
@@ -78,7 +78,7 @@ export const BEATS: Log14Beat[] = [
     text: 'The middle never joined.',
   },
   {
-    g: 41, lines: 3, mark: 1, gloss: 1,
+    g: 383, lines: 3, mark: 1, gloss: 1,
     dur: 1.0,
     interact: {
       prompt: 'How should the blame divide?',

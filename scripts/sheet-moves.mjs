@@ -1,188 +1,156 @@
-// Twenty frames of a motion drawn side by side, so a pose that is numerically
-// valid and visually meaningless gets caught. Numbers find geometry; only the
-// sheet finds "that does not look like the thing it is called" (LESSON_RULES
-// Part 3 — `arms-crossed` once drew a figure with no arms and passed every
-// numeric check, because nothing was out of range).
+// DRAW A MOVEMENT AS A FILMSTRIP, IN PLAIN NODE.
 //
-// Runs in plain Node: rig.ts has zero imports, sucrase strips the types, and
-// jimp-compact draws bones as thick lines and joints as discs. No Metro, no
-// device, about two seconds a sheet.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+//   node scripts/sheet-moves.mjs 121 132        acts 121…132, six frames each
+//   node scripts/sheet-moves.mjs 145            one act, large
+//   FRAMES=8 node scripts/sheet-moves.mjs 133 144
+//
+// `check:moves` proves a motion is SOUND — no foot skate, no hand inside the
+// skull, no jump between frames, feet on the ground. It cannot tell you whether
+// the thing reads as what it is called, and this library is full of evidence
+// that the two are different questions: `read` on the launch screen travelled 0.2
+// units and passed every smoothness check ever written, because a photograph has
+// no discontinuities (§19). N12 is the same finding — three of four "looking"
+// actions drew a figure standing perfectly still and every number was fine.
+//
+// So this is the wardrobe sheet's method pointed at motion instead of costume:
+// the REAL rig, the REAL act, frames across `u` (or across the clock for the
+// living holds), drawn at the size a lesson draws them. It costs no Metro and no
+// browser because `rig.ts` and `moves.ts` are zero-import.
+//
+// READ IT AS A STRIP, NOT AS FRAMES. What matters is whether the sequence has an
+// ARC — a start, a middle that is different, and an end that is somewhere. A
+// strip whose six cells look alike is act 39's problem: a gesture that measures
+// perfectly and does nothing.
+import { writeFileSync, readFileSync, mkdirSync } from 'node:fs';
 import os from 'node:os';
-import { pathToFileURL } from 'node:url';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import JimpPkg from 'jimp-compact';
+import { canvas, text } from './lib/rasterpath.mjs';
 
-const Jimp = JimpPkg.default || JimpPkg;
-const REPO = process.cwd();
+const Jimp = JimpPkg.Jimp ?? JimpPkg;
+const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname).replace(/^\//, ''), '..');
+
 const { transform } = await import(
-  pathToFileURL(path.join(REPO, 'node_modules/sucrase/dist/index.js')).href,
+  pathToFileURL(path.join(REPO, 'node_modules/sucrase/dist/index.js')).href
 );
-
-// Same loader as check-moves: a data: URL has no base path, so moves.ts's
-// `./rig` import needs both files transpiled into one temp directory.
-const TMP = path.join(os.tmpdir(), 'philosophize-moves-sheet');
+const TMP = path.join(os.tmpdir(), 'ph-moves-sheet');
 mkdirSync(TMP, { recursive: true });
-function emit(rel, name) {
-  const js = transform(readFileSync(path.join(REPO, rel), 'utf8'), { transforms: ['typescript'] }).code
-    .replace(/(from\s+['"])\.\/(rig|moves)(['"])/g, '$1./$2.mjs$3');
-  writeFileSync(path.join(TMP, name), js);
+const emit = (rel, name) => {
+  const src = transform(readFileSync(path.join(REPO, rel), 'utf8'), { transforms: ['typescript'] }).code
+    .replace(/(from\s+['"])\.\/([A-Za-z0-9_-]+)(['"])/g, '$1./$2.mjs$3');
+  writeFileSync(path.join(TMP, name), src);
   return pathToFileURL(path.join(TMP, name)).href;
-}
-emit('components/lesson/cinematic/rig.ts', 'rig.mjs');
-emit('components/lesson/cinematic/moves.ts', 'moves.mjs');
-const R = await import(pathToFileURL(path.join(TMP, 'rig.mjs')).href);
-const M = await import(pathToFileURL(path.join(TMP, 'moves.mjs')).href);
-const I = await import(emit('components/lesson/cinematic/interact.ts', 'interact.mjs'));
+};
 
-// FIG_K DRAWS BIGGER, AND IT IS NOT A CONVENIENCE.
+const RIG = await import(emit('components/lesson/cinematic/rig.ts', 'rig.mjs'));
+const M = await import(emit('components/lesson/cinematic/moves.ts', 'moves.mjs'));
+
+const INK = '#1A1A1A';
+const PAPER = '#FAFAF7';
+
+// ── geometry → path data (no arc commands; see rasterpath's header) ──────────
+function disc(cx, cy, r) {
+  const n = 40;
+  const pts = [];
+  for (let i = 0; i < n; i += 1) {
+    const a = (2 * Math.PI * i) / n;
+    pts.push(`${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`);
+  }
+  return `M${pts.join('L')}Z`;
+}
+function bonePath(xf, thick) {
+  const tx = xf[0].translateX; const ty = xf[1].translateY;
+  const deg = parseFloat(String(xf[2].rotate));
+  const len = xf[3].scaleX * RIG.BONE_SRC;
+  const r = (deg * Math.PI) / 180;
+  const c = Math.cos(r); const s = Math.sin(r);
+  const pts = [[0, -thick / 2], [len, -thick / 2], [len, thick / 2], [0, thick / 2]]
+    .map(([x, y]) => [tx + x * c - y * s, ty + x * s + y * c]);
+  return `M${pts.map((q) => `${q[0].toFixed(2)},${q[1].toFixed(2)}`).join('L')}Z`;
+}
+const jointAt = (xf, r) => disc(xf[0].translateX, xf[1].translateY, r);
+
+function figurePath(B, k) {
+  const limb = RIG.STR.limb * k;
+  const torso = RIG.STR.torso * k;
+  const headR = RIG.STR.headR * k;
+  let d = '';
+  for (const n of ['thighL', 'shinL', 'thighR', 'shinR', 'uarmL', 'farmL', 'uarmR', 'farmR']) {
+    d += bonePath(B[n], limb);
+  }
+  d += bonePath(B.torso, torso);
+  for (const n of ['kneeL', 'kneeR', 'ankL', 'ankR', 'elL', 'elR', 'wrL', 'wrR', 'shLd', 'shRd']) {
+    d += jointAt(B[n], limb / 2);
+  }
+  d += jointAt(B.pel, torso / 2) + jointAt(B.shB, torso / 2) + jointAt(B.head, headR);
+  return d;
+}
+
+// ── which acts, and how each is sampled ─────────────────────────────────────
 //
-// At K = 1 a figure is about 90px tall in a 150px cell, and at that size a
-// correct pose and a broken one look equally like a black blob — which is the
-// state this sheet exists to prevent. §19 records the same thing about the era
-// numerals: a glyph that looked sliced at 2× was whole at 4×, and the reading of
-// the smaller picture was simply wrong. So: measure with `check:moves`, then come
-// here and LOOK BIGGER. `FIG_K=3 node scripts/sheet-moves.mjs act:110`.
-//
-// The cell, the canvas and the ground line all scale with it, so the figure keeps
-// the same room and the same headroom at every size.
-const K = +(process.env.FIG_K || 1);
-// FIG_N IS THE OTHER HALF, AND WITHOUT IT FIG_K BUYS NOTHING. Twenty frames at
-// K = 3 is a 9000px strip, and anything looking at it scales the whole strip back
-// down to fit — so every pixel gained by drawing bigger is given straight back.
-// Fewer, larger frames is what actually shows the pose. Six is a good read of a
-// three-act action; twenty is right for checking continuity.
-const N = +(process.env.FIG_N || 20);
-const CELL = Math.round(150 * K), H = Math.round(260 * K), GROUND = Math.round(210 * K);
-const INK = 0x1a1a1aff, PAPER = 0xfafaf7ff, RULE = 0xd8d5ccff;
+// THE LIVING SHELVES ARE SAMPLED ON THE CLOCK. 59–78 and 157–168 ignore `u`
+// entirely, so stepping `u` across them draws the same frame six times and the
+// strip says "this does nothing" about a motion that loops perfectly well. This
+// is check-moves' own trap, one instrument over.
+const LIVING = (a) => (a >= 59 && a <= 78) || (a >= 157 && a <= 168);
 
-// TRUE STROKE WEIGHTS, taken from how Stickman.tsx actually draws.
-// `boneBase(thick)` sets the bone's full HEIGHT, so its half-width is thick/2;
-// `dotBase(r)` takes a RADIUS, and the head is `dotBase(STR.headR * k)` — so the
-// head radius is 20 rig units, not 10.
-//
-// This matters more than it looks. The first version drew 2px limbs and a 9px
-// head, which reads as a wire figure and would happily show an arm the real
-// renderer buries inside the torso — and "the forearm vanished against the body"
-// is exactly the class of defect these sheets exist to catch (LESSON_RULES B16b).
-const LIMB_W = (R.STR.limb / 2) * K;
-const TORSO_W = (R.STR.torso / 2) * K;
-const HEAD_R = R.STR.headR * K;
+const from = Number(process.argv[2] || 121);
+const to = Number(process.argv[3] || from);
+const acts = [];
+for (let a = from; a <= to; a += 1) acts.push(a);
 
-function line(img, a, b, w) {
-  const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) * 2) + 1;
-  for (let i = 0; i <= n; i++) {
-    const x = a.x + ((b.x - a.x) * i) / n, y = a.y + ((b.y - a.y) * i) / n;
-    for (let dx = -w; dx <= w; dx++) {
-      for (let dy = -w; dy <= w; dy++) {
-        if (dx * dx + dy * dy <= w * w) img.setPixelColor(INK, Math.round(x + dx), Math.round(y + dy));
-      }
-    }
+const FRAMES = Number(process.env.FRAMES || 6);
+const one = acts.length === 1;
+const FIG = Number(process.env.FIG || (one ? 250 : 120));
+const k = FIG / RIG.FIG_H;
+const CELL_W = Math.round(FIG * 0.82);
+const CELL_H = Math.round(FIG * 1.34);
+const PAD = 6;
+const LABEL = 18;
+
+// The act's own comment, so the strip says what it is meant to be showing.
+const SRC = readFileSync(path.join(REPO, 'components/lesson/cinematic/moves.ts'), 'utf8');
+const nameOf = (a) => {
+  const m = new RegExp(`code === ${a}\\)\\s*\\{\\s*//\\s*(.+)`).exec(SRC);
+  return m ? m[1].trim().slice(0, 46) : `act ${a}`;
+};
+
+const rowW = FRAMES * CELL_W + (FRAMES + 1) * PAD;
+const rowH = CELL_H + LABEL + PAD;
+const sheetW = rowW;
+const sheetH = acts.length * rowH + PAD;
+const sheet = canvas(sheetW, sheetH, '#EFEDE6');
+
+for (const [i, a] of acts.entries()) {
+  const oy = PAD + i * rowH;
+  text(sheet, `${a}  ${nameOf(a)}`, PAD + 2, oy, '#1A1A1A', one ? 2 : 1);
+
+  for (let f = 0; f < FRAMES; f += 1) {
+    const ox = PAD + f * (CELL_W + PAD);
+    const top = oy + LABEL;
+    sheet.fillRect(ox, top, CELL_W, CELL_H, PAPER);
+
+    // u across the shot for a one-shot; t across twelve seconds for a hold.
+    const u = FRAMES === 1 ? 1 : f / (FRAMES - 1);
+    const st = LIVING(a) ? M.actStance(a, 3 + u * 12, 1) : M.actStance(a, 3, u);
+
+    const groundY = CELL_H - Math.round(FIG * 0.16);
+    const B = RIG.pose(st, CELL_W / 2, groundY, k, 1, 1);
+    sheet.fillRect(ox + 4, top + groundY, CELL_W - 8, 1, '#BEBCB4');
+    sheet.path(figurePath(B, k), INK, ox, top);
   }
 }
-function disc(img, c, r) {
-  for (let dx = -r; dx <= r; dx++) {
-    for (let dy = -r; dy <= r; dy++) {
-      if (dx * dx + dy * dy <= r * r) img.setPixelColor(INK, Math.round(c.x + dx), Math.round(c.y + dy));
-    }
-  }
-}
 
-function draw(img, j) {
-    // Far side first, so the near limbs read in front — the same order Stickman
-    // draws in, which is what makes a far arm behind the torso look correct here
-    // rather than accidentally on top of it.
-    line(img, j.shL, j.elL, LIMB_W); line(img, j.elL, j.wrL, LIMB_W);
-    line(img, j.hipL, j.kneeL, LIMB_W); line(img, j.kneeL, j.ankL, LIMB_W);
-    line(img, j.pel, j.chest, TORSO_W);
-    line(img, j.hipR, j.kneeR, LIMB_W); line(img, j.kneeR, j.ankR, LIMB_W);
-  line(img, j.shR, j.elR, LIMB_W); line(img, j.elR, j.wrR, LIMB_W);
-  disc(img, j.head, HEAD_R);
+const outDir = path.join(REPO, 'scripts', '.lesson-shots');
+mkdirSync(outDir, { recursive: true });
+const out = path.join(outDir, one ? `move-${from}.png` : `moves-${from}-${to}.png`);
+const img = new Jimp(sheetW, sheetH);
+for (let p = 0; p < sheetW * sheetH; p += 1) {
+  img.bitmap.data[p * 4] = sheet.px[p * 3];
+  img.bitmap.data[p * 4 + 1] = sheet.px[p * 3 + 1];
+  img.bitmap.data[p * 4 + 2] = sheet.px[p * 3 + 2];
+  img.bitmap.data[p * 4 + 3] = 255;
 }
-
-export async function sheet(name, frames) {
-  const img = new Jimp(CELL * N, H, PAPER);
-  for (let i = 0; i < N; i++) {
-    const ox = i * CELL;
-    for (let x = 0; x < CELL; x++) img.setPixelColor(RULE, ox + x, GROUND);
-    // Cfg is FLAT — the stance spreads in beside the placement fields.
-    draw(img, R.solve({ x: ox + CELL / 2, groundY: GROUND, k: K, dir: 1, ...frames[i] }));
-  }
-  mkdirSync(path.join(REPO, '.moves-sheets'), { recursive: true });
-  await img.writeAsync(path.join(REPO, '.moves-sheets', `${name}.png`));
-  console.log(`.moves-sheets/${name}.png`);
-}
-
-/**
- * Two figures in one cell. The only way to see the thing that matters about a
- * pair motion — whether the hands actually arrive at the same place — since each
- * figure on its own always looks like it is reaching correctly.
- */
-export async function pairSheet(name, frames) {
-  const W = 190;
-  const img = new Jimp(W * N, H, PAPER);
-  for (let i = 0; i < N; i++) {
-    const ox = i * W;
-    for (let x = 0; x < W; x++) img.setPixelColor(RULE, ox + x, GROUND);
-    const { a, b, pa, pb } = frames[i];
-    draw(img, R.solve({ ...pa, x: ox + pa.x, groundY: GROUND, ...a }));
-    draw(img, R.solve({ ...pb, x: ox + pb.x, groundY: GROUND, ...b }));
-  }
-  mkdirSync(path.join(REPO, '.moves-sheets'), { recursive: true });
-  await img.writeAsync(path.join(REPO, '.moves-sheets', `${name}.png`));
-  console.log(`.moves-sheets/${name}.png`);
-}
-
-const T = 3.0;
-const WALK_CYCLE = R.WALK.S / R.WALK.stance;
-
-// `node scripts/sheet-moves.mjs posture:8 act:3 hold:68 move:7` draws just those;
-// with no
-// arguments it draws the baselines, which is also how the renderer itself gets
-// verified — against a figure already known to look right.
-const want = process.argv.slice(2);
-if (!want.length) {
-  await sheet('walk', Array.from({ length: N }, (_, i) => R.walk((i / N) * WALK_CYCLE, R.WALK)));
-  await sheet('seated', Array.from({ length: N }, () => R.seated(21, T)));
-} else {
-  for (const arg of want) {
-    const [kind, nStr] = arg.split(':');
-    const n = Number(nStr);
-    if (kind === 'posture') {
-      // A settled posture does not change over u, so vary the CLOCK instead —
-      // that shows the breath and weight drift, and proves it never freezes.
-      await sheet(`posture-${n}`, Array.from({ length: N }, (_, i) => M.postureHold(n, T + i * 0.22)));
-    } else if (kind === 'act') {
-      await sheet(`act-${n}`, Array.from({ length: N }, (_, i) => M.actStance(n, T, i / (N - 1))));
-    } else if (kind === 'hold') {
-      // A LIVING HOLD (59–78) IGNORES u ENTIRELY, so `act:63` draws the same frame
-      // twenty times and tells you nothing — the sheet comes out looking like a
-      // pose that has been checked when nothing has looked at it. Sweep the CLOCK
-      // instead, over twelve seconds, which is also the only way the slow events
-      // are seen at all: the re-settle in 62 fires about every ten seconds and the
-      // scratch in 66 about every eight.
-      await sheet(`hold-${n}`, Array.from({ length: N }, (_, i) => M.actStance(n, T + (i / N) * 12, 1)));
-    } else if (kind === 'move') {
-      const g = M.gaitFor(n), cyc = g.S / g.stance;
-      await sheet(`move-${n}`, Array.from({ length: N }, (_, i) => M.moveStance(n, (i / N) * cyc)));
-    } else if (kind === 'prop') {
-      await sheet(`prop-${n}`, Array.from({ length: N }, (_, i) => I.propAct(n, T, i / (N - 1))));
-    } else if (kind === 'carry') {
-      // `carry:3` means hold 3 on a plain walk; `carry:3.2` means hold 3 in mode 2.
-      const hold = Math.trunc(n), mode = Math.round((n - Math.trunc(n)) * 10);
-      const g = M.gaitFor(mode), cyc = g.S / g.stance;
-      await sheet(`carry-${hold}-mode${mode}`,
-        Array.from({ length: N }, (_, i) => I.carryMode(mode, (i / N) * cyc, hold)));
-    } else if (kind === 'pair') {
-      const pa = { x: 66, groundY: GROUND, k: K, dir: 1 };
-      const pb = { x: 122, groundY: GROUND, k: K, dir: -1 };
-      const fn = nStr === 'pass'
-        ? (u) => I.passObject(T, u, pa, pb)
-        : (u) => I.handshake(T, u, pa, pb);
-      await pairSheet(`pair-${nStr}`, Array.from({ length: N }, (_, i) => {
-        const r = fn(i / (N - 1));
-        return { a: r.a, b: r.b, pa, pb };
-      }));
-    }
-  }
-}
+await img.writeAsync(out);
+console.log(`wrote ${out}  (${acts.length} act${acts.length > 1 ? 's' : ''} × ${FRAMES} frames)`);

@@ -33,7 +33,7 @@ export const BEATS: Ethics18Beat[] = [
   },
   {
     p: 41, x: 168, line: 1, test: 1,
-    text: 'They cannot argue, cannot promise, cannot be held to anything — so they were furniture.',
+    text: 'Animals cannot argue, cannot promise, and cannot be held to anything. So they were furniture.',
     dur: 2.6,
   },
   {
@@ -44,7 +44,7 @@ export const BEATS: Ethics18Beat[] = [
   },
   {
     p: 13, x: 124, line: 1, test: 1,
-    text: 'Nor can someone deeply cognitively impaired. Nobody thinks they are outside — so the test is not the one we use.',
+    text: 'Nor can someone deeply cognitively impaired. Nobody thinks they are outside — so that is not the real test.',
     dur: 3.4,
   },
   {
@@ -62,7 +62,7 @@ export const BEATS: Ethics18Beat[] = [
   },
   {
     p: 383, x: 168, line: 1, test: 2, wide: 1,
-    text: 'Change the test to the one we actually use, and nobody has to argue about where the line goes. It moves by itself, and it takes the pig with it.',
+    text: 'Change the test to the one people actually use, and nobody has to argue about where the line goes. It moves by itself, and it takes the pig with it.',
     cite: 'The line follows',
     dur: 4.6,
   },
@@ -76,14 +76,14 @@ export const BEATS: Ethics18Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, x: 124, line: 1, test: 2, wide: 1,
+    p: 165, x: 124, line: 1, test: 2, wide: 1,
     interact: {
       prompt: 'What decides whether something counts morally?',
       sort: {
         chip: 'moral standing',
         bins: [
           { id: 'reason', label: 'can it reason', reads: 'whether it can reason' },
-          { id: 'speak', label: 'can it talk', reads: 'whether it can talk to us' },
+          { id: 'speak', label: 'can it talk', reads: 'whether it can talk to you' },
           { id: 'suffer', label: 'can it suffer', reads: 'whether it can suffer', correct: true },
         ],
       },

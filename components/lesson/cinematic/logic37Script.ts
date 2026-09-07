@@ -32,7 +32,7 @@ export interface Logic37Beat extends BaseBeat {
 
 export const BEATS: Logic37Beat[] = [
   {
-    p: 25, x: 56, boxes: 1,
+    p: 462, x: 56, boxes: 1,
     text: 'A village with one barber and one rule. He shaves every man who does not shave himself, and nobody else.',
     dur: 4.0,
   },
@@ -56,7 +56,7 @@ export const BEATS: Logic37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 56, boxes: 1, sorted: 1, barber: 1,
+    p: 380, x: 56, boxes: 1, sorted: 1, barber: 1,
     text: 'That is the whole result, and the result bites harder than you would think. A sentence can be built perfectly and still describe nothing that could exist.',
     dur: 4.6,
   },
@@ -71,7 +71,7 @@ export const BEATS: Logic37Beat[] = [
     dur: 1.8,
   },
   {
-    p: 47, x: 56, boxes: 1, barber: 1, sets: 1,
+    p: 433, x: 56, boxes: 1, barber: 1, sets: 1,
     quote: {
       id: 'lq-logic-arguments-37-1',
       text: 'Arithmetic totters.',

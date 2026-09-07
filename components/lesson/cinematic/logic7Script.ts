@@ -19,7 +19,7 @@ export interface Logic7Beat extends BaseBeat {
 
 export const BEATS: Logic7Beat[] = [
   {
-    p: 25, x: 70,
+    p: 462, x: 70,
     text: 'There are two moves that can never let you down. Learn them, and no one can slide a broken argument past you again.',
     dur: 3.8,
   },
@@ -31,7 +31,7 @@ export const BEATS: Logic7Beat[] = [
   },
   {
     p: 41, x: 168, rule: 1,
-    text: 'Nothing clever yet — just a promise: whenever the first thing happens, so does the second.',
+    text: 'Nothing clever yet. Just a promise: whenever the first thing happens, so does the second.',
     dur: 2.7,
   },
   {
@@ -46,7 +46,7 @@ export const BEATS: Logic7Beat[] = [
     dur: 1.8,
   },
   {
-    p: 13, x: 124, rule: 1, fact: 1, pick: 1,
+    p: 432, x: 124, rule: 1, fact: 1, pick: 1,
     interact: {
       prompt: 'The rule holds, and it IS raining. Tap the card that must be true.',
       explain: 'The rule promised wet streets whenever it rains — so once the rain is real, the wet streets are guaranteed. You knew it without ever looking at the street.',
@@ -77,7 +77,7 @@ export const BEATS: Logic7Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 124, rule: 1, fact: 2,
+    p: 165, x: 124, rule: 1, fact: 2,
     interact: {
       prompt: 'The pavement is dry. What does that tell you about the rain?',
       sort: {
@@ -94,13 +94,13 @@ export const BEATS: Logic7Beat[] = [
     dur: 1.0,
   },
   {
-    p: 167, x: 168, rule: 1, fact: 2, concl: 2,
+    p: 459, x: 168, rule: 1, fact: 2, concl: 2,
     text: 'That is the second move: modus tollens. Knock out the "then" part, and the "if" part falls with it.',
     cite: 'Move two · modus tollens',
     dur: 3.3,
   },
   {
-    p: 167, x: 168, rule: 1, fact: 2, concl: 2,
+    p: 459, x: 168, rule: 1, fact: 2, concl: 2,
     text: 'You just read the sky by looking at the pavement.',
     dur: 1.8,
   },

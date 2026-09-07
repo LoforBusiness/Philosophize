@@ -60,7 +60,7 @@ export const BEATS: Pol15Beat[] = [
     dur: 4.8,
   },
   {
-    p: 4, x: 124, stages: 4, night: 1,
+    p: 165, x: 124, stages: 4, night: 1,
     interact: {
       prompt: 'Smashing windows by night, then hiding. Is that civil disobedience?',
       poll: {

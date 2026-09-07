@@ -21,7 +21,7 @@ export interface Meta31Beat extends BaseBeat {
 
 export const BEATS: Meta31Beat[] = [
   {
-    g: 5, holes: 0, ticks: 0, chips: 0,
+    g: 440, holes: 0, ticks: 0, chips: 0,
     dur: 3.8,
     text: 'One slab of cheese. Solid all the way through, and there is nothing here to argue about yet.',
   },
@@ -37,13 +37,13 @@ export const BEATS: Meta31Beat[] = [
     text: 'Something was taken away. And yet there are three more things here than before.',
   },
   {
-    g: 168, holes: 1, ticks: 3, chips: 0,
+    g: 456, holes: 1, ticks: 3, chips: 0,
     dur: 3,
     text: 'You can count holes. You can measure one, call it deeper than the next, and be right.',
     cite: 'One, two, three',
   },
   {
-    g: 168, holes: 1, ticks: 3, chips: 0,
+    g: 456, holes: 1, ticks: 3, chips: 0,
     dur: 1.8,
     text: 'Everything we do with objects, we do with holes.',
   },
@@ -61,7 +61,7 @@ export const BEATS: Meta31Beat[] = [
     },
   },
   {
-    g: 160, holes: 1, ticks: 3, chips: 1,
+    g: 457, holes: 1, ticks: 3, chips: 1,
     dur: 2.3,
     text: 'So what did you count? There are only three things it could be.',
     cite: 'Three candidates',
@@ -72,7 +72,7 @@ export const BEATS: Meta31Beat[] = [
     text: 'The cheese, the ring of cheese around each gap, or the empty gap itself.',
   },
   {
-    g: 2, holes: 1, ticks: 3, chips: 1, pick: 1,
+    g: 466, holes: 1, ticks: 3, chips: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap whatever it is you counted when you counted three.',
@@ -81,7 +81,7 @@ export const BEATS: Meta31Beat[] = [
     },
   },
   {
-    g: 8, holes: 1, ticks: 3, chips: 1,
+    g: 173, holes: 1, ticks: 3, chips: 1,
     dur: 1.0,
     interact: {
       prompt: 'How often can rewording make a hole go away?',

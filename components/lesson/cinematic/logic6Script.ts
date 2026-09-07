@@ -18,7 +18,7 @@ export interface Logic6Beat extends BaseBeat {
 
 export const BEATS: Logic6Beat[] = [
   {
-    p: 2, link: 0, rain: 0,
+    p: 443, link: 0, rain: 0,
     text: 'Two tiny words run almost every argument. Master "if" and "then" and you hold logic’s favourite tool.',
     dur: 3.4,
   },
@@ -71,7 +71,7 @@ export const BEATS: Logic6Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, link: 1, table: 1,
+    p: 165, link: 1, table: 1,
     interact: {
       prompt: 'What does accepting a conditional commit you to?',
       split: {

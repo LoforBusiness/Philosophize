@@ -30,24 +30,24 @@ export const BEATS: Log13Beat[] = [
     text: 'Let one student retake one quiz. That is the whole proposal, and nobody in the room objects to it.',
   },
   {
-    g: 159, steps: 4,
+    g: 465, steps: 4,
     dur: 2.6,
-    text: 'Then it arrives with company. They will want to retake every test.',
+    text: 'Then the retake arrives with company. They will want to retake every test.',
     cite: 'And then, and then',
   },
   {
-    g: 159, steps: 4,
+    g: 465, steps: 4,
     dur: 2.4,
     text: 'Grades will stop meaning anything. So we cannot allow the retake.',
   },
   {
-    g: 13, steps: 4, joins: 1,
+    g: 383, steps: 4, joins: 1,
     dur: 4.8,
     text: 'Look at the gaps instead of the steps. Every step is a claim and every gap is a reason that never turned up.',
     cite: 'The joins',
   },
   {
-    g: 137, steps: 4, joins: 1,
+    g: 128, steps: 4, joins: 1,
     dur: 3.8,
     quote: {
       id: 'lq-logic-arguments-13',
@@ -65,7 +65,7 @@ export const BEATS: Log13Beat[] = [
     cite: 'A slope that holds',
   },
   {
-    g: 4, steps: 4, joins: 1, honest: 1, pick: 1,
+    g: 467, steps: 4, joins: 1, honest: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap the first step that has not been earned.',

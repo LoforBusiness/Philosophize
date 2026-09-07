@@ -23,7 +23,7 @@ export interface Ethics12Beat extends BaseBeat {
 
 export const BEATS: Ethics12Beat[] = [
   {
-    p: 25, x: 56, n: 1, word: 0,
+    p: 462, x: 56, n: 1, word: 0,
     text: 'Before you act, ask one question — what if everyone did this? Kant thought that single test could sort right from wrong, with no arithmetic at all.',
     dur: 3.8,
   },
@@ -58,18 +58,18 @@ export const BEATS: Ethics12Beat[] = [
     dur: 3.6,
   },
   {
-    p: 159, x: 124, n: 12, word: 1,
+    p: 465, x: 124, n: 12, word: 1,
     text: 'Now everyone breaks a promise the moment it suits them. Nobody believes one any more, so the word goes blank on every card.',
     cite: 'What the law does',
     dur: 4,
   },
   {
-    p: 159, x: 124, n: 12, word: 1,
+    p: 465, x: 124, n: 12, word: 1,
     text: 'There is no promising left to break.',
     dur: 1.8,
   },
   {
-    p: 4, x: 124, n: 12, word: 1,
+    p: 457, x: 124, n: 12, word: 1,
     interact: {
       prompt: 'Which principle would let you break the promise?',
       sort: {

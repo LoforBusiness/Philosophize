@@ -39,7 +39,7 @@ export const BEATS: Epi5Beat[] = [
   },
   {
     p: 24, star: 0.8, rungs: 5,
-    text: 'Aristotle calls that the only free knowledge, because it is in service of nothing.',
+    text: 'Aristotle calls knowing for its own sake the only free knowledge. It is in service of nothing.',
     dur: 1.8,
   },
   {
@@ -54,7 +54,7 @@ export const BEATS: Epi5Beat[] = [
     dur: 3,
   },
   {
-    p: 160, star: 1, rungs: 5,
+    p: 467, star: 1, rungs: 5,
     // The cite plate carries `thaumazein`; the narration says what it means. A term
     // the reader can SEE spelled out does not also need spelling out in the prose (J7).
     text: 'Both Plato and Aristotle say philosophy begins in wonder. Not the pleasant kind.',
@@ -62,7 +62,7 @@ export const BEATS: Epi5Beat[] = [
     dur: 2.2,
   },
   {
-    p: 160, star: 1, rungs: 5,
+    p: 467, star: 1, rungs: 5,
     // The cite plate carries `thaumazein`; the narration says what it means. A term
     // the reader can SEE spelled out does not also need spelling out in the prose (J7).
     text: 'Their word is closer to being knocked off balance by something you cannot account for.',
@@ -93,7 +93,7 @@ export const BEATS: Epi5Beat[] = [
     dur: 3.0,
   },
   {
-    p: 25, star: 1, rungs: 5,
+    p: 172, star: 1, rungs: 5,
     interact: {
       prompt: 'Where does Aristotle put the wanting to know?',
       split: {
@@ -111,7 +111,7 @@ export const BEATS: Epi5Beat[] = [
     dur: 1.0,
   },
   {
-    p: 13, star: 1, power: 1, rungs: 5,
+    p: 383, star: 1, power: 1, rungs: 5,
     interact: {
       // Was "Who said ... ? Tap the name" — a memory test of the quote card two beats
       // back. Asking which of them HELD the position is the same tap and a real question (J8).

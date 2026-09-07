@@ -46,7 +46,7 @@ export const BEATS: EthicsBeat[] = [
   {
     hpose: 2,
     critter: true,
-    text: 'You are not alone in caring. Darwin traced morality’s raw materials — empathy, fairness, care for your group — to instincts we share with other animals.',
+    text: 'You are not alone in caring. Darwin traced empathy, fairness and care for your group back to instincts other animals have too.',
     dur: 4.2,
   },
   {
@@ -73,7 +73,7 @@ export const BEATS: EthicsBeat[] = [
     hpose: 4,
     judge: true,
     origins: true,
-    text: 'Where it comes from is disputed — instinct, says Darwin; society turned inward, says Freud; reason itself, says Kant.',
+    text: 'Where conscience comes from is disputed. Darwin says instinct, Freud says society turned inward, and Kant says reason itself.',
     dur: 2.3,
   },
   {
@@ -150,7 +150,7 @@ export const BEATS: EthicsBeat[] = [
   {
     hpose: 2,
     plant: true,
-    text: 'Flourishing is closer — living and acting well, with a strong character, over a whole life.',
+    text: 'Flourishing is closer. Living and acting well, with a strong character, over a whole life.',
     dur: 2.2,
   },
   {

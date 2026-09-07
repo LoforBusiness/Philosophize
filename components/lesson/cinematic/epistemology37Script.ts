@@ -33,7 +33,7 @@ export interface Epistemology37Beat extends BaseBeat {
 
 export const BEATS: Epistemology37Beat[] = [
   {
-    p: 25, x: 54, hull: 1,
+    p: 462, x: 54, hull: 1,
     text: 'An old ship, due to carry emigrants. Her owner has five separate reasons to doubt she is sound.',
     dur: 3.8,
   },
@@ -67,12 +67,12 @@ export const BEATS: Epistemology37Beat[] = [
     dur: 2.7,
   },
   {
-    p: 21, x: 54, hull: 1, quiet: 1, sailed: 1, verdict: 1,
+    p: 380, x: 54, hull: 1, quiet: 1, sailed: 1, verdict: 1,
     text: 'Then he took his fee, waved her off, and grieved sincerely when she went down. He never lied to anybody, including himself.',
     dur: 4.6,
   },
   {
-    p: 47, x: 54, hull: 1, quiet: 1, sailed: 1, verdict: 1,
+    p: 433, x: 54, hull: 1, quiet: 1, sailed: 1, verdict: 1,
     quote: {
       id: 'lq-epistemology-knowledge-37-1',
       text: 'It is wrong always, everywhere, and for anyone, to believe anything upon insufficient evidence.',

@@ -23,18 +23,18 @@ export interface Ethics31Beat extends BaseBeat {
 
 export const BEATS: Ethics31Beat[] = [
   {
-    p: 3, rungs: 0, ladder: 0, duty: 1,
+    p: 383, rungs: 0, ladder: 0, duty: 1,
     dur: 4.2,
     text: 'Something is on a shelf and you have been told to fetch it. The duty is lit, and at this point nobody has asked whether you can.',
   },
   {
-    p: 158, rungs: 4, ladder: 1, duty: 1,
+    p: 462, rungs: 4, ladder: 1, duty: 1,
     dur: 2.6,
     text: 'A ladder appears, so you climb. Four rungs, and the shelf is closer.',
     cite: 'Climbing',
   },
   {
-    p: 158, rungs: 4, ladder: 1, duty: 1,
+    p: 462, rungs: 4, ladder: 1, duty: 1,
     dur: 2,
     text: 'Nothing about the duty has changed because nothing needed to.',
   },
@@ -50,7 +50,7 @@ export const BEATS: Ethics31Beat[] = [
     text: 'Watch the lamp.',
   },
   {
-    p: 2, rungs: 7, ladder: 1, duty: 0,
+    p: 384, rungs: 7, ladder: 1, duty: 0,
     dur: 3.8,
     quote: {
       id: 'lq-ethics-ethics-31-1',
@@ -63,18 +63,18 @@ export const BEATS: Ethics31Beat[] = [
     },
   },
   {
-    p: 158, rungs: 11, ladder: 2, duty: 1,
+    p: 460, rungs: 11, ladder: 2, duty: 1,
     dur: 3.2,
     text: 'Now extend the ladder. The lamp comes straight back on, and you did not become a better person in between.',
     cite: 'Give it the reach',
   },
   {
-    p: 158, rungs: 11, ladder: 2, duty: 1,
+    p: 460, rungs: 11, ladder: 2, duty: 1,
     dur: 1.8,
     text: 'The duty was tracking the reach the whole time.',
   },
   {
-    p: 1, rungs: 11, ladder: 1, duty: 0, pick: 1,
+    p: 459, rungs: 11, ladder: 1, duty: 0, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Take the reach away again. Tap the thing that has to give.',

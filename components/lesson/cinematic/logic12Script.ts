@@ -23,7 +23,7 @@ export const BEATS: Logic12Beat[] = [
     text: 'You are either with us or against us. Two doors, and you are told to pick one.',
   },
   {
-    g: 4, lit: 0,
+    g: 457, lit: 0,
     dur: 4.4,
     text: 'Both doors are real. Some people genuinely are with you, and some genuinely are against you — nothing has been made up here.',
     cite: 'Both doors are real',

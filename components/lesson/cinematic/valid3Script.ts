@@ -30,14 +30,14 @@ export const BEATS: Valid3Beat[] = [
     dur: 3.6,
   },
   {
-    p: 167, link: 1, form: 0,
+    p: 459, link: 1, form: 0,
     text: 'Two tests, and never confuse them. An argument is VALID when its shape will not let true premises lead to a false conclusion.',
     cite: 'Validity vs Soundness',
     dur: 3.2,
   },
   {
-    p: 167, link: 1, form: 0,
-    text: 'It is SOUND when it is valid and the premises are actually true.',
+    p: 459, link: 1, form: 0,
+    text: 'An argument is SOUND when it is valid and the premises are actually true.',
     dur: 1.8,
   },
   {

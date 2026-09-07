@@ -43,7 +43,7 @@ export const BEATS: Political7Beat[] = [
   },
   {
     p: 38, x: 190, stone: 1,
-    text: 'Nobody grants them. A government exists to guard them, not to hand them out.',
+    text: 'Nobody grants your rights. A government exists to guard them, not to hand them out.',
     dur: 2,
   },
   {
@@ -71,18 +71,18 @@ export const BEATS: Political7Beat[] = [
     dur: 3.6,
   },
   {
-    p: 176, x: 190, stone: 1, charter: 1,
+    p: 467, x: 190, stone: 1, charter: 1,
     text: 'Here is how to tell the two apart. Tomorrow a government passes a law: from now on, you may not say what you think.',
     cite: 'The test',
     dur: 3.5,
   },
   {
-    p: 176, x: 190, stone: 1, charter: 1,
+    p: 467, x: 190, stone: 1, charter: 1,
     text: 'The law is real, and it is enforced.',
     dur: 1.8,
   },
   {
-    p: 44, x: 190, stone: 1, charter: 1, pick: 1,
+    p: 162, x: 190, stone: 1, charter: 1, pick: 1,
     interact: {
       prompt: 'That law wipes the right off the books. Tap the source where the right is still standing.',
       explain: 'Wipe the paper and the paper’s right goes with it — that is what made it the paper’s in the first place. The stone’s answer is different: you kept the right, and the law simply broke it. The whole argument turns on that gap.',
@@ -107,7 +107,7 @@ export const BEATS: Political7Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 262, stone: 1, charter: 1, tear: 1,
+    p: 165, x: 262, stone: 1, charter: 1, tear: 1,
     interact: {
       prompt: 'If law is all there is, what follows?',
       sort: {
@@ -135,7 +135,7 @@ export const BEATS: Political7Beat[] = [
     dur: 2.6,
   },
   {
-    p: 0, x: 190,
+    p: 462, x: 190,
     summary: {
       title: 'Two Stories About Rights',
       points: [

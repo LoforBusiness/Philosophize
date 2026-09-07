@@ -31,9 +31,34 @@
 //
 // The last case is reported with the words that stayed behind, because that is
 // the sentence the reader will use when they see it again.
+//
+// ── WHAT "INSIDE THE ANSWER'S BOX" CANNOT DECIDE, AND WHY IT IS STILL ADVISORY ──
+//
+// "Inside the box" is a PROXY for "belongs to the answer", and two things sit
+// inside that box without belonging to it:
+//
+//   · A NEIGHBOURING ANSWER. Answers stack and their hit boxes abut —
+//     aesthetics12's header states the touch box is "the pitch exactly" — so the
+//     next card's centre lands a pixel or two inside the chosen one. Those are
+//     EXCLUDED now: every ring's parent is stamped `data-revtgt`, and an element
+//     owned by a different target is that target's business.
+//   · SCENE FURNITURE THE ANSWER STANDS ON. A table's rules, a colonnade, a plate
+//     naming a philosopher. It is not a descendant of any target and it is right
+//     for it to stay put.
+//
+// The second one cannot be resolved geometrically, so THIS CHECK IS ADVISORY.
+// Four lessons were chased down on its say-so — ethics-5, logic-3, logic-4,
+// political-5 — and all four were photographed before and after answering: the
+// correct card rises, inks solid, takes white type and a tick, and its title AND
+// subtitle travel together, while the losers dim in place. Every one of them was
+// this false positive. `scripts/.lesson-shots/reveal-<id>.png` holds the frames.
+//
+// SO: treat a finding here as a lesson to LOOK AT, never as a defect to fix. The
+// render is the arbiter, exactly as it is for the wardrobe (§17, AA1c).
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
+import { claimRoute } from './lib/previewroute.mjs';
 
 const CDP = +(process.env.CDP_PORT || 9403);
 const WEB = +(process.env.WEB_PORT || 8873);
@@ -95,6 +120,13 @@ const TAP_ADVANCE = "(()=>{const e=document.elementFromPoint(210,320);(e||docume
 const SNAP = `(()=>{
   const host = ${STAGE};
   if (!host) return null;
+  // WHICH TARGET EACH ELEMENT BELONGS TO. Answers stack, and their hit boxes abut
+  // — aesthetics12's own header says the touch box is "the pitch exactly" — so a
+  // neighbour's card sits with its centre a pixel or two inside the chosen one's
+  // box. Counting those made four lessons look split when the render shows the
+  // answer rising as one piece and the losers correctly staying put. An element
+  // that lives inside ANOTHER target is that target's business.
+  ${RINGS}.forEach((r, i) => { const p = r.parentElement; if (p) p.setAttribute('data-revtgt', String(i)); });
   const out = [];
   for (const el of host.querySelectorAll('*')) {
     const r = el.getBoundingClientRect();
@@ -116,7 +148,9 @@ const SNAP = `(()=>{
     // rise while the row and both its lines plainly did. He carries testID="figure"
     // for exactly this sort of question (see Stickman.tsx).
     if (el.closest('[data-testid="figure"]')) continue;
-    out.push({ x: +r.x.toFixed(2), y: +r.y.toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2), t: own, p: painted ? 1 : 0 });
+    const owner = el.closest('[data-revtgt]');
+    out.push({ x: +r.x.toFixed(2), y: +r.y.toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2), t: own, p: painted ? 1 : 0,
+      g: owner ? +owner.getAttribute('data-revtgt') : -1 });
   }
   return out;
 })()`;
@@ -182,6 +216,9 @@ async function reveal(tab, id) {
     // Everything that sat inside the correct answer's box before the tap.
     const inside = [];
     for (const e of before) {
+      // Anything that belongs to a DIFFERENT target is not part of this answer,
+      // however much their boxes overlap. `g` is the target it descends from.
+      if (e.g >= 0 && e.g !== k) continue;
       const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
       if (cx >= box.x - 2 && cx <= box.x + box.w + 2 && cy >= box.y - 2 && cy <= box.y + box.h + 2) inside.push(e);
     }
@@ -211,9 +248,15 @@ async function reveal(tab, id) {
 }
 
 (async () => {
+  // THROUGH THE SHARED LOCK, LIKE EVERY OTHER HARNESS THAT WRITES INTO app/.
+  // This one wrote its route and never removed it, so a sweep left a live
+  // `app/previewreveal.tsx` behind — a route that forces `_hasHydrated` and
+  // `launchDone`, which is exactly the scaffolding check:routes exists to keep
+  // out of a build (§21). It also took no lock, so it would happily delete the
+  // route out from under measure-must, whose page it borrows.
   const route = fs.readFileSync('scripts/measure-must.mjs', 'utf8');
   const src = /const ROUTE_SRC = `([\s\S]*?)`;\n/.exec(route)[1];
-  if (!fs.existsSync(ROUTE_FILE)) fs.writeFileSync(ROUTE_FILE, src);
+  claimRoute({ route: ROUTE_FILE, src, owner: 'check-reveal', keep: process.env.REVEAL_KEEP === '1' });
 
   const routeFile = fs.readFileSync('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx', 'utf8');
   const all = [...routeFile.matchAll(/'([a-z0-9-]+)':\s*[A-Za-z0-9_]+/g)].map((m) => m[1]);
@@ -226,7 +269,12 @@ async function reveal(tab, id) {
       const i = next++;
       if (i >= ids.length) return;
       let r, tab = null;
-      try { tab = await makeTab(); r = await reveal(tab, ids[i]); } catch (e) { r = { id: ids[i], skip: 'threw: ' + String(e).slice(0, 80) }; }
+      // A THROW IS NOT A SKIP. Filed as one, a sweep in which every lesson failed
+      // to load reports "186 skipped (no scene-target question)" and exits 0 —
+      // which is indistinguishable from a corpus with nothing to check. That is
+      // the same failure check-readable already records (§21); it is kept apart
+      // here so a dead probe is a FINDING rather than a quiet clean bill.
+      try { tab = await makeTab(); r = await reveal(tab, ids[i]); } catch (e) { r = { id: ids[i], skip: 'threw: ' + String(e).slice(0, 80), threw: true }; }
       finally { if (tab) { try { await tab.close(); } catch { /* gone already */ } } }
       results.push(r);
       done++;
@@ -236,11 +284,18 @@ async function reveal(tab, id) {
   }));
 
   const judged = results.filter((r) => !r.skip);
+  const threw = results.filter((r) => r.threw);
+  const skipped = results.filter((r) => r.skip && !r.threw);
   const broken = judged.filter((r) => r.still > 0 && r.moved > 0);
   const dead = judged.filter((r) => r.moved === 0);
 
   console.log('\nE39 IN THE RENDER\n');
-  console.log(`  ${judged.length} lesson(s) measured · ${results.length - judged.length} skipped (no scene-target question)`);
+  console.log(`  ${judged.length} lesson(s) measured · ${skipped.length} skipped (no scene-target question)`);
+  if (threw.length) {
+    console.log(`\n  ${threw.length} LESSON(S) COULD NOT BE MEASURED AT ALL — this sweep proves nothing about them:`);
+    for (const r of threw.slice(0, 8)) console.log(`      ${r.id.padEnd(28)} ${r.skip}`);
+    if (threw.length > 8) console.log(`      … and ${threw.length - 8} more`);
+  }
   if (broken.length) {
     console.log('\n  the outline moved and these words did not:');
     for (const r of broken) console.log(`      ${r.id.padEnd(28)} ${r.still} stayed  ${r.stillWords.join(' · ')}`);
@@ -250,6 +305,6 @@ async function reveal(tab, id) {
     for (const r of dead) console.log(`      ${r.id}`);
   }
   fs.writeFileSync('scripts/.reveal.json', JSON.stringify(results, null, 1));
-  console.log(`\n  ${broken.length} split · ${dead.length} dead · wrote scripts/.reveal.json`);
-  process.exit(broken.length + dead.length ? 1 : 0);
+  console.log(`\n  ${broken.length} split · ${dead.length} dead · ${threw.length} unmeasured · wrote scripts/.reveal.json`);
+  process.exit(broken.length + dead.length + threw.length ? 1 : 0);
 })();

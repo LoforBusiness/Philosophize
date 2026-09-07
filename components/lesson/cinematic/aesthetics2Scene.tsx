@@ -9,7 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -123,7 +123,7 @@ export default function Aesthetics2Scene({ clock, bt, bi, pickPos, i }: SceneApi
     const cross = clamp01(bt.value / 1.4);
     return {
       artist: pose(artistS, ARTIST_X, GROUND, K_FIG, 1, 1),
-      viewer: pose(viewerS, VIEWER_X, GROUND, K_FIG, -1, 1),
+      viewer: reactPose(viewerS, VIEWER_X, GROUND, K_FIG, -1, 1),
       waveX: lerp(ARTIST_X + 46, VIEWER_X - 46, ease01(cross)),
       waveVis: WAVE[n] * Math.sin(Math.PI * cross),
       // R7b — the pad lights the viewer's chest. Up the y axis, from the tears are
@@ -195,7 +195,7 @@ export default function Aesthetics2Scene({ clock, bt, bi, pickPos, i }: SceneApi
         <View style={styles.feltInner} />
       </Animated.View>
 
-      <Stickman D={DA} k={K_FIG} />
+      <Stickman role="second" D={DA} k={K_FIG} />
       <Stickman D={DV} k={K_FIG} />
 
       {/* the feeling crossing the gap — three arcs riding one anchor */}

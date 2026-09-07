@@ -66,7 +66,7 @@ export const BEATS: Log16Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 132, dawns: 5, arrow: 1, cands: 1, live: 1,
+    p: 165, x: 132, dawns: 5, arrow: 1, cands: 1, live: 1,
     interact: {
       prompt: 'Tap the card that would actually test it.',
       explain: 'The card with no crow on it. If the sun still comes up, the crow was never doing the work. Another crowing morning just repeats what you have. And nobody can arrange a morning without a sunrise, so it tests nothing.',
@@ -81,7 +81,7 @@ export const BEATS: Log16Beat[] = [
     dur: 4.4,
   },
   {
-    p: 137, x: 250, dawns: 6, silent: 1,
+    p: 456, x: 250, dawns: 6, silent: 1,
     quote: {
       id: 'lq-logic-arguments-16-2',
       text: 'One event follows another; but we never can observe any tie between them. They seem conjoined, but never connected.',

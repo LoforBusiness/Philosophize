@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Animated, {
   useSharedValue, useDerivedValue, useAnimatedStyle, useFrameCallback,
-  withTiming, Easing, FadeInDown, LinearTransition, runOnJS, type SharedValue,
+  withTiming, withSequence, withDelay, Easing, FadeInDown, LinearTransition, runOnJS, type SharedValue,
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import { getLessonById } from '@/data';
@@ -19,7 +19,7 @@ import BrickStructure, {
   BASE_LX, BASE_RX, BASE_Y, CENTER_X, KEY_X, KEY_Y, type StructState,
 } from './BrickStructure';
 import { BEATS, gates, type Beat } from './builderScript';
-import { Bubble, CORRECT_LABEL } from './cinematicKit';
+import { Bubble, CORRECT_LABEL, REACT, reactPose } from './cinematicKit';
 import {
   BLANK, clamp01, ease01, easeOutBack, easeOutCubic, headAt, lerp, masterHold, masterLive,
   mixStance, narratorHold, narratorLive, pose, seg, stand, type Bundle, type Stance,
@@ -265,7 +265,11 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
     return {
       cam: { s: cs, cx: ccx, cy: lerp(prv.cy, cur.cy, tr) },
       master: pose(masterS, MASTER_X, GROUND, K_FIG, -1, 1),
-      app: pose(appS, APP_X, GROUND, APP_K, 1, 1),
+      // THE APPRENTICE ANSWERS BACK (AA5), not the master. The scene's own header
+      // says which is which — "a watching apprentice GETS TESTED" — so he is the
+      // reader's stand-in, and he is the one who nods when they are right. A
+      // master builder nodding at his own work would say nothing about the answer.
+      app: reactPose(appS, APP_X, GROUND, APP_K, 1, 1),
       // Screen x of each speaker's HEAD, so a bubble can sit over whoever is talking.
       // The figures ride the camera and the bubbles do not. It has to be the head and
       // not the mark they stand on: the master leans into his work, so his head is
@@ -385,6 +389,13 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
       setAsked((n) => n + 1);
       if (isCorrect) setCorrect((n) => n + 1);
     }
+    // AA5 — see the same block in ArgumentFightLesson. Both players predate
+    // CinematicPlayer and carry their own copy of the loop, so neither ever wrote
+    // the shared reaction value. Identical sequence and timings on purpose.
+    REACT.value = withSequence(
+      withTiming(isCorrect ? 1 : -1, { duration: 220, easing: Easing.out(Easing.quad) }),
+      withDelay(260, withTiming(0, { duration: 420, easing: Easing.inOut(Easing.quad) })),
+    );
   }, [picked]);
 
   const onStage = useCallback((e: LayoutChangeEvent) => {

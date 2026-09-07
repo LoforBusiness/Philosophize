@@ -23,7 +23,7 @@ export interface Logic34Beat extends BaseBeat {
 
 export const BEATS: Logic34Beat[] = [
   {
-    p: 25, x: 50, n: 0,
+    p: 172, x: 50, n: 0,
     text: 'A jar of marbles, and you want to know what fraction are dark. The dashed line is the true answer, and you are not allowed to look at it.',
     dur: 4.2,
   },
@@ -56,7 +56,7 @@ export const BEATS: Logic34Beat[] = [
     dur: 2.6,
   },
   {
-    p: 137, x: 50, n: 1,
+    p: 465, x: 50, n: 1,
     quote: {
       id: 'lq-logic-arguments-34-1',
       text: 'The more observations have been made, the less danger there is of wandering from one\'s goal.',
@@ -68,7 +68,7 @@ export const BEATS: Logic34Beat[] = [
     dur: 3.6,
   },
   {
-    p: 4, x: 50, n: 0, live: 1,
+    p: 461, x: 50, n: 0, live: 1,
     interact: {
       prompt: 'Drag the sample up. Stop where pulling more marbles stops being worth it.',
       drag: {
@@ -87,18 +87,18 @@ export const BEATS: Logic34Beat[] = [
     dur: 1.0,
   },
   {
-    p: 167, x: 50, n: 0.9, biased: 1,
+    p: 459, x: 50, n: 0.9, biased: 1,
     text: 'Now the awkward one. Here is a huge sample, drawn only from people who answered the phone.',
     cite: 'Tight, and wrong',
     dur: 3.3,
   },
   {
-    p: 167, x: 50, n: 0.9, biased: 1,
+    p: 459, x: 50, n: 0.9, biased: 1,
     text: 'The bracket is tight around the wrong number.',
     dur: 1.8,
   },
   {
-    p: 45, x: 50, n: 0.9, biased: 1,
+    p: 379, x: 50, n: 0.9, biased: 1,
     interact: {
       prompt: 'The sample is enormous. Does that fix it?',
       cards: [

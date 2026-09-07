@@ -32,17 +32,17 @@ export interface Ethics35Beat extends BaseBeat {
 
 export const BEATS: Ethics35Beat[] = [
   {
-    p: 164, x: 54, pair: 1,
+    p: 462, x: 54, pair: 1,
     text: 'Two men, one afternoon, one drowning child. The first reaches in and holds him under.',
     dur: 2.4,
   },
   {
-    p: 164, x: 54, pair: 1,
+    p: 462, x: 54, pair: 1,
     text: 'The second sees the boy slip under and puts his hands in his pockets.',
     dur: 2.2,
   },
   {
-    p: 13, x: 54, pair: 1, live: 1,
+    p: 168, x: 54, pair: 1, live: 1,
     tap: {
       prompt: 'Tap the one you would call a killer.',
       options: [
@@ -64,7 +64,7 @@ export const BEATS: Ethics35Beat[] = [
     dur: 1.8,
   },
   {
-    p: 21, x: 54, pair: 1, tags: 4, beam: 1, tip: 1, live: 1,
+    p: 380, x: 54, pair: 1, tags: 4, beam: 1, tip: 1, live: 1,
     interact: {
       prompt: 'Every difference is gone but one. Tip the beam to where you actually stand.',
       drag: {
@@ -83,7 +83,7 @@ export const BEATS: Ethics35Beat[] = [
     dur: 1.0,
   },
   {
-    p: 47, x: 54, pair: 1, tags: 4, beam: 1,
+    p: 433, x: 54, pair: 1, tags: 4, beam: 1,
     quote: {
       id: 'lq-ethics-ethics-35-1',
       text: 'The bare difference between killing and letting die does not, in itself, make a moral difference.',

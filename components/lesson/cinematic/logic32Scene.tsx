@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic32Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -120,7 +120,7 @@ export default function Logic32Scene({ clock, bt, bi, i, picked, onPick, pickPos
       tr));
     return {
       askr: pose(sa, A_X, GROUND, K_FIG, 1, 1),
-      corn: pose(sb, B_X, GROUND, K_FIG, -1, 1),
+      corn: reactPose(sb, B_X, GROUND, K_FIG, -1, 1),
       q: carry(cv, 0, n, QV[p], QV[n], tr, qFade ? grow : 1),
       // R7c — refusing the package is what brings the smuggled claim into view, so the
       // line under the sentence surfaces as the lever travels to 'take the hidden claim
@@ -185,7 +185,7 @@ export default function Logic32Scene({ clock, bt, bi, i, picked, onPick, pickPos
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={DA} k={K_FIG} />
+      <Stickman role="second" D={DA} k={K_FIG} />
       <Stickman D={DB} k={K_FIG} />
     </Animated.View>
   );

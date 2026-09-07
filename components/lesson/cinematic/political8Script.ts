@@ -72,7 +72,7 @@ export const BEATS: Political8Beat[] = [
     dur: 2.1,
   },
   {
-    p: 45, x: 170, mode: 1, marks: 1, pick: 1,
+    p: 447, x: 170, mode: 1, marks: 1, pick: 1,
     interact: {
       prompt: 'The tallest could already see, so her crate is spare. Tap the onlooker who should get it.',
       explain: 'Only the shortest was still blocked, so that is the one place a crate changes anything. Same three crates, nothing added — and now every pair of eyes clears the fence.',
@@ -92,7 +92,7 @@ export const BEATS: Political8Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 100, mode: 2, marks: 1, eyeline: 1,
+    p: 165, x: 100, mode: 2, marks: 1, eyeline: 1,
     interact: {
       prompt: 'What did the identical crates actually give them?',
       poll: {
@@ -109,18 +109,18 @@ export const BEATS: Political8Beat[] = [
     dur: 1.0,
   },
   {
-    p: 168, x: 170, mode: 2, marks: 1, eyeline: 1,
+    p: 456, x: 170, mode: 2, marks: 1, eyeline: 1,
     text: 'So equality is a blank waiting to be filled in. Equal resources?',
     cite: 'Equality of what?',
     dur: 1.8,
   },
   {
-    p: 168, x: 170, mode: 2, marks: 1, eyeline: 1,
+    p: 456, x: 170, mode: 2, marks: 1, eyeline: 1,
     text: 'Equal chances? Equal happiness?',
     dur: 1.8,
   },
   {
-    p: 168, x: 170, mode: 2, marks: 1, eyeline: 1,
+    p: 456, x: 170, mode: 2, marks: 1, eyeline: 1,
     text: 'Amartya Sen and Martha Nussbaum answer differently. Make capabilities equal: what a person can really do and be.',
     dur: 3,
   },

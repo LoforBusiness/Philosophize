@@ -33,12 +33,12 @@ export interface Met21Beat extends BaseBeat {
 
 export const BEATS: Met21Beat[] = [
   {
-    p: 164, x: 200, line: 1, past: 1, future: 1,
+    p: 462, x: 200, line: 1, past: 1, future: 1,
     text: 'A line, with you standing on the middle of it. The question is not whether time passes.',
     dur: 3.7,
   },
   {
-    p: 164, x: 200, line: 1, past: 1, future: 1,
+    p: 462, x: 200, line: 1, past: 1, future: 1,
     text: 'It is what is there.',
     dur: 1.8,
   },
@@ -54,13 +54,13 @@ export const BEATS: Met21Beat[] = [
     dur: 1.8,
   },
   {
-    p: 45, x: 132, line: 1, past: 1, future: 0.08,
+    p: 379, x: 132, line: 1, past: 1, future: 0.08,
     text: 'The growing block keeps everything that has happened and says the future is not written yet. The line gets longer.',
     cite: 'The growing block',
     dur: 4.8,
   },
   {
-    p: 4, x: 132, line: 1, past: 0.08, future: 0.08, live: 1,
+    p: 165, x: 132, line: 1, past: 0.08, future: 0.08, live: 1,
     interact: {
       prompt: 'Tap the part presentism says is real.',
       explain: 'Only the column you are standing in. It is the view most people start with and it has the hardest job: if the past does not exist, it is not obvious what makes a claim about it true, or what your memories are memories of.',
@@ -75,7 +75,7 @@ export const BEATS: Met21Beat[] = [
     dur: 4.8,
   },
   {
-    p: 137, x: 268, line: 1, past: 1, future: 1,
+    p: 128, x: 268, line: 1, past: 1, future: 1,
     quote: {
       id: 'lq-metaphysics-being-21-1',
       text: 'The distinction between past, present and future is only a stubbornly persistent illusion.',
@@ -92,7 +92,7 @@ export const BEATS: Met21Beat[] = [
     dur: 4.8,
   },
   {
-    p: 41, x: 268, line: 1, past: 1, future: 1,
+    p: 442, x: 268, line: 1, past: 1, future: 1,
     interact: {
       prompt: 'Which one says every moment is equally real?',
       poll: {

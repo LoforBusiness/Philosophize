@@ -27,17 +27,17 @@ export interface Met17Beat extends BaseBeat {
 
 export const BEATS: Met17Beat[] = [
   {
-    g: 164, wall: 1,
+    g: 462, wall: 1,
     dur: 3.8,
     text: 'Mary knows every physical fact about colour. Wavelengths, cones, which neurons fire and in what order.',
   },
   {
-    g: 164, wall: 1,
+    g: 462, wall: 1,
     dur: 1.8,
     text: 'The wall is complete.',
   },
   {
-    g: 45, wall: 1,
+    g: 379, wall: 1,
     dur: 4.6,
     text: 'She has also never seen any. She has lived her whole life in a room with nothing in it but black, white and grey.',
     cite: 'And she has never seen it',
@@ -49,7 +49,7 @@ export const BEATS: Met17Beat[] = [
     cite: 'She steps outside',
   },
   {
-    g: 137, wall: 1, door: 1, card: 1,
+    g: 465, wall: 1, door: 1, card: 1,
     dur: 3.8,
     quote: {
       id: 'lq-metaphysics-being-17-1',
@@ -62,13 +62,13 @@ export const BEATS: Met17Beat[] = [
     },
   },
   {
-    g: 5, wall: 1, door: 1, card: 1,
+    g: 440, wall: 1, door: 1, card: 1,
     dur: 5.0,
     text: 'How the brain sorts light is a hard question with an ordinary answer coming. Why any of it is felt at all is a different sort of question.',
     cite: 'The hard problem',
   },
   {
-    g: 4, wall: 1, door: 1, card: 1, pick: 1,
+    g: 165, wall: 1, door: 1, card: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap what Mary gains by stepping outside.',

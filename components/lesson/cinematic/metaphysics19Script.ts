@@ -34,7 +34,7 @@ export interface Met19Beat extends BaseBeat {
 
 export const BEATS: Met19Beat[] = [
   {
-    p: 25, x: 200, props: 1, peg: 0.16,
+    p: 172, x: 200, props: 1, peg: 0.16,
     text: 'An apple, written out as everything true of it. Red, round, sweet, eighty grams, on this table.',
     dur: 4.4,
   },
@@ -61,7 +61,7 @@ export const BEATS: Met19Beat[] = [
     dur: 4.8,
   },
   {
-    p: 137, x: 132, props: 1, peg: 0.4, strip: 1,
+    p: 465, x: 132, props: 1, peg: 0.4, strip: 1,
     quote: {
       id: 'lq-metaphysics-being-19-1',
       text: 'A supposed I know not what, to support those ideas we call accidents.',
@@ -74,7 +74,7 @@ export const BEATS: Met19Beat[] = [
     dur: 3.4,
   },
   {
-    p: 4, x: 132, props: 1, peg: 0.4, strip: 1, live: 1,
+    p: 165, x: 132, props: 1, peg: 0.4, strip: 1, live: 1,
     interact: {
       prompt: 'Tap what is left after every card has come off.',
       explain: 'The peg, if you are Locke, and it was never described because nothing can be said about a thing with no properties. Hume looked at the same picture and said the stack was all there was. The pile is the cards you removed, not the apple.',
@@ -83,13 +83,13 @@ export const BEATS: Met19Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 268, props: 1, peg: 0.4, strip: 0, twin: 1,
+    p: 453, x: 268, props: 1, peg: 0.4, strip: 0, twin: 1,
     text: 'Here is the cost of saying there is no peg. A second apple, matching the first in every property there is.',
     cite: 'The twin',
     dur: 4.6,
   },
   {
-    p: 41, x: 268, props: 1, peg: 0.4, twin: 1,
+    p: 442, x: 268, props: 1, peg: 0.4, twin: 1,
     interact: {
       prompt: 'Two things exactly alike. What is the case?',
       sort: {

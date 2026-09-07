@@ -62,7 +62,7 @@ export const BEATS: Meta32Beat[] = [
   {
     g: 167, orbs: 1, tether: 1, tag: 1,
     dur: 2.9,
-    text: 'We can point at one sphere and call it A. But the label came from outside, carried in by us.',
+    text: 'You can point at one sphere and call it A. But the label came from outside, carried in by you.',
     cite: 'The label is ours',
   },
   {
@@ -71,7 +71,7 @@ export const BEATS: Meta32Beat[] = [
     text: 'Take the label away again and the universe is exactly as before.',
   },
   {
-    g: 4, orbs: 1, tether: 1, tag: 0, pick: 1,
+    g: 457, orbs: 1, tether: 1, tag: 0, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap the number of things in this universe.',

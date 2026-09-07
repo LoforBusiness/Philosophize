@@ -33,23 +33,23 @@ export interface Eth21Beat extends BaseBeat {
 
 export const BEATS: Eth21Beat[] = [
   {
-    p: 25, x: 200, act: 1, arms: 1,
+    p: 462, x: 200, act: 1, arms: 1,
     text: 'A doctor gives enough morphine to stop the pain. Everyone knows it will also shorten the life.',
     dur: 4.6,
   },
   {
-    p: 2, x: 200, act: 1, arms: 1, aim: 1,
+    p: 384, x: 200, act: 1, arms: 1, aim: 1,
     text: 'Two outcomes, both certain, both from one act. Only one of them was the point.',
     cite: 'Aimed at, or come along with',
     dur: 4.2,
   },
   {
     p: 379, x: 132, act: 1, arms: 1, aim: 1,
-    text: 'Aquinas saw that we judge the two arrows in different ways. We do so everywhere, not just in hospitals.',
+    text: 'Aquinas saw that you judge the two arrows in different ways. So does everyone, not just in hospitals.',
     dur: 4.4,
   },
   {
-    p: 4, x: 132, act: 1, arms: 1, aim: 1, live: 1,
+    p: 380, x: 132, act: 1, arms: 1, aim: 1, live: 1,
     interact: {
       prompt: 'Tap the outcome the doctor was aiming at.',
       explain: 'Stopping the pain. The shorter life is foreseen with certainty and still not intended, which sounds like a dodge until you notice you already use the distinction. Nobody thinks a surgeon intends the scar.',
@@ -74,7 +74,7 @@ export const BEATS: Eth21Beat[] = [
     dur: 1.8,
   },
   {
-    p: 137, x: 268, act: 1, arms: 1, means: 1,
+    p: 144, x: 268, act: 1, arms: 1, means: 1,
     quote: {
       id: 'lq-ethics-ethics-21-1',
       text: 'Nothing hinders one act from having two effects, only one of which is intended, while the other is beside the intention.',

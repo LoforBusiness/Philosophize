@@ -21,7 +21,7 @@ export interface Logic33Beat extends BaseBeat {
 
 export const BEATS: Logic33Beat[] = [
   {
-    p: 25, x: 52, bend: 0,
+    p: 172, x: 52, bend: 0,
     text: 'Seven measurements, and a straight line drawn through them. It misses most of the dots and nobody is pretending otherwise.',
     dur: 3.8,
   },
@@ -43,18 +43,18 @@ export const BEATS: Logic33Beat[] = [
     dur: 1.8,
   },
   {
-    p: 160, x: 52, bend: 1, nextDot: 1,
+    p: 467, x: 52, bend: 1, nextDot: 1,
     text: 'Then a new measurement comes in, and the perfect curve is nowhere near it. It was never learning the pattern.',
     cite: 'The eighth measurement',
     dur: 3.3,
   },
   {
-    p: 160, x: 52, bend: 1, nextDot: 1,
+    p: 467, x: 52, bend: 1, nextDot: 1,
     text: 'It was learning your seven dots, errors and all.',
     dur: 1.8,
   },
   {
-    p: 137, x: 52, bend: 1, nextDot: 1,
+    p: 456, x: 52, bend: 1, nextDot: 1,
     quote: {
       id: 'lq-logic-arguments-33-1',
       text: 'Everything should be made as simple as possible, but not simpler.',
@@ -66,7 +66,7 @@ export const BEATS: Logic33Beat[] = [
     dur: 3.4,
   },
   {
-    p: 4, x: 52, bend: 0, live: 1,
+    p: 461, x: 52, bend: 0, live: 1,
     interact: {
       prompt: 'Drag the bends in. Stop where the curve explains the dots without chasing them.',
       drag: {

@@ -26,18 +26,18 @@ export interface Met16Beat extends BaseBeat {
 
 export const BEATS: Met16Beat[] = [
   {
-    g: 25, panels: 2, crave: 1,
+    g: 379, panels: 2, crave: 1,
     dur: 4.6,
     text: 'Two addicts, and everything about them is the same. Same craving, same dose, same chemistry doing the same thing.',
   },
   {
-    g: 159, panels: 2, crave: 1, second: 1,
+    g: 465, panels: 2, crave: 1, second: 1,
     dur: 3,
     text: 'Now add what each of them thinks about his own wanting. One is behind it.',
     cite: 'The second arrow',
   },
   {
-    g: 159, panels: 2, crave: 1, second: 1,
+    g: 465, panels: 2, crave: 1, second: 1,
     dur: 2,
     text: 'The other is dragged along by a craving he hates.',
   },
@@ -53,7 +53,7 @@ export const BEATS: Met16Beat[] = [
     text: 'You have views about what you want.',
   },
   {
-    g: 137, panels: 2, crave: 1, second: 1,
+    g: 456, panels: 2, crave: 1, second: 1,
     dur: 3.8,
     quote: {
       id: 'lq-metaphysics-being-16-1',
@@ -72,7 +72,7 @@ export const BEATS: Met16Beat[] = [
     cite: 'Where the freedom is',
   },
   {
-    g: 4, panels: 2, crave: 1, second: 1, pick: 1,
+    g: 165, panels: 2, crave: 1, second: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap the addict Frankfurt calls unfree.',
@@ -81,7 +81,7 @@ export const BEATS: Met16Beat[] = [
     },
   },
   {
-    g: 41, panels: 2, crave: 1, second: 1,
+    g: 442, panels: 2, crave: 1, second: 1,
     dur: 1.0,
     interact: {
       prompt: 'What does calling a choice free actually mean?',

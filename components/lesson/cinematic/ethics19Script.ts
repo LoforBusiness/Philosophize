@@ -34,7 +34,7 @@ export interface Eth19Beat extends BaseBeat {
 
 export const BEATS: Eth19Beat[] = [
   {
-    p: 25, x: 200, doc: 1, rows: 1,
+    p: 172, x: 200, doc: 1, rows: 1,
     text: 'Four decisions, all about the same life. Yours.',
     dur: 3.4,
   },
@@ -73,7 +73,7 @@ export const BEATS: Eth19Beat[] = [
     dur: 4.0,
   },
   {
-    p: 4, x: 132, doc: 1, rows: 1, affects: 1, taken: 1, live: 1,
+    p: 165, x: 132, doc: 1, rows: 1, affects: 1, taken: 1, live: 1,
     interact: {
       prompt: 'Tap the one line somebody else may sign.',
       explain: 'Driving after drinking. Mill\'s test is not how risky the choice is. It is whether anybody else is in it. The other three are dangerous or foolish or both, and they are still yours. Danger to yourself never hands somebody else the pen.',
@@ -82,13 +82,13 @@ export const BEATS: Eth19Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 268, doc: 1, rows: 1, affects: 1,
+    p: 467, x: 268, doc: 1, rows: 1, affects: 1,
     text: 'The rule is easy while the choices are small. It gets expensive at the end of a life.',
     cite: 'The hard case',
     dur: 4.2,
   },
   {
-    p: 41, x: 268, doc: 1, rows: 1, affects: 1,
+    p: 383, x: 268, doc: 1, rows: 1, affects: 1,
     interact: {
       prompt: 'What does the harm principle actually allow here?',
       drag: {

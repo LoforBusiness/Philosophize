@@ -27,7 +27,7 @@ export interface L9Beat extends BaseBeat {
 
 export const BEATS: L9Beat[] = [
   {
-    a: 20, d: 0, dx: 420, claim: true,
+    a: 384, d: 0, dx: 420, claim: true,
     text: 'Someone puts a claim up where everyone can read it. The quickest way to look like you have beaten it is never to go near it.',
     dur: 3.8,
   },
@@ -59,7 +59,7 @@ export const BEATS: L9Beat[] = [
     dur: 4.2,
   },
   {
-    a: 44, d: 0, dx: 264, claim: true,
+    a: 162, d: 0, dx: 264, claim: true,
     quote: {
       id: 'lq-logic-arguments-9',
       text: 'Sophistry is an appearance of wisdom without the reality.',
@@ -72,7 +72,7 @@ export const BEATS: L9Beat[] = [
     dur: 3.2,
   },
   {
-    a: 0, d: 1, dx: 264, replies: true,
+    a: 462, d: 1, dx: 264, replies: true,
     interact: {
       prompt: 'Three replies to that budget plan. Tap the one that attacks the arguer instead of the argument.',
       explain:
@@ -81,7 +81,7 @@ export const BEATS: L9Beat[] = [
     dur: 4.8,
   },
   {
-    a: 4, d: 12, dx: 264,
+    a: 165, d: 12, dx: 264,
     interact: {
       prompt: 'A terrible argument that the sun will rise. Which is it?',
       poll: {

@@ -33,7 +33,7 @@ export const BEATS: Ethics36Beat[] = [
     dur: 4.2,
   },
   {
-    p: 13, x: 56, book: 1,
+    p: 432, x: 56, book: 1,
     text: 'Now you say you forgive them. Nothing about yesterday has changed.',
     dur: 2.6,
   },
@@ -43,7 +43,7 @@ export const BEATS: Ethics36Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 56, book: 1, live: 1,
+    p: 165, x: 56, book: 1, live: 1,
     interact: {
       prompt: 'Tap the line forgiving strikes out.',
       explain: 'Only the third. Strike the first and you are forgetting. Strike the second and you are excusing — deciding they were not really responsible, which means there was never anything to forgive. Forgiveness needs the verdict to stand.',
@@ -62,7 +62,7 @@ export const BEATS: Ethics36Beat[] = [
     dur: 1.8,
   },
   {
-    p: 47, x: 56, book: 1, struck: 1,
+    p: 435, x: 56, book: 1, struck: 1,
     quote: {
       id: 'lq-ethics-ethics-36-1',
       text: 'Forgiveness is the forswearing of resentment on moral grounds.',
@@ -74,17 +74,17 @@ export const BEATS: Ethics36Beat[] = [
     dur: 3.6,
   },
   {
-    p: 167, x: 130, book: 1, struck: 1, gift: 1,
+    p: 459, x: 130, book: 1, struck: 1, gift: 1,
     text: 'Forgiveness is a gift, and a gift has an owner. The resentment was yours by right.',
     dur: 2.9,
   },
   {
-    p: 167, x: 130, book: 1, struck: 1, gift: 1,
+    p: 459, x: 130, book: 1, struck: 1, gift: 1,
     text: 'Giving the resentment up is yours to do.',
     dur: 1.8,
   },
   {
-    p: 160, x: 130, book: 1, struck: 1, gift: 1,
+    p: 455, x: 130, book: 1, struck: 1, gift: 1,
     interact: {
       prompt: 'What is the strongest objection to a duty to forgive?',
       sort: {

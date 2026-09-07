@@ -66,13 +66,13 @@ export const BEATS: Ethics3Beat[] = [
     dur: 2.3,
   },
   {
-    d: 161, tx: 196, pull: 0, lens: 2,
+    d: 458, tx: 196, pull: 0, lens: 2,
     text: 'Immanuel Kant would not. He will not trade lives like sums, because the one person has a worth no arithmetic can outweigh.',
     cite: 'Deontology — the duty',
     dur: 3.8,
   },
   {
-    d: 161, tx: 196, pull: 0, lens: 2,
+    d: 458, tx: 196, pull: 0, lens: 2,
     text: 'Duty binds whatever follows from it.',
     dur: 1.8,
   },
@@ -101,7 +101,7 @@ export const BEATS: Ethics3Beat[] = [
     dur: 3.2,
   },
   {
-    d: 21, tx: 196, lens: 0,
+    d: 380, tx: 196, lens: 0,
     interact: {
       prompt: 'What does a consequentialist actually weigh?',
       split: {
@@ -119,7 +119,7 @@ export const BEATS: Ethics3Beat[] = [
     dur: 1.0,
   },
   {
-    d: 4, tx: 196, lens: 0,
+    d: 165, tx: 196, lens: 0,
     // Answered ON the board: it clears and two big TRUE / FALSE plates take its place.
     interact: {
       prompt: 'Utilitarians and Kant both say "the end justifies the means." True?',

@@ -62,7 +62,7 @@ export const BEATS: Metaphysics8Beat[] = [
   },
   {
     p: 15, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'And there is the one with your name on it. It goes over right on schedule.',
+    text: 'And there is the domino with your name on it. It goes over right on schedule.',
     cite: 'Your domino',
     dur: 2.8,
   },
@@ -84,7 +84,7 @@ export const BEATS: Metaphysics8Beat[] = [
   },
   {
     // 8 (shrug), not 4 (think): the line opens "A third camp shrugs".
-    p: 8, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
+    p: 378, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
     text: 'A third camp shrugs at the whole fight. Both sides picked the wrong test, they think.',
     cite: 'A third way',
     dur: 2.6,
@@ -96,7 +96,7 @@ export const BEATS: Metaphysics8Beat[] = [
     dur: 2.2,
   },
   {
-    p: 21, x: 200, chain: 1, front: 3, tags: 0, mark: 0, pick: 1,
+    p: 380, x: 200, chain: 1, front: 3, tags: 0, mark: 0, pick: 1,
     interact: {
       prompt: 'This camp agrees every domino falls, yours included. Tap what they say makes a choice FREE.',
       explain: 'Free means the push came from inside you — your own wants — with nobody else’s hand on your arm. The chain is left standing exactly where it was.',
@@ -105,7 +105,7 @@ export const BEATS: Metaphysics8Beat[] = [
     dur: 1.0,
   },
   {
-    p: 12, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
+    p: 165, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
     interact: {
       prompt: 'Where does the third camp actually stand?',
       poll: {

@@ -27,7 +27,7 @@ export const BEATS: Aes16Beat[] = [
   },
   {
     p: 41, x: 168, canvas: 1,
-    text: 'There it is. Finished in 1911, and not one mark on it has moved since.',
+    text: 'There is the painting. Finished in 1911, and not one mark has moved since.',
     cite: 'The work',
     dur: 2.8,
   },
@@ -37,7 +37,7 @@ export const BEATS: Aes16Beat[] = [
     dur: 1.8,
   },
   {
-    p: 36, x: 124, canvas: 1, facts: 1,
+    p: 425, x: 124, canvas: 1, facts: 1,
     text: 'The first line on the card: the painter took the commission from a man he despised, and said so in a letter.',
     cite: 'One fact',
     dur: 4.2,
@@ -61,7 +61,7 @@ export const BEATS: Aes16Beat[] = [
     dur: 4.8,
   },
   {
-    p: 4, x: 124, canvas: 1, facts: 3,
+    p: 165, x: 124, canvas: 1, facts: 3,
     interact: {
       prompt: 'What did learning it actually change?',
       drag: {

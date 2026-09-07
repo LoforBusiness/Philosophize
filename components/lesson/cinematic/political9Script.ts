@@ -28,7 +28,7 @@ export interface P9Beat extends BaseBeat {
 
 export const BEATS: P9Beat[] = [
   {
-    vote: 0, one: 0,
+    vote: 0, one: 461,
     text: 'Rule by the people. Four of them here, and one over there who wants something the four do not.',
     dur: 3.6,
   },
@@ -55,7 +55,7 @@ export const BEATS: P9Beat[] = [
     dur: 1.8,
   },
   {
-    vote: 0, tally: true, advance: true, rights: true, one: 137,
+    vote: 0, tally: true, advance: true, rights: true, one: 465,
     quote: {
       id: 'lq-political-political-9-1',
       text: 'Society can and does execute its own mandates: and if it issues wrong mandates, it practises a social tyranny more formidable than many kinds of political oppression.',

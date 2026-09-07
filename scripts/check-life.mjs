@@ -23,7 +23,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { corpus } from './lib/gestures.mjs';
 import {
-  VARIANTS, LIVING_RUN, COMIC, COMIC_CODES, comicName, play,
+  VARIANTS, LIVING_RUN, COMIC, COMIC_CODES, comicName, play, holdsARun,
   grave, channels, reachesCatalogue, branchOf, cueFits,
 } from './lib/liveliness.mjs';
 import { decomment, readScript } from './lib/gestures.mjs';
@@ -80,11 +80,13 @@ const total = [...use.values()].reduce((a, b) => a + b, 0);
 const ranked = [...use].sort((a, b) => b[1] - a[1]);
 const top10 = (100 * ranked.slice(0, 10).reduce((a, [, v]) => a + v, 0)) / total;
 
-// 68% before group N was enforced, 53% after. DOWN ONLY — and 53 is a DEBT
-// rather than a target: it is still ten poses doing half the work, and the way
+// 68% before group N was enforced, 53% after it, 43% after the corpus-wide spread
+// (N14), 40 once that spread reached the split runs too. DOWN ONLY — and 40 is
+// still a DEBT rather than a target: ten poses doing two beats in five. The way
 // down is more VARIANTS rows, because a pose with no second body can never be
-// anything but itself.
-const TOP10_BUDGET = 53;
+// anything but itself, and then another run of `spread-lessons` to distribute
+// them.
+const TOP10_BUDGET = 40;
 if (top10 <= TOP10_BUDGET + 0.5) {
   ok(`the ten commonest poses are ${top10.toFixed(0)}% of every gesture call`,
     `budget ${TOP10_BUDGET}% · was 68% before group N was enforced`);
@@ -93,12 +95,40 @@ if (top10 <= TOP10_BUDGET + 0.5) {
     `over the ${TOP10_BUDGET}% budget — the figure is converging on a handful of poses again`);
 }
 
-// UP ONLY.
-const DISTINCT_FLOOR = 90;
+// UP ONLY. 63 → 101 (group N) → 136 (the N14 spread).
+const DISTINCT_FLOOR = 136;
 if (use.size >= DISTINCT_FLOOR) {
   ok(`${use.size} distinct poses in use across ${beats} beats`, `floor ${DISTINCT_FLOOR} · was 63`);
 } else {
   bad(`only ${use.size} distinct poses in use`, `floor is ${DISTINCT_FLOOR}`);
+}
+
+// ── 1b · N14 · HOW MUCH OF THE CATALOGUE THE SCRIPTS ACTUALLY REACH ──────────
+//
+// The two numbers above can BOTH be satisfied by a corpus that has never once
+// opened the library. They were, for a fortnight: 101 distinct poses and 53% at
+// the top, with 117 of 169 actions never called and every one of the forty-eight
+// written that week among them. Distinctness is about the shape of the
+// distribution; this is about its SUPPORT, and only the second one notices a
+// shelf nobody takes anything down from.
+//
+// It counts ACTS rather than codes because an act is what somebody wrote. A code
+// is a way of reaching one — held, played, or the same act twice in two bands —
+// and counting codes would let a single act reached three ways read as three.
+const moveSrc = fs.readFileSync(`${SCENE_DIR}/moves.ts`, 'utf8');
+const catalogue = new Set([...moveSrc.matchAll(/\bcode === (\d+)\)/g)].map((m) => +m[1]));
+const reachedActs = new Set();
+for (const code of use.keys()) {
+  if (code >= 300) reachedActs.add(code - 299);
+  else if (code >= 100 && code < 200) reachedActs.add(code - 99);
+}
+const ACTS_FLOOR = 91;
+if (reachedActs.size >= ACTS_FLOOR) {
+  ok(`${reachedActs.size} of ${catalogue.size} actions in the catalogue are reached (N14)`,
+    `floor ${ACTS_FLOOR} · was 52 · run spread-lessons after adding any`);
+} else {
+  bad(`only ${reachedActs.size} of ${catalogue.size} actions are ever reached`,
+    `floor is ${ACTS_FLOOR} — a catalogue is not a vocabulary until the scripts call it`);
 }
 
 // ── 2 · N6 · no lesson strikes the same pose twice outside a run ──────────────
@@ -138,7 +168,17 @@ for (const l of lessons) {
     // never taken is a lift re-raising on every piece of one sentence.
     // The LAST piece of a run may carry a played action: N7's own exception, and
     // the shape the joke pass relies on — hold, hold, hold, react.
-    if (code >= 300 && !tail.has(i)) {
+    //
+    // AND SO MAY ANY PIECE, IF THE ACT IGNORES `u`. The ban is about a one-shot
+    // reading its progress off `bt`, which resets at every piece; the two living
+    // shelves read the scene clock and take no notice of `u` at all, so they
+    // cannot replay however often `bt` restarts. That was measured rather than
+    // reasoned about — `check:moves` sweeps `u` at fixed `t` for every act in
+    // `CLOCK_ACTS` and fails if one moves a joint — and it is what lets a run in
+    // lesson twelve be a different movement from the identical run in lesson
+    // eleven (N14). The rule was right about the band it was written for and
+    // over-broad for a shelf that did not exist when it was written.
+    if (code >= 300 && !tail.has(i) && !holdsARun(code)) {
       frozenRuns.push(`${l.id} beat ${i}: played action ${code} in a run's MIDDLE — it replays per piece`);
     } else if (LIVING_RUN[code] !== undefined && LIVING_RUN[code] !== code) {
       frozenRuns.push(`${l.id} beat ${i}: pose ${code} has a living twin ${LIVING_RUN[code]}`);
@@ -155,12 +195,16 @@ if (frozenRuns.length <= RUN_BUDGET) {
 
 // ── 4 · N8 · every lesson performs something ─────────────────────────────────
 const never = lessons.filter((l) => !l.beats.some((b) => b.declared !== null && b.declared >= 300));
-// 173 of 177 before, 32 now. The 30 that remain have no beat that can carry an
-// action at all: every candidate is graded, a quote, the hook, the summary, or
-// sits inside a split run where a played action would replay per piece. Lowering
-// this means giving one of those lessons a beat, not loosening the placement
-// rules. DOWN ONLY.
-const STILL_BUDGET = 32;
+// 173 of 177 before, then 32, and ONE now. The thirty-one that closed did not
+// need a beat each: N14's run rotation gave the split runs a played code from the
+// second living shelf, which is legal in a run's middle precisely because those
+// acts ignore `u` and so cannot replay per piece — and "sits inside a split run"
+// was the reason most of the thirty-two had nowhere to put an action.
+//
+// DOWN ONLY, and at 1 this is tight enough that a NEW lesson will trip it. That
+// is the intended failure: the fix is `npm run make:liven`, which finds the beat,
+// not a looser rule here.
+const STILL_BUDGET = 1;
 if (never.length <= STILL_BUDGET) {
   ok(`${lessons.length - never.length} of ${lessons.length} lessons perform an action (N8)`,
     `${never.length} still hold poses only · budget ${STILL_BUDGET} · was 170`);
@@ -289,7 +333,13 @@ let twoFigure = 0;
 for (const f of sceneFiles) {
   const src = decomment(fs.readFileSync(path.join(SCENE_DIR, f), 'utf8'));
   if (/\blookPose\b/.test(src)) continue;
-  const poses = (src.match(/(?<![A-Za-z0-9_])pose\(/g) || []).length;
+  // `reactPose` IS A FIGURE POSE. It is `lookPose` with the gaze weight at zero —
+  // the answer reaction WITHOUT the gaze — which is exactly what a two-figure
+  // scene wants: it keeps the exemption this rule grants (which of two figures is
+  // the narrator is a judgement) while still letting the mascot nod when the
+  // reader answers. Counting only `pose(` here dropped these scenes from two
+  // figures to one the moment they were wired, and reported 18 of them as blind.
+  const poses = (src.match(/(?<![A-Za-z0-9_])(?:pose|reactPose)\(/g) || []).length;
   if (poses > 1) { twoFigure += 1; continue; }
   blind.push(f.replace('Scene.tsx', ''));
 }

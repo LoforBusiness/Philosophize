@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive, gazeAt, pointAt } from './moves';
 import { BEATS } from './ethics10Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -154,7 +154,7 @@ export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: Scen
     }
 
     return {
-      fig: pose(sr, fx, GROUND, K_FIG, dir, 1),
+      fig: reactPose(sr, fx, GROUND, K_FIG, dir, 1),
       near: pose(nearS, NEAR_X, GROUND, NEAR_K, -1, 1),
       far: pose(farS, FAR_X, FAR_G, FAR_K, 1, farOn ? (farFade ? grow : 1) : 0),
       farOn: farOn ? (farFade ? grow : 1) : 0,
@@ -215,8 +215,8 @@ export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: Scen
         })}
 
       <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={FF} k={FAR_K} />
-      <Stickman D={NF} k={NEAR_K} />
+      <Stickman role="crowd" D={FF} k={FAR_K} />
+      <Stickman role="crowd" D={NF} k={NEAR_K} />
       <Stickman D={DF} k={K_FIG} />
     </Animated.View>
   );

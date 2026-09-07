@@ -39,7 +39,7 @@ export const BEATS: Met18Beat[] = [
     dur: 3.2,
   },
   {
-    p: 2, x: 200, shelf: 1, aim: 1,
+    p: 443, x: 200, shelf: 1, aim: 1,
     text: 'Point at the apple and you have pointed at something. Same for the chair, same for the star.',
     dur: 4.4,
   },
@@ -60,7 +60,7 @@ export const BEATS: Met18Beat[] = [
     dur: 4.2,
   },
   {
-    p: 4, x: 132, shelf: 1, aim: 1, hang: 1, live: 1,
+    p: 165, x: 132, shelf: 1, aim: 1, hang: 1, live: 1,
     interact: {
       prompt: 'Tap the one nothing in the room can point at.',
       explain: 'The number three. You can point at three apples, or at a numeral chalked on a board. Neither of those is the number. One is fruit and one is a mark. What they have in common has no place in the room.',
@@ -75,7 +75,7 @@ export const BEATS: Met18Beat[] = [
     dur: 4.0,
   },
   {
-    p: 137, x: 268, shelf: 1, aim: 1, hang: 1, beyond: 1,
+    p: 456, x: 268, shelf: 1, aim: 1, hang: 1, beyond: 1,
     quote: {
       id: 'lq-metaphysics-being-18-2',
       text: 'The mathematician cannot create things at will, any more than the geographer can; he too can only discover what is there and give it a name.',
@@ -97,7 +97,7 @@ export const BEATS: Met18Beat[] = [
         start: 1,
         zones: [
           { id: 'none', upto: 0.3, reads: 'no contact at all', correct: true },
-          { id: 'faint', upto: 0.72, reads: 'something faint we cannot describe' },
+          { id: 'faint', upto: 0.72, reads: 'something faint you cannot describe' },
           { id: 'full', upto: 1, reads: 'as much as a stone does' },
         ],
       },

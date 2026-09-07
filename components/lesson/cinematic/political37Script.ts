@@ -48,7 +48,7 @@ export const BEATS: Political37Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 54, pair: 1, horns: 1, labels: 1, live_d: 1, live: 1,
+    p: 457, x: 54, pair: 1, horns: 1, labels: 1, live_d: 1, live: 1,
     interact: {
       prompt: 'Cap what may be spent. Slide, and watch both voices change.',
       drag: {
@@ -67,17 +67,17 @@ export const BEATS: Political37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 13, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
+    p: 168, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
     text: 'Rawls put it as a distinction. Having a liberty is one thing.',
     dur: 2.1,
   },
   {
     p: 414, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
-    text: 'Being able to use it is another, and only one of those is equal here.',
+    text: 'Being able to use the right is another. Only one of the two is equal here.',
     dur: 2.7,
   },
   {
-    p: 47, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
+    p: 433, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
     quote: {
       id: 'lq-political-political-37-1',
       text: 'The liberties protected by the principle of participation lose much of their value whenever those with greater means control the course of public debate.',
@@ -90,7 +90,7 @@ export const BEATS: Political37Beat[] = [
     dur: 4.0,
   },
   {
-    p: 160, x: 54, pair: 1, horns: 1, cap: 1, labels: 1, live: 1,
+    p: 467, x: 54, pair: 1, horns: 1, cap: 1, labels: 1, live: 1,
     interact: {
       prompt: 'Tap what the cap you set is actually restricting.',
       explain: 'Speech. Spending to spread a message is a way of saying it, so a cap is a limit on political speech — the thing a free society guards most fiercely. That is why this argument does not resolve: it is liberty against liberty, not liberty against equality.',
@@ -99,12 +99,12 @@ export const BEATS: Political37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 167, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
+    p: 459, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
     text: 'So the argument never settles. One side defends the right to be heard.',
     dur: 2.3,
   },
   {
-    p: 167, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
+    p: 459, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
     text: 'So does the other. The two sides disagree about whose right it is.',
     dur: 2.3,
   },

@@ -41,7 +41,7 @@ export const BEATS: Logic32Beat[] = [
   {
     a: 163, b: 4, q: 1, tried: 1,
     dur: 2.4,
-    text: 'The accusation now stands on the record, and nobody ever made the accusation.',
+    text: 'The accusation now stands on the record. Nobody ever made it.',
   },
   {
     a: 163, b: 46, q: 1, tried: 2,
@@ -55,7 +55,7 @@ export const BEATS: Logic32Beat[] = [
     text: 'It is worse.',
   },
   {
-    a: 44, b: 46, q: 1, tried: 2,
+    a: 162, b: 46, q: 1, tried: 2,
     dur: 3.4,
     quote: {
       id: 'lq-logic-arguments-32-1',

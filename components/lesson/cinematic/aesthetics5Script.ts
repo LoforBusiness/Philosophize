@@ -17,7 +17,7 @@ export interface Aes5Beat extends BaseBeat {
 
 export const BEATS: Aes5Beat[] = [
   {
-    p: 4, bird: 0, ego: 1, self: 0.74,
+    p: 165, bird: 0, ego: 1, self: 0.74,
     text: 'You look at the world all day, yet rarely see it. Aesthetics is attention training — it teaches the eye to wake up.',
     dur: 3.6,
   },
@@ -57,7 +57,7 @@ export const BEATS: Aes5Beat[] = [
     dur: 3.6,
   },
   {
-    p: 19, bird: 1, ego: 0, self: 0.06,
+    p: 384, bird: 1, ego: 0, self: 0.06,
     interact: {
       prompt: 'Who does the unselfing?',
       split: {

@@ -37,7 +37,7 @@ export const BEATS: Pol20Beat[] = [
     dur: 4.2,
   },
   {
-    p: 159, x: 200, stacks: 1,
+    p: 177, x: 200, stacks: 1,
     text: 'They overlap almost nowhere, and neither is going to talk the other round. This is not a failure.',
     cite: 'Reasonable pluralism',
     dur: 3.2,
@@ -48,7 +48,7 @@ export const BEATS: Pol20Beat[] = [
     dur: 1.8,
   },
   {
-    p: 2, x: 132, stacks: 1, shelf: 1, cands: 1,
+    p: 443, x: 132, stacks: 1, shelf: 1, cands: 1,
     text: 'They still have to share a street, and a law about the street will land on both of them.',
     dur: 4.2,
   },
@@ -59,7 +59,7 @@ export const BEATS: Pol20Beat[] = [
     dur: 4.6,
   },
   {
-    p: 4, x: 132, stacks: 1, shelf: 1, cands: 1, live: 1,
+    p: 165, x: 132, stacks: 1, shelf: 1, cands: 1, live: 1,
     interact: {
       prompt: 'Tap the reason that can go on the shelf.',
       explain: 'Safety. The other two might both be true, and one of them is somebody\'s deepest conviction, but neither can be checked by a person who does not already share it. The shelf is not for the best reasons. It is for the ones everybody can get at.',
@@ -68,7 +68,7 @@ export const BEATS: Pol20Beat[] = [
     dur: 1.0,
   },
   {
-    p: 137, x: 268, stacks: 1, shelf: 1, cands: 1, landed: 1,
+    p: 456, x: 268, stacks: 1, shelf: 1, cands: 1, landed: 1,
     quote: {
       id: 'lq-political-political-20-2',
       text: 'A plurality of reasonable yet incompatible comprehensive doctrines is the normal result of the exercise of human reason within free institutions.',
@@ -81,7 +81,7 @@ export const BEATS: Pol20Beat[] = [
     dur: 4.0,
   },
   {
-    p: 21, x: 268, stacks: 1, shelf: 1, cands: 1, landed: 1,
+    p: 453, x: 268, stacks: 1, shelf: 1, cands: 1, landed: 1,
     text: 'Look at the size of the shelf. Almost everything either side cares about stayed in its own stack.',
     dur: 4.2,
   },

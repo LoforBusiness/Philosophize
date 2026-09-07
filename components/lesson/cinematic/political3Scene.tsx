@@ -10,7 +10,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political3Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -133,7 +133,7 @@ export default function Political3Scene({ clock, bt, bi, i, dragPos }: SceneApi)
     const sub = keepHeld(heldSub, mixStance(carryFrom(heldSub, n, emoteHold(SUB_CODE[p], t)), emoteLive(SUB_CODE[n], t, bt.value), tr));
     const r = keepHeld(heldR, mixStance(carryFrom(heldR, n, emoteHold(R_CODE[p], t)), emoteLive(R_CODE[n], t, bt.value), tr));
     return {
-      sub: pose(sub, SUB_X, GROUND, K_FIG, 1, 1),
+      sub: reactPose(sub, SUB_X, GROUND, K_FIG, 1, 1),
       ruler: pose(r, R_X, GROUND, K_FIG, -1, 1),
       // The scroll's journey is DELAYED into the back half of the transition, so it
       // is still near the subject's end of the rail at the moment the circuit
@@ -241,7 +241,7 @@ export default function Political3Scene({ clock, bt, bi, i, dragPos }: SceneApi)
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DS} k={K_FIG} />
-      <Stickman D={DR} k={K_FIG} />
+      <Stickman role="second" D={DR} k={K_FIG} />
     </Animated.View>
   );
 }

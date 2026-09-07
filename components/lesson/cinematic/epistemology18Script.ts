@@ -48,7 +48,7 @@ export const BEATS: Epi18Beat[] = [
     dur: 1.9,
   },
   {
-    p: 45, x: 132, rails: 1, grip: 1, ev: 0.3,
+    p: 447, x: 132, rails: 1, grip: 1, ev: 0.3,
     text: 'Now the same piece of evidence arrives at both. Somebody you trust tells you it is not so.',
     cite: 'One fact, two claims',
     dur: 4.4,
@@ -59,7 +59,7 @@ export const BEATS: Epi18Beat[] = [
     dur: 3.8,
   },
   {
-    p: 4, x: 132, rails: 1, grip: 1, ev: 0.3, live_d: 1,
+    p: 165, x: 132, rails: 1, grip: 1, ev: 0.3, live_d: 1,
     interact: {
       prompt: 'Push the same evidence at both claims. How far does each one move?',
       drag: {
@@ -78,13 +78,13 @@ export const BEATS: Epi18Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, rails: 1, grip: 1, ev: 1,
+    p: 177, x: 132, rails: 1, grip: 1, ev: 1,
     text: 'This is the rule Bayes wrote down. A new fact moves you in proportion to how loosely you were holding on.',
     cite: 'Updating',
     dur: 4.6,
   },
   {
-    p: 137, x: 268, rails: 1, grip: 1, ev: 1,
+    p: 456, x: 268, rails: 1, grip: 1, ev: 1,
     quote: {
       id: 'lq-epistemology-knowledge-18-2',
       text: 'A wise man proportions his belief to the evidence.',

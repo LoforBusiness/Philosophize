@@ -66,7 +66,7 @@ export const BEATS: Aes4Beat[] = [
     dur: 1.8,
   },
   {
-    a: 0, v: 4, test: 2, signed: 1,
+    a: 158, v: 4, test: 2, signed: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-4-1',
       text: 'To see something as art requires something the eye cannot descry — an atmosphere of artistic theory, a knowledge of the history of art: an artworld.',
@@ -78,7 +78,7 @@ export const BEATS: Aes4Beat[] = [
     dur: 3.6,
   },
   {
-    a: 13, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
+    a: 383, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
     text: 'Fountain fits neither answer. It copies nothing and expresses nothing, and it still will not go away.',
     cite: 'The artworld confers',
     dur: 2.4,
@@ -89,7 +89,7 @@ export const BEATS: Aes4Beat[] = [
     dur: 2.6,
   },
   {
-    a: 21, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
+    a: 380, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
     interact: {
       prompt: 'So where does the art actually live — in the object, or in the room around it?',
       cards: [
@@ -102,7 +102,7 @@ export const BEATS: Aes4Beat[] = [
     dur: 1.0,
   },
   {
-    a: 0, v: 8, test: 3, verdict: 1, signed: 1, art: 1,
+    a: 462, v: 8, test: 3, verdict: 1, signed: 1, art: 1,
     interact: {
       prompt: 'What turns a chosen object into art?',
       sort: {

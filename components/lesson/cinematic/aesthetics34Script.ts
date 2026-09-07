@@ -30,7 +30,7 @@ export const BEATS: Aesthetics34Beat[] = [
     dur: 3.4,
   },
   {
-    p: 47, x: 50, strip: 0, arrows: 1,
+    p: 433, x: 50, strip: 0, arrows: 1,
     text: 'First notice what makes it a picture OF a bull. Not resemblance — two twins resemble each other and neither is a picture of the other.',
     cite: 'Resemblance runs both ways',
     dur: 4.8,
@@ -48,7 +48,7 @@ export const BEATS: Aesthetics34Beat[] = [
     dur: 4.8,
   },
   {
-    p: 137, x: 50, strip: 1,
+    p: 139, x: 50, strip: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-34-1',
       text: 'Denotation is the core of representation and is independent of resemblance.',
@@ -61,7 +61,7 @@ export const BEATS: Aesthetics34Beat[] = [
     dur: 3.6,
   },
   {
-    p: 160, x: 50, strip: 0, live: 1,
+    p: 467, x: 50, strip: 0, live: 1,
     interact: {
       prompt: 'Take strokes away. Stop at the first picture that is no longer of a bull.',
       drag: {
@@ -86,7 +86,7 @@ export const BEATS: Aesthetics34Beat[] = [
     dur: 4.8,
   },
   {
-    p: 45, x: 50, strip: 0.75,
+    p: 447, x: 50, strip: 0.75,
     interact: {
       prompt: 'No exact line where it stops. So is depicting just personal opinion?',
       cards: [

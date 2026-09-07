@@ -17,9 +17,25 @@
 // without re-measuring its must-see boxes is a build error rather than a silent
 // crop (§21). Writing a maxim into 186 scripts would therefore mark all 186
 // measurements stale and demand a full `measure:must` sweep — hours of browser
-// time — to record something that never touches the stage at all. The stamp is
-// right to be conservative and there is no version of weakening it that is worth
-// the convenience, so the content moves instead.
+// time — to record something that never touches the stage at all.
+//
+// ── THAT SECOND HALF USED TO SAY "AND THERE IS NO VERSION OF WEAKENING THE
+//    STAMP THAT IS WORTH THE CONVENIENCE". IT WAS WRONG, AND THE WRITING PASS
+//    PROVED IT ────────────────────────────────────────────────────────────────
+//
+// The stamp no longer hashes a script's PROSE, only its structure and channels.
+// That is not a convenience: a must-box records what is inside `#stage-clip`, and
+// every word a script carries is drawn by `CinematicPlayer` in the lower deck,
+// outside it. Checked rather than argued — no `*Scene.tsx` reads prose off a beat.
+// So the prose could never move a box, and hashing it bought nothing while
+// costing a browser sweep per rewritten sentence, which is exactly the trade this
+// file already refuses for `Target.tsx`.
+//
+// THE TABLE STAYS ANYWAY, for the reason underneath the one that has gone: a
+// maxim is authored and re-derived by `make:focus` / `check:focus` against the
+// whole corpus at once, and a per-lesson field would scatter that. What changed is
+// that this is now a choice about where authored content lives, rather than a
+// workaround for a hash.
 //
 // The cost of the move is that a rewritten beat can orphan its own maxim, since
 // nothing links them but a string. That is exactly the failure J9's stale "the
@@ -58,10 +74,10 @@ export const LESSON_FOCUS: Record<string, LessonFocus> = {
   'metaphysics-being-1': { beat: 7, phrase: 'Science never even tries' },
   'aesthetics-aesthetics-1': { beat: 4, phrase: 'You want nothing from it' },
   'political-political-1': { beat: 8, phrase: 'The contract is a test of legitimacy, not a document' },
-  'ethics-ethics-2': { beat: 4, phrase: 'Most of us quietly use all three' },
+  'ethics-ethics-2': { beat: 4, phrase: 'Most people quietly use all three' },
   'epistemology-knowledge-3': { beat: 1, phrase: 'Feeling certain is something happening in you' },
   'metaphysics-being-2': { beat: 4, phrase: 'Nothing would have been simpler' },
-  'aesthetics-aesthetics-2': { beat: 7, phrase: 'Almost nothing else we build does that' },
+  'aesthetics-aesthetics-2': { beat: 7, phrase: 'Almost nothing else anybody builds does that' },
   'political-political-2': { beat: 5, phrase: 'Both take by threat — only legitimacy tells them apart' },
   'logic-arguments-3': { beat: 5, phrase: 'Valid form, false premises: the argument is valid but not sound' },
   'logic-arguments-4': { beat: 3, phrase: 'An inductive argument only makes its conclusion likely, so grade it strong or weak' },
@@ -109,7 +125,7 @@ export const LESSON_FOCUS: Record<string, LessonFocus> = {
   'epistemology-knowledge-36': { beat: 11, phrase: 'A reason is built, and it arrives feeling like a memory' },
   'logic-arguments-36': { beat: 6, phrase: 'This is why the famous line is only half true' },
   'ethics-ethics-36': { beat: 7, phrase: 'Forgiveness is a gift, and a gift has an owner' },
-  'aesthetics-aesthetics-36': { beat: 6, phrase: 'we say we are seeing the square, not a record of it' },
+  'aesthetics-aesthetics-36': { beat: 6, phrase: 'you say you are seeing the square, not a record of it' },
   'political-political-36': { beat: 7, phrase: 'Nothing here shows up in a statistic' },
   'metaphysics-being-37': { beat: 3, phrase: 'Fragile means: if it is struck, it breaks' },
   'epistemology-knowledge-37': { beat: 9, phrase: 'Both are right about different cases' },

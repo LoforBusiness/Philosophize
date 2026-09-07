@@ -32,7 +32,7 @@ export interface Aesthetics36Beat extends BaseBeat {
 export const BEATS: Aesthetics36Beat[] = [
   {
     p: 164, x: 54, square: 1,
-    text: 'One square, one afternoon. Busy at this end, empty at that one.',
+    text: 'One square, one afternoon. Packed at one end of the day, empty at the other.',
     dur: 2.4,
   },
   {
@@ -41,7 +41,7 @@ export const BEATS: Aesthetics36Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 54, square: 1, live_d: 1,
+    p: 457, x: 54, square: 1, live_d: 1,
     interact: {
       prompt: 'Slide the viewfinder. Read what your photograph would be captioned.',
       drag: {
@@ -70,13 +70,13 @@ export const BEATS: Aesthetics36Beat[] = [
     dur: 2.6,
   },
   {
-    p: 176, x: 54, square: 1, crop: 0.5, prints: 1,
+    p: 467, x: 54, square: 1, crop: 0.5, prints: 1,
     text: 'Photographs get this power from feeling transparent. Light came off the thing and landed here.',
     dur: 2.6,
   },
   {
-    p: 176, x: 54, square: 1, crop: 0.5, prints: 1,
-    text: 'So we say we are seeing the square, not a record of it.',
+    p: 467, x: 54, square: 1, crop: 0.5, prints: 1,
+    text: 'So you say you are seeing the square, not a record of it.',
     dur: 2.2,
   },
   {
@@ -107,12 +107,12 @@ export const BEATS: Aesthetics36Beat[] = [
   },
   {
     p: 12, x: 128, square: 1, crop: 0.14, prints: 1,
-    text: 'A painting nobody suspects of neutrality does less damage here. We know a painter chose.',
+    text: 'A painting nobody suspects of neutrality does less damage here. You know a painter chose.',
     dur: 3.3,
   },
   {
     p: 12, x: 128, square: 1, crop: 0.14, prints: 1,
-    text: 'We forget that a photographer did.',
+    text: 'You forget that a photographer did.',
     dur: 1.8,
   },
   {

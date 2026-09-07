@@ -10,7 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics4Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  useCarry, carry, STONE,
+  useCarry, carry, STONE, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -105,7 +105,7 @@ export default function Aesthetics4Scene({ clock, bt, bi, pickPos, i }: SceneApi
     const ask = carry(cv, 0, n, ASK[p], ASK[n], tr);
     return {
       a: pose(a, A_X, GROUND, K_FIG, 1, 1),
-      v: pose(v, V_X, GROUND, K_FIG, -1, 1),
+      v: reactPose(v, V_X, GROUND, K_FIG, -1, 1),
       test: carry(cv, 1, n, TEST[p], TEST[n], tr),
       verdict: carry(cv, 2, n, VERD[p], VERD[n], tr),
       signed: carry(cv, 3, n, SIGNED[p], SIGNED[n], tr),
@@ -166,7 +166,7 @@ export default function Aesthetics4Scene({ clock, bt, bi, pickPos, i }: SceneApi
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={DA} k={K_FIG} />
+      <Stickman role="second" D={DA} k={K_FIG} />
       <Stickman D={DV} k={K_FIG} />
     </Animated.View>
   );

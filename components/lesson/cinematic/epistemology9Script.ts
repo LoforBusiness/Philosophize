@@ -56,7 +56,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 1.8,
   },
   {
-    p: 47, x: 148, land: 1, map: 1, cards: 1,
+    p: 440, x: 148, land: 1, map: 1, cards: 1,
     interact: {
       prompt: 'Two maps of that same land are pinned up. Tap the one that is TRUE.',
       explain: 'Map A is true for one plain, powerful reason: it matches the land. Not the neatness of the drawing, not how sure you feel about it — the hills out there decide.',
@@ -89,7 +89,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 3.6,
   },
   {
-    p: 159, x: 148, land: 1, map: 1, link: 1,
+    p: 177, x: 148, land: 1, map: 1, link: 1,
     text: 'Fine — go and check. Hold the sketch up, look at the land, compare the two.',
     cite: 'The awkward bit',
     dur: 2.5,
@@ -100,7 +100,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 2.3,
   },
   {
-    p: 4, x: 148, land: 1, map: 1, link: 1,
+    p: 165, x: 148, land: 1, map: 1, link: 1,
     interact: {
       prompt: 'When you check a map against the world, what do you actually reach?',
       sort: {
@@ -117,13 +117,13 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 1.0,
   },
   {
-    p: 167, x: 268, land: 1, map: 1, theory: 1,
+    p: 459, x: 268, land: 1, map: 1, theory: 1,
     text: 'One answer: stop hunting for a magic exit. A belief is true when it locks into everything else you hold — no contradictions, nothing left dangling.',
     cite: 'Coherence',
     dur: 3.9,
   },
   {
-    p: 167, x: 268, land: 1, map: 1, theory: 1,
+    p: 459, x: 268, land: 1, map: 1, theory: 1,
     text: 'Truth is fitting the whole web.',
     dur: 1.8,
   },
@@ -139,7 +139,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 3.5,
   },
   {
-    p: 28, x: 268,
+    p: 163, x: 268,
     summary: {
       title: 'Three Ways to Be True',
       points: [

@@ -35,7 +35,7 @@ export interface Metaphysics37Beat extends BaseBeat {
 
 export const BEATS: Metaphysics37Beat[] = [
   {
-    p: 25, x: 56, shelf: 1,
+    p: 462, x: 56, shelf: 1,
     text: 'One glass, one shelf, ninety years. The glass was never knocked, never dropped, and never broke.',
     dur: 3.6,
   },
@@ -48,7 +48,7 @@ export const BEATS: Metaphysics37Beat[] = [
     p: 4, x: 56, shelf: 1, labels: 1, live: 1,
     interact: {
       prompt: 'Tap the label that says what being fragile is.',
-      explain: 'What it WOULD do. Not what it did, because it did nothing. Not what it is made of, because a thing can be fragile for many reasons. And not what we expect, because the glass was fragile before anyone looked at it.',
+      explain: 'What it WOULD do. Not what it did, because it did nothing. Not what it is made of, because a thing can be fragile for many reasons. And not what anyone expects, because the glass was fragile before anyone looked at it.',
       xp: 5,
     },
     dur: 1.0,
@@ -75,7 +75,7 @@ export const BEATS: Metaphysics37Beat[] = [
     dur: 1.8,
   },
   {
-    p: 160, x: 56, shelf: 1, live_d: 1, live: 1,
+    p: 457, x: 56, shelf: 1, live_d: 1, live: 1,
     interact: {
       prompt: 'The sorcerer is gone and nobody has touched it. How fragile is it right now?',
       drag: {
@@ -94,7 +94,7 @@ export const BEATS: Metaphysics37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 47, x: 56, shelf: 1,
+    p: 433, x: 56, shelf: 1,
     quote: {
       id: 'lq-metaphysics-being-37-1',
       text: 'A disposition is a property whose instances are directed toward manifestations that may never occur.',

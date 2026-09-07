@@ -39,7 +39,7 @@ export const BEATS: Ethics5Beat[] = [
     // The empty three-lane chart opens the lesson: it names the very three places
     // this line names, and the thinkers drop into it as the narration reaches them.
     x: 177, soc: 1, chart: 1,
-    text: 'Long ago — in Greece, in India, in China — humans began to argue, out loud, about how to live.',
+    text: 'In Greece, in India, in China, humans began to argue about how to live. Out loud, for the first time.',
     dur: 3.2,
   },
   {
@@ -76,7 +76,7 @@ export const BEATS: Ethics5Beat[] = [
   },
   {
     x: 265, soc: 5, chart: 3,
-    text: 'China’s is ren, which means something like humaneness, and Confucius says it only ever grows between people.',
+    text: 'China’s is ren, something like humaneness. Confucius says it only ever grows between people.',
     dur: 2.4,
   },
   {

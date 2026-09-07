@@ -67,3 +67,10 @@ scripts/.lesson-shots/
 
 # the reveal harness writes a scratch measurement here
 scripts/.reveal.json
+
+# spread-lessons writes the lessons it changed here, so measure-must can be
+# pointed at exactly those (N14). An output, not a source.
+scripts/.spread-ids.json
+
+# check-nod's scratch measurement
+scripts/.nod.json

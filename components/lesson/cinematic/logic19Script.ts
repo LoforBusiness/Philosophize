@@ -34,24 +34,24 @@ export interface Log19Beat extends BaseBeat {
 
 export const BEATS: Log19Beat[] = [
   {
-    p: 25, x: 200, rule: 1, cards: 1,
+    p: 379, x: 200, rule: 1, cards: 1,
     text: 'A rule, and four cards. Each one has a letter on the face and a number on the back.',
     cite: 'The rule',
     dur: 4.2,
   },
   {
-    p: 2, x: 200, rule: 1, cards: 1, reach: 1,
+    p: 384, x: 200, rule: 1, cards: 1, reach: 1,
     text: 'Which two would you turn to test it? Almost everybody reaches for the vowel and the even number.',
     dur: 4.4,
   },
   {
-    p: 45, x: 132, rule: 1, cards: 1, reach: 1,
+    p: 447, x: 132, rule: 1, cards: 1, reach: 1,
     text: 'Turn the four and the rule survives whatever is on its back. A consonant is allowed an even number.',
     cite: 'The useless one',
     dur: 4.4,
   },
   {
-    p: 4, x: 132, rule: 1, cards: 1, live: 1,
+    p: 165, x: 132, rule: 1, cards: 1, live: 1,
     interact: {
       prompt: 'Tap the card that could still break the rule.',
       explain: 'The seven. Turning the seven is the only move that can come back with bad news, and a test that cannot fail is not a test. The four is safe whatever lies behind it, which is exactly why people reach for the four.',
@@ -66,12 +66,12 @@ export const BEATS: Log19Beat[] = [
     dur: 4.0,
   },
   {
-    p: 13, x: 268, rule: 1, cards: 1, turned: 1,
+    p: 383, x: 268, rule: 1, cards: 1, turned: 1,
     text: 'You went looking for the card that would say yes. Only the card that can say no is really a test.',
     dur: 4.6,
   },
   {
-    p: 137, x: 268, rule: 1, cards: 1, turned: 1,
+    p: 128, x: 268, rule: 1, cards: 1, turned: 1,
     quote: {
       id: 'lq-logic-arguments-19-1',
       text: 'It is easy to obtain confirmations, or verifications, for nearly every theory — if we look for confirmations.',
@@ -84,7 +84,7 @@ export const BEATS: Log19Beat[] = [
     dur: 3.6,
   },
   {
-    p: 41, x: 268, rule: 1, cards: 1, turned: 1,
+    p: 442, x: 268, rule: 1, cards: 1, turned: 1,
     interact: {
       prompt: 'Split your checking between the two kinds of case.',
       split: {

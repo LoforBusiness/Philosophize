@@ -45,7 +45,7 @@ export const BEATS: Pol12Beat[] = [
   },
   {
     p: 13, x: 124, door: 1, open: 1, neg: 1,
-    text: 'Notice that this says nothing whatever about whether you can actually walk through it.',
+    text: 'The definition says nothing about whether you can actually walk through the door.',
     dur: 2.6,
   },
   {

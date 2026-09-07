@@ -24,12 +24,12 @@ export interface Metaphysics11Beat extends BaseBeat {
 
 export const BEATS: Metaphysics11Beat[] = [
   {
-    p: 163, c: 42, cx: 440, tok: 0,
+    p: 458, c: 42, cx: 440, tok: 0,
     text: 'Nearly every scrap of matter this man was born with has been replaced. The name under him has not moved once.',
     dur: 2.8,
   },
   {
-    p: 163, c: 42, cx: 440, tok: 0,
+    p: 458, c: 42, cx: 440, tok: 0,
     text: 'What is it holding on to?',
     dur: 1.8,
   },
@@ -57,7 +57,7 @@ export const BEATS: Metaphysics11Beat[] = [
     dur: 1.8,
   },
   {
-    p: 11, c: 4, tok: 1,
+    p: 165, c: 4, tok: 1,
     quote: {
       id: 'lq-metaphysics-being-11',
       text: 'Consciousness makes personal identity... as far as this consciousness can be extended backwards to any past action, so far reaches the identity of that person.',
@@ -70,7 +70,7 @@ export const BEATS: Metaphysics11Beat[] = [
     dur: 3.6,
   },
   {
-    p: 8, c: 31, tok: 1,
+    p: 378, c: 31, tok: 1,
     interact: {
       prompt: 'Where does Locke hang the person?',
       split: {
@@ -88,7 +88,7 @@ export const BEATS: Metaphysics11Beat[] = [
     dur: 1.0,
   },
   {
-    p: 22, c: 28, tok: 1, pick: 1,
+    p: 170, c: 28, tok: 1, pick: 1,
     interact: {
       prompt: 'The memories now sit over the man on the right. Tap the stand of whoever is the prince.',
       explain: 'The trap: his stand still says COBBLER, and it is his own body — which is what a court would go by. Locke says follow the memories. The man on the right remembers being the prince, so the prince is who he is.',

@@ -22,12 +22,12 @@ export interface Ethics32Beat extends BaseBeat {
 
 export const BEATS: Ethics32Beat[] = [
   {
-    a: 4, b: 25, reasons: 0, card: 0,
+    a: 461, b: 25, reasons: 0, card: 0,
     dur: 4.2,
     text: 'One of these two has thought about a hard moral question for years. The other has just asked them what the answer is.',
   },
   {
-    a: 2, b: 25, reasons: 3, card: 1,
+    a: 443, b: 25, reasons: 3, card: 1,
     dur: 4.8,
     text: 'Behind the verdict sit the reasons: the cases weighed, the objections met, the times they changed their mind. The card is only the last line of it.',
     cite: 'What is behind it',
@@ -39,7 +39,7 @@ export const BEATS: Ethics32Beat[] = [
     cite: 'Handed over',
   },
   {
-    a: 44, b: 20, reasons: 3, card: 2,
+    a: 393, b: 20, reasons: 3, card: 2,
     dur: 3.6,
     quote: {
       id: 'lq-ethics-ethics-32-1',
@@ -57,7 +57,7 @@ export const BEATS: Ethics32Beat[] = [
     cite: 'A new case',
   },
   {
-    a: 6, b: 12, reasons: 3, card: 2, fresh: 1, pick: 1,
+    a: 383, b: 12, reasons: 3, card: 2, fresh: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap whichever of them can actually answer the new case.',
@@ -80,7 +80,7 @@ export const BEATS: Ethics32Beat[] = [
           { id: 'take', upto: 1, reads: 'their answer, taken as your own' },
         ],
       },
-      explain: 'The middle. The near end flatters us and nobody lives that way. Testimony is excellent evidence that you have overlooked something, and a poor replacement for going and seeing what it was.',
+      explain: 'The middle. The near end flatters you, and nobody lives that way. Testimony is excellent evidence that you have overlooked something, and a poor replacement for going and seeing what it was.',
       xp: 5,
     },
   },

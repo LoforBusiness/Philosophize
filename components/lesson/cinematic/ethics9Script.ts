@@ -83,7 +83,7 @@ export const BEATS: Ethics9Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, x: 124, notes: 1, taken: 2, owed: 1,
+    p: 457, x: 124, notes: 1, taken: 2, owed: 1,
     interact: {
       prompt: 'He chose the better option. Was anything still lost?',
       sort: {
@@ -94,7 +94,7 @@ export const BEATS: Ethics9Beat[] = [
           { id: 'duty', label: 'a real duty', reads: 'a real duty went unmet', correct: true },
         ],
       },
-      explain: 'A real duty. If choosing rightly cancelled the loss, regret would be irrational — and yet we distrust anyone who walks away untroubled. Something real was owed and was not paid. Williams called what is left over moral residue.',
+      explain: 'A real duty. If choosing rightly cancelled the loss, regret would be irrational — and yet you distrust anyone who walks away untroubled. Something real was owed and was not paid. Williams called what is left over moral residue.',
       xp: 5,
     },
     dur: 1.0,

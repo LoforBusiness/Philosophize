@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics7Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -158,7 +158,7 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dra
     const c = keepHeld(heldC, mixStance(carryFrom(heldC, n, emoteHold(Q[p], t)), emoteLive(Q[n], t, bt.value), tr));
 
     return {
-      fig: pose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: reactPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       comp: pose(c, COMP_X, GROUND, K_FIG, -1, 1),
       art: carry(cv, 1, n, ARTV[p], ARTV[n], tr),
       capt: captOn ? (captFade ? grow : 1) : 0,
@@ -296,7 +296,7 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dra
       ) : null}
 
       <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={DC} k={K_FIG} />
+      <Stickman role="second" D={DC} k={K_FIG} />
       <Stickman D={DF} k={K_FIG} />
     </Animated.View>
   );

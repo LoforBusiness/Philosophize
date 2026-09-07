@@ -23,7 +23,7 @@ export interface Meta4Beat extends BaseBeat {
 
 export const BEATS: Meta4Beat[] = [
   {
-    p: 2, tokens: 0,
+    p: 384, tokens: 0,
     text: 'Say "nothing exists" and you have said too much. Parmenides found this snag 2,500 years ago — and it still bites.',
     dur: 3.4,
   },
@@ -39,13 +39,13 @@ export const BEATS: Meta4Beat[] = [
     dur: 1.8,
   },
   {
-    p: 167, tokens: 2, barred: 1,
-    text: 'At Elea he set out two ways. That it is, and that it is not.',
+    p: 459, tokens: 2, barred: 1,
+    text: 'At Elea, Parmenides set out two ways. The way that is, and the way that is not.',
     cite: 'Parmenides, On Nature',
     dur: 1.8,
   },
   {
-    p: 167, tokens: 2, barred: 1,
+    p: 459, tokens: 2, barred: 1,
     text: 'Parmenides throws out the second, because what is not can be neither known nor said. So only what is counts as real, and change is a trick of the senses.',
     dur: 3.5,
   },
@@ -74,7 +74,7 @@ export const BEATS: Meta4Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, tokens: 3, barred: 1, frozen: 1,
+    p: 165, tokens: 3, barred: 1, frozen: 1,
     interact: {
       prompt: 'Why did Parmenides claim that non-being cannot exist?',
       cards: [
@@ -87,7 +87,7 @@ export const BEATS: Meta4Beat[] = [
     dur: 1.0,
   },
   {
-    p: 13, tokens: 3, barred: 1, frozen: 1,
+    p: 383, tokens: 3, barred: 1, frozen: 1,
     interact: {
       prompt: 'How empty is a physicist\'s vacuum, really?',
       drag: {

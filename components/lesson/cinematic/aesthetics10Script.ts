@@ -74,7 +74,7 @@ export const BEATS: Aes10Beat[] = [
     dur: 4.8,
   },
   {
-    p: 4, x: 110, film: 1, panel: 1, shut: 0, verdict: 2, link: 1, boards: 1,
+    p: 457, x: 110, film: 1, panel: 1, shut: 0, verdict: 2, link: 1, boards: 1,
     interact: {
       prompt: 'A work that glamorises cruelty is worse AS art. Which board does that line belong on?',
       explain: 'The trap: everyone agrees the film is superbly made, so calling it worse AS art sounds like a confusion. It is not. The moralist grants the skill and says what a work asks you to feel is part of its worth as art — the exact link Wilde denies.',
@@ -83,7 +83,7 @@ export const BEATS: Aes10Beat[] = [
     dur: 1.0,
   },
   {
-    p: 9, x: 110, film: 1, panel: 1, shut: 0, verdict: 2, link: 1,
+    p: 445, x: 110, film: 1, panel: 1, shut: 0, verdict: 2, link: 1,
     interact: {
       prompt: 'Beauty and the city pull apart. Which one does Plato let go?',
       drag: {

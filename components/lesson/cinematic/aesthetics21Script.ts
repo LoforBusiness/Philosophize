@@ -37,12 +37,12 @@ export interface Aes21Beat extends BaseBeat {
 
 export const BEATS: Aes21Beat[] = [
   {
-    p: 25, x: 200, works: 1,
-    text: 'Three works, and the stock of each. Six printings, four recordings, one canvas.',
+    p: 462, x: 200, works: 1,
+    text: 'Three works: six printings, four recordings, one canvas. In a moment all of it burns.',
     dur: 3.8,
   },
   {
-    p: 45, x: 200, works: 1, burn: 0.5,
+    p: 379, x: 200, works: 1, burn: 0.5,
     text: 'Now start burning. Every copy of the novel, every recording of the symphony, and the painting on the wall.',
     cite: 'The test',
     dur: 4.4,
@@ -54,7 +54,7 @@ export const BEATS: Aes21Beat[] = [
   },
   {
     p: 13, x: 132, works: 1, burn: 1,
-    text: 'The painting cannot come back. There was never a text of it.',
+    text: 'The painting cannot come back. There was never a text to print it from.',
     cite: 'One of a kind',
     dur: 3,
   },
@@ -73,7 +73,7 @@ export const BEATS: Aes21Beat[] = [
     dur: 1.0,
   },
   {
-    p: 137, x: 268, works: 1, burn: 1, gone: 1,
+    p: 139, x: 268, works: 1, burn: 1, gone: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-21-2',
       text: 'A work of art is autographic if and only if the distinction between original and forgery of it is significant.',
@@ -86,7 +86,7 @@ export const BEATS: Aes21Beat[] = [
     dur: 3.8,
   },
   {
-    p: 21, x: 268, works: 1, burn: 1, gone: 1,
+    p: 380, x: 268, works: 1, burn: 1, gone: 1,
     text: 'Then photography walks in and makes a mess of it. Prints from one negative, and people still queue for the first one.',
     dur: 4.8,
   },
@@ -103,7 +103,7 @@ export const BEATS: Aes21Beat[] = [
           { id: 'novel', upto: 1, reads: 'like a novel, the negative is the work' },
         ],
       },
-      explain: 'The middle, uncomfortably. The negative works like a text, so any print carries the image and burning one destroys nothing. And yet the market treats an early signed print as the object, which is how we treat paintings. The rule is real and photography sits across it.',
+      explain: 'The middle, uncomfortably. The negative works like a text, so any print carries the image and burning one destroys nothing. And yet the market treats an early signed print as the object, which is how paintings are treated. The rule is real and photography sits across it.',
       xp: 5,
     },
     dur: 1.0,

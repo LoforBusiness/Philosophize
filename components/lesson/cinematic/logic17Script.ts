@@ -36,7 +36,7 @@ export interface Log17Beat extends BaseBeat {
 
 export const BEATS: Log17Beat[] = [
   {
-    p: 25, x: 200, pair: 1,
+    p: 172, x: 200, pair: 1,
     text: 'A man you cannot stand tells you two things. He really is dishonest, and you really do know it.',
     dur: 4.2,
   },
@@ -52,12 +52,12 @@ export const BEATS: Log17Beat[] = [
     dur: 2,
   },
   {
-    p: 159, x: 132, pair: 1, marks: 1, slur: 1,
+    p: 465, x: 132, pair: 1, marks: 1, slur: 1,
     text: 'So you go after the man. He lies, he has form, why would anyone listen.',
     dur: 3.5,
   },
   {
-    p: 159, x: 132, pair: 1, marks: 1, slur: 1,
+    p: 465, x: 132, pair: 1, marks: 1, slur: 1,
     text: 'It feels like winning.',
     dur: 1.8,
   },
@@ -81,7 +81,7 @@ export const BEATS: Log17Beat[] = [
     dur: 3.6,
   },
   {
-    p: 4, x: 132, pair: 1, marks: 1, slur: 1, lift: 1, live: 1,
+    p: 165, x: 132, pair: 1, marks: 1, slur: 1, lift: 1, live: 1,
     interact: {
       prompt: 'Lift both claims off their speaker. Tap the one still standing.',
       explain: 'The column with reasons printed under it. An argument carries its own support, so the speaker\'s character changes nothing. The other column was only ever the speaker\'s word, and a liar\'s word is worth less. Noticing that difference is not a fallacy.',
@@ -95,7 +95,7 @@ export const BEATS: Log17Beat[] = [
     dur: 4.6,
   },
   {
-    p: 41, x: 268, pair: 1, marks: 1, lift: 1, falls: 1,
+    p: 383, x: 268, pair: 1, marks: 1, lift: 1, falls: 1,
     interact: {
       prompt: 'What are you leaning on?',
       split: {

@@ -23,7 +23,7 @@ export interface Aes19Beat extends BaseBeat {
 
 export const BEATS: Aes19Beat[] = [
   {
-    p: 25, x: 70,
+    p: 379, x: 70,
     text: 'Aesthetics has spent most of its life indoors, looking at things in frames. Take the frame outside and point it at whatever is actually there.',
     dur: 4.6,
   },

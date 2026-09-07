@@ -31,19 +31,19 @@ export const BEATS: Aes13Beat[] = [
     text: 'The other was painted last year by a man called van Meegeren, and no expert in Europe could separate them.',
   },
   {
-    g: 4, art: 1, chain: 0,
+    g: 461, art: 1, chain: 0,
     dur: 4.4,
     text: 'Look as long as you like. There is no brushstroke to find — the forger was better than the tests, which is exactly why the case is interesting.',
     cite: 'Nothing to find',
   },
   {
-    g: 167, art: 1, chain: 1,
+    g: 459, art: 1, chain: 1,
     dur: 3.7,
     text: 'So draw what you cannot see: where each canvas has been. One line runs back through three and a half centuries of hands.',
     cite: 'Where they have been',
   },
   {
-    g: 167, art: 1, chain: 1,
+    g: 459, art: 1, chain: 1,
     dur: 1.8,
     text: 'The other starts last year and stops.',
   },
@@ -63,11 +63,11 @@ export const BEATS: Aes13Beat[] = [
   {
     g: 406, art: 1, chain: 1,
     dur: 4.6,
-    text: 'When van Meegeren confessed in 1947, not a single canvas changed. The same paintings that had been called lost masterpieces became cheap imitations overnight.',
+    text: 'When van Meegeren confessed in 1947, not a single canvas changed. Paintings called lost masterpieces became cheap fakes overnight.',
     cite: 'Nothing changed',
   },
   {
-    g: 160, art: 1, chain: 1, pick: 1,
+    g: 455, art: 1, chain: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'One is the Vermeer. Tap the only thing here that could tell you which.',
@@ -76,7 +76,7 @@ export const BEATS: Aes13Beat[] = [
     },
   },
   {
-    g: 11, art: 1, chain: 1,
+    g: 165, art: 1, chain: 1,
     dur: 1.0,
     interact: {
       prompt: 'What makes something a forgery?',

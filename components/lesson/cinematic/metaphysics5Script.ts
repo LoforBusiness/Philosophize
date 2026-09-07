@@ -15,13 +15,13 @@ export interface Meta5Beat extends BaseBeat {
 
 export const BEATS: Meta5Beat[] = [
   {
-    p: 25, stars: 0.7, q: 0,
+    p: 462, stars: 0.7, q: 0,
     text: 'There is something rather than nothing. Why? Leibniz framed the question; Heidegger called it the first one of all.',
     dur: 3.6,
   },
   {
     p: 24, stars: 1, q: 1,
-    text: 'Heidegger called this the fundamental question of metaphysics. Not why this thing or that thing exists.',
+    text: 'Heidegger called the question fundamental to all of metaphysics. Not why one thing exists, or another.',
     cite: 'The fundamental question',
     dur: 3.3,
   },
@@ -31,7 +31,7 @@ export const BEATS: Meta5Beat[] = [
     dur: 1.9,
   },
   {
-    p: 19, stars: 1, q: 1, psr: 1,
+    p: 384, stars: 1, q: 1, psr: 1,
     // The rule is drawn on stage in plain words — EVERY FACT NEEDS A REASON. Naming
     // it "the Principle of Sufficient Reason" over the top of that adds a term and
     // no meaning, and undoes the choice the scene already made (J7).
@@ -72,7 +72,7 @@ export const BEATS: Meta5Beat[] = [
     dur: 2.7,
   },
   {
-    p: 4, stars: 1, q: 0.4, psr: 1, dasein: 1,
+    p: 165, stars: 1, q: 0.4, psr: 1, dasein: 1,
     interact: {
       prompt: 'What kind of question is "why is there anything at all"?',
       sort: {

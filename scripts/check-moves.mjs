@@ -8,6 +8,7 @@
 // any new one is trusted. A check that cannot report a clean pass on `walk` is
 // broken, and a check that fires on almost everything has told you nothing
 // (LESSON_RULES Part 3) — fix the check, not the motion.
+import { CLOCK_ACTS } from './lib/liveliness.mjs';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import os from 'node:os';
 import { pathToFileURL } from 'node:url';
@@ -183,6 +184,8 @@ function worstStep(m, n) {
 const FACE_OK = new Set([
   'act 14',          // DUCK — hands go over the head, which is the gesture
   'act 61', 'hold 61',   // CHIN IN HAND — the hand is at the chin by definition
+  'act 158', 'hold 158', // THINKING IT OVER — the same gesture, on the second shelf
+  'act 140',             // THE ASIDE — a hand beside the mouth IS the gesture
   'act 78', 'hold 78',   // LEANING IN CLOSE — the hand comes up to the ear
   'act 96',              // RUB THE NECK — the hand goes behind the neck
   'act 17',          // FACEPALM — the hand is ON the face by definition
@@ -333,9 +336,20 @@ const MOTIONS = [
   // motions nothing has ever looked at — the shape of blindness §21 records the
   // must-box probe, `check-moves` itself and `validate-cinematic` each falling
   // into, where the suite gets QUIETER and that reads as progress.
-  ...Array.from({ length: 120 }, (_, i) => ({
+  // 168, not 120: the second shelf (121–168) is enumerated here in the same commit
+  // that adds it, for the reason the paragraph above gives.
+  //
+  // 157–168 are EXCLUDED from this sampler and swept on the clock below instead.
+  // They read `t` and ignore `u` exactly as 59–78 do, so running them through the
+  // one-shot sampler measures frame T forty-eight times and reports a clean pass
+  // on twelve motions nothing has looked at — which is the same blindness this
+  // file's own comment warns about, arriving through the door it just opened.
+  ...Array.from({ length: 156 }, (_, i) => ({
     name: `act ${i + 1}`, kind: 'oneShot', at: (u) => M.actStance(i + 1, T, u),
     ...(i + 1 === 92 ? { lands: () => M.postureHold(1, T) } : {}),
+  })),
+  ...Array.from({ length: 12 }, (_, i) => ({
+    name: `hold ${i + 157}`, kind: 'oneShot', at: (u) => M.actStance(i + 157, T + u * 12, 1),
   })),
   // THE HOLDS ARE SAMPLED ON THE CLOCK, NOT ON u. 59–78 ignore `u` entirely, so
   // running them through the one-shot sampler above measures the same frame 49
@@ -437,6 +451,163 @@ for (const m of MOTIONS) {
   checkContinuity(m.name, m); checkLanding(m.name, m); checkHead(m.name, m);
 }
 
+// ── A RANGE-OF-MOTION CHECK WAS BUILT HERE, AND DELETED. ────────────────────
+//
+// The reasoning is kept because it is the sort that gets rediscovered and
+// re-implemented, and because the measurement is worth having written down.
+//
+// The idea was sound and is the one §19 used on the launch screen: every check
+// above hunts for a DISCONTINUITY, and perfect stillness has none, so a living
+// hold that does nothing scores full marks on all five. There, `read` travelled
+// 0.2 units across its whole cycle and `stargazer` moved not one tracked point.
+//
+// IT CANNOT HAPPEN IN THIS LIBRARY, and that is the finding. Every act is built
+// as `{ ...stand(t), … }`, and a bare `stand(t)` already travels **5.28 units**
+// across twenty-four seconds on its own breathing. So no absolute floor below
+// 5.28 can ever fire — the counter-test proved it, by freezing hold 163's two
+// oscillators and watching the suite stay green, because the frozen act was
+// still breathing underneath.
+//
+// A floor ABOVE 5.28 fails correct poses instead: act 75 (AT ATTENTION) measures
+// 1.0 and act 70 (HANDS CLASPED) 3.4, both DAMPING stand deliberately, and both
+// right. So the check is either unfalsifiable or wrong, which is the same verdict
+// the boxiness metric and the launch silhouette check got (§13, §19).
+//
+// The living shelves are judged by `node scripts/sheet-moves.mjs 157 168`, which
+// draws them across the clock and is the only instrument that can answer it.
+
+
+// ── DOES EVERY ACT THAT CLAIMS TO IGNORE `u` ACTUALLY IGNORE IT? ────────────
+//
+// `liveliness.CLOCK_ACTS` is the list of acts that read the scene clock and take
+// no notice of their own progress, and a real rule hangs off it: N7 forbids a
+// PLAYED code inside a split run's middle, because a one-shot reads `u` from
+// `bt` and `bt` resets on every piece of a sentence — four pieces, four replays
+// of the same arm. An act that ignores `u` cannot do that however often `bt`
+// restarts, so it is the one kind of played code a run may carry.
+//
+// The list is therefore load-bearing and was, until this check, a comment. One
+// act written with an accidental `p` in it would put a tic back into four hundred
+// and forty-five beats of the corpus, and every other check in this file would
+// stay green: a one-shot in a run is geometrically perfect, it is merely wrong.
+//
+// So: hold `t`, sweep `u`, and fail if a single joint moves. Counter-tested by
+// putting act 4 (THINK, a genuine one-shot) into the set and watching it fail.
+{
+  const drift = [];
+  for (const act of CLOCK_ACTS) {
+    let worst = 0;
+    for (const t of [1.3, 5.7, 11.2]) {
+      const base = R.solve({ x: 200, groundY: 500, k: 1, dir: 1, ...M.actStance(act, t, 0) });
+      for (const u of [0.17, 0.41, 0.63, 0.88, 1]) {
+        const now = R.solve({ x: 200, groundY: 500, k: 1, dir: 1, ...M.actStance(act, t, u) });
+        for (const j of ['head', 'wrL', 'wrR', 'ankL', 'ankR', 'elL', 'elR', 'chest', 'pel']) {
+          worst = Math.max(worst, Math.hypot(now[j].x - base[j].x, now[j].y - base[j].y));
+        }
+      }
+    }
+    if (worst > 0.001) drift.push(`act ${act} moves ${worst.toFixed(2)}u across u at fixed t`);
+  }
+  if (drift.length) {
+    console.log(`\nCLOCK_ACTS is wrong about ${drift.length} act(s) — a played code carrying one`);
+    console.log('would replay on every piece of a split sentence (N7):');
+    for (const d of drift) console.log(`  ${d}`);
+    process.exit(1);
+  }
+  console.log(`${CLOCK_ACTS.size} act(s) ignore u entirely, so a run may carry them played (N7)`);
+}
+
+// ── DOES A ONE-SHOT ACTUALLY GO ANYWHERE? ───────────────────────────────────
+//
+// **A RANGE CHECK WAS BUILT HERE BEFORE, AND DELETED, AND THIS IS NOT THAT ONE.**
+// The first version swept the CLOCK, and bare `stand(t)` travels 5.28 units on
+// its own over twenty-four seconds — so every act cleared any floor below that
+// whether or not it did anything, and the counter-test proved it: freezing hold
+// 163's two oscillators left the suite green, because the frozen act was still
+// breathing underneath. A check that cannot fail is worse than no check.
+//
+// Sweeping `u` AT A FIXED CLOCK is the escape, and it is exact rather than
+// clever: `stand(t)` does not depend on `u`, so it contributes nothing to the
+// excursion and what is left is the act's own arc. The acts that ignore `u`
+// entirely are exempt by construction — they have no arc to measure, they are the
+// posture and living shelves, and `sheet:moves` is what judges those.
+//
+// It exists because the EYE found two dead acts that every other check passed.
+// 146 NOT CONVINCED ("the head goes over, and stays there") travels **1.6 units**
+// against a head 40 across, and 156 SIT WITH IT travels 3.2 — the same class as
+// the launch screen's `read` at 0.2u (§19) and N12's three "looking" actions that
+// drew a figure standing perfectly still. Geometrically perfect, and a photograph.
+{
+  const ACTS = [...new Set(
+    [...readFileSync(path.join(REPO, 'components/lesson/cinematic/moves.ts'), 'utf8')
+      .matchAll(/\bcode === (\d+)\)/g)].map((m) => +m[1]),
+  )].filter((a) => a > 0).sort((a, b) => a - b);
+
+  const JOINTS = ['head', 'wrL', 'wrR', 'ankL', 'ankR', 'elL', 'elR', 'chest'];
+  const at = (act, t, u) => {
+    const B = R.solve({ x: 200, groundY: GROUND, k: 1, dir: 1, ...M.actStance(act, t, u) });
+    return JOINTS.map((j) => [B[j].x, B[j].y]);
+  };
+  const excursion = (act) => {
+    let worst = 0;
+    // THREE CLOCKS, and the widest wins. An act whose arc is scaled by an
+    // oscillator would measure near zero at that oscillator's own zero crossing,
+    // and one unlucky sample would condemn a perfectly good motion.
+    for (const t of [1.3, 5.7, 11.2]) {
+      const lo = JOINTS.map(() => [Infinity, Infinity]);
+      const hi = JOINTS.map(() => [-Infinity, -Infinity]);
+      for (let i = 0; i <= 60; i += 1) {
+        const now = at(act, t, i / 60);
+        for (let j = 0; j < JOINTS.length; j += 1) {
+          lo[j] = [Math.min(lo[j][0], now[j][0]), Math.min(lo[j][1], now[j][1])];
+          hi[j] = [Math.max(hi[j][0], now[j][0]), Math.max(hi[j][1], now[j][1])];
+        }
+      }
+      for (let j = 0; j < JOINTS.length; j += 1) {
+        worst = Math.max(worst, Math.hypot(hi[j][0] - lo[j][0], hi[j][1] - lo[j][1]));
+      }
+    }
+    return worst;
+  };
+
+  // MEASURED, NOT LISTED. `CLOCK_ACTS` names only the two living shelves because
+  // that is the set N7 needs; the posture and dance shelf (29–55) ignores `u`
+  // too, and a hand-kept second list would drift from the first the day somebody
+  // adds a posture. The zero here is exact — an act that ignores `u` returns a
+  // stance that does not mention it — so no threshold is being guessed.
+  const ignoresU = new Set(ACTS.filter((a) => excursion(a) === 0));
+
+  // 10.8 is PAT THE POCKETS, which reads; 9.6 and 9.9 are a glance over the
+  // shoulder and a decaying wobble, both small on purpose. 8 sits under all three
+  // and over everything that is genuinely dead.
+  const FLOOR = 8;
+  const still = ACTS.filter((a) => !ignoresU.has(a))
+    .map((a) => ({ act: a, d: excursion(a) }))
+    .filter((q) => q.d < FLOOR)
+    .sort((a, b) => a.d - b.d);
+
+  // DOWN ONLY. Every one left is COLD — no script calls any of them — which is why
+  // they are a budget rather than a blocker. It was 5: 146 and 156 were LIVE in eight
+  // beats and were fixed the day this check was written, 1.6u → 14.6 and 3.2 → 12.7.
+  // Fix one, lower the number.
+  const STILL_BUDGET = 3;
+  if (still.length > STILL_BUDGET) {
+    console.log(`\n${still.length} act(s) barely move across their own u (floor ${FLOOR}u, budget ${STILL_BUDGET}):`);
+    for (const q of still) console.log(`  act ${q.act} travels ${q.d.toFixed(1)}u`);
+    console.log('  A single arc that goes nowhere passes every smoothness check ever');
+    console.log('  written, because a still image has no discontinuities. Give it a LIMB');
+    console.log('  (N12: a head move is not a move), or make it a clock act.');
+    process.exit(1);
+  }
+  const names = still.map((q) => `${q.act} (${q.d.toFixed(1)}u)`).join(', ');
+  console.log(`${ACTS.length - ignoresU.size} one-shot(s) clear the ${FLOOR}u floor`
+    // NO CLAIM ABOUT WHETHER THESE ARE REACHED. This file never reads the corpus,
+    // and "all cold" was in the first draft of this line while two of the five
+    // were live in eight beats — a summary asserting something its own instrument
+    // cannot see, which is the failure this whole check exists to catch, one level
+    // up. `check:life` owns the reach question (N14).
+    + (still.length ? ` · ${still.length}/${STILL_BUDGET} still debt: ${names}` : ''));
+}
 
 if (fail.length) {
   console.log(`\n${fail.length} problem(s):\n`);

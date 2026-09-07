@@ -21,12 +21,12 @@ export interface Pol13Beat extends BaseBeat {
 
 export const BEATS: Pol13Beat[] = [
   {
-    p: 164, x: 70,
+    p: 462, x: 70,
     text: 'Mill gives exactly one reason for using power over a person against their will. To stop them harming somebody else.',
     dur: 3.3,
   },
   {
-    p: 164, x: 70,
+    p: 462, x: 70,
     text: 'Not for their own good, and not because you dislike the choice.',
     dur: 2,
   },
@@ -77,7 +77,7 @@ export const BEATS: Pol13Beat[] = [
     dur: 2.2,
   },
   {
-    p: 6, x: 124, steps: 3, pick: 1,
+    p: 383, x: 124, steps: 3, pick: 1,
     interact: {
       prompt: 'Tap the step Mill would refuse to grant.',
       explain: 'Step two swaps offence for harm. Harm sets back real interests or rights; being upset is not one. If the number of offended people counted, a majority could silence anything it disliked.',
@@ -86,7 +86,7 @@ export const BEATS: Pol13Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, x: 124, steps: 3, tag: 1,
+    p: 165, x: 124, steps: 3, tag: 1,
     interact: {
       prompt: 'Which of these is harm rather than offence?',
       poll: {

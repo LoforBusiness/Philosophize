@@ -64,18 +64,18 @@ export const BEATS: Logic26Beat[] = [
     dur: 3.6,
   },
   {
-    p: 167, x: 168, links: 4, snap: 1,
+    p: 459, x: 168, links: 4, snap: 1,
     text: 'Something in that chain has to give. Every step after the first was valid, so the break lands where it started.',
     cite: 'Where it breaks',
     dur: 3.5,
   },
   {
-    p: 167, x: 168, links: 4, snap: 1,
+    p: 459, x: 168, links: 4, snap: 1,
     text: 'The assumption was false. There is no largest number.',
     dur: 1.8,
   },
   {
-    p: 4, x: 124, links: 4, snap: 1,
+    p: 165, x: 124, links: 4, snap: 1,
     interact: {
       prompt: 'The reasoning held and the end is absurd. What has been shown?',
       sort: {
@@ -92,7 +92,7 @@ export const BEATS: Logic26Beat[] = [
     dur: 1.0,
   },
   {
-    p: 6, x: 124, links: 4, snap: 1, pick: 1,
+    p: 383, x: 124, links: 4, snap: 1, pick: 1,
     interact: {
       prompt: 'The chain ends in an absurdity. Tap what it breaks.',
       explain: 'Not the logic and not a middle step — every one of those was a valid move you would make again. The only thing that was ever optional is the thing you assumed at the top.',

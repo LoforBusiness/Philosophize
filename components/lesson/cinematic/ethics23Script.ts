@@ -21,17 +21,17 @@ export interface Ethics23Beat extends BaseBeat {
 
 export const BEATS: Ethics23Beat[] = [
   {
-    p: 164, x: 70,
+    p: 462, x: 70,
     text: 'You pass a shallow pond and a small child is drowning in it. Wading in ruins an expensive pair of shoes.',
     dur: 3.5,
   },
   {
-    p: 164, x: 70,
+    p: 462, x: 70,
     text: 'Nobody thinks this is a hard question.',
     dur: 1.8,
   },
   {
-    p: 41, x: 168, gauges: 1, near: 1,
+    p: 442, x: 168, gauges: 1, near: 1,
     text: 'So the first gauge goes straight to the top, and it does not even feel like a moral decision. It feels like noticing.',
     cite: 'The child at your feet',
     dur: 4.2,
@@ -76,7 +76,7 @@ export const BEATS: Ethics23Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, x: 124, gauges: 1, near: 1, far: 1,
+    p: 165, x: 124, gauges: 1, near: 1, far: 1,
     interact: {
       prompt: 'Draw how much of the duty stays yours as the crowd grows.',
       plot: {

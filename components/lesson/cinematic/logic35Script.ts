@@ -31,7 +31,7 @@ export interface Logic35Beat extends BaseBeat {
 
 export const BEATS: Logic35Beat[] = [
   {
-    p: 25, x: 62, rise: 0,
+    p: 172, x: 62, rise: 0,
     text: 'Two things, measured all summer. Watch the two lines move.',
     dur: 2.8,
   },
@@ -56,7 +56,7 @@ export const BEATS: Logic35Beat[] = [
     dur: 2.5,
   },
   {
-    p: 4, x: 62, rise: 1, arrow: 1, picks: 1, live: 1,
+    p: 461, x: 62, rise: 1, arrow: 1, picks: 1, live: 1,
     interact: {
       prompt: 'Tap the thing that could be feeding both columns.',
       explain: 'Heat. It sells cones and it fills the water, so both climb without either touching the other. Swimming lessons sit in the middle of a real chain, which makes it a mechanism. Holiday pay moves one column and not the other.',
@@ -65,17 +65,17 @@ export const BEATS: Logic35Beat[] = [
     dur: 1.0,
   },
   {
-    p: 176, x: 62, rise: 1, picks: 1, under: 1,
+    p: 467, x: 62, rise: 1, picks: 1, under: 1,
     text: 'A cause under both is called a confounder. Take the summer out and the link between cone and drowning vanishes.',
     dur: 3.8,
   },
   {
-    p: 176, x: 62, rise: 1, picks: 1, under: 1,
+    p: 467, x: 62, rise: 1, picks: 1, under: 1,
     text: 'It was never there.',
     dur: 1.8,
   },
   {
-    p: 47, x: 62, rise: 1, under: 1,
+    p: 386, x: 62, rise: 1, under: 1,
     quote: {
       id: 'lq-logic-arguments-35-1',
       text: 'Correlation does not imply causation, but it sure is a hint.',
@@ -97,7 +97,7 @@ export const BEATS: Logic35Beat[] = [
     dur: 1.8,
   },
   {
-    p: 45, x: 130, rise: 1, under: 1, cut: 1,
+    p: 447, x: 130, rise: 1, under: 1, cut: 1,
     interact: {
       prompt: 'What actually cuts the hidden causes?',
       drag: {

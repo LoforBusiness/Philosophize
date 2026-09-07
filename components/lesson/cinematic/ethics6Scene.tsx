@@ -10,7 +10,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle, type Stance } from
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics6Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -101,7 +101,7 @@ export default function Ethics6Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
     const d = keepHeld(heldD, mixStance(carryFrom(heldD, n, emoteHold(D_CODE[p], t)), emoteLive(D_CODE[n], t, bt.value), tr));
     const str = keepHeld(heldStr, mixStance(carryFrom(heldStr, n, emoteHold(S_CODE[p], t)), emoteLive(S_CODE[n], t, bt.value), tr));
     return {
-      dec: pose(d, DEC_X, BRIDGE_Y, K_FIG, 1, 1),
+      dec: reactPose(d, DEC_X, BRIDGE_Y, K_FIG, 1, 1),
       str: pose(str, STR_X, BRIDGE_Y, K_FIG * 1.16, -1, 1),
       tx: carry(cv, 0, n, TX[p], TX[n], tr),
       // R7b — the seam draws the shove. Slide toward HE IS USED AS A TOOL and the
@@ -192,7 +192,7 @@ export default function Ethics6Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
 
       {/* the decider + the larger stranger, on the bridge */}
       <Stickman D={DD} k={K_FIG} />
-      <Stickman D={DS} k={K_FIG * 1.16} />
+      <Stickman role="crowd" D={DS} k={K_FIG * 1.16} />
     </Animated.View>
   );
 }
@@ -244,7 +244,7 @@ function boundStance(t: number, seed: number): Stance {
 
 function Peg({ x, seed, clock }: { x: number; seed: number; clock: SharedValue<number> }) {
   const D = useDerivedValue<Bundle>(() => pose(boundStance(clock.value, seed), x, GROUND, PEG_K, 1, 1));
-  return <Stickman D={D} k={PEG_K} />;
+  return <Stickman role="crowd" D={D} k={PEG_K} />;
 }
 
 const styles = StyleSheet.create({

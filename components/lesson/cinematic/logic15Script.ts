@@ -27,17 +27,17 @@ export interface Log15Beat extends BaseBeat {
 
 export const BEATS: Log15Beat[] = [
   {
-    g: 164, crowd: 1, sample: 1,
+    g: 462, crowd: 1, sample: 1,
     dur: 3.2,
     text: 'Two tourists were rude to you last week. Both of them were from the same country.',
   },
   {
-    g: 164, crowd: 1, sample: 1,
+    g: 462, crowd: 1, sample: 1,
     dur: 1.8,
     text: 'Both of those things are true.',
   },
   {
-    g: 45, crowd: 1, sample: 1, leap: 1, claim: 1,
+    g: 447, crowd: 1, sample: 1, leap: 1, claim: 1,
     dur: 4.8,
     text: 'And out of that comes a sentence about a whole nation. Look at how wide the claim is against how wide the evidence is.',
     cite: 'Two, and then everyone',
@@ -45,11 +45,11 @@ export const BEATS: Log15Beat[] = [
   {
     g: 383, crowd: 1, sample: 1, leap: 1, claim: 1,
     dur: 4.8,
-    text: 'Firsthand evidence feels like strong evidence. You were there, you saw it, and none of that makes two people into a pattern.',
+    text: 'Firsthand evidence feels like strong evidence. You were there and you saw it — and two people are still not a pattern.',
     cite: 'Why it feels solid',
   },
   {
-    g: 137, crowd: 1, sample: 1, leap: 1, claim: 1,
+    g: 139, crowd: 1, sample: 1, leap: 1, claim: 1,
     dur: 3.8,
     quote: {
       id: 'lq-logic-arguments-15',
@@ -77,7 +77,7 @@ export const BEATS: Log15Beat[] = [
     },
   },
   {
-    g: 41, crowd: 1, sample: 1, leap: 1, claim: 1,
+    g: 442, crowd: 1, sample: 1, leap: 1, claim: 1,
     dur: 1.0,
     interact: {
       prompt: 'What would actually fix this argument?',

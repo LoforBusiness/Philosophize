@@ -46,7 +46,7 @@ export const BEATS: Eth14Beat[] = [
     text: 'The case is that everyone else has freedom too.',
   },
   {
-    g: 45, built: 5,
+    g: 447, built: 5,
     dur: 5.0,
     text: 'So you put part of what you hold into a wall, and everyone does the same. What comes back over it is order.',
     cite: 'The bargain',
@@ -58,7 +58,7 @@ export const BEATS: Eth14Beat[] = [
     cite: 'Locke cuts a door',
   },
   {
-    g: 137, built: 5, door: 1,
+    g: 144, built: 5, door: 1,
     dur: 3.8,
     quote: {
       id: 'lq-ethics-ethics-14-1',
@@ -71,7 +71,7 @@ export const BEATS: Eth14Beat[] = [
     },
   },
   {
-    g: 4, built: 5, door: 1, pick: 1,
+    g: 461, built: 5, door: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap what the wall is built out of.',
@@ -80,7 +80,7 @@ export const BEATS: Eth14Beat[] = [
     },
   },
   {
-    g: 41, built: 5, door: 1,
+    g: 383, built: 5, door: 1,
     dur: 1.0,
     interact: {
       prompt: 'Where does the real disagreement sit?',

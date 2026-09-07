@@ -39,7 +39,7 @@ export const BEATS: Log21Beat[] = [
     dur: 4.2,
   },
   {
-    p: 2, x: 200, chips: 1, bench: 1, under: 0,
+    p: 443, x: 200, chips: 1, bench: 1, under: 0,
     text: 'Two tests, and they ask different questions. Take the lamp away and see.',
     cite: 'The bench',
     dur: 3,
@@ -50,12 +50,12 @@ export const BEATS: Log21Beat[] = [
     dur: 1.8,
   },
   {
-    p: 45, x: 132, chips: 1, bench: 1, under: 1,
+    p: 447, x: 132, chips: 1, bench: 1, under: 1,
     text: 'A match in petrol lights it every time, and a spark would have done just as well. Enough, but not required.',
     dur: 4.8,
   },
   {
-    p: 4, x: 132, chips: 1, bench: 1, under: 0, live: 1,
+    p: 457, x: 132, chips: 1, bench: 1, under: 0, live: 1,
     interact: {
       prompt: 'Tap the one you must have, which is still not enough.',
       explain: 'Oxygen. Take oxygen away and nothing burns, so oxygen is required. Fill a room with oxygen and nothing happens, so oxygen is not enough on its own. Those two facts are independent, and that is why the words are worth keeping apart.',
@@ -70,12 +70,12 @@ export const BEATS: Log21Beat[] = [
     dur: 4.0,
   },
   {
-    p: 13, x: 268, chips: 1, bench: 1, under: 3,
+    p: 168, x: 268, chips: 1, bench: 1, under: 3,
     text: 'So there are four boxes, not two. Most arguments that go wrong here have put something in the wrong one.',
     dur: 4.6,
   },
   {
-    p: 137, x: 268, chips: 1, bench: 1, under: 3,
+    p: 139, x: 268, chips: 1, bench: 1, under: 3,
     quote: {
       id: 'lq-logic-arguments-21-1',
       text: 'We have no other notion of cause and effect, but that of certain objects, which have been always conjoined together.',

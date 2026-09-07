@@ -55,7 +55,7 @@ export const BEATS: Epi24Beat[] = [
     dur: 4.6,
   },
   {
-    p: 4, x: 132, ladder: 1, sure: 1, hand: 1, live: 1,
+    p: 457, x: 132, ladder: 1, sure: 1, hand: 1, live: 1,
     interact: {
       prompt: 'Tap the rung or the hand you are surest of.',
       explain: 'The hand, and almost nobody hesitates. That is the observation Moore is making. He is not saying the sceptic argued badly, he is pointing out which end of the argument you were more confident about before it started.',
@@ -64,7 +64,7 @@ export const BEATS: Epi24Beat[] = [
     dur: 1.0,
   },
   {
-    p: 137, x: 132, ladder: 1, sure: 1, hand: 1,
+    p: 139, x: 132, ladder: 1, sure: 1, hand: 1,
     quote: {
       id: 'lq-epistemology-knowledge-24-2',
       text: 'I can know things which I cannot prove; and among things which I certainly did know, even if I could not prove them, were the premisses of my proof.',
@@ -83,7 +83,7 @@ export const BEATS: Epi24Beat[] = [
     dur: 4.8,
   },
   {
-    p: 13, x: 268, ladder: 1, sure: 1, hand: 1, give: 1,
+    p: 168, x: 268, ladder: 1, sure: 1, hand: 1, give: 1,
     text: 'The sceptic can answer that. He says the bar beside the hand is confidence, not knowledge, and that is exactly what is at issue.',
     dur: 4.8,
   },

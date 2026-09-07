@@ -27,7 +27,7 @@ export interface Logic5Beat extends BaseBeat {
 
 export const BEATS: Logic5Beat[] = [
   {
-    p: 2, machine: 1,
+    p: 384, machine: 1,
     text: 'A proof is a chain: premises that march, step by step, to a conclusion. One weak link, and it falls.',
     dur: 3.4,
   },
@@ -43,13 +43,13 @@ export const BEATS: Logic5Beat[] = [
     dur: 1.8,
   },
   {
-    p: 167, machine: 1, run: 1,
+    p: 459, machine: 1, run: 1,
     text: 'Euclid drew a circle around A through B, another around B through A; they cross at C. AB equals AC, AB equals BC — so AC equals BC.',
     cite: 'Euclid, Elements I.1',
     dur: 4.1,
   },
   {
-    p: 167, machine: 1, run: 1,
+    p: 459, machine: 1, run: 1,
     text: 'A triangle, proved link by link.',
     dur: 1.8,
   },
@@ -67,7 +67,7 @@ export const BEATS: Logic5Beat[] = [
     dur: 3.4,
   },
   {
-    p: 4, chain: 1,
+    p: 165, chain: 1,
     interact: {
       prompt: 'Euclid’s proof has one step missing. Tap the gap where a hidden flaw could sit.',
       explain:
@@ -83,7 +83,7 @@ export const BEATS: Logic5Beat[] = [
     dur: 4.4,
   },
   {
-    p: 13, chute: 1,
+    p: 383, chute: 1,
     interact: {
       prompt: 'A proof "feels obviously right" but skips three steps. Which chute do you send it down?',
       explain: 'Feeling obvious isn’t a check. Unstated steps are exactly where a hidden flaw can slip past you — so send it to be checked, not waved through.',

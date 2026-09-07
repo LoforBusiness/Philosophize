@@ -13,7 +13,7 @@ export interface Pol6Beat extends BaseBeat {
 
 export const BEATS: Pol6Beat[] = [
   {
-    p: 2, bars: 1,
+    p: 443, bars: 1,
     text: 'Would you accept this society if you turned out to be the poorest in it? Rawls turned that question into a test for justice itself.',
     dur: 3.6,
   },
@@ -24,7 +24,7 @@ export const BEATS: Pol6Beat[] = [
     dur: 4.8,
   },
   {
-    p: 3, bars: 1, prin: 1,
+    p: 438, bars: 1, prin: 1,
     text: 'First: each person gets the same basic liberties, and these come first. Second: inequalities are allowed only if they help the least advantaged and attach to jobs open to all.',
     cite: 'Liberty first, then difference',
     dur: 5.0,
@@ -63,7 +63,7 @@ export const BEATS: Pol6Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, bars: 1, prin: 1,
+    p: 165, bars: 1, prin: 1,
     interact: {
       prompt: 'How does Rawls order the two?',
       split: {

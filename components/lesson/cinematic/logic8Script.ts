@@ -56,7 +56,7 @@ export const BEATS: Logic8Beat[] = [
     dur: 2.8,
   },
   {
-    p: 4, x: 152, wet: 1, rule: 1, trap: 1, pick: 1,
+    p: 380, x: 152, wet: 1, rule: 1, trap: 1, pick: 1,
     interact: {
       prompt: 'The street is soaked. Tap the card that the wet pavement ACTUALLY proves.',
       explain: 'Wet is a result, and results can have more than one parent. The rule promised that rain leads to wet — it never promised that wet leads back to rain.',
@@ -87,13 +87,13 @@ export const BEATS: Logic8Beat[] = [
     dur: 2.2,
   },
   {
-    p: 8, x: 152, wet: 1, rule: 1, trap: 2, spr: 1,
+    p: 173, x: 152, wet: 1, rule: 1, trap: 2, spr: 1,
     text: 'Now flip it the other way. Tomorrow the forecast promises no rain at all, so you plan on dry pavement and leave the umbrella hanging by the door.',
     cite: 'The other flip',
     dur: 4.6,
   },
   {
-    p: 21, x: 152, wet: 1, rule: 1, trap: 2, spr: 1,
+    p: 467, x: 152, wet: 1, rule: 1, trap: 2, spr: 1,
     interact: {
       prompt: 'Suppose it never rained. What follows about the streets?',
       drag: {
@@ -118,7 +118,7 @@ export const BEATS: Logic8Beat[] = [
     dur: 4.8,
   },
   {
-    p: 137, x: 152, wet: 1, rule: 1, trap: 2, cross: 1, spr: 1,
+    p: 465, x: 152, wet: 1, rule: 1, trap: 2, cross: 1, spr: 1,
     quote: {
       id: 'lq-logic-arguments-8-1',
       text: 'There are often several independent modes in which the same phenomenon could have originated.',

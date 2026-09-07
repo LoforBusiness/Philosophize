@@ -55,7 +55,7 @@ export const BEATS: Ethics4Beat[] = [
     dur: 4.6,
   },
   {
-    a: 160, b: 0, rows: 3,
+    a: 455, b: 0, rows: 3,
     quote: {
       id: 'lq-ethics-ethics-4-1',
       text: 'Morality differs in every society, and is a convenient term for socially approved habits.',
@@ -94,7 +94,7 @@ export const BEATS: Ethics4Beat[] = [
     dur: 1.8,
   },
   {
-    a: 21, b: 0, floor: 1, rows: 3,
+    a: 177, b: 0, floor: 1, rows: 3,
     interact: {
       prompt: 'What does this kind of relativism claim?',
       drag: {
@@ -113,7 +113,7 @@ export const BEATS: Ethics4Beat[] = [
     dur: 1.0,
   },
   {
-    a: 8, b: 4, floor: 1, rows: 3,
+    a: 378, b: 4, floor: 1, rows: 3,
     interact: {
       prompt: 'If every culture sets its own rules, must each one tolerate the rest?',
       explain:

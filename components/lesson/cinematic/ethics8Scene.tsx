@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics8Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import type { Shot } from './camera';
@@ -105,7 +105,7 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick, dragPos
     const thread = carry(cv, 2, n, THRV[p], THRV[n], tr);
 
     return {
-      fig: pose(s, fx, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: reactPose(s, fx, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
       // The cared-for figure never moves and never re-animates: a settled slump
       // with only stand()'s breath under it, so they read as present, not busy.
       // 48, not 46: the script says they are ON THE FLOOR by their bed. 46 is a
@@ -217,7 +217,7 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick, dragPos
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={DO} k={K_FIG} />
+      <Stickman role="second" D={DO} k={K_FIG} />
       <Stickman D={DF} k={K_FIG} />
     </Animated.View>
   );

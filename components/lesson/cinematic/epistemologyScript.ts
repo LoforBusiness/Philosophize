@@ -31,7 +31,7 @@ export const BEATS: EpistBeat[] = [
   {
     hpose: 2,
     locks: [0.25, 0.25, 0.25],
-    text: 'That question is the whole of epistemology, and Plato was already pressing it in the Theaetetus.',
+    text: 'That question is the whole of epistemology. Plato was already pressing it in the Theaetetus.',
     dur: 2.7,
   },
   {

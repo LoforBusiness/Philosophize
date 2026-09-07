@@ -25,7 +25,7 @@ export interface Pol18Beat extends BaseBeat {
 
 export const BEATS: Pol18Beat[] = [
   {
-    g: 25, lanes: 2, bikes: 1,
+    g: 462, lanes: 2, bikes: 1,
     dur: 4.6,
     text: 'Two people, one bicycle each, and the bicycles are identical. So far this is as equal as anything gets.',
   },
@@ -43,11 +43,11 @@ export const BEATS: Pol18Beat[] = [
   {
     g: 412, lanes: 2, bikes: 1, ride: 1,
     dur: 4.8,
-    text: 'Nothing unfair happened at the start. The resource was equal. It turned into wildly different amounts of getting about.',
+    text: 'Nothing unfair happened at the start — the resource was equal. It turned into wildly different amounts of getting about.',
     cite: 'Equal input',
   },
   {
-    g: 137, lanes: 2, bikes: 1, ride: 1,
+    g: 465, lanes: 2, bikes: 1, ride: 1,
     dur: 3.8,
     quote: {
       id: 'lq-political-political-18-1',
@@ -66,10 +66,10 @@ export const BEATS: Pol18Beat[] = [
     cite: 'Capabilities',
   },
   {
-    g: 4, lanes: 2, bikes: 1, ride: 1, pick: 1,
+    g: 165, lanes: 2, bikes: 1, ride: 1, pick: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Tap what Sen says we should be equalising.',
+      prompt: 'Tap what Sen says should be equalised.',
       explain: 'How far they get. The bicycles are already equal and it bought one of them almost nothing. The board about effort is the one to be careful with. Nothing here is a story about who tried hardest, and reading it that way loses the argument.',
       xp: 5,
     },

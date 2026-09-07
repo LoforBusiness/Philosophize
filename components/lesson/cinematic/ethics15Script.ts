@@ -27,23 +27,23 @@ export interface Eth15Beat extends BaseBeat {
 
 export const BEATS: Eth15Beat[] = [
   {
-    g: 164, plain: 1, tilt: 0,
+    g: 462, plain: 1, tilt: 0,
     dur: 2.3,
     text: 'Here is a plain report of something that happened. You stole that money.',
   },
   {
-    g: 164, plain: 1, tilt: 0,
+    g: 462, plain: 1, tilt: 0,
     dur: 1.9,
     text: 'Anyone can hold the sentence up against the world and check.',
   },
   {
-    g: 159, plain: 1, moral: 1, tilt: 0,
+    g: 465, plain: 1, moral: 1, tilt: 0,
     dur: 3.7,
     text: 'Now the same report with a moral word in it. You acted wrongly in stealing that money.',
     cite: 'Same weight',
   },
   {
-    g: 159, plain: 1, moral: 1, tilt: 0,
+    g: 465, plain: 1, moral: 1, tilt: 0,
     dur: 1.8,
     text: 'The beam does not move.',
   },
@@ -59,7 +59,7 @@ export const BEATS: Eth15Beat[] = [
     text: 'It is a tone of voice, a wince set down in ink.',
   },
   {
-    g: 137, plain: 1, moral: 1, tilt: 0,
+    g: 139, plain: 1, moral: 1, tilt: 0,
     dur: 3.8,
     quote: {
       id: 'lq-ethics-ethics-15-1',
@@ -92,7 +92,7 @@ export const BEATS: Eth15Beat[] = [
     },
   },
   {
-    g: 41, plain: 1, moral: 1, tilt: 0, doubt: 1,
+    g: 383, plain: 1, moral: 1, tilt: 0, doubt: 1,
     dur: 1.0,
     interact: {
       prompt: 'What kind of thing is "stealing is wrong"?',

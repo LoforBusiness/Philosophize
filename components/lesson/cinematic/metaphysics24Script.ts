@@ -66,7 +66,7 @@ export const BEATS: Meta24Beat[] = [
     dur: 2.2,
   },
   {
-    p: 4, x: 124, grains: 1, lamp: 1,
+    p: 165, x: 124, grains: 1, lamp: 1,
     interact: {
       prompt: 'A friend says: "Just define a heap as 100 grains or more. Solved." Why does that dodge it?',
       plot: {
@@ -79,7 +79,7 @@ export const BEATS: Meta24Beat[] = [
           { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5, 0.5], reads: 'the word never settles at all' },
         ],
       },
-      explain: 'The trap is false precision. It makes 99 a non-heap and 100 a heap with no real difference between them, and it quietly replaces our vague word instead of explaining why the vague word resists a line.',
+      explain: 'The trap is false precision. It makes 99 a non-heap and 100 a heap with no real difference between them, and it quietly replaces the vague word instead of explaining why the vague word resists a line.',
       xp: 5,
     },
     dur: 1.0,

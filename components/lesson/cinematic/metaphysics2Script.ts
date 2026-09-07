@@ -73,25 +73,25 @@ export const BEATS: Meta2Beat[] = [
     // 167 = TALKING WITH THE HANDS, the narration loop (N2). The hook is somebody
     // talking to you, and this is what that looks like from the neck down.
     e: 167, x: 92, gone: 0.3,
-    text: 'That is the whole question, and it has outlasted everyone who has picked it up.',
+    text: 'That question has outlasted everyone who ever picked it up.',
     dur: 2.1,
   },
   {
     // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
-    e: 168, x: 150, gone: 0.3, pr: 1,
+    e: 456, x: 150, gone: 0.3, pr: 1,
     text: 'Leibniz had a rule. Nothing is ever simply the case — there is always a reason for it.',
     cite: 'Leibniz, sufficient reason',
     dur: 2.1,
   },
   {
     // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
-    e: 168, x: 150, gone: 0.3, pr: 1,
+    e: 456, x: 150, gone: 0.3, pr: 1,
     text: 'Then he aimed the rule at existence itself. Why is there anything?',
     dur: 1.8,
   },
   {
     // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
-    e: 168, x: 150, gone: 0.3, pr: 1,
+    e: 456, x: 150, gone: 0.3, pr: 1,
     text: 'Nothing would have been simpler. He was right about that much.',
     dur: 1.8,
   },

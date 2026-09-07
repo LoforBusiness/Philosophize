@@ -22,35 +22,35 @@ export interface Metaphysics34Beat extends BaseBeat {
 
 export const BEATS: Metaphysics34Beat[] = [
   {
-    p: 164, x: 58, depth: 0,
+    p: 462, x: 58, depth: 0,
     text: 'A table. Solid, obvious, and not in any doubt.',
     dur: 1.9,
   },
   {
-    p: 164, x: 58, depth: 0,
+    p: 462, x: 58, depth: 0,
     text: 'Ask the awkward question about it anyway.',
     dur: 1.8,
   },
   {
-    p: 160, x: 58, depth: 0, ask: 1,
+    p: 457, x: 58, depth: 0, ask: 1,
     text: 'Not what made the table, and not who owns the table. What holds a table up?',
     cite: 'What holds this up?',
     dur: 2.5,
   },
   {
-    p: 160, x: 58, depth: 0, ask: 1,
+    p: 457, x: 58, depth: 0, ask: 1,
     text: 'Not the legs. What makes the thing a table at all.',
     dur: 1.8,
   },
   {
-    p: 47, x: 58, depth: 0.25, ask: 1,
+    p: 440, x: 58, depth: 0.25, ask: 1,
     text: 'The wood does. The table is real because the grain is arranged as it is, and philosophers call that grounding rather than causing.',
     cite: 'Grounding, not causing',
     dur: 3.3,
   },
   {
     p: 399, x: 58, depth: 0.25, ask: 1,
-    text: 'The wood is not earlier than the table. It is underneath it.',
+    text: 'The wood is not earlier than the table. The wood is underneath it.',
     dur: 1.8,
   },
   {
@@ -60,7 +60,7 @@ export const BEATS: Metaphysics34Beat[] = [
     dur: 4.6,
   },
   {
-    p: 137, x: 58, depth: 0.55,
+    p: 465, x: 58, depth: 0.55,
     quote: {
       id: 'lq-metaphysics-being-34-1',
       text: 'The task of metaphysics is to say what grounds what.',
@@ -72,7 +72,7 @@ export const BEATS: Metaphysics34Beat[] = [
     dur: 3.4,
   },
   {
-    p: 4, x: 58, depth: 0, live: 1,
+    p: 461, x: 58, depth: 0, live: 1,
     interact: {
       prompt: 'Drag down through the levels. Stop at the first one that rests on nothing below it.',
       drag: {
@@ -102,7 +102,7 @@ export const BEATS: Metaphysics34Beat[] = [
     dur: 1.8,
   },
   {
-    p: 45, x: 58, depth: 1,
+    p: 379, x: 58, depth: 1,
     interact: {
       prompt: 'So must the chain of dependence stop somewhere?',
       cards: [

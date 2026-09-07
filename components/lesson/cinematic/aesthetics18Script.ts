@@ -32,19 +32,19 @@ export interface Aes18Beat extends BaseBeat {
 
 export const BEATS: Aes18Beat[] = [
   {
-    p: 25, x: 200, curve: 1,
+    p: 172, x: 200, curve: 1,
     text: 'A piece of music everyone calls sad. Here is its shape: slow, low, and going down.',
     dur: 4.2,
   },
   {
-    p: 2, x: 200, curve: 1, body: 1,
+    p: 384, x: 200, curve: 1, body: 1,
     text: 'And here is a person who has had bad news. Same slope, drawn from the same numbers.',
     cite: 'Resemblance',
     dur: 4.2,
   },
   {
-    p: 45, x: 132, curve: 1, body: 1, match: 1,
-    text: 'That is the whole theory. We hear the music as sad because it moves the way sadness moves.',
+    p: 447, x: 132, curve: 1, body: 1, match: 1,
+    text: 'That is the whole theory. You hear the music as sad because it moves the way sadness moves.',
     dur: 4.4,
   },
   {
@@ -54,7 +54,7 @@ export const BEATS: Aes18Beat[] = [
     dur: 4.8,
   },
   {
-    p: 4, x: 132, curve: 1, body: 1, match: 1, empty: 1, live: 1,
+    p: 467, x: 132, curve: 1, body: 1, match: 1, empty: 1, live: 1,
     interact: {
       prompt: 'Tap the panel that holds what the music actually has.',
       explain: 'The contour. A tune has a shape, a speed and a direction, and every one of those is in the notes. Nothing in the score is having an experience. The empty panel is empty because there is no one in there for it to be about.',
@@ -63,7 +63,7 @@ export const BEATS: Aes18Beat[] = [
     dur: 1.0,
   },
   {
-    p: 137, x: 268, curve: 1, body: 1, match: 1, empty: 1,
+    p: 128, x: 268, curve: 1, body: 1, match: 1, empty: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-18-2',
       text: 'Music is not the cause or the cure of feelings, but their logical expression.',
@@ -81,7 +81,7 @@ export const BEATS: Aes18Beat[] = [
     dur: 4.6,
   },
   {
-    p: 41, x: 268, curve: 1, body: 1, empty: 1,
+    p: 383, x: 268, curve: 1, body: 1, empty: 1,
     interact: {
       prompt: 'Sad music moves you. Where is the sadness?',
       split: {

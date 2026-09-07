@@ -33,12 +33,12 @@ export interface Political36Beat extends BaseBeat {
 
 export const BEATS: Political36Beat[] = [
   {
-    p: 25, x: 52, street: 1,
+    p: 462, x: 52, street: 1,
     text: 'A street at night. Behind every lit window a person is doing something plain and legal.',
     dur: 3.6,
   },
   {
-    p: 4, x: 52, street: 1, lamp: 1, live_d: 1, live: 1,
+    p: 461, x: 52, street: 1, lamp: 1, live_d: 1, live: 1,
     interact: {
       prompt: 'Turn the watching up. Nobody is arrested. Watch the street.',
       drag: {
@@ -57,22 +57,22 @@ export const BEATS: Political36Beat[] = [
     dur: 1.0,
   },
   {
-    p: 13, x: 52, street: 1, watch: 0.6, lamp: 1,
+    p: 383, x: 52, street: 1, watch: 0.6, lamp: 1,
     text: 'This is why "nothing to hide, nothing to fear" answers a question nobody asked. The cost lands on people doing nothing wrong.',
     dur: 4.6,
   },
   {
-    p: 176, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
+    p: 467, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
     text: 'Bentham drew a prison where one guard could see every cell and no prisoner could tell if he was looking. Look at the box.',
     dur: 4.1,
   },
   {
-    p: 176, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
+    p: 467, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
     text: 'Nobody is in it.',
     dur: 1.8,
   },
   {
-    p: 47, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
+    p: 385, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
     quote: {
       id: 'lq-political-political-36-1',
       text: 'Visibility is a trap.',
@@ -94,12 +94,12 @@ export const BEATS: Political36Beat[] = [
     dur: 1.0,
   },
   {
-    p: 167, x: 84, street: 1, watch: 0.6, lamp: 1, picks: 1,
+    p: 459, x: 84, street: 1, watch: 0.6, lamp: 1, picks: 1,
     text: 'Nothing here shows up in a statistic. No case was brought.',
     dur: 2.2,
   },
   {
-    p: 167, x: 84, street: 1, watch: 0.6, lamp: 1, picks: 1,
+    p: 459, x: 84, street: 1, watch: 0.6, lamp: 1, picks: 1,
     text: 'What shrank was the range of things people were willing to try.',
     dur: 2.4,
   },

@@ -30,7 +30,7 @@ export interface Epi20Beat extends BaseBeat {
 
 export const BEATS: Epi20Beat[] = [
   {
-    p: 25, x: 200, voices: 0.25, agree: 0.22,
+    p: 172, x: 200, voices: 0.25, agree: 0.22,
     text: 'You read something surprising. One source, and you hold it loosely.',
     dur: 3.6,
   },
@@ -62,7 +62,7 @@ export const BEATS: Epi20Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 132, voices: 1, agree: 0.32, wires: 1, live: 1,
+    p: 165, x: 132, voices: 1, agree: 0.32, wires: 1, live: 1,
     interact: {
       prompt: 'Tap the source that actually adds something.',
       explain: 'The speaker whose wire runs somewhere else. The other three are just as sincere and just as sure, and between them they carry a single report. Agreement is evidence only when each person could have found out alone.',
@@ -89,7 +89,7 @@ export const BEATS: Epi20Beat[] = [
     dur: 4.4,
   },
   {
-    p: 41, x: 268, voices: 1, agree: 0.32, wires: 1,
+    p: 383, x: 268, voices: 1, agree: 0.32, wires: 1,
     interact: {
       prompt: 'Whose report is actually worth something?',
       poll: {

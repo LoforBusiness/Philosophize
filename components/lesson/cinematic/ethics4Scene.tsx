@@ -10,7 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics4Script';
 import {
   K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry,
-  carry, STONE,
+  carry, STONE, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -99,7 +99,7 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick, dragPos
     const a = keepHeld(heldA, mixStance(carryFrom(heldA, n, emoteHold(A_CODE[p], t)), emoteLive(A_CODE[n], t, bt.value), tr));
     const b = keepHeld(heldB, mixStance(carryFrom(heldB, n, emoteHold(B_CODE[p], t)), emoteLive(B_CODE[n], t, bt.value), tr));
     return {
-      a: pose(a, A_X, FIG_G, K_FIG, 1, 1),
+      a: reactPose(a, A_X, FIG_G, K_FIG, 1, 1),
       b: pose(b, B_X, FIG_G, K_FIG, -1, 1),
       // R7b — the knob puts the shared floor out. Drag toward NOTHING IS RIGHT OR
       // WRONG and the common ground under both cultures fades, so the reader watches
@@ -137,7 +137,7 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick, dragPos
       {/* ── the two arguers ───────────────────────────────────────────────── */}
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DA} k={K_FIG} />
-      <Stickman D={DB} k={K_FIG} />
+      <Stickman role="second" D={DB} k={K_FIG} />
 
       {/* ── the floor: Brown's universals, drawn as a bar chart ───────────── */}
       <Animated.View style={[StyleSheet.absoluteFill, chartStyle]} pointerEvents="none">

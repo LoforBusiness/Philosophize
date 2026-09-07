@@ -19,23 +19,23 @@ export interface Epis31Beat extends BaseBeat {
 
 export const BEATS: Epis31Beat[] = [
   {
-    g: 160, open: 0,
+    g: 467, open: 0,
     dur: 2.9,
     text: 'You are already down the road when it hits you: did you lock the door? You can picture doing it.',
   },
   {
-    g: 160, open: 0,
+    g: 467, open: 0,
     dur: 1.8,
     text: 'That picture is the only evidence you have.',
   },
   {
-    g: 167, open: 1,
+    g: 459, open: 1,
     dur: 3.9,
     text: 'So you check. You open the memory and there it is — the key, the turn, the pull on the handle.',
     cite: 'The first drawer',
   },
   {
-    g: 167, open: 1,
+    g: 459, open: 1,
     dur: 1.8,
     text: 'Clear as anything.',
   },
@@ -75,7 +75,7 @@ export const BEATS: Epis31Beat[] = [
     text: 'Meanwhile the door itself has been standing over there the whole time.',
   },
   {
-    g: 2, open: 3, pick: 1,
+    g: 466, open: 3, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap the card that could check a memory from outside memory.',
@@ -84,7 +84,7 @@ export const BEATS: Epis31Beat[] = [
     },
   },
   {
-    g: 11, open: 3,
+    g: 165, open: 3,
     dur: 1.0,
     interact: {
       prompt: 'How should you treat your own memory?',

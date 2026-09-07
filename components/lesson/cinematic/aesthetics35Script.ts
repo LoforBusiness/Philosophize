@@ -36,7 +36,7 @@ export const BEATS: Aesthetics35Beat[] = [
     dur: 3.8,
   },
   {
-    p: 2, x: 56, track: 1, split: 1,
+    p: 466, x: 56, track: 1, split: 1,
     text: 'Here is the setup. I told my doctor I broke my arm in two places.',
     dur: 2.6,
   },
@@ -46,7 +46,7 @@ export const BEATS: Aesthetics35Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 56, track: 1, split: 1, live: 1,
+    p: 380, x: 56, track: 1, split: 1, live: 1,
     interact: {
       prompt: 'Three endings sit on three branches. Tap the one that lands.',
       explain: 'He told me to stop going to those places. It fits perfectly and it is not the line you were on. That gap is the joke. The hospital ending fits and surprises nobody. The umbrella surprises and fits nothing, which is a mistake.',
@@ -55,17 +55,17 @@ export const BEATS: Aesthetics35Beat[] = [
     dur: 1.0,
   },
   {
-    p: 176, x: 56, track: 1, split: 1, run: 1,
+    p: 467, x: 56, track: 1, split: 1, run: 1,
     text: 'Both readings had to fit. That is the part people miss.',
     dur: 2,
   },
   {
-    p: 176, x: 56, track: 1, split: 1, run: 1,
-    text: 'A punchline that does not fit the setup is not surprising, it is wrong.',
+    p: 467, x: 56, track: 1, split: 1, run: 1,
+    text: 'A punchline that does not fit the setup is not surprising. It is wrong.',
     dur: 2.6,
   },
   {
-    p: 47, x: 56, track: 1, split: 1, run: 1,
+    p: 440, x: 56, track: 1, split: 1, run: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-35-1',
       text: 'Laughter is an affection arising from a strained expectation being suddenly reduced to nothing.',
@@ -98,7 +98,7 @@ export const BEATS: Aesthetics35Beat[] = [
     dur: 1.8,
   },
   {
-    p: 45, x: 128, track: 1, split: 1, spoil: 1,
+    p: 379, x: 128, track: 1, split: 1, spoil: 1,
     interact: {
       prompt: 'Which case breaks the idea that laughter needs a victim?',
       sort: {

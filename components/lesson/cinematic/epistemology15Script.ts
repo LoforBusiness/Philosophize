@@ -26,23 +26,23 @@ export interface Epi15Beat extends BaseBeat {
 
 export const BEATS: Epi15Beat[] = [
   {
-    g: 164, cells: 4,
+    g: 462, cells: 4,
     dur: 2.3,
     text: 'Two questions about anything you know. Did you need to look?',
   },
   {
-    g: 164, cells: 4,
+    g: 462, cells: 4,
     dur: 2.3,
     text: 'And does it tell you something, or only unpack a word?',
   },
   {
-    g: 159, cells: 4, dealt: 3,
+    g: 465, cells: 4, dealt: 3,
     dur: 2.1,
     text: 'Three of the boxes fill straight away. Bachelors are unmarried.',
     cite: 'Three easy ones',
   },
   {
-    g: 159, cells: 4, dealt: 3,
+    g: 465, cells: 4, dealt: 3,
     dur: 2.9,
     text: 'The chair is over there. And the fourth box is supposed to be empty.',
   },
@@ -58,7 +58,7 @@ export const BEATS: Epi15Beat[] = [
     text: 'If you learned something new, you had to look.',
   },
   {
-    g: 137, cells: 4, dealt: 3,
+    g: 139, cells: 4, dealt: 3,
     dur: 3.8,
     quote: {
       id: 'lq-epistemology-knowledge-15-1',
@@ -91,7 +91,7 @@ export const BEATS: Epi15Beat[] = [
     },
   },
   {
-    g: 41, cells: 4, dealt: 3, sum: 1,
+    g: 383, cells: 4, dealt: 3, sum: 1,
     dur: 1.0,
     interact: {
       prompt: 'Where does twelve come from?',

@@ -23,13 +23,13 @@ export const BEATS: Epis32Beat[] = [
     text: 'Four maps of the same stretch of coast. Not four coastlines — one coastline, drawn four times at four scales.',
   },
   {
-    g: 167, maps: 1,
+    g: 459, maps: 1,
     dur: 2.8,
     text: 'The first is the whole country in one stroke. Nothing on it is false.',
     cite: 'One line',
   },
   {
-    g: 167, maps: 1,
+    g: 459, maps: 1,
     dur: 1.8,
     text: 'There is simply almost nothing on it.',
   },

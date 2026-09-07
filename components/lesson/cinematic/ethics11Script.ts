@@ -71,7 +71,7 @@ export const BEATS: Ethics11Beat[] = [
     dur: 4.0,
   },
   {
-    p: 4, x: 126, tok: 1, led: 1, shelf: 1,
+    p: 457, x: 126, tok: 1, led: 1, shelf: 1,
     interact: {
       prompt: 'Cheap thrills sum to more raw pleasure than one symphony. For Mill, have they beaten it?',
       split: {
@@ -89,7 +89,7 @@ export const BEATS: Ethics11Beat[] = [
     dur: 1.0,
   },
   {
-    p: 30, x: 126, tok: 1, led: 1, shelf: 1, up: 1, pick: 1,
+    p: 169, x: 126, tok: 1, led: 1, shelf: 1, up: 1, pick: 1,
     interact: {
       prompt: 'Three pleasures, one table. Tap the one Mill lifts onto the higher shelf.',
       explain: 'The trap: intensity is not rank. The dessert and the bar game are real pleasures — push-pin was Bentham\'s own example — but neither had to be learned. Mill\'s higher pleasure is the one you trained yourself to hear, and nobody who can hear it trades it back.',

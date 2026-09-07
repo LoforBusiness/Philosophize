@@ -23,7 +23,7 @@ export interface Aesthetics33Beat extends BaseBeat {
 
 export const BEATS: Aesthetics33Beat[] = [
   {
-    p: 25, x: 52, clean: 0,
+    p: 462, x: 52, clean: 0,
     text: 'A painting four hundred years old, hanging exactly as it came down to us. Dark, and a little hard to read.',
     dur: 3.8,
   },
@@ -40,18 +40,18 @@ export const BEATS: Aesthetics33Beat[] = [
     dur: 4.4,
   },
   {
-    p: 160, x: 52, clean: 0.85, layers: 1,
+    p: 467, x: 52, clean: 0.85, layers: 1,
     text: 'Keep going and the argument starts. When the Sistine ceiling was cleaned, startling pinks came out.',
     cite: 'The Sistine ceiling',
     dur: 2.8,
   },
   {
-    p: 160, x: 52, clean: 0.85, layers: 1,
+    p: 467, x: 52, clean: 0.85, layers: 1,
     text: 'Some scholars said a deliberate final glaze had just been scrubbed off for ever.',
     dur: 2.4,
   },
   {
-    p: 137, x: 52, clean: 0.85,
+    p: 144, x: 52, clean: 0.85,
     quote: {
       id: 'lq-aesthetics-aesthetics-33-1',
       text: 'Restoration should stop at the point where conjecture begins.',
@@ -63,7 +63,7 @@ export const BEATS: Aesthetics33Beat[] = [
     dur: 3.6,
   },
   {
-    p: 4, x: 52, clean: 0, live: 1,
+    p: 380, x: 52, clean: 0, live: 1,
     interact: {
       prompt: 'Drag the swab across. Stop where you would put it down.',
       drag: {
@@ -88,7 +88,7 @@ export const BEATS: Aesthetics33Beat[] = [
     dur: 4.8,
   },
   {
-    p: 45, x: 52, clean: 0.55, layers: 1,
+    p: 447, x: 52, clean: 0.55, layers: 1,
     interact: {
       prompt: 'A restorer removes a layer they cannot prove was later. The real problem?',
       cards: [

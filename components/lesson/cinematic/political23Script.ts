@@ -34,29 +34,29 @@ export interface Pol23Beat extends BaseBeat {
 
 export const BEATS: Pol23Beat[] = [
   {
-    p: 164, x: 200, tags: 1,
+    p: 462, x: 200, tags: 1,
     text: 'Three things you are. Two of them you signed up for.',
     dur: 2.7,
   },
   {
-    p: 164, x: 200, tags: 1,
+    p: 462, x: 200, tags: 1,
     text: 'One was true before you could speak.',
     dur: 1.8,
   },
   {
-    p: 2, x: 200, tags: 1, box: 1,
+    p: 384, x: 200, tags: 1, box: 1,
     text: 'Now set them aside. To pick fair rules, Rawls asks you to forget your class, your faith and your history.',
     cite: 'Choosing from nowhere',
     dur: 4.8,
   },
   {
-    p: 45, x: 132, tags: 1, box: 1, left: 1,
+    p: 379, x: 132, tags: 1, box: 1, left: 1,
     text: 'The liberal picture says a chooser is still in there. You exist first, then pick what to care about.',
     cite: 'The unencumbered self',
     dur: 4.6,
   },
   {
-    p: 4, x: 132, tags: 1, box: 1, left: 1, live: 1,
+    p: 165, x: 132, tags: 1, box: 1, left: 1, live: 1,
     interact: {
       prompt: 'Tap the tie you did not choose.',
       explain: 'Being a daughter. You can leave a club and change careers, and no act of yours began the first tie. The point is not that the tie binds harder. The point is that you found yourself already inside it, before any choosing began.',
@@ -71,7 +71,7 @@ export const BEATS: Pol23Beat[] = [
     dur: 4.6,
   },
   {
-    p: 137, x: 268, tags: 1, strip: 1, box: 1,
+    p: 128, x: 268, tags: 1, strip: 1, box: 1,
     quote: {
       id: 'lq-political-political-23-2',
       text: 'We cannot regard ourselves as independent in this way without great cost to those loyalties and convictions whose moral force consists partly in the fact that living by them is inseparable from understanding ourselves as the particular persons we are.',
@@ -83,12 +83,12 @@ export const BEATS: Pol23Beat[] = [
     dur: 5.0,
   },
   {
-    p: 13, x: 268, tags: 1, strip: 1, box: 1,
+    p: 383, x: 268, tags: 1, strip: 1, box: 1,
     text: 'Morality only makes sense inside a tradition. Asked to choose values from nowhere, a person has no compass at all.',
     dur: 4.8,
   },
   {
-    p: 41, x: 268, tags: 1, strip: 1, box: 1,
+    p: 442, x: 268, tags: 1, strip: 1, box: 1,
     interact: {
       prompt: 'How does the situated view split what you are?',
       split: {

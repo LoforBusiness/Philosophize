@@ -24,12 +24,12 @@ export interface Ethics7Beat extends BaseBeat {
 
 export const BEATS: Ethics7Beat[] = [
   {
-    p: 159, x: 90, carB: -70,
+    p: 463, x: 90, carB: -70,
     text: 'Two drivers glance at their phone for exactly two seconds. One gets home, eats dinner, forgets it.',
     dur: 2.7,
   },
   {
-    p: 159, x: 90, carB: -70,
+    p: 463, x: 90, carB: -70,
     text: 'The other is in a courtroom by Friday. Same two seconds.',
     dur: 1.8,
   },
@@ -67,7 +67,7 @@ export const BEATS: Ethics7Beat[] = [
     dur: 2,
   },
   {
-    p: 21, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 150, pick: 1,
+    p: 453, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 150, pick: 1,
     interact: {
       prompt: 'Both drivers made the same two-second choice. Judging that choice alone, tap your verdict.',
       explain: 'Identical risk, identical carelessness. The child was already stepping out before either driver reached for a phone. So nothing either of them chose was different. Only the road they happened to be on.',
@@ -87,18 +87,18 @@ export const BEATS: Ethics7Beat[] = [
     dur: 3,
   },
   {
-    p: 4, x: 90, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
+    p: 165, x: 90, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
     interact: {
       prompt: 'What happened to the two drivers?',
       poll: {
         options: [
           { id: 'luck', reads: 'identical choices, opposite verdicts: only luck differed', holders: ['Williams', 'Nagel'], correct: true },
-          { id: 'fair', reads: 'identical choices, one verdict: what we say we believe' },
+          { id: 'fair', reads: 'identical choices, one verdict: what you say you believe' },
           { id: 'plain', reads: 'different choices, different verdicts: nothing strange' },
           { id: 'odd', reads: 'different choices, one verdict: a different puzzle' },
         ],
       },
-      explain: 'Identical choices, opposite verdicts, and that should be impossible. The second driver seems to have chosen worse, because we read the choice backwards from the wreckage. Rewind the tape and the two match to the second. We say blame tracks control, then judge the crash.',
+      explain: 'Identical choices, opposite verdicts, and that should be impossible. The second driver seems to have chosen worse, because you read the choice backwards from the wreckage. Rewind the tape and the two match to the second. You say blame tracks control, then judge the crash.',
       xp: 5,
     },
     dur: 1.0,

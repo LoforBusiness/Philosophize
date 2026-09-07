@@ -77,7 +77,7 @@ export const BEATS: Epi21Beat[] = [
     dur: 4.8,
   },
   {
-    p: 6, x: 124, dial: 1, will: 1, ev: 1, pick: 1,
+    p: 383, x: 124, dial: 1, will: 1, ev: 1, pick: 1,
     interact: {
       prompt: 'One tray moved the needle and one did not. Tap the one that moved it.',
       explain: 'Belief tracks how the world seems, not how much you want the world to be that way. Trying is the one move that never works here, and the failure of trying is the strange part.',
@@ -86,7 +86,7 @@ export const BEATS: Epi21Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, x: 124, dial: 1, will: 1, ev: 1,
+    p: 165, x: 124, dial: 1, will: 1, ev: 1,
     interact: {
       prompt: 'How much of what you believe is up to you?',
       drag: {

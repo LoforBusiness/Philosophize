@@ -90,7 +90,7 @@ export const BEATS: Metaphysics10Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 124, frame: 1, str: 1,
+    p: 457, x: 124, frame: 1, str: 1,
     interact: {
       prompt: 'Where does Aristotle put redness?',
       drag: {

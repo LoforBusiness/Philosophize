@@ -15,8 +15,8 @@ export interface Aes6Beat extends BaseBeat {
 
 export const BEATS: Aes6Beat[] = [
   {
-    p: 25, vast: 1, flower: 0, split: 0, mind: 0,
-    text: 'A storm at sea is terrifying — so why do we stop to watch it? Some experiences thrill us precisely because they dwarf us.',
+    p: 379, vast: 1, flower: 0, split: 0, mind: 0,
+    text: 'A storm at sea is terrifying — so why do you stop to watch it? Some experiences thrill us precisely because they dwarf us.',
     dur: 3.6,
   },
   {
@@ -27,7 +27,7 @@ export const BEATS: Aes6Beat[] = [
   },
   {
     p: 34, vast: 1, flower: 1, split: 3,
-    text: 'A storm, or a vast mountain, is sublime — it overwhelms, mixing terror with a strange delight.',
+    text: 'A storm or a vast mountain is sublime. It overwhelms, mixing terror with a strange delight.',
     dur: 2.8,
   },
   {
@@ -62,24 +62,24 @@ export const BEATS: Aes6Beat[] = [
         { text: 'Delight mixed with terror', correct: true },
         { text: 'A gentle, pleasing calm', correct: false },
       ],
-      explain: 'The sublime grips us through vastness and power, stirring a delight laced with terror — not the gentle, pleasing calm Burke linked with beauty.',
+      explain: 'The sublime grips you through vastness and power, stirring a delight laced with terror — not the gentle, pleasing calm Burke linked with beauty.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
-    p: 160, vast: 1, split: 3, mind: 1,
+    p: 457, vast: 1, split: 3, mind: 1,
     text: 'Kant moved the awe inward. The mountain does overwhelm your senses.',
     cite: 'Kant — awe in the mind',
     dur: 1.8,
   },
   {
-    p: 160, vast: 1, split: 3, mind: 1,
+    p: 457, vast: 1, split: 3, mind: 1,
     text: 'But the real jolt, Kant says, is your mind finding room for something so vast. The mountain is not the sublime thing.',
     dur: 3.2,
   },
   {
-    p: 160, vast: 1, split: 3, mind: 1,
+    p: 457, vast: 1, split: 3, mind: 1,
     text: 'You are.',
     dur: 1.8,
   },

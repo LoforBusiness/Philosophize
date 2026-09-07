@@ -22,24 +22,24 @@ export interface Pol32Beat extends BaseBeat {
 
 export const BEATS: Pol32Beat[] = [
   {
-    g: 5, fill: 0.34, result: 0, mark: 0, labels: 0,
+    g: 440, fill: 0.34, result: 0, mark: 0, labels: 0,
     dur: 3.8,
     text: 'The count is coming in. Two piles of marks, each one somebody who got up and went out on a wet Thursday.',
   },
   {
-    g: 2, fill: 1, result: 1, mark: 0, labels: 0,
+    g: 466, fill: 1, result: 1, mark: 0, labels: 0,
     dur: 4.2,
     text: 'And it is settled. The result would have been exactly the same if any one of these marks had never been made.',
     cite: 'Declared',
   },
   {
-    g: 167, fill: 1, result: 1, mark: 1, labels: 0,
+    g: 459, fill: 1, result: 1, mark: 1, labels: 0,
     dur: 3,
     text: 'Including yours. The odds of a single vote deciding a national election are worse than most lotteries.',
     cite: 'Yours',
   },
   {
-    g: 167, fill: 1, result: 1, mark: 1, labels: 0,
+    g: 459, fill: 1, result: 1, mark: 1, labels: 0,
     dur: 1.8,
     text: 'You knew that on the way to the hall.',
   },
@@ -63,7 +63,7 @@ export const BEATS: Pol32Beat[] = [
     cite: 'The gap',
   },
   {
-    g: 4, fill: 1, result: 1, mark: 1, labels: 1, pick: 1,
+    g: 461, fill: 1, result: 1, mark: 1, labels: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap the one thing your single mark reliably changes.',
@@ -72,7 +72,7 @@ export const BEATS: Pol32Beat[] = [
     },
   },
   {
-    g: 11, fill: 1, result: 1, mark: 1, labels: 1,
+    g: 165, fill: 1, result: 1, mark: 1, labels: 1,
     dur: 1.0,
     interact: {
       prompt: 'Your vote will not decide it. Why is voting still rational?',

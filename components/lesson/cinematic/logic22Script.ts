@@ -22,7 +22,7 @@ export interface Logic22Beat extends BaseBeat {
 
 export const BEATS: Logic22Beat[] = [
   {
-    p: 25, x: 70,
+    p: 379, x: 70,
     text: 'For two thousand years "all swans are white" was simply true. Then someone sailed to Australia and saw a black one, and that was the end of it.',
     dur: 4.4,
   },

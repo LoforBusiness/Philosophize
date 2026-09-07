@@ -32,33 +32,33 @@ export interface Epi22Beat extends BaseBeat {
 
 export const BEATS: Epi22Beat[] = [
   {
-    p: 164, x: 200, routes: 1,
+    p: 462, x: 200, routes: 1,
     text: 'Two people want the same address. One asks somebody who knows it.',
     dur: 3.4,
   },
   {
-    p: 164, x: 200, routes: 1,
+    p: 462, x: 200, routes: 1,
     text: 'One guesses.',
     dur: 1.8,
   },
   {
-    p: 2, x: 200, routes: 1, run: 1,
+    p: 384, x: 200, routes: 1, run: 1,
     text: 'Both arrive. Both now believe something true, and today there is nothing to choose between them.',
     cite: 'Same destination',
     dur: 4.4,
   },
   {
-    p: 159, x: 132, routes: 1, run: 1, gaps: 1,
+    p: 463, x: 132, routes: 1, run: 1, gaps: 1,
     text: 'Look underneath. One route is a road.',
     dur: 1.8,
   },
   {
-    p: 159, x: 132, routes: 1, run: 1, gaps: 1,
+    p: 463, x: 132, routes: 1, run: 1, gaps: 1,
     text: 'The other is a line of stepping stones with nothing between them.',
     dur: 2.9,
   },
   {
-    p: 4, x: 132, routes: 1, run: 1, gaps: 1, live: 1,
+    p: 165, x: 132, routes: 1, run: 1, gaps: 1, live: 1,
     interact: {
       prompt: 'Both arrived. Tap the route you would take again tomorrow.',
       explain: 'The road. Today the two are worth exactly the same, which is what makes the question hard — the difference is not in the belief you hold now, it is in whether the thing that produced it will produce another one.',
@@ -73,7 +73,7 @@ export const BEATS: Epi22Beat[] = [
     dur: 4.8,
   },
   {
-    p: 137, x: 268, routes: 1, run: 1, gaps: 1,
+    p: 128, x: 268, routes: 1, run: 1, gaps: 1,
     quote: {
       id: 'lq-epistemology-knowledge-22-1',
       text: 'True opinions, as long as they remain, are a fine thing and do all sorts of good. But they refuse to stay long.',
@@ -86,12 +86,12 @@ export const BEATS: Epi22Beat[] = [
     dur: 4.0,
   },
   {
-    p: 13, x: 268, routes: 1, run: 1, gaps: 1,
+    p: 383, x: 268, routes: 1, run: 1, gaps: 1,
     text: 'So the extra value is not in today at all. It is in every other day, and you can draw it.',
     dur: 4.2,
   },
   {
-    p: 41, x: 268, routes: 1, run: 1, gaps: 1,
+    p: 442, x: 268, routes: 1, run: 1, gaps: 1,
     interact: {
       prompt: 'Draw how often the guesser arrives, over five tries.',
       plot: {

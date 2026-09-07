@@ -33,11 +33,11 @@ export interface Eth22Beat extends BaseBeat {
 export const BEATS: Eth22Beat[] = [
   {
     p: 25, x: 200, wants: 1,
-    text: 'Five things people say they want out of a life. Nobody has ranked them and nothing here is a trick.',
+    text: 'Five things people say they want out of a life, in no particular order. In a moment somebody offers you all five at once.',
     dur: 4.4,
   },
   {
-    p: 2, x: 200, wants: 1, machine: 1,
+    p: 443, x: 200, wants: 1, machine: 1,
     text: 'Now the offer. A tank, a lifetime of experience indistinguishable from the real thing, and no way back.',
     cite: 'The experience machine',
     dur: 4.6,
@@ -48,7 +48,7 @@ export const BEATS: Eth22Beat[] = [
     dur: 4.0,
   },
   {
-    p: 4, x: 132, wants: 1, machine: 1, live: 1,
+    p: 457, x: 132, wants: 1, machine: 1, live: 1,
     interact: {
       prompt: 'Tap the one thing the machine can actually deliver.',
       explain: 'The feeling. Everything else on that row is something you wanted to BE true, not something you wanted to feel — and the tank changes what you experience without touching any of it. You would believe you had them.',
@@ -57,17 +57,17 @@ export const BEATS: Eth22Beat[] = [
     dur: 1.0,
   },
   {
-    p: 176, x: 132, wants: 1, machine: 1, cable: 1,
+    p: 467, x: 132, wants: 1, machine: 1, cable: 1,
     text: 'One cable, into one column. The other four are not switched off.',
     dur: 3.1,
   },
   {
-    p: 176, x: 132, wants: 1, machine: 1, cable: 1,
+    p: 467, x: 132, wants: 1, machine: 1, cable: 1,
     text: 'They were never plugged in.',
     dur: 1.8,
   },
   {
-    p: 137, x: 268, wants: 1, machine: 1, cable: 1,
+    p: 139, x: 268, wants: 1, machine: 1, cable: 1,
     quote: {
       id: 'lq-ethics-ethics-22-2',
       text: 'We want to do certain things, and not just have the experience of doing them.',

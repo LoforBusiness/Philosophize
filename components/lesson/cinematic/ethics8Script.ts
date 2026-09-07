@@ -93,7 +93,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 1.8,
   },
   {
-    p: 137, x: 182, grid: 0.4, oth: 1, thread: 1,
+    p: 465, x: 182, grid: 0.4, oth: 1, thread: 1,
     quote: {
       id: 'lq-ethics-ethics-8-1',
       text: 'The moral problem arises from conflicting responsibilities rather than from competing rights.',
@@ -106,7 +106,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 3.8,
   },
   {
-    p: 4, x: 112, grid: 0.34, oth: 1, thread: 1,
+    p: 380, x: 112, grid: 0.34, oth: 1, thread: 1,
     interact: {
       prompt: 'What does caring actually amount to here?',
       drag: {
@@ -147,7 +147,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 2,
   },
   {
-    p: 0, x: 172, grid: 0.28, oth: 1, thread: 1,
+    p: 461, x: 172, grid: 0.28, oth: 1, thread: 1,
     summary: {
       title: 'Morality as Relationship',
       points: [

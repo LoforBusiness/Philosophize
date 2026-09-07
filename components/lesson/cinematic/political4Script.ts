@@ -23,7 +23,7 @@ export interface Pol4Beat extends BaseBeat {
 
 export const BEATS: Pol4Beat[] = [
   {
-    p: 29, walls: 1, harm: 0, panel: 0,
+    p: 166, walls: 1, harm: 0, panel: 0,
     text: 'Free because no one stops you, or free because you can? Two ideas of freedom — and two very different politics.',
     dur: 3.6,
   },
@@ -75,7 +75,7 @@ export const BEATS: Pol4Beat[] = [
   },
   {
     // Both cards sit neutral here — lighting one would hand the reader the answer.
-    p: 21, walls: 0, harm: 0, panel: 0,
+    p: 380, walls: 0, harm: 0, panel: 0,
     interact: {
       prompt: 'Tap the kind of freedom that is only about nobody standing in your way.',
       cards: [
@@ -88,7 +88,7 @@ export const BEATS: Pol4Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, walls: 0, harm: 0, panel: 2,
+    p: 165, walls: 0, harm: 0, panel: 2,
     interact: {
       prompt: 'What does Berlin actually guard?',
       split: {

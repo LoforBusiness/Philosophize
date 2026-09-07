@@ -35,7 +35,7 @@ export interface Metaphysics35Beat extends BaseBeat {
 
 export const BEATS: Metaphysics35Beat[] = [
   {
-    p: 25, x: 322, line: 1,
+    p: 172, x: 322, line: 1,
     text: 'Here is your life drawn as a line. You are standing at the near end.',
     dur: 3.2,
   },
@@ -50,12 +50,12 @@ export const BEATS: Metaphysics35Beat[] = [
     dur: 1.8,
   },
   {
-    p: 160, x: 120, line: 1, arc: 1, knot: 1,
+    p: 457, x: 120, line: 1, arc: 1, knot: 1,
     text: 'So you arrive, and you stop your grandparents meeting. Then you are never born.',
     dur: 2.5,
   },
   {
-    p: 160, x: 120, line: 1, arc: 1, knot: 1,
+    p: 457, x: 120, line: 1, arc: 1, knot: 1,
     text: 'Then nobody arrives. Then they meet, and you are born, and you arrive.',
     dur: 2.3,
   },
@@ -72,7 +72,7 @@ export const BEATS: Metaphysics35Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, x: 120, line: 1, knot: 1, snap: 1,
+    p: 467, x: 120, line: 1, knot: 1, snap: 1,
     quote: {
       id: 'lq-metaphysics-being-35-1',
       text: 'Time travel, I maintain, is possible. The paradoxes are oddities, not impossibilities.',

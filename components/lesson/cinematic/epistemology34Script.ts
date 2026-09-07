@@ -19,12 +19,12 @@ export interface Epistemology34Beat extends BaseBeat {
 
 export const BEATS: Epistemology34Beat[] = [
   {
-    p: 164, x: 54, claim: 0,
+    p: 462, x: 54, claim: 0,
     text: 'Two bars. The left one is what you say.',
     dur: 1.8,
   },
   {
-    p: 164, x: 54, claim: 0,
+    p: 462, x: 54, claim: 0,
     text: 'The right one is how often what you say turns out to hold.',
     dur: 2.2,
   },
@@ -51,18 +51,18 @@ export const BEATS: Epistemology34Beat[] = [
     dur: 2.6,
   },
   {
-    p: 160, x: 54, claim: 0.95, gap: 1,
+    p: 467, x: 54, claim: 0.95, gap: 1,
     text: 'Being well calibrated means those two bars match. Notice that is not the same as being right often.',
     cite: 'Calibration',
     dur: 3,
   },
   {
-    p: 160, x: 54, claim: 0.95, gap: 1,
+    p: 467, x: 54, claim: 0.95, gap: 1,
     text: 'Someone right half the time who says so has them level.',
     dur: 1.8,
   },
   {
-    p: 137, x: 54, claim: 0.95,
+    p: 465, x: 54, claim: 0.95,
     quote: {
       id: 'lq-epistemology-knowledge-34-1',
       text: 'The whole problem with the world is that fools and fanatics are always so certain of themselves, and wiser people so full of doubts.',
@@ -75,7 +75,7 @@ export const BEATS: Epistemology34Beat[] = [
     dur: 3.8,
   },
   {
-    p: 4, x: 54, claim: 0, live: 1,
+    p: 461, x: 54, claim: 0, live: 1,
     interact: {
       prompt: 'Drag what you claim. Stop where the right-hand bar has stopped keeping up.',
       drag: {
@@ -100,7 +100,7 @@ export const BEATS: Epistemology34Beat[] = [
     dur: 4.4,
   },
   {
-    p: 45, x: 54, claim: 0.72, gap: 1,
+    p: 379, x: 54, claim: 0.72, gap: 1,
     interact: {
       prompt: 'So how could you get better calibrated by tomorrow?',
       cards: [

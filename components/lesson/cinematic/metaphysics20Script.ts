@@ -32,7 +32,7 @@ export interface Met20Beat extends BaseBeat {
 
 export const BEATS: Met20Beat[] = [
   {
-    p: 25, x: 200, outer: 1,
+    p: 172, x: 200, outer: 1,
     text: 'One world, and the world is real. Nothing here denies the world exists.',
     dur: 4.0,
   },
@@ -63,7 +63,7 @@ export const BEATS: Met20Beat[] = [
     dur: 1.9,
   },
   {
-    p: 4, x: 132, outer: 1, nest: 1, tally: 1, token: 1, live: 1,
+    p: 165, x: 132, outer: 1, nest: 1, tally: 1, token: 1, live: 1,
     interact: {
       prompt: 'Tap the frame your token is most likely inside.',
       explain: 'The inner grid, if the count is right, and that is the whole argument. It is not a claim that the world feels fake. It is a claim about proportions: pick a mind at random from that picture and you will almost certainly pick a simulated one.',
@@ -94,7 +94,7 @@ export const BEATS: Met20Beat[] = [
     dur: 1.8,
   },
   {
-    p: 41, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
+    p: 383, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
     interact: {
       prompt: 'What count stops this argument?',
       drag: {

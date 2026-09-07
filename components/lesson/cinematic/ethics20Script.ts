@@ -34,19 +34,19 @@ export interface Eth20Beat extends BaseBeat {
 
 export const BEATS: Eth20Beat[] = [
   {
-    p: 25, x: 200, blocks: 1, rate: 0,
+    p: 379, x: 200, blocks: 1, rate: 0,
     text: 'Seven harms, all the same size. The only difference is when each one happens.',
     dur: 4.0,
   },
   {
-    p: 45, x: 200, blocks: 1, rate: 0.72,
+    p: 447, x: 200, blocks: 1, rate: 0.72,
     text: 'Every government discounts the far harms first. A cost two hundred years out is written down until almost nothing is left.',
     cite: 'Discounting',
     dur: 4.8,
   },
   {
-    p: 13, x: 132, blocks: 1, rate: 0.72,
-    text: 'Some of that is fair. A distant benefit is less certain, and the people there may be richer than us.',
+    p: 383, x: 132, blocks: 1, rate: 0.72,
+    text: 'Some of that is fair. A distant benefit is less certain, and the people there may be richer than you.',
     dur: 4.4,
   },
   {
@@ -56,7 +56,7 @@ export const BEATS: Eth20Beat[] = [
     dur: 4.0,
   },
   {
-    p: 4, x: 132, blocks: 1, rate: 0.72, live_d: 1,
+    p: 165, x: 132, blocks: 1, rate: 0.72, live_d: 1,
     interact: {
       prompt: 'Set the rate. How much less does a harm count for being late?',
       drag: {
@@ -80,7 +80,7 @@ export const BEATS: Eth20Beat[] = [
     dur: 4.6,
   },
   {
-    p: 137, x: 268, blocks: 1, rate: 0, truth: 1,
+    p: 128, x: 268, blocks: 1, rate: 0, truth: 1,
     quote: {
       id: 'lq-ethics-ethics-20-2',
       text: 'Why should costs and benefits receive less weight, simply because they are further in the future? When the future comes, these benefits and costs will be no less real.',
@@ -93,7 +93,7 @@ export const BEATS: Eth20Beat[] = [
     dur: 3.8,
   },
   {
-    p: 41, x: 268, blocks: 1, rate: 0, truth: 1,
+    p: 442, x: 268, blocks: 1, rate: 0, truth: 1,
     interact: {
       prompt: 'So should a government discount future costs at all?',
       cards: [

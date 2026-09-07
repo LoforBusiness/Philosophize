@@ -25,18 +25,18 @@ export interface Met14Beat extends BaseBeat {
 
 export const BEATS: Met14Beat[] = [
   {
-    g: 25, rows: 4,
+    g: 172, rows: 4,
     dur: 4.4,
     text: 'Four claims, all of them true. And five columns, one for each of the ways the world could consistently have gone.',
   },
   {
-    g: 159, rows: 4, marks: 1,
+    g: 463, rows: 4, marks: 1,
     dur: 3.4,
     text: 'Now mark each claim in every world it survives. Two of the rows fill completely.',
     cite: 'Fill in the rows',
   },
   {
-    g: 159, rows: 4, marks: 1,
+    g: 463, rows: 4, marks: 1,
     dur: 1.8,
     text: 'Two of them come out patchy.',
   },
@@ -52,7 +52,7 @@ export const BEATS: Met14Beat[] = [
     text: 'A patchy row just happens to be true here.',
   },
   {
-    g: 137, rows: 4, marks: 1,
+    g: 139, rows: 4, marks: 1,
     dur: 3.8,
     quote: {
       id: 'lq-metaphysics-being-14',
@@ -85,7 +85,7 @@ export const BEATS: Met14Beat[] = [
     },
   },
   {
-    g: 41, rows: 4, marks: 1,
+    g: 383, rows: 4, marks: 1,
     dur: 1.0,
     interact: {
       prompt: 'What kind of truth is "water is H₂O"?',
@@ -97,7 +97,7 @@ export const BEATS: Met14Beat[] = [
           { id: 'open', reads: 'doubtable, and it could have gone otherwise' },
         ],
       },
-      explain: 'Doubted for centuries, and true in every world. Two different things are being measured: one is the world, the other is us. Water was H2O in every world while people doubted it for centuries, and plenty of things nobody doubts could easily have gone another way.',
+      explain: 'Doubted for centuries, and true in every world. Two different things are being measured: one is the world, the other is the knower. Water was H2O in every world while people doubted it for centuries, and plenty of things nobody doubts could easily have gone another way.',
       xp: 5,
     },
   },

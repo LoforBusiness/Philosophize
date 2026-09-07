@@ -21,12 +21,12 @@ export interface Meta15Beat extends BaseBeat {
 
 export const BEATS: Meta15Beat[] = [
   {
-    p: 164, x: 70,
+    p: 462, x: 70,
     text: 'One ball rolls up and strikes another, and the second rolls away. You have watched that ten thousand times.',
     dur: 3.5,
   },
   {
-    p: 164, x: 70,
+    p: 462, x: 70,
     text: 'Hume asks what exactly you saw.',
     dur: 1.8,
   },
@@ -67,7 +67,7 @@ export const BEATS: Meta15Beat[] = [
     dur: 4.6,
   },
   {
-    p: 4, x: 124, balls: 1, gap: 1, found: 2,
+    p: 165, x: 124, balls: 1, gap: 1, found: 2,
     interact: {
       prompt: 'How much of the cause do you actually see?',
       drag: {
@@ -89,7 +89,7 @@ export const BEATS: Meta15Beat[] = [
     p: 6, x: 124, balls: 1, gap: 1, found: 2, pick: 1,
     interact: {
       prompt: 'The search found it on the second pass. Tap where.',
-      explain: 'In the observer. Constant conjunction trains an expectation. And the felt push of that expectation is what we then report as seeing one thing make another happen.',
+      explain: 'In the observer. Constant conjunction trains an expectation. And the felt push of that expectation is what you then report as seeing one thing make another happen.',
       xp: 5,
     },
     dur: 1.0,

@@ -22,13 +22,13 @@ export interface Meta13Beat extends BaseBeat {
 
 export const BEATS: Meta13Beat[] = [
   {
-    p: 25, x: 70,
+    p: 379, x: 70,
     text: 'A scanner reads every atom of you, sends the data to Mars, builds a perfect copy there, and vaporises the original here. Step in?',
     dur: 4.4,
   },
   {
     p: 401, x: 168, track: 1,
-    text: 'Say yes, and say it works. What travels is not a body — it is the chain: your memories, your intentions, your half-finished thought about lunch, all continuous.',
+    text: 'Say yes, and say it works. What travels is a chain, not a body — memories, intentions, one half-finished thought about lunch.',
     cite: 'What travels',
     dur: 5.0,
   },

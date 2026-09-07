@@ -33,12 +33,12 @@ export interface Metaphysics36Beat extends BaseBeat {
 
 export const BEATS: Metaphysics36Beat[] = [
   {
-    p: 25, x: 54, hotel: 1,
+    p: 379, x: 54, hotel: 1,
     text: 'A hotel with endless rooms, and tonight every single one is taken. Then somebody walks in wanting a bed.',
     dur: 3.8,
   },
   {
-    p: 4, x: 54, hotel: 1, live_d: 1, live: 1,
+    p: 461, x: 54, hotel: 1, live_d: 1, live: 1,
     interact: {
       prompt: 'Slide to how many the clerk can still take in.',
       drag: {
@@ -67,12 +67,12 @@ export const BEATS: Metaphysics36Beat[] = [
     dur: 1.8,
   },
   {
-    p: 21, x: 54, hotel: 1, shift: 1,
+    p: 380, x: 54, hotel: 1, shift: 1,
     text: 'It works because there is no last room to fall off the end of. Try it in a hotel with a hundred rooms and guest one hundred is out on the street.',
     dur: 4.8,
   },
   {
-    p: 47, x: 54, hotel: 1, shift: 1,
+    p: 385, x: 54, hotel: 1, shift: 1,
     quote: {
       id: 'lq-metaphysics-being-36-1',
       text: 'The infinite is nowhere to be found in reality. It is an idea of reason.',
@@ -84,7 +84,7 @@ export const BEATS: Metaphysics36Beat[] = [
     dur: 3.6,
   },
   {
-    p: 2, x: 54, hotel: 1, dbl: 1, live: 1,
+    p: 384, x: 54, hotel: 1, dbl: 1, live: 1,
     interact: {
       prompt: 'Now an endless coach arrives. Everyone doubles their room number. Tap a free door.',
       explain: 'Any odd one. They all opened, in one instruction, and there are as many of them as there were rooms to begin with. A part of the hotel has been matched exactly against the whole of it, which is what being infinite means.',
@@ -98,13 +98,13 @@ export const BEATS: Metaphysics36Beat[] = [
     dur: 4.4,
   },
   {
-    p: 159, x: 128, hotel: 1, dbl: 1,
+    p: 463, x: 128, hotel: 1, dbl: 1,
     text: 'Which is why some argue no real thing could work like this. The maths is fine.',
     cite: 'Craig, on the impossibility of an actual infinite',
     dur: 3,
   },
   {
-    p: 159, x: 128, hotel: 1, dbl: 1,
+    p: 463, x: 128, hotel: 1, dbl: 1,
     text: 'Whether anything buildable behaves this way is a different question.',
     dur: 1.8,
   },

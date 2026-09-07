@@ -34,7 +34,7 @@ export interface Log20Beat extends BaseBeat {
 
 export const BEATS: Log20Beat[] = [
   {
-    p: 25, x: 200, boards: 1,
+    p: 462, x: 200, boards: 1,
     text: 'Three versions of the same claim. Nobody has lied and nobody has invented anything.',
     dur: 4.0,
   },
@@ -50,12 +50,12 @@ export const BEATS: Log20Beat[] = [
     dur: 2.2,
   },
   {
-    p: 45, x: 132, boards: 1, struts: 1,
+    p: 447, x: 132, boards: 1, struts: 1,
     text: 'A straw man is not usually a lie. It is repeating the weakest version you heard and then arguing with that.',
     dur: 4.6,
   },
   {
-    p: 4, x: 132, boards: 1, struts: 1, live: 1,
+    p: 457, x: 132, boards: 1, struts: 1, live: 1,
     interact: {
       prompt: 'Tap the version a straw man goes after.',
       explain: 'The board on a single leg. That board falls the moment anything touches it, which is why knocking it down is tempting and why the win settles nothing. The other two boards are still standing, and neither has been answered.',
@@ -76,7 +76,7 @@ export const BEATS: Log20Beat[] = [
     dur: 4.4,
   },
   {
-    p: 137, x: 268, boards: 1, struts: 1, strike: 1,
+    p: 144, x: 268, boards: 1, struts: 1, strike: 1,
     quote: {
       id: 'lq-logic-arguments-20-1',
       text: 'He who knows only his own side of the case knows little of that. His reasons may be good, and no one may have been able to refute them.',

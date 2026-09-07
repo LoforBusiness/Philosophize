@@ -20,12 +20,12 @@ export interface Ethics13Beat extends BaseBeat {
 
 export const BEATS: Ethics13Beat[] = [
   {
-    g: 5, pos: 0, habit: 0,
+    g: 384, pos: 0, habit: 0,
     dur: 4.0,
     text: 'Rules and outcomes judge the act. Aristotle judges the person, and asks how much of a trait they have — not whether they followed anything.',
   },
   {
-    g: 46, pos: 0, habit: 0,
+    g: 173, pos: 0, habit: 0,
     dur: 4.2,
     text: 'Too little fear-handling and you are a coward: you run from things that should be faced. That is one end of the rail.',
     cite: 'Too little',
@@ -56,7 +56,7 @@ export const BEATS: Ethics13Beat[] = [
     cite: 'Somewhere along here',
   },
   {
-    g: 2, pos: 4, habit: 0, pick: 1,
+    g: 443, pos: 4, habit: 0, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap where courage sits on the rail.',
@@ -65,7 +65,7 @@ export const BEATS: Ethics13Beat[] = [
     },
   },
   {
-    g: 26, pos: 2, habit: 1,
+    g: 381, pos: 2, habit: 1,
     dur: 1.0,
     interact: {
       prompt: 'So what makes a person courageous?',

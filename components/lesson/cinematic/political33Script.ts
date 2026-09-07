@@ -28,8 +28,8 @@ export const BEATS: Political33Beat[] = [
     dur: 3.8,
   },
   {
-    p: 47, x: 52, open: 1,
-    text: 'Open them all the way and everything is admitted. Every argument gets a hearing, which is exactly what a free society is supposed to be for.',
+    p: 440, x: 52, open: 1,
+    text: 'Open them all the way and everything is admitted. Every argument gets a hearing, which is what a free society is for.',
     cite: 'Everything admitted',
     dur: 4.6,
   },
@@ -56,7 +56,7 @@ export const BEATS: Political33Beat[] = [
     dur: 3.3,
   },
   {
-    p: 137, x: 52, open: 0.1,
+    p: 465, x: 52, open: 0.1,
     quote: {
       id: 'lq-political-political-33-1',
       text: 'We should claim the right to suppress them if necessary even by force; for it may easily turn out that they are not prepared to meet us on the level of rational argument.',
@@ -69,7 +69,7 @@ export const BEATS: Political33Beat[] = [
     dur: 4.4,
   },
   {
-    p: 4, x: 52, open: 0, live: 1,
+    p: 380, x: 52, open: 0, live: 1,
     interact: {
       prompt: 'Drag the doors. Stop where Popper would actually stop.',
       drag: {
@@ -94,7 +94,7 @@ export const BEATS: Political33Beat[] = [
     dur: 4.8,
   },
   {
-    p: 45, x: 52, open: 0.5,
+    p: 379, x: 52, open: 0.5,
     interact: {
       prompt: '"We only suppress the intolerant." Why is the rule on the doors dangerous in practice?',
       cards: [

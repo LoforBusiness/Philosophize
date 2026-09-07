@@ -27,7 +27,7 @@ export interface Metaphysics33Beat extends BaseBeat {
 
 export const BEATS: Metaphysics33Beat[] = [
   {
-    p: 25, x: 62, fall: 0,
+    p: 172, x: 62, fall: 0,
     text: 'Nine blocks, stacked. Nothing has happened yet, and nothing about this picture tells you which way time is running.',
     dur: 3.6,
   },
@@ -49,18 +49,18 @@ export const BEATS: Metaphysics33Beat[] = [
     dur: 1.9,
   },
   {
-    p: 160, x: 62, fall: 1, rev: 1,
+    p: 467, x: 62, fall: 1, rev: 1,
     text: 'Here is the strange part. Every single collision in that reversed film is legal.',
     cite: 'Nothing forbids it',
     dur: 2.4,
   },
   {
-    p: 160, x: 62, fall: 1, rev: 1,
+    p: 467, x: 62, fall: 1, rev: 1,
     text: 'Take any two blocks knocking together and the reverse obeys the same laws exactly.',
     dur: 2.4,
   },
   {
-    p: 137, x: 62, fall: 1,
+    p: 456, x: 62, fall: 1,
     quote: {
       id: 'lq-metaphysics-being-33-1',
       text: 'The law that entropy always increases holds, I think, the supreme position among the laws of Nature.',
@@ -72,7 +72,7 @@ export const BEATS: Metaphysics33Beat[] = [
     dur: 3.6,
   },
   {
-    p: 4, x: 62, fall: 0, live: 1,
+    p: 461, x: 62, fall: 0, live: 1,
     interact: {
       prompt: 'Drag the blocks apart. Stop where a tower stops being one of very few ways to look.',
       drag: {
@@ -101,7 +101,7 @@ export const BEATS: Metaphysics33Beat[] = [
   },
   {
     p: 167, x: 62, fall: 0.82,
-    text: 'Anything wandering at random wanders into the mess and never happens to wander back.',
+    text: 'Anything moving at random wanders into the mess and never wanders back.',
     dur: 2.5,
   },
   {

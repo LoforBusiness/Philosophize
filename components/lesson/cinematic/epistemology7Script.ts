@@ -70,7 +70,7 @@ export const BEATS: Epi7Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, days: 4, twist: 1,
+    p: 165, days: 4, twist: 1,
     interact: {
       prompt: 'So what exactly is the problem Hume has found here?',
       cards: [
@@ -85,7 +85,7 @@ export const BEATS: Epi7Beat[] = [
   {
     p: 8, days: 4, twist: 1,
     interact: {
-      prompt: 'What does Hume say we should do about induction?',
+      prompt: 'What does Hume say you should do about induction?',
       drag: {
         lo: 'STOP USING IT',
         hi: 'CALL IT PROVED',
@@ -96,7 +96,7 @@ export const BEATS: Epi7Beat[] = [
           { id: 'proved', upto: 1, reads: 'keep it, and call it proved' },
         ],
       },
-      explain: 'The middle, and it is the odd part of Hume. He shows there is no logical proof and then says we will go on anyway, because custom is stronger than argument. Neither end is his: he does not drop it and he does not rescue it.',
+      explain: 'The middle, and it is the odd part of Hume. He shows there is no logical proof and then says you will go on anyway, because custom is stronger than argument. Neither end is his: he does not drop it and he does not rescue it.',
       xp: 5,
     },
     dur: 1.0,

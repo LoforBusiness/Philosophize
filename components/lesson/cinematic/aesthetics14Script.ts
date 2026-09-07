@@ -26,23 +26,23 @@ export interface Aes14Beat extends BaseBeat {
 
 export const BEATS: Aes14Beat[] = [
   {
-    g: 164, board: 1, level: 1,
+    g: 462, board: 1, level: 1,
     dur: 2.7,
     text: 'One cask, tasted by a whole room. The verdict comes back unanimous.',
   },
   {
-    g: 164, board: 1, level: 1,
+    g: 462, board: 1, level: 1,
     dur: 1.8,
     text: 'There is nothing wrong with this wine.',
   },
   {
-    g: 159, board: 3, level: 1,
+    g: 465, board: 3, level: 1,
     dur: 1.8,
     text: 'Then two people disagree. One of them tastes iron.',
     cite: 'Two hold out',
   },
   {
-    g: 159, board: 3, level: 1,
+    g: 465, board: 3, level: 1,
     dur: 3,
     text: 'The other just finds it too sweet, which is not the same kind of complaint at all.',
   },
@@ -58,7 +58,7 @@ export const BEATS: Aes14Beat[] = [
     text: 'Hume simply will not go on to say that every verdict is therefore as good as the next.',
   },
   {
-    g: 137, board: 3, level: 1,
+    g: 139, board: 3, level: 1,
     dur: 3.8,
     quote: {
       id: 'lq-aesthetics-aesthetics-14-1',
@@ -86,7 +86,7 @@ export const BEATS: Aes14Beat[] = [
     },
   },
   {
-    g: 41, board: 3, level: 0, key: 1,
+    g: 383, board: 3, level: 0, key: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tastes differ. Does that make every verdict as good as the next?',

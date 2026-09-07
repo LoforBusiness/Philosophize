@@ -20,12 +20,12 @@ export interface Epistemology33Beat extends BaseBeat {
 
 export const BEATS: Epistemology33Beat[] = [
   {
-    p: 25, x: 56, ev: 0, bar: 0.2,
+    p: 172, x: 56, ev: 0, bar: 0.2,
     text: 'A friend asks whether the bank opens on Saturday. You were there last Saturday and there was a queue out of the door.',
     dur: 3.8,
   },
   {
-    p: 47, x: 56, ev: 1, bar: 0.2,
+    p: 435, x: 56, ev: 1, bar: 0.2,
     text: 'That is your evidence, and it is ordinary. You say you know, nobody blinks, and the two of you carry on.',
     cite: 'One memory, and it is enough',
     dur: 4.0,
@@ -37,18 +37,18 @@ export const BEATS: Epistemology33Beat[] = [
     dur: 4.0,
   },
   {
-    p: 160, x: 56, ev: 1, bar: 0.85,
+    p: 457, x: 56, ev: 1, bar: 0.85,
     text: 'And you get out of the car and check. Look at the column while you do it — not one brick has moved.',
     cite: 'The evidence did not move',
     dur: 3.5,
   },
   {
-    p: 160, x: 56, ev: 1, bar: 0.85,
+    p: 457, x: 56, ev: 1, bar: 0.85,
     text: 'You have exactly what you had a minute ago.',
     dur: 1.8,
   },
   {
-    p: 137, x: 56, ev: 1, bar: 0.85,
+    p: 456, x: 56, ev: 1, bar: 0.85,
     quote: {
       id: 'lq-epistemology-knowledge-33-1',
       text: 'Enough is enough: it does not mean everything.',
@@ -60,7 +60,7 @@ export const BEATS: Epistemology33Beat[] = [
     dur: 3.4,
   },
   {
-    p: 4, x: 56, ev: 1, live: 1,
+    p: 467, x: 56, ev: 1, live: 1,
     interact: {
       prompt: 'The column never changes as you drag. Stop where what you have stops being enough.',
       drag: {
@@ -79,7 +79,7 @@ export const BEATS: Epistemology33Beat[] = [
     dur: 1.0,
   },
   {
-    p: 35, x: 56, ev: 1, bar: 0.85,
+    p: 383, x: 56, ev: 1, bar: 0.85,
     text: 'So there is no single height that counts as knowing. There is a height for this conversation, and it goes up when the answer starts to cost something.',
     cite: 'No single height',
     dur: 4.6,

@@ -19,7 +19,7 @@ export interface Pol14Beat extends BaseBeat {
 
 export const BEATS: Pol14Beat[] = [
   {
-    g: 5, rows: 1,
+    g: 384, rows: 1,
     dur: 4.0,
     text: 'Start from any distribution you are willing to call just. Make it dead equal if you like — Nozick does not mind, and that is the point of letting you choose.',
   },
@@ -35,7 +35,7 @@ export const BEATS: Pol14Beat[] = [
     text: 'Every single transfer is free.',
   },
   {
-    g: 45, rows: 3,
+    g: 447, rows: 3,
     dur: 4.4,
     text: 'And the pattern is gone. He is vastly rich, everyone else is a dollar poorer, and nobody was wronged at any step of it.',
     cite: 'The pattern is gone',
@@ -60,7 +60,7 @@ export const BEATS: Pol14Beat[] = [
     cite: 'Reach in and stop something',
   },
   {
-    g: 4, rows: 3, pick: 1,
+    g: 461, rows: 3, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap what holding the pattern in place would mean interrupting.',
@@ -69,7 +69,7 @@ export const BEATS: Pol14Beat[] = [
     },
   },
   {
-    g: 11, rows: 3,
+    g: 165, rows: 3,
     dur: 1.0,
     interact: {
       prompt: 'What is Nozick actually arguing with the footballer?',

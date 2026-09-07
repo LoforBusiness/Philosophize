@@ -34,7 +34,7 @@ export interface Log18Beat extends BaseBeat {
 
 export const BEATS: Log18Beat[] = [
   {
-    p: 25, x: 200, crowd: 0.12, needle: 0.5,
+    p: 172, x: 200, crowd: 0.12, needle: 0.5,
     text: 'One person says the water here is safe. You have no idea whether it is.',
     dur: 3.8,
   },
@@ -44,13 +44,13 @@ export const BEATS: Log18Beat[] = [
     dur: 4.6,
   },
   {
-    p: 159, x: 128, crowd: 1, gap: 1, needle: 0.5,
+    p: 465, x: 128, crowd: 1, gap: 1, needle: 0.5,
     text: 'Here is the machinery. The handle is what they turn.',
     cite: 'Look at the middle',
     dur: 2.4,
   },
   {
-    p: 159, x: 128, crowd: 1, gap: 1, needle: 0.5,
+    p: 465, x: 128, crowd: 1, gap: 1, needle: 0.5,
     text: 'The needle is whether the water is safe.',
     dur: 2,
   },
@@ -60,7 +60,7 @@ export const BEATS: Log18Beat[] = [
     dur: 3.8,
   },
   {
-    p: 4, x: 128, crowd: 1, gap: 1, needle: 0.5, live_d: 1,
+    p: 165, x: 128, crowd: 1, gap: 1, needle: 0.5, live_d: 1,
     interact: {
       prompt: 'Turn it up. Take it all the way to everybody, and watch the needle.',
       drag: {
@@ -79,7 +79,7 @@ export const BEATS: Log18Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 128, crowd: 1, gap: 1, meshed: 1, needle: 0.78,
+    p: 467, x: 128, crowd: 1, gap: 1, meshed: 1, needle: 0.78,
     text: 'Here is the other kind of link. Somebody tested the water, and this shaft has no hole in it.',
     cite: 'What does reach it',
     dur: 4.2,
@@ -98,7 +98,7 @@ export const BEATS: Log18Beat[] = [
     dur: 3.6,
   },
   {
-    p: 41, x: 268, crowd: 1, gap: 1, meshed: 1, needle: 0.78,
+    p: 442, x: 268, crowd: 1, gap: 1, meshed: 1, needle: 0.78,
     interact: {
       prompt: 'So is it always wrong to be moved by a story?',
       cards: [

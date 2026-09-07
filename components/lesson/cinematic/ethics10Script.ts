@@ -36,7 +36,7 @@ export interface Et10Beat extends BaseBeat {
 
 export const BEATS: Et10Beat[] = [
   {
-    p: 45, x: 88,
+    p: 447, x: 88,
     text: 'You are walking past a shallow pond in good shoes. There is a small child face-down in it, and nobody else anywhere.',
     dur: 3.8,
   },
@@ -57,7 +57,7 @@ export const BEATS: Et10Beat[] = [
     dur: 4.4,
   },
   {
-    p: 137, x: 268, wading: true, reach: 0.55,
+    p: 456, x: 268, wading: true, reach: 0.55,
     quote: {
       id: 'lq-ethics-ethics-10-1',
       text: 'If it is in our power to prevent something bad from happening, without thereby sacrificing anything of comparable moral importance, then we ought, morally, to do it.',
@@ -70,18 +70,18 @@ export const BEATS: Et10Beat[] = [
     dur: 3.8,
   },
   {
-    p: 176, x: 268, wading: true, far: true,
+    p: 467, x: 268, wading: true, far: true,
     text: 'There is another child. Same danger, same small cost to you, nine thousand kilometres further off.',
     cite: 'Famine, Affluence, and Morality',
     dur: 2.1,
   },
   {
-    p: 176, x: 268, wading: true, far: true,
+    p: 467, x: 268, wading: true, far: true,
     text: 'The argument that got you into the pond does not obviously stop at the bank. Effective altruism started right there.',
     dur: 3.1,
   },
   {
-    p: 47, x: 268, wading: true, far: true, factors: true,
+    p: 440, x: 268, wading: true, far: true, factors: true,
     interact: {
       prompt: 'One child is near, one far. Tap the difference Singer says carries no moral weight.',
       explain:
@@ -90,7 +90,7 @@ export const BEATS: Et10Beat[] = [
     dur: 4.8,
   },
   {
-    p: 8, x: 268, wading: true, far: true,
+    p: 378, x: 268, wading: true, far: true,
     interact: {
       prompt: 'How much must you accept for the argument to work?',
       drag: {

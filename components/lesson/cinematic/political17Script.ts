@@ -26,24 +26,24 @@ export interface Pol17Beat extends BaseBeat {
 
 export const BEATS: Pol17Beat[] = [
   {
-    g: 25, well: 1, turns: 4,
+    g: 379, well: 1, turns: 4,
     dur: 4.6,
     text: 'A village digs a well together and keeps a rota. Everyone hauls, everyone drinks, and nobody signed anything.',
   },
   {
-    g: 45, well: 1, turns: 4, blank: 1, taken: 1,
+    g: 415, well: 1, turns: 4, blank: 1, taken: 1,
     dur: 4.8,
     text: 'A newcomer drinks from it daily. His row on the rota is empty, and when his turn comes he points at that.',
     cite: 'I never signed up',
   },
   {
-    g: 13, well: 1, turns: 4, blank: 1, taken: 1,
+    g: 432, well: 1, turns: 4, blank: 1, taken: 1,
     dur: 4.8,
     text: 'He is right about the signature. Almost nobody has ever agreed to the state they live under either, which is the awkward part.',
     cite: 'And he is right',
   },
   {
-    g: 137, well: 1, turns: 4, blank: 1, taken: 1,
+    g: 456, well: 1, turns: 4, blank: 1, taken: 1,
     dur: 3.8,
     quote: {
       id: 'lq-political-political-17-1',
@@ -56,13 +56,13 @@ export const BEATS: Pol17Beat[] = [
     },
   },
   {
-    g: 5, well: 1, turns: 4, blank: 1, taken: 1,
+    g: 433, well: 1, turns: 4, blank: 1, taken: 1,
     dur: 5.0,
     text: 'So fair play stops asking about signatures. If you take what a shared effort produces, you owe your share of producing it.',
     cite: 'Fair play',
   },
   {
-    g: 4, well: 1, turns: 4, blank: 1, taken: 1, pick: 1,
+    g: 165, well: 1, turns: 4, blank: 1, taken: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap what creates the newcomer\'s duty.',
@@ -71,7 +71,7 @@ export const BEATS: Pol17Beat[] = [
     },
   },
   {
-    g: 41, well: 1, turns: 4, blank: 1, taken: 1,
+    g: 442, well: 1, turns: 4, blank: 1, taken: 1,
     dur: 1.0,
     interact: {
       prompt: 'Nobody signed anything. Where could the obligation come from?',

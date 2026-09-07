@@ -43,29 +43,29 @@ export const BEATS: Epistemology11Beat[] = [
     dur: 1.8,
   },
   {
-    p: 159, x: 154, real: 195,
+    p: 465, x: 154, real: 195,
     text: 'You step across for a second look. The other dial has moved on; the hallway clock has not.',
     cite: 'The stopped clock',
     dur: 3.2,
   },
   {
-    p: 159, x: 154, real: 195,
+    p: 465, x: 154, real: 195,
     text: 'It stopped twelve hours ago, at exactly three.',
     dur: 1.8,
   },
   {
-    p: 168, x: 154, real: 220,
+    p: 459, x: 154, real: 220,
     text: 'Still, count what you had. You believed it.',
     cite: 'Justified true belief',
     dur: 1.8,
   },
   {
-    p: 168, x: 154, real: 220,
+    p: 459, x: 154, real: 220,
     text: 'It was true. And a clock on a wall is an ordinary reason to trust one.',
     dur: 2.7,
   },
   {
-    p: 168, x: 154, real: 220,
+    p: 459, x: 154, real: 220,
     text: 'Belief, truth, justification — all three.',
     dur: 1.8,
   },
@@ -93,7 +93,7 @@ export const BEATS: Epistemology11Beat[] = [
     dur: 2.4,
   },
   {
-    p: 4, x: 226, real: 350,
+    p: 457, x: 226, real: 350,
     interact: {
       prompt: 'Which of the three conditions does the stopped clock actually break?',
       sort: {
@@ -111,7 +111,7 @@ export const BEATS: Epistemology11Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 226, real: 410, pick: 1,
+    p: 177, x: 226, real: 410, pick: 1,
     interact: {
       prompt: 'The hallway clock read three o’clock all day. Tap the one moment when that reading was actually true.',
       explain: 'The trap: a stopped clock is not always wrong — it is right for an instant, twice a day. At three it matched the world by accident. Your reason never touched the fact, so being right was luck rather than knowledge.',
@@ -120,7 +120,7 @@ export const BEATS: Epistemology11Beat[] = [
     dur: 1.0,
   },
   {
-    p: 44, x: 226, real: 410,
+    p: 441, x: 226, real: 410,
     summary: {
       title: 'What You Now Know',
       points: [

@@ -32,12 +32,12 @@ export interface Pol21Beat extends BaseBeat {
 
 export const BEATS: Pol21Beat[] = [
   {
-    p: 25, x: 200, map: 1,
+    p: 172, x: 200, map: 1,
     text: 'You never signed anything. No state has ever had your signature on a page.',
     dur: 3.8,
   },
   {
-    p: 45, x: 200, map: 1, claimed: 1,
+    p: 447, x: 200, map: 1, claimed: 1,
     text: 'The usual answer is that you agreed by staying. Carry on living here and you have accepted the terms.',
     cite: 'Tacit consent',
     dur: 4.6,
@@ -59,7 +59,7 @@ export const BEATS: Pol21Beat[] = [
     dur: 3.8,
   },
   {
-    p: 4, x: 132, map: 1, claimed: 1, exit: 1, live: 1,
+    p: 165, x: 132, map: 1, claimed: 1, exit: 1, live: 1,
     interact: {
       prompt: 'Tap the only ground no state claims.',
       explain: 'The open sea, and the sea is no comfort. A choice counts as agreement only when refusing was really open to you. Leaving takes money, papers, a new language and another state at the far end. So almost everybody stays, whatever they think.',
@@ -68,7 +68,7 @@ export const BEATS: Pol21Beat[] = [
     dur: 1.0,
   },
   {
-    p: 137, x: 268, map: 1, claimed: 1, exit: 1,
+    p: 465, x: 268, map: 1, claimed: 1, exit: 1,
     quote: {
       id: 'lq-political-political-21-2',
       text: 'Can we seriously say that a poor peasant or artisan has a free choice to leave his country, when he knows no foreign language and lives from day to day by the small wages which he acquires?',
@@ -92,7 +92,7 @@ export const BEATS: Pol21Beat[] = [
     dur: 2.2,
   },
   {
-    p: 41, x: 268, map: 1, claimed: 1, exit: 1,
+    p: 383, x: 268, map: 1, claimed: 1, exit: 1,
     interact: {
       prompt: 'What would real consent to the state have to involve?',
       sort: {

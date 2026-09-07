@@ -24,12 +24,12 @@ export interface Aesthetics7Beat extends BaseBeat {
 
 export const BEATS: Aesthetics7Beat[] = [
   {
-    p: 164, x: 90, q: 8, art: 1, capt: 0,
+    p: 462, x: 90, q: 8, art: 1, capt: 0,
     text: 'Someone glances at the scribble, then at the painting, and says the scribble is better. You want to say that is wrong.',
     dur: 3.5,
   },
   {
-    p: 164, x: 90, q: 8, art: 1, capt: 0,
+    p: 462, x: 90, q: 8, art: 1, capt: 0,
     text: 'On what grounds?',
     dur: 1.8,
   },
@@ -56,7 +56,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 1.8,
   },
   {
-    p: 44, x: 160, q: 22, art: 1, capt: 1,
+    p: 162, x: 160, q: 22, art: 1, capt: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-7-1',
       text: 'Beauty is no quality in things themselves: it exists merely in the mind which contemplates them; and each mind perceives a different beauty.',
@@ -89,13 +89,13 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 1.0,
   },
   {
-    p: 168, x: 170, q: 45, art: 1, capt: 3, marks: 1,
+    p: 459, x: 170, q: 45, art: 1, capt: 3, marks: 1,
     text: 'So Hume set a bar. A verdict counts when it comes from long practice, wide comparison, no personal grudges, and plain good sense.',
     cite: 'Hume · the true critic',
     dur: 3.6,
   },
   {
-    p: 168, x: 170, q: 45, art: 1, capt: 3, marks: 1,
+    p: 459, x: 170, q: 45, art: 1, capt: 3, marks: 1,
     text: 'Where people like that agree, you have a standard.',
     dur: 1.8,
   },
@@ -111,7 +111,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 2.6,
   },
   {
-    p: 4, x: 160, q: 39, art: 1, capt: 3, marks: 1,
+    p: 165, x: 160, q: 39, art: 1, capt: 3, marks: 1,
     interact: {
       prompt: 'Where does Hume leave beauty?',
       split: {

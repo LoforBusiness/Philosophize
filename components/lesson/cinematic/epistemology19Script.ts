@@ -32,12 +32,12 @@ export interface Epi19Beat extends BaseBeat {
 
 export const BEATS: Epi19Beat[] = [
   {
-    p: 25, x: 200, doors: 1,
+    p: 172, x: 200, doors: 1,
     text: 'Five people, and every one of them really does know something you do not.',
     dur: 3.8,
   },
   {
-    p: 2, x: 200, doors: 1, chip: 1,
+    p: 466, x: 200, doors: 1, chip: 1,
     text: 'A question turns up, cut to fit exactly one of these doors. Standing at the wrong door will open nothing.',
     cite: 'Expertise is a relation',
     dur: 4.8,
@@ -58,7 +58,7 @@ export const BEATS: Epi19Beat[] = [
     dur: 1.9,
   },
   {
-    p: 137, x: 132, doors: 1, chip: 1, stray: 1,
+    p: 465, x: 132, doors: 1, chip: 1, stray: 1,
     quote: {
       id: 'lq-epistemology-knowledge-19-3',
       text: 'It is a part of our constitution, that what we are told by others should be believed, until we have positive evidence to the contrary.',
@@ -71,7 +71,7 @@ export const BEATS: Epi19Beat[] = [
     dur: 3.8,
   },
   {
-    p: 4, x: 132, doors: 1, chip: 1, live: 1,
+    p: 165, x: 132, doors: 1, chip: 1, live: 1,
     interact: {
       prompt: 'Tap the door this question actually belongs at.',
       explain: 'Nutrition. A cardiologist knows more medicine than you and has read almost none of the diet trials. Standing is earned subject by subject, and the label on the door is what you are checking, not the person\'s eminence.',
@@ -86,7 +86,7 @@ export const BEATS: Epi19Beat[] = [
     dur: 4.2,
   },
   {
-    p: 41, x: 268, doors: 1, split: 1,
+    p: 383, x: 268, doors: 1, split: 1,
     interact: {
       prompt: 'Two experts disagree. What should you actually do?',
       sort: {

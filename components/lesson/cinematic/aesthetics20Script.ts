@@ -31,8 +31,8 @@ export interface Aes20Beat extends BaseBeat {
 
 export const BEATS: Aes20Beat[] = [
   {
-    p: 25, x: 200, uses: 1,
-    text: 'Four reasons people give for why art is worth the money and the museums.',
+    p: 379, x: 200, uses: 1,
+    text: 'Four reasons people give for why art is worth the money. Watch each one get answered by something cheaper.',
     dur: 3.8,
   },
   {
@@ -63,7 +63,7 @@ export const BEATS: Aes20Beat[] = [
     dur: 3.2,
   },
   {
-    p: 4, x: 132, uses: 1, swaps: 1, struck: 1, live: 1,
+    p: 461, x: 132, uses: 1, swaps: 1, struck: 1, live: 1,
     interact: {
       prompt: 'Tap the row nothing arrived to replace.',
       explain: 'Showing you a world through somebody else\'s eyes. Facts can be handed over, images can be copied, walls can be covered. What has no substitute is another person\'s way of seeing, because that is not information that could be sent by a cheaper route.',
@@ -72,7 +72,7 @@ export const BEATS: Aes20Beat[] = [
     dur: 1.0,
   },
   {
-    p: 137, x: 268, uses: 1, swaps: 1, struck: 1,
+    p: 144, x: 268, uses: 1, swaps: 1, struck: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-20-2',
       text: 'Art is not a diversion or a side issue. It is the most educational of human activities and a place in which the nature of morality can be seen.',
@@ -85,12 +85,12 @@ export const BEATS: Aes20Beat[] = [
     dur: 4.0,
   },
   {
-    p: 21, x: 268, uses: 1, swaps: 1, struck: 1,
+    p: 380, x: 268, uses: 1, swaps: 1, struck: 1,
     text: 'One warning about the method. Something can be replaceable and still be worth having.',
     dur: 3.8,
   },
   {
-    p: 41, x: 268, uses: 1, swaps: 1, struck: 1,
+    p: 442, x: 268, uses: 1, swaps: 1, struck: 1,
     interact: {
       prompt: 'You cross out three of the four. What has that done?',
       sort: {

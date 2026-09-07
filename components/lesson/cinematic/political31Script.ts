@@ -21,7 +21,7 @@ export interface Pol31Beat extends BaseBeat {
 
 export const BEATS: Pol31Beat[] = [
   {
-    g: 5, grass: 1, herd: 1, sums: 0,
+    g: 433, grass: 1, herd: 1, sums: 0,
     dur: 4.0,
     text: 'A field nobody owns and everybody may use. Deep grass, one animal on it, and four herders who all have the same right to be here.',
   },
@@ -43,7 +43,7 @@ export const BEATS: Pol31Beat[] = [
     cite: 'And everyone else',
   },
   {
-    g: 137, grass: 0.22, herd: 4, sums: 0,
+    g: 456, grass: 0.22, herd: 4, sums: 0,
     dur: 3.6,
     quote: {
       id: 'lq-political-political-31-1',
@@ -56,18 +56,18 @@ export const BEATS: Pol31Beat[] = [
     },
   },
   {
-    g: 167, grass: 0.22, herd: 4, sums: 1,
+    g: 459, grass: 0.22, herd: 4, sums: 1,
     dur: 2.7,
     text: 'Here is the sum each of them did. One whole unit of gain, kept entirely.',
     cite: 'The sum they did',
   },
   {
-    g: 167, grass: 0.22, herd: 4, sums: 1,
+    g: 459, grass: 0.22, herd: 4, sums: 1,
     dur: 2.1,
     text: 'One whole unit of damage, cut into four. Nothing else was required.',
   },
   {
-    g: 4, grass: 0.22, herd: 4, sums: 1, pick: 1,
+    g: 467, grass: 0.22, herd: 4, sums: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap what makes ruining the field the sensible move for each of them.',
@@ -76,7 +76,7 @@ export const BEATS: Pol31Beat[] = [
     },
   },
   {
-    g: 11, grass: 0.22, herd: 4, sums: 1,
+    g: 165, grass: 0.22, herd: 4, sums: 1,
     dur: 1.0,
     interact: {
       prompt: 'What actually stops the pasture being stripped?',

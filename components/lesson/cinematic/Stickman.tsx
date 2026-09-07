@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { View, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import { BONE_SRC, STR, type Bundle } from './rig';
+import type { Piece } from './wardrobe';
+import { useWorn } from './wardrobeContext';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Draws one figure from a Bundle of transform arrays, as native RN Views.
@@ -33,9 +35,46 @@ interface Props {
   /** Fatter fists, for the boxers. */
   gloves?: boolean;
   color?: string;
+  /**
+   * What this figure is wearing — see `wardrobe.ts`.
+   *
+   * A costume is per-FIGURE and per-lesson, never per-beat: a hat that appears
+   * halfway through an argument is a thing the reader has to account for, and
+   * they are meant to be following the argument.
+   */
+  wear?: Piece[];
+  /**
+   * Which figure this is, when the lesson dresses them from context.
+   *
+   * `lead` is the mascot. `second` is the one other figure in a two-figure scene
+   * — the opposing position — and gets a different costume on purpose, because
+   * two identical figures in identical hats read as a bug. `crowd` is the third
+   * figure and beyond, and wears nothing.
+   */
+  role?: 'lead' | 'second' | 'crowd';
 }
 
-export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Props) {
+/**
+ * A FIXED number of accessory slots, and the hook rule is why.
+ *
+ * §17's first standing rule is that the hook count may never change between
+ * renders — a lesson once threw on its final tap because a hook sat below an
+ * early return, and it took down the reward modal with it. Mapping hooks over
+ * `wear.length` would be the same defect with a costume change as the trigger.
+ * Six slots is the largest costume plus one; unused ones cost a worklet that
+ * returns `opacity: 0` and nothing else.
+ */
+const WORN_SLOTS = 6;
+
+/** The stage's own ground, so a `paper` piece reads as a gap rather than a mark. */
+const PAPER = '#FAFAF7';
+
+export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear, role = 'lead' }: Props) {
+  // An explicit `wear` wins; otherwise the lesson dresses him. Outside a lesson —
+  // the launch screen, the branch road, the welcome intro — the context is empty
+  // and he is the bare mascot, which is what those surfaces have always drawn.
+  const fromCtx = useWorn(role);
+  const worn = wear ?? fromCtx;
   // Thicknesses are baked per figure. They never animate, so they stay in style.
   const S = useMemo(() => {
     const limb = STR.limb * k;
@@ -127,6 +166,72 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
   };
   const groupFade = useAnimatedStyle(() => ({ opacity: D.value.opacity }));
 
+  // ── the costume ───────────────────────────────────────────────────────────
+  //
+  // Each piece hangs off a JOINT the bundle already carries, so it inherits every
+  // bit of motion the figure has for free — including the walk, the settle and
+  // the living holds — with no second animation to keep in step.
+  //
+  // A HEAD piece rotates with the NECK, and that matters more than it sounds: a
+  // hat that stays level while its wearer leans is a hat floating in mid-air, and
+  // the neck angle is the same axis N12 says attention has to ride, so the hat
+  // and the gaze can never disagree.
+  const wornStatic = useMemo(
+    () => Array.from({ length: WORN_SLOTS }, (_, i) => {
+      const p = worn[i];
+      if (!p) return null;
+      const w = p.w * k;
+      const h = p.h * k;
+      const base: ViewStyle = {
+        position: 'absolute',
+        left: -w / 2,
+        top: -h / 2,
+        width: w,
+        height: h,
+        borderRadius: (p.r ?? 0) * k,
+      };
+      // A RING SHOWS WHAT IS BEHIND IT, which is the whole point of the monocle:
+      // most of its circle sits proud of the head, so the hole reads against
+      // paper. Drawn as a fill it would be a black disc stuck to his temple.
+      if (p.ring) return { ...base, borderWidth: p.ring * k, borderColor: color, borderRadius: w / 2 };
+      // PAPER, not ink — see `Piece.paper`. The value matches the stage ground so
+      // the line reads as an absence rather than as a pale object.
+      return { ...base, backgroundColor: p.paper ? PAPER : color };
+    }),
+    [worn, k, color],
+  );
+
+  const wornStyles = Array.from({ length: WORN_SLOTS }, (_, i) => {
+    const p = worn[i];
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- WORN_SLOTS is constant; see above
+    return useAnimatedStyle(() => {
+      if (!p) return { opacity: 0, transform: [{ translateX: -9999 }, { translateY: -9999 }] };
+      const B = D.value;
+      const dir = B.dir < 0 ? -1 : 1;
+      const hx = B.head[0].translateX; const hy = B.head[1].translateY;
+      const sx = B.shB[0].translateX; const sy = B.shB[1].translateY;
+      // 0 when upright: the neck points straight up, and atan2 of that is −90°.
+      const neck = Math.atan2(hy - sy, hx - sx) + Math.PI / 2;
+
+      let ax = hx; let ay = hy; let rot = neck;
+      if (p.at === 'neck') { ax = sx; ay = sy; }
+      else if (p.at === 'pelvis') { ax = B.pel[0].translateX; ay = B.pel[1].translateY; rot = 0; }
+      else if (p.at === 'handR') { ax = B.wrR[0].translateX; ay = B.wrR[1].translateY; rot = 0; }
+      else if (p.at === 'handL') { ax = B.wrL[0].translateX; ay = B.wrL[1].translateY; rot = 0; }
+
+      const px = p.x * dir * k; const py = p.y * k;
+      const c = Math.cos(rot); const s = Math.sin(rot);
+      return {
+        opacity: 1,
+        transform: [
+          { translateX: ax + px * c - py * s },
+          { translateY: ay + px * s + py * c },
+          { rotate: `${(rot * 180) / Math.PI + (p.rot ?? 0) * dir}deg` },
+        ],
+      };
+    });
+  });
+
   return (
     <Animated.View
       pointerEvents="none"
@@ -179,6 +284,13 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A' }: Pr
       <Animated.View style={[S.joint, a.shRd]} />
       <Animated.View style={[S.joint, a.elR]} />
       <Animated.View testID="fist-r" style={[S.fist, a.wrR]} />
+
+      {/* LAST, so a hat sits over the head rather than under it. Everything here
+          is the same ink as the figure, so overlap costs nothing — except the
+          monocle's ring, which needs what is behind it to show through. */}
+      {wornStatic.map((st, i) => (
+        st ? <Animated.View key={i} testID="worn" style={[st, wornStyles[i]]} /> : null
+      ))}
     </Animated.View>
   );
 }

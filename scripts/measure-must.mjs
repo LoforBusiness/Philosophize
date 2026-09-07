@@ -566,14 +566,40 @@ const STAGE_NEXT = +(process.env.STAGE_TRIES || 60);
       //
       // Only where the stamp is UNCHANGED. A scene that really did lose a beat is
       // a different stamp, and its shorter reading is the truth.
+      // AND THE STAMP IS THE WRONG THING TO GATE THAT ON, which only shows when
+      // you edit a scene and re-measure it on a busy machine — the two together.
+      //
+      // "A scene that really did lose a beat is a different stamp, so its shorter
+      // reading is the truth" is sound about a scene that lost a beat, and wrong
+      // about every other edit. Wiring the answer reaction into 22 scenes changed
+      // one line in each; every stamp moved, so the guard switched itself off for
+      // exactly those lessons — and the same run measured `ethics-ethics-8` at 5
+      // beats against the 17 already on file. That would have replaced a complete
+      // row with a fifth of one, in the lesson with the most beats in the repo,
+      // with nothing downstream able to notice.
+      //
+      // ASK THE SCRIPT INSTEAD. `expected` is the beat count read from the script
+      // itself, minus the summary. A reading SHORT OF THAT is a harness failure
+      // whatever the stamp says; a reading that MEETS it is complete and wins,
+      // which is what makes this safe when a beat is genuinely removed — the
+      // expected count falls with it.
       const kept = [];
       for (const id of Object.keys(words)) {
         const before = prev.words?.[id];
         if (!before) continue;
-        if ((prev.stamps ?? {})[id] !== stamps[id]) continue;      // the scene moved
+        const want = expected.get(id) ?? 0;
+        const stampMoved = (prev.stamps ?? {})[id] !== stamps[id];
+        const complete = words[id].length >= want;
+        if (stampMoved && complete) continue;                      // the scene moved, and this reading is whole
         if (before.length > words[id].length) {
           allWords[id] = before;
-          kept.push(`${id} ${words[id].length}→${before.length}`);
+          // AND KEEP THE OLD STAMP WITH THE OLD BOXES. Writing the new stamp over
+          // carried-forward boxes is the one thing worse than the short row: it
+          // would claim those boxes were measured from the current scene, which is
+          // precisely the rot the stamp exists to catch. Held together, the lesson
+          // stays honestly STALE and `check:cinematic` keeps asking for it.
+          if (stampMoved && (prev.stamps ?? {})[id]) allStamps[id] = prev.stamps[id];
+          kept.push(`${id} ${words[id].length}→${before.length}${stampMoved ? ` (short of ${want}, left stale)` : ''}`);
         }
       }
       if (kept.length) {

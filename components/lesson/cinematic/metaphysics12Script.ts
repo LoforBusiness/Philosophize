@@ -20,12 +20,12 @@ export interface Meta12Beat extends BaseBeat {
 
 export const BEATS: Meta12Beat[] = [
   {
-    g: 160, owner: 0, none: 0,
+    g: 467, owner: 0, none: 0,
     dur: 3,
     text: 'Look inward right now. There is a warmth, a sound, a thought about tomorrow, another thought about this sentence.',
   },
   {
-    g: 160, owner: 0, none: 0,
+    g: 467, owner: 0, none: 0,
     dur: 1.8,
     text: 'The stream is easy to find.',
   },
@@ -41,7 +41,7 @@ export const BEATS: Meta12Beat[] = [
     text: 'So: a box for the owner.',
   },
   {
-    g: 159, owner: 1, none: 0,
+    g: 177, owner: 1, none: 0,
     dur: 3.9,
     text: 'Hume went looking and reported back that he could never catch it. Every time he tried, he found another perception instead.',
     cite: 'Hume looked',
@@ -65,7 +65,7 @@ export const BEATS: Meta12Beat[] = [
     },
   },
   {
-    g: 8, owner: 1, none: 1,
+    g: 378, owner: 1, none: 1,
     dur: 4.8,
     text: 'Buddhism arrives at the same place by another road, and calls the fixed self anatta — an illusion. Which invites the obvious overreach, so let us put it on the table too.',
     cite: 'The overreach',
@@ -80,7 +80,7 @@ export const BEATS: Meta12Beat[] = [
     },
   },
   {
-    g: 11, owner: 1, none: 1,
+    g: 165, owner: 1, none: 1,
     dur: 1.0,
     interact: {
       prompt: 'What is left of the self once the owner goes?',

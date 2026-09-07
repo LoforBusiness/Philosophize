@@ -34,18 +34,18 @@ export interface Pol19Beat extends BaseBeat {
 
 export const BEATS: Pol19Beat[] = [
   {
-    p: 25, x: 200, axis: 1,
+    p: 462, x: 200, axis: 1,
     text: 'A child is drowning in a pond at your feet. You wade in and ruin a good pair of shoes.',
     dur: 4.4,
   },
   {
-    p: 2, x: 200, axis: 1, cost: 1,
+    p: 443, x: 200, axis: 1, cost: 1,
     text: 'The top panel is what it costs you. Across the whole distance, it is the price of the shoes.',
     cite: 'The cost',
     dur: 4.4,
   },
   {
-    p: 45, x: 132, axis: 1, cost: 1, pull: 1,
+    p: 379, x: 132, axis: 1, cost: 1, pull: 1,
     text: 'The bottom panel is how strongly you feel you must act. Watch what happens to it.',
     cite: 'The pull',
     dur: 4.0,
@@ -65,7 +65,7 @@ export const BEATS: Pol19Beat[] = [
     dur: 1.0,
   },
   {
-    p: 137, x: 268, axis: 1, cost: 1, pull: 1, mark: 1,
+    p: 139, x: 268, axis: 1, cost: 1, pull: 1, mark: 1,
     quote: {
       id: 'lq-political-political-19-1',
       text: 'If it is in our power to prevent something bad from happening, without thereby sacrificing anything of comparable moral importance, we ought, morally, to do it.',
@@ -78,7 +78,7 @@ export const BEATS: Pol19Beat[] = [
     dur: 4.0,
   },
   {
-    p: 21, x: 268, axis: 1, cost: 1, pull: 1, mark: 1,
+    p: 380, x: 268, axis: 1, cost: 1, pull: 1, mark: 1,
     text: 'The trouble is where that principle stops. There is always one more preventable death for the price of one more thing you own.',
     cite: 'How far does it go?',
     dur: 4.8,

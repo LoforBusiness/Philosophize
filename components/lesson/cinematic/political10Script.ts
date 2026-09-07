@@ -94,7 +94,7 @@ export const BEATS: Political10Beat[] = [
     dur: 2,
   },
   {
-    p: 21, x: 108, tape: 1, ptr: 4, ruler: 1,
+    p: 177, x: 108, tape: 1, ptr: 4, ruler: 1,
     interact: {
       prompt: 'How much does Locke let you take from the common land?',
       drag: {
@@ -122,7 +122,7 @@ export const BEATS: Political10Beat[] = [
     dur: 1.0,
   },
   {
-    p: 9, x: 108, tape: 1, ptr: 4, ruler: 1,
+    p: 445, x: 108, tape: 1, ptr: 4, ruler: 1,
     summary: {
       title: 'Who Owns What, and Why',
       points: [

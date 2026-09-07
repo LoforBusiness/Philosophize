@@ -28,12 +28,12 @@ export interface Political11Beat extends BaseBeat {
 
 export const BEATS: Political11Beat[] = [
   {
-    p: 164, x: 56,
+    p: 462, x: 56,
     text: 'Switch off every government tonight — no courts, no police, nobody in charge. By morning, what is left of us?',
     dur: 2.5,
   },
   {
-    p: 164, x: 56,
+    p: 462, x: 56,
     text: 'Answer that and you have already decided what state you can justify.',
     dur: 1.8,
   },
@@ -68,13 +68,13 @@ export const BEATS: Political11Beat[] = [
     dur: 3.6,
   },
   {
-    p: 176, x: 120, dial: 1, set: 2, built: 2,
+    p: 467, x: 120, dial: 1, set: 2, built: 2,
     text: 'Locke turns it to RATIONAL. We already owe each other things out here; what is missing is only a neutral judge.',
     cite: 'Locke · a limited government',
     dur: 2.7,
   },
   {
-    p: 176, x: 120, dial: 1, set: 2, built: 2,
+    p: 467, x: 120, dial: 1, set: 2, built: 2,
     text: 'So he builds small, and the people stay outside it holding the rights they walked in with.',
     dur: 2.1,
   },
@@ -95,7 +95,7 @@ export const BEATS: Political11Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, x: 120, dial: 1, set: 3, built: 3,
+    p: 461, x: 120, dial: 1, set: 3, built: 3,
     interact: {
       prompt: 'Which one comes first?',
       split: {
@@ -113,7 +113,7 @@ export const BEATS: Political11Beat[] = [
     dur: 1.0,
   },
   {
-    p: 30, x: 120, dial: 1, set: 1, built: 3, plates: 1,
+    p: 384, x: 120, dial: 1, set: 1, built: 3, plates: 1,
     interact: {
       prompt: 'The dial is back on FEARFUL. Tap the state that diagnosis demands.',
       explain: 'If nobody can be trusted, only a power above everyone can hold the peace. So Hobbes trades away nearly all freedom to buy it. The trap: the small limited house is the moderate, sensible-looking answer. And it is Locke’s, built on a diagnosis Hobbes has already rejected.',

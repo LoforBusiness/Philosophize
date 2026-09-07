@@ -31,7 +31,8 @@
 import fs from 'node:fs';
 import { corpus, decomment, readScript } from './lib/gestures.mjs';
 import {
-  VARIANTS, LIVING_RUN, COMIC, play, grave, channels, reachesCatalogue, branchOf, cueHits,
+  VARIANTS, LIVING_RUN, COMIC, COMIC_CODES, play, grave, channels, reachesCatalogue,
+  branchOf, cueHits,
 } from './lib/liveliness.mjs';
 
 const DRY = process.argv.includes('--dry');
@@ -263,6 +264,31 @@ for (const [branch, list] of byBranch) {
   const done = new Set();
   const at = new Map();          // gag act → the reading positions it has been told at
   const order = new Map(list.map((l, i) => [l.id, i]));
+
+  // ── THE GAGS ALREADY IN THE SCRIPTS COUNT, AND FOR A LONG TIME THEY DID NOT ──
+  //
+  // This pass wrote its jokes and then forgot them. `done` and `at` started empty
+  // on every run, so a second run treated a branch carrying twenty-nine gags as a
+  // branch carrying none: it placed forty-one more on top, nineteen lessons ended
+  // up with two, and twenty-three gags came back inside the eight-lesson window
+  // the rule exists to protect. `check:life` caught all of it — which is the
+  // system working — but the codemod had to be run twice for anyone to find out,
+  // and the natural instinct with a codemod is that running it again is free.
+  //
+  // A PASS THAT PLACES SOMETHING MUST BE ABLE TO SEE WHAT IT PLACED LAST TIME.
+  // Nothing else in this file has the problem: passes 0, 1 and 2 all read the
+  // current code and write a function of it, so running them again is genuinely a
+  // no-op. Pass 3 is the only one that ADDS, and adding is the operation that has
+  // to look first.
+  for (const p of pending) {
+    const pos = order.get(p.lesson.id);
+    for (const b of p.lesson.beats) {
+      if (b.declared === null || !COMIC_CODES.has(b.declared)) continue;
+      done.add(p.lesson.id);
+      const act = b.declared - 299;
+      at.set(act, [...(at.get(act) || []), pos]);
+    }
+  }
 
   // A GAG MAY COME BACK ONCE, AND ONLY FAR AWAY. "Do not keep reusing the exact
   // same funny things because then it will no longer be funny" is the rule, and

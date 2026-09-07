@@ -63,7 +63,7 @@ export const BEATS: Aes8Beat[] = [
   },
   {
     p: 31, x: 68, mode: 0, lens: 2,
-    text: 'Hang those up. There is a second pair on the same wall.',
+    text: 'Hang that pair up. There is a second pair on the same wall.',
     cite: 'The second pair',
     dur: 1.8,
   },
@@ -84,7 +84,7 @@ export const BEATS: Aes8Beat[] = [
     dur: 2.8,
   },
   {
-    p: 4, x: 68, mode: 0, lens: 0, pick: 1,
+    p: 165, x: 68, mode: 0, lens: 0, pick: 1,
     interact: {
       prompt: 'She cannot read what the mosaic shows, yet calls it great art. Tap the pair she uses.',
       explain: 'She has no idea what the story is, so the story cannot be what moved her. Whatever did the work was the arrangement itself — the lines, the blocks, and the way they sit against each other.',
@@ -93,7 +93,7 @@ export const BEATS: Aes8Beat[] = [
     dur: 1.0,
   },
   {
-    p: 167, x: 148, mode: 1, lens: 1,
+    p: 168, x: 148, mode: 1, lens: 1,
     text: 'That way of looking has a name: formalism. Clive Bell claimed every real work of visual art shares one thing.',
     cite: 'Formalism · Clive Bell',
     dur: 2.6,
@@ -104,7 +104,7 @@ export const BEATS: Aes8Beat[] = [
     dur: 2.6,
   },
   {
-    p: 137, x: 148, mode: 1, lens: 1,
+    p: 456, x: 148, mode: 1, lens: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-8-1',
       text: 'These relations and combinations of lines and colours, these aesthetically moving forms, I call Significant Form.',
@@ -123,11 +123,11 @@ export const BEATS: Aes8Beat[] = [
   },
   {
     p: 37, x: 68, mode: 2, lens: 2,
-    text: 'Collingwood added that the painter often only finds the feeling by painting it.',
+    text: 'Collingwood added a twist. The painter often finds the feeling only by painting the picture.',
     dur: 2.1,
   },
   {
-    p: 45, x: 148, mode: 2, lens: 2, modeAns: 3,
+    p: 447, x: 148, mode: 2, lens: 2, modeAns: 3,
     interact: {
       prompt: 'So what should be said about the two theories?',
       sort: {

@@ -12,7 +12,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic9Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  useCarry, carry, STONE,
+  useCarry, carry, STONE, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -139,7 +139,7 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick }: SceneA
 
     return {
       arg: pose(aMix, ARG_X, GROUND, K_FIG, 1, 1),
-      dod: pose(dMix, dx, GROUND, K_FIG, DDIR[n], walkIn),
+      dod: reactPose(dMix, dx, GROUND, K_FIG, DDIR[n], walkIn),
       claim: (claimOn ? 1 : 0) * (claimFade ? grow : 1),
       smear: (smearOn ? 1 : 0) * (smearFade ? grow : 1),
       straw: (strawOn ? 1 : 0) * (strawFade ? grow : 1),
@@ -221,7 +221,7 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick }: SceneA
         })}
 
       <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={AF} k={K_FIG} />
+      <Stickman role="second" D={AF} k={K_FIG} />
       <Stickman D={DF} k={K_FIG} />
     </Animated.View>
   );

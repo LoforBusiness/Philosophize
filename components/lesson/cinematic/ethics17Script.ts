@@ -33,27 +33,27 @@ export interface Eth17Beat extends BaseBeat {
 
 export const BEATS: Eth17Beat[] = [
   {
-    p: 164, x: 200, maxim: 1, trust: 1,
+    p: 462, x: 200, maxim: 1, trust: 1,
     text: 'A man at your door asks where your friend is hiding. He means to kill him.',
     dur: 3.4,
   },
   {
-    p: 164, x: 200, maxim: 1, trust: 1,
+    p: 462, x: 200, maxim: 1, trust: 1,
     text: 'Kant says do not lie.',
     dur: 1.8,
   },
   {
-    p: 159, x: 200, maxim: 1, trust: 1,
-    text: 'That looks monstrous, and Kant knew so. His reason is not that lying is ugly.',
+    p: 463, x: 200, maxim: 1, trust: 1,
+    text: 'That looks monstrous, and Kant knew it. His reason is not that lying is ugly.',
     dur: 2.7,
   },
   {
-    p: 159, x: 200, maxim: 1, trust: 1,
+    p: 463, x: 200, maxim: 1, trust: 1,
     text: 'Kant\'s reason is that lying cannot be made a rule for all.',
     dur: 2.1,
   },
   {
-    p: 2, x: 132, maxim: 1, copies: 1, trust: 1,
+    p: 466, x: 132, maxim: 1, copies: 1, trust: 1,
     text: 'So run his test. Write down what you are about to do, and hand a copy to everybody.',
     cite: 'Universalise it',
     dur: 4.2,
@@ -64,7 +64,7 @@ export const BEATS: Eth17Beat[] = [
     dur: 4.0,
   },
   {
-    p: 137, x: 132, maxim: 1, copies: 1, trust: 0.06,
+    p: 465, x: 132, maxim: 1, copies: 1, trust: 0.06,
     quote: {
       id: 'lq-ethics-ethics-17-2',
       text: 'Act only according to that maxim whereby you can at the same time will that it should become a universal law.',
@@ -77,7 +77,7 @@ export const BEATS: Eth17Beat[] = [
     dur: 3.6,
   },
   {
-    p: 4, x: 132, maxim: 1, copies: 1, trust: 0.06, live: 1,
+    p: 165, x: 132, maxim: 1, copies: 1, trust: 0.06, live: 1,
     interact: {
       prompt: 'Tap the thing the maxim needed, and used up.',
       explain: 'Being believed. A lie only works while most people tell the truth, so it lives off a stock it does not refill. Hand the maxim to everybody and the stock is gone. The rule destroys the thing that made it worth breaking.',
@@ -86,13 +86,13 @@ export const BEATS: Eth17Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 268, maxim: 1, copies: 1, trust: 0.06,
+    p: 453, x: 268, maxim: 1, copies: 1, trust: 0.06,
     text: 'Constant pushed back at once. Tell the truth and your friend dies, so surely the blood is on your hands.',
     cite: 'The obvious reply',
     dur: 4.6,
   },
   {
-    p: 41, x: 268, maxim: 1, copies: 1, trust: 0.06,
+    p: 442, x: 268, maxim: 1, copies: 1, trust: 0.06,
     interact: {
       prompt: 'Where does Kant put the death?',
       split: {

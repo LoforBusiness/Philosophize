@@ -55,7 +55,7 @@ export const BEATS: Pol22Beat[] = [
     dur: 4.6,
   },
   {
-    p: 4, x: 132, switchOn: 1, tiles: 1, reach: 1, live: 1,
+    p: 165, x: 132, switchOn: 1, tiles: 1, reach: 1, live: 1,
     interact: {
       prompt: 'The lever is up. Tap what still makes her unfree.',
       explain: 'His reach. Negative liberty only ever reads the lever, and the lever is up, so it reports her free. What she has to live with is not the flipping but the standing possibility, which is why she flatters him and stays watchful.',
@@ -87,7 +87,7 @@ export const BEATS: Pol22Beat[] = [
     dur: 4.8,
   },
   {
-    p: 41, x: 268, switchOn: 1, tiles: 1, reach: 1,
+    p: 383, x: 268, switchOn: 1, tiles: 1, reach: 1,
     interact: {
       prompt: 'A servant with a kind master. Free, or not?',
       poll: {

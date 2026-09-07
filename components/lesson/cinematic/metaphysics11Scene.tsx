@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './metaphysics11Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -196,7 +196,7 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick, d
     const part = Math.sin(Math.PI * sw);
 
     return {
-      pri: pose(pS, PRI_X, PLINTH_T, K_FIG, 1, 1),
+      pri: reactPose(pS, PRI_X, PLINTH_T, K_FIG, 1, 1),
       cob: pose(cS, cx, PLINTH_T, K_FIG, CDIR[n], walkIn),
       tokX: lerp(cr0.x, cr1.x, u) - TOK_W / 2,
       tokY: lerp(cr0.y, cr1.y, u) - LEADER - TOK_H - ARC * Math.sin(Math.PI * u),
@@ -268,7 +268,7 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick, d
       </Animated.View>
 
       <Stickman D={PF} k={K_FIG} />
-      <Stickman D={CF} k={K_FIG} />
+      <Stickman role="second" D={CF} k={K_FIG} />
     </Animated.View>
   );
 }

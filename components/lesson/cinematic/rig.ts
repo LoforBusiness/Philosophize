@@ -1699,6 +1699,17 @@ export interface Bundle {
   /** Caps for the tops of the arms. The arms hang off shL/shR, not off shB. */
   shLd: XF; shRd: XF;
   pel: XF; shB: XF; head: XF; scale: number;
+  /**
+   * Which way the figure faces, +1 or −1.
+   *
+   * Carried here rather than derived, because a COSTUME has to mirror with him
+   * (`wardrobe.ts`) and the joints alone cannot say: `solve` has already applied
+   * the facing, so a monocle written once for a figure facing right would sit on
+   * the back of his head the moment he turned. Deriving it from the shoulders'
+   * sign works while he is square on and is undefined mid-turn, which is the one
+   * moment it matters.
+   */
+  dir: number;
 }
 
 /** Off-stage and invisible — used for figures not in the current shot. */
@@ -1711,7 +1722,7 @@ export const BLANK: Bundle = (() => {
     kneeL: off, kneeR: off, ankL: off, ankR: off,
     elL: off, elR: off, wrL: off, wrR: off,
     shLd: off, shRd: off,
-    pel: off, shB: off, head: off,
+    pel: off, shB: off, head: off, dir: 1,
   };
 })();
 
@@ -1723,7 +1734,7 @@ export const BLANK: Bundle = (() => {
  * joint along the bone — the very array the SVG <G> version used. A joint is a
  * circle centred on the origin, so translate alone places it.
  */
-export function bundle(j: Joints, k: number, opacity: number): Bundle {
+export function bundle(j: Joints, k: number, opacity: number, dir = 1): Bundle {
   'worklet';
   const bone = (a: P2, b: P2): XF => {
     'worklet';
@@ -1737,7 +1748,7 @@ export function bundle(j: Joints, k: number, opacity: number): Bundle {
   };
   const at = (p: P2): XF => { 'worklet'; return [{ translateX: p.x }, { translateY: p.y }]; };
   return {
-    opacity, scale: k,
+    opacity, scale: k, dir: dir < 0 ? -1 : 1,
     thighL: bone(j.hipL, j.kneeL), shinL: bone(j.kneeL, j.ankL),
     thighR: bone(j.hipR, j.kneeR), shinR: bone(j.kneeR, j.ankR),
     torso: bone(j.pel, j.chest),
@@ -1763,7 +1774,7 @@ export function pose(
   return bundle(
     solve({ x, groundY, k, dir, tilt: s.tilt, neck: s.neck, bob: s.bob,
             footL: s.footL, footR: s.footR, fistL: s.fistL, fistR: s.fistR }),
-    k, opacity
+    k, opacity, dir
   );
 }
 

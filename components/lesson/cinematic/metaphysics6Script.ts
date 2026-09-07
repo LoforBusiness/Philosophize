@@ -25,7 +25,7 @@ export interface Meta6Beat extends BaseBeat {
 
 export const BEATS: Meta6Beat[] = [
   {
-    p: 2, swap: 0, two: 0, orig: 1,
+    p: 443, swap: 0, two: 0, orig: 1,
     text: 'Swap every plank of a ship, one at a time. When none of the first wood is left — is it the same ship, or a new one?',
     dur: 3.6,
   },
@@ -41,7 +41,7 @@ export const BEATS: Meta6Beat[] = [
     dur: 1.8,
   },
   {
-    p: 137, swap: 1, orig: 0,
+    p: 139, swap: 1, orig: 0,
     quote: {
       id: 'lq-metaphysics-being-6-1',
       text: 'All things move and nothing remains still; you cannot step twice into the same stream.',
@@ -54,13 +54,13 @@ export const BEATS: Meta6Beat[] = [
     dur: 3.6,
   },
   {
-    p: 167, swap: 1, orig: 0,
+    p: 459, swap: 1, orig: 0,
     text: 'Philosophers split the word "same" in two. Qualitative sameness is sharing every feature, like two new coins.',
     cite: 'Two senses of sameness',
     dur: 2.5,
   },
   {
-    p: 167, swap: 1, orig: 0,
+    p: 459, swap: 1, orig: 0,
     text: 'Numerical sameness is being the one thing you were yesterday. The ship keeps the second and loses the first.',
     dur: 2.7,
   },
@@ -76,9 +76,9 @@ export const BEATS: Meta6Beat[] = [
     dur: 1.8,
   },
   {
-    p: 4, swap: 1, orig: 0,
+    p: 165, swap: 1, orig: 0,
     interact: {
-      prompt: 'Why does the Ship of Theseus threaten our idea of identity over time?',
+      prompt: 'Why does the Ship of Theseus threaten the idea of identity over time?',
       cards: [
         { text: 'Every part can change', correct: true },
         { text: 'Wooden ships rot quickly', correct: false },
@@ -89,7 +89,7 @@ export const BEATS: Meta6Beat[] = [
     dur: 1.0,
   },
   {
-    p: 5, swap: 0.4, two: 1, orig: 0,
+    p: 384, swap: 0.4, two: 1, orig: 0,
     interact: {
       prompt: 'How does the claim divide between the two ships?',
       split: {
@@ -101,7 +101,7 @@ export const BEATS: Meta6Beat[] = [
           { id: 'use', upto: 1, reads: 'the one still sailing, never stopped' },
         ],
       },
-      explain: 'The seam belongs in the middle. Each ship holds one half of what we mean by the same ship: one keeps the wood, the other keeps the unbroken use. Push it to either end and you have not found the answer, you have chosen which test counts.',
+      explain: 'The seam belongs in the middle. Each ship holds one half of what anyone means by the same ship: one keeps the wood, the other keeps the unbroken use. Push it to either end and you have not found the answer, you have chosen which test counts.',
       xp: 5,
     },
     dur: 1.0,

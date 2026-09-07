@@ -21,17 +21,17 @@ export interface Logic25Beat extends BaseBeat {
 
 export const BEATS: Logic25Beat[] = [
   {
-    p: 164, x: 70,
+    p: 462, x: 70,
     text: 'A test that is 99% accurate comes back positive for a disease. Almost everyone reads that as "almost certainly ill".',
     dur: 3.7,
   },
   {
-    p: 164, x: 70,
+    p: 462, x: 70,
     text: 'Almost everyone is wrong.',
     dur: 1.8,
   },
   {
-    p: 41, x: 168, result: 1,
+    p: 437, x: 168, result: 1,
     text: 'The disease hits one person in ten thousand. So take ten thousand people and run the test on all of them, and just count what comes out.',
     cite: 'Ten thousand people',
     dur: 4.4,
@@ -56,7 +56,7 @@ export const BEATS: Logic25Beat[] = [
     dur: 3.4,
   },
   {
-    p: 29, x: 168, result: 1, real: 1, fake: 1,
+    p: 449, x: 168, result: 1, real: 1, fake: 1,
     text: 'But 1% of the other 9,999 also test positive, and 1% of a big number is a big number. A hundred people get the same letter you did.',
     cite: 'The hundred false alarms',
     dur: 4.8,
@@ -71,7 +71,7 @@ export const BEATS: Logic25Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, x: 124, result: 1, real: 1, fake: 1,
+    p: 165, x: 124, result: 1, real: 1, fake: 1,
     interact: {
       prompt: 'How do the shy, tidy people divide between the two jobs?',
       split: {

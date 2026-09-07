@@ -406,6 +406,39 @@ export default function ProfileScreen() {
         // which has nineteen children — twelve of them, 525 of the page's 716
         // nodes, start below the fold.
         removeClippedSubviews={Platform.OS === 'android'}
+        // ── AND THE CLIPPING PASS WAS NEVER THE OVERSCROLL FAULT ─────────────
+        //
+        //   > "when you're already at the top ... when you try scroll up even
+        //   > more, it's really lag[gy] ... and if you go all the way to the
+        //   > bottom of that tab and try scroll even more, it is also leggy."
+        //
+        // The note above this line reasoned the clipping pass into place and then
+        // admitted it was "still unverified ... and that needs `adb`". A phone
+        // was finally attached, and the answer is that clipping was aimed at the
+        // wrong mechanism. Measured on an S24 Ultra, Android 16, at 120Hz:
+        //
+        //   Profile, mid-page scroll        1.1% janky    11ms median
+        //   Profile, overscroll at the top   67.4% janky   65ms median
+        //   Profile, overscroll at bottom    68.5% janky   57ms median
+        //   Home, the identical gestures      0.0% janky   10ms median
+        //
+        // Ordinary scrolling is fine and always was. It is only the ENDS, which
+        // is exactly what was reported and exactly what the clipping pass cannot
+        // touch: Android 12+ replaced the overscroll glow with a StretchEffect, a
+        // RenderEffect that captures the scrolling content into an offscreen
+        // buffer so a shader can distort it -- every frame of the bounce, on the
+        // longest page in the app.
+        //
+        // BISECTED AT THE SYSTEM LEVEL rather than argued. With the phone's
+        // `animator_duration_scale` set to 0, so the stretch animation cannot
+        // play and nothing else about the app changes:
+        //
+        //   overscroll at the bottom   67.1% -> 9.1% janky, 57ms -> 12ms
+        //   Slow bitmap uploads          101 -> 0
+        //
+        // One prop turns it off, and it costs the screen nothing: the stretch was
+        // never carrying meaning here, and the reader is asking for it to stop.
+        overScrollMode="never"
       >
         {/* The header wears the user's chosen artwork. Every colour in it comes
             from that art's tone palette, so a light engraving gets ink text and a

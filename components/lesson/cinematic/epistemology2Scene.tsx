@@ -10,7 +10,7 @@ import {
 // See ethics2Scene: identity for codes under 100, and it opens the catalogue.
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -113,7 +113,14 @@ export default function Epistemology2Scene({ clock, bt, bi, pickPos, i }: SceneA
       tr));
 
     return {
-      doubter: pose(doubterS, DOUBT_X, GROUND, K_FIG, -1, 1),
+      // THE DOUBTER REACTS, NOT THE DEMON, and he is now the LEAD as well.
+      // `make-figure-roles` used to pick the principal from a list of five bundle
+      // names and fall back to MOUNT ORDER for anything else; this scene calls its
+      // figures DM and DD, so the demon won the role by being painted first — and
+      // wore the lead costume for it. The demon is the antagonist, the one
+      // deceiving you, so a demon who nods approvingly at a correct answer is the
+      // picture contradicting the lesson (A1). `LEAD` names the doubter now.
+      doubter: reactPose(doubterS, DOUBT_X, GROUND, K_FIG, -1, 1),
       demon: pose(demonS, DEMON_X, GROUND, K_FIG, 1, mOn),
       demonOn: mOn,
       // R7b — the arm sets how much the demon has faked away. Push it along and the
@@ -201,7 +208,7 @@ export default function Epistemology2Scene({ clock, bt, bi, pickPos, i }: SceneA
         <View style={styles.haloInner} />
       </Animated.View>
 
-      <Stickman D={DM} k={K_FIG} />
+      <Stickman role="second" D={DM} k={K_FIG} />
       <Stickman D={DD} k={K_FIG} />
 
       {/* the demon's horns and tail, riding its head and pelvis */}

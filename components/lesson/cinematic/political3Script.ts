@@ -59,18 +59,18 @@ export const BEATS: Pol3Beat[] = [
     dur: 1.8,
   },
   {
-    sub: 158, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
+    sub: 462, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
     text: 'Locke said we set up a government to guard our rights, and it holds power only in trust. Break the trust and the government forfeits its right to rule.',
     cite: 'Locke, 1689',
     dur: 3.9,
   },
   {
-    sub: 158, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
+    sub: 462, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
     text: 'The American founders leaned on Locke in 1776.',
     dur: 1.8,
   },
   {
-    sub: 0, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1,
+    sub: 460, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1,
     quote: {
       id: 'lq-political-political-3-1',
       text: 'Men being by nature all free, equal and independent, no one can be subjected to the political power of another without his own consent.',
@@ -94,7 +94,7 @@ export const BEATS: Pol3Beat[] = [
     dur: 1.8,
   },
   {
-    sub: 21, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1,
+    sub: 380, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1,
     interact: {
       prompt: 'On Locke’s account, tap what makes a government forfeit its right to rule.',
       cards: [
@@ -107,7 +107,7 @@ export const BEATS: Pol3Beat[] = [
     dur: 1.0,
   },
   {
-    sub: 4, r: 0, scroll: 1, pair: 2, flow: 1, seal: 1,
+    sub: 165, r: 0, scroll: 1, pair: 2, flow: 1, seal: 1,
     interact: {
       prompt: 'How close does a majority vote get to the general will?',
       drag: {

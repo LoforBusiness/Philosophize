@@ -40,13 +40,13 @@ export const BEATS: Strong4Beat[] = [
     dur: 2.1,
   },
   {
-    p: 167, fill: 0.55, verdict: 0, lens: 0,
-    text: 'A deductive argument promises its conclusion. Grade that one valid or sound.',
+    p: 459, fill: 0.55, verdict: 0, lens: 0,
+    text: 'A deductive argument aims to guarantee. Grade the argument valid, or sound.',
     cite: 'Two families of argument',
     dur: 1.8,
   },
   {
-    p: 167, fill: 0.55, verdict: 0, lens: 0,
+    p: 459, fill: 0.55, verdict: 0, lens: 0,
     text: 'An inductive argument only makes its conclusion likely, so grade it strong or weak. Use the wrong ruler and you get the wrong verdict.',
     dur: 3.5,
   },
@@ -62,7 +62,7 @@ export const BEATS: Strong4Beat[] = [
     dur: 1.8,
   },
   {
-    p: 8, fill: 0.78, lock: 0, dice: 1, verdict: 1, lens: 2,
+    p: 173, fill: 0.78, lock: 0, dice: 1, verdict: 1, lens: 2,
     text: '"Most Greeks eat olives; Socrates is Greek; so he eats olives. Only probable — he might hate them.',
     cite: 'Induction — likely',
     dur: 3.1,
@@ -86,7 +86,7 @@ export const BEATS: Strong4Beat[] = [
     dur: 3.0,
   },
   {
-    p: 21, fill: 0.78, dice: 1, verdict: 1, lens: 2,
+    p: 380, fill: 0.78, dice: 1, verdict: 1, lens: 2,
     // Answered ON the panel: the ruler cards clear and four verdict chips take
     // their place, so the reader grades the argument instead of reading a list.
     interact: {
@@ -98,7 +98,7 @@ export const BEATS: Strong4Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, fill: 0.78, dice: 1, verdict: 1, lens: 2,
+    p: 165, fill: 0.78, dice: 1, verdict: 1, lens: 2,
     interact: {
       prompt: 'What is the right verdict on a strong inductive argument?',
       sort: {

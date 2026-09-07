@@ -45,7 +45,7 @@ export const BEATS: KnowHowBeat[] = [
     dur: 1.8,
   },
   {
-    p: 40, x: 168, steps: 3,
+    p: 435, x: 168, steps: 3,
     text: 'Add the rest. Every line is accurate and you have memorised all of them.',
     cite: 'The whole method',
     dur: 2.7,

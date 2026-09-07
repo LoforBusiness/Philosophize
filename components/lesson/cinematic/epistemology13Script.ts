@@ -22,17 +22,17 @@ export interface Epi13Beat extends BaseBeat {
 
 export const BEATS: Epi13Beat[] = [
   {
-    p: 164, x: 70,
+    p: 462, x: 70,
     text: 'A fair lottery, a million tickets, one winner. You hold ticket 400,001.',
     dur: 2.1,
   },
   {
-    p: 164, x: 70,
-    text: 'Will it win? You would say that flatly, and you would be right.',
+    p: 462, x: 70,
+    text: 'Will it win? You would say no, flatly, and you would be right.',
     dur: 2.3,
   },
   {
-    p: 41, x: 168, grid: 1,
+    p: 437, x: 168, grid: 1,
     text: 'Here are twenty of them, to keep the drawing manageable. Nothing about the argument changes with the count.',
     cite: 'The draw',
     dur: 4.0,
@@ -68,7 +68,7 @@ export const BEATS: Epi13Beat[] = [
     dur: 2.6,
   },
   {
-    p: 4, x: 124, grid: 1, off: 2, winner: 1,
+    p: 165, x: 124, grid: 1, off: 2, winner: 1,
     interact: {
       prompt: 'Draw how reasonable "this ticket loses" gets as more tickets are added.',
       plot: {
@@ -87,7 +87,7 @@ export const BEATS: Epi13Beat[] = [
     dur: 1.0,
   },
   {
-    p: 6, x: 124, grid: 1, off: 2, winner: 1, pick: 1,
+    p: 383, x: 124, grid: 1, off: 2, winner: 1, pick: 1,
     interact: {
       prompt: 'You are sure of every verdict up there. Tap the ticket that wins.',
       explain: 'You cannot name one, and you cannot deny there is one. That gap — between what you can say about each ticket and what you can say about all of them — is the whole paradox.',

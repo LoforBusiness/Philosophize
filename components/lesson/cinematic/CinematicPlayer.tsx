@@ -3,7 +3,7 @@ import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue, useFrameCallback, useAnimatedStyle, useAnimatedReaction, useDerivedValue, runOnJS,
-  withTiming, Easing, type SharedValue,
+  withTiming, withSequence, withDelay, Easing, type SharedValue,
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import { getLessonById } from '@/data';
@@ -19,6 +19,9 @@ import {
 import { MUST } from './mustBoxes';
 import { TOURS } from './tours';
 import { GAZE } from './gazeTargets';
+import { WardrobeProvider } from './wardrobeContext';
+import Visitor from './Visitor';
+import { VISITOR } from '../../../data/lessonVisitor';
 import { toursOff } from './tourFlag';
 import { cue, touch } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
@@ -40,8 +43,7 @@ import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
   XpPill, TapNudge,
   COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, GROUND, INK,
-  type BaseBeat,
-} from './cinematicKit';
+  type BaseBeat, REACT,} from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The shared cinematic player shell. It owns everything that is identical across
@@ -234,6 +236,9 @@ export default function CinematicPlayer({
   // beat so that authoring it never restamps a lesson's must-see boxes — see
   // data/lessonFocus.ts for why that matters and what `check:focus` holds.
   const lessonFocus = LESSON_FOCUS[lesson.id];
+  // The second figure who walks in because the argument has two sides — see
+  // Visitor.tsx. Most lessons have no cue and mount nothing.
+  const visitorCue = VISITOR[lesson.id];
   const focus = lessonFocus && lessonFocus.beat === i ? lessonFocus.phrase : undefined;
   const [pickedOk, setPickedOk] = useState(false);
   const [correct, setCorrect] = useState(0);
@@ -870,6 +875,18 @@ export default function CinematicPlayer({
       if (isCorrect) { cue('right', run.current); run.current += 1; }
       else { run.current = 0; cue('rethink'); }
     }
+    // AND THE FIGURE ANSWERS TOO. `lookPose` reads this, so every scene that
+    // routes its figure through it nods or draws back with the reader — the
+    // mascot "learning with you" rather than standing beside a card that changed
+    // colour. `withTiming` both ways, because group L's whole finding is that a
+    // value which steps between two frames reads as a glitch.
+    //
+    // The out is slower than the in (M3's exits-are-shorter, read backwards: an
+    // exit that is faster than its entrance reads as the reaction being cut off).
+    REACT.value = withSequence(
+      withTiming(isCorrect ? 1 : -1, { duration: 220, easing: Easing.out(Easing.quad) }),
+      withDelay(260, withTiming(0, { duration: 420, easing: Easing.inOut(Easing.quad) })),
+    );
   }, [picked, sounded]);
 
   const onStage = useCallback((e: LayoutChangeEvent) => {
@@ -963,12 +980,12 @@ export default function CinematicPlayer({
                       style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
                     >
                       <TargetCountProvider onCount={setTargetCount} onBox={onBox} host={camHost}>
-                        <Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                        <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}</WardrobeProvider>
                       </TargetCountProvider>
                     </Animated.View>
                   ) : (
                     <TargetCountProvider onCount={setTargetCount}>
-                      <Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />
+                      <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}</WardrobeProvider>
                     </TargetCountProvider>
                   )}
                 </View>

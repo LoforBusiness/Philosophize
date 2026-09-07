@@ -45,22 +45,22 @@ export const BEATS: Aes22Beat[] = [
   },
   {
     p: 2, x: 200, screen: 1, slime: 1, meters: 1, heart: 1,
-    text: 'The belief that any of it is real never leaves the floor.',
+    text: 'The belief that any of the story is real never leaves the floor.',
     dur: 2.9,
   },
   {
-    p: 159, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
+    p: 463, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
     text: 'Three claims all seem true. You feel real fear.',
     cite: 'The paradox of fiction',
     dur: 2.2,
   },
   {
-    p: 159, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
+    p: 463, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
     text: 'Feeling needs belief. You believe none of the film.',
     dur: 2.2,
   },
   {
-    p: 4, x: 132, screen: 1, slime: 1, meters: 1, heart: 1, live: 1,
+    p: 165, x: 132, screen: 1, slime: 1, meters: 1, heart: 1, live: 1,
     interact: {
       prompt: 'Tap what the paradox says a real emotion must have.',
       explain: 'Belief. It is the claim doing the work and the one nobody notices making. Most people put the emotion in the racing heart, and if that were all it took the puzzle would already be over.',
@@ -69,13 +69,13 @@ export const BEATS: Aes22Beat[] = [
     dur: 1.0,
   },
   {
-    p: 21, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
+    p: 177, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
     text: 'One answer says you were never afraid. You were playing a game, and inside the game your fear is fictional.',
     cite: 'Make-believe',
     dur: 4.8,
   },
   {
-    p: 137, x: 268, screen: 1, slime: 1, meters: 1, heart: 1,
+    p: 456, x: 268, screen: 1, slime: 1, meters: 1, heart: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-22-2',
       text: 'Charles is not really afraid. It is fictional that he is afraid. He is engaged in a game of make-believe.',

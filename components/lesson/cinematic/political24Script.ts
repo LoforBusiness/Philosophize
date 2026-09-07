@@ -32,23 +32,23 @@ export interface Pol24Beat extends BaseBeat {
 
 export const BEATS: Pol24Beat[] = [
   {
-    p: 25, x: 200, signs: 1, pub: 1,
+    p: 462, x: 200, signs: 1, pub: 1,
     text: 'A minority language. It is printed on the court papers and taught in the schools, and at home it is simply spoken.',
     dur: 4.8,
   },
   {
-    p: 2, x: 200, signs: 1, pub: 1,
-    text: 'Recognition is not a courtesy added on top. We become who we are through how the people around us see us.',
+    p: 384, x: 200, signs: 1, pub: 1,
+    text: 'Recognition is not a courtesy added on top. You become who you are through how the people around you see you.',
     cite: 'Identity is dialogical',
     dur: 4.8,
   },
   {
-    p: 45, x: 132, signs: 1, pub: 0,
+    p: 447, x: 132, signs: 1, pub: 0,
     text: 'Take it out of the public places and leave the goodwill. Five generations later, this is what is left.',
     dur: 4.6,
   },
   {
-    p: 4, x: 132, signs: 1, pub: 0, live: 1,
+    p: 457, x: 132, signs: 1, pub: 0, live: 1,
     interact: {
       prompt: 'Tap the place that cannot keep the language alive.',
       explain: 'In private. It stayed lit the whole time and the bars fell anyway. That is why this looks like a special favour from outside and like survival from inside: goodwill at home is the one form of recognition that costs nobody anything.',
@@ -63,7 +63,7 @@ export const BEATS: Pol24Beat[] = [
     dur: 4.8,
   },
   {
-    p: 137, x: 268, signs: 1, pub: 0,
+    p: 144, x: 268, signs: 1, pub: 0,
     quote: {
       id: 'lq-political-political-24-2',
       text: 'Nonrecognition or misrecognition can inflict harm, can be a form of oppression, imprisoning someone in a false, distorted, and reduced mode of being.',
@@ -76,7 +76,7 @@ export const BEATS: Pol24Beat[] = [
     dur: 4.6,
   },
   {
-    p: 13, x: 268, signs: 1, pub: 0,
+    p: 383, x: 268, signs: 1, pub: 0,
     text: 'Two demands pull apart here. Treat everybody identically, or recognise what makes each way of life its own thing.',
     dur: 4.6,
   },

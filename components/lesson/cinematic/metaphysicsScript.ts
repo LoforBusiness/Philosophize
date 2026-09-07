@@ -85,7 +85,7 @@ export const BEATS: MetaBeat[] = [
   {
     hpose: 2,
     chain: true,
-    text: 'It has to assume there are states and laws to begin with.',
+    text: 'Science has to assume there are states and laws to begin with.',
     dur: 1.8,
   },
   {

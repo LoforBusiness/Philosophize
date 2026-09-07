@@ -19,12 +19,12 @@ export interface Epis14Beat extends BaseBeat {
 
 export const BEATS: Epis14Beat[] = [
   {
-    g: 5, vat: 0, leap: 0,
+    g: 384, vat: 0, leap: 0,
     dur: 4.0,
-    text: 'Here is your situation, drawn honestly. There is a world, and there is what reaches you of it, and you are on this side of that.',
+    text: 'Here is your situation, drawn honestly. There is the world, and there is what reaches you of the world — with a leap in between.',
   },
   {
-    g: 2, vat: 0, leap: 0,
+    g: 443, vat: 0, leap: 0,
     dur: 4.4,
     text: 'Everything you have ever checked, you checked by looking. So every check happened here, on this side of the glass, and never against the world itself.',
     cite: 'What you can check',
@@ -60,7 +60,7 @@ export const BEATS: Epis14Beat[] = [
     text: 'Nothing on it moved — and nothing on it ever would.',
   },
   {
-    g: 4, vat: 1, leap: 1, pick: 1,
+    g: 461, vat: 1, leap: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap the only part of this you can actually inspect.',
@@ -69,7 +69,7 @@ export const BEATS: Epis14Beat[] = [
     },
   },
   {
-    g: 11, vat: 1, leap: 1,
+    g: 165, vat: 1, leap: 1,
     dur: 1.0,
     interact: {
       prompt: 'What has to be true for the vat scenario to work at all?',

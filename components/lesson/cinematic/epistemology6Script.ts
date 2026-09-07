@@ -19,7 +19,7 @@ export interface Epi6Beat extends BaseBeat {
 
 export const BEATS: Epi6Beat[] = [
   {
-    p: 8, bal: 1, crack: 0, route: 0,
+    p: 444, bal: 1, crack: 0, route: 0,
     text: 'What if every belief can be doubted? The ancient skeptics took that idea further than Descartes ever did.',
     dur: 3.4,
   },
@@ -46,7 +46,7 @@ export const BEATS: Epi6Beat[] = [
     dur: 1.9,
   },
   {
-    p: 137, bal: 1, route: 3,
+    p: 139, bal: 1, route: 3,
     quote: {
       id: 'lq-epistemology-knowledge-6-1',
       text: 'To every argument an equal argument is opposed.',
@@ -79,11 +79,11 @@ export const BEATS: Epi6Beat[] = [
   },
   {
     p: 12, bal: 0.3, crack: 1, route: 3,
-    text: 'So most sceptics doubt softly. They go after your confidence, not after the possibility of ever finding anything out.',
+    text: 'So most sceptics doubt softly. They go after your confidence, not after the chance of ever knowing anything.',
     dur: 3,
   },
   {
-    p: 4, crack: 1, route: 3,
+    p: 165, crack: 1, route: 3,
     interact: {
       prompt: 'What is wrong with saying nothing is certain?',
       sort: {

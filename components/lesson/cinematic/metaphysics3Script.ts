@@ -21,7 +21,7 @@ export interface Meta3Beat extends BaseBeat {
 
 export const BEATS: Meta3Beat[] = [
   {
-    p: 20, shadow: 0.9, form: 0, apple: 1,
+    p: 384, shadow: 0.9, form: 0, apple: 1,
     text: 'Plato said the apple in your hand is only half-real. Not unreal — stuck between being and not-being.',
     dur: 3.4,
   },
@@ -77,7 +77,7 @@ export const BEATS: Meta3Beat[] = [
     dur: 2.3,
   },
   {
-    p: 6, shadow: 0.15, form: 1, apple: 1,
+    p: 383, shadow: 0.15, form: 1, apple: 1,
     interact: {
       prompt: 'Plato ranks these against each other. Tap whichever one he calls most real.',
       explain:
@@ -87,7 +87,7 @@ export const BEATS: Meta3Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, shadow: 0.15, form: 1, apple: 1,
+    p: 165, shadow: 0.15, form: 1, apple: 1,
     interact: {
       prompt: 'Where does Plato put the reality?',
       split: {

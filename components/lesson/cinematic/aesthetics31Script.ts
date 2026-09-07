@@ -22,7 +22,7 @@ export interface Aes31Beat extends BaseBeat {
 
 export const BEATS: Aes31Beat[] = [
   {
-    g: 40, strings: 4, playing: 1, clapA: 0, clapB: 0,
+    g: 383, strings: 4, playing: 1, clapA: 0, clapB: 0,
     dur: 4.0,
     text: 'Nine notes on four strings. A good phrase, played well, and the room is pleased with it.',
   },
@@ -33,13 +33,13 @@ export const BEATS: Aes31Beat[] = [
     cite: 'The first time',
   },
   {
-    g: 41, strings: 1, playing: 1, clapA: 1, clapB: 0,
+    g: 442, strings: 1, playing: 1, clapA: 1, clapB: 0,
     dur: 4.6,
     text: 'Now three of the strings are gone. Same nine notes, same tempo, same phrasing — every sound leaving the instrument is the sound that left it before.',
     cite: 'One string',
   },
   {
-    g: 137, strings: 1, playing: 0, clapA: 1, clapB: 0,
+    g: 456, strings: 1, playing: 0, clapA: 1, clapB: 0,
     dur: 3.6,
     quote: {
       id: 'lq-aesthetics-aesthetics-31-1',
@@ -62,7 +62,7 @@ export const BEATS: Aes31Beat[] = [
     text: 'The meter is the only thing on stage that moved.',
   },
   {
-    g: 2, strings: 1, playing: 0, clapA: 1, clapB: 1, pick: 1,
+    g: 443, strings: 1, playing: 0, clapA: 1, clapB: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap what the extra applause is actually for.',
@@ -71,7 +71,7 @@ export const BEATS: Aes31Beat[] = [
     },
   },
   {
-    g: 11, strings: 1, playing: 0, clapA: 1, clapB: 1,
+    g: 165, strings: 1, playing: 0, clapA: 1, clapB: 1,
     dur: 1.0,
     interact: {
       prompt: 'Where does sheer difficulty, on its own, land?',

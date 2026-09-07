@@ -163,7 +163,8 @@ const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'e
   // running out produces `undefined` on the right of the assertion, which reads
   // like the checker breaking rather than like a claim being stale.
   'forty-one', 'forty-two', 'forty-three', 'forty-four', 'forty-five',
-  'forty-six', 'forty-seven', 'forty-eight', 'forty-nine', 'fifty'];
+  'forty-six', 'forty-seven', 'forty-eight', 'forty-nine', 'fifty', 'fifty-one',
+  'fifty-two', 'fifty-three', 'fifty-four', 'fifty-five'];
 if (!WORDS[validators.length]) {
   console.log(`  FAIL  WORDS has no entry for ${validators.length} — extend it in this file`);
 }

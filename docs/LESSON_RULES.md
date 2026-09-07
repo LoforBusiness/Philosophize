@@ -2750,6 +2750,28 @@ The related trap: the figure is drawn in PROFILE with a featureless round head, 
 argument to `pose()`. "Look left, then right" is not something an action can express,
 however carefully it is written. Forward and back it can.
 
+**AND `check:moves` MEASURES IT NOW, WHICH TOOK TWO ATTEMPTS AND ONE DELETION.**
+Two acts written for the N14 spread went out dead and the EYE caught them, not the
+suite: 146 NOT CONVINCED ("the head goes over, and stays there") travels **1.6
+units** and 156 SIT WITH IT travels 3.2, against a family whose next-lowest is 10.8
+and reads fine. Same class as the launch screen's `read` at 0.2u.
+
+The first range check was deleted for being unfalsifiable: it swept the CLOCK, and
+bare `stand(t)` travels 5.28 units on its own, so every act cleared any sane floor
+whether or not it did anything — the counter-test froze an act's oscillators and
+the suite stayed green, because the frozen act was still breathing underneath.
+**Sweeping `u` at a FIXED clock is the escape**, and it is exact rather than
+clever: `stand(t)` does not depend on `u`, so it contributes nothing and what is
+left is the act's own arc. Acts that ignore `u` entirely are exempt — they have no
+arc, they are the posture and living shelves, and `sheet:moves` judges those. The
+exemption is MEASURED (excursion exactly zero) rather than listed, so adding a
+posture cannot drift a hand-kept list out of date.
+
+Floor 8u, budget 5, all five of them cold. **Its first summary line asserted "all
+cold" while two of the five were live in eight beats** — a check claiming something
+its own instrument cannot see, which is the failure it exists to catch, one level
+up. It says nothing about reach now; `check:life` owns that (N14).
+
 ### N13 · A gag needs two events and a gap
 
 What makes one of these funny is TIMING, not the pose. Every action in `moves.ts`
@@ -2774,6 +2796,112 @@ in a single frame and `check-moves` called it: 6.2 units of hand, jumped, and st
 6.2 when sampled sixteen times finer — the test that tells a snap from a teleport
 (group L). "The abruptness is the gag" is true and is not a licence. Over 0.04 of `u`
 it is about four frames: still a snap, and now something the eye can follow.
+
+### N14 · The corpus repeats itself even when no lesson does
+
+N6 asks whether a LESSON strikes the same pose twice. Nothing asked whether the
+CORPUS does, and the corpus is what a reader meets: one lesson, then the next, then
+the next, thirty-one of them down a branch. Both questions can be answered "no
+repeats" at once and the second one is the one that is felt.
+
+Measured the day this rule was written, with N6 fully satisfied and
+`liven-lessons` finding **zero** repeated poses left to vary:
+
+    1,993 gesture calls · 101 distinct codes
+    169 actions in the catalogue · 52 reached · 117 NEVER REACHED
+    the ten commonest poses: 53% of every gesture call
+
+Forty-eight actions had been added to `moves.ts` that week and **every one of them
+was cold**. This is the third time the same finding has been written down here —
+group N found 96 actions and 21 postures reached by eight codes, group Y found a
+thousand lines of `interact.ts` called three times — and it is worth stating as the
+general rule it is: **a catalogue is not a vocabulary until something puts it into
+the scripts, and nothing puts it there by existing.**
+
+`node scripts/spread-lessons.mjs` is the pass. For every beat whose pose has a
+`VARIANTS` row it chooses from `[the authored code, ...its variants]` at an index
+derived from **where the lesson sits in its branch**, so a reader working down a
+branch is never shown the same body for the same meaning twice running. The
+authored code keeps slot 0, which is not timidity: it leaves one in every n + 1 of
+these beats exactly as staged, so the corpus is never a thing only a codemod has
+chosen.
+
+**It is safe in bulk for one reason and one only: a `VARIANTS` row is ONE MEANING
+with several bodies for it.** `think` is a hand at the chin; `thinking it over` is a
+hand at the chin that shifts its weight. A script that said "he considers" still
+says it, so there is no sentence anywhere a swap can falsify (A1). The pass never
+reads a beat's prose and never needs to.
+
+Four things it must not do, each of which cost a run to find:
+
+- **A MARK IS AN ANSWER.** `circle it`, `cross it out` and `tick it` evaluate rather
+  than point, and the first run put `tick it` on `ethics21`'s graded beat — the
+  figure ticking away while the reader is being asked to split the morphine case.
+  That is not group O (nothing legible is revealed) and it is worse in one way: a
+  reader who takes the hint and is wrong was misled by the app rather than by the
+  question. They are barred from graded beats and are exactly right everywhere else.
+- **IT MUST BE A FIXED POINT.** Five codes are both a key and a value in `VARIANTS`
+  — the living holds the *previous* round swapped into, which then became the
+  corpus's own most-repeated poses and needed rows of their own. So the first draft
+  wrote 167 into a beat and the next run read 167, found its row, and moved it
+  again: a second dry run wanted 73 more lessons with nothing changed but the clock.
+  An option that is itself a row key is dropped, so a beat either keeps its authored
+  code or moves to one with no row at all. **Every run of this costs a must-box
+  re-measure, so a pass that drifts charges an hour of browser time for being run
+  twice.**
+- **A PASS THAT ADDS HAS TO LOOK FIRST.** The same defect from the other side, found
+  in `liven-lessons` on the same afternoon: its joke pass wrote gags and then forgot
+  them, so a second run treated a branch carrying twenty-nine as carrying none.
+  Nineteen lessons ended up with two gags and twenty-three came back inside the
+  eight-lesson window N10 exists to protect. Passes that read a code and write a
+  function of it are idempotent for free; the pass that ADDS is the one that has to
+  check what is already there.
+- **NOT EVERY NEW ACTION BELONGS IN THE TABLE.** Fourteen of the forty-eight are
+  deliberately unreachable from here — PAT THE POCKETS, LOOK UNDER, FOUND IT, LEAF
+  THROUGH, MARK THE PLACE, TURN THE PAGE, CLOSE THE BOOK, SET IT DOWN, TAKE IT UP,
+  READ ALOUD, PUT IT ASIDE, THE ASIDE, LOOK CLOSER, READ. Every one is ABOUT
+  something, and a variant table is applied without asking what the beat says.
+  `pat the pockets` on a beat about distributive justice is N9's failure wearing a
+  different hat. They are for an AUTHOR to place, which is the point of having them:
+  the library exists so a lesson being written can reach for the right thing, not so
+  a codemod can spend all of it.
+
+**AND THE SPLIT RUNS ARE ROTATED TOO, WHICH IS WHERE THE BIGGEST BLOCK WAS.**
+`LIVING_RUN` gives each frozen pose ONE living twin, so every run in the corpus
+that began as `think` became `chin in hand` — 445 beats, and the reason codes 164
+and 167 stayed at the top of the table while everything around them came down. A
+run must be one movement all the way through; nothing says it has to be the same
+movement in lesson twelve as in lesson eleven, and `RUN_VARIANTS` is that table.
+
+**N7's ban on a played code inside a run was over-broad, and the correction is
+measured rather than argued.** The ban exists because a one-shot reads `u` off
+`bt`, and `bt` resets on every piece of a split sentence — four pieces, four
+replays of the same arm. The two living shelves (59–78 and 157–168) ignore `u`
+entirely, so they cannot replay however often `bt` restarts. `CLOCK_ACTS` names
+them and `check:moves` proves it: hold `t`, sweep `u`, fail if a single joint
+moves. Counter-tested by putting act 4 (THINK, a genuine one-shot) into the set
+and watching it fail by name. **A rule can be exactly right about the band it was
+written for and wrong about a band that did not exist yet.**
+
+After the pass, with N6 still clean and no gag moved:
+
+| | before | after |
+|---|---|---|
+| the ten commonest, as a share of all gesture calls | 53% | **40%** |
+| distinct poses in use | 101 | **136** |
+| actions in the catalogue ever reached | 52 | **91** |
+| lessons that PERFORM an action rather than hold a pose | 145 | **176 of 177** |
+
+**And it costs a re-measure, which is not optional.** A must-see box contains the
+whole man, arms included, and it is measured from the render — so a different pose
+really is a different box, and `muststamp` hashes every channel value for exactly
+that reason. Counter-tested before the pass was written: changing one `p:` in one
+script takes `check:cinematic` from green to *1 lesson(s) changed since their boxes
+were measured*. The run order is
+
+    node scripts/spread-lessons.mjs
+    node scripts/measure-must.mjs scripts/.spread-ids.json     # the pass writes the list
+    npm run make:tours && npm run make:gaze
 
 ---
 
@@ -3117,9 +3245,10 @@ was got wrong for fifty and twenty-two lessons respectively.
 
 Read the middle column as a set of tests, not a menu:
 
-- **`lever`, not `cards`,** when the answers are ORDERED — could not have · could,
+- **`sort`, not `cards`,** when the answers are ORDERED — could not have · could,
   if you had wanted to · could, full stop. Cards throw the order away, and the
-  order was half the content.
+  order was half the content; a row of bins keeps it. (This test used to say
+  `lever`, and the control changed under it — the test did not.)
 - **`plot`, not `drag`,** when the reader believes something about a SHAPE. "How
   much aura is left" is a number; "how the aura goes as the copies multiply" is a
   curve, and a rail cannot hold one. Four cards describing four curves makes the
@@ -3127,11 +3256,14 @@ Read the middle column as a set of tests, not a menu:
 - **`split`, not `drag`,** when giving one side more has to visibly take it off the
   other. A rail with a label at each end says "more this way" and says nothing
   about what you gave up.
-- **`field`, not two questions,** when the whole lesson is that the two questions
+- **`poll`, not two questions,** when the whole lesson is that the two questions
   come apart. Presentism, the growing block and eternalism are three of four
   corners; non-domination is the corner where "left alone" and "nobody holds that
-  power" disagree. Ask those as a pick and you have quietly answered the
-  interesting half.
+  power" disagree. This used to be `field`, and the pad was retired because the
+  reader had to rebuild its corners from two axis labels before they could read the
+  question at all — so the corners are WRITTEN OUT as options now, and the poll
+  then shows who actually held each. The scene is what keeps the two axes visibly
+  independent (R7c).
 
 **`cards` is still the right answer most of the time — 155 lessons to 44.** An
 analogue control on a claim that genuinely has two sides is a worse question with
@@ -3156,10 +3288,11 @@ open-mindedness, named, and a reader who never lands on them has been taught les
 
 None of the five compares a float to a target.
 
-- `drag`, `lever`, `split` — the value falls in a **zone** or on a **detent**.
+- `drag`, `split` — the value falls in a **zone** or on a **detent**.
+- `sort` — the chip is over a **bin**.
 - `plot` — the drawn curve is scored to the **nearest profile** by RMS, so a reader
   who draws a cliff gets "a cliff" whether it falls at 0.9 or at 0.7.
-- `field` — the token is in one of **four quadrants**.
+- `poll` — the reader has pressed one **row**.
 
 A tolerance dressed up as precision is a worse question, not a stricter one. The
 thing being tested is whether they think the value collapses, not whether they can
@@ -3195,7 +3328,7 @@ time the failure looked identical: a sweep that measures less and says nothing.
   `click` does.
 - Deck choices are bare `Pressable`s, so `[role="button"]` alone finds half the
   buttons in this app.
-- A `drag`, `lever`, `plot`, `split` or `field` beat has **no button anywhere**, so
+- A `drag`, `sort`, `plot`, `split` or `poll` beat has **no ordinary button**, so
   a harness that only knows how to click measures 6 beats of 9 and reports them as
   measured. A short sweep is indistinguishable from a clean one unless something
   counts.
@@ -3216,13 +3349,15 @@ scene that reads them makes the reader move the picture rather than a widget bes
 one — the tower comes apart, the painting cleans, the crowd grows while every life
 in it shrinks. One gesture, on the UI thread, with no React render in between.
 
-The condition is the beat: the scene reads `dragPos` **only on its own graded beat**
-and the script's own track everywhere else. One value, two sources, and the picture
+The condition is the beat: the scene reads the control's value **only on its own
+graded beat** and the script's own track everywhere else. WHICH value depends on
+the control — `dragPos` for `drag`, `split` and `plot`, whose position IS the
+answer, and `pickPos` for `sort` and `poll`, whose rows are shuffled (X3). One value, two sources, and the picture
 never disagrees with whichever is in charge. Derive that flag from the beat rather
 than declaring a channel for it —
 
 ```ts
-const PULL = BEATS.map((b) => (b.interact?.lever ? 1 : 0));
+const PULL = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 ```
 
 — so it cannot fall out of step with the control it is about, and it costs
@@ -3281,12 +3416,17 @@ Four things make this cheap and safe rather than a rebuild:
   gives: `reacting ? dragPos.value : X[n]` inside the carry eases in over the
   transition, and outside it swaps on the single frame the beat opens (L1/L5).
 - **The mapping may be inverted, or a tent.** Drag toward *nothing is right or
-  wrong* and the shared moral floor goes OUT (`1 - dragPos`). A lever whose MIDDLE
-  setting is the case gets `1 - Math.abs(dragPos * 2 - 1)`, so the second apple
+  wrong* and the shared moral floor goes OUT (`1 - dragPos`). A control whose MIDDLE
+  setting is the case gets `1 - Math.abs(pickPos * 2 - 1)`, so the second apple
   exists only at the setting that says there are two of them.
-- **A `field` should drive BOTH axes**, or the pad is a rail with a spare
-  dimension. epistemology-23 is the model: the mouth of the hopper opens across,
-  the mesh tightens up, and the reader builds the machine the lesson is about.
+- **A question with two independent settings should drive BOTH**, or one of them
+  is decoration. epistemology-23 is still the model and it is now a `poll`: each
+  option carries a mouth setting AND a mesh setting in a table the scene reads with
+  `pickAt`, so choosing a character drives the machine to that character's
+  settings and the reader watches the mouth close as the answer moves from *hears
+  everything* to *the dogmatist*. A pad did this with two axes; a table does it
+  with one value, and it interpolates, so the picture TRAVELS between the named
+  positions rather than cutting between four stills.
 
 **Some lessons should NOT do this, and that is a finding rather than a gap.**
 aesthetics-16 asks what changed when you learned the painter was cruel, and the
@@ -3298,7 +3438,7 @@ scenes that looked hard; going back through the remaining 59 one at a time found
 that most of them were not hard at all, because the scene had already drawn the
 thing the control is about and simply was not letting the reader touch it —
 political-31's field is bare at *ask each herder to take less* and grows back at
-*change what taking too much costs*; epistemology-12's three pipes ARE the lever's
+*change what taking too much costs*; epistemology-12's three pipes ARE the sort's
 three stops; aesthetics-31 takes strings off the instrument as the token moves
 toward *very hard to play*; political-15's night lifts off the stair as it moves
 toward *done in the open*.
@@ -3306,7 +3446,7 @@ toward *done in the open*.
 **What is left is genuinely left.** Three shapes, and it is worth being able to
 name which one a lesson is before deciding it is a gap:
 
-1. **A ladder that is not a scale.** A lever whose stops are three unrelated
+1. **A ladder that is not a scale.** A control whose settings are three unrelated
    diagnoses — *one ruler pressing down* · *an outside power* · *the many closing
    in* — has no quantity behind it, so any monotone track lies at two of the three
    settings. That is A1, and A1 wins.
@@ -3352,7 +3492,7 @@ are printed at.
 H52 still says exactly two graded questions per lesson. Group Q says neighbouring
 lessons may not ask the same question. Between them the working rule is simple:
 **a lesson's two questions use two different controls, and a lesson does not use
-the same control as either neighbour.** A branch that runs lever · lever · lever is
+the same control as either neighbour.** A branch that runs sort · sort · sort is
 back to boxes you tap, wearing a nicer hat.
 
 ---
@@ -3831,8 +3971,8 @@ to get wrong and impossible to see in the source:
 - [ ] One question in the deck, one answered on the stage (H65); the distractors are
       real rival positions, not filler (H66).
 - [ ] **The control matches the shape of the claim** (R1): a scale is `drag`, an
-      ordered set of named settings is `lever`, a curve is `plot`, a division of one
-      thing is `split`, two independent yes/no questions are `field`, and everything
+      ordered set of named settings is `sort`, a curve is `plot`, a division of one
+      thing is `split`, a position you would defend is `poll`, and everything
       else is `cards` — which is still most of them. The two graded beats do not use
       the same control, and neither does either neighbour (R8).
 - [ ] **Nothing is drawn where no shot can reach it** (D36): every word inside
@@ -5996,6 +6136,168 @@ with `file` rather than assuming.
 
 ---
 
+---
+
+## Group V — the narrator is not in the room
+
+A reader named a model: *American History Tellers*, the Wondery show. They were
+specific about what they wanted from it — *"I like the script that they use and
+how they tell the story… I like how simple it is to understand when hearing the
+words"* — and about the hard case: **the topics are difficult and the telling
+should not be.**
+
+Its writer, Lindsay Graham, states the method plainly enough to build rules from:
+
+> *"There's a temptation to get the facts across and that's the worst instinct,
+> because no facts live or breathe."*
+> *"We think in a very, almost television way. We have characters, they do things,
+> there are consequences."*
+> *"Something has to happen every two minutes."*
+> *"The voice in my shows is removed. There's no first-person personal pronouns."*
+
+`npm run check:voice` holds V1. Everything else in this group is a rule for a
+person, because the two attempts to make them countable both failed in the way
+group Z describes — see the end.
+
+## V1 · No seminar "we"
+
+**A beat may not put the narrator and the reader in the same pronoun.** "We
+forget that a photographer did", "Tragedy hurts, and we go anyway", "Most of us
+quietly use all three" — that is a lecturer agreeing with a room about what they
+both think, and it is the register a story does not have. Hand the sentence to
+the reader instead: *you* forget, *you* go anyway. The picture is untouched, so
+A1 costs nothing.
+
+**THREE KINDS ARE NOT THIS, and the check leaves them alone**:
+
+- **a philosopher's own claim, reported.** "Hobbes said we laugh at someone
+  beneath us" is Hobbes's first person; rewriting it misquotes him.
+- **speech in quotation marks.** `you say "I promise to repay"` — the pronoun is
+  the example.
+- **a "us" that names a real group** the lesson is about.
+
+The check covers **`text`, `explain`, `prompt` and `reads`** — every field a
+reader actually reads. It scanned `text` alone at first, which left the worst
+place untouched: **`explain` is the sentence shown in the second AFTER
+answering**, when attention is highest, and it was saying things like *"we would
+not accept 'too demanding' from somebody refusing to wade into the pond"*.
+
+`cite` is excluded and must stay excluded — "Descartes, Meditations I, 1641"
+ends in a Roman NUMERAL, which any first-person rule reads as "I". A
+philosopher's quotation is excluded by INDENT rather than by a word list: those
+75 are the source's own words.
+
+38 narrator first-persons were rewritten in all. What remains is quoted speech
+and readouts deliberately written in the reader's own voice, so the check is a
+high-water mark rather than a zero.
+
+> **The checker was blind to the commonest form of the defect, and its own
+> counter-test is what found that.** `\b(we|our|us|I|my|me)\b` has no `i` flag, so
+> a **sentence-initial "We"** — which is most of them, since a beat is usually one
+> or two sentences — matched nothing. Splicing "We see the needle…" into a lesson
+> left the count sitting at exactly the budget, which reads as a clean corpus.
+> `we|our|us|my|me` folds case; `I` must not, or every stray tokenised "i" fires.
+
+## V2 · A beat contains an event, not an exhibit
+
+Graham's "no facts live or breathe" is the rule these lessons are most at risk
+from, because a philosophy lesson's material really is a set of claims. The test
+is whether the beat has something HAPPEN in it. `epistemology31` opens *"You are
+already down the road when it hits you: did you lock the door?"* — a moment, a
+person, a jolt. It could have opened "Memory cannot certify itself" and said the
+same thing.
+
+## V3 · The turn is the rhythm, and it is one sentence
+
+AHT's most repeated move is a short reversal immediately after the setup: *"But
+today is anything but regular."* It costs a sentence and it tells the reader the
+situation just changed, which is the difference between a list and a story.
+
+**THIS IS A TECHNIQUE, NOT A TARGET, AND THE EXEMPLAR IS WHY.** 7.6% of beats
+carry one — and `political7`, the lesson the reader holds up as the standard,
+carries **none at all**. A rule its own best example fails is not a rule, so
+there is no budget here and no check. What the number is good for is the
+opposite of a quota: if a beat already reads well without a turn, leave it.
+Reach for one when a beat has set something up and the next thing that happens
+contradicts it.
+
+## V4 · Strip to the emotional core, not to the summary
+
+> *"All we need to know is Pope Pius IX is really angry."*
+
+The instinct when compressing is to keep the load-bearing facts and drop the
+colour. Graham does the reverse: he keeps the one thing a person would feel and
+drops everything else. In a lesson that means the stake — what goes wrong for
+somebody if this idea is false — survives the cut before the taxonomy does.
+
+## V5 · THE COLD OPEN DOES NOT TRANSFER, AND THAT IS THE FINDING
+
+The signature device of the show is the second-person dramatised opening: a date,
+a place, a broken radio, a double martini, four hundred words before the narrator
+speaks. **Do not write that here**, and the reason is structural rather than a
+matter of taste.
+
+**AHT builds a scene in words because audio has no picture. These lessons have a
+picture.** A beat that sets the scene in prose is narrating what the reader is
+already looking at — A1 read backwards — and it spends a beat's ~11 words (J12)
+on the one job the stage does for free. The cinematic format already *is* the
+cold open; the prose is the narrator over the top of it.
+
+So what transfers from AHT is the **voice** (V1), the **event** (V2), the
+**turn** (V3) and the **cut** (V4). The scene-painting is already the scene's.
+
+## V6 · The corpus was measured before it was rewritten, and it was mostly right
+
+Two metrics were built to find un-AHT-like prose and **both were deleted for
+disagreeing with lessons whose answer was already known** (Z-group's rule):
+
+- **a keyword "concreteness" score** called *"Two canvases. One is a Vermeer."*
+  and *"A bull, drawn properly. Eleven strokes, and nobody has to be told what it
+  is."* abstract. It was scoring its own word list — it had no entry for canvas,
+  Vermeer, urinal, swan or morphine.
+- **a linking-verb "exhibit" score** ranked `epistemology31` and `metaphysics24`
+  among the worst in the corpus. Its action-verb test required an `-s`/`-ed`
+  ending, so every imperative — *"Take one grain away"*, *"Keep applying it"* —
+  was invisible, and an imperative is the most active sentence there is.
+
+**A THIRD WAS BUILT AND DELETED IN THE SAME WAY**, and three for three is the
+finding rather than bad luck. An EXHIBIT score meant to catch an opening that
+announces an inventory instead of starting something flagged 72, including:
+
+    political3     "A gun makes you obey. What makes you owe obedience?"
+    ethics6        "Five lives saved. So why does this one feel wrong?"
+    epistemology7  "The sun rose today. Will it rise tomorrow?"
+    ethics35       "Two men, one afternoon, one drowning child. The first
+                    reaches in and holds him under."
+
+Those are among the best openings in the corpus. It tested for an "event verb"
+against a keyword list, so `glance`, `reaches`, `holds`, `rose` and `makes` read
+as no event at all. **WHETHER A BEAT STARTS SOMETHING IS NOT COUNTABLE.** A
+person reads the opening; a checker can only measure whether a sentence is hard
+to get through.
+
+**AND A RATIO NEEDS A DENOMINATOR, WHICH J12 TOOK AWAY.** The beat-splitting pass
+cut 466 packed beats into pieces, so a great many beats are now three or four
+words — and Flesch is built for passages. *"Two completely different reasons."*
+scores **−9**; *"Belief, truth, justification — all three."* scores 33; *"Look at
+it. Beautiful, obviously."* scores 52. All three are exactly right as written.
+One pointer in a five-word beat is 20% and means nothing. `prose-worklist` gates
+its ratio faults at twelve words for that reason, and the clause rule too — three
+commas in a five-word LIST is one clean thought, not two bolted together.
+
+What survived measurement: the corpus reads at **83.2 mean Flesch reading ease
+and 10.2 words a sentence**. Working the whole corpus down a calibrated worklist
+came to **73 pieces across 54 lessons** — the rest were already clean by every
+readability rule the suite holds. **The prose was already close to the model.**
+
+> **A WHOLESALE REWRITE WAS THE WRONG MOVE AND WAS NOT MADE.** 1,364 beats are
+> pinned to what the stage draws, to the maxims in `data/lessonFocus.ts` that are
+> cut from their own wording, to the generated name index, and to the neighbour
+> rules in group Q. The affordable, checkable change is the one that leaves all
+> four alone.
+
+---
+
 ## Group W — two things in the paragraph are not ordinary words
 
 The deck under the figure used to be one flat `<Text>`. Every word of every beat
@@ -6656,3 +6958,409 @@ The two that were done are the two where the drawn subject is in motion by natur
 **And the origin has to be the object.** Both ride an `absoluteFill`, so a bare
 `rotate` swings about the middle of the 400×560 design space and throws the ship
 off its own water. `transformOrigin` in px, at the waterline amidships.
+
+---
+
+## Group AA — what the figure wears, and what he does when you answer
+
+**AA rather than a single letter because A–Z are used**, and this is genuinely a
+new area rather than an extension of one: group N is what the figure DOES, group
+Y is his relationship to the world around him, and neither covers what he has ON
+or how he answers the reader back.
+
+A reader asked for both halves at once:
+
+> *"sometimes maybe wearing a top hat with a cane and a eyeglass … or have a
+> second stickman walk in … dressed funny or dressed differently. I still want the
+> core stickman to be the main mascot"* — and — *"the stickman's purpose is to
+> learn with the user."*
+
+`npm run check:wardrobe` holds AA1–AA4. `npm run sheet:wardrobe` is the
+instrument, and it is the one that matters: every rule below was learned by
+drawing the wardrobe and looking at it, and none of them is visible in a number.
+
+## AA1 · A HAT SITS DOWN OVER THE SKULL. It does not rest on top of it
+
+A reader looked at the shipped wardrobe and said the top hat *"is above his head,
+so it looks like it's floating."* They were describing exact geometry.
+
+The head is a CIRCLE of radius 20. Every brim in the first version had its bottom
+edge at y −20 — **TANGENT to the top of that circle.** Two shapes touching at a
+single point, with a wedge of blank paper opening either side of it. A hat resting
+on a sphere at one point is a hat in mid-air. The mortarboard was worse: its board
+sat three units clear of the head with nothing between them at all.
+
+Every drawing guide says the same thing in words — *"the hat should overlap and
+interact naturally with the head, rather than appearing as a separate element
+placed on top"*, and *"erase the parts of the head that should be hidden"*. The
+arithmetic version is `seatY()` in `wardrobe.ts`: **a hat descends until its crown
+walls touch the skull**, so a crown of width w meets a head of radius R at
+
+    y = −√(R² − (w/2)²)
+
+For a 30-wide crown that is **−13.2, not −20**. Every hat was seven to thirteen
+units too high. **AA6 holds it**, and its counter-test is the reader's own
+complaint: restoring the old numbers makes `dandy` — the costume they named — fail
+with "it rests on one point".
+
+> **The check had to be scoped to HEADWEAR, not to everything anchored to the
+> head.** A monocle's chain hangs to y +33 and satisfies any overlap test by
+> itself, so with the chain counted `dandy` passed while wearing the very hat the
+> reader was complaining about. A crown, a brim, a board and a cap are WIDE; a
+> chain, a tassel and its bob are not.
+
+## AA1b · A piece must change the SILHOUETTE, or it does not exist
+
+He is solid ink, with no face, no shading and no colour, about a hundred units
+tall. Anything drawn INSIDE that outline is not subtle, it is absent. §19 already
+records the same finding twice from the other end — `seated()`'s note that *"a
+fist near the body buries the whole forearm inside the torso silhouette and the
+figure loses an arm"*, and the two launch poses a reader rejected because leg,
+torso and both arms merged into one mass.
+
+**So these were designed, drawn, and cut:**
+
+- **SUNGLASSES and a MOUSTACHE.** Marks on a face, and the head is a plain disc.
+- **A SHIRT, a WAISTCOAT, a BELT.** All paint the torso bone, which is already
+  solid ink of the same colour.
+- **A BOW TIE and a COLLAR — and this one is geometry, not taste. THERE IS NO
+  NECK.** The head has radius 20 and the neck is 16 long, so the head's bottom
+  edge sits BELOW the shoulder base: they overlap. Nothing anchored between them
+  is small, it is inside solid ink.
+- **A BOOK, or anything else small and held.** A held item only reads if the POSE
+  holds the hand clear of the body, and lesson poses mostly tuck it against the
+  ribs. The CANE survives because it is long enough to reach the GROUND, so it
+  breaks the outline below the figure whatever the arm is doing. **Reach is not
+  the test; reach beyond the body AT EVERY POSE is.**
+
+**AND THE SAME RULE CUT THE SCARF, TWICE.** Version one was a rounded blob beside
+the head and read as a thumb. Version two held it off the body with a gap of paper
+and read as a stick floating in mid-air. The rule had already predicted both: **a
+scarf lives on a NECK**, and this figure's head overlaps its own shoulders, so
+there is no neck to hang one from — exactly the bow tie's problem reached from the
+other direction. It is a SATCHEL now, hanging from the hip where there is empty
+paper on both sides of the leg.
+
+**A FLAT CAP IS ALSO IMPOSSIBLE, AND THE REFERENCE EXPLAINS WHY.** A flat cap
+*"skims the skull in a low, shallow profile"* — a perfect description of something
+invisible here, since it stays inside the head's own outline. Its cousin is defined
+by the opposite: *"a visibly puffed, rounded crown that BILLOWS ABOVE THE PEAK"*,
+with the body *"overhanging the brim more dramatically"*. So it is a NEWSBOY, 44
+across a head of 40.
+
+**AND WHERE INK MEETS INK, DRAW PAPER.** A cap that hugs the skull is ink on ink:
+no edge, so the two merge into one amorphous mass and the figure reads as wearing
+a helmet, or as nothing at all — which is what a reader saw ("one that I saw was
+really bad, I don't even know what it was"). `Piece.paper` draws a hairline of the
+stage's own ground along the seat. It is the guides' *"erase the parts of the head
+that should be hidden"* translated into a medium where everything is one colour,
+and it is the single change that turned that costume from a blob into a cap.
+
+**The MONOCLE is the interesting case**, because a reader asked for it by name and
+the obvious version fails. Centred on the head it is invisible. It earns its place
+by sitting **eleven units proud of a head of twenty** and dangling a chain clear
+below, so it breaks the outline twice. At radius 8 — the first draft — it was a
+bump. It is the piece most likely to be "tidied" back onto a face that does not
+exist.
+
+**Two hats that differ only in trim are one hat.** The five differ in silhouette:
+tall cylinder, dome, wide flat board, low cap with a peak, enormous brim.
+
+## AA1c · REACHING THE SKULL IS NOT SITTING ON IT — and AA6 could not tell them apart
+
+The rule above was written and enforced, and **the newsboy cap went on floating
+for the life of the costume, on 42 figures across 36 lessons**, because AA6 asked the wrong
+question. It tested whether any headwear DESCENDS far enough to overlap the head.
+A crown WIDER than the skull overlaps it easily while its own bottom corners
+bridge open paper — so `flat_cap`, 44 across with its bottom edge at y −11 when
+`seatY(44)` is −4.4, passed every run.
+
+Rendered large it is unmistakable: a 44×18 slab, wider than the head, with a
+full-width seam ruled beneath it, and the top of the SKULL annexed into the mass
+above that seam. It is the reader's own *"his hat is above his head, so it looks
+like it's floating"* — in the one costume that was never re-checked after the top
+hat was fixed. It is very likely also *"another dressing up, one that I saw was
+really bad. I don't even know what it was."*
+
+**THE WIDTH AND THE SEAT ARE ONE DECISION, NOT TWO.** `seatY` inverts, so this is
+arithmetic rather than taste: a crown whose bottom edge is to rest at −12 must be
+2·√(20² − 12²) = **32** across. At that width the bottom edge lies ALONG the skull
+instead of bridging it, there is no wedge under the corners, and the billow the
+reference asks for comes from HEIGHT rather than overhang. **AA6b** re-derives
+every crown against `seatY(its own width)`.
+
+> **A `paper` seam is drawn LAST, so it cuts whatever it crosses (AA6c).** The old
+> cap's peak ran y −14 to −10 through a seam at −11 and lost its base, so the peak
+> read as a bar floating in the slot beside the cap. The seam's job is to draw the
+> hat's lower edge; a piece that continues BELOW it is severed, not separated.
+>
+> **A SEAM IS HORIZONTAL; A STRAP IS VERTICAL**, and the first draft of the check
+> could not tell them apart. The satchel's own `paper` piece is a 2×12 rotated line
+> drawn DOWN the bag to read as a strap — deliberate, and it severs nothing,
+> because the bag continues either side of it.
+
+> **AND A CORNER RADIUS MOVES THE EDGE A JOINED PIECE HAS TO MEET.** With the cap
+> reseated, the peak still hung clear of it: `r` rounds the crown's bottom corner,
+> so at the peak's own lower edge the crown had already curved in from x 16 to
+> **13.4**, and a peak rooted at 15 sat 1.6 units off in open paper. Butt a joined
+> piece against the edge where the two actually MEET, not against the box's
+> nominal side.
+
+## AA1d · A RING MUST TOUCH NOTHING
+
+The monocle is the one ring in the wardrobe, and it only reads as a lens while it
+is a closed loop hanging in clear paper. Its top edge sat at y −12.5 — inside the
+top hat's brim band (−15…−11) AND inside the wide brim's (−16.5…−11.5) — so on
+**both** costumes that wear it, the lens fused with the brim above it.
+
+A closed loop joined to a bar at its top is not an eyeglass, it is a HANDLE.
+Rendered large, the aesthete was carrying a teacup on the side of his head.
+
+This is AA1b read at a smaller scale: two objects that touch are one object, and
+the one they make is neither of them. Dropped to y 0 the ring hangs 1.5 units
+clear of the stovepipe and 2.0 clear of the wide brim. **AA6d** holds it, with the
+figure's own cord exempted — that is meant to hang out of it.
+
+> **AND A BRIM IS ONLY THE PART THAT CLEARS THE SKULL.** The bowler's was 46
+> across a head of 40 — **3 units a side, about three pixels at the size a lesson
+> draws him** — so seven eighths of it was ruled inside the silhouette where ink on
+> ink shows nothing, and with no seam under it the crown merged into the head as
+> well. What was left read as two small tabs on a gourd. At 50 it clears by 5 and
+> is still plainly not the top hat's 56 nor the aesthete's 60, so the five
+> silhouettes stay distinct.
+
+## AA2 · A hat is part of the man, as far as the camera is concerned
+
+`mustrule` puts *"the whole man, arms included, and every figure on stage"* inside
+EVERY must-see box. So a costume changes what the camera must frame and what the
+band must contain, and **`Stickman.tsx` is deliberately not in `muststamp`** —
+nothing would have gone red.
+
+`npm run make:wardrobe` assigns the costumes AND regrows the boxes in the same
+run, so the two cannot drift. Three things it has to get right, all learned the
+hard way:
+
+- **IT MUST BE IDEMPOTENT.** Growing every figure box by the costume's reach is
+  correct once and wrong every time after. Boxes only get LOOSER, so no check goes
+  red — the camera just quietly stops pushing in. The reach last applied is
+  recorded in the side file and taken back off before the new one goes on.
+- **THE FIT TEST MUST READ THE BARE FIGURE.** Measuring the stored box directly
+  makes it a FEEDBACK LOOP: the expansion changes what fits, which changes the
+  costume, which changes the expansion. Proven rather than argued — the second run
+  of the first version moved 3,851 boxes that should not have moved.
+- **A COSTUME THAT WILL NOT FIT ITS BAND IS REFUSED**, not shipped and cropped.
+  `mustBox` CLAMPS to the band, so a hat above it is an H59 fault the camera
+  cannot rescue.
+
+> **`wardrobe.ts` was put into `muststamp` for an afternoon and taken back out.**
+> Putting it there is the obvious move and it is worse: a hash can only say that
+> SOMETHING changed, and the honest response to that message is a multi-hour
+> re-measure. `check:wardrobe` re-derives each lesson's reach from the current
+> geometry and compares it with what the boxes were grown by — so it names the
+> lessons, says by how much, and tells you which command to run. **A check that
+> says WHAT is wrong beats a hash that says something is.**
+
+## AA3 · Neighbours never dress alike, and a grave lesson wears nothing loud
+
+Group Q applied to the figure. The costume is DERIVED and rotated rather than
+authored 186 times, because 186 authored decisions is the kind of list that gets
+half-finished, and a half-dressed corpus reads worse than an undressed one.
+
+**A GRAVE LESSON DOES NOT WEAR A JOKE.** `liveliness.GRAVE` already decides which
+lessons are too heavy for a pratfall (N11, applied to the whole lesson and not
+just the sentence), and a top hat and monocle on a lesson about slavery is exactly
+the same insult in a different medium. 48 lessons are held to the sober set. This
+is the rule most likely to be relaxed by somebody wanting more variety; it is the
+reason the feature is safe to ship at all.
+
+**THE MASCOT IS STILL THE MASCOT.** `plain` is the single commonest entry — 70 of
+186 — and the loudest costumes are the rarest. A figure in fancy dress every
+lesson has no default to vary FROM.
+
+> **The rotation collapsed once and looked fine.** A grave lesson used to switch to
+> a separate SOBER array indexed by the cursor that had been advancing against the
+> main cycle, so the two indexings desynchronised: `ringmaster` came out ONCE in
+> 186 lessons and `aesthete` three times. A grave lesson now SKIPS to the next
+> sober entry of the one cycle instead of walking a different list.
+
+## AA4 · Two figures are an argument; three are a crowd
+
+A scene mounts one `<Stickman>` per figure, and without a role they all read the
+LEAD's costume — so `aesthetics7`'s two figures came out as **identical dandies in
+matching top hats**, which is worse than both being plain because it draws the eye
+to a coincidence rather than to a difference.
+
+- **the LEAD** is the mascot, and is found BY NAME (`DF`, `OF`, `DSov`), not by
+  mount order. Mount order is PAINT order: assigning by position made a citizen
+  the lead of `politicalScene` and gave the SOVEREIGN — the one figure in that
+  scene who obviously wants a top hat — the crowd's empty costume.
+- **the SECOND** figure in a two-hander is the opposing position, and wears a
+  different costume on purpose.
+- **THREE OR MORE wear nothing.** Four identical dandies in a multitude is a
+  uniform, not variety.
+
+`npm run make:figure-roles` does it; 28 extra figures across 20 scenes.
+
+## AA5 · He answers you back
+
+> *"the stickman's purpose is to learn with the user."*
+
+He was not. **149 scenes reference `picked` and NOT ONE of them changed his
+pose** — so at the one moment in a lesson when the reader has actually done
+something, the only thing on screen that moved was a card.
+
+He nods when they are right and draws back when they are not. The wiring is one
+module-level shared value in `cinematicKit` (`REACT`), written by the player and
+read by `lookPose` — so it reaches all 164 scenes that already route their figure
+through `lookPose` **with no scene edited at all**. A per-scene prop would have
+been 164 mechanical edits to files whose every byte is inside `muststamp`, which
+is 164 chances to move a prop and force a re-measure.
+
+Three things that cost a render each:
+
+- **`tilt` and `neck` ARE RADIANS.** `solve` uses them as `Math.PI + tilt` and
+  `Math.cos(tilt)`. The first draft wrote 9 and 5 as if they were degrees — 515°
+  and 286° — and the measured head travel on answering was **87px where a nod is
+  about twelve**. The bisect settled it: with the reaction switched off the same
+  tap moved the head 0.2px.
+- **NEGATIVE TILT IS FORWARD**, and the first version had it backwards: a wrong
+  answer bowed him and a right one leant him away. Read off a captured
+  resting-versus-peak pair, not off the solver.
+- **MEASURE BOTH AXES.** A forward dip moves the head mostly in X. Judging the nod
+  on `y` alone reported 1.9px for a move that was really 4.1, and would have led to
+  turning it up three times too far.
+
+The wrong-answer move is smaller than the right-answer one on purpose. §7's rule
+holds here too: this is a mascot who is pleased for you, not one who is
+disappointed in you.
+
+## AA5b · An exemption from the GAZE quietly took the REACTION with it
+
+"It reaches all 164 scenes that already route their figure through `lookPose`"
+has a second half nobody wrote down: **the other 22 got nothing.** In those
+lessons, answering a question moved no figure at all.
+
+They are not a random 22. They are the exact set the rule book already exempts:
+
+- **20 scenes stage more than one figure**, and are exempt from the gaze because
+  `make:gaze` aims at the area-weighted centre of everything a beat draws that is
+  not the figure — with two figures there is no single answer to "which of them is
+  the narrator". The exemption was implemented by leaving them on plain `pose()`.
+- **`logic-arguments-1` and `-2` predate `CinematicPlayer`** and keep their own
+  copies of the loop, so neither ever wrote `REACT` at all. They are the first two
+  lessons of the Logic branch — among the first any reader meets.
+
+**THE EXEMPTION WAS ABOUT THE GAZE AND IT TOOK THE REACTION WITH IT**, because
+`lookPose` carries both. `reactPose` is that call with the gaze weight at zero,
+so the exemption stands and the mascot still answers back.
+
+> **NO SOURCE CHECK COULD SEE THIS, AND THAT IS THE POINT.** No scene mentions
+> `REACT` by name — the whole reason one shared value reached 164 scenes without
+> editing any of them. A grep for the reaction finds nothing in a working scene
+> and nothing in a broken one. `scripts/check-nod.mjs` asks the render instead:
+> record every part of the figure, answer, record again, keep the largest
+> displacement.
+>
+> **SAMPLE THE WHOLE ROUND TRIP, NOT ONE MOMENT.** The reaction is 220ms out,
+> 260 held, 420 back — so the ~1000ms settle every other harness here uses lands
+> exactly when the figure is home again, and reports a working nod as dead. And
+> take the floor from the scene's OWN idling rather than from zero: he breathes
+> (group N), so a still figure is never perfectly still.
+
+> **AND WIRING IT BLINDED `check:life` IN THE SAME COMMIT.** Its two-figure
+> exemption counts `pose(` with a lookbehind, which does not match `reactPose(` —
+> so the moment those scenes were wired their figure count fell from two to one,
+> the exemption lapsed, and 18 of them were reported as never looking at anything.
+> This is L5, L8 and C18 for the fourth time: **when a lesson gains a new way to
+> be posed, every checker that counts poses gains it too, in the same commit.**
+
+> **AND THE LEAD WAS BEING GUESSED (AA4b).** `make-figure-roles` finds the
+> principal from a list of five bundle names and falls back to MOUNT ORDER for
+> anything else — the very thing its own header records as wrong. **12 of the 20
+> two-figure scenes hit that fallback**, and it got one plainly wrong:
+> `epistemology2` names its figures `DM` and `DD`, so the DEMON — the antagonist
+> deceiving the reader — was made the lead over the doubter who stands in for
+> them. Wiring the lead there would have had the demon nodding approvingly when
+> the reader answered well, which is A1 backwards. It reports every guess now
+> rather than making it silently; the remaining eleven (artist vs viewer, prince
+> vs cobbler, empiricist vs rationalist) are content judgements, and they decide
+> which figure wears the lead costume.
+
+## AA8 · The visitor, who walks in because the argument has two sides
+
+> *"have a second stickman walk in … dressed funny or dressed differently."*
+
+**33 lessons** get one. He arrives on the beat BEFORE a `poll` or a `split` and is
+standing there when the question is asked — which is what makes him an argument
+rather than a cameo.
+
+**WHICH LESSONS IS TAKEN FROM STRUCTURE, NEVER FROM THE PROSE.** Group Z's finding
+is that a keyword score disagrees with the examples whose answer you already know,
+and "does this lesson have two sides?" is exactly the kind of question that
+tempts one. It does not need one: a `poll` literally lists named positions
+("which would you defend"), and a `split` divides one thing between two. Both are
+two-sided by construction, so the control IS the evidence.
+
+**AND WHETHER THERE IS ROOM IS MEASURED.** A figure is ~48 wide standing on the
+ground. `mustBoxes` records every item every beat draws, so `make:visitor` finds
+the widest clear floor that exists on BOTH the entrance beat and the question beat
+— both, because a visitor who has to move out of the way between them is worse
+than no visitor. 18 lessons are refused for having nowhere to put him.
+
+> **BLEED IS BACKGROUND, NOT AN OBSTACLE**, and forgetting it costs the whole
+> feature. The floor every scene now lays down is a full-width View running past
+> the stage edge; counting it as blocking reported **41 of 56 lessons as having no
+> room**, which is the entire stage in every lesson. `mustprobe` already marks
+> anything drawn to be cut — read the flag.
+
+**THE PLAYER DRAWS HIM, NOT THE SCENE.** Staging him by hand in 33 scene files is
+33 edits to files whose every byte is inside `muststamp` — 33 chances to nudge a
+prop and force a re-measure of everything — and it is the kind of list that gets
+half-finished, leaving a corpus where a visitor turns up in some lessons and not
+others for no reason a reader can see. He is one component (`Visitor.tsx`),
+mounted once, driven off a generated cue.
+
+He is parked OFF-STAGE rather than faded in: a figure who materialises is the
+teleport group L forbids, and `mustprobe` drops any item whose centre is off the
+stage, so he costs the camera nothing until the frame he steps on. His walk uses
+`rig.moveTr` for the same reason every other walk does — a fixed duration sprints
+a long journey and strands the footfalls (§17). He faces the way he TRAVELS while
+walking and turns to the lead on arrival, because two figures facing the same way
+are two bystanders and two facing each other are an argument.
+
+### Four generator bugs, and three of them were the same bug
+
+The visitor and the wardrobe write to the same file, and getting that pair to
+settle took four passes. Every one is worth knowing because they all look right:
+
+- **A SYNTHETIC BOX IS AN OUTPUT, NOT AN INPUT.** The visitor's body is written
+  into `words` as a `fig` item tagged `v`. Left in place across runs it is read by
+  both the costume fit test and the growth loop, so the box the script wrote last
+  time decides what it writes this time. `make:wardrobe` moved 1007 boxes on one
+  run and 620 on the next with nothing changed between. Tagged items are dropped
+  before anything reads the file.
+- **`fits()` MUST READ THE BARE FIGURE**, and so must `fitsAtX`, and so must
+  `make:visitor`'s floor scan. Three separate functions, one mistake: the stored
+  boxes carry the previous run's costume growth, so reading them raw is a feedback
+  loop in which the last answer decides the next one.
+- **A COSTUME THAT FITS THE LEAD MAY NOT FIT THE VISITOR.** `fits` measures
+  against the LEAD's recorded boxes; the visitor stands somewhere else entirely,
+  often near a stage edge, so a wide satchel cleared the test on the lead's x and
+  poked straight out of the stage on his. Five lessons did exactly that. **AA7**
+  checks him where he actually stands.
+- **A LESSON WITH A VISITOR IS A TWO-HANDER even though its scene mounts one
+  figure.** Deciding that by grepping the scene for `role="second"` gave
+  `ethics-ethics-17` a second costume of `plain` and put two identical figures on
+  stage facing each other — the twin problem AA4 exists to prevent, arriving
+  through the one door AA4 does not watch.
+
+> **RUN ORDER: `make:visitor`, THEN `make:wardrobe`.** The first only reads; the
+> second reads the visitor table, dresses him, and grows the boxes for both. AA1
+> and AA7 fail with the commands in the message if they are run the other way or
+> not at all.
+
+> **AND THE MOTION CHECKS CANNOT SEE HIM.** `check:smooth`, `check:turn` and
+> `check:life` all read `*Scene.tsx`, and he is mounted by the player — so he is
+> outside every one of them. That is a real blind spot and the reason he uses
+> nothing bespoke: `travelStance`, `moveTr` and `emoteAny` are the same code those
+> checks validate in 184 scenes, in one path rather than 33.

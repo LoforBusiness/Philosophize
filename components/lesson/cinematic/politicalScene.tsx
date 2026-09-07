@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './politicalScript';
 import {
   boxMove, clamp01, ease01, lerp, mixStance, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -135,7 +135,7 @@ export default function PoliticalScene({ clock, bt, bi, qv, dragPos, i }: SceneA
     const sovGY = GROUND - PED * auth;
     return {
       c0: cit(0), c1: cit(1), c2: cit(2), c3: cit(3),
-      sov: pose(sovereignPose(t), SOV_X, sovGY, K_FIG, -1, auth),
+      sov: reactPose(sovereignPose(t), SOV_X, sovGY, K_FIG, -1, auth),
       auth, t,
     };
   });
@@ -175,10 +175,10 @@ export default function PoliticalScene({ clock, bt, bi, qv, dragPos, i }: SceneA
       <View style={styles.ground} pointerEvents="none" />
       <Animated.View style={[styles.pedestal, ped]} pointerEvents="none" />
 
-      <Stickman D={DC0} k={CIT_K} />
-      <Stickman D={DC1} k={CIT_K} />
-      <Stickman D={DC2} k={CIT_K} />
-      <Stickman D={DC3} k={CIT_K} />
+      <Stickman role="crowd" D={DC0} k={CIT_K} />
+      <Stickman role="crowd" D={DC1} k={CIT_K} />
+      <Stickman role="crowd" D={DC2} k={CIT_K} />
+      <Stickman role="crowd" D={DC3} k={CIT_K} />
       <Stickman D={DSov} k={K_FIG} />
 
       {/* the sword held aloft, riding the sovereign's right wrist */}

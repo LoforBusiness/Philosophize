@@ -25,7 +25,7 @@ export interface Ethics33Beat extends BaseBeat {
 
 export const BEATS: Ethics33Beat[] = [
   {
-    p: 25, x: 48, give: 0,
+    p: 379, x: 48, give: 0,
     text: 'Your column on the left, theirs on the right. Nobody thinks you should keep all of it and nobody thinks you should keep none.',
     dur: 4.0,
   },
@@ -48,7 +48,7 @@ export const BEATS: Ethics33Beat[] = [
   },
   {
     p: 380, x: 48, give: 0.9, more: 1,
-    text: 'Follow the rule honestly and the giving does not stop until the two columns are level. Peter Singer thought that was the right answer and that we had simply been looking away.',
+    text: 'Follow the rule honestly and the giving does not stop until the two columns are level. Peter Singer thought that was the right answer and that everyone had simply been looking away.',
     cite: 'Singer bites the bullet',
     dur: 5.0,
   },
@@ -65,7 +65,7 @@ export const BEATS: Ethics33Beat[] = [
     dur: 3.8,
   },
   {
-    p: 160, x: 48, give: 0, live: 1,
+    p: 455, x: 48, give: 0, live: 1,
     interact: {
       prompt: 'Drag your column across. Stop where giving stops being required and starts being heroic.',
       drag: {
@@ -84,25 +84,25 @@ export const BEATS: Ethics33Beat[] = [
     dur: 1.0,
   },
   {
-    p: 167, x: 48, give: 0.45,
+    p: 459, x: 48, give: 0.45,
     text: 'Susan Wolf pushed back from the other side. A life given over entirely to duty is not the best human life, she argued.',
     cite: 'Wolf, on moral saints',
     dur: 3.9,
   },
   {
-    p: 167, x: 48, give: 0.45,
+    p: 459, x: 48, give: 0.45,
     text: 'It is a narrowed one.',
     dur: 1.8,
   },
   {
-    p: 45, x: 48, give: 0.45,
+    p: 447, x: 48, give: 0.45,
     interact: {
       prompt: 'Singer replies that a demanding conclusion is not a false one. Fair?',
       cards: [
         { text: 'Partly, on both sides', correct: true },
         { text: 'No, too hard means wrong', correct: false },
       ],
-      explain: 'Difficulty is not disproof, and we would not accept "too demanding" from somebody refusing to wade into the pond. But a settled, near-universal reaction is evidence about morality rather than noise. That is why this argument is still going.',
+      explain: 'Difficulty is not disproof, and nobody would accept "too demanding" from somebody refusing to wade into the pond. But a settled, near-universal reaction is evidence about morality rather than noise. That is why this argument is still going.',
       xp: 5,
     },
     dur: 1.0,

@@ -26,7 +26,7 @@ export interface Aes15Beat extends BaseBeat {
 
 export const BEATS: Aes15Beat[] = [
   {
-    g: 25, rose: 1, tags: 5,
+    g: 379, rose: 1, tags: 5,
     dur: 4.4,
     text: 'A rose, and five things a person might say standing in front of it. Every one of them is honest.',
   },
@@ -48,22 +48,22 @@ export const BEATS: Aes15Beat[] = [
     text: 'If the delight is still there, that was beauty.',
   },
   {
-    g: 168, rose: 1, tags: 5,
+    g: 456, rose: 1, tags: 5,
     dur: 2.3,
     text: 'A stake is anything you want from the painting. To own the painting.',
   },
   {
-    g: 168, rose: 1, tags: 5,
+    g: 456, rose: 1, tags: 5,
     dur: 1.8,
     text: 'To sell it. To furnish a room.',
   },
   {
-    g: 168, rose: 1, tags: 5,
+    g: 456, rose: 1, tags: 5,
     dur: 1.8,
     text: 'To be seen standing beside it.',
   },
   {
-    g: 137, rose: 1, tags: 5,
+    g: 465, rose: 1, tags: 5,
     dur: 3.8,
     quote: {
       id: 'lq-aesthetics-aesthetics-15-1',
@@ -76,7 +76,7 @@ export const BEATS: Aes15Beat[] = [
     },
   },
   {
-    g: 4, rose: 1, tags: 5, pick: 1,
+    g: 165, rose: 1, tags: 5, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Four of these want something from the rose. Tap the one that does not.',
@@ -85,18 +85,18 @@ export const BEATS: Aes15Beat[] = [
     },
   },
   {
-    g: 176, rose: 1, tags: 5, cut: 1,
+    g: 467, rose: 1, tags: 5, cut: 1,
     dur: 3.8,
     text: 'Cut the other four and the rose does not change. Notice what survived is not even "I like it".',
     cite: 'What is left',
   },
   {
-    g: 176, rose: 1, tags: 5, cut: 1,
+    g: 467, rose: 1, tags: 5, cut: 1,
     dur: 1.8,
     text: 'It is aimed at you.',
   },
   {
-    g: 41, rose: 1, tags: 5, cut: 1,
+    g: 442, rose: 1, tags: 5, cut: 1,
     dur: 1.0,
     interact: {
       prompt: 'What survives being disinterested?',

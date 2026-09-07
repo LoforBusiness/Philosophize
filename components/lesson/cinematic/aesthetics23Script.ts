@@ -34,17 +34,17 @@ export interface Aes23Beat extends BaseBeat {
 
 export const BEATS: Aes23Beat[] = [
   {
-    p: 164, x: 200, stave: 1,
+    p: 462, x: 200, stave: 1,
     text: 'Seven notes, no words. It can move you to tears.',
     dur: 2.4,
   },
   {
-    p: 164, x: 200, stave: 1,
+    p: 462, x: 200, stave: 1,
     text: 'Now try to say what it was about.',
     dur: 2,
   },
   {
-    p: 2, x: 200, stave: 1, plates: 1, point: 1, aim: 0,
+    p: 466, x: 200, stave: 1, plates: 1, point: 1, aim: 0,
     text: 'A mood, easily. Slow drooping lines sound sorrowful, the way a slow drooping person does.',
     cite: 'Expression',
     dur: 4.4,
@@ -56,7 +56,7 @@ export const BEATS: Aes23Beat[] = [
     dur: 4.8,
   },
   {
-    p: 4, x: 132, stave: 1, plates: 1, point: 1, aim: 1, live: 1,
+    p: 165, x: 132, stave: 1, plates: 1, point: 1, aim: 1, live: 1,
     interact: {
       prompt: 'Tap where a fugue with no title points.',
       explain: 'At nothing outside itself. A mood is the tempting answer and the fugue may well have one, but having a mood is not pointing at anything. Strip the title off the birdsong piece and you have lively trills.',
@@ -76,7 +76,7 @@ export const BEATS: Aes23Beat[] = [
     dur: 1.8,
   },
   {
-    p: 137, x: 268, stave: 1, plates: 1, point: 1, aim: 2,
+    p: 465, x: 268, stave: 1, plates: 1, point: 1, aim: 2,
     quote: {
       id: 'lq-aesthetics-aesthetics-23-2',
       text: 'Music is by no means like the other arts the copy of the Ideas, but the copy of the will itself.',
@@ -94,7 +94,7 @@ export const BEATS: Aes23Beat[] = [
     dur: 4.6,
   },
   {
-    p: 41, x: 268, stave: 1, plates: 1, point: 1, aim: 2,
+    p: 383, x: 268, stave: 1, plates: 1, point: 1, aim: 2,
     interact: {
       prompt: 'Where does most instrumental music belong?',
       sort: {

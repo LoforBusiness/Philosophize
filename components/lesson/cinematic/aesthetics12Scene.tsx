@@ -10,7 +10,7 @@ import {
 // exactly rig's and mean what they always did, 100+ reach moves.ts (see emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics12Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -162,6 +162,12 @@ export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick, dr
       tr, WALK, 4,
     );
 
+    // PLAIN pose: the POET does not react. This lesson is "Who Decides What Art
+    // Means?", and its answer is the reader — so the READER is the lead here and
+    // the one who nods (see LEAD in make-figure-roles). The poet is the figure who
+    // will not budge, which is the whole of B15 in this scene; a poet who nodded
+    // along with the reader's verdict would be conceding the argument the lesson
+    // is about.
     const pf = pose(pMix, POET_X, GROUND, K_FIG, 1, 1);
     const hx = pf.head[0].translateX;
     const hy = pf.head[1].translateY;
@@ -169,7 +175,7 @@ export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick, dr
 
     return {
       poet: pf,
-      reader: pose(rMix, carry(cv, 1, n, RX[p], RX[n], tr), GROUND, K_FIG, RDIR[n], 1),
+      reader: reactPose(rMix, carry(cv, 1, n, RX[p], RX[n], tr), GROUND, K_FIG, RDIR[n], 1),
       boxX: hx - BOX_W / 2,
       boxY: hy - BOX_LIFT - BOX_H,
       tetherX: hx - 3,
@@ -266,7 +272,7 @@ export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick, dr
         })}
 
       <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={PF} k={K_FIG} />
+      <Stickman role="second" D={PF} k={K_FIG} />
       <Stickman D={RF} k={K_FIG} />
     </Animated.View>
   );

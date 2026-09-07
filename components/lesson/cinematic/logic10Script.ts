@@ -26,7 +26,7 @@ export interface Logic10Beat extends BaseBeat {
 
 export const BEATS: Logic10Beat[] = [
   {
-    p: 25, x: 34, arg: 1,
+    p: 172, x: 34, arg: 1,
     text: 'A friend says: “He is rich, so he must be happy.” You nod along. Two sentences went past you, and a third one never did.',
     dur: 3.8,
   },
@@ -72,7 +72,7 @@ export const BEATS: Logic10Beat[] = [
     dur: 3,
   },
   {
-    p: 21, x: 158, arg: 1, slot: 1, hid: 2,
+    p: 380, x: 158, arg: 1, slot: 1, hid: 2,
     interact: {
       prompt: 'When does a missing premise actually break an argument?',
       sort: {
@@ -89,7 +89,7 @@ export const BEATS: Logic10Beat[] = [
     dur: 1.0,
   },
   {
-    p: 4, x: 158, arg: 2, slot: 1, pick: 1,
+    p: 165, x: 158, arg: 2, slot: 1, pick: 1,
     interact: {
       prompt: '“You should sleep more — you look exhausted.” Tap the premise this argument needs but never says.',
       explain: 'The trap: the other two are true, and true is not the same as load-bearing. This argument only walks if looking tired is evidence of needing sleep. Deny that one bridge and it collapses — the general facts about sleep were never holding it up.',
@@ -98,7 +98,7 @@ export const BEATS: Logic10Beat[] = [
     dur: 1.0,
   },
   {
-    p: 160, x: 158, arg: 2, slot: 1,
+    p: 455, x: 158, arg: 2, slot: 1,
     summary: {
       title: 'The Premise Nobody Said',
       points: [

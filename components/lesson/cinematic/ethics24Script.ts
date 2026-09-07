@@ -31,7 +31,7 @@ export interface Eth24Beat extends BaseBeat {
 
 export const BEATS: Eth24Beat[] = [
   {
-    p: 25, x: 200, slab: 1,
+    p: 172, x: 200, slab: 1,
     text: 'A sentence, and the four things people say it is for. In an ordinary case all four agree, so nobody has to choose.',
     dur: 4.8,
   },
@@ -58,7 +58,7 @@ export const BEATS: Eth24Beat[] = [
     dur: 4.2,
   },
   {
-    p: 4, x: 132, slab: 1, names: 1, gone: 1, live: 1,
+    p: 467, x: 132, slab: 1, names: 1, gone: 1, live: 1,
     interact: {
       prompt: 'Tap the pillar still holding the slab up.',
       explain: 'Desert. Nothing is prevented, nobody is deterred and there is no one to protect, so if the sentence still seems right the reason is backward-looking. That is retribution, and most people find they hold it whether or not they would say so.',
@@ -67,7 +67,7 @@ export const BEATS: Eth24Beat[] = [
     dur: 1.0,
   },
   {
-    p: 137, x: 268, slab: 1, names: 1, gone: 1,
+    p: 456, x: 268, slab: 1, names: 1, gone: 1,
     quote: {
       id: 'lq-ethics-ethics-24-1',
       text: 'Judicial punishment can never be used merely as a means to promote some other good for the criminal himself or for civil society.',
@@ -86,7 +86,7 @@ export const BEATS: Eth24Beat[] = [
     dur: 4.6,
   },
   {
-    p: 41, x: 268, slab: 1, names: 1, gone: 1,
+    p: 442, x: 268, slab: 1, names: 1, gone: 1,
     interact: {
       prompt: 'Which theory would allow punishing someone innocent?',
       sort: {

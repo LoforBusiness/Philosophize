@@ -34,7 +34,7 @@ export interface Aes24Beat extends BaseBeat {
 
 export const BEATS: Aes24Beat[] = [
   {
-    p: 25, x: 200, panel: 1,
+    p: 172, x: 200, panel: 1,
     text: 'One panel, in one room, where it has hung for five hundred years. People cross oceans to stand in front of it.',
     dur: 4.8,
   },
@@ -51,7 +51,7 @@ export const BEATS: Aes24Beat[] = [
     dur: 4.8,
   },
   {
-    p: 4, x: 132, panel: 1, copies: 1, plates: 1, live: 1,
+    p: 165, x: 132, panel: 1, copies: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what a perfect scan does not copy.',
       explain: 'The history of being here. A scan takes the brushstrokes and the colours down to the cracks, so people reach for something visual and find nothing. What no scan can take is that this panel stood in this room through everything that happened.',
@@ -83,7 +83,7 @@ export const BEATS: Aes24Beat[] = [
     dur: 4.8,
   },
   {
-    p: 41, x: 268, panel: 1, copies: 1, plates: 1,
+    p: 383, x: 268, panel: 1, copies: 1, plates: 1,
     interact: {
       prompt: 'Draw how the aura goes as the copies multiply.',
       plot: {

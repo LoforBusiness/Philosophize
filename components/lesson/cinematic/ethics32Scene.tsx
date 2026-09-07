@@ -11,7 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics32Script';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -110,7 +110,7 @@ export default function Ethics32Scene({ clock, bt, bi, i, picked, onPick, dragPo
     const card = carry(cv, 0, n, CARD[p], reacting ? 1 + dragPos.value : CARD[n], tr);
     return {
       know: pose(sa, A_X, GROUND, K_FIG, 1, 1),
-      borr: pose(sb, B_X, GROUND, K_FIG, -1, 1),
+      borr: reactPose(sb, B_X, GROUND, K_FIG, -1, 1),
       // The knower's card appears at 1 and stays; the borrower's arrives as the
       // value crosses to 2, so the reader sees it travel rather than blink on.
       cardA: Math.min(1, card),
@@ -182,7 +182,7 @@ export default function Ethics32Scene({ clock, bt, bi, i, picked, onPick, dragPo
       {plate('borrower', false, B_X - PLATE_W / 2, 'WAS TOLD')}
 
       <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={DA} k={K_FIG} />
+      <Stickman role="second" D={DA} k={K_FIG} />
       <Stickman D={DB} k={K_FIG} />
     </Animated.View>
   );

@@ -51,18 +51,18 @@ export const BEATS: Epistemology12Beat[] = [
     dur: 5.0,
   },
   {
-    p: 160, x: 124, pipes: 2,
+    p: 457, x: 124, pipes: 2,
     text: 'You know what you ate this morning, but the toast is long gone. What you are reading is a copy your mind kept.',
     cite: 'Pipe two · memory',
     dur: 3.8,
   },
   {
-    p: 160, x: 124, pipes: 2,
+    p: 457, x: 124, pipes: 2,
     text: 'That pipe is longer, and it bends.',
     dur: 1.8,
   },
   {
-    p: 137, x: 124, pipes: 2,
+    p: 128, x: 124, pipes: 2,
     quote: {
       id: 'lq-epistemology-knowledge-12-1',
       text: 'There is no species of reasoning more common, more useful, and even necessary to human life, than that which is derived from the testimony of men.',
@@ -75,18 +75,18 @@ export const BEATS: Epistemology12Beat[] = [
     dur: 4.0,
   },
   {
-    p: 159, x: 124, pipes: 3,
+    p: 463, x: 124, pipes: 3,
     text: 'The third pipe does not begin near you at all. It runs in from strangers — teachers, books, mapmakers, people long dead.',
     cite: 'Pipe three · testimony',
     dur: 3.8,
   },
   {
-    p: 159, x: 124, pipes: 3,
+    p: 463, x: 124, pipes: 3,
     text: 'Now watch what it does to the level.',
     dur: 1.8,
   },
   {
-    p: 21, x: 124, pipes: 3,
+    p: 453, x: 124, pipes: 3,
     interact: {
       prompt: 'Rain felt, toast remembered, a wall you were told about. Which route is least direct?',
       sort: {
@@ -103,7 +103,7 @@ export const BEATS: Epistemology12Beat[] = [
     dur: 1.0,
   },
   {
-    p: 47, x: 124, pipes: 3, token: 1, pick: 1,
+    p: 386, x: 124, pipes: 3, token: 1, pick: 1,
     interact: {
       prompt: 'A new belief enters the tank: the Great Wall exists. Tap the pipe that delivered it.',
       explain: 'The trap: it feels seen — films, photographs, a line on a map. Every one of those is a report from somebody else. You have never stood on that wall, and most of the tank is stacked out of beliefs exactly like it.',
@@ -112,7 +112,7 @@ export const BEATS: Epistemology12Beat[] = [
     dur: 1.0,
   },
   {
-    p: 33, x: 124, pipes: 3,
+    p: 385, x: 124, pipes: 3,
     summary: {
       title: 'The Three Pipelines',
       points: [

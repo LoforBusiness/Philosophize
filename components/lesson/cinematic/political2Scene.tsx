@@ -10,7 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political2Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  useCarry, carry, STONE,
+  useCarry, carry, STONE, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -112,7 +112,7 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick, pick
 
     return {
       ruler: pose(rulerS, RULER_X, GROUND - pod * PODIUM_H, K, 1, 1),
-      subject: pose(subS, SUBJECT_X, GROUND, K, -1, 1 - led),
+      subject: reactPose(subS, SUBJECT_X, GROUND, K, -1, 1 - led),
       pod,
       led,
       rowP: lerp(clamp01(CHART[p]), clamp01(CHART[n]), tr),
@@ -192,7 +192,7 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick, pick
         <Text style={styles.podLab}>LEGITIMACY</Text>
       </Animated.View>
 
-      <Stickman D={DR} k={K} />
+      <Stickman role="second" D={DR} k={K} />
       <Stickman D={DS} k={K} />
 
       {/* ── the legitimacy ledger (and, on the question beat, the targets) ──── */}

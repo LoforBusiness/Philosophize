@@ -25,12 +25,12 @@ export interface E10Beat extends BaseBeat {
 
 export const BEATS: E10Beat[] = [
   {
-    p: 164, x: 92, gauge: 0, needle: 0.62,
+    p: 462, x: 92, gauge: 0, needle: 0.62,
     text: 'You are not certain the sun will rise tomorrow. You would still bet everything you own on it.',
     dur: 2.7,
   },
   {
-    p: 164, x: 92, gauge: 0, needle: 0.62,
+    p: 462, x: 92, gauge: 0, needle: 0.62,
     text: 'So do you know, or don’t you?',
     dur: 1.8,
   },
@@ -42,7 +42,7 @@ export const BEATS: E10Beat[] = [
   },
   {
     p: 33, x: 92, gauge: 1, band: 2, needle: 0.62,
-    text: 'Fallibilism moves the line. You can genuinely know something and still admit you could, in principle, be mistaken.',
+    text: 'Fallibilism moves the line. You can genuinely know something and still admit you might be wrong.',
     cite: 'Fallibilism',
     dur: 3.1,
   },
@@ -76,7 +76,7 @@ export const BEATS: E10Beat[] = [
     dur: 2.7,
   },
   {
-    p: 4, x: 228, gauge: 1, band: 2, needle: 0.78, flags: true,
+    p: 380, x: 228, gauge: 1, band: 2, needle: 0.78, flags: true,
     interact: {
       prompt: 'Fallibilism draws the line somewhere on this gauge. Tap where knowledge begins.',
       explain:
@@ -85,7 +85,7 @@ export const BEATS: E10Beat[] = [
     dur: 4.6,
   },
   {
-    p: 21, x: 228, gauge: 1, band: 2, needle: 0.78,
+    p: 177, x: 228, gauge: 1, band: 2, needle: 0.78,
     interact: {
       prompt: 'How firmly does a fallibilist actually hold it?',
       drag: {

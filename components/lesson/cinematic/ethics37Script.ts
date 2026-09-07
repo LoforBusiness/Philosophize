@@ -31,7 +31,7 @@ export interface Ethics37Beat extends BaseBeat {
 
 export const BEATS: Ethics37Beat[] = [
   {
-    p: 25, x: 54, posts: 1,
+    p: 172, x: 54, posts: 1,
     text: 'Two people stand apart on an ordinary Tuesday. Neither owes the other a thing.',
     dur: 3.4,
   },
@@ -57,7 +57,7 @@ export const BEATS: Ethics37Beat[] = [
     dur: 2.9,
   },
   {
-    p: 4, x: 54, posts: 1, cord: 1, lean: 1,
+    p: 461, x: 54, posts: 1, cord: 1, lean: 1,
     interact: {
       prompt: 'Where does the wrong actually land?',
       split: {
@@ -75,17 +75,17 @@ export const BEATS: Ethics37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 176, x: 54, posts: 1, cord: 1, lean: 1,
+    p: 467, x: 54, posts: 1, cord: 1, lean: 1,
     text: 'Look what is leaning on the cord now. The other person cancelled a plan.',
     dur: 2.9,
   },
   {
-    p: 176, x: 54, posts: 1, cord: 1, lean: 1,
+    p: 467, x: 54, posts: 1, cord: 1, lean: 1,
     text: 'Told a friend. Stopped hunting for another way.',
     dur: 1.8,
   },
   {
-    p: 47, x: 54, posts: 1, cord: 1, lean: 1,
+    p: 440, x: 54, posts: 1, cord: 1, lean: 1,
     quote: {
       id: 'lq-ethics-ethics-37-1',
       text: 'A promise would not be intelligible before human conventions had established it.',

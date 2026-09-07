@@ -10,7 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics3Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  useCarry, carry, STONE,
+  useCarry, carry, STONE, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -133,7 +133,7 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick, dragPos
     const d = keepHeld(heldD, mixStance(carryFrom(heldD, n, emoteHold(D_CODE[p], t)), emoteLive(D_CODE[n], t, bt.value), tr));
     const lens = carry(cv, 0, n, LENS[p], LENS[n], tr);
     return {
-      fig: pose(d, FIG_X, GROUND, K, 1, 1),
+      fig: reactPose(d, FIG_X, GROUND, K, 1, 1),
       tx: carry(cv, 1, n, TX[p], TX[n], tr),
       // R7b — the seam throws the lever. Slide toward WHAT HAPPENS NEXT and the
       // points switch: a consequentialist acts on the outcome, and the reader is the
@@ -271,7 +271,7 @@ function boundStance(t: number, seed: number): Stance {
 
 function Bound({ x, y, seed, clock }: { x: number; y: number; seed: number; clock: SharedValue<number> }) {
   const D = useDerivedValue<Bundle>(() => pose(boundStance(clock.value, seed), x, y, PEG_K, 1, 1));
-  return <Stickman D={D} k={PEG_K} />;
+  return <Stickman role="second" D={D} k={PEG_K} />;
 }
 
 const styles = StyleSheet.create({

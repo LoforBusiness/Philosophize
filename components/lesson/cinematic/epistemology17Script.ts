@@ -27,9 +27,9 @@ export interface Epi17Beat extends BaseBeat {
 
 export const BEATS: Epi17Beat[] = [
   {
-    g: 25, facts: 1, frame: 1,
+    g: 462, facts: 1, frame: 1,
     dur: 4.6,
-    text: 'A field of facts, and a frame drawn round the ones a theory accounts for. Inside the frame, everything behaves.',
+    text: 'A theory draws a frame around the facts it explains. Inside the frame, everything behaves.',
   },
   {
     g: 159, facts: 1, frame: 1, odd: 3,
@@ -51,10 +51,10 @@ export const BEATS: Epi17Beat[] = [
   {
     g: 13, facts: 1, frame: 1, odd: 3,
     dur: 2,
-    text: 'It is working comfortably inside one. He called that frame a paradigm.',
+    text: 'Science is working comfortably inside a frame. Kuhn called the frame a paradigm.',
   },
   {
-    g: 137, facts: 1, frame: 1, odd: 3,
+    g: 465, facts: 1, frame: 1, odd: 3,
     dur: 3.8,
     quote: {
       id: 'lq-epistemology-knowledge-17-1',
@@ -73,7 +73,7 @@ export const BEATS: Epi17Beat[] = [
     cite: 'The revolution',
   },
   {
-    g: 4, facts: 1, frame: 1, odd: 3, shift: 1, pick: 1,
+    g: 165, facts: 1, frame: 1, odd: 3, shift: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap what changed when the paradigm did.',

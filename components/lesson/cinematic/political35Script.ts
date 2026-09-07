@@ -33,17 +33,17 @@ export interface Political35Beat extends BaseBeat {
 
 export const BEATS: Political35Beat[] = [
   {
-    p: 164, x: 52, chairs: 1,
+    p: 462, x: 52, chairs: 1,
     text: 'A room where a decision gets made. Three people are in it.',
     dur: 2.1,
   },
   {
-    p: 164, x: 52, chairs: 1,
+    p: 462, x: 52, chairs: 1,
     text: 'Nine of the chairs belong to people who are not born yet.',
     dur: 2.1,
   },
   {
-    p: 4, x: 52, chairs: 1, live_w: 1, live: 1,
+    p: 461, x: 52, chairs: 1, live_w: 1, live: 1,
     interact: {
       prompt: 'Give the empty chairs a weight. Slide until it matches what you actually believe.',
       drag: {
@@ -62,7 +62,7 @@ export const BEATS: Political35Beat[] = [
     dur: 1.0,
   },
   {
-    p: 13, x: 52, chairs: 1, weight: 0.5,
+    p: 168, x: 52, chairs: 1, weight: 0.5,
     text: 'So far the choice is merely hard. Now comes the strange part.',
     dur: 3.0,
   },
@@ -77,26 +77,26 @@ export const BEATS: Political35Beat[] = [
     dur: 1.8,
   },
   {
-    p: 176, x: 52, chairs: 1, weight: 0.5, swap: 1,
+    p: 467, x: 52, chairs: 1, weight: 0.5, swap: 1,
     text: 'Watch who is in the room now. Not the same three.',
     dur: 2.2,
   },
   {
-    p: 176, x: 52, chairs: 1, weight: 0.5, swap: 1,
+    p: 467, x: 52, chairs: 1, weight: 0.5, swap: 1,
     text: 'Under the careful policy these people were never born at all.',
     dur: 2.2,
   },
   {
     p: 160, x: 52, chairs: 1, weight: 0.5, swap: 1, live: 1,
     interact: {
-      prompt: 'The future is worse. Tap the person we made worse off.',
+      prompt: 'The future is worse. Tap the person who ends up worse off.',
       explain: 'There is nobody to tap, and the absence is the lesson. Everyone in the worse world owes their existence to the reckless choice, so no one there can say they would have been better off. The wrong is obvious and the victim is missing.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
-    p: 47, x: 126, chairs: 1, weight: 0.5, swap: 1,
+    p: 386, x: 126, chairs: 1, weight: 0.5, swap: 1,
     quote: {
       id: 'lq-political-political-35-1',
       text: 'We are the trustees of the earth, not its owners.',

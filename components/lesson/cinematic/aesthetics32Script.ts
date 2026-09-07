@@ -20,7 +20,7 @@ export interface Aes32Beat extends BaseBeat {
 
 export const BEATS: Aes32Beat[] = [
   {
-    g: 5, rows: 1, mean: 0,
+    g: 440, rows: 1, mean: 0,
     dur: 4.0,
     text: 'Nine years of a life, one bar each. This one starts badly and ends well — the last years are the best it ever had.',
   },
@@ -65,7 +65,7 @@ export const BEATS: Aes32Beat[] = [
     text: 'You can, instantly.',
   },
   {
-    g: 4, rows: 3, mean: 1, pick: 1,
+    g: 461, rows: 3, mean: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap the life that goes better.',
@@ -74,7 +74,7 @@ export const BEATS: Aes32Beat[] = [
     },
   },
   {
-    g: 11, rows: 3, mean: 1,
+    g: 165, rows: 3, mean: 1,
     dur: 1.0,
     interact: {
       prompt: 'Draw the shape of the life you would rather have lived.',

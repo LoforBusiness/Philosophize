@@ -29,12 +29,12 @@ export interface Logic36Beat extends BaseBeat {
 
 export const BEATS: Logic36Beat[] = [
   {
-    p: 25, x: 58, room: 1,
+    p: 379, x: 58, room: 1,
     text: 'Somebody claims there is an elephant in this room. Here is the room, marked out in squares.',
     dur: 3.6,
   },
   {
-    p: 4, x: 58, room: 1, live_d: 1, live: 1,
+    p: 461, x: 58, room: 1, live_d: 1, live: 1,
     interact: {
       prompt: 'Search it. Every square comes back empty — stop when the emptiness means something.',
       drag: {
@@ -53,7 +53,7 @@ export const BEATS: Logic36Beat[] = [
     dur: 1.0,
   },
   {
-    p: 13, x: 58, room: 1, done: 1,
+    p: 168, x: 58, room: 1, done: 1,
     text: 'So the rule. Finding nothing counts exactly as much as your search would have found the thing, had it been there.',
     dur: 4.4,
   },
@@ -63,7 +63,7 @@ export const BEATS: Logic36Beat[] = [
     dur: 4.6,
   },
   {
-    p: 47, x: 58, room: 1, done: 0.15,
+    p: 385, x: 58, room: 1, done: 0.15,
     quote: {
       id: 'lq-logic-arguments-36-1',
       text: 'Absence of evidence is evidence of absence, if the evidence should have been found.',

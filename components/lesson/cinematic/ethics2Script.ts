@@ -51,7 +51,7 @@ export const BEATS: Ethics2Beat[] = [
     // Nothing on this stage is labelled "Deontology", and the next three beats show
     // each lens by working the wallet through it. Naming all three first was a
     // vocabulary tax paid before any of them meant anything (J6).
-    text: 'Most of us quietly use all three.',
+    text: 'Most people quietly use all three.',
     dur: 1.8,
   },
   {

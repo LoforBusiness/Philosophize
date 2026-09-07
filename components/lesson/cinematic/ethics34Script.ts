@@ -24,7 +24,7 @@ export interface Ethics34Beat extends BaseBeat {
 
 export const BEATS: Ethics34Beat[] = [
   {
-    p: 25, x: 46, pop: 0,
+    p: 462, x: 46, pop: 0,
     text: 'Ten people, and every one of them has a wonderful life. The bar underneath is how much good this world contains.',
     dur: 3.8,
   },
@@ -40,7 +40,7 @@ export const BEATS: Ethics34Beat[] = [
     dur: 1.8,
   },
   {
-    p: 19, x: 46, pop: 1,
+    p: 384, x: 46, pop: 1,
     text: 'Keep going and you reach a multitude whose lives are only just worth living. The bar is higher than it has ever been.',
     cite: 'Barely worth living',
     dur: 4.2,
@@ -52,7 +52,7 @@ export const BEATS: Ethics34Beat[] = [
     dur: 4.4,
   },
   {
-    p: 137, x: 46, pop: 1,
+    p: 128, x: 46, pop: 1,
     quote: {
       id: 'lq-ethics-ethics-34-1',
       text: 'For any possible population of at least ten billion people, all with a very high quality of life, there must be some much larger imaginable population whose existence would be better, even though its members have lives that are barely worth living.',
@@ -65,7 +65,7 @@ export const BEATS: Ethics34Beat[] = [
     dur: 4.6,
   },
   {
-    p: 160, x: 46, pop: 0, live: 1,
+    p: 467, x: 46, pop: 0, live: 1,
     interact: {
       prompt: 'Drag the trade. Stop where the totalling gives an answer you cannot accept.',
       drag: {
@@ -90,7 +90,7 @@ export const BEATS: Ethics34Beat[] = [
     dur: 4.4,
   },
   {
-    p: 45, x: 46, pop: 0.2, avg: 1,
+    p: 447, x: 46, pop: 0.2, avg: 1,
     interact: {
       prompt: 'Does judging by average wellbeing fix it?',
       cards: [
