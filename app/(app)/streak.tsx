@@ -1,6 +1,9 @@
-import { useCallback, useMemo, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Platform, type LayoutChangeEvent } from 'react-native';
-import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  View, Text, Pressable, ScrollView, StyleSheet, Platform,
+  type LayoutChangeEvent, type NativeSyntheticEvent, type NativeScrollEvent,
+} from 'react-native';
+import { useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import SketchIcon from '@/components/shared/SketchIcon';
@@ -132,15 +135,20 @@ export default function StreakScreen() {
   // actually been measured. A watcher that has not reported yet must not be able
   // to freeze him.
   const offStage = useSharedValue(false);
-  const heroBottom = useSharedValue(Number.MAX_SAFE_INTEGER);
+  const heroBottom = useRef(Number.MAX_SAFE_INTEGER);
   const onHeroLayout = useCallback((e: LayoutChangeEvent) => {
     const { y, height } = e.nativeEvent.layout;
-    heroBottom.value = y + height;
-  }, [heroBottom]);
-  const onScroll = useAnimatedScrollHandler((e) => {
-    const gone = e.contentOffset.y > heroBottom.value;
+    heroBottom.current = y + height;
+  }, []);
+  // A PLAIN JS HANDLER, AND THE SHARED VALUE IS STILL WRITTEN. Whether the
+  // mascot is off stage changes at most twice in a gesture, so it does not need
+  // a worklet on every scroll event -- and `offStage` is still a shared value,
+  // so the frame callback that READS it is untouched. This is exactly the shape
+  // Profile uses for its own scroll watcher.
+  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const gone = e.nativeEvent.contentOffset.y > heroBottom.current;
     if (gone !== offStage.value) offStage.value = gone;
-  });
+  }, [offStage]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -191,18 +199,45 @@ export default function StreakScreen() {
             at 70 MB with 35 MB it is free to evict. Nothing can be thrown away,
             so Skia throws away things it still needs and fetches them back.
 
-            `removeClippedSubviews` is the lever that fits: the month card is the
-            heaviest thing here -- 42 day tokens, ~26 CircularRRectOps a frame --
-            and for most of this screen's height it is not on screen at all.
-            Unlike Profile's (§19, where the flag sat on a ScrollView with two
-            children and could never reach anything) this content container has
-            FOUR direct children and the big one is a whole card, so the pass has
-            something real to detach. */}
-        <Animated.ScrollView
+            AND THE CAUSE WAS THE SCROLL CONTAINER ITSELF. Two guesses were
+            shipped before this one and both were wrong, so here is what the
+            phone actually said. Every scrollable screen in the app, measured
+            with the same six swipes each way:
+
+              home / learn / thinkers / insights / pass / profile   0 - 1.6%
+              branch (also a PUSHED screen, also animated)          0.13%
+              streak                                               80.00%
+
+            And the render threads of the smooth one and the broken one, seconds
+            apart on the same phone:
+
+              profile mid-scroll   syncFrameState  0.75 ms   biggest upload 146x147
+              streak  mid-scroll   syncFrameState 23.94 ms   biggest upload 945x2599
+
+            945x2599 is the WHOLE PAGE rasterised to a texture, 87 times in five
+            seconds, and every one of those uploads is nested inside
+            `prepareTree` -- which is HWUI building hardware layers, not drawing.
+
+            The one structural difference: this was the ONLY screen in the app on
+            `Animated.ScrollView` with `useAnimatedScrollHandler`. One of one
+            using it janked; none of seven not using it did. It is a plain
+            ScrollView now, watched from JS like Profile's.
+
+            What was ruled out on the device first, so nobody re-tries them: the
+            calendar (detaching it changed 74.8% to 75.6%), the mascot (on screen
+            or off, identical), the forty-two animated cell wrappers (removing
+            all of them moved 5,851 allocations to 5,723), and the overscroll
+            stretch (100px swipes that cannot reach a stop still measure 71.4%).
+
+            `removeClippedSubviews` stays. It is worth having on a page with a
+            42-token card, and unlike Profile's (§19, where the flag sat on a
+            ScrollView with two children and could never reach anything) this
+            content container has FOUR direct children. It is not the fix. */}
+        <ScrollView
           contentContainerStyle={styles.body}
           showsVerticalScrollIndicator={false}
           onScroll={onScroll}
-          scrollEventThrottle={16}
+          scrollEventThrottle={64}
           removeClippedSubviews={Platform.OS === 'android'}
         >
           {/* ── THE HERO ────────────────────────────────────────────────────
@@ -295,7 +330,7 @@ export default function StreakScreen() {
               costs you nothing. You earn one every {restEarnEvery(isPro)} days.
             </Text>
           </View>
-        </Animated.ScrollView>
+        </ScrollView>
       </ScreenTransition>
     </SafeAreaView>
   );

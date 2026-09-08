@@ -3168,6 +3168,62 @@ line fits two rows, no wrong-answer line is aimed at the reader (§7), no though
 sits on a beat still being answered (group O), and none of 1,272 placed bubbles
 covers a word.
 
+> **AND THEN THE BUBBLES DID NOT FOLLOW HIM, WHICH WAS THREE DEFECTS AND NOT ONE.**
+> The reader came back: *"they don't seem to be following the Stickman correctly
+> … it is not very smooth when the thinking boxes show up … sometimes they'll skip
+> from one sentence to another all of a sudden"*, and *"when the stickman is
+> walking, it doesn't follow in a very clean way."* All three were real, all three
+> were countable, and **not one of them was visible in the source** — every part
+> involved was individually correct and the faults were in the timing BETWEEN
+> them.
+>
+> - **A SENTENCE CHANGED IN FRONT OF THE READER, 591 TIMES ACROSS 171 LESSONS.**
+>   The text was held in state and the placement was read from
+>   `THOUGHTS[…].at[i]` during render, so a tap moved the BOX to the next beat's
+>   spot at once while the words stayed behind for 620ms — and then the words
+>   changed in a single frame, because `thoughtIn` was already 1 and
+>   `withTiming(1)` on a value already at 1 is a no-op. The bubble never animated
+>   in on those beats at all; it just changed its mind.
+> - **418 BEAT CHANGES BLINKED IT OUT, ACROSS 180 LESSONS.** The render was gated
+>   on the live `spot`, so on a beat with nowhere to put one the component left
+>   the tree on the frame the beat changed and the 200ms fade-out animated
+>   something no longer in it.
+> - **79 BUBBLES SAT ON A BEAT WHERE HE WALKS, AND ALL 79 WERE STILL MID-WALK at
+>   the moment the bubble was told to appear.** A placement is measured against
+>   one beat's RESTING frame; pinned there it pops up over a spot he has not
+>   reached, trails at nothing, and holds still while he walks into it.
+>
+> **THE FIX FOR THE FIRST TWO IS A SHAPE, NOT A TIMING, AND THAT MATTERS.** Fading
+> out and then swapping 620ms later is two clocks agreeing — `withTiming` runs on
+> frames, `setTimeout` runs on the JS thread — and measured in a real render they
+> DO come apart: starve the frames and the opacity stays at 1 while the timer
+> fires on schedule. So the outgoing thought now keeps its OWN component and its
+> own driver (`leaving`, a prop `Thought` has carried since it was written and
+> nothing had ever passed), and the incoming one mounts fresh. **No mounted
+> `Thought` ever changes its words**, at any frame rate.
+>
+> **AND THE BOX RIDES HIM: `figX + (x − refX)·settle`.** The player recomputes the
+> figure's live x from the same `walk` track and beat clock the scene uses —
+> including the `carry`, since a plain `lerp` from `X[p]` starts from where the
+> previous beat was HEADING rather than where it got to. At rest that expression
+> is the measured spot to the unit, so the 848 bubbles on a still beat do not move
+> at all; mid-walk it is his own position, with the sideways offset the generator
+> searched out restored as he arrives.
+>
+> **IT DELIBERATELY DOES NOT ANCHOR ON THE STORED `headX`**, and that is the one
+> thing worth carrying. 90 of 940 placements record a figure centre more than 40
+> units from their own beat's x — 15 of those 50 lessons stage a SECOND figure,
+> where the midpoint is what the generator meant, and the rest simply do not
+> record where the beat leaves him. `metaphysics-being-35` beat 3 walks 322 → 120
+> and records 237, so anchoring there asks for x 425 on a 400-wide stage, the
+> clamp pins the box to the edge, and it keeps a quarter of his 186px. That
+> placement table is worth re-deriving one day; nothing here depends on it.
+>
+> **`npm run check:bubble` is the ratchet**, and it needs Metro and a browser
+> because every one of these is a relationship between frames. Measured after:
+> 0 sentence swaps and 0 teleports across 41 readable boxes, and the corpus's
+> longest walk keeps 24% of his travel where it kept none.
+
 ### The branch road — the same rig, outside a lesson
 
 `components/branch/` puts the rig on a **branch screen**: a 360-tall strip the
@@ -4616,6 +4672,18 @@ browser at it; the first transform can take longer than a navigation timeout.
   - **`npm run check:alive`** asks whether the picture moves when NOBODY is
     tapping — two screenshots from one page load, differenced, figure excluded.
     See §12; one page load is the whole trick.
+  - **`npm run check:bubble`** asks whether the thought bubble follows him, and
+    whether it ever changes its sentence where the reader can see it (group AB).
+    Three rules, each one a thing a reader named: the words may never change while
+    the box is readable, the box may not jump while the figure is standing still,
+    and while he WALKS the box may not stand still. **It runs on ONE lane and that
+    is not timidity** — every other harness here STEPS a page, this one SAMPLES a
+    running animation, and a second tab in the same headless Chrome is backgrounded,
+    where `requestAnimationFrame` is throttled to nothing while `setTimeout` keeps
+    firing. That is exactly the divergence it exists to detect, so on two lanes it
+    reports one — moving from lesson to lesson between runs, which is the tell.
+    A pair of samples further apart than 250ms is BLIND rather than clean, and the
+    blind ones are counted and printed.
   - **`npm run sheet:beats <id>`** is the axis `sheet:lessons` lacks: ONE lesson at
     EVERY beat rather than many lessons at one. A complaint about a sequence
     cannot be answered by a single frame. **It must settle on the CAMERA, not on a

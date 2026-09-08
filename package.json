@@ -145,6 +145,7 @@
     "check:readable": "node scripts/check-readable.mjs",
     "check:reveal": "node scripts/check-reveal.mjs",
     "check:nod": "node scripts/check-nod.mjs",
+    "check:bubble": "node scripts/check-bubble.mjs",
     "measure:must": "node scripts/measure-must.mjs",
     "check:launch": "node scripts/check-launch.mjs && node scripts/check-words.mjs",
     "check:host": "node --import ./scripts/lib/register.mjs scripts/check-host.mjs",

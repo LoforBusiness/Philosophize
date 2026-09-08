@@ -43,7 +43,8 @@ import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
   XpPill, TapNudge,
   COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, GROUND, INK,
-  type BaseBeat, REACT, Thought,} from './cinematicKit';
+  type BaseBeat, REACT, Thought, useCarry, carry,} from './cinematicKit';
+import { ease01, moveTr } from './rig';
 import { quipFor, visitorSays } from './quips';
 import { THOUGHTS } from '@/data/lessonThoughts';
 
@@ -366,19 +367,111 @@ export default function CinematicPlayer({
   // is discontinuous at a beat change because `bt` is (group L), and a bubble that
   // is mid-fade when the reader taps would jump to a new opacity in one frame.
   const thoughtIn = useSharedValue(0);
-  // WHERE IT MAY SIT ON THIS BEAT — `[dx, tailY]` from `make:thoughts`, measured
-  // against the art this beat actually draws, or NULL when there was nowhere that
-  // did not cover a word. A beat with no spot shows no bubble: the reader asked
-  // for one that does not cover anything, and "nowhere to put it" is an answer.
+  // WHERE IT MAY SIT ON THIS BEAT — `[x, tailY, discs, headX]` from
+  // `make:thoughts`, measured against the art this beat actually draws, or NULL
+  // when there was nowhere that did not cover a word. A beat with no spot shows no
+  // bubble: the reader asked for one that does not cover anything, and "nowhere to
+  // put it" is an answer.
   const spot = THOUGHTS[lesson.id]?.at[i] ?? null;
   // AND THE SECOND FIGURE SAYS ONE THING, AS HE ARRIVES. Two stickmen facing each
   // other in silence is not a conversation, which is what the reader asked to see
   // — and his line is safe to pool because a `poll` or a `split` fixes his
   // meaning: he holds the other position, whatever the lesson is about (AA8).
-  const visSpot = THOUGHTS[lesson.id]?.vis;
-  const visHere = visSpot && visSpot[0] === i ? visSpot : null;
 
-  const [bubble, setBubble] = useState<{ text: string; kind: 'think' | 'say' } | null>(null);
+  // THE FIGURE'S LIVE x, FOR THE BUBBLE TO RIDE.
+  //
+  // The scene owns the figure and the player cannot ask it where he is — but it
+  // has the same two inputs the scene does, the `walk` track and the beat clock,
+  // and the scene's own x is `carry(X[p] → X[n])` over `moveTr`. Recomputing that
+  // here reproduces it exactly, INCLUDING the carry: a plain `lerp` from `X[p]`
+  // would start from the position the previous beat was heading for rather than
+  // the one it actually reached, so a reader tapping through a long walk would
+  // leave the bubble a little ahead of the man it belongs to (group L, one system
+  // over). A lesson with no `walk` track reports 0 and nothing follows anything.
+  const walkSv = useSharedValue<number[]>([]);
+  useEffect(() => { walkSv.value = walk ?? []; }, [walk, walkSv]);
+  const figCarry = useCarry(1);
+  const figX = useDerivedValue(() => {
+    const t = walkSv.value;
+    if (t.length === 0) return 0;
+    const n = bi.value;
+    const p = n > 0 ? n - 1 : 0;
+    const a = t[p] ?? 0;
+    const b = t[n] ?? a;
+    return carry(figCarry, 0, n, a, b, ease01(bt.value / moveTr(a, b, 0.85)));
+  });
+  /**
+   * HOW FAR THROUGH THIS BEAT'S WALK HE IS — and flatly 1 when he does not walk.
+   *
+   * `moveTr` returns the 0.85 crossfade base for a beat that moves nobody, so a
+   * plain reading of it would have every bubble in the corpus sliding into place
+   * over the first second of every beat. The 848 bubbles on a beat with no walk
+   * must land exactly where they were measured and not travel at all, so the
+   * distance decides whether there is a journey to be part-way through.
+   */
+  const figTr = useDerivedValue(() => {
+    const t = walkSv.value;
+    if (t.length === 0) return 1;
+    const n = bi.value;
+    const p = n > 0 ? n - 1 : 0;
+    const a = t[p] ?? 0;
+    const b = t[n] ?? a;
+    if (Math.abs(b - a) < 1) return 1;
+    return ease01(bt.value / moveTr(a, b, 0.85));
+  });
+
+  /**
+   * WHAT IS ON SCREEN, HELD WHOLE — the words, where they sit, and where he stood
+   * when that placement was measured.
+   *
+   * All three used to be read separately: the text from state, the placement from
+   * `THOUGHTS[...].at[i]` during render. So a tap moved the BOX to the next beat's
+   * spot immediately while the words stayed behind for 620ms, and then the words
+   * changed in a single frame because `thoughtIn` was already 1 and `withTiming(1)`
+   * had nothing to travel. Measured across the corpus that is 591 beat changes in
+   * 171 lessons — the reader's *"they'll skip from one sentence to another all of
+   * a sudden"*, exactly. Reading the placement out of the same object as the text
+   * means the two cannot come apart.
+   */
+  const [bubble, setBubble] = useState<
+    { text: string; kind: 'think' | 'say'; at: readonly [number, number, number, number]; refX: number } | null
+  >(null);
+  // The second figure's line, held the same way and for the second half of the
+  // same defect: gated on `visHere` it unmounted on the frame the beat changed,
+  // so its fade-out played on a component that was no longer in the tree.
+  const [visBub, setVisBub] = useState<{ at: readonly [number, number, number, number]; text: string } | null>(null);
+
+  /**
+   * WHAT IS ON ITS WAY OUT, AS ITS OWN COMPONENT — so a swap cannot be seen even
+   * if the frame it would be seen on never arrives.
+   *
+   * Fading the box out and then swapping its words 620ms later is two clocks
+   * agreeing: `withTiming` runs on frames and `setTimeout` runs on the JS thread.
+   * Measured in a real render they DO come apart — starve the frames and the
+   * opacity stays at 1 while the timer fires exactly on schedule, and the words
+   * change under the reader at full opacity. It is reproducible in a headless
+   * Chrome by putting two tabs in one browser, and §19 has already measured
+   * 976ms frames on a real screen, so it is not only a harness artefact.
+   *
+   * So the outgoing thought keeps its OWN component and its own driver, and the
+   * incoming one mounts fresh. No mounted `Thought` ever changes its words, at
+   * any frame rate — which is a property of the shape rather than of the timing.
+   * `leaving` has been a documented prop on `Thought` since it was written and
+   * this is the thing it was written for.
+   */
+  const thoughtOut = useSharedValue(0);
+  type Bub = { text: string; kind: 'think' | 'say'; at: readonly [number, number, number, number]; refX?: number };
+  const [leaving, setLeaving] = useState<Bub[]>([]);
+  // What is on screen right now, readable from an effect that must not re-run
+  // when it changes — the effect is keyed on the BEAT, and taking the outgoing
+  // bubble from state would make it a dependency and restart the beat's timing.
+  const onScreen = useRef<Bub[]>([]);
+  useEffect(() => {
+    onScreen.current = [
+      ...(bubble ? [bubble] : []),
+      ...(visBub ? [{ text: visBub.text, kind: 'think' as const, at: visBub.at }] : []),
+    ];
+  }, [bubble, visBub]);
   // The foot-plant times for the walk into the current beat, how many have already
   // sounded, and when the walk comes to rest (−1 if it ends mid-stride). Numbers
   // only — a JS closure cannot cross into a worklet (§17).
@@ -848,29 +941,66 @@ export default function CinematicPlayer({
   // at best and a spoiler at worst, and O1's list of what a graded beat may show
   // before a pick does not include the mascot's opinion. `make:thoughts` refuses
   // to place one there, and this refuses to draw one.
+  // THE OLD THOUGHT COMES DOWN AS ITS OWN COMPONENT, AND THE NEW ONE ARRIVES AS
+  // ANOTHER. That is the reader's *"they'll skip from one sentence to another all
+  // of a sudden"*, and the reason it is a change of SHAPE rather than of timing is
+  // that timing is what was broken: the words lived in state and the placement was
+  // read from the table during render, so a tap moved the box to the next beat's
+  // spot at once and left the previous beat's words in it for 620ms — and then
+  // swapped them in one frame, because `withTiming(1)` on a value already at 1
+  // travels nowhere. 591 beat changes across 171 lessons.
+  //
+  // Handing the outgoing one its own driver means no mounted `Thought` ever
+  // changes its words, whatever the frame rate — which matters because the two
+  // clocks here are not the same clock: `withTiming` runs on frames and this
+  // timer runs on the JS thread, and §19 has measured 976ms frames on a real
+  // screen.
+  const FADE_OUT = 200;
   useEffect(() => {
     const row = THOUGHTS[lesson.id];
-    const text = row && row.at[i] && !gates(beat) ? row.say[i] ?? null : null;
+    const here = row?.at[i] ?? null;
+    const text = here && !gates(beat) ? row?.say[i] ?? null : null;
     // THE DRIVE IS SHARED WITH THE SECOND FIGURE, so it has to rise on a beat
     // where only HE speaks. Keyed on the lead's thought alone, the visitor walked
     // in and said nothing in every lesson whose entrance beat the mascot had no
     // thought on — which is most of them.
-    const alsoVisitor = !!row?.vis && row.vis[0] === i;
-    if (!text && !alsoVisitor) {
-      thoughtIn.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.quad) });
-      return undefined;
+    const vis = row?.vis && row.vis[0] === i ? row.vis : null;
+
+    // HAND WHATEVER IS UP TO THE OUTGOING SLOT AND LET IT FADE THERE. It keeps
+    // its own words for the whole of its exit — 418 beat changes in 180 lessons
+    // used to take the component out of the tree on the frame the beat changed,
+    // so the fade-out animated something no longer in it, and the bubble simply
+    // blinked out.
+    const out = onScreen.current;
+    setBubble(null);
+    setVisBub(null);
+    thoughtIn.value = 0;
+    // THE SLOT IS ALWAYS WRITTEN AND ALWAYS SWEPT, even when there is nothing to
+    // put in it. Setting it only when something was on screen strands the
+    // previous occupant: tap twice inside the 200ms and the second pass finds
+    // `onScreen` already empty, schedules no sweep, and leaves a mounted bubble
+    // that the NEXT beat change lights back up to full opacity — an old thought
+    // reappearing over a lesson that has moved on.
+    setLeaving(out);
+    if (out.length) {
+      thoughtOut.value = 1;
+      thoughtOut.value = withTiming(0, { duration: FADE_OUT, easing: Easing.out(Easing.quad) });
     }
+    const dropping = setTimeout(() => setLeaving([]), FADE_OUT + 120);
+    const clear = () => clearTimeout(dropping);
+    if (!text && !vis) return clear;
     // 620ms IN — except on the beat the second figure walks in, where his line
     // is placed at the mark he is heading FOR. At 620ms he is still crossing the
     // stage and the bubble hangs over the spot he has not reached yet, which
     // reads as a caption waiting for him. His walk takes most of the beat
     // (`rig.moveTr` at the house base), so his line waits for it.
-    const delay = alsoVisitor ? Math.max(620, (beat.dur ?? 4) * 1000 * 0.78) : 620;
+    const delay = vis ? Math.max(620, (beat.dur ?? 4) * 1000 * 0.78) : 620;
     const t = setTimeout(() => {
-      if (text) setBubble({ text, kind: 'think' });
+      setBubble(text && here ? { text, kind: 'think', at: here, refX: walk?.[i] ?? 0 } : null);
+      setVisBub(vis ? { at: [vis[1], vis[2], vis[3], vis[1]], text: visitorSays(lesson.id) } : null);
       thoughtIn.value = withTiming(1, { duration: 520, easing: Easing.out(Easing.cubic) });
     }, delay);
-    return () => clearTimeout(t);
+    return () => { clear(); clearTimeout(t); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i, lesson.id]);
 
@@ -960,9 +1090,18 @@ export default function CinematicPlayer({
     // the reader asked for a mascot who answers back rather than one who reacts
     // and is then subtitled. It replaces whatever he was thinking: he has stopped
     // working the lesson out and is talking to them.
-    setBubble({ text: quipFor(lesson.id, i, isCorrect), kind: 'say' });
+    //
+    // NO SPOT, NO LINE — the same rule the thought follows. A graded beat whose
+    // stage left nowhere clear to put a box drew nothing here before either, the
+    // render being gated on the live spot; asking once means the quip is never
+    // set into a state nothing will draw.
+    if (spot) setBubble({ text: quipFor(lesson.id, i, isCorrect), kind: 'say', at: spot, refX: walk?.[i] ?? 0 });
     thoughtIn.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
-  }, [picked, sounded]);
+    // `i` AND `spot` ARE IN THE DEPS, and they have to be: this callback was
+    // rebuilt only when `picked` changed, which happens on every ADVANCE — so it
+    // was right by accident, and a beat nobody answered left the next one seeded
+    // on a stale index.
+  }, [picked, sounded, i, spot, walk, lesson.id, thoughtIn]);
 
   const onStage = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -1055,12 +1194,12 @@ export default function CinematicPlayer({
                       style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
                     >
                       <TargetCountProvider onCount={setTargetCount} onBox={onBox} host={camHost}>
-                        <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubble && spot ? <Thought text={bubble.text} kind={bubble.kind} x={spot[0]} anchorY={spot[1]} discs={spot[2]} headX={spot[3]} drive={thoughtIn} /> : null}{visHere ? <Thought text={visitorSays(lesson.id)} kind="think" x={visHere[1]} anchorY={visHere[2]} discs={visHere[3]} headX={visHere[1]} drive={thoughtIn} /> : null}</WardrobeProvider>
+                        <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{leaving.map((L, li) => <Thought key={`out${li}`} text={L.text} kind={L.kind} x={L.at[0]} anchorY={L.at[1]} discs={L.at[2]} headX={L.at[3]} drive={thoughtOut} leaving figX={L.refX === undefined ? undefined : figX} refX={L.refX ?? 0} settle={figTr} probeId={`thought-out${li}`} />)}{bubble ? <Thought text={bubble.text} kind={bubble.kind} x={bubble.at[0]} anchorY={bubble.at[1]} discs={bubble.at[2]} headX={bubble.at[3]} drive={thoughtIn} figX={figX} refX={bubble.refX} settle={figTr} probeId="thought-lead" /> : null}{visBub ? <Thought text={visBub.text} kind="think" x={visBub.at[0]} anchorY={visBub.at[1]} discs={visBub.at[2]} headX={visBub.at[3]} drive={thoughtIn} probeId="thought-vis" /> : null}</WardrobeProvider>
                       </TargetCountProvider>
                     </Animated.View>
                   ) : (
                     <TargetCountProvider onCount={setTargetCount}>
-                      <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubble && spot ? <Thought text={bubble.text} kind={bubble.kind} x={spot[0]} anchorY={spot[1]} discs={spot[2]} headX={spot[3]} drive={thoughtIn} /> : null}{visHere ? <Thought text={visitorSays(lesson.id)} kind="think" x={visHere[1]} anchorY={visHere[2]} discs={visHere[3]} headX={visHere[1]} drive={thoughtIn} /> : null}</WardrobeProvider>
+                      <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{leaving.map((L, li) => <Thought key={`out${li}`} text={L.text} kind={L.kind} x={L.at[0]} anchorY={L.at[1]} discs={L.at[2]} headX={L.at[3]} drive={thoughtOut} leaving figX={L.refX === undefined ? undefined : figX} refX={L.refX ?? 0} settle={figTr} probeId={`thought-out${li}`} />)}{bubble ? <Thought text={bubble.text} kind={bubble.kind} x={bubble.at[0]} anchorY={bubble.at[1]} discs={bubble.at[2]} headX={bubble.at[3]} drive={thoughtIn} figX={figX} refX={bubble.refX} settle={figTr} probeId="thought-lead" /> : null}{visBub ? <Thought text={visBub.text} kind="think" x={visBub.at[0]} anchorY={visBub.at[1]} discs={visBub.at[2]} headX={visBub.at[3]} drive={thoughtIn} probeId="thought-vis" /> : null}</WardrobeProvider>
                     </TargetCountProvider>
                   )}
                 </View>

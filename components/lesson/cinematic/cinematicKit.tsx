@@ -1044,11 +1044,42 @@ export function Bubble({
 // a preference but the enforcement: at Inter 12 that is about twenty characters a
 // line and two lines is the most it will take before `check:thoughts` fails the
 // build. A thought that needs three lines is a narration beat wearing a cloud.
+/**
+ * WHERE THE BOX SITS THIS FRAME, in stage x.
+ *
+ * DECLARED ABOVE EVERY WORKLET THAT CALLS IT. `'worklet'` functions are rewritten
+ * into `const`s and their closures are built at module scope, so one declared
+ * further down the file is in its temporal dead zone and throws AT IMPORT, taking
+ * the whole route tree with it (§17, rule 2).
+ *
+ * `figX + (x − refX)·settle`, and both ends of that are exact: at `settle` 1 with
+ * the walk finished it is the measured spot to the unit, and at 0 it is his own
+ * live position, which is always on stage because he is. In between, the lateral
+ * offset the generator searched out is restored as he arrives.
+ *
+ * IT DOES NOT READ `headX` FOR POSITION, AND THAT IS THE POINT. The obvious
+ * version anchors on the stored head — and the stored head is not always where he
+ * ends up. Counted across the corpus, 90 of 940 placements record a figure centre
+ * more than 40 units from their own beat's x: 15 of the 50 lessons involved stage
+ * a SECOND figure, where the midpoint between the two is what the generator meant,
+ * and the rest are single-figure beats whose recorded centre is simply not where
+ * the beat leaves him — `metaphysics-being-35` beat 3 walks 322 → 120 and records
+ * 237. Anchoring there asked for x 425 on a 400-wide stage, so the clamp pinned
+ * the box to the edge and it kept a quarter of his 186px. His live position cannot
+ * be poisoned that way, and at rest this still returns the measured spot exactly.
+ */
+function where(x: number, figX: SharedValue<number> | undefined, refX: number, settle: SharedValue<number> | undefined) {
+  'worklet';
+  if (!figX) return x;
+  const st = settle ? settle.value : 1;
+  return figX.value + (x - refX) * st;
+}
+
 const THINK_W = 130;
 const THINK_TAIL_UP = 30;
 
 export function Thought({
-  text, x, headX, anchorY, discs, drive, leaving, kind = 'think',
+  text, x, headX, anchorY, discs, drive, figX, refX = 0, settle, leaving, kind = 'think', probeId = 'thought',
 }: {
   text: string;
   /**
@@ -1091,9 +1122,53 @@ export function Thought({
   anchorY: number;
   /** 0 → 1, driven by the player: a beat's own thought, or the answer landing. */
   drive: SharedValue<number>;
+  /**
+   * THE FIGURE'S LIVE x, SO THE BUBBLE TRAVELS WITH HIM.
+   *
+   * The placement above is a still: `make:thoughts` measured it against the art of
+   * one beat, with him standing where that beat leaves him. On a beat he WALKS,
+   * that description is true only once he has arrived — and measured across the
+   * corpus, all 79 bubbles that land on a walking beat were still mid-walk at the
+   * moment they were told to appear. Every one of them popped up over a spot he
+   * had not reached, trailed at nothing, and held still while he walked into it.
+   *
+   * So the box rides `figX − refX`, which is exactly zero once the walk is done —
+   * the measured spot is where it comes to rest, and nothing about the resting
+   * frame the generator verified has changed. Omit the pair and the offset is
+   * zero always, which is what the second figure's line wants: he is delivered
+   * standing still.
+   */
+  figX?: SharedValue<number>;
+  /** Where he stood when `x` and `headX` were measured — the beat's own walk x. */
+  refX?: number;
+  /**
+   * HOW FAR THROUGH THE WALK HE IS, 0…1 — and 1 on a beat where he does not walk.
+   *
+   * Offsetting the measured spot by the whole of his journey is right until it
+   * is not: `metaphysics-being-35` measures its box at x 273 while he walks in
+   * from 322, so early in that walk the box wants to be at 475 — a hundred and
+   * fifty units off the stage — and the clamp pins it to the right edge for two
+   * and a half seconds while he walks out from under it. Measured, it kept only
+   * a third of his 185px.
+   *
+   * So while he is walking the box rides HIS HEAD, and the lateral offset the
+   * generator searched out is restored as he arrives. Both ends are exact: at
+   * `settle` 1 this is the measured spot to the unit, and at 0 it is directly
+   * over him, which is always on stage because he is.
+   */
+  settle?: SharedValue<number>;
   leaving?: boolean;
   /** `say` is the answer line — a bolder box, because he is addressing the reader. */
   kind?: 'think' | 'say';
+  /**
+   * A DOM id, so `check:bubble` can measure this thing at all.
+   *
+   * The same reason every analogue control carries a `nativeID`: a harness that
+   * can only guess at which box is which measures the wrong one and reports a
+   * clean sweep. Two of these can be on stage at once — his and the second
+   * figure's — and they behave differently on purpose.
+   */
+  probeId?: string;
 }) {
   const w = useSharedValue(0);
   const h = useSharedValue(0);
@@ -1107,16 +1182,22 @@ export function Thought({
   // margin says nothing about whose thought it is.
   const wrap = useAnimatedStyle(() => {
     const half = w.value / 2;
-    const cx = Math.max(half + 10, Math.min(STAGE_W - half - 10, x));
+    const cx = Math.max(half + 10, Math.min(STAGE_W - half - 10, where(x, figX, refX, settle)));
     return { transform: [{ translateX: cx - STAGE_W / 2 }] };
   });
 
   // The trail leans back toward him when the box has been clamped, so it still
-  // points at whose head this came out of.
+  // points at whose head this came out of — and it follows the SAME `dx`, so a
+  // bubble travelling with him keeps pointing at the head it came out of rather
+  // than at the place he set off from.
   const trail = useAnimatedStyle(() => {
     const half = w.value / 2;
-    const cx = Math.max(half + 10, Math.min(STAGE_W - half - 10, x));
-    const off = Math.max(-(half - 14), Math.min(half - 14, headX - cx));
+    const cx = Math.max(half + 10, Math.min(STAGE_W - half - 10, where(x, figX, refX, settle)));
+    // POINTING AT HIM, LIVE. `headX` is the head the placement was measured
+    // against and is the right answer when there is no walk track to do better
+    // with; where there is one, his own position is the head this came out of.
+    const head = figX ? figX.value : headX;
+    const off = Math.max(-(half - 14), Math.min(half - 14, head - cx));
     return { transform: [{ translateX: off }] };
   });
 
@@ -1162,8 +1243,8 @@ export function Thought({
   });
 
   return (
-    <Animated.View style={[styles.thoughtWrap, { bottom: STAGE_H - anchorY }, wrap]} pointerEvents="none">
-      <Animated.View onLayout={onLayout} style={[styles.thought, box]}>
+    <Animated.View nativeID={probeId} style={[styles.thoughtWrap, { bottom: STAGE_H - anchorY }, wrap]} pointerEvents="none">
+      <Animated.View nativeID={`${probeId}-box`} onLayout={onLayout} style={[styles.thought, box]}>
         <View style={[styles.thoughtBox, kind === 'say' && styles.sayBox]}>
           <Text style={[styles.thoughtText, kind === 'say' && styles.sayText]}>{text}</Text>
         </View>
