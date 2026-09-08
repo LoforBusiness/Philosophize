@@ -185,7 +185,7 @@ const SCRIPT: Array<[number, string, Visual | null, Gesture | null, number[]?]> 
   // compares it to ALL_PHILOSOPHERS.length. It used to insist the line ended in
   // " thinkers.", which made the check a hostage to the wording — reword the
   // line and the count silently stopped being checked.
-  [23.0, 'Three hundred and twenty-eight had a go.', 'thinkers', null],
+  [23.0, 'Three hundred and forty-one had a go.', 'thinkers', null],
   // ── FOUR SURNAMES, AND THE FOURTH ONE USED TO FALL OFF THE LINE ───────────
   //
   // A reader: "the simone de beauvoir, his last name goes too far under it,

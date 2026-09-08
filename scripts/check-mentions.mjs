@@ -59,8 +59,26 @@ for (const p of ALL_PHILOSOPHERS) {
   surCount.set(s, (surCount.get(s) ?? 0) + 1);
 }
 const shared = [...surCount.entries()].filter(([, n]) => n > 1);
-ok(`${shared.length} shared surname(s) are excluded from prose matching`,
-  shared.slice(0, 4).map(([s, n]) => `${s}×${n}`).join(', '));
+// A HIGH-WATER MARK, NOT A PRINTOUT, AND THIS ONE COST A THINKER.
+//
+// A bare surname in lesson prose is only matched when exactly ONE thinker has
+// it, so ADDING a philosopher can silently DELETE an existing one's links.
+// Alain Locke was written, entered, and taken back out on exactly this: he made
+// "Locke" ambiguous and stripped JOHN Locke out of eight lessons across the
+// branch he matters most in. Nothing failed. The table simply regenerated one
+// name shorter and every check stayed green -- it was visible only by diffing
+// the generated file by hand.
+//
+// So the count ratchets. Raising it is a deliberate act that says: this new
+// name is worth what it costs the one it collides with.
+const SHARED_BUDGET = 3;
+if (shared.length <= SHARED_BUDGET) {
+  ok(`${shared.length} shared surname(s) are excluded from prose matching`,
+    shared.slice(0, 4).map(([s, n]) => `${s}×${n}`).join(', '));
+} else {
+  bad(`${shared.length} shared surnames, budget ${SHARED_BUDGET} — a new thinker has taken an old one's prose links`,
+    shared.map(([s, n]) => `${s}×${n}`).join(', '));
+}
 
 // ── the table matches what the lessons say NOW ──────────────────────────────
 //

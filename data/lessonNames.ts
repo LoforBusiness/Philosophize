@@ -27,6 +27,7 @@ export const LESSON_NAMES: Record<string, readonly LessonName[]> = {
   'aesthetics-aesthetics-5': [['Simone Weil', 'simone-weil'], ['Murdoch', 'iris-murdoch'], ['Weil', 'simone-weil']],
   'aesthetics-aesthetics-6': [['Burke', 'edmund-burke'], ['Kant', 'immanuel-kant']],
   'aesthetics-aesthetics-7': [['Hume', 'david-hume']],
+  'aesthetics-aesthetics-9': [['Arthur Danto', 'arthur-danto'], ['Danto', 'arthur-danto']],
   'epistemology-knowledge-1': [['Socrates', 'socrates'], ['Plato', 'plato']],
   'epistemology-knowledge-15': [['Kant', 'immanuel-kant']],
   'epistemology-knowledge-17': [['Kuhn', 'thomas-kuhn']],

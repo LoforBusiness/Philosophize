@@ -9,6 +9,7 @@ import { EXPANSION2B_EXTRA } from './extra-philosophers/expansion2b';
 import { EXPANSION3_EXTRA } from './extra-philosophers/expansion3';
 import { EXPANSION4_EXTRA } from './extra-philosophers/expansion4';
 import { EXPANSION5_EXTRA } from './extra-philosophers/expansion5';
+import { EXPANSION6_EXTRA } from './extra-philosophers/expansion6';
 import { PHILOSOPHER_QUOTES_EXTRA } from './philosopherQuotesExtra';
 
 export interface PhilosopherQuote {
@@ -411,6 +412,7 @@ const RAW_PHILOSOPHERS: Philosopher[] = [
   ...EXPANSION3_EXTRA,
   ...EXPANSION4_EXTRA,
   ...EXPANSION5_EXTRA,
+  ...EXPANSION6_EXTRA,
 ];
 
 // Merge in the verified extra quotes (see philosopherQuotesExtra.ts). Appended
