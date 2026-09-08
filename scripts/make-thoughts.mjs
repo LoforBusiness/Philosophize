@@ -68,22 +68,19 @@ const BORDER = pick(/thoughtBox:\s*\{[^}]*borderWidth:\s*([\d.]+)/s);
 const SIZE = pick(/thoughtText:\s*\{[^}]*fontSize:\s*([\d.]+)/s);
 const LH = pick(/thoughtText:\s*\{[^}]*lineHeight:\s*([\d.]+)/s);
 const INNER = BOX_W - 2 * PAD - 2 * BORDER - 1;
-// HOW FAR SIDEWAYS THE BOX MAY SIT AND STILL BE HIS.
+// HOW FAR SIDEWAYS THE BOX MAY SIT AND STILL BE HIS (AB12).
 //
-// The trail leans back toward his head, and `Thought` clamps that lean to
-// `half - 14` — so past this the trail stops pointing at him and the bubble reads
-// as a caption that happens to be nearby. `logic-arguments-21` beat 6 placed a
-// thought 154 units to his left while he walked 136 units to the right, so the box
-// drifted the OTHER WAY across a third of the stage with its trail pinned at the
-// clamp. Read out of the component rather than typed, the same rule the box
-// dimensions follow.
-// SCOPED TO THE THOUGHT'S OWN TRAIL. The speech bubble one component up writes
-// the identical expression with a different number, so an unanchored pattern
-// reads 20 where the answer is 14 — the same trap `check:worklets` records
-// about reading the wrong function's first lines. Anchored on `head - cx`,
-// which only the thought's trail has.
-const LEAN = pick(/Math\.max\(-\(half - ([\d.]+)\), Math\.min\(half - [\d.]+, head - cx\)\)/);
-const DRIFT = BOX_W / 2 - LEAN;
+// `logic-arguments-21` beat 6 placed a thought 154 units to his left while he
+// walked 136 units to the right, so the box drifted the OTHER WAY across a third
+// of the stage from the man it belonged to.
+//
+// STATED IN THE COMPONENT AND READ HERE, not inferred from its trail geometry.
+// It used to be derived from the clamp expression, and that broke twice over:
+// the speech bubble one component up writes the identical clamp with a different
+// constant, so an unanchored pattern answered 20 where the truth was 14 — and
+// then the trail started FANNING its discs and stopped having a single number to
+// read at all.
+const DRIFT = pick(/export const THINK_DRIFT = ([\d.]+);/);
 // Box bottom → the smallest disc, for a trail of three, two or one.
 //
 // THE TRAIL IS A FREE PARAMETER, and treating it as fixed cost thirteen lessons.

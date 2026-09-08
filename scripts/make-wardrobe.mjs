@@ -31,6 +31,8 @@ import os from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { grave } from './lib/liveliness.mjs';
 import { mustBox, renderTable, STAGE_W } from './lib/mustrule.mjs';
+import { loadRig } from './lib/loadrig.mjs';
+import { corpus } from './lib/gestures.mjs';
 import { widestOn, secondFor, ROLL } from './lib/wardroberule.mjs';
 
 const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname).replace(/^\//, ''), '..');
@@ -47,6 +49,12 @@ fs.writeFileSync(wsrc, transform(
 const W = await import(pathToFileURL(wsrc).href);
 
 const K_FIG = 1.0;
+/** The pad `mustBox` puts round every box, which absorbs the first units of any
+ *  pose change. Read from the rule rather than retyped, so the two cannot drift. */
+const MUST_PAD = 4;
+const { RIG: RIGM, MOVES: M } = await loadRig();
+/** Which pose each beat holds — `lessons` below is built from the route and has no beats. */
+const CODES = new Map(corpus().map((l) => [l.id, l.beats.map((b) => b.code)]));
 
 /**
  * A SYNTHETIC BOX IS AN OUTPUT, NOT AN INPUT — drop last run's before reading.
@@ -356,6 +364,71 @@ for (const L of lessons) {
 }
 side.wardrobeReach = applied;
 
+// ── AND THE SAME BILL FOR A POSE THAT CHANGED SHAPE ─────────────────────────
+//
+// `mustBoxes` records what a beat drew ON THE DAY IT WAS MEASURED, and nothing
+// invalidates it when a POSE changes: `muststamp` hashes the scene, the script and
+// the probe, and `moves.ts` is none of the three. So widening an act's stance
+// makes every stored box that holds it quietly too small, no check goes red, and
+// the camera crops a hand.
+//
+// That is exactly why moves.ts rule 1b left the first living shelf alone —
+// "changing them moves the figure's box in every lesson that holds one, which is a
+// corpus-wide re-measure". A reader then hit what the shelf was hiding (*"I don't
+// like that movement of the hands, it doesn't seem quite natural"*: acts 59, 60,
+// 65 and 66 hung the hands at x ±6 inside a trunk 12 thick and rendered as a head
+// on a slab), the shelf was rewritten to ±14, and this is the cheaper half of the
+// bill — 7 units wider a side, of which `mustBox`'s own 4-unit pad absorbs four.
+//
+// GROWN RATHER THAN RE-MEASURED, and the reason is the bookkeeping right above.
+// `measure:must` renders through the player, which DRESSES the figure, so fresh
+// boxes already hold the costume — while `wardrobeReach` would still claim that
+// growth is owed. Fresh boxes plus a stale reach means the next run subtracts
+// something that is not there. This touches only the `fig` items on the beats
+// whose act actually moved.
+//
+// Idempotent for the reason the costume growth is: boxes only ever get LOOSER, so
+// a double-add is invisible. What was applied is recorded per beat and taken back
+// off before the new value goes on.
+// AN ABSENT RECORD MEANS THE BOX ALREADY HOLDS ITS POSE, WHICH IS THE ONLY SAFE
+// DEFAULT. Treating it as zero and growing by the full reach is what the first
+// draft did, and it moved 7,589 boxes on a corpus where nine acts had changed:
+// a measured box holds whatever the figure was doing when it was measured, so
+// the baseline is the reach AT MEASUREMENT TIME, never nothing.
+// `scripts/seed-pose-reach.mjs` writes that baseline once, from the moves.ts the
+// boxes were recorded against.
+const poseWas = side.poseReach || {};
+const poseNow = {};
+let posed = 0; const posedIn = new Set();
+for (const L of lessons) {
+  const per = side.words[L.id];
+  if (!per) continue;
+  const was = poseWas[L.id] || [];
+  const now = [];
+  (CODES.get(L.id) || []).forEach((code, i) => {
+    // The WRIST plus the glove, sampled across the loop, less the trunk it has to
+    // clear and less the pad already allowed. The living acts read the monotonic
+    // clock and never stop, so one sample answers for a pose that is still moving.
+    let r = 0;
+    for (const t of [0, 0.6, 1.2, 1.8, 2.4, 3.0, 3.6, 4.2, 4.8, 5.4]) {
+      const st = M.emoteAny(code, t);
+      for (const f of [st.fistL, st.fistR]) if (f) r = Math.max(r, Math.abs(f.x));
+    }
+    now[i] = +Math.max(0, (r + RIGM.STR.glove / 2) - RIGM.STR.torso / 2 - MUST_PAD).toFixed(2);
+    const d = (now[i] - (was[i] ?? now[i])) * K_FIG;
+    if (!d || !per[i]) return;
+    for (const it of per[i]) {
+      if (it.k !== 'fig' || it.v) continue;
+      it.b[0] -= d;
+      it.b[2] += 2 * d;
+      posed += 1;
+    }
+    posedIn.add(L.id);
+  });
+  poseNow[L.id] = now;
+}
+side.poseReach = poseNow;
+
 // ── AND THE VISITOR'S OWN BODY GOES INTO THE BOXES ──────────────────────────
 //
 // He is a second figure standing on the stage from his entrance beat onward, and
@@ -393,10 +466,11 @@ for (const L of lessons) {
 
 const rendered = renderTable(side.words, side.stamps, 'all', bands);
 fs.writeFileSync(SIDE, JSON.stringify(
-  { boxes: rendered.boxes, words: side.words, stamps: side.stamps, wardrobeReach: applied }, null, 1,
+  { boxes: rendered.boxes, words: side.words, stamps: side.stamps, wardrobeReach: applied, poseReach: poseNow }, null, 1,
 ));
 fs.writeFileSync(path.join(REPO, 'components/lesson/cinematic/mustBoxes.ts'), rendered.text);
 console.log(`
-  ${grown} figure box(es) grown to hold a costume`);
+  ${grown} figure box(es) grown to hold a costume
+  ${posed} figure box(es) resized to hold the pose the rig draws today, in ${posedIn.size} lesson(s)`);
 console.log(`  ${visitorBoxes} beat(s) given the visitor's own body; mustBoxes rewritten`);
 console.log('  now run: npm run make:tours   (the boxes moved, so the shots do)');

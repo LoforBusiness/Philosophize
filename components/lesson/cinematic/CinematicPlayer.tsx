@@ -453,7 +453,21 @@ export default function CinematicPlayer({
     text: string;
     kind: 'think' | 'say';
     at: readonly [number, number, number, number];
-    /** Omitted for the second figure: his line is delivered standing still. */
+    /**
+     * WHERE HE STOOD WHEN THE PLACEMENT WAS MEASURED — and UNDEFINED when this
+     * lesson has no walk track at all.
+     *
+     * That distinction is load-bearing and cost a render to find. `Thought` reads
+     * `figX ? figX.value : headX`, and `figX` is a SharedValue OBJECT, so the
+     * fallback never fired: in the 86 scenes that declare an x track and never
+     * pass it, `figX` reports 0 and the trail leaned toward the left edge of the
+     * stage instead of toward him. Measured on `epistemology-knowledge-5`, the
+     * discs sat 71 units the WRONG WAY from a box that needed to lean 12 the
+     * other. `walk?.[i] ?? 0` cannot say "there is no track"; `walk ? … :
+     * undefined` can.
+     *
+     * Also omitted for the second figure, who is delivered standing still.
+     */
     refX?: number;
     show: boolean;
   };
@@ -962,7 +976,7 @@ export default function CinematicPlayer({
     const delay = vis ? Math.max(620, (beat.dur ?? 4) * 1000 * 0.78) : 620;
     const t = setTimeout(() => {
       const next: Bub[] = [];
-      if (text && here) next.push({ key: `t${i}`, text, kind: 'think', at: here, refX: walk?.[i] ?? 0, show: true });
+      if (text && here) next.push({ key: `t${i}`, text, kind: 'think', at: here, refX: walk ? walk[i] ?? 0 : undefined, show: true });
       if (vis) next.push({ key: `v${i}`, text: visitorSays(lesson.id), kind: 'think', at: [vis[1], vis[2], vis[3], vis[1]], show: true });
       setBubbles((bs) => [...bs, ...next]);
     }, delay);
@@ -1066,7 +1080,8 @@ export default function CinematicPlayer({
     // answering, so the stage is his to talk from.
     if (spot) {
       setBubbles((bs) => [...bs, {
-        key: `a${i}`, text: quipFor(lesson.id, i, isCorrect), kind: 'say', at: spot, refX: walk?.[i] ?? 0, show: true,
+        key: `a${i}`, text: quipFor(lesson.id, i, isCorrect), kind: 'say', at: spot,
+        refX: walk ? walk[i] ?? 0 : undefined, show: true,
       }]);
     }
     // `i` AND `spot` ARE IN THE DEPS, and they have to be: this callback was

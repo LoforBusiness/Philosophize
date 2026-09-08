@@ -257,33 +257,43 @@ const MONOCLE: Piece[] = [
 ];
 
 /**
- * A SATCHEL, and the scarf it replaces is why.
+ * THE SATCHEL AND THE COAT TAILS ARE CUT, AND A READER CUT THEM.
  *
- * The scarf was tried twice and cut. Version one was a rounded blob beside the
- * head and read as a thumb; version two held it off the body with a gap of paper
- * and read as a stick floating in mid-air. The rule at the top of this file
- * already predicted both — a scarf lives on a NECK, and this figure's head
- * overlaps its own shoulders, so there is no neck to hang one from. Exactly the
- * bow tie's problem, arrived at from the other direction.
+ *   *"the box behind the stickman follow[s] in a bad way, you can remove that box
+ *    by its feet and then any other stickman costume that also has those luggage
+ *    looking boxes, especially since they follow without anything holding them."*
  *
- * A bag hangs from the HIP, where there is empty paper on both sides of the leg,
- * and it is a shape a traveller carries. It attaches and it reads.
+ * They were the only two pieces in the wardrobe that were not WORN. Everything
+ * else here either sits on the skull (the five hats), rides the face on a cord
+ * (the monocle) or is gripped (the cane, which is anchored to the HAND for exactly
+ * this reason — "he is holding it, so when he raises his arm the cane comes with
+ * it, which is the whole difference between a prop and a painted-on decoration").
+ *
+ * The satchel was a 17×15 box beside the hip and the coat tails a 14×34 one behind
+ * the legs, and both were pinned to the pelvis — so they tracked his walk exactly,
+ * at a fixed offset, with nothing drawn between them and him. The satchel's strap
+ * could not help: it is `paper: true`, which draws a hairline of the GROUND to keep
+ * ink off ink (AA6), so what reads as a strap is a gap. A bag on a gap is a box
+ * flying alongside a man.
+ *
+ * The rule this leaves behind is the one at the top of this file, in a third form:
+ * a piece has to attach to something the eye can see it attached to. A hat sits
+ * ON the skull, a monocle hangs FROM a drawn cord, a cane is IN the hand. Nothing
+ * else survived, and the two that were merely NEAR him were the two a reader
+ * picked out.
+ *
+ * Kept here rather than deleted, the way `swordPaths` is kept in badgeShapes: the
+ * geometry was measured and the decision is one line to revisit if either ever
+ * gets something visible to hang from.
  */
-const SATCHEL: Piece[] = [
+const RETIRED_SATCHEL: Piece[] = [
   { at: 'pelvis', x: -17, y: 3, w: 17, h: 15, r: 3 },
   { at: 'pelvis', x: -9, y: 0, w: 2, h: 12, rot: 18, paper: true },
 ];
-
-/**
- * Hangs BELOW the pelvis and BEHIND the legs, where there is empty paper.
- *
- * Moved back from −14 to −17 after looking: at −14 it overlapped the swinging
- * thigh and the two ink shapes read as one thickened leg. A garment has to clear
- * the limb it hangs beside, because ink over ink has no edge.
- */
-const COAT_TAILS: Piece[] = [
+const RETIRED_COAT_TAILS: Piece[] = [
   { at: 'pelvis', x: -17, y: 17, w: 14, h: 34, r: 3, rot: 9 },
 ];
+void RETIRED_SATCHEL; void RETIRED_COAT_TAILS;
 
 /**
  * Long enough to reach the ground from a hanging hand.
@@ -306,17 +316,27 @@ const CANE: Piece[] = [
 // thirty that need to be squinted at, and a wardrobe is only variety if a reader
 // can tell two of them apart from across a room.
 
+// TEN LOOKS OUT OF FIVE HATS AND TWO WORN ACCESSORIES, and the ids do not move.
+//
+// BALANCED RATHER THAN BACKFILLED. Giving all four re-formed costumes a cane was
+// the obvious repair and left six of ten carrying one, which is not a wardrobe,
+// it is one prop with hats. Five carry the cane, three the monocle, and three are
+// a hat on its own — so any two costumes still differ by something a reader can
+// name from across a room, which is the only test this list has ever had.
+// `lessonWardrobe.ts` and `wardroberule`'s roll and sober list are all keyed on
+// them, so the four that lost a piece are re-formed rather than renamed: a costume
+// id is a name a reader never sees and a table everything else is joined on.
 export const COSTUMES: Costume[] = [
   { id: 'plain', label: 'the mascot, undressed', pieces: [] },
   { id: 'dandy', label: 'top hat · monocle · cane', pieces: [...TOP_HAT, ...MONOCLE, ...CANE] },
   { id: 'gent', label: 'bowler · cane', pieces: [...BOWLER, ...CANE] },
   { id: 'scholar', label: 'mortarboard', pieces: [...MORTARBOARD] },
-  { id: 'magistrate', label: 'top hat · coat tails', pieces: [...TOP_HAT, ...COAT_TAILS] },
-  { id: 'traveller', label: 'newsboy cap · satchel', pieces: [...FLAT_CAP, ...SATCHEL] },
+  { id: 'magistrate', label: 'top hat', pieces: [...TOP_HAT] },
+  { id: 'traveller', label: 'newsboy cap · cane', pieces: [...FLAT_CAP, ...CANE] },
   { id: 'aesthete', label: 'wide brim · monocle', pieces: [...WIDE_BRIM, ...MONOCLE] },
   { id: 'lecturer', label: 'mortarboard · cane', pieces: [...MORTARBOARD, ...CANE] },
-  { id: 'stroller', label: 'newsboy cap · coat tails', pieces: [...FLAT_CAP, ...COAT_TAILS] },
-  { id: 'ringmaster', label: 'wide brim · coat tails · cane', pieces: [...WIDE_BRIM, ...COAT_TAILS, ...CANE] },
+  { id: 'stroller', label: 'newsboy cap', pieces: [...FLAT_CAP] },
+  { id: 'ringmaster', label: 'wide brim · monocle · cane', pieces: [...WIDE_BRIM, ...MONOCLE, ...CANE] },
 ];
 
 export const BY_ID: Record<string, Costume> =

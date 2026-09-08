@@ -1075,6 +1075,68 @@ function where(x: number, figX: SharedValue<number> | undefined, refX: number, s
   return figX.value + (x - refX) * st;
 }
 
+/**
+ * THE TRAIL POINTS AT HIM, AND IT USED TO ONLY LEAN.
+ *
+ * A reader: *"the thinking boxes don't quite point enough towards the stickman
+ * doing the thinking."* The three discs were a vertical column translated
+ * sideways as one rigid group, and clamped to `half - 14` — so on a narrow box
+ * (the clamp is a function of the TEXT's width) they could barely move at all,
+ * and even at full lean they stayed a straight column standing off to one side.
+ * A column is not a trail. What says "this came out of that head" is a CHAIN:
+ * the discs spread along the line from the box to the head, smallest and nearest
+ * him at the bottom.
+ *
+ * So each disc carries its own share — a quarter, then three fifths, then all of
+ * it — and the last one may hang past the box's own edge, because it is the one
+ * that has to arrive at his head. Clamped all the same: a disc that chases him
+ * without limit is a dotted line across the stage rather than a thought.
+ */
+const THINK_FAN = [0.25, 0.58, 1];
+const THINK_REACH = 18;
+/**
+ * HOW FAR THE BOX ITSELF MAY SIT FROM HIS HEAD (AB12), read by `make:thoughts`
+ * and re-derived by `check:thoughts`.
+ *
+ * It used to be inferred from the trail's own clamp expression, which stopped
+ * being a single number the moment the discs started fanning — and inferring it
+ * had already gone wrong once: the speech bubble writes the identical clamp with
+ * a different constant one component up, so an unanchored read answered 20 where
+ * the truth was 14. Stated once here instead.
+ */
+export const THINK_DRIFT = 51;
+
+/**
+ * HOW FAR ALONG THE LINE TO HIS HEAD THIS DISC SITS.
+ *
+ * `frac` is the disc's place in the chain — 0.25 for the one under the box, 1 for
+ * the small one nearest him — so the three together draw a trail that arrives at
+ * his head rather than a column standing beside it.
+ *
+ * DECLARED ABOVE ITS CALLERS, and that is not style: the babel plugin rewrites a
+ * `'worklet'` function into a `const` and builds every worklet's closure at module
+ * scope, so calling one declared further down hits its temporal dead zone and
+ * throws AT IMPORT, taking the whole route tree with it (§17 rule 2). It also has
+ * to sit below `where`, which it calls, for the same reason.
+ */
+function leanTo(
+  frac: number, w: number, x: number, headX: number,
+  figX: SharedValue<number> | undefined, refX: number, settle: SharedValue<number> | undefined,
+) {
+  'worklet';
+  const half = w / 2;
+  // Before layout there is no box to measure a lean against, and half of nothing
+  // turns the clamp inside out.
+  if (half <= 0) return 0;
+  const cx = Math.max(half + 10, Math.min(STAGE_W - half - 10, where(x, figX, refX, settle)));
+  // POINTING AT HIM, LIVE. `headX` is the head the placement was measured against
+  // and is the right answer when there is no walk track to do better with; where
+  // there is one, his own position is the head this came out of.
+  const head = figX ? figX.value : headX;
+  const cap = half + THINK_REACH;
+  return Math.max(-cap, Math.min(cap, head - cx)) * frac;
+}
+
 const THINK_W = 130;
 const THINK_TAIL_UP = 30;
 /**
@@ -1245,17 +1307,7 @@ export function Thought({
   // points at whose head this came out of — and it follows the SAME `dx`, so a
   // bubble travelling with him keeps pointing at the head it came out of rather
   // than at the place he set off from.
-  const trail = useAnimatedStyle(() => {
-    const half = w.value / 2;
-    if (half <= 14) return { transform: [{ translateX: 0 }] };
-    const cx = Math.max(half + 10, Math.min(STAGE_W - half - 10, where(x, figX, refX, settle)));
-    // POINTING AT HIM, LIVE. `headX` is the head the placement was measured
-    // against and is the right answer when there is no walk track to do better
-    // with; where there is one, his own position is the head this came out of.
-    const head = figX ? figX.value : headX;
-    const off = Math.max(-(half - 14), Math.min(half - 14, head - cx));
-    return { transform: [{ translateX: off }] };
-  });
+
 
   // ONE LINEAR DRIVER, AND THE EXIT IS THE ENTRANCE READ BACKWARDS — ThinkerPeek's
   // finding, and the reason the stage windows below are honest: a stage occupying
@@ -1281,17 +1333,26 @@ export function Thought({
   const d1 = useAnimatedStyle(() => {
     const d = drive.value;
     const e = ease01(seg(d, 0.00, 0.22));
-    return { opacity: e, transform: [{ scale: 0.4 + 0.6 * e }] };
+    return {
+      opacity: e,
+      transform: [{ translateX: leanTo(THINK_FAN[2], w.value, x, headX, figX, refX, settle) }, { scale: 0.4 + 0.6 * e }],
+    };
   });
   const d2 = useAnimatedStyle(() => {
     const d = drive.value;
     const e = ease01(seg(d, 0.12, 0.36));
-    return { opacity: e, transform: [{ scale: 0.4 + 0.6 * e }] };
+    return {
+      opacity: e,
+      transform: [{ translateX: leanTo(THINK_FAN[1], w.value, x, headX, figX, refX, settle) }, { scale: 0.4 + 0.6 * e }],
+    };
   });
   const d3 = useAnimatedStyle(() => {
     const d = drive.value;
     const e = ease01(seg(d, 0.26, 0.50));
-    return { opacity: e, transform: [{ scale: 0.4 + 0.6 * e }] };
+    return {
+      opacity: e,
+      transform: [{ translateX: leanTo(THINK_FAN[0], w.value, x, headX, figX, refX, settle) }, { scale: 0.4 + 0.6 * e }],
+    };
   });
 
   return (
@@ -1301,11 +1362,11 @@ export function Thought({
           <Text style={[styles.thoughtText, kind === 'say' && styles.sayText]}>{text}</Text>
         </View>
       </Animated.View>
-      <Animated.View style={[styles.trail, trail]}>
+      <View style={styles.trail}>
         {discs >= 3 ? <Animated.View style={[styles.puff, styles.puff1, d3]} /> : null}
         {discs >= 2 ? <Animated.View style={[styles.puff, styles.puff2, d2]} /> : null}
         <Animated.View style={[styles.puff, styles.puff3, d1]} />
-      </Animated.View>
+      </View>
     </Animated.View>
   );
 }

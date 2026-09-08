@@ -918,7 +918,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **fifty-two** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **fifty-four** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -929,7 +929,28 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-turn` · `check-moves` · `check-life` · `check-thoughts`. It exits 0 today. `check-clear` and `check-plain` — which this file
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-turn` · `check-moves` · `check-life` · `check-thoughts` · `check-rules`.
+
+> **`check-rules` is the newest and it is not about a lesson at all — it is about
+> the file lessons are written FROM.** `docs/LESSON_RULES.md` is what an author
+> reads before writing anything, so a stale line there does not cause one defect,
+> it causes the next twenty: **a wrong rule is worse than a missing one, because it
+> is obeyed.** Group U has said since it was written that a rule without a checker
+> is a wish, and the file saying so was the one thing in the repo nothing
+> re-derived. Its first run found six: four rule ids used twice — U4's own failure,
+> at J11, K11, K12 and D31b — a `check:splits` that existed, passed, and was in no
+> npm script at all, and a reading-ease floor the authoring checklist still quoted
+> as 55 two pages after J11 raised it to 60. `node scripts/countertest-rules.mjs`
+> puts each defect back, and stages the two shapes that must stay SILENT: a Part 1
+> rule restated in a later section, and a screen string in capitals that is not a
+> constant.
+>
+> **`check-splits` is the finding rather than the fix.** It was written, it works,
+> the rule book cited it by name — and it was in no script, so its budget could not
+> ratchet and nobody could run it. That is the third time this file has recorded
+> the same thing (`check:moves` for months, the preview-route rule "enforced" by
+> remembering it), which is why the citation check exists now rather than another
+> reminder. It exits 0 today. `check-clear` and `check-plain` — which this file
 recorded as the two permanent failures, "measuring lesson prose that is being
 rewritten in another session's working tree" — are now green and sitting EXACTLY
 on their budgets, 72 and 18. That is the dangerous state to inherit, not a
@@ -1075,20 +1096,18 @@ they belong to, so the rule book has them and this file did not:
   397 and a hanging hand is 450, against a median lowest prop edge of 256. So
   `interact.ts`'s holding and carrying vocabulary stays unreachable until scenes
   are re-staged one at a time (group Y5). Attention generalised; contact did not.
-- **The first living shelf has no arms at lesson scale.** Acts 59–78 hang the
-  hands at x ±6; the torso stroke is 12 wide and a limb stroke is 11, so a forearm
-  centred on x 6 shows five units of itself — about two pixels at the size a
-  lesson draws the figure. 59 WEIGHT SHIFT, 60 LISTENING and 65 GAZING UP render
-  as a head on a slab, and 164 (held 65) was the second-commonest code in the app.
-  Nothing measured it because nothing is WRONG with it: the arm is straight, at
-  arm's length, geometrically perfect and invisible. `npm run sheet:moves 59 78`
-  is what shows it, and moves.ts rule **1b** carries the arithmetic and the 14
-  that fixes it. 162, 163 and 164 were rewritten to it; the twenty shipped acts
-  were deliberately left, because they should be judged as a batch and changing
-  them moves the figure's box in every lesson that holds one — a corpus-wide
-  re-measure. **It is not a check on purpose**: a hand at the body is right in a
-  dozen poses (chin in hand, arms folded, hands clasped) and a detector that
-  cannot tell those from an accident is the boxiness metric again (§13).
+- **~~The first living shelf has no arms at lesson scale.~~ FIXED, and the note
+  outliving the decision is the finding.** Acts 59–78 hung the hands at x ±6
+  inside a 12-wide torso in the same ink, so a forearm showed five units of itself
+  and 59 WEIGHT SHIFT, 60 LISTENING and 65 GAZING UP rendered as a head on a slab.
+  This entry used to end *"the twenty shipped acts were deliberately left … a
+  corpus-wide re-measure"*, which was a sound decision when it was written and then
+  sat here for weeks reading as **do not look here** — until a reader looked at the
+  one thing it described. Seven used acts, 208 beats, 129 lessons; all nine are out
+  at 13–17 now, and the bill was 903 boxes grown arithmetically by `make:wardrobe`
+  in a single run rather than hours of browser time, because that machinery had
+  arrived for costumes in the meantime. **A deferral is priced against the tools of
+  the day it was written** — LESSON_RULES U7 and N15.
 - **Six shipped lessons key two different quotations off one saveable id.**
   `savedQuotes` dedups on the id alone, so the second quotation can never be
   collected and renders as already held. Held at six by `npm run check:quotes`,
@@ -3340,6 +3359,77 @@ covers a word.
 > divided by the frame gap without a floor, so two reads landing inside one
 > painted frame (9ms was measured) turned a legitimate 0.20 step into a 0.38
 > "snap".
+
+> **AND THE TRAIL WAS POINTING AT THE LEFT EDGE OF THE STAGE IN 86 LESSONS.**
+> The reader again: *"the thinking boxes don't quite point enough towards the
+> stickman doing the thinking."* Two faults, and the second is the one no amount
+> of reading would have found.
+>
+> - **A COLUMN THAT HAS MOVED SIDEWAYS IS STILL A COLUMN.** The three discs were
+>   translated as one rigid group and clamped to `half − 14`, half of the box's own
+>   measured width — so a SHORT thought, which makes a narrow box, had almost no
+>   lean available at all, and even at full lean the trail was a straight stack
+>   standing beside him. A trail is a CHAIN: the discs spread along the line from
+>   the box to the head, the small one nearest him. Each carries its own share now
+>   (a quarter, three fifths, all of it) and the last may hang past the box's edge,
+>   because it is the one that has to arrive.
+> - **`figX` IS AN OBJECT, SO `figX ? figX.value : headX` NEVER FELL BACK.** 86 of
+>   196 scenes declare an x track and never pass it to the player, and in those
+>   `figX` reports **0** — so the trail leaned toward x 0, the left edge of the
+>   stage, rather than toward him. Measured on `epistemology-knowledge-5`, the
+>   discs sat **71 units the wrong way** from a box that needed to lean 12 the
+>   other. `walk?.[i] ?? 0` cannot say "there is no track" and `walk ? … :
+>   undefined` can; that one expression is the whole fix. Re-measured after: 31%,
+>   73% and 126% of the way to his head, against the 25/58/100 the fan asks for.
+>
+> **Only the render could say it**, and a contact sheet could not: three discs a
+> few pixels across in a grid of nine beats is precisely the picture §19 warns
+> about — *"a numeral that looks sliced at 2× may be whole at 4×; trust the
+> measurement, then go and look bigger."* Reading the DOM said the discs were 71
+> units to the left of where they should be; the sheet only said the bubble looked
+> a bit off.
+
+> **AND THE FIRST LIVING SHELF FINALLY GOT ITS ARMS (N15).** *"the stickman does 3
+> times in a row of his hands, and I don't like that movement of the hands, it
+> doesn't seem quite natural."* The lesson holds **act 65, GAZING UP — whose own
+> name ends "arms forgotten"** — and moves.ts rule 1b had described the fault for
+> weeks: acts 59–78 hang the hands at x ±6, the torso is 12 thick and a limb 11 in
+> the same ink, so a forearm centred there shows five units of itself, about two
+> pixels at lesson size. Seven used acts were still inside the trunk, on **208
+> beats across 129 lessons**; act 66 alone is one beat in eighty-nine of them.
+>
+> The rule also said why nobody had fixed it: *"changing them moves the figure's
+> box in every lesson that holds one, which is a corpus-wide re-measure."* It does
+> not have to be. `muststamp` hashes the scene, the script and the probe and
+> `moves.ts` is none of the three, so nothing goes red — but `make:wardrobe`
+> already grows stored boxes arithmetically for a costume, and a pose is the same
+> bill: **903 boxes in 145 lessons**, of which `mustBox`'s own 4-unit pad was
+> already absorbing four units. Re-measuring is the other option and it is the one
+> that breaks the bookkeeping, because `measure:must` renders through the player,
+> which DRESSES the figure, while `make:wardrobe` separately claims that growth is
+> still owed.
+>
+> **THE BASELINE IS THE WHOLE OF IT.** Growing needs to know what the boxes already
+> account for, and a measured box accounts for whatever the figure was doing when
+> the probe read it. Treating that as nothing is not a conservative guess, it is a
+> wrong one: the first draft did exactly that and grew **7,589** boxes on a corpus
+> where nine acts had moved. `scripts/seed-pose-reach.mjs` writes the baseline once
+> from the `moves.ts` at git HEAD, applies nothing, and undoes any reach a previous
+> run applied — the `restamp-must.mjs` pattern, and committed for the same reason.
+
+> **AND TWO COSTUMES WERE BOXES THAT FOLLOWED HIM WITH NOTHING HOLDING THEM (AA9).**
+> *"you can remove that box by its feet and then any other stickman costume that
+> also has those luggage looking boxes, especially since they follow without
+> anything holding them."* The SATCHEL and the COAT TAILS were the only two pieces
+> in the wardrobe that were not WORN — every other one sits on the skull, rides the
+> face on a drawn cord, or is gripped, and the cane's own comment already had the
+> rule. Both were pinned to the pelvis, so they tracked his walk exactly at a fixed
+> offset with nothing drawn between them and him, and **the satchel's strap could
+> not help: it is `paper: true`, which draws a hairline of the GROUND to keep ink
+> off ink, so what reads as a strap is a gap.** A bag on a gap is a box flying
+> alongside a man. 34 lessons carried one; both are cut, and the four costumes that
+> lost a piece are re-formed rather than renamed, because a costume id is a name a
+> reader never sees and a table everything else is joined on.
 
 ### The branch road — the same rig, outside a lesson
 

@@ -263,20 +263,18 @@ const riseOf = (c) => {
 /** Half a head of paper. Past this the trail stops connecting the two. */
 const FLOAT = 20;
 /**
- * AND HOW FAR SIDEWAYS IT MAY SIT, which is geometry rather than taste.
+ * AND HOW FAR SIDEWAYS IT MAY SIT, which is geometry rather than taste (AB12).
  *
- * The trail leans back toward his head and `Thought` clamps that lean to
- * `half - 14`, so past this the trail is pinned at its stop and no longer points
- * at him. `logic-arguments-21` beat 6 placed a thought 154 units to his LEFT while
- * he walked 136 units to the RIGHT: the box crossed a third of the stage away from
- * the man it belonged to, with its trail hard against the clamp the whole way.
+ * `logic-arguments-21` beat 6 placed a thought 154 units to his LEFT while he
+ * walked 136 units to the RIGHT: the box crossed a third of the stage away from
+ * the man it belonged to.
  *
- * Read out of the component, and ANCHORED — the speech bubble writes the identical
- * expression with a different number one component up, so an unscoped pattern
- * answers 20 where the truth is 14.
+ * Read out of the component, which now STATES it. Deriving it from the trail's
+ * clamp went wrong twice — the speech bubble writes the identical expression with
+ * a different constant one component up, and then the discs began fanning and
+ * there was no single clamp left to read.
  */
-const LEAN = parseFloat((KIT.match(/Math\.max\(-\(half - ([\d.]+)\), Math\.min\(half - [\d.]+, head - cx\)\)/) || [])[1]);
-const DRIFT = BOX_W / 2 - LEAN;
+const DRIFT = num(/export const THINK_DRIFT = ([\d.]+);/, 'the drift limit');
 const HAT = J.wardrobeReach || {};
 const far = [];
 const adrift = [];
@@ -314,7 +312,7 @@ if (far.length) bad(`${far.length} thought(s) hang more than ${FLOAT} units clea
 // what it skipped is printed beside the count of what it held.
 else ok(`every thought hangs within ${FLOAT} units of his head`, `${gaps.length} measured, median ${med.toFixed(0)} · ${unsure} skipped, no figure the walk track names`);
 
-if (Number.isNaN(LEAN)) bad('could not read the trail lean out of cinematicKit');
+if (DRIFT === null) bad('could not read the drift limit out of cinematicKit');
 else if (adrift.length) bad(`${adrift.length} thought(s) sit further sideways than the trail can lean`, adrift.slice(0, 4).join(' · '));
 else ok('every thought sits where its trail can still point at him', `within ${DRIFT.toFixed(0)} units`);
 

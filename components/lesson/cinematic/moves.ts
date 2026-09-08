@@ -59,10 +59,23 @@
 //    hands clasped, warming the hands) and a detector that cannot tell those from
 //    an accident is the boxiness metric again (§13).
 //
-//    162, 163 and 164 were rewritten to it. The twenty acts of the first shelf
-//    were left alone on purpose: changing them moves the figure's box in every
-//    lesson that holds one, which is a corpus-wide re-measure for a change that
-//    should be judged as a batch against the whole shelf rather than smuggled in.
+//    162, 163 and 164 were rewritten to it first, and then the FIRST shelf was, in
+//    one batch: 59, 60, 64, 65, 66, 71, 72, 73 and 75, out at 13-17. Two were not
+//    a simple move — 64 keeps its hands BEHIND the hips and needed -17 rather than
+//    -9, because a pelvis is 12 wide and the akimbo elbow is the whole read; and
+//    66 scratches across to the far upper arm, which is mostly a vertical travel
+//    once the resting hand is already clear of the ribs.
+//
+//    THIS PARAGRAPH USED TO SAY THE SHELF "was left alone on purpose", because
+//    changing it moves the figure's box in every lesson that holds one and that
+//    looked like a corpus-wide re-measure. It was a good decision when it was
+//    written and it then sat here for weeks reading as DO NOT LOOK HERE, until a
+//    reader looked at the one thing it described: "the stickman does 3 times in a
+//    row of his hands, and I don't like that movement of the hands, it doesn't
+//    seem quite natural." The bill turned out to be 903 boxes grown arithmetically
+//    in one run, because `make:wardrobe` had gained that machinery for costumes in
+//    the meantime. A deferral is priced against the tools of the day it was
+//    written; see LESSON_RULES U7.
 //
 // 2. FEET STAY NARROW AND NEAR-VERTICAL WHEN STANDING. A wide sliding stance made
 //    the near-straight legs read as segmented bars with a gap between them. The
@@ -1777,8 +1790,12 @@ export function actStance(code: number, t: number, u: number): Stance {
       neck: s.neck + w * 0.035,
       bob: s.bob - load * 1.6,
       footL: { x: -5 - w * 1.8, y: 0 }, footR: { x: 5 - w * 1.8, y: 0 },
-      fistL: { x: -5 - w * 2.2, y: 6 + load * 0.6 },
-      fistR: { x: 6 - w * 2.2, y: 6 + load * 0.6 },
+      // RULE 1b. The hands used to hang at x ±5.5, inside a trunk 12 thick drawn
+      // in the same ink, so the forearms showed about five units of themselves —
+      // two pixels at lesson size — and the plainest idle in the library rendered
+      // as a head on a slab. They swing with the weight from out here instead.
+      fistL: { x: -14 - w * 2.2, y: 6 + load * 0.6 },
+      fistR: { x: 14 - w * 2.2, y: 6 + load * 0.6 },
     };
   }
   if (code === 60) {                             // LISTENING — inclined, with the odd small nod
@@ -1792,7 +1809,9 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       neck: s.neck + 0.09 + drift * 0.035 + nod * 0.075,
       tilt: s.tilt + 0.015 + nod * 0.012,
-      fistL: { x: -5 + drift * 1.4, y: 6 }, fistR: { x: 6 + drift * 1.2, y: 6 },
+      // Out at 14 (rule 1b): at ±5.5 the arms were inside the trunk and a pose
+      // whose whole content is a small nod had nothing else visible to carry it.
+      fistL: { x: -14 + drift * 1.4, y: 6 }, fistR: { x: 14 + drift * 1.2, y: 6 },
     };
   }
   if (code === 61) {                             // CHIN IN HAND — thinking, and barely moving
@@ -1866,7 +1885,12 @@ export function actStance(code: number, t: number, u: number): Stance {
       neck: s.neck - 0.05,
       bob: s.bob - Math.abs(w) * 0.9,
       footL: { x: -8 - w * 1.2, y: 0 }, footR: { x: 8 - w * 1.2, y: 0 },
-      fistL: { x: -9 + w * 1.2, y: 1 }, fistR: { x: -8 + w * 1.2, y: -1 },
+      // FURTHER BACK, not further out — the comment above is why the hands are
+      // behind rather than in front, and rule 1b is why −9 was not far enough:
+      // the pelvis is 12 wide, so a hand at −9 keeps the whole forearm inside the
+      // body and the akimbo elbow, which is the entire read of this pose, never
+      // appears. At −17 the elbow wings out behind him against paper.
+      fistL: { x: -17 + w * 1.2, y: 1 }, fistR: { x: -16 + w * 1.2, y: -1 },
     };
   }
   if (code === 65) {                             // GAZING UP — head back, arms forgotten
@@ -1875,7 +1899,10 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.05, neck: -0.30 + d * 0.05,
       bob: s.bob + 0.5,
-      fistL: { x: -5 + d * 1.6, y: 7 }, fistR: { x: 6 + d * 1.4, y: 7 },
+      // FORGOTTEN, NOT ABSENT (rule 1b). The name is the intent — the arms are
+      // doing nothing while he looks up — but at ±5.5 they were not hanging, they
+      // were gone, and this was the second-commonest code in the app.
+      fistL: { x: -14 + d * 1.6, y: 7 }, fistR: { x: 14 + d * 1.4, y: 7 },
     };
   }
   if (code === 66) {                             // FIDGETING — nothing is ever quite still
@@ -1891,10 +1918,14 @@ export function actStance(code: number, t: number, u: number): Stance {
       tilt: s.tilt + w * 0.02, neck: s.neck + b * 0.008 - sc * 0.04,
       bob: s.bob - Math.abs(w) * 0.9,
       footL: { x: -5 - w * 1.5, y: 0 }, footR: { x: 6 - w * 1.5, y: 0 },
-      fistL: { x: -4 + a, y: 6 + b * 0.5 },
-      // Across to the far upper arm, not back onto the ribs: at x −4 the scratching
-      // forearm lies on the torso and the whole gesture is invisible.
-      fistR: { x: lerp(6 + b, 14, sc), y: lerp(6 + a * 0.5, -22, sc) },
+      // Both hands out at 14 (rule 1b) and fidgeting from there. At −4 the left
+      // one lay along the trunk, so two of the three clocks this act runs were
+      // being spent on a limb nobody could see.
+      fistL: { x: -14 + a, y: 6 + b * 0.5 },
+      // The scratch reaches the far UPPER ARM. Now that the resting hand is
+      // already clear of the ribs the travel is mostly vertical, which is what a
+      // hand coming up to a shoulder actually does.
+      fistR: { x: lerp(14 + b, 15, sc), y: lerp(6 + a * 0.5, -22, sc) },
     };
   }
   if (code === 67) {                             // IMPATIENT — folded, and the foot going
@@ -1972,7 +2003,9 @@ export function actStance(code: number, t: number, u: number): Stance {
       tilt: s.tilt - c * 0.07, neck: s.neck - c * 0.10,
       bob: s.bob + c * 2.0,
       footL: { x: -5, y: -c * 1.4 }, footR: { x: 5, y: -c * 1.4 },
-      fistL: { x: -6 - c * 3, y: 7 - c * 2 }, fistR: { x: 7 + c * 3, y: 7 - c * 2 },
+      // Rule 1b: the chest opening is the point, and at ±6.5 the arms it opens
+      // against were inside the body.
+      fistL: { x: -14 - c * 3, y: 7 - c * 2 }, fistR: { x: 15 + c * 3, y: 7 - c * 2 },
     };
   }
   if (code === 72) {                             // STEPPING IN PLACE — restless, or cold
@@ -1987,7 +2020,9 @@ export function actStance(code: number, t: number, u: number): Stance {
       tilt: s.tilt + 0.02,
       bob: s.bob - 0.8 + (fl + fr) * 0.5,
       footL: { x: -5, y: -fl * 5.5 }, footR: { x: 6, y: -fr * 5.5 },
-      fistL: { x: -5 + fr * 2.5, y: 6 }, fistR: { x: 6 + fl * 2.5, y: 6 },
+      // Rule 1b — and the counter-swing is what marks time as walking rather than
+      // bobbing, so it has to be visible.
+      fistL: { x: -14 + fr * 2.5, y: 6 }, fistR: { x: 14 + fl * 2.5, y: 6 },
     };
   }
   if (code === 73) {                             // UP ON THE TOES — light, springy, ready
@@ -1997,7 +2032,8 @@ export function actStance(code: number, t: number, u: number): Stance {
       tilt: s.tilt - 0.03, neck: s.neck - 0.03,
       bob: s.bob + b * 3.0,
       footL: { x: -5, y: -b * 3.2 }, footR: { x: 5, y: -b * 3.2 },
-      fistL: { x: -6, y: 6 - b * 2 }, fistR: { x: 7, y: 6 - b * 2 },
+      // Rule 1b. Light and springy needs arms to be light with.
+      fistL: { x: -14, y: 6 - b * 2 }, fistR: { x: 15, y: 6 - b * 2 },
     };
   }
   if (code === 74) {                             // SLOUCHED ON ONE HIP — bored
@@ -2024,7 +2060,10 @@ export function actStance(code: number, t: number, u: number): Stance {
       tilt: 0.02 + d * 0.006, neck: -0.04,
       bob: s.bob * 0.4,
       footL: { x: -4, y: 0 }, footR: { x: 4, y: 0 },
-      fistL: { x: -6 + d * 0.5, y: 8 }, fistR: { x: 6 + d * 0.5, y: 8 },
+      // At attention the arms ARE pressed to the sides, and rule 1b still applies:
+      // a pose nobody can see says nothing formal. 13 is the least of the shelf,
+      // which keeps it braced while leaving the forearms against paper.
+      fistL: { x: -13 + d * 0.5, y: 8 }, fistR: { x: 13 + d * 0.5, y: 8 },
     };
   }
   if (code === 76) {                             // WARMING THE HANDS — rubbing, shoulders in
@@ -3488,9 +3527,28 @@ export function actStance(code: number, t: number, u: number): Stance {
       tilt: s.tilt + shift * 0.03,
       neck: s.neck + 0.10 + settle * 0.02,
       footL: { x: -5, y: 0 }, footR: { x: 5, y: 0 },
-      fistL: { x: -6, y: 6 + shift * 0.8 },
+      // BOTH HANDS FORWARD OF THE TRUNK, and a reader named the pose that taught
+      // it: *"I don't like that movement of the hands, it doesn't seem quite
+      // natural."* Drawn at lesson size this was a head with a bump on it and no
+      // arms at all. Two separate causes, and rule 1b has both:
+      //
+      // · the free hand sat at x −6. The torso is 12 thick and a limb is 11, in
+      //   the same ink, so a forearm centred there lies ALONG the trunk and shows
+      //   about five units of itself. Out at 14 it has paper behind it.
+      // · the working hand sat at x 9, y −33 — knuckles against a head of radius
+      //   20, with no paper between the forearm and the skull, so the two fused.
+      //   Act 61 is this same gesture done right and its knuckles are at x 11,
+      //   y −35; 12 gives the gap and keeps the touch.
+      //
+      // It stays DISTINCT from 61 rather than becoming it: 61 crosses the free arm
+      // under to carry the supporting elbow, this one lets it hang loose and swing
+      // with the weight, which is the difference between working a problem and
+      // standing there turning it over. It hangs at hip height rather than at the
+      // thigh, because a forearm dropped to y 5 lands on a swinging leg and the
+      // ink-over-ink rule bites one limb further down.
+      fistL: { x: 15, y: -3 + shift * 1.8 },
       // Face-adjacent by design; registered in FACE_OK beside act 61.
-      fistR: { x: 9, y: -33 + settle * 1.2 },
+      fistR: { x: 12 + shift * 0.5, y: -34 + settle * 1.2 },
     };
   }
   if (code === 159) {                            // UNCONVINCED, AND STAYING THAT WAY

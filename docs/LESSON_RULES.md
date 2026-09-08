@@ -1008,7 +1008,7 @@ One at a time, too: the outgoing bubble fades fully out before the incoming one 
 (0→0.18, then 0.22→0.52 in `Bubble`). Overlapping them for even a tenth of a second
 reads as a flicker rather than as a reply.
 
-**D31b. Words must not sit on the rule that boxes them: 4dp of clearance, measured
+**D31c. Words must not sit on the rule that boxes them: 4dp of clearance, measured
 in DP and measured at the GLYPHS.** D28 catches text that clips or spills; this is
 the near-miss that still looks wrong — a label hard against its own border, which
 reads as cramped even when every character is technically inside.
@@ -1417,6 +1417,36 @@ easiest kind to ship and the hardest to attribute.
 > of which happens, one of them from inside the very docstring that states this rule — and
 > it scopes per component, because a file-wide scan flagged three correct components whose
 > props merely shared a name with a later local.
+
+**G52. A VALUE THAT MEANS "ABSENT" MUST NOT BE A VALUE THE DATA CAN HOLD.** Four
+separate defects in this app are one mistake, and each took a render to find because
+the code reads correctly in every one of them:
+
+- `figX ? figX.value : headX` — **a SharedValue is an object, so the test is always
+  true.** Where the track was missing the value was `0`, so the thought bubble's
+  trail aimed at the left edge of the stage in 86 of 196 lessons. Measured on
+  `epistemology-knowledge-5`: 71 units the wrong way.
+- `walk?.[i] ?? 0` — `0` is a real x. The expression cannot say "there is no walk
+  track", so the caller could not tell the component either.
+- `pressPoint` returning `0` when the event carried no coordinates — the top-left
+  corner is a real point, so "nobody pressed" became "somebody pressed the corner",
+  and every guard written against it passed because every comparison with `NaN` is
+  false.
+- a growth baseline of `0` meaning "not yet accounted for" — a measured box already
+  holds the pose it was measured with, so zero grew 7,589 boxes that needed nothing.
+
+**The absent case belongs to whoever KNOWS.** A worklet cannot tell a missing track
+from a figure standing at the origin; the caller that built the props can, and its
+job is to pass `undefined` rather than a plausible number. `walk ? walk[i] ?? 0 :
+undefined` is the whole of the fix in the first two.
+
+> **This one is deliberately NOT checked, and U2 wants the reason in writing.** The
+> pattern `x ? x.value : fallback` is CORRECT wherever the prop really is optional —
+> it is what the fixed code does — so a detector would fire on the repair as loudly
+> as on the fault. What separates them is whether any caller can actually pass
+> nothing, which is a question about every call site rather than about the line. The
+> recognisable form is the rule: **if a default is indistinguishable from real data,
+> the bug is silent and permanent.**
 
 ### H. The house shape — what the 48 built lessons agree on
 
@@ -3981,8 +4011,8 @@ to get wrong and impossible to see in the source:
 - [ ] **The rotation holds** (R9): the control differs from the lesson before it,
       one question is still answered on the STAGE, and the deck is not the default.
       `npm run check:rotation`.
-- [ ] **It reads plainly** (J10): reading ease 55 or better, and under 12% of the
-      words are `it · that · this · they · these · which`. Say the noun.
+- [ ] **It reads plainly** (J10, J11): reading ease 60 or better, and under 12% of
+      the words are `it · that · this · they · these · which`. Say the noun.
       `npm run check:plain`.
 - [ ] **Every label lands at 8pt or more** (D34) — `declared × fit`, where a tall
       band shrinks everything. `npm run check:legible`.
@@ -4098,15 +4128,75 @@ to get wrong and impossible to see in the source:
 
 ---
 
+**Changing something SHARED — the figure, the wardrobe, the bubble, the camera**
+
+Every reader complaint this file records was reported as one lesson and was none of
+them (U6). The rig, the wardrobe, `CinematicPlayer` and the camera reach all 198
+scenes, so this is where the work actually happens — and it is the one part Part 2
+had no section for.
+
+- [ ] **Count it first, in the corpus, offline.** How many beats, how many lessons.
+      The number decides whether it is authoring or engine, and it is the only way
+      to know afterwards that the fix worked (U6).
+- [ ] **A new or edited ACT keeps its resting hands at |x| ≥ 14** (rule 1b) and is
+      looked at with `npm run sheet:moves <a> <b>` before anything uses it. The rig
+      cannot tell you an arm is invisible — it is straight, at arm's length, and
+      geometrically perfect (N15).
+- [ ] **A new WARDROBE piece hangs off something the eye can see** — on the skull,
+      on a drawn cord, or in the hand. A piece merely NEAR him is a box that follows
+      him, and `paper: true` is a gap, not a strap (AA9).
+- [ ] **Editing `moves.ts` or `wardrobe.ts` moves the stored figure boxes, and no
+      stamp will tell you** — `muststamp` hashes the scene, the script and the
+      probe, and neither file is any of the three. Run `npm run make:wardrobe`,
+      which grows them for both and records what it applied so a second run is a
+      no-op (N15, H60d).
+- [ ] **Then the chain, once, in order**: `make:visitor` → `make:wardrobe` →
+      `make:tours` → `make:gaze` → `make:thoughts`. It is not idempotent as a
+      chain — `make:wardrobe` grows the boxes `make:visitor` reads — so run it once
+      from a settled tree and check the second run of each is a no-op.
+- [ ] **A value that means "absent" is `undefined`, never a plausible number**
+      (G52). `0` is a real coordinate; a SharedValue is always truthy. The caller
+      that knows whether the data exists is the one that has to say so.
+- [ ] **A phase change is not a remount** (AB11). If a component measures itself,
+      moving it between two slots to change its state resets that measurement.
+      Give it a `show` prop and let it own its own driver.
+- [ ] **Anything read out of another file is anchored** — the speech bubble and the
+      thought bubble write the same clamp with different constants one component
+      apart, so an unanchored pattern reads the wrong one (AB13).
+
+**Then the rule you just learned**
+
+- [ ] **Write it down before moving on** (U1), with its shape rather than its
+      instance (U5), and with a checker, a budget, or an honest note saying it
+      cannot be checked and why (U2).
+- [ ] **Counter-test the checker both ways** (U3) — and keep the staged tokens out
+      of the checker's own reach: `check:rules` scans `scripts/`, so a counter-test
+      living there had to build its fake constant at runtime or the defect passed.
+- [ ] **Grep the id first** (U4), then `npm run check:rules`, which holds ids,
+      citations, commands, paths, constants, costumes and the checklist's own
+      thresholds against the code (U8).
+- [ ] **If you deferred something, say what would END it and what it costs**
+      (U7). A deferral is priced against the tools of the day it was written, and
+      it reads as "do not look here" until somebody re-prices it.
+
 ## Part 3 — How to verify
 
 **Run the shape check first — it costs a second and needs no browser.**
 
 ```
-npm run check          # tsc + both validators
+npm run check          # tsc + fifty-four validators, this file's checker included
 npm run check:cinematic
 npm run check:tour     # group K, offline, against each lesson's own band
+npm run check:rules    # THIS FILE, against the code it describes (U8)
 ```
+
+> **`check:rules` is the one to run after editing this file, not before.** It holds
+> the things that go stale on their own — a rule id used twice, a command that is
+> in no npm script, a script path that was renamed, a citation into a group that
+> does not exist, a constant that has left the code, a costume that has left the
+> wardrobe, and a threshold Part 2 quotes that its checker no longer enforces. Every
+> one of those had already happened here at least once, and the first run found six.
+> `node scripts/countertest-rules.mjs` proves it can still fail.
 
 > **The table reproduces now, and re-measuring one lesson is safe again.** This note
 > used to say the opposite: `aesthetics-aesthetics-4` returned `[34, 222, 342, 288]`
@@ -4727,6 +4817,29 @@ sweep before starting.
 
 ---
 
+## H60d · A stored measurement is a MOMENT, not a place
+
+`mustBoxes` records what a beat drew when the probe read it — once, after the camera
+settled. **The art holds still for that; the figure does not.** Measured across the
+corpus, **113 of 317 walking beats record his centre 40 or more units from the x the
+script walks him to**, and one is 151 units out.
+
+So anything that anchors on the recorded figure is right on a still beat and wrong on
+exactly the beats that matter. `make:thoughts` did, and the player faithfully restores
+the offset it recorded — which is how a thought came to REST 154 units to his side on
+`logic-arguments-21`. CLAUDE.md had already noticed the symptom and filed it as noise
+("90 of 940 placements record a figure centre more than 40 units from their own beat's
+x"). It was never noise. It is the probe reading mid-walk.
+
+**Anchor on where the beat LEAVES him** — `walkOf(id)[i]`, the scene's own
+`const X = BEATS.map(b => b.x ?? DEFAULT)` rebuilt offline, which is the array
+`CinematicPlayer` itself settles on. That is where he stands while the reader reads,
+and on a still beat the two agree to within 13 units either way. Use the recorded BOX
+only for what does not move during a beat: his feet, and from those his skull.
+
+`check:thoughts` re-derives it and **prints how many placements it had to skip**,
+because a check that quietly measured less would read as a check that found less.
+
 ## Group S — a word must fit the box it is in, and nothing may be laid over it
 
 Everything above this group is about the STAGE — what the scene draws, what the
@@ -5153,6 +5266,86 @@ The three that have earned the most:
 - **a coarse control hides a continuous defect** (S7): three changes per gesture
   and thirty are not the same test.
 
+### U6 · One lesson in a reader's message is a corpus count first
+
+Every complaint that has arrived here named ONE lesson, and not one of them was one
+lesson. The bubble that skipped a sentence was 591 beat changes across 171 lessons.
+The hands that looked wrong in the fourth epistemology lesson were seven acts on 208
+beats across 129. The box that followed him with nothing holding it was 34 lessons.
+The trail that would not point at him was 86.
+
+That is not a coincidence, it is the architecture: the figure, the wardrobe, the
+bubble and the camera are all drawn by shared code, so **a fault a reader can see in
+one lesson is almost never in that lesson**. Fixing the instance is the expensive
+mistake — it leaves the other hundred and twenty-eight, and it teaches you nothing
+about the shape.
+
+**So: count it before fixing it.** Offline, out of the corpus, with a number. The
+count decides three things a hunch cannot — whether it is one lesson or the engine,
+whether the fix is authoring or a shared component, and what to re-measure afterwards.
+It is also the only way to know the fix worked: 208 beats is a claim, "it looks better"
+is not.
+
+**And the reader's lesson number may not be the id.** Ids carry gaps from lessons
+long removed, so "the 4th lesson" is the fourth in READING ORDER — the fourth entry
+in the unit's `lessons` array — which was `epistemology-knowledge-5`, not `-4`. Get
+that wrong and you fix a lesson nobody complained about. Both were worth looking at
+here; only one had the costume the message described.
+
+### U7 · A note that defers work is a rule with an expiry
+
+The most expensive stale line in this repo was not a wrong number, it was a correct
+one that outlived its own decision. `moves.ts` rule 1b described the first living
+shelf exactly — hands at x ±6, five units of forearm visible, "renders as a head on a
+slab" — and then said the twenty acts **"were deliberately left, because they should
+be judged as a batch and changing them moves the figure's box in every lesson that
+holds one."**
+
+That was a good decision when it was written. It then sat there for weeks reading as
+*do not look here*, until a reader looked at the one thing it described.
+
+So a deferred-debt note carries two more things:
+
+1. **What would end it** — the condition, not the vibe. "Until somebody can judge
+   them as a batch" is not a condition; "until an act on this shelf is reported by a
+   reader, or the box growth can be done offline" is.
+2. **What it costs to pay** — the number that made it look expensive, so the next
+   person can check whether it still is. It looked like a corpus-wide re-measure and
+   was actually 903 boxes grown arithmetically in one run, because `make:wardrobe`
+   had gained the machinery for costumes in the meantime. **A deferral is priced
+   against the tools of the day it was written.**
+
+`check:rules` §7 holds the instance: if no used act of the shelf still hangs inside
+the trunk, no rule may say the shelf was left alone. The general form cannot be
+checked — nothing can tell a live deferral from a dead one — which is exactly why it
+has to be written with its own expiry.
+
+### U8 · The rule book is checked, and a worklist is re-derived when the data moves
+
+This file is what an author reads BEFORE writing a lesson, so a stale line here does
+not cause one defect, it causes the next twenty. **A wrong rule is worse than a
+missing one, because it is obeyed.** `npm run check:rules` is `check:bible` pointed at
+this file, and its first run found six things nobody had noticed: four rule ids used
+twice (U4's own failure, J11, K11, K12 and D31b), a `check:splits` that no npm script
+could run, and a reading-ease floor the checklist still quoted as 55 two pages after
+J11 raised it to 60.
+
+It holds seven things, all of which had already gone wrong at least once: ids are
+unique, every command named is in `package.json`, every script path exists, every
+citation lands in a group this file has, every constant named is in the code, every
+costume named is in the wardrobe, and every threshold the checklist quotes equals the
+constant its checker enforces. `node scripts/countertest-rules.mjs` puts each defect
+back and also stages the two shapes that must stay SILENT — a Part 1 rule restated in
+a later section, and a screen string in capitals that is not a constant.
+
+**AND A WORKLIST IS DATA, SO IT ROTS.** `check:bubble` runs against twelve lessons
+chosen because their figure walks furthest under a thought. Rationing the thoughts to
+two a lesson (AB9) moved most of them off those beats, and the harness went on
+reporting a clean sweep of a rule it was no longer exercising — "no lesson walked far
+enough" was true of what it could reach and false of the corpus. A chosen worklist
+ships with the script that derives it (`node scripts/pick-bubble-work.mjs`), and it is
+re-run whenever the table it was chosen from changes.
+
 ---
 
 ## E39 · What moves when an answer lands must be the thing that was chosen
@@ -5232,7 +5425,7 @@ always free, and a component cannot know which one this scene left empty.
 
 ---
 
-## J11 · A word the lesson is not teaching must be one the reader already has
+## J15 · A word the lesson is not teaching must be one the reader already has
 
 The reader drew the distinction themselves, and it is the whole rule:
 
@@ -6447,48 +6640,6 @@ re-renders.
 
 ---
 
-## K11 · Anything indexed BY BEAT is re-derived when the beat count changes
-
-A hand-written `SHOTS` table is a list with one entry per beat. J12's segmenting
-pass cut over-packed beats in two — corpus-wide, 872 beats became 1,291 — and it
-copies every CHANNEL verbatim so the picture holds still while the words advance.
-A shot is not a channel: it lives in the scene, not on the beat, so nothing
-copied it.
-
-`ethics8Scene` was the only lesson with one, written for 11 beats and left at 11
-when the lesson became 18. Every shot after the first split slid one place, and
-the reader got the arc played against the wrong sentences: a pull-back mid-line,
-then a push where the arc wanted wide. Tap, zoom out, tap, zoom in.
-
-**Repeat a beat's shot for each piece it was split into.** `check:camera` holds
-one entry per beat. Beats past the end of the list are CLAMPED to the last shot
-rather than throwing, which is why the tail of that lesson merely held wide
-instead of crashing — a silent failure, not a loud one.
-
-The general form, and it is the third time this file records it: **what is
-DERIVED re-derives, what is HAND-WRITTEN needs a checker.** 183 lessons build
-their camera with `followMoves(X, BEATS.map(kindOf), …)` and could not go out of
-step; the one that was typed out did.
-
-## K12 · A station's travel time has to reach the camera
-
-`shotAt` reads the travel off the shot it is moving TO, defaulting to `tr ?? 0.8`.
-`tourStartShots` spread `tr` onto its result only on the FOLLOW branch — a static
-station came back bare — and 197 of the app's 201 stations are static.
-
-So for the whole life of the tour system the generator's travel time was
-decorative: every push in every lesson took a flat 0.8 seconds however far it
-went, and K8's 0.35–1.2s window was enforced on a number the player never saw.
-
-Nothing could catch this by reading the table, because the table was correct. It
-took measuring a push in a browser — **0.79s against a table saying 1.2** — after
-a deliberate change to the generator made no difference to the render at all.
-`check:tour` now puts a static and a follow station through the real function and
-asserts both come back carrying their `tr`.
-
-**When a generated value stops changing what you see, check that it is being
-read before you tune it further.**
-
 ## K13 · A travel takes as long as its distance needs
 
 Every station shipped at `tr: 0.7` whatever it was travelling. A push to the
@@ -6553,6 +6704,48 @@ Two more traps in that instrument, both of which produced confident nonsense:
   barely changes the picture's SIZE while moving it hundreds of units, so a
   width-only threshold reported a 0.55s travel as 0.15s and made an ordinary move
   look like one cut short.
+
+## K16 · Anything indexed BY BEAT is re-derived when the beat count changes
+
+A hand-written `SHOTS` table is a list with one entry per beat. J12's segmenting
+pass cut over-packed beats in two — corpus-wide, 872 beats became 1,291 — and it
+copies every CHANNEL verbatim so the picture holds still while the words advance.
+A shot is not a channel: it lives in the scene, not on the beat, so nothing
+copied it.
+
+`ethics8Scene` was the only lesson with one, written for 11 beats and left at 11
+when the lesson became 18. Every shot after the first split slid one place, and
+the reader got the arc played against the wrong sentences: a pull-back mid-line,
+then a push where the arc wanted wide. Tap, zoom out, tap, zoom in.
+
+**Repeat a beat's shot for each piece it was split into.** `check:camera` holds
+one entry per beat. Beats past the end of the list are CLAMPED to the last shot
+rather than throwing, which is why the tail of that lesson merely held wide
+instead of crashing — a silent failure, not a loud one.
+
+The general form, and it is the third time this file records it: **what is
+DERIVED re-derives, what is HAND-WRITTEN needs a checker.** 183 lessons build
+their camera with `followMoves(X, BEATS.map(kindOf), …)` and could not go out of
+step; the one that was typed out did.
+
+## K17 · A station's travel time has to reach the camera
+
+`shotAt` reads the travel off the shot it is moving TO, defaulting to `tr ?? 0.8`.
+`tourStartShots` spread `tr` onto its result only on the FOLLOW branch — a static
+station came back bare — and 197 of the app's 201 stations are static.
+
+So for the whole life of the tour system the generator's travel time was
+decorative: every push in every lesson took a flat 0.8 seconds however far it
+went, and K8's 0.35–1.2s window was enforced on a number the player never saw.
+
+Nothing could catch this by reading the table, because the table was correct. It
+took measuring a push in a browser — **0.79s against a table saying 1.2** — after
+a deliberate change to the generator made no difference to the render at all.
+`check:tour` now puts a static and a follow station through the real function and
+asserts both come back carrying their `tr`.
+
+**When a generated value stops changing what you see, check that it is being
+read before you tune it further.**
 
 ## W8 · The snapshot draws itself in, and the close is that reversed
 
@@ -7593,3 +7786,103 @@ the other way: 12px of real movement against 90px of walk is 13%, and no floor
 expressed as a share can separate that from a box that is pinned. What a reader
 names is a box standing PERFECTLY still while he walks into it, and that is zero.
 The floor is absolute pixels.
+
+### AB13 · The trail is a chain to his head, not a column beside the box
+
+> *"the thinking boxes don't quite point enough towards the stickman doing the
+> thinking."*
+
+The three discs were a vertical column translated sideways **as one rigid group**,
+and clamped to `half − 14` — half of the box's own measured width. Two faults in
+one expression:
+
+- **A column that has moved sideways is still a column.** Nothing about it points
+  anywhere; it is the balloon's tail standing to attention next to the man.
+- **The clamp is a function of the TEXT.** A short thought makes a narrow box, and
+  a narrow box has a small `half`, so the trail on the bubbles that most need to
+  reach could barely move at all.
+
+A trail is a **chain**: the discs spread along the line from the box to the head,
+the small one nearest him. Each disc now carries its own share — `THINK_FAN`,
+a quarter then three fifths then all of it — and the last one may hang up to
+`THINK_REACH` past the box's own edge, because it is the one that has to arrive.
+It is still clamped: a disc that chases him without limit is a dotted line across
+the stage rather than a thought.
+
+**`THINK_DRIFT` is now stated rather than inferred.** How far the BOX may sit from
+his head (AB12) used to be read out of the trail's clamp expression, which failed
+twice: the speech bubble writes the identical clamp with a different constant one
+component up, so an unanchored pattern answered 20 where the truth was 14 — and
+then the discs began fanning and there was no single clamp left to read. A number
+two files depend on is written down once.
+
+### N15 · The first living shelf gets its arms — and the boxes get the bill
+
+Rule 1b has said since it was written that acts 59–78 hang the hands at x ±6,
+inside a trunk 12 thick drawn in the same ink, so a forearm shows five units of
+itself — about two pixels at lesson size. It also said the shelf was being left
+alone, because *"changing them moves the figure's box in every lesson that holds
+one, which is a corpus-wide re-measure"*.
+
+A reader hit it: *"the stickman does 3 times in a row of his hands, and I don't
+like that movement of the hands, it doesn't seem quite natural."* The lesson holds
+**act 65, GAZING UP — whose own name ends "arms forgotten"** — and forgotten is
+what it looked like. Seven used acts were still inside the trunk, on **208 beats
+across 129 lessons**; act 66 alone is one beat in eighty-nine of them.
+
+All nine are out at 13–17 now. Two were not a simple move:
+
+- **64 HANDS ON THE HIPS** keeps its hands BEHIND the hips (the comment above it
+  explains why: in front, the folded forearm encloses a triangle of paper and the
+  arm reads as a hole punched through the body). −9 was not far enough — the
+  pelvis is 12 wide, so the whole forearm stayed inside it and the akimbo elbow,
+  which is the entire read of the pose, never appeared. It is −17 now.
+- **66 FIDGETING** scratches across to the far upper arm. With the resting hand
+  already clear of the ribs that travel is mostly vertical, which is what a hand
+  coming up to a shoulder actually does.
+
+**AND THE BILL IS PAID ARITHMETICALLY, NOT WITH A BROWSER.** `muststamp` hashes the
+scene, the script and the probe; `moves.ts` is none of the three, so a wider act
+leaves every stored box holding it silently too small and nothing goes red.
+`make:wardrobe` now grows those boxes the same way it grows them for a costume,
+recording what it applied so a second run is a no-op — 903 boxes in 145 lessons,
+of which `mustBox`'s own 4-unit pad was already absorbing four units.
+
+Re-measuring would have been the other option and it is the one that breaks the
+bookkeeping: `measure:must` renders through the player, which DRESSES the figure,
+while `make:wardrobe` separately claims that costume growth is still owed. Fresh
+boxes plus a stale `wardrobeReach` means the next run subtracts something that is
+not there.
+
+**The baseline is the part to get right.** Growing needs to know what the boxes
+already account for, and a measured box accounts for whatever the figure was doing
+when the probe read it. Treating that as nothing is not a conservative guess, it
+is a wrong one — the first draft did exactly that and grew **7,589** boxes on a
+corpus where nine acts had moved. `scripts/seed-pose-reach.mjs` writes the
+baseline once, from the `moves.ts` at git HEAD, and applies nothing.
+
+### AA9 · A costume piece hangs off something the eye can see
+
+> *"the box behind the stickman follow[s] in a bad way, you can remove that box by
+> its feet and then any other stickman costume that also has those luggage looking
+> boxes, especially since they follow without anything holding them."*
+
+The SATCHEL and the COAT TAILS were the only two pieces in the wardrobe that were
+not **worn**. Every other one either sits on the skull (the five hats), rides the
+face on a drawn cord (the monocle), or is gripped — and the cane's own comment
+already had the rule: it is anchored to the HAND *"so when he raises his arm the
+cane comes with it, which is the whole difference between a prop and a painted-on
+decoration."*
+
+The satchel was a 17×15 box beside the hip and the coat tails a 14×34 one behind
+the legs, both pinned to the pelvis: they tracked his walk exactly, at a fixed
+offset, with nothing drawn between them and him. **The strap could not help** —
+it is `paper: true`, which draws a hairline of the GROUND to keep ink off ink
+(AA6), so what reads as a strap is a gap. A bag on a gap is a box flying alongside
+a man. 34 lessons carried one.
+
+Both are cut, and the four costumes that lost a piece are **re-formed rather than
+renamed**: a costume id is a name a reader never sees and a table everything else
+is joined on. Giving all four a cane was the obvious repair and left six of ten
+carrying one, which is not a wardrobe, it is one prop with hats — so five carry the
+cane, three the monocle, and three are a hat on its own.
