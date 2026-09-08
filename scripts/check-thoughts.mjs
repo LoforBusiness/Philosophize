@@ -298,7 +298,11 @@ for (const l of LESSONS) {
     if (!c || !c.sure) { unsure += 1; continue; }
     const gap = c.crown - a[1];
     gaps.push(gap);
-    if (gap > FLOAT) far.push(`${l.id}[${i}] ${gap.toFixed(0)} clear`);
+    // HALF A UNIT OF ROUNDING, and it is the generator's own (AB6 read backwards).
+    // `make:thoughts` searches `up` in whole steps and then writes
+    // `round(crown - up)`, so a placement it cleared at exactly 20 reads back here
+    // as 20.4. The tolerance is the rounding, not a softened rule.
+    if (gap > FLOAT + 0.5) far.push(`${l.id}[${i}] ${gap.toFixed(1)} clear`);
     const side = Math.abs(a[0] - a[3]);
     if (side > DRIFT) adrift.push(`${l.id}[${i}] ${side.toFixed(0)} sideways`);
   }

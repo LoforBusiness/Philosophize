@@ -50,6 +50,23 @@ const lesson: Lesson = {
       highlight: 'the pure gaze',
     },
     {
+      // The scene's first graded question, so the deck and the stage score the
+      // same thing (E37c): two visitors, one canvas, and only one difference
+      // between them that the picture has not already shown to be equal.
+      type: 'question',
+      prompt: 'Two visitors read the same canvas very differently. What is not the same for both?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'The canvas — one of them is looking at a better painting', isCorrect: false },
+          { id: 'b', text: 'What each one brought: the books, trips and talk of a childhood', isCorrect: true },
+          { id: 'c', text: 'How long they looked — one simply gave it more attention', isCorrect: false },
+        ],
+        explanation: 'Effort is the tempting answer, because it is the one thing a visitor seems to control. But Bourdieu\'s case holds the canvas and the looking fixed on purpose: the difference walked in through the door as cultural capital, absorbed long before either visitor arrived.',
+      },
+    },
+    {
       type: 'dilemma',
       scenario: 'You genuinely adore obscure arthouse cinema and find blockbuster comedies dull. A friend, citing Bourdieu, teases that you only like difficult films because they signal you\'re cultured — your taste is social positioning in disguise. You feel the love is sincere, from the heart.',
       prompt: 'Is your refined taste really about distinction?',

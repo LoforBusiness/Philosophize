@@ -51,6 +51,22 @@ const lesson: Lesson = {
       emoji: '✋',
     },
     {
+      // The scene's first graded question, so the deck and the stage score the
+      // same thing (E37c): which end of the regress each way out starts from.
+      type: 'question',
+      prompt: 'A particularist escapes the regress by starting somewhere. Where?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'With a strict rule, then sorting every belief by it', isCorrect: false },
+          { id: 'b', text: 'With clear cases of knowing, then a rule built to fit them', isCorrect: true },
+          { id: 'c', text: 'Nowhere — the regress shows enquiry cannot begin', isCorrect: false },
+        ],
+        explanation: 'Starting from the rule is the methodist door, and it is tempting because it sounds stricter — but it quietly assumes the very criterion in question. The particularist trusts a few plain cases first, then shapes a rule to fit them. Refusing to start is consistent, and it ends enquiry.',
+      },
+    },
+    {
       type: 'dilemma',
       scenario:
         'You want to figure out which of your beliefs really count as knowledge. But you cannot sort the beliefs without a standard, and you cannot pick a trustworthy standard without already sorting some beliefs. You have to start somewhere. Where do you put your first stake in the ground?',

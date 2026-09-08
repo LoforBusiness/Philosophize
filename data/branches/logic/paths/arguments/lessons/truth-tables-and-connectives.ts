@@ -29,6 +29,17 @@ const lesson: Lesson = {
       highlight: 'false only when P true, Q false',
     },
     {
+      // The scene's saveable quote, so the deck and the stage hold the same one
+      // under the same id (H52, check:quotes).
+      type: 'quote',
+      id: 'lq-logic-arguments-23-1',
+      quote: 'A proposition is a truth-function of elementary propositions.',
+      author: 'Ludwig Wittgenstein',
+      era: '1921',
+      work: 'Tractatus Logico-Philosophicus',
+      philosopherId: 'ludwig-wittgenstein',
+    },
+    {
       type: 'example',
       title: 'The Unbreakable Promise',
       scenario: 'You promise: "If it rains, I\'ll bring an umbrella." When does this promise become a lie? Only one way: it rains AND you show up dry-handed. If it doesn\'t rain, you broke nothing — umbrella or not. That single-failure pattern is exactly how logic\'s "if-then" behaves on a truth table.',

@@ -270,8 +270,8 @@ When `CARD_BUDGET` reaches 0 the takeover is done, and `LessonRunner`, `cards/`,
 
 ### Shape today
 
-**Every branch holds exactly 39 lessons, of which exactly 33 are cinematic** —
-85% of the way through the takeover. Both numbers are deliberate invariants rather
+**Every branch holds exactly 39 lessons, of which exactly 34 are cinematic** —
+87% of the way through the takeover. Both numbers are deliberate invariants rather
 than where the counts happened to land: the totals were 27–30 and the cinematic
 share was 11–14, and both showed on the Learn cards. `check:cinematic` enforces
 that all six branches match on both.
@@ -311,13 +311,13 @@ They constrain each other, and there are exactly two moves that respect both:
 
 | Branch | Units | Lessons | of which cinematic | card decks left |
 |---|---|---|---|---|
-| Metaphysics | 5 | 39 | 33 | 6 |
-| Epistemology | 5 | 39 | 33 | 6 |
-| Logic | 5 | 39 | 33 | 6 |
-| Ethics | 5 | 39 | 33 | 6 |
-| Aesthetics | 3 | 39 | 33 | 6 |
-| Political Philosophy | 5 | 39 | 33 | 6 |
-| **Total** | **28** | **234** | **198 (85%)** | **36** |
+| Metaphysics | 5 | 39 | 34 | 5 |
+| Epistemology | 5 | 39 | 34 | 5 |
+| Logic | 5 | 39 | 34 | 5 |
+| Ethics | 5 | 39 | 34 | 5 |
+| Aesthetics | 3 | 39 | 34 | 5 |
+| Political Philosophy | 5 | 39 | 34 | 5 |
+| **Total** | **28** | **234** | **204 (87%)** | **30** |
 
 > Numbers go stale; the check does not. `npm run check:cinematic` prints the live
 > figures and the next lesson to convert in each branch every time it runs.
@@ -894,7 +894,7 @@ A unit's `index.ts` exports an array of `Path` objects (the units); each needs a
 stable `id` — `lessonsByUnit` is keyed on it, so **renaming an id silently resets
 that unit's progress for every existing user.**
 
-**Keep every branch at 39, and at 33 cinematic (§5).** The counts were 27–30 and it
+**Keep every branch at 39, and at 34 cinematic (§5).** The counts were 27–30 and it
 showed on the Learn cards, so they were levelled deliberately; adding one lesson to
 one branch puts them back out. Add six, one per branch — and give each of the six a
 scene, or the cinematic invariant goes out instead of the lesson one.
@@ -1028,7 +1028,7 @@ they belong to, so the rule book has them and this file did not:
   with bios, eras and **1,780 quotes** between them — and all 322 have exactly
   three "Did you know?" facts, with nothing missing.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
-  gating; **198 cinematic lessons** (animated stickman scenes, §17), answered six
+  gating; **204 cinematic lessons** (animated stickman scenes, §17), answered six
   ways — scene targets, two cards, and the analogue family of `drag` · `sort` ·
   `poll` · `split` · `plot` (§17, group R). **The analogue family is now the
   majority**: 182 graded beats against 150 on the stage and 36 left in the deck,
@@ -1078,7 +1078,7 @@ they belong to, so the rule book has them and this file did not:
   mastheads, the launch screen and Quick Start (§19).
 
 **Known gaps / tech debt:**
-- **Card decks are now a minority** — 36 of 234. That is now the number
+- **Card decks are now a minority** — 30 of 234. That is now the number
   that matters; see the takeover rule at the top of §5.
 - **Roughly nine scenes in ten are a PHOTOGRAPH between taps.** Measured in
   pixels by `npm run check:alive`, not by grep: two screenshots from one page
@@ -1752,7 +1752,7 @@ in order, the full streak, XP, rank and badge systems, and all 322 thinkers.
 
 **P0 — Daily Review (spaced repetition).** The retention engine and the strongest reason to subscribe. Resurface concepts from completed lessons on a spacing schedule via quick `multiple-choice` / `true-false` / `reinforcement` prompts; add a "Review" entry on Home; completing a review counts toward the streak. Track per-concept last-seen + strength in `userDataStore`.
 
-**P0 — Convert the remaining 36 card decks (§5).** Six at a time, one per branch, so
+**P0 — Convert the remaining 30 card decks (§5).** Six at a time, one per branch, so
 the per-branch counts stay level, until `check:cinematic` reports 0 card decks left.
 Then `LessonRunner`, `cards/` and `interactions/` can go. Every lesson added along
 the way is cinematic.
@@ -1801,7 +1801,7 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**This is the format the app is converging on** — 198 of the 234 lessons are here
+**This is the format the app is converging on** — 204 of the 234 lessons are here
 already, and the card runner is what they are replacing (§5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a

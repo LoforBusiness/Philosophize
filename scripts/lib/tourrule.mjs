@@ -440,9 +440,26 @@ export function lessonTours(beats, band, ground) {
       const a = figs[0], b = figs[figs.length - 1];
       const travelled = Math.abs((b.b[0] + b.b[2] / 2) - (a.b[0] + a.b[2] / 2));
       if (travelled >= 60) {
-        const near = clampToBand([a.b[0], a.b[1], a.b[2], a.b[3]], band);
-        const far = clampToBand([b.b[0], b.b[1], b.b[2], b.b[3]], band);
-        if (centrable(near, band) && centrable(far, band)) followed = { near, far };
+        // ONE SIZE FOR BOTH ENDS, OR IT IS NOT A FOLLOW.
+        //
+        // `camera.ts` requires a follow to hold ONE scale (K9) — the camera goes
+        // WITH him, it does not zoom while it travels. The two ends are the same
+        // figure at two moments, so their boxes differ by whatever his pose and
+        // costume happen to be doing, and feeding those straight in produced a
+        // station that asked for 1.69→1.59. Every end therefore gets the LARGER of
+        // the two sizes, centred on its own middle: same scale by construction,
+        // and big enough to hold him at both ends.
+        const w = Math.max(a.b[2], b.b[2]);
+        const h = Math.max(a.b[3], b.b[3]);
+        const at = (f) => clampToBand([
+          f.b[0] + f.b[2] / 2 - w / 2, f.b[1] + f.b[3] / 2 - h / 2, w, h,
+        ], band);
+        const near = at(a);
+        const far = at(b);
+        // The clamp can still shave an end that runs off the band, which would put
+        // the scales back out of step, so a follow is only offered when it did not.
+        const same = Math.abs(near[2] - far[2]) < 0.51 && Math.abs(near[3] - far[3]) < 0.51;
+        if (same && centrable(near, band) && centrable(far, band)) followed = { near, far };
       }
     }
     if (followed) {

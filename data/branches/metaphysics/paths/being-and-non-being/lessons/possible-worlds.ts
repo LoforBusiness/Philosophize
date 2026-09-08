@@ -43,7 +43,7 @@ const lesson: Lesson = {
     {
       type: 'quote',
       id: 'lq-metaphysics-being-25-1',
-      quote: 'There are so many other worlds, in fact, that absolutely every way that a world could possibly be is a way that some world is.',
+      quote: 'There are so many other worlds that absolutely every way a world could be is a way some world is.',
       author: 'David Lewis',
       era: '1986',
       work: 'On the Plurality of Worlds',
