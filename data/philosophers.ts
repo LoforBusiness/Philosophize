@@ -60,7 +60,7 @@ const BASE_PHILOSOPHERS: Philosopher[] = [
     oneLiner: 'Reality hides behind the world we see.',
     bio: "Plato was a student of Socrates who turned his teacher's conversations into written dialogues, preserving them for all time. He founded the Academy in Athens, often called the first university in the Western world. His famous Allegory of the Cave argues that the everyday world is just a shadow of deeper, perfect truths he called the Forms. From politics to love to knowledge, almost every later Western philosopher has been responding to ideas Plato raised first.",
     areas: ['Metaphysics', 'Epistemology', 'Political Philosophy'],
-    branchSlugs: ['metaphysics', 'epistemology', 'political-philosophy'],
+    branchSlugs: ['metaphysics', 'epistemology', 'political-philosophy', 'aesthetics'],
     quotes: [
       { id: 'plato-1', text: 'Wise men speak because they have something to say; fools because they have to say something.' },
       { id: 'plato-2', text: 'The measure of a man is what he does with power.' },
@@ -78,7 +78,7 @@ const BASE_PHILOSOPHERS: Philosopher[] = [
     oneLiner: 'Virtue is a habit; excellence is practice.',
     bio: "Aristotle studied under Plato but broke away to build his own sweeping system of thought, covering everything from biology and physics to ethics and drama. He invented formal logic, giving us the first rules for valid reasoning that lasted over two thousand years. His ethics centered on the idea that a good life means cultivating good habits and finding the balanced middle path between extremes. He also tutored a young Alexander the Great, linking one of history's greatest minds to one of its greatest conquerors.",
     areas: ['Logic', 'Ethics', 'Metaphysics'],
-    branchSlugs: ['logic', 'ethics', 'metaphysics'],
+    branchSlugs: ['logic', 'ethics', 'metaphysics', 'aesthetics'],
     quotes: [
       { id: 'aristotle-1', text: 'We are what we repeatedly do. Excellence, then, is not an act, but a habit.' },
       { id: 'aristotle-2', text: 'Knowing yourself is the beginning of all wisdom.' },
@@ -96,7 +96,7 @@ const BASE_PHILOSOPHERS: Philosopher[] = [
     oneLiner: 'Treat others well; harmony begins at home.',
     bio: "Confucius was a Chinese teacher whose ideas about respect, family, and good conduct have shaped East Asian culture for over two thousand years. He lived in a time of social chaos and taught that a stable society depends on people behaving virtuously in their relationships and roles. His sayings, collected by students in a book called the Analects, stress sincerity, learning, and treating others as you wish to be treated. His influence reached far beyond philosophy into government, education, and everyday manners across much of Asia.",
     areas: ['Ethics', 'Political Philosophy'],
-    branchSlugs: ['ethics', 'political-philosophy'],
+    branchSlugs: ['ethics', 'political-philosophy', 'aesthetics'],
     quotes: [
       { id: 'confucius-1', text: 'Do not impose on others what you do not wish for yourself.' },
       { id: 'confucius-2', text: 'It does not matter how slowly you go as long as you do not stop.' },
@@ -150,7 +150,7 @@ const BASE_PHILOSOPHERS: Philosopher[] = [
     oneLiner: 'Faith and reason can work in harmony.',
     bio: "Thomas Aquinas was a medieval Italian monk and scholar who set out to show that religious faith and rational thought need not be enemies. Drawing heavily on Aristotle, whose works were newly rediscovered in his era, he built a vast system connecting philosophy with Christian theology. His masterwork, the Summa Theologica, tackled enormous questions about God, morality, and the natural world with careful step-by-step reasoning. His ideas remain central to Catholic thought and influenced how the West thinks about law, ethics, and the existence of God.",
     areas: ['Metaphysics', 'Ethics'],
-    branchSlugs: ['metaphysics', 'ethics'],
+    branchSlugs: ['metaphysics', 'ethics', 'aesthetics'],
     quotes: [
       { id: 'thomas-aquinas-1', text: 'To one who has faith, no explanation is necessary. To one without faith, no explanation is possible.' },
       { id: 'thomas-aquinas-2', text: 'There is nothing on this earth more to be prized than true friendship.' },
@@ -222,7 +222,7 @@ const BASE_PHILOSOPHERS: Philosopher[] = [
     oneLiner: 'Trust experience, and question every easy certainty.',
     bio: "David Hume was a Scottish philosopher famous for his sharp skepticism and his insistence that we base our beliefs on experience rather than wishful thinking. He pointed out that just because the sun has risen every day, we cannot logically prove it will rise tomorrow, shaking confidence in cause and effect. He also argued that reason alone cannot motivate us to act, since our choices are ultimately driven by feelings and desires. Calm, witty, and good-humored, he influenced nearly every philosopher who came after him, including Kant.",
     areas: ['Epistemology'],
-    branchSlugs: ['epistemology'],
+    branchSlugs: ['epistemology', 'aesthetics'],
     quotes: [
       { id: 'david-hume-1', text: 'A wise man proportions his belief to the evidence.' },
       { id: 'david-hume-2', text: 'Reason is, and ought only to be, the slave of the passions.' },
@@ -276,7 +276,7 @@ const BASE_PHILOSOPHERS: Philosopher[] = [
     oneLiner: 'History advances through clashing ideas resolving forward.',
     bio: "Georg Wilhelm Friedrich Hegel was a German philosopher who saw all of reality and history as a single unfolding process moving toward greater freedom and self-understanding. He believed progress happens through conflict, as ideas clash and combine into richer new ideas, a pattern later summarized as thesis, antithesis, and synthesis. His dense, ambitious writing tried to capture the whole sweep of human thought and culture. Though notoriously difficult, he deeply influenced later thinkers, most famously Karl Marx, who borrowed and reworked his method.",
     areas: ['Metaphysics'],
-    branchSlugs: ['metaphysics'],
+    branchSlugs: ['metaphysics', 'aesthetics'],
     quotes: [
       { id: 'georg-hegel-1', text: 'We learn from history that we do not learn from history.' },
       { id: 'georg-hegel-2', text: 'Nothing great in the world has ever been accomplished without passion.' },
@@ -366,7 +366,7 @@ const BASE_PHILOSOPHERS: Philosopher[] = [
     oneLiner: 'You are free, and condemned to choose.',
     bio: "Jean-Paul Sartre was a French philosopher and writer who became the public face of existentialism in the mid-twentieth century. He argued that humans have no fixed nature or preset purpose; instead, we exist first and then define ourselves through our choices. This radical freedom, he said, comes with heavy responsibility, since we cannot blame anyone else for who we become. A novelist and playwright as well as a philosopher, he turned down the Nobel Prize in Literature and remained a fierce political voice throughout his life.",
     areas: ['Existentialism', 'Metaphysics', 'Ethics'],
-    branchSlugs: ['metaphysics', 'ethics'],
+    branchSlugs: ['metaphysics', 'ethics', 'aesthetics'],
     quotes: [
       { id: 'jean-paul-sartre-1', text: 'Man is condemned to be free.' },
       { id: 'jean-paul-sartre-2', text: 'Existence precedes essence.' },

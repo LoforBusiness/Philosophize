@@ -86,7 +86,7 @@ export const CONTEMPORARY_EXTRA: Philosopher[] = [
     oneLiner: 'We learn democracy and truth by doing.',
     bio: "John Dewey was an American philosopher and education reformer who believed that thinking is something we do to solve real problems, not a detached contemplation of eternal truths. As a pragmatist, he saw ideas as tools tested through experience and experiment. He argued that schools should be active, hands-on communities that prepare people to live as engaged citizens in a democracy. His influence on modern education and public life in America is hard to overstate.",
     areas: ['Education', 'Pragmatism', 'Political Philosophy'],
-    branchSlugs: ['epistemology', 'ethics', 'political-philosophy'],
+    branchSlugs: ['epistemology', 'ethics', 'political-philosophy', 'aesthetics'],
     category: 'CONTEMPORARY',
     country: 'United States',
     quotes: [
@@ -238,7 +238,7 @@ export const CONTEMPORARY_EXTRA: Philosopher[] = [
     oneLiner: 'Attention to others is the rarest form of love.',
     bio: "Simone Weil was a French philosopher, mystic, and activist who lived her ideas with fierce intensity. Though highly educated, she worked in factories and fields to share the hardships of laborers and understand suffering from the inside. She wrote movingly about attention, affliction, and the moral duty we owe to the vulnerable. Drawn toward a deep spirituality late in her short life, she remains a singular voice on compassion, justice, and the inner life.",
     areas: ['Ethics', 'Political Philosophy', 'Mysticism'],
-    branchSlugs: ['ethics', 'political-philosophy', 'metaphysics'],
+    branchSlugs: ['ethics', 'political-philosophy', 'metaphysics', 'aesthetics'],
     category: 'CONTEMPORARY',
     country: 'France',
     quotes: [

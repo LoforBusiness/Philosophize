@@ -10,7 +10,7 @@ export const MEDIEVAL_EXTRA: Philosopher[] = [
     oneLiner: 'Faith seeking understanding; the restless heart.',
     bio: "Augustine was a North African bishop whose writings became a cornerstone of Western Christian thought. In his Confessions, often called the first autobiography, he traced his restless search for meaning before finding peace in faith. He wrestled deeply with questions of time, memory, free will, and evil that still occupy philosophers today. By blending Greek philosophy with Christian belief, he shaped how the West would think about God, the self, and history for a thousand years.",
     areas: ['Metaphysics', 'Ethics', 'Philosophy of Religion'],
-    branchSlugs: ['metaphysics', 'ethics'],
+    branchSlugs: ['metaphysics', 'ethics', 'aesthetics'],
     category: 'MEDIEVAL',
     country: 'Roman North Africa',
     quotes: [

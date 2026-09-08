@@ -29,7 +29,7 @@ export const EASTERN_EXTRA: Philosopher[] = [
     oneLiner: 'Embrace freedom, change, and the play of life.',
     bio: "Zhuangzi was a brilliant and playful Daoist thinker whose writings are full of jokes, paradoxes, and unforgettable stories. He is best known for the tale in which he dreams he is a butterfly, then wakes and wonders whether he is a man who dreamt he was a butterfly or a butterfly now dreaming he is a man. Through such fables he questioned our certainty about reality, language, and the boundaries of the self. He prized spontaneity and inner freedom, urging people to flow with life rather than cling to fixed ideas.",
     areas: ['Metaphysics', 'Epistemology', 'Ethics'],
-    branchSlugs: ['metaphysics', 'epistemology', 'ethics'],
+    branchSlugs: ['metaphysics', 'epistemology', 'ethics', 'aesthetics'],
     category: 'EASTERN',
     country: 'China',
     quotes: [

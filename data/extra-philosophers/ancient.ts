@@ -342,7 +342,7 @@ export const ANCIENT_EXTRA: Philosopher[] = [
     oneLiner: 'All reality flows from the One.',
     bio: "Plotinus was the founder of Neoplatonism, reviving and transforming Plato’s thought in the late Roman world. He taught that all of reality emanates from a single ineffable source he called the One, descending through Intellect and Soul into the material world. The soul’s deepest longing, he believed, is to ascend back toward that source and unite with it. His mystical yet rigorous philosophy profoundly shaped later Christian, Islamic, and Jewish thinkers.",
     areas: ['Metaphysics', 'Epistemology', 'Ethics'],
-    branchSlugs: ['metaphysics', 'epistemology', 'ethics'],
+    branchSlugs: ['metaphysics', 'epistemology', 'ethics', 'aesthetics'],
     category: 'ANCIENT',
     country: 'Rome',
     quotes: [
