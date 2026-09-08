@@ -180,6 +180,52 @@ ok(noBranch.length === 0, 'and at least one branch to chart',
     `${quotes[0].n} chars (${quotes[0].who}), ceiling ${ceiling}`);
 }
 
+// -- 9. ONE SENTENCE, ONE AUTHOR --------------------------------------------
+//
+// The roster held three quotations twice, and two of them were not duplicates
+// at all -- they were the app putting a sentence in the mouth of the person who
+// QUOTED it:
+//
+//   * "The question is not, Can they reason? ... but, Can they suffer?" stood on
+//     Peter Singer. It is Bentham's, from the 1789 Introduction to the
+//     Principles of Morals and Legislation; Singer quotes it in Animal
+//     Liberation.
+//   * "Out of the crooked timber of humanity..." stood on Isaiah Berlin. It is
+//     Kant's, from the Idea for a Universal History; Berlin took it for a title.
+//
+// That matters more here than a repeated card would. Section 13 makes
+// authenticity the whole pitch -- "here is the sentence Descartes actually
+// wrote" -- so a quotation on the wrong shelf is the one defect this content
+// cannot afford, and nothing in fifty-two validators could see it.
+//
+// The third was a real duplicate: the wonder line from the Theaetetus sat on
+// both Socrates and Plato, so a reader could collect the same card twice. The
+// app had already settled that one elsewhere and nobody had applied it --
+// knowledge-versus-understanding.ts credits `Plato (Socrates speaking)`.
+//
+// WHAT THIS CANNOT SEE, stated because the next one will arrive this way: it
+// compares the roster against ITSELF, so it only catches a misattribution where
+// both parties are in it. Berlin also carries "The fox knows many things, but
+// the hedgehog knows one big thing", which is Archilochus -- and Archilochus is
+// not a thinker here, so there is nothing for it to collide with. A quotation
+// borrowed from outside the roster stays invisible to arithmetic and needs a
+// person.
+{
+  const byText = new Map();
+  const clashes = [];
+  for (const p of ALL) {
+    for (const q of (p.quotes ?? [])) {
+      // Punctuation and case are not the identity of a sentence; two entries
+      // that differ by a comma are still the same quotation on two shelves.
+      const key = q.text.trim().toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ');
+      if (byText.has(key)) clashes.push(`${byText.get(key)} == ${p.name}: "${q.text.slice(0, 52)}..."`);
+      else byText.set(key, p.name);
+    }
+  }
+  ok(clashes.length === 0, 'no quotation stands on two thinkers at once',
+    clashes.join(' | ') || `${byText.size} distinct quotations across ${ALL.length} thinkers`);
+}
+
 // ── the first-run intro tells a reader how many thinkers there are ──────────
 //
 // It said "two hundred and twenty-three" for as long as it had existed, and the

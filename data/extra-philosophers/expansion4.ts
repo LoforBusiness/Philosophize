@@ -151,7 +151,7 @@ export const EXPANSION4_EXTRA: Philosopher[] = [
     branchSlugs: ["ethics", "political-philosophy"],
     quotes: [
       { id: "peter-singer-1", text: "If it is in our power to prevent something bad from happening, without thereby sacrificing anything of comparable moral importance, we ought, morally, to do it." },
-      { id: "peter-singer-2", text: "The question is not, Can they reason? nor, Can they talk? but, Can they suffer?" },
+      { id: "peter-singer-2", text: "Pain and suffering are in themselves bad and should be prevented or minimized, irrespective of the race, sex, or species of the being that suffers." },
       { id: "peter-singer-3", text: "The capacity for suffering and enjoyment is a prerequisite for having interests at all." },
       { id: "peter-singer-4", text: "How well we comply with our obligation to those in need is a real test of our moral seriousness." }
     ],
@@ -190,7 +190,7 @@ export const EXPANSION4_EXTRA: Philosopher[] = [
     quotes: [
       { id: "isaiah-berlin-1", text: "Liberty is liberty, not equality or fairness or justice or culture, or human happiness or a quiet conscience." },
       { id: "isaiah-berlin-2", text: "The fox knows many things, but the hedgehog knows one big thing." },
-      { id: "isaiah-berlin-3", text: "Out of the crooked timber of humanity, no straight thing was ever made." },
+      { id: "isaiah-berlin-3", text: "To manipulate men, to propel them towards goals which you — the social reformer — see, but they may not, is to deny their human essence, to treat them as objects without wills of their own." },
       { id: "isaiah-berlin-4", text: "Few new truths have ever won their way against the resistance of established ideas save by being overstated." },
       { id: "isaiah-berlin-5", text: "Freedom for the wolves has often meant death to the sheep." }
     ],

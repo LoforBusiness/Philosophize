@@ -20,7 +20,6 @@ export const PHILOSOPHER_QUOTES_EXTRA: Record<string, PhilosopherQuote[]> = {
     { id: 'socrates-x8', text: 'We ought not to render evil for evil to anyone, whatever evil we may have suffered from him.' },
     { id: 'socrates-x9', text: 'Crito, we owe a cock to Asclepius; pay it and do not neglect it.' },
     { id: 'socrates-x10', text: 'Those who practise philosophy in the right way are in training for dying.' },
-    { id: 'socrates-x11', text: 'Wonder is the feeling of a philosopher, and philosophy begins in wonder.' },
     { id: 'socrates-x12', text: 'The greatest of blessings come to us through madness, when it is sent as a gift of the gods.' },
     { id: 'socrates-x13', text: 'The chief penalty for being unwilling to rule is to be ruled by someone worse than yourself.' },
     { id: 'socrates-x14', text: 'The shortest and surest way to live with honour in the world is to be in reality what we would appear to be.' },
