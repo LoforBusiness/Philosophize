@@ -48,14 +48,16 @@ interface Props {
   /** Play the entrance. Off for a mascot that is already on screen. */
   delay?: number;
   /**
-   * True while he has been scrolled up out of the viewport. Optional, and
-   * ABSENT MEANS VISIBLE -- a mascot with no watcher animates, rather than one
-   * with a broken watcher freezing.
+   * True while he must HOLD STILL, which is two situations rather than one: he
+   * has been scrolled up out of the viewport, or the scroll is in motion. The
+   * second is the one that matters for frame rate -- see the note on the frame
+   * callback below. Optional, and ABSENT MEANS VISIBLE: a mascot with no
+   * watcher animates, rather than one with a broken watcher freezing.
    */
-  offStage?: SharedValue<boolean>;
+  hold?: SharedValue<boolean>;
 }
 
-export default function StreakMascot({ mood, alive, delay = 0, offStage }: Props) {
+export default function StreakMascot({ mood, alive, delay = 0, hold }: Props) {
   const clock = useSharedValue(0);
 
   // AUTOSTART OFF, AND STOPPED WHEN THIS IS NOT THE SCREEN YOU ARE ON.
@@ -79,6 +81,20 @@ export default function StreakMascot({ mood, alive, delay = 0, offStage }: Props
   // gone — and a rig solve feeding twenty-four transforms went on running, on
   // the UI thread, which is the thread the scroll is being drawn by.
   //
+  // AND POSITION WAS STILL ONE LEVEL TOO COARSE, WHICH IS THE FAULT A READER
+  // REPORTED THREE TIMES. Being scrolled PAST him is not the only time he must
+  // hold still; the other one is while the scroll is actually MOVING, and it is
+  // the expensive one. Android 12+ overscroll is a StretchEffect -- a
+  // RenderEffect, so the whole scrolling subtree has to be captured into an
+  // offscreen buffer for the shader to distort. That capture can only be reused
+  // while the content inside it does not change, and this figure changes
+  // twenty-four view transforms every frame. So for as long as he animated, the
+  // bounce re-rasterised the entire page at 120Hz.
+  //
+  // He is at the TOP of the page, which is exactly where a reader overscrolls,
+  // so "he is off screen by then" was never true of the case that hurts. The
+  // earlier on-screen/off-screen test could not see it for the same reason.
+  //
   // Stopping the CLOCK is what stops all of it: `D` is derived from it, and the
   // twenty-four styles are derived from `D`, so a clock that does not advance
   // costs one early return a frame instead of twenty-six worklets and
@@ -87,7 +103,7 @@ export default function StreakMascot({ mood, alive, delay = 0, offStage }: Props
   // actually ran.
   const frame = useFrameCallback((f) => {
     'worklet';
-    if (offStage?.value) return;
+    if (hold?.value) return;
     let dt = (f.timeSincePreviousFrame ?? 16) / 1000;
     if (dt > 0.05) dt = 0.05;
     clock.value += dt;

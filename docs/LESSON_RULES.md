@@ -7463,3 +7463,133 @@ not on it. The generator refuses to place one, the player refuses to draw one an
 cannot drift out of one of them. The answer line arrives only AFTER the pick, in
 an ink box rather than a paper one, because he has stopped working the lesson out
 and is talking to the reader.
+
+### AB9 · Twice a lesson, not every time the reader taps
+
+The first version drew a bubble on every beat that had a line: **1,113 of them,
+half of all 2,237 beats in the app.** The reader:
+
+> *"it appears way too much. I only want it to appear maybe around two times
+> during the lesson. I don't want it every single tab."*
+
+`make:thoughts` picks **two beats a lesson** and leaves the rest of the writing on
+the shelf. The split is deliberate: `say` still holds every line that was
+authored, because **the writing is the expensive half and the choosing is the
+cheap one** — a line held back today can be shown tomorrow by moving a weight in
+the generator, where re-authoring it could not. What decides is `at`: no
+placement, no bubble, which is a rule the player already obeyed, so the change
+cost the runtime nothing.
+
+Three things go into the choice, and the second is the one that is not obvious:
+
+- **How well the bubble can SIT.** With five candidates and two slots the
+  generator can simply decline a beat where the only spot floats (AB10), which is
+  most of what fixed the height complaint.
+- **WHERE the pair falls.** Two bubbles three beats apart in an eleven-beat lesson
+  is the same complaint in miniature, so a pair is scored on its spread as well as
+  on its placement — one near the first third, one near the last quarter, never
+  closer than two beats.
+- **WHAT IS ALREADY ON THAT BEAT.** The two graded beats draw the answer line and
+  the entrance beat draws the visitor's, so a thought beside one is penalised:
+  think, tap, reply is three bubbles running.
+
+**The answer line is not rationed and must not be.** It is a reply to something
+the reader just did, it lands only on the two graded beats, and it is the half
+they asked for by name. `check:thoughts` §8 counts thoughts only, for that reason.
+
+### AB10 · The bubble hangs off his HEAD, not off his raised hand
+
+> *"the thinking boxes need to be closer to the [stickman]. They seem to be really
+> far up above the stickman for a lot of them."*
+
+They were, and the height was measured against the wrong thing **twice over**:
+
+- **`mustBoxes` records one box per `<Stickman>` and a beat draws several.**
+  `ethics-ethics-6` draws twenty-five. Taking the union anchored his thought on
+  the top of the tallest person on stage — 148 units above his own head. Mount
+  order cannot break the tie either: that is PAINT order, and `check:nod` already
+  records a two-figure scene mounting its lead LAST. What settles it is the track
+  the RUNTIME uses — every scene passes `walk={X}` and the player derives the live
+  figure x from that same array, so the box his x lands in is his.
+- **A BOX TOP IS NOT A SKULL.** The box is the union of his LIMB Views, so a beat
+  where he lifts a hand, points, or wears a hat reports a top a **median of
+  fourteen units** above his head and as much as ninety. Hung four units above
+  THAT, the bubble floats a head's height clear of him.
+
+Measured against his real head — `skullRise` poses the beat's own move code in
+plain Node — the shipped table sat a **median 21 units clear of it, p90 48**.
+Anchored on the head it is **median 4, p90 4, worst 20**.
+
+**A raised arm through the bubble is not a fault.** The bubble is drawn after the
+scene, so it is in front, and an arm crossing a balloon is what every comic has
+always done. A balloon parked in empty paper is what reads as a mistake.
+
+Both directions are bounded rather than trusted (`LIFT_CAP`): the anchor is never
+above the box, because he is inside it, and never more than 46 units down into it,
+so a scene that transforms its figure can put a bubble over his own arm but never
+onto his face. `check:thoughts` §9 re-derives all of it and **says how many it had
+to skip**, because the walk track names no figure in a handful of scenes and a
+check that quietly measured less would read as a check that found less.
+
+### AB11 · A phase change must not be a remount
+
+> *"the bubble needs to disappear and reappear really smoothly. Right now, it
+> really doesn't."*
+
+Three faults, and all three come from the same decision: the player owned the
+bubble's lifecycle and moved it between slots to change phase.
+
+- **A REMOUNT RESETS THE MEASUREMENT.** `Thought` learns its own width and height
+  from `onLayout`. Moving a bubble from the live slot to an outgoing array is a
+  different element in a different position, so the copy started at `w = 0` — and
+  the trail's clamp, `max(-(half-14), min(half-14, …))`, is a constant **+14 at
+  half 0**. Every exit began by snapping its trail fourteen units sideways.
+- **THE TWO CLOCKS AGAIN.** The player set the shared driver to 0 in the same
+  effect. A shared value reaches the UI thread on the next frame; a React state
+  change waits for the JS thread. So for at least one frame the outgoing bubble
+  was still mounted and reading zero, and then the fresh copy mounted at full
+  opacity and started its fade. **Bright, gone, bright, fade.**
+- **THE EXIT WAS NOT THE ENTRANCE BACKWARDS.** `leaving` collapsed all four stages
+  into one flat opacity, so a thought that had formed disc by disc switched off in
+  one piece.
+
+`Thought` owns its driver now and takes a `show` boolean. One element per thought
+for its whole life, the layout measured once, and **one LINEAR value carrying it
+both ways** — which is ThinkerPeek's finding, and why the stage windows are
+honest: run the same value from 1 back to 0 and the box empties first, then the
+trail retracts downward toward his head. The thought is reabsorbed rather than
+switched off, and it costs no second set of numbers.
+
+**Nothing unmounts until it has finished leaving.** The player keeps every bubble
+in one keyed list and sweeps it 100ms after the exit — always scheduled, even when
+there is nothing to sweep, because a conditional sweep stranded the occupant on a
+double tap and the NEXT beat change lit it back to full opacity.
+
+### AB12 · A bubble sits where its own trail can still reach him
+
+The generator may slide a box sideways looking for paper that is clear of words,
+and until the render measured it there was no limit on how far. `logic-arguments-21`
+beat 6 walks him **136 units right** to a thought placed **154 units left** of
+where he lands: the box crosses a third of the stage away from the man it belongs
+to, and the follow rule reported it keeping 13% of his travel.
+
+**The trail sets the limit, and it is geometry rather than taste.** `Thought`
+leans the trail back toward his head and clamps that lean to `half - 14` — so past
+about 51 units the trail is hard against its stop and no longer points at him. The
+bubble stops being his and becomes a caption that happens to be nearby.
+
+Nine thoughts of 339 sat beyond 40 units and five beyond 51, so **declining them
+costs almost nothing** — which is the licence AB9's rationing keeps buying: with
+several candidates and two slots, a bad placement is simply not spent.
+
+Read the number out of the component and **anchor the pattern**: the speech bubble
+writes the identical expression with a different constant one component up, so the
+unscoped version answers 20 where the truth is 14. That is the same trap
+`check:worklets` records about reading the wrong function's opening lines.
+
+**And the rule that found it was measuring the wrong thing.** "The share of his
+travel the box kept" punishes a box that is correctly restoring an offset pointing
+the other way: 12px of real movement against 90px of walk is 13%, and no floor
+expressed as a share can separate that from a box that is pinned. What a reader
+names is a box standing PERFECTLY still while he walks into it, and that is zero.
+The floor is absolute pixels.

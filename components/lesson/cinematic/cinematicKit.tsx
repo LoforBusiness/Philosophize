@@ -1077,9 +1077,31 @@ function where(x: number, figX: SharedValue<number> | undefined, refX: number, s
 
 const THINK_W = 130;
 const THINK_TAIL_UP = 30;
+/**
+ * IN AND OUT, AND THE EXIT IS THE ENTRANCE READ BACKWARDS.
+ *
+ * One LINEAR driver, with every stage a slice of it, is ThinkerPeek's finding and
+ * the reason the windows below are honest: a stage occupying the first 42% of a
+ * linear value occupies 42% of the time, which is not true of an eased one — M3's
+ * emphasized-decelerate drew a 15-unit leader in 10ms. Run the same value from 1
+ * back to 0 and the stages play in reverse for free: the box empties first, then
+ * the trail retracts downward toward his head, which reads as the thought being
+ * reabsorbed rather than as a panel switching off.
+ *
+ * The exit is shorter than the entrance (M3), and it is the whole exit — nothing
+ * unmounts until it has finished.
+ */
+const THINK_IN = 520;
+// 340 RATHER THAN 240, AND THE RENDER PICKED THE NUMBER. The box occupies the
+// last 30% of the driver, so an exit of 240ms fades the box itself in 72ms — four
+// frames, measured at 0.37 of its opacity in one — which is a switch rather than a
+// fade and is the other half of *"it needs to disappear … really smoothly"*. At
+// 340 the same slice is 102ms and the worst frame is 0.26. Still two thirds of the
+// entrance, which is the rule it has to keep (M3: exits are shorter).
+const THINK_OUT = 340;
 
 export function Thought({
-  text, x, headX, anchorY, discs, drive, figX, refX = 0, settle, leaving, kind = 'think', probeId = 'thought',
+  text, x, headX, anchorY, discs, show, figX, refX = 0, settle, kind = 'think', probeId = 'thought',
 }: {
   text: string;
   /**
@@ -1120,8 +1142,24 @@ export function Thought({
    * that a third row grows UP rather than pushing the mascot down.
    */
   anchorY: number;
-  /** 0 → 1, driven by the player: a beat's own thought, or the answer landing. */
-  drive: SharedValue<number>;
+  /**
+   * WHETHER THIS THOUGHT IS STILL HIS — and the component owns the rest.
+   *
+   * It used to take a driver from the player, and the player used to move a
+   * bubble between a live slot and an outgoing one. Both are the same mistake:
+   * a component whose lifecycle is held outside it gets REMOUNTED to change
+   * phase, and a remount resets `w` and `h` to zero — so the exit began by
+   * snapping its trail fourteen units sideways and its box by five, on the exact
+   * frame the reader was watching it leave. Worse, the player zeroed the shared
+   * driver in the same effect: a shared value reaches the UI thread on the next
+   * frame while a React state change waits for the JS thread, so for at least one
+   * frame the outgoing bubble was still mounted and reading zero. Full, gone,
+   * full, fade — which is what the reader saw.
+   *
+   * Owning it here means one element per thought for its whole life, the layout
+   * measured once, and one value carrying it both ways.
+   */
+  show: boolean;
   /**
    * THE FIGURE'S LIVE x, SO THE BUBBLE TRAVELS WITH HIM.
    *
@@ -1157,7 +1195,6 @@ export function Thought({
    * over him, which is always on stage because he is.
    */
   settle?: SharedValue<number>;
-  leaving?: boolean;
   /** `say` is the answer line — a bolder box, because he is addressing the reader. */
   kind?: 'think' | 'say';
   /**
@@ -1177,12 +1214,30 @@ export function Thought({
     h.value = e.nativeEvent.layout.height;
   }, []);
 
+  // THE ONE DRIVER, OWNED HERE. It runs to 1 on mount and back to 0 when the beat
+  // moves on, and the caller keeps the component mounted until it has arrived —
+  // so nothing ever changes its words, its position or its size mid-flight.
+  const drive = useSharedValue(0);
+  useEffect(() => {
+    drive.value = withTiming(show ? 1 : 0, {
+      duration: show ? THINK_IN : THINK_OUT,
+      easing: Easing.linear,
+    });
+  }, [show, drive]);
+
   // Over his head, clamped so a long line never walks off the stage — the same
   // rule the speech bubble follows, and for the same reason: a box pinned to the
   // margin says nothing about whose thought it is.
+  //
+  // NOTHING IS CLAMPED BEFORE THE BOX HAS BEEN MEASURED. `w` is 0 until layout,
+  // and half of nothing turns the clamp inside out — `max(14, min(-14, …))` is a
+  // constant 14, so the trail used to start its life fourteen units to the right
+  // of the head it points at. It is invisible at `drive` 0 and it must also be
+  // correct there, because a mount and a first frame are not the same instant.
   const wrap = useAnimatedStyle(() => {
     const half = w.value / 2;
-    const cx = Math.max(half + 10, Math.min(STAGE_W - half - 10, where(x, figX, refX, settle)));
+    const want = where(x, figX, refX, settle);
+    const cx = half > 0 ? Math.max(half + 10, Math.min(STAGE_W - half - 10, want)) : want;
     return { transform: [{ translateX: cx - STAGE_W / 2 }] };
   });
 
@@ -1192,6 +1247,7 @@ export function Thought({
   // than at the place he set off from.
   const trail = useAnimatedStyle(() => {
     const half = w.value / 2;
+    if (half <= 14) return { transform: [{ translateX: 0 }] };
     const cx = Math.max(half + 10, Math.min(STAGE_W - half - 10, where(x, figX, refX, settle)));
     // POINTING AT HIM, LIVE. `headX` is the head the placement was measured
     // against and is the right answer when there is no walk track to do better
@@ -1207,7 +1263,6 @@ export function Thought({
   // an eased one. M3's emphasized-decelerate drew a 15-unit leader in 10ms.
   const box = useAnimatedStyle(() => {
     const d = drive.value;
-    if (leaving) return { opacity: d, transform: [{ scale: 1 }] };
     const e = ease01(seg(d, 0.42, 1));
     const sc = 0.84 + 0.16 * e + Math.sin(Math.PI * e) * 0.03;
     return {
@@ -1225,19 +1280,16 @@ export function Thought({
   // nested their hooks, `tsc` was perfectly happy and React threw at runtime).
   const d1 = useAnimatedStyle(() => {
     const d = drive.value;
-    if (leaving) return { opacity: d, transform: [{ scale: 1 }] };
     const e = ease01(seg(d, 0.00, 0.22));
     return { opacity: e, transform: [{ scale: 0.4 + 0.6 * e }] };
   });
   const d2 = useAnimatedStyle(() => {
     const d = drive.value;
-    if (leaving) return { opacity: d, transform: [{ scale: 1 }] };
     const e = ease01(seg(d, 0.12, 0.36));
     return { opacity: e, transform: [{ scale: 0.4 + 0.6 * e }] };
   });
   const d3 = useAnimatedStyle(() => {
     const d = drive.value;
-    if (leaving) return { opacity: d, transform: [{ scale: 1 }] };
     const e = ease01(seg(d, 0.26, 0.50));
     return { opacity: e, transform: [{ scale: 0.4 + 0.6 * e }] };
   });

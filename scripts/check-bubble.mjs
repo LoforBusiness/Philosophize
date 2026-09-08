@@ -6,46 +6,63 @@
 //   npm run check:bubble                 # the default worklist
 //   npm run check:bubble -- ids.json     # a chosen list
 //
-// A reader reported three things about the bubbles, and all three were true:
-// *"they don't seem to be following the Stickman correctly"*, *"it is not very
-// smooth when the thinking boxes show up"*, and *"sometimes they'll skip from one
-// sentence to another all of a sudden"*.
+// A reader reported five things about the bubbles across two sittings, and every
+// one of them was true: *"they don't seem to be following the Stickman
+// correctly"*, *"sometimes they'll skip from one sentence to another all of a
+// sudden"*, *"it appears way too much … I don't want it every single tab"*, *"the
+// thinking boxes need to be closer to the [stickman]"*, and *"the bubble needs to
+// disappear and reappear really smoothly. Right now, it really doesn't."*
+//
+// Two of those are answered offline — how MANY there are and how HIGH they sit are
+// properties of the table, and `check:thoughts` holds both. The three left are
+// relationships between FRAMES, and only the render can answer them.
 //
 // ── WHY NONE OF IT COULD BE SEEN FROM THE SOURCE ────────────────────────────
 //
-// Every one of the three was a TIMING relationship between two things that are
-// each individually correct. The placement table is right — `check:thoughts`
-// re-derives all 1,358 boxes and none covers a word. The entrance curve is right.
-// The figure's walk is right. What was wrong was that the box took the next
-// beat's placement on the frame the reader tapped while keeping the previous
-// beat's words for another 620ms, and that a placement measured for a beat's
-// RESTING frame was pinned there while the figure was still walking toward it.
-// Counting the corpus offline says how often that can happen — 591 sentence
-// swaps, 418 one-frame disappearances, 79 bubbles on a walking beat — and says
-// nothing at all about what the reader sees. Only the render does.
+// Every one was a TIMING relationship between two things that are each
+// individually correct. The placement table is right — `check:thoughts` re-derives
+// every box and none covers a word. The entrance curve is right. The figure's walk
+// is right. What was wrong was that the box took the next beat's placement on the
+// frame the reader tapped while keeping the previous beat's words for another
+// 620ms; that a placement measured for a beat's RESTING frame was pinned there
+// while the figure was still walking toward it; and that changing a bubble's PHASE
+// remounted it, which resets the layout it had measured and hands it a driver that
+// is a frame behind React.
 //
-// ── WHAT IT MEASURES ────────────────────────────────────────────────────────
+// ── WHAT IT MEASURES, AND WHY IT RECORDS RATHER THAN POLLS ──────────────────
 //
-// Beat by beat, every ~90ms: where the bubble is, how opaque it is, what it says,
-// and where the figure is. Then three rules, and each is a thing the reader named:
+// A `requestAnimationFrame` loop inside the page writes one row per painted frame:
+// every bubble's opacity, words and position, and every figure's centre. It used
+// to poll from out here every 90ms, which cannot see a defect that lasts one or
+// two frames — and the defect it was built for lasted exactly that. Reading
+// everything in ONE frame also means the two clocks this file exists to catch
+// apart cannot come apart inside a single reading.
 //
-//   CUT     the words may never change while the box is visible. A sentence that
-//           swaps at opacity 1 is the "skip from one sentence to another".
-//   TELEPORT  the box may not jump while the figure is standing still. That is
-//           the placement changing under a bubble that has not been taken down.
-//   FROZEN  while the figure WALKS, the box must not stand still. Measured as the
-//           share of his travel the box kept over the window they are both
-//           visible for. NOT "the same distance": the box is also restoring the
-//           sideways offset the generator searched out, so on a long walk it
-//           legitimately travels less than he does. Standing perfectly still
-//           while he crosses the stage is the thing the reader named, and it is
-//           what this catches — it read 0% before, and 24–100% after.
+// Five rules, each a thing the reader named:
+//
+//   CUT       the words may never change while the box is readable. A sentence
+//             that swaps at opacity 1 is the "skip from one sentence to another".
+//   TELEPORT  the box may not jump while the figure is standing still. That is the
+//             placement changing under a bubble that has not been taken down.
+//   FROZEN    while the figure WALKS, the box must not stand still. Measured as
+//             the share of his travel the box kept over the window they are both
+//             visible for. NOT "the same distance": the box is also restoring the
+//             sideways offset the generator searched out, so on a long walk it
+//             legitimately travels a little less — or a little more. It read 0%
+//             before the fix and 109% after.
+//   BLINK     bright, dark and bright again inside 450ms. No transition does that;
+//             a remount does.
+//   SNAP      how much of its own opacity a bubble may gain or lose in a frame,
+//             as a RATE so a dropped frame is not mistaken for a switch. This is
+//             the one that caught the exit being too fast: the box occupies the
+//             last 30% of the driver, so a 240ms exit faded it in 72ms.
 //
 // The floors are the corpus's own measured behaviour and not numbers picked to
 // feel strict — see FLOORS below, each with what it was measured at.
 import fs from 'node:fs';
 import http from 'node:http';
 import { claimRoute } from './lib/previewroute.mjs';
+import { ANSWER_CONTROL } from './lib/answerctl.mjs';
 
 const CDP = +(process.env.CDP_PORT || 9382);
 const WEB = +(process.env.WEB_PORT || 8847);
@@ -64,12 +81,9 @@ const STAGE_TRIES = +(process.env.STAGE_TRIES || 300);
 // over 520, so a window shorter than about 1.3s never sees a settled box at all —
 // and the walks that carry a thought run to 3.6s, which is the whole point.
 const WATCH_MS = +(process.env.BUBBLE_WATCH || 4200);
-const STEP_MS = 90;
-// The longest gap between two samples that can still say anything about a swap.
-// A swap is invisible for ~620ms (200 fading out, then the wait); anything wider
-// than this straddles it. Every CDP round trip is real time on a shared browser,
-// so this is a property of the machine rather than of the app.
-const PAIR_MS = +(process.env.BUBBLE_PAIR || 250);
+// Bright, dark and bright again inside this is a blink rather than a transition:
+// an exit takes 340ms to reach nothing and the next thought is 620ms behind it.
+const BLINK_MS = 450;
 
 const FLOORS = {
   // Zero, and it can be zero: a sentence changing in front of the reader is the
@@ -78,9 +92,37 @@ const FLOORS = {
   // 6 page px. Sub-pixel drift and the edge clamp both live under this; the
   // defect it replaces moved the box the full width of the next placement.
   teleport: 6,
-  // The least of his travel the box may keep. A box that is following him at all
-  // clears this by a wide margin; the defect it replaces kept exactly none.
-  keep: 0.15,
+  // HOW FAR THE BOX MUST MOVE, IN PIXELS, WHILE HE WALKS — not a share of his
+  // travel, which is what this was and which punishes the wrong thing.
+  //
+  // The box rides `figX + (x - refX) * settle`, so over a walk it covers his
+  // travel PLUS the sideways offset the generator searched out, and that offset
+  // can point the other way: `logic-arguments-21` beat 6 walked him 136 units
+  // right to a box placed 154 units left, so the box legitimately moved 12px
+  // while he moved 90 — 13% of his travel, which the old floor of 15% failed.
+  // (That placement is now refused outright, because a trail can only lean 51
+  // units and past that the bubble stops being his — but the metric was wrong
+  // either way.) The defect the reader actually named is a box that stands
+  // PERFECTLY still while he walks into it, and that is zero.
+  move: 8,
+  // Zero, for the same reason `cut` is: a bubble that goes dark and comes back is
+  // not a gentler version of anything, it is the remount the fix removed.
+  blink: 0,
+  // How much of its own opacity a bubble may gain or lose per 16.7ms.
+  //
+  // A whole bubble arriving in one frame — which is what a remount does — is 1.00.
+  // The design's own worst, measured across twelve lessons and a hundred readable
+  // boxes, is 0.30: the box fades over the last 30% of the driver, so the 340ms
+  // exit moves it about 0.16 a frame with the easing peaking above that. 0.45 sits
+  // between the two with room for the frame timing to wander, which matters
+  // because a budget sitting ON the measurement fails on the next slow machine
+  // rather than on the next defect. It caught the exit at 240ms (0.37) when the
+  // budget was 0.34, which is what it is for.
+  //
+  // Measured as a RATE, and the divisor is never less than ONE frame: two reads
+  // can land inside a single painted frame (9ms was measured) and dividing by
+  // 0.54 turns a legitimate 0.20 step into a 0.38 snap.
+  snap: 0.45,
 };
 // Only a walk this long can say anything, and the number is measured rather than
 // picked. The figure's centre here is the union of every limb rect, so a gesture
@@ -124,57 +166,151 @@ async function makeTab() {
 }
 
 const STAGE = "document.querySelector('#stage-cam')";
-const TAP_ADVANCE = "(()=>{const e=document.elementFromPoint(210,320);(e||document.body).dispatchEvent(new MouseEvent('click',{bubbles:true}));return true})()";
+const TAP_STAGE = "(()=>{const e=document.elementFromPoint(210,320);(e||document.body).dispatchEvent(new MouseEvent('click',{bubbles:true}));return 'stage'})()";
+/**
+ * ADVANCE — AND ANSWER, WHICH THIS COULD NOT DO AND HAD TO LEARN.
+ *
+ * It tapped the middle of the stage and returned true whatever happened. On a
+ * GRADED beat a tap on the stage does nothing, so the run parked there and every
+ * later beat was a copy of the one it stuck on — §21's own warning, arriving in a
+ * sixth harness. It looked productive only because the old table put a thought on
+ * almost every beat, so there were readable boxes before the first question;
+ * rationing them to two a lesson (AB9) moved most thoughts PAST it and the same
+ * blindness came back as "no lesson walked far enough", which was true of what it
+ * could reach and false of the corpus.
+ *
+ * The order is check-spoiler's and the reason is its: a control beat still has
+ * `role=button` elements that are not its answer, so a generic branch firing first
+ * clicks something inert and reports success. Analogue controls, then a card, then
+ * the stage. It returns WHAT it did, so a caller can tell an answer from an
+ * advance from nothing at all.
+ */
+const ANSWER_OR_TAP = `(()=>{
+  const drove = ${ANSWER_CONTROL};
+  if (drove) return drove;
+  // A LIVE TARGET ON THE STAGE. Excluded when it is disabled, which matters here
+  // and not in measure-must: 132 targets are written \`disabled={!live || answered}\`,
+  // so on an ordinary beat there is a target-shaped element that swallows the
+  // click and advances nothing. Skipping them is what lets an ordinary beat fall
+  // through to the stage tap below.
+  const live = (e) => e.getAttribute('aria-disabled') !== 'true';
+  const ring = document.querySelector('#target-ring');
+  if (ring && ring.parentElement && live(ring.parentElement)) {
+    ring.parentElement.dispatchEvent(new MouseEvent('click', {bubbles:true}));
+    return 'target';
+  }
+  // CHOICE CARDS DRAWN ON THE PICTURE. Searched across the DOCUMENT rather than
+  // inside #stage-clip: the PLAYER renders them, so they are siblings overlaying
+  // the crop rather than descendants of it. The size floor keeps the header's
+  // 28x28 close button out, which would leave the lesson instead of answering it.
+  const card = [...document.querySelectorAll('[role="button"]')].find((e) => {
+    const r = e.getBoundingClientRect();
+    return live(e) && r.width > 60 && r.height > 28;
+  });
+  if (card) { card.dispatchEvent(new MouseEvent('click', {bubbles:true})); return 'card'; }
+  // A DECK CHOICE IS A [tabindex] DIV, NOT A [role=button] — cinematicKit's
+  // Choices renders plain Pressables with no accessibilityRole, so selecting on
+  // the role alone finds none of them and every deck-answered lesson stops short.
+  const clip = document.getElementById('stage-clip');
+  const below = clip ? clip.getBoundingClientRect().bottom : 0;
+  const row = [...document.querySelectorAll('[role="button"],[tabindex]')].find((e) => {
+    if (e.getAttribute('data-testid') === 'thinker-name') return false;
+    const r = e.getBoundingClientRect();
+    return live(e) && r.top > below && r.width > 150 && r.height >= 20 && r.height <= 90;
+  });
+  if (row) { row.dispatchEvent(new MouseEvent('click', {bubbles:true})); return 'deck'; }
+  const e = document.elementFromPoint(210, 320);
+  (e || document.body).dispatchEvent(new MouseEvent('click', {bubbles:true}));
+  return 'stage';
+})()`;
 
 /**
- * ONE SAMPLE: the bubble, and the figure it is supposed to belong to.
+ * THE RECORDER, WHICH RUNS IN THE PAGE ON EVERY ANIMATION FRAME.
+ *
+ * IT USED TO POLL FROM OUT HERE, EVERY 90ms, AND THAT CANNOT SEE THE DEFECT IT
+ * WAS BUILT FOR. A reader said the bubble *"needs to disappear and reappear
+ * really smoothly. Right now, it really doesn't"*, and what was wrong lasted one
+ * or two frames: the player zeroed a shared driver while the old bubble was still
+ * mounted, so it went dark, and then a fresh copy mounted at full opacity and
+ * began its fade. Bright, gone, bright, fade — about 30ms of it, between two
+ * samples taken 90ms apart. A poller reports that as clean, forever.
+ *
+ * Recording inside the page fixes both halves. Every frame is a frame the browser
+ * actually painted, so nothing is inferred between them; and the opacity, the
+ * words, the position and the figure are read in ONE frame, so the two clocks
+ * this file exists to catch apart cannot come apart inside a single reading. A
+ * throttled tab now records FEWER frames rather than inconsistent ones — a missed
+ * defect rather than an invented one, which is the right way round.
+ *
+ * EVERY BUBBLE, NOT JUST THE LIVE ONE. A thought on its way out gives up the
+ * `thought-lead` id precisely so a harness cannot end up watching it, so a
+ * recorder that asked for that id alone would see the stage go empty during every
+ * exit and call it smooth.
  *
  * `nativeID` reaches the DOM as `id` on web and as `data-nativeid` on some
  * versions, so both are asked for — the same defensiveness every harness here
  * needs and for the same reason (§21: selecting on one attribute finds half of
  * what you are looking for).
  *
- * EVERY FIGURE IS RETURNED, AND THE CALLER PICKS ONE ONCE.
- *
- * The first draft took the WIDEST, on the reasoning that the lead is the biggest
- * thing on the stage. `Visitor` parks his man OFF-STAGE at x −60 for the whole
- * lesson rather than fading him in, so two figures are mounted from beat 0 in the
- * 24 lessons that have one — and the widest of the two flips as the walking one's
- * arms swing. `logic-arguments-19` duly reported 283px of drift on a beat where
- * nothing had moved: the centre had jumped between two different men. The caller
- * chooses the figure nearest the bubble ONCE and follows that index, which is
- * stable because the page is never reloaded between samples.
+ * EVERY FIGURE IS RECORDED AND THE CALLER PICKS ONE ONCE. The first draft took
+ * the WIDEST, on the reasoning that the lead is the biggest thing on the stage.
+ * `Visitor` parks his man OFF-STAGE at x −60 for the whole lesson rather than
+ * fading him in, so two are mounted from beat 0 in the 24 lessons that have one —
+ * and the widest flips as the walking one's arms swing. `logic-arguments-19` duly
+ * reported 283px of drift on a beat where nothing had moved.
  */
-const SAMPLE = `(()=>{
-  const b = document.querySelector('#thought-lead') || document.querySelector('[data-nativeid="thought-lead"]');
-  const bx = document.querySelector('#thought-lead-box') || document.querySelector('[data-nativeid="thought-lead-box"]');
-  let bub = null;
-  if (b && bx) {
-    const r = b.getBoundingClientRect();
-    if (r.width > 0.5) {
-      bub = {
+const INSTALL = `(()=>{
+  if (window.__bubTick) cancelAnimationFrame(window.__bubTick);
+  window.__bubLog = [];
+  const t0 = performance.now();
+  let limbs = null; let age = 0;
+  const tick = () => {
+    // The limb list is re-queried every ten frames rather than every frame: it is
+    // the expensive half of this, and a recorder heavy enough to drop frames is
+    // measuring itself.
+    if (!limbs || age-- <= 0) {
+      limbs = [];
+      for (const f of document.querySelectorAll('[data-testid="figure"]')) limbs.push([...f.querySelectorAll('*')]);
+      age = 10;
+    }
+    const bubs = [];
+    for (const w of document.querySelectorAll('[id^="thought-"], [data-nativeid^="thought-"]')) {
+      const wid = w.id || w.getAttribute('data-nativeid') || '';
+      if (!wid || wid.endsWith('-box')) continue;
+      const bx = document.getElementById(wid + '-box')
+        || document.querySelector('[data-nativeid="' + wid + '-box"]');
+      if (!bx) continue;
+      const r = w.getBoundingClientRect();
+      if (r.width < 0.5) continue;
+      bubs.push({
+        id: wid,
         x: +(r.x + r.width / 2).toFixed(2),
-        op: +(getComputedStyle(bx).opacity || 0),
-        text: (b.innerText || '').replace(/\\s+/g, ' ').trim(),
-      };
+        op: +(+getComputedStyle(bx).opacity || 0).toFixed(3),
+        text: (w.innerText || '').replace(/[\\s]+/g, ' ').trim(),
+      });
     }
-  }
-  const figs = document.querySelectorAll('[data-testid="figure"]');
-  const fxs = [];
-  for (const f of figs) {
-    let x0 = Infinity; let x1 = -Infinity;
-    for (const el of f.querySelectorAll('*')) {
-      const r = el.getBoundingClientRect();
-      if (r.width < 0.5 || r.height < 0.5) continue;
-      if (r.x < x0) x0 = r.x;
-      if (r.x + r.width > x1) x1 = r.x + r.width;
+    const fxs = [];
+    for (const parts of limbs) {
+      let x0 = Infinity; let x1 = -Infinity;
+      for (const el of parts) {
+        const r = el.getBoundingClientRect();
+        if (r.width < 0.5 || r.height < 0.5) continue;
+        if (r.x < x0) x0 = r.x;
+        if (r.x + r.width > x1) x1 = r.x + r.width;
+      }
+      fxs.push(x1 > x0 ? +((x0 + x1) / 2).toFixed(2) : null);
     }
-    fxs.push(x1 > x0 ? +((x0 + x1) / 2).toFixed(2) : null);
-  }
-  return { bub, fxs };
+    window.__bubLog.push({ t: +(performance.now() - t0).toFixed(1), b: bubs, f: fxs });
+    window.__bubTick = requestAnimationFrame(tick);
+  };
+  window.__bubTick = requestAnimationFrame(tick);
+  return true;
 })()`;
 
-/** Was the box readable in this sample? Below this it is arriving or leaving. */
+/** Take the trace and start a fresh one, so each beat is measured on its own. */
+const DRAIN = "(()=>{const l=window.__bubLog||[];window.__bubLog=[];return l})()";
+
+/** Was the box readable in this frame? Below this it is arriving or leaving. */
 const VISIBLE = 0.35;
 
 async function watch(tab, id) {
@@ -189,96 +325,151 @@ async function watch(tab, id) {
   if (!await evalJs(`!!${STAGE}`)) return { id, skip: 'never rendered a stage', threw: true };
 
   const cuts = [];
-  let blind = 0;
+  const blinks = [];
+  let gaps = 0;
   let teleport = 0;
-  let kept = 1;
+  let snap = 0;
+  let snapAt = '';
+  // NULL UNTIL A WINDOW QUALIFIES, not 1. Initialised to 1 and only lowered, a
+  // bubble that kept ALL of his travel — the best case, and what the fix produces
+  // — left `kept` at exactly 1, which the report read as "this rule was never
+  // exercised" and turned into a FAIL. The best possible result must not be
+  // indistinguishable from no result.
+  let kept = null;
   let keptAt = '';
   let seen = 0;
   let beats = 0;
+  const acts = [];
+  let answered = false;
 
-  for (let b = 0; b < 12; b++) {
-    const samples = [];
-    for (let t = 0; t < WATCH_MS; t += STEP_MS) {
-      const s = await evalJs(SAMPLE);
-      if (s) samples.push({ ...s, t: Date.now() });
-      await new Promise((r) => setTimeout(r, STEP_MS));
-    }
+  if (!await evalJs(INSTALL)) return { id, skip: 'the recorder would not install', threw: true };
+
+  // ENOUGH ITERATIONS TO GET PAST BOTH QUESTIONS. Answering a graded beat costs
+  // one iteration and advancing off it costs another, so a lesson of eleven beats
+  // needs thirteen — and a run that stops short reports the beats it never reached
+  // as clean.
+  for (let b = 0; b < 15; b += 1) {
+    await new Promise((r) => setTimeout(r, WATCH_MS));
+    const frames = await evalJs(DRAIN);
     beats += 1;
+    if (!frames || frames.length < 8) { gaps += 1; acts.push(await evalJs(TAP_STAGE)); continue; }
+
+    // The strongest bubble on stage, per frame — leaving ones included, since an
+    // exit is exactly when the reader is watching one.
+    const top = frames.map((f) => {
+      let best = null;
+      for (const x of f.b) if (!best || x.op > best.op) best = x;
+      return best;
+    });
 
     // ── CUT · the words changing where they can be read ─────────────────────
     //
-    // ONLY A PAIR TAKEN CLOSE TOGETHER CAN SAY ANYTHING. A swap is invisible for
-    // about 620ms — 200 of fade-out and then the wait before the new words go up
-    // — so two samples further apart than that can straddle the whole transition
-    // and show opacity 1 on both sides with different words in them. Run across
-    // two lanes on a busy machine this reported `logic-arguments-37` as cutting
-    // its sentence in half; traced frame by frame the swap happens at opacity
-    // 0.00, and on one lane the same run is clean. An instrument that cannot
-    // repeat itself cannot judge anything (§21), so a pair that took too long is
-    // BLIND rather than clean, and blind pairs are counted and reported.
-    for (let k = 1; k < samples.length; k++) {
-      const p = samples[k - 1];
-      const n = samples[k];
-      if (!p.bub || !n.bub) continue;
-      if (p.bub.text === n.bub.text) continue;
-      if (p.bub.op <= VISIBLE || n.bub.op <= VISIBLE) continue;
-      if (n.t - p.t > PAIR_MS) { blind += 1; continue; }
-      const near = samples.slice(Math.max(0, k - 4), k + 4)
-        .map((z) => `${z.t - samples[0].t}ms op ${z.bub ? z.bub.op.toFixed(2) : '--'} "${z.bub ? z.bub.text.slice(0, 18) : ''}"`)
-        .join(' | ');
-      cuts.push(`beat ${b}: "${p.bub.text.slice(0, 24)}" -> "${n.bub.text.slice(0, 24)}" at opacity ${n.bub.op.toFixed(2)}, ${n.t - p.t}ms apart
-            ${near}`);
+    // One ELEMENT, its own words, between two frames the browser painted. It used
+    // to be two polls 90ms apart and could not tell a swap from a fade-and-return
+    // — run across two lanes it reported `logic-arguments-37` cutting its sentence
+    // in half, and the same "defect" moved to another lesson on the next run. A
+    // finding that changes lesson between runs is a fact about the instrument.
+    for (let k = 1; k < frames.length; k += 1) {
+      for (const n of frames[k].b) {
+        const p = frames[k - 1].b.find((z) => z.id === n.id);
+        if (!p || p.text === n.text) continue;
+        if (p.op <= VISIBLE || n.op <= VISIBLE) continue;
+        cuts.push(`beat ${b}: "${p.text.slice(0, 24)}" -> "${n.text.slice(0, 24)}" at opacity ${n.op.toFixed(2)}, ${(frames[k].t - frames[k - 1].t).toFixed(0)}ms apart`);
+      }
     }
 
-    // WHICH OF THE FIGURES THIS BUBBLE BELONGS TO, decided once and then held.
-    // The nearest one when the box first becomes readable: `Visitor` parks a
-    // second man off-stage at −60 for the whole lesson, and any per-sample choice
-    // flips between the two and invents a walk nobody took.
-    const readable = samples.filter((s) => s.bub && s.bub.op > VISIBLE);
+    // ── BLINK · bright, gone, bright ────────────────────────────────────────
+    //
+    // The reader's *"it needs to disappear and reappear really smoothly"*, stated
+    // as the one thing a legitimate transition can never do. An exit takes 240ms
+    // to reach nothing and the next thought is 620ms behind it, so a bubble that
+    // is bright, dark and bright again inside 450ms did not leave — it dropped a
+    // frame's worth of itself and came back, which is what a remount looks like.
+    for (let k = 0; k < frames.length; k += 1) {
+      if (!top[k] || top[k].op < 0.5) continue;
+      let dark = -1;
+      for (let j = k + 1; j < frames.length && frames[j].t - frames[k].t < BLINK_MS; j += 1) {
+        if (dark < 0 && (!top[j] || top[j].op < 0.12)) dark = j;
+        else if (dark >= 0 && top[j] && top[j].op > 0.5) {
+          blinks.push(`beat ${b}: ${top[k].op.toFixed(2)} -> ${top[dark] ? top[dark].op.toFixed(2) : 'gone'} -> ${top[j].op.toFixed(2)} in ${(frames[j].t - frames[k].t).toFixed(0)}ms`);
+          k = j; break;
+        }
+      }
+    }
+
+    // ── SNAP · how much of itself a bubble can gain or lose in one frame ────
+    //
+    // NORMALISED BY THE FRAME GAP, which is what makes it honest on a slow
+    // machine: the entrance moves the box about 0.10 of its opacity per 16ms and
+    // the exit about 0.07, so a dropped frame legitimately doubles a step and a
+    // SNAP is a whole bubble arriving in one. Dividing by the gap measures the
+    // rate rather than the step, and a throttled tab then reports the same number
+    // a fast one does.
+    for (let k = 1; k < frames.length; k += 1) {
+      const dt = frames[k].t - frames[k - 1].t;
+      // A GAP SHORTER THAN A FRAME IS STILL ONE FRAME. Two reads can land inside a
+    // single painted frame — 9ms was measured — and dividing by 0.54 turned a
+    // legitimate 0.20 step into a 0.38 "snap". The divisor is what a frame costs
+    // at worst, never less than one.
+    if (dt <= 0 || dt > 120) continue;
+    const frames16 = Math.max(1, dt / 16.7);
+      for (const n of frames[k].b) {
+        const p = frames[k - 1].b.find((z) => z.id === n.id);
+        if (!p) continue;
+        const rate = Math.abs(n.op - p.op) / frames16;
+        if (rate > snap) { snap = rate; snapAt = `beat ${b}: ${p.op.toFixed(2)} -> ${n.op.toFixed(2)} in ${dt.toFixed(0)}ms`; }
+      }
+    }
+
+    // WHICH FIGURE THIS BUBBLE BELONGS TO, decided once and then held — the
+    // nearest one on the first frame the box is readable.
+    const readable = frames.filter((f, k) => top[k] && top[k].op > VISIBLE);
     let lead = -1;
     if (readable.length) {
       const f = readable[0];
+      const bub = f.b.reduce((x, y) => (x.op > y.op ? x : y));
       let near = Infinity;
-      for (let k = 0; k < f.fxs.length; k++) {
-        if (f.fxs[k] === null) continue;
-        const d = Math.abs(f.fxs[k] - f.bub.x);
+      for (let k = 0; k < f.f.length; k += 1) {
+        if (f.f[k] === null) continue;
+        const d = Math.abs(f.f[k] - bub.x);
         if (d < near) { near = d; lead = k; }
       }
     }
-    const fxOf = (s) => (lead >= 0 && s.fxs && s.fxs[lead] !== undefined ? s.fxs[lead] : null);
+    const fxOf = (f) => (lead >= 0 && f.f && f.f[lead] !== undefined ? f.f[lead] : null);
+    const bubOf = (f) => (f.b.length ? f.b.reduce((x, y) => (x.op > y.op ? x : y)) : null);
 
     // ── TELEPORT · the box moving while the man does not ────────────────────
-    for (let k = 1; k < samples.length; k++) {
-      const p = samples[k - 1];
-      const n = samples[k];
-      const pf = fxOf(p);
-      const nf = fxOf(n);
-      if (!p.bub || !n.bub || pf === null || nf === null) continue;
-      if (p.bub.op <= VISIBLE || n.bub.op <= VISIBLE) continue;
-      if (n.t - p.t > PAIR_MS) { blind += 1; continue; }
+    for (let k = 1; k < frames.length; k += 1) {
+      const p = bubOf(frames[k - 1]); const n = bubOf(frames[k]);
+      const pf = fxOf(frames[k - 1]); const nf = fxOf(frames[k]);
+      if (!p || !n || p.id !== n.id || pf === null || nf === null) continue;
+      if (p.op <= VISIBLE || n.op <= VISIBLE) continue;
       if (Math.abs(nf - pf) > 1.5) continue;
-      teleport = Math.max(teleport, Math.abs(n.bub.x - p.bub.x));
+      teleport = Math.max(teleport, Math.abs(n.x - p.x));
     }
 
     // ── ADRIFT · what each of them did over the window they share ───────────
-    //
-    // Both ends taken from samples where the box is READABLE, so a box that is
-    // still fading in is not asked to have kept up with anything.
-    const vis = readable.filter((s) => fxOf(s) !== null);
+    const vis = readable.filter((f) => fxOf(f) !== null && bubOf(f));
     if (vis.length >= 2) {
       seen += 1;
-      const first = vis[0];
-      const last = vis[vis.length - 1];
+      const first = vis[0]; const last = vis[vis.length - 1];
       const walked = Math.abs(fxOf(last) - fxOf(first));
       if (walked > REAL_WALK) {
-        const moved = Math.abs(last.bub.x - first.bub.x);
-        const share = moved / walked;
-        if (share < kept) { kept = share; keptAt = `beat ${b}: he moved ${walked.toFixed(0)}px, the box ${moved.toFixed(0)}px`; }
+        const moved = Math.abs(bubOf(last).x - bubOf(first).x);
+        if (kept === null || moved < kept) { kept = moved; keptAt = `beat ${b}: he moved ${walked.toFixed(0)}px, the box ${moved.toFixed(0)}px`; }
       }
     }
 
-    if (!await evalJs(TAP_ADVANCE)) break;
-    await new Promise((r) => setTimeout(r, 260));
+    if (process.env.BUBBLE_TRACE) {
+      const w = vis.length >= 2 ? Math.abs(fxOf(vis[vis.length - 1]) - fxOf(vis[0])) : -1;
+      console.log(`      beat ${b}: ${frames.length} frames, ${readable.length} readable, lead ${lead}, walked ${w.toFixed(1)}px, last act ${acts[acts.length - 1] || '-'}`);
+    }
+    // ANSWER, THEN ADVANCE. An analogue control stays mounted after it has been
+    // answered, so a harness that always reaches for the control it can see drives
+    // the same beat again and again — six windows on one `split` before this. What
+    // a reader does is answer once and tap on, so that is what this does.
+    acts.push(answered ? await evalJs(TAP_STAGE) : await evalJs(ANSWER_OR_TAP));
+    answered = !answered && acts[acts.length - 1] !== 'stage';
   }
 
   return {
@@ -286,30 +477,40 @@ async function watch(tab, id) {
     beats,
     seen,
     cuts,
-    blind,
+    blinks,
+    gaps,
     teleport: +teleport.toFixed(1),
+    snap: +snap.toFixed(2),
+    snapAt,
     kept,
     keptAt,
   };
 }
 
 // THE DEFAULT WORKLIST, chosen rather than sampled: the lessons whose figure
-// walks FURTHEST on a beat that carries a thought (so ADRIFT has something to
-// measure), plus two whose thoughts run back to back on consecutive beats (so CUT
-// does). Pass a JSON file of ids to look at anything else.
+// walks FURTHEST on a beat that still carries a thought, so the follow rule has
+// something to measure at all.
+//
+// IT HAD TO BE RE-DERIVED WHEN THE TABLE CHANGED, and that is the sort of thing
+// that rots quietly. `make:thoughts` now shows two thoughts a lesson rather than
+// every beat that had a line, so most of the old list no longer has a bubble on a
+// walking beat — and a worklist that has stopped covering the rule it was chosen
+// for reports a clean sweep with nothing in it. `node scripts/pick-bubble-work.mjs`
+// re-derives it; the guards below are what make a hollow run fail rather than pass.
+// Pass a JSON file of ids to look at anything else.
 const DEFAULT = [
-  'metaphysics-being-35',      // 202 units, the longest walk in the corpus under a thought
-  'ethics-ethics-17',          // 136
-  'metaphysics-being-19',      // 136
+  'metaphysics-being-35',      // 202 units under a thought, the longest in the corpus
+  'logic-arguments-19',        // 136
+  'logic-arguments-20',        // 136
   'logic-arguments-21',        // 136
   'epistemology-knowledge-24', // 136
-  'logic-arguments-17',        // 136
-  'epistemology-knowledge-19', // 136
-  'logic-arguments-19',        // 136
-  'logic-arguments-8',         // 96, and twice
-  'aesthetics-aesthetics-8',   // 80
-  'logic-arguments-37',        // thoughts on consecutive beats, for CUT
-  'logic-arguments-38',        // and a recent one, for CUT
+  'ethics-ethics-10',          // 100
+  'metaphysics-being-13',      // 98
+  'metaphysics-being-15',      // 98
+  'political-political-15',    // 98
+  'aesthetics-aesthetics-11',  // 98
+  'epistemology-knowledge-2',  // 98
+  'epistemology-knowledge-21', // 98
 ];
 
 const ROUTE_SRC = `// WRITTEN BY scripts/check-bubble.mjs — deleted again when it finishes.
@@ -359,7 +560,7 @@ export default function PreviewBubble() {
         results.push(r); done += 1;
         const tag = r.skip
           ? r.skip
-          : `${String(r.seen).padStart(2)} beat(s) with a readable box · cuts ${String(r.cuts.length).padStart(2)} · teleport ${String(r.teleport).padStart(6)}px · kept ${String(r.kept === 1 ? '  n/a' : `${(r.kept * 100).toFixed(0)}%`).padStart(5)} of his walk`;
+          : `${String(r.seen).padStart(2)} beat(s) with a readable box · cuts ${String(r.cuts.length).padStart(2)} · blinks ${String(r.blinks.length).padStart(2)} · snap ${r.snap.toFixed(2)} · teleport ${String(r.teleport).padStart(5)}px · the box moved ${r.kept === null ? ' n/a' : `${r.kept.toFixed(0)}px`}`;
         console.log(`  ${String(done).padStart(3)}/${ids.length}  ${r.id.padEnd(28)} ${tag}`);
       }
     }));
@@ -371,9 +572,11 @@ export default function PreviewBubble() {
   const unmeasured = results.filter((r) => r.threw);
   const cut = judged.filter((r) => r.cuts.length > FLOORS.cut);
   const tele = judged.filter((r) => r.teleport > FLOORS.teleport);
-  const ad = judged.filter((r) => r.kept < FLOORS.keep);
+  const ad = judged.filter((r) => r.kept !== null && r.kept < FLOORS.move);
   const boxesSeen = judged.reduce((a, r) => a + r.seen, 0);
-  const blindPairs = judged.reduce((a, r) => a + (r.blind || 0), 0);
+  const blink = judged.filter((r) => r.blinks.length > FLOORS.blink);
+  const snapped = judged.filter((r) => r.snap > FLOORS.snap);
+  const thinFrames = judged.reduce((a, r) => a + (r.gaps || 0), 0);
 
   console.log('');
   let bad = 0;
@@ -399,24 +602,35 @@ export default function PreviewBubble() {
     for (const r of tele.slice(0, 4)) console.log(`          ${r.id}  ${r.teleport}px`);
   } else ok(`no box moves while the figure does not`, `budget ${FLOORS.teleport}px`);
 
-  const walkers = judged.filter((r) => r.kept < 1);
+  if (blink.length) {
+    no(`${blink.length} lesson(s) blink the bubble out and back`, 'a transition never does this');
+    for (const r of blink.slice(0, 4)) for (const c of r.blinks.slice(0, 2)) console.log(`          ${r.id}  ${c}`);
+  } else ok('no bubble goes dark and comes back', `within ${BLINK_MS}ms`);
+
+  const worstSnap = judged.length ? Math.max(...judged.map((r) => r.snap)) : 0;
+  if (snapped.length) {
+    no(`${snapped.length} lesson(s) snap the bubble on or off`, `worst ${worstSnap.toFixed(2)} of its opacity in a frame, budget ${FLOORS.snap}`);
+    for (const r of snapped.slice(0, 4)) console.log(`          ${r.id}  ${r.snap} — ${r.snapAt}`);
+  } else ok('the bubble fades rather than switching', `worst ${worstSnap.toFixed(2)} of its opacity a frame, budget ${FLOORS.snap}`);
+
+  const walkers = judged.filter((r) => r.kept !== null);
   if (ad.length) {
-    no(`${ad.length} lesson(s) leave the bubble standing while he walks`, `worst ${(Math.min(...ad.map((r) => r.kept)) * 100).toFixed(0)}% of his travel, floor ${(FLOORS.keep * 100).toFixed(0)}%`);
-    for (const r of ad.slice(0, 4)) console.log(`          ${r.id}  kept ${(r.kept * 100).toFixed(0)}% — ${r.keptAt}`);
+    no(`${ad.length} lesson(s) leave the bubble standing while he walks`, `worst ${Math.min(...ad.map((r) => r.kept)).toFixed(1)}px, floor ${FLOORS.move}px`);
+    for (const r of ad.slice(0, 4)) console.log(`          ${r.id}  moved ${r.kept.toFixed(1)}px — ${r.keptAt}`);
   } else if (!walkers.length) {
     // NOT SILENTLY CLEAN. If no lesson in the list walked far enough while a box
     // was readable, this rule judged nothing and must say so rather than pass.
     no('no lesson walked far enough to test the follow', 'add one whose figure crosses the stage under a thought');
   } else {
-    ok(`every visible bubble travels with the figure`, `worst kept ${(Math.min(...walkers.map((r) => r.kept)) * 100).toFixed(0)}% of his walk, floor ${(FLOORS.keep * 100).toFixed(0)}%`);
+    ok(`every visible bubble travels with the figure`, `${walkers.length} lesson(s) walked far enough to test it · the box moved at least ${Math.min(...walkers.map((r) => r.kept)).toFixed(0)}px, floor ${FLOORS.move}px`);
   }
 
-  if (blindPairs) {
-    // Said out loud rather than swallowed: these are the moments the run could
-    // not see, and a busy machine makes more of them. Nothing FAILS on them, but
-    // a sweep reporting hundreds is a sweep to re-run with fewer lanes.
+  if (thinFrames) {
+    // Said out loud rather than swallowed: a beat whose trace came back almost
+    // empty is a beat nothing was judged on, and a browser that is being starved
+    // makes more of them. A run reporting many is a run to take again.
     console.log(`
-  ~ ${blindPairs} sample pair(s) were too far apart to judge — re-run with LANES=1 if that number is large.`);
+  ~ ${thinFrames} beat(s) recorded too few frames to judge — re-run if that number is large.`);
   }
 
   if (unmeasured.length) {

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import Animated, {
-  useSharedValue, useAnimatedStyle, withTiming, withRepeat, cancelAnimation, Easing,
+  useSharedValue, useAnimatedStyle, useAnimatedReaction, withTiming, withRepeat,
+  cancelAnimation, Easing,
   type SharedValue,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -157,6 +158,13 @@ interface Props {
    * of controlled. A caller that does not care simply omits this.
    */
   onMonth?: (year: number, month: number) => void;
+  /**
+   * True while the scroll this grid sits in is MOVING. Today's ring is the
+   * only thing here that animates for ever, and one animated node is enough
+   * to force Android's overscroll stretch to re-rasterise the whole page
+   * every frame of the bounce -- see the note by the reaction below.
+   */
+  hold?: SharedValue<boolean>;
 }
 
 const DAY_MS = 86400000;
@@ -200,7 +208,9 @@ function spansIn(row: readonly CalendarDay[]): [number, number][] {
   return out;
 }
 
-export default function StreakCalendar({ activeDays, restDays, today, since, size = 34, onMonth }: Props) {
+export default function StreakCalendar({
+  activeDays, restDays, today, since, size = 34, onMonth, hold,
+}: Props) {
   const [offset, setOffset] = useState(0);
   const [gridW, setGridW] = useState(0);
 
@@ -240,6 +250,46 @@ export default function StreakCalendar({ activeDays, restDays, today, since, siz
   // outlive the visit.
   const bloom = useSharedValue(0);
   const pulse = useSharedValue(0);
+
+  // ── AND THE RING HOLDS ITS BREATH WHILE THE PAGE IS MOVING ────────────────
+  //
+  // `pulse` is one small ring on one cell, so it looks far too cheap to matter.
+  // What matters is not its cost but the fact that it is NEVER STILL. Android
+  // 12+ overscroll is a StretchEffect, which is a RenderEffect: the scrolling
+  // subtree has to be captured into an offscreen buffer for the shader to
+  // distort it, and that capture is reusable only while nothing inside it
+  // changes. ONE node dirtied every frame is exactly as damaging as a hundred,
+  // because it invalidates the same buffer.
+  //
+  // PAUSED WHERE IT STANDS AND RESUMED IN PHASE, not restarted. `cancelAnimation`
+  // leaves the value exactly where it was, so the styles reading it stop re-running
+  // altogether and the node goes clean -- and the resume finishes the cycle that
+  // was interrupted before handing back to the repeat, so the ring never jumps
+  // (group L). Restarting it from 0 would be one line shorter and would blink at
+  // the reader on the frame they stopped scrolling, which is the moment they are
+  // most likely to be looking at it.
+  useAnimatedReaction(
+    () => !!hold?.value,
+    (held, was) => {
+      if (held === was) return;
+      if (held) {
+        cancelAnimation(pulse);
+        return;
+      }
+      const at = pulse.value;
+      pulse.value = withTiming(
+        1,
+        { duration: PULSE_MS * (1 - at), easing: Easing.linear },
+        (done) => {
+          if (!done) return;
+          pulse.value = 0;
+          pulse.value = withRepeat(
+            withTiming(1, { duration: PULSE_MS, easing: Easing.linear }), -1, false,
+          );
+        },
+      );
+    },
+  );
 
   // ── AND THE ENTRANCE IS PACKED AWAY WHEN IT IS OVER ────────────────────────
   //

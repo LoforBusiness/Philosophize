@@ -48,6 +48,8 @@ import path from 'node:path';
 import { loadFont, wrap } from './lib/ttfwidth.mjs';
 import { corpus } from './lib/gestures.mjs';
 import { loadTs } from './lib/loadts.mjs';
+import { loadRig, skullRise } from './lib/loadrig.mjs';
+import { sceneOf, walkOf, scaleOf, crownOf } from './lib/scenefig.mjs';
 
 const DRY = process.argv.includes('--dry');
 const DIR = 'components/lesson/cinematic';
@@ -66,6 +68,22 @@ const BORDER = pick(/thoughtBox:\s*\{[^}]*borderWidth:\s*([\d.]+)/s);
 const SIZE = pick(/thoughtText:\s*\{[^}]*fontSize:\s*([\d.]+)/s);
 const LH = pick(/thoughtText:\s*\{[^}]*lineHeight:\s*([\d.]+)/s);
 const INNER = BOX_W - 2 * PAD - 2 * BORDER - 1;
+// HOW FAR SIDEWAYS THE BOX MAY SIT AND STILL BE HIS.
+//
+// The trail leans back toward his head, and `Thought` clamps that lean to
+// `half - 14` — so past this the trail stops pointing at him and the bubble reads
+// as a caption that happens to be nearby. `logic-arguments-21` beat 6 placed a
+// thought 154 units to his left while he walked 136 units to the right, so the box
+// drifted the OTHER WAY across a third of the stage with its trail pinned at the
+// clamp. Read out of the component rather than typed, the same rule the box
+// dimensions follow.
+// SCOPED TO THE THOUGHT'S OWN TRAIL. The speech bubble one component up writes
+// the identical expression with a different number, so an unanchored pattern
+// reads 20 where the answer is 14 — the same trap `check:worklets` records
+// about reading the wrong function's first lines. Anchored on `head - cx`,
+// which only the thought's trail has.
+const LEAN = pick(/Math\.max\(-\(half - ([\d.]+)\), Math\.min\(half - [\d.]+, head - cx\)\)/);
+const DRIFT = BOX_W / 2 - LEAN;
 // Box bottom → the smallest disc, for a trail of three, two or one.
 //
 // THE TRAIL IS A FREE PARAMETER, and treating it as fixed cost thirteen lessons.
@@ -87,16 +105,10 @@ const boxH = (text) => {
 const route = fs.readFileSync('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx', 'utf8');
 const COMP = new Map([...route.matchAll(/^\s*'([a-z0-9-]+)':\s*(\w+),/gm)].map((m) => [m[1], m[2]]));
 function bandOf(id) {
-  const c = COMP.get(id);
-  if (!c) return null;
-  const base = `${c[0].toLowerCase()}${c.slice(1).replace(/Lesson$/, '')}Scene.tsx`;
-  for (const f of [base, `${c}.tsx`]) {
-    const p = path.join(DIR, f);
-    if (!fs.existsSync(p)) continue;
-    const m = fs.readFileSync(p, 'utf8').match(/band=\{\[\s*(-?\d+)\s*,\s*(-?\d+)\s*\]\}/);
-    if (m) return [+m[1], +m[2]];
-  }
-  return [0, 560];
+  const s = sceneOf(id);
+  if (s === null) return null;
+  const m = s.match(/band=\{\[\s*(-?\d+)\s*,\s*(-?\d+)\s*\]\}/);
+  return m ? [+m[1], +m[2]] : [0, 560];
 }
 
 // ── what is already authored ────────────────────────────────────────────────
@@ -126,10 +138,23 @@ const GRADED = new Map();
 // measured count truncated every authored array by one and left `check:thoughts`
 // reporting eighty-six rows out of step with their own lesson.
 const NBEATS = new Map();
+const CODES = new Map();
 for (const l of corpus()) {
   GRADED.set(l.id, l.beats.map((b) => !!b.graded));
   NBEATS.set(l.id, l.beats.length);
+  CODES.set(l.id, l.beats.map((b) => b.code));
 }
+
+// Where his head is, per pose code — the rig's own answer rather than the union
+// of his limbs. Cached, because 198 lessons reach for about a hundred codes.
+const { RIG, MOVES } = await loadRig();
+const RISE = new Map();
+const riseOf = (code) => {
+  if (!RISE.has(code)) RISE.set(code, skullRise(RIG, MOVES, code));
+  return RISE.get(code);
+};
+/** How far above the bare figure the costume reaches, per lesson (make:wardrobe). */
+const HAT = J.wardrobeReach || {};
 
 const hit = (a, b) => a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + b[3] && b[1] < a[1] + a[3];
 
@@ -141,21 +166,30 @@ const hit = (a, b) => a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + 
  * the answer is always the one nearest his head that works, and "directly above,
  * touching" wins whenever it is available.
  */
-function place(items, w, h, bandTop, at) {
-  // WHOSE HEAD. Normally the union of the figure boxes — but on a beat where the
-  // SECOND figure has walked in there are two of them, and a union puts the
-  // bubble in the space between two people rather than over either. So the caller
-  // can name the head it means, and the visitor's is taken from his own cue.
+function place(items, w, h, bandTop, at, mx, head) {
+  // WHOSE HEAD, AND WHERE THE TOP OF IT IS — `crownOf`, shared with the check
+  // that re-derives this. The caller can name it outright instead: the second
+  // figure's line is placed against his own cue, because a union puts the bubble
+  // in the air between two people rather than over either.
+  //
+  // THE TOP OF HIS BOX IS NOT THE TOP OF HIS HEAD, and anchoring on it is what
+  // the reader saw. The box is the union of one figure's LIMB Views, so a beat
+  // where he lifts a hand, points, or wears a hat reports a top a median of
+  // fourteen units above his skull and as much as ninety. Hung four units above
+  // THAT, the bubble floats a head's height clear of him: *"they seem to be
+  // really far up above the stickman."*
+  //
+  // The bubble is drawn after the scene, so where his own raised arm crosses it
+  // the bubble is in front — which is what every comic has always done, and the
+  // opposite of the fault, because an arm through a balloon reads as depth while
+  // a balloon parked in empty paper reads as a mistake.
   let cx; let crown;
   if (at) {
     cx = at.cx; crown = at.crown;
   } else {
-    const figs = items.filter((it) => it.k === 'fig');
-    if (!figs.length) return null;
-    const fx0 = Math.min(...figs.map((f) => f.b[0]));
-    const fx1 = Math.max(...figs.map((f) => f.b[0] + f.b[2]));
-    crown = Math.min(...figs.map((f) => f.b[1]));
-    cx = (fx0 + fx1) / 2;
+    const c = crownOf(items.filter((it) => it.k === 'fig'), mx, head.rise, head.hat);
+    if (!c) return null;
+    ({ cx, crown } = c);
   }
   // ── THE TRADE IS SCORED, NOT NESTED ───────────────────────────────────────
   //
@@ -199,7 +233,7 @@ function place(items, w, h, bandTop, at) {
               + (mode === 'text' ? OVER_ART : 0) + (3 - t.discs) * SHORT_TRAIL;
             if (!best || cost < best.cost) {
               best = {
-                cost, x: rx, headX: Math.round(cx),
+                cost, up, x: rx, headX: Math.round(cx),
                 tailY, discs: t.discs, over: mode === 'text',
               };
             }
@@ -212,13 +246,85 @@ function place(items, w, h, bandTop, at) {
   return null;
 }
 
-let clear = 0; let overArt = 0; let nowhere = 0; let visLines = 0; const rows = [];
+// ── HOW MANY OF THEM A READER ACTUALLY MEETS ────────────────────────────────
+//
+// The first version drew one on every beat that had a line, which came to 1,113
+// bubbles — HALF of all 2,237 beats — and the reader said what that is like:
+// *"it appears way too much … I don't want it every single tab."*
+//
+// So the words stay and the SHOWING is rationed. `say` still holds every line
+// that was authored, because the writing is the expensive half and the choosing
+// is the cheap one — a line that is not drawn today can be drawn tomorrow by
+// changing a weight here, where re-authoring it could not. What decides is `at`:
+// no placement, no bubble, which is a rule the player already obeyed.
+//
+// TWO THINGS ARE SCORED AND THE SECOND ONE IS NOT OBVIOUS. Which beat gets a
+// bubble is mostly a question of where the bubble can SIT — the reader's other
+// complaint was that they *"seem to be really far up above the stickman"*, and
+// with six candidates and two slots the generator can simply decline the ones
+// that float. And the pair has to be SPREAD: two bubbles three beats apart in an
+// eleven-beat lesson is the same complaint in miniature, so a pair is scored on
+// where it falls as well as on how it sits.
+const SHOW = 2;
+/** Beats apart, minimum. Two in a row reads as the bubble being back on. */
+const MIN_GAP = 2;
+/**
+ * Above this many units clear of his head, a bubble reads as a caption rather
+ * than as his: the head is 40 across, so half a head of empty paper between the
+ * last disc and his skull is the point at which the trail stops connecting them.
+ * A THOUGHT above it is declined outright — there are other beats. An answer LINE
+ * cannot be declined (it is a reply to something the reader just did) so it is
+ * only counted and printed.
+ */
+const FLOAT = 20;
+/** Where in the lesson the pair wants to land, as a fraction of its beats. */
+const IDEAL = [0.3, 0.75];
+const SPREAD_W = 34;
+/**
+ * A graded beat draws the ANSWER line, and the beat beside one is a bad
+ * neighbour: think, tap, reply is three bubbles running. Same for the beat the
+ * second figure walks in on, where he already has a line up.
+ */
+const NEIGHBOUR = 30;
+
+function choosePair(all, n, busy) {
+  // A thought that can only be hung a long way clear of his head is not shown at
+  // all. That is the whole licence the rationing buys: with five candidates and
+  // two slots there is no reason to spend one on the bad placement, and "no
+  // bubble" reads as him listening while a floating one reads as a fault.
+  const cands = all.filter((c) => c.up <= FLOAT && c.side <= DRIFT);
+  if (!cands.length) return [];
+  const near = (i) => (busy.some((b) => Math.abs(b - i) <= 1) ? NEIGHBOUR : 0);
+  const at = (i) => (n > 1 ? i / (n - 1) : 0);
+  if (cands.length === 1) return [cands[0].i];
+  let best = null;
+  for (let a = 0; a < cands.length; a += 1) {
+    for (let b = a + 1; b < cands.length; b += 1) {
+      if (cands[b].i - cands[a].i < MIN_GAP) continue;
+      const s = cands[a].cost + cands[b].cost + near(cands[a].i) + near(cands[b].i)
+        + SPREAD_W * (Math.abs(at(cands[a].i) - IDEAL[0]) + Math.abs(at(cands[b].i) - IDEAL[1]));
+      if (!best || s < best.s) best = { s, pair: [cands[a].i, cands[b].i] };
+    }
+  }
+  // Every candidate crowded into a run shorter than MIN_GAP: show the best one
+  // rather than none, since one thought is still him working it out.
+  if (!best) return [cands.reduce((p, q) => (p.cost + near(p.i) < q.cost + near(q.i) ? p : q)).i];
+  return best.pair;
+}
+
+let clear = 0; let overArt = 0; let nowhere = 0; let visLines = 0; let shown = 0; let held = 0;
+const ups = []; const sides = []; const replyUps = []; const rows = []; const floaters = []; const perLesson = [];
 for (const [id, beats] of Object.entries(J.words)) {
   const band = bandOf(id);
   if (!band) continue;
   const graded = GRADED.get(id) || [];
   const said = SAY[id] || [];
+  const walk = await walkOf(id);
+  const codes = CODES.get(id) || [];
+  const k = scaleOf(id);
+  const hat = (HAT[id]?.up ?? 0);
   const at = [];
+  const cands = [];
   for (const [i, items] of beats.entries()) {
     // What this beat would actually draw: his thought, or — on a graded beat —
     // the longer of the two answer lines it could land on.
@@ -233,9 +339,18 @@ for (const [id, beats] of Object.entries(J.words)) {
     // The band is passed IN, because a box above its top edge is not subtle, it
     // is gone (H59) — and checking it afterwards would throw away a placement a
     // shorter trail could have saved.
-    const p = place(items, BOX_W, h, band[0]);
+    const p = place(items, BOX_W, h, band[0], null, walk ? walk[i] : undefined,
+      { rise: riseOf(codes[i]) * k, hat });
     if (!p) { at.push(null); nowhere += 1; continue; }
     at.push([p.x, p.tailY, p.discs, p.headX]);
+    // The answer line is not rationed — it is his reply to something the reader
+    // did, it arrives only on the two graded beats, and it is the half of this
+    // the reader asked for by name. Only the running commentary is chosen from.
+    if (!graded[i]) cands.push({ i, cost: p.cost, up: p.up, side: Math.abs(p.x - p.headX) });
+    else {
+      replyUps.push(p.up);
+      if (p.up > FLOAT) floaters.push(`${id}[${i}] ${p.up} up`);
+    }
     if (p.over) overArt += 1; else clear += 1;
   }
   // ── AND THE SECOND FIGURE, ON THE BEAT HE ARRIVES ────────────────────────
@@ -250,6 +365,17 @@ for (const [id, beats] of Object.entries(J.words)) {
     const p = place(beats[cue.enter], BOX_W, h, band[0], { cx: cue.x, crown: CROWN });
     if (p) { vis = [cue.enter, p.x, p.tailY, p.discs]; visLines += 1; }
   }
+  // ── AND NOW THE RATIONING, LAST, SO EVERY CANDIDATE WAS COSTED FIRST ─────
+  //
+  // The busy beats are the ones already carrying a box: the two graded beats
+  // draw the answer line, and the entrance beat draws the visitor's.
+  const busy = [...at.keys()].filter((i) => graded[i] && at[i]);
+  if (vis) busy.push(vis[0]);
+  const keep = new Set(choosePair(cands, at.length, busy));
+  for (const c of cands) {
+    if (keep.has(c.i)) { shown += 1; ups.push(c.up); sides.push(c.side); } else { at[c.i] = null; held += 1; }
+  }
+  perLesson.push(keep.size);
   rows.push({ id, at, say: said, vis, n: NBEATS.get(id) ?? beats.length });
 }
 
@@ -269,8 +395,19 @@ const body = rows.map((r) => {
 const HEAD = fs.readFileSync(OUT, 'utf8').split('export const THOUGHTS')[0];
 const out = `${HEAD}export const THOUGHTS: Record<string, LessonThoughts> = {\n${body}\n};\n`;
 
+const stat = (A) => {
+  const s = [...A].sort((a, b) => a - b);
+  const q = (p) => (s.length ? s[Math.floor(s.length * p)] : 0);
+  return `median ${q(0.5)}  p90 ${q(0.9)}  worst ${s[s.length - 1] ?? 0}`;
+};
 console.log(`${rows.length} lessons`);
-console.log(`  ${clear} bubble(s) sit in fully clear space`);
+console.log(`  ${shown} thought(s) shown — ${(shown / rows.length).toFixed(2)} a lesson, of ${shown + held} authored`);
+console.log(`  a thought's tail clears his head by:   ${stat(ups)}`);
+console.log(`  and sits sideways of it by:           ${stat(sides)}  (a trail leans ${DRIFT.toFixed(0)})`);
+console.log(`  an answer line's, which cannot move:   ${stat(replyUps)}`);
+console.log(`  ${floaters.length} answer line(s) more than ${FLOAT} clear of his head${floaters.length ? `: ${floaters.slice(0, 3).join(' · ')}` : ''}`);
+console.log(`  thoughts a lesson: ${[0, 1, 2].map((n) => `${perLesson.filter((v) => v === n).length}×${n}`).join(' · ')}`);
+console.log(`  ${clear} placement(s) sit in fully clear space`);
 console.log(`  ${overArt} sit over ART but never over a word (D31)`);
 console.log(`  ${nowhere} beat(s) have nowhere at all and show none`);
 console.log(`  ${visLines} second figures say something as they walk in`);

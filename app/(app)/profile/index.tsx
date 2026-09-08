@@ -455,6 +455,45 @@ export default function ProfileScreen() {
         // re-uploads them the next frame, forever.
         //
         // So the fix is headroom, not amputation.
+        //
+        // ── AND THE STREAK SCREEN HAS THE SAME FAULT, WHICH SETTLED WHAT
+        //    "HEADROOM" MEANS ─────────────────────────────────────────────
+        //
+        // Three fixes were shipped at the streak screen against a reading that
+        // its 945x2599 texture was "the whole page rasterised". It was not. That
+        // ScrollView is full-bleed, so a picture of the page would be 1080 wide;
+        // 945 is NARROWER than the panel. Against 1080x2340 it is 0.875 across
+        // by 1.111 down -- area preserved to within 3%. That is a rubber band,
+        // which is to say it is THIS effect's own buffer, on that screen too.
+        //
+        // So there is one fault on both screens, and what separates them is what
+        // the buffer has to re-rasterise:
+        //
+        //   * A RenderEffect's capture is REUSABLE while nothing inside it
+        //     changes. Counted across the app, the streak screen is the only
+        //     scroll content that is never still -- a rig solve writing
+        //     twenty-four transforms a frame, and a `withRepeat(-1)` ring. Both
+        //     now hold still while the page is moving, and only while it is.
+        //
+        //   * THIS page has no frame callback and no endless animation anywhere
+        //     in it -- checked, not assumed. Its content is already static, so
+        //     there is nothing here to freeze and that fix does not apply. What
+        //     is left is the raw cost of capturing the biggest page in the app,
+        //     which is why it is smooth in the middle and struggles only at the
+        //     ends.
+        //
+        // WHICH MAKES THE NEXT LEVER A COUNTABLE ONE, and it is not a guess:
+        // `SvgView` (react-native-svg, Android) does not draw to the canvas. It
+        // renders itself into an ARGB_8888 Bitmap and blits that, recycling it on
+        // detach. Every icon, medal, seal and chart on this page is therefore a
+        // resident texture -- which is exactly why the counter that moved under
+        // the bisect was `Slow bitmap uploads`, and why this page (50 of them)
+        // struggles where Home (8) does not. Fewer and smaller SVGs in the scroll
+        // content is the headroom. That also re-justifies `removeClippedSubviews`
+        // above: it is not a drawing optimisation, since HWUI skips off-screen
+        // nodes anyway -- it is what hands those bitmaps back.
+        //
+        // Unverified on a device: no phone was attached for this pass.
       >
         {/* The header wears the user's chosen artwork. Every colour in it comes
             from that art's tone palette, so a light engraving gets ink text and a

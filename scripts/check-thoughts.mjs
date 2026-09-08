@@ -161,9 +161,10 @@ for (const l of LESSONS) {
     // hint at best. The player refuses to draw one and the generator refuses to
     // place one; this refuses to let one be WRITTEN, so the three cannot drift.
     if (l.beats[i].graded) onGraded.push(`${l.id}[${i}]`);
-    // A thought with no placement never reaches the screen. Not a failure — some
-    // stages are full — but it is worth saying out loud rather than letting a
-    // line be written, checked, and silently never shown.
+    // A thought with no placement never reaches the screen. That is now the
+    // NORMAL case rather than a shortfall: `make:thoughts` shows two a lesson and
+    // leaves the rest of the writing on the shelf, so this counts rather than
+    // complains. Section 8 is what holds the number.
     if (!row.at[i]) orphaned.push(`${l.id}[${i}]`);
   }
 }
@@ -208,6 +209,114 @@ for (const l of LESSONS) {
 }
 if (covered.length) bad(`${covered.length} bubble(s) cover a word (D31)`, covered.slice(0, 3).join(' · '));
 else ok(`none of ${placed} placed bubbles covers a word (D31)`);
+
+// ── 8 · HE THINKS TWICE A LESSON, NOT EVERY TIME THE READER TAPS ────────────
+//
+// The first version drew a bubble on every beat that had a line: 1,113 of them,
+// half of all 2,237 beats in the app. The reader: *"it appears way too much …
+// I don't want it every single tab."*
+//
+// So the WORDS stay and the showing is rationed, which is the trade worth stating
+// — the writing is the expensive half and the choosing is the cheap one, so a
+// line held back today can be shown tomorrow by moving a weight in the generator,
+// where re-authoring it could not. What this holds is the number a reader meets.
+// The answer line is not counted: it lands only when they have answered something,
+// on the two graded beats, and it is the half they asked for by name.
+const SHOW = 2;
+const chatty = [];
+let thoughts = 0;
+for (const l of LESSONS) {
+  const row = THOUGHTS[l.id];
+  if (!row) continue;
+  const n = row.at.filter((a, i) => a && row.say[i] && !l.beats[i].graded).length;
+  thoughts += n;
+  if (n > SHOW) chatty.push(`${l.id}: ${n}`);
+}
+if (chatty.length) bad(`${chatty.length} lesson(s) show more than ${SHOW} thoughts`, chatty.slice(0, 4).join(' · '));
+else ok(`no lesson shows more than ${SHOW} thoughts`, `${thoughts} across ${LESSONS.length}, ${(thoughts / LESSONS.length).toFixed(2)} a lesson · ${orphaned.length} lines written and held back`);
+
+// ── 9 · AND THE BUBBLE HANGS OFF HIS HEAD, NOT OFF HIS RAISED HAND ──────────
+//
+// *"the thinking bubbles need to be closer to the sigma. They seem to be really
+// far up above the stickman for a lot of them."*
+//
+// They were, and nothing here could see it, because the height was measured
+// against the wrong thing twice over. `mustBoxes` records the union of ONE
+// figure's limb Views and a beat draws several — `ethics-ethics-6` draws
+// twenty-five — so the anchor was the top of the tallest person on stage. And
+// even for the right person a box top is not a skull: a raised hand is in the
+// union, so the box top sits a median FOURTEEN units above his head and as much
+// as ninety.
+//
+// Measured against his actual head, out of the rig, the shipped table sat a
+// median of 21 units clear of it with a p90 of 48. This re-derives the same two
+// answers the generator does — whose box, and where his head is inside it — and
+// holds what came out.
+const { loadRig, skullRise } = await import('./lib/loadrig.mjs');
+const { walkOf, scaleOf, crownOf } = await import('./lib/scenefig.mjs');
+const { RIG, MOVES } = await loadRig();
+const rise = new Map();
+const riseOf = (c) => {
+  if (!rise.has(c)) rise.set(c, skullRise(RIG, MOVES, c));
+  return rise.get(c);
+};
+/** Half a head of paper. Past this the trail stops connecting the two. */
+const FLOAT = 20;
+/**
+ * AND HOW FAR SIDEWAYS IT MAY SIT, which is geometry rather than taste.
+ *
+ * The trail leans back toward his head and `Thought` clamps that lean to
+ * `half - 14`, so past this the trail is pinned at its stop and no longer points
+ * at him. `logic-arguments-21` beat 6 placed a thought 154 units to his LEFT while
+ * he walked 136 units to the RIGHT: the box crossed a third of the stage away from
+ * the man it belonged to, with its trail hard against the clamp the whole way.
+ *
+ * Read out of the component, and ANCHORED — the speech bubble writes the identical
+ * expression with a different number one component up, so an unscoped pattern
+ * answers 20 where the truth is 14.
+ */
+const LEAN = parseFloat((KIT.match(/Math\.max\(-\(half - ([\d.]+)\), Math\.min\(half - [\d.]+, head - cx\)\)/) || [])[1]);
+const DRIFT = BOX_W / 2 - LEAN;
+const HAT = J.wardrobeReach || {};
+const far = [];
+const adrift = [];
+const gaps = [];
+let unsure = 0;
+for (const l of LESSONS) {
+  const row = THOUGHTS[l.id];
+  const beats = J.words[l.id];
+  if (!row || !beats) continue;
+  const walk = await walkOf(l.id);
+  const k = scaleOf(l.id);
+  const hat = HAT[l.id]?.up ?? 0;
+  for (const [i, a] of row.at.entries()) {
+    // Only his own THOUGHTS. An answer line cannot be declined — it is a reply to
+    // something the reader just did — so a hard rule over it would fail on stages
+    // that simply have no room, and the honest place for that number is the
+    // generator's own report.
+    if (!a || !beats[i] || !row.say[i] || l.beats[i].graded) continue;
+    const c = crownOf(beats[i].filter((it) => it.k === 'fig'), walk ? walk[i] : undefined,
+      riseOf(l.beats[i].code) * k, hat);
+    if (!c || !c.sure) { unsure += 1; continue; }
+    const gap = c.crown - a[1];
+    gaps.push(gap);
+    if (gap > FLOAT) far.push(`${l.id}[${i}] ${gap.toFixed(0)} clear`);
+    const side = Math.abs(a[0] - a[3]);
+    if (side > DRIFT) adrift.push(`${l.id}[${i}] ${side.toFixed(0)} sideways`);
+  }
+}
+gaps.sort((x, y) => x - y);
+const med = gaps.length ? gaps[Math.floor(gaps.length / 2)] : 0;
+if (far.length) bad(`${far.length} thought(s) hang more than ${FLOAT} units clear of his head`, far.slice(0, 4).join(' · '));
+// A CHECK THAT MEASURED NOTHING MUST NOT LOOK CLEAN — §21's rule, which this
+// file's own inputs make easy to break: where the walk track names no figure the
+// crown falls back to the union and this declines to judge it, so the count of
+// what it skipped is printed beside the count of what it held.
+else ok(`every thought hangs within ${FLOAT} units of his head`, `${gaps.length} measured, median ${med.toFixed(0)} · ${unsure} skipped, no figure the walk track names`);
+
+if (Number.isNaN(LEAN)) bad('could not read the trail lean out of cinematicKit');
+else if (adrift.length) bad(`${adrift.length} thought(s) sit further sideways than the trail can lean`, adrift.slice(0, 4).join(' · '));
+else ok('every thought sits where its trail can still point at him', `within ${DRIFT.toFixed(0)} units`);
 
 console.log(fails ? `\n${fails} failing.\n` : '\nall clear.\n');
 process.exit(fails ? 1 : 0);

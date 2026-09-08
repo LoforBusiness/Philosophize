@@ -3220,9 +3220,126 @@ covers a word.
 > placement table is worth re-deriving one day; nothing here depends on it.
 >
 > **`npm run check:bubble` is the ratchet**, and it needs Metro and a browser
-> because every one of these is a relationship between frames. Measured after:
-> 0 sentence swaps and 0 teleports across 41 readable boxes, and the corpus's
-> longest walk keeps 24% of his travel where it kept none.
+> because every one of these is a relationship between frames.
+
+> **AND THEN HE THOUGHT TOO OFTEN, TOO HIGH, AND STILL DID NOT LEAVE CLEANLY.**
+> The same reader, on the shipped version: *"it appears way too much. I only want
+> it to appear maybe around two times during the lesson. I don't want it every
+> single tab"*, *"the bubble needs to disappear and reappear really smoothly.
+> Right now, it really doesn't"*, and *"the thinking boxes need to be closer to
+> the [stickman]. They seem to be really far up above the stickman for a lot of
+> them."* Three complaints, three separate causes, and none of them was the one
+> the previous pass fixed.
+>
+> - **HALF OF EVERY LESSON HAD A BUBBLE ON IT — 1,113 across 2,237 beats.** The
+>   generator drew one wherever a line had been authored, so the bubble stopped
+>   being an event. `make:thoughts` picks **two beats a lesson** now (AB9), and
+>   the split is the part worth keeping: `say` still holds all 1,113 lines,
+>   because the writing is the expensive half and the choosing is the cheap one —
+>   a line held back today can be shown tomorrow by moving a weight, where
+>   re-authoring it could not. **334 shown, 1.70 a lesson** — 165 lessons at two,
+>   4 at one and 29 at none, those last being stages with no room near his head.
+>   **The answer line is NOT rationed**: it is a reply to something
+>   the reader just did, it lands only on the two graded beats, and it is the half
+>   they asked for by name.
+> - **THE ANCHOR WAS NOT HIS HEAD, TWICE OVER (AB10).** `mustBoxes` records one
+>   box per `<Stickman>` and a beat draws several — `ethics-ethics-6` draws
+>   twenty-five — so taking the union hung his thought over the tallest person on
+>   stage, 148 units above his own head. And even for the right person, the box is
+>   the union of his LIMB Views: a raised hand or a hat puts its top a **median 14
+>   units** above his skull and as much as 90. Measured against his real head —
+>   the rig posing the beat's own move code in plain Node — the shipped table sat
+>   a **median 21 units clear of it, p90 48**. Anchored on the head: **median 4,
+>   p90 4, worst 20**, with a bubble that can only float declined outright, which
+>   is a licence the rationing buys.
+> - **A PHASE CHANGE WAS A REMOUNT (AB11).** The player owned the lifecycle and
+>   moved a bubble between a live slot and an outgoing array, which is a different
+>   element in a different position. That resets the width `Thought` measured, and
+>   the trail's clamp is a constant **+14 at width 0** — so every exit began by
+>   snapping its trail sideways. Worse, the player zeroed the shared driver in the
+>   same effect: a shared value reaches the UI thread on the next frame and a React
+>   state change waits for the JS thread, so the outgoing bubble sat at zero while
+>   still mounted and the fresh copy then arrived at full opacity. **Bright, gone,
+>   bright, fade.** `Thought` owns its driver now and takes a `show` boolean —
+>   **one element per thought for its whole life** — and the exit is the entrance
+>   played backwards on one linear value, so the box empties and then the trail
+>   retracts toward his head.
+>
+> **THE HARNESS HAD TO GROW THREE TIMES OVER, AND ONE OF ITS FAULTS PREDATED ALL
+> OF THIS.** It polled every 90ms, and the blink lasted one or two frames — so it
+> would have reported the defect clean for ever. It records inside the page on
+> every animation frame now, which also means the opacity, the words and the
+> figure are read in ONE frame and cannot disagree. It gained **BLINK** (bright,
+> dark, bright inside 450ms) and **SNAP** (how much opacity a bubble may gain or
+> lose per frame, as a RATE so a dropped frame is not mistaken for a switch) — and
+> SNAP immediately caught the new exit being too fast: the box occupies the last
+> 30% of the driver, so 240ms faded it in **72ms**, measured at 0.37 in one frame.
+> 340ms fixes it at 0.24.
+>
+> **And it could not answer a question, which had been true since it was written.**
+> It tapped the middle of the stage and returned true whatever happened, so it
+> parked on the first graded beat — §21's warning arriving in a sixth harness. It
+> looked productive only because the old table put a thought on nearly every beat,
+> so there were readable boxes before the question; rationing them moved most
+> thoughts PAST it and the blindness surfaced as *"no lesson walked far enough"*,
+> which was true of what it could reach and false of the corpus. With
+> `answerctl`'s controls plus a live scene target, a choice card and a deck row,
+> one lesson went from 2 readable boxes to 13.
+>
+> **AND THE RENDER THEN FOUND A THIRD PLACEMENT FAULT NOBODY HAD NAMED.** The
+> follow rule reported `logic-arguments-21` keeping 13% of his travel, and it was
+> right about the number and wrong about the verdict. That beat walks him 136 units
+> RIGHT to a thought placed 154 units LEFT of where he lands — so the box crosses a
+> third of the stage AWAY from the man it belongs to. The generator had licence to
+> slide 120 units sideways looking for clear paper, and nothing said how far is too
+> far. **The trail says.** `Thought` clamps its lean to `half - 14`, so past 51
+> units the trail is pinned at its stop and stops pointing at him: the bubble is
+> a caption that happens to be nearby. Nine thoughts of 339 were beyond 40 units
+> and five beyond 51, so declining them costs almost nothing — which is the licence
+> the rationing keeps buying. The number is read out of the component, and it had
+> to be ANCHORED: the speech bubble writes the identical expression with a
+> different constant one component up, so the unscoped pattern answered 20 where
+> the truth is 14.
+>
+> **The rule underneath it was measuring the wrong thing, too.** "The share of his
+> travel the box kept" punishes a box that is correctly restoring a sideways offset
+> pointing the other way — 12px of legitimate movement against 90px of walk is 13%,
+> and no floor expressed as a share can tell that from a box that is pinned. What
+> the reader named is a box that stands PERFECTLY still while he walks into it, and
+> that is zero pixels. The floor is 8px now.
+>
+> **AND THE ANCHOR WAS A MOMENT RATHER THAN A PLACE, WHICH IS WHY THAT DRIFT
+> EXISTED AT ALL.** A must-box is measured at ONE instant of a beat and the figure
+> moves during it, so on a walking beat the recorded centre is wherever the probe
+> caught him: **113 of 317 walking beats record him 40 or more units from the x
+> the script walks him to**, one of them 151 units out. The generator anchored
+> there, and the player faithfully restores exactly that offset — so the box came
+> to REST that far to his side. This is the same table CLAUDE.md already described
+> as "90 of 940 placements record a figure centre more than 40 units from their own
+> beat's x"; it was never noise, it is the probe reading mid-walk. The anchor is
+> his END x now, which is where he stands while the reader reads and the value the
+> player itself settles on; on a beat he does not walk the two agree within 13
+> units either way. `check:thoughts` went from 18 placements it had to skip to
+> **none**.
+>
+> **AND 86 SCENES NEVER HAND THE PLAYER THEIR WALK TRACK — of which 3 matter.**
+> `CinematicPlayer` derives the live figure x from `walk={X}`, so a scene that
+> declares an X track and does not pass it reports 0 and nothing follows anything.
+> 83 of the 86 never move the figure, so there is nothing to follow;
+> **`metaphysics-being-2`, `ethics-ethics-5` and `aesthetics-aesthetics-17` do walk
+> him**, and in those three the bubble cannot follow and the footfalls do not
+> sound, because it is the same prop. Recorded and NOT fixed: it is three scene
+> edits, but each invalidates its must-box stamp and the change also switches
+> footfall scheduling on, so it wants its own pass with `check:sound` in view
+> rather than a ride on this one.
+>
+> **Two of its own numbers were wrong in the direction that hides a pass.**
+> `kept` was initialised to 1 and only ever lowered, so a bubble that kept ALL of
+> his travel — the best case, and what the fix produces — was indistinguishable
+> from a rule that never ran, and the guard turned it into a FAIL. And the rate
+> divided by the frame gap without a floor, so two reads landing inside one
+> painted frame (9ms was measured) turned a legitimate 0.20 step into a 0.38
+> "snap".
 
 ### The branch road — the same rig, outside a lesson
 
@@ -4672,18 +4789,30 @@ browser at it; the first transform can take longer than a navigation timeout.
   - **`npm run check:alive`** asks whether the picture moves when NOBODY is
     tapping — two screenshots from one page load, differenced, figure excluded.
     See §12; one page load is the whole trick.
-  - **`npm run check:bubble`** asks whether the thought bubble follows him, and
-    whether it ever changes its sentence where the reader can see it (group AB).
-    Three rules, each one a thing a reader named: the words may never change while
-    the box is readable, the box may not jump while the figure is standing still,
-    and while he WALKS the box may not stand still. **It runs on ONE lane and that
-    is not timidity** — every other harness here STEPS a page, this one SAMPLES a
-    running animation, and a second tab in the same headless Chrome is backgrounded,
-    where `requestAnimationFrame` is throttled to nothing while `setTimeout` keeps
-    firing. That is exactly the divergence it exists to detect, so on two lanes it
-    reports one — moving from lesson to lesson between runs, which is the tell.
-    A pair of samples further apart than 250ms is BLIND rather than clean, and the
-    blind ones are counted and printed.
+  - **`npm run check:bubble`** asks whether the thought bubble follows him,
+    whether it ever changes its sentence where the reader can see it, and whether
+    it leaves smoothly (group AB). **Five rules, each one a thing a reader named:**
+    the words may never change while the box is readable; the box may not jump
+    while the figure is standing still; while he WALKS the box may not stand
+    still; it may not go dark and come back inside 450ms (BLINK); and it may not
+    gain or lose more than 0.34 of its opacity in a frame (SNAP). The other two
+    complaints — how MANY bubbles and how HIGH they sit — are properties of the
+    table and are held offline by `check:thoughts`.
+    **It RECORDS rather than polls**, on a `requestAnimationFrame` loop inside the
+    page. Polling every 90ms could not see the defect it was built for, which
+    lasted one or two frames; and reading the opacity, the words and the figure in
+    ONE frame means the two clocks this harness exists to catch apart cannot come
+    apart inside a single reading. A throttled tab now records FEWER frames rather
+    than inconsistent ones — a missed defect rather than an invented one, which is
+    the right way round, and why LANES=1 is a default rather than a law.
+    **It answers questions now**, through `answerctl`'s controls plus a live scene
+    target, a choice card and a deck row. Before that it tapped the middle of the
+    stage and returned true whatever happened, so it parked on the first graded
+    beat and every later beat was a copy of the one it stuck on. One lesson went
+    from 2 readable boxes to 13. Its worklist is derived by
+    `node scripts/pick-bubble-work.mjs` and **must be re-derived when the thought
+    table changes** — a worklist that has stopped covering the rule it was chosen
+    for reports a clean sweep with nothing in it.
   - **`npm run sheet:beats <id>`** is the axis `sheet:lessons` lacks: ONE lesson at
     EVERY beat rather than many lessons at one. A complaint about a sequence
     cannot be answered by a single frame. **It must settle on the CAMERA, not on a
