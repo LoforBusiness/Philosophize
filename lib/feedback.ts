@@ -24,7 +24,7 @@ import { useUserDataStore } from '@/stores/userDataStore';
 // reader CAUSED get a haptic.
 // ─────────────────────────────────────────────────────────────────────────────
 
-type Buzz = 'light' | 'medium' | 'success' | null;
+type Buzz = 'light' | 'medium' | 'heavy' | 'success' | null;
 
 const HAPTIC: Record<Cue, Buzz> = {
   // ── not caused by the reader, or far too frequent to be felt ───────────────
@@ -49,6 +49,12 @@ const HAPTIC: Record<Cue, Buzz> = {
   // still fading, which two successes in a row would smear into one long rumble.
   badge: 'medium',
   rankup: 'success',
+  // THE DAY IS STRUCK, and this is the one cue in the app whose whole point is
+  // weight. `success` is the notification pattern -- two light taps, the buzz a
+  // phone makes to confirm a form was submitted -- and it is wrong for a die
+  // landing. A seal is a single heavy contact, so it takes the heaviest IMPACT
+  // there is and lands on the frame the die touches the paper.
+  seal: 'heavy',
 };
 
 /** Read once per call rather than subscribed: cues fire from animation frames. */
@@ -70,6 +76,7 @@ export function cue(name: Cue, step = 0) {
   try {
     if (buzz === 'light') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     else if (buzz === 'medium') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    else if (buzz === 'heavy') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     else void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   } catch {}
 }

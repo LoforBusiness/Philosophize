@@ -43,7 +43,9 @@ import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
   XpPill, TapNudge,
   COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, GROUND, INK,
-  type BaseBeat, REACT,} from './cinematicKit';
+  type BaseBeat, REACT, Thought,} from './cinematicKit';
+import { quipFor, visitorSays } from './quips';
+import { THOUGHTS } from '@/data/lessonThoughts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The shared cinematic player shell. It owns everything that is identical across
@@ -349,6 +351,34 @@ export default function CinematicPlayer({
   const gazeX = useSharedValue(STAGE_W / 2);
   const gazeY = useSharedValue(STAGE_H / 2);
   const gazeOn = useSharedValue(0);
+
+  // ── WHAT HE IS MAKING OF IT (the thought bubble) ──────────────────────────
+  //
+  // A reader said the mascot was *"usually just there, not really doing
+  // anything"* and asked for bubbles over his head — him working the lesson out,
+  // and a line back when they answer. **THE PLAYER DRAWS IT, NOT THE SCENE**, for
+  // the reason `Visitor` and `REACT` are both here: 186 scenes is 186 edits to
+  // files whose every byte is inside `muststamp`, and it is the kind of list that
+  // gets half-finished, leaving a corpus where he thinks in some lessons and not
+  // others for no reason a reader can see.
+  //
+  // `thoughtIn` is a TIMING rather than a slice of `bt`. Anything driven by `bt`
+  // is discontinuous at a beat change because `bt` is (group L), and a bubble that
+  // is mid-fade when the reader taps would jump to a new opacity in one frame.
+  const thoughtIn = useSharedValue(0);
+  // WHERE IT MAY SIT ON THIS BEAT — `[dx, tailY]` from `make:thoughts`, measured
+  // against the art this beat actually draws, or NULL when there was nowhere that
+  // did not cover a word. A beat with no spot shows no bubble: the reader asked
+  // for one that does not cover anything, and "nowhere to put it" is an answer.
+  const spot = THOUGHTS[lesson.id]?.at[i] ?? null;
+  // AND THE SECOND FIGURE SAYS ONE THING, AS HE ARRIVES. Two stickmen facing each
+  // other in silence is not a conversation, which is what the reader asked to see
+  // — and his line is safe to pool because a `poll` or a `split` fixes his
+  // meaning: he holds the other position, whatever the lesson is about (AA8).
+  const visSpot = THOUGHTS[lesson.id]?.vis;
+  const visHere = visSpot && visSpot[0] === i ? visSpot : null;
+
+  const [bubble, setBubble] = useState<{ text: string; kind: 'think' | 'say' } | null>(null);
   // The foot-plant times for the walk into the current beat, how many have already
   // sounded, and when the walk comes to rest (−1 if it ends mid-stride). Numbers
   // only — a JS closure cannot cross into a worklet (§17).
@@ -806,6 +836,44 @@ export default function CinematicPlayer({
     gazeY.value = withTiming(t[1], { duration: 560, easing: Easing.out(Easing.cubic) });
   }, [i, lesson.id, gazeX, gazeY, gazeOn]);
 
+  // ── AND SO DOES WHAT HE IS THINKING ───────────────────────────────────────
+  //
+  // A bubble arrives a beat late — 620ms in — because a thought that lands WITH
+  // the narration is a caption, and a thought that lands after it is somebody
+  // working it out. That delay is the whole difference between the mascot
+  // presenting the lesson and the mascot learning it beside the reader.
+  //
+  // NOT ON A GRADED BEAT BEFORE THE ANSWER (group O). The reveal owns that
+  // moment: a thought over his head while the reader is still choosing is a hint
+  // at best and a spoiler at worst, and O1's list of what a graded beat may show
+  // before a pick does not include the mascot's opinion. `make:thoughts` refuses
+  // to place one there, and this refuses to draw one.
+  useEffect(() => {
+    const row = THOUGHTS[lesson.id];
+    const text = row && row.at[i] && !gates(beat) ? row.say[i] ?? null : null;
+    // THE DRIVE IS SHARED WITH THE SECOND FIGURE, so it has to rise on a beat
+    // where only HE speaks. Keyed on the lead's thought alone, the visitor walked
+    // in and said nothing in every lesson whose entrance beat the mascot had no
+    // thought on — which is most of them.
+    const alsoVisitor = !!row?.vis && row.vis[0] === i;
+    if (!text && !alsoVisitor) {
+      thoughtIn.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.quad) });
+      return undefined;
+    }
+    // 620ms IN — except on the beat the second figure walks in, where his line
+    // is placed at the mark he is heading FOR. At 620ms he is still crossing the
+    // stage and the bubble hangs over the spot he has not reached yet, which
+    // reads as a caption waiting for him. His walk takes most of the beat
+    // (`rig.moveTr` at the house base), so his line waits for it.
+    const delay = alsoVisitor ? Math.max(620, (beat.dur ?? 4) * 1000 * 0.78) : 620;
+    const t = setTimeout(() => {
+      if (text) setBubble({ text, kind: 'think' });
+      thoughtIn.value = withTiming(1, { duration: 520, easing: Easing.out(Easing.cubic) });
+    }, delay);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i, lesson.id]);
+
   useEffect(() => {
     const d = beat.interact?.drag;
     if (d) dragPos.value = d.start;
@@ -887,6 +955,13 @@ export default function CinematicPlayer({
       withTiming(isCorrect ? 1 : -1, { duration: 220, easing: Easing.out(Easing.quad) }),
       withDelay(260, withTiming(0, { duration: 420, easing: Easing.inOut(Easing.quad) })),
     );
+    // AND HE SAYS SOMETHING. The body and the line are one event on purpose — a
+    // nod with a caption arriving separately reads as two things happening, and
+    // the reader asked for a mascot who answers back rather than one who reacts
+    // and is then subtitled. It replaces whatever he was thinking: he has stopped
+    // working the lesson out and is talking to them.
+    setBubble({ text: quipFor(lesson.id, i, isCorrect), kind: 'say' });
+    thoughtIn.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
   }, [picked, sounded]);
 
   const onStage = useCallback((e: LayoutChangeEvent) => {
@@ -980,12 +1055,12 @@ export default function CinematicPlayer({
                       style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
                     >
                       <TargetCountProvider onCount={setTargetCount} onBox={onBox} host={camHost}>
-                        <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}</WardrobeProvider>
+                        <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubble && spot ? <Thought text={bubble.text} kind={bubble.kind} x={spot[0]} anchorY={spot[1]} discs={spot[2]} headX={spot[3]} drive={thoughtIn} /> : null}{visHere ? <Thought text={visitorSays(lesson.id)} kind="think" x={visHere[1]} anchorY={visHere[2]} discs={visHere[3]} headX={visHere[1]} drive={thoughtIn} /> : null}</WardrobeProvider>
                       </TargetCountProvider>
                     </Animated.View>
                   ) : (
                     <TargetCountProvider onCount={setTargetCount}>
-                      <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}</WardrobeProvider>
+                      <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubble && spot ? <Thought text={bubble.text} kind={bubble.kind} x={spot[0]} anchorY={spot[1]} discs={spot[2]} headX={spot[3]} drive={thoughtIn} /> : null}{visHere ? <Thought text={visitorSays(lesson.id)} kind="think" x={visHere[1]} anchorY={visHere[2]} discs={visHere[3]} headX={visHere[1]} drive={thoughtIn} /> : null}</WardrobeProvider>
                     </TargetCountProvider>
                   )}
                 </View>

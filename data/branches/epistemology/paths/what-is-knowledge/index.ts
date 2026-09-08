@@ -37,6 +37,8 @@ import thePaintedMule from './lessons/the-painted-mule';
 import areYouTheExpertOnYou from './lessons/are-you-the-expert-on-you';
 
 import theShipownersBelief from './lessons/the-shipowners-belief';
+import howNearlyYouWereWrong from './lessons/how-nearly-you-were-wrong';
+import whatACommitteeKnows from './lessons/what-a-committee-knows';
 // 5 units — split from the original single "What Is Knowledge?" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
 const units: Path[] = [
@@ -76,8 +78,8 @@ const units: Path[] = [
     slug: "the-wise-knower",
     name: "The Wise Knower",
     description: "The humility, ethics, and hard-won wisdom of knowing well among other people.",
-    lessons: [peerDisagreement, epistemicInjustice, motivatedReasoning, knowledgeVersusUnderstanding, becomingAWiseKnower, theMapIsNotTheTerritory, stakesAndKnowing, howSureAreYouReally, thePaintedMule, areYouTheExpertOnYou, theShipownersBelief],
+    lessons: [peerDisagreement, epistemicInjustice, motivatedReasoning, knowledgeVersusUnderstanding, becomingAWiseKnower, theMapIsNotTheTerritory, stakesAndKnowing, howSureAreYouReally, thePaintedMule, areYouTheExpertOnYou, theShipownersBelief, howNearlyYouWereWrong, whatACommitteeKnows],
   },
 ];
 
-export default units;
+export default units;

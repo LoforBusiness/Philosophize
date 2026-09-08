@@ -55,6 +55,14 @@ const SCREENS = [
   { key: 'panel', q: 's=panel', want: ['DAYS RUNNING', 'NEXT', 'REST DAY HELD'] },
   { key: 'calendar', q: 's=cal', want: ['STUDIED', 'RESTED', 'MISSED'], rail: true },
   { key: 'celebration', q: 's=celebrate&run=7', want: ['STREAK EXTENDED', 'DAYS'] },
+  // THE CEREMONY, which is what a first lesson of the day actually raises now.
+  // Three readings, because the three differ in what they DRAW and not merely in
+  // a number: an ordinary day, a landmark (collar, twice the leaf, a second foil
+  // sweep), and the one where another lesson is genuinely available — the only
+  // state whose tail line is allowed to ask for one.
+  { key: 'ceremony', q: 's=ceremony&run=12', want: ['THE RUN CONTINUES', 'IN', 'INK', 'DAYS', 'Continue'] },
+  { key: 'ceremony-landmark', q: 's=ceremony&run=7', want: ['THE RUN CONTINUES', 'A LANDMARK'] },
+  { key: 'ceremony-more', q: 's=ceremony&run=12&more=1', want: ['ready when you are'] },
   // A streak that has gone out: everything that was gilt must be slate.
   { key: 'lapsed', q: 's=tab&lapsed=1&run=0', want: ['STREAK LAPSED'] },
 ];

@@ -572,6 +572,45 @@ function impact() {
   ), { time: 0.34, wet: 0.45, damp: 0.42 }).slice(0, n), 0.66);
 }
 
+/**
+ * A SEAL COMING DOWN ON PAPER — the day being struck into the ledger.
+ *
+ * The streak moment was the only reward in the app that made no sound at all.
+ * The chime, the badge bell and the rank fanfare all had one; the animation that
+ * decides whether somebody comes back tomorrow was silent, and silent on the
+ * exact frame it most needed weight.
+ *
+ * IT IS A PRESS, NOT A KNOCK, and that is the whole difference from `impact`.
+ * That one is a struck panel — something rapped. This is a die pushed INTO a
+ * surface, so it is lower, it has almost no edge, and it stops almost at once:
+ * the paper and the desk under it kill the tail. A long ring here would read as
+ * a bell, which `badge` already owns, and two bells are one bell heard twice.
+ *
+ * Three layers and no more: the press, the die at D3 in struck metal damped hard
+ * (0.92 — higher modes die first, which is what makes it read as damped rather
+ * than merely short), and one brief octave above so there is brass in it instead
+ * of a thud with a tone underneath.
+ *
+ * PEAK 0.70 IS THE FREQUENCY RULE, not a taste. `validate-sound` holds that the
+ * thing which fires often is quieter than the thing which fires rarely: this
+ * lands once a day, above `impact`'s many-per-lesson 0.66 and below `badge`'s
+ * 0.72.
+ */
+function seal() {
+  reseed(4489);
+  const n = secs(0.90);
+  const cn = secs(0.026);
+  const c = lowpass(tilted(cn, -1.05), 0.20);
+  const ce = env(cn, 0.0006, 0.0075);
+  const die = modal(n, 146.83, MATERIAL.metal, { decay: 0.26, damp: 0.92, g: 0.9, tilt: 1.05 });
+  const edge = at(0.008, bell(secs(0.42), 293.66, 0.14, 0.26));
+  return finish(reflect(mix(
+    c.map((x, i) => x * ce[i] * 0.6),
+    die,
+    edge,
+  ), { time: 0.30, wet: 0.36, damp: 0.5 }).slice(0, n), 0.70);
+}
+
 // HI for anything with a transient in it — a heel, a fingertip, a page edge, a
 // counter tick. LO for the struck tones, whose highest partial is a third of the
 // way to that ceiling and which gain nothing from the extra bytes.
@@ -594,6 +633,10 @@ const SET = {
   'right-3': atRate(LO, () => right(880.00)),
   badge: atRate(LO, badge),
   rankup: atRate(LO, rankup),
+  // LO like the other struck tones: the die's highest mode is 146.83 × 6.4 ≈
+  // 940 Hz and the press is low-passed at 0.20, so there is nothing above
+  // 11 kHz for the extra bytes to carry.
+  seal: atRate(LO, seal),
 };
 
 fs.mkdirSync(OUT, { recursive: true });

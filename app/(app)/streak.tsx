@@ -166,8 +166,14 @@ export default function StreakScreen() {
             bounce. Proven rather than assumed: with the phone's animator scale
             set to 0, so the stretch cannot play, Profile's identical symptom went
             from 67% janky to 9% and `Slow bitmap uploads` from 101 to 0.
-            `overScrollMode` is the switch for it, and the app loses nothing it
-            was using -- the ends of this list were never a gesture surface.
+            `overScrollMode="never"` turns the stretch off and was tried here.
+            It is NOT kept, for the reason the reader gave about Profile: "I
+            honestly want that scroll up feel the same as the other tabs ... I
+            still want that on the profile tab, but I wanna make sure it isn't
+            laggy." Deleting a gesture every other tab has is not a fix. And on
+            THIS screen it would not even be one: taking the stretch away moves
+            the overscroll case from 98.91% janky to the 71% that ordinary
+            scrolling already costs, which is the fault underneath it.
 
             ORDINARY SCROLLING WAS 71% JANKY, and that half is NOT the stretch:
             the same animator-scale test moved it 71.30% -> 71.91%, which is to
@@ -197,7 +203,6 @@ export default function StreakScreen() {
           showsVerticalScrollIndicator={false}
           onScroll={onScroll}
           scrollEventThrottle={16}
-          overScrollMode="never"
           removeClippedSubviews={Platform.OS === 'android'}
         >
           {/* ── THE HERO ────────────────────────────────────────────────────

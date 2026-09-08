@@ -66,6 +66,7 @@ const SOURCES = {
   tick3: require('../../assets/sound/tick-3.wav'),
   badge: require('../../assets/sound/badge.wav'),
   rankup: require('../../assets/sound/rankup.wav'),
+  seal: require('../../assets/sound/seal.wav'),
 } as const;
 
 /** The variant ladders. Indexed by the `step` argument; the last entry repeats. */
@@ -96,17 +97,21 @@ const THROTTLE: Record<Cue, number> = {
   // runaway, not to thin the run. Thinning it would make the count stutter.
   tick: 25,
   right: 200, reward: 400, badge: 200, rankup: 800,
+  // Once a day, and it takes the whole screen while it plays. The throttle
+  // is only a runaway guard here — nothing can legitimately strike the seal
+  // twice inside a second.
+  seal: 800,
 };
 const lastAt: Partial<Record<Cue, number>> = {};
 
 /**
  * Per-clip trim. The MIX is baked into the files — `finish(buf, peak)` in
  * scripts/make-sounds.mjs is where a cue's loudness relative to the others is
- * decided — so this only exists to lift the three that are meant to dominate the
+ * decided — so this only exists to lift the four that are meant to dominate the
  * moment they play in. Everything else shares one level on purpose: a per-cue
  * volume table is how a sound set drifts out of balance one nudge at a time.
  */
-const LEVEL: Partial<Record<Key, number>> = { reward: 0.9, badge: 0.9, rankup: 0.95 };
+const LEVEL: Partial<Record<Key, number>> = { reward: 0.9, badge: 0.9, seal: 0.9, rankup: 0.95 };
 
 async function prepare() {
   if (ready) return;

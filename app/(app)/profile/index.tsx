@@ -436,9 +436,25 @@ export default function ProfileScreen() {
         //   overscroll at the bottom   67.1% -> 9.1% janky, 57ms -> 12ms
         //   Slow bitmap uploads          101 -> 0
         //
-        // One prop turns it off, and it costs the screen nothing: the stretch was
-        // never carrying meaning here, and the reader is asking for it to stop.
-        overScrollMode="never"
+        // AND TURNING THE STRETCH OFF IS THE WRONG FIX, WHICH THE READER SAID
+        // BEFORE IT SHIPPED: "I honestly want that scroll up feel the same as the
+        // other tabs ... I still want that on the profile tab, but I wanna make
+        // sure it isn't laggy." `overScrollMode="never"` was tried here and is
+        // deliberately NOT kept — it buys the frame rate by deleting a gesture
+        // every other tab has, which makes Profile the odd one out in the other
+        // direction.
+        //
+        // The stretch is not expensive in itself. Measured against Home, which
+        // stretches perfectly smoothly, Home draws FOUR TIMES the geometry
+        // (15,626 CircularRRectOps against 3,828) and allocates nothing at all,
+        // while Profile's stretch allocates 5,623 Vulkan images and frees 4,653
+        // in five seconds. What costs is that the stretch needs ONE MORE
+        // full-screen offscreen buffer, and this screen has no room for it: it
+        // runs at 7 render targets and 0 bytes purgeable where Home runs at 2 and
+        // 35 MB purgeable. Over budget, Skia evicts textures it still needs and
+        // re-uploads them the next frame, forever.
+        //
+        // So the fix is headroom, not amputation.
       >
         {/* The header wears the user's chosen artwork. Every colour in it comes
             from that art's tone palette, so a light engraving gets ink text and a

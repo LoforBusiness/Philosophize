@@ -37,6 +37,8 @@ import theEmptyChairs from './lessons/the-empty-chairs';
 import whoIsWatching from './lessons/who-is-watching';
 
 import oneVoteManyWallets from './lessons/one-vote-many-wallets';
+import whoSpeaksForYou from './lessons/who-speaks-for-you';
+import whyTheLoserObeys from './lessons/why-the-loser-obeys';
 // 5 units — split from the original single "What Is Political Philosophy?" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
 const units: Path[] = [
@@ -76,8 +78,8 @@ const units: Path[] = [
     slug: "identity-and-the-hard-cases",
     name: "Identity & the Hard Cases",
     description: "The communal self, recognition, and feminism, then politics' toughest real-world tests — war, prisons, borders — down to how we should even theorize.",
-    lessons: [communitarianismVsLiberalism, recognitionAndMulticulturalism, feministPoliticalPhilosophy, deliberativeDemocracy, justWarTheory, punishmentAndPrisons, bordersAndImmigration, idealVsNonIdealTheory, whyVoteAtAll, mustAFreeSocietyTolerateEverything, whoShouldDecideThis, theEmptyChairs, whoIsWatching, oneVoteManyWallets],
+    lessons: [communitarianismVsLiberalism, recognitionAndMulticulturalism, feministPoliticalPhilosophy, deliberativeDemocracy, justWarTheory, punishmentAndPrisons, bordersAndImmigration, idealVsNonIdealTheory, whyVoteAtAll, mustAFreeSocietyTolerateEverything, whoShouldDecideThis, theEmptyChairs, whoIsWatching, oneVoteManyWallets, whoSpeaksForYou, whyTheLoserObeys],
   },
 ];
 
-export default units;
+export default units;

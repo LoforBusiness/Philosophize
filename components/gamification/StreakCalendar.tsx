@@ -240,15 +240,45 @@ export default function StreakCalendar({ activeDays, restDays, today, since, siz
   // outlive the visit.
   const bloom = useSharedValue(0);
   const pulse = useSharedValue(0);
+
+  // ── AND THE ENTRANCE IS PACKED AWAY WHEN IT IS OVER ────────────────────────
+  //
+  // `bloom` is finished 440ms after arrival and never moves again, but every one
+  // of the month's cells stayed an `Animated.View` carrying a live mapper for the
+  // whole visit — forty-two animated render nodes to play a fade that ended
+  // before the reader's thumb had reached the glass.
+  //
+  // That is the same shape as the TodayRing note below, one level out, and it is
+  // what the phone said was costing the scroll. Traced on an S24 Ultra while
+  // scrolling this screen, the render thread ran `prepareTree` at 23.6ms a frame
+  // and asked Vulkan for **5,851 new images in five seconds — about forty-four
+  // every frame**, freeing 4,223 in the same window. Forty-four is this grid:
+  // forty-two day cells and the furniture around them, each re-acquiring backing
+  // store every frame to animate nothing. Home, for contrast, draws FOUR TIMES
+  // the geometry (15,626 rounded-rect ops against 3,828) and allocates zero.
+  //
+  // So once the bloom is spent the cells are rendered as plain Views. The flip is
+  // a remount of forty-two nodes, which is why it is timed to land in the quiet
+  // after the entrance rather than under a finger, and it is invisible: both
+  // versions draw the identical thing at opacity 1 and scale 1.
+  const [settled, setSettled] = useState(false);
+
   useFocusEffect(
     useCallback(() => {
+      setSettled(false);
       bloom.value = 0;
       bloom.value = withTiming(1, { duration: BLOOM_MS, easing: Easing.linear });
       pulse.value = 0;
       pulse.value = withRepeat(
         withTiming(1, { duration: PULSE_MS, easing: Easing.linear }), -1, false,
       );
+      // A plain timer rather than a `withTiming` callback: `runOnJS` from the
+      // animation's completion would fire on the UI thread's schedule, and this
+      // is a React state flip that only has to happen SOME time after the fade,
+      // never on a particular frame. The 60 is slack, not tuning.
+      const t = setTimeout(() => setSettled(true), BLOOM_MS + 60);
       return () => {
+        clearTimeout(t);
         cancelAnimation(bloom);
         cancelAnimation(pulse);
       };
@@ -360,7 +390,14 @@ export default function StreakCalendar({ activeDays, restDays, today, since, siz
                       nothing, so it does not need a component to draw it. Eleven
                       of the forty-two on an average month were mounting one and
                       registering its hooks to return null. */}
-                  {c.key === null ? null : (
+                  {c.key === null ? null : settled ? (
+                    <StaticCell
+                      cell={c}
+                      size={size}
+                      milestone={milestone.has(c.key)}
+                      pulse={pulse}
+                    />
+                  ) : (
                     <Cell
                       cell={c}
                       size={size}
@@ -447,6 +484,31 @@ function TodayRing({ size, pulse }: { size: number; pulse: SharedValue<number> }
   );
 }
 
+/**
+ * THE SAME DAY, WITHOUT THE ENTRANCE.
+ *
+ * Rendered once `settled` is true — see the note on it above. It draws exactly
+ * what `Cell` draws, minus the animated wrapper and its mapper, which is the
+ * whole point: after 440ms those two carry no information and the phone was
+ * paying for forty-two of them on every frame of every scroll.
+ *
+ * It is a SEPARATE COMPONENT rather than a branch inside `Cell`, because the
+ * difference is a hook. Making `useAnimatedStyle` conditional is §17's first
+ * rule broken; swapping the component is free and cannot change a hook count.
+ */
+function StaticCell({
+  cell, size, milestone, pulse,
+}: {
+  cell: CalendarDay; size: number; milestone: boolean; pulse: SharedValue<number>;
+}) {
+  if (cell.key === null) return null;
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <CellFace cell={cell} size={size} milestone={milestone} pulse={pulse} />
+    </View>
+  );
+}
+
 function Cell({
   cell, size, index, milestone, bloom, pulse,
 }: {
@@ -471,6 +533,26 @@ function Cell({
   });
   if (cell.key === null) return null;
 
+  return (
+    <Animated.View
+      style={[
+        { width: size, height: size, alignItems: 'center', justifyContent: 'center' },
+        inStyle,
+      ]}
+    >
+      <CellFace cell={cell} size={size} milestone={milestone} pulse={pulse} />
+    </Animated.View>
+  );
+}
+
+/**
+ * WHAT A DAY LOOKS LIKE. No hooks, on purpose: it is rendered by `Cell` while the
+ * entrance is playing and by `StaticCell` afterwards, and a hook here would make
+ * the swap between the two a change of hook count.
+ */
+function CellFace({ cell, size, milestone, pulse }: {
+  cell: CalendarDay; size: number; milestone: boolean; pulse: SharedValue<number>;
+}) {
   const lit = cell.state === 'done';
   const rested = cell.state === 'rest';
   const isToday = cell.state === 'today';
@@ -483,12 +565,7 @@ function Cell({
   // reader comes to feel good about days they already did.
 
   return (
-    <Animated.View
-      style={[
-        { width: size, height: size, alignItems: 'center', justifyContent: 'center' },
-        inStyle,
-      ]}
-    >
+    <>
       {/* THE COLLAR — a milestone landed on this day. Struck OUTSIDE the token,
           for the reason §7 gives about the rank pin's own collar: the part of a
           flourish that sits behind the thing it decorates is not subtle, it is
@@ -559,7 +636,7 @@ function Cell({
           </Text>
         </View>
       )}
-    </Animated.View>
+    </>
   );
 }
 

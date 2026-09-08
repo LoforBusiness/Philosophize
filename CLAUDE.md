@@ -164,7 +164,7 @@ Philosophize/
 │   ├── types.ts                 # ALL type definitions — the load-bearing file
 │   ├── index.ts                 # ALL_BRANCHES + getLessonById, lessonAccessibility,
 │   │                            #   branchCountsFromUnits, getLessonUnitInfo
-│   ├── branches/                # 6 branches · 28 units · 222 lessons (§5)
+│   ├── branches/                # 6 branches · 28 units · 234 lessons (§5)
 │   ├── philosophers.ts          # BASE + composes ALL_PHILOSOPHERS (322)
 │   ├── extra-philosophers/      # ancient/eastern/medieval/modern/contemporary/
 │   │                            #   expansion, expansion2a/2b/3/4 (+ *-facts)
@@ -270,8 +270,8 @@ When `CARD_BUDGET` reaches 0 the takeover is done, and `LessonRunner`, `cards/`,
 
 ### Shape today
 
-**Every branch holds exactly 37 lessons, of which exactly 28 are cinematic** —
-76% of the way through the takeover. Both numbers are deliberate invariants rather
+**Every branch holds exactly 39 lessons, of which exactly 33 are cinematic** —
+85% of the way through the takeover. Both numbers are deliberate invariants rather
 than where the counts happened to land: the totals were 27–30 and the cinematic
 share was 11–14, and both showed on the Learn cards. `check:cinematic` enforces
 that all six branches match on both.
@@ -287,7 +287,8 @@ They constrain each other, and there are exactly two moves that respect both:
 - **To raise the LESSON count, add the same number to every branch and make each
   new one cinematic.** Two per branch took 30/14 to 32/16 and held both invariants
   in one pass; three per branch, in three rounds of six, took 34/19 to 37/22 the
-  same way. Adding one lesson to one branch breaks both at once.
+  same way; two per branch again took 37/31 to 39/33. Adding one lesson to one
+  branch breaks both at once.
 
 > **AND EVERY NEW LESSON NOW HAS TO BE UNLIKE ITS NEIGHBOURS, MEASURABLY.** F43
 > has asked for that since the card era and nothing enforced it, so the corpus
@@ -310,13 +311,13 @@ They constrain each other, and there are exactly two moves that respect both:
 
 | Branch | Units | Lessons | of which cinematic | card decks left |
 |---|---|---|---|---|
-| Metaphysics | 5 | 37 | 31 | 6 |
-| Epistemology | 5 | 37 | 31 | 6 |
-| Logic | 5 | 37 | 31 | 6 |
-| Ethics | 5 | 37 | 31 | 6 |
-| Aesthetics | 3 | 37 | 31 | 6 |
-| Political Philosophy | 5 | 37 | 31 | 6 |
-| **Total** | **28** | **222** | **186 (84%)** | **36** |
+| Metaphysics | 5 | 39 | 33 | 6 |
+| Epistemology | 5 | 39 | 33 | 6 |
+| Logic | 5 | 39 | 33 | 6 |
+| Ethics | 5 | 39 | 33 | 6 |
+| Aesthetics | 3 | 39 | 33 | 6 |
+| Political Philosophy | 5 | 39 | 33 | 6 |
+| **Total** | **28** | **234** | **198 (85%)** | **36** |
 
 > Numbers go stale; the check does not. `npm run check:cinematic` prints the live
 > figures and the next lesson to convert in each branch every time it runs.
@@ -360,7 +361,7 @@ Every lesson MUST:
 - Have exactly one correct answer in every `MultipleChoiceInteraction`
 
 > `tsc` checks types only, so these are enforced by `npm run check:cards`
-> (`scripts/validate-lessons.mjs`) — 222/222 clean. Cinematic lessons have their own
+> (`scripts/validate-lessons.mjs`) — 234/234 clean. Cinematic lessons have their own
 > shape check, `npm run check:cinematic` (§17). `npm run check` runs tsc plus ten
 > validators — see §11.
 
@@ -449,8 +450,8 @@ Index on (user_id, lesson_id).
 **Level formula:** Level N requires `Math.floor(50 * N * Math.sqrt(N))` total XP (`getXPForLevel`).
 
 > **21,400 IS A FIRST PASS, NOT A CEILING — and this file said otherwise for a
-> long time.** Counted out of the tree: 222 lessons at a perfect 60 each is
-> 13,320, all 28 units mastered 2,800, all 132 saveable quotes 396, all 322
+> long time.** Counted out of the tree: 234 lessons at a perfect 60 each is
+> 14,040, all 28 units mastered 2,800, all 132 saveable quotes 396, all 322
 > thinkers met 644, every one of their quizzes aced 6,440 — **21,400 XP for doing
 > everything in the app, perfectly, once**. That number was then used to argue a
 > 52,000-XP ladder was unreachable and to cut it to 16,000.
@@ -893,7 +894,7 @@ A unit's `index.ts` exports an array of `Path` objects (the units); each needs a
 stable `id` — `lessonsByUnit` is keyed on it, so **renaming an id silently resets
 that unit's progress for every existing user.**
 
-**Keep every branch at 37, and at 31 cinematic (§5).** The counts were 27–30 and it
+**Keep every branch at 39, and at 33 cinematic (§5).** The counts were 27–30 and it
 showed on the Learn cards, so they were levelled deliberately; adding one lesson to
 one branch puts them back out. Add six, one per branch — and give each of the six a
 scene, or the cinematic invariant goes out instead of the lesson one.
@@ -917,7 +918,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **fifty-one** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **fifty-two** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -928,7 +929,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-turn` · `check-moves` · `check-life`. It exits 0 today. `check-clear` and `check-plain` — which this file
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-turn` · `check-moves` · `check-life` · `check-thoughts`. It exits 0 today. `check-clear` and `check-plain` — which this file
 recorded as the two permanent failures, "measuring lesson prose that is being
 rewritten in another session's working tree" — are now green and sitting EXACTLY
 on their budgets, 72 and 18. That is the dangerous state to inherit, not a
@@ -951,7 +952,7 @@ figures and 3 hand-built PEOPLE — it was 6 until four of the seven it reported
 turned out to be a bird, a hen, a zebra and a cow, which the rule was never about
 (Z6) — and `check-moves` 6 head-clearance defects plus
 5 acts that barely move across their own `u`, all of them cold. A budget
-line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 222 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
+line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 234 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
 
 > **`check-moves` was the last one on that list to actually run, and for a long
 > time it did not.** It existed, this section quoted its budget, and
@@ -1002,11 +1003,11 @@ they belong to, so the rule book has them and this file did not:
 
 **Phase 5 — shipped and iterating in public.** Live on Google Play, versionCode 21, as Ashmere.
 
-- **Content:** 6 branches · **28 units** · **222 lessons**. **322 philosophers**
+- **Content:** 6 branches · **28 units** · **234 lessons**. **322 philosophers**
   with bios, eras and **1,780 quotes** between them — and all 322 have exactly
   three "Did you know?" facts, with nothing missing.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
-  gating; **186 cinematic lessons** (animated stickman scenes, §17), answered six
+  gating; **198 cinematic lessons** (animated stickman scenes, §17), answered six
   ways — scene targets, two cards, and the analogue family of `drag` · `sort` ·
   `poll` · `split` · `plot` (§17, group R). **The analogue family is now the
   majority**: 182 graded beats against 150 on the stage and 36 left in the deck,
@@ -1056,7 +1057,7 @@ they belong to, so the rule book has them and this file did not:
   mastheads, the launch screen and Quick Start (§19).
 
 **Known gaps / tech debt:**
-- **Card decks are now a minority** — 36 of 222. That is now the number
+- **Card decks are now a minority** — 36 of 234. That is now the number
   that matters; see the takeover rule at the top of §5.
 - **Roughly nine scenes in ten are a PHOTOGRAPH between taps.** Measured in
   pixels by `npm run check:alive`, not by grep: two screenshots from one page
@@ -1655,7 +1656,7 @@ NOT GATES.** `PASS_LINES` already held the five differences; `includedLines()`
 now counts the library, the thinkers, the saveable quotes, the ranks and the
 badges out of the tree, and `check:pass` re-derives every one of them by counting
 again independently. This is not fussiness — the curriculum has gone 60 → 192 →
-222 lessons, and CLAUDE.md was still saying 132 saveable quotes when the real
+234 lessons, and CLAUDE.md was still saying 132 saveable quotes when the real
 figure was **228**. A number typed onto a certificate is a number nobody
 re-derives. The check also reads the tab's source with the JSX braces stripped
 and fails on any digit left in literal text.
@@ -1722,7 +1723,7 @@ in order, the full streak, XP, rank and badge systems, and all 322 thinkers.
 **Why someone pays (the thesis — the aspiration, not the current feature list):**
 1. They actually **retain** what they learn (spaced review), not just tap through it.
 2. The **cinematic, narrated** lessons feel like nothing else in the category.
-3. **Breadth** — 6 branches, 222 lessons, 322 thinkers — is a genuine library.
+3. **Breadth** — 6 branches, 234 lessons, 322 thinkers — is a genuine library.
 4. **Credential & mastery** — ranks + path-mastery give visible proof of progress.
 5. The **daily habit** (streak + review) makes the subscription part of a routine.
 
@@ -1781,7 +1782,7 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**This is the format the app is converging on** — 186 of the 222 lessons are here
+**This is the format the app is converging on** — 198 of the 234 lessons are here
 already, and the card runner is what they are replacing (§5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
@@ -3114,6 +3115,59 @@ it, because with the reaction switched off the same tap moved it 0.2px;
 leant him away on a right one; and **measure BOTH axes**, since a forward dip moves
 the head mostly in X and judging it on `y` alone under-reads it by half.
 
+### And he never said what he was making of it
+
+> *"the stickman … is usually just there, not really doing anything … little
+> thought bubbles go up in his head during the lesson, like the stickman is
+> thinking or discovering something"* — and, on answering, *"makes fun of them"*
+> when wrong, *"something passive aggressive that is somewhat encouraging"* when
+> right.
+
+That is group **AB** of the rule book, and the point of it is that **he is
+learning too** — not presenting the material, but the other student. 1,041
+authored thoughts across 178 lessons, plus a line back on every answer.
+
+**THE PLAYER DRAWS IT, WHICH IS WHY IT COST NO SCENE EDITS.** Same seam as
+`REACT` and `Visitor`: 186 scenes is 186 edits to files whose every byte is inside
+`muststamp`. The words live in `data/lessonThoughts.ts` for the reason the maxim
+does — writing them into 186 scripts marks every must-box stale.
+
+**WHERE IT SITS IS MEASURED, NOT GUESSED.** `npm run make:thoughts` places every
+bubble against the art the beat actually draws. Held to "clear of everything" a
+bubble has nowhere to go in **41 of 186 lessons** — these stages are built to fill
+the frame. Held to D31 — never over a WORD, art negotiable — it fails in 13. Three
+parameters each bought lessons back: one row instead of two, a trail that shortens
+from three discs to one, and minimising the gap to his crown (median **4 units**).
+
+**FOUR DEFECTS, AND THREE ARE THE SAME MISTAKE.**
+
+- **A hash that indexes an array must be clamped.** `quipFor` returned `undefined`
+  for a third of all seeds — `^` evaluates as signed int32 and the finaliser's last
+  xor was never re-clamped. It would have shipped as an empty bubble. Three other
+  files here get it right; `liven-lessons` carried the same latent copy.
+- **A measurement is spent in the space it was taken in.** The first table stored
+  an OFFSET from the figure and the player added it to the live x it derives from
+  the script's `walk` track — which a scene need not pass. Where it was missing the
+  bubble fell back to the stage centre and landed across a plate the generator had
+  carefully avoided.
+- **Round before you validate.** Eleven bubbles grazed a word by four tenths of a
+  unit, because the position was cleared and *then* rounded.
+- **A priority expressed by loop nesting is one nobody can read.** Trail outermost
+  walked a bubble 120 units into the middle of an argument card; mode outermost
+  preferred a clear spot 84 units above his crown to one 4 units above that grazed
+  a diagram. The trade is scored now.
+
+**AND THE SECOND FIGURE SPEAKS.** The 24 lessons where a visitor walks in (AA8)
+had two stickmen facing each other in silence; he now says one line as he arrives,
+timed to his walk. His line is POOLED where the mascot's thoughts could not be,
+and that is structural: a `poll` or a `split` fixes his meaning — he holds the
+other position — whatever the lesson is about.
+
+`npm run check:thoughts` holds all of it offline against the real `.ttf`: every
+line fits two rows, no wrong-answer line is aimed at the reader (§7), no thought
+sits on a beat still being answered (group O), and none of 1,272 placed bubbles
+covers a word.
+
 ### The branch road — the same rig, outside a lesson
 
 `components/branch/` puts the rig on a **branch screen**: a 360-tall strip the
@@ -3624,7 +3678,7 @@ legend for whose arc is whose.
 **The load-bearing part is that no target may come from a ceiling.** The tap
 interaction used to say "4 more lessons finishes Logic", and the reader named
 what is wrong with it: *"since I will be continuing adding lessons that doesnt
-make sense."* It is worse than untidy — the curriculum has gone 60 → 192 → 222
+make sense."* It is worse than untidy — the curriculum has gone 60 → 192 → 234
 lessons and is still growing, so a ceiling-based target **moves away from a
 reader who has done nothing wrong** every time content ships. Effort is supposed
 to be permanent.

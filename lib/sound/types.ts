@@ -15,6 +15,7 @@ export type Cue =
   | 'tick'     // the XP counter, cycling three rising pitches (pass `step`)
   | 'reward'   // the chime at the end of a lesson
   | 'badge'    // a low bell under a shimmer
+  | 'seal'     // a die pressed into paper: the day struck onto the streak
   | 'rankup';  // the only fanfare in the app
 
 export interface SoundProvider {

@@ -186,17 +186,25 @@ head('THE STAMP, AND WHETHER ITS LEGEND FITS');
   // Measured against the real `.ttf` in plain Node, the same reader `check:fits`
   // uses — because a character count is not a width (see lib/ttfwidth.mjs), and
   // because this has to cost milliseconds rather than a Metro and a browser.
-  const src = fs.readFileSync(path.join('components', 'gamification', 'StreakCelebration.tsx'), 'utf8');
+  // MEASURED ON THE CEREMONY, which is the surface that actually ships this
+  // moment. `StreakCelebration.tsx` drew the panel-sized version and is retired
+  // — still on disk only so that a stale editor buffer in another session
+  // cannot resurrect an import to a file that is gone. Delete it, and this
+  // comment, once nothing references it.
+  const src = fs.readFileSync(path.join('components', 'gamification', 'StreakCeremony.tsx'), 'utf8');
   const words = (/const STAMP = \[([^\]]*)\] as const;/.exec(src) ?? [])[1];
   const size = +((/const STAMP_SIZE = ([\d.]+);/.exec(src) ?? [])[1]);
   const tilt = Math.abs(+((/const STAMP_TILT = '(-?[\d.]+)deg';/.exec(src) ?? [])[1]));
-  const ring = +((/stampRing: \{\s*\n\s*position: 'absolute', width: (\d+)/.exec(src) ?? [])[1]);
+  // The ceremony states its ring as a constant because every part of the seal is
+  // derived from one number; the old panel only had it as a style width.
+  const ring = +((/const STAMP_RING = ([\d.]+);/.exec(src)
+    ?? /stampRing: \{\s*\n\s*position: 'absolute', width: (\d+)/.exec(src) ?? [])[1]);
   const stroke = +((/stampRing:[\s\S]*?borderWidth: ([\d.]+)/.exec(src) ?? [])[1]);
   const ls = +((/stampWord:[\s\S]*?letterSpacing: ([\d.]+)/.exec(src) ?? [])[1]);
   const lh = +((/lineHeight: STAMP_SIZE \* ([\d.]+)/.exec(src) ?? [])[1]);
 
   if (!words || !size || !ring) {
-    bad('the stamp declares its legend and its box', 'one of STAMP / STAMP_SIZE / stampRing is gone — this check has stopped tracking it');
+    bad('the stamp declares its legend and its box', 'one of STAMP / STAMP_SIZE / STAMP_RING is gone — this check has stopped tracking it');
   } else {
     const list = words.split(',').map((w) => w.trim().replace(/^'|'$/g, '')).filter(Boolean);
     const FONT = 'node_modules/@expo-google-fonts/special-elite/400Regular/SpecialElite_400Regular.ttf';
@@ -204,7 +212,13 @@ head('THE STAMP, AND WHETHER ITS LEGEND FITS');
       bad('the stamp face is installed', FONT);
     } else {
       const se = loadFont(FONT);
-      const BREATH = 1.8;                       // ink must not touch the ring
+      // Ink must not touch the ring. 1.8 was the breath at the panel's 44 ring,
+      // and it is a PROPORTION of the ring rather than an absolute — the seal is
+      // drawn at two sizes and a fixed gap looks tight at one and loose at the
+      // other. (§17's SETTLE_UNITS lesson, one component over: anything written
+      // as an absolute that MEANS a proportion breaks the day a second value
+      // turns up.)
+      const BREATH = 1.8 * (ring / 44);
       const R = ring / 2 - stroke - BREATH;
       // Two stacked lines straddle the centre, so the worst line sits half a
       // line-height out — where the chord is narrowest.
@@ -215,22 +229,122 @@ head('THE STAMP, AND WHETHER ITS LEGEND FITS');
         const px = se.width(w, size) + ls * Math.max(0, w.length - 1);
         if (!worst || px > worst.px) worst = { w, px };
       }
-      const head = room - worst.px;
-      if (head >= 2) ok(`the stamp's legend fits inside its ring`,
-        `"${list.join(' ')}" at ${size}px — widest "${worst.w}" is ${worst.px.toFixed(1)} in ${room.toFixed(1)} of chord, ${head.toFixed(1)} spare`);
+      // NOT `head` — that is this file's own section-printing function, and
+      // shadowing it here is the shadowed-`over` bug check-readable shipped.
+      const spare = room - worst.px;
+      if (spare >= 2) ok(`the stamp's legend fits inside its ring`,
+        `"${list.join(' ')}" at ${size}px — widest "${worst.w}" is ${worst.px.toFixed(1)} in ${room.toFixed(1)} of chord, ${spare.toFixed(1)} spare`);
       else bad(`the stamp's legend does not fit its ring`,
         `"${worst.w}" is ${worst.px.toFixed(1)} and the chord is only ${room.toFixed(1)} — shorten it or drop STAMP_SIZE`);
 
-      // AND IT MUST NOT REPEAT THE HEADLINE. The heading above the seal says
-      // STREAK KEPT whenever a rest day is spent; a stamp echoing it says the
-      // same thing twice on one screen, which is why "DAY KEPT" was dropped
-      // despite setting larger.
-      const HEADINGS = ['STREAK KEPT', 'STREAK STARTED', 'STREAK EXTENDED'];
+      // ── AND IT MUST NOT TELL THE READER THEY ARE FINISHED ──────────────────
+      //
+      // THIS IS THE RULE THE WHOLE SCREEN WAS REBUILT AROUND, and nothing was
+      // holding it. The legend read DAY DONE for the life of the component,
+      // chosen by measuring four candidates against this very font and taking
+      // the one that fitted — a good method aimed at the wrong question. A
+      // reader named it exactly: it "implies that the user should be done for
+      // the day and doesn't make them want to try doing another lesson."
+      //
+      // The fit rule above cannot see meaning, so it would happily pass DAY DONE
+      // again tomorrow. Every word this screen shows is checked here instead:
+      // the legend, the eyebrow, and the tail line that replaced it.
+      const TERMINAL = [
+        'DONE', 'FINISHED', 'COMPLETE', 'COMPLETED', 'OVER', 'ENDS', 'ENDED',
+        'STOP', 'ENOUGH', 'THAT IS IT', "THAT'S IT", 'ALL SET', 'SEE YOU',
+        'COME BACK TOMORROW', 'REST NOW', 'CALL IT A DAY', 'GOAL MET',
+      ];
       const legend = list.join(' ');
-      const echo = HEADINGS.find((h) => h.split(' ').some((t) => list.includes(t) && t !== 'STREAK'));
-      if (!echo) ok('and it does not echo the headline above it', `"${legend}" against ${HEADINGS.length} headings`);
-      else bad('the stamp repeats the headline directly above it', `"${legend}" vs "${echo}"`);
+      const eyebrows = (/export const EYEBROWS = \[([^\]]*)\]/.exec(src) ?? [])[1] ?? '';
+      // BOTH QUOTINGS. The first draft of this read only `'...'`, so the tail
+      // built as a template literal — the one that names the next landmark, and
+      // the commonest line on the screen — was never checked at all. A checker
+      // that silently reads half the copy is the failure this file keeps
+      // recording. `${...}` is stripped so an interpolation cannot smuggle a
+      // word past the test or invent one that is not there.
+      const tails = [...src.matchAll(/return\s+['`]([^'`]{6,})['`]/g)]
+        .map((m) => m[1].replace(/\$\{[^}]*\}/g, ' '));
+      const said = [legend, ...eyebrows.split(',').map((s) => s.trim().replace(/^'|'$/g, '')), ...tails]
+        .filter(Boolean);
+      const guilty = [];
+      for (const line of said) {
+        const up = line.toUpperCase();
+        // Word-boundaried, so "ENDS" does not fire on "extends" and OVER does
+        // not fire inside a longer word.
+        const hit = TERMINAL.find((t) => new RegExp(`\\b${t}\\b`).test(up));
+        if (hit) guilty.push(`"${line}" (${hit})`);
+      }
+      if (guilty.length === 0) {
+        ok('and nothing on this screen says the day is over', `${said.length} lines checked`);
+      } else {
+        bad('the streak screen tells the reader they are finished', guilty.join(' · '));
+      }
+
+      // AND THE LEGEND MUST NOT REPEAT THE EYEBROW ABOVE IT. A stamp echoing the
+      // headline says the same thing twice on one screen, which is why DAY KEPT
+      // was dropped despite setting larger than the legend that shipped.
+      const HEADINGS = eyebrows
+        ? eyebrows.split(',').map((s) => s.trim().replace(/^'|'$/g, '')).filter(Boolean)
+        : [];
+      if (HEADINGS.length === 0) {
+        bad('the eyebrows are declared where this check can read them', 'export const EYEBROWS is gone');
+      } else {
+        const echo = HEADINGS.find((h) => h.split(' ').some((t) => list.includes(t) && t !== 'THE'));
+        if (!echo) ok('and it does not echo the eyebrow above it', `"${legend}" against ${HEADINGS.length} eyebrows`);
+        else bad('the stamp repeats the eyebrow directly above it', `"${legend}" vs "${echo}"`);
+      }
     }
+  }
+}
+
+head('THE CEREMONY PLAYS IN ORDER, AND NOTHING PLAYS AS A CHORD');
+{
+  // THE ORDER IS THE DESIGN. RankUpScreen states the rule and this screen
+  // inherits it: each step begins as the one before it lands, because played
+  // together they are the same information and a fraction of the feeling.
+  //
+  // Timings are constants that derive from each other, so this evaluates the
+  // block rather than re-typing the arithmetic — re-typing it would only prove
+  // the check equals itself, which is the trap `validate-sound` records about
+  // re-deriving footfalls.ts's own formula.
+  const src = fs.readFileSync(path.join('components', 'gamification', 'StreakCeremony.tsx'), 'utf8');
+  const names = ['T_HOLD', 'D_FALL', 'T_LAND', 'T_INK', 'T_SWEEP', 'T_RAIL', 'D_RAIL', 'T_DAY', 'T_TAIL', 'T_CTA', 'COUNT_MS'];
+  const lines = names
+    .map((n) => (new RegExp(`^const ${n} = ([^;]+);`, 'm').exec(src) ?? [])[0])
+    .filter(Boolean);
+  if (lines.length !== names.length) {
+    bad('the ceremony declares its timeline where this check can read it',
+      `missing: ${names.filter((n) => !lines.some((l) => l.startsWith(`const ${n} `))).join(', ')}`);
+  } else {
+    const T = new Function(`${lines.join('\n')}\nreturn {${names.join(',')}};`)();
+
+    // 1 · every step strictly after the one before it
+    const order = ['T_HOLD', 'T_LAND', 'T_INK', 'T_SWEEP', 'T_RAIL', 'T_DAY', 'T_TAIL', 'T_CTA'];
+    const wrong = [];
+    for (let i = 1; i < order.length; i++) {
+      if (!(T[order[i]] > T[order[i - 1]])) wrong.push(`${order[i - 1]}(${T[order[i - 1]]}) → ${order[i]}(${T[order[i]]})`);
+    }
+    if (wrong.length === 0) ok('each step begins after the one before it', order.map((n) => `${n} ${T[n]}`).join(' · '));
+    else bad('two steps of the ceremony play at once', wrong.join(' · '));
+
+    // 2 · THE INK IS LEFT BEHIND BY THE DIE. A legend that fades in during the
+    // fall is painted on the object; one that appears once it has landed was
+    // pressed by it. This is the whole difference and it is one comparison.
+    if (T.T_INK > T.T_LAND) ok('the legend appears after the die is down', `contact ${T.T_LAND}ms → ink ${T.T_INK}ms`);
+    else bad('the legend rides in with the falling die', `ink ${T.T_INK}ms vs contact ${T.T_LAND}ms`);
+
+    // 3 · the count is finished before the closing line asks for attention
+    if (T.T_LAND + T.COUNT_MS <= T.T_TAIL) ok('the number has finished counting before the tail line', `${T.T_LAND + T.COUNT_MS}ms ≤ ${T.T_TAIL}ms`);
+    else bad('the tail line arrives while the number is still moving', `${T.T_LAND + T.COUNT_MS}ms > ${T.T_TAIL}ms`);
+
+    // 4 · A CEREMONY NOBODY CAN GET PAST IS A TOLL. This plays on every first
+    // lesson of the day, so it has to be over in about the time it takes to read
+    // it — and a tap runs it to the end for anyone who has seen it before.
+    const total = T.T_CTA + 280;
+    if (total <= 3000) ok('the whole ceremony is over inside three seconds', `${total}ms to the button`);
+    else bad('the ceremony outstays a daily moment', `${total}ms — a reader meets this every day`);
+    if (/const skip = \(\) => \{/.test(src)) ok('and a tap runs it to its end state', 'skip() present');
+    else bad('there is no way to skip the ceremony', 'no skip()');
   }
 }
 

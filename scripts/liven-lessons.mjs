@@ -49,7 +49,12 @@ function hash01(s) {
   h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b) >>> 0;
   h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35) >>> 0;
   h ^= h >>> 16;
-  return h / 4294967296;
+  // `>>> 0` because `^` evaluates as SIGNED int32, so the last xor of anything
+  // above 2^31 returns a negative number. Harmless HERE — this value is only ever
+  // sorted on and added as a tiebreak, never used as an index — but it is the
+  // same expression that made `quips.quipFor` return `undefined` a third of the
+  // time, and a latent copy of a bug is how it comes back.
+  return (h >>> 0) / 4294967296;
 }
 
 /** A branch's own order for the comic shelf: every branch meets them differently. */

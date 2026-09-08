@@ -7,6 +7,7 @@ import StreakPanel from '@/components/gamification/StreakPanel';
 import StreakCalendar from '@/components/gamification/StreakCalendar';
 import StreakTab from '@/app/(app)/streak';
 import StreakCelebration from '@/components/gamification/StreakCelebration';
+import StreakCeremony from '@/components/gamification/StreakCeremony';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
@@ -36,7 +37,14 @@ function seedDays(today: Date, run: number) {
 
 export default function PreviewStreak() {
   const [ready, setReady] = useState(false);
-  const today = new Date();
+  // `?d=YYYY-MM-DD` OVERRIDES TODAY, and it is not a convenience. The week strip
+  // is built from the real calendar, so on a Monday a 40-day streak still draws
+  // one lit day and six future rings and the run rail has nothing to span —
+  // correct, and useless for judging the one element the rail exists to be.
+  // Noon rather than midnight: `toISOString` on a local midnight rolls back a
+  // day in any positive-offset zone, which would silently shift every seeded key.
+  const dq = q('d');
+  const today = dq ? new Date(`${dq}T12:00:00`) : new Date();
   const todayKey = today.toISOString().slice(0, 10);
   const run = +(q('run') ?? 12);
   const { active, rest } = seedDays(today, run);
@@ -83,6 +91,23 @@ export default function PreviewStreak() {
           since={null}
         />
       </View>
+    );
+  } else if (s === 'ceremony') {
+    // THE FULL-SCREEN MOMENT. It fills the viewport itself, so unlike every
+    // other surface here it gets no padded wrapper — a box round it would be
+    // measuring a different screen from the one that ships.
+    body = (
+      <StreakCeremony
+        streak={run}
+        prevStreak={run - 1}
+        restSpent={q('rest') === '1' ? 1 : 0}
+        activeDays={active}
+        restDays={rest}
+        today={todayKey}
+        since={null}
+        moreToday={q('more') === '1'}
+        onDone={() => {}}
+      />
     );
   } else if (s === 'panel') {
     body = (

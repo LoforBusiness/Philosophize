@@ -174,6 +174,9 @@ const order = [
   // The three gestures sit with the world sounds, under everything earned.
   ['whoosh-1', 'right-1'], ['whoosh-2', 'right-1'], ['whoosh-3', 'right-1'],
   ['rethink', 'right-1'], ['right-1', 'impact'], ['impact', 'badge'], ['badge', 'rankup'],
+  // The seal fires ONCE A DAY, so it sits above everything that fires inside a
+  // lesson and below the two that are rarer than a day.
+  ['impact', 'seal'], ['seal', 'badge'],
   // A walk ending is a shift of weight, not another footfall. If it ever gets as
   // loud as a stride it stops being an arrival and becomes a stumble.
   ['whoosh-1', 'step-a'],

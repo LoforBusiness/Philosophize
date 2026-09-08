@@ -1015,6 +1015,168 @@ export function Bubble({
   );
 }
 
+// ── THE THOUGHT BUBBLE: WHAT HE IS MAKING OF ALL THIS ────────────────────────
+//
+// A reader worked through the lessons and said the mascot is *"usually just
+// there, not really doing anything"*, and asked for the fix in their own words:
+// *"little thought bubbles go up in his head during the lesson, like the stickman
+// is thinking or discovering something"*, and a line back when they answer — teasing
+// on a wrong one, *"passive aggressive that is somewhat encouraging"* on a right one.
+//
+// **THE POINT IS THAT HE IS LEARNING TOO.** He is not a presenter standing beside
+// the material; he is the other student. So the bubbles are what HE is working
+// out, arriving a beat behind the narration the way a real thought does.
+//
+// ── WHY THIS IS NOT A FLAG ON `Bubble` ──────────────────────────────────────
+//
+// The speech bubble above solved the hard geometry — a View scales about its
+// CENTRE, so a corner-anchored box inflating from 0.86 walks diagonally into
+// place, and pinning the tail is what stops it swimming. This reuses that maths
+// exactly. What it does NOT share is the tail (a triangle and a leader against a
+// descending trail of discs), the entrance ORDER (a thought forms from the discs
+// UP; speech pops from the mouth) or the word budget. Three structural
+// differences behind one boolean is how a component ends up unreadable.
+//
+// ── THE WORD BUDGET IS THE DESIGN ───────────────────────────────────────────
+//
+// *"I don't want them to be huge. Nothing like big paragraphs … pretty short in
+// the words."* The box is 130 wide against the speech bubble's 216, which is not
+// a preference but the enforcement: at Inter 12 that is about twenty characters a
+// line and two lines is the most it will take before `check:thoughts` fails the
+// build. A thought that needs three lines is a narration beat wearing a cloud.
+const THINK_W = 130;
+const THINK_TAIL_UP = 30;
+
+export function Thought({
+  text, x, headX, anchorY, discs, drive, leaving, kind = 'think',
+}: {
+  text: string;
+  /**
+   * Stage x the box centres on, and the stage x of HIS OWN centre.
+   *
+   * Both come from `make:thoughts`, which measured them out of `mustBoxes` — and
+   * they are two numbers rather than one because the box slides sideways when the
+   * space directly overhead is taken, while the trail still has to lean back
+   * toward the head it came out of.
+   *
+   * A PLAIN NUMBER RATHER THAN THE FIGURE'S LIVE x, and that is the fix for a real
+   * defect: the player derives the live x from the script's `walk` track, a scene
+   * need not pass one, and where it was missing the bubble fell back to the middle
+   * of the stage — landing across a plate the generator had carefully avoided. A
+   * measurement is spent in the space it was taken in.
+   */
+  x: number;
+  headX: number;
+  /**
+   * How many discs run from the box down to his head: 3, 2 or 1.
+   *
+   * The trail is a FREE PARAMETER and treating it as fixed cost thirteen lessons.
+   * These stages are built to fill the frame — `logic-arguments-3` leaves a
+   * forty-eight unit gap between its VALID MEANS block and his crown, where a box
+   * and a full trail need sixty-two — so `make:thoughts` shortens the trail before
+   * it gives up on the beat. One disc still reads as a thought; no bubble does not.
+   */
+  discs: number;
+  /**
+   * Stage y where the SMALLEST disc sits — just above his crown.
+   *
+   * Anchored from the BOTTOM, not the top, and that is the whole reason this
+   * prop is shaped like this: the box grows upward off the trail, so a one-line
+   * thought and a two-line thought both keep their tail the same distance from
+   * his head. Anchored from the top instead, a short thought pulls its own trail
+   * fifteen units away from the figure and reads as a caption that has come
+   * loose. Same argument as §7's reward cloud, which is anchored at its bottom so
+   * that a third row grows UP rather than pushing the mascot down.
+   */
+  anchorY: number;
+  /** 0 → 1, driven by the player: a beat's own thought, or the answer landing. */
+  drive: SharedValue<number>;
+  leaving?: boolean;
+  /** `say` is the answer line — a bolder box, because he is addressing the reader. */
+  kind?: 'think' | 'say';
+}) {
+  const w = useSharedValue(0);
+  const h = useSharedValue(0);
+  const onLayout = useCallback((e: LayoutChangeEvent) => {
+    w.value = e.nativeEvent.layout.width;
+    h.value = e.nativeEvent.layout.height;
+  }, []);
+
+  // Over his head, clamped so a long line never walks off the stage — the same
+  // rule the speech bubble follows, and for the same reason: a box pinned to the
+  // margin says nothing about whose thought it is.
+  const wrap = useAnimatedStyle(() => {
+    const half = w.value / 2;
+    const cx = Math.max(half + 10, Math.min(STAGE_W - half - 10, x));
+    return { transform: [{ translateX: cx - STAGE_W / 2 }] };
+  });
+
+  // The trail leans back toward him when the box has been clamped, so it still
+  // points at whose head this came out of.
+  const trail = useAnimatedStyle(() => {
+    const half = w.value / 2;
+    const cx = Math.max(half + 10, Math.min(STAGE_W - half - 10, x));
+    const off = Math.max(-(half - 14), Math.min(half - 14, headX - cx));
+    return { transform: [{ translateX: off }] };
+  });
+
+  // ONE LINEAR DRIVER, AND THE EXIT IS THE ENTRANCE READ BACKWARDS — ThinkerPeek's
+  // finding, and the reason the stage windows below are honest: a stage occupying
+  // the first 40% of a LINEAR value occupies 40% of the time, which is not true of
+  // an eased one. M3's emphasized-decelerate drew a 15-unit leader in 10ms.
+  const box = useAnimatedStyle(() => {
+    const d = drive.value;
+    if (leaving) return { opacity: d, transform: [{ scale: 1 }] };
+    const e = ease01(seg(d, 0.42, 1));
+    const sc = 0.84 + 0.16 * e + Math.sin(Math.PI * e) * 0.03;
+    return {
+      opacity: ease01(seg(d, 0.42, 0.72)),
+      transform: [{ translateY: (h.value / 2 - THINK_TAIL_UP) * (1 - sc) }, { scale: sc }],
+    };
+  });
+  // The discs arrive FIRST and from the bottom up, which is the whole difference
+  // between a thought forming and a panel appearing.
+  //
+  // WRITTEN OUT THREE TIMES RATHER THAN FROM A HELPER. `const disc = (a, b) =>
+  // useAnimatedStyle(...)` reads better and is a hook called from a nested
+  // function — it happens to work while the call order is fixed, and it is the
+  // rule this repo has already broken once (§19: the memoised Profile sections
+  // nested their hooks, `tsc` was perfectly happy and React threw at runtime).
+  const d1 = useAnimatedStyle(() => {
+    const d = drive.value;
+    if (leaving) return { opacity: d, transform: [{ scale: 1 }] };
+    const e = ease01(seg(d, 0.00, 0.22));
+    return { opacity: e, transform: [{ scale: 0.4 + 0.6 * e }] };
+  });
+  const d2 = useAnimatedStyle(() => {
+    const d = drive.value;
+    if (leaving) return { opacity: d, transform: [{ scale: 1 }] };
+    const e = ease01(seg(d, 0.12, 0.36));
+    return { opacity: e, transform: [{ scale: 0.4 + 0.6 * e }] };
+  });
+  const d3 = useAnimatedStyle(() => {
+    const d = drive.value;
+    if (leaving) return { opacity: d, transform: [{ scale: 1 }] };
+    const e = ease01(seg(d, 0.26, 0.50));
+    return { opacity: e, transform: [{ scale: 0.4 + 0.6 * e }] };
+  });
+
+  return (
+    <Animated.View style={[styles.thoughtWrap, { bottom: STAGE_H - anchorY }, wrap]} pointerEvents="none">
+      <Animated.View onLayout={onLayout} style={[styles.thought, box]}>
+        <View style={[styles.thoughtBox, kind === 'say' && styles.sayBox]}>
+          <Text style={[styles.thoughtText, kind === 'say' && styles.sayText]}>{text}</Text>
+        </View>
+      </Animated.View>
+      <Animated.View style={[styles.trail, trail]}>
+        {discs >= 3 ? <Animated.View style={[styles.puff, styles.puff1, d3]} /> : null}
+        {discs >= 2 ? <Animated.View style={[styles.puff, styles.puff2, d2]} /> : null}
+        <Animated.View style={[styles.puff, styles.puff3, d1]} />
+      </Animated.View>
+    </Animated.View>
+  );
+}
+
 // ── choices (teaching taps + graded questions) ────────────────────────────────
 /**
  * THE CHIP THAT SAYS A QUESTION HAS STARTED.
@@ -1384,6 +1546,29 @@ export const styles = StyleSheet.create({
   tail: { width: 12, height: 12, backgroundColor: INK, transform: [{ rotate: '45deg' }] },
   tailShout: { backgroundColor: INK },
   leader: { width: 2, height: LEADER_H, backgroundColor: INK, marginTop: -2, opacity: 0.55 },
+
+  // THE THOUGHT BUBBLE. Rounder than the speech box on purpose — a thought has no
+  // edges — and narrower, which is what keeps the words short (see Thought).
+  thoughtWrap: { position: 'absolute', left: 0, width: STAGE_W, alignItems: 'center' },
+  thought: { maxWidth: THINK_W, alignItems: 'center' },
+  thoughtBox: {
+    borderWidth: 1.5, borderColor: INK, borderRadius: 14,
+    backgroundColor: PAPER, paddingHorizontal: 11, paddingVertical: 7,
+  },
+  thoughtText: {
+    fontFamily: 'Inter_500Medium', fontSize: 12, color: INK, lineHeight: 15.5,
+    textAlign: 'center',
+  },
+  // The answer line is HIM TALKING TO THE READER rather than thinking, so it is
+  // struck the other way up — ink ground, paper type — the same inversion the
+  // shout bubble uses, and the reason the two never read as the same event.
+  sayBox: { backgroundColor: INK, borderColor: INK },
+  sayText: { fontFamily: 'Inter_600SemiBold', color: PAPER },
+  trail: { alignItems: 'center', marginTop: 3 },
+  puff: { backgroundColor: PAPER, borderColor: INK, borderWidth: 1.5 },
+  puff1: { width: 9, height: 9, borderRadius: 4.5, marginBottom: 2.5 },
+  puff2: { width: 6.5, height: 6.5, borderRadius: 3.25, marginBottom: 2.5 },
+  puff3: { width: 4, height: 4, borderRadius: 2 },
 
   /**
    * The lower half — answer control (if any) and deck, as ONE box (L6).
