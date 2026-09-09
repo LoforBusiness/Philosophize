@@ -155,6 +155,35 @@ export default memo(function LaunchFigure({ scene }: Props) {
     transform: [{ translateX: J.value.wrR.x - P.cupW / 2 }, { translateY: J.value.wrR.y - P.cupH }],
   }));
 
+  // Steam. Two wisps cycling out of phase above the rim — each rises, drifts
+  // sideways on a sine, and thins out, then re-enters at the rim. They live
+  // INSIDE the cup's wrapper, so they ride the wrist with it and can never
+  // drift off the mug (the same reason the cup itself is wrist-solved). The
+  // phases are offset so the two never move as one; opacity ramps in over the
+  // first tenth so a wisp is born faint rather than popping into existence.
+  const steamA = useAnimatedStyle(() => {
+    'worklet';
+    const ph = (clock.value * 0.42) % 1;
+    return {
+      opacity: Math.min(1, ph / 0.12) * (1 - ph) * 0.55,
+      transform: [
+        { translateX: P.cupW * 0.32 + Math.sin(ph * 6.283 + 0.8) * 1.6 },
+        { translateY: -3 - ph * 11 },
+      ],
+    };
+  });
+  const steamB = useAnimatedStyle(() => {
+    'worklet';
+    const ph = (clock.value * 0.42 + 0.47) % 1;
+    return {
+      opacity: Math.min(1, ph / 0.12) * (1 - ph) * 0.45,
+      transform: [
+        { translateX: P.cupW * 0.62 + Math.sin(ph * 6.283 + 3.1) * 1.4 },
+        { translateY: -2 - ph * 9 },
+      ],
+    };
+  });
+
   // The book spans wrist to wrist and tips with them.
   const bookStyle = useAnimatedStyle(() => {
     'worklet';
@@ -188,6 +217,8 @@ export default memo(function LaunchFigure({ scene }: Props) {
       <Stickman D={D} k={k} color={INK} />
       {activity === 'sip' ? (
         <Animated.View style={[styles.prop, cupStyle]}>
+          <Animated.View style={[styles.steam, steamA]} />
+          <Animated.View style={[styles.steam, steamB]} />
           {/* a mug, not a box: tapered body, a handle on the trailing side and a
               rim line across the top so it reads as something open */}
           <View style={[styles.cup, { width: P.cupW, height: P.cupH, borderWidth: P.cupB }]}>
@@ -245,6 +276,11 @@ const styles = StyleSheet.create({
   cupHandle: {
     position: 'absolute',
     borderColor: INK, borderRightColor: 'transparent', backgroundColor: 'transparent',
+  },
+
+  steam: {
+    position: 'absolute', left: 0, top: 0,
+    width: 2, height: 4.5, borderRadius: 1, backgroundColor: INK,
   },
 
   bookWrap: { flexDirection: 'row', alignItems: 'flex-start' },

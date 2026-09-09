@@ -7,13 +7,22 @@ import Animated, {
   useAnimatedStyle,
   useAnimatedProps,
   useAnimatedReaction,
+  useDerivedValue,
+  useFrameCallback,
+  interpolate,
   interpolateColor,
   withTiming,
   withDelay,
+  withSequence,
   Easing,
   runOnJS,
   type SharedValue,
 } from 'react-native-reanimated';
+import Stickman from '@/components/lesson/cinematic/Stickman';
+import {
+  solve, bundle, walk, stand, mixStance, FIG_H,
+  type Joints, type Bundle,
+} from '@/components/lesson/cinematic/rig';
 import QuotePlate from '@/components/shared/QuotePlate';
 import LaurelMark from '@/components/shared/LaurelMark';
 import { C } from '@/constants/design';
@@ -100,6 +109,75 @@ function makeStroke(width: number, seed: number) {
   return { d, len: Math.ceil(len) };
 }
 
+// ─── THE WALKER ──────────────────────────────────────────────────────────────
+//
+// The reader on the first cut: "it looks very boring … make sure there is good
+// animations, not just a still image." So the progress line is DRAWN BY SOMEONE
+// now: the figure walks across the page and the ink appears behind him — the
+// same conceit as the branch road, at title-page scale. Everything below is the
+// real rig, so the gait is the one every lesson already validates:
+//
+//   · his x IS the progress. The stroke's dash tip and his feet both map
+//     progress/92 across the same span, so the line can never lead or trail the
+//     man drawing it — one value, two readers, by construction;
+//   · the gait phase is fed distance IN HIS OWN UNITS (travelled / k), which is
+//     what stops the feet skating (§17's walk-pace lesson: a stride is
+//     proportional to the figure, so a scaled figure walking screen distance
+//     needs the distance rescaled the same way);
+//   · over the last stretch he eases from walk() into stand() through
+//     mixStance, so the hold at 92 is a person arriving and breathing — stand()
+//     rides life2, so he never reads as a loop — instead of a freeze-frame,
+//     which is the host's "stopped dead for 0.36s" defect (§19);
+//   · the clock ACCUMULATES timeSincePreviousFrame — never read
+//     timeSinceFirstFrame; a re-render re-registers the callback and resets it,
+//     which is the exact bug LaunchFigure documents.
+// 0.44 was tried first and below ~50px the limbs merge into the torso stroke —
+// a walking tadpole. 0.55 puts him at ~57px, where the gait reads.
+const WALKER_K = 0.55;
+const WALKER_H = Math.ceil(FIG_H * WALKER_K) + 3;   // 49 — feet at the stage's bottom edge
+const WALKER_PAD = 12;                              // he starts and ends inside the line's ends
+
+const InkWalker = memo(function InkWalker({
+  progress,
+  width,
+}: {
+  progress: SharedValue<number>;
+  width: number;
+}) {
+  const clock = useSharedValue(0);
+  useFrameCallback((f) => {
+    'worklet';
+    let dt = (f.timeSincePreviousFrame ?? 16) / 1000;
+    if (dt > 0.05) dt = 0.05;
+    clock.value += dt;
+  }, true);
+
+  const J = useDerivedValue<Joints>(() => {
+    'worklet';
+    const p = Math.min(progress.value, 92) / 92;
+    const x = WALKER_PAD + (width - 2 * WALKER_PAD) * p;
+    // Walking → arriving. The blend runs over the last twelfth of the journey,
+    // so he decelerates into the stand rather than switching poses.
+    const arrive = Math.max(0, Math.min(1, (p - 0.9) / 0.1));
+    const s = mixStance(walk((x - WALKER_PAD) / WALKER_K), stand(clock.value), arrive);
+    return solve({
+      x, groundY: WALKER_H, k: WALKER_K, dir: 1,
+      tilt: s.tilt, neck: s.neck, bob: s.bob,
+      footL: s.footL, footR: s.footR, fistL: s.fistL, fistR: s.fistR,
+    });
+  });
+  const D = useDerivedValue<Bundle>(() => {
+    'worklet';
+    return bundle(J.value, WALKER_K, 1);
+  });
+
+  return (
+    <View style={{ width, height: WALKER_H }} pointerEvents="none">
+      <Stickman D={D} k={WALKER_K} color={C.ink} />
+    </View>
+  );
+});
+
 // The percentage readout. Isolated so the tick-by-tick re-render touches this
 // tiny Text only — nothing above it re-renders during the count.
 const Pct = memo(function Pct({
@@ -160,6 +238,10 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
   const progress = useSharedValue(0);
   const screenOpacity = useSharedValue(1);
   const introFade = useSharedValue(0);
+  // The wordmark STRIKES on — the streak seal's choreography (§7) at title
+  // scale: a fall that ACCELERATES (Easing.in; the half everyone gets
+  // backwards), a squash on contact, a settle. 0→1 is the fall, 1→2 the recoil.
+  const strike = useSharedValue(0);
   const plateIn = useSharedValue(0);
   const footIn = useSharedValue(0);
   const [held, setHeld] = useState(false);
@@ -176,6 +258,7 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
       // It still FADES briefly — the hand-off from the fresh native splash this
       // path restarts behind. 260ms buys that and nothing else.
       introFade.value = withTiming(1, { duration: 260 });
+      strike.value = 2;
       plateIn.value = withTiming(1, { duration: 260 });
       footIn.value = withTiming(1, { duration: 260 });
       progress.value = 92;
@@ -183,8 +266,17 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
       return;
     }
     introFade.value = withTiming(1, { duration: 420 });
-    plateIn.value = withDelay(180, withTiming(1, { duration: 480, easing: Easing.out(Easing.cubic) }));
-    footIn.value = withDelay(340, withTiming(1, { duration: 420 }));
+    strike.value = withDelay(
+      140,
+      withSequence(
+        withTiming(1, { duration: 230, easing: Easing.in(Easing.quad) }),
+        withTiming(2, { duration: 320, easing: Easing.out(Easing.back(2.2)) })
+      )
+    );
+    // The plate is DEALT onto the table rather than faded up: it slides in with
+    // a slight tilt and settles flat, a touch past level and back.
+    plateIn.value = withDelay(420, withTiming(1, { duration: 560, easing: Easing.out(Easing.back(1.5)) }));
+    footIn.value = withDelay(650, withTiming(1, { duration: 420 }));
     progress.value = withTiming(
       92,
       { duration: 2700, easing: Easing.out(Easing.cubic) },
@@ -229,16 +321,26 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
     backgroundColor: interpolateColor(introFade.value, [0, 1], [SPLASH_BG, GROUND]),
   }));
   const mastStyle = useAnimatedStyle(() => ({
-    opacity: introFade.value,
-    transform: [{ translateY: (1 - introFade.value) * 8 }],
+    opacity: Math.min(1, strike.value * 1.6),
+    transform: [
+      { scale: interpolate(strike.value, [0, 1, 2], [1.22, 0.955, 1]) },
+      { translateY: interpolate(strike.value, [0, 1, 2], [-10, 1.5, 0]) },
+    ],
   }));
   const plateStyle = useAnimatedStyle(() => ({
-    opacity: plateIn.value,
-    transform: [{ translateY: (1 - plateIn.value) * 10 }],
+    opacity: Math.min(1, plateIn.value * 1.5),
+    transform: [
+      { translateY: (1 - plateIn.value) * 30 },
+      { rotate: `${(1 - plateIn.value) * -2.2}deg` },
+    ],
   }));
   const footStyle = useAnimatedStyle(() => ({ opacity: footIn.value }));
+  const lineStyle = useAnimatedStyle(() => ({ opacity: introFade.value }));
+  // The tip of the ink line and the walker's feet read the SAME mapping — see
+  // InkWalker: both are progress/92 across the span, so the line always ends
+  // where he is standing.
   const strokeProps = useAnimatedProps(() => ({
-    strokeDashoffset: len * (1 - progress.value / 100),
+    strokeDashoffset: len * (1 - Math.min(progress.value, 92) / 92),
   }));
 
   return (
@@ -251,33 +353,45 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
       <View style={[styles.col, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 26 }]}>
         <View style={styles.spacerA} />
 
-        {/* The head of the page: mark, wordmark, and the rule that draws itself
-            as the progress line. The wordmark is the brand from app.json —
-            check-launch derives the expected string from expo.name, the rule
-            that caught this screen still saying the previous name (§19). */}
-        <Animated.View style={[styles.mast, mastStyle]}>
-          <LaurelMark width={78} />
-          <Text style={styles.wordmark}>ASHMERE</Text>
-          <View style={styles.strokeWrap}>
-            <Svg
-              width={strokeW}
-              height={STROKE_SVG_H}
-              viewBox={`0 ${-STROKE_SVG_H / 2} ${strokeW} ${STROKE_SVG_H}`}
-            >
-              <AnimatedPath
-                d={d}
-                stroke={C.ink}
-                strokeWidth={2.6}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                fill="none"
-                strokeDasharray={`${len} ${len}`}
-                animatedProps={strokeProps}
-              />
-            </Svg>
+        {/* The head of the page: mark and wordmark strike on together; under
+            them the walker draws the progress line. The wordmark is the brand
+            from app.json — check-launch derives the expected string from
+            expo.name, the rule that caught this screen still saying the
+            previous name (§19). */}
+        <View style={styles.mast}>
+          <Animated.View style={[styles.mastStrike, mastStyle]}>
+            <LaurelMark width={78} />
+            <Text style={styles.wordmark}>ASHMERE</Text>
+          </Animated.View>
+          <Animated.View style={[styles.strokeWrap, lineStyle]}>
+            {/* The line's centre sits 7px up from this box's bottom (the Svg is
+                14 tall, ruled through its middle); the walker's stage bottoms
+                out exactly there, so his feet are ON the ink. */}
+            <View style={{ width: strokeW, height: WALKER_H + STROKE_SVG_H / 2 }}>
+              <Svg
+                width={strokeW}
+                height={STROKE_SVG_H}
+                viewBox={`0 ${-STROKE_SVG_H / 2} ${strokeW} ${STROKE_SVG_H}`}
+                style={styles.strokeSvg}
+              >
+                <AnimatedPath
+                  d={d}
+                  stroke={C.ink}
+                  strokeWidth={2.6}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                  strokeDasharray={`${len} ${len}`}
+                  animatedProps={strokeProps}
+                />
+              </Svg>
+              <View style={styles.walkerSeat}>
+                <InkWalker progress={progress} width={strokeW} />
+              </View>
+            </View>
             <Pct progress={progress} color={C.inkSoft} />
-          </View>
-        </Animated.View>
+          </Animated.View>
+        </View>
 
         <View style={styles.spacerB} />
 
@@ -311,6 +425,9 @@ const styles = StyleSheet.create({
   spacerB: { flex: 2 },
   spacerC: { flex: 3 },
   mast: { alignItems: 'center' },
+  mastStrike: { alignItems: 'center' },
+  strokeSvg: { position: 'absolute', left: 0, bottom: 0 },
+  walkerSeat: { position: 'absolute', left: 0, bottom: STROKE_SVG_H / 2 },
   wordmark: {
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 30,
@@ -319,7 +436,7 @@ const styles = StyleSheet.create({
     color: C.ink,
     marginTop: 10,
   },
-  strokeWrap: { alignItems: 'center', gap: 9, marginTop: 14 },
+  strokeWrap: { alignItems: 'center', gap: 8, marginTop: 4 },
   pct: {
     fontFamily: 'Inter_500Medium',
     fontSize: 11,

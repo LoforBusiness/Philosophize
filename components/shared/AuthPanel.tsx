@@ -211,6 +211,24 @@ function ChunkButton({
   );
 }
 
+// --- The entrance ------------------------------------------------------------
+
+// The landing arrives as a cascade — headline, mascot, then each door in turn —
+// instead of appearing fully set. One shape, staggered by delay, all timing
+// (no springs: the doors are a stack, and a stack that overshoots at four
+// different amplitudes reads as jelly).
+function Rise({ delay, children }: { delay: number; children: ReactNode }) {
+  return (
+    <MotiView
+      from={{ opacity: 0, translateY: 16 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ type: 'timing', duration: 460, delay, easing: Easing.out(Easing.cubic) }}
+    >
+      {children}
+    </MotiView>
+  );
+}
+
 // --- Inputs ------------------------------------------------------------------
 
 interface FieldProps {
@@ -277,7 +295,14 @@ function Field({
 // /sign-in route. A successful sign-in of any kind is routed into the app by
 // app/_layout.tsx onAuthStateChange; the X / "Continue without an account" goes
 // back (or enters the app as a guest when this is the launch-time screen).
-export default function AuthPanel() {
+//
+// `showAllDoors` is for PREVIEW AND MARKETING RENDERS ONLY: it shows every
+// provider button regardless of platform availability, because the browser —
+// where this project photographs itself (§21) — cannot run native Google/Apple
+// sign-in and hides them, and a screenshot without the Google door misreads as
+// the design lacking one. Nothing in the app passes it; the handlers behind
+// the forced buttons still fail safely.
+export default function AuthPanel({ showAllDoors = false }: { showAllDoors?: boolean } = {}) {
   const { width } = useWindowDimensions();
   const [step, setStep] = useState<Step>('landing');
   const [mode, setMode] = useState<Mode>('signin');
@@ -293,6 +318,8 @@ export default function AuthPanel() {
   const [appleAvailable, setAppleAvailable] = useState(false);
 
   const isSignup = mode === 'signup';
+  const googleDoor = socialAuthAvailable || showAllDoors;
+  const appleDoor = appleAvailable || showAllDoors;
 
   useEffect(() => {
     isAppleSignInAvailable().then(setAppleAvailable);
@@ -410,42 +437,54 @@ export default function AuthPanel() {
             <>
               {/* The voice is a door, not a slogan — and the chair is the one
                   he is already sitting on. */}
-              <Text style={styles.hello}>Welcome.{'\n'}Pull up a chair.</Text>
+              <Rise delay={0}>
+                <Text style={styles.hello}>Welcome.{'\n'}Pull up a chair.</Text>
+              </Rise>
 
               <View style={styles.mascotZone}>
-                <Mascot width={mascotW} />
+                <Rise delay={140}>
+                  <Mascot width={mascotW} />
+                </Rise>
               </View>
 
               {error && <Message tone="error" text={error} />}
 
               <View style={styles.doors}>
-                <ChunkButton
-                  dark
-                  label="Continue with email"
-                  onPress={() => { setError(null); setInfo(null); setStep('email'); }}
-                />
-                {socialAuthAvailable && (
-                  <ChunkButton
-                    label="Continue with Google"
-                    onPress={() => handleSocial('google')}
-                    disabled={busy === 'google'}
-                    leading={busy === 'google' ? <ActivityIndicator color={Ink} size="small" /> : <GoogleGlyph />}
-                  />
-                )}
-                {appleAvailable && (
+                <Rise delay={280}>
                   <ChunkButton
                     dark
-                    label="Continue with Apple"
-                    onPress={() => handleSocial('apple')}
-                    disabled={busy === 'apple'}
-                    leading={busy === 'apple' ? <ActivityIndicator color={Page} size="small" /> : <AppleGlyph />}
+                    label="Continue with email"
+                    onPress={() => { setError(null); setInfo(null); setStep('email'); }}
                   />
+                </Rise>
+                {googleDoor && (
+                  <Rise delay={360}>
+                    <ChunkButton
+                      label="Continue with Google"
+                      onPress={() => handleSocial('google')}
+                      disabled={busy === 'google'}
+                      leading={busy === 'google' ? <ActivityIndicator color={Ink} size="small" /> : <GoogleGlyph />}
+                    />
+                  </Rise>
+                )}
+                {appleDoor && (
+                  <Rise delay={440}>
+                    <ChunkButton
+                      dark
+                      label="Continue with Apple"
+                      onPress={() => handleSocial('apple')}
+                      disabled={busy === 'apple'}
+                      leading={busy === 'apple' ? <ActivityIndicator color={Page} size="small" /> : <AppleGlyph />}
+                    />
+                  </Rise>
                 )}
               </View>
 
-              <Pressable onPress={skip} hitSlop={8} style={styles.guest}>
-                <Text style={styles.guestText}>Continue without an account</Text>
-              </Pressable>
+              <Rise delay={520}>
+                <Pressable onPress={skip} hitSlop={8} style={styles.guest}>
+                  <Text style={styles.guestText}>Continue without an account</Text>
+                </Pressable>
+              </Rise>
 
               <Text style={styles.terms}>
                 By continuing, you agree to our{' '}

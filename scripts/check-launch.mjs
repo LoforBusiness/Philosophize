@@ -144,6 +144,33 @@ console.log('check-launch: the title page');
     'straight to held — no second performance on a restarted cold start');
 }
 
+// ── 4b · the page performs — it is not a photograph ──────────────────────────
+//
+// The first cut of the title page was static and the reader said so ("very
+// boring … not just a still image"). The progress line is walked now: the rig's
+// own figure crosses the page drawing the ink behind him, then stands and
+// breathes through the hold. Three things keep that honest:
+//
+//   · the REAL rig walks him (walk/stand/mixStance imports), so the gait is the
+//     one every lesson validates, not a bespoke shuffle;
+//   · the frame clock ACCUMULATES timeSincePreviousFrame — reading
+//     timeSinceFirstFrame resets on any re-render (LaunchFigure's documented
+//     bug, and the launch screen re-renders when `held` flips);
+//   · the walker's feet and the ink's tip read ONE mapping (progress/92 across
+//     the span), so the line can never lead or trail the man drawing it.
+{
+  ok(/import Stickman from '@\/components\/lesson\/cinematic\/Stickman'/.test(screenRaw)
+    && /\bwalk\(/.test(screen) && /\bstand\(/.test(screen) && /mixStance\(/.test(screen),
+    'a living figure walks the progress line, on the real rig');
+  ok(/useFrameCallback/.test(screen) && /timeSincePreviousFrame/.test(screen)
+    && !/timeSinceFirstFrame(?!\s*\?\?)/.test(screen.replace(/timeSincePreviousFrame/g, '')),
+    'its clock accumulates frame deltas', 'timeSinceFirstFrame resets on re-render');
+  const mappings = (screen.match(/Math\.min\(progress\.value, 92\) \/ 92/g) ?? []).length;
+  ok(mappings >= 2,
+    'the walker and the ink tip share one progress mapping',
+    `${mappings} readers of min(progress,92)/92 — his feet and the line cannot disagree`);
+}
+
 // ── 5 · the status bar never flips ───────────────────────────────────────────
 //
 // Paper from the splash hand-off to the welcome page's cream: dark icons the
