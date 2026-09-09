@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, memo } from 'react';
 import { View, Text, StyleSheet, StatusBar, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,112 +14,66 @@ import Animated, {
   runOnJS,
   type SharedValue,
 } from 'react-native-reanimated';
-import { STAGE_W, STAGE_H } from '@/components/lesson/cinematic/rig';
-import { LAUNCH_SCENES, SceneArt, SceneFore } from './launchScenes';
-import LaunchFigure from './LaunchFigure';
+import QuotePlate from '@/components/shared/QuotePlate';
+import LaurelMark from '@/components/shared/LaurelMark';
+import { C } from '@/constants/design';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
+import { SPLASH_BG } from './launchArt';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-import {
-  PALETTES, CREAM, SPLASH_BG, SCRIM_RGB, SCRIM_STOPS,
-  TOP_SCRIM_STOPS, topScrimHeight,
-} from './launchArt';
+// ─── THE TITLE PAGE ──────────────────────────────────────────────────────────
+//
+// The cold-start loading moment, redesigned 2026-09-08. It was six near-black
+// illustrated landscapes with the figure living in them; the reader asked for a
+// completely new look, no figure required. What replaced it is the front of a
+// printed book — which is what this app already claims to be everywhere else:
+//
+//   · the laurel and the wordmark, set like a title page's head;
+//   · a hand-drawn ink rule that draws itself across the page as the progress
+//     line, with a counting percentage under it;
+//   · one short quotation from the library, presented on the SAME struck
+//     QuotePlate every other surface uses — era spine, printer's mark, the one
+//     top-left light. A different quotation every launch;
+//   · the tagline at the foot, where a title page carries its imprint.
+//
+// WHAT THE REDESIGN BUYS STRUCTURALLY, beyond taste:
+//
+//   · NO scrims. The old screen needed two measured gradient scrims because
+//     nothing may take its contrast from artwork (§19). There is no artwork:
+//     everything here is ink on `C.paper`, and scripts/check-launch.mjs holds
+//     every pairing by arithmetic.
+//   · NO first-frame flash, by construction. The native splash is SPLASH_BG
+//     (pale grey) and the old scenes were near-black — a 10:1 step the ground
+//     had to be eased across. Paper is a 1.1:1 step from the splash; the ground
+//     still starts on SPLASH_BG and settles into GROUND on the intro curve, so
+//     the hand-off stays one continuous surface.
+//   · NO status-bar flip. The old screen was the only thing in the app setting
+//     `barStyle`, light over dark art, flipped mid-dissolve so the icons
+//     crossed with the picture. The ground is paper from the first frame to the
+//     welcome page's cream, so the bar is dark-content the whole way and there
+//     is no crossing left to time.
+//
+// The six scene files (launchArt's landscapes, launchScenes, launchMotion) are
+// no longer mounted here. launchArt still exports SPLASH_BG — app/_layout.tsx
+// reads it — and LaunchFigure + launchMotion are alive on the sign-in screen's
+// mascot. The landscape data itself is dormant; sheet-launch.mjs still draws it.
 
-// The scene now runs full-bleed to the bottom edge and the foreground is the
-// DARK end, which is what let the art stop being a blank sheet below the horizon.
-// NOTHING ON THIS SCREEN TAKES ITS CONTRAST FROM THE ARTWORK (§19). Both ends
-// are built the same way: a FIXED gradient scrim mixed from SCRIM_RGB, one fixed
-// cream over it, and a drop shadow on top of that.
-//   · the quote, at the bottom, on SCRIM_STOPS — clear at its top edge, 0.94
-//     where the words are;
-//   · the masthead, the stroke and the percentage, at the top, on
-//     TOP_SCRIM_STOPS — the same thing inverted, 0.66 across the whole chrome
-//     band and out to nothing below it.
-// scripts/check-launch.mjs composites the real art under both and measures them.
-// Nothing here is a guess.
+// The ground, and the two inks on it. Tokens, not local hexes — check-launch
+// re-derives every pairing from constants/design.ts and fails the build if a
+// text tone here stops clearing 4.5:1 on the ground it sits on.
+const GROUND = C.paper;
 
-// ─── THE CHROME BAND ─────────────────────────────────────────────────────────
-//
-// The masthead, the progress stroke and the percentage, in that order down the
-// top of the screen. They are declared as named constants rather than typed
-// into the styles because scripts/check-launch.mjs READS THESE VERY LINES and
-// lays the band out itself on eight device sizes — so the check can never again
-// be measuring a geometry the component does not have.
-//
-// TWO COORDINATE SPACES MEET HERE, and that is the whole hazard. The masthead
-// is positioned in SCREEN space (`insets.top + MAST_TOP_PAD`); the stroke wants
-// to be in STAGE space, pinned to a dark part of the sky. The stage is
-// cover-fitted — fit = max(w/400, h/800), offY = (h - 800·fit)/2 — so `offY` is
-// 0 only when the device is exactly 2:1 or taller. Below that it goes NEGATIVE
-// and stage space slides upward relative to the screen: at 820×1180 by 230px,
-// on a Z Fold's inner screen by 253px. A stroke placed at a bare
-// `offY + STROKE_STAGE_Y * fit` therefore climbs through the masthead and then
-// off the top of the display entirely, and `app.json` ships
-// `orientation: portrait` with `supportsTablet: true` and excludes neither
-// tablets nor foldables on Play. `strokeTop` below CLAMPS against the
-// masthead's own box for exactly that reason.
-//
-// Both line heights are SET, not inherited from the font. Inter at fontSize 10
-// lays out ≈12.1px and at 12 ≈14.6px, but the exact figure is platform metrics —
-// and a checker cannot measure a box whose height it has to guess at.
-const MAST_TOP_PAD = 18;        // masthead box top, below the safe-area inset
-const MAST_LINE_H = 13;         // the masthead's line box
-const CHROME_GAP = 12;          // clear air between the masthead box and strokeWrap's top
-const STROKE_W = 3;             // the ink line's own width
-const STROKE_JITTER = 2.6;      // makeStroke's worst |y|: 1.4 sine + 1.2 noise
-const STROKE_SVG_H = 14;        // the Svg box the stroke is centred in
-const PCT_GAP = 12;             // strokeWrap's own `gap`, stroke box → percentage
-const PCT_LINE_H = 15;          // the percentage's line box
-// The ink therefore reaches STROKE_JITTER + STROKE_W/2 = 4.1 either side of that
-// box's centre — 2.9 to 11.1 down from strokeWrap's top, which is the extent
-// check-launch.mjs tests against the masthead and against the top of the screen.
-
-// The stage y the progress stroke PREFERS — up in the sky, clear of the figure
-// below it and below the masthead above. It is a preference, not a position:
-// `strokeTop` takes the lower of it and the masthead's floor.
-//
-// launchArt.ts inverted the sky so it is brightest at the HORIZON: the top of
-// the frame is now the dark end. 258 was chosen for the OLD sky — dark at top,
-// pale at bottom — and under the new gradient that y sits ~58% down, in the
-// brightest part of the frame. 90 keeps the stroke up where the composition
-// wants it, high in the sky and well clear of the figure. Legibility is no
-// longer a reason to prefer one y over another — the top scrim covers whatever
-// row the clamp lands on — but the composition still is.
-//
-// The clearance it buys, on the 390×844 reference check-launch.mjs measures
-// (insets.top 47, fit 1.055, offY 0), with every term shown:
-//
-//   masthead box   47 + 18 = 65 → 65 + 13 = 78 screen   (stage 61.6 – 73.9)
-//   strokeWrap top 0 + 90 × 1.055 = 94.95 screen
-//   stroke ink     94.95 + 2.9 = 97.85 → 106.05 screen  (stage 92.7 – 100.5)
-//   clearance      97.85 − 78 = 19.85 screen px ÷ 1.055 = 18.8 STAGE UNITS
-//
-// 18.8, not the ~28 an earlier version of this comment claimed: that number
-// measured the stroke's ANCHOR to the masthead box's TOP, which throws away the
-// masthead's 13px line box and the stroke's own 2.9px inset. The figure's crown
-// sits at stage y 512–575, so the other end has ~420 units and is not close.
-const STROKE_STAGE_Y = 90;
-
-// There were two alphas here, one for ink chrome and one for cream, tuned until
-// the chrome could be read off the sky. The last note left on them said the
-// cream one had "0.04 of margin and there is no more… if this needs to give
-// again, the answer is a scrim under the chrome". It did, and it is: the chrome
-// is cream on TOP_SCRIM_STOPS now and neither alpha has anything left to do.
-
-/** CREAM, alpha-blended — derived from the constant, never retyped as decimals. */
-function toRgba(hex: string, alpha: number): string {
-  const n = parseInt(hex.slice(1), 16);
-  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
-}
+const STROKE_SVG_H = 14;
 
 // Quotes short enough to actually read during the ~3.4s the screen is up. The
 // fallback can't realistically be hit, but this screen sits on the boot path —
-// an empty pool must never be able to crash the launch.
+// an empty pool must never be able to crash the launch. The id rides along so
+// QuotePlate can dress the plate in the author's era.
 const SHORT_QUOTES = ALL_PHILOSOPHERS.flatMap((p) =>
-  p.quotes.map((q) => ({ text: q.text, author: p.name }))
+  p.quotes.map((q) => ({ text: q.text, author: p.name, id: p.id }))
 ).filter((q) => q.text.length <= 90);
-const FALLBACK_QUOTE = { text: 'The unexamined life is not worth living.', author: 'Socrates' };
+const FALLBACK_QUOTE = { text: 'The unexamined life is not worth living.', author: 'Socrates', id: 'socrates' };
 
 // A slightly wobbly hand-drawn horizontal stroke, plus its exact length so the
 // draw-on animation (strokeDashoffset) can map progress 0–100 to the path.
@@ -147,7 +101,7 @@ function makeStroke(width: number, seed: number) {
 }
 
 // The percentage readout. Isolated so the tick-by-tick re-render touches this
-// tiny Text only — the scene above it never re-renders during the count.
+// tiny Text only — nothing above it re-renders during the count.
 const Pct = memo(function Pct({
   progress,
   color,
@@ -179,93 +133,58 @@ interface Props {
    * THE SCREEN UNDERNEATH MAY START NOW — fired when the lift BEGINS, not when
    * it ends, and the two are a second apart on purpose.
    *
-   * A reader: "there is that other animation screen that shows up first and then
-   * after that is almost loaded it does that glitch." Measured, the glitch is a
-   * blank screen. `onDone` was the only signal this component gave, it fires
-   * after the fade, and it is what starts the welcome's clock — so the launch
-   * art dissolved away to reveal the welcome at clock ZERO, and the welcome at
-   * clock zero is EMPTY CREAM. Its host walks on from off-stage right and his
-   * first pixel does not cross the frame until t = 1.03s (measured against the
-   * real rig). Rich full-bleed illustration → 320ms fade → a second of nothing.
-   *
-   * So the screen underneath is told at the top of the outro instead. The 100%
-   * run, the hold and the fade together give it 1.04s of cover — just past 1.03
-   * — which means the launch art is dissolving over a host who is already
-   * walking, rather than off a blank page.
+   * `onDone` fires after the fade and is what starts the welcome's clock — so
+   * firing only that dissolved the launch onto the welcome at clock ZERO, and
+   * the welcome at clock zero is EMPTY CREAM: its host walks on from off-stage
+   * and his first pixel does not cross the frame until t = 1.03s (measured
+   * against the real rig). So the screen underneath is told at the top of the
+   * outro instead. The 100% run, the hold and the fade together give it 1.04s
+   * of cover — just past 1.03 — which means the launch page is dissolving over
+   * a host who is already walking, rather than off a blank page.
    */
   onLift?: () => void;
   onDone: () => void;
 }
 
-// The cold-start loading moment: one of six hand-drawn outdoor scenes (a
-// different one each launch), the figure living in it, a cream stroke that draws
-// itself across the sky as a progress line with a counting percentage, and a
-// short quote resting on a dark scrim at the bottom. Both ends of the screen are
-// fixed cream on a fixed scrim, so the scene underneath can be anything at all.
-// At 100% the screen lifts away.
 export default function LaunchScreen({ ready, skipAnimation = false, onLift, onDone }: Props) {
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
-  // One scene + one quote per launch.
+  // One quote per launch.
   const seed = useMemo(() => Math.floor(Math.random() * 233280), []);
-  const scene = LAUNCH_SCENES[seed % LAUNCH_SCENES.length];
-  const base = PALETTES[scene.key].steps[0];
   const quote = SHORT_QUOTES.length > 0 ? SHORT_QUOTES[seed % SHORT_QUOTES.length] : FALLBACK_QUOTE;
 
-  // Cover-fit the 400×800 stage. The art and the figure both live inside it, so
-  // sharing this one mapping is what guarantees the feet meet the hill.
-  const fit = Math.max(width / STAGE_W, height / STAGE_H);
-  const offX = (width - STAGE_W * fit) / 2;
-  const offY = (height - STAGE_H * fit) / 2;
-
-  const strokeW = Math.round(width * 0.68);
+  const strokeW = Math.round(width * 0.56);
   const { d, len } = useMemo(() => makeStroke(strokeW, seed + 7), [strokeW, seed]);
-
-  // Where the chrome band lands. The masthead is plain screen space; the stroke
-  // takes the LOWER of its preferred stage y and a screen-space floor sitting
-  // CHROME_GAP under the masthead's box. On a 2:1-or-taller device offY is 0 and
-  // the floor never binds, so the composition is exactly the one authored above;
-  // below 2:1 offY goes negative, the stage placement would climb through the
-  // masthead and off the display, and the floor takes over. See the two-spaces
-  // note by MAST_TOP_PAD — this one line is the whole of that fix.
-  const mastTop = insets.top + MAST_TOP_PAD;
-  const strokeTop = Math.max(mastTop + MAST_LINE_H + CHROME_GAP, offY + STROKE_STAGE_Y * fit);
-
-  // THE BOTTOM OF THE CHROME, and therefore the bottom of the scrim's full-alpha
-  // run. Derived from `strokeTop` — the clamped one — down through the stroke's
-  // box, `strokeWrap`'s own gap and the percentage's line box, which is the same
-  // chain check-launch.mjs lays out. Every term is a named constant above, so a
-  // scrim that stops short of the percentage is not a thing that can be typed.
-  const chromeBottom = strokeTop + STROKE_SVG_H + PCT_GAP + PCT_LINE_H;
 
   const progress = useSharedValue(0);
   const screenOpacity = useSharedValue(1);
-  const sceneScale = useSharedValue(1);
   const introFade = useSharedValue(0);
+  const plateIn = useSharedValue(0);
+  const footIn = useSharedValue(0);
   const [held, setHeld] = useState(false);
 
   // Choreography: draw to 92 over 2.7s (fast start, gentle settle), then wait
   // for `ready` — normally already true, so the finish chains straight on.
   // With the finish + fade this puts the whole moment a little over 3s — long
-  // enough to actually read the quote at the bottom.
+  // enough to actually read the plate. The head, the plate and the foot arrive
+  // as three slices of one entrance, top of the page first.
   useEffect(() => {
     if (skipAnimation) {
       // Straight to held: no draw-on, no counting, no second performance. The
       // `ready` effect below still governs the lift, so boot order is unchanged.
-      //
-      // It still FADES, briefly, and that is not a second performance — it is the
-      // hand-off from the native splash. This path restarts the app into a new
-      // bundle, so there is a fresh splash in front of it, and snapping the
-      // ground straight to a near-black scene is the flash SPLASH_BG exists to
-      // remove. 260ms buys that and nothing else.
+      // It still FADES briefly — the hand-off from the fresh native splash this
+      // path restarts behind. 260ms buys that and nothing else.
       introFade.value = withTiming(1, { duration: 260 });
+      plateIn.value = withTiming(1, { duration: 260 });
+      footIn.value = withTiming(1, { duration: 260 });
       progress.value = 92;
       setHeld(true);
       return;
     }
     introFade.value = withTiming(1, { duration: 420 });
-    sceneScale.value = withTiming(1.04, { duration: 3800, easing: Easing.out(Easing.quad) });
+    plateIn.value = withDelay(180, withTiming(1, { duration: 480, easing: Easing.out(Easing.cubic) }));
+    footIn.value = withDelay(340, withTiming(1, { duration: 420 }));
     progress.value = withTiming(
       92,
       { duration: 2700, easing: Easing.out(Easing.cubic) },
@@ -281,7 +200,8 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
   // 280 + 240 + 520 = 1.04s of cover, against the 1.03s the welcome's host needs
   // to walk into frame — see `onLift`. Shorten any of the three and the handover
   // goes back to revealing an empty page; the hold at 100% is also what stops
-  // the count reading as a cut, which is the other half of what the reader saw.
+  // the count reading as a cut. scripts/check-ui.mjs §10 reads these numbers
+  // out of this block and holds them against the tab warm-up's SETTLE_MS.
   const lifted = useRef(false);
   useEffect(() => {
     if (!held || !ready || lifted.current) return;
@@ -300,224 +220,117 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [held, ready]);
 
-  // THE STATUS BAR HAS TO CROSS WITH THE PICTURE, NOT WITH THE UNMOUNT.
-  //
-  // This screen is the only thing in the app that sets `barStyle` at all, and it
-  // sets it light because the illustration behind it is near-black. It then held
-  // light for the whole 520ms dissolve onto a cream welcome page — white icons on
-  // cream, which is to say no icons — and snapped back to the platform default
-  // when the component finally left the tree. A clock and a battery blinking out
-  // and back at the exact moment of the hand-off is the other half of what a
-  // reader means by a glitchy start.
-  //
-  // It flips when the composite is half-way across instead. `screenOpacity` is
-  // the fade itself, so the icons change on the frame the ground they sit on
-  // does — no timer to drift, and nothing to keep in step with the duration.
-  const [barDark, setBarDark] = useState(false);
-  useAnimatedReaction(
-    () => screenOpacity.value < 0.5,
-    (past, was) => { if (past && !was) runOnJS(setBarDark)(true); }
-  );
-
   const rootStyle = useAnimatedStyle(() => ({ opacity: screenOpacity.value }));
-  // THE GROUND STARTS WHERE THE SPLASH LEFT OFF. See SPLASH_BG in launchArt.ts:
-  // the alternative is a hard cut from pale grey to near-black on the app's very
-  // first frame. It deepens on the same curve the art arrives on, so the reader
-  // sees one continuous surface rather than a hand-off.
+  // THE GROUND STARTS WHERE THE SPLASH LEFT OFF. See SPLASH_BG in launchArt.ts.
+  // Paper is only a 1.1:1 step from the splash grey, but the settle still rides
+  // the intro curve so the very first frame is the splash's own colour and the
+  // hand-off has no seam at all.
   const groundStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(introFade.value, [0, 1], [SPLASH_BG, base]),
+    backgroundColor: interpolateColor(introFade.value, [0, 1], [SPLASH_BG, GROUND]),
   }));
-  // The scene breathes very slightly as it loads. Scaled about its centre, so the
-  // picture grows into the frame instead of creeping off one corner.
-  const stageStyle = useAnimatedStyle(() => ({
-    opacity: introFade.value,
-    transform: [{ scale: sceneScale.value }],
-  }));
-  const fadeInStyle = useAnimatedStyle(() => ({
+  const mastStyle = useAnimatedStyle(() => ({
     opacity: introFade.value,
     transform: [{ translateY: (1 - introFade.value) * 8 }],
   }));
+  const plateStyle = useAnimatedStyle(() => ({
+    opacity: plateIn.value,
+    transform: [{ translateY: (1 - plateIn.value) * 10 }],
+  }));
+  const footStyle = useAnimatedStyle(() => ({ opacity: footIn.value }));
   const strokeProps = useAnimatedProps(() => ({
     strokeDashoffset: len * (1 - progress.value / 100),
   }));
 
   return (
-    <Animated.View
-      style={[StyleSheet.absoluteFill, styles.root, groundStyle, rootStyle]}
-    >
-      {/* Light while the illustration is up — the status bar sits inside the top
-          scrim's full-alpha run on every device, whatever scene came up behind
-          it — and dark from the moment the dissolve is more welcome than launch.
-          See `barDark`. */}
-      <StatusBar barStyle={barDark ? 'dark-content' : 'light-content'} />
+    <Animated.View style={[StyleSheet.absoluteFill, styles.root, groundStyle, rootStyle]}>
+      {/* Dark icons for the whole life of the screen: the ground is paper from
+          the splash hand-off to the welcome page's cream, so there is no longer
+          a crossing to time. This stays the only barStyle in the app. */}
+      <StatusBar barStyle="dark-content" />
 
-      {/* The scene: inert SVG art with the figure moving on top of it, both in
-          stage coordinates. needsOffscreenAlphaCompositing so the intro fade
-          composites the figure ONCE — otherwise overlapping limbs double-darken
-          on the way in, the way they did on the welcome screen. */}
-      <Animated.View
-        needsOffscreenAlphaCompositing
-        style={[
-          styles.stageBox,
-          { left: offX, top: offY, width: STAGE_W * fit, height: STAGE_H * fit },
-          stageStyle,
-        ]}
-        pointerEvents="none"
-      >
-        <View style={{ width: STAGE_W, height: STAGE_H, transform: [{ scale: fit }], transformOrigin: '0% 0%' }}>
-          {/* BACK · FIGURE · FRONT. The third layer is the whole of what stops
-              this reading as a man pasted onto a backdrop: everything used to be
-              painted before him, so he was by construction the nearest thing in
-              the world and there was no near plane at all. See `foreFor`. */}
-          <SceneArt scene={scene} />
-          <LaunchFigure scene={scene} />
-          <SceneFore scene={scene} />
-        </View>
-      </Animated.View>
+      <View style={[styles.col, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 26 }]}>
+        <View style={styles.spacerA} />
 
-      {/* The quote's scrim. Fixed alphas, never derived from the picture — the
-          art below the crest is deliberately near-black now, and the words have
-          to be safe on the lightest scene as well as the darkest. */}
-      <Svg width="100%" height="34%" style={styles.scrim} pointerEvents="none">
-        <Defs>
-          <LinearGradient id="ls-fade" x1="0" y1="0" x2="0" y2="1">
-            {SCRIM_STOPS.map((s) => (
-              <Stop
-                key={s.offset}
-                offset={s.offset}
-                stopColor={`rgb(${SCRIM_RGB.join(',')})`}
-                stopOpacity={s.opacity}
+        {/* The head of the page: mark, wordmark, and the rule that draws itself
+            as the progress line. The wordmark is the brand from app.json —
+            check-launch derives the expected string from expo.name, the rule
+            that caught this screen still saying the previous name (§19). */}
+        <Animated.View style={[styles.mast, mastStyle]}>
+          <LaurelMark width={78} />
+          <Text style={styles.wordmark}>ASHMERE</Text>
+          <View style={styles.strokeWrap}>
+            <Svg
+              width={strokeW}
+              height={STROKE_SVG_H}
+              viewBox={`0 ${-STROKE_SVG_H / 2} ${strokeW} ${STROKE_SVG_H}`}
+            >
+              <AnimatedPath
+                d={d}
+                stroke={C.ink}
+                strokeWidth={2.6}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
+                strokeDasharray={`${len} ${len}`}
+                animatedProps={strokeProps}
               />
-            ))}
-          </LinearGradient>
-        </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" fill="url(#ls-fade)" />
-      </Svg>
+            </Svg>
+            <Pct progress={progress} color={C.inkSoft} />
+          </View>
+        </Animated.View>
 
-      {/* The chrome's scrim — the same construction as the quote's, inverted:
-          full alpha from the top edge down to `chromeBottom`, then out to
-          nothing. `topScrimHeight` is what makes the hold land exactly there,
-          so this is sized by the layout rather than by a guessed percentage.
-          Unanimated, like the quote's — the text fades in over it. */}
-      <Svg
-        width="100%"
-        height={topScrimHeight(chromeBottom)}
-        style={styles.topScrim}
-        pointerEvents="none"
-      >
-        <Defs>
-          <LinearGradient id="ls-top-fade" x1="0" y1="0" x2="0" y2="1">
-            {TOP_SCRIM_STOPS.map((s) => (
-              <Stop
-                key={s.offset}
-                offset={s.offset}
-                stopColor={`rgb(${SCRIM_RGB.join(',')})`}
-                stopOpacity={s.opacity}
-              />
-            ))}
-          </LinearGradient>
-        </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" fill="url(#ls-top-fade)" />
-      </Svg>
+        <View style={styles.spacerB} />
 
-      {/* Masthead */}
-      <Animated.View style={[styles.mast, { top: mastTop }, fadeInStyle]}>
-        {/* THE LETTERS ARE SPACED IN THE STRING, and that is how the old name
-            survived a rename. The app became Ashmere in build 21 and every other
-            surface followed — Home, the auth panel, the paywall, the update gate
-            — but a wordmark written one letter at a time matches no search for
-            the name itself, so the first screen of every launch kept the
-            previous brand and nothing reported it. check-launch asserted the old
-            string outright, so it was green throughout.
-
-            It now derives the expected wordmark from app.json's `expo.name`. If
-            this is renamed again, search for the LETTER-SPACED form as well. */}
-        <Text style={[styles.mastText, { color: CREAM }]}>A S H M E R E</Text>
-      </Animated.View>
-
-      {/* The cream stroke drawing itself + percentage, pinned to the sky — but
-          never above the masthead, and never off the top of the display. */}
-      <Animated.View style={[styles.strokeWrap, { top: strokeTop }, fadeInStyle]}>
-        <Svg
-          width={strokeW}
-          height={STROKE_SVG_H}
-          viewBox={`0 ${-STROKE_SVG_H / 2} ${strokeW} ${STROKE_SVG_H}`}
-        >
-          <AnimatedPath
-            d={d}
-            stroke={CREAM}
-            strokeWidth={STROKE_W}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-            strokeDasharray={`${len} ${len}`}
-            animatedProps={strokeProps}
+        {/* The epigraph — the app's own struck plate, era spine and all, so the
+            first object anyone sees is the object the whole app is made of.
+            Its tones are tone.plate()'s and are already held by check-ui. */}
+        <Animated.View style={plateStyle}>
+          <QuotePlate
+            text={quote.text}
+            author={quote.author}
+            philosopherId={quote.id}
+            size="md"
+            kicker="FROM THE LIBRARY"
           />
-        </Svg>
-        <Pct progress={progress} color={CREAM} />
-      </Animated.View>
+        </Animated.View>
 
-      {/* Quote */}
-      <Animated.View style={[styles.quoteWrap, { paddingBottom: insets.bottom + 34 }, fadeInStyle]}>
-        <Text style={[styles.quoteText, { color: CREAM }]} numberOfLines={3}>
-          “{quote.text}”
-        </Text>
-        <Text style={[styles.quoteBy, { color: toRgba(CREAM, 0.72) }]}>— {quote.author.toUpperCase()}</Text>
-      </Animated.View>
+        <View style={styles.spacerC} />
+
+        <Animated.Text style={[styles.foot, footStyle]}>
+          THE ART OF THINKING DEEPLY
+        </Animated.Text>
+      </View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { zIndex: 1000, elevation: 1000 },
-  stageBox: { position: 'absolute', overflow: 'hidden' },
-  scrim: { position: 'absolute', left: 0, right: 0, bottom: 0 },
-  topScrim: { position: 'absolute', left: 0, right: 0, top: 0 },
-  mast: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
-  // The same drop-shadow the quote wears below, and it is the same hedge for
-  // the same reason: it sits ON TOP of the measured scrim contrast, never
-  // instead of it. Nothing here is relying on a shadow to be readable.
-  mastText: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 10,
-    lineHeight: MAST_LINE_H,
-    letterSpacing: 4,
-    textShadowColor: 'rgba(0,0,0,0.55)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+  col: { flex: 1, paddingHorizontal: 26 },
+  spacerA: { flex: 3 },
+  spacerB: { flex: 2 },
+  spacerC: { flex: 3 },
+  mast: { alignItems: 'center' },
+  wordmark: {
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 30,
+    lineHeight: 38,
+    letterSpacing: 3,
+    color: C.ink,
+    marginTop: 10,
   },
-  strokeWrap: { position: 'absolute', left: 0, right: 0, alignItems: 'center', gap: PCT_GAP },
+  strokeWrap: { alignItems: 'center', gap: 9, marginTop: 14 },
   pct: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 12,
-    lineHeight: PCT_LINE_H,
+    fontSize: 11,
+    lineHeight: 14,
     letterSpacing: 2,
-    textShadowColor: 'rgba(0,0,0,0.55)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
   },
-  quoteWrap: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: 'center',
-    paddingHorizontal: 36,
-  },
-  quoteText: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontStyle: 'italic',
-    fontSize: 16.5,
-    lineHeight: 24,
-    textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.55)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
-  },
-  quoteBy: {
+  foot: {
+    alignSelf: 'center',
     fontFamily: 'Inter_500Medium',
-    fontSize: 9.5,
-    letterSpacing: 2,
-    marginTop: 10,
+    fontSize: 10,
+    letterSpacing: 2.5,
+    color: C.inkSoft,
   },
 });
