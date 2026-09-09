@@ -60,32 +60,19 @@ const lesson: Lesson = {
       },
     },
     {
-      type: 'dilemma',
-      scenario: 'Every conscious being in the universe blinks out of existence at once. No minds remain anywhere.',
-      prompt: 'Do the mountains still exist?',
-      choices: [
-        { id: 'a', label: 'Yes — they exist independently of any mind' },
-        { id: 'b', label: 'No — to exist is to be perceived' },
-        { id: 'c', label: '"Exist" has no settled meaning without a knower' },
-      ],
-      views: [
-        {
-          thinker: 'Realist',
-          stance: 'The mountains remain, unperceived.',
-          why: 'Reality does not lean on observers. The rock, the past, and the laws were here before any mind and would outlast every mind. Our perceiving discovers the world; it does not prop it up.',
-        },
-        {
-          thinker: 'Berkeley (idealist)',
-          stance: 'Nothing physical persists unperceived — unless God perceives it.',
-          why: 'To be is to be perceived, so unsensed mountains are a contradiction. Berkeley’s rescue: God perceives all things always, so the world endures in the divine mind even when no human looks.',
-        },
-        {
-          thinker: 'Kantian',
-          stance: 'Something is there, but not the world as we know it.',
-          why: 'Space, time, and objects are how minds must structure experience. Strip away all minds and a thing-in-itself may remain, but the ordered world of mountains and moments — that depends on a knower.',
-        },
-      ],
+      type: 'question',
+      prompt: 'Every conscious being blinks out at once. Whose view says the mountains are gone?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Berkeley: to be is to be perceived', isCorrect: true },
+          { id: 'b', text: 'The realist: reality never needed observers', isCorrect: false },
+          { id: 'c', text: 'The Kantian: a thing in itself remains', isCorrect: false },
+          { id: 'd', text: 'None of them: the question is empty', isCorrect: false },
+        ],
+        explanation: 'Berkeley. An unsensed mountain is a contradiction on his view, and his rescue is that God perceives all things always. The realist keeps the rock outright, and the Kantian keeps a thing in itself while the ordered world of mountains and moments goes with the minds.',
+      },
     },
     {
       type: 'summary',

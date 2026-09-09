@@ -65,27 +65,19 @@ const lesson: Lesson = {
       },
     },
     {
-      type: 'dilemma',
-      scenario: 'A government must decide a contested issue. Option one: hold a quick national vote and follow the majority. Option two: convene a deliberative assembly that debates for months, then recommends. The vote is faster and more equal in raw numbers; the assembly is slower but reasoned.',
-      prompt: 'Which better confers democratic legitimacy?',
-      choices: [
-        { id: 'a', label: 'The quick majority vote; every head counts equally' },
-        { id: 'b', label: 'The deliberative assembly; reasons were tested' },
-        { id: 'c', label: 'Neither alone; combine debate then a vote' },
-      ],
-      views: [
-        {
-          thinker: 'Jürgen Habermas',
-          stance: 'Legitimacy flows from reasoned public debate',
-          why: 'A decision binds us justly when it could be defended to everyone affected by reasons they could accept. Mere counting skips that test, so deliberation, not the tally alone, is the deeper source of legitimacy.',
-        },
-        {
-          thinker: 'Aggregative democrats',
-          stance: 'Equal votes best respect equal citizens',
-          why: 'Deliberation can be captured by the articulate and well-resourced. One person, one vote treats everyone as a political equal without privileging those who argue well, and protects against talk that merely dresses up power.',
-        },
-      ],
+      type: 'question',
+      prompt: 'A contested law. How should the counting and the reasoning divide the work?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Reasons first, and then a count that binds', isCorrect: true },
+          { id: 'b', text: 'The tally alone — every head counts equally', isCorrect: false },
+          { id: 'c', text: 'The reasoning alone, with the vote a formality', isCorrect: false },
+          { id: 'd', text: 'Neither — hand it to whoever knows the subject', isCorrect: false },
+        ],
+        explanation: 'Both, in that order. A pure tally never tests anything, and pure deliberation hands the outcome to whoever argues best and never has to be counted — which is the aggregative democrat\'s real complaint. Habermas wanted the argument to shape the options and the vote to settle them, and an assembly reporting to a parliament is exactly that shape.',
+      },
     },
     {
       type: 'summary',

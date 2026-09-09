@@ -65,27 +65,19 @@ const lesson: Lesson = {
       },
     },
     {
-      type: 'dilemma',
-      scenario: 'A prosperous democracy debates its border. Opening it would give millions a fairer shot at a decent life. Closing it lets citizens control who shares in their language, institutions, and welfare state. Both sides claim the language of justice.',
-      prompt: 'May the state justly restrict immigration?',
-      choices: [
-        { id: 'a', label: 'No, free movement is a basic claim of justice' },
-        { id: 'b', label: 'Yes, communities may decide their own membership' },
-        { id: 'c', label: 'Restrict, but with strong duties to refugees' },
-      ],
-      views: [
-        {
-          thinker: 'Joseph Carens',
-          stance: 'Borders should be largely open',
-          why: 'If we believe in equal moral worth, restricting movement mostly protects the unearned advantages of the already-fortunate. Freedom to move is, for many, the difference between a flourishing life and a blighted one.',
-        },
-        {
-          thinker: 'Michael Walzer',
-          stance: 'Self-determining communities may close the door',
-          why: 'The right to shape a shared way of life requires the right to admit. A community with no control over membership cannot sustain the bonds, culture, and mutual obligations that make it a community at all.',
-        },
-      ],
+      type: 'question',
+      prompt: 'Two babies are born the same day, one inside a wealthy democracy and one just outside. What does the case show?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'A birth lottery decides much of both lives', isCorrect: true },
+          { id: 'b', text: 'The two will end up much the same', isCorrect: false },
+          { id: 'c', text: 'Wealth is earned by the community inside', isCorrect: false },
+          { id: 'd', text: 'Immigration is a purely economic question', isCorrect: false },
+        ],
+        explanation: 'A birth lottery. Neither child chose a side, and the line drawn before either could choose shapes both lives more than almost anything they go on to do. Carens builds the open-borders case on exactly that, and Walzer still answers that a community must decide who joins.',
+      },
     },
     {
       type: 'summary',

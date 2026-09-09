@@ -65,32 +65,19 @@ const lesson: Lesson = {
       },
     },
     {
-      type: 'dilemma',
-      scenario: 'You release a stone and it falls, as it always has. A child asks: "Does it have to fall, or does it just always happen to?"',
+      type: 'question',
       prompt: 'What makes the stone fall every time?',
-      choices: [
-        { id: 'a', label: 'It just always does; the law is the pattern, nothing more' },
-        { id: 'b', label: 'A real necessity in nature forces it to fall' },
-        { id: 'c', label: 'A deep dispositional power of matter to attract' },
-      ],
-      views: [
-        {
-          thinker: 'Hume (regularity)',
-          stance: 'There is only the constant pattern.',
-          why: 'We see the stone fall, never a "must" behind it. A law is the best compact summary of what always happens. Expecting necessity is a habit of the mind, not a feature we ever observe in the falling.',
-        },
-        {
-          thinker: 'Armstrong (necessitation)',
-          stance: 'A law of nature forces the falling.',
-          why: 'Mass necessitates gravitational attraction — a real relation between properties, not just a tally of cases. That necessitation is why the regularity holds and why our predictions are reliable rather than lucky guesses.',
-        },
-        {
-          thinker: 'Dispositionalist',
-          stance: 'Things fall because of their own powers.',
-          why: 'Laws are not extra entities over objects. Massive bodies just have an intrinsic disposition to attract — a power they would exercise in the right conditions. The "law" describes those powers; it does not float above them.',
-        },
-      ],
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'A law above the stone that forces the fall', isCorrect: true },
+          { id: 'b', text: 'Nothing does — the pattern simply repeats', isCorrect: false },
+          { id: 'c', text: 'Habit, which makes us expect a fall', isCorrect: false },
+          { id: 'd', text: 'The stone has fallen before, so it must again', isCorrect: false },
+        ],
+        explanation: 'A law that forces it. Something has to separate the machine-fed bag from the accidental one, and a bare pattern cannot. The dispositionalist keeps that must and puts it inside the stone rather than above it, which is the serious rival. Habit is a fact about us, and the last option is the pattern again wearing a must.',
+      },
     },
     {
       type: 'summary',

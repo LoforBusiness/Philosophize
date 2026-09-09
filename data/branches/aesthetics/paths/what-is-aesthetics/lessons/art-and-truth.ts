@@ -45,20 +45,34 @@ const lesson: Lesson = {
       philosopherId: 'plato',
     },
     {
-      type: 'dilemma',
-      scenario: 'A reader says a war novel taught her more about courage and fear than any history book — she understands those soldiers now. A skeptic counters: she learned nothing; the soldiers are invented, the "lessons" are just feelings she projected onto a fiction. No actual knowledge changed hands.',
-      prompt: 'Did the novel genuinely teach her something?',
-      choices: [
-        { id: 'yes', label: 'Yes — it gave real understanding of courage and fear' },
-        { id: 'no', label: 'No — invented stories cannot supply knowledge' },
-        { id: 'feeling', label: 'It moved her, but moving isn\'t teaching' },
-      ],
-      views: [
-        { thinker: 'Aristotle', stance: 'Poetry is more philosophical than history', why: 'History records what happened; poetry shows what would happen — the universal patterns of human action. By dramatising what is typical and probable, fiction teaches truths a list of mere facts cannot.' },
-        { thinker: 'Martha Nussbaum', stance: 'Novels cultivate moral understanding', why: 'By making us imaginatively inhabit other lives, fiction trains the perception and empathy ethical life requires. The novel does real cognitive and moral work no argument or data set can replace.' },
-        { thinker: 'Plato', stance: 'Imitation misleads, it doesn\'t teach', why: 'Art is twice removed from truth and inflames feeling over reason. What feels like insight is emotional manipulation. The skeptic is right: she gained sensation, not knowledge.' },
-      ],
+      type: 'question',
+      prompt: 'A war novel leaves a reader saying she understands those soldiers now. What did she get?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'A deeper grasp of courage and fear', isCorrect: true },
+          { id: 'b', text: 'Nothing at all, since the soldiers are invented', isCorrect: false },
+          { id: 'c', text: 'New historical facts about the war', isCorrect: false },
+          { id: 'd', text: 'A feeling she mistook for knowledge', isCorrect: false },
+        ],
+        explanation: 'A deeper grasp. The soldiers are invented, so no new fact changed hands, and what changed is knowing courage and fear from inside. Calling that a mere feeling assumes knowledge only ever means fresh information.',
+      },
+    },
+    {
+      type: 'question',
+      prompt: 'How much does a novel hand over about the world?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'No new facts, but a deeper grasp', isCorrect: true },
+          { id: 'b', text: 'A pleasant lie, and nothing more', isCorrect: false },
+          { id: 'c', text: 'A textbook with invented characters', isCorrect: false },
+          { id: 'd', text: 'Exactly what a history book hands over', isCorrect: false },
+        ],
+        explanation: 'Understanding rather than information. Plato called the poet a maker of images, twice removed from the truth. The reply is that a false story can still show a real thing clearly, which is why the novel is not simply a worse history book.',
+      },
     },
     {
       type: 'reinforcement',

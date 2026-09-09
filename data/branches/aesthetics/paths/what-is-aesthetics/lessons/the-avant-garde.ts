@@ -44,20 +44,34 @@ const lesson: Lesson = {
       work: 'Art as Technique',
     },
     {
-      type: 'dilemma',
-      scenario: 'A gallery exhibits a single banana duct-taped to the wall. Crowds gawk; one critic calls it a brilliant comment on the art market, another calls it an empty stunt that proves the avant-garde has run out of ideas and is now just provoking for headlines.',
-      prompt: 'Is rule-breaking like this real art, or exhausted gimmickry?',
-      choices: [
-        { id: 'vital', label: 'Vital — it still makes us question what art is' },
-        { id: 'empty', label: 'Empty — shock for its own sake, nothing more' },
-        { id: 'absorbed', label: 'Once shocking, now just another convention' },
-      ],
-      views: [
-        { thinker: 'Avant-garde defender', stance: 'Provocation reopens the question', why: 'If it makes thousands argue about where art\'s boundary lies, it has done art\'s work: jolting habit, forcing us to ask what we value and why. Discomfort is the point, not a flaw.' },
-        { thinker: 'Peter Bürger', stance: 'The avant-garde gesture has been neutralised', why: 'Once the gallery and market absorb shock as a sellable style, the rebellion is tamed. Repeating Duchamp\'s gesture decades later can\'t reattack institutions that now happily profit from it.' },
-        { thinker: 'A traditionalist', stance: 'Skill and beauty still matter', why: 'Endless rule-breaking mistakes novelty for value. A banana on a wall trades craft for a headline. Eventually art must offer more than the thrill of "you didn\'t expect that."' },
-      ],
+      type: 'question',
+      prompt: 'What is the avant-garde breaking the rules for?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'To wake a habituated audience up', isCorrect: true },
+          { id: 'b', text: 'To shock, and nothing beyond that', isCorrect: false },
+          { id: 'c', text: 'To sell the work for more', isCorrect: false },
+          { id: 'd', text: 'To prove the old rules were mistakes', isCorrect: false },
+        ],
+        explanation: 'Defamiliarisation. Shklovsky said art exists to make the stone stony: a broken form makes a familiar thing visible again. Shock is the method rather than the aim, the market grew round the work afterwards, and nothing here says perspective or the key was a mistake.',
+      },
+    },
+    {
+      type: 'question',
+      prompt: 'A gallery tapes a banana to the wall and crowds gather. What has happened to the shock the avant-garde traded in?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Once shocking, now just another convention', isCorrect: true },
+          { id: 'b', text: 'Still as startling as it was in 1917', isCorrect: false },
+          { id: 'c', text: 'Each generation is harder to startle than the last', isCorrect: false },
+          { id: 'd', text: 'One scandal, and then nothing at all', isCorrect: false },
+        ],
+        explanation: 'It decays. Every broken rule is absorbed and becomes the convention the next generation breaks, which is why the movement has to keep moving. Peter Burger made the point about the gallery: once shock sells, the rebellion has been housed.',
+      },
     },
     {
       type: 'reinforcement',

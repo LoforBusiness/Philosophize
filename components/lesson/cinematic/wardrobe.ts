@@ -103,9 +103,14 @@ export interface Costume {
 //   · THE MONOCLE HAD TO GROW. At radius 8 it was a bump on the head's edge. At
 //     11, sitting 11 units proud of a head of 20, it is a monocle.
 //
-// The five hats are chosen to differ in SILHOUETTE rather than in detail — tall
-// cylinder, dome, wide flat board, low cap with a peak, enormous brim. Two hats
-// that differ only in trim are one hat.
+// The six hats are chosen to differ in SILHOUETTE rather than in detail — tall
+// cylinder, dome, wide flat board, low cap with a peak, enormous brim, and a
+// brimless fez. Two hats that differ only in trim are one hat.
+//
+// THE FEZ IS THE ONE PICKED FOR A MEASUREMENT RATHER THAN FOR ITS OUTLINE, and it
+// is worth knowing which: it is the only hat narrow enough to be worn by a figure
+// standing at the left edge of the stage, which is where the scenes put him. Its
+// note below has the numbers.
 
 /**
  * WHERE A HAT'S BAND SITS ON A ROUND HEAD — derived, not chosen.
@@ -236,6 +241,41 @@ const WIDE_BRIM: Piece[] = [
 ];
 
 /**
+ * THE ONE HAT THAT FITS ANYWHERE, and it exists because of a measurement rather
+ * than a taste.
+ *
+ * `make:wardrobe` was refusing 2,318 costumes and printing that as one number,
+ * which is the useless shape for it: `fits()` has three rules. Counted apart,
+ * **1,729 of those refusals are the LEFT EDGE of the stage, 222 the right edge,
+ * and 16 the band.** Scenes stage the figure hard against x = 0 — his leftmost
+ * box edge has a MEDIAN of 2.6 units — and every one of the other five hats is
+ * WIDER THAN HIS HEAD, so each carries a side reach of 6 to 11 and is refused
+ * almost everywhere. 205 lessons of 244 could wear nothing at all, and every
+ * costume in the app sat in the first half of its branch.
+ *
+ * `reachOf` says what to do about it in one line: a head piece centred at x 0
+ * measures `|x| + w/2 − 20`, so anything no wider than the 40-unit head reaches
+ * ZERO sideways and only the band can refuse it. A fez is that hat by
+ * definition — brimless, straight-sided, 28 across.
+ *
+ * AND A CYLINDER ON ITS OWN IS A BOX. The tassel is the second field mark, the
+ * same reasoning the kestrel needed: one shape says "hat on a head", two say
+ * WHICH hat. It hangs from the crown's top corner and down its side, and both
+ * pieces stay inside |x| + w/2 ≤ 20 so the whole costume still reaches nothing —
+ * which is the only reason it can be worn at x = 0 at all.
+ *
+ * The cord is drawn OUTSIDE the head's own circle for its whole length: at y −19
+ * a circle of radius 20 is 6.2 units wide, and the cord hangs at 14.5. Inside it
+ * would be ink on ink and simply absent (the rule at the top of this file).
+ */
+const FEZ: Piece[] = [
+  { at: 'head', x: 0, y: -22.3, w: 28, h: 16, r: 1.5 },        // crown — bottom −14.3 = seatY(28)
+  { at: 'head', x: 16, y: -25, w: 1.6, h: 9, rot: 18 },        // the cord, off the crown's top corner
+  { at: 'head', x: 17.5, y: -19, w: 5, h: 5, r: 2.5 },         // the tassel, out at the head's own edge
+  { at: 'head', x: 0, y: -13.6, w: 29, h: 1.4, paper: true },  // the seat, below everything it could sever
+];
+
+/**
  * The eyeglass, and the reason it is drawn where it is.
  *
  * A monocle centred on the head is inside the disc and invisible. This one sits
@@ -264,7 +304,7 @@ const MONOCLE: Piece[] = [
  *    looking boxes, especially since they follow without anything holding them."*
  *
  * They were the only two pieces in the wardrobe that were not WORN. Everything
- * else here either sits on the skull (the five hats), rides the face on a cord
+ * else here either sits on the skull (the six hats), rides the face on a cord
  * (the monocle) or is gripped (the cane, which is anchored to the HAND for exactly
  * this reason — "he is holding it, so when he raises his arm the cane comes with
  * it, which is the whole difference between a prop and a painted-on decoration").
@@ -316,7 +356,7 @@ const CANE: Piece[] = [
 // thirty that need to be squinted at, and a wardrobe is only variety if a reader
 // can tell two of them apart from across a room.
 
-// TEN LOOKS OUT OF FIVE HATS AND TWO WORN ACCESSORIES, and the ids do not move.
+// ELEVEN LOOKS OUT OF SIX HATS AND TWO WORN ACCESSORIES, and the ids do not move.
 //
 // BALANCED RATHER THAN BACKFILLED. Giving all four re-formed costumes a cane was
 // the obvious repair and left six of ten carrying one, which is not a wardrobe,
@@ -326,6 +366,11 @@ const CANE: Piece[] = [
 // `lessonWardrobe.ts` and `wardroberule`'s roll and sober list are all keyed on
 // them, so the four that lost a piece are re-formed rather than renamed: a costume
 // id is a name a reader never sees and a table everything else is joined on.
+//
+// `smoker` is the eleventh and it is not here for variety — it is the only look in
+// the roll that a figure standing at x = 0 can wear, which is where the scenes put
+// him. See the note on FEZ: the other five hats are all wider than his head, and
+// that one fact kept 205 lessons of 244 bare.
 export const COSTUMES: Costume[] = [
   { id: 'plain', label: 'the mascot, undressed', pieces: [] },
   { id: 'dandy', label: 'top hat · monocle · cane', pieces: [...TOP_HAT, ...MONOCLE, ...CANE] },
@@ -337,6 +382,7 @@ export const COSTUMES: Costume[] = [
   { id: 'lecturer', label: 'mortarboard · cane', pieces: [...MORTARBOARD, ...CANE] },
   { id: 'stroller', label: 'newsboy cap', pieces: [...FLAT_CAP] },
   { id: 'ringmaster', label: 'wide brim · monocle · cane', pieces: [...WIDE_BRIM, ...MONOCLE, ...CANE] },
+  { id: 'smoker', label: 'fez', pieces: [...FEZ] },
 ];
 
 export const BY_ID: Record<string, Costume> =

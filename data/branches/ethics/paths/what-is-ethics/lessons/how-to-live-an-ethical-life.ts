@@ -65,32 +65,19 @@ const lesson: Lesson = {
       },
     },
     {
-      type: 'dilemma',
-      scenario: 'You face a genuine dilemma where the three lenses point different ways. The consequentialist answer maximizes good but bends a rule. The deontological answer keeps your hands clean but lets harm occur. The virtuous answer is unclear because good people might disagree. There is no formula that decides for you.',
-      prompt: 'When the theories disagree, what do you do?',
-      choices: [
-        { id: 'a', label: 'Always default to best outcomes' },
-        { id: 'b', label: 'Always default to the rules' },
-        { id: 'c', label: 'Weigh all three and own the judgment' },
-      ],
-      views: [
-        {
-          thinker: 'Pluralist',
-          stance: 'No master rule; exercise judgment.',
-          why: 'Real moral life has irreducibly many values that can clash. There is no algorithm to rank them. We weigh the considerations, decide with care, and take responsibility — accepting that wisdom, not a formula, is what ethics finally asks of us.',
-        },
-        {
-          thinker: 'Aristotle',
-          stance: 'Trust the person of practical wisdom.',
-          why: 'The mark of ethical maturity is phronesis — practical wisdom: perceiving what a situation calls for and acting well, the way an experienced person does. It cannot be reduced to rules; it is cultivated through habit, experience, and reflection.',
-        },
-        {
-          thinker: 'Anti-relativist',
-          stance: 'Hard cases don’t mean anything goes.',
-          why: 'That some dilemmas are genuinely hard does not make all answers equal. Many choices are still clearly right or wrong. Reserve "it’s a judgment call" for the truly close cases, not as a license to dodge plain moral demands.',
-        },
-      ],
+      type: 'question',
+      prompt: 'The three lenses point three different ways and no formula breaks the tie. What now?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Weigh them and own the judgement', isCorrect: true },
+          { id: 'b', text: 'Follow whichever rule is strictest', isCorrect: false },
+          { id: 'c', text: 'Pick the lens that suits your wish', isCorrect: false },
+          { id: 'd', text: 'Treat every answer as equally good', isCorrect: false },
+        ],
+        explanation: 'Weigh them, and own it. Aristotle called the skill practical wisdom, and it cannot be reduced to a rule because the rules are what have collided. Defaulting to the strictest looks like rigour and is a way of not deciding, and a hard case does not make every answer equal.',
+      },
     },
     {
       type: 'summary',

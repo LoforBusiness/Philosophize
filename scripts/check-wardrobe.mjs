@@ -41,6 +41,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { grave } from './lib/liveliness.mjs';
 import { STAGE_W } from './lib/mustrule.mjs';
+import { SOBER as RULE_SOBER } from './lib/wardroberule.mjs';
 
 
 const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname).replace(/^\//, ''), '..');
@@ -92,7 +93,7 @@ function textOf(stem) {
     .map((m) => m[2]).join(' ');
 }
 
-const SOBER = new Set(['plain', 'scholar', 'lecturer', 'gent', 'traveller', 'stroller']);
+const SOBER = new Set(RULE_SOBER);
 const applied = side.wardrobeReach || {};
 const bad = { stale: [], band: [], twins: [], heavy: [], unknown: [], floats: [], visitor: [] };
 

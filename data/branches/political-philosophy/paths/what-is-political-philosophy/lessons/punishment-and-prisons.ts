@@ -65,27 +65,19 @@ const lesson: Lesson = {
       },
     },
     {
-      type: 'dilemma',
-      scenario: 'A guilty offender is genuinely reformed and poses zero future danger. Punishing him now deters no one and protects no one; it only imposes suffering for a past act. A judge must decide whether he still owes a sentence.',
-      prompt: 'Should the reformed, harmless offender still be punished?',
-      choices: [
-        { id: 'a', label: 'Yes, he deserves it for what he did' },
-        { id: 'b', label: 'No, punishment with no future benefit is pointless' },
-        { id: 'c', label: 'A reduced sentence, balancing both concerns' },
-      ],
-      views: [
-        {
-          thinker: 'Retributivist (Kant)',
-          stance: 'Desert demands punishment, regardless of benefit',
-          why: 'Justice means treating people as responsible agents who get what their acts merit. To punish only when useful treats persons as tools for social ends, not as rational beings answerable for what they freely did.',
-        },
-        {
-          thinker: 'Consequentialist',
-          stance: 'No good outcome, no warrant to harm',
-          why: 'Punishment is a real harm and must earn its keep. If no one is deterred, protected, or reformed, the suffering is gratuitous, dressing up vengeance as justice while doing nobody any actual good.',
-        },
-      ],
+      type: 'question',
+      prompt: 'A guilty offender is genuinely reformed and dangerous to nobody. Which view still says he owes a sentence?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Retributivism: the past act settles it', isCorrect: true },
+          { id: 'b', text: 'Consequentialism: no future good, no warrant', isCorrect: false },
+          { id: 'c', text: 'Foucault: the cell disciplines regardless', isCorrect: false },
+          { id: 'd', text: 'None of them: reform closes the case', isCorrect: false },
+        ],
+        explanation: 'Retributivism. Kant holds that desert is the whole ground of punishment, so a sentence is owed whether or not anybody benefits. A consequentialist would release him, and Foucault asks a different question altogether: what the prison does, not whether it is deserved.',
+      },
     },
     {
       type: 'summary',

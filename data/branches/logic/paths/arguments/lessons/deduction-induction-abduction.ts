@@ -66,6 +66,21 @@ const lesson: Lesson = {
       emoji: '⚙️',
     },
     {
+      type: 'question',
+      prompt: '"Every sunrise so far, so probably tomorrow too." Which engine is running?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Induction — many cases, so probably the rule', isCorrect: true },
+          { id: 'b', text: 'Deduction — the conclusion cannot be false', isCorrect: false },
+          { id: 'c', text: 'Abduction — the likeliest cause of what you saw', isCorrect: false },
+          { id: 'd', text: 'All three at once, in sequence', isCorrect: false },
+        ],
+        explanation: 'Induction. A pile of cases going to a rule is exactly the job it does, and one black swan still breaks it. Deduction would need a rule already in hand, and abduction is hunting for a cause rather than a pattern — there is no hidden explanation being proposed here.',
+      },
+    },
+    {
       type: 'summary',
       title: 'Three Ways to Reason',
       keyPoints: [

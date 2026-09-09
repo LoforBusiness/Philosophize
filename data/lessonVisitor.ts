@@ -43,4 +43,8 @@ export const VISITOR: Record<string, VisitorCue> = {
   'ethics-ethics-14': { enter: 7, x: 257, from: 460, dir: -1 },
   'logic-arguments-40': { enter: 7, x: 32, from: -60, dir: 1 },
   'ethics-ethics-40': { enter: 7, x: 34, from: -60, dir: 1 },
+  'metaphysics-being-26': { enter: 7, x: 30, from: -60, dir: 1 },
+  'political-political-26': { enter: 7, x: 33, from: -60, dir: 1 },
+  'metaphysics-being-27': { enter: 7, x: 30, from: -60, dir: 1 },
+  'logic-arguments-27': { enter: 7, x: 29, from: -60, dir: 1 },
 };

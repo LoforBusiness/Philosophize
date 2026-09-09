@@ -59,32 +59,19 @@ const lesson: Lesson = {
       },
     },
     {
-      type: 'dilemma',
-      scenario: 'A research lab must choose how to weigh interests. A chimpanzee shows complex emotion, self-recognition, and clear suffering. A human patient is permanently unconscious with no chance of recovery and no awareness. Resources force a hard comparison of whose interests count more.',
-      prompt: 'Whose moral status weighs more here?',
-      choices: [
-        { id: 'a', label: 'The human, simply for being human' },
-        { id: 'b', label: 'The chimpanzee, who can still suffer and feel' },
-        { id: 'c', label: 'They are exactly equal' },
-      ],
-      views: [
-        {
-          thinker: 'Peter Singer',
-          stance: 'Weigh capacities, not species labels.',
-          why: 'What matters is the capacity to suffer and to have interests. A self-aware, feeling chimpanzee has more at stake than a permanently unconscious being. To rank by species alone is speciesism, an arbitrary prejudice.',
-        },
-        {
-          thinker: 'Kantian',
-          stance: 'Persons command unconditional respect.',
-          why: 'Moral status flows from rational agency and dignity, not mere sentience. Even an impaired human belongs to a kind of being owed respect, while animals, lacking rational autonomy, fall outside that special circle of ends-in-themselves.',
-        },
-        {
-          thinker: 'Care ethicist',
-          stance: 'Look at relationships, not just capacities.',
-          why: 'Abstract criteria miss what matters: the web of care and dependency we are actually in. The unconscious patient is bound to grieving family; obligations grow from relationships, not from a checklist of traits.',
-        },
-      ],
+      type: 'question',
+      prompt: 'Which criterion should draw the line?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Being able to suffer — anything with a stake is in', isCorrect: true },
+          { id: 'b', text: 'Being able to plan a future, and knowing you have one', isCorrect: false },
+          { id: 'c', text: 'Being human, and nothing further', isCorrect: false },
+          { id: 'd', text: 'Being useful to somebody who already counts', isCorrect: false },
+        ],
+        explanation: 'Suffering. It is the one criterion that names a stake rather than a category, and a duty has to be about something a being can lose. Planning is the serious rival, and it carries a cost the others do not: it puts permanently unconscious humans outside the line. Species alone names no stake, and usefulness is the answer that denies moral status altogether.',
+      },
     },
     {
       type: 'summary',

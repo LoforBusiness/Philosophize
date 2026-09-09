@@ -38,32 +38,19 @@ const lesson: Lesson = {
       philosopherId: 'bertrand-russell',
     },
     {
-      type: 'dilemma',
-      scenario: 'Someone claims an invisible dragon lives in their garage. Every test you propose, they explain away: it\'s heatless, floats above flour, gives off no sound. They insist that since you cannot prove it isn\'t there, you should believe it is.',
-      prompt: 'Where does the burden of proof sit?',
-      choices: [
-        { id: 'a', label: 'On the claimant — they must show the dragon exists' },
-        { id: 'b', label: 'On the doubter — disprove the dragon or accept it' },
-        { id: 'c', label: 'Shared equally between both sides' },
-      ],
-      views: [
-        {
-          thinker: 'Carl Sagan',
-          stance: 'The claimant must produce evidence.',
-          why: 'A claim immune to every test is indistinguishable from no dragon at all. Extraordinary claims require extraordinary evidence — the absence of disproof is not presence of proof.',
-        },
-        {
-          thinker: 'Bertrand Russell',
-          stance: 'Unfalsifiable claims default to disbelief.',
-          why: 'If a claim cannot in principle be checked, the rational resting point is to withhold assent. We are not obliged to believe everything we cannot refute, or belief becomes worthless.',
-        },
-        {
-          thinker: 'W. K. Clifford',
-          stance: 'It is wrong to believe on insufficient evidence.',
-          why: 'Belief without proof corrupts the mind and society. Until the claimant meets their burden, suspending judgement is not just allowed — it is the honest duty of the inquirer.',
-        },
-      ],
+      type: 'question',
+      prompt: 'Somebody keeps an invisible dragon in the garage and explains away every test. Where does the burden sit?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'On the claimant, who has to produce evidence', isCorrect: true },
+          { id: 'b', text: 'On the doubter, who has to disprove it', isCorrect: false },
+          { id: 'c', text: 'Split evenly, since neither side can prove it', isCorrect: false },
+          { id: 'd', text: 'Nowhere, because the claim is unfalsifiable', isCorrect: false },
+        ],
+        explanation: 'On the claimant. Asserting is what creates the debt, and doubt takes on none of it. Splitting the burden evenly would make every unsupported claim halfway to true, and a claim no test can reach is the same picture as an empty garage.',
+      },
     },
     {
       type: 'question',

@@ -44,33 +44,34 @@ const lesson: Lesson = {
       highlight: 'Socratic humility',
     },
     {
-      type: 'dilemma',
-      scenario:
-        'You finish this path and a friend asks what philosophy of knowledge gave you. You could point to facts you can now recite—Gettier, reliabilism, contextualism. Or you could point to a changed posture: how you now treat your own certainty and other people’s words. Which is the real prize of the journey?',
-      prompt: 'What did the path actually give you?',
-      choices: [
-        { id: 'a', label: 'A toolkit of facts and theories to recite' },
-        { id: 'b', label: 'A wiser way of holding beliefs and doubts' },
-        { id: 'c', label: 'Proof that real knowledge is impossible' },
-      ],
-      views: [
-        {
-          thinker: 'Virtue Epistemologist',
-          stance: 'The prize is character.',
-          why: 'The theories matter, but their point is to reshape the knower. What lasts is the disposition: open, humble, careful, fair. That is what keeps finding truth long after the definitions blur.',
-        },
-        {
-          thinker: 'Socratic',
-          stance: 'The prize is humble curiosity.',
-          why: 'Knowing what you do not know is where inquiry begins, not where it dies. The path’s gift is a mind that keeps asking instead of settling—wisdom as an ongoing practice.',
-        },
-        {
-          thinker: 'Pragmatist',
-          stance: 'The prize is better living.',
-          why: 'Knowledge is not a trophy on a shelf but a tool for acting well. Its value shows in how you decide, whom you trust, and how you handle being wrong.',
-        },
-      ],
+      type: 'question',
+      prompt: 'What made Socrates wiser than the men he questioned?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'He knew where his own knowledge stopped', isCorrect: true },
+          { id: 'b', text: 'He held more facts than any of them', isCorrect: false },
+          { id: 'c', text: 'He was never wrong about anything', isCorrect: false },
+          { id: 'd', text: 'He refused to believe anything at all', isCorrect: false },
+        ],
+        explanation: 'He knew where he stopped. Socrates claims no store of answers and no immunity from error, only an accurate view of his own limits. That is a working posture rather than modesty, and it is the opposite of refusing to believe anything.',
+      },
+    },
+    {
+      type: 'question',
+      prompt: 'As a knower learns more, what happens to the questions they can see?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'The edge keeps opening as they learn', isCorrect: true },
+          { id: 'b', text: 'The view stays the same from start to finish', isCorrect: false },
+          { id: 'c', text: 'The puzzles get used up one by one', isCorrect: false },
+          { id: 'd', text: 'One confusing stretch, and then clarity', isCorrect: false },
+        ],
+        explanation: 'It keeps opening. Every answer brings a question that could not have been asked before, so what somebody knows they do not know grows faster than what they know. A shrinking edge would mean philosophy eventually runs out of work.',
+      },
     },
     {
       type: 'summary',

@@ -57,6 +57,29 @@ const lesson: Lesson = {
       emoji: '🧩',
     },
     {
+      type: 'quote',
+      id: 'lq-logic-arguments-27-1',
+      quote: 'The universality of colloquial language is presumably the primary source of all semantical antinomies.',
+      author: 'Alfred Tarski',
+      era: '1944',
+      work: 'The Semantic Conception of Truth',
+    },
+    {
+      type: 'question',
+      prompt: 'What should logic do with a sentence like the Liar?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Stop a language from naming its own truth', isCorrect: true },
+          { id: 'b', text: 'Give it no truth value at all', isCorrect: false },
+          { id: 'c', text: 'Let it be true and false together', isCorrect: false },
+          { id: 'd', text: 'Ban self-reference from every sentence', isCorrect: false },
+        ],
+        explanation: 'Cut the pointing. Tarski split the language in levels, so truth for one level is only ever spoken at the next and the loop has nowhere to close. Leaving it valueless works until somebody writes "this sentence is not true". Accepting both is a serious position that costs a law nearly all logic rests on. And banning self-reference outright would forbid "this sentence is in English", which is harmless and true.',
+      },
+    },
+    {
       type: 'summary',
       title: 'This Sentence Is False',
       keyPoints: [

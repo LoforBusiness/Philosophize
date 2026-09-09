@@ -65,6 +65,22 @@ const lesson: Lesson = {
       },
     },
     {
+      type: 'question',
+      prompt: 'A genuine peer disagrees. How far should you move toward them?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'A long way, and not the whole way', isCorrect: true },
+          { id: 'b', text: 'Not at all, if you weighed the evidence', isCorrect: false },
+          { id: 'c', text: 'Straight to the midpoint, every time', isCorrect: false },
+          { id: 'd', text: 'Past them, since they may know more', isCorrect: false },
+        ],
+        explanation:
+          'A long way, and not all of it. Refusing to move treats your own certainty as evidence, which is the trap the last question named. Splitting automatically is the opposite extreme: it hands a veto to anyone willing to disagree, and it stops you asking whether the two of you really are equals on this question.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

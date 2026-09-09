@@ -58,26 +58,19 @@ const lesson: Lesson = {
       },
     },
     {
-      type: 'dilemma',
-      scenario: 'A wealthy person gives a steady, fair share to good causes and lives a full, ordinary life with hobbies and friends. A critic says that since she could do much more good by giving nearly everything away, she is failing her duty and her comfortable life is a moral indulgence.',
-      prompt: 'Is giving "a fair share" enough, or is more required?',
-      choices: [
-        { id: 'a', label: 'A fair share fulfills her duty; the rest is optional' },
-        { id: 'b', label: 'She is obligated to give until it really hurts' },
-      ],
-      views: [
-        {
-          thinker: 'Defender of supererogation',
-          stance: 'A fair share is duty; more is a gift.',
-          why: 'Morality leaves space for a life of one’s own — projects, friendships, rest. Giving beyond a reasonable share is admirable, even saintly, but not owed. Praising the extra makes sense only if it was never strictly required.',
-        },
-        {
-          thinker: 'Strict consequentialist',
-          stance: 'You must do the most good you can.',
-          why: 'If a luxury matters less than a life you could save, keeping it is a moral failure, not a harmless choice. The cozy line between "duty" and "extra" is a comfortable fiction we tell to excuse ourselves.',
-        },
-      ],
+      type: 'question',
+      prompt: 'Somebody gives a steady fair share to good causes and keeps an ordinary life. Where does duty end?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'A fair share is owed, and the rest is a gift', isCorrect: true },
+          { id: 'b', text: 'Give until it hurts, or stand condemned', isCorrect: false },
+          { id: 'c', text: 'Nobody owes anybody anything at all', isCorrect: false },
+          { id: 'd', text: 'Duty is whatever the law happens to require', isCorrect: false },
+        ],
+        explanation: 'A fair share is the duty. That is the only arrangement that leaves room to admire the kidney donor, because praise makes sense only where the act was never owed. Push the line to the far end and every ordinary life becomes a moral failure.',
+      },
     },
     {
       type: 'summary',

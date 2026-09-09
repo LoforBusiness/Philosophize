@@ -50,6 +50,21 @@ const lesson: Lesson = {
     },
     {
       type: 'question',
+      prompt: 'What does everyday aesthetics actually claim?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Most aesthetic experience happens outside art', isCorrect: true },
+          { id: 'b', text: 'Art has been overrated for centuries', isCorrect: false },
+          { id: 'c', text: 'Only personal taste decides what counts', isCorrect: false },
+          { id: 'd', text: 'A tidy drawer is as deep as a Rembrandt', isCorrect: false },
+        ],
+        explanation: 'Outside art. Saito and others point at cooking, tidying and commuting, where nearly all of a life is actually spent. Nothing in the claim runs art down, taste is not the same as attention, and levelling a drawer with a Rembrandt is the overreach critics fear.',
+      },
+    },
+    {
+      type: 'question',
       prompt: 'A friend insists, "Only real art can be beautiful — a great meal is just tasty, not aesthetic." What is the best reply?',
       xpValue: 5,
       interaction: {

@@ -392,8 +392,8 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
 //     the combined length of the unbroken cinematic run at the FRONT of each
 //     branch. It may only go UP. Converting a lesson from behind the frontier
 //     lowers CARD_BUDGET without moving this, and the check says so.
-const CARD_BUDGET = 30;
-const SOLID_FLOOR = 154;
+const CARD_BUDGET = 0;
+const SOLID_FLOOR = 246;
 
 // ── THE A/B/C/D DECK IS BEING RETIRED TOO ───────────────────────────────────
 //

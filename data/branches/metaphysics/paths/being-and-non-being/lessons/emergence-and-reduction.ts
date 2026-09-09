@@ -64,32 +64,19 @@ const lesson: Lesson = {
       },
     },
     {
-      type: 'dilemma',
-      scenario: 'A neuroscientist maps every neuron firing while you taste coffee. She can predict your behaviour perfectly. Yet the felt taste — what it is like for you — seems absent from her wiring diagram.',
-      prompt: 'Is conscious experience reducible to the neurons?',
-      choices: [
-        { id: 'a', label: 'Yes — it just is the neural activity, fully reducible' },
-        { id: 'b', label: 'No — experience strongly emerges, new and irreducible' },
-        { id: 'c', label: 'It weakly emerges; we just lack the full derivation' },
-      ],
-      views: [
-        {
-          thinker: 'Reductionist',
-          stance: 'Experience is identical to brain activity.',
-          why: 'There is no extra ingredient. The taste of coffee is a pattern of neural firing, described in two vocabularies. Once neuroscience is complete, nothing about the experience will be left unexplained.',
-        },
-        {
-          thinker: 'Strong emergentist',
-          stance: 'Consciousness is new and irreducible.',
-          why: 'You can know every neuron and still not derive what the taste is like — recall the hard problem of consciousness. Experience arises from the brain yet has its own reality, not fixed in advance by the physical facts.',
-        },
-        {
-          thinker: 'Weak emergentist',
-          stance: 'It emerges but is in principle derivable.',
-          why: 'Consciousness is surprising and high-level, like the traffic jam, but ultimately follows from the parts once we understand the organisation. The gap is in our knowledge, not in nature.',
-        },
-      ],
+      type: 'question',
+      prompt: 'The jam has a speed and a direction. How much of it sits outside the cars?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'None — the jam is the cars, braking in order', isCorrect: true },
+          { id: 'b', text: 'Half — the pattern is real on top of the cars', isCorrect: false },
+          { id: 'c', text: 'Most of it — a wave is not made of anything', isCorrect: false },
+          { id: 'd', text: 'All of it — the jam is a separate object', isCorrect: false },
+        ],
+        explanation: 'None of it. A jam moves, has a speed and gets reported on the radio, and it is still nothing but braking, in order, on a road — which is weak emergence exactly. Consciousness is the case where this answer is genuinely contested; a queue of cars is not.',
+      },
     },
     {
       type: 'summary',

@@ -50,20 +50,34 @@ const lesson: Lesson = {
       work: 'The Sovereignty of Good',
     },
     {
-      type: 'dilemma',
-      scenario: 'You have one free evening and a little money. You could donate it to a hunger charity, or spend it on a concert that will move you deeply. A friend says spending on beauty while others go hungry is indulgent. You wonder whether a life with no room for beauty is a life worth defending at all.',
-      prompt: 'What place should beauty hold against other goods?',
-      choices: [
-        { id: 'luxury', label: 'A luxury — duty and need come first' },
-        { id: 'need', label: 'A genuine need — part of a life worth living' },
-        { id: 'balance', label: 'Neither rules: a good life balances both' },
-      ],
-      views: [
-        { thinker: 'Iris Murdoch', stance: 'Attending to beauty is moral practice', why: 'Beauty unselfs us, drawing attention away from the ego toward reality. Far from a distraction from goodness, learning to truly attend to beauty trains the very attention that ethics demands.' },
-        { thinker: 'A utilitarian', stance: 'Relieve suffering first', why: 'When a fixed sum could ease real hunger, spending it on personal pleasure is hard to justify. Beauty is good, but acute suffering has the stronger claim. Maximise the welfare you can.' },
-        { thinker: 'Aristotle', stance: 'A flourishing life needs both', why: 'Eudaimonia is not bare survival but a complete life of virtuous activity — which includes contemplation and the enjoyment of fine things. A life with no room for beauty falls short of flourishing.' },
-      ],
+      type: 'question',
+      prompt: 'Murdoch calls the appreciation of beauty an unselfing. What does she mean?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Attention moves onto something real outside you', isCorrect: true },
+          { id: 'b', text: 'You forget who you are for a while', isCorrect: false },
+          { id: 'c', text: 'You decide that you do not matter', isCorrect: false },
+          { id: 'd', text: 'Beauty replaces the need for morality', isCorrect: false },
+        ],
+        explanation: 'Attention moves outward. The anxious ego steps back because the kestrel has taken the room, which is not amnesia and not self-abasement. Murdoch calls the shift moral training: learning to attend to a bird is practice for attending to a person.',
+      },
+    },
+    {
+      type: 'question',
+      prompt: 'While beauty is doing its work, where does the attention sit?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Almost entirely on the thing being looked at', isCorrect: true },
+          { id: 'b', text: 'Half on the thing, half on yourself', isCorrect: false },
+          { id: 'c', text: 'Entirely on your own reaction to it', isCorrect: false },
+          { id: 'd', text: 'Nowhere in particular, which is the point', isCorrect: false },
+        ],
+        explanation: 'Almost all of it outward. Murdoch calls beauty the checking of selfishness, so a viewer still monitoring their own reaction has not been unselfed. The object does the work, and it can only do the work while it is what somebody is looking at.',
+      },
     },
     {
       type: 'summary',

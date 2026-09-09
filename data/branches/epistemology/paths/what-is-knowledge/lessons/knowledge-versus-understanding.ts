@@ -67,6 +67,21 @@ const lesson: Lesson = {
       },
     },
     {
+      type: 'question',
+      prompt: 'What is a student with correct facts and no transfer actually short of?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'The links that hold the facts together', isCorrect: true },
+          { id: 'b', text: 'More facts, and a longer list of them', isCorrect: false },
+          { id: 'c', text: 'Nothing at all, since the score was high', isCorrect: false },
+          { id: 'd', text: 'A better memory for the ones she has', isCorrect: false },
+        ],
+        explanation: 'The links. Understanding is knowledge woven into a structure, which is why it reaches a case nobody rehearsed. A longer list would sit in the same heap, a high score measured only the rehearsing, and memory was never the thing that failed.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

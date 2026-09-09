@@ -53,32 +53,19 @@ const lesson: Lesson = {
       emoji: '🔁',
     },
     {
-      type: 'dilemma',
-      scenario: 'A tidy principle you find compelling implies that, in a rare case, you must do something your conscience recoils from. The principle is elegant and has served you well. The intuition is fierce but might be mere squeamishness or inherited prejudice.',
-      prompt: 'Which do you revise to reach equilibrium?',
-      choices: [
-        { id: 'a', label: 'Keep the principle; distrust the gut reaction' },
-        { id: 'b', label: 'Keep the intuition; amend the principle' },
-        { id: 'c', label: 'Adjust both until they cohere' },
-      ],
-      views: [
-        {
-          thinker: 'Rawls',
-          stance: 'Adjust both toward mutual fit.',
-          why: 'No fixed foundation gets the last word. Test the principle against considered judgments and the judgments against the principle, revising whichever is weaker, until they support each other. The aim is a coherent web, not a single unshakeable axiom.',
-        },
-        {
-          thinker: 'Strict theorist',
-          stance: 'Trust the principle; bite the bullet.',
-          why: 'A good theory must sometimes overturn intuition — that is how moral progress happens. Many "obvious" feelings were once just prejudice. If the principle is sound, accept its hard implications rather than patch it to flatter your comfort.',
-        },
-        {
-          thinker: 'Intuitionist',
-          stance: 'Particular judgments are the bedrock.',
-          why: 'We are far surer that torturing the innocent is wrong than of any abstract formula. When a theory collides with a clear, considered judgment, so much the worse for the theory. Principles answer to cases, not the reverse.',
-        },
-      ],
+      type: 'question',
+      prompt: 'A principle you find compelling implies something your conscience recoils from. How does reflective equilibrium proceed?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Adjust both until they fit each other', isCorrect: true },
+          { id: 'b', text: 'Trust the principle and accept the implication', isCorrect: false },
+          { id: 'c', text: 'Trust the conscience and drop the principle', isCorrect: false },
+          { id: 'd', text: 'Suspend judgement until a proof arrives', isCorrect: false },
+        ],
+        explanation: 'Adjust both. No fixed foundation gets the last word, so the principle is tested against considered judgments and the judgments against the principle. A method that always trusts one side is a foundation rather than an equilibrium.',
+      },
     },
     {
       type: 'summary',

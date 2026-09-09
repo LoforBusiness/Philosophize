@@ -33,7 +33,7 @@ import { grave } from './lib/liveliness.mjs';
 import { mustBox, renderTable, STAGE_W } from './lib/mustrule.mjs';
 import { loadRig } from './lib/loadrig.mjs';
 import { corpus } from './lib/gestures.mjs';
-import { widestOn, secondFor, ROLL } from './lib/wardroberule.mjs';
+import { widestOn, secondFor, ROLL, SOBER } from './lib/wardroberule.mjs';
 
 const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname).replace(/^\//, ''), '..');
 const { transform } = await import(
@@ -158,13 +158,25 @@ const OUT = 'data/lessonWardrobe.ts';
  * neighbour check has to do anything.
  */
 const CYCLE = [
-  'plain', 'gent', 'plain', 'scholar', 'traveller', 'plain', 'dandy',
-  'stroller', 'plain', 'lecturer', 'magistrate', 'plain', 'gent',
-  'aesthete', 'plain', 'scholar', 'stroller', 'plain', 'traveller', 'ringmaster',
+  'plain', 'gent', 'plain', 'scholar', 'smoker', 'traveller', 'plain', 'dandy',
+  'stroller', 'plain', 'lecturer', 'smoker', 'magistrate', 'plain', 'gent',
+  'aesthete', 'plain', 'scholar', 'smoker', 'stroller', 'plain', 'traveller', 'ringmaster',
 ];
 
-/** Sober enough for a lesson about death. No monocle, no ringmaster, no top hat. */
-const SOBER = ['plain', 'scholar', 'lecturer', 'gent', 'traveller', 'stroller'];
+// THREE SLOTS FOR THE FEZ, AND THE NUMBER IS THE WHOLE DECISION.
+//
+// `smoker` is the only look in the roll that fits a figure standing at x = 0, and
+// the scenes put him there in 205 lessons of 244 (see FEZ in wardrobe.ts). So in
+// most of the corpus this cycle collapses to `plain` against `smoker`, and its
+// share of the slots IS the share of lessons that end up dressed — nothing else
+// in the list can compete for them.
+//
+// Rule 1 already forbids two neighbours matching, so six slots would alternate
+// plain, fez, plain, fez down a whole branch and the hat would stop being an
+// event. Three against seven `plain` puts a fez on roughly one lesson in three of
+// the constrained ones, which is the "sometimes" that was asked for — and it is
+// one number to move if that reads as too many or too few.
+
 
 const route = fs.readFileSync(ROUTE, 'utf8');
 const lessons = [];
@@ -236,7 +248,22 @@ for (const b of Object.keys(byBranch).sort()) {
     let pick = null;
     for (let i = 0; i < CYCLE.length; i += 1) {
       const c = CYCLE[(cursor + i) % CYCLE.length];
-      if (c === prev) continue;
+      // RULE 1 IS ABOUT COSTUMES, AND `plain` IS THE ABSENCE OF ONE.
+      //
+      // Excluding it alongside the rest looks like consistency and is what locked
+      // the back half of every branch into a strict bare, fez, bare, fez. Where
+      // only two entries fit a lesson — and after the fez arrived that is 205 of
+      // 244, because it is the only hat narrow enough for a figure standing at
+      // x = 0 — "neighbours differ" has just one move left and takes it every
+      // time. Changing the slot weights from three to two moved the count by one
+      // lesson and did not touch the pattern, which is the tell that the weights
+      // were never what was deciding it.
+      //
+      // Two undressed lessons running do not read as a repeated costume; they read
+      // as the mascot, which is what rule 3 asks for. The fallback below has been
+      // emitting plain twice in a row all along whenever nothing fitted, so this
+      // only makes the weights govern the case where something does.
+      if (c === prev && c !== 'plain') continue;
       if (heavy && !SOBER.includes(c)) continue;
       const cos = W.BY_ID[c];
       if (band && cos && !fits(L.id, cos, band)) { refused += 1; continue; }

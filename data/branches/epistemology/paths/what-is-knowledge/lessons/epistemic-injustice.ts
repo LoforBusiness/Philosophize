@@ -66,6 +66,21 @@ const lesson: Lesson = {
       },
     },
     {
+      type: 'question',
+      prompt: 'A group has no words yet for a harm they keep suffering. Which injustice is that?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Hermeneutical — there are no words to send', isCorrect: true },
+          { id: 'b', text: 'Testimonial — the words arrive and are marked down', isCorrect: false },
+          { id: 'c', text: 'Neither — a gap in the language wrongs nobody', isCorrect: false },
+          { id: 'd', text: 'Both at once, in equal measure', isCorrect: false },
+        ],
+        explanation: 'Hermeneutical. Nothing has been deflated, because nothing got as far as being said. Calling a gap in the shared language harmless is the answer Fricker set out to refuse: somebody carries the cost of a missing concept, and it is never the group who had no need of it.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

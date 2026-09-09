@@ -65,32 +65,19 @@ const lesson: Lesson = {
       },
     },
     {
-      type: 'dilemma',
-      scenario: 'A bright friend, after these lessons, asks the blunt question: should anyone keep doing metaphysics at all, or hand every real question over to physics?',
-      prompt: 'What is metaphysics good for?',
-      choices: [
-        { id: 'a', label: 'Nothing — physics will answer everything worth asking' },
-        { id: 'b', label: 'Clarifying concepts science must assume but cannot prove' },
-        { id: 'c', label: 'Reaching truths beyond all possible experience' },
-      ],
-      views: [
-        {
-          thinker: 'Scientism',
-          stance: 'Leave it to physics.',
-          why: 'Only empirical methods deliver knowledge. Questions science cannot test are either disguised scientific questions or pseudo-questions. As physics advances, the space left for armchair metaphysics shrinks toward nothing.',
-        },
-        {
-          thinker: 'Conceptual metaphysician',
-          stance: 'It clarifies what science takes for granted.',
-          why: 'Physics assumes notions of time, cause, law, object, and possibility — but does not justify them. Metaphysics examines those very foundations. Even reading an experiment requires ideas no experiment can supply.',
-        },
-        {
-          thinker: 'Speculative metaphysician',
-          stance: 'It reaches where experience cannot.',
-          why: 'Why is there anything? What is consciousness? Whether free will is real? These lie beyond any instrument, yet they are not meaningless. Reason can map the live options even where observation can never go.',
-        },
-      ],
+      type: 'question',
+      prompt: 'What has happened to metaphysics between antiquity and today?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'A better map every century, with the far wall unreached', isCorrect: true },
+          { id: 'b', text: 'The same ground walked again and again', isCorrect: false },
+          { id: 'c', text: 'The ancients knew it and later ages forgot', isCorrect: false },
+          { id: 'd', text: 'One good century, and then nothing', isCorrect: false },
+        ],
+        explanation: 'The map improved. Nobody has reached a final answer, and the questions are stated far more precisely than Parmenides could state them, dead ends are marked, and whole positions have been ruled out. That is what progress looks like where no experiment can decide.',
+      },
     },
     {
       type: 'summary',

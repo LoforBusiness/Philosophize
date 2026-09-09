@@ -65,27 +65,19 @@ const lesson: Lesson = {
       },
     },
     {
-      type: 'dilemma',
-      scenario: 'A nation faces invasion. It could end the war fast by bombing a city full of civilians, saving many of its own soldiers, or fight a longer, costlier battle that spares non-combatants. The cause of self-defense is just. The question is the means.',
-      prompt: 'May it bomb the city to end the war sooner?',
-      choices: [
-        { id: 'a', label: 'Yes, fewer total deaths is what matters' },
-        { id: 'b', label: 'No, deliberately killing civilians is never permitted' },
-        { id: 'c', label: 'Only as a genuine last resort to avoid defeat' },
-      ],
-      views: [
-        {
-          thinker: 'Just war theory (Walzer)',
-          stance: 'Civilian immunity holds even when costly',
-          why: 'Non-combatants have not forfeited their right not to be attacked. In bello rules forbid targeting them directly, even to win faster. A just cause does not dissolve the innocence of those who never took up arms.',
-        },
-        {
-          thinker: 'Utilitarian / realist',
-          stance: 'Minimize total suffering, even by hard means',
-          why: 'If the bombing truly ends the war and yields fewer deaths overall, refusing it sacrifices more lives to keep one\'s hands clean. In the extremity of war, results, not rigid rules, should guide the terrible choice.',
-        },
-      ],
+      type: 'question',
+      prompt: 'A nation with a just cause could end the war fast by bombing a city full of civilians. May it?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'No, deliberately killing civilians is never permitted', isCorrect: true },
+          { id: 'b', text: 'Yes, fewer total deaths is what matters', isCorrect: false },
+          { id: 'c', text: 'Yes, a just cause carries the means with it', isCorrect: false },
+          { id: 'd', text: 'Yes, if defeat is otherwise certain', isCorrect: false },
+        ],
+        explanation: 'No. Non-combatants never took up arms, so the in bello rule forbids aiming at them however fast it would end the war. The cause still passes, which is the pair of verdicts just war theory keeps apart: just to fight, unjust in the fighting.',
+      },
     },
     {
       type: 'summary',

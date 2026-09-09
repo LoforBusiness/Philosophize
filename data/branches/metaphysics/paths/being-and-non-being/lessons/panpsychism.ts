@@ -65,32 +65,19 @@ const lesson: Lesson = {
       },
     },
     {
-      type: 'dilemma',
-      scenario: 'A philosopher insists felt experience cannot arise from purely non-experiential matter — yet plainly you are conscious. Something in our picture of the world must give.',
-      prompt: 'Which way should we go?',
-      choices: [
-        { id: 'a', label: 'Mind is fundamental — panpsychism is true' },
-        { id: 'b', label: 'Consciousness emerges from complex physical systems' },
-        { id: 'c', label: 'There is no extra inner experience to explain' },
-      ],
-      views: [
-        {
-          thinker: 'Panpsychist',
-          stance: 'Experience goes all the way down.',
-          why: 'You cannot conjure experience from stuff with none, so the base must already carry a trace of it. Brains combine those traces into full consciousness. Strange, yes — but it keeps mind from appearing by magic.',
-        },
-        {
-          thinker: 'Emergentist',
-          stance: 'Consciousness arises only in complex brains.',
-          why: 'Mind is a high-level phenomenon, like life or wetness, that appears when matter is organised richly enough. Sprinkling experience onto particles is needless; better to explain how organisation gives rise to it.',
-        },
-        {
-          thinker: 'Illusionist',
-          stance: 'There is no inner glow to explain.',
-          why: 'The hard problem assumes a private "what it is like" that is real. Deny that, and the puzzle dissolves: the brain represents itself as having rich experience, but there is no extra phenomenal stuff needing a home in physics.',
-        },
-      ],
+      type: 'question',
+      prompt: 'On the panpsychist picture, what happens to experience as matter gets more organised?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'It brightens from a flicker that was never quite dark', isCorrect: true },
+          { id: 'b', text: 'It switches on once a brain is complex enough', isCorrect: false },
+          { id: 'c', text: 'It stays the same faint glow all the way up', isCorrect: false },
+          { id: 'd', text: 'There is no inner glow anywhere to explain', isCorrect: false },
+        ],
+        explanation: 'A dimmer, not a switch. Panpsychism puts a trace of experience at the base, so organisation only turns it up. A switch is emergentism, a flat line would leave a mouse and a person equally awake, and nothing at all is illusionism.',
+      },
     },
     {
       type: 'summary',

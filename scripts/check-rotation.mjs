@@ -46,7 +46,7 @@ const BELOW = ['cards', 'drag', 'sort', 'poll', 'plot', 'split', 'lever', 'field
  */
 const DECK_CEIL = 0.14;
 /** Neighbouring lessons answered the same way. High-water mark; may only go DOWN. */
-const SAME_BUDGET = 27;
+const SAME_BUDGET = 25;
 /** Lessons asking both questions below the figure. High-water mark; may only go DOWN. */
 const STAGELESS_BUDGET = 36;
 

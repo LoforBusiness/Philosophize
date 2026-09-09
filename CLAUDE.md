@@ -260,8 +260,13 @@ Two ratchets in `scripts/validate-cinematic.mjs`, both high-water marks:
   and the check says so. It also prints **the next lesson to convert in each
   branch**, so "in order" is never a judgement call.
 
-When `CARD_BUDGET` reaches 0 the takeover is done, and `LessonRunner`, `cards/`,
-`interactions/` and that whole half of §3 can be deleted.
+**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 246**, which is what the takeover
+finishing looks like in this file. Both stay in place: the budget is what makes a
+new card-only lesson a build error rather than a decision somebody has to remember,
+and the floor is what stops the frontier walking backwards. `LessonRunner`, `cards/`
+and `interactions/` are now dead weight — nothing routes to them, because every
+lesson id is in the `CINEMATIC` map — and deleting them is a separate, safe commit
+whenever somebody wants the lines back.
 
 > The two things that do NOT change: **`fill-blank` / `match` stay unimplemented on
 > purpose** — they are card interactions, and building them now is work on the
@@ -270,11 +275,13 @@ When `CARD_BUDGET` reaches 0 the takeover is done, and `LessonRunner`, `cards/`,
 
 ### Shape today
 
-**Every branch holds exactly 41 lessons, of which exactly 36 are cinematic** —
-87% of the way through the takeover. Both numbers are deliberate invariants rather
-than where the counts happened to land: the totals were 27–30 and the cinematic
-share was 11–14, and both showed on the Learn cards. `check:cinematic` enforces
-that all six branches match on both.
+**Every branch holds exactly 41 lessons, and every one of them is cinematic.**
+The takeover is DONE: `CARD_BUDGET` is 0, `SOLID_FLOOR` is 246, and there is no
+lesson left in the app that a reader meets as a card deck. Both numbers were
+deliberate invariants on the way rather than where the counts happened to land —
+the totals were 27–30 and the cinematic share was 11–14, and both showed on the
+Learn cards — and `check:cinematic` still enforces that all six branches match on
+both, because the next lesson anybody adds has to keep them level.
 
 They constrain each other, and there are exactly two moves that respect both:
 
@@ -288,7 +295,8 @@ They constrain each other, and there are exactly two moves that respect both:
   new one cinematic.** Two per branch took 30/14 to 32/16 and held both invariants
   in one pass; three per branch, in three rounds of six, took 34/19 to 37/22 the
   same way; two per branch again took 37/31 to 39/33, and once more 39/34 to
-  41/36. Adding one lesson to one
+  41/36. The last five per branch went the same way, in five rounds of six, and
+  took 41/36 to 41/41. Adding one lesson to one
   branch breaks both at once.
 
 > **AND EVERY NEW LESSON NOW HAS TO BE UNLIKE ITS NEIGHBOURS, MEASURABLY.** F43
@@ -312,13 +320,13 @@ They constrain each other, and there are exactly two moves that respect both:
 
 | Branch | Units | Lessons | of which cinematic | card decks left |
 |---|---|---|---|---|
-| Metaphysics | 5 | 41 | 36 | 5 |
-| Epistemology | 5 | 41 | 36 | 5 |
-| Logic | 5 | 41 | 36 | 5 |
-| Ethics | 5 | 41 | 36 | 5 |
-| Aesthetics | 3 | 41 | 36 | 5 |
-| Political Philosophy | 5 | 41 | 36 | 5 |
-| **Total** | **28** | **246** | **216 (88%)** | **30** |
+| Metaphysics | 5 | 41 | 41 | 0 |
+| Epistemology | 5 | 41 | 41 | 0 |
+| Logic | 5 | 41 | 41 | 0 |
+| Ethics | 5 | 41 | 41 | 0 |
+| Aesthetics | 3 | 41 | 41 | 0 |
+| Political Philosophy | 5 | 41 | 41 | 0 |
+| **Total** | **28** | **246** | **246 (100%)** | **0** |
 
 > Numbers go stale; the check does not. `npm run check:cinematic` prints the live
 > figures and the next lesson to convert in each branch every time it runs.
@@ -895,10 +903,10 @@ A unit's `index.ts` exports an array of `Path` objects (the units); each needs a
 stable `id` — `lessonsByUnit` is keyed on it, so **renaming an id silently resets
 that unit's progress for every existing user.**
 
-**Keep every branch at 41, and at 36 cinematic (§5).** The counts were 27–30 and it
-showed on the Learn cards, so they were levelled deliberately; adding one lesson to
-one branch puts them back out. Add six, one per branch — and give each of the six a
-scene, or the cinematic invariant goes out instead of the lesson one.
+**Keep every branch at 41, and at 41 cinematic (§5).** The counts were 27–30 and
+it showed on the Learn cards, so they were levelled deliberately; adding one lesson
+to one branch puts them back out. Add six, one per branch — and give each of the six
+a scene, or `CARD_BUDGET` goes up and the build fails, which is the point of it.
 
 **Grep for the free id; do not assume it is the next number.** Every branch runs
 1…32 unbroken today, but that is recent: the ids used to carry *gaps* where lessons
@@ -1029,27 +1037,72 @@ they belong to, so the rule book has them and this file did not:
   with bios, eras and **1,780 quotes** between them — and all 322 have exactly
   three "Did you know?" facts, with nothing missing.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
-  gating; **216 cinematic lessons** (animated stickman scenes, §17), answered six
+  gating; **246 cinematic lessons — every lesson in the app** (animated stickman
+  scenes, §17), answered six
   ways — scene targets, two cards, and the analogue family of `drag` · `sort` ·
-  `poll` · `split` · `plot` (§17, group R). **The analogue family is now the
-  majority**: 182 graded beats against 150 on the stage and 36 left in the deck,
+  `poll` · `split` · `plot` (§17, group R). **The analogue family is the
+  majority**: 240 graded beats against 210 on the stage and 38 left in the deck,
   and every lesson but two has one (the two ask both their questions on the stage
-  instead). **149 of those 182 move the picture as the reader moves the control**
-  (R7c, §17), and **164 of 184 scenes now turn the figure toward what the beat is
+  instead). **207 of those 240 move the picture as the reader moves the control**
+  (R7c, §17), and **224 scenes now turn the figure toward what the beat is
   about** — `lookPose` off a per-beat table `npm run make:gaze` derives from what
   each beat draws (the 20 that pose two figures are exempt). Animated
   `LessonReward` with XP count-up, streak and rank-up. **The figure is dressed and
-  he reacts**: 108 of 186 lessons put a costume on him from a wardrobe of ten
+  he reacts**: 78 of 246 lessons put a costume on him from a wardrobe of eleven
   (`npm run sheet:wardrobe`), neighbours never match, grave lessons are held to
-  the sober set, and he nods or draws back on every answer in the 164 scenes that
-  route through `lookPose`. **24 lessons also have a second figure walk in** on the
+  the sober set, and he nods or draws back on every answer in the scenes that
+  route through `lookPose`. **27 lessons also have a second figure walk in** on the
   beat before a two-sided question, dressed differently and turned to face him
   (group AA) — the count moves whenever the must-boxes are re-measured, because
   whether there is ROOM for him is derived from them.
   **The narration deck marks two things**: a philosopher's name, in their era's
-  colour and tappable for a one-line snapshot (78 lessons, 153 name forms), and
-  one maxim a lesson, struck on a band — 162 of 186, with 24 carrying none on
+  colour and tappable for a one-line snapshot, and
+  one maxim a lesson, struck on a band — 204 of 246, with 42 carrying none on
   purpose (§17).
+
+  > **ONLY 24 LESSONS WERE DRESSED, AND THE CAUSE WAS THE LEFT EDGE OF THE STAGE.**
+  > `make:wardrobe` refuses **2,318** costumes and prints that as one number, which
+  > is the useless shape for it: `fits()` has three rules and they want completely
+  > different fixes. Counted apart — **1,729 refusals are the LEFT EDGE, 222 the
+  > right edge, and 16 the band.** The first draft of this note said the band, on
+  > the strength of the total alone, and was wrong by two orders of magnitude.
+  >
+  > **The figure is staged hard against x = 0, corpus-wide.** His leftmost box edge
+  > has a MEDIAN of 2.6 units, and every one of the nine costumes reaches 6–11 units
+  > sideways — because every one carries a brim, a board or a cane wider than the
+  > 40-wide head. So 52 lessons of 244 clear an 8.5 reach and **205 can wear nothing
+  > at all**. The band was never the constraint: it refuses one to three lessons per
+  > costume.
+  >
+  > **And the distribution is worse than the count.** Every costume in the app sits
+  > in the FIRST half of its branch, because the newer lessons are the later ones
+  > and they all stand him at x 24–30. Political philosophy dresses 2 of 41 with a
+  > 19-lesson bare run; every branch ends in a bare run of 15 to 23. A reader deep
+  > in a branch never meets one again.
+  >
+  > **THE FIX IS A COSTUME THAT ONLY RISES**, and `reachOf` names it in one line: a
+  > head piece centred at x 0 measures `|x| + w/2 − 20`, so anything no wider than
+  > the 40-unit head reaches ZERO sideways and only the band can refuse it. That is
+  > a fez — brimless by definition — and it is the eleventh look in the roll. **78
+  > of 246 are dressed now against 24**, the longest bare run in any branch is 8
+  > where it was 23, and costumes reach the back half of a branch for the first
+  > time. Re-staging 200 scenes rightward was the alternative and costs a full
+  > must-box re-measure plus every composition laid out around him.
+  >
+  > **THE PRICE IS THAT ONE HAT DOES MOST OF THE WORK.** `smoker` is 55 of the 78,
+  > because it is the only look that fits where the scenes actually stand him. The
+  > way to spread that is to move the figure right in individual lessons as they are
+  > next touched, one at a time, not in a pass.
+  >
+  > **AND THE SLOT WEIGHTS TURNED OUT NOT TO BE WHAT DECIDED ANY OF IT.** Where only
+  > two entries fit a lesson — `plain` and the fez, which is 205 lessons of 244 —
+  > "neighbours never match" has one move left and takes it every time, so the back
+  > half of every branch came out a strict bare, fez, bare, fez. Changing the fez
+  > from three slots to two moved the count by ONE lesson and did not touch the
+  > pattern, which is what proved the weights were not the cause. `plain` is exempt
+  > from that rule now: two undressed lessons running do not read as a repeated
+  > costume, they read as the mascot, and the fallback had been emitting them all
+  > along whenever nothing fitted.
 - **Gamification:** 70 badges in 5 tiers, **48 ranks in 8 coloured orders, each
   order struck in a better material and six worked shapes cycling inside every
   one of them** (§7), a conferred-rank ceremony that shows
@@ -1079,8 +1132,11 @@ they belong to, so the rule book has them and this file did not:
   mastheads, the launch screen and Quick Start (§19).
 
 **Known gaps / tech debt:**
-- **Card decks are now a minority** — 30 of 246. That is now the number
-  that matters; see the takeover rule at the top of §5.
+- **~~Card decks are a minority.~~ THERE ARE NONE.** 0 of 246, `CARD_BUDGET` 0,
+  `SOLID_FLOOR` 246. What is left of the old format is the DATA — every lesson
+  still carries its `cards` array, which is the fallback the runner uses if a
+  `CINEMATIC` entry is ever removed, and that is what makes a scene safe to roll
+  back (§17). The runner itself is now unreachable; see the note at the top of §5.
 - **Roughly nine scenes in ten are a PHOTOGRAPH between taps.** Measured in
   pixels by `npm run check:alive`, not by grep: two screenshots from one page
   load, differenced, with the figure's own box excluded. `political7` — the
@@ -1753,10 +1809,11 @@ in order, the full streak, XP, rank and badge systems, and all 322 thinkers.
 
 **P0 — Daily Review (spaced repetition).** The retention engine and the strongest reason to subscribe. Resurface concepts from completed lessons on a spacing schedule via quick `multiple-choice` / `true-false` / `reinforcement` prompts; add a "Review" entry on Home; completing a review counts toward the streak. Track per-concept last-seen + strength in `userDataStore`.
 
-**P0 — Convert the remaining 30 card decks (§5).** Six at a time, one per branch, so
-the per-branch counts stay level, until `check:cinematic` reports 0 card decks left.
-Then `LessonRunner`, `cards/` and `interactions/` can go. Every lesson added along
-the way is cinematic.
+**~~P0 — Convert the remaining 30 card decks.~~ DONE.** Five rounds of six, in
+reading order, one per branch a round, so the per-branch counts never came apart;
+`check:cinematic` reports 246 of 246 and 0 card decks left. `LessonRunner`, `cards/`
+and `interactions/` are unreachable now and can go in their own commit. Every lesson
+added from here is cinematic (§5).
 
 
 **P1 — Finish the orphaned premium machinery.** Wire the cinematic **story scenes** (`SnowWalkStory`, `ExistenceStory`) in as a path's hook or capstone; ship a **"Read to me"** narration toggle (`KineticNarration`); and decide to either **show** the `feedback/` panels in the runner or delete them.
@@ -1802,8 +1859,8 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**This is the format the app is converging on** — 216 of the 246 lessons are here
-already, and the card runner is what they are replacing (§5). They are not card
+**This is the format the app converged ON** — 246 of the 246 lessons are here now,
+and the card runner they replaced is unreachable (§5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
 `CINEMATIC` map from lesson id → component; anything absent falls through to the
@@ -2567,6 +2624,36 @@ worst frame 10.9 → 8.6 units.
 > shot list is repaired and one-per-beat, but what a reader sees in that lesson is
 > the tour, and the arc is decoration until the scene draws something smaller.
 
+> **AND `make:tours` NOW REFUSES TO WRITE AT ALL, WHICH IS A GENERATOR AND A
+> VALIDATOR DISAGREEING ABOUT ONE NUMBER.** Finishing the takeover re-measured
+> thirty lessons and re-ran `make:wardrobe`, which reshuffled costumes (inserting
+> thirty lessons changes every neighbour relationship) and corrected over a thousand
+> figure boxes. On the corrected boxes the generator offers some lesson a FOLLOW
+> that `checkTour` then rejects: *a follow must hold one scale, not 1.15→1.22 (K9)*.
+> `make:tours` writes all lessons or none, so **`tours.ts` is still the last good
+> table** — the thirty new lessons carry no station and hold the wide shot.
+>
+> **WHICH lesson it names is not stable, and that is the diagnosis.** It was
+> `aesthetics-aesthetics-23` beat 8; after the fez moved the boxes again it is
+> `metaphysics-being-22` beat 7 at 1.16→1.31. A single bad tour would stay put. One
+> that follows the boxes around is two implementations of one rule disagreeing, and
+> whichever lesson happens to sit closest to the line reports it.
+>
+> **That is the right framing for them anyway**, and `measure-must` says so in its
+> own words: all 281 of their beats report a subject that already spans the stage,
+> so `containShot` would pin every station to ~1.0. `check:tour`, `check:camera`
+> and `check:space` are all green against the new boxes.
+>
+> **The disagreement is real and is NOT in the boxes.** Instrumented, the
+> generator's two end boxes are the same size and give the same `scaleFor` at both
+> ends — 1.343 for the failing station — so its own guard (*"a follow is only
+> offered when [the clamp] did not [shave an end]"*) passes honestly. Neither 1.15
+> nor 1.22 is that number, so `camera.ts` derives a station's scale through
+> something `tourrule.mjs` does not model. Reconciling them re-cameras all 246
+> lessons and wants its own commit; the first move is to print what
+> `tourStartShots`/`tourEndShots` hand `containShot` at both ends of that station.
+> This is the third time this file has recorded one rule with two implementations.
+
 > **One thing measured and NOT explained, recorded rather than tidied away.**
 > `epistemology-knowledge-31` still completes a 1.15× push in 0.16s where its
 > table says 0.55, with a peak of 13.8 units in a frame. It is not the shot list
@@ -2593,8 +2680,8 @@ the same weight, including the two kinds that carry more than the rest.
   it opens `ThinkerPeek`: name, dates and the `oneLiner` the roster already keeps
   for all 322. **Nothing new had to be written for any thinker**, which is the
   whole reason this was cheap.
-- **A MAXIM.** One phrase per lesson, struck on a band. 162 of 186 lessons carry
-  one and **24 deliberately carry none** — the floor in `make-focus` exists
+- **A MAXIM.** One phrase per lesson, struck on a band. 204 of 246 lessons carry
+  one and **42 deliberately carry none** — the floor in `make-focus` exists
   because a highlighter on a merely-acceptable sentence tells the reader that a
   prop in the story is the thing to carry away, which is worse than no mark.
 
@@ -2988,9 +3075,10 @@ it beside `make:tours`.
 > core stickman to be the main mascot"* — and — *"the stickman's purpose is to
 > learn with the user."*
 
-Both halves are group **AA** of the rule book, and both are shipped: 116 of 186
-lessons now dress the figure, and he nods or draws back on every answer in the 164
-scenes that route through `lookPose`.
+Both halves are group **AA** of the rule book, and both are shipped: 78 of 246
+lessons dress the figure — see the note in §12 for why that number was 24 until a
+brimless hat was added, and why the constraint was never the band — and he nods or
+draws back on every answer in the scenes that route through `lookPose`.
 
 **A HAT SITS DOWN OVER THE SKULL, AND THE FIRST VERSION DID NOT.** A reader looked
 at the shipped wardrobe and said the top hat *"is above his head, so it looks like
@@ -3091,7 +3179,7 @@ from the lead's neighbours, which is all it can know. It cannot know the BAND.
 top hat pokes seven units above that lesson's band, and nothing in the component
 could have seen it.
 
-**AND A SECOND FIGURE WALKS IN, IN 33 LESSONS (AA8).** He arrives on the beat
+**AND A SECOND FIGURE WALKS IN, IN 27 LESSONS (AA8).** He arrives on the beat
 before a `poll` or a `split` and is standing there when the question is asked —
 the person who holds the OTHER position, which is what keeps A1 true and makes him
 an argument rather than a cameo. **Which lessons is taken from STRUCTURE, never
@@ -3144,8 +3232,14 @@ the head mostly in X and judging it on `y` alone under-reads it by half.
 > right.
 
 That is group **AB** of the rule book, and the point of it is that **he is
-learning too** — not presenting the material, but the other student. 1,041
-authored thoughts across 178 lessons, plus a line back on every answer.
+learning too** — not presenting the material, but the other student. 1,020
+authored thoughts, 329 of them shown, plus a line back on every answer.
+
+**THE THIRTY LESSONS THAT FINISHED THE TAKEOVER CARRY NO THOUGHT LINES**, which is
+why 80 lessons now show none against 29 before. `say` is AUTHORED and the
+generator only chooses among what has been written, so a new lesson gets a bubble
+only once somebody writes it one — the split this section already argues for,
+seen from the other side.
 
 **THE PLAYER DRAWS IT, WHICH IS WHY IT COST NO SCENE EDITS.** Same seam as
 `REACT` and `Visitor`: 186 scenes is 186 edits to files whose every byte is inside
@@ -3257,8 +3351,9 @@ covers a word.
 >   the split is the part worth keeping: `say` still holds all 1,113 lines,
 >   because the writing is the expensive half and the choosing is the cheap one —
 >   a line held back today can be shown tomorrow by moving a weight, where
->   re-authoring it could not. **334 shown, 1.70 a lesson** — 165 lessons at two,
->   4 at one and 29 at none, those last being stages with no room near his head.
+>   re-authoring it could not. **329 shown, 1.34 a lesson** — 163 lessons at two,
+>   3 at one and 80 at none: 30 of those are the lessons that finished the takeover
+>   and have no authored lines yet, the rest are stages with no room near his head.
 >   **The answer line is NOT rationed**: it is a reply to something
 >   the reader just did, it lands only on the two graded beats, and it is the half
 >   they asked for by name.

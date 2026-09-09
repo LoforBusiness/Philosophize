@@ -65,6 +65,21 @@ const lesson: Lesson = {
       emoji: '🎭',
     },
     {
+      type: 'question',
+      prompt: 'The same flamingo is kitsch to one neighbour and camp to another. What decides which?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'The beholder — the object never changed', isCorrect: true },
+          { id: 'b', text: 'The object — some things simply are tacky', isCorrect: false },
+          { id: 'c', text: 'The price, since cheap things read as kitsch', isCorrect: false },
+          { id: 'd', text: 'The artist, who meant one or the other', isCorrect: false },
+        ],
+        explanation: 'The beholder. Tackiness is real enough, and it is what both attitudes are responding to — which is exactly why it cannot be the thing that tells them apart. Price tracks kitsch loosely and predicts nothing, and a mass-moulded flamingo has no artist with an intention to consult.',
+      },
+    },
+    {
       type: 'summary',
       title: 'The Joy of Bad Taste',
       keyPoints: [

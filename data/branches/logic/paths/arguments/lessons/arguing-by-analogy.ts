@@ -36,6 +36,29 @@ const lesson: Lesson = {
       emoji: '🎻',
     },
     {
+      type: 'quote',
+      id: 'lq-logic-arguments-28-1',
+      quote: 'You wake up in the morning and find yourself back to back in bed with an unconscious violinist.',
+      author: 'Judith Jarvis Thomson',
+      era: '1971',
+      work: 'A Defense of Abortion',
+    },
+    {
+      type: 'question',
+      prompt: 'What makes an argument by analogy strong?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'Shared features that bear on the conclusion', isCorrect: true },
+          { id: 'b', text: 'As many shared features as possible', isCorrect: false },
+          { id: 'c', text: 'A vivid comparison the reader can picture', isCorrect: false },
+          { id: 'd', text: 'A conclusion wider than either case', isCorrect: false },
+        ],
+        explanation: 'Relevance, not count. Two things can share a hundred traits that bear on nothing, and one relevant difference sinks the argument on its own. Vividness persuades without proving, and a wide conclusion is the fault rather than the strength.',
+      },
+    },
+    {
       type: 'question',
       prompt: '"Banning hate speech is fine — we ban shouting fire in a theatre." What weakens this analogy most?',
       xpValue: 5,

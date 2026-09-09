@@ -15,7 +15,23 @@ import path from 'node:path';
  * Must stay identical to `ROLL` in components/lesson/cinematic/wardrobeContext.tsx.
  * `sameRollAs` below is what makes that a build failure rather than a comment.
  */
-export const ROLL = ['dandy', 'scholar', 'magistrate', 'traveller', 'aesthete', 'gent', 'ringmaster', 'lecturer', 'stroller'];
+export const ROLL = ['dandy', 'scholar', 'magistrate', 'traveller', 'aesthete', 'gent', 'ringmaster', 'lecturer', 'stroller', 'smoker'];
+
+/**
+ * SOBER ENOUGH FOR A LESSON ABOUT DEATH — no monocle, no ringmaster, no top hat.
+ *
+ * It lives HERE because it was living in two places: `make-wardrobe` picked from
+ * one copy and `check-wardrobe` judged against another, so adding `smoker` to the
+ * generator dressed twelve grave lessons in a hat the checker had never been told
+ * about. Nothing failed at the point of the mistake — the generator was perfectly
+ * happy — and the report arrived one step later reading as a content defect in
+ * twelve lessons rather than as one missing word in a list.
+ *
+ * That is the shape this repo keeps recording (L8, K9, the two ROLLs directly
+ * above): ONE RULE, TWO IMPLEMENTATIONS, and the copies drift silently because
+ * each is right about what it can see.
+ */
+export const SOBER = ['plain', 'scholar', 'lecturer', 'gent', 'traveller', 'stroller', 'smoker'];
 
 /**
  * The second figure's look, derived from the lead's.

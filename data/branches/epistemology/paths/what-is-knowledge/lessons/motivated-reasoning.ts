@@ -66,6 +66,21 @@ const lesson: Lesson = {
       },
     },
     {
+      type: 'question',
+      prompt: 'You apply an easy standard to news you like and a hard one to news you do not. What fixes it?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'One standard, applied to both', isCorrect: true },
+          { id: 'b', text: 'A harder standard for everything', isCorrect: false },
+          { id: 'c', text: 'Trusting whichever conclusion hurts more', isCorrect: false },
+          { id: 'd', text: 'Reading only sources you distrust', isCorrect: false },
+        ],
+        explanation: 'One standard, both ways. Motivated reasoning is asymmetric scrutiny, so the repair is symmetry rather than severity. Raising the bar for everything only makes you a sceptic, and trusting whatever hurts most is the same bias flipped over.',
+      },
+    },
+    {
       type: 'summary',
       title: 'What You Now Know',
       keyPoints: [

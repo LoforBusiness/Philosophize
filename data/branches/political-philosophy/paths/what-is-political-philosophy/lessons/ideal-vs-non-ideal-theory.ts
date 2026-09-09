@@ -66,27 +66,19 @@ const lesson: Lesson = {
       },
     },
     {
-      type: 'dilemma',
-      scenario: 'A reformer has limited time and energy. She can devote it to designing the blueprint of a perfectly just society, hoping it guides reform for generations, or to abolishing one glaring injustice now, imperfectly, with no grand theory behind it.',
-      prompt: 'Where should political philosophy spend its effort?',
-      choices: [
-        { id: 'a', label: 'Map the ideal first; it guides all reform' },
-        { id: 'b', label: 'Fix the worst injustice now; theory can wait' },
-        { id: 'c', label: 'Both at once; an ideal anchors urgent repair' },
-      ],
-      views: [
-        {
-          thinker: 'John Rawls (ideal theory)',
-          stance: 'We need a clear target to aim at',
-          why: 'Without a worked-out conception of perfect justice, reforms drift; we cannot tell whether a change is real progress or a detour. The ideal is a compass, not a fantasy, orienting all our piecemeal efforts.',
-        },
-        {
-          thinker: 'Amartya Sen (non-ideal theory)',
-          stance: 'Reduce injustice we can actually see',
-          why: 'People suffering now cannot wait for a perfect blueprint that may never arrive. We routinely know one arrangement is less unjust than another; acting on those comparisons does more good than chasing utopia.',
-        },
-      ],
+      type: 'question',
+      prompt: 'A run of real, comparative reforms is carried out over a century. What happens to the injustice?',
       xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'It comes off one wrong at a time', isCorrect: true },
+          { id: 'b', text: 'Nothing shifts until the blueprint arrives', isCorrect: false },
+          { id: 'c', text: 'Nothing, and then a perfect society', isCorrect: false },
+          { id: 'd', text: 'Every reform puts a new wrong in place', isCorrect: false },
+        ],
+        explanation: 'One wrong at a time. Comparative judgements are how a society actually becomes less unjust, and each removal is real whether or not perfect justice is ever described. Rawls answers that a target still keeps the reforms from drifting.',
+      },
     },
     {
       type: 'summary',

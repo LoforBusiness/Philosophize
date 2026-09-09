@@ -52,6 +52,21 @@ const lesson: Lesson = {
       },
     },
     {
+      type: 'question',
+      prompt: 'What actually makes an argument hard to knock down?',
+      xpValue: 5,
+      interaction: {
+        type: 'multiple-choice',
+        options: [
+          { id: 'a', text: 'You attacked it hardest yourself', isCorrect: true },
+          { id: 'b', text: 'Nobody has attacked it yet', isCorrect: false },
+          { id: 'c', text: 'It has more premises than the alternatives', isCorrect: false },
+          { id: 'd', text: 'It is stated with enough confidence', isCorrect: false },
+        ],
+        explanation: 'You attacked it first. An untested argument is not strong, it is merely unexamined, and the first serious critic finds what you never looked for. Extra premises give a critic more to aim at, and confidence proves nothing at all.',
+      },
+    },
+    {
       type: 'reinforcement',
       callout: 'This is everything you\'ve learned, in one move.',
       body: 'Premises and conclusions, validity and soundness, hidden premises, the fallacies, charity, the burden of proof. Building a strong argument is just running all of it forwards instead of backwards — creating what you\'ve spent a whole path learning to dismantle.',
