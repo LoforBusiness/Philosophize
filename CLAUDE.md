@@ -164,7 +164,7 @@ Philosophize/
 │   ├── types.ts                 # ALL type definitions — the load-bearing file
 │   ├── index.ts                 # ALL_BRANCHES + getLessonById, lessonAccessibility,
 │   │                            #   branchCountsFromUnits, getLessonUnitInfo
-│   ├── branches/                # 6 branches · 28 units · 234 lessons (§5)
+│   ├── branches/                # 6 branches · 28 units · 246 lessons (§5)
 │   ├── philosophers.ts          # BASE + composes ALL_PHILOSOPHERS (322)
 │   ├── extra-philosophers/      # ancient/eastern/medieval/modern/contemporary/
 │   │                            #   expansion, expansion2a/2b/3/4 (+ *-facts)
@@ -270,7 +270,7 @@ When `CARD_BUDGET` reaches 0 the takeover is done, and `LessonRunner`, `cards/`,
 
 ### Shape today
 
-**Every branch holds exactly 39 lessons, of which exactly 34 are cinematic** —
+**Every branch holds exactly 41 lessons, of which exactly 36 are cinematic** —
 87% of the way through the takeover. Both numbers are deliberate invariants rather
 than where the counts happened to land: the totals were 27–30 and the cinematic
 share was 11–14, and both showed on the Learn cards. `check:cinematic` enforces
@@ -287,7 +287,8 @@ They constrain each other, and there are exactly two moves that respect both:
 - **To raise the LESSON count, add the same number to every branch and make each
   new one cinematic.** Two per branch took 30/14 to 32/16 and held both invariants
   in one pass; three per branch, in three rounds of six, took 34/19 to 37/22 the
-  same way; two per branch again took 37/31 to 39/33. Adding one lesson to one
+  same way; two per branch again took 37/31 to 39/33, and once more 39/34 to
+  41/36. Adding one lesson to one
   branch breaks both at once.
 
 > **AND EVERY NEW LESSON NOW HAS TO BE UNLIKE ITS NEIGHBOURS, MEASURABLY.** F43
@@ -311,13 +312,13 @@ They constrain each other, and there are exactly two moves that respect both:
 
 | Branch | Units | Lessons | of which cinematic | card decks left |
 |---|---|---|---|---|
-| Metaphysics | 5 | 39 | 34 | 5 |
-| Epistemology | 5 | 39 | 34 | 5 |
-| Logic | 5 | 39 | 34 | 5 |
-| Ethics | 5 | 39 | 34 | 5 |
-| Aesthetics | 3 | 39 | 34 | 5 |
-| Political Philosophy | 5 | 39 | 34 | 5 |
-| **Total** | **28** | **234** | **204 (87%)** | **30** |
+| Metaphysics | 5 | 41 | 36 | 5 |
+| Epistemology | 5 | 41 | 36 | 5 |
+| Logic | 5 | 41 | 36 | 5 |
+| Ethics | 5 | 41 | 36 | 5 |
+| Aesthetics | 3 | 41 | 36 | 5 |
+| Political Philosophy | 5 | 41 | 36 | 5 |
+| **Total** | **28** | **246** | **216 (88%)** | **30** |
 
 > Numbers go stale; the check does not. `npm run check:cinematic` prints the live
 > figures and the next lesson to convert in each branch every time it runs.
@@ -361,7 +362,7 @@ Every lesson MUST:
 - Have exactly one correct answer in every `MultipleChoiceInteraction`
 
 > `tsc` checks types only, so these are enforced by `npm run check:cards`
-> (`scripts/validate-lessons.mjs`) — 234/234 clean. Cinematic lessons have their own
+> (`scripts/validate-lessons.mjs`) — 246/246 clean. Cinematic lessons have their own
 > shape check, `npm run check:cinematic` (§17). `npm run check` runs tsc plus ten
 > validators — see §11.
 
@@ -894,7 +895,7 @@ A unit's `index.ts` exports an array of `Path` objects (the units); each needs a
 stable `id` — `lessonsByUnit` is keyed on it, so **renaming an id silently resets
 that unit's progress for every existing user.**
 
-**Keep every branch at 39, and at 34 cinematic (§5).** The counts were 27–30 and it
+**Keep every branch at 41, and at 36 cinematic (§5).** The counts were 27–30 and it
 showed on the Learn cards, so they were levelled deliberately; adding one lesson to
 one branch puts them back out. Add six, one per branch — and give each of the six a
 scene, or the cinematic invariant goes out instead of the lesson one.
@@ -973,7 +974,7 @@ figures and 3 hand-built PEOPLE — it was 6 until four of the seven it reported
 turned out to be a bird, a hen, a zebra and a cow, which the rule was never about
 (Z6) — and `check-moves` 6 head-clearance defects plus
 5 acts that barely move across their own `u`, all of them cold. A budget
-line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 234 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
+line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 246 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
 
 > **`check-moves` was the last one on that list to actually run, and for a long
 > time it did not.** It existed, this section quoted its budget, and
@@ -1024,11 +1025,11 @@ they belong to, so the rule book has them and this file did not:
 
 **Phase 5 — shipped and iterating in public.** Live on Google Play, versionCode 21, as Ashmere.
 
-- **Content:** 6 branches · **28 units** · **234 lessons**. **322 philosophers**
+- **Content:** 6 branches · **28 units** · **246 lessons**. **322 philosophers**
   with bios, eras and **1,780 quotes** between them — and all 322 have exactly
   three "Did you know?" facts, with nothing missing.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
-  gating; **204 cinematic lessons** (animated stickman scenes, §17), answered six
+  gating; **216 cinematic lessons** (animated stickman scenes, §17), answered six
   ways — scene targets, two cards, and the analogue family of `drag` · `sort` ·
   `poll` · `split` · `plot` (§17, group R). **The analogue family is now the
   majority**: 182 graded beats against 150 on the stage and 36 left in the deck,
@@ -1078,7 +1079,7 @@ they belong to, so the rule book has them and this file did not:
   mastheads, the launch screen and Quick Start (§19).
 
 **Known gaps / tech debt:**
-- **Card decks are now a minority** — 30 of 234. That is now the number
+- **Card decks are now a minority** — 30 of 246. That is now the number
   that matters; see the takeover rule at the top of §5.
 - **Roughly nine scenes in ten are a PHOTOGRAPH between taps.** Measured in
   pixels by `npm run check:alive`, not by grep: two screenshots from one page
@@ -1742,7 +1743,7 @@ in order, the full streak, XP, rank and badge systems, and all 322 thinkers.
 **Why someone pays (the thesis — the aspiration, not the current feature list):**
 1. They actually **retain** what they learn (spaced review), not just tap through it.
 2. The **cinematic, narrated** lessons feel like nothing else in the category.
-3. **Breadth** — 6 branches, 234 lessons, 322 thinkers — is a genuine library.
+3. **Breadth** — 6 branches, 246 lessons, 322 thinkers — is a genuine library.
 4. **Credential & mastery** — ranks + path-mastery give visible proof of progress.
 5. The **daily habit** (streak + review) makes the subscription part of a routine.
 
@@ -1801,7 +1802,7 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**This is the format the app is converging on** — 204 of the 234 lessons are here
+**This is the format the app is converging on** — 216 of the 246 lessons are here
 already, and the card runner is what they are replacing (§5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a

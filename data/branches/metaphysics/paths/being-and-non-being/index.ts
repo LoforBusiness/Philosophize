@@ -38,6 +38,8 @@ import theHotelThatIsAlwaysFull from './lessons/the-hotel-that-is-always-full';
 
 import isAGlassFragileBeforeItBreaks from './lessons/is-a-glass-fragile-before-it-breaks';
 import theVaseAndTheClay from './lessons/the-vase-and-the-clay';
+import isSpaceAThing from './lessons/is-space-a-thing';
+import isThereAFactAboutTomorrow from './lessons/is-there-a-fact-about-tomorrow';
 import canNothingCauseSomething from './lessons/can-nothing-cause-something';
 // 5 units — split from the original single "Being and Non-Being" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
@@ -78,7 +80,7 @@ const units: Path[] = [
     slug: "frontiers-of-reality",
     name: "Frontiers of Reality",
     description: "Zoom out to the big picture — how reality layers, whether its laws truly compel, and if the world needs a mind at all.",
-    lessons: [emergenceAndReduction, lawsOfNature, panpsychism, realismVsAntiRealism, doesMetaphysicsMakeProgress, couldTwoThingsBeExactlyAlike, theArrowOfTime, isThereABottomLevel, couldYouChangeThePast, theHotelThatIsAlwaysFull, isAGlassFragileBeforeItBreaks, theVaseAndTheClay, canNothingCauseSomething],
+    lessons: [emergenceAndReduction, lawsOfNature, panpsychism, realismVsAntiRealism, doesMetaphysicsMakeProgress, couldTwoThingsBeExactlyAlike, theArrowOfTime, isThereABottomLevel, couldYouChangeThePast, theHotelThatIsAlwaysFull, isAGlassFragileBeforeItBreaks, theVaseAndTheClay, canNothingCauseSomething, isThereAFactAboutTomorrow, isSpaceAThing],
   },
 ];
 

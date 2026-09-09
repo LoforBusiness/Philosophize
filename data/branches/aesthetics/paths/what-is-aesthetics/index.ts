@@ -38,6 +38,8 @@ import doesAPhotographTellTheTruth from './lessons/does-a-photograph-tell-the-tr
 
 import whereIsAJazzSolo from './lessons/where-is-a-jazz-solo';
 import youKnowHowItEnds from './lessons/you-know-how-it-ends';
+import whereDoesTheWorkStop from './lessons/where-does-the-work-stop';
+import theSensesThatWereNotInvited from './lessons/the-senses-that-were-not-invited';
 import madeWellOrMadeToSaySomething from './lessons/made-well-or-made-to-say-something';
 // 3 units — split from the original single "What Is Aesthetics?" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
@@ -65,7 +67,7 @@ const units: Path[] = [
     slug: "puzzles-at-the-edge",
     name: "Puzzles at the Edge",
     description: "The deeper puzzles — where an artwork actually lives, why a perfect fake unsettles us, how taste is shaped — and what beauty is finally for.",
-    lessons: [theOntologyOfArt, theParadoxOfFiction, musicAndEmotion, benjaminAuraAndReproduction, bourdieuTasteAndClass, kitschAndCamp, theAvantGarde, aestheticsOfTheEveryday, artAndTruth, beautyAndTheGoodLife, whyDoEndingsMatter, howMuchShouldYouCleanAPainting, whenAPictureStopsBeingOfSomething, whyIsAnythingFunny, doesAPhotographTellTheTruth, whereIsAJazzSolo, youKnowHowItEnds, madeWellOrMadeToSaySomething],
+    lessons: [theOntologyOfArt, theParadoxOfFiction, musicAndEmotion, benjaminAuraAndReproduction, bourdieuTasteAndClass, kitschAndCamp, theAvantGarde, aestheticsOfTheEveryday, artAndTruth, beautyAndTheGoodLife, whyDoEndingsMatter, howMuchShouldYouCleanAPainting, whenAPictureStopsBeingOfSomething, whyIsAnythingFunny, doesAPhotographTellTheTruth, whereIsAJazzSolo, youKnowHowItEnds, madeWellOrMadeToSaySomething, theSensesThatWereNotInvited, whereDoesTheWorkStop],
   },
 ];
 

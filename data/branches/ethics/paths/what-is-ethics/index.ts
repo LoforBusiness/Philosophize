@@ -38,6 +38,8 @@ import whatForgivingDoes from './lessons/what-forgiving-does';
 
 import whyAPromiseBinds from './lessons/why-a-promise-binds';
 import whyYourOwnChildComesFirst from './lessons/why-your-own-child-comes-first';
+import nudgedNotForced from './lessons/nudged-not-forced';
+import canYouWrongTheDead from './lessons/can-you-wrong-the-dead';
 import knowingBetterAndDoingWorse from './lessons/knowing-better-and-doing-worse';
 // 5 units — split from the original single "What Is Ethics?" path.
 // Units are contiguous slices of the original lesson order, so progression is preserved.
@@ -78,7 +80,7 @@ const units: Path[] = [
     slug: "stepping-back",
     name: "Stepping Back",
     description: "Zoom out one last time: where morals actually live, how to settle a clash of principle and gut, what lies beyond duty — and how to live.",
-    lessons: [metaethicsWhereMoralsLive, reflectiveEquilibrium, supererogationBeyondDuty, howToLiveAnEthicalLife, oughtImpliesCan, borrowingAVerdict, howMuchIsRequired, morePeopleWorseLives, pushingAndLettingGo, whatForgivingDoes, whyAPromiseBinds, whyYourOwnChildComesFirst, knowingBetterAndDoingWorse],
+    lessons: [metaethicsWhereMoralsLive, reflectiveEquilibrium, supererogationBeyondDuty, howToLiveAnEthicalLife, oughtImpliesCan, borrowingAVerdict, howMuchIsRequired, morePeopleWorseLives, pushingAndLettingGo, whatForgivingDoes, whyAPromiseBinds, whyYourOwnChildComesFirst, knowingBetterAndDoingWorse, canYouWrongTheDead, nudgedNotForced],
   },
 ];
 

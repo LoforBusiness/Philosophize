@@ -211,6 +211,18 @@ import { Metaphysics11Lesson } from '@/components/lesson/cinematic/metaphysics11
 import { Aesthetics10Lesson } from '@/components/lesson/cinematic/aesthetics10Scene';
 import { Aesthetics12Lesson } from '@/components/lesson/cinematic/aesthetics12Scene';
 import { Political10Lesson } from '@/components/lesson/cinematic/political10Scene';
+import { Metaphysics40Lesson } from '@/components/lesson/cinematic/metaphysics40Scene';
+import { Epistemology40Lesson } from '@/components/lesson/cinematic/epistemology40Scene';
+import { Logic40Lesson } from '@/components/lesson/cinematic/logic40Scene';
+import { Ethics40Lesson } from '@/components/lesson/cinematic/ethics40Scene';
+import { Aesthetics40Lesson } from '@/components/lesson/cinematic/aesthetics40Scene';
+import { Political40Lesson } from '@/components/lesson/cinematic/political40Scene';
+import { Metaphysics41Lesson } from '@/components/lesson/cinematic/metaphysics41Scene';
+import { Epistemology41Lesson } from '@/components/lesson/cinematic/epistemology41Scene';
+import { Logic41Lesson } from '@/components/lesson/cinematic/logic41Scene';
+import { Ethics41Lesson } from '@/components/lesson/cinematic/ethics41Scene';
+import { Aesthetics41Lesson } from '@/components/lesson/cinematic/aesthetics41Scene';
+import { Political41Lesson } from '@/components/lesson/cinematic/political41Scene';
 import { Political11Lesson } from '@/components/lesson/cinematic/political11Scene';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -473,6 +485,18 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   'metaphysics-being-17': Metaphysics17Lesson,
   'political-political-16': Political16Lesson,
   'political-political-17': Political17Lesson,
+  'metaphysics-being-40': Metaphysics40Lesson,
+  'epistemology-knowledge-40': Epistemology40Lesson,
+  'logic-arguments-40': Logic40Lesson,
+  'ethics-ethics-40': Ethics40Lesson,
+  'aesthetics-aesthetics-40': Aesthetics40Lesson,
+  'political-political-40': Political40Lesson,
+  'metaphysics-being-41': Metaphysics41Lesson,
+  'epistemology-knowledge-41': Epistemology41Lesson,
+  'logic-arguments-41': Logic41Lesson,
+  'ethics-ethics-41': Ethics41Lesson,
+  'aesthetics-aesthetics-41': Aesthetics41Lesson,
+  'political-political-41': Political41Lesson,
   'political-political-18': Political18Lesson,
 };
 

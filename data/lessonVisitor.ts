@@ -21,8 +21,8 @@ export interface VisitorCue {
 
 export const VISITOR: Record<string, VisitorCue> = {
   'ethics-ethics-31': { enter: 8, x: 45, from: -60, dir: 1 },
-  'metaphysics-being-39': { enter: 6, x: 284, from: 460, dir: -1 },
-  'logic-arguments-39': { enter: 6, x: 36, from: -60, dir: 1 },
+  'metaphysics-being-39': { enter: 6, x: 287, from: 460, dir: -1 },
+  'logic-arguments-39': { enter: 6, x: 47, from: -60, dir: 1 },
   'logic-arguments-16': { enter: 8, x: 56, from: -60, dir: 1 },
   'ethics-ethics-17': { enter: 8, x: 349, from: 460, dir: -1 },
   'epistemology-knowledge-20': { enter: 8, x: 351, from: 460, dir: -1 },
@@ -38,8 +38,9 @@ export const VISITOR: Record<string, VisitorCue> = {
   'ethics-ethics-37': { enter: 4, x: 153, from: -60, dir: -1 },
   'logic-arguments-23': { enter: 8, x: 40, from: -60, dir: 1 },
   'metaphysics-being-13': { enter: 6, x: 46, from: -60, dir: 1 },
-  'political-political-13': { enter: 9, x: 51, from: -60, dir: 1 },
   'political-political-15': { enter: 5, x: 44, from: -60, dir: 1 },
   'metaphysics-being-8': { enter: 12, x: 97, from: -60, dir: 1 },
   'ethics-ethics-14': { enter: 7, x: 257, from: 460, dir: -1 },
+  'logic-arguments-40': { enter: 7, x: 32, from: -60, dir: 1 },
+  'ethics-ethics-40': { enter: 7, x: 34, from: -60, dir: 1 },
 };
