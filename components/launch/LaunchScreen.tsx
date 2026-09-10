@@ -7,24 +7,14 @@ import Animated, {
   useAnimatedStyle,
   useAnimatedProps,
   useAnimatedReaction,
-  useDerivedValue,
-  useFrameCallback,
-  interpolate,
   interpolateColor,
   withTiming,
   withDelay,
-  withSequence,
   Easing,
   runOnJS,
   type SharedValue,
 } from 'react-native-reanimated';
-import Stickman from '@/components/lesson/cinematic/Stickman';
-import {
-  solve, bundle, walk, stand, mixStance, FIG_H,
-  type Joints, type Bundle,
-} from '@/components/lesson/cinematic/rig';
 import QuotePlate from '@/components/shared/QuotePlate';
-import LaurelMark from '@/components/shared/LaurelMark';
 import { C } from '@/constants/design';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { SPLASH_BG } from './launchArt';
@@ -33,40 +23,57 @@ const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 // ─── THE TITLE PAGE ──────────────────────────────────────────────────────────
 //
-// The cold-start loading moment, redesigned 2026-09-08. It was six near-black
-// illustrated landscapes with the figure living in them; the reader asked for a
-// completely new look, no figure required. What replaced it is the front of a
-// printed book — which is what this app already claims to be everywhere else:
+// The cold-start loading moment. It was six near-black illustrated landscapes
+// with the figure living in them; then a title page with a laurel over the
+// wordmark and a stickman who walked the progress line. The reader rejected
+// both of those last two — "I just don't like the logo above ashmere and also
+// that quick walking animation, I want some other cleaner animation" — and what
+// replaced them was RESEARCHED rather than guessed.
 //
-//   · the laurel and the wordmark, set like a title page's head;
-//   · a hand-drawn ink rule that draws itself across the page as the progress
-//     line, with a counting percentage under it;
-//   · one short quotation from the library, presented on the SAME struck
-//     QuotePlate every other surface uses — era spine, printer's mark, the one
-//     top-left light. A different quotation every launch;
-//   · the tagline at the foot, where a title page carries its imprint.
+// ── WHAT THE REFERENCES ACTUALLY SAY ────────────────────────────────────────
+//
+// Two independent sources describe the same object, and it is the one a book
+// wants. The luxury/premium pattern is a minimal line-draw reveal: a thin line
+// traces, then the wordmark arrives, soft easing, about two seconds, ending on
+// the exact logo centred and fully readable. The signature-drawing literature
+// then gives the cadence in NUMBERS — 140ms of stagger between strokes for a
+// pen-lift rhythm, and ROUND CAPS, because butt caps leave the dashoffset
+// reveal with hard rectangular ends and it reads as a clipped vector wipe,
+// where round caps give the ink a soft pen-tip start and finish.
+//
+// So the animation IS the drawing, and there are exactly two moving things:
+//
+//   · THE WORDMARK IS SET, one letter at a time, at that 140ms rhythm — the
+//     title being composed on the page rather than a logo dropped onto it. It
+//     replaced a STRIKE (squash, recoil, back-easing), which is the right
+//     motion for a streak seal and the wrong one here: a bounce is the gamified
+//     register this screen is deliberately not in.
+//   · THE RULE DRAWS ITSELF as the progress, with a NIB at its tip. The nib is
+//     not an addition — a stroke-dashoffset reveal already IS a pen moving, and
+//     the references say so in as many words; the nib only makes the thing
+//     doing it visible. It is one small ink mark riding the line's own measured
+//     y, and it LIFTS at the end, because that is what a pen does.
+//
+// WHY NOT THE FIGURE. He is the mascot of the lessons, and at 57px on a title
+// page he read as a sprite scurrying along a rule — limbs at speed, in a
+// composition whose whole argument is stillness. Removing him also takes the
+// rig off the boot path entirely, which is worth a line of its own: this screen
+// died once on walk()'s defaulted gait never reaching the UI runtime's closure
+// — fatal in release, on every launch. No worklet here can throw at all now.
+//
+// WHY NOTHING REPLACED THE LAUREL. A title page does not need an ornament; the
+// type is the ornament. Swapping one mark for another mark is how you get asked
+// to remove the second one.
 //
 // WHAT THE REDESIGN BUYS STRUCTURALLY, beyond taste:
 //
-//   · NO scrims. The old screen needed two measured gradient scrims because
-//     nothing may take its contrast from artwork (§19). There is no artwork:
-//     everything here is ink on `C.paper`, and scripts/check-launch.mjs holds
-//     every pairing by arithmetic.
-//   · NO first-frame flash, by construction. The native splash is SPLASH_BG
-//     (pale grey) and the old scenes were near-black — a 10:1 step the ground
-//     had to be eased across. Paper is a 1.1:1 step from the splash; the ground
-//     still starts on SPLASH_BG and settles into GROUND on the intro curve, so
-//     the hand-off stays one continuous surface.
-//   · NO status-bar flip. The old screen was the only thing in the app setting
-//     `barStyle`, light over dark art, flipped mid-dissolve so the icons
-//     crossed with the picture. The ground is paper from the first frame to the
-//     welcome page's cream, so the bar is dark-content the whole way and there
-//     is no crossing left to time.
-//
-// The six scene files (launchArt's landscapes, launchScenes, launchMotion) are
-// no longer mounted here. launchArt still exports SPLASH_BG — app/_layout.tsx
-// reads it — and LaunchFigure + launchMotion are alive on the sign-in screen's
-// mascot. The landscape data itself is dormant; sheet-launch.mjs still draws it.
+//   · NO scrims. Nothing may take its contrast from artwork (§19), and there is
+//     no artwork: everything is ink on C.paper, and check-launch holds every
+//     pairing by arithmetic.
+//   · NO first-frame flash. The native splash is SPLASH_BG (pale grey) and the
+//     old scenes were near-black — a 10:1 step. Paper is 1.2:1 from it.
+//   · NO status-bar flip. Paper from the splash hand-off to the welcome's
+//     cream, so the bar is dark-content throughout with no crossing to time.
 
 // The ground, and the two inks on it. Tokens, not local hexes — check-launch
 // re-derives every pairing from constants/design.ts and fails the build if a
@@ -74,6 +81,27 @@ const AnimatedPath = Animated.createAnimatedComponent(Path);
 const GROUND = C.paper;
 
 const STROKE_SVG_H = 14;
+
+// ── THE WORDMARK ────────────────────────────────────────────────────────────
+//
+// ONE CONSTANT, AND THE LETTERS ARE DERIVED FROM IT. That is not tidiness: this
+// screen spelled the PREVIOUS brand for a whole rename because its masthead was
+// written one letter at a time, and so matched no search for the name itself,
+// and nothing reported it (§19). Setting the letters individually is exactly
+// that shape again — so the string lives here whole, check-launch derives the
+// expected value from app.json's expo.name, and a rename fails the build
+// instead of shipping.
+const WORDMARK = 'ASHMERE';
+const LETTERS = WORDMARK.split('');
+
+/** The pen-lift rhythm, from the signature-drawing literature. */
+const LETTER_STAGGER = 140;
+/** Tracking, as a real gap rather than letterSpacing — a per-character
+ *  letterSpacing also pads AFTER the last letter, which shifts a centred word
+ *  off centre by half a track. */
+const LETTER_TRACK = 3;
+
+const NIB = 5;
 
 // Quotes short enough to actually read during the ~3.4s the screen is up. The
 // fallback can't realistically be hit, but this screen sits on the boot path —
@@ -84,8 +112,17 @@ const SHORT_QUOTES = ALL_PHILOSOPHERS.flatMap((p) =>
 ).filter((q) => q.text.length <= 90);
 const FALLBACK_QUOTE = { text: 'The unexamined life is not worth living.', author: 'Socrates', id: 'socrates' };
 
-// A slightly wobbly hand-drawn horizontal stroke, plus its exact length so the
-// draw-on animation (strokeDashoffset) can map progress 0–100 to the path.
+/**
+ * A slightly wobbly hand-drawn horizontal stroke, its exact length so the
+ * draw-on (strokeDashoffset) can map progress onto the path, and the SAMPLED ys
+ * so the nib can ride the line rather than float near it.
+ *
+ * The ys matter more than they look. The path wobbles about 2.6 units either
+ * way, and a nib pinned to the centreline would sit off the ink for most of its
+ * journey — at 5px that reads as a speck of dirt travelling beside a line.
+ * Interpolating the same samples the path was built from puts it exactly on the
+ * stroke, by construction, for any seed.
+ */
 function makeStroke(width: number, seed: number) {
   const segs = 40;
   const dx = width / segs;
@@ -98,6 +135,7 @@ function makeStroke(width: number, seed: number) {
   let len = 0;
   let px = 0;
   let py = 0;
+  const ys: number[] = [0];
   for (let i = 1; i <= segs; i++) {
     const x = i * dx;
     const y = Math.sin(i * 0.7) * 1.4 + (rand() - 0.5) * 2.4;
@@ -105,77 +143,36 @@ function makeStroke(width: number, seed: number) {
     len += Math.hypot(x - px, y - py);
     px = x;
     py = y;
+    ys.push(y);
   }
-  return { d, len: Math.ceil(len) };
+  return { d, len: Math.ceil(len), ys };
 }
 
-// ─── THE WALKER ──────────────────────────────────────────────────────────────
-//
-// The reader on the first cut: "it looks very boring … make sure there is good
-// animations, not just a still image." So the progress line is DRAWN BY SOMEONE
-// now: the figure walks across the page and the ink appears behind him — the
-// same conceit as the branch road, at title-page scale. Everything below is the
-// real rig, so the gait is the one every lesson already validates:
-//
-//   · his x IS the progress. The stroke's dash tip and his feet both map
-//     progress/92 across the same span, so the line can never lead or trail the
-//     man drawing it — one value, two readers, by construction;
-//   · the gait phase is fed distance IN HIS OWN UNITS (travelled / k), which is
-//     what stops the feet skating (§17's walk-pace lesson: a stride is
-//     proportional to the figure, so a scaled figure walking screen distance
-//     needs the distance rescaled the same way);
-//   · over the last stretch he eases from walk() into stand() through
-//     mixStance, so the hold at 92 is a person arriving and breathing — stand()
-//     rides life2, so he never reads as a loop — instead of a freeze-frame,
-//     which is the host's "stopped dead for 0.36s" defect (§19);
-//   · the clock ACCUMULATES timeSincePreviousFrame — never read
-//     timeSinceFirstFrame; a re-render re-registers the callback and resets it,
-//     which is the exact bug LaunchFigure documents.
-// 0.44 was tried first and below ~50px the limbs merge into the torso stroke —
-// a walking tadpole. 0.55 puts him at ~57px, where the gait reads.
-const WALKER_K = 0.55;
-const WALKER_H = Math.ceil(FIG_H * WALKER_K) + 3;   // 49 — feet at the stage's bottom edge
-const WALKER_PAD = 12;                              // he starts and ends inside the line's ends
-
-const InkWalker = memo(function InkWalker({
-  progress,
-  width,
+/**
+ * One letter of the title, arriving in its turn.
+ *
+ * All seven read ONE driver — `set`, which counts LETTERS rather than seconds —
+ * so the stagger is a subtraction rather than seven timings that could drift
+ * apart. The ease is a DECELERATE: a letter is a thing coming to rest, and the
+ * handwriting bezier the references give is for a stroke being drawn, which is
+ * the rule's job below rather than the type's.
+ */
+const Letter = memo(function Letter({
+  ch,
+  index,
+  set,
 }: {
-  progress: SharedValue<number>;
-  width: number;
+  ch: string;
+  index: number;
+  set: SharedValue<number>;
 }) {
-  const clock = useSharedValue(0);
-  useFrameCallback((f) => {
+  const style = useAnimatedStyle(() => {
     'worklet';
-    let dt = (f.timeSincePreviousFrame ?? 16) / 1000;
-    if (dt > 0.05) dt = 0.05;
-    clock.value += dt;
-  }, true);
-
-  const J = useDerivedValue<Joints>(() => {
-    'worklet';
-    const p = Math.min(progress.value, 92) / 92;
-    const x = WALKER_PAD + (width - 2 * WALKER_PAD) * p;
-    // Walking → arriving. The blend runs over the last twelfth of the journey,
-    // so he decelerates into the stand rather than switching poses.
-    const arrive = Math.max(0, Math.min(1, (p - 0.9) / 0.1));
-    const s = mixStance(walk((x - WALKER_PAD) / WALKER_K), stand(clock.value), arrive);
-    return solve({
-      x, groundY: WALKER_H, k: WALKER_K, dir: 1,
-      tilt: s.tilt, neck: s.neck, bob: s.bob,
-      footL: s.footL, footR: s.footR, fistL: s.fistL, fistR: s.fistR,
-    });
+    const u = Math.max(0, Math.min(1, set.value - index));
+    const e = 1 - Math.pow(1 - u, 3);
+    return { opacity: e, transform: [{ translateY: (1 - e) * 7 }] };
   });
-  const D = useDerivedValue<Bundle>(() => {
-    'worklet';
-    return bundle(J.value, WALKER_K, 1);
-  });
-
-  return (
-    <View style={{ width, height: WALKER_H }} pointerEvents="none">
-      <Stickman D={D} k={WALKER_K} color={C.ink} />
-    </View>
-  );
+  return <Animated.Text style={[styles.letter, style]}>{ch}</Animated.Text>;
 });
 
 // The percentage readout. Isolated so the tick-by-tick re-render touches this
@@ -233,24 +230,21 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
   const quote = SHORT_QUOTES.length > 0 ? SHORT_QUOTES[seed % SHORT_QUOTES.length] : FALLBACK_QUOTE;
 
   const strokeW = Math.round(width * 0.56);
-  const { d, len } = useMemo(() => makeStroke(strokeW, seed + 7), [strokeW, seed]);
+  const { d, len, ys } = useMemo(() => makeStroke(strokeW, seed + 7), [strokeW, seed]);
 
   const progress = useSharedValue(0);
   const screenOpacity = useSharedValue(1);
   const introFade = useSharedValue(0);
-  // The wordmark STRIKES on — the streak seal's choreography (§7) at title
-  // scale: a fall that ACCELERATES (Easing.in; the half everyone gets
-  // backwards), a squash on contact, a settle. 0→1 is the fall, 1→2 the recoil.
-  const strike = useSharedValue(0);
+  /** How many letters have been set. Counts letters, not seconds — see Letter. */
+  const set = useSharedValue(0);
   const plateIn = useSharedValue(0);
   const footIn = useSharedValue(0);
   const [held, setHeld] = useState(false);
 
-  // Choreography: draw to 92 over 2.7s (fast start, gentle settle), then wait
-  // for `ready` — normally already true, so the finish chains straight on.
-  // With the finish + fade this puts the whole moment a little over 3s — long
-  // enough to actually read the plate. The head, the plate and the foot arrive
-  // as three slices of one entrance, top of the page first.
+  // Choreography: the title sets itself while the rule draws to 92 over 2.7s
+  // (fast start, gentle settle), then waits for `ready` — normally already true,
+  // so the finish chains straight on. With the finish + fade this puts the whole
+  // moment a little over 3s — long enough to actually read the plate.
   useEffect(() => {
     if (skipAnimation) {
       // Straight to held: no draw-on, no counting, no second performance. The
@@ -258,7 +252,7 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
       // It still FADES briefly — the hand-off from the fresh native splash this
       // path restarts behind. 260ms buys that and nothing else.
       introFade.value = withTiming(1, { duration: 260 });
-      strike.value = 2;
+      set.value = LETTERS.length;
       plateIn.value = withTiming(1, { duration: 260 });
       footIn.value = withTiming(1, { duration: 260 });
       progress.value = 92;
@@ -266,17 +260,25 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
       return;
     }
     introFade.value = withTiming(1, { duration: 420 });
-    strike.value = withDelay(
-      140,
-      withSequence(
-        withTiming(1, { duration: 230, easing: Easing.in(Easing.quad) }),
-        withTiming(2, { duration: 320, easing: Easing.out(Easing.back(2.2)) })
-      )
+    // LINEAR, and that is the point: the driver counts letters, so a linear ramp
+    // IS an even 140ms apart. Easing the DRIVER would bunch the middle letters
+    // and space the outer ones — the stagger has to live in the value, and each
+    // letter's own ease lives in Letter.
+    set.value = withDelay(
+      160,
+      withTiming(LETTERS.length, {
+        duration: LETTERS.length * LETTER_STAGGER,
+        easing: Easing.linear,
+      })
     );
     // The plate is DEALT onto the table rather than faded up: it slides in with
-    // a slight tilt and settles flat, a touch past level and back.
-    plateIn.value = withDelay(420, withTiming(1, { duration: 560, easing: Easing.out(Easing.back(1.5)) }));
-    footIn.value = withDelay(650, withTiming(1, { duration: 420 }));
+    // a slight tilt and settles flat, a touch past level and back. It waits for
+    // the title to finish setting, so the page composes top-down.
+    plateIn.value = withDelay(
+      160 + LETTERS.length * LETTER_STAGGER,
+      withTiming(1, { duration: 560, easing: Easing.out(Easing.back(1.5)) })
+    );
+    footIn.value = withDelay(1400, withTiming(1, { duration: 420 }));
     progress.value = withTiming(
       92,
       { duration: 2700, easing: Easing.out(Easing.cubic) },
@@ -314,18 +316,11 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
 
   const rootStyle = useAnimatedStyle(() => ({ opacity: screenOpacity.value }));
   // THE GROUND STARTS WHERE THE SPLASH LEFT OFF. See SPLASH_BG in launchArt.ts.
-  // Paper is only a 1.1:1 step from the splash grey, but the settle still rides
+  // Paper is only a 1.2:1 step from the splash grey, but the settle still rides
   // the intro curve so the very first frame is the splash's own colour and the
   // hand-off has no seam at all.
   const groundStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(introFade.value, [0, 1], [SPLASH_BG, GROUND]),
-  }));
-  const mastStyle = useAnimatedStyle(() => ({
-    opacity: Math.min(1, strike.value * 1.6),
-    transform: [
-      { scale: interpolate(strike.value, [0, 1, 2], [1.22, 0.955, 1]) },
-      { translateY: interpolate(strike.value, [0, 1, 2], [-10, 1.5, 0]) },
-    ],
   }));
   const plateStyle = useAnimatedStyle(() => ({
     opacity: Math.min(1, plateIn.value * 1.5),
@@ -336,12 +331,31 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
   }));
   const footStyle = useAnimatedStyle(() => ({ opacity: footIn.value }));
   const lineStyle = useAnimatedStyle(() => ({ opacity: introFade.value }));
-  // The tip of the ink line and the walker's feet read the SAME mapping — see
-  // InkWalker: both are progress/92 across the span, so the line always ends
-  // where he is standing.
   const strokeProps = useAnimatedProps(() => ({
     strokeDashoffset: len * (1 - Math.min(progress.value, 92) / 92),
   }));
+  // THE NIB READS THE SAME MAPPING AS THE LINE'S TIP — min(progress, 92) / 92
+  // across the same span — so it cannot lead or trail the ink it is drawing.
+  // Its y is interpolated out of the path's own samples, so it sits ON the
+  // stroke through every wobble; and it LIFTS over the last stretch, which is
+  // the pen-lift the reference names rather than a mark that reaches the end of
+  // the line and parks there.
+  const nibStyle = useAnimatedStyle(() => {
+    'worklet';
+    const p = Math.min(progress.value, 92) / 92;
+    const t = p * (ys.length - 1);
+    const i = Math.floor(t);
+    const j = Math.min(ys.length - 1, i + 1);
+    const y = ys[i] + (ys[j] - ys[i]) * (t - i);
+    const lift = Math.max(0, Math.min(1, (p - 0.9) / 0.1));
+    return {
+      opacity: 1 - lift,
+      transform: [
+        { translateX: strokeW * p - NIB / 2 },
+        { translateY: y - NIB / 2 - lift * 3 },
+      ],
+    };
+  });
 
   return (
     <Animated.View style={[StyleSheet.absoluteFill, styles.root, groundStyle, rootStyle]}>
@@ -353,27 +367,27 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
       <View style={[styles.col, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 26 }]}>
         <View style={styles.spacerA} />
 
-        {/* The head of the page: mark and wordmark strike on together; under
-            them the walker draws the progress line. The wordmark is the brand
-            from app.json — check-launch derives the expected string from
-            expo.name, the rule that caught this screen still saying the
-            previous name (§19). */}
+        {/* The head of the page: the title sets itself letter by letter, then
+            the rule draws under it as the progress line. The wordmark is ONE
+            constant derived from app.json — see WORDMARK. */}
         <View style={styles.mast}>
-          <Animated.View style={[styles.mastStrike, mastStyle]}>
-            <LaurelMark width={78} />
-            <Text style={styles.wordmark}>ASHMERE</Text>
-          </Animated.View>
+          <View style={styles.word}>
+            {LETTERS.map((ch, i) => (
+              <Letter key={`${ch}-${i}`} ch={ch} index={i} set={set} />
+            ))}
+          </View>
+
           <Animated.View style={[styles.strokeWrap, lineStyle]}>
-            {/* The line's centre sits 7px up from this box's bottom (the Svg is
-                14 tall, ruled through its middle); the walker's stage bottoms
-                out exactly there, so his feet are ON the ink. */}
-            <View style={{ width: strokeW, height: WALKER_H + STROKE_SVG_H / 2 }}>
+            <View style={{ width: strokeW, height: STROKE_SVG_H }}>
               <Svg
                 width={strokeW}
                 height={STROKE_SVG_H}
                 viewBox={`0 ${-STROKE_SVG_H / 2} ${strokeW} ${STROKE_SVG_H}`}
-                style={styles.strokeSvg}
+                style={StyleSheet.absoluteFill}
               >
+                {/* ROUND CAPS, and the reference is explicit about why: butt
+                    caps end the dashoffset reveal on a hard rectangle and it
+                    reads as a clipped vector wipe rather than as ink. */}
                 <AnimatedPath
                   d={d}
                   stroke={C.ink}
@@ -385,9 +399,9 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
                   animatedProps={strokeProps}
                 />
               </Svg>
-              <View style={styles.walkerSeat}>
-                <InkWalker progress={progress} width={strokeW} />
-              </View>
+              {/* The nib. A View rather than an animated Circle: §17's rule 7
+                  keeps animation off SVG properties and on native Views. */}
+              <Animated.View style={[styles.nib, nibStyle]} pointerEvents="none" />
             </View>
             <Pct progress={progress} color={C.inkSoft} />
           </Animated.View>
@@ -425,18 +439,23 @@ const styles = StyleSheet.create({
   spacerB: { flex: 2 },
   spacerC: { flex: 3 },
   mast: { alignItems: 'center' },
-  mastStrike: { alignItems: 'center' },
-  strokeSvg: { position: 'absolute', left: 0, bottom: 0 },
-  walkerSeat: { position: 'absolute', left: 0, bottom: STROKE_SVG_H / 2 },
-  wordmark: {
+  word: { flexDirection: 'row', gap: LETTER_TRACK },
+  letter: {
     fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 30,
-    lineHeight: 38,
-    letterSpacing: 3,
+    fontSize: 32,
+    lineHeight: 40,
     color: C.ink,
-    marginTop: 10,
   },
-  strokeWrap: { alignItems: 'center', gap: 8, marginTop: 4 },
+  strokeWrap: { alignItems: 'center', gap: 9, marginTop: 18 },
+  nib: {
+    position: 'absolute',
+    left: 0,
+    top: STROKE_SVG_H / 2,
+    width: NIB,
+    height: NIB,
+    borderRadius: NIB / 2,
+    backgroundColor: C.ink,
+  },
   pct: {
     fontFamily: 'Inter_500Medium',
     fontSize: 11,

@@ -102,10 +102,20 @@ console.log('check-launch: the title page');
 // name one letter at a time for a whole rename because it was written by hand
 // and matched no search for the name itself; the expected string is derived,
 // so a rename fails here instead of shipping.
+// THE TITLE IS NOW SET ONE LETTER AT A TIME, which is the very shape that hid
+// the last rename — so the rule got STRICTER rather than looser. There is no
+// `>ASHMERE<` in the source any more; there is one constant, and the letters are
+// derived from it. Both halves are checked, because either alone is a hole: a
+// constant nothing renders is decoration, and a `.split('')` over a hard-coded
+// array is the old defect wearing the new shape.
 {
   const brand = JSON.parse(read('app.json')).expo.name.toUpperCase();
-  ok(new RegExp(`>${brand}<`).test(screenRaw),
-    `the wordmark says ${brand}`, 'derived from app.json expo.name');
+  ok(new RegExp(`const WORDMARK = '${brand}'`).test(screen),
+    `the wordmark constant says ${brand}`, 'derived from app.json expo.name');
+  ok(/const LETTERS = WORDMARK\.split\(''\)/.test(screen)
+    && /LETTERS\.map\(/.test(screen),
+    'and the letters on the page are derived from that constant',
+    'a per-letter title cannot drift from the brand it spells');
 }
 
 // ── 3 · every tone is measured on the ground it sits on ──────────────────────
@@ -114,7 +124,7 @@ console.log('check-launch: the title page');
 // arithmetic — but only if the styles actually use the tokens the arithmetic
 // checks. Each rule pins the STYLE to its token, then measures the token.
 {
-  ok(/wordmark: \{[^}]*color: C\.ink/s.test(screen), 'the wordmark is set in ink');
+  ok(/letter: \{[^}]*color: C\.ink/s.test(screen), 'the title is set in ink');
   ok(/<Pct progress=\{progress\} color=\{C\.inkSoft\} \/>/.test(screen),
     'the percentage is set in inkSoft');
   ok(/foot: \{[\s\S]*?color: C\.inkSoft/.test(screen), 'the foot line is set in inkSoft');
@@ -144,31 +154,46 @@ console.log('check-launch: the title page');
     'straight to held — no second performance on a restarted cold start');
 }
 
-// ── 4b · the page performs — it is not a photograph ──────────────────────────
+// ── 4b · the page performs, and it performs the RIGHT WAY ────────────────────
 //
-// The first cut of the title page was static and the reader said so ("very
-// boring … not just a still image"). The progress line is walked now: the rig's
-// own figure crosses the page drawing the ink behind him, then stands and
-// breathes through the hold. Three things keep that honest:
+// Two readers' notes are held here at once, and they pull in opposite
+// directions. The first cut of the title page was static ("very boring … not
+// just a still image"), so the page has to move; the second cut answered that
+// with the lesson mascot walking the rule, and that was rejected too ("that
+// quick walking animation, I want some other cleaner animation"). A rule that
+// only demanded MOTION would pass the sprite, and a rule that only forbade the
+// sprite would pass a photograph. So this asks for the specific object the
+// references describe:
 //
-//   · the REAL rig walks him (walk/stand/mixStance imports), so the gait is the
-//     one every lesson validates, not a bespoke shuffle;
-//   · the frame clock ACCUMULATES timeSincePreviousFrame — reading
-//     timeSinceFirstFrame resets on any re-render (LaunchFigure's documented
-//     bug, and the launch screen re-renders when `held` flips);
-//   · the walker's feet and the ink's tip read ONE mapping (progress/92 across
-//     the span), so the line can never lead or trail the man drawing it.
+//   · THE TITLE IS SET one letter at a time, at the signature literature's own
+//     140ms pen-lift rhythm, off ONE driver — seven separate timings is seven
+//     things that can drift out of rhythm;
+//   · THE RULE DRAWS ITSELF with ROUND caps. That is not a preference: butt
+//     caps end a dashoffset reveal on a hard rectangle and it reads as a
+//     clipped vector wipe rather than as ink;
+//   · THE NIB AND THE INK TIP READ ONE MAPPING, so the pen cannot lead or trail
+//     the line it is drawing;
+//   · and the RIG IS OFF THE BOOT PATH. This is the half that is about safety
+//     rather than taste: the walker died here once on a defaulted gait that
+//     never reached the UI runtime's closure — fatal in release, on every
+//     launch, invisible to tsc and to a browser. Nothing on this screen can
+//     throw on the UI thread now, and this rule is what keeps it that way.
 {
-  ok(/import Stickman from '@\/components\/lesson\/cinematic\/Stickman'/.test(screenRaw)
-    && /\bwalk\(/.test(screen) && /\bstand\(/.test(screen) && /mixStance\(/.test(screen),
-    'a living figure walks the progress line, on the real rig');
-  ok(/useFrameCallback/.test(screen) && /timeSincePreviousFrame/.test(screen)
-    && !/timeSinceFirstFrame(?!\s*\?\?)/.test(screen.replace(/timeSincePreviousFrame/g, '')),
-    'its clock accumulates frame deltas', 'timeSinceFirstFrame resets on re-render');
+  ok(/const LETTER_STAGGER = 140;/.test(screen),
+    'the title sets at the 140ms pen-lift rhythm', 'from the signature-drawing literature');
+  ok(/const Letter = memo\(/.test(screen) && /set\.value - index/.test(screen),
+    'and all its letters read one driver', 'a stagger is a subtraction, not seven timings');
+  ok(/strokeLinecap="round"/.test(screenRaw) && /strokeDashoffset/.test(screen),
+    'the rule draws itself, round-capped',
+    'butt caps read as a clipped vector wipe rather than ink');
   const mappings = (screen.match(/Math\.min\(progress\.value, 92\) \/ 92/g) ?? []).length;
   ok(mappings >= 2,
-    'the walker and the ink tip share one progress mapping',
-    `${mappings} readers of min(progress,92)/92 — his feet and the line cannot disagree`);
+    'the nib and the ink tip share one progress mapping',
+    `${mappings} readers of min(progress,92)/92 — the pen cannot lead the line`);
+  ok(!/cinematic\/Stickman/.test(screenRaw) && !/cinematic\/rig/.test(screenRaw)
+    && !/useFrameCallback/.test(screen),
+    'and no rig, figure or frame clock is on the boot path',
+    'the walker crashed release here on a defaulted gait; nothing here can throw');
 }
 
 // ── 5 · the status bar never flips ───────────────────────────────────────────
