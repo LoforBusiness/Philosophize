@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  View, Text, Pressable, ScrollView, StyleSheet, Platform,
+  View, Text, Pressable, ScrollView, StyleSheet,
   type LayoutChangeEvent, type NativeSyntheticEvent, type NativeScrollEvent,
 } from 'react-native';
 import { useSharedValue } from 'react-native-reanimated';
@@ -297,11 +297,32 @@ export default function StreakScreen() {
             which is structurally unable to see either of them: the top of the
             page is where a reader overscrolls, and it is where both of them are.
 
-            `removeClippedSubviews` stays, and its reason has changed. It is not
-            a drawing optimisation -- HWUI skips off-screen nodes anyway. It is a
-            MEMORY one, and memory is what is short: `SvgView` renders every icon
-            in this app into an ARGB_8888 bitmap and recycles it on detach, so
-            clipping is what hands the GPU cache back its headroom. */}
+            AND `removeClippedSubviews` WAS THE FAULT ITSELF. It was kept above
+            as a MEMORY optimisation on the reasoning that SvgView recycles its
+            ARGB_8888 bitmap on detach. Measured on the phone, it does not: GPU
+            memory is 115.66 MB at the top of the page, 116.16 mid, 115.83 back
+            at the top -- the clipping pass attaches and detaches 173 views and
+            hands back nothing at all.
+            What it does instead is put a view-management pass on the UI thread
+            that runs whenever the subtree invalidates. That is free while a page
+            is still, and ruinous the moment anything invalidates every frame --
+            which is what a mascot does, and what Android's overscroll stretch
+            does to a whole page.
+            THE CORRELATION IS EXACT ACROSS THE APP. These were the only two
+            screens carrying the flag, and they were the only two that janked:
+              Home | Pass | Insights | Learn | Thinkers   no flag   0.2-1.1%
+              Streak                                      flag      67-84%
+              Profile                                     flag      65-67%
+            Pass is the control that matters -- 1055 views and the same 112 MB of
+            GPU memory as Profile's 1330, and it overscrolls at 0.18%. Weight was
+            never the difference; the flag was.
+            AND THE COST NEEDS BOTH HALVES, which is why the page could look
+            innocent. With the mascot frozen (scrolled past) this screen renders
+            0 frames and janks 0% WITH the flag still on. With the flag off there
+            is nothing per-frame for an invalidation to trigger. The same rig,
+            animating full-size in a lesson, runs 477 frames at 9ms and 0% janky
+            -- so the rig, `needsOffscreenAlphaCompositing` and the figure's size
+            are all exonerated. */}
         <ScrollView
           contentContainerStyle={styles.body}
           showsVerticalScrollIndicator={false}
@@ -311,7 +332,6 @@ export default function StreakScreen() {
           onScrollEndDrag={onMoveEnd}
           onMomentumScrollBegin={onMoveStart}
           onMomentumScrollEnd={onMoveEnd}
-          removeClippedSubviews={Platform.OS === 'android'}
         >
           {/* ── THE HERO ────────────────────────────────────────────────────
               The count is the loudest thing on the screen and it takes the ember

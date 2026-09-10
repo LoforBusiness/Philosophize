@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { View, Text, Pressable, ScrollView, Alert, StyleSheet, Dimensions, Platform } from 'react-native';
+import { View, Text, Pressable, ScrollView, Alert, StyleSheet, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import SketchIcon from '@/components/shared/SketchIcon';
@@ -400,12 +400,40 @@ export default function ProfileScreen() {
         // note that used to sit here claimed it "keeps the fling cheap"; that
         // was never true of this content shape, and nothing measured it.
         //
-        // It stays because it is the ROOT of the clipping pass: React Native only
-        // recurses into nested clipping groups from a ScrollView that has the
-        // flag itself. The View that can actually use it is `styles.body` below,
-        // which has nineteen children — twelve of them, 525 of the page's 716
-        // nodes, start below the fold.
-        removeClippedSubviews={Platform.OS === 'android'}
+        // AND IT WAS NOT MERELY USELESS, IT WAS THE FAULT. A phone was attached
+        // for this pass, and the flag is gone from both places it sat.
+        //
+        // What it actually did, measured: it attaches and detaches 173 views
+        // (1330 at the top, 1503 mid-page, 1330 again on the way back) and hands
+        // back NO memory — GPU usage is 115.66 MB at the top, 116.16 mid, 115.83
+        // back at the top. The note above hoped it was "what hands those bitmaps
+        // back". It does not; SvgView's bitmaps stay resident either way.
+        //
+        // What it costs is a view-management pass on the UI THREAD that runs
+        // whenever the subtree invalidates. A still page never invalidates, so
+        // this page was smooth at rest and smooth while scrolling — a scroll is
+        // a translate. Android's overscroll stretch is a RenderEffect that
+        // invalidates the whole subtree EVERY FRAME, and that is when the pass
+        // ran, at both ends, which is exactly where the reader felt it.
+        //
+        // THE CORRELATION IS EXACT ACROSS THE APP, and it is what turns this
+        // from a theory into the answer. Two screens carried the flag; the same
+        // two janked, and no others did:
+        //
+        //   Home · Pass · Insights · Learn · Thinkers   no flag   0.2–1.1% janky
+        //   Streak                                      flag      67–84%
+        //   Profile                                     flag      65–67%
+        //
+        // Pass is the control that settles it: 1055 views against this page's
+        // 1330 and the SAME 112 MB of GPU memory, and it overscrolls at 0.18%.
+        // The weight of the page was never the difference. It also retires the
+        // SVG-count theory below — Pass draws the same fourteen gradients and
+        // twelve SVG sites this page does.
+        //
+        // The GPU was never the problem either: through the whole broken gesture
+        // its percentiles are 4/7/7/11ms, the same as Home's. It is `Slow UI
+        // thread` on 47 of 47 janky frames, with 46 slow bitmap uploads — the
+        // signature of views being re-attached and their contents re-uploaded.
         // ── AND THE CLIPPING PASS WAS NEVER THE OVERSCROLL FAULT ─────────────
         //
         //   > "when you're already at the top ... when you try scroll up even
@@ -562,12 +590,12 @@ export default function ProfileScreen() {
         ), [insets.top, palette, displayName, nameFont, descriptor, joinedLabel, cur, profileQuote, openRanksBadges, openSavedQuotes, openPhilosopher])}
 
         {/* Body */}
-        {/* THE CLIPPING ACTUALLY HAPPENS HERE — see the note on the ScrollView.
-            Nineteen children, twelve of them below the fold when the reader is at
-            the top, which is 525 of the page's 716 nodes and 44 of its 50 SVGs.
-            Layout-neutral by definition: the flag only detaches views that are
-            already outside the visible rect. */}
-        <View style={styles.body} removeClippedSubviews={Platform.OS === 'android'}>
+        {/* THE CLIPPING USED TO HAPPEN HERE, and this was the half that could
+            actually reach something — nineteen children, twelve below the fold
+            at the top. It is gone with the root: see the measurements on the
+            ScrollView. Detaching those twelve bought no memory back and put a
+            UI-thread pass under every frame of the overscroll stretch. */}
+        <View style={styles.body}>
           {/* THE CABINET, FIRST. The pin you hold and the three medals you chose
               to be seen holding — see components/profile/Showcase. It is above
               everything because it is the only part of this page that is a
