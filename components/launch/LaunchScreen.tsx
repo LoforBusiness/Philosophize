@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef, useState, memo } from 'react';
 import { View, Text, StyleSheet, StatusBar, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  useAnimatedProps,
   useAnimatedReaction,
+  useDerivedValue,
   interpolateColor,
   withTiming,
   withDelay,
@@ -14,148 +13,102 @@ import Animated, {
   runOnJS,
   type SharedValue,
 } from 'react-native-reanimated';
-import QuotePlate from '@/components/shared/QuotePlate';
 import { C } from '@/constants/design';
-import { ALL_PHILOSOPHERS } from '@/data/philosophers';
+import InkDrawing from './InkDrawing';
+import { ART } from './inkArt';
 import { SPLASH_BG } from './launchArt';
 
-const AnimatedPath = Animated.createAnimatedComponent(Path);
+// ─── THE DRAWING ─────────────────────────────────────────────────────────────
+//
+// The cold-start loading moment. It has been six near-black illustrated
+// landscapes, then a laurel over the wordmark, then a title page whose rule drew
+// itself under a struck quotation. What it is now was asked for directly, and in
+// this order: a completely white page; the scribble on the left drawing itself
+// out, stroke by stroke, into a ball of ink; the line carrying on across the
+// page and drawing the light bulb; and then the yellow going in and the light
+// coming on. Everything is DRAWN — nothing appears.
+//
+// ── WHAT THE SCREEN IS MADE OF NOW ──────────────────────────────────────────
+//
+// The picture is one unbroken pen line, and `inkArt.ts` holds it as the path the
+// pen actually took rather than as an outline of the ink — that distinction is
+// the whole reason it can be drawn at all, and its header records how the
+// centreline was recovered from the JPEG. `InkDrawing` reveals it along its own
+// length and explains why each stroke gets its own small <Svg>.
+//
+// ONE CLOCK RUNS ALL OF IT. `progress` is the readout, 0 → 92 while the drawing
+// is made and 92 → 100 on the way out; `u` is that same value re-expressed as
+// the drawing's own 0 → 1 timeline. The pen, the marker, the light and the title
+// are all functions of `u`, so none of them can drift out of step with the
+// others — which is the trap group L of the rule book is entirely about, and
+// which this screen has already been bitten by once in the status-bar flip.
+//
+// THE DRAW RUNS LINEAR ON PURPOSE. An eased driver would put the pen's speed in
+// the easing curve, where it belongs to the SCHEDULE: `InkDrawing` deals time by
+// stroke length, so the tangle is scribbled fast and the bulb is drawn slowly
+// because those are two different acts, not because a cubic happens to be
+// flattening out at that moment.
+//
+// WHY THE PAGE IS PURE WHITE rather than `C.paper`. Everything else in this app
+// is printed on #FAFAF7 and this screen was too. It was asked for white, the
+// source drawing's own page measures #FEFEFE, and a bulb glowing on a warm sheet
+// is a slightly different picture from a bulb glowing on a white one. The cost
+// is one number: the native splash is a COMPILED resource (§18) and cannot be
+// changed over the air, so the first frame is still the splash grey and the step
+// up to white is 1.28:1 instead of 1.02:1 — imperceptible, and against the 10.7:1
+// flash the old near-black scenes opened with. The ground still STARTS on the
+// splash colour and settles, so the hand-off has no seam.
+//
+// NO RIG, NO FIGURE, NO FRAME CLOCK, and that is a safety rule rather than a
+// taste one. This screen died in release once on `walk()`'s defaulted gait never
+// reaching the UI runtime's closure — fatal on every launch, invisible to tsc
+// and invisible in a browser. Nothing here can throw on the UI thread.
 
-// ─── THE TITLE PAGE ──────────────────────────────────────────────────────────
-//
-// The cold-start loading moment. It was six near-black illustrated landscapes
-// with the figure living in them; then a title page with a laurel over the
-// wordmark and a stickman who walked the progress line. The reader rejected
-// both of those last two — "I just don't like the logo above ashmere and also
-// that quick walking animation, I want some other cleaner animation" — and what
-// replaced them was RESEARCHED rather than guessed.
-//
-// ── WHAT THE REFERENCES ACTUALLY SAY ────────────────────────────────────────
-//
-// Two independent sources describe the same object, and it is the one a book
-// wants. The luxury/premium pattern is a minimal line-draw reveal: a thin line
-// traces, then the wordmark arrives, soft easing, about two seconds, ending on
-// the exact logo centred and fully readable. The signature-drawing literature
-// then gives the cadence in NUMBERS — 140ms of stagger between strokes for a
-// pen-lift rhythm, and ROUND CAPS, because butt caps leave the dashoffset
-// reveal with hard rectangular ends and it reads as a clipped vector wipe,
-// where round caps give the ink a soft pen-tip start and finish.
-//
-// So the animation IS the drawing, and there are exactly two moving things:
-//
-//   · THE WORDMARK IS SET, one letter at a time, at that 140ms rhythm — the
-//     title being composed on the page rather than a logo dropped onto it. It
-//     replaced a STRIKE (squash, recoil, back-easing), which is the right
-//     motion for a streak seal and the wrong one here: a bounce is the gamified
-//     register this screen is deliberately not in.
-//   · THE RULE DRAWS ITSELF as the progress, with a NIB at its tip. The nib is
-//     not an addition — a stroke-dashoffset reveal already IS a pen moving, and
-//     the references say so in as many words; the nib only makes the thing
-//     doing it visible. It is one small ink mark riding the line's own measured
-//     y, and it LIFTS at the end, because that is what a pen does.
-//
-// WHY NOT THE FIGURE. He is the mascot of the lessons, and at 57px on a title
-// page he read as a sprite scurrying along a rule — limbs at speed, in a
-// composition whose whole argument is stillness. Removing him also takes the
-// rig off the boot path entirely, which is worth a line of its own: this screen
-// died once on walk()'s defaulted gait never reaching the UI runtime's closure
-// — fatal in release, on every launch. No worklet here can throw at all now.
-//
-// WHY NOTHING REPLACED THE LAUREL. A title page does not need an ornament; the
-// type is the ornament. Swapping one mark for another mark is how you get asked
-// to remove the second one.
-//
-// WHAT THE REDESIGN BUYS STRUCTURALLY, beyond taste:
-//
-//   · NO scrims. Nothing may take its contrast from artwork (§19), and there is
-//     no artwork: everything is ink on C.paper, and check-launch holds every
-//     pairing by arithmetic.
-//   · NO first-frame flash. The native splash is SPLASH_BG (pale grey) and the
-//     old scenes were near-black — a 10:1 step. Paper is 1.2:1 from it.
-//   · NO status-bar flip. Paper from the splash hand-off to the welcome's
-//     cream, so the bar is dark-content throughout with no crossing to time.
+/** The page. See the note above — this screen is the one pure-white surface. */
+const GROUND = '#FFFFFF';
 
-// The ground, and the two inks on it. Tokens, not local hexes — check-launch
-// re-derives every pairing from constants/design.ts and fails the build if a
-// text tone here stops clearing 4.5:1 on the ground it sits on.
-const GROUND = C.paper;
+/**
+ * How long the drawing takes. It is a floor on every cold start, so it is the
+ * one number here worth being tight about: 2,900ms plus the 1,040ms outro puts
+ * the screen at 3.94s, against the 3.74s the title page it replaces took.
+ */
+const DRAW_MS = 2900;
 
-const STROKE_SVG_H = 14;
-
-// ── THE WORDMARK ────────────────────────────────────────────────────────────
+// ── THE TITLE ───────────────────────────────────────────────────────────────
 //
 // ONE CONSTANT, AND THE LETTERS ARE DERIVED FROM IT. That is not tidiness: this
 // screen spelled the PREVIOUS brand for a whole rename because its masthead was
-// written one letter at a time, and so matched no search for the name itself,
-// and nothing reported it (§19). Setting the letters individually is exactly
-// that shape again — so the string lives here whole, check-launch derives the
-// expected value from app.json's expo.name, and a rename fails the build
-// instead of shipping.
+// written one letter at a time and so matched no search for the name itself, and
+// nothing reported it (§19). Setting the letters individually is exactly that
+// shape again — so the string lives here whole, check-launch derives the
+// expected value from app.json's expo.name, and a rename fails the build.
 const WORDMARK = 'ASHMERE';
 const LETTERS = WORDMARK.split('');
 
 /** The pen-lift rhythm, from the signature-drawing literature. */
 const LETTER_STAGGER = 140;
-/** Tracking, as a real gap rather than letterSpacing — a per-character
+/** Tracking as a real gap rather than letterSpacing — a per-character
  *  letterSpacing also pads AFTER the last letter, which shifts a centred word
  *  off centre by half a track. */
 const LETTER_TRACK = 3;
 
-const NIB = 5;
-
-// Quotes short enough to actually read during the ~3.4s the screen is up. The
-// fallback can't realistically be hit, but this screen sits on the boot path —
-// an empty pool must never be able to crash the launch. The id rides along so
-// QuotePlate can dress the plate in the author's era.
-const SHORT_QUOTES = ALL_PHILOSOPHERS.flatMap((p) =>
-  p.quotes.map((q) => ({ text: q.text, author: p.name, id: p.id }))
-).filter((q) => q.text.length <= 90);
-const FALLBACK_QUOTE = { text: 'The unexamined life is not worth living.', author: 'Socrates', id: 'socrates' };
-
 /**
- * A slightly wobbly hand-drawn horizontal stroke, its exact length so the
- * draw-on (strokeDashoffset) can map progress onto the path, and the SAMPLED ys
- * so the nib can ride the line rather than float near it.
+ * Where in the drawing's timeline the title starts setting itself.
  *
- * The ys matter more than they look. The path wobbles about 2.6 units either
- * way, and a nib pinned to the centreline would sit off the ink for most of its
- * journey — at 5px that reads as a speck of dirt travelling beside a line.
- * Interpolating the same samples the path was built from puts it exactly on the
- * stroke, by construction, for any seed.
+ * Derived rather than picked: the seven letters take LETTERS.length ×
+ * LETTER_STAGGER to arrive, and the name has to be finished before the drawing
+ * is. Starting here, the title composes while the marker fills the glass and
+ * lands as the light settles — the app's name arriving under the idea.
  */
-function makeStroke(width: number, seed: number) {
-  const segs = 40;
-  const dx = width / segs;
-  let s = seed % 233280;
-  const rand = () => {
-    s = (s * 9301 + 49297) % 233280;
-    return s / 233280;
-  };
-  let d = 'M0 0';
-  let len = 0;
-  let px = 0;
-  let py = 0;
-  const ys: number[] = [0];
-  for (let i = 1; i <= segs; i++) {
-    const x = i * dx;
-    const y = Math.sin(i * 0.7) * 1.4 + (rand() - 0.5) * 2.4;
-    d += ` L${x.toFixed(1)} ${y.toFixed(1)}`;
-    len += Math.hypot(x - px, y - py);
-    px = x;
-    py = y;
-    ys.push(y);
-  }
-  return { d, len: Math.ceil(len), ys };
-}
+const WORD_SPAN = (LETTERS.length * LETTER_STAGGER) / DRAW_MS;
+const WORD_AT = 1 - WORD_SPAN - 0.01;
 
 /**
  * One letter of the title, arriving in its turn.
  *
  * All seven read ONE driver — `set`, which counts LETTERS rather than seconds —
  * so the stagger is a subtraction rather than seven timings that could drift
- * apart. The ease is a DECELERATE: a letter is a thing coming to rest, and the
- * handwriting bezier the references give is for a stroke being drawn, which is
- * the rule's job below rather than the type's.
+ * apart. The ease is a DECELERATE: a letter is a thing coming to rest.
  */
 const Letter = memo(function Letter({
   ch,
@@ -167,7 +120,6 @@ const Letter = memo(function Letter({
   set: SharedValue<number>;
 }) {
   const style = useAnimatedStyle(() => {
-    'worklet';
     const u = Math.max(0, Math.min(1, set.value - index));
     const e = 1 - Math.pow(1 - u, 3);
     return { opacity: e, transform: [{ translateY: (1 - e) * 7 }] };
@@ -225,63 +177,46 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
-  // One quote per launch.
-  const seed = useMemo(() => Math.floor(Math.random() * 233280), []);
-  const quote = SHORT_QUOTES.length > 0 ? SHORT_QUOTES[seed % SHORT_QUOTES.length] : FALLBACK_QUOTE;
-
-  const strokeW = Math.round(width * 0.56);
-  const { d, len, ys } = useMemo(() => makeStroke(strokeW, seed + 7), [strokeW, seed]);
-
   const progress = useSharedValue(0);
   const screenOpacity = useSharedValue(1);
   const introFade = useSharedValue(0);
-  /** How many letters have been set. Counts letters, not seconds — see Letter. */
-  const set = useSharedValue(0);
-  const plateIn = useSharedValue(0);
-  const footIn = useSharedValue(0);
   const [held, setHeld] = useState(false);
 
-  // Choreography: the title sets itself while the rule draws to 92 over 2.7s
-  // (fast start, gentle settle), then waits for `ready` — normally already true,
-  // so the finish chains straight on. With the finish + fade this puts the whole
-  // moment a little over 3s — long enough to actually read the plate.
+  /**
+   * The drawing's own timeline. Everything the page draws reads THIS — one
+   * clock, so the pen, the marker, the light and the title cannot disagree.
+   * The mapping is the same min(progress, 92) / 92 the old rule and its nib
+   * shared, and for the same reason.
+   */
+  const u = useDerivedValue(() => Math.min(progress.value, 92) / 92);
+
+  /** How many letters have been set. Counts letters, not seconds — see Letter. */
+  const set = useDerivedValue(() => {
+    const t = (u.value - WORD_AT) / WORD_SPAN;
+    const p = t < 0 ? 0 : t > 1 ? 1 : t;
+    return p * LETTERS.length;
+  });
+
+  // The drawing is made over DRAW_MS and then waits for `ready` — normally
+  // already true, so the finish chains straight on.
   useEffect(() => {
     if (skipAnimation) {
-      // Straight to held: no draw-on, no counting, no second performance. The
+      // Straight to held: no drawing, no counting, no second performance. The
       // `ready` effect below still governs the lift, so boot order is unchanged.
       // It still FADES briefly — the hand-off from the fresh native splash this
       // path restarts behind. 260ms buys that and nothing else.
       introFade.value = withTiming(1, { duration: 260 });
-      set.value = LETTERS.length;
-      plateIn.value = withTiming(1, { duration: 260 });
-      footIn.value = withTiming(1, { duration: 260 });
       progress.value = 92;
       setHeld(true);
       return;
     }
     introFade.value = withTiming(1, { duration: 420 });
-    // LINEAR, and that is the point: the driver counts letters, so a linear ramp
-    // IS an even 140ms apart. Easing the DRIVER would bunch the middle letters
-    // and space the outer ones — the stagger has to live in the value, and each
-    // letter's own ease lives in Letter.
-    set.value = withDelay(
-      160,
-      withTiming(LETTERS.length, {
-        duration: LETTERS.length * LETTER_STAGGER,
-        easing: Easing.linear,
-      })
-    );
-    // The plate is DEALT onto the table rather than faded up: it slides in with
-    // a slight tilt and settles flat, a touch past level and back. It waits for
-    // the title to finish setting, so the page composes top-down.
-    plateIn.value = withDelay(
-      160 + LETTERS.length * LETTER_STAGGER,
-      withTiming(1, { duration: 560, easing: Easing.out(Easing.back(1.5)) })
-    );
-    footIn.value = withDelay(1400, withTiming(1, { duration: 420 }));
+    // LINEAR, and that is the point: the pen's speed belongs to the schedule in
+    // InkDrawing, which deals time by stroke length, not to an easing curve that
+    // would quietly make the bulb draw slowly because a cubic is flattening out.
     progress.value = withTiming(
       92,
-      { duration: 2700, easing: Easing.out(Easing.cubic) },
+      { duration: DRAW_MS, easing: Easing.linear },
       (finished) => {
         if (finished) runOnJS(setHeld)(true);
       }
@@ -294,8 +229,8 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
   // 280 + 240 + 520 = 1.04s of cover, against the 1.03s the welcome's host needs
   // to walk into frame — see `onLift`. Shorten any of the three and the handover
   // goes back to revealing an empty page; the hold at 100% is also what stops
-  // the count reading as a cut. scripts/check-ui.mjs §10 reads these numbers
-  // out of this block and holds them against the tab warm-up's SETTLE_MS.
+  // the count reading as a cut. scripts/check-ui.mjs §10 reads these numbers out
+  // of this block and holds them against the tab warm-up's SETTLE_MS.
   const lifted = useRef(false);
   useEffect(() => {
     if (!held || !ready || lifted.current) return;
@@ -315,118 +250,45 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
   }, [held, ready]);
 
   const rootStyle = useAnimatedStyle(() => ({ opacity: screenOpacity.value }));
-  // THE GROUND STARTS WHERE THE SPLASH LEFT OFF. See SPLASH_BG in launchArt.ts.
-  // Paper is only a 1.2:1 step from the splash grey, but the settle still rides
-  // the intro curve so the very first frame is the splash's own colour and the
-  // hand-off has no seam at all.
+  // THE GROUND STARTS WHERE THE SPLASH LEFT OFF. See SPLASH_BG in launchArt.ts:
+  // the compiled splash colour cannot be changed over the air, so the page
+  // settles onto white across the intro rather than cutting to it.
   const groundStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(introFade.value, [0, 1], [SPLASH_BG, GROUND]),
   }));
-  const plateStyle = useAnimatedStyle(() => ({
-    opacity: Math.min(1, plateIn.value * 1.5),
-    transform: [
-      { translateY: (1 - plateIn.value) * 30 },
-      { rotate: `${(1 - plateIn.value) * -2.2}deg` },
-    ],
-  }));
-  const footStyle = useAnimatedStyle(() => ({ opacity: footIn.value }));
-  const lineStyle = useAnimatedStyle(() => ({ opacity: introFade.value }));
-  const strokeProps = useAnimatedProps(() => ({
-    strokeDashoffset: len * (1 - Math.min(progress.value, 92) / 92),
-  }));
-  // THE NIB READS THE SAME MAPPING AS THE LINE'S TIP — min(progress, 92) / 92
-  // across the same span — so it cannot lead or trail the ink it is drawing.
-  // Its y is interpolated out of the path's own samples, so it sits ON the
-  // stroke through every wobble; and it LIFTS over the last stretch, which is
-  // the pen-lift the reference names rather than a mark that reaches the end of
-  // the line and parks there.
-  const nibStyle = useAnimatedStyle(() => {
-    'worklet';
-    const p = Math.min(progress.value, 92) / 92;
-    const t = p * (ys.length - 1);
-    const i = Math.floor(t);
-    const j = Math.min(ys.length - 1, i + 1);
-    const y = ys[i] + (ys[j] - ys[i]) * (t - i);
-    const lift = Math.max(0, Math.min(1, (p - 0.9) / 0.1));
-    return {
-      opacity: 1 - lift,
-      transform: [
-        { translateX: strokeW * p - NIB / 2 },
-        { translateY: y - NIB / 2 - lift * 3 },
-      ],
-    };
-  });
+  const artStyle = useAnimatedStyle(() => ({ opacity: introFade.value }));
+
+  // THE DRAWING IS FULL-BLEED, and that is the composition rather than a
+  // shortcut. The line enters the page at the left edge and the bulb sits hard
+  // against the right one; inset it and both ends stop being a line that came
+  // from somewhere and became something.
+  const artH = useMemo(() => (width / ART.w) * ART.h, [width]);
 
   return (
     <Animated.View style={[StyleSheet.absoluteFill, styles.root, groundStyle, rootStyle]}>
-      {/* Dark icons for the whole life of the screen: the ground is paper from
-          the splash hand-off to the welcome page's cream, so there is no longer
-          a crossing to time. This stays the only barStyle in the app. */}
+      {/* Dark icons for the whole life of the screen. The ground is white from
+          the splash hand-off to the welcome page's cream, so there is no
+          crossing to time. This stays the only barStyle in the app. */}
       <StatusBar barStyle="dark-content" />
 
-      <View style={[styles.col, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 26 }]}>
+      <View style={[styles.col, { paddingTop: insets.top, paddingBottom: insets.bottom + 22 }]}>
         <View style={styles.spacerA} />
 
-        {/* The head of the page: the title sets itself letter by letter, then
-            the rule draws under it as the progress line. The wordmark is ONE
-            constant derived from app.json — see WORDMARK. */}
-        <View style={styles.mast}>
-          <View style={styles.word}>
-            {LETTERS.map((ch, i) => (
-              <Letter key={`${ch}-${i}`} ch={ch} index={i} set={set} />
-            ))}
-          </View>
+        <Animated.View style={[{ width, height: artH }, artStyle]}>
+          <InkDrawing u={u} width={width} />
+        </Animated.View>
 
-          <Animated.View style={[styles.strokeWrap, lineStyle]}>
-            <View style={{ width: strokeW, height: STROKE_SVG_H }}>
-              <Svg
-                width={strokeW}
-                height={STROKE_SVG_H}
-                viewBox={`0 ${-STROKE_SVG_H / 2} ${strokeW} ${STROKE_SVG_H}`}
-                style={StyleSheet.absoluteFill}
-              >
-                {/* ROUND CAPS, and the reference is explicit about why: butt
-                    caps end the dashoffset reveal on a hard rectangle and it
-                    reads as a clipped vector wipe rather than as ink. */}
-                <AnimatedPath
-                  d={d}
-                  stroke={C.ink}
-                  strokeWidth={2.6}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="none"
-                  strokeDasharray={`${len} ${len}`}
-                  animatedProps={strokeProps}
-                />
-              </Svg>
-              {/* The nib. A View rather than an animated Circle: §17's rule 7
-                  keeps animation off SVG properties and on native Views. */}
-              <Animated.View style={[styles.nib, nibStyle]} pointerEvents="none" />
-            </View>
-            <Pct progress={progress} color={C.inkSoft} />
-          </Animated.View>
+        {/* The title composes under the drawing as the glass fills, and is
+            finished as the light settles. */}
+        <View style={styles.word}>
+          {LETTERS.map((ch, i) => (
+            <Letter key={`${ch}-${i}`} ch={ch} index={i} set={set} />
+          ))}
         </View>
 
         <View style={styles.spacerB} />
 
-        {/* The epigraph — the app's own struck plate, era spine and all, so the
-            first object anyone sees is the object the whole app is made of.
-            Its tones are tone.plate()'s and are already held by check-ui. */}
-        <Animated.View style={plateStyle}>
-          <QuotePlate
-            text={quote.text}
-            author={quote.author}
-            philosopherId={quote.id}
-            size="md"
-            kicker="FROM THE LIBRARY"
-          />
-        </Animated.View>
-
-        <View style={styles.spacerC} />
-
-        <Animated.Text style={[styles.foot, footStyle]}>
-          THE ART OF THINKING DEEPLY
-        </Animated.Text>
+        <Pct progress={progress} color={C.inkSoft} />
       </View>
     </Animated.View>
   );
@@ -434,39 +296,26 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
 
 const styles = StyleSheet.create({
   root: { zIndex: 1000, elevation: 1000 },
-  col: { flex: 1, paddingHorizontal: 26 },
-  spacerA: { flex: 3 },
-  spacerB: { flex: 2 },
-  spacerC: { flex: 3 },
-  mast: { alignItems: 'center' },
-  word: { flexDirection: 'row', gap: LETTER_TRACK },
+  col: { flex: 1, alignItems: 'center' },
+  spacerA: { flex: 5 },
+  spacerB: { flex: 4 },
+  word: {
+    flexDirection: 'row',
+    gap: LETTER_TRACK,
+    marginTop: 34,
+  },
   letter: {
     fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 32,
-    lineHeight: 40,
+    fontSize: 26,
+    lineHeight: 34,
+    letterSpacing: 0,
     color: C.ink,
-  },
-  strokeWrap: { alignItems: 'center', gap: 9, marginTop: 18 },
-  nib: {
-    position: 'absolute',
-    left: 0,
-    top: STROKE_SVG_H / 2,
-    width: NIB,
-    height: NIB,
-    borderRadius: NIB / 2,
-    backgroundColor: C.ink,
   },
   pct: {
     fontFamily: 'Inter_500Medium',
     fontSize: 11,
     lineHeight: 14,
     letterSpacing: 2,
-  },
-  foot: {
-    alignSelf: 'center',
-    fontFamily: 'Inter_500Medium',
-    fontSize: 10,
-    letterSpacing: 2.5,
     color: C.inkSoft,
   },
 });

@@ -1299,7 +1299,21 @@ export function masterLive(code: number, t: number, bt: number): Stance {
 }
 
 /** Mid-stride, driven by distance so the feet stay locked. */
-export function walk(dist: number, g: Gait = WALK): Stance {
+// THE GAIT IS REQUIRED, AND A DEFAULT HERE IS A CRASH WAITING FOR A CALLER.
+// The Reanimated plugin builds a worklet's `__closure` from the identifiers in
+// its BODY. A default value lives in the SIGNATURE, so `WALK` is never shipped
+// to the UI runtime -- and out there `walk()` has no scope chain to fall back
+// on, so it throws `ReferenceError: Property 'WALK' doesn't exist` and takes
+// the app down. That is fatal in release and invisible everywhere it would be
+// cheap to catch: `tsc` was happy with the default, `check:worklets` asks what
+// a worklet CALLS rather than what its signature defaults to, and web has one
+// thread and real closures so the browser is perfect.
+//
+// It shipped twice. The comment below `travelStance` asked callers to pass it
+// explicitly and the launch screen's walker did not, because nothing made it.
+// A required parameter makes it a TYPE ERROR, which is the one form of this
+// rule that cannot be forgotten.
+export function walk(dist: number, g: Gait): Stance {
   'worklet';
   const ph = phaseFor(dist, g);
   const fR = footTarget(ph, g);
@@ -1452,7 +1466,7 @@ export function gaitVary(g: Gait, seed: number): Gait {
  * crashes the UI runtime, so order matters here.
  */
 export function strideStance(
-  x0: number, x1: number, settled: Stance, tr: number, g: Gait = WALK, seed = 0
+  x0: number, x1: number, settled: Stance, tr: number, g: Gait, seed = 0
 ): Stance {
   'worklet';
   // Every walk gets its own habit, dealt from where it starts and ends, so the

@@ -5,7 +5,7 @@ import Animated, {
   useSharedValue, useAnimatedStyle, withDelay, withTiming, Easing,
 } from 'react-native-reanimated';
 import StreakBook from '@/components/gamification/StreakBook';
-import StreakCelebration from '@/components/gamification/StreakCelebration';
+import StreakCeremony from '@/components/gamification/StreakCeremony';
 import RankUpScreen, { T_BURST } from '@/components/gamification/RankUpScreen';
 import RewardLoafer, { pickLine } from '@/components/gamification/RewardLoafer';
 import BadgeEarned, { BadgeEarnedHeading } from '@/components/gamification/BadgeEarned';
@@ -220,7 +220,11 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   // thing that can happen on a completion and it used to pass in total silence.
   // `null` until the completion effect has run, so the reward never paints for a
   // frame before we know whether it has been pre-empted.
-  const [phase, setPhase] = useState<'pending' | 'rankup' | 'reward'>('pending');
+  // `streak` sits between them: a rank-up is rarer and keeps the stage first,
+  // then the day is struck, then the receipt. Keeping it a PHASE rather than a
+  // flag on the reward screen is what stops the badge chimes below firing behind
+  // the ceremony — that effect already gates on `phase !== 'reward'`.
+  const [phase, setPhase] = useState<'pending' | 'rankup' | 'streak' | 'reward'>('pending');
   const [rankUp, setRankUp] = useState<{ from: RankDef; to: RankDef; next: RankDef | null; totalXP: number } | null>(null);
   // Badges finishing WOULD earn. Like the streak and the rank above, worked out
   // without writing any of it — see previewNewBadges.
@@ -361,19 +365,10 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   useEffect(() => {
     const st = useUserDataStore.getState();
     const earned = rankForXP(st.totalXP + xp).index;
-    if (earned > st.rankIndex) {
-      setRankUp({
-        from: RANKS[st.rankIndex],
-        to: RANKS[st.rankIndex + 1],
-        next: RANKS[st.rankIndex + 2] ?? null,
-        totalXP: st.totalXP + xp,
-      });
-      setPhase('rankup');
-    } else {
-      setPhase('reward');
-    }
-    // Rest days are passed in here for the same reason the rest of this block
-    // exists: what the screen PROMISES and what `commit()` later writes have to
+    // THE DAY IS WORKED OUT FIRST, because it now decides a phase as well as a
+    // panel: the ceremony only exists on the lesson that actually moves the
+    // streak. Rest days are passed in for the same reason the rest of this block
+    // exists — what the screen PROMISES and what `commit()` later writes have to
     // be the same number. Leave them out and someone who missed a day, and holds
     // a rest day that will save their streak, is shown a "1" that jumps back to
     // their real streak the moment they press Continue.
@@ -384,6 +379,17 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
       dateStr(new Date(Date.now() - 86_400_000)),
       restDaysHeld(st.restDaysEarned, st.restDaysUsed),
     );
+    if (earned > st.rankIndex) {
+      setRankUp({
+        from: RANKS[st.rankIndex],
+        to: RANKS[st.rankIndex + 1],
+        next: RANKS[st.rankIndex + 2] ?? null,
+        totalXP: st.totalXP + xp,
+      });
+      setPhase('rankup');
+    } else {
+      setPhase(day.firstOfDay ? 'streak' : 'reward');
+    }
     setInfo(day);
     // The streak comes from `day`, not from the store: several badges are keyed
     // on it, and this lesson is very often the one that moves it. Reading the
@@ -415,10 +421,13 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   ];
   const tallyAdds = parts.reduce((a, p) => a + p.amount, 0) === xp;
 
-  // Come in behind whatever is actually on screen: the full streak ceremony runs
-  // to ~2s, the one-line version is done immediately. A fixed delay would leave
-  // dead air on the days the reader has already played.
-  const badgeBase = info?.firstOfDay ? 2050 : 1450;
+  // ONE DELAY NOW, and the split that used to be here was load-bearing before
+  // the ceremony moved out. It read `info?.firstOfDay ? 2050 : 1450`, holding the
+  // badges back two seconds so they came in behind the streak panel that used to
+  // play ON this screen. That panel is a screen of its own now and this one does
+  // not mount until it is finished, so the long branch bought nothing but two
+  // seconds of dead air on exactly the days a reader has most to be shown.
+  const badgeBase = 1450;
   /** One expression for when badge k lands, so its sound cannot drift off its art. */
   const badgeAt = (k: number) => badgeBase + 150 + k * 520;
 
@@ -446,6 +455,14 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     return () => clearTimeout(id);
   }, [sounded, phase]);
 
+  // ── EVERY HOOK IS ABOVE THIS LINE ─────────────────────────────────────────
+  //
+  // Section 17, rule 1, and it is the rule that has cost this app the most: a
+  // hook added below an early return means React counts fewer of them on the
+  // render where the return fires, throws, and takes down the whole tree --
+  // INCLUDING the reward modal that has just been mounted. Every cinematic
+  // lesson ended on a blank screen with no way forward. Add hooks above.
+
   // One frame of bare paper while the completion effect decides which screen this
   // is. Painting the reward first would flash XP behind a rank-up.
   if (phase === 'pending') {
@@ -464,6 +481,32 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
           to={rankUp.to}
           next={rankUp.next}
           totalXP={rankUp.totalXP}
+          onDone={() => setPhase(info?.firstOfDay ? 'streak' : 'reward')}
+        />
+      </Modal>
+    );
+  }
+
+  // THE DAY IS STRUCK. Only on the lesson that actually moves the streak, and
+  // only ever once — pressing Continue moves to the receipt and there is no way
+  // back into this phase.
+  if (phase === 'streak' && info) {
+    return (
+      <Modal visible animationType="fade" transparent={false} onRequestClose={handleContinue}>
+        <StreakCeremony
+          streak={info.streak}
+          prevStreak={info.prevStreak}
+          restSpent={info.restSpent}
+          activeDays={activeDays}
+          restDays={restDays}
+          pendingRest={info.restSpent > 0 ? daysBetween(lastLessonDate, dateStr(new Date())) : undefined}
+          today={dateStr(new Date())}
+          since={joinedAt ? dateStr(new Date(joinedAt)) : null}
+          // THE ONLY LINE ALLOWED TO ASK FOR ANOTHER LESSON, and it asks only
+          // when there is one to have. `atLimit` is the same fact the Continue
+          // path below acts on, so the ceremony can never invite a reader into a
+          // lesson the next screen refuses them.
+          moreToday={!atLimit}
           onDone={() => setPhase('reward')}
         />
       </Modal>
@@ -516,36 +559,26 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
             </Text>
           )}
 
-          {/* THE STREAK CEREMONY. Ignite → count → the day lands, in that order
-              and staggered, because playing them together is the same
-              information and a fraction of the feeling.
+          {/* THE STREAK, AS A RECEIPT RATHER THAN A CELEBRATION.
 
-              The rest-day note inside it is said plainly and only when it
-              happened: a rest day is spent silently and the reader is told AFTER
-              their streak was saved, never asked beforehand, because a prompt at
-              that moment turns a kindness into one more decision on a day they
-              already missed. */}
-          {info &&
-            (info.firstOfDay ? (
-              <View style={styles.streakBox}>
-                <DrawnRule delay={1500} width={54} />
-                <StreakCelebration
-                  streak={info.streak}
-                  prevStreak={info.prevStreak}
-                  restSpent={info.restSpent}
-                  activeDays={activeDays}
-                  restDays={restDays}
-                  pendingRest={info.restSpent > 0 ? daysBetween(lastLessonDate, dateStr(new Date())) : undefined}
-                  today={dateStr(new Date())}
-                  since={joinedAt ? dateStr(new Date(joinedAt)) : null}
-                />
-              </View>
-            ) : (
-              <View style={styles.streakSmallRow}>
-                <StreakBook value={info.streak} size={52} />
-                <Text style={styles.streakSmall}>{info.streak}-day streak</Text>
-              </View>
-            ))}
+              This used to be where the whole thing happened — a panel three
+              quarters of the way down a scrolling receipt, under an XP counter.
+              The celebrating is done by StreakCeremony, which has just had the
+              entire screen to do it in; saying it twice would make the second
+              telling the flat one. So both cases read the same line now, and the
+              only difference the reader sees is whether they were shown a
+              ceremony on the way here.
+
+              The rest-day note moved into the ceremony with it: a rest day is
+              spent silently and the reader is told AFTER their streak was saved,
+              never asked beforehand, because a prompt at that moment turns a
+              kindness into one more decision on a day they already missed. */}
+          {info && (
+            <View style={styles.streakSmallRow}>
+              <StreakBook value={info.streak} size={52} />
+              <Text style={styles.streakSmall}>{info.streak}-day streak</Text>
+            </View>
+          )}
 
           {/* THE ONE PERMISSION ASK, and this is where it is spent — see
               NotifyPrompt. It renders itself away unless the OS has actually
@@ -639,7 +672,6 @@ const styles = StyleSheet.create({
 
   correct: { fontFamily: 'Inter_700Bold', fontSize: 15, color: Ink, marginTop: 14 },
 
-  streakBox: { alignSelf: 'stretch', alignItems: 'center', marginTop: 18 },
   streakHeading: {
     fontFamily: 'Inter_700Bold',
     fontSize: 11,

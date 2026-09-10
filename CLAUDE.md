@@ -4523,6 +4523,123 @@ either.
 > `node scripts/sheet-launch.mjs <scene>`, which draws the figure at the size it
 > ships at and is the only instrument that ever saw the fault.
 
+### The loading screen is a DRAWING now, and it draws itself
+
+> *"I want you to use this image … I just want you to put it on the starting
+> screen … I want everything to be drawn, not just appear, but I want it to draw
+> into form."*
+
+A white page. One unbroken pen line enters at the left edge, scribbles itself
+into a ball of ink, unspools across the page and becomes a light bulb; the marker
+fills the glass, and the light strikes. It replaced the title page (laurel,
+wordmark, a rule drawing itself under a struck quotation), which replaced six
+near-black illustrated landscapes.
+
+**IT ARRIVED AS A JPEG, AND THAT IS THE WHOLE ENGINEERING PROBLEM.** An ordinary
+tracer returns an OUTLINE — both sides of every stroke, as closed loops. Those
+can be filled and they cannot be DRAWN, because an outline is not the path a pen
+took. What a dash reveal needs is the CENTRELINE, so the picture is recovered
+rather than traced: threshold the ink, thin it to one pixel with Zhang-Suen,
+build a graph of the skeleton, and walk it.
+
+**EVERY JUNCTION IN THIS PICTURE IS A CROSSING, NEVER A FORK** — the pen never
+branched — so the continuation at a node is always the STRAIGHTEST one. Three
+things had to be got right, and each was found by measuring rather than by
+reasoning:
+
+- **Pair the ends BEFORE walking, not on arrival.** A greedy walk decides each
+  crossing as it reaches it, and a wrong choice strands the partner edge behind
+  it: 58 fragments, with one pen-lift of 1,032px. Matching each node's ends into
+  straight-through pairs first is exact for four ends — there are only three
+  matchings — and cannot strand anything.
+- **A TANGENCY IS NOT A CROSSING, AND IT LOOKS LIKE ONE.** Where two strands run
+  nearly parallel their ink FUSES, and thinning that blob yields two degree-3
+  nodes joined by a short stub instead of one degree-4 crossing. **65 of 135
+  nodes came out odd**, and a pen cannot pass straight through an odd node, so
+  the walk gave up at every one of them. Contracting the stub restores the
+  crossing.
+- **Rule across the crossing afterwards.** The junction blob is cut out to build
+  the graph, so concatenating two edges leaves a hole exactly where the pen went
+  straight through — which the overlay shows as a red speck at every crossing.
+
+**THE VERIFICATION IS AN OVERLAY, AND IT IS WHAT MADE ALL OF THE ABOVE CHEAP.**
+Rasterise the trace back over the original at the source's own stroke width:
+black is ink both agree on, RED is ink that was missed, BLUE is ink that was
+invented. Every parameter above was chosen by looking at that picture rather than
+at a fidelity percentage — and the percentage alone would have misled, because
+what is left unmatched is all AT the crossings, where the real ink is the union
+of two strokes and no single centreline can fill the X.
+
+**TANGLE AND JOURNEY ARE ONE RUN IN THE SOURCE, CUT APART ON PURPOSE.** One
+traced run is 7,548 units long and spans the whole width — it is the ball of ink,
+the connector AND the bulb, one unbroken pen movement. That is the truth about
+the picture and the wrong order to REVEAL it in: drawn as traced, the bulb
+appears a third of the way through and the animation then goes back to
+scribbling. Cut at the edge of the tangle, the reveal reads the way the picture
+does. `check:launch` holds the phase order, because a regenerated art file could
+put it back silently.
+
+**THE YELLOW IS GENERATED RATHER THAN TRACED, AND THAT IS NOT A SHORTCUT.** It is
+marker scribble laid under the pen: thresholded it fuses into one blob whose
+skeleton is a medial-axis mess, so there is no pen path in there to recover. Its
+two real properties were measured off the source instead — the strokes run at
+**32 degrees** with **~31 units between centres** — and the fill is those lines,
+clipped to the actual yellow region, which is what gives them the ragged
+overshoot past the glass that a hand-held marker leaves.
+
+> **THE ANGLE WAS READ BACKWARDS BY EYE, TWICE, AND THE MEASUREMENT WAS RIGHT
+> BOTH TIMES.** Variance along a projection is the obvious test and it is the
+> wrong one: it answered 98°, because it was measuring the region's overall
+> density gradient rather than any stripes. What discriminates is DIRECTIONAL
+> AUTOCORRELATION — step a fixed distance along a candidate direction and ask
+> whether you are still on ink — which answered 32° at every step size tried, and
+> answered 32° again when the same test was run back over the finished render.
+> §19 already records three separate marks being "fixed" against a downscaled
+> screenshot; this is the same rule, for an angle.
+
+**THE PERFORMANCE SHAPE IS §17 RULE 7 APPLIED TO TIME INSTEAD OF SPACE.** Read
+react-native-svg rather than guessing at it: `RenderableView.setStrokeDashoffset`
+ends in a bare `invalidate()` with no equality guard, so every dashoffset written
+in a frame forces that SvgView to redraw its whole backing bitmap. Fifty-two
+paths inside one `<Svg>` would repaint the entire drawing fifty-two times per
+frame. So each stroke gets its own `<Svg>`, sized to its own box and no bigger; a
+finished stroke has no animated props ATTACHED, so nothing writes to it at all;
+and only a short window animates. Measured on this drawing at 390dp: one
+full-screen surface would repaint **53.6%** of a screen per frame and re-stroke
+every path, where the worst real window of concurrent strokes repaints **22.3%**
+with six paths in it.
+
+> **THE LOOKAHEAD IS A SAFETY DEVICE, NOT A FUDGE FACTOR.** The window advances
+> through `runOnJS`, and the JS thread during launch is the busiest it ever is —
+> §19 measured the old screen's percentage sticking on zero and then jumping
+> twenty while five tab screens mounted. Mounting the next few strokes EARLY costs
+> nothing to look at, because their offset is their whole length and they draw
+> nothing, and it means a stroke's reveal is already running on the UI thread
+> before JS has noticed it should be. Widening it from four to six costs 2% of a
+> screen; a stroke arriving late costs the illusion.
+
+**ONE CLOCK RUNS ALL OF IT.** `progress` is the readout and `u` is that same
+value re-expressed as the drawing's 0→1 timeline; the pen, the marker, the light
+and the title are all functions of `u`. That is group L in one line, and this
+screen has been bitten by two clocks before — the status bar used to cross on the
+UNMOUNT rather than on the picture. The draw runs LINEAR on purpose: the pen's
+speed belongs to the SCHEDULE, which deals time by stroke LENGTH so the pen holds
+one speed and the tangle and the bulb can be given different ones — not to an
+easing curve that would quietly slow the bulb down because a cubic happens to be
+flattening out there.
+
+**THE PAGE IS PURE WHITE, AND THAT COSTS EXACTLY ONE NUMBER.** Everything else in
+this app is printed on `C.paper`. The splash is a COMPILED resource (§18) and
+cannot be changed over the air, so the first frame is still the splash grey and
+the step up to white is **1.28:1** rather than paper's 1.02:1 — against the
+**10.7:1** flash the near-black scenes opened with. The ground still STARTS on
+the splash colour and settles onto white, so the hand-off has no seam.
+
+**The whole thing is 2,900ms of drawing plus the 1,040ms outro — 3.94s, against
+the 3.74s the title page took.** That is a floor on every cold start, so
+`check:launch` holds it as a number rather than leaving it to be tuned by feel
+until somebody notices the app has become slow to open.
+
 ### The first four seconds, and the two cuts hiding in them
 
 > *"it still has that glitchy start … if there are any other glitches or not

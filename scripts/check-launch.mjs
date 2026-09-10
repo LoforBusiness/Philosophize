@@ -2,25 +2,27 @@
 //
 //   node scripts/check-launch.mjs        (npm run check:launch)
 //
-// The launch screen was redesigned 2026-09-08 from six near-black illustrated
-// landscapes to a TITLE PAGE: laurel + wordmark, a hand-drawn ink rule drawing
-// itself as the progress line, one QuotePlate from the library, the tagline at
-// the foot — all ink on paper. That deleted the two measured scrims and the
-// figure, so this checker shrank with it. What is left to hold is exactly what
-// the old one existed for, minus the art:
+// The launch screen has been three things. Six near-black illustrated
+// landscapes; then a TITLE PAGE — laurel, wordmark, a hand-drawn rule drawing
+// itself as the progress line, one QuotePlate from the library; and now THE
+// DRAWING: a white page on which one unbroken pen line scribbles itself into a
+// ball of ink, crosses the page, becomes a light bulb, and lights.
+//
+// What survives every rewrite is the boot contract, and that is most of this
+// file. What changes is the art, so the art rules are rewritten with it —
+// deliberately, because a checker that describes a screen two designs ago is
+// worse than no checker: it is green, and it is describing nothing.
 //
 //   §1  the splash hand-off — SPLASH_BG equals app.json's splash colour, the
-//       ground starts ON it, and the step from splash to paper is mild;
+//       ground starts ON it, and the step from splash to page is mild;
 //   §2  the wordmark says what app.json says (the rule that caught this screen
 //       still reading the previous brand for a whole rename);
-//   §3  every text tone clears 4.5:1 on the paper it sits on, and the progress
-//       stroke clears 3:1 as a mark — derived from constants/design.ts, never
-//       retyped;
-//   §4  the quotation rides the shared QuotePlate (whose tones check-ui already
-//       holds), the pool is length-capped with a fallback, and skipAnimation
-//       still stands the performance down;
-//   §5  the status bar is dark-content and never flips — a paper ground start
-//       to finish has no crossing left to time;
+//   §3  every tone clears its floor on the ground it actually sits on;
+//   §4  the drawing is DRAWN rather than faded in, its data is whole, and its
+//       phases are in the order the picture is about;
+//   §4b the performance shape §17 rule 7 forces, held structurally;
+//   §4c ONE clock — the pen, the light and the title cannot drift apart;
+//   §5  the status bar is dark-content and never flips;
 //   §6  the outro still carries its 1.04s welcome-cover budget, and the marker
 //       check-ui §10 slices on is still present.
 //
@@ -35,7 +37,10 @@ const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm,
 
 const screenRaw = read('components/launch/LaunchScreen.tsx');
 const screen = strip(screenRaw);
-const artSrc = read('components/launch/launchArt.ts');
+const drawRaw = read('components/launch/InkDrawing.tsx');
+const draw = strip(drawRaw);
+const artSrc = read('components/launch/inkArt.ts');
+const launchArtSrc = read('components/launch/launchArt.ts');
 const designSrc = read('constants/design.ts');
 
 let bad = 0;
@@ -56,22 +61,21 @@ const token = (name) => {
   if (!m) { ok(false, `constants/design.ts declares ${name}`); return '#000000'; }
   return m[1];
 };
-const PAPER = token('paper');
 const INK = token('ink');
 const INK_SOFT = token('inkSoft');
 
-console.log('check-launch: the title page');
+console.log('check-launch: the drawing');
 
 // ── 1 · the hand-off from the native splash ──────────────────────────────────
 //
 // The app's FIRST frame is the native splash; the second is this screen. The
 // splash colour is a COMPILED resource (§18) and SPLASH_BG in launchArt.ts is
 // the OTA-updatable twin — the pair that can drift, so it is compared, not
-// trusted. The ground must also START on it: paper is only a whisker from the
-// splash grey, but "starts on the splash colour" is the rule that keeps the
-// hand-off seamless whoever tunes either side next.
+// trusted. The ground must also START on it, so the hand-off has no seam
+// whoever tunes either side next.
+let GROUND = '#FFFFFF';
 {
-  const splashM = artSrc.match(/export const SPLASH_BG = '(#[0-9A-Fa-f]{6})'/);
+  const splashM = launchArtSrc.match(/export const SPLASH_BG = '(#[0-9A-Fa-f]{6})'/);
   ok(!!splashM, 'launchArt declares SPLASH_BG', splashM?.[1] ?? 'missing');
   const SPLASH = splashM?.[1] ?? '#000000';
 
@@ -85,14 +89,19 @@ console.log('check-launch: the title page');
     `app.json ${declared} · launchArt ${SPLASH}`
   );
 
-  ok(/const GROUND = C\.paper;/.test(screen),
-    'the ground is the design system’s paper, not a local hex');
+  const gm = screen.match(/const GROUND = '(#[0-9A-Fa-f]{6})';/);
+  ok(!!gm, 'the screen declares its ground as one constant', gm?.[1] ?? 'missing');
+  GROUND = gm?.[1] ?? '#FFFFFF';
   ok(/interpolateColor\(introFade\.value, \[0, 1\], \[SPLASH_BG, GROUND\]\)/.test(screen),
     'and it starts on the splash colour, settling on the intro curve');
 
-  const step = ratio(SPLASH, PAPER);
-  ok(step < 1.25,
-    'splash → ground is a mild step, not a flash',
+  // THE PAGE IS PURE WHITE AND THE SPLASH CANNOT BE, so this step is wider than
+  // it was for paper. The splash is compiled into the binary and no OTA can
+  // touch it, so the honest budget is "imperceptible", not "identical" — and
+  // the number that matters is the one the old scenes had: 10.7:1.
+  const step = ratio(SPLASH, GROUND);
+  ok(step < 1.35,
+    'splash → page is a mild step, not a flash',
     `${step.toFixed(2)}:1 (the old near-black scenes were 10.7:1 at their mildest)`);
 }
 
@@ -100,53 +109,160 @@ console.log('check-launch: the title page');
 //
 // The brand lives in exactly one place. The old masthead spelled the previous
 // name one letter at a time for a whole rename because it was written by hand
-// and matched no search for the name itself; the expected string is derived,
-// so a rename fails here instead of shipping.
-// THE TITLE IS NOW SET ONE LETTER AT A TIME, which is the very shape that hid
-// the last rename — so the rule got STRICTER rather than looser. There is no
-// `>ASHMERE<` in the source any more; there is one constant, and the letters are
-// derived from it. Both halves are checked, because either alone is a hole: a
-// constant nothing renders is decoration, and a `.split('')` over a hard-coded
-// array is the old defect wearing the new shape.
+// and matched no search for the name itself; the expected string is derived, so
+// a rename fails here instead of shipping. Both halves are checked, because
+// either alone is a hole: a constant nothing renders is decoration, and a
+// `.split('')` over a hard-coded array is the old defect in the new shape.
 {
   const brand = JSON.parse(read('app.json')).expo.name.toUpperCase();
   ok(new RegExp(`const WORDMARK = '${brand}'`).test(screen),
     `the wordmark constant says ${brand}`, 'derived from app.json expo.name');
-  ok(/const LETTERS = WORDMARK\.split\(''\)/.test(screen)
-    && /LETTERS\.map\(/.test(screen),
+  ok(/const LETTERS = WORDMARK\.split\(''\)/.test(screen) && /LETTERS\.map\(/.test(screen),
     'and the letters on the page are derived from that constant',
     'a per-letter title cannot drift from the brand it spells');
 }
 
 // ── 3 · every tone is measured on the ground it sits on ──────────────────────
 //
-// No scrims and no artwork: everything is on paper, so legibility is pure
-// arithmetic — but only if the styles actually use the tokens the arithmetic
-// checks. Each rule pins the STYLE to its token, then measures the token.
+// No scrims and no photography: everything is on the page, so legibility is
+// pure arithmetic — but only if the styles actually use the tokens the
+// arithmetic checks. Each rule pins the STYLE to its token, then measures the
+// token against the ground §1 just read out of the file.
 {
   ok(/letter: \{[^}]*color: C\.ink/s.test(screen), 'the title is set in ink');
   ok(/<Pct progress=\{progress\} color=\{C\.inkSoft\} \/>/.test(screen),
     'the percentage is set in inkSoft');
-  ok(/foot: \{[\s\S]*?color: C\.inkSoft/.test(screen), 'the foot line is set in inkSoft');
-  ok(/stroke=\{C\.ink\}/.test(screen), 'the progress stroke is drawn in ink');
+  ok(/colour=\{C\.ink\}/.test(draw), 'the pen draws in ink, not a local hex');
 
-  const inkOnPaper = ratio(INK, PAPER);
-  const softOnPaper = ratio(INK_SOFT, PAPER);
-  ok(inkOnPaper >= 4.5, 'ink on paper clears 4.5:1', `${inkOnPaper.toFixed(2)}:1`);
-  ok(softOnPaper >= 4.5, 'inkSoft on paper clears 4.5:1', `${softOnPaper.toFixed(2)}:1`);
-  ok(inkOnPaper >= 3.0, 'the stroke clears the 3:1 mark floor', `${inkOnPaper.toFixed(2)}:1`);
+  const inkOnGround = ratio(INK, GROUND);
+  const softOnGround = ratio(INK_SOFT, GROUND);
+  ok(inkOnGround >= 4.5, 'ink on the page clears 4.5:1', `${inkOnGround.toFixed(2)}:1`);
+  ok(softOnGround >= 4.5, 'inkSoft on the page clears 4.5:1', `${softOnGround.toFixed(2)}:1`);
+  ok(inkOnGround >= 3.0, 'the pen clears the 3:1 mark floor', `${inkOnGround.toFixed(2)}:1`);
 }
 
-// ── 4 · the quotation, and the paths that must not crash the boot ────────────
+// ── 4 · the drawing is DRAWN, and its data is whole ──────────────────────────
+//
+// The reader asked for one thing above all else: "I want everything to be
+// drawn, not just appear, but I want it to draw into form." An opacity fade
+// would satisfy every other rule in this file and be the wrong screen, so the
+// reveal mechanism is asserted directly — a dash offset running down each
+// stroke's OWN measured length, which is the only reveal that is a pen moving.
 {
-  ok(/import QuotePlate from '@\/components\/shared\/QuotePlate'/.test(screenRaw)
-    && /<QuotePlate/.test(screenRaw) && /philosopherId=\{quote\.id\}/.test(screenRaw),
-    'the quotation rides the shared QuotePlate, era spine and all',
-    'its tones are tone.plate()’s, held by check-ui');
-  ok(/\.filter\(\(q\) => q\.text\.length <= 90\)/.test(screen),
-    'the pool is capped at 90 characters', 'readable in the ~3.4s the screen is up');
-  ok(/const FALLBACK_QUOTE = \{/.test(screen) && /SHORT_QUOTES\.length > 0 \?/.test(screen),
-    'an empty pool falls back instead of crashing the boot');
+  ok(/strokeDashoffset: s\.len \* \(1 - p\)/.test(draw),
+    'every mark is revealed along its own length',
+    'a dash reveal is a pen moving; an opacity fade is a thing appearing');
+  ok(/strokeLinecap="round"/.test(drawRaw),
+    'and round-capped',
+    'a butt cap ends a dash reveal on a hard rectangle and reads as a vector wipe');
+
+  const rows = [...artSrc.matchAll(/\{ d: '([^']*)', len: (\d+), x: (-?\d+), y: (-?\d+), w: (\d+), h: (\d+)/g)]
+    .map((m) => ({ d: m[1], len: +m[2], x: +m[3], y: +m[4], w: +m[5], h: +m[6] }));
+  ok(rows.length > 40, 'the art file holds the traced drawing', `${rows.length} strokes`);
+  ok(rows.every((r) => r.len > 0 && r.w > 0 && r.h > 0 && r.d.startsWith('M')),
+    'every stroke has a path, a positive length and a box',
+    'the length is what the reveal maps onto — a zero would never draw');
+
+  // THE PHASES ARE THE PICTURE'S OWN ARGUMENT. The tangle and the journey are
+  // ONE unbroken run in the source and were cut apart on purpose: drawn in
+  // traced order the bulb appears a third of the way in and the animation then
+  // goes back to scribbling. If a regenerated art file ever lands with the
+  // journey overlapping the ball of ink, the reveal stops telling the story.
+  const grab = (name) => {
+    const at = artSrc.indexOf(`export const ${name}: InkStroke[] = [`);
+    const end = artSrc.indexOf('\n];', at);
+    return [...artSrc.slice(at, end).matchAll(/x: (-?\d+), y: (-?\d+), w: (\d+), h: (\d+)/g)]
+      .map((m) => ({ x: +m[1], w: +m[3] }));
+  };
+  const tangle = grab('TANGLE');
+  const journey = grab('JOURNEY');
+  const hatch = grab('HATCH');
+  ok(tangle.length > 0 && journey.length > 0 && hatch.length > 0,
+    'the three movements are all present',
+    `${tangle.length} tangle · ${journey.length} journey · ${hatch.length} marker`);
+  const tangleRight = Math.max(...tangle.map((s) => s.x + s.w));
+  const journeyRight = Math.max(...journey.map((s) => s.x + s.w));
+  ok(journeyRight > tangleRight,
+    'the journey reaches past the ball of ink',
+    `tangle ends at ${tangleRight}, the journey runs to ${journeyRight}`);
+  const glass = artSrc.match(/GLASS = \{ cx: (\d+), cy: (\d+), r: (\d+) \}/);
+  ok(!!glass, 'the glass is declared', glass ? `cx ${glass[1]} r ${glass[3]}` : 'missing');
+  const hatchL = Math.min(...hatch.map((s) => s.x));
+  const hatchR = Math.max(...hatch.map((s) => s.x + s.w));
+  ok(!!glass && +glass[1] > hatchL && +glass[1] < hatchR,
+    'and it is derived from the marker it lights, not typed in',
+    'a hand-set centre drifts away from the thing it is supposed to be lighting');
+
+  // The movements must run in the order the picture is about.
+  const phase = (n) => +(draw.match(new RegExp(`const ${n} = ([0-9.]+);`))?.[1] ?? -1);
+  const [tT, tJ, tH, tS] = ['T_TANGLE', 'T_JOURNEY', 'T_HATCH', 'T_STRIKE'].map(phase);
+  ok(tT > 0 && tT < tJ && tJ < tH && tH <= 1,
+    'the tangle, then the line, then the marker — in that order',
+    `${tT} → ${tJ} → ${tH}`);
+  ok(tS >= tJ && tS < 1, 'and the light strikes after the bulb exists', `strike at ${tS}`);
+}
+
+// ── 4b · the performance shape, held structurally ────────────────────────────
+//
+// §17 rule 7: what an animated SVG costs is the AREA it repaints. Measured on
+// this drawing, one <Svg> holding all 52 paths would repaint 53.6% of a screen
+// per frame AND re-stroke every path; tiled, the worst real window of live
+// strokes repaints 22.3%, with six paths in it.
+//
+// None of that is visible in a screenshot and none of it is visible in a
+// browser, which is where this project can actually look at itself — so it is
+// held here, structurally, or it will be refactored away by somebody tidying.
+{
+  ok(/const LOOKAHEAD = \d+;/.test(draw),
+    'the live window is a named constant',
+    'strokes past it are not mounted; strokes before it do not animate');
+  ok(/animatedProps=\{live \? drawing : undefined\}/.test(draw),
+    'a finished stroke has no animated props attached',
+    'setStrokeDashoffset ends in a bare invalidate() — an attached prop repaints its SvgView every frame');
+  ok(/ALL\.slice\(0, mounted\)/.test(draw) && /Math\.min\(ALL\.length, done \+ LOOKAHEAD\)/.test(draw),
+    'and only the window is mounted at all');
+  // One <Svg> per stroke, sized to that stroke's own box — the tiling itself.
+  ok(/width=\{s\.w \* scale\}/.test(draw) && /height=\{s\.h \* scale\}/.test(draw)
+    && /viewBox=\{`\$\{s\.x\} \$\{s\.y\} \$\{s\.w\} \$\{s\.h\}`\}/.test(draw),
+    'each stroke is drawn in an <Svg> no bigger than itself',
+    'the repaint bill is the box, so the box is the art and nothing else');
+  // Counted on the STRIPPED source: this file explains the tiling in prose, and
+  // reading the raw text counts every `<Svg>` in a comment as another one on the
+  // page. That is L8's lesson in miniature — strip before you detect.
+  ok((draw.match(/<Svg/g) ?? []).length === 2,
+    'there are exactly two kinds of <Svg> here: a stroke, and the inert lamp',
+    'the light is carried by the View’s opacity and scale, never by SVG properties');
+}
+
+// ── 4c · ONE clock ───────────────────────────────────────────────────────────
+//
+// The pen, the marker, the light and the title are all functions of the same
+// value. That is group L of the rule book in one line: two clocks that are
+// supposed to agree will come apart under load, and this screen has already
+// been bitten by it once — the status bar used to cross on the UNMOUNT rather
+// than on the picture, so the icons blinked out over a cream page.
+{
+  ok(/const u = useDerivedValue\(\(\) => Math\.min\(progress\.value, 92\) \/ 92\)/.test(screen),
+    'the drawing’s timeline is derived from the readout, not timed separately');
+  ok(/<InkDrawing u=\{u\} width=\{width\} \/>/.test(screen), 'the drawing reads it');
+  ok(/const set = useDerivedValue\(\(\) => \{[\s\S]*?u\.value - WORD_AT/.test(screen),
+    'and so does the title', 'no second timing to fall out of step');
+  ok(/const WORD_SPAN = \(LETTERS\.length \* LETTER_STAGGER\) \/ DRAW_MS;/.test(screen),
+    'the title’s window is derived from its own rhythm and the draw length',
+    'so a change to either cannot leave the name half-set when the page lifts');
+  ok(/const LETTER_STAGGER = 140;/.test(screen),
+    'the title sets at the 140ms pen-lift rhythm', 'from the signature-drawing literature');
+  ok(/const Letter = memo\(/.test(screen) && /set\.value - index/.test(screen),
+    'and all its letters read one driver', 'a stagger is a subtraction, not seven timings');
+
+  // THE HALF THAT IS ABOUT SAFETY RATHER THAN TASTE. The walker died here once
+  // on a defaulted gait that never reached the UI runtime's closure — fatal in
+  // release, on every launch, invisible to tsc and invisible in a browser.
+  const boot = screenRaw + drawRaw;
+  ok(!/cinematic\/Stickman/.test(boot) && !/cinematic\/rig/.test(boot)
+    && !/useFrameCallback/.test(strip(boot)),
+    'no rig, figure or frame clock is on the boot path',
+    'the walker crashed release here on a defaulted gait; nothing here can throw');
 
   const skip = screen.slice(screen.indexOf('if (skipAnimation)'), screen.indexOf('introFade.value = withTiming(1, { duration: 420 })'));
   ok(/progress\.value = 92;/.test(skip) && /setHeld\(true\);/.test(skip) && /return;/.test(skip),
@@ -154,52 +270,10 @@ console.log('check-launch: the title page');
     'straight to held — no second performance on a restarted cold start');
 }
 
-// ── 4b · the page performs, and it performs the RIGHT WAY ────────────────────
-//
-// Two readers' notes are held here at once, and they pull in opposite
-// directions. The first cut of the title page was static ("very boring … not
-// just a still image"), so the page has to move; the second cut answered that
-// with the lesson mascot walking the rule, and that was rejected too ("that
-// quick walking animation, I want some other cleaner animation"). A rule that
-// only demanded MOTION would pass the sprite, and a rule that only forbade the
-// sprite would pass a photograph. So this asks for the specific object the
-// references describe:
-//
-//   · THE TITLE IS SET one letter at a time, at the signature literature's own
-//     140ms pen-lift rhythm, off ONE driver — seven separate timings is seven
-//     things that can drift out of rhythm;
-//   · THE RULE DRAWS ITSELF with ROUND caps. That is not a preference: butt
-//     caps end a dashoffset reveal on a hard rectangle and it reads as a
-//     clipped vector wipe rather than as ink;
-//   · THE NIB AND THE INK TIP READ ONE MAPPING, so the pen cannot lead or trail
-//     the line it is drawing;
-//   · and the RIG IS OFF THE BOOT PATH. This is the half that is about safety
-//     rather than taste: the walker died here once on a defaulted gait that
-//     never reached the UI runtime's closure — fatal in release, on every
-//     launch, invisible to tsc and to a browser. Nothing on this screen can
-//     throw on the UI thread now, and this rule is what keeps it that way.
-{
-  ok(/const LETTER_STAGGER = 140;/.test(screen),
-    'the title sets at the 140ms pen-lift rhythm', 'from the signature-drawing literature');
-  ok(/const Letter = memo\(/.test(screen) && /set\.value - index/.test(screen),
-    'and all its letters read one driver', 'a stagger is a subtraction, not seven timings');
-  ok(/strokeLinecap="round"/.test(screenRaw) && /strokeDashoffset/.test(screen),
-    'the rule draws itself, round-capped',
-    'butt caps read as a clipped vector wipe rather than ink');
-  const mappings = (screen.match(/Math\.min\(progress\.value, 92\) \/ 92/g) ?? []).length;
-  ok(mappings >= 2,
-    'the nib and the ink tip share one progress mapping',
-    `${mappings} readers of min(progress,92)/92 — the pen cannot lead the line`);
-  ok(!/cinematic\/Stickman/.test(screenRaw) && !/cinematic\/rig/.test(screenRaw)
-    && !/useFrameCallback/.test(screen),
-    'and no rig, figure or frame clock is on the boot path',
-    'the walker crashed release here on a defaulted gait; nothing here can throw');
-}
-
 // ── 5 · the status bar never flips ───────────────────────────────────────────
 //
-// Paper from the splash hand-off to the welcome page's cream: dark icons the
-// whole way, so the clock-and-battery blink the old dark screen had to time
+// A white page from the splash hand-off to the welcome page's cream: dark icons
+// the whole way, so the clock-and-battery blink the old dark screen had to time
 // away cannot exist. A light-content anywhere in this file means somebody has
 // put a dark ground back without reopening that question.
 {
@@ -224,6 +298,13 @@ console.log('check-launch: the title page');
   const total = [...durations.slice(0, 2), ...delays.slice(0, 1)].reduce((a, b) => a + b, 0);
   ok(total >= 1031, 'the outro covers the welcome host’s 1.03s walk-in', `${total}ms of cover`);
   ok(/runOnJS\(onDone\)\(\)/.test(outro), 'and onDone still fires at the end of the fade');
+
+  // THE DRAW LENGTH IS A FLOOR ON EVERY COLD START, so it is worth a rule of its
+  // own rather than being tuned by feel until somebody notices the app is slow
+  // to open.
+  const ms = +(screen.match(/const DRAW_MS = (\d+);/)?.[1] ?? 0);
+  ok(ms > 0 && ms <= 3200, 'the drawing does not overstay its welcome',
+    `${ms}ms of drawing + ${total}ms of outro = ${((ms + total) / 1000).toFixed(2)}s per cold start`);
 }
 
 console.log(bad ? `\ncheck-launch: ${bad} FAILING` : '\ncheck-launch: all green');
