@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Dimensions, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Line } from 'react-native-svg';
 import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { RatePromptHost } from '@/components/shared/RatePrompt';
@@ -47,22 +46,31 @@ const QUOTE_POOL = ALL_PHILOSOPHERS.flatMap((p) =>
 );
 
 // Faint ruled-paper texture behind the whole page (fixed, non-scrolling).
+//
+// VIEWS, NOT AN <Svg>. react-native-svg paints every <Svg> into a bitmap the size
+// of its whole box, so this sheet of hairlines was a 1080×2340 texture — 9.6MB of
+// GPU memory for sixty-odd one-pixel lines. A built tab stays attached for the
+// session, so that texture was held on EVERY screen, and it was one of the two
+// things keeping Profile and Streak within a few MB of Android's 121MB GPU cache
+// budget. Past that budget each frame evicts and re-uploads every bitmap in the
+// app: Profile's overscroll stretch needs one more screen-sized layer and tipped
+// over, and Streak's walking mascot did it at rest. A View is a colour on a render
+// node and holds no texture at all.
 function RuledPaper() {
   const lines: number[] = [];
   for (let y = 70; y < SH; y += 34) lines.push(y);
   return (
-    <Svg
-      width={SW}
-      height={SH}
-      style={StyleSheet.absoluteFill}
-      pointerEvents="none"
-    >
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
       {lines.map((y) => (
-        <Line key={y} x1={0} y1={y} x2={SW} y2={y} stroke={Rule} strokeWidth={1} />
+        <View key={y} style={[ruled.line, { top: y - 0.5 }]} />
       ))}
-    </Svg>
+    </View>
   );
 }
+
+const ruled = StyleSheet.create({
+  line: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: Rule },
+});
 
 // ── WHAT USED TO BE HERE ─────────────────────────────────────────────────────
 //

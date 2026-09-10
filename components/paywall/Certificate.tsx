@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, type LayoutChangeEvent } from 'react-native';
+import { View, Text, StyleSheet, PixelRatio, type LayoutChangeEvent } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, G } from 'react-native-svg';
 import { INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, MID, METAL, mix } from '@/components/shared/tone';
@@ -109,6 +109,25 @@ function dressing(variant: CertVariant) {
  * INERT. §17's rule 7 is about an ANIMATED full-screen `<Svg>` costing ~10fps —
  * this one never redraws, which is the whole reason the frame is allowed to be
  * SVG while every moving thing in the app is a View.
+ *
+ * AND TILED, BECAUSE AN INERT <Svg> STILL COSTS ITS WHOLE AREA IN GPU MEMORY.
+ * react-native-svg paints each <Svg> into an ARGB bitmap covering its entire box,
+ * and this frame's box is the entire certificate: 945×2599 and 945×2334 pixels on
+ * a 1080p phone, 17.8MB of texture for two hairlines that touch almost none of
+ * it. A built tab stays attached for the session, so the Pass tab held those
+ * textures on EVERY screen, and they were most of what kept Profile and Streak
+ * within a few MB of Android's 121MB GPU cache budget. Past it each frame evicts
+ * and re-uploads every bitmap in the app — Profile's overscroll stretch needs one
+ * more screen-sized layer, which is what tipped it over.
+ *
+ * So the same two paths are drawn through four strips: a top and a bottom band
+ * deep enough to hold the notches, and two narrow sides between them, each an
+ * <Svg> no bigger than the rule it carries with the path shifted into it. The
+ * geometry is untouched and a full-page frame drops from ~9MB to under 1MB. The
+ * sides reach two device pixels into each band: butted exactly, the strips left a
+ * one-pixel break across both rules at every join — invisible in a screenshot at
+ * phone size, a row of pure white when the pixels were read — and an overlap only
+ * redraws the same opaque rule over itself.
  */
 export function Frame({ w, h, outer, inner }: {
   w: number; h: number;
@@ -129,11 +148,45 @@ export function Frame({ w, h, outer, inner }: {
     ].join(' ');
   };
 
-  return (
-    <Svg width={w} height={h} style={StyleSheet.absoluteFill} pointerEvents="none">
+  const rules = (
+    <>
       <Path d={cut(o, notch)} fill="none" stroke={outer} strokeWidth={1.8} />
       <Path d={cut(o + gap, Math.max(4, notch - gap))} fill="none" stroke={inner} strokeWidth={0.9} />
-    </Svg>
+    </>
+  );
+
+  // A band holds the outer notch (inset + notch + half its 1.8 stroke) with a
+  // pixel of antialiasing to spare; a side holds the inner rule (inset + gap +
+  // half its 0.9 stroke) the same way. Nothing else in the drawing lies between.
+  const band = PixelRatio.roundToNearestPixel(notch + o + 2);
+  const side = PixelRatio.roundToNearestPixel(o + gap + 2);
+  const lap = 2 / PixelRatio.get();
+  const sideTop = band - lap;
+  const sideH = h - 2 * band + 2 * lap;
+
+  if (sideH <= 2 * lap || w <= 2 * side) {
+    return (
+      <Svg width={w} height={h} style={StyleSheet.absoluteFill} pointerEvents="none">
+        {rules}
+      </Svg>
+    );
+  }
+
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <Svg width={w} height={band} style={{ position: 'absolute', left: 0, top: 0 }}>
+        {rules}
+      </Svg>
+      <Svg width={w} height={band} style={{ position: 'absolute', left: 0, top: h - band }}>
+        <G transform={`translate(0 ${-(h - band)})`}>{rules}</G>
+      </Svg>
+      <Svg width={side} height={sideH} style={{ position: 'absolute', left: 0, top: sideTop }}>
+        <G transform={`translate(0 ${-sideTop})`}>{rules}</G>
+      </Svg>
+      <Svg width={side} height={sideH} style={{ position: 'absolute', left: w - side, top: sideTop }}>
+        <G transform={`translate(${-(w - side)} ${-sideTop})`}>{rules}</G>
+      </Svg>
+    </View>
   );
 }
 

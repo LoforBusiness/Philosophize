@@ -297,32 +297,25 @@ export default function StreakScreen() {
             which is structurally unable to see either of them: the top of the
             page is where a reader overscrolls, and it is where both of them are.
 
-            AND `removeClippedSubviews` WAS THE FAULT ITSELF. It was kept above
-            as a MEMORY optimisation on the reasoning that SvgView recycles its
-            ARGB_8888 bitmap on detach. Measured on the phone, it does not: GPU
-            memory is 115.66 MB at the top of the page, 116.16 mid, 115.83 back
-            at the top -- the clipping pass attaches and detaches 173 views and
-            hands back nothing at all.
-            What it does instead is put a view-management pass on the UI thread
-            that runs whenever the subtree invalidates. That is free while a page
-            is still, and ruinous the moment anything invalidates every frame --
-            which is what a mascot does, and what Android's overscroll stretch
-            does to a whole page.
-            THE CORRELATION IS EXACT ACROSS THE APP. These were the only two
-            screens carrying the flag, and they were the only two that janked:
-              Home | Pass | Insights | Learn | Thinkers   no flag   0.2-1.1%
-              Streak                                      flag      67-84%
-              Profile                                     flag      65-67%
-            Pass is the control that matters -- 1055 views and the same 112 MB of
-            GPU memory as Profile's 1330, and it overscrolls at 0.18%. Weight was
-            never the difference; the flag was.
-            AND THE COST NEEDS BOTH HALVES, which is why the page could look
-            innocent. With the mascot frozen (scrolled past) this screen renders
-            0 frames and janks 0% WITH the flag still on. With the flag off there
-            is nothing per-frame for an invalidation to trigger. The same rig,
-            animating full-size in a lesson, runs 477 frames at 9ms and 0% janky
-            -- so the rig, `needsOffscreenAlphaCompositing` and the figure's size
-            are all exonerated. */}
+            AND NONE OF THIS PAGE WAS THE FAULT: THE GPU BUDGET WAS. A pass
+            before this one blamed `removeClippedSubviews` on a correlation --
+            this screen and Profile were the only two carrying it and the only two
+            that janked -- and took it out. Published and re-measured, this screen
+            still janked 67.6% with nobody touching it, 74 slow bitmap uploads in
+            three seconds.
+            What the two screens share is where they sit against HWUI's one
+            texture budget, 121.31MB on this phone (`dumpsys gfxinfo`, "Max
+            resource usage"). react-native-svg paints every <Svg> into a bitmap
+            the size of its box and every built tab stays attached, so the whole
+            app's bitmaps share that cache: this screen sat at 113.05MB with 128KB
+            purgeable. Any frame that needs one more buffer overflows it, and Skia
+            evicts and re-uploads every bitmap in the app on every frame after.
+            The same rig in a lesson runs 0% janky because a lesson is not sitting
+            on six tabs' worth of textures.
+            27MB of that cache was two drawings on OTHER tabs -- Home's full-screen
+            ruled paper and the Pass certificate frames -- and they are Views and
+            tiled strips now. The hold-still above stays: fewer frames to draw is
+            still fewer frames. */}
         <ScrollView
           contentContainerStyle={styles.body}
           showsVerticalScrollIndicator={false}

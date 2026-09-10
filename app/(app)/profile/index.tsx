@@ -380,148 +380,47 @@ export default function ProfileScreen() {
         onScroll={climb.check}
         scrollEventThrottle={64}
         // The two ends of a gesture as well as the middle of it. `onScroll` is
-        // throttled and `removeClippedSubviews` below means the chart may only
-        // become measurable at all part-way through the flick that brings it in —
-        // so the cheapest insurance against a look that goes unnoticed is to ask
-        // again at the moments the reader has definitely stopped moving.
+        // throttled, so the chart may only become measurable part-way through the
+        // flick that brings it in — and the cheapest insurance against a look that
+        // goes unnoticed is to ask again at the moments the reader has definitely
+        // stopped moving.
         onScrollEndDrag={climb.check}
         onMomentumScrollEnd={climb.check}
-        // ── THIS IS THE CLIPPING ROOT, AND ON ITS OWN IT CLIPS NOTHING ────────
-        //
-        // Fifty-one badges plus the ranks strip make this the longest fixed page
-        // in the app — 2770 units against Home's 1316 — so detaching what is
-        // scrolled off is worth having. It has never happened.
-        //
-        // `removeClippedSubviews` works per DIRECT CHILD, and measured in the
-        // real page this ScrollView has exactly TWO: the header, and one body
-        // View 2471 units tall. The body spans the viewport at every scroll
-        // position, so neither child is ever fully off screen and the pass
-        // detaches nothing, ever — at the top it could reach 0 of 716 nodes. The
-        // note that used to sit here claimed it "keeps the fling cheap"; that
-        // was never true of this content shape, and nothing measured it.
-        //
-        // AND IT WAS NOT MERELY USELESS, IT WAS THE FAULT. A phone was attached
-        // for this pass, and the flag is gone from both places it sat.
-        //
-        // What it actually did, measured: it attaches and detaches 173 views
-        // (1330 at the top, 1503 mid-page, 1330 again on the way back) and hands
-        // back NO memory — GPU usage is 115.66 MB at the top, 116.16 mid, 115.83
-        // back at the top. The note above hoped it was "what hands those bitmaps
-        // back". It does not; SvgView's bitmaps stay resident either way.
-        //
-        // What it costs is a view-management pass on the UI THREAD that runs
-        // whenever the subtree invalidates. A still page never invalidates, so
-        // this page was smooth at rest and smooth while scrolling — a scroll is
-        // a translate. Android's overscroll stretch is a RenderEffect that
-        // invalidates the whole subtree EVERY FRAME, and that is when the pass
-        // ran, at both ends, which is exactly where the reader felt it.
-        //
-        // THE CORRELATION IS EXACT ACROSS THE APP, and it is what turns this
-        // from a theory into the answer. Two screens carried the flag; the same
-        // two janked, and no others did:
-        //
-        //   Home · Pass · Insights · Learn · Thinkers   no flag   0.2–1.1% janky
-        //   Streak                                      flag      67–84%
-        //   Profile                                     flag      65–67%
-        //
-        // Pass is the control that settles it: 1055 views against this page's
-        // 1330 and the SAME 112 MB of GPU memory, and it overscrolls at 0.18%.
-        // The weight of the page was never the difference. It also retires the
-        // SVG-count theory below — Pass draws the same fourteen gradients and
-        // twelve SVG sites this page does.
-        //
-        // The GPU was never the problem either: through the whole broken gesture
-        // its percentiles are 4/7/7/11ms, the same as Home's. It is `Slow UI
-        // thread` on 47 of 47 janky frames, with 46 slow bitmap uploads — the
-        // signature of views being re-attached and their contents re-uploaded.
-        // ── AND THE CLIPPING PASS WAS NEVER THE OVERSCROLL FAULT ─────────────
+        // ── THE OVERSCROLL LAG WAS NEVER ON THIS PAGE: IT WAS THE GPU BUDGET ──
         //
         //   > "when you're already at the top ... when you try scroll up even
         //   > more, it's really lag[gy] ... and if you go all the way to the
         //   > bottom of that tab and try scroll even more, it is also leggy."
         //
-        // The note above this line reasoned the clipping pass into place and then
-        // admitted it was "still unverified ... and that needs `adb`". A phone
-        // was finally attached, and the answer is that clipping was aimed at the
-        // wrong mechanism. Measured on an S24 Ultra, Android 16, at 120Hz:
+        // Measured on an S24 Ultra at 120Hz: mid-page scrolling 1.1% janky, the
+        // stretch at either end 65–68%, Home's identical gestures 0%. With
+        // `animator_duration_scale` at 0 the stretch cannot play, and the jank
+        // and the `Slow bitmap uploads` both go to zero — so the stretch is the
+        // trigger. It is not the cost.
         //
-        //   Profile, mid-page scroll        1.1% janky    11ms median
-        //   Profile, overscroll at the top   67.4% janky   65ms median
-        //   Profile, overscroll at bottom    68.5% janky   57ms median
-        //   Home, the identical gestures      0.0% janky   10ms median
+        // HWUI gives the whole app ONE texture budget: 121.31MB on this phone
+        // (`dumpsys gfxinfo`, "Max resource usage"). react-native-svg paints
+        // every <Svg> into an ARGB bitmap the size of its box, and every built
+        // tab stays attached for the session, so all six tabs' bitmaps sit in
+        // that one cache whichever tab is showing. At rest Profile was at
+        // 115.88MB, Streak 113.05MB, Home and Pass about 105MB. The stretch needs
+        // one more screen-sized layer, 10.3MB: Pass lands at 115 and is fine,
+        // Profile lands at 126 and is over. Over budget, Skia evicts textures it
+        // still needs and uploads them again the next frame, for as long as the
+        // stretch lasts — the trace shows every bitmap in the app re-uploaded on
+        // each of 28 stretch frames, and GPU memory sawing from 161MB to 331MB.
         //
-        // Ordinary scrolling is fine and always was. It is only the ENDS, which
-        // is exactly what was reported and exactly what the clipping pass cannot
-        // touch: Android 12+ replaced the overscroll glow with a StretchEffect, a
-        // RenderEffect that captures the scrolling content into an offscreen
-        // buffer so a shader can distort it -- every frame of the bounce, on the
-        // longest page in the app.
-        //
-        // BISECTED AT THE SYSTEM LEVEL rather than argued. With the phone's
-        // `animator_duration_scale` set to 0, so the stretch animation cannot
-        // play and nothing else about the app changes:
-        //
-        //   overscroll at the bottom   67.1% -> 9.1% janky, 57ms -> 12ms
-        //   Slow bitmap uploads          101 -> 0
-        //
-        // AND TURNING THE STRETCH OFF IS THE WRONG FIX, WHICH THE READER SAID
-        // BEFORE IT SHIPPED: "I honestly want that scroll up feel the same as the
-        // other tabs ... I still want that on the profile tab, but I wanna make
-        // sure it isn't laggy." `overScrollMode="never"` was tried here and is
-        // deliberately NOT kept — it buys the frame rate by deleting a gesture
-        // every other tab has, which makes Profile the odd one out in the other
-        // direction.
-        //
-        // The stretch is not expensive in itself. Measured against Home, which
-        // stretches perfectly smoothly, Home draws FOUR TIMES the geometry
-        // (15,626 CircularRRectOps against 3,828) and allocates nothing at all,
-        // while Profile's stretch allocates 5,623 Vulkan images and frees 4,653
-        // in five seconds. What costs is that the stretch needs ONE MORE
-        // full-screen offscreen buffer, and this screen has no room for it: it
-        // runs at 7 render targets and 0 bytes purgeable where Home runs at 2 and
-        // 35 MB purgeable. Over budget, Skia evicts textures it still needs and
-        // re-uploads them the next frame, forever.
-        //
-        // So the fix is headroom, not amputation.
-        //
-        // ── AND THE STREAK SCREEN HAS THE SAME FAULT, WHICH SETTLED WHAT
-        //    "HEADROOM" MEANS ─────────────────────────────────────────────
-        //
-        // Three fixes were shipped at the streak screen against a reading that
-        // its 945x2599 texture was "the whole page rasterised". It was not. That
-        // ScrollView is full-bleed, so a picture of the page would be 1080 wide;
-        // 945 is NARROWER than the panel. Against 1080x2340 it is 0.875 across
-        // by 1.111 down -- area preserved to within 3%. That is a rubber band,
-        // which is to say it is THIS effect's own buffer, on that screen too.
-        //
-        // So there is one fault on both screens, and what separates them is what
-        // the buffer has to re-rasterise:
-        //
-        //   * A RenderEffect's capture is REUSABLE while nothing inside it
-        //     changes. Counted across the app, the streak screen is the only
-        //     scroll content that is never still -- a rig solve writing
-        //     twenty-four transforms a frame, and a `withRepeat(-1)` ring. Both
-        //     now hold still while the page is moving, and only while it is.
-        //
-        //   * THIS page has no frame callback and no endless animation anywhere
-        //     in it -- checked, not assumed. Its content is already static, so
-        //     there is nothing here to freeze and that fix does not apply. What
-        //     is left is the raw cost of capturing the biggest page in the app,
-        //     which is why it is smooth in the middle and struggles only at the
-        //     ends.
-        //
-        // WHICH MAKES THE NEXT LEVER A COUNTABLE ONE, and it is not a guess:
-        // `SvgView` (react-native-svg, Android) does not draw to the canvas. It
-        // renders itself into an ARGB_8888 Bitmap and blits that, recycling it on
-        // detach. Every icon, medal, seal and chart on this page is therefore a
-        // resident texture -- which is exactly why the counter that moved under
-        // the bisect was `Slow bitmap uploads`, and why this page (50 of them)
-        // struggles where Home (8) does not. Fewer and smaller SVGs in the scroll
-        // content is the headroom. That also re-justifies `removeClippedSubviews`
-        // above: it is not a drawing optimisation, since HWUI skips off-screen
-        // nodes anyway -- it is what hands those bitmaps back.
-        //
-        // Unverified on a device: no phone was attached for this pass.
+        // TWO WRONG ANSWERS SHIPPED FIRST, and neither is worth repeating.
+        // `removeClippedSubviews` was blamed on a correlation — Profile and
+        // Streak were the only screens carrying it and the only two that janked
+        // — and removing it and publishing changed nothing. And the largest
+        // textures in the trace were read as this effect's own capture buffer.
+        // They were not this page's at all. The live view tree names them: Home's
+        // full-screen ruled-paper <Svg> (1080×2340) and the Pass tab's two
+        // certificate frames (945×2599, 945×2334) — 27MB of bitmap for a few
+        // hairlines, held on every tab. They are Views and tiled strips now, and
+        // that is the headroom. `overScrollMode="never"` stays rejected: it buys
+        // the frame rate by deleting a gesture every other tab has.
       >
         {/* The header wears the user's chosen artwork. Every colour in it comes
             from that art's tone palette, so a light engraving gets ink text and a

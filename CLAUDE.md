@@ -3781,44 +3781,52 @@ Hard-won specifics:
   card. Replacing them with higher-resolution files needs no code change — same
   filenames in `assets/images/branches/` and `assets/images/quickstart/`.
 
-### And the overscroll at the top, where the clipping never reached
+### And the overscroll at the top — the GPU budget, not the page
 
 > *"when you're already at the top … when you try scroll up even more … it's
 > really lag[gy]. And if you scroll down, it's fine. For all the other tabs, it
-> is smooth when you do this."*
+> is smooth when you do this."* — and the streak tab, which lagged with nobody
+> touching it.
 
-**PROFILE IS A GENUINE OUTLIER, AND IT IS WORTH HAVING THE NUMBERS.** Measured in
-the real page at 390×844: 2770 units of content — 3.3 screens — against Home's
-1316 and Insights' 1399, and **716 nodes and 50 SVGs** against 164/8 and 208/2.
-Android 12+ does not scroll past the end, it applies a `StretchEffect`, which is
-a RenderEffect over the scrolling subtree; §17's rule 7 already records what a
-moving parent over SVG content costs here.
+**THIS SECTION WAS WRONG TWICE, AND BOTH ANSWERS SHIPPED.** It first said
+`removeClippedSubviews` was doing too little, then — with a phone attached — that
+it was the fault itself, on a correlation: Profile and Streak were the only two
+screens carrying the flag and the only two that janked. The flag was removed and
+published, and nothing changed.
 
-**AND THE OPTIMISATION MEANT TO CONTAIN THAT HAS NEVER ONCE RUN.**
-`removeClippedSubviews` works per DIRECT CHILD, and this ScrollView has exactly
-**two**: the header, and one body View 2471 units tall. The body spans the
-viewport at every scroll position, so neither child is ever fully off screen —
-**at the top the pass could detach 0 of 716 nodes.** The comment claimed it
-"keeps the fling cheap on Android". It was never true of this content shape, and
-nothing had ever measured it.
+**HWUI GIVES THE WHOLE APP ONE GPU TEXTURE BUDGET, AND EVERY TAB SPENDS IT.**
+`dumpsys gfxinfo` prints it as "Max resource usage": **121.31MB** on the S24
+Ultra (screen area × 48). Two facts put the whole app inside that one number:
+react-native-svg paints every `<Svg>` into an ARGB bitmap the size of its BOX,
+and every built tab stays attached for the session (`freezeOnBlur` stops renders,
+not drawing). Measured at rest: Profile **115.88MB**, Streak **113.05MB** with
+128KB purgeable, Home and Pass about 105MB. Android's overscroll stretch needs one
+more screen-sized layer, 10.3MB: Pass lands at 115 and stays smooth, Profile lands
+at 126 and does not. Over budget, Skia evicts textures it still needs and uploads
+them again the next frame, every frame — the trace shows every bitmap in the app
+re-uploaded on each of 28 stretch frames and GPU memory sawing from 161 to 331MB.
+Streak's walking mascot does the same thing at rest.
 
-One level down is where it works: `styles.body` has **nineteen** children, and
-twelve of them — 1411 units, **525 of the page's 716 nodes and 44 of its 50
-SVGs** — start below the fold when the reader is at the top. React Native only
-recurses into nested clipping groups from a ScrollView that carries the flag
-itself, so the ScrollView keeps it as the ROOT of the pass and the body carries
-the one that can reach something.
+**THE 27MB THAT TIPPED IT WAS ON OTHER TABS.** `dumpsys activity top` names the
+views: Home's full-screen ruled-paper `<Svg>` (1080×2340, 9.6MB, for sixty-odd
+hairlines) and the Pass certificate `Frame` (945×2599 and 945×2334, 17.8MB, for
+two rules). A note on the streak screen had read that 945×2599 texture as the
+stretch's own buffer. The ruled paper is Views now, and `Frame` draws the same
+two paths through four edge strips, well under 1MB a certificate.
 
-> **AND THE INSTRUMENT COULD NOT SETTLE THE MECHANISM, WHICH IS WORTH ADMITTING.**
-> A browser cannot reproduce Android's stretch, so the nearest proxy is animating
-> a transform on the scroll content and counting frame gaps. It gave Profile 33ms
-> a frame against 16.7 for the other two — and then, on a third run of the same
-> code, 16.7 for everything. **Two of three runs agreed and the third did not**,
-> which by this file's own standard (§19: "an instrument that cannot repeat itself
-> cannot judge a refactor") makes it evidence of a difference and not a
-> measurement of one. The structural finding above needed no such proxy: it is
-> counted, not timed. What is still unverified is whether detaching 73% of the
-> page at the top is enough on a real device, and that needs `adb`.
+| on the phone | before | after (Expo Go, same phone, all six tabs warm) |
+|---|---|---|
+| Profile, stretch at the top | 65–67% janky, ~60ms frames | 0.20%, 12ms |
+| Profile, stretch at the bottom | 64–68% janky | 0.37%, 12ms |
+| Streak, at rest | 68.97% janky, 60 slow uploads in 3s | 0.25%, 0 |
+
+**THE RULE: an `<Svg>` costs its whole box in GPU memory for as long as its tab
+is built, whether or not anything in it moves.** A full-bleed or full-card `<Svg>`
+drawn for a few lines is the most expensive way there is to draw them. Before
+adding one, compare `dumpsys gfxinfo`'s "Total GPU memory usage" with its "Max
+resource usage", and read a thrash as `Slow bitmap uploads` climbing with `Janky
+frames`. `overScrollMode="never"` stays rejected: it buys the frame rate by
+deleting a gesture every other tab has.
 
 ### On a page this long, a `setState` is not a small thing
 
