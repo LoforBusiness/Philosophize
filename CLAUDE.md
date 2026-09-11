@@ -1718,6 +1718,16 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     both play after the last beat. `HEARD` in `lib/feedback.ts` decides, the
     player schedules nothing that is not heard, and `check:sound` fails the build
     on a third sound. Every haptic stayed.
+  - **And the first lesson speaks.** `ethics-ethics-9` ("When Both Choices Are
+    Wrong") reads its seven teaching lines aloud: a beat's own `text`, never a
+    quote, a question or the summary. The clips are in `assets/narration/`,
+    rendered through the character ledger, and `node scripts/make-narration.mjs`
+    writes `lib/narration/manifest.ts`, estimating when each word starts from the
+    clip's pauses because Chirp 3 HD returns no word timings. `NarrationText`
+    fades each word in on that estimate, the player plays a line when its paragraph
+    swaps in and cuts it on a tap, and a speaker button in that lesson's header
+    writes `settings.narration` (on by default). A lesson missing from the manifest
+    gets no voice, no button and no extra render, and so does the web.
 - **Productive struggle.** Every lesson earns its payoff with a real question or dilemma. A good "trick" answer is tempting for a *nameable* reason — so the explanation should **name the bias/fallacy and say why the tempting choice fails.**
 - **Ground it in a real thinker.** Pair the concept with a primary-source `quote` card. Authenticity ("here is the sentence Descartes actually wrote") is what makes it feel valuable, not gamified trivia.
 - **Give it an arc.** Hook (provocation) → build → struggle → a "what you now know" payoff on the summary.

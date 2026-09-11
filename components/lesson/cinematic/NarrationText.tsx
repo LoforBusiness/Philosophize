@@ -1,8 +1,13 @@
-import { useMemo, useRef } from 'react';
-import { Text, type StyleProp, type TextStyle } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { StyleSheet, Text, type StyleProp, type TextStyle } from 'react-native';
 import { ERA, type EraKey } from '@/constants/design';
 import { eraGroupOfId } from '@/data/philosophers';
 import { LESSON_NAMES } from '@/data/lessonNames';
+import { narration } from '@/lib/narration';
+import { NARRATION } from '@/lib/narration/manifest';
+import { useNarrationStore } from '@/lib/narration/store';
+import { PENDING_MS, wordAlpha, withAlpha } from '@/lib/narration/reveal';
+import { useUserDataStore } from '@/stores/userDataStore';
 import { INK, RULE } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -43,12 +48,24 @@ import { INK, RULE } from './cinematicKit';
 // arrangement in which the line breaks are computed across the whole paragraph.
 // Rendering the runs as siblings in a row lays each out independently and a
 // highlighted name can no longer share a line with the words around it.
+//
+// ── AND IN A NARRATED LESSON, EACH WORD APPEARS AS IT IS SPOKEN ──────────────
+//
+// Decided 11 Sep 2026. A paragraph whose beat has a clip in lib/narration starts
+// with every word laid out but transparent, and fades each one in on the time
+// scripts/make-narration.mjs estimated for it. The words are coloured rather than
+// hidden, so the lines break exactly where they will when the paragraph is whole,
+// and nothing moves as it fills in. A paragraph whose voice never starts is shown
+// whole after PENDING_MS; a muted lesson, the web, and every lesson without a clip
+// never enter this path at all.
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface Props {
   text: string;
   /** The lesson's id — the name index is per lesson (see data/lessonNames.ts). */
   lessonId: string;
+  /** Which beat this paragraph belongs to, so a narrated line can find its voice. */
+  beat?: number;
   /** A phrase of `text` to strike as the thing worth remembering. */
   focus?: string;
   style?: StyleProp<TextStyle>;
@@ -122,7 +139,48 @@ export function runsOf(text: string, names: readonly (readonly [string, string])
   return runs.filter((r) => r.text.length > 0);
 }
 
-export default function NarrationText({ text, lessonId, focus, style, onPeek, openId }: Props) {
+/**
+ * Where this paragraph is in its spoken line: `t` seconds in (negative while the
+ * voice has not started), or null when every word should simply be shown.
+ */
+function useSpokenClock(lessonId: string, beat: number | undefined, text: string) {
+  const line = beat == null ? undefined : NARRATION[lessonId]?.[beat];
+  const on = useUserDataStore((s) => s.settings.narration);
+  const narrates = !!line && line.text === text && on && narration.isSupported();
+  const mountedAt = useRef(Date.now()).current;
+  // Only a line started around or after this paragraph appeared counts: the store
+  // still holds the last play of this beat from any earlier visit to the lesson.
+  const phase = useNarrationStore((s) =>
+    narrates && s.lessonId === lessonId && s.beat === beat && s.at >= mountedAt - 250 ? s.phase : null);
+  const at = useNarrationStore((s) => (narrates && s.lessonId === lessonId && s.beat === beat ? s.at : 0));
+  const [now, setNow] = useState(mountedAt);
+
+  const waiting = phase === null || phase === 'idle';
+  const playing = phase === 'playing' && !!line && (now - at) / 1000 <= line.dur + 0.3;
+  const running = narrates && (playing || (waiting && now - mountedAt < PENDING_MS));
+
+  useEffect(() => {
+    if (!running) return;
+    let raf = 0;
+    let last = 0;
+    const tick = () => {
+      const t = Date.now();
+      // About twenty renders a second: each word steps through five shades as it
+      // fades, and a render per frame would buy nothing a reader can see.
+      if (t - last >= 45) { last = t; setNow(t); }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [running]);
+
+  if (!narrates || !line) return null;
+  if (phase === 'playing') return playing ? { t: (now - at) / 1000, starts: line.words } : null;
+  if (waiting && now - mountedAt < PENDING_MS) return { t: -1, starts: line.words };
+  return null;
+}
+
+export default function NarrationText({ text, lessonId, beat, focus, style, onPeek, openId }: Props) {
   const names = LESSON_NAMES[lessonId] ?? [];
   // Where each drawn name sits, filled in by onLayout as the paragraph lays out.
   // A ref rather than state: it is read on press and never rendered from, so
@@ -143,10 +201,31 @@ export default function NarrationText({ text, lessonId, focus, style, onPeek, op
   const para = useRef<Text>(null);
   const marks = useRef<Record<number, Text | null>>({});
   const runs = useMemo(() => runsOf(text, names, focus), [text, names, focus]);
+  const spoken = useSpokenClock(lessonId, beat, text);
+  const baseColor = useMemo(() => {
+    const c = StyleSheet.flatten(style)?.color;
+    return typeof c === 'string' ? c : INK;
+  }, [style]);
+  // Which word every character belongs to. Whitespace belongs to the word before it,
+  // so a struck maxim's band grows across the space as the next word arrives. Counted
+  // over the WHOLE text, because a run can end mid-word: "Sartre." is one spoken word
+  // and two runs, the name and its full stop.
+  const wordAt = useMemo(() => {
+    const out = new Int32Array(text.length);
+    let k = -1;
+    let inWord = false;
+    for (let c = 0; c < text.length; c += 1) {
+      const ws = /\s/.test(text[c]);
+      if (!ws && !inWord) k += 1;
+      inWord = !ws;
+      out[c] = Math.max(0, k);
+    }
+    return out;
+  }, [text]);
 
   // The common case is a paragraph with nothing in it to pick out, and it must
   // cost exactly what it used to: one Text, no wrappers, no press handlers.
-  if (runs.length === 1 && runs[0].kind === 'plain') {
+  if (!spoken && runs.length === 1 && runs[0].kind === 'plain') {
     return <Text style={style}>{text}</Text>;
   }
 
@@ -160,20 +239,60 @@ export default function NarrationText({ text, lessonId, focus, style, onPeek, op
     });
   };
 
+  const alphaOf = (word: number) => (spoken ? wordAlpha(spoken.starts, word, spoken.t) : 1);
+  /** A run cut into pieces that each belong to one word, with where each starts in `text`. */
+  const piecesOf = (runText: string, start: number) => {
+    const out: { text: string; word: number }[] = [];
+    let s = 0;
+    for (let c = 1; c <= runText.length; c += 1) {
+      if (c === runText.length || wordAt[start + c] !== wordAt[start + s]) {
+        out.push({ text: runText.slice(s, c), word: wordAt[start + s] });
+        s = c;
+      }
+    }
+    return out;
+  };
+
+  let offset = 0;
   return (
     <Text ref={para} style={style}>
       {runs.map((run, k) => {
-        if (run.kind === 'plain') return <Text key={k}>{run.text}</Text>;
-        if (run.kind === 'focus') {
+        const start = offset;
+        offset += run.text.length;
+        if (run.kind === 'plain') {
+          if (!spoken) return <Text key={k}>{run.text}</Text>;
           return (
-            <Text key={k} style={{ fontWeight: '700', backgroundColor: RULE, color: INK }}>
-              {run.text}
+            <Text key={k}>
+              {piecesOf(run.text, start).map((p, j) => (
+                <Text key={j} style={{ color: withAlpha(baseColor, alphaOf(p.word)) }}>{p.text}</Text>
+              ))}
+            </Text>
+          );
+        }
+        if (run.kind === 'focus') {
+          if (!spoken) {
+            return (
+              <Text key={k} style={{ fontWeight: '700', backgroundColor: RULE, color: INK }}>
+                {run.text}
+              </Text>
+            );
+          }
+          return (
+            <Text key={k} style={{ fontWeight: '700' }}>
+              {piecesOf(run.text, start).map((p, j) => {
+                const a = alphaOf(p.word);
+                return (
+                  <Text key={j} style={{ backgroundColor: withAlpha(RULE, a), color: withAlpha(INK, a) }}>{p.text}</Text>
+                );
+              })}
             </Text>
           );
         }
         const group = eraGroupOfId(run.pid) as EraKey | null;
         const hue = group ? ERA[group] : INK;
         const open = openId === run.pid;
+        // A name arrives as one piece, on its first word's time.
+        const a = alphaOf(wordAt[start]);
         return (
           <Text
             key={k}
@@ -209,10 +328,10 @@ export default function NarrationText({ text, lessonId, focus, style, onPeek, op
               anchor(k, (x) => onPeek(run.pid, x));
             } : undefined}
             style={{
-              color: hue,
+              color: withAlpha(hue, a),
               fontWeight: '700',
               textDecorationLine: 'underline',
-              textDecorationColor: hue,
+              textDecorationColor: withAlpha(hue, a),
               // The open one reads as held down rather than merely marked.
               backgroundColor: open ? `${hue}1A` : 'transparent',
             }}

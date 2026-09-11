@@ -11,6 +11,8 @@ import { lessonXP, XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import { exitLesson } from '../exitLesson';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { narration } from '@/lib/narration';
+import { NARRATION } from '@/lib/narration/manifest';
 import { useUIStore } from '@/stores/uiStore';
 import {
   shotAt, resolveMoves, containShot, NEUTRAL, tourStartShots, tourEndShots, tourAt, tourEnd, trackAt,
@@ -283,6 +285,29 @@ export default function CinematicPlayer({
     const walked = gesture.map((_, k) => !!walk && k > 0 && Math.abs(walk[k] - walk[k - 1]) > 1);
     return swishTrack(gesture, walked, beats.map((b) => b.dur));
   }, [sounded, gesture, walk, beats]);
+
+  // ── narration ──────────────────────────────────────────────────────────────
+  // The lesson read aloud, one clip per spoken beat (lib/narration). Only a lesson in
+  // the manifest has any of this: every other lesson gets no voice, no button and no
+  // extra work. The voice follows `shown` rather than `i`, because the paragraph it
+  // reads appears when the deck swaps; a tap cuts the line it interrupts at once.
+  const narrated = narration.isSupported() ? NARRATION[lesson.id] : undefined;
+  const narrationOn = useUserDataStore((s) => s.settings.narration);
+  const setUserSetting = useUserDataStore((s) => s.setSetting);
+  useEffect(() => {
+    if (!narrated) return;
+    narration.prepare(lesson.id);
+    return () => narration.release();
+  }, [narrated, lesson.id]);
+  useEffect(() => {
+    if (narrated) narration.stop();
+  }, [i, narrated]);
+  useEffect(() => {
+    if (!narrated) return;
+    const line = narrated[shown];
+    if (narrationOn && !done && line && beats[shown]?.text === line.text) narration.play(lesson.id, shown);
+    else narration.stop();
+  }, [narrated, narrationOn, shown, done, lesson.id, beats]);
 
   const clock = useSharedValue(0);
   // TWO BEAT CLOCKS, AND WHICH IS WHICH IS THE WHOLE OF K1.
@@ -1156,6 +1181,20 @@ export default function CinematicPlayer({
         </View>
         {/* The score, while it is still being earned rather than after. */}
         <XpPill xp={correct * XP_PER_CORRECT_ANSWER} />
+        {/* THE VOICE'S ONE CONTROL, and only in a lesson that has a voice. On by
+            default; the reader's choice is kept in settings, so muting one lesson
+            mutes the next. */}
+        {narrated ? (
+          <Pressable
+            onPress={() => setUserSetting('narration', !narrationOn)}
+            hitSlop={12}
+            style={styles.close}
+            accessibilityRole="button"
+            accessibilityLabel={narrationOn ? 'Mute the narration' : 'Read this lesson aloud'}
+          >
+            <SketchIcon name={narrationOn ? 'volume-on' : 'volume-off'} size={20} color={INK} />
+          </Pressable>
+        ) : null}
       </View>
 
       <Pressable style={styles.body} onPress={advance} disabled={locked}>
@@ -1344,6 +1383,7 @@ export default function CinematicPlayer({
                   <NarrationText
                     text={beat.text}
                     lessonId={lesson.id}
+                    beat={i}
                     focus={focus}
                     style={styles.narr}
                     openId={peek}

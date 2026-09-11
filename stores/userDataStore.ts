@@ -82,6 +82,10 @@ export interface AppSettings {
   // lib/feedback.ts, which is the single gate both channels pass through — so
   // this key has a reader outside Settings, which is the rule above.
   soundEffects: boolean;
+  // Narration: whether a narrated lesson reads its lines aloud (lib/narration). On by
+  // default, decided 11 Sep 2026. The lesson's speaker button writes it, and
+  // CinematicPlayer and NarrationText read it, which is the rule above.
+  narration: boolean;
   // Privacy
   usageAnalytics: boolean;
   // Narration: `voiceId` was here — a hand-picked TTS voice, written by a picker in
@@ -110,6 +114,9 @@ const DEFAULT_SETTINGS: AppSettings = {
   // On by default: it is quiet, short, respects the device's silent switch, and
   // never takes audio focus from whatever the reader is listening to.
   soundEffects: true,
+  // On by default, decided 11 Sep 2026: a narrated lesson reads itself aloud unless
+  // the reader mutes it with the speaker button in the lesson.
+  narration: true,
   // ON by default, disclosed on the welcome screen, one switch away in
   // Settings → Usage Analytics.
   //
