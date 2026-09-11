@@ -37,7 +37,7 @@ export interface Et10Beat extends BaseBeat {
 export const BEATS: Et10Beat[] = [
   {
     p: 447, x: 88,
-    text: 'You are walking past a shallow pond in good shoes. There is a small child face-down in it, and nobody else anywhere.',
+    text: 'You’re walking past a shallow pond in good shoes. There’s a small child face-down in it, and nobody else anywhere.',
     dur: 3.8,
   },
   {
@@ -48,12 +48,12 @@ export const BEATS: Et10Beat[] = [
   },
   {
     p: 14, x: 168,
-    text: 'There is no comparison to make. Peter Singer’s whole argument starts from the fact that you already know this.',
+    text: 'There’s no comparison to make. Peter Singer’s whole argument starts from the fact that you already know this.',
     dur: 3,
   },
   {
     p: 395, x: 268, wading: true, reach: 1,
-    text: 'So you are in the water, shoes and all. Now Singer asks the awkward question: which part of that reasoning was about the child being NEAR you?',
+    text: 'So you’re in the water, shoes and all. Now Singer asks the awkward question: which part of that reasoning was about the child being near you?',
     dur: 4.4,
   },
   {
@@ -71,13 +71,13 @@ export const BEATS: Et10Beat[] = [
   },
   {
     p: 467, x: 268, wading: true, far: true,
-    text: 'There is another child. Same danger, same small cost to you, nine thousand kilometres further off.',
+    text: 'There’s another child. Same danger, same small cost to you, nine thousand kilometres further off.',
     cite: 'Famine, Affluence, and Morality',
     dur: 2.1,
   },
   {
     p: 467, x: 268, wading: true, far: true,
-    text: 'The argument that got you into the pond does not obviously stop at the bank. Effective altruism started right there.',
+    text: 'The argument that got you into the pond doesn’t obviously stop at the bank. Effective altruism started right there.',
     dur: 3.1,
   },
   {
@@ -85,7 +85,7 @@ export const BEATS: Et10Beat[] = [
     interact: {
       prompt: 'One child is near, one far. Tap the difference Singer says carries no moral weight.',
       explain:
-        'Distance. It changes how the case feels and nothing about what is at stake. The other two are not decoys — Singer’s principle needs both: help you can actually give, at a cost that is not itself serious.',
+        'Distance. It changes how the case feels and nothing about what’s at stake. The other two are not decoys. Singer’s principle needs both: help you can actually give, at a cost that isn’t itself serious.',
     },
     dur: 4.8,
   },

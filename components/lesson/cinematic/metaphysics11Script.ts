@@ -30,12 +30,12 @@ export const BEATS: Metaphysics11Beat[] = [
   },
   {
     p: 458, c: 42, cx: 440, tok: 0,
-    text: 'What is it holding on to?',
+    text: 'What’s it holding on to?',
     dur: 1.8,
   },
   {
     p: 412, c: 42, cx: 290, tok: 0,
-    text: 'Locke asks you to picture two of them. A prince — and a cobbler, who walks in off the street having never once seen a palace.',
+    text: 'Locke asks you to picture two of them. A prince, and a cobbler who walks in off the street having never once seen a palace.',
     cite: 'The two men',
     dur: 4.4,
   },
@@ -82,7 +82,7 @@ export const BEATS: Metaphysics11Beat[] = [
           { id: 'mind', upto: 1, reads: 'your memories, wherever they wake up', correct: true },
         ],
       },
-      explain: 'Almost all of it goes to memory. The bodily answer feels safest and a court wants it, but a body swaps nearly all its matter over a lifetime — the Ship of Theseus wearing your face. Locke hangs the person on the thread instead.',
+      explain: 'Almost all of it goes to memory. The bodily answer feels safest, and a court wants it. But a body swaps nearly all its matter over a lifetime. It’s the Ship of Theseus wearing your face. Locke hangs the person on the thread instead.',
       xp: 5,
     },
     dur: 1.0,
@@ -91,7 +91,7 @@ export const BEATS: Metaphysics11Beat[] = [
     p: 170, c: 28, tok: 1, pick: 1,
     interact: {
       prompt: 'The memories now sit over the man on the right. Tap the stand of whoever is the prince.',
-      explain: 'The trap: his stand still says COBBLER, and it is his own body — which is what a court would go by. Locke says follow the memories. The man on the right remembers being the prince, so the prince is who he is.',
+      explain: 'The trap is that his stand still says COBBLER, and it’s his own body. That’s what a court would go by. Locke says follow the memories. The man on the right remembers being the prince, so the prince is who he is.',
       xp: 5,
     },
     dur: 1.0,

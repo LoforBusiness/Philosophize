@@ -38,12 +38,12 @@ export const BEATS: Pol18Beat[] = [
   {
     g: 159, lanes: 2, bikes: 1, ride: 1,
     dur: 2.9,
-    text: 'The other cannot use their legs and gets almost nowhere at all.',
+    text: 'The other can’t use their legs and gets almost nowhere at all.',
   },
   {
     g: 412, lanes: 2, bikes: 1, ride: 1,
     dur: 4.8,
-    text: 'Nothing unfair happened at the start — the resource was equal. It turned into wildly different amounts of getting about.',
+    text: 'Nothing unfair happened at the start: the resource was equal. It turned into wildly different amounts of getting about.',
     cite: 'Equal input',
   },
   {
@@ -62,7 +62,7 @@ export const BEATS: Pol18Beat[] = [
   {
     g: 384, lanes: 2, bikes: 1, ride: 1,
     dur: 4.8,
-    text: 'So Sen moves the question. Stop measuring what people hold and measure what their lives actually let them do.',
+    text: 'So Sen moves the question. He says to stop measuring what people hold and measure what their lives actually let them do.',
     cite: 'Capabilities',
   },
   {
@@ -89,7 +89,7 @@ export const BEATS: Pol18Beat[] = [
           { id: 'nothing', upto: 1, reads: 'income has nothing to do with it whatever' },
         ],
       },
-      explain: 'The middle. The near end mistakes the means for the end: income is an input, and how much of a life it buys depends on health, on where you live, on what a body can do. Equal resources can leave real freedom a very long way apart.',
+      explain: 'The middle. The near end mistakes the means for the end. Income is an input. How much of a life it buys depends on health, on where you live, on what a body can do. Equal resources can leave real freedom a very long way apart.',
       xp: 5,
     },
   },

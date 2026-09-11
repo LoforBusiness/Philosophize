@@ -40,7 +40,7 @@ export const BEATS: Met18Beat[] = [
   },
   {
     p: 443, x: 200, shelf: 1, aim: 1,
-    text: 'Point at the apple and you have pointed at something. Same for the chair, same for the star.',
+    text: 'Point at the apple and you’ve pointed at something. Same for the chair, same for the star.',
     dur: 4.4,
   },
   {
@@ -101,7 +101,7 @@ export const BEATS: Met18Beat[] = [
           { id: 'full', upto: 1, reads: 'as much as a stone does' },
         ],
       },
-      explain: 'None, and that is the strongest objection Platonism faces. Knowing a thing normally means it reached you somehow — light, sound, pressure. An object with no place and no time can do none of that. The middle zone is the usual reply, and it names the problem.',
+      explain: 'None, and that’s the strongest objection Platonism faces. Knowing a thing normally means it reached you somehow — light, sound, pressure. An object with no place and no time can do none of that. The middle zone is the usual reply, and it names the problem.',
       xp: 5,
     },
     dur: 1.0,

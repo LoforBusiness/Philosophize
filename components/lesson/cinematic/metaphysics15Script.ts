@@ -22,7 +22,7 @@ export interface Meta15Beat extends BaseBeat {
 export const BEATS: Meta15Beat[] = [
   {
     p: 462, x: 70,
-    text: 'One ball rolls up and strikes another, and the second rolls away. You have watched that ten thousand times.',
+    text: 'One ball rolls up and strikes another, and the second rolls away. You’ve watched that ten thousand times.',
     dur: 3.5,
   },
   {
@@ -38,7 +38,7 @@ export const BEATS: Meta15Beat[] = [
   },
   {
     p: 41, x: 168, balls: 1,
-    text: 'You saw the second move. Three things, all of them plain, none of them the thing we actually care about.',
+    text: 'You saw the second move. Three things, all of them plain, none of them the thing you’re after.',
     dur: 3.2,
   },
   {
@@ -62,7 +62,7 @@ export const BEATS: Meta15Beat[] = [
   },
   {
     p: 34, x: 168, balls: 1, gap: 1, found: 1,
-    text: 'Nothing. One thing after another, over and over, and no glue anywhere. Hume answers that the glue is real, and that the glue is in you.',
+    text: 'Nothing but one thing after another, over and over, with no glue anywhere. Hume answers that the glue is real, and that the glue is in you.',
     cite: 'Not found',
     dur: 4.6,
   },
@@ -103,7 +103,7 @@ export const BEATS: Meta15Beat[] = [
         'Causal power is projected habit, not perception',
         'Causal necessity is not logical necessity',
       ],
-      closing: 'The glue is real enough. It is just on your side of the glass.',
+      closing: 'The glue is real enough. It’s just on your side of the glass.',
     },
     dur: 3.0,
   },

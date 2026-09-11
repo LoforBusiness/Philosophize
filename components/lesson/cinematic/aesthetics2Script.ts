@@ -31,12 +31,12 @@ export const BEATS: Aes2Beat[] = [
   },
   {
     a: 7, v: 0, wave: true, felt: true, chain: 3,
-    text: 'The maker feels something, puts the feeling into the work, and you catch the feeling off the work. Collingwood adds that makers often do not know the feeling until the work is finished.',
+    text: 'The artist feels something, the work carries it, and you catch it off the work. Collingwood adds that artists often don’t know the feeling until the work is finished.',
     dur: 3.8,
   },
   {
     a: 387, v: 15, wave: true, felt: true, chain: 3,
-    text: 'A boy who once met a wolf tells the story so well that the room is frightened too. Tolstoy calls that art, and says the telling only works if the boy means every word.',
+    text: 'A boy who met a wolf tells the story so well the room is frightened too. For Tolstoy that’s art, but only if the boy means every word.',
     cite: 'Tolstoy, What Is Art?, 1897',
     dur: 4.8,
   },
@@ -67,7 +67,7 @@ export const BEATS: Aes2Beat[] = [
   },
   {
     a: 20, v: 17, wave: true, felt: true, chain: 3,
-    text: 'If they are right, a feeling can be packed into lines and sounds and words. It then outlives the person, the language and the century.',
+    text: 'If they’re right, a feeling can be packed into lines and sounds and words. It then outlives the person, the language and the century.',
     cite: 'Feeling made portable',
     dur: 3.4,
   },
@@ -88,7 +88,7 @@ export const BEATS: Aes2Beat[] = [
           { id: 'odd', reads: 'real people, and pretend tears' },
         ],
       },
-      explain: 'Made-up people, and real tears, and nothing sits comfortably there. Fake people, so fake tears is the tidy answer and it is simply untrue: the tears are real, which is exactly the difficulty. Radford called it the paradox of fiction and nobody has settled it since.',
+      explain: 'Made-up people, and real tears, and nothing sits comfortably there. The tidy answer is “made-up people, and pretend tears”, and it’s untrue. The tears are real, and that’s the difficulty. Radford called it the paradox of fiction, and nobody has settled it since.',
       xp: 5,
     },
     dur: 1.0,

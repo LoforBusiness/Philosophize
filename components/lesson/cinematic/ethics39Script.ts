@@ -35,12 +35,12 @@ export interface Ethics39Beat extends BaseBeat {
 export const BEATS: Ethics39Beat[] = [
   {
     p: 25, x: 52, stair: 1,
-    text: 'It is midnight and you know you should sleep. You press play anyway.',
+    text: 'It’s midnight and you know you should sleep. You press play anyway.',
     dur: 3.6,
   },
   {
     p: 30, x: 52, stair: 1, rungs: 1,
-    text: 'Between knowing better and doing better there are three steps. Judge which is better, mean to act, then act.',
+    text: 'Between knowing better and doing better there are three steps. Judge which is better, intend to act, then act.',
     dur: 4.4,
   },
   {
@@ -59,12 +59,12 @@ export const BEATS: Ethics39Beat[] = [
   },
   {
     p: 383, x: 52, stair: 1, rungs: 1, climb: 0.75,
-    text: 'To do a thing is to think it best right now. So the worse act was a mistake about the sums, not a failure of nerve.',
+    text: 'For him, to do a thing is to think it best right now. So the worse act was a mistake about the sums, not a failure of nerve.',
     dur: 4.8,
   },
   {
     p: 6, x: 98, stair: 1, rungs: 1, climb: 0.75,
-    text: 'Aristotle would not have it. The knowledge is there, he said, but asleep — held the way a sleeping man holds what he knows.',
+    text: 'Aristotle wouldn’t have it. He said the knowledge is there but asleep, held the way a sleeping man holds what he knows.',
     dur: 4.4,
   },
   {
@@ -91,7 +91,7 @@ export const BEATS: Ethics39Beat[] = [
           { id: 'hidden', label: 'a hidden preference', reads: 'you wanted this all along and would not say so' },
         ],
       },
-      explain: 'Weakness of will, and the test is what you would say if somebody asked. You would say stopping is better, and mean it, with your thumb still on the remote. A change of mind answers differently, and a preference you hold is not hidden from you.',
+      explain: 'Weakness of will, and the test is what you’d say if somebody asked. You’d say stopping is better, and mean it, with your thumb still on the remote. A change of mind answers differently, and a preference you hold is not hidden from you.',
       xp: 5,
     },
     dur: 1.0,

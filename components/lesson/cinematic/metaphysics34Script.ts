@@ -55,7 +55,7 @@ export const BEATS: Metaphysics34Beat[] = [
   },
   {
     p: 384, x: 58, depth: 0.55, ask: 1,
-    text: 'So ask the wood the same question, and you get molecules. Ask those and you get atoms, which were named for being the thing you could not cut.',
+    text: 'So ask the wood the same question, and you get molecules. Ask those and you get atoms, which were named for being the thing you couldn’t cut.',
     cite: 'And under that?',
     dur: 4.6,
   },
@@ -92,13 +92,13 @@ export const BEATS: Metaphysics34Beat[] = [
   },
   {
     p: 167, x: 58, depth: 1,
-    text: 'A level that rests on nothing is what fundamental means. Notice it is not the same as smallest, and not the same as earliest.',
+    text: 'A level that rests on nothing is what fundamental means. Notice it’s not the same as smallest, and not the same as earliest.',
     cite: 'What fundamental means',
     dur: 3.7,
   },
   {
     p: 167, x: 58, depth: 1,
-    text: 'It is about what holds what up.',
+    text: 'It’s about what holds what up.',
     dur: 1.8,
   },
   {
@@ -109,7 +109,7 @@ export const BEATS: Metaphysics34Beat[] = [
         { text: 'Not obviously', correct: true },
         { text: 'Yes, or nothing is real', correct: false },
       ],
-      explain: 'The other card is a strong intuition and nobody has turned it into a proof. Picture a world that descends forever. Every level real, every level held up by the next. It is hard to imagine and has never been shown impossible.',
+      explain: 'The card “Yes, or nothing is real” is a strong intuition, and nobody has turned it into a proof. Picture a world that descends forever. Every level real, every level held up by the next. It’s hard to imagine and has never been shown impossible.',
       xp: 5,
     },
     dur: 1.0,

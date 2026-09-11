@@ -40,7 +40,7 @@ export const BEATS: Ethics25Beat[] = [
   },
   {
     p: 30, x: 40, bridge: 1,
-    text: 'John Stuart Mill drew the line in one sentence, and it is narrower than it sounds.',
+    text: 'John Stuart Mill drew the line in one sentence, and it’s narrower than it sounds.',
     dur: 4.4,
   },
   {
@@ -57,19 +57,19 @@ export const BEATS: Ethics25Beat[] = [
     p: 161, x: 40, bridge: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap the only reason Mill lets you compel an adult.',
-      explain: 'Harm to other people. Their own good is the reason he rules out by name, and not having been told yet is why the bridge case works — you are guessing at their will, not overriding it.',
+      explain: 'Harm to other people. Their own good is the reason Mill rules out by name. The bridge case works because the stranger hasn’t been told yet. You’re guessing at their will, not overriding it.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 159, x: 40, bridge: 1, sign: 1,
-    text: 'So he tests himself on a bridge with a plank missing, and a stranger walking toward it.',
+    text: 'So Mill tests his rule on a bridge with a plank missing, and a stranger walking towards it.',
     dur: 4.8,
   },
   {
     p: 62, x: 96, bridge: 1, sign: 1,
-    text: 'Grab them. There is no time to explain, and nobody wants to fall.',
+    text: 'Grab them. There’s no time to explain, and nobody wants to fall.',
     dur: 3.8,
   },
   {
@@ -87,7 +87,7 @@ export const BEATS: Ethics25Beat[] = [
   },
   {
     p: 383, x: 96, bridge: 1, sign: 1,
-    text: 'Once they have read the sign, the bridge is theirs to cross. That is the whole difference.',
+    text: 'Once they’ve read the sign, the bridge is theirs to cross. That’s the whole difference.',
     dur: 4.8,
   },
   {
@@ -104,7 +104,7 @@ export const BEATS: Ethics25Beat[] = [
           { id: 'ban', upto: 1, reads: 'close the bridge; nobody crosses' },
         ],
       },
-      explain: 'The warning end, on Mill\'s own terms. A tax is a mild compulsion aimed at the person themselves, which is the thing he ruled out — though he would allow it where a seller profits from a buyer who has not been told.',
+      explain: 'The warning end, on Mill’s own terms. A tax is a mild compulsion aimed at the person themselves, and that’s the thing he ruled out. He’d still allow it where a seller profits from a buyer who hasn’t been told.',
       xp: 5,
     },
     dur: 1.0,
@@ -118,7 +118,7 @@ export const BEATS: Ethics25Beat[] = [
         'Mill allows compulsion only to stop harm to others',
         'The bridge stop respects a will it cannot ask',
       ],
-      closing: 'The real question is rarely whether something is harmful. It is whose life it is to risk.',
+      closing: 'The real question is rarely whether something is harmful. It’s whose life it is to risk.',
     },
     dur: 4.0,
   },

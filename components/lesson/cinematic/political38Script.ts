@@ -39,7 +39,7 @@ export const BEATS: Political38Beat[] = [
   },
   {
     p: 384, x: 52, chamber: 1, cord: 1,
-    text: 'There is a cord between the two of you, and the only question is how much slack it has.',
+    text: 'There’s a cord between the two of you, and the only question is how much slack it has.',
     dur: 4.0,
   },
   {
@@ -51,19 +51,19 @@ export const BEATS: Political38Beat[] = [
     p: 4, x: 52, chamber: 1, cord: 1, cards: 1, live: 1,
     interact: {
       prompt: 'Tap the one a messenger could not supply.',
-      explain: 'His own judgement. Carrying what you instruct is exactly what a messenger does, so it cannot be the difference. A party line is a third master, owed to neither you nor the argument in the room.',
+      explain: 'His own judgement. Carrying what you instruct is what a messenger does, so it can’t be the difference. A party line is a third master, owed to neither you nor the argument in the room.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 176, x: 52, chamber: 1, cord: 1, cards: 1,
-    text: 'In 1774 Edmund Burke faced the voters of Bristol on election day. Instructions, he told them, were not part of the bargain.',
+    text: 'In 1774 Edmund Burke faced the voters of Bristol on election day. He told them that instructions were not part of the bargain.',
     dur: 5.0,
   },
   {
     p: 35, x: 98, chamber: 1, cord: 1, cards: 1,
-    text: 'The voters returned Burke once, then threw him out. That is the other half of the argument.',
+    text: 'The voters returned Burke once, then threw him out. That’s the other half of the argument.',
     dur: 4.0,
   },
   {
@@ -90,7 +90,7 @@ export const BEATS: Political38Beat[] = [
           { id: 'party', reads: 'a partisan, holding the line he was selected on' },
         ],
       },
-      explain: 'A trustee, on the argument, and the cost is real. Instructions can be checked against a record; judgement cannot, because any vote at all can be described as the judgement he was sent to use. Watch the cord: taut, he is accountable and useless in a debate.',
+      explain: 'A trustee, on the argument, and the cost is real. Instructions can be checked against a record. Judgement can’t, because any vote at all can be called the judgement he was sent to use. Watch the cord. Taut, he’s accountable and useless in a debate.',
       xp: 5,
     },
     dur: 1.0,

@@ -45,7 +45,7 @@ export const BEATS: Log15Beat[] = [
   {
     g: 383, crowd: 1, sample: 1, leap: 1, claim: 1,
     dur: 4.8,
-    text: 'Firsthand evidence feels like strong evidence. You were there and you saw it — and two people are still not a pattern.',
+    text: 'Firsthand evidence feels like strong evidence. You were there and you saw it, but two people are still not a pattern.',
     cite: 'Why it feels solid',
   },
   {
@@ -72,7 +72,7 @@ export const BEATS: Log15Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Every part of this is true. Tap the part that has not been earned.',
-      explain: 'The step. The two ringed dots are honest evidence and nobody disputes them, and the conclusion may even be true. You still would not know so. What has nothing underneath is the jump from the narrow width to the wide one.',
+      explain: 'The step. The two ringed dots are honest evidence and nobody disputes them, and the conclusion may even be true. You still wouldn’t know so. What has nothing underneath is the jump from the narrow width to the wide one.',
       xp: 5,
     },
   },

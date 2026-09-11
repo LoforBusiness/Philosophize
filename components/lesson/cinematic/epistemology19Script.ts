@@ -33,18 +33,18 @@ export interface Epi19Beat extends BaseBeat {
 export const BEATS: Epi19Beat[] = [
   {
     p: 172, x: 200, doors: 1,
-    text: 'Five people, and every one of them really does know something you do not.',
+    text: 'Five people, and every one of them knows something you don’t.',
     dur: 3.8,
   },
   {
     p: 466, x: 200, doors: 1, chip: 1,
-    text: 'A question turns up, cut to fit exactly one of these doors. Standing at the wrong door will open nothing.',
+    text: 'A question turns up, cut to fit only one of these doors. Standing at the wrong door will open nothing.',
     cite: 'Expertise is a relation',
     dur: 4.8,
   },
   {
     p: 379, x: 132, doors: 1, chip: 1, stray: 1,
-    text: 'Here is the everyday failure. A famous heart doctor is asked about diet on television, and answers.',
+    text: 'Here’s the everyday failure. A famous heart doctor is asked about diet on television, and answers.',
     dur: 4.2,
   },
   {
@@ -54,7 +54,7 @@ export const BEATS: Epi19Beat[] = [
   },
   {
     p: 13, x: 132, doors: 1, chip: 1, stray: 1,
-    text: 'They are simply for a different door.',
+    text: 'They’re for a different door.',
     dur: 1.9,
   },
   {
@@ -74,7 +74,7 @@ export const BEATS: Epi19Beat[] = [
     p: 165, x: 132, doors: 1, chip: 1, live: 1,
     interact: {
       prompt: 'Tap the door this question actually belongs at.',
-      explain: 'Nutrition. A cardiologist knows more medicine than you and has read almost none of the diet trials. Standing is earned subject by subject, and the label on the door is what you are checking, not the person\'s eminence.',
+      explain: 'Nutrition. A cardiologist knows more medicine than you and has read almost none of the diet trials. Standing is earned subject by subject. The label on the door is what you’re checking, not the person’s eminence.',
       xp: 5,
     },
     dur: 1.0,
@@ -97,7 +97,7 @@ export const BEATS: Epi19Beat[] = [
           { id: 'weight', label: 'weigh the sides', reads: 'count who is on each side, and why', correct: true },
         ],
       },
-      explain: 'Weigh the sides. Disagreement at the edge of a field is normal and does not touch its settled middle. "pick either" is how a real debate gets used to sell a false one: hold up one dissenter, call the whole subject unsettled.',
+      explain: 'Weigh the sides. Disagreement at the edge of a field is normal and doesn’t touch its settled middle. “Pick either” is how a real debate gets used to sell a false one. Somebody holds up one dissenter and calls the whole subject unsettled.',
       xp: 5,
     },
     dur: 1.0,

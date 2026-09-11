@@ -25,7 +25,7 @@ export interface Aesthetics7Beat extends BaseBeat {
 export const BEATS: Aesthetics7Beat[] = [
   {
     p: 462, x: 90, q: 8, art: 1, capt: 0,
-    text: 'Someone glances at the scribble, then at the painting, and says the scribble is better. You want to say that is wrong.',
+    text: 'Someone glances at the scribble, then at the masterwork, and says the scribble is better. You want to say that’s wrong.',
     dur: 3.5,
   },
   {
@@ -41,7 +41,7 @@ export const BEATS: Aesthetics7Beat[] = [
   },
   {
     p: 47, x: 250, q: 9, art: 1, capt: 1,
-    text: 'Nearly everyone who walks in here feels the gap — but a feeling is not yet a reason.',
+    text: 'Nearly everyone who walks in here feels the gap. But a feeling is not yet a reason.',
     dur: 2.9,
   },
   {
@@ -76,7 +76,7 @@ export const BEATS: Aesthetics7Beat[] = [
   },
   {
     p: 12, x: 90, q: 7, art: 1, capt: 1,
-    text: 'Something in you refuses that. Hume refused it too.',
+    text: 'Something in you refuses the tie. Hume refused it too.',
     dur: 1.8,
   },
   {
@@ -101,7 +101,7 @@ export const BEATS: Aesthetics7Beat[] = [
   },
   {
     p: 24, x: 250, q: 25, art: 1, capt: 3, marks: 1,
-    text: 'This is not snobbery. A wine taster really does taste notes you cannot; practice reshapes perception itself.',
+    text: 'This is not snobbery. A wine taster does taste notes you can’t, because practice reshapes perception itself.',
     cite: 'Practice changes what you see',
     dur: 2.4,
   },
@@ -123,7 +123,7 @@ export const BEATS: Aesthetics7Beat[] = [
           { id: 'resp', upto: 1, reads: 'in the response, which can still be trained', correct: true },
         ],
       },
-      explain: 'All of it in the response. A standard sounds like a ruler you hold against the canvas, and Hume never put beauty back into the paint. What he noticed is that a response can be practised, compared and freed of grudges — which is why some critics are worth reading.',
+      explain: 'All of it in the response. A standard sounds like a ruler you hold against the canvas, and Hume never put beauty back into the paint. What he noticed is that a response can be practised, compared and freed of grudges. That’s why some critics are worth reading.',
       xp: 5,
     },
     dur: 1.0,
@@ -137,7 +137,7 @@ export const BEATS: Aesthetics7Beat[] = [
         'Practice, comparison, no prejudice, good sense',
         'Subjective still leaves room for better and worse',
       ],
-      closing: 'Next time someone shrugs that taste is all opinion, ask how many paintings they have looked at.',
+      closing: 'Next time someone shrugs that taste is all opinion, ask how many paintings they’ve looked at.',
     },
     dur: 3.0,
   },

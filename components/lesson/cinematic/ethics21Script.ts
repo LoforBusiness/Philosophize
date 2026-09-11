@@ -52,7 +52,7 @@ export const BEATS: Eth21Beat[] = [
     p: 380, x: 132, act: 1, arms: 1, aim: 1, live: 1,
     interact: {
       prompt: 'Tap the outcome the doctor was aiming at.',
-      explain: 'Stopping the pain. The shorter life is foreseen with certainty and still not intended, which sounds like a dodge until you notice you already use the distinction. Nobody thinks a surgeon intends the scar.',
+      explain: 'Stopping the pain. The shorter life is foreseen with certainty and still not intended. That sounds like a dodge until you notice you already use the distinction. Nobody thinks a surgeon intends the scar.',
       xp: 5,
     },
     dur: 1.0,
@@ -100,7 +100,7 @@ export const BEATS: Eth21Beat[] = [
           { id: 'intended', upto: 1, reads: 'you meant the relief, and knew the cost', correct: true },
         ],
       },
-      explain: 'Mostly intended. The relief is the whole point of the act and the shortened life is a cost you accept without wanting. Splitting it evenly would say you were half aiming at the death, which is the thing the doctor is not doing.',
+      explain: 'Mostly intended. The relief is the whole point of the act, and the shortened life is a cost you accept without wanting. Splitting it evenly would say you were half aiming at the death. That’s the thing the doctor is not doing.',
       xp: 5,
     },
     dur: 1.0,

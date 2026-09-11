@@ -66,7 +66,7 @@ export const BEATS: Aes20Beat[] = [
     p: 461, x: 132, uses: 1, swaps: 1, struck: 1, live: 1,
     interact: {
       prompt: 'Tap the row nothing arrived to replace.',
-      explain: 'Showing you a world through somebody else\'s eyes. Facts can be handed over, images can be copied, walls can be covered. What has no substitute is another person\'s way of seeing, because that is not information that could be sent by a cheaper route.',
+      explain: 'Showing you a world through somebody else’s eyes. Facts can be handed over, images can be copied, walls can be covered. What has no substitute is another person’s way of seeing. It isn’t information that could be sent by a cheaper route.',
       xp: 5,
     },
     dur: 1.0,
@@ -101,7 +101,7 @@ export const BEATS: Aes20Beat[] = [
           { id: 'narrow', label: 'narrows the field', reads: 'the field is narrower, and nothing is proved', correct: true },
         ],
       },
-      explain: 'Narrows the field. Crossing answers out shows which reasons cannot be the whole story, and it never makes the survivor true. Art may well teach and decorate and record. The question was what art does that nothing cheaper already does.',
+      explain: 'Narrows the field. Crossing answers out shows which reasons can’t be the whole story, and it never makes the survivor true. Art may well teach and decorate and record. The question was what art does that nothing cheaper already does.',
       xp: 5,
     },
     dur: 1.0,

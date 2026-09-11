@@ -29,7 +29,7 @@ export const BEATS: Logic32Beat[] = [
   {
     a: 383, b: 45, q: 1,
     dur: 4.2,
-    text: '"Have you stopped cheating at cards?" The question sounds like an ordinary yes-or-no, and is not one.',
+    text: 'The question is “have you stopped cheating at cards?” It sounds like an ordinary yes-or-no, and is not one.',
     cite: 'The question',
   },
   {
@@ -46,13 +46,13 @@ export const BEATS: Logic32Beat[] = [
   {
     a: 163, b: 46, q: 1, tried: 2,
     dur: 3.8,
-    text: 'Try no, which feels like the safe one. No, you have not stopped — so you are cheating right now.',
+    text: 'Try no, which feels like the safe one. No, you haven’t stopped, so you are cheating right now.',
     cite: 'Answer: no',
   },
   {
     a: 163, b: 46, q: 1, tried: 2,
     dur: 1.8,
-    text: 'It is worse.',
+    text: 'It’s worse.',
   },
   {
     a: 162, b: 46, q: 1, tried: 2,
@@ -72,7 +72,7 @@ export const BEATS: Logic32Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'One word smuggled the accusation in. Tap it.',
-      explain: '"Stopped" can only be true if you started, so the word carries the charge without ever stating the charge. "Cheating" is out in the open — that is exactly why it is not the problem. You can see it and dispute it.',
+      explain: 'The word “stopped” can only be true if you started, so it carries the charge without ever stating the charge. The word “cheating” is out in the open. That’s why it’s not the problem. You can see it and dispute it.',
       xp: 5,
     },
   },
@@ -89,7 +89,7 @@ export const BEATS: Logic32Beat[] = [
           { id: 'split', label: 'split it apart', reads: 'refuse the package and take the hidden claim first', correct: true },
         ],
       },
-      explain: 'Split it apart. Answering no feels like the safe reply and it is the worse one: no to have you stopped means you have not stopped. Both plain answers hand over the smuggled claim. Splitting the question is the only move that gives away nothing.',
+      explain: 'Split it apart. Answering no feels like the safe reply, and it’s the worse one. Saying no to “have you stopped?” means you haven’t stopped. Both plain answers hand over the smuggled claim. Splitting the question is the only move that gives away nothing.',
       xp: 5,
     },
   },
@@ -102,7 +102,7 @@ export const BEATS: Logic32Beat[] = [
         'The giveaway word presupposes, it does not assert',
         'Refuse the frame, then answer the real question',
       ],
-      closing: 'Some questions are not requests for information. They are arguments wearing a question mark.',
+      closing: 'Some questions are not requests for information. They’re arguments wearing a question mark.',
     },
     dur: 3.0,
   },

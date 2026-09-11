@@ -21,7 +21,7 @@ export const BEATS: Epis31Beat[] = [
   {
     g: 467, open: 0,
     dur: 2.9,
-    text: 'You are already down the road when it hits you: did you lock the door? You can picture doing it.',
+    text: 'You’re already down the road when it hits you: did you lock the door? You can picture doing it.',
   },
   {
     g: 467, open: 0,
@@ -42,13 +42,13 @@ export const BEATS: Epis31Beat[] = [
   {
     g: 168, open: 2,
     dur: 2.1,
-    text: 'But how do you know that memory is any good? You remember checking it.',
+    text: 'But how do you know the memory is any good? You remember checking it.',
     cite: 'The second drawer',
   },
   {
     g: 168, open: 2,
     dur: 2.5,
-    text: 'That is a second drawer, in the same cabinet, made of the same stuff as the first.',
+    text: 'That’s a second drawer, in the same cabinet, made of the same stuff as the first.',
   },
   {
     g: 128, open: 2,
@@ -79,7 +79,7 @@ export const BEATS: Epis31Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap the card that could check a memory from outside memory.',
-      explain: 'The door. Every drawer in that cabinet is another memory, and a memory cannot vouch for itself. Only the world breaks the circle. A minute after you look, that too is a memory.',
+      explain: 'The door. Every drawer in that cabinet is another memory, and a memory can’t vouch for itself. Only the world breaks the circle. A minute after you look, that too is a memory.',
       xp: 5,
     },
   },
@@ -96,7 +96,7 @@ export const BEATS: Epis31Beat[] = [
           { id: 'doubt', label: 'suspect it', reads: 'treat every memory as suspect until it is confirmed' },
         ],
       },
-      explain: 'Trust it. "prove it first" cannot be carried out: nothing outside memory is available to you, because any check you make is itself remembered a moment later. Memory is a floor to stand on rather than a conclusion to prove.',
+      explain: 'Trust it. The advice “prove it first” can’t be carried out. Nothing outside memory is available to you, because any check you make is itself remembered a moment later. Memory is a floor to stand on rather than a conclusion to prove.',
       xp: 5,
     },
   },
@@ -109,7 +109,7 @@ export const BEATS: Epis31Beat[] = [
         'Only the world breaks the circle, and only for a moment',
         'Basic trust is not the same as blind trust',
       ],
-      closing: 'Some beliefs are not conclusions you reached. They are the ground you were standing on.',
+      closing: 'Some beliefs are not conclusions you reached. They’re the ground you were standing on.',
     },
     dur: 3.0,
   },

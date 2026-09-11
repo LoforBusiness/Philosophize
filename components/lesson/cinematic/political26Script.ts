@@ -56,14 +56,14 @@ export const BEATS: Political26Beat[] = [
     p: 260, x: 28, decision: 1, box: 1, table: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what a snap referendum leaves out.',
-      explain: 'The testing. A tally collects opinions and asks nobody to defend one, so nothing in it can have changed a\'s mind. Reading it as a case against voting, or for rule by experts, gets it backwards. The whole idea is that citizens do the reasoning.',
+      explain: 'The testing. A tally collects opinions and asks nobody to defend one, so nothing in it can have changed anyone’s mind. Reading it as a case against voting, or for rule by experts, gets it backwards. The whole idea is that citizens do the reasoning.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 450, x: 88, decision: 1, box: 1, table: 1, feeds: 1,
-    text: 'A citizens assembly hears experts for weeks and questions itself. Many arrive fixed and leave moved.',
+    text: 'A citizens’ assembly hears experts for weeks and questions itself. Many arrive fixed and leave moved.',
     dur: 5.0,
   },
   {

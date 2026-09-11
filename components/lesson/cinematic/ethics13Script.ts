@@ -22,18 +22,18 @@ export const BEATS: Ethics13Beat[] = [
   {
     g: 384, pos: 0, habit: 0,
     dur: 4.0,
-    text: 'Rules and outcomes judge the act. Aristotle judges the person, and asks how much of a trait they have — not whether they followed anything.',
+    text: 'Rules and outcomes judge the act. Aristotle judges the person, and asks how much of a trait they have, not whether they followed anything.',
   },
   {
     g: 173, pos: 0, habit: 0,
     dur: 4.2,
-    text: 'Too little fear-handling and you are a coward: you run from things that should be faced. That is one end of the rail.',
+    text: 'Too little fear-handling and you’re a coward: you run from things that should be faced. That’s one end of the rail.',
     cite: 'Too little',
   },
   {
     g: 387, pos: 4, habit: 0,
     dur: 4.4,
-    text: 'Too much and you are reckless: you charge at things that should be walked away from. Same trait, other end, and it is a vice too.',
+    text: 'Too much and you’re reckless: you charge at things that should be walked away from. Same trait, other end, and it is a vice too.',
     cite: 'Too much',
   },
   {
@@ -52,7 +52,7 @@ export const BEATS: Ethics13Beat[] = [
   {
     g: 396, pos: 4, habit: 0,
     dur: 4.6,
-    text: 'So courage is somewhere along here — and notice what kind of answer that is. Not a rule you could write down, but an amount, judged against what is actually in front of you.',
+    text: 'So courage is somewhere along here, and notice what kind of answer that is. Not a rule to write down, but an amount judged against what’s in front of you.',
     cite: 'Somewhere along here',
   },
   {
@@ -60,7 +60,7 @@ export const BEATS: Ethics13Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap where courage sits on the rail.',
-      explain: 'The middle. Virtue is not the maximum of a trait — courage is not the most fear or the least, but the right amount for what is in front of you. Both ends of this rail are vices of the same trait.',
+      explain: 'The middle. Virtue is not the maximum of a trait. Courage is not the most fear or the least, but the right amount for what’s in front of you. Both ends of this rail are vices of the same trait.',
       xp: 5,
     },
   },
@@ -79,7 +79,7 @@ export const BEATS: Ethics13Beat[] = [
           { id: 'timid', upto: 1, reads: 'timid: afraid of what cannot hurt you' },
         ],
       },
-      explain: 'The other card is the trap: no fear at all is the far left of this rail, not the middle. Courage is a settled habit of the right amount — and Aristotle\'s reply is that anyone still consulting the rule has not yet become the person the rule describes.',
+      explain: 'The trap is “no fear at all”. It’s the far left of this rail, not the middle. Courage is a settled habit of the right amount. Aristotle’s reply is that anyone still consulting the rule hasn’t yet become the person the rule describes.',
       xp: 5,
     },
   },
@@ -92,7 +92,7 @@ export const BEATS: Ethics13Beat[] = [
         'The mean is judged against the situation, not averaged',
         'Good character is worn in by habit, like a groove',
       ],
-      closing: 'A rule tells you what to do this once. A character decides it for you before you have finished reading the question.',
+      closing: 'A rule tells you what to do this once. A character decides it for you before you’ve finished reading the question.',
     },
     dur: 3.0,
   },

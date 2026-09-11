@@ -33,13 +33,13 @@ export const BEATS: Aes15Beat[] = [
   {
     g: 413, rose: 1, tags: 5,
     dur: 4.8,
-    text: 'Kant is not asking which of the five claims is true. He wants to know which one is a judgement of beauty at all.',
+    text: 'Kant isn’t asking which of the five claims is true. He wants to know which one is a judgement of beauty at all.',
     cite: 'Not whether you like it',
   },
   {
     g: 159, rose: 1, tags: 5,
     dur: 2.9,
-    text: 'Kant\'s test is odd and very simple. Strip away every stake you have in the rose.',
+    text: 'Kant’s test is odd and very simple. Strip away every stake you have in the rose.',
     cite: 'The test',
   },
   {
@@ -50,7 +50,7 @@ export const BEATS: Aes15Beat[] = [
   {
     g: 456, rose: 1, tags: 5,
     dur: 2.3,
-    text: 'A stake is anything you want from the painting. To own the painting.',
+    text: 'A stake is anything you want from the rose. To own it.',
   },
   {
     g: 456, rose: 1, tags: 5,
@@ -87,13 +87,13 @@ export const BEATS: Aes15Beat[] = [
   {
     g: 467, rose: 1, tags: 5, cut: 1,
     dur: 3.8,
-    text: 'Cut the other four and the rose does not change. Notice what survived is not even "I like it".',
+    text: 'Cut the other four and the rose doesn’t change. Notice what survived isn’t even “I like it”.',
     cite: 'What is left',
   },
   {
     g: 467, rose: 1, tags: 5, cut: 1,
     dur: 1.8,
-    text: 'It is aimed at you.',
+    text: 'It’s aimed at you.',
   },
   {
     g: 442, rose: 1, tags: 5, cut: 1,
@@ -109,7 +109,7 @@ export const BEATS: Aes15Beat[] = [
           { id: 'keep', upto: 1, reads: 'the delight stays, your stake goes', correct: true },
         ],
       },
-      explain: 'All the delight stays. Disinterested and uninterested are two different words, and hearing the first as the second is what makes Kant sound cold. He removes your stake and keeps the pleasure. The pleasure is the whole point; it simply is not about you.',
+      explain: 'All the delight stays. Disinterested and uninterested are two different words, and hearing the first as the second is what makes Kant sound cold. He removes your stake and keeps the pleasure. The pleasure is the whole point, and it isn’t about you.',
       xp: 5,
     },
   },

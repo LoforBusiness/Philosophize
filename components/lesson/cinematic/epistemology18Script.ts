@@ -34,12 +34,12 @@ export interface Epi18Beat extends BaseBeat {
 export const BEATS: Epi18Beat[] = [
   {
     p: 25, x: 200, rails: 1, ev: 0,
-    text: 'Two claims, and you believe one of them far more than the other. That is the top rail and the bottom one.',
+    text: 'Two claims, and you believe one of them far more than the other. That’s the top rail and the bottom one.',
     dur: 4.4,
   },
   {
     p: 2, x: 200, rails: 1, grip: 1, ev: 0,
-    text: 'Look at what is holding each marker. The round earth is tied to almost everything else you know.',
+    text: 'Look at what’s holding each marker. The round earth is tied to almost everything else you know.',
     dur: 3.1,
   },
   {
@@ -49,13 +49,13 @@ export const BEATS: Epi18Beat[] = [
   },
   {
     p: 447, x: 132, rails: 1, grip: 1, ev: 0.3,
-    text: 'Now the same piece of evidence arrives at both. Somebody you trust tells you it is not so.',
+    text: 'Now the same piece of evidence arrives at both. Somebody you trust tells you it isn’t so.',
     cite: 'One fact, two claims',
     dur: 4.4,
   },
   {
     p: 383, x: 132, rails: 1, grip: 1, ev: 0.3,
-    text: 'The same report should not move both people the same distance. The evidence alone cannot decide how far.',
+    text: 'The same report should not move both markers the same distance. The evidence alone can’t decide how far.',
     dur: 3.8,
   },
   {
@@ -72,7 +72,7 @@ export const BEATS: Epi18Beat[] = [
           { id: 'strong', upto: 1, reads: 'the loose one has swung right over', correct: true },
         ],
       },
-      explain: 'Same push, two different distances. What decides how far a fact moves you is not the fact. It is how firmly you were already holding the claim. The round-earth marker barely shifts because almost everything else you know is holding it.',
+      explain: 'Same push, two different distances. What decides how far a fact moves you isn’t the fact. It’s how firmly you were already holding the claim. The round-earth marker barely shifts because almost everything else you know is holding it.',
       xp: 5,
     },
     dur: 1.0,
@@ -104,7 +104,7 @@ export const BEATS: Epi18Beat[] = [
         { text: 'Doubt the study first', correct: true },
         { text: 'Drop the old result', correct: false },
       ],
-      explain: 'Doubt the study first, and that is not stubbornness. A result held up by a thousand others is likelier to survive than one paper is to be right. If the study replicates, the balance changes, and then so should you.',
+      explain: 'Doubt the study first, and that isn’t stubbornness. A result held up by a thousand others is likelier to survive than one paper is to be right. If the study replicates, the balance changes, and then so should you.',
       xp: 5,
     },
     dur: 1.0,
@@ -118,7 +118,7 @@ export const BEATS: Epi18Beat[] = [
         'Refusing to move at all is not caution, it is closing the rail',
         'Strong claims need evidence in proportion to what holds them',
       ],
-      closing: 'Ask what is holding the marker before you decide the push was too weak.',
+      closing: 'Ask what’s holding the marker before you decide the push was too weak.',
     },
     dur: 3.4,
   },

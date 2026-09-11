@@ -75,8 +75,13 @@ import path from 'node:path';
 
 const DIR = 'components/lesson/cinematic';
 
-/** The high-water mark. May only go DOWN. */
-const VOICE_BUDGET = 43;
+/**
+ * The high-water mark. May only go DOWN.
+ *
+ * 43 → 4 on 11 Sep 2026, when every lesson was rewritten to be read aloud (group
+ * AC): what is left is a philosopher's own reported first person and quoted speech.
+ */
+const VOICE_BUDGET = 4;
 
 /**
  * EVERY FIELD THE READER READS, AND NOT ONE MORE.

@@ -16,12 +16,12 @@ export interface Aes6Beat extends BaseBeat {
 export const BEATS: Aes6Beat[] = [
   {
     p: 379, vast: 1, flower: 0, split: 0, mind: 0,
-    text: 'A storm at sea is terrifying — so why do you stop to watch it? Some experiences thrill us precisely because they dwarf us.',
+    text: 'A storm at sea is terrifying, so why do you stop to watch it? Some experiences thrill you because they dwarf you.',
     dur: 3.6,
   },
   {
     p: 34, vast: 1, flower: 1, split: 3,
-    text: 'Burke split our reactions in two. A flower is beautiful: small, smooth, pleasing.',
+    text: 'Burke split your reactions in two. A flower is beautiful: small, smooth, pleasing.',
     cite: 'Beyond beauty',
     dur: 2.2,
   },
@@ -32,7 +32,7 @@ export const BEATS: Aes6Beat[] = [
   },
   {
     p: 15, vast: 1, flower: 0, split: 3,
-    text: 'Stand on a cliff in a gale. The drop could kill you, and you are perfectly safe.',
+    text: 'Stand on a cliff in a gale. The drop could kill you, yet you’re safe.',
     cite: 'Terror at a safe distance',
     dur: 2.4,
   },
@@ -62,7 +62,7 @@ export const BEATS: Aes6Beat[] = [
         { text: 'Delight mixed with terror', correct: true },
         { text: 'A gentle, pleasing calm', correct: false },
       ],
-      explain: 'The sublime grips you through vastness and power, stirring a delight laced with terror — not the gentle, pleasing calm Burke linked with beauty.',
+      explain: 'The sublime grips you through vastness and power, and stirs a delight laced with terror. The gentle, pleasing calm on the other card is what Burke linked with beauty.',
       xp: 5,
     },
     dur: 1.0,
@@ -75,7 +75,7 @@ export const BEATS: Aes6Beat[] = [
   },
   {
     p: 457, vast: 1, split: 3, mind: 1,
-    text: 'But the real jolt, Kant says, is your mind finding room for something so vast. The mountain is not the sublime thing.',
+    text: 'But Kant says the real jolt is your mind finding room for something so vast. The mountain is not the sublime thing.',
     dur: 3.2,
   },
   {
@@ -108,7 +108,7 @@ export const BEATS: Aes6Beat[] = [
         'The sublime mixes terror with delight',
         'Kant: the real awe is in the mind',
       ],
-      closing: 'Beauty pleases the eye; the sublime stuns the whole self.',
+      closing: 'Beauty pleases the eye. The sublime stuns the whole self.',
     },
     dur: 2.8,
   },

@@ -21,18 +21,18 @@ export const BEATS: Epis14Beat[] = [
   {
     g: 384, vat: 0, leap: 0,
     dur: 4.0,
-    text: 'Here is your situation, drawn honestly. There is the world, and there is what reaches you of the world — with a leap in between.',
+    text: 'Here’s your situation, drawn honestly. There’s the world, and there’s what reaches you of the world, with a leap in between.',
   },
   {
     g: 443, vat: 0, leap: 0,
     dur: 4.4,
-    text: 'Everything you have ever checked, you checked by looking. So every check happened here, on this side of the glass, and never against the world itself.',
+    text: 'Everything you’ve ever checked, you checked by looking. So every check happened here, on this side of the glass, and never against the world itself.',
     cite: 'What you can check',
   },
   {
     g: 383, vat: 0, leap: 1,
     dur: 4.4,
-    text: 'So the world is not something you observe. It is something you infer, across this gap, from what shows up on the screen.',
+    text: 'So the world is not something you observe. It’s something you infer, across this gap, from what shows up on the screen.',
     cite: 'The leap',
   },
   {
@@ -57,14 +57,14 @@ export const BEATS: Epis14Beat[] = [
   {
     g: 159, vat: 1, leap: 1,
     dur: 1.8,
-    text: 'Nothing on it moved — and nothing on it ever would.',
+    text: 'Nothing on the screen moved, and nothing on it ever would.',
   },
   {
     g: 461, vat: 1, leap: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap the only part of this you can actually inspect.',
-      explain: 'The screen. Everything you have ever verified, you verified by looking — which means you verified it here. The world is reached across the gap, and the gap is the part you cannot get behind from inside.',
+      explain: 'The screen. Everything you’ve ever verified, you verified by looking — which means you verified it here. The world is reached across the gap, and the gap is the part you can’t get behind from inside.',
       xp: 5,
     },
   },
@@ -81,7 +81,7 @@ export const BEATS: Epis14Beat[] = [
           { id: 'odd', reads: 'one world felt two ways: a different puzzle entirely' },
         ],
       },
-      explain: 'Two worlds, one experience, and it is built that way on purpose. Every piece of evidence you could ever collect is explained equally well by both worlds, so evidence cannot separate them. Common sense is no help: a simulation would fake the pinch too.',
+      explain: 'Two worlds, one experience, and it’s built that way on purpose. Every piece of evidence you could ever collect is explained equally well by both worlds, so evidence can’t separate them. Common sense is no help: a simulation would fake the pinch too.',
       xp: 5,
     },
   },
@@ -94,7 +94,7 @@ export const BEATS: Epis14Beat[] = [
         'Russell: the external world is an inference, not a sighting',
         'Putnam argued the scenario may even be self-refuting',
       ],
-      closing: 'You probably cannot prove the world is real. Notice that you cannot prove it is fake either, and you have to live somewhere.',
+      closing: 'You probably can’t prove the world is real. Notice that you can’t prove it’s fake either, and you have to live somewhere.',
     },
     dur: 3.0,
   },

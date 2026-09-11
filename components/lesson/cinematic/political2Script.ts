@@ -31,23 +31,23 @@ export const BEATS: Pol2Beat[] = [
   },
   {
     r: 161, sub: 8, podium: false, chart: 1,
-    text: 'Power bends bodies; authority wins minds. They are not the same thing.',
+    text: 'Power bends bodies, but authority wins minds. They are not the same thing.',
     dur: 2,
   },
   {
     r: 13, sub: 18, podium: false, chart: 2,
-    text: 'Weber split two ideas we blur together. Power gets its way despite resistance, by threat or force, and a mugger has it.',
+    text: 'Weber split two ideas people usually blur together. Power gets its way despite resistance, by threat or force, and a mugger has it.',
     cite: 'Weber: power vs authority',
     dur: 3.1,
   },
   {
     r: 13, sub: 18, podium: false, chart: 2,
-    text: 'Authority is being obeyed because people think you are entitled to be.',
+    text: 'Authority is being obeyed because people think you’re entitled to be.',
     dur: 1.8,
   },
   {
     r: 7, sub: 4, podium: true, chart: 2,
-    text: 'Augustine sharpened it. A captured pirate told Alexander: with one ship I am a robber; you with a fleet are an emperor.',
+    text: 'Augustine sharpened the point. A captured pirate told Alexander, “With one ship I’m a robber, and you with a fleet are an emperor.”',
     cite: 'Augustine, City of God, IV.4',
     dur: 3.3,
   },
@@ -86,7 +86,7 @@ export const BEATS: Pol2Beat[] = [
     interact: {
       prompt: 'Which type of authority best fits an elected president?',
       explain:
-        'A president is obeyed because of the office and the vote that put them in it. Not because of family, and not because of charm. Weber called that rational-legal authority.',
+        'A president is obeyed because of the office and the vote that filled it. Not because of family, and not because of charm. Weber called this rational-legal authority.',
       xp: 5,
     },
     dur: 1.0,
@@ -103,7 +103,7 @@ export const BEATS: Pol2Beat[] = [
           { id: 'office', label: 'the office', reads: 'the lawful office they now hold', correct: true },
         ],
       },
-      explain: 'The office. Charisma may well have won the vote, and it is not what makes an order binding afterwards: that flows from the office. Real leaders blend all three, so the question is always which one is doing the work.',
+      explain: 'The office. Charisma may well have won the vote, but it is not what makes an order binding afterwards. That flows from the office. Real leaders blend all three, so the question is always which one is doing the work.',
       xp: 5,
     },
     dur: 1.0,

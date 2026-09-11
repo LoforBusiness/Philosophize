@@ -22,7 +22,7 @@ export interface Political7Beat extends BaseBeat {
 export const BEATS: Political7Beat[] = [
   {
     p: 8, x: 264,
-    text: 'You are allowed to say what you think. So who actually handed you that?',
+    text: 'You’re allowed to say what you think. So who handed you that?',
     dur: 2,
   },
   {
@@ -72,33 +72,33 @@ export const BEATS: Political7Beat[] = [
   },
   {
     p: 467, x: 190, stone: 1, charter: 1,
-    text: 'Here is how to tell the two apart. Tomorrow a government passes a law: from now on, you may not say what you think.',
+    text: 'Here’s how to tell the two apart. Tomorrow a government passes a law: from now on, you may not say what you think.',
     cite: 'The test',
     dur: 3.5,
   },
   {
     p: 467, x: 190, stone: 1, charter: 1,
-    text: 'The law is real, and it is enforced.',
+    text: 'The law is real, and it’s enforced.',
     dur: 1.8,
   },
   {
     p: 162, x: 190, stone: 1, charter: 1, pick: 1,
     interact: {
       prompt: 'That law wipes the right off the books. Tap the source where the right is still standing.',
-      explain: 'Wipe the paper and the paper’s right goes with it — that is what made it the paper’s in the first place. The stone’s answer is different: you kept the right, and the law simply broke it. The whole argument turns on that gap.',
+      explain: 'Wipe the paper and the paper’s right goes with it. That’s what made it the paper’s in the first place. The stone’s answer is different: you kept the right, and the law broke it. The whole argument turns on that gap.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 24, x: 330, stone: 1, charter: 1, tear: 1,
-    text: 'Watch what the law can actually reach. It tears the paper in half — and the stone does not move.',
+    text: 'Watch what the law can reach. It tears the paper in half, and the stone does not move.',
     cite: 'Natural rights',
     dur: 2.7,
   },
   {
     p: 24, x: 330, stone: 1, charter: 1, tear: 1,
-    text: 'That is the claim: rights you have just for being human. A government can break one.',
+    text: 'That’s the claim: rights you have just for being human. A government can break one.',
     dur: 2.2,
   },
   {
@@ -118,7 +118,7 @@ export const BEATS: Political7Beat[] = [
           { id: 'nothing', label: 'no law is unjust', reads: 'then no law could ever be called unjust', correct: true },
         ],
       },
-      explain: 'No law is unjust, and it is the whole natural-rights reply. No law, no right sounds hard-headed, and Bentham argued exactly that. But if a right is only what the law grants, then a law that takes one away breaks no standard. There is none left above it.',
+      explain: 'No law is unjust, and it’s the whole natural-rights reply. No law, no right sounds hard-headed, and Bentham argued exactly that. But if a right is only what the law grants, then a law that takes one away breaks no standard. There’s none left above it.',
       xp: 5,
     },
     dur: 1.0,

@@ -43,7 +43,7 @@ export const BEATS: Epi22Beat[] = [
   },
   {
     p: 384, x: 200, routes: 1, run: 1,
-    text: 'Both arrive. Both now believe something true, and today there is nothing to choose between them.',
+    text: 'Both arrive. Both now believe something true, and today there’s nothing to choose between them.',
     cite: 'Same destination',
     dur: 4.4,
   },
@@ -61,7 +61,7 @@ export const BEATS: Epi22Beat[] = [
     p: 165, x: 132, routes: 1, run: 1, gaps: 1, live: 1,
     interact: {
       prompt: 'Both arrived. Tap the route you would take again tomorrow.',
-      explain: 'The road. Today the two are worth exactly the same, which is what makes the question hard — the difference is not in the belief you hold now, it is in whether the thing that produced it will produce another one.',
+      explain: 'The road. Today the two are worth the same, which is what makes the question hard. The difference isn’t in the belief you hold now. It’s in whether the thing that produced it will produce another one.',
       xp: 5,
     },
     dur: 1.0,
@@ -87,7 +87,7 @@ export const BEATS: Epi22Beat[] = [
   },
   {
     p: 383, x: 268, routes: 1, run: 1, gaps: 1,
-    text: 'So the extra value is not in today at all. It is in every other day, and you can draw it.',
+    text: 'So the extra value is not in today at all. It’s in every other day, and you can draw it.',
     dur: 4.2,
   },
   {
@@ -104,7 +104,7 @@ export const BEATS: Epi22Beat[] = [
           { id: 'never', profile: [0.08, 0.08, 0.1, 0.08, 0.06], reads: 'never gets there at all' },
         ],
       },
-      explain: 'One high mark and then the floor. A guess that happened to land tells you nothing about the next one, and that gap is the whole difference in value. Drawing it high across is the mistake worth making, because it is what treating luck as a method looks like.',
+      explain: 'One high mark and then the floor. A guess that happened to land tells you nothing about the next one. That gap is the whole difference in value. Drawing it high across is the mistake worth making, because it’s what treating luck as a method looks like.',
       xp: 5,
     },
     dur: 1.0,

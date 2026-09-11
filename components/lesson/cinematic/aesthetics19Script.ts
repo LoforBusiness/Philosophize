@@ -24,18 +24,18 @@ export interface Aes19Beat extends BaseBeat {
 export const BEATS: Aes19Beat[] = [
   {
     p: 379, x: 70,
-    text: 'Aesthetics has spent most of its life indoors, looking at things in frames. Take the frame outside and point it at whatever is actually there.',
+    text: 'Aesthetics has spent most of its life indoors, looking at things in frames. Take the frame outside and point it at whatever happens to be there.',
     dur: 4.6,
   },
   {
     p: 41, x: 168, row: 1, frame: 1,
-    text: 'A drainpipe. Nobody hung it and nobody signed it, and still the pipe has a shape, a rhythm and a set of stains.',
+    text: 'A drainpipe. Nobody hung it or signed it, and still the pipe has a shape, a rhythm and a set of stains.',
     cite: 'A drainpipe',
     dur: 3,
   },
   {
     p: 41, x: 168, row: 1, frame: 1,
-    text: 'Put a frame round the pipe and you will look at it properly for the first time.',
+    text: 'Put a frame round the pipe and you’ll look at it properly for the first time.',
     dur: 2.2,
   },
   {
@@ -86,7 +86,7 @@ export const BEATS: Aes19Beat[] = [
           { id: 'know', upto: 1, reads: 'knowing what you are looking at', correct: true },
         ],
       },
-      explain: 'The far end. The scenery picture treats not knowing as not needing to know. A marsh breaks it: a wasteland, until somebody tells you what is going on in it. Natural history does for a marsh what art history does for a painting.',
+      explain: 'The far end. The scenery picture treats not knowing as not needing to know. A marsh breaks it: a wasteland, until somebody tells you what’s going on in it. Natural history does for a marsh what art history does for a painting.',
       xp: 5,
     },
     dur: 1.0,
@@ -95,7 +95,7 @@ export const BEATS: Aes19Beat[] = [
     p: 6, x: 124, row: 1, frame: 3, verdict: 2, know: 1, pick: 1,
     interact: {
       prompt: 'The frame never moved. Tap what actually changed the verdict.',
-      explain: 'Knowing what it is. The frame only decides where you point; it cannot tell you what is in front of you, and on Carlson\'s view that is the part appreciation was waiting on.',
+      explain: 'Knowing what it is. The frame only decides where you point. It can’t tell you what’s in front of you. On Carlson’s view, that’s the part appreciation was waiting on.',
       xp: 5,
     },
     dur: 1.0,
@@ -109,7 +109,7 @@ export const BEATS: Aes19Beat[] = [
         'The pretty-glance view treats nature as scenery',
         'A frame points; it does not inform',
       ],
-      closing: 'You have walked past the same marsh a hundred times. Nothing about it was hiding.',
+      closing: 'You’ve walked past the same marsh a hundred times. Nothing about it was hiding.',
     },
     dur: 3.0,
   },

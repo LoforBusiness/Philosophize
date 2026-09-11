@@ -28,18 +28,18 @@ export interface L9Beat extends BaseBeat {
 export const BEATS: L9Beat[] = [
   {
     a: 384, d: 0, dx: 420, claim: true,
-    text: 'Someone puts a claim up where everyone can read it. The quickest way to look like you have beaten it is never to go near it.',
+    text: 'Someone puts a claim up where everyone can read it. The quickest way to look like you’ve beaten it is never to go near it.',
     dur: 3.8,
   },
   {
     a: 14, d: 13, dx: 264, claim: true, smear: true,
-    text: 'The first dodge aims at the arguer. "He failed maths at school, so ignore his budget.',
+    text: 'The first dodge aims at the arguer. It says “he failed maths at school, so ignore his budget”.',
     cite: 'Ad hominem',
     dur: 2,
   },
   {
     a: 14, d: 13, dx: 264, claim: true, smear: true,
-    text: 'But a claim does not get its truth from the mouth it came out of — the insult has answered nothing on the board.',
+    text: 'But a claim doesn’t get its truth from the mouth it came out of. The insult has answered nothing on the board.',
     dur: 3,
   },
   {
@@ -55,7 +55,7 @@ export const BEATS: L9Beat[] = [
   },
   {
     a: 378, d: 8, dx: 264, claim: true, straw: 2, untouched: true,
-    text: 'Now look at what has actually happened. Two replies, a lot of noise, and the claim is standing exactly where it was — unread and unanswered.',
+    text: 'Now look at what’s actually happened. Two replies, a lot of noise, and the claim is still standing where it was, unread and unanswered.',
     dur: 4.2,
   },
   {
@@ -76,7 +76,7 @@ export const BEATS: L9Beat[] = [
     interact: {
       prompt: 'Three replies to that budget plan. Tap the one that attacks the arguer instead of the argument.',
       explain:
-        'Ad hominem goes at the person: a school report cannot make a column of figures add up. The trap is the third reply — also a dodge, but a straw man. It distorts the position, then argues with the distortion.',
+        'Ad hominem goes at the person: a school report can’t make a column of figures add up. The trap is the third reply — also a dodge, but a straw man. It distorts the position, then argues with the distortion.',
     },
     dur: 4.8,
   },
@@ -92,7 +92,7 @@ export const BEATS: L9Beat[] = [
           { id: 'worst', reads: 'bad reasoning, false conclusion: nothing here at all' },
         ],
       },
-      explain: 'Bad reasoning, true conclusion, and that answer is crowded. A fallacy tells you the reasoning does not support the conclusion. It says nothing about whether the conclusion is true. Assuming it does has its own name: the fallacy fallacy.',
+      explain: 'Bad reasoning, true conclusion, and that answer is crowded. A fallacy tells you the reasoning doesn’t support the conclusion. It says nothing about whether the conclusion is true. Assuming it does has its own name: the fallacy fallacy.',
     },
     dur: 4.6,
   },

@@ -23,7 +23,7 @@ export const BEATS: Meta31Beat[] = [
   {
     g: 440, holes: 0, ticks: 0, chips: 0,
     dur: 3.8,
-    text: 'One slab of cheese. Solid all the way through, and there is nothing here to argue about yet.',
+    text: 'One slab of cheese. Solid all the way through, and there’s nothing here to argue about yet.',
   },
   {
     g: 159, holes: 1, ticks: 0, chips: 0,
@@ -45,7 +45,7 @@ export const BEATS: Meta31Beat[] = [
   {
     g: 456, holes: 1, ticks: 3, chips: 0,
     dur: 1.8,
-    text: 'Everything we do with objects, we do with holes.',
+    text: 'Everything you do with objects, you do with holes.',
   },
   {
     g: 129, holes: 1, ticks: 3, chips: 0,
@@ -76,7 +76,7 @@ export const BEATS: Meta31Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap whatever it is you counted when you counted three.',
-      explain: 'The rim. Argle\'s answer, from a famous 1970 dialogue: a hole just is its rim, a bit of cheese bent into a ring. Count the rings and you have counted the holes, and nothing new had to exist.',
+      explain: 'The rim. That’s Argle’s answer, from a famous 1970 dialogue. A hole just is its rim, a bit of cheese bent into a ring. Count the rings and you’ve counted the holes, and nothing new had to exist.',
       xp: 5,
     },
   },
@@ -95,7 +95,7 @@ export const BEATS: Meta31Beat[] = [
           { id: 'never', upto: 1, reads: 'rewording never works' },
         ],
       },
-      explain: 'Usually — and the failures are why this is still argued about. Rewording is a fair move, but it has to work every time. Try it on "there are as many holes as pegs" and it breaks. Counting is the one thing "holey" cannot do.',
+      explain: 'Usually — and the failures are why this is still argued about. Rewording is a fair move, but it has to work every time. Try it on “there are as many holes as pegs” and it breaks. Counting is the one thing “holey” can’t do.',
       xp: 5,
     },
   },

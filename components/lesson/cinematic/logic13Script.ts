@@ -27,7 +27,7 @@ export const BEATS: Log13Beat[] = [
   {
     g: 25, steps: 1,
     dur: 4.2,
-    text: 'Let one student retake one quiz. That is the whole proposal, and nobody in the room objects to it.',
+    text: 'Let one student retake one quiz. That’s the whole proposal, and nobody in the room objects to it.',
   },
   {
     g: 465, steps: 4,
@@ -38,7 +38,7 @@ export const BEATS: Log13Beat[] = [
   {
     g: 465, steps: 4,
     dur: 2.4,
-    text: 'Grades will stop meaning anything. So we cannot allow the retake.',
+    text: 'Grades will stop meaning anything. So the retake can’t be allowed.',
   },
   {
     g: 383, steps: 4, joins: 1,
@@ -69,7 +69,7 @@ export const BEATS: Log13Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap the first step that has not been earned.',
-      explain: 'The second one, and that it comes FIRST is the whole lesson. A slope does not fail at the alarming end. It fails at the first join nobody argued for. Nothing says why one retake produces a demand for all of them. After that, every step is free.',
+      explain: 'The second one, and the whole lesson is that it comes first. A slope does not fail at the alarming end. It fails at the first join nobody argued for. Nothing says why one retake produces a demand for all of them. After that, every step is free.',
       xp: 5,
     },
   },
@@ -86,7 +86,7 @@ export const BEATS: Log13Beat[] = [
           { id: 'joins', label: 'an unargued step', reads: 'a step is asserted with no reason given', correct: true },
         ],
       },
-      explain: 'An unargued step. "too far-fetched" is the one most people pick, and it is why the fallacy keeps working. An alarming ending is fine if every step to it is argued, and a modest ending is still a slope if they are not. The fault lives in the joins.',
+      explain: 'An unargued step. The answer “too far-fetched” is the one most people pick, and that’s why the fallacy keeps working. An alarming ending is fine if every step to it is argued. A modest ending is still a slope if the steps aren’t. The fault lives in the joins.',
       xp: 5,
     },
   },

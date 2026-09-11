@@ -40,13 +40,13 @@ export const BEATS: Pol4Beat[] = [
   },
   {
     p: 13, walls: 0.25, harm: 1, panel: 1, test: 1,
-    text: 'Eat badly, take wild risks, preach unpopular views? Mill says that is your business.',
+    text: 'Eat badly, take wild risks, preach unpopular views? Mill says that’s your business.',
     cite: 'Mill’s harm principle',
     dur: 2,
   },
   {
     p: 13, walls: 0.25, harm: 1, panel: 1, test: 1,
-    text: 'But poison a well, defraud a buyer, throw a punch? Now you harm others — and only then may power step in.',
+    text: 'But poison a well, defraud a buyer, throw a punch? Now you harm others, and only then may power step in.',
     dur: 3.2,
   },
   {
@@ -82,7 +82,7 @@ export const BEATS: Pol4Beat[] = [
         { text: 'Negative liberty', correct: true },
         { text: 'Positive liberty', correct: false },
       ],
-      explain: 'For Berlin, negative liberty is the space where no one blocks your way. Positive liberty asks instead whether you truly have the power to be your own master.',
+      explain: 'For Berlin, negative liberty is the space where no one blocks your way. Positive liberty asks instead whether you have the power to be your own master.',
       xp: 5,
     },
     dur: 1.0,
@@ -100,7 +100,7 @@ export const BEATS: Pol4Beat[] = [
           { id: 'neg', upto: 1, reads: 'a core of being left alone', correct: true },
         ],
       },
-      explain: 'Nearly all of it. Berlin valued positive liberty and spent his essay warning what happens when it is handed to a state: rulers get to coerce you in the name of your real self. So he fences off a core that nobody may enter for your own good.',
+      explain: 'Nearly all of it. Berlin valued positive liberty, and spent his essay warning what happens when it’s handed to a state. Rulers get to coerce you in the name of your real self. So he fences off a core that nobody may enter for your own good.',
       xp: 5,
     },
     dur: 1.0,

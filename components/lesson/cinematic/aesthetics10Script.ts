@@ -29,7 +29,7 @@ export interface Aes10Beat extends BaseBeat {
 export const BEATS: Aes10Beat[] = [
   {
     p: 164, x: 44, film: 1, panel: 1, shut: 0,
-    text: 'Two hours of the finest film-making you have ever sat through. Every frame placed by a master.',
+    text: 'Two hours of the finest film-making you’ve ever sat through. Every frame placed by a master.',
     dur: 2.6,
   },
   {
@@ -45,7 +45,7 @@ export const BEATS: Aes10Beat[] = [
   },
   {
     p: 13, x: 110, film: 1, panel: 1, shut: 1, verdict: 1,
-    text: 'Oscar Wilde draws the shutter across that second question. A book is well written or badly written, and there is nothing else on the paper to judge.',
+    text: 'Oscar Wilde draws the shutter across that second question. He says a book is well written or badly written, and there’s nothing else on the paper to judge.',
     cite: 'Wilde slides it shut',
     dur: 4.8,
   },
@@ -63,13 +63,13 @@ export const BEATS: Aes10Beat[] = [
   },
   {
     p: 389, x: 110, film: 1, panel: 1, shut: 0, verdict: 1,
-    text: 'The moralist shoves the shutter back. What a work invites you to feel is not a footnote about it — it is part of what the work already is.',
+    text: 'The moralist shoves the shutter back. What a work invites you to feel isn’t a footnote: it is part of what the work already is.',
     cite: 'The moralist opens it',
     dur: 4.6,
   },
   {
     p: 30, x: 110, film: 1, panel: 1, shut: 0, verdict: 2, link: 1,
-    text: 'A third camp draws a line between the two. Berys Gaut: if a work asks you to feel what you should not, that failure counts against it as art.',
+    text: 'A third camp draws a line between the two. Berys Gaut says that if a work asks you to feel what you shouldn’t, it’s flawed as art.',
     cite: 'Ethicism',
     dur: 4.8,
   },
@@ -77,7 +77,7 @@ export const BEATS: Aes10Beat[] = [
     p: 457, x: 110, film: 1, panel: 1, shut: 0, verdict: 2, link: 1, boards: 1,
     interact: {
       prompt: 'A work that glamorises cruelty is worse AS art. Which board does that line belong on?',
-      explain: 'The trap: everyone agrees the film is superbly made, so calling it worse AS art sounds like a confusion. It is not. The moralist grants the skill and says what a work asks you to feel is part of its worth as art — the exact link Wilde denies.',
+      explain: 'The trap: everyone agrees the film is superbly made, so calling it worse AS art sounds like a confusion. It isn’t. The moralist grants the skill, but says the feeling a work asks for is part of its worth as art. That’s the link Wilde denies.',
       xp: 5,
     },
     dur: 1.0,
@@ -96,7 +96,7 @@ export const BEATS: Aes10Beat[] = [
           { id: 'city', upto: 1, reads: 'the city first, and beautiful art frightened him most', correct: true },
         ],
       },
-      explain: 'The far end, which reverses the usual picture. He policed art precisely because he ranked the good of the city above beauty, and he feared beautiful art more than clumsy art: beauty is what makes a bad lesson persuasive.',
+      explain: 'The far end, which reverses the usual picture. Plato policed art because he ranked the good of the city above beauty. He feared beautiful art more than clumsy art, because beauty is what makes a bad lesson persuasive.',
       xp: 5,
     },
     dur: 1.0,

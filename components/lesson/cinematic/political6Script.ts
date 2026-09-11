@@ -19,7 +19,7 @@ export const BEATS: Pol6Beat[] = [
   },
   {
     p: 418, bars: 1,
-    text: 'Back behind the veil of ignorance — choose the rules not knowing who you will be. From that fair start, Rawls says, two principles fall out, in strict order.',
+    text: 'Back behind the veil of ignorance, you choose the rules not knowing who you’ll be. Rawls says two principles fall out of that fair start, in strict order.',
     cite: 'The two principles',
     dur: 4.8,
   },
@@ -44,13 +44,13 @@ export const BEATS: Pol6Beat[] = [
   },
   {
     p: 13, bars: 1, prin: 1,
-    text: 'A surgeon earns far more than a clerk. Not necessarily.',
+    text: 'Is a surgeon earning far more than a clerk unjust? Not necessarily.',
     cite: 'The difference principle',
     dur: 1.8,
   },
   {
     p: 13, bars: 1, prin: 1,
-    text: 'If the higher pay draws talent that makes even the worst-off better than under equal pay, the gap is just. The test is the bottom, not the top.',
+    text: 'The gap is just when higher pay draws talent that lifts even the worst-off above the equality line. The test is the bottom, not the top.',
     dur: 3.8,
   },
   {
@@ -75,7 +75,7 @@ export const BEATS: Pol6Beat[] = [
           { id: 'first', upto: 1, reads: 'liberties settled first, and only then the money', correct: true },
         ],
       },
-      explain: 'All the way over. Helping the poor sounds like grounds for a trade, and Rawls will not allow one: the basic liberties have strict priority. Only once they are secured for everybody does the difference principle get to speak about wealth.',
+      explain: 'All the way over. Helping the poor sounds like grounds for a trade, and Rawls will not allow one. The basic liberties have strict priority. Only once they’re secured for everybody does the difference principle get to speak about wealth.',
       xp: 5,
     },
     dur: 1.0,
@@ -89,7 +89,7 @@ export const BEATS: Pol6Beat[] = [
         'The test is the bottom, not the top',
         'Justice judged from behind the veil',
       ],
-      closing: 'A just society is one you would accept before knowing your place in it.',
+      closing: 'A just society is one you’d accept before knowing your place in it.',
     },
     dur: 2.8,
   },

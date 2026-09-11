@@ -33,7 +33,7 @@ export interface Logic37Beat extends BaseBeat {
 export const BEATS: Logic37Beat[] = [
   {
     p: 462, x: 56, boxes: 1,
-    text: 'A village with one barber and one rule. He shaves every man who does not shave himself, and nobody else.',
+    text: 'A village with one barber and one rule. He shaves every man who doesn’t shave himself, and nobody else.',
     dur: 4.0,
   },
   {
@@ -43,26 +43,26 @@ export const BEATS: Logic37Beat[] = [
   },
   {
     p: 2, x: 56, boxes: 1, sorted: 1,
-    text: 'Do not, and he shaves you.',
+    text: 'Don’t, and he shaves you.',
     dur: 1.8,
   },
   {
     p: 4, x: 56, boxes: 1, sorted: 1, barber: 1, live: 1,
     interact: {
       prompt: 'Now put the barber in a box.',
-      explain: 'Neither box takes him, and there is no third. Put him left and he shaves himself, so his rule forbids it. Put him right and he does not, so his rule requires it. The description is grammatical and there is no such man.',
+      explain: 'Neither box takes him, and there’s no third. Put him left and he shaves himself, so his rule forbids it. Put him right and he doesn’t, so his rule requires it. The description is grammatical and there’s no such man.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 380, x: 56, boxes: 1, sorted: 1, barber: 1,
-    text: 'That is the whole result, and the result bites harder than you would think. A sentence can be built perfectly and still describe nothing that could exist.',
+    text: 'That’s the whole result, and the result bites harder than you would think. A sentence can be built perfectly and still describe nothing that could exist.',
     dur: 4.6,
   },
   {
     p: 13, x: 56, boxes: 1, sorted: 1, barber: 1, sets: 1,
-    text: 'Russell found the real one in 1901. Take the collection of all collections that do not contain themselves.',
+    text: 'Russell found the real one in 1901. Take the set of all sets that do not contain themselves.',
     dur: 3.8,
   },
   {
@@ -95,7 +95,7 @@ export const BEATS: Logic37Beat[] = [
           { id: 'axioms', label: 'the rules required it', reads: 'the rules said this set must exist', correct: true },
         ],
       },
-      explain: 'The rules required it. With the barber you say there is no such man and walk away. The axioms of the day said any condition you can state determines a set, so this one was a legal object — and it was sitting inside the foundation of arithmetic.',
+      explain: 'The rules required it. With the barber you say there’s no such man and walk away. The axioms of the day said any condition you can state determines a set. So this one was a legal object, sitting inside the foundation of arithmetic.',
       xp: 5,
     },
     dur: 1.0,

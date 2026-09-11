@@ -44,7 +44,7 @@ export const BEATS: Aesthetics25Beat[] = [
   },
   {
     p: 36, x: 40, frames: 1,
-    text: 'One reads it at once. The other does not know where to start.',
+    text: 'One reads it at once. The other doesn’t know where to start.',
     dur: 3.6,
   },
   {
@@ -56,7 +56,7 @@ export const BEATS: Aesthetics25Beat[] = [
     p: 161, x: 40, frames: 1, shelves: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what is not the same for both visitors.',
-      explain: 'What they brought. The canvas is one canvas, and the second visitor looked at it for just as long — the picture shows both. Only the stack under each one differs.',
+      explain: 'What they brought. The canvas is one canvas, and the second visitor looked at it for just as long. The picture shows both. Only the stack under each one differs.',
       xp: 5,
     },
     dur: 1.0,
@@ -68,7 +68,7 @@ export const BEATS: Aesthetics25Beat[] = [
   },
   {
     p: 62, x: 96, frames: 1, shelves: 1,
-    text: 'It arrives so early that it feels like your own eye.',
+    text: 'Cultural capital arrives so early it feels like your own eye.',
     dur: 3.4,
   },
   {
@@ -101,7 +101,7 @@ export const BEATS: Aesthetics25Beat[] = [
           { id: 'both', label: 'both', reads: 'really felt, and shaped long before you felt it', correct: true },
         ],
       },
-      explain: 'Both, and Bourdieu needs it to be both. The love is sincere precisely because the training finished years ago. Calling it a pose would make it easy to deny, and that is not the claim.',
+      explain: 'Both, and Bourdieu needs it to be both. The love is sincere because the training finished years ago. Calling it a pose would make it easy to deny, and that’s not the claim.',
       xp: 5,
     },
     dur: 1.0,
@@ -115,7 +115,7 @@ export const BEATS: Aesthetics25Beat[] = [
         'A trained eye feels like an untrained one',
         'The disinterested gaze costs money to afford',
       ],
-      closing: 'The next time something strikes you as beautiful, ask quietly who taught you to see it that way.',
+      closing: 'The next time something strikes you as beautiful, ask yourself who taught you to see it that way.',
     },
     dur: 3.6,
   },

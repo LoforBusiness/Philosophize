@@ -28,7 +28,7 @@ export const BEATS: Pol31Beat[] = [
   {
     g: 2, grass: 0.66, herd: 2, sums: 0,
     dur: 2.8,
-    text: 'You put on one more. The whole of what it eats is yours; the wear on the grass falls on all four of you.',
+    text: 'You put on one more. The whole of what it eats is yours, but the wear on the grass falls on all four of you.',
     cite: 'One more',
   },
   {
@@ -39,7 +39,7 @@ export const BEATS: Pol31Beat[] = [
   {
     g: 387, grass: 0.22, herd: 4, sums: 0,
     dur: 4.6,
-    text: 'So does everyone else, for exactly the same reason. Now the field is bare, every herder is worse off than they started, and nobody has done a single unreasonable thing.',
+    text: 'So does everyone else, for the same reason. Now the field is bare, every herder is worse off than before, and nobody has done a single unreasonable thing.',
     cite: 'And everyone else',
   },
   {
@@ -58,7 +58,7 @@ export const BEATS: Pol31Beat[] = [
   {
     g: 459, grass: 0.22, herd: 4, sums: 1,
     dur: 2.7,
-    text: 'Here is the sum each of them did. One whole unit of gain, kept entirely.',
+    text: 'Here’s the sum each of them did. One whole unit of gain, all of it kept.',
     cite: 'The sum they did',
   },
   {
@@ -71,7 +71,7 @@ export const BEATS: Pol31Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap what makes ruining the field the sensible move for each of them.',
-      explain: 'The shared cost. One gain against one cost is a bad trade that nobody makes. One gain against a quarter of a cost is a good one — and every herder does that sum and gets the same answer.',
+      explain: 'The shared cost. One gain against one cost is a bad trade that nobody makes. One gain against a quarter of a cost is a good one. Every herder does that sum and gets the same answer.',
       xp: 5,
     },
   },
@@ -88,7 +88,7 @@ export const BEATS: Pol31Beat[] = [
           { id: 'rules', label: 'change the cost', reads: 'change what taking too much costs', correct: true },
         ],
       },
-      explain: 'The other card fails on its own terms. Whoever complies simply loses, and the field dies anyway. Despair was Hardin\'s own guess. Elinor Ostrom won a Nobel for commons that never collapsed, each binding its users to a limit they helped set.',
+      explain: 'Asking them to take less fails on its own terms. Whoever complies loses, and the field dies anyway. Garrett Hardin, who named the tragedy, expected ruin. Elinor Ostrom won a Nobel for commons that never collapsed, each binding its users to a limit they helped set.',
       xp: 5,
     },
   },
@@ -101,7 +101,7 @@ export const BEATS: Pol31Beat[] = [
         'Restraint alone does not save a commons',
         'Ostrom: real communities fix it by binding themselves',
       ],
-      closing: 'When everyone acts sensibly and the result is a disaster, stop looking at the people and look at the payoffs.',
+      closing: 'When everyone acts sensibly and the result is a disaster, stop looking at the people. Look at the payoffs.',
     },
     dur: 3.0,
   },

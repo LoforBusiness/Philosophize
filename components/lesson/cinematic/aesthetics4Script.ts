@@ -30,7 +30,7 @@ export interface Aes4Beat extends BaseBeat {
 export const BEATS: Aes4Beat[] = [
   {
     a: 2, v: 0, ask: 1, test: 0, verdict: 0, signed: 0, art: 0,
-    text: 'In 1917, a plain urinal was entered as art. No carving, no painting — just a choice.',
+    text: 'In 1917, a plain urinal was entered as art. No carving, no painting, just a choice.',
     dur: 2.8,
   },
   {
@@ -40,13 +40,13 @@ export const BEATS: Aes4Beat[] = [
   },
   {
     a: 167, v: 10, test: 2,
-    text: 'For ages there were two answers. Plato’s: art copies the world skilfully, and the Greek word for that is mimesis.',
+    text: 'For ages there were two answers. Plato said art copies the world skilfully, and the Greek word for that is mimesis.',
     cite: 'Two old answers',
     dur: 2.6,
   },
   {
     a: 167, v: 10, test: 2,
-    text: 'Tolstoy’s: art puts a feeling into a form somebody else can pick up. Both assume a person made it.',
+    text: 'Tolstoy said art puts a feeling into a form somebody else can pick up. Both assume a person made it.',
     dur: 2.4,
   },
   {
@@ -57,7 +57,7 @@ export const BEATS: Aes4Beat[] = [
   },
   {
     a: 36, v: 15, test: 2, signed: 1,
-    text: 'The committee hid the piece. An unsigned defence replied that the maker did not matter.',
+    text: 'The committee hid the piece. An unsigned defence replied that the maker didn’t matter.',
     dur: 1.9,
   },
   {
@@ -85,7 +85,7 @@ export const BEATS: Aes4Beat[] = [
   },
   {
     a: 400, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
-    text: 'Asking "but is that art? is already philosophy, because it makes you say what you secretly think art is.',
+    text: 'Asking “but is that art?” is already philosophy. It makes you say what you secretly think art is.',
     dur: 2.6,
   },
   {
@@ -96,7 +96,7 @@ export const BEATS: Aes4Beat[] = [
         { text: 'The artworld confers the status', correct: true },
         { text: 'Something in the object', correct: false },
       ],
-      explain: 'George Dickie’s answer is the room. Galleries, critics and a tradition hand the object its status, and the object contributes nothing. A chosen urinal becomes art, and an identical one in a shop stays plumbing.',
+      explain: 'George Dickie’s answer is the room. Galleries, critics and a tradition hand the object its status, and the object adds nothing. A chosen urinal becomes art, and an identical one in a shop stays plumbing.',
       xp: 5,
     },
     dur: 1.0,
@@ -113,7 +113,7 @@ export const BEATS: Aes4Beat[] = [
           { id: 'world', label: 'the art world', reads: 'the art world taking it up', correct: true },
         ],
       },
-      explain: 'The art world. "saying so" is the anything goes reading and it is not what Dickie or Danto said. It took theory, history and an artworld for the choice to register at all — which is why the identical urinal in a plumbing shop stayed plumbing.',
+      explain: 'The art world. The “saying so” bin is the anything-goes reading, and it isn’t what Dickie or Danto said. It took theory, history and an artworld for the choice to register at all. That’s why the identical urinal in a plumbing shop stayed plumbing.',
       xp: 5,
     },
     dur: 1.0,

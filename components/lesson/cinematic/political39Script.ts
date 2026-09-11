@@ -56,7 +56,7 @@ export const BEATS: Political39Beat[] = [
   },
   {
     p: 159, x: 52, tally: 1, law: 1, reasons: 1,
-    text: 'Power makes you comply. Authority gives you a reason you would still hold with nobody watching.',
+    text: 'Power makes you comply. Authority gives you a reason you’d still hold with nobody watching.',
     dur: 4.0,
   },
   {
@@ -92,7 +92,7 @@ export const BEATS: Political39Beat[] = [
           { id: 'rise', profile: [0.2, 0.45, 0.72, 0.95], reads: 'more duty the worse the law, held by nobody' },
         ],
       },
-      explain: 'It holds a long way and then gives out. A flat line makes every atrocity binding on the people it is done to. A floor of nothing makes losing an election optional. Where the cliff sits is the whole disagreement, and almost nobody puts it at either end.',
+      explain: 'It holds a long way and then gives out. A flat line makes every atrocity binding on the people it’s done to. A floor of nothing makes losing an election optional. Where the cliff sits is the whole disagreement, and almost nobody puts it at either end.',
       xp: 5,
     },
     dur: 1.0,
@@ -106,7 +106,7 @@ export const BEATS: Political39Beat[] = [
         'Being outnumbered is not one of them',
         'The duty holds a long way and then gives out',
       ],
-      closing: 'The question is never whether there is a limit. The question is where you put the limit, and whether it holds when your own side is the sixty.',
+      closing: 'The question is never whether there’s a limit. The question is where you put the limit, and whether it holds when your own side is the sixty.',
     },
     dur: 3.6,
   },

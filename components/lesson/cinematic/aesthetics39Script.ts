@@ -44,7 +44,7 @@ export const BEATS: Aesthetics39Beat[] = [
   },
   {
     p: 36, x: 52, routes: 1, steps: 1, works: 1,
-    text: 'And here is what came out of each one.',
+    text: 'And here’s what came out of each one.',
     dur: 2.6,
   },
   {
@@ -58,12 +58,12 @@ export const BEATS: Aesthetics39Beat[] = [
   },
   {
     p: 159, x: 52, routes: 1, steps: 1, works: 1,
-    text: 'That is the craft theory of art. The line is drawn in the making, and never in the thing that comes out.',
+    text: 'That’s Collingwood’s line between art and craft. It’s drawn in the making, never in the thing that comes out.',
     dur: 4.6,
   },
   {
     p: 383, x: 98, routes: 1, steps: 1, works: 1,
-    text: 'Immanuel Kant had drawn it two centuries earlier, and put the difference in one word: freedom.',
+    text: 'Immanuel Kant had drawn it a century and a half earlier, and put the difference in one word: freedom.',
     dur: 4.2,
   },
   {
@@ -91,7 +91,7 @@ export const BEATS: Aesthetics39Beat[] = [
           { id: 'both', label: 'both', reads: 'planned, and then found by the people who built it', correct: true },
         ],
       },
-      explain: 'Both, and the fourth route says why. There was a drawing, and there were three hundred years of masons who never met the man who drew it. Most real making is like this, which is not a failure of the distinction but a reason to ask about particular things.',
+      explain: 'Both, and the fourth route says why. There was a drawing, and there were three hundred years of masons who never met the man who drew it. Most real making is like this. That’s not a failure of the distinction but a reason to ask about particular things.',
       xp: 5,
     },
     dur: 1.0,
@@ -105,7 +105,7 @@ export const BEATS: Aesthetics39Beat[] = [
         'The difference is in the making, not the object',
         'Commissioned masterpieces are the standing objection',
       ],
-      closing: 'Most real making is a bit of both, and that is not a failure of the distinction. It is what makes asking about a particular thing worth doing.',
+      closing: 'Most real making is a bit of both, and that’s not a failure of the distinction. It’s what makes asking about a particular thing worth doing.',
     },
     dur: 3.4,
   },

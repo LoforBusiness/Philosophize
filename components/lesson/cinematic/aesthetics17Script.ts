@@ -38,7 +38,7 @@ export const BEATS: Aes17Beat[] = [
   {
     g: 383, x: 160, shape: 1, fear: 0.86, frame: 1,
     dur: 4.6,
-    text: 'Nothing has been turned down. The meter does not care that this sound arrived inside a frame.',
+    text: 'Nothing has been turned down. The meter doesn’t care that this sound arrived inside a frame.',
     cite: 'The fear is the same fear',
   },
   {
@@ -70,7 +70,7 @@ export const BEATS: Aes17Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'The frame left two of these exactly as they were. Tap the one it changed.',
-      explain: 'What happens next. The shape is the same shape. The meter has not moved. So "it is not really frightening" was never available. The frame takes away the consequence. A terror with nothing following it turns out to be something people queue for.',
+      explain: 'What happens next. The shape is the same shape. The meter hasn’t moved. So “it’s not really frightening” was never available. The frame takes away the consequence. A terror with nothing following it turns out to be something people queue for.',
       xp: 5,
     },
   },
@@ -87,7 +87,7 @@ export const BEATS: Aes17Beat[] = [
           { id: 'real', label: 'the fear is real', reads: 'the fear is real, with the consequences taken out', correct: true },
         ],
       },
-      explain: 'The fear is real. The first two are a pair of doors you are invited to pick between, and there is a third. The fear is genuine and something has been removed from it — which is what every serious answer to this puzzle has in common.',
+      explain: 'The fear is real. “The fear is fake” and “the fun is fake” look like the only two doors, and there’s a third. The fear is genuine, and something has been removed from it. That’s what every serious answer to this puzzle has in common.',
       xp: 5,
     },
   },

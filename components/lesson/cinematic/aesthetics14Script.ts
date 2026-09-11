@@ -33,7 +33,7 @@ export const BEATS: Aes14Beat[] = [
   {
     g: 462, board: 1, level: 1,
     dur: 1.8,
-    text: 'There is nothing wrong with this wine.',
+    text: 'There’s nothing wrong with this wine.',
   },
   {
     g: 465, board: 3, level: 1,
@@ -44,7 +44,7 @@ export const BEATS: Aes14Beat[] = [
   {
     g: 465, board: 3, level: 1,
     dur: 3,
-    text: 'The other just finds it too sweet, which is not the same kind of complaint at all.',
+    text: 'The other just finds it too sweet, which isn’t the same kind of complaint at all.',
   },
   {
     g: 13, board: 3, level: 1,
@@ -55,7 +55,7 @@ export const BEATS: Aes14Beat[] = [
   {
     g: 13, board: 3, level: 1,
     dur: 2.9,
-    text: 'Hume simply will not go on to say that every verdict is therefore as good as the next.',
+    text: 'Hume refuses to go on and say that every verdict is therefore as good as the next.',
   },
   {
     g: 139, board: 3, level: 1,
@@ -81,7 +81,7 @@ export const BEATS: Aes14Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap the verdict the key settles.',
-      explain: 'The iron. One palate found metal that a whole room missed, and the thong is where the leather came from. The sweetness card cannot be settled by anything at the bottom: it reports the taster, not the cask. That is why Hume does not count it.',
+      explain: 'The iron. One palate found metal that a whole room missed. The sweetness card can’t be settled by anything at the bottom: it reports the taster, not the cask. That’s why Hume doesn’t count it.',
       xp: 5,
     },
   },
@@ -100,7 +100,7 @@ export const BEATS: Aes14Beat[] = [
           { id: 'fixed', upto: 1, reads: 'one verdict is simply correct' },
         ],
       },
-      explain: 'The other card slides from "tastes differ" to "so all tastes are equal", and that one step is doing all the work. Hume grants the first sentence and denies the second. A whole room found nothing in that cask.',
+      explain: 'The “every verdict equal” end slides from “tastes differ” to “so all tastes are equal”. That one step is doing all the work. Hume grants the first sentence and denies the second. A whole room found nothing in that cask.',
       xp: 5,
     },
   },

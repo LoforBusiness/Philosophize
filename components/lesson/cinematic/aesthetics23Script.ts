@@ -59,7 +59,7 @@ export const BEATS: Aes23Beat[] = [
     p: 165, x: 132, stave: 1, plates: 1, point: 1, aim: 1, live: 1,
     interact: {
       prompt: 'Tap where a fugue with no title points.',
-      explain: 'At nothing outside itself. A mood is the tempting answer and the fugue may well have one, but having a mood is not pointing at anything. Strip the title off the birdsong piece and you have lively trills.',
+      explain: 'At nothing outside itself. A mood is the tempting answer, and the fugue may well have one. But having a mood is not pointing at anything. Strip the title off the birdsong piece and you get lively trills.',
       xp: 5,
     },
     dur: 1.0,
@@ -90,7 +90,7 @@ export const BEATS: Aes23Beat[] = [
   },
   {
     p: 399, x: 268, stave: 1, plates: 1, point: 1, aim: 2,
-    text: 'That is the grand objection. Music points at nothing you can see because it copies the wanting underneath everything.',
+    text: 'That’s the grand objection. Music points at nothing you can see because it copies the wanting underneath everything.',
     dur: 4.6,
   },
   {
@@ -105,7 +105,7 @@ export const BEATS: Aes23Beat[] = [
           { id: 'objects', label: 'names things', reads: 'names things the way words do' },
         ],
       },
-      explain: 'Mood, no object, and it is two jobs rather than one. A slow line sounds sorrowful without being about anything. Naming an object takes a title, and once you notice that, the title is doing the pointing.',
+      explain: 'Mood, no object, and it’s two jobs rather than one. A slow line sounds sorrowful without being about anything. Naming an object takes a title, and once you notice that, the title is doing the pointing.',
       xp: 5,
     },
     dur: 1.0,

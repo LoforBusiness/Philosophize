@@ -39,14 +39,14 @@ export const BEATS: MetaBeat[] = [
   {
     hpose: 2,
     rule: true,
-    text: 'Leibniz said nothing is ever just true for no reason. Point that at everything at once.',
+    text: 'Leibniz said nothing is ever just true for no reason. Point that rule at everything at once.',
     cite: 'Leibniz, Principles of Nature and Grace §7',
     dur: 2.3,
   },
   {
     hpose: 2,
     rule: true,
-    text: 'Why this crowded universe rather than an empty one? Nothing would have been simpler, he said, and easier.',
+    text: 'Why this crowded universe rather than an empty one? He said nothing would have been simpler and easier.',
     dur: 2.5,
   },
   {
@@ -66,14 +66,14 @@ export const BEATS: MetaBeat[] = [
   {
     hpose: 1,
     erase: 0.86,
-    text: 'Try to reach it. Parmenides did.',
+    text: 'Try to reach nothing. Parmenides tried.',
     cite: 'Parmenides, On Nature, early 5th c. BCE',
     dur: 1.8,
   },
   {
     hpose: 1,
     erase: 0.86,
-    text: 'Strip away objects, space, time, physics — and a dark empty void is still something. You cannot even think about what is not, because thinking about it makes it a thing.',
+    text: 'Strip away objects, space, time and physics, and a dark void is still something. You can’t think about what is not without making it a thing.',
     dur: 4.2,
   },
   {
@@ -98,7 +98,7 @@ export const BEATS: MetaBeat[] = [
         { text: 'It presumes things exist', correct: true },
         { text: 'The Big Bang settled it', correct: false },
       ],
-      explain: 'Science explains each state by a prior state and the laws. It presupposes there are laws and states at all — so it never reaches why there is anything to begin with.',
+      explain: 'Science explains each state by a prior state and the laws. It presupposes that there are laws and states at all. So it never reaches why there’s anything to begin with.',
       xp: 5,
     },
     dur: 1.0,

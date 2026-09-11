@@ -52,7 +52,7 @@ export const BEATS: Strong4Beat[] = [
   },
   {
     p: 6, fill: 1, lock: 1, dice: 0, verdict: 2, lens: 1,
-    text: '"All men are mortal; Socrates is a man; so he is mortal. Grant the first two and the third cannot be false.',
+    text: 'Take “all men are mortal, Socrates is a man, so he’s mortal”. Grant the first two and the third can’t be false.',
     cite: 'Deduction — guaranteed',
     dur: 3.4,
   },
@@ -63,7 +63,7 @@ export const BEATS: Strong4Beat[] = [
   },
   {
     p: 173, fill: 0.78, lock: 0, dice: 1, verdict: 1, lens: 2,
-    text: '"Most Greeks eat olives; Socrates is Greek; so he eats olives. Only probable — he might hate them.',
+    text: 'Now take “most Greeks eat olives, Socrates is Greek, so he eats olives”. He might hate them, so the conclusion is only probable.',
     cite: 'Induction — likely',
     dur: 3.1,
   },
@@ -92,7 +92,7 @@ export const BEATS: Strong4Beat[] = [
     interact: {
       prompt: 'These premises make the conclusion likely, not certain. Tap the verdict that fits.',
       explain:
-        'Strong, not valid. Validity is the deductive ruler and it does not apply here. A strong argument that also has true premises has its own name: cogent.',
+        'Strong, not valid. Validity is the deductive ruler and it doesn’t apply here. A strong argument that also has true premises has its own name: cogent.',
       xp: 5,
     },
     dur: 1.0,

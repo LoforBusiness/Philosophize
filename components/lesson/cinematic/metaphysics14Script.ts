@@ -80,7 +80,7 @@ export const BEATS: Met14Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Two of these hold in every world. Tap the one nobody could know without looking.',
-      explain: 'Water is H₂O. Once you know what water actually is, there is no world where it is something else — but no amount of thinking about the word gets you to the chemistry. The triangle is the trap: also a full row, and settled entirely by what the word means.',
+      explain: 'Water is H₂O. Once you know what water is made of, there’s no world where it’s something else. But no amount of thinking about the word gets you to the chemistry. The triangle is the trap. It’s also a full row, but it’s settled by what the word means alone.',
       xp: 5,
     },
   },
@@ -97,7 +97,7 @@ export const BEATS: Met14Beat[] = [
           { id: 'open', reads: 'doubtable, and it could have gone otherwise' },
         ],
       },
-      explain: 'Doubted for centuries, and true in every world. Two different things are being measured: one is the world, the other is the knower. Water was H2O in every world while people doubted it for centuries, and plenty of things nobody doubts could easily have gone another way.',
+      explain: 'Doubted for centuries, and true in every world. Two different things are being measured: one is the world, the other is the knower. Water was H₂O in every world while people doubted it for centuries. And plenty of things nobody doubts could easily have gone another way.',
       xp: 5,
     },
   },

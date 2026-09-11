@@ -33,7 +33,7 @@ export interface Aesthetics38Beat extends BaseBeat {
 export const BEATS: Aesthetics38Beat[] = [
   {
     p: 172, x: 52, chart: 1,
-    text: 'You have seen this one. You know he gets out of the building.',
+    text: 'You’ve seen this one. You know he gets out of the building.',
     dur: 3.4,
   },
   {
@@ -88,7 +88,7 @@ export const BEATS: Aesthetics38Beat[] = [
           { id: 'forget', reads: 'you genuinely forget the ending each time' },
         ],
       },
-      explain: 'Something at stake, held in front of you moment by moment. Forgetting fails a simple test: recite the ending during the scene and the feeling is still there. Setting knowledge aside is closer, and it still owes an account of what is left to be tense about.',
+      explain: 'Something at stake, held in front of you moment by moment. Forgetting fails a simple test: recite the ending during the scene and the feeling is still there. Setting knowledge aside is closer, and it still owes an account of what’s left to be tense about.',
       xp: 5,
     },
     dur: 1.0,
@@ -102,7 +102,7 @@ export const BEATS: Aesthetics38Beat[] = [
         'So the theory of suspense is what gives way',
         'Stakes and attention do the work doubt was credited with',
       ],
-      closing: 'It explains why a story you love holds up on a fifth reading, and why a spoiler costs less than people fear. What you lose is surprise, and surprise was never the same thing.',
+      closing: 'That’s why a story you love holds up on a fifth reading, and a spoiler costs less than people fear. What you lose is surprise, and surprise was never the same thing.',
     },
     dur: 3.6,
   },

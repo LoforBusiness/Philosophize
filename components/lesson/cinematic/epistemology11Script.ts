@@ -34,7 +34,7 @@ export interface Epistemology11Beat extends BaseBeat {
 export const BEATS: Epistemology11Beat[] = [
   {
     p: 164, x: 80, real: 180, link: 1,
-    text: 'You glance up at the hallway clock. Three o’clock — and it really is three o’clock.',
+    text: 'You glance up at the hallway clock. Three o’clock, and it really is three o’clock.',
     dur: 2.4,
   },
   {
@@ -44,13 +44,13 @@ export const BEATS: Epistemology11Beat[] = [
   },
   {
     p: 465, x: 154, real: 195,
-    text: 'You step across for a second look. The other dial has moved on; the hallway clock has not.',
+    text: 'You step across for a second look. The other dial has moved on, but the hallway clock hasn’t.',
     cite: 'The stopped clock',
     dur: 3.2,
   },
   {
     p: 465, x: 154, real: 195,
-    text: 'It stopped twelve hours ago, at exactly three.',
+    text: 'It stopped twelve hours ago, at three.',
     dur: 1.8,
   },
   {
@@ -89,7 +89,7 @@ export const BEATS: Epistemology11Beat[] = [
   },
   {
     p: 5, x: 226, real: 300,
-    text: 'Nothing ever joined your reason to the fact — the match was an accident.',
+    text: 'Nothing ever joined your reason to the fact. The match was an accident.',
     dur: 2.4,
   },
   {
@@ -105,7 +105,7 @@ export const BEATS: Epistemology11Beat[] = [
           { id: 'none', label: 'none of them', reads: 'none of them, all three are met', correct: true },
         ],
       },
-      explain: 'None of them, and that is the whole of Gettier. A broken clock feels like a broken condition and it is not. You believed it, it was true, and a clock on a wall is an ordinary reason to trust. All three met, and still not knowledge.',
+      explain: 'None of them, and that’s the whole of Gettier. A broken clock feels like a broken condition, and it isn’t. You believed it, it was true, and a clock on a wall is an ordinary reason to trust. All three met, and still not knowledge.',
       xp: 5,
     },
     dur: 1.0,
@@ -114,7 +114,7 @@ export const BEATS: Epistemology11Beat[] = [
     p: 177, x: 226, real: 410, pick: 1,
     interact: {
       prompt: 'The hallway clock read three o’clock all day. Tap the one moment when that reading was actually true.',
-      explain: 'The trap: a stopped clock is not always wrong — it is right for an instant, twice a day. At three it matched the world by accident. Your reason never touched the fact, so being right was luck rather than knowledge.',
+      explain: 'The trap: a stopped clock isn’t always wrong — it’s right for an instant, twice a day. At three it matched the world by accident. Your reason never touched the fact, so being right was luck rather than knowledge.',
       xp: 5,
     },
     dur: 1.0,

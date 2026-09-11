@@ -26,7 +26,7 @@ export interface Meta6Beat extends BaseBeat {
 export const BEATS: Meta6Beat[] = [
   {
     p: 443, swap: 0, two: 0, orig: 1,
-    text: 'Swap every plank of a ship, one at a time. When none of the first wood is left — is it the same ship, or a new one?',
+    text: 'Swap every plank of a ship, one at a time. When no original wood is left, is it the same ship or a new one?',
     dur: 3.6,
   },
   {
@@ -55,7 +55,7 @@ export const BEATS: Meta6Beat[] = [
   },
   {
     p: 459, swap: 1, orig: 0,
-    text: 'Philosophers split the word "same" in two. Qualitative sameness is sharing every feature, like two new coins.',
+    text: 'Philosophers split the word “same” in two. Qualitative sameness is sharing every feature, like two new coins.',
     cite: 'Two senses of sameness',
     dur: 2.5,
   },
@@ -66,7 +66,7 @@ export const BEATS: Meta6Beat[] = [
   },
   {
     p: 22, swap: 1, orig: 0, you: 1,
-    text: 'And you are the living proof. Almost every cell in your body has been replaced since childhood — the toddler in old photos shares barely any matter with you.',
+    text: 'You’re the living proof. Almost every cell in your body has been replaced since you were the toddler in your old photos.',
     cite: 'Your own riddle',
     dur: 4.1,
   },
@@ -83,7 +83,7 @@ export const BEATS: Meta6Beat[] = [
         { text: 'Every part can change', correct: true },
         { text: 'Wooden ships rot quickly', correct: false },
       ],
-      explain: 'If a thing keeps its identity after every part is replaced, identity cannot rest on the parts alone — which is exactly what makes the case so puzzling.',
+      explain: 'If a thing keeps its identity after every part is replaced, identity can’t rest on the parts alone. That’s what makes the case so puzzling.',
       xp: 5,
     },
     dur: 1.0,
@@ -101,7 +101,7 @@ export const BEATS: Meta6Beat[] = [
           { id: 'use', upto: 1, reads: 'the one still sailing, never stopped' },
         ],
       },
-      explain: 'The seam belongs in the middle. Each ship holds one half of what anyone means by the same ship: one keeps the wood, the other keeps the unbroken use. Push it to either end and you have not found the answer, you have chosen which test counts.',
+      explain: 'The seam belongs in the middle. Each ship holds half of what anyone means by “the same ship”. One keeps the wood, the other keeps the unbroken use. Push the seam to either end and you haven’t found the answer. You’ve chosen which test counts.',
       xp: 5,
     },
     dur: 1.0,

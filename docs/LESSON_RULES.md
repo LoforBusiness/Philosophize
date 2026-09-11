@@ -1248,34 +1248,64 @@ example ≤ 80 · question prompt ≤ 25 · reinforcement ≤ 50 · summary poin
 dilemma scenario ≤ 80 · quote ≈ 28. A beat that needs more words needs to be two
 beats.
 
-**F44b. `text` is read aloud — write it for the ear as well as the eye.** `beat.text`
-is the one string the narrator speaks (`cite`, `quote.text` and question prompts are
-deliberately never spoken), so it is prose with two audiences at once. The corpus is
-already in good shape — median sentence **10 words**, only one of 1,409 over 32 — and
-the aim is to keep it there. What actually breaks aloud:
+**F44b. `text` is written to be spoken, word for word, and the screen follows the
+voice.** Every narration beat will be read aloud by Google's Chirp 3 HD voice
+(Algieba, British English), on by default and mutable, with each word appearing on
+screen as the voice reaches it — decided 11 Sep 2026, with the audio pipeline still
+being built.
+`cite`, `quote.text`, prompts and their choices are never spoken — reading a
+question's options aloud gives the trap away by intonation. So `text` is written for
+the ear first and is exactly what the voice says. **Group AC is the rule set** and
+`npm run check:ear` holds it; the short form is whole sentences a beat with their
+quotes closed inside it, no capitals for emphasis, contractions by default, numbers
+and symbols as they are said, a pause is a full stop, and at most 30 words a beat.
 
-- **CAPITALS for emphasis are the dangerous one.** The lessons set the load-bearing
-  word in caps — "an argument is VALID", "the claim is TRUE. You BELIEVE it." An audit
-  found ~25 of them, and engines commonly read an all-caps token as an initialism and
-  spell it out, so the most important word in the sentence is the one most likely to
-  arrive as "V, A, L, I, D". `forSpeech` now lowercases them **for the voice only** —
-  caps buy nothing spoken, since TTS has no emphasis to render — so the display keeps
-  its emphasis. Two-letter caps are ambiguous (`IS` is a word, `AB` is a line segment)
-  and are decided by a list; if you write a new two-letter initialism, add it there.
-- **Punctuation is the only pacing control there is.** There is no emotion parameter.
-  An engine pauses at a comma, a full stop and a semicolon; it swallows an ellipsis
-  and is inconsistent about a colon. `forSpeech` converts em dashes and ellipses to
-  the pause they were drawing; anything else you want heard as a beat should be a
-  comma or a full stop in the first place.
-- **A quotation mark is silent.** 51 lines put a phrase in quotes; the voice reads
-  straight through. If the quotation matters, the sentence has to say so in words.
-- **Keep a sentence inside one breath.** Under 25 words. Long is not wrong on the
-  page and is hard to follow read aloud, where the listener cannot go back.
+> This rule used to describe a `forSpeech` function that rewrote the display string
+> for the voice — lowercasing capitals, turning dashes and ellipses into commas. It
+> was deleted on 4 Aug 2026 along with the device voice it served, and its claims
+> about what "an engine" does were about the phone's built-in TTS. With a reveal
+> synced to the voice, the display and the speech must be the same string, so the
+> fixes are made in the words.
 
-Do **not** rewrite prose purely for the voice at the cost of the picture: A1 still
-wins, and the scene is built around the words. Where display and speech genuinely
-want different strings, fix it in `forSpeech` (it is shared) rather than bending the
-line.
+Do **not** rewrite prose for the voice at the cost of the picture: A1 still wins, and
+the scene is built around the words.
+
+**F46. Open on a situation the reader can half-answer, not on a name or a
+definition.** Sandel opens *Justice* with a runaway trolley and a show of hands before
+any theory; Nagel wrote for "people who don't know the first thing about the subject"
+by starting from the problem rather than its history. A gap the reader can feel the
+edges of is what makes the next beat wanted (Loewenstein 1994).
+
+**F47. Idea first, term second, and the term only if the lesson needs it.** A
+definition does not cure jargon: technical terms hurt understanding *even when
+defined* (Bullock et al. 2019). J7's "a term arrives alone, glossed" is the floor;
+this is the order.
+
+**F48. Give the other side at its strongest, in its own beat.** Dennett's rule for
+criticism is to restate a view "so clearly, vividly, and fairly that your target says,
+'Thanks, I wish I'd thought of putting it that way'"; Adamson teaches each system
+"from the inside". In beats, the best version gets a beat and the reply gets the next —
+never both at once.
+
+**F49. A thinker arrives with the question they chased.** Stephen West describes a
+philosopher as "a collection of assumptions, and a set of questions that they thought
+were worth answering during their time." A detail from their life earns a beat only if
+it explains the idea: interesting-but-irrelevant detail lowers learning (g −0.33,
+Sundararajan & Adesope 2020), and more so when it stays on screen.
+
+**F50. Separate the settled from the open.** Grade what is settled — a bad inference.
+On a live question, show who held what (the `poll` control exists for exactly this),
+and never blur it into "it depends" (AD3). A ninety-second lesson with a graded
+question and a summary cannot end unresolved; only what it never claimed to settle may
+stay open.
+
+**F51. Simplify the sentence, never the problem.** Wireless Philosophy cuts the
+terminology and keeps the difficulty; de Botton calls it being "not afraid of
+simplicity". Groups J, AC and AD are all about the sentence, and none of them licenses
+a shallower claim.
+
+F46–F51 are judgement, like J5 and group M: a checker cannot tell whether an opening
+starts something (V6 records three metrics deleted for trying).
 
 **F45. Never cross-reference a lesson by number.** "As we saw in Lesson 4" breaks
 silently the moment anything is reordered and `tsc` will never tell you. Write
@@ -1745,9 +1775,11 @@ The median is 11 and the app rarely reaches 20 on its own. When it does, a dash 
 almost always joining two things that should have been two sentences. The fix is a
 full stop, not a rewrite. `check-words` counts them.
 
-**J2 — a beat of narration stays under 45 words.**
-The median is 22 and the longest honest beat is 44, so this only bites on something
-genuinely overstuffed. A beat is one thing said once, not a paragraph.
+**J2 — a beat of narration stays under 30 words.**
+It was 45 while the paragraph was only read: the median was 22 then and is 16 now,
+after J12 cut the packed beats. The narration is written to be spoken, and at about
+155 words a minute 30 words is twelve seconds of a reader waiting on the voice (AC8). A beat is
+one thing said once, not a paragraph.
 
 **J3 — an explanation after an answer stays under 50 words.**
 It is the longest thing anyone reads (median 34) and it lands at the moment attention
@@ -1795,7 +1827,10 @@ in China" and its kind.
 **J7 — a term arrives alone, and the sentence around it says what it means.**
 Not countable; judgement, like J5. One new word per beat, after the thing it names has
 been shown. *"India's word is dharma: doing what your place in life actually asks of you"*
-works because the gloss is attached. Four Greek terms in one explanation does not.
+works because the gloss is attached. Four Greek terms in one explanation does not. The
+gloss is the floor, not the cure: technical terms hurt understanding even when they are
+defined (Bullock et al. 2019), so the idea comes first and the term second, and only
+if the lesson needs the term at all (F47).
 
 **And check what the stage already says.** `metaphysics5` draws the label
 **EVERY FACT NEEDS A REASON** on screen, and the narration was saying "his Principle of
@@ -1823,7 +1858,8 @@ nothing could: a stale letter still typechecks and still renders. Say *which car
 The one rule here that cannot be counted, and the one the others serve. Name a concrete
 thing before the abstract term for it. Prefer the short word where it means the same.
 If a sentence would sound strange said out loud to a friend, it is wrong on the page
-too. The countable rules above exist because this one is a matter of judgement and
+too — and it will be said out loud, by a voice that never stumbles to warn you that it
+is wrong (AC11). The countable rules above exist because this one is a matter of judgement and
 judgement drifts; they are the floor, not the standard.
 
 **A `quote` block is exempt from all of it.** That is what it is for: a primary source,
@@ -2530,7 +2566,10 @@ the reader, rewrite it.
 Passive-aggression is implication. *"Philosophy has been working on why for three
 hundred years. No rush."* never calls anyone slow. Stating the insult outright is
 sarcasm, which is a different and much cheaper thing, and it dates badly on a second
-reading — which every reader who repeats a lesson will give it.
+reading — which every reader who repeats a lesson will give it. And because the
+narration will be spoken, the implication has to be carried by the WORDS: a synthetic
+voice has no eyebrow to raise, so a line that needs a knowing tone to land comes out
+flat, and a flat reading of a line written for a tone is worse than either (AC9).
 
 **M3 — the information survives the attitude.**
 Delete every dry aside and the beat must still teach exactly what it taught before.
@@ -4014,6 +4053,18 @@ to get wrong and impossible to see in the source:
 - [ ] **It reads plainly** (J10, J11): reading ease 60 or better, and under 12% of
       the words are `it · that · this · they · these · which`. Say the noun.
       `npm run check:plain`.
+- [ ] **It is written to be heard** (group AC): whole sentences a beat, with their
+      quotes closed inside it; no CAPITALS, no numerals but years, no symbols;
+      contractions unless the *not* is the point; a quoted phrase framed in words,
+      and the speaker named first; no semicolons, ellipses or parentheses, and at
+      most one dash; at most 30 words and two sentences a beat. `npm run check:ear`.
+- [ ] **It does not read as generated** (group AD): no ", highlighting…" tails, no
+      "serves as", no unnamed sources or staged complexity; an adverb only where it
+      changes the claim; a negation knocks down something somebody holds. Read
+      `node scripts/check-ear.mjs --list negation` for the half no pattern can judge.
+- [ ] **It teaches like a person** (F46–F51): it opens on a situation, the idea comes
+      before the term, the other side gets its strongest version in its own beat,
+      and a thinker arrives with the question they chased.
 - [ ] **Every label lands at 8pt or more** (D34) — `declared × fit`, where a tall
       band shrinks everything. `npm run check:legible`.
 - [ ] **Every `reads` string is lesson copy** (R2) and every wrong region is a
@@ -4184,11 +4235,20 @@ had no section for.
 **Run the shape check first — it costs a second and needs no browser.**
 
 ```
-npm run check          # tsc + fifty-four validators, this file's checker included
+npm run check          # tsc + fifty-five validators, this file's checker included
 npm run check:cinematic
 npm run check:tour     # group K, offline, against each lesson's own band
+npm run check:ear      # groups AC and AD — the narration is heard, and must not read as generated
 npm run check:rules    # THIS FILE, against the code it describes (U8)
 ```
+
+> **`check:ear` has a counter-test, and it failed once before it passed.** `node
+> scripts/countertest-ear.mjs` stages every defect the checker names in a throwaway
+> one-lesson corpus and watches the right rule count it — and stages the shapes that
+> must stay silent: a year, 350 BCE, "point A", "line AB", Hobbes's own quoted triad, a
+> two-fragment opener. Its first run caught the fragment rule defining a fragment as
+> two words, which could not see the catalogue's own example. Run it after touching
+> `scripts/lib/earrules.mjs`.
 
 > **`check:rules` is the one to run after editing this file, not before.** It holds
 > the things that go stale on their own — a rule id used twice, a command that is
@@ -6439,6 +6499,12 @@ cold open; the prose is the narrator over the top of it.
 So what transfers from AHT is the **voice** (V1), the **event** (V2), the
 **turn** (V3) and the **cut** (V4). The scene-painting is already the scene's.
 
+**And the same test applies to the voice that now reads the lessons.** Google's own
+scripting tips for Chirp 3 HD recommend disfluencies — "ums" — for authenticity.
+That exists for audio that has no screen. These words are on one, so a hesitation is
+a detail about nothing (AC10); the tips that DO transfer — write conversationally,
+contract, keep sentences short — are group AC.
+
 ## V6 · The corpus was measured before it was rewritten, and it was mostly right
 
 Two metrics were built to find un-AHT-like prose and **both were deleted for
@@ -7886,3 +7952,281 @@ renamed**: a costume id is a name a reader never sees and a table everything els
 is joined on. Giving all four a cane was the obvious repair and left six of ten
 carrying one, which is not a wardrobe, it is one prop with hats — so five carry the
 cane, three the monocle, and three are a hat on its own.
+
+---
+
+## Group AC — the paragraph is heard
+
+**Decided on 11 Sep 2026:** every lesson's narration will be spoken by Google's
+Chirp 3 HD voice — Algieba, British English — on by default and mutable, with **each
+word appearing on screen as the voice reaches it**. The audio pipeline is still being
+built; the rules apply now, because a lesson written today is the one that voice will
+read. That changes what a sentence is for.
+It is heard once, with no going back, at about 155 words a minute against the 238
+an adult reads silently; and every word the reader sees has to be a word the voice
+says, or the reveal and the voice come apart.
+
+The rules were researched before a line was changed, from three bodies of
+evidence that mostly agree: broadcast writing for the ear (NPR's training
+material, the BBC News Styleguide, Mervin Block), Google's own Chirp 3 HD
+documentation, and the multimedia-learning literature (Mayer; Adesope & Nesbit
+2012; Leahy & Sweller 2011). `npm run check:ear` holds the countable half, from
+`scripts/lib/earrules.mjs`, and `node scripts/countertest-ear.mjs` proves it can
+still fail.
+
+> **THIS WAS TRIED ONCE, WITH THE PHONE'S OWN VOICE, AND PULLED THE NEXT DAY.** On
+> 3 Aug 2026 `expo-speech` read the lessons aloud; on 4 Aug it was removed — *"a
+> flat reading of writing this deliberate was worse than silence."* That attempt
+> kept a second, speech-only copy of each line and fixed the text there. With a
+> reveal synced to the voice, a second copy is a second text to keep aligned word
+> for word, so every fix below is made in the words themselves.
+
+**Measured before it was written.** Across 1,718 narration beats: 15 quotation
+marks that never closed and 2 sentences cut across a tap (both left by the beat
+splitter — AC2), 26 words set in CAPITALS, 14 numerals that were not years, 21
+semicolons, 148 dashes, about 1,270 spelled-out forms across text, explanations and
+closings against **3** contractions, and 18 quoted phrases no listener would hear
+as quotations.
+
+### AC1 · Every word on screen is a word the voice says
+
+- **No CAPITALS for emphasis** — "an argument is VALID", "rain IS falling". Chirp 3
+  HD supports no `<emphasis>` at all, what it does with a capitalised word is
+  undocumented, and the August voice spelled them out letter by letter. Get the
+  stress from word order instead (AC3). Initialisms a person says as letters (BCE)
+  stay, and so does a segment named by its ends ("line AB").
+- **No numerals but years.** "In 1917" and "350 BCE" are read the way a person says
+  them. "38 tricks", "99%" and "2,400 years" are not reliably, and each shows a
+  token the voice does not say. Write the words.
+- **No symbols** — % & / + =.
+- **A letter used as a name gets its noun.** In "around A through B" a bare capital
+  A mid-sentence is read as the article. "Point A" is not. P, Q and N are fine
+  once introduced.
+
+All four are zeros in `check:ear`.
+
+### AC2 · A beat holds whole sentences, and its quotation marks close inside it
+
+Each beat becomes its own audio clip, and a clip ends on a sentence's final fall.
+So `Not "what do I do?` on one tap and `but "who am I becoming?` on the next is
+heard as two sentences, the second starting with "but".
+
+**The splitter did it.** `scripts/split-beats.mjs` cut sentences on
+`(?<=[.!?])["')\]]?\s+`, which puts the optional closing quote INSIDE the
+separator: every cut after `?"` deleted the quote mark, and a quoted question the
+sentence carried on past was cut in two. `scripts/check-words.mjs` counted with the
+same expression, so the check agreed with the damage. Both keep the closing mark in
+the lookbehind now and split only where a new sentence starts — which also made
+`check:words` count one more over-long beat it had been missing, because the old
+separator did not know the curly quote.
+
+A beat starting lowercase, a beat ending without a full stop, and an unbalanced
+quote are zeros.
+
+### AC3 · End the sentence on the word that carries it
+
+English puts its main stress on the last content word of a sentence, and a
+synthetic voice does exactly that and nothing else — there is no emphasis tag to
+reach for. "Kant thought lying was always wrong" stresses *wrong*. If *always* is
+the claim: "For Kant, lying was wrong every single time." Capitals were the eye's
+way of asking for this; the ear only has order.
+
+Not countable. AC1's capitals ban is its checkable half.
+
+### AC4 · Contract by default, and spell it out when the "not" is the point
+
+Google's own scripting guidance for Chirp 3 HD is to write conversationally and use
+contractions. The corpus had three. Spoken, "does not" puts weight on *not* — which
+is a tool, so it is spent only where the negation IS the claim ("A frame is not a
+part.") or where a contraction cannot go ("…what it is."). Everywhere else: isn't,
+doesn't, it's, that's, you're.
+
+It covers `explain` and `closing` too, though neither is spoken: a verdict in a
+different register from the paragraph above it reads as a second author.
+
+Use the curly apostrophe `’`. It needs no escaping inside a `'…'` string, and the
+maxim table compares characters literally (W5).
+
+`EXPANDED_BUDGET` holds what is left, and may only go down.
+
+### AC5 · Say it before you quote it
+
+Quotation marks are silent. *For two thousand years "all swans are white" was
+simply true* is, heard aloud, a sentence about swans that has lost its grammar. A
+quoted phrase needs a frame the ear can hear — "the claim that all swans are
+white", "the rule “keep any wallet you find”", "Descartes wrote…".
+
+And the frame comes FIRST. Broadcast style attributes before the words (NPR, the
+BBC Styleguide, Block), because a listener who hears a claim and then its owner has
+spent the claim believing it was the narrator's. Titles go before names — "the
+German philosopher Kant", never "Kant, a German philosopher," — because an
+appositive is a parenthesis nobody can hear.
+
+`UNFRAMED_BUDGET` holds the quotations the pattern cannot find a frame for.
+
+### AC6 · Nothing long before the subject
+
+A listener cannot hold a half-built sentence open. A short tag is free ("In
+1917,"); eight words of *If… / Although… / When…* before the main clause are not.
+Lead with the main clause, or split the sentence.
+
+A worklist rather than a gate — `node scripts/check-ear.mjs --list opener` —
+because the detector cannot tell a conditional that IS the lesson ("If it rains,
+the streets get wet") from one that is merely long.
+
+### AC7 · A pause is a full stop
+
+Google documents what Chirp 3 HD does with each mark, and that settles the
+questions the first round of advice got wrong:
+
+| mark | Chirp 3 HD, in Google's words | so |
+|---|---|---|
+| full stop | "a full stop and a longer pause" | this is the pause |
+| comma | "shorter pauses within sentences" | only where grammar puts one — a breath comma looks wrong on screen |
+| ellipsis | "a longer, more deliberate pause … trailing thoughts, hesitation" | never: a mood rather than a pause, and on screen it trails off |
+| hyphen or dash | "a brief pause or a sudden break in thought" | one a beat, for an interruption or a gloss that renames what came just before |
+
+Semicolons and parentheses are marks for the eye alone; nobody hears a bracket. A
+longer pause for the voice, where one is truly needed, is a `[pause]` tag in the
+render layer — never in a script.
+
+An ellipsis, a semicolon, a parenthesis and two dashes in one beat are zeros;
+`DASH_BUDGET` holds the rest.
+
+### AC8 · A spoken beat is short enough to wait for
+
+With the reveal following the voice, the reader waits on it. At about 155 words a minute a 30-word beat is
+twelve seconds, long spoken segments reverse the benefit of narration (Leahy &
+Sweller 2011), and the segmenting evidence J12 cites used one or two sentences a
+segment. So J2 is **30 words**, not 45 (`MAX_BEAT` in `scripts/check-words.mjs`),
+alongside J1's twenty a sentence and J12's two a beat.
+
+Trim; never split a beat to fit. A beat is a must-box, a tour station, a gaze
+target and a thought placement, and every one of those is indexed by it.
+
+### AC9 · The meaning survives a flat reading
+
+The voice cannot raise an eyebrow. Irony, a sarcastic "Sure.", a rhetorical
+question that only lands with a sneer — all flatten, and a flat reading of a line
+written for a knowing tone is worse than either. Group M's dry narrator survives
+only where the dryness is in what is SAID: an understatement that is literally
+true, a juxtaposition, a fact left standing. Read it in a monotone; if it stops
+being funny, it was a tone.
+
+Not countable.
+
+### AC10 · Nothing written for the voice alone
+
+Google's tips also recommend disfluencies — "ums" — for authenticity. **That does
+not transfer:** the words are on screen, and in a lesson a hesitation is a detail
+about nothing, which the seductive-details evidence prices at g −0.33
+(Sundararajan & Adesope 2020). Nor filler that performs speech ("you might be
+wondering", "think of it like"). Nor a name respelt for pronunciation —
+pronunciation belongs in the voice's own list (Chirp 3 HD takes IPA through
+`custom_pronunciations`), and the screen shows the real spelling.
+
+### AC11 · Listen to it before calling it done
+
+J5 said a sentence that sounds wrong said aloud is wrong on the page. It will
+literally be said aloud, by a voice that never stumbles to warn you: it stresses the
+wrong word, reads "read" in the wrong tense and a name in the wrong language, all in
+the same even tone. Until the audio exists, read every beat aloud in a flat voice.
+Once it exists, listen with eyes closed once and reading along once, and keep the
+words it got wrong for the pronunciation list.
+
+Not countable.
+
+### AC12 · What the first round of advice got wrong, recorded so it is not re-proposed
+
+Four suggestions sound right and were checked against the evidence first:
+
+- **"Be generous with commas."** Radio fixes a long sentence with a full stop.
+  Extra commas look like mistakes on screen, and the voice already pauses at the
+  ones grammar puts there.
+- **"An ellipsis is a soft pause."** Google documents it as hesitation (AC7).
+- **"Short, spaced sentences for atmosphere."** Pace is the voice's speaking rate,
+  not sentence length — and setting the scene in words is what V5 already rules
+  out, because these lessons have a picture.
+- **"Vary sentence length — human writing is bursty."** Burstiness is a detector's
+  term for how predictable text is, not sentence length, and GPTZero stopped
+  relying on it. The corpus already runs from two words to twenty (AD8).
+
+---
+
+## Group AD — it must not read as generated
+
+The lessons were drafted with a model's help, and a reader can tell when a sentence
+was written to sound like writing. The markers were **ranked by evidence rather than
+guessed**: a PNAS study of grammatical and rhetorical style (Reinhart et al., 2025),
+the excess-vocabulary studies (Kobak et al.; Liang et al.), and the practitioner
+catalogue *Wikipedia: Signs of AI writing*.
+
+**The corpus was measured against them first, and it was already clean on the
+strongest ones** — no ", highlighting…" tails, no "serves as", no stock phrases, one
+unnamed source. What it did carry is quieter and particular to it: 270 intensifier
+adverbs, "It isn't X. It's Y." corrections, and quoted phrases standing where a
+claim should. So most of this group is zeros that keep it clean, and `check:ear`
+holds them.
+
+### AD1 · Name the concrete thing
+
+No clause that ends by announcing its own significance (", highlighting…",
+", underscoring…", ", reflecting…") — the largest grammatical difference measured,
+two to five times the human rate. No "serves as" or "a testament to" where the word
+is *is*. None of the words the vocabulary studies measure: delve, tapestry,
+testament, underscore, pivotal, intricate, realm, foster, showcase, vibrant,
+interplay, multifaceted, crucial, nuanced, moreover, furthermore, additionally,
+notably. All zeros.
+
+### AD2 · A negation knocks down a claim somebody holds
+
+"It isn't X. It's Y." is the most-cited tell — when X is something nobody said.
+Philosophy runs on real distinctions ("knowledge is not just true belief" is the
+lesson), and a beginner's actual mistake is a real X. The test is whether you can
+name who holds it. If you cannot, say Y.
+
+A worklist: `node scripts/check-ear.mjs --list negation`.
+
+### AD3 · Name who holds a view
+
+"Some argue", "many philosophers think", "there are no easy answers", "it's
+complicated". **Hedging is not the tell** — models hedge *less* than people do
+(Jiang & Hyland; Herbold et al.), and "perhaps" is listed as a sign of a human
+writer. What rises is the unnamed source and the staged complexity. On a live
+question, name the positions and who held them: "Hume says no. Kant says yes."
+Zeros.
+
+### AD4 · Threes only when there are three
+
+Lists of three used for rhythm are the widest rhetorical difference measured. A
+three-part theory is three things. A worklist (`--list triads`), because a pattern
+cannot tell a list from a clause boundary — as a zero, its first run fired on
+Hobbes's own "nasty, brutish, and short".
+
+### AD5 · One attribution verb, and it is "says"
+
+Or argues, thinks, asks, writes. Not notes, observes, posits, contends or asserts.
+Cycling synonyms for one thinker is a tell, and in philosophy a swapped verb changes
+the claim: to *contend* is not to *observe*. A zero for "X notes that", "observes
+that", "posits", "contends", "asserts".
+
+### AD6 · An adverb stays only if deleting it changes the claim
+
+simply, exactly, actually, quietly, genuinely, plainly, really, truly, perfectly,
+literally, obviously, clearly. Heard aloud they are air. When one does change the
+claim, say what it means instead: *"Most people quietly use all three"* became
+*"Most people use all three without noticing."* `ADVERB_BUDGET` holds what is left.
+
+### AD7 · Don't cure one tell with another
+
+Every fix above has an overcorrection that is itself catalogued: stacked fragments
+("Openly. In a book. As a priest."), "Not X. Not Y. Just Z.", fake casualness
+("Here's the kicker", "Honestly?"), thesaurus swaps. **A two-fragment opener that
+introduces the picture is not one of them** — "Three people. One fence." opens
+`political8`, the lesson the reader holds up as the standard. Three fragments
+running, and the stock phrases, are zeros.
+
+### AD8 · Variety is what a beat does, not how long it is
+
+Vary what beats DO — a claim, an example, a question, a turn — not their word
+counts. AC12 records why sentence-length variety is not a target.

@@ -40,7 +40,7 @@ export const BEATS: Epi24Beat[] = [
   },
   {
     p: 2, x: 200, ladder: 1, sure: 1,
-    text: 'Beside each one, how sure you actually are of it. Not how clever it sounds.',
+    text: 'Beside each claim, a bar for how sure you are. Not how clever it sounds.',
     cite: 'Measured, not argued',
     dur: 3.7,
   },
@@ -58,7 +58,7 @@ export const BEATS: Epi24Beat[] = [
     p: 457, x: 132, ladder: 1, sure: 1, hand: 1, live: 1,
     interact: {
       prompt: 'Tap the rung or the hand you are surest of.',
-      explain: 'The hand, and almost nobody hesitates. That is the observation Moore is making. He is not saying the sceptic argued badly, he is pointing out which end of the argument you were more confident about before it started.',
+      explain: 'The hand, and almost nobody hesitates. That’s the point Moore is making. He’s not saying the sceptic argued badly. He’s pointing out which end of the argument you were more confident about before it started.',
       xp: 5,
     },
     dur: 1.0,
@@ -78,13 +78,13 @@ export const BEATS: Epi24Beat[] = [
   },
   {
     p: 380, x: 268, ladder: 1, sure: 1, hand: 1, give: 1,
-    text: 'An argument runs both ways. Doubt the conclusion harder than the premises, and it is the premises that have to move.',
+    text: 'An argument runs both ways. Doubt the conclusion harder than the premises, and it’s the premises that have to move.',
     cite: 'The Moorean shift',
     dur: 4.8,
   },
   {
     p: 168, x: 268, ladder: 1, sure: 1, hand: 1, give: 1,
-    text: 'The sceptic can answer that. He says the bar beside the hand is confidence, not knowledge, and that is exactly what is at issue.',
+    text: 'The sceptic can answer that. He says the bar beside the hand is confidence, not knowledge, and that difference is what’s in dispute.',
     dur: 4.8,
   },
   {
@@ -99,7 +99,7 @@ export const BEATS: Epi24Beat[] = [
           { id: 'accept', label: 'accept it', reads: 'you have to accept the conclusion' },
         ],
       },
-      explain: 'A premise has to go. Validity means true premises cannot give you a false conclusion, so a false conclusion out of a valid argument proves something went in that was not true. Which premise is a separate fight, and it is the one Moore leaves open.',
+      explain: 'A premise has to go. Validity means true premises can’t give you a false conclusion. So a valid argument with a false conclusion proves that something going in wasn’t true. Which premise is a separate fight, and it’s the one Moore leaves open.',
       xp: 5,
     },
     dur: 1.0,

@@ -51,14 +51,14 @@ export const BEATS: Pol22Beat[] = [
   },
   {
     p: 45, x: 132, switchOn: 1, tiles: 1, reach: 1, flip: 1,
-    text: 'If he ever felt like it, here is what happens, and there is nothing whatever she could do.',
+    text: 'If he ever felt like it, here’s what happens, and there’s nothing whatever she could do.',
     dur: 4.6,
   },
   {
     p: 165, x: 132, switchOn: 1, tiles: 1, reach: 1, live: 1,
     interact: {
       prompt: 'The lever is up. Tap what still makes her unfree.',
-      explain: 'His reach. Negative liberty only ever reads the lever, and the lever is up, so it reports her free. What she has to live with is not the flipping but the standing possibility, which is why she flatters him and stays watchful.',
+      explain: 'His reach. Negative liberty only ever reads the lever, and the lever is up, so it reports her free. What she has to live with isn’t the flipping but the standing possibility. That’s why she flatters him and stays watchful.',
       xp: 5,
     },
     dur: 1.0,
@@ -98,7 +98,7 @@ export const BEATS: Pol22Beat[] = [
           { id: 'free', reads: 'free on both counts at once' },
         ],
       },
-      explain: 'Undisturbed, and still not free. Non-interference on its own calls her free, and that is the reading being argued with. Notice the other odd case: a citizen taxed by a law they can vote on is interfered with and not dominated.',
+      explain: 'Undisturbed, and still not free. Non-interference on its own calls her free, and that’s the reading being argued with. The other odd case is a citizen taxed by a law they can challenge. That citizen is interfered with but not dominated.',
       xp: 5,
     },
     dur: 1.0,

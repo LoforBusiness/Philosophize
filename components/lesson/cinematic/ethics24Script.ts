@@ -32,7 +32,7 @@ export interface Eth24Beat extends BaseBeat {
 export const BEATS: Eth24Beat[] = [
   {
     p: 172, x: 200, slab: 1,
-    text: 'A sentence, and the four things people say it is for. In an ordinary case all four agree, so nobody has to choose.',
+    text: 'A sentence, and the four things people say it’s for. In an ordinary case all four agree, so nobody has to choose.',
     dur: 4.8,
   },
   {
@@ -48,20 +48,20 @@ export const BEATS: Eth24Beat[] = [
   },
   {
     p: 45, x: 132, slab: 1, names: 1, gone: 1,
-    text: 'Now a man of ninety, forty years after the crime, ill and plainly harmless. He will not reoffend and nobody is watching.',
+    text: 'Now a man of ninety, forty years after the crime, ill and harmless. He won’t reoffend, and nobody is watching.',
     cite: 'The test case',
     dur: 4.8,
   },
   {
     p: 383, x: 132, slab: 1, names: 1, gone: 1,
-    text: 'Three of the four pillars have nothing left to hold. The sentence has not stopped feeling right.',
+    text: 'Three of the four pillars have nothing left to hold. The sentence hasn’t stopped feeling right.',
     dur: 4.2,
   },
   {
     p: 467, x: 132, slab: 1, names: 1, gone: 1, live: 1,
     interact: {
       prompt: 'Tap the pillar still holding the slab up.',
-      explain: 'Desert. Nothing is prevented, nobody is deterred and there is no one to protect, so if the sentence still seems right the reason is backward-looking. That is retribution, and most people find they hold it whether or not they would say so.',
+      explain: 'Desert. Nobody needs reforming, nobody is deterred and there’s no one to protect. If the sentence still seems right, the reason is backward-looking. That’s retribution, and most people find they hold it whether or not they’d say so.',
       xp: 5,
     },
     dur: 1.0,
@@ -97,7 +97,7 @@ export const BEATS: Eth24Beat[] = [
           { id: 'neither', label: 'neither', reads: 'neither could allow it' },
         ],
       },
-      explain: 'Deterrence on its own. If the point of punishing is the effect on everybody else, an innocent man will serve as well as a guilty one when nobody knows. Desert forbids it outright, because he has nothing coming. That is why almost nobody holds either theory alone.',
+      explain: 'Deterrence on its own. It looks only at the effect on everybody else. If nobody knows, an innocent man has that effect as well as a guilty one. Desert forbids it outright, because he has nothing coming. That’s why almost nobody holds either theory alone.',
       xp: 5,
     },
     dur: 1.0,
@@ -111,7 +111,7 @@ export const BEATS: Eth24Beat[] = [
         'A harmless old offender removes every forward-looking reason',
         'Deterrence alone would permit punishing someone innocent',
       ],
-      closing: 'Three pillars gone and the sentence still stood. That is worth knowing about yourself.',
+      closing: 'Three pillars gone and the sentence still stood. That’s worth knowing about yourself.',
     },
     dur: 3.4,
   },

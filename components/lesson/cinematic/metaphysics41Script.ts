@@ -55,14 +55,14 @@ export const BEATS: Metaphysics41Beat[] = [
     p: 167, x: 28, bodies: 1, scale: 1, shift: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap the step Leibniz leans on here.',
-      explain: 'The missing reason. He holds that nothing happens without one, and a choice between two identical worlds has none to give — so there was never a choice. Being undetectable is weaker on its own: plenty of real things go undetected.',
+      explain: 'The missing reason. Leibniz holds that nothing happens without one, and a choice between two identical worlds has none to give. So there was never a choice. Being undetectable is weaker on its own: plenty of real things go undetected.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 324, x: 88, bodies: 1, scale: 1, shift: 1,
-    text: 'Look at the gaps. Every distance between every pair is exactly what it was.',
+    text: 'Look at the gaps. Every distance between every pair is unchanged.',
     dur: 4.4,
   },
   {
@@ -95,7 +95,7 @@ export const BEATS: Metaphysics41Beat[] = [
           { id: 'empty', label: 'an empty question', reads: 'words with nothing behind them either way' },
         ],
       },
-      explain: 'One world, twice. If space is the arrangement, then the arrangement came along and nothing stayed behind for it to have moved against. Calling the question empty gives up too early — the bucket shows there is something real to argue about.',
+      explain: 'One world, twice. If space is the arrangement, then the arrangement came along and nothing stayed behind for it to have moved against. Calling the question empty gives up too early. The bucket shows there’s something real to argue about.',
       xp: 5,
     },
     dur: 1.0,

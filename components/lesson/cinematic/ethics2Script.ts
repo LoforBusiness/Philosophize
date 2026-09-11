@@ -34,7 +34,7 @@ export const BEATS: Ethics2Beat[] = [
     // Nothing on this stage is labelled "Deontology", and the next three beats show
     // each lens by working the wallet through it. Naming all three first was a
     // vocabulary tax paid before any of them meant anything (J6).
-    text: 'Ethics hands you three lenses, not three religions. One asks what happens next.',
+    text: 'Ethics hands you three lenses. One asks what happens next.',
     cite: 'Three lenses',
     dur: 1.9,
   },
@@ -51,7 +51,7 @@ export const BEATS: Ethics2Beat[] = [
     // Nothing on this stage is labelled "Deontology", and the next three beats show
     // each lens by working the wallet through it. Naming all three first was a
     // vocabulary tax paid before any of them meant anything (J6).
-    text: 'Most people quietly use all three.',
+    text: 'Most people use all three without noticing.',
     dur: 1.8,
   },
   {
@@ -62,7 +62,7 @@ export const BEATS: Ethics2Beat[] = [
   },
   {
     p: 416, x: 262, g: 21, gx: 108, named: 1, lens: 1,
-    text: 'For him that is the whole question, and everybody’s happiness counts the same.',
+    text: 'For him that’s the whole question, and everybody’s happiness counts the same.',
     dur: 2.1,
   },
   {
@@ -80,24 +80,24 @@ export const BEATS: Ethics2Beat[] = [
   },
   {
     p: 14, x: 262, g: 6, gx: 108, named: 1, lens: 2,
-    text: 'Kant ignores the happy ending. Only act on a rule you could want everyone to follow.',
+    text: 'Kant ignores the happy ending. He says to act only on a rule you could want everyone to follow.',
     cite: 'Kant, Groundwork, 1785',
     dur: 2.3,
   },
   {
     p: 14, x: 262, g: 6, gx: 108, named: 1, lens: 2,
-    text: 'Try that with "keep wallets you find" and it eats itself, because nobody would hand anything in.',
+    text: 'Try Kant’s test on the rule “keep any wallet you find”. It eats itself, because nobody would hand one in.',
     dur: 2.5,
   },
   {
     p: 13, x: 262, g: 22, gx: 108, named: 1, lens: 3,
-    text: 'Aristotle asks a third question. Not "what do I do?',
+    text: 'Aristotle asks a third question. Not what to do, but who you’re becoming.',
     cite: 'Aristotle, Nicomachean Ethics',
     dur: 1.8,
   },
   {
     p: 13, x: 262, g: 22, gx: 108, named: 1, lens: 3,
-    text: 'but "who am I becoming? Every honest act makes the next one easier, and that is what he means by a good life.',
+    text: 'Every honest act makes the next one easier. That’s what he means by a good life.',
     dur: 3.3,
   },
   {
@@ -109,7 +109,7 @@ export const BEATS: Ethics2Beat[] = [
         { text: 'Which brings most happiness', correct: true },
         { text: 'Could everyone follow it', correct: false },
       ],
-      explain: '“Which brings most happiness.” That question weighs results and nothing else — whose life got better, whose got worse. The other card is Kant’s question, and it does not care how the story ends.',
+      explain: '“Which brings most happiness.” That question weighs results and nothing else — whose life got better, whose got worse. The other card is Kant’s question, and it doesn’t care how the story ends.',
       xp: 5,
     },
     dur: 1.0,
@@ -126,7 +126,7 @@ export const BEATS: Ethics2Beat[] = [
           { id: 'neither', label: 'neither does', reads: 'neither one settles whether it is right', correct: true },
         ],
       },
-      explain: 'Neither does. This is the gap Hume pointed at in 1739: a description of what people do never turns by itself into a claim about what they ought to do. Both of the other settings quietly cross it and hope nobody notices.',
+      explain: 'Neither does. Hume pointed at this gap in 1739. What people do never tells you, by itself, what they ought to do. The other two settings step over the gap and hope nobody notices.',
       xp: 5,
     },
     dur: 1.0,

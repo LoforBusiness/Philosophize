@@ -32,7 +32,7 @@ export const BEATS: Ethics23Beat[] = [
   },
   {
     p: 442, x: 168, gauges: 1, near: 1,
-    text: 'So the first gauge goes straight to the top, and it does not even feel like a moral decision. It feels like noticing.',
+    text: 'So the first gauge goes straight to the top, and it doesn’t even feel like a moral decision. It feels like noticing.',
     cite: 'The child at your feet',
     dur: 4.2,
   },
@@ -63,7 +63,7 @@ export const BEATS: Ethics23Beat[] = [
   },
   {
     p: 167, x: 168, gauges: 1, near: 1, far: 1,
-    text: 'Not your power to help, which is the same. Only how far away it is — and distance is not a moral property.',
+    text: 'Not your power to help, which is the same. Only how far away it is, and distance is not a moral property.',
     dur: 3.2,
   },
   {
@@ -89,7 +89,7 @@ export const BEATS: Ethics23Beat[] = [
           { id: 'share', profile: [0.95, 0.6, 0.35, 0.2], reads: 'it halves, and then halves again' },
         ],
       },
-      explain: 'Flat. The sloping answer has a name — diffusion of responsibility — and the pond is the test of it: you would not stroll past a drowning child because a crowd was also watching. Others being able to act has never once cancelled your being able to.',
+      explain: 'Flat. The sloping answer has a name — diffusion of responsibility — and the pond tests it. You wouldn’t stroll past a drowning child because a crowd was also watching. Others being able to act has never once cancelled your being able to.',
       xp: 5,
     },
     dur: 1.0,

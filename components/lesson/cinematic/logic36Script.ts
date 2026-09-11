@@ -30,7 +30,7 @@ export interface Logic36Beat extends BaseBeat {
 export const BEATS: Logic36Beat[] = [
   {
     p: 379, x: 58, room: 1,
-    text: 'Somebody claims there is an elephant in this room. Here is the room, marked out in squares.',
+    text: 'Somebody claims there’s an elephant in this room. Here’s the room, marked out in squares.',
     dur: 3.6,
   },
   {
@@ -47,14 +47,14 @@ export const BEATS: Logic36Beat[] = [
           { id: 'all', upto: 1, reads: 'there is no elephant', correct: true },
         ],
       },
-      explain: 'Nothing was found at any point on that rail. What changed was how much of the room you had covered — and that is the only thing that ever decides what an empty result is worth.',
+      explain: 'Nothing was found at any point on that rail. What changed was how much of the room you’d covered. That’s the only thing that ever decides what an empty result is worth.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 168, x: 58, room: 1, done: 1,
-    text: 'So the rule. Finding nothing counts exactly as much as your search would have found the thing, had it been there.',
+    text: 'So the rule. Finding nothing counts for as much as the chance your search would have found the thing, had it been there.',
     dur: 4.4,
   },
   {
@@ -78,19 +78,19 @@ export const BEATS: Logic36Beat[] = [
     p: 160, x: 58, room: 1, done: 0.15, cases: 1, live: 1,
     interact: {
       prompt: 'Two real searches, both found nothing. Tap the one whose silence is worth something.',
-      explain: 'The forty-person trial cannot see a one-in-a-thousand effect whether or not it is there, so its silence sounds the same either way. Forty thousand people would have shown it, so their silence is a result.',
+      explain: 'The forty-person trial can’t see a one-in-a-thousand effect whether or not it’s there. Its silence sounds the same either way. Forty thousand people would have shown the effect, so their silence is a result.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 383, x: 104, room: 1, done: 1, cases: 1,
-    text: 'This is why the famous line is only half true. "Absence of evidence is not evidence of absence" describes a bad search and nothing else.',
+    text: 'This is why the famous line is only half true. The saying “absence of evidence is not evidence of absence” describes a bad search and nothing else.',
     dur: 4.8,
   },
   {
     p: 45, x: 104, room: 1, done: 1,
-    text: 'Used on a careful one, it is a way of ignoring a result. Say the words out loud and then ask how hard anybody looked.',
+    text: 'Used on a careful search, it’s a way of ignoring a result. Say the words out loud and then ask how hard anybody looked.',
     dur: 4.4,
   },
   {
@@ -102,7 +102,7 @@ export const BEATS: Logic36Beat[] = [
         'A token search makes it worth nothing',
         'The slogan is true of bad searches only',
       ],
-      closing: 'The question is never whether the searcher found the thing. The question is whether the searcher would have found it, and that question usually has an answer you can work out.',
+      closing: 'The question is never whether the searcher found the thing. The question is whether the searcher would have found it, and you can usually work that out.',
     },
     dur: 3.2,
   },

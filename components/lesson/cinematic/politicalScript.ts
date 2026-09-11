@@ -38,17 +38,17 @@ export const BEATS: PoliticalBeat[] = [
   },
   {
     auth: 0,
-    text: 'With nobody left to judge between us, fear and rivalry collide, and life turns "nasty, brutish, and short."',
+    text: 'With nobody left to judge disputes, fear and rivalry collide. Hobbes says life turns “nasty, brutish, and short”.',
     dur: 2.7,
   },
   {
     auth: 0,
-    text: 'Even the weakest can kill the strongest — so each strikes first, from fear. The result is "a war of every man against every man.',
+    text: 'Even the weakest can kill the strongest, so each strikes first out of fear. Hobbes calls the result “a war of every man against every man”.',
     dur: 3.3,
   },
   {
     auth: 0,
-    text: 'The only exit: authorize one sovereign to keep the peace.',
+    text: 'The only way out is to authorise one sovereign to keep the peace.',
     dur: 1.8,
   },
   {
@@ -80,12 +80,12 @@ export const BEATS: PoliticalBeat[] = [
   },
   {
     auth: 1,
-    text: 'No one literally signed it. The contract is a test of legitimacy, not a document.',
+    text: 'No one ever signed it on paper. The contract is a test of legitimacy, not a document.',
     dur: 1.9,
   },
   {
     auth: 1,
-    text: 'For Hobbes the covenant binds subjects, so there is no right to revolt. Locke disagreed: betray our rights, and the people may resist.',
+    text: 'For Hobbes the covenant binds subjects, so there’s no right to revolt. Locke disagreed: when rulers betray people’s rights, the people may resist.',
     dur: 2.9,
   },
   {
@@ -103,7 +103,7 @@ export const BEATS: PoliticalBeat[] = [
           { id: 'bad', upto: 1, reads: 'whenever the ruler governs badly' },
         ],
       },
-      explain: 'The near end, and it is Locke who sits at the other one. Hobbes saw even a cruel sovereign as better than a return to the war of all against all, because the alternative to a bad ruler is not a good ruler. It is no arbiter at all.',
+      explain: 'The near end, and it’s Locke who sits at the other one. Hobbes saw even a cruel sovereign as better than a return to the war of all against all. The alternative to a bad ruler is not a good ruler. It’s no arbiter at all.',
       xp: 5,
     },
     dur: 1.0,
@@ -117,7 +117,7 @@ export const BEATS: PoliticalBeat[] = [
         'The contract authorizes a sovereign for peace',
         'Without the sword, covenants are but words',
       ],
-      closing: 'Political philosophy asks who should rule, and why we should obey.',
+      closing: 'Political philosophy asks who should rule, and why anyone should obey.',
     },
     dur: 2.8,
   },

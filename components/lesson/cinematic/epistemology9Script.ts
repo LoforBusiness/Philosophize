@@ -30,12 +30,12 @@ export const BEATS: Epistemology9Beat[] = [
   },
   {
     p: 164, x: 208,
-    text: 'Try it: when you call something true, what exactly are you claiming?',
+    text: 'Try it: when you call something true, what are you claiming?',
     dur: 1.8,
   },
   {
     p: 34, x: 268, land: 1,
-    text: 'Start with the world. Two hills and one lonely tree, sitting there being exactly what they are.',
+    text: 'Start with the world. Two hills and one lonely tree, sitting there being what they are.',
     cite: 'Out there',
     dur: 2.7,
   },
@@ -52,7 +52,7 @@ export const BEATS: Epistemology9Beat[] = [
   },
   {
     p: 40, x: 148, land: 1, map: 1,
-    text: 'Now — what would make it a good one?',
+    text: 'Now, what would make it a good one?',
     dur: 1.8,
   },
   {
@@ -66,7 +66,7 @@ export const BEATS: Epistemology9Beat[] = [
   },
   {
     p: 2, x: 148, land: 1, map: 1,
-    text: 'You just used the oldest theory of truth. A belief is true when it matches how things actually are.',
+    text: 'You just used the oldest theory of truth. A belief is true when it matches how things are.',
     cite: 'Correspondence',
     dur: 2.7,
   },
@@ -90,13 +90,13 @@ export const BEATS: Epistemology9Beat[] = [
   },
   {
     p: 177, x: 148, land: 1, map: 1, link: 1,
-    text: 'Fine — go and check. Hold the sketch up, look at the land, compare the two.',
+    text: 'Fine, go and check. Hold the sketch up, look at the land, compare the two.',
     cite: 'The awkward bit',
     dur: 2.5,
   },
   {
     p: 404, x: 148, land: 1, map: 1, link: 1,
-    text: 'Until somebody asks a rude little question: what exactly are you comparing the sketch against?',
+    text: 'Then somebody asks a rude little question: what are you comparing the sketch against?',
     dur: 2.3,
   },
   {
@@ -111,7 +111,7 @@ export const BEATS: Epistemology9Beat[] = [
           { id: 'other', label: 'a second map', reads: 'a second map, drawn by somebody else' },
         ],
       },
-      explain: 'Your own seeing. "the land" feels obvious, because looking feels like touching the world bare-handed. The instant you look, what you are holding is your report of those hills. Every check compares a belief with a belief, and that is the whole difficulty.',
+      explain: 'Your own seeing. “The land” feels obvious, because looking feels like touching the world bare-handed. The instant you look, what you’re holding is your report of those hills. Every check compares a belief with a belief, and that’s the whole difficulty.',
       xp: 5,
     },
     dur: 1.0,
@@ -135,7 +135,7 @@ export const BEATS: Epistemology9Beat[] = [
   },
   {
     p: 13, x: 268, land: 1, map: 1, theory: 2,
-    text: 'If it walks you across those real hills, year after year, and never once strands you. Comfort is not enough; only what survives the walk counts.',
+    text: 'It has to walk you across those real hills, year after year, and never once strand you. Comfort is not enough: only what survives the walk counts.',
     dur: 3.5,
   },
   {
@@ -148,7 +148,7 @@ export const BEATS: Epistemology9Beat[] = [
         'Coherence: it fits everything else you hold',
         'Pragmatism: it keeps on working',
       ],
-      closing: 'You cannot know a thing that is false. So every theory of knowledge is quietly a theory of truth.',
+      closing: 'You can’t know a thing that’s false. So every theory of knowledge hides a theory of truth inside it.',
     },
     dur: 3.0,
   },

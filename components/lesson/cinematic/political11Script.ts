@@ -29,23 +29,23 @@ export interface Political11Beat extends BaseBeat {
 export const BEATS: Political11Beat[] = [
   {
     p: 462, x: 56,
-    text: 'Switch off every government tonight — no courts, no police, nobody in charge. By morning, what is left of us?',
+    text: 'Switch off every government tonight — no courts, no police, nobody in charge. By morning, what’s left of everybody?',
     dur: 2.5,
   },
   {
     p: 462, x: 56,
-    text: 'Answer that and you have already decided what state you can justify.',
+    text: 'Answer that and you’ve already decided what state you can justify.',
     dur: 1.8,
   },
   {
     p: 383, x: 56, dial: 1,
-    text: 'Nobody thinks this really happened. It is an instrument: set it to a reading of human nature, and see what has to be built on top.',
+    text: 'Nobody thinks this happened in history. It’s an instrument: set it to a reading of human nature, and see what has to be built on top.',
     cite: 'The state of nature · a tool, not a history',
     dur: 4.2,
   },
   {
     p: 167, x: 120, dial: 1, set: 1, built: 1,
-    text: 'Hobbes turns the dial to FEARFUL. Everyone is roughly equal, so everyone can kill everyone, so everyone strikes first.',
+    text: 'Hobbes turns the dial to fearful. Everyone is roughly equal, so everyone can kill everyone, so everyone strikes first.',
     cite: 'Hobbes · the war of all against all',
     dur: 2.4,
   },
@@ -69,7 +69,7 @@ export const BEATS: Political11Beat[] = [
   },
   {
     p: 467, x: 120, dial: 1, set: 2, built: 2,
-    text: 'Locke turns it to RATIONAL. We already owe each other things out here; what is missing is only a neutral judge.',
+    text: 'Locke turns it to rational. People already owe each other things out here, and all that’s missing is a neutral judge.',
     cite: 'Locke · a limited government',
     dur: 2.7,
   },
@@ -80,7 +80,7 @@ export const BEATS: Political11Beat[] = [
   },
   {
     p: 33, x: 120, dial: 1, set: 3, built: 3,
-    text: 'Rousseau turns it to INNOCENT. We were fine until property and rank taught us to compare ourselves.',
+    text: 'Rousseau turns it to innocent. People were fine until property and rank taught them to compare themselves.',
     cite: 'Rousseau · the general will',
     dur: 2,
   },
@@ -91,7 +91,7 @@ export const BEATS: Political11Beat[] = [
   },
   {
     p: 33, x: 120, dial: 1, set: 3, built: 3,
-    text: 'That is how he means to hand freedom back.',
+    text: 'That’s how he means to hand freedom back.',
     dur: 1.8,
   },
   {
@@ -107,7 +107,7 @@ export const BEATS: Political11Beat[] = [
           { id: 'nature', upto: 1, reads: 'settle human nature, the state follows', correct: true },
         ],
       },
-      explain: 'Nearly all of it on the reading. The other end reverses cause and effect: it has each man choosing his conclusion first and reverse-engineering a premise to reach it. Change what people are like in the state of nature and the government you are allowed changes with it.',
+      explain: 'Nearly all of it on the reading. The other end reverses cause and effect. It has each man choosing his conclusion first and reverse-engineering a premise to reach it. Change what people are like in the state of nature and the government you’re allowed changes with it.',
       xp: 5,
     },
     dur: 1.0,
@@ -116,7 +116,7 @@ export const BEATS: Political11Beat[] = [
     p: 384, x: 120, dial: 1, set: 1, built: 3, plates: 1,
     interact: {
       prompt: 'The dial is back on FEARFUL. Tap the state that diagnosis demands.',
-      explain: 'If nobody can be trusted, only a power above everyone can hold the peace. So Hobbes trades away nearly all freedom to buy it. The trap: the small limited house is the moderate, sensible-looking answer. And it is Locke’s, built on a diagnosis Hobbes has already rejected.',
+      explain: 'If nobody can be trusted, only a power above everyone can hold the peace. So Hobbes trades away nearly all freedom to buy it. The trap: the small limited house is the moderate, sensible-looking answer. And it’s Locke’s, built on a diagnosis Hobbes has already rejected.',
       xp: 5,
     },
     dur: 1.0,
@@ -131,7 +131,7 @@ export const BEATS: Political11Beat[] = [
         'Each reading demands a different contract',
         'Argue the premise before you argue the cure',
       ],
-      closing: 'Every argument about government starts with a quiet claim about what we are like.',
+      closing: 'Every argument about government starts with a quiet claim about what people are like.',
     },
     dur: 3.0,
   },

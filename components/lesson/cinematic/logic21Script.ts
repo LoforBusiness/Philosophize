@@ -40,13 +40,13 @@ export const BEATS: Log21Beat[] = [
   },
   {
     p: 443, x: 200, chips: 1, bench: 1, under: 0,
-    text: 'Two tests, and they ask different questions. Take the lamp away and see.',
+    text: 'Two tests, and they ask different questions. Take a thing away, and see if the fire still starts.',
     cite: 'The bench',
     dur: 3,
   },
   {
     p: 400, x: 200, chips: 1, bench: 1, under: 0,
-    text: 'Then switch that lamp on alone and see.',
+    text: 'Then try that thing alone, and see if it starts the fire.',
     dur: 1.8,
   },
   {
@@ -58,7 +58,7 @@ export const BEATS: Log21Beat[] = [
     p: 457, x: 132, chips: 1, bench: 1, under: 0, live: 1,
     interact: {
       prompt: 'Tap the one you must have, which is still not enough.',
-      explain: 'Oxygen. Take oxygen away and nothing burns, so oxygen is required. Fill a room with oxygen and nothing happens, so oxygen is not enough on its own. Those two facts are independent, and that is why the words are worth keeping apart.',
+      explain: 'Oxygen. Take oxygen away and nothing burns, so oxygen is required. Fill a room with oxygen and nothing happens, so oxygen is not enough on its own. Those two facts are independent, and that’s why the words are worth keeping apart.',
       xp: 5,
     },
     dur: 1.0,
@@ -99,7 +99,7 @@ export const BEATS: Log21Beat[] = [
           { id: 'both', reads: 'the whole story' },
         ],
       },
-      explain: 'Enough on its own, so it is sufficient. It is not required, because a spark or a hot surface would have started the same fire. Being sufficient says nothing at all about being necessary, and that is the confusion this question takes apart.',
+      explain: 'Enough on its own, so it’s sufficient. It’s not required, because a spark or a hot surface would have started the same fire. Being sufficient says nothing at all about being necessary, and that’s the confusion this question takes apart.',
       xp: 5,
     },
     dur: 1.0,

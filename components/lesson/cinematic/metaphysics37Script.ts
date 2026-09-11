@@ -71,7 +71,7 @@ export const BEATS: Metaphysics37Beat[] = [
   },
   {
     p: 2, x: 56, shelf: 1, hammer: 1, swing: 1, ward: 1,
-    text: 'It is still exactly as fragile as it was.',
+    text: 'The glass is still as fragile as it ever was.',
     dur: 1.8,
   },
   {
@@ -107,7 +107,7 @@ export const BEATS: Metaphysics37Beat[] = [
   },
   {
     p: 383, x: 128, shelf: 1,
-    text: 'Which is a strange thing for a fact to be. Something true of the glass is true because of an event that never happened and now never will.',
+    text: 'That’s a strange thing for a fact to be. Something true of the glass is true because of an event that never happened and now never will.',
     dur: 4.8,
   },
   {

@@ -29,7 +29,7 @@ export const BEATS: Ethics12Beat[] = [
   },
   {
     p: 418, x: 124, n: 1, word: 0,
-    text: 'You need money, so you say “I promise to repay” — knowing perfectly well that you cannot. That private reason for acting is what Kant calls your maxim.',
+    text: 'You need money, so you say “I promise to repay”, knowing full well you can’t. That private reason for acting is what Kant calls your maxim.',
     cite: 'The maxim',
     dur: 4.8,
   },
@@ -65,7 +65,7 @@ export const BEATS: Ethics12Beat[] = [
   },
   {
     p: 465, x: 124, n: 12, word: 1,
-    text: 'There is no promising left to break.',
+    text: 'There’s no promising left to break.',
     dur: 1.8,
   },
   {
@@ -80,7 +80,7 @@ export const BEATS: Ethics12Beat[] = [
           { id: 'happy', label: 'more people happy', reads: 'break it when more people end up happy', correct: true },
         ],
       },
-      explain: 'More people happy, and it sounds like plain decency, which is what hides it. That is Mill counting, not Kant testing. Kant never adds the happiness up. He asks one thing: does the rule survive being handed to everybody at once?',
+      explain: 'More people happy, and it sounds like plain decency, which is what hides it. That’s Mill counting, not Kant testing. Kant never adds the happiness up. He asks one thing: does the rule survive being handed to everybody at once?',
       xp: 5,
     },
     dur: 1.0,
@@ -89,7 +89,7 @@ export const BEATS: Ethics12Beat[] = [
     p: 30, x: 124, n: 12, word: 1, pick: 1,
     interact: {
       prompt: 'Three maxims go into the press. Tap the one that survives being made a law everyone follows.',
-      explain: 'The trap: each loser sounds like a small private exception. Universalised, they cancel themselves — if everyone lied when it suited them, nobody would believe anything, so there would be nothing left to gain. Only keeping promises still works when everyone does it.',
+      explain: 'The trap: each loser sounds like a small private exception. Universalised, they cancel themselves. If everyone lied when it suited them, nobody would believe anything, so there would be nothing left to gain. Only keeping promises still works when everyone does it.',
       xp: 5,
     },
     dur: 1.0,

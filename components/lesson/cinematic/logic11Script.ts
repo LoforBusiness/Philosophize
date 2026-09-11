@@ -29,13 +29,13 @@ export const BEATS: Logic11Beat[] = [
   },
   {
     p: 176, x: 48, steps: 2,
-    text: 'Two claims go up. The book is God’s word; whatever God says is true.',
+    text: 'Two claims go up. The book is God’s word, and whatever God says is true.',
     cite: 'The two premises',
     dur: 2.6,
   },
   {
     p: 176, x: 48, steps: 2,
-    text: 'Innocent so far — nothing has been smuggled in yet.',
+    text: 'Innocent so far. Nothing has been smuggled in yet.',
     dur: 1.8,
   },
   {
@@ -65,7 +65,7 @@ export const BEATS: Logic11Beat[] = [
   },
   {
     p: 163, x: 116, steps: 4, base: 1, spine: 1,
-    text: 'A chain that sound is exactly what makes the trap dangerous.',
+    text: 'A chain that sound is what makes the trap dangerous.',
     dur: 2.1,
   },
   {
@@ -82,7 +82,7 @@ export const BEATS: Logic11Beat[] = [
           { id: 'proof', upto: 1, reads: 'it proves the conclusion outright' },
         ],
       },
-      explain: 'None, and the knob starts on the trap. Validity feels like proof and is not. All it promises is that true premises could not give a false conclusion, and a circle clears that bar by putting the conclusion in the premises. It never fails and never tells you anything.',
+      explain: 'None, and the knob starts on the trap. Validity feels like proof and is not. All it promises is that true premises couldn’t give a false conclusion. A circle clears that bar by putting the conclusion in the premises. It never fails and never tells you anything.',
       xp: 5,
     },
     dur: 1.0,
@@ -91,7 +91,7 @@ export const BEATS: Logic11Beat[] = [
     p: 447, x: 116, steps: 4, base: 1, spine: 1, pick: 1, arc: 1,
     interact: {
       prompt: 'Tap the step that assumes the very thing the argument is meant to prove.',
-      explain: 'The trap: step 3 looks like extra support, so the proof seems to be doing more work. It is doing less. Step 1 leans on God; step 3 leans on the book. The loop closes, and no evidence from outside ever gets in.',
+      explain: 'The trap: step three looks like extra support, so the proof seems to be doing more work. It’s doing less. Step one leans on God. Step three leans on the book. The loop closes, and no evidence from outside ever gets in.',
       xp: 5,
     },
     dur: 1.0,

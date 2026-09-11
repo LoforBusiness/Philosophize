@@ -23,12 +23,12 @@ export interface Epi4Beat extends BaseBeat {
 export const BEATS: Epi4Beat[] = [
   {
     e: 173, r: 4, fill: 0, glow: 0, bridge: 0,
-    text: 'Blank mind at birth, or already primed? Two camps — empiricists and rationalists — and they have never once stopped arguing about it.',
+    text: 'Blank mind at birth, or already primed? Two camps, the empiricists and the rationalists, have never once stopped arguing about it.',
     dur: 3.4,
   },
   {
     e: 2, r: 0, fill: 0.35,
-    text: 'Locke pictured the newborn mind as a sheet of blank paper. Nothing is on it before you live it, and everything that arrives got there by being seen, felt or thought over.',
+    text: 'Locke pictured the newborn mind as a sheet of blank paper. Everything that arrives on it later gets there by being seen, felt or thought over.',
     cite: 'Empiricism — from experience',
     dur: 4.2,
   },
@@ -39,7 +39,7 @@ export const BEATS: Epi4Beat[] = [
   },
   {
     e: 31, r: 0, fill: 0.85,
-    text: 'You learn "hot" by getting burned, "red" by seeing red. Big ideas grow from small sensations, written onto a page that started blank.',
+    text: 'You learn the word hot by getting burned, and red by seeing red. Big ideas grow from small sensations, written onto a page that started blank.',
     cite: 'Locke, 1689',
     dur: 4.6,
   },
@@ -75,7 +75,7 @@ export const BEATS: Epi4Beat[] = [
   },
   {
     e: 418, r: 19, glow: 1,
-    text: 'So learning, Plato says, is remembering what was in there already.',
+    text: 'So Plato says learning is remembering what was in there already.',
     dur: 1.8,
   },
   {
@@ -96,7 +96,7 @@ export const BEATS: Epi4Beat[] = [
   },
   {
     e: 39, r: 39, fill: 0.85, glow: 1, bridge: 1,
-    text: 'But the mind has shapes of its own — space, time, cause — and pours the raw material into them. Neither sense nor mind works alone.',
+    text: 'But the mind pours that raw material into forms of its own: space, time and cause. Neither sense nor mind works alone.',
     dur: 2.6,
   },
   {

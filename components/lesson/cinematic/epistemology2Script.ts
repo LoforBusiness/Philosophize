@@ -19,7 +19,7 @@ export interface Epi2Beat extends BaseBeat {
 export const BEATS: Epi2Beat[] = [
   {
     d: 12, m: 5, doubt: 0.1,
-    text: 'What if everything you’re sure of is a lie? Descartes doubted it all on purpose — then rebuilt knowledge from the rubble.',
+    text: 'What if everything you’re sure of is a lie? Descartes doubted it all on purpose, then rebuilt knowledge from the rubble.',
     dur: 3.8,
   },
   {
@@ -98,7 +98,7 @@ export const BEATS: Epi2Beat[] = [
           { id: 'doubter', label: 'the doubter', reads: 'the one being fooled is safe', correct: true },
         ],
       },
-      explain: 'The doubter. To be fooled you have to exist to be fooled, so the harder the demon works the more certain the doubter becomes. Arithmetic is not safe — Descartes lets the demon have the sums. Only the doubter survives.',
+      explain: 'The doubter. You can’t be fooled unless you exist. So the harder the demon works, the more certain the doubter becomes. Arithmetic isn’t safe — Descartes lets the demon have the sums. Only the doubter survives.',
       xp: 5,
     },
     dur: 1.0,

@@ -34,7 +34,7 @@ export interface Aesthetics28Beat extends BaseBeat {
 export const BEATS: Aesthetics28Beat[] = [
   {
     p: 429, x: 26, rooms: 1, lit: 1,
-    text: 'You have not been to a museum in months. You have had aesthetic experiences all week.',
+    text: 'You haven’t been to a museum in months. You’ve had aesthetic experiences all week.',
     dur: 5.0,
   },
   {
@@ -63,7 +63,7 @@ export const BEATS: Aesthetics28Beat[] = [
   },
   {
     p: 457, x: 82, rooms: 1, lit: 1, street: 1,
-    text: 'A footballer threads a pass nobody expected, and the stadium gasps. Grace, timing, form fitting purpose.',
+    text: 'A footballer threads a pass nobody expected, and the stadium gasps. Grace, timing, form that fits its purpose.',
     dur: 5.0,
   },
   {
@@ -95,7 +95,7 @@ export const BEATS: Aesthetics28Beat[] = [
           { id: 'same', label: 'all of it equal', reads: 'a sandwich now rivals a Rembrandt' },
         ],
       },
-      explain: 'In the ordinary too. You look at a dish for its balance and the way it is set out, and that is aesthetic looking, whatever the room. Saying a sandwich rivals a Rembrandt goes too far the other way.',
+      explain: 'In the ordinary too. You look at a dish for its balance and the way it’s set out. That’s aesthetic looking, whatever the room. Saying a sandwich rivals a Rembrandt goes too far the other way.',
       xp: 5,
     },
     dur: 1.0,

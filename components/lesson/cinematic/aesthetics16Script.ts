@@ -22,12 +22,12 @@ export interface Aes16Beat extends BaseBeat {
 export const BEATS: Aes16Beat[] = [
   {
     p: 25, x: 70,
-    text: 'You have stood in front of this painting three times and liked it more each time. Today you read the label on the wall.',
+    text: 'You’ve stood in front of this painting three times and liked it more each time. Today you read the label on the wall.',
     dur: 4.0,
   },
   {
     p: 41, x: 168, canvas: 1,
-    text: 'There is the painting. Finished in 1911, and not one mark has moved since.',
+    text: 'There’s the painting. Finished in 1911, and not one mark has moved since.',
     cite: 'The work',
     dur: 2.8,
   },
@@ -38,7 +38,7 @@ export const BEATS: Aes16Beat[] = [
   },
   {
     p: 425, x: 124, canvas: 1, facts: 1,
-    text: 'The first line on the card: the painter took the commission from a man he despised, and said so in a letter.',
+    text: 'The first line on the card says the painter took the commission from a man he despised. He said so in a letter.',
     cite: 'One fact',
     dur: 4.2,
   },
@@ -56,7 +56,7 @@ export const BEATS: Aes16Beat[] = [
   },
   {
     p: 383, x: 168, canvas: 1, facts: 3,
-    text: 'The gallery keeps adding. Now the card is longer than the painting is wide, and you notice you have been reading it instead of looking.',
+    text: 'The gallery keeps adding, and now the card is longer than the painting is wide. You notice you’ve been reading it instead of looking.',
     cite: 'The rail fills',
     dur: 4.8,
   },
@@ -74,7 +74,7 @@ export const BEATS: Aes16Beat[] = [
           { id: 'none', upto: 1, reads: 'nothing changed at all' },
         ],
       },
-      explain: 'The middle, and both ends feel principled, which is what makes them tempting. The paint has not moved. Nothing in the picture is different from yesterday. What changed is you, standing in front of it, knowing something you did not know before.',
+      explain: 'The middle, and both ends feel principled, which is what makes them tempting. The paint hasn’t moved. Nothing in the picture is different from yesterday. What changed is you, standing in front of it, knowing something you didn’t know before.',
       xp: 5,
     },
     dur: 1.0,
@@ -83,7 +83,7 @@ export const BEATS: Aes16Beat[] = [
     p: 6, x: 124, canvas: 1, facts: 3, pick: 1,
     interact: {
       prompt: 'Three things about this wall. Tap what actually changed on the canvas.',
-      explain: 'Nothing. Every mark is where it was in 1911. The rail underneath grew, the room grew quieter, and you changed — but the work has been finished the whole time.',
+      explain: 'Nothing. Every mark is where it was in 1911. The rail underneath grew, the room grew quieter, and you changed. But the work has been finished the whole time.',
       xp: 5,
     },
     dur: 1.0,

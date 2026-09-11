@@ -38,13 +38,13 @@ export const BEATS: Ethics18Beat[] = [
   },
   {
     p: 13, x: 124, line: 1, test: 1,
-    text: 'But look at what that test actually catches. Infants cannot reason.',
+    text: 'But look at what else that test catches. Infants cannot reason.',
     cite: 'The test misfires',
     dur: 1.8,
   },
   {
     p: 13, x: 124, line: 1, test: 1,
-    text: 'Nor can someone deeply cognitively impaired. Nobody thinks they are outside — so that is not the real test.',
+    text: 'Nor can someone deeply cognitively impaired. Nobody thinks they’re outside, so that’s not the real test.',
     dur: 3.4,
   },
   {
@@ -87,7 +87,7 @@ export const BEATS: Ethics18Beat[] = [
           { id: 'suffer', label: 'can it suffer', reads: 'whether it can suffer', correct: true },
         ],
       },
-      explain: 'Can it suffer, and Bentham got there first. "can it reason" is the old test and it does not even follow: reasoning has nothing to do with being hurt. Infants cannot reason either, and nobody proposes leaving them out.',
+      explain: 'Can it suffer, and Bentham got there first. “Can it reason” is the old test, and it doesn’t even follow. Reasoning has nothing to do with being hurt. Infants can’t reason either, and nobody proposes leaving them out.',
       xp: 5,
     },
     dur: 1.0,

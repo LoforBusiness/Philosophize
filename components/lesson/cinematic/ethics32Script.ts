@@ -35,7 +35,7 @@ export const BEATS: Ethics32Beat[] = [
   {
     a: 384, b: 31, reasons: 3, card: 2,
     dur: 4.4,
-    text: 'The card hands across perfectly. Both people now hold the same true verdict, and the reasons behind the verdict stay where they were.',
+    text: 'The card hands across. Both people now hold the same true verdict, and the reasons behind the verdict stay where they were.',
     cite: 'Handed over',
   },
   {
@@ -61,7 +61,7 @@ export const BEATS: Ethics32Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap whichever of them can actually answer the new case.',
-      explain: 'The one with the reasons. A verdict tells you what to say about the case it came from; the reasons are the only part that travels. The borrower is holding a true answer to a question nobody asked.',
+      explain: 'The one with the reasons. A verdict tells you what to say about the case it came from. The reasons are the only part that travels. The borrower is holding a true answer to a question nobody asked.',
       xp: 5,
     },
   },
@@ -80,7 +80,7 @@ export const BEATS: Ethics32Beat[] = [
           { id: 'take', upto: 1, reads: 'their answer, taken as your own' },
         ],
       },
-      explain: 'The middle. The near end flatters you, and nobody lives that way. Testimony is excellent evidence that you have overlooked something, and a poor replacement for going and seeing what it was.',
+      explain: 'The middle. The near end flatters you, and nobody lives that way. Testimony is excellent evidence that you’ve overlooked something, and a poor replacement for going and seeing what it was.',
       xp: 5,
     },
   },

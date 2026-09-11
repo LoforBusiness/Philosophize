@@ -31,23 +31,23 @@ export const BEATS: Aes8Beat[] = [
   },
   {
     p: 164, x: 148, mode: 0, lens: 0,
-    text: 'The other says it works because it aches. Same canvas.',
+    text: 'The other says the painting works because it aches. Same canvas.',
     dur: 1.8,
   },
   {
     p: 164, x: 148, mode: 0, lens: 0,
-    text: 'Two completely different reasons.',
+    text: 'Two reasons with nothing in common.',
     dur: 1.8,
   },
   {
     p: 24, x: 68, mode: 0, lens: 1,
-    text: 'Luckily there is a pair of glasses on the wall for each of them. Take the first pair down.',
+    text: 'Luckily there’s a pair of glasses on the wall for each of them. Take the first pair down.',
     cite: 'The first pair',
     dur: 2.4,
   },
   {
     p: 24, x: 68, mode: 0, lens: 1,
-    text: 'Nothing mystical — they just change what you notice.',
+    text: 'Nothing mystical. They just change what you notice.',
     dur: 1.8,
   },
   {
@@ -58,36 +58,36 @@ export const BEATS: Aes8Beat[] = [
   },
   {
     p: 47, x: 148, mode: 1, lens: 1,
-    text: 'Whatever it is a picture OF has gone completely quiet.',
+    text: 'Whatever the picture shows has gone silent.',
     dur: 1.8,
   },
   {
     p: 31, x: 68, mode: 0, lens: 2,
-    text: 'Hang that pair up. There is a second pair on the same wall.',
+    text: 'Hang that pair up. There’s a second pair on the same wall.',
     cite: 'The second pair',
     dur: 1.8,
   },
   {
     p: 31, x: 68, mode: 0, lens: 2,
-    text: 'It is about to show you a different painting, on exactly the same canvas.',
+    text: 'It’s about to show you a different painting, on the same canvas.',
     dur: 2.2,
   },
   {
     p: 130, x: 148, mode: 2, lens: 2,
-    text: 'Now the blocks dissolve into strokes. You are not measuring anything.',
+    text: 'Now the blocks dissolve into strokes. You’re not measuring anything.',
     cite: 'Through the second pair',
     dur: 1.8,
   },
   {
     p: 130, x: 148, mode: 2, lens: 2,
-    text: 'You are catching a mood, as if the painter handed you what they were feeling that afternoon.',
+    text: 'You’re catching a mood, as if the painter handed you what they were feeling that afternoon.',
     dur: 2.8,
   },
   {
     p: 165, x: 68, mode: 0, lens: 0, pick: 1,
     interact: {
       prompt: 'She cannot read what the mosaic shows, yet calls it great art. Tap the pair she uses.',
-      explain: 'She has no idea what the story is, so the story cannot be what moved her. Whatever did the work was the arrangement itself — the lines, the blocks, and the way they sit against each other.',
+      explain: 'She has no idea what the story is, so the story cannot be what moved her. The arrangement did the work: the lines, the blocks, and the way they sit against each other.',
       xp: 5,
     },
     dur: 1.0,

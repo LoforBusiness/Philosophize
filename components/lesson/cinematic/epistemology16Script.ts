@@ -28,7 +28,7 @@ export const BEATS: Epi16Beat[] = [
   {
     g: 379, results: 5,
     dur: 4.6,
-    text: 'Here is every answer the 1919 eclipse could have come back with. Starlight bends by this much, or that much, or not at all.',
+    text: 'Here’s every answer the 1919 eclipse could have come back with. Starlight bends by this much, or that much, or not at all.',
   },
   {
     g: 45, results: 5, bars: 3,
@@ -45,7 +45,7 @@ export const BEATS: Epi16Beat[] = [
   {
     g: 13, results: 5, bars: 3,
     dur: 1.9,
-    text: 'That is usually said as a boast.',
+    text: 'That’s usually said as a boast.',
   },
   {
     g: 456, results: 5, bars: 3,
@@ -71,7 +71,7 @@ export const BEATS: Epi16Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap the theory that nothing could ever have refuted.',
-      explain: 'The wide one. It permits every result on the row, so no result can count against it — and it learned nothing from the eclipse either way. The two narrow bars each risked almost everything on a single reading, which is exactly what made the measurement worth taking.',
+      explain: 'The wide one. It permits every result on the row, so no result can count against it. It also learned nothing from the eclipse either way. The two narrow bars each risked almost everything on a single reading. That’s what made the measurement worth taking.',
       xp: 5,
     },
   },
@@ -90,7 +90,7 @@ export const BEATS: Epi16Beat[] = [
           { id: 'wild', upto: 1, reads: 'rules out so much it is already refuted' },
         ],
       },
-      explain: 'The other card is what almost everyone says first, and it is why bad theories survive so long. A claim nothing could ever prove wrong sounds unbeaten. It is closer to never having entered: a claim that rules out no result tells you nothing about which result you will get.',
+      explain: 'The middle. The near end is what almost everyone says first, and it’s why bad theories survive so long. A claim nothing could ever prove wrong sounds unbeaten. It’s closer to never having entered. A claim that rules out no result tells you nothing about which result you’ll get.',
       xp: 5,
     },
   },

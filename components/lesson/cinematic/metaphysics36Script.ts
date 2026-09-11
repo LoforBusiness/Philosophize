@@ -58,17 +58,17 @@ export const BEATS: Metaphysics36Beat[] = [
   },
   {
     p: 13, x: 54, hotel: 1, shift: 1,
-    text: 'That is the whole proof. Room 1 goes to room 2, room 2 to room 3, on forever.',
+    text: 'That’s the whole proof. Room one goes to room two, room two to room three, and on forever.',
     dur: 3,
   },
   {
     p: 13, x: 54, hotel: 1, shift: 1,
-    text: 'Nobody is homeless and room 1 is empty.',
+    text: 'Nobody is homeless and room one is empty.',
     dur: 1.8,
   },
   {
     p: 380, x: 54, hotel: 1, shift: 1,
-    text: 'It works because there is no last room to fall off the end of. Try it in a hotel with a hundred rooms and guest one hundred is out on the street.',
+    text: 'It works because there is no last room to fall off the end of. Try it with a hundred rooms and guest one hundred is out on the street.',
     dur: 4.8,
   },
   {
@@ -87,7 +87,7 @@ export const BEATS: Metaphysics36Beat[] = [
     p: 384, x: 54, hotel: 1, dbl: 1, live: 1,
     interact: {
       prompt: 'Now an endless coach arrives. Everyone doubles their room number. Tap a free door.',
-      explain: 'Any odd one. They all opened, in one instruction, and there are as many of them as there were rooms to begin with. A part of the hotel has been matched exactly against the whole of it, which is what being infinite means.',
+      explain: 'Any odd one. They all opened, in one instruction, and there are as many of them as there were rooms to begin with. A part of the hotel has been matched one to one with the whole. That’s what being infinite means.',
       xp: 5,
     },
     dur: 1.0,
@@ -99,7 +99,7 @@ export const BEATS: Metaphysics36Beat[] = [
   },
   {
     p: 463, x: 128, hotel: 1, dbl: 1,
-    text: 'Which is why some argue no real thing could work like this. The maths is fine.',
+    text: 'That’s why William Lane Craig argues no real thing could work like this. The maths is fine.',
     cite: 'Craig, on the impossibility of an actual infinite',
     dur: 3,
   },
@@ -117,7 +117,7 @@ export const BEATS: Metaphysics36Beat[] = [
         'A part matches the whole, one to one',
         'Consistent is not the same as buildable',
       ],
-      closing: 'The discomfort is real. It is arithmetic built for finite things, complaining about a place with no last room.',
+      closing: 'The discomfort is real. It’s arithmetic built for finite things, complaining about a place with no last room.',
     },
     dur: 3.2,
   },

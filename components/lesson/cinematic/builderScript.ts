@@ -110,7 +110,7 @@ export const BEATS: Beat[] = [
     build: { p1: '', p2: '', key: '' },
     gest: 5,                                        // sweep the keystone into place
     say: [{ who: 'master', text: 'There. It stands.' }],
-    text: 'That shape is every argument you will ever meet.',
+    text: 'That shape is every argument you’ll ever meet.',
     dur: 1.8,
   },
 
@@ -119,7 +119,7 @@ export const BEATS: Beat[] = [
     act: 2,
     build: { p1: '', p2: '', key: '', tags: true },
     gest: 3,                                        // count off the base
-    text: 'The two stones at the base are the premises — the reasons you lay down. Words like because and since point them out.',
+    text: 'The two stones at the base are the premises — the reasons you lay down. Words like “because” and “since” point them out.',
     dur: 4.2,
   },
   {
@@ -134,7 +134,7 @@ export const BEATS: Beat[] = [
     act: 2,
     build: { p1: '', p2: '', key: '', tags: true },
     gest: 6,                                        // point up at the keystone
-    text: 'The words therefore, so and thus all flag one.',
+    text: 'The words “therefore”, “so” and “thus” all flag a conclusion.',
     dur: 1.8,
   },
   {
@@ -147,7 +147,7 @@ export const BEATS: Beat[] = [
         { id: 'b', text: '"therefore"', correct: true },
       ],
       explain:
-        '"Because" and "since" introduce a premise — the reason. "Therefore," "so" and "thus" point to the conclusion the reasons support.',
+        'The words “because” and “since” introduce a premise — the reason. “Therefore”, “so” and “thus” point to the conclusion the reasons support.',
     },
     dur: 0.8,
   },
@@ -157,14 +157,14 @@ export const BEATS: Beat[] = [
     act: 3,
     build: { p1: S_P1, p2: S_P2, key: S_K },
     gest: 2,                                        // present the finished structure
-    text: 'Here is logic’s oldest structure, first written down around 350 BCE.',
+    text: 'Here’s logic’s oldest structure, first written down around 350 BCE.',
     dur: 4.0,
   },
   {
     act: 3,
     build: { p1: S_P1, p2: S_P2, key: S_K },
     gest: 1,                                        // emphatic — "forced into place"
-    text: 'Grant the builder both premises and the top stone is forced into place — no matter how you feel about it. That is what "follows of necessity" means.',
+    text: 'Grant the builder both premises, and no matter how you feel, the top stone is forced into place. That’s what the phrase “follows of necessity” means.',
     cite: 'Aristotle, Prior Analytics',
     dur: 4.4,
   },
@@ -182,7 +182,7 @@ export const BEATS: Beat[] = [
         { id: 'false', text: 'False', correct: true },
       ],
       explain:
-        'A claim with nothing behind it is a bare assertion. Strip the premises and there is no inference, and no reason to believe it.',
+        'A claim with nothing behind it is a bare assertion. Strip the premises and there’s no inference, and no reason to believe it.',
       xp: 5,
     },
     dur: 1.0,
@@ -191,7 +191,7 @@ export const BEATS: Beat[] = [
     act: 4,
     build: { p1: S_P1, p2: S_P2, key: S_K },
     gest: 0,                                        // open hand — the plain point
-    text: 'Pull the reasons and nothing holds the claim up. Premises are not decoration — they are the load-bearing part.',
+    text: 'Pull the reasons and nothing holds the claim up. Premises aren’t decoration but the load-bearing part.',
     dur: 3.8,
   },
   {
@@ -208,7 +208,7 @@ export const BEATS: Beat[] = [
         { id: 'd', text: 'Both — they each conclude something', correct: false },
       ],
       explain:
-        'A conclusion can come first. "Therefore" marks the claim being supported; "after all" introduces the premise backing it up. Read the role, not the position.',
+        'A conclusion can come first. The word “therefore” marks the claim being supported, and “after all” introduces the premise backing it up. Read the role, not the position.',
       xp: 5,
     },
     dur: 1.0,

@@ -41,12 +41,12 @@ export const BEATS: Logic38Beat[] = [
   },
   {
     p: 30, x: 60, mill: 1, runA: 1,
-    text: 'Anselm feeds his in. That than which nothing greater can be conceived, and existing is greater than not existing.',
+    text: 'Anselm feeds in the word God, “that than which nothing greater can be conceived”. For him, existing is greater than not existing.',
     dur: 4.4,
   },
   {
     p: 176, x: 60, mill: 1, runA: 1, twin: 1, runB: 1,
-    text: 'A monk named Gaunilo built the same mill and changed one word. The island than which no greater island can be conceived.',
+    text: 'A monk named Gaunilo built the same mill and changed one word. He fed in the island than which no greater island can be conceived.',
     dur: 4.4,
   },
   {
@@ -107,7 +107,7 @@ export const BEATS: Logic38Beat[] = [
         'An absurd output convicts the form, not the topic',
         'The only reply names a step that will not carry over',
       ],
-      closing: 'It is the cheapest test in philosophy and the hardest to answer. Before defending a conclusion, run your reasoning on something you do not already believe.',
+      closing: 'It’s the cheapest test in philosophy and the hardest to answer. Before you defend a conclusion, run your reasoning on something you don’t already believe.',
     },
     dur: 3.2,
   },

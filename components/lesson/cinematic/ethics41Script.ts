@@ -63,7 +63,7 @@ export const BEATS: Ethics41Beat[] = [
   },
   {
     p: 451, x: 88, doors: 1, floorOn: 1, tilt: 0.45,
-    text: 'Countries with opt-out donation get far more donors than countries with opt-in.',
+    text: 'Countries with opt-out organ donation get far more donors than countries with opt-in.',
     dur: 4.8,
   },
   {
@@ -98,7 +98,7 @@ export const BEATS: Ethics41Beat[] = [
           { id: 'force', upto: 1, reads: 'force — the other door is simply shut' },
         ],
       },
-      explain: 'At the nudge. Force is the obvious wrong and the duller one: it overrules your judgement and leaves it intact, and you know exactly what happened. A nudge goes around your judgement and leaves you sure you decided, which is far harder to consent to.',
+      explain: 'At the nudge. Force is the obvious wrong and the duller one. It overrules your judgement and leaves it intact, and you know what happened. A nudge goes around your judgement and leaves you sure you decided. That’s far harder to consent to.',
       xp: 5,
     },
     dur: 1.0,

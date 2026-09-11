@@ -29,7 +29,7 @@ export const BEATS: Eth15Beat[] = [
   {
     g: 462, plain: 1, tilt: 0,
     dur: 2.3,
-    text: 'Here is a plain report of something that happened. You stole that money.',
+    text: 'Here’s a plain report of what happened. You stole that money.',
   },
   {
     g: 462, plain: 1, tilt: 0,
@@ -50,13 +50,13 @@ export const BEATS: Eth15Beat[] = [
   {
     g: 13, plain: 1, moral: 1, tilt: 0,
     dur: 2.1,
-    text: 'That is emotivism. The extra word carries no extra fact.',
+    text: 'That’s emotivism. The extra word carries no extra fact.',
     cite: 'Ayer\'s claim',
   },
   {
     g: 13, plain: 1, moral: 1, tilt: 0,
     dur: 2.5,
-    text: 'It is a tone of voice, a wince set down in ink.',
+    text: 'It’s a tone of voice, a wince set down in ink.',
   },
   {
     g: 139, plain: 1, moral: 1, tilt: 0,
@@ -74,7 +74,7 @@ export const BEATS: Eth15Beat[] = [
   {
     g: 5, plain: 1, moral: 1, tilt: 0, doubt: 1,
     dur: 3.3,
-    text: 'The other camp says the instrument is the problem. If cruelty really is wrong, that is a fact about cruelty.',
+    text: 'Realists say the instrument is the problem. If cruelty really is wrong, that’s a fact about cruelty.',
     cite: 'The realist answers',
   },
   {
@@ -87,7 +87,7 @@ export const BEATS: Eth15Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap what emotivism says the moral word adds.',
-      explain: 'A feeling, and not a claim at all. The board about the speaker is worth slowing down for: "I disapprove of stealing" IS a claim, and you could check it by watching me. Emotivism says the moral word does not report the disapproval. It performs it.',
+      explain: 'A feeling, and not a claim at all. The board about the speaker is worth slowing down for. “I disapprove of stealing” IS a claim, and you could check it by watching the speaker. Emotivism says the moral word does not report the disapproval. It performs it.',
       xp: 5,
     },
   },
@@ -104,7 +104,7 @@ export const BEATS: Eth15Beat[] = [
           { id: 'boo', label: 'a boo', reads: 'a boo, and a boo is neither', correct: true },
         ],
       },
-      explain: 'A boo. The middle is a different theory wearing this one coat: it makes the sentence true or false depending on what people feel, so the sentence is still a report. Emotivism will not allow even that. A boo cannot be false, and it cannot be checked.',
+      explain: 'A boo. The bin “a report of feeling” is a different theory wearing this one’s coat. It makes the sentence true or false depending on what people feel, so the sentence is still a report. Emotivism won’t allow even that. A boo can’t be false, and it can’t be checked.',
       xp: 5,
     },
   },

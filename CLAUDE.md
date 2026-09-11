@@ -927,14 +927,14 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **fifty-four** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **fifty-five** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
 `check-routes` · `check-nav` · `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-echo` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` · `check-wardrobe` ·
 `check-camera` · `check-tour` · `check-space` · `check-controls` · `check-shade` · `check-lift` · `check-fits` ·
-`check-plainwords` · `check-voice` · `check-streak` · `check-quips` ·
+`check-plainwords` · `check-voice` · `check-ear` · `check-streak` · `check-quips` ·
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
@@ -1652,6 +1652,51 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
   imperative. **A wholesale rewrite of 1,364 beats was the wrong move and was not
   made**: they are pinned to what the stage draws, to maxims cut from their own
   wording, to the generated name index and to group Q's neighbour rules.
+
+  **AND THEN THE LESSONS WERE GIVEN A VOICE, WHICH CHANGED WHAT A SENTENCE IS FOR.**
+  Decided 11 Sep 2026: every narration beat will be read by Google's Chirp 3 HD
+  voice (Algieba, British English), on by default and mutable, with each word
+  appearing on screen as the voice reaches it. The audio pipeline is still being
+  built; the writing had to change first, because a lesson written today is the
+  one that voice will read. So a sentence is heard once with no going back, and
+  every word on screen has to be a word the voice says. **Groups AC and AD** of the
+  rule book are the result, researched before a line changed — broadcast writing
+  for the ear, Google's own Chirp documentation, the multimedia-learning evidence,
+  and the ranked studies of what makes prose read as generated — and `npm run
+  check:ear` holds their countable half from `scripts/lib/earrules.mjs`.
+
+  **THIS TIME THE REWRITE WAS THE RIGHT MOVE, and the difference from the pass
+  above is what made it safe.** Every lesson's `text`, `explain` and `closing` was
+  rewritten in twelve reading-order batches, with a guard that failed any file where
+  anything else in the script had moved — quotations, prompts, pose codes, beat
+  count — and a lint that held each lesson's maxim and each gag's cue word. What it
+  found is worth more than the style:
+
+  - **The J12 splitter had been deleting quote marks.** `split-beats.mjs` put the
+    closing quote inside its separator, so 15 beats shipped with quotes that never
+    closed and 2 sentences were cut across a tap: invisible on a page, two sentences
+    to an ear. It is fixed in both it and `check-words`, which shared the expression.
+  - **The corpus had three contractions and 1,272 spelled-out forms.** Google's
+    guidance for the voice is to write conversationally; spelled out, every "does
+    not" is stressed. 407 are left, each one a "not" that is the claim.
+  - **Half the advice that started it was wrong**, and AC12 records which — breath
+    commas, ellipses as pauses, short sentences for atmosphere, and "burstiness",
+    which is a detector's term, not a writing principle.
+  - **The rewriters found real faults the rules had never looked for** — narration
+    naming things the stage does not draw (a dog, a plank, a cup, "citizenship"
+    over THE VOTE), explanations pointing at card positions on controls that
+    shuffle, an explanation telling every reader "you took the one on the right",
+    Foot credited with Thomson's footbridge, and a Collingwood distinction labelled
+    as the theory he rejected. Reading each lesson for the ear is reading it closely.
+  - **And it exposed a hole in the must-box stamp.** `muststamp` ignored narration,
+    explanations and readouts, but its list stopped before a summary's `closing`
+    and `points` and a control's `chip`. So rewriting closings made 103 box stamps
+    and 43 tour stamps stale for a change that cannot move a box. The list is
+    complete now. `scripts/restamp-deck-prose.mjs` re-stamped only lessons the old
+    rule proved valid, after a diagnostic found none stale for any other reason.
+  - **What it could not do is listen.** A synthetic voice misplaces stress and
+    misreads a name in a perfectly even tone, so AC11's listening pass, and a
+    pronunciation list, wait for the audio.
 - **Productive struggle.** Every lesson earns its payoff with a real question or dilemma. A good "trick" answer is tempting for a *nameable* reason — so the explanation should **name the bias/fallacy and say why the tempting choice fails.**
 - **Ground it in a real thinker.** Pair the concept with a primary-source `quote` card. Authenticity ("here is the sentence Descartes actually wrote") is what makes it feel valuable, not gamified trivia.
 - **Give it an arc.** Hook (provocation) → build → struggle → a "what you now know" payoff on the summary.

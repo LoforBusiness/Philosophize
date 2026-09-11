@@ -42,7 +42,7 @@ export const BEATS: Epi20Beat[] = [
   },
   {
     p: 2, x: 200, voices: 1, agree: 0.9,
-    text: 'The bar climbs, and it is right to climb.',
+    text: 'The bar climbs, and it’s right to climb.',
     dur: 2.1,
   },
   {
@@ -58,7 +58,7 @@ export const BEATS: Epi20Beat[] = [
   },
   {
     p: 13, x: 132, voices: 1, agree: 0.32, wires: 1,
-    text: 'The count was never really four.',
+    text: 'The real count was never four.',
     dur: 1.8,
   },
   {
@@ -100,7 +100,7 @@ export const BEATS: Epi20Beat[] = [
           { id: 'noise', reads: 'unknown, and just passing it on' },
         ],
       },
-      explain: 'Checked it themselves, and unknown. The point is that fame does nothing. What makes a second report count is that it had its own way of checking and might have come out differently. A big name repeating a post adds reach, and reach is what feels like evidence.',
+      explain: 'Checked it themselves, and unknown. The point is that fame does nothing. A second report counts when it had its own way of checking and might have come out differently. A big name repeating a post adds reach, and reach is what feels like evidence.',
       xp: 5,
     },
     dur: 1.0,

@@ -23,12 +23,12 @@ export interface Epi13Beat extends BaseBeat {
 export const BEATS: Epi13Beat[] = [
   {
     p: 462, x: 70,
-    text: 'A fair lottery, a million tickets, one winner. You hold ticket 400,001.',
+    text: 'A fair lottery, a million tickets, one winner. You hold ticket forty thousand and one.',
     dur: 2.1,
   },
   {
     p: 462, x: 70,
-    text: 'Will it win? You would say no, flatly, and you would be right.',
+    text: 'Will it win? You’d say no, flatly, and you’d be right.',
     dur: 2.3,
   },
   {
@@ -39,7 +39,7 @@ export const BEATS: Epi13Beat[] = [
   },
   {
     p: 394, x: 168, grid: 1, off: 1,
-    text: 'Strike the first one out. You are 99.9999% sure — better odds than most things you happily claim to know, including who your neighbours are.',
+    text: 'Strike the first one out, at a million to one. It’s still not certainty, but it beats most things you happily claim to know, like who your neighbours are.',
     cite: 'One verdict',
     dur: 4.8,
   },
@@ -64,7 +64,7 @@ export const BEATS: Epi13Beat[] = [
   },
   {
     p: 29, x: 168, grid: 1, off: 2, winner: 1,
-    text: 'You have just said this draw has no winner — and you know it does.',
+    text: 'You’ve just said this draw has no winner, and you know there’s one.',
     dur: 2.6,
   },
   {
@@ -81,7 +81,7 @@ export const BEATS: Epi13Beat[] = [
           { id: 'fall', profile: [0.95, 0.7, 0.4, 0.2, 0.05], reads: 'the more tickets, the weaker each verdict' },
         ],
       },
-      explain: 'It climbs, and that is the sting. Every verdict gets MORE reasonable as tickets are added, and the whole set gets more certainly false, because one ticket wins. Believing each is not believing all. And nothing says which belief is wrong.',
+      explain: 'It climbs, and that’s the sting. Every verdict gets more reasonable as tickets are added. The whole set gets more certainly false, because one ticket wins. Believing each is not believing all. And nothing says which belief is wrong.',
       xp: 5,
     },
     dur: 1.0,
@@ -90,7 +90,7 @@ export const BEATS: Epi13Beat[] = [
     p: 383, x: 124, grid: 1, off: 2, winner: 1, pick: 1,
     interact: {
       prompt: 'You are sure of every verdict up there. Tap the ticket that wins.',
-      explain: 'You cannot name one, and you cannot deny there is one. That gap — between what you can say about each ticket and what you can say about all of them — is the whole paradox.',
+      explain: 'You can’t name one, and you can’t deny there’s one. The whole paradox is the gap between what you can say about each ticket and about all of them.',
       xp: 5,
     },
     dur: 1.0,

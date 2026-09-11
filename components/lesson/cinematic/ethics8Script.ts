@@ -40,7 +40,7 @@ export const BEATS: Ethics8Beat[] = [
   },
   {
     p: 47, x: 80, grid: 1,
-    text: 'Tidy boxes — and nobody’s name in any of them.',
+    text: 'Tidy boxes, with nobody’s name in any of them.',
     dur: 1.8,
   },
   {
@@ -119,14 +119,14 @@ export const BEATS: Ethics8Beat[] = [
           { id: 'method', upto: 1, reads: 'a method with demands you can plainly fail', correct: true },
         ],
       },
-      explain: 'The far end. Care sounds like a mood, which is why it gets filed under nice instead of under reasoning. It makes demands: pay attention, accept the responsibility, answer the person actually in front of you. Every one of those can be failed, and often is.',
+      explain: 'The far end. Care sounds like a mood, which is why it gets filed under nice instead of under reasoning. It makes demands: pay attention, accept the responsibility, answer the person in front of you. Every one of those can be failed, and often is.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 38, x: 112, grid: 0.3, oth: 1, thread: 1,
-    text: 'Nel Noddings built that into a full ethics. Morality, she argued, grows out of the bond between the one caring and the one cared for.',
+    text: 'Nel Noddings built care into a full ethics. For her, morality grows out of the bond between the one caring and the one cared for.',
     cite: 'Nel Noddings · 1984',
     dur: 3.3,
   },

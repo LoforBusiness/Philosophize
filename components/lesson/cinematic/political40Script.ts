@@ -39,12 +39,12 @@ export const BEATS: Political40Beat[] = [
   },
   {
     p: 174, x: 32, shelves: 0.34,
-    text: 'The usual complaint about markets is unfairness. That one does not fit here.',
+    text: 'The usual complaint about markets is unfairness. That one doesn’t fit here.',
     dur: 4.2,
   },
   {
     p: 438, x: 32, shelves: 1,
-    text: 'So there is a second complaint underneath it, and it is about the goods themselves.',
+    text: 'So there’s a second complaint underneath the first, and it’s about the goods themselves.',
     dur: 4.6,
   },
   {
@@ -56,7 +56,7 @@ export const BEATS: Political40Beat[] = [
     p: 260, x: 32, shelves: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what this argument adds to the old one.',
-      explain: 'That a sale can spoil the thing. Unfairness was the old objection, and you answer it by making people richer — which does nothing here, since a rich voter selling a vote is still selling a vote. Waste is an argument for markets, not against them.',
+      explain: 'That a sale can spoil the thing. Unfairness was the old objection, and you answer it by making people richer. That does nothing here, because a rich voter selling a vote is still selling a vote. Waste is an argument for markets, not against them.',
       xp: 5,
     },
     dur: 1.0,
@@ -95,7 +95,7 @@ export const BEATS: Political40Beat[] = [
           { id: 'blocked', label: 'not for sale', reads: 'never, whatever the circumstances' },
         ],
       },
-      explain: 'The middle shelf. Calling a queue mere rationing throws away the thing that made it a queue — time was the only currency in it. And a flat ban is more than the argument needs: this is a case for naming what you lose, not for a rule.',
+      explain: 'The middle shelf. Calling a queue mere rationing throws away what made it a queue. Time was the only currency in it. And a flat ban is more than the argument needs. This is a case for naming what you lose, not for a rule.',
       xp: 5,
     },
     dur: 1.0,

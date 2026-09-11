@@ -29,18 +29,18 @@ export const BEATS: Ethics4Beat[] = [
   },
   {
     a: 167, b: 8, floor: 0, rows: 1,
-    text: 'Saying there is no right answer underneath the disagreement is a much bigger claim, and a separate one.',
+    text: 'Saying there’s no right answer underneath the disagreement is a much bigger claim, and a separate one.',
     dur: 2.3,
   },
   {
     a: 2, b: 10, rows: 2,
-    text: 'First the harmless fact. Societies really do hold different codes.',
+    text: 'First the harmless fact. Societies do hold different codes.',
     cite: 'Two kinds of relativism',
     dur: 1.8,
   },
   {
     a: 2, b: 10, rows: 2,
-    text: 'The bold claim — moral relativism — goes further. Whether something is right depends on the group asking, and there is no answer underneath.',
+    text: 'The bold claim, called moral relativism, goes further. Whether something is right depends on the group asking, and there’s no answer underneath.',
     dur: 2.9,
   },
   {
@@ -50,7 +50,7 @@ export const BEATS: Ethics4Beat[] = [
   },
   {
     a: 380, b: 35, rows: 3,
-    text: 'Ruth Benedict pressed the bold claim: what a society calls "good" simply tracks what it has come to approve. Morality, she held, is a name for socially approved habits.',
+    text: 'Ruth Benedict pressed the bold claim: what a society calls “good” only tracks what it has come to approve. For her, morality is a name for socially approved habits.',
     cite: 'Ruth Benedict, 1934',
     dur: 4.6,
   },
@@ -68,7 +68,7 @@ export const BEATS: Ethics4Beat[] = [
   },
   {
     a: 13, b: 15, rows: 3,
-    text: 'The objectivist fires back: some truths hold whatever a culture says. Torturing a child for fun is wrong — full stop.',
+    text: 'The objectivist fires back: some truths hold whatever a culture says. Torturing a child for fun is wrong, full stop.',
     cite: 'Moral objectivism',
     dur: 3.4,
   },
@@ -90,7 +90,7 @@ export const BEATS: Ethics4Beat[] = [
   },
   {
     a: 38, b: 38, floor: 1, rows: 3,
-    text: 'A shared floor, under feet that thought they stood apart.',
+    text: 'A shared floor, under the feet of cultures sure they stood apart.',
     dur: 1.8,
   },
   {
@@ -117,7 +117,7 @@ export const BEATS: Ethics4Beat[] = [
     interact: {
       prompt: 'If every culture sets its own rules, must each one tolerate the rest?',
       explain:
-        'It sounds open-minded, and it backfires. If every value is only local, then "tolerance suits us" can never grow into "everyone must be tolerant." A rule for everybody is exactly what this view cannot give you.',
+        'It sounds open-minded, and it backfires. If every value is only local, “tolerance suits us” can never grow into “everyone must be tolerant”. This view can’t give you a rule for everybody.',
       xp: 5,
     },
     dur: 1.0,
@@ -131,7 +131,7 @@ export const BEATS: Ethics4Beat[] = [
         'Brown found a shared moral floor',
         'Tolerance does not follow from relativism',
       ],
-      closing: 'Understanding a culture is not giving up judgement. It is judging with open eyes and a longer look.',
+      closing: 'Understanding a culture is not giving up judgement. It’s judging with open eyes and a longer look.',
     },
     dur: 2.8,
   },

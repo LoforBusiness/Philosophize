@@ -66,7 +66,7 @@ export const BEATS: Eth16Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Both hand-overs are drawn the same. Tap the one thing missing from the second.',
-      explain: 'The knife. The chain of causes is drawn the same both times because it IS the same, and your hand does the same thing both times. If being free meant escaping causes, there would be nothing here to point at.',
+      explain: 'The knife. The chain of causes is drawn the same both times because it IS the same. Your hand does the same thing both times. If being free meant escaping causes, there would be nothing here to point at.',
       xp: 5,
     },
   },

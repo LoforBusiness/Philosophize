@@ -43,12 +43,12 @@ export const BEATS: Political28Beat[] = [
   },
   {
     p: 443, x: 24, cell: 1, past: 1,
-    text: 'One answer looks back. He did it, so the sentence is what he has earned.',
+    text: 'One answer looks back. He did it, so the sentence is what he’s earned.',
     dur: 4.6,
   },
   {
     p: 265, x: 24, cell: 1, past: 1, future: 1,
-    text: 'The other looks forward. Punish to deter, to protect, and to send somebody back changed.',
+    text: 'The other looks forward. Punishment is there to deter, to protect, and to send somebody back changed.',
     dur: 4.8,
   },
   {
@@ -94,7 +94,7 @@ export const BEATS: Political28Beat[] = [
           { id: 'power', reads: 'the cell is a machine for making citizens', holders: ['Michel Foucault'] },
         ],
       },
-      explain: 'The past act settles it. Kant holds that desert is the whole ground, so a sentence is owed whether or not anybody benefits. A consequentialist would release the man, and Foucault would ask what the prison is really doing.',
+      explain: 'The past act settles it. For Kant, what the offender deserves is the whole ground, so a sentence is owed whether or not anybody benefits. A consequentialist would release the man, and Foucault would ask what the prison is doing.',
       xp: 5,
     },
     dur: 1.0,

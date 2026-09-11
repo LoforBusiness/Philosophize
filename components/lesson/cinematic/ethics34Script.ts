@@ -36,7 +36,7 @@ export const BEATS: Ethics34Beat[] = [
   },
   {
     p: 47, x: 46, pop: 0.45,
-    text: 'It goes up, because there is more of it.',
+    text: 'The bar goes up because there are more lives to count.',
     dur: 1.8,
   },
   {
@@ -47,7 +47,7 @@ export const BEATS: Ethics34Beat[] = [
   },
   {
     p: 380, x: 46, pop: 1,
-    text: 'Derek Parfit called the ending repugnant. He could not accept it, and spent the rest of his life failing to refute it.',
+    text: 'Derek Parfit called the ending repugnant. He couldn’t accept it, and spent the rest of his life failing to refute it.',
     cite: 'Parfit',
     dur: 4.4,
   },
@@ -78,7 +78,7 @@ export const BEATS: Ethics34Beat[] = [
           { id: 'repugnant', upto: 1, reads: 'and the bar says yes', correct: true },
         ],
       },
-      explain: 'At the far end. Every step you dragged through was a small improvement by the total. The destination is one almost nobody will accept. That is the argument. Notice it never told you a barely-good life was bad. It only kept adding.',
+      explain: 'At the far end. Every step you dragged through was a small improvement by the total. The destination is one almost nobody will accept. That’s the argument. Notice it never told you a barely-good life was bad. It only kept adding.',
       xp: 5,
     },
     dur: 1.0,
@@ -111,7 +111,7 @@ export const BEATS: Ethics34Beat[] = [
         'Averaging swaps it for an equally strange result',
         'Parfit rejected it and could not refute it',
       ],
-      closing: 'This one is genuinely open. Every theory of how good a world is has to answer here, and none of the answers is comfortable.',
+      closing: 'Nobody has solved this one. Every theory of how good a world is has to answer here, and none of the answers is comfortable.',
     },
     dur: 3.0,
   },

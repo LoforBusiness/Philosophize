@@ -19,14 +19,14 @@ export interface Logic6Beat extends BaseBeat {
 export const BEATS: Logic6Beat[] = [
   {
     p: 443, link: 0, rain: 0,
-    text: 'Two tiny words run almost every argument. Master "if" and "then" and you hold logic’s favourite tool.',
+    text: 'Two tiny words run almost every argument. Master the words “if” and “then”, and you hold logic’s favourite tool.',
     dur: 3.4,
   },
   {
     // The arrow and the promise table arrive together: the whole diagram assembles
     // on the beat that explains what a conditional actually claims.
     p: 167, link: 1, table: 1,
-    text: 'A conditional says "if P, then Q. P is the antecedent — the condition.',
+    text: 'A conditional says “if P, then Q”. P is the antecedent — the condition.',
     cite: 'Antecedent → consequent',
     dur: 2.2,
   },
@@ -34,12 +34,12 @@ export const BEATS: Logic6Beat[] = [
     // The arrow and the promise table arrive together: the whole diagram assembles
     // on the beat that explains what a conditional actually claims.
     p: 167, link: 1, table: 1,
-    text: 'Q is the consequent — what follows. It promises nothing about P alone, only the link between them.',
+    text: 'Q is the consequent — what follows. The sentence promises nothing about P alone, only the link between them.',
     dur: 2.8,
   },
   {
     p: 13, link: 1, rain: 1, table: 1,
-    text: '"If it rains, the streets get wet. The sentence does not say rain IS falling.',
+    text: 'Take the sentence “if it rains, the streets get wet”. Nothing in it says rain is falling right now.',
     cite: 'A promise, not a fact',
     dur: 2.2,
   },
@@ -83,7 +83,7 @@ export const BEATS: Logic6Beat[] = [
           { id: 'link', upto: 1, reads: 'the link, and nothing whatever about the if', correct: true },
         ],
       },
-      explain: 'All of it goes to the link. If pigs fly, the moon is cheese can be accepted as true while pigs stay firmly on the ground, because the sentence never claimed pigs fly. It claimed only that one would bring the other.',
+      explain: 'All of it goes to the link. You can accept “if pigs fly, the moon is cheese” while pigs stay on the ground. The sentence never claimed pigs fly, only that one would bring the other.',
       xp: 5,
     },
     dur: 1.0,

@@ -44,7 +44,7 @@ export const BEATS: Met16Beat[] = [
   {
     g: 13, panels: 2, crave: 1, second: 1,
     dur: 3.3,
-    text: 'Frankfurt calls that second arrow a desire about a desire. You do not only want things.',
+    text: 'Frankfurt calls that second arrow a desire about a desire. You don’t only want things.',
     cite: 'Wanting to want',
   },
   {
@@ -68,7 +68,7 @@ export const BEATS: Met16Beat[] = [
   {
     g: 399, panels: 2, crave: 1, second: 1,
     dur: 4.8,
-    text: 'So freedom is not about where the craving came from. It is about whether the man is standing behind it or being pulled by it.',
+    text: 'So freedom is not about where the craving came from. It’s about whether the man stands behind the craving or is pulled by it.',
     cite: 'Where the freedom is',
   },
   {
@@ -76,7 +76,7 @@ export const BEATS: Met16Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap the addict Frankfurt calls unfree.',
-      explain: 'The one whose second arrow points back against his own craving. His body does exactly what the other one\'s body does, and the chemistry is identical, so nothing about the ACT can be what separates them. What he lacks is any endorsement of the will that is moving him.',
+      explain: 'The one whose second arrow points back against his own craving. His body does what the other man’s body does, and the chemistry is identical. So nothing about the act can be what separates them. What he lacks is any endorsement of the will that’s moving him.',
       xp: 5,
     },
   },
@@ -93,7 +93,7 @@ export const BEATS: Met16Beat[] = [
           { id: 'endorsed', label: 'wanting your own want', reads: 'free means wanting your own desire', correct: true },
         ],
       },
-      explain: 'Wanting your own want. The first swaps Frankfurt for an easier opponent: he is a compatibilist, so every desire here can be fully caused and he does not mind. What he adds is a second question — not where a desire came from, but whether you stand behind it.',
+      explain: 'Wanting your own want. The “no cause at all” bin swaps Frankfurt for an easier opponent. He’s a compatibilist, so every desire here can be fully caused and he doesn’t mind. What he adds is a second question: not where a desire came from, but whether you stand behind it.',
       xp: 5,
     },
   },
@@ -106,7 +106,7 @@ export const BEATS: Met16Beat[] = [
         'Both addicts are caused; only one is estranged from his craving',
         'Frankfurt keeps determinism and relocates the freedom',
       ],
-      closing: 'The question stops being where the wanting came from, and becomes whether it is yours.',
+      closing: 'The question stops being where the wanting came from, and becomes whether it’s yours.',
     },
     dur: 3.0,
   },

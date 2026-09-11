@@ -29,13 +29,13 @@ export const BEATS: Political33Beat[] = [
   },
   {
     p: 440, x: 52, open: 1,
-    text: 'Open them all the way and everything is admitted. Every argument gets a hearing, which is what a free society is for.',
+    text: 'Open the doors all the way and everything is admitted. Every argument gets a hearing, which is what a free society is for.',
     cite: 'Everything admitted',
     dur: 4.6,
   },
   {
     p: 19, x: 52, open: 1, threat: 1,
-    text: 'Then something walks through that intends to shut the doors behind it. Karl Popper noticed the trap in 1945.',
+    text: 'Then something walks through intending to shut the doors behind it. Karl Popper noticed the trap in 1945.',
     cite: 'Popper, 1945',
     dur: 3.5,
   },
@@ -46,7 +46,7 @@ export const BEATS: Political33Beat[] = [
   },
   {
     p: 160, x: 52, open: 0.1, threat: 1,
-    text: 'So shut the doors. Now look at what you have built.',
+    text: 'So shut the doors. Now look at what you’ve built.',
     cite: 'The other horn',
     dur: 1.8,
   },
@@ -82,7 +82,7 @@ export const BEATS: Political33Beat[] = [
           { id: 'all', upto: 1, reads: 'open to those who will shut it', correct: false },
         ],
       },
-      explain: 'Read the line closely. Popper\'s claim is narrower than its reputation. He does not say silence the intolerant. He says argue with them for as long as they will argue, and claim the right to force only once they refuse.',
+      explain: 'Read the line closely. Popper’s claim is narrower than its reputation. He does not say to silence the intolerant. He says to argue with them for as long as they’ll argue. He claims the right to force only once they refuse.',
       xp: 5,
     },
     dur: 1.0,

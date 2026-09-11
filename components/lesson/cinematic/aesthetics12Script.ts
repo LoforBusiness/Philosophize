@@ -43,7 +43,7 @@ export const BEATS: Aes12Beat[] = [
   },
   {
     p: 170, r: 21, rx: 224, ticks: 3, box: 1,
-    text: 'Every reader who stops adds another mark, and every mark says the same word. Sealed inside the poet’s head is whatever he actually meant.',
+    text: 'Every reader who stops adds another mark, and every mark says the same word. Sealed inside the poet’s head is whatever he meant.',
     cite: 'Two places meaning could live',
     dur: 4.8,
   },
@@ -83,7 +83,7 @@ export const BEATS: Aes12Beat[] = [
           { id: 'poem', upto: 1, reads: 'in the poem, which every reader can examine', correct: true },
         ],
       },
-      explain: 'Nearly all of it in the poem. Taking how a work was made for what the work means is the genetic fallacy. What the poet intended is private and cannot be checked, so it settles nothing in public — and the poem is the one thing everybody can point at.',
+      explain: 'Nearly all of it in the poem. Letting what the poet meant decide what the poem means is the intentional fallacy. What the poet intended is private and can’t be checked, so it settles nothing in public. The poem is the one thing everybody can point at.',
       xp: 5,
     },
     dur: 1.0,
@@ -92,7 +92,7 @@ export const BEATS: Aes12Beat[] = [
     p: 169, r: 5, rx: 224, ticks: 5, box: 1, pick: 1,
     interact: {
       prompt: 'The poet says the line was a joke. Tap what actually settles the poem’s meaning.',
-      explain: 'The trap: the box feels like the source, so it feels authoritative. But nobody can open it, and an intention nobody can inspect settles nothing. The poem on the board is the one thing every reader can actually check.',
+      explain: 'The trap: the box feels like the source, so it feels authoritative. But nobody can open it, and an intention nobody can inspect settles nothing. The poem on the board is the one thing every reader can check.',
       xp: 5,
     },
     dur: 1.0,

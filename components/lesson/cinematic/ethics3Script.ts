@@ -35,18 +35,18 @@ export const BEATS: Ethics3Beat[] = [
   },
   {
     d: 2, tx: 118, pull: 0, lens: 0,
-    text: 'Three verdicts. Same dilemma, same goal — yet they split.',
+    text: 'Three verdicts. Same dilemma, same goal, yet they split.',
     dur: 2.4,
   },
   {
     d: 13, tx: 158, lens: 0,
-    text: 'A runaway trolley hurtles toward five people on the track. Your hand rests on a lever.',
+    text: 'A runaway trolley hurtles towards five people on the track. Your hand rests on a lever.',
     cite: 'Philippa Foot, 1967',
     dur: 2.5,
   },
   {
     d: 13, tx: 158, lens: 0,
-    text: 'Pull it, and the trolley swerves onto a side track — where one person stands instead.',
+    text: 'Pull it, and the trolley swerves onto a side track, where one person stands instead.',
     dur: 2.5,
   },
   {
@@ -56,7 +56,7 @@ export const BEATS: Ethics3Beat[] = [
   },
   {
     d: 13, tx: 196, pull: 1, lens: 1,
-    text: 'John Stuart Mill would pull. The right act promotes the most happiness, counting each person equally.',
+    text: 'John Stuart Mill would pull. For him, the right act promotes the most happiness, counting each person equally.',
     cite: 'Consequentialism — the outcome',
     dur: 2.3,
   },
@@ -67,7 +67,7 @@ export const BEATS: Ethics3Beat[] = [
   },
   {
     d: 458, tx: 196, pull: 0, lens: 2,
-    text: 'Immanuel Kant would not. He will not trade lives like sums, because the one person has a worth no arithmetic can outweigh.',
+    text: 'Immanuel Kant would not. He won’t trade lives like sums, because the one person has a worth no arithmetic can outweigh.',
     cite: 'Deontology — the duty',
     dur: 3.8,
   },
@@ -78,7 +78,7 @@ export const BEATS: Ethics3Beat[] = [
   },
   {
     d: 22, tx: 196, lens: 3,
-    text: 'Aristotle asks a different question: not "what do I do? but "who do I become?',
+    text: 'Aristotle asks a different question. Not what you should do, but who you become.',
     cite: 'Virtue ethics — the character',
     dur: 2.9,
   },
@@ -113,7 +113,7 @@ export const BEATS: Ethics3Beat[] = [
           { id: 'out', upto: 1, reads: 'the outcome alone, and nothing else whatever', correct: true },
         ],
       },
-      explain: 'All the way over. Consequentialism, and its famous form utilitarianism, weigh an act by what the act brings about, and above all by how much happiness comes of it. The other end of the bar is Kant, who does not look at the ending at all.',
+      explain: 'All the way over. Consequentialism, and its famous form utilitarianism, weighs an act by what the act brings about. Above all, it counts how much happiness comes of it. The other end of the bar is Kant, who doesn’t look at the ending at all.',
       xp: 5,
     },
     dur: 1.0,
@@ -124,7 +124,7 @@ export const BEATS: Ethics3Beat[] = [
     interact: {
       prompt: 'Utilitarians and Kant both say "the end justifies the means." True?',
       explain:
-        'A utilitarian may let good ends justify the means, but Kant flatly forbids it: never treat a person merely as a means, whatever follows.',
+        'A utilitarian may let good ends justify the means. Kant flatly forbids it: never treat a person merely as a means, whatever follows.',
       xp: 5,
     },
     dur: 1.0,
@@ -138,7 +138,7 @@ export const BEATS: Ethics3Beat[] = [
         'Virtue ethics: good acts, good character',
         'These three pillars form normative ethics',
       ],
-      closing: 'Next hard choice, run all three — outcome, duty, character — and watch where they clash.',
+      closing: 'At your next hard choice, run all three and watch where outcome, duty and character clash.',
     },
     dur: 2.8,
   },

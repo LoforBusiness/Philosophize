@@ -33,26 +33,26 @@ export interface Aesthetics37Beat extends BaseBeat {
 export const BEATS: Aesthetics37Beat[] = [
   {
     p: 379, x: 54, staves: 1, score: 1,
-    text: 'Two performances tonight. The top one is a written piece — every note existed before anybody walked on.',
+    text: 'Two performances tonight. The top one was written first, and every note existed before anybody walked on.',
     dur: 3.8,
   },
   {
     p: 384, x: 54, staves: 1, score: 1, played: 1,
-    text: 'The bottom line is a solo. Watch the line arrive with nothing above it and nothing to compare it against.',
+    text: 'The bottom row is a solo. Watch the line arrive with nothing above it and nothing to compare it against.',
     dur: 4.2,
   },
   {
     p: 165, x: 54, staves: 1, score: 1, played: 1, live: 1,
     interact: {
       prompt: 'Tap the row with nothing standing behind it.',
-      explain: 'The lower one. The written piece has something the performance is a performance OF, so a wrong note is a mistake. There is nothing for the solo to be wrong about, because the playing and the making are the same act.',
+      explain: 'The lower one. The written piece has something the performance is a performance OF, so a wrong note is a mistake. There’s nothing for the solo to be wrong about, because the playing and the making are the same act.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 380, x: 54, staves: 1, score: 1, played: 1,
-    text: 'Which is why you can burn every copy of a symphony and it survives. Do that to an improvisation and there is nothing left to recover.',
+    text: 'That’s why you can burn every copy of a symphony and it survives. Do that to an improvisation and there’s nothing left to recover.',
     dur: 4.8,
   },
   {
@@ -69,7 +69,7 @@ export const BEATS: Aesthetics37Beat[] = [
   },
   {
     p: 309, x: 54, staves: 1, score: 1, played: 1,
-    text: 'Then recording arrived, and players started learning famous solos note for note. Something meant to happen once acquired a correct version.',
+    text: 'Then recording arrived, and players started learning famous solos note for note. Something meant to happen once now had a correct version.',
     dur: 4.8,
   },
   {
@@ -86,7 +86,7 @@ export const BEATS: Aesthetics37Beat[] = [
           { id: 'text', upto: 1, reads: 'a piece to get right', correct: true },
         ],
       },
-      explain: 'The notes survived the trip and the making-it-up did not. What sits on the stave now is a composition with an odd history: it began as something being decided and it is now something being followed.',
+      explain: 'The notes survived the trip and the making-it-up did not. What sits on the stave now is a composition with an odd history. It began as something being decided, and it’s now something being followed.',
       xp: 5,
     },
     dur: 1.0,
@@ -110,7 +110,7 @@ export const BEATS: Aesthetics37Beat[] = [
         'So the performance is the work, not a copy',
         'Transcribing it turns it into a composition',
       ],
-      closing: 'It is the one art where being there for the making is not a privilege. It is the only way the thing exists at all.',
+      closing: 'It’s the one art where being there for the making is not a privilege. It’s the only way the thing exists at all.',
     },
     dur: 3.2,
   },

@@ -40,12 +40,12 @@ export const BEATS: Ethics9Beat[] = [
   },
   {
     p: 41, x: 168, notes: 1,
-    text: 'The student\'s mother lived for him alone, and his leaving would break her.',
+    text: 'The student’s mother lived for him alone, and his leaving would break her.',
     dur: 1.9,
   },
   {
     p: 383, x: 124, notes: 1,
-    text: 'Neither claim outranks the other. That is what makes this a dilemma rather than a hard sum — there is no scale both of them fit on.',
+    text: 'Neither claim outranks the other. This is a dilemma, not a hard sum, because there is no scale both of them fit on.',
     cite: 'Not a hard sum',
     dur: 4.4,
   },
@@ -64,7 +64,7 @@ export const BEATS: Ethics9Beat[] = [
   },
   {
     p: 167, x: 168, notes: 1, taken: 2,
-    text: 'The student goes. Say he was right to — most people think he was.',
+    text: 'The student goes. Say he was right to, as most people think he was.',
     cite: 'He chooses',
     dur: 2.1,
   },
@@ -77,7 +77,7 @@ export const BEATS: Ethics9Beat[] = [
     p: 6, x: 124, notes: 1, taken: 2, pick: 1,
     interact: {
       prompt: 'He chose, and chose well. Tap the note that is still owed an account.',
-      explain: 'A correct choice does not settle the account. The duty he could not meet was never cancelled, only outweighed — and it still has a claim on him.',
+      explain: 'A correct choice does not settle the account. The duty he couldn’t meet was never cancelled, only outweighed — and it still has a claim on him.',
       xp: 5,
     },
     dur: 1.0,

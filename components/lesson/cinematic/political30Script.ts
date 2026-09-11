@@ -55,7 +55,7 @@ export const BEATS: Political30Beat[] = [
     p: 157, x: 24, stack: 1, cleared: 0.4, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what the painting analogy is meant to show.',
-      explain: 'No perfect ideal is needed. Sen is making a point about method: comparing two arrangements does not require naming the best one there could be. Art can plainly be ranked, and the argument does not say the ideal is worthless.',
+      explain: 'No perfect ideal is needed. Sen is making a point about method. Comparing two arrangements does not require naming the best one there could be. Art can be ranked, and the argument doesn’t say the ideal is worthless.',
       xp: 5,
     },
     dur: 1.0,
@@ -98,7 +98,7 @@ export const BEATS: Political30Beat[] = [
           { id: 'fall', profile: [0.9, 0.62, 0.36, 0.1], reads: 'every reform puts a wrong back on' },
         ],
       },
-      explain: 'One wrong at a time. Comparative reforms are how a society actually gets less unjust, and each one is real whether or not perfect justice is ever described. A flat line waits for a blueprint while the stack stays exactly where it is.',
+      explain: 'One wrong at a time. Comparative reforms are how a society gets less unjust in practice. Each one is real whether or not perfect justice is ever described. A flat line waits for a blueprint while the stack stays where it is.',
       xp: 5,
     },
     dur: 1.0,

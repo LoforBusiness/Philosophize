@@ -28,7 +28,7 @@ export interface Political10Beat extends BaseBeat {
 export const BEATS: Political10Beat[] = [
   {
     p: 164, x: 44,
-    text: 'Three people, three piles — and the tallest is three times the shortest. Is that unjust?',
+    text: 'Three people, three piles, and the tallest is three times the shortest. Is that unjust?',
     dur: 1.8,
   },
   {
@@ -44,7 +44,7 @@ export const BEATS: Political10Beat[] = [
   },
   {
     p: 37, x: 44,
-    text: 'You work a patch, the work is yours, so the patch is yours too. But he bolts a brake onto that: leave enough, and as good, for everyone else.',
+    text: 'You work a patch, the work is yours, so the patch is yours too. But he builds a brake into the rule: leave enough, and as good, for everyone else.',
     dur: 3.6,
   },
   {

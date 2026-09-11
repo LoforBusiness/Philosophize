@@ -34,7 +34,7 @@ export interface Ethics40Beat extends BaseBeat {
 export const BEATS: Ethics40Beat[] = [
   {
     p: 355, x: 36,
-    text: 'You promised a dying friend you would burn his letters. Nobody else heard it.',
+    text: 'You promised a dying friend you’d burn his letters. Nobody else heard it.',
     dur: 4.4,
   },
   {
@@ -44,7 +44,7 @@ export const BEATS: Ethics40Beat[] = [
   },
   {
     p: 431, x: 36, promise: 1, seat: 1,
-    text: 'Break the promise and name the person who is worse off. The naming is the hard part.',
+    text: 'Break the promise and name the person who’s worse off. The naming is the hard part.',
     dur: 4.4,
   },
   {
@@ -56,7 +56,7 @@ export const BEATS: Ethics40Beat[] = [
     p: 171, x: 36, promise: 1, seat: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what is still there to be damaged.',
-      explain: 'What he wanted. It was always a stake in how things would go, and things are still going. The man is the one thing nobody can reach now, and answering nothing makes a secret betrayal harmless — which is the case that started this.',
+      explain: 'What he wanted. It was always a stake in how things would go, and things are still going. The man is the one thing nobody can reach now. Answering nothing makes a secret betrayal harmless, and that’s the case that started this.',
       xp: 5,
     },
     dur: 1.0,
@@ -95,7 +95,7 @@ export const BEATS: Ethics40Beat[] = [
           { id: 'him', reads: 'him — his surviving wants can still be defeated', holders: ['Aristotle', 'Joel Feinberg'], correct: true },
         ],
       },
-      explain: 'Him. The tie has something to hold, because a stake outlives its owner. The character answer is thin rather than false — it makes the promise about you, when you made it about him. Epicurus needs the want to stop when the wanting stops.',
+      explain: 'Him. The tie has something to hold, because a stake outlives its owner. The character answer is thin rather than false. It makes the promise about you, when you made it about him. Epicurus needs the want to stop when the wanting stops.',
       xp: 5,
     },
     dur: 1.0,

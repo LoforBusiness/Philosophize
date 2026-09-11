@@ -39,7 +39,7 @@ export const BEATS: Met17Beat[] = [
   {
     g: 379, wall: 1,
     dur: 4.6,
-    text: 'She has also never seen any. She has lived her whole life in a room with nothing in it but black, white and grey.',
+    text: 'But Mary has never seen colour. She’s lived her whole life in a room with nothing in it but black, white and grey.',
     cite: 'And she has never seen it',
   },
   {
@@ -72,7 +72,7 @@ export const BEATS: Met17Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap what Mary gains by stepping outside.',
-      explain: 'What red is like. The board offering a new physical fact is the serious reply. It has to say the wall was never finished. That is hard when the wall is every physical fact by definition. The other board has to tell Mary she imagined the moment.',
+      explain: 'What red is like. The board offering a new physical fact is the serious reply. It has to say the wall was never finished. That’s hard when the wall is every physical fact by definition. The other board has to tell Mary she imagined the moment.',
       xp: 5,
     },
   },
@@ -90,7 +90,7 @@ export const BEATS: Met17Beat[] = [
           { id: 'all', upto: 1, reads: 'physics covers every last bit' },
         ],
       },
-      explain: 'Nearly all of it, and the sliver on the right is the whole argument. The far end treats every physical fact and everything as the same list, which is exactly what is in question. She had the first list complete and she still learns something the day the door opens.',
+      explain: 'Nearly all of it, and the sliver on the right is the whole argument. The far end treats every physical fact and everything as the same list, which is what’s in question. She had the first list complete and she still learns something the day the door opens.',
       xp: 5,
     },
   },

@@ -33,7 +33,7 @@ export const BEATS: Aes13Beat[] = [
   {
     g: 461, art: 1, chain: 0,
     dur: 4.4,
-    text: 'Look as long as you like. There is no brushstroke to find — the forger was better than the tests, which is exactly why the case is interesting.',
+    text: 'Look as long as you like, and there’s no brushstroke to find. The forger was better than the tests, which is why the case is interesting.',
     cite: 'Nothing to find',
   },
   {
@@ -71,7 +71,7 @@ export const BEATS: Aes13Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'One is the Vermeer. Tap the only thing here that could tell you which.',
-      explain: 'The history. Looking harder is the instinct and it is the one move guaranteed to fail — the forgery was built to survive it. What separates these two has never been on either canvas.',
+      explain: 'The history. Looking harder is the instinct, and it’s the one move guaranteed to fail. The forgery was built to survive it. What separates these two has never been on either canvas.',
       xp: 5,
     },
   },
@@ -88,7 +88,7 @@ export const BEATS: Aes13Beat[] = [
           { id: 'two', reads: 'different to look at, same painter' },
         ],
       },
-      explain: 'Same to look at, different painters. The formalist will not let the second half matter. Judging a work by where it came from is the genetic fallacy. The refusal cuts both ways: if the form is identical, so is the value. Most people cannot go along with it.',
+      explain: 'Same to look at, different painters. The formalist won’t let the second half matter. Judging a work by where it came from is the genetic fallacy. The refusal cuts both ways: if the form is identical, so is the value. Most people can’t go along with it.',
       xp: 5,
     },
   },

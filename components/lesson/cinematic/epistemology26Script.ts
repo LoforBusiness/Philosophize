@@ -37,7 +37,7 @@ export const BEATS: Epistemology26Beat[] = [
   },
   {
     p: 159, x: 28, bill: 1, pair: 1,
-    text: 'Your friend gets forty-five. You are both careful, and both good at sums.',
+    text: 'Your friend gets forty-five. You’re both careful, and both good at sums.',
     dur: 4.4,
   },
   {
@@ -47,14 +47,14 @@ export const BEATS: Epistemology26Beat[] = [
   },
   {
     p: 258, x: 28, bill: 1, pair: 1,
-    text: 'So you cannot assume she blundered. By definition she is as likely to be right.',
+    text: 'So you can’t assume she blundered. By definition she’s as likely to be right.',
     dur: 4.8,
   },
   {
     p: 168, x: 28, bill: 1, pair: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap why being sure settles nothing here.',
-      explain: 'Because she is exactly as sure. If a strong feeling decided it, each of you would win by your own lights, which settles nothing at all. Feelings do bear on belief, and who spoke last is no rule anybody has ever defended.',
+      explain: 'Because she’s just as sure. If a strong feeling decided it, each of you would win by your own lights, which settles nothing at all. Feelings do bear on belief, and who spoke last is no rule anybody has ever defended.',
       xp: 5,
     },
     dur: 1.0,
@@ -95,7 +95,7 @@ export const BEATS: Epistemology26Beat[] = [
           { id: 'hold', upto: 1, reads: 'hold, and treat her as the one who slipped' },
         ],
       },
-      explain: 'A long way, and not all the way. Refusing to move treats your own certainty as evidence, which is the trap. Splitting automatically is the other extreme: it hands a veto to anyone willing to disagree, and it stops you weighing whether the two of you really are equals here.',
+      explain: 'A long way, and not all the way. Refusing to move treats your own certainty as evidence, which is the trap. Splitting automatically is the other extreme. It hands a veto to anyone willing to disagree. It also stops you weighing whether the two of you are equals here.',
       xp: 5,
     },
     dur: 1.0,
@@ -110,7 +110,7 @@ export const BEATS: Epistemology26Beat[] = [
         'Conciliationists lower confidence when a peer differs',
         'Steadfasters may hold a view they have really weighed',
       ],
-      closing: 'The hardest disagreements are not with fools. They are with the people you most respect, who looked at the same bill and read it differently.',
+      closing: 'The hardest disagreements are not with fools. They’re with the people you most respect, who looked at the same bill and read it differently.',
     },
     dur: 5.0,
   },

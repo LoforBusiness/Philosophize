@@ -25,7 +25,7 @@ export interface Logic8Beat extends BaseBeat {
 export const BEATS: Logic8Beat[] = [
   {
     p: 12, x: 230, wet: 1,
-    text: 'You are almost home when the pavement registers a beat late. Behind you the street is dark and soaking, and your head has already answered why.',
+    text: 'You’re almost home when the pavement registers a beat late. Behind you the street is dark and soaking, and your head has already answered why.',
     dur: 4.1,
   },
   {
@@ -35,7 +35,7 @@ export const BEATS: Logic8Beat[] = [
   },
   {
     p: 38, x: 152, wet: 1, rule: 1,
-    text: 'You walk back to the wet patch. The rule is one you would bet money on: if it rains, the streets get wet.',
+    text: 'You walk back to the wet patch. The rule is one you’d bet money on: if it rains, the streets get wet.',
     cite: 'The wet patch',
     dur: 3.4,
   },
@@ -59,14 +59,14 @@ export const BEATS: Logic8Beat[] = [
     p: 380, x: 152, wet: 1, rule: 1, trap: 1, pick: 1,
     interact: {
       prompt: 'The street is soaked. Tap the card that the wet pavement ACTUALLY proves.',
-      explain: 'Wet is a result, and results can have more than one parent. The rule promised that rain leads to wet — it never promised that wet leads back to rain.',
+      explain: 'Wet is a result, and results can have more than one parent. The rule promised that rain leads to wet. It never promised that wet leads back to rain.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 159, x: 248, wet: 1, rule: 1, trap: 1, spr: 1,
-    text: 'Twenty steps on, you hear it. A sprinkler, sweeping the pavement from next door’s lawn, and it has been going all evening.',
+    text: 'Twenty steps on, you hear it. A sprinkler, sweeping the pavement from next door’s lawn, and it’s been going all evening.',
     cite: 'The other cause',
     dur: 3.8,
   },
@@ -88,7 +88,7 @@ export const BEATS: Logic8Beat[] = [
   },
   {
     p: 173, x: 152, wet: 1, rule: 1, trap: 2, spr: 1,
-    text: 'Now flip it the other way. Tomorrow the forecast promises no rain at all, so you plan on dry pavement and leave the umbrella hanging by the door.',
+    text: 'Now flip it the other way. Tomorrow’s forecast promises no rain at all, so you plan on dry pavement and leave the umbrella by the door.',
     cite: 'The other flip',
     dur: 4.6,
   },
@@ -106,14 +106,14 @@ export const BEATS: Logic8Beat[] = [
           { id: 'wet', upto: 1, reads: 'the streets must be wet' },
         ],
       },
-      explain: 'The middle, and the knob starts on the trap. Switching off the cause feels like switching off the effect. The rule only ran one way, rain to wet, and said nothing about a dry night. The sprinkler does not check the forecast.',
+      explain: 'The middle, and the knob starts on the trap. Switching off the cause feels like switching off the effect. The rule only ran one way, rain to wet, and said nothing about a dry night. The sprinkler doesn’t check the forecast.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 383, x: 248, wet: 1, rule: 1, trap: 2, cross: 1, spr: 1,
-    text: 'That is trap two: denying the antecedent. Removing one cause does not remove the result, because the result had other doors it could come through.',
+    text: 'That’s trap two: denying the antecedent. Removing one cause does not remove the result, because the result had other doors it could come through.',
     cite: 'Trap two · denying the antecedent',
     dur: 4.8,
   },

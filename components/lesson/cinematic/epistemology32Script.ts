@@ -20,7 +20,7 @@ export const BEATS: Epis32Beat[] = [
   {
     g: 5, maps: 0,
     dur: 4.0,
-    text: 'Four maps of the same stretch of coast. Not four coastlines — one coastline, drawn four times at four scales.',
+    text: 'Four maps of the same stretch of coast. One coastline, drawn four times at four scales.',
   },
   {
     g: 459, maps: 1,
@@ -31,7 +31,7 @@ export const BEATS: Epis32Beat[] = [
   {
     g: 459, maps: 1,
     dur: 1.8,
-    text: 'There is simply almost nothing on it.',
+    text: 'There’s almost nothing on it.',
   },
   {
     g: 168, maps: 3,
@@ -42,7 +42,7 @@ export const BEATS: Epis32Beat[] = [
   {
     g: 168, maps: 3,
     dur: 2.6,
-    text: 'It is also the sort of map you would still be reading when the tide came in.',
+    text: 'It’s also the sort of map you’d still be reading when the tide came in.',
   },
   {
     g: 129, maps: 3,
@@ -59,7 +59,7 @@ export const BEATS: Epis32Beat[] = [
   {
     g: 159, maps: 4,
     dur: 2.9,
-    text: 'And here is the perfect one. One to one, nothing omitted, no error anywhere in it.',
+    text: 'And here’s the perfect one. One to one, nothing omitted, no error anywhere in it.',
     cite: 'The perfect map',
   },
   {
@@ -72,7 +72,7 @@ export const BEATS: Epis32Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'You are sailing this coast tonight. Tap the map you would take.',
-      explain: 'The second. The first cannot be sailed by and the third cannot be read in the dark, and the fourth omits nothing at all — which is why it can only show you the rock you are standing on.',
+      explain: 'The second. You can’t sail by the first, and you can’t read the third in the dark. The fourth omits nothing at all. So it can only show you the rock you’re standing on.',
       xp: 5,
     },
   },
@@ -104,7 +104,7 @@ export const BEATS: Epis32Beat[] = [
         'A map is judged by the job, not by resemblance',
         'Ask what a model omits before you trust it',
       ],
-      closing: 'The question is never whether your picture of the world is complete. It is whether it leaves out the right things.',
+      closing: 'The question is never whether your picture of the world is complete. It’s whether it leaves out the right things.',
     },
     dur: 3.0,
   },

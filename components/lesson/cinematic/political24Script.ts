@@ -33,7 +33,7 @@ export interface Pol24Beat extends BaseBeat {
 export const BEATS: Pol24Beat[] = [
   {
     p: 462, x: 200, signs: 1, pub: 1,
-    text: 'A minority language. It is printed on the court papers and taught in the schools, and at home it is simply spoken.',
+    text: 'A minority language. It’s printed on the court papers and taught in the schools, and at home it’s spoken.',
     dur: 4.8,
   },
   {
@@ -44,14 +44,14 @@ export const BEATS: Pol24Beat[] = [
   },
   {
     p: 447, x: 132, signs: 1, pub: 0,
-    text: 'Take it out of the public places and leave the goodwill. Five generations later, this is what is left.',
+    text: 'Take the language out of the public places and leave the goodwill. Five generations later, this is what’s left.',
     dur: 4.6,
   },
   {
     p: 457, x: 132, signs: 1, pub: 0, live: 1,
     interact: {
       prompt: 'Tap the place that cannot keep the language alive.',
-      explain: 'In private. It stayed lit the whole time and the bars fell anyway. That is why this looks like a special favour from outside and like survival from inside: goodwill at home is the one form of recognition that costs nobody anything.',
+      explain: 'In private. It stayed lit the whole time and the bars fell anyway. Goodwill at home is the one form of recognition that costs nobody anything. So from outside, court and school look like a special favour, and from inside they look like survival.',
       xp: 5,
     },
     dur: 1.0,
@@ -92,7 +92,7 @@ export const BEATS: Pol24Beat[] = [
           { id: 'public', label: 'a place in public', reads: 'give it a place in public life', correct: true },
         ],
       },
-      explain: 'Public use. Equal dignity says treat everyone the same, and that is the setting that emptied the bars. Tolerance at home was already there and did not help. The tension is real: treating people identically can erase them, and treating them differently can divide them.',
+      explain: 'A place in public. Equal dignity says to treat everyone the same, and that’s the policy that emptied the bars. Tolerance at home was already there and didn’t help. The tension is real. Treating people identically can erase them, and treating them differently can divide them.',
       xp: 5,
     },
     dur: 1.0,

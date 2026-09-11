@@ -51,14 +51,14 @@ export const BEATS: Ethics38Beat[] = [
     p: 159, x: 46, beam: 1, weights: 1, live: 1,
     interact: {
       prompt: 'Tap the reason an impartial rule may not take.',
-      explain: 'She is mine. The other two are facts a stranger could weigh exactly as you do: who is reachable, and what good follows. A relation to you cannot be read off from outside, which is precisely why an impartial rule will not have it.',
+      explain: 'She is mine. The other two are facts a stranger could weigh as well as you: who’s nearer, and what good follows. A relation to you can’t be read off from outside. That’s why an impartial rule won’t have it.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 176, x: 46, beam: 1, weights: 1,
-    text: 'William Godwin took that to the end. Save the archbishop over the chambermaid, he wrote, even if the chambermaid is your mother.',
+    text: 'William Godwin took that to the end. He wrote: save the archbishop over the chambermaid, even if the chambermaid is your mother.',
     dur: 4.6,
   },
   {
@@ -107,7 +107,7 @@ export const BEATS: Ethics38Beat[] = [
         'Most people act on it anyway, and defend it',
         'Needing a rule to permit it is the odd part',
       ],
-      closing: 'The interesting question is not whether you would save your own. The question is what you take yourself to be doing.',
+      closing: 'The interesting question is not whether you’d save your own. The question is what you take yourself to be doing.',
     },
     dur: 3.2,
   },

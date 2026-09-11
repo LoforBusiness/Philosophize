@@ -33,7 +33,7 @@ export interface Epistemology27Beat extends BaseBeat {
 export const BEATS: Epistemology27Beat[] = [
   {
     p: 423, x: 28, said: 1,
-    text: 'You can wrong somebody without telling a single lie. Simply refusing to believe a speaker will do.',
+    text: 'You can wrong somebody without telling a single lie. Refusing to believe a speaker is enough.',
     dur: 4.6,
   },
   {
@@ -43,7 +43,7 @@ export const BEATS: Epistemology27Beat[] = [
   },
   {
     p: 436, x: 28, said: 1, gauge: 1, credit: 0.35,
-    text: 'The doctor hears anxiety, because she is young. Her word is worth less on arrival.',
+    text: 'The doctor hears anxiety, because the patient is young. Her word is worth less on arrival.',
     dur: 4.8,
   },
   {
@@ -55,14 +55,14 @@ export const BEATS: Epistemology27Beat[] = [
     p: 163, x: 28, said: 1, gauge: 1, credit: 0.35, plates: 1, live: 1,
     interact: {
       prompt: 'A juror believes a witness less for his accent. Tap the wrong.',
-      explain: 'Testimonial. The witness can speak and be understood perfectly well; what happens is that prejudice lowers how far the juror credits him. That deflation is the signature, and it is the whole of the harm.',
+      explain: 'Testimonial. The witness can speak and be understood. Prejudice lowers how far the juror believes him. That deflation is the signature, and it’s the whole of the harm.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 451, x: 88, said: 1, gauge: 1, credit: 0.35,
-    text: 'There is a second kind, and it lands earlier. Sometimes a group has no words for what happened.',
+    text: 'There’s a second kind, and it lands earlier. Sometimes a group has no words for what happened.',
     dur: 5.0,
   },
   {
@@ -79,7 +79,7 @@ export const BEATS: Epistemology27Beat[] = [
   },
   {
     p: 448, x: 88, said: 1, gauge: 1, credit: 0.35,
-    text: 'Before anybody said sexual harassment, victims could feel the wrong and not name it.',
+    text: 'Before anybody said the words “sexual harassment”, victims could feel the wrong and not name it.',
     dur: 5.0,
   },
   {
@@ -94,7 +94,7 @@ export const BEATS: Epistemology27Beat[] = [
           { id: 'none', label: 'no injustice', reads: 'a gap in the language wrongs nobody' },
         ],
       },
-      explain: 'Hermeneutical. Nothing has been deflated, because nothing got as far as being said — the plate is empty rather than the gauge. Calling a gap in the shared language harmless is the answer Fricker set out to refuse: somebody carries the cost of it, and it is never the majority.',
+      explain: 'Hermeneutical. Nothing has been deflated, because nothing got as far as being said. The plate is empty, not the gauge. Fricker set out to refuse the claim that a gap in the shared language is harmless. Somebody carries the cost, and it’s never the majority.',
       xp: 5,
     },
     dur: 1.0,
@@ -109,7 +109,7 @@ export const BEATS: Epistemology27Beat[] = [
         'Hermeneutical injustice removes the words to say it',
         'Fricker put ethics inside the theory of knowledge',
       ],
-      closing: 'Whom you believe, and how far, is not only a question about truth. It is also a question about justice.',
+      closing: 'Whom you believe, and how far, is not only a question about truth. It’s also a question about justice.',
     },
     dur: 5.0,
   },

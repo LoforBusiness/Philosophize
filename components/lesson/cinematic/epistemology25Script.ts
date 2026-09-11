@@ -34,7 +34,7 @@ export interface Epistemology25Beat extends BaseBeat {
 export const BEATS: Epistemology25Beat[] = [
   {
     p: 2, x: 44,
-    text: 'You have a test for what counts as knowledge. Good. How did you check the test?',
+    text: 'You’ve got a test for what counts as knowledge. So how did you check the test?',
     dur: 4.4,
   },
   {
@@ -68,7 +68,7 @@ export const BEATS: Epistemology25Beat[] = [
   },
   {
     p: 62, x: 100, rungs: 1, nothing: 1, flow: 2,
-    text: 'The particularist runs it the other way: hands first, then a rule built to fit them.',
+    text: 'The particularist runs it the other way: cases first, then a rule built to fit them.',
     dur: 4.6,
   },
   {
@@ -100,7 +100,7 @@ export const BEATS: Epistemology25Beat[] = [
           { id: 'stop', reads: 'refuse to begin, and suspend judgement' },
         ],
       },
-      explain: 'With the cases. That is where nearly everyone starts. The rule-first door sounds stricter, but it quietly takes its own rule for granted. Refusing to start is honest, and it also ends every question.',
+      explain: 'With the cases. That’s where nearly everyone starts. The rule-first door sounds stricter, but it takes its own rule for granted without saying so. Refusing to start is honest, and it also ends every question.',
       xp: 5,
     },
     dur: 1.0,

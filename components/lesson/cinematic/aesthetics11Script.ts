@@ -33,7 +33,7 @@ export const BEATS: Aes11Beat[] = [
   },
   {
     p: 41, x: 168, frames: 1,
-    text: 'Here they are. Not similar — identical.',
+    text: 'Here they are. Not similar, identical.',
     cite: 'Both canvases',
     dur: 1.8,
   },
@@ -44,7 +44,7 @@ export const BEATS: Aes11Beat[] = [
   },
   {
     p: 396, x: 124, frames: 1, plaques: 1,
-    text: 'Only the plaques tell the two apart. Cover the plaques and no visitor, curator or critic has ever sorted them reliably.',
+    text: 'Only the plaques tell the two apart. Cover the plaques and no visitor, curator or critic can sort them reliably.',
     cite: 'The plaques',
     dur: 4.4,
   },
@@ -62,7 +62,7 @@ export const BEATS: Aes11Beat[] = [
   },
   {
     p: 389, x: 168, frames: 1, plaques: 1, same: 1,
-    text: 'So every visible property is shared. Whatever separates these two is therefore not in the object at all — it is in how the object came to be here.',
+    text: 'So every visible property is shared. Whatever separates these two isn’t in the object at all, but in how the object came to be here.',
     cite: 'Nothing visible left',
     dur: 4.8,
   },
@@ -87,7 +87,7 @@ export const BEATS: Aes11Beat[] = [
           { id: 'feeling', label: 'a feeling', reads: 'a feeling that was had, and then passed on', correct: true },
         ],
       },
-      explain: 'A feeling. Identical objects, identical value sounds strict, and it quietly assumes a work is only its surface. Tolstoy asks something else. Was a feeling carried across? Carrying one takes a person who had the feeling first.',
+      explain: 'A feeling. “Identical objects, identical value” sounds strict, and it takes for granted that a work is only its surface. Tolstoy asks something else. Was a feeling carried across? Carrying one takes a person who had the feeling first.',
       xp: 5,
     },
     dur: 1.0,

@@ -48,9 +48,11 @@ const CIN = path.join(process.cwd(), 'components', 'lesson', 'cinematic');
 // J1  A SENTENCE THE READER MUST FOLLOW: 20 words. The median is 11 and the app's
 //     own writing rarely reaches 20 unless a dash has joined two thoughts.
 const MAX_SENTENCE = 20;
-// J2  ONE BEAT OF NARRATION: 45 words. The median is 22 and the longest honest
-//     beat is 44, so this bites only on something genuinely overstuffed.
-const MAX_BEAT = 45;
+// J2  ONE BEAT OF NARRATION: 30 words. It was 45 while the paragraph was only
+//     read; the narration is written to be spoken now, and at ~155 words a
+//     minute a 30-word beat is twelve seconds of a reader waiting on the voice
+//     (AC8). The rewrite of 11 Sep 2026 brought every beat under it.
+const MAX_BEAT = 30;
 // J12 HOW MANY SENTENCES A BEAT PUTS IN FRONT OF THE READER AT ONCE.
 //
 //     A beat's whole text is rendered as one block — CinematicPlayer draws
@@ -82,7 +84,9 @@ const MAX_BEAT_SENTENCES = 2;
 //
 // `node scripts/split-beats.mjs` reproduces it exactly and is idempotent: a beat of
 // two sentences is never touched twice. SPLIT_CEILING sets how long a lesson may get.
-const BEAT_SENTENCE_BUDGET = 7;
+// 7 → 0 on 11 Sep 2026, when every lesson was rewritten to be read aloud (group AC):
+// a spoken beat is its own audio clip, so it holds at most two sentences, always.
+const BEAT_SENTENCE_BUDGET = 0;
 // J3  AN EXPLANATION AFTER AN ANSWER: 50 words. It is the longest thing anybody
 //     reads (median 34, p90 44) and it arrives at the moment attention is lowest,
 //     right after the reader has already committed to a choice.
@@ -130,7 +134,8 @@ const MAX_HARD_PCT = 35;
 //     needs a name list nobody will maintain, so this is a high-water mark instead: it
 //     may only fall, and a NEW roll-call beat pushes it over and fails the build.
 const MAX_NAMES_MID = 2;
-const NAME_STUFF_BUDGET = 4;
+// 4 → 2 on 11 Sep 2026, when every lesson was rewritten to be read aloud (group AC).
+const NAME_STUFF_BUDGET = 2;
 // J8  RECALL-SHAPED PROMPTS: a budget, falling. "Who said 'knowledge itself is power'?"
 //     is a memory test of the previous slide, not a question about the idea.
 const RECALL_BUDGET = 1;
@@ -147,7 +152,9 @@ const RECALL_BUDGET = 1;
 // is a high-water mark that may only ever go DOWN, exactly like CARD_BUDGET and
 // MC_BUDGET. Writing a new over-long sentence raises it and fails the build.
 // The other three are zeroes: they were nearly clean already.
-const LONG_SENTENCE_BUDGET = 28;
+// 28 → 0 on 11 Sep 2026, when every lesson was rewritten to be read aloud (group AC):
+// a listener cannot go back, so no sentence runs past twenty words.
+const LONG_SENTENCE_BUDGET = 0;
 
 let fails = 0;
 const ok = (label, pass, detail) => {
@@ -162,10 +169,20 @@ const SYL = (w) => {
   return Math.max(1, g ? g.length : 1);
 };
 const wordsOf = (s) => s.trim().split(/\s+/).filter(Boolean);
-/** Sentences, with the abbreviations that would otherwise split one in two. */
+/**
+ * Sentences, with the abbreviations that would otherwise split one in two.
+ *
+ * THE CLOSING MARK BELONGS TO THE SENTENCE, NOT TO THE GAP (AC2). This split
+ * was `(?<=[.!?])["')\]]?\s+`, which put an optional closing quote INSIDE the
+ * separator — so every cut after `?"` deleted the quote mark, and a quoted
+ * question the sentence carried on past (`Not "what do I do?" but "who am I
+ * becoming?"`) was cut in two. split-beats.mjs used the same expression and
+ * wrote 15 unbalanced beats and 2 half-sentences into the corpus with it. The
+ * mark now stays in the lookbehind, and a split needs a new sentence to start.
+ */
 const sentencesOf = (s) => s
   .replace(/\b(Mr|Mrs|Ms|Dr|St|e\.g|i\.e|vs|c)\./g, '$1<>')
-  .split(/(?<=[.!?])["')\]]?\s+/)
+  .split(/(?<=[.!?]["”’')\]]?)\s+(?=["“‘'(]?[A-Z0-9])/)
   .map((x) => x.replace(/<>/g, '.'))
   .filter((x) => wordsOf(x).length > 1);
 

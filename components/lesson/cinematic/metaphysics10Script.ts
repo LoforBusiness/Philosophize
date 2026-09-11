@@ -29,7 +29,7 @@ export interface Metaphysics10Beat extends BaseBeat {
 export const BEATS: Metaphysics10Beat[] = [
   {
     p: 13, x: 64,
-    text: 'A rose, a ruby, a flag. Nothing else about them matches — yet all three are red.',
+    text: 'A rose, a ruby, a flag. Nothing else about them matches, yet all three are red.',
     dur: 2.9,
   },
   {
@@ -39,7 +39,7 @@ export const BEATS: Metaphysics10Beat[] = [
   },
   {
     p: 47, x: 124, card: 1,
-    text: 'Whatever the three things share, give the shared part a card of its own: REDNESS. Now the awkward question.',
+    text: 'Give whatever the three things share a card of its own, and call the card redness. Now the awkward question.',
     cite: 'The one in the many',
     dur: 3.5,
   },
@@ -56,7 +56,7 @@ export const BEATS: Metaphysics10Beat[] = [
   },
   {
     p: 5, x: 124, tags: 1,
-    text: 'Aristotle took it straight back down. Redness is real, he agreed — but it lives pinned in the things themselves.',
+    text: 'Aristotle took it straight back down. He agreed redness is real, but it lives pinned in the things themselves.',
     cite: 'Aristotle · in the things',
     dur: 4,
   },
@@ -80,13 +80,13 @@ export const BEATS: Metaphysics10Beat[] = [
   },
   {
     p: 8, x: 124, str: 1, card: 3,
-    text: 'A third camp shrugs. Nothing is shared at all — “red” is a word we hang beside things that happen to look alike.',
+    text: 'A third camp shrugs. They say nothing is shared, and “red” is a word you hang beside things that happen to look alike.',
     cite: 'The nominalist',
     dur: 3.9,
   },
   {
     p: 8, x: 124, str: 1, card: 3,
-    text: 'It touches none of them.',
+    text: 'The card touches none of them.',
     dur: 1.8,
   },
   {
@@ -103,7 +103,7 @@ export const BEATS: Metaphysics10Beat[] = [
           { id: 'realm', upto: 1, reads: 'in its own realm, above red things' },
         ],
       },
-      explain: 'The middle, and the two ends are the views he is between. Aristotle keeps universals real, so the first zone is not his. But he takes redness off the wall and pins it to the things: fully real, never free of some red object.',
+      explain: 'The middle, and the two ends are the views he sits between. Aristotle keeps universals real, so the first zone is not his. But he takes redness off the wall and pins it to the things. It’s fully real, and never free of some red object.',
       xp: 5,
     },
     dur: 1.0,
@@ -112,7 +112,7 @@ export const BEATS: Metaphysics10Beat[] = [
     p: 30, x: 124, str: 1, slots: 1,
     interact: {
       prompt: 'Tap the home a nominalist would give the card.',
-      explain: 'The trap: hearing “nowhere” as “the rose is not really red”. It is not that. A nominalist grants every red thing its colour and denies only the extra item, redness itself — the card is a word we hang beside them.',
+      explain: 'The trap is hearing “nowhere” as “the rose is not really red”. It isn’t that. A nominalist grants every red thing its colour and denies only the extra item, redness itself. The card is a word people hang beside them.',
       xp: 5,
     },
     dur: 1.0,
@@ -126,7 +126,7 @@ export const BEATS: Metaphysics10Beat[] = [
         'Aristotle: real, but only inside the things',
         'Nominalists: only particulars, plus a handy name',
       ],
-      closing: 'Next time two things strike you as alike, ask what exactly you have found.',
+      closing: 'Next time two things strike you as alike, ask what exactly you’ve found.',
     },
     dur: 3.0,
   },

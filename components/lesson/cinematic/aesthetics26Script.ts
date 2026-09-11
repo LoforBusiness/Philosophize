@@ -33,7 +33,7 @@ export interface Aesthetics26Beat extends BaseBeat {
 export const BEATS: Aesthetics26Beat[] = [
   {
     p: 423, x: 28, bird: 1,
-    text: 'A plastic flamingo on a lawn. Nobody is calling it great sculpture.',
+    text: 'A plastic flamingo on a lawn. Nobody’s calling it great sculpture.',
     dur: 4.2,
   },
   {
@@ -43,7 +43,7 @@ export const BEATS: Aesthetics26Beat[] = [
   },
   {
     p: 435, x: 28, bird: 1,
-    text: 'Milan Kundera called it the second tear. Not moved by the children, but by being moved.',
+    text: 'Milan Kundera called it the second tear. The first is for children on the grass, the second for how nice it feels to be moved.',
     dur: 5.0,
   },
   {
@@ -55,14 +55,14 @@ export const BEATS: Aesthetics26Beat[] = [
     p: 164, x: 28, bird: 1, eye: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what a grin at a tacky bird is.',
-      explain: 'Knowing love. Sincerely mistaking this for a masterpiece would be the bad taste your flatmate means, and pretending it secretly is one gives up the joke. Camp sees that the thing is awful and enjoys exactly that, on purpose.',
+      explain: 'Knowing love. Sincerely mistaking this for a masterpiece would be the bad taste your flatmate means. Pretending it secretly is one gives up the joke. Camp sees that the thing is awful and enjoys that, on purpose.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 442, x: 88, bird: 1, eye: 1,
-    text: 'Susan Sontag mapped it: drag, B-movies, a chandelier hung in a diner.',
+    text: 'Susan Sontag mapped camp: drag, B-movies, a chandelier hung in a diner.',
     dur: 4.6,
   },
   {
@@ -79,7 +79,7 @@ export const BEATS: Aesthetics26Beat[] = [
   },
   {
     p: 445, x: 88, bird: 1, eye: 1,
-    text: 'The same flamingo can be either. One neighbour finds it lovely; one finds it gloriously absurd.',
+    text: 'The same flamingo can be either. One neighbour finds it lovely, and another finds it gloriously absurd.',
     dur: 5.0,
   },
   {
@@ -96,7 +96,7 @@ export const BEATS: Aesthetics26Beat[] = [
           { id: 'eye', upto: 1, reads: 'the beholder — the bird never changed', correct: true },
         ],
       },
-      explain: 'The beholder, and the picture says so: nothing about the bird moved while you slid. Tackiness is real enough, and tackiness is what BOTH attitudes respond to — so tackiness cannot be the mark that tells the two apart.',
+      explain: 'The beholder, and the picture says so: nothing about the bird moved while you slid. Tackiness is real enough, and tackiness is what BOTH attitudes respond to. So tackiness cannot be the mark that tells the two apart.',
       xp: 5,
     },
     dur: 1.0,
@@ -111,7 +111,7 @@ export const BEATS: Aesthetics26Beat[] = [
         'Camp knows the thing is awful and enjoys that',
         'The object hardly changes; the attitude does',
       ],
-      closing: 'Bad taste taken up with open eyes turns into a taste of its own, and it is one of the few that has to be held on purpose.',
+      closing: 'Bad taste taken up with open eyes turns into a taste of its own. It’s one of the few that has to be held on purpose.',
     },
     dur: 4.8,
   },

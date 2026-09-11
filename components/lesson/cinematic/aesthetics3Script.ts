@@ -40,7 +40,7 @@ export const BEATS: Aes3Beat[] = [
     // Both halves alive at once: a story arc beginning to climb while the modes
     // play — "song or story", drawn rather than asserted.
     p: 130, arc: 0.3, modes: 1,
-    text: 'That is strange enough to want an explanation.',
+    text: 'That’s strange enough to want an explanation.',
     dur: 1.8,
   },
   {
@@ -62,7 +62,7 @@ export const BEATS: Aes3Beat[] = [
   },
   {
     p: 15, arc: 1, mask: 1,
-    text: 'Aristotle thinks we can bear to look at painful things drawn well, because looking at them teaches us something.',
+    text: 'Aristotle thinks you can bear to look at painful things drawn well because looking at them teaches you something.',
     dur: 2.9,
   },
   {
@@ -75,7 +75,7 @@ export const BEATS: Aes3Beat[] = [
       ],
       // Was a list of FOUR Greek terms, three of them glossing options that stopped
       // existing when the A/B/C/D cards went. Only one is on screen now.
-      explain: 'Catharsis. It is the one word Aristotle never pins down, and people have argued ever since. Mimesis, the other card, means imitation. That is a different idea altogether.',
+      explain: 'Catharsis. It’s the one word Aristotle never pins down, and people have argued ever since. Mimesis, the other card, means imitation. That’s a different idea.',
       xp: 5,
     },
     dur: 1.0,
@@ -88,7 +88,7 @@ export const BEATS: Aes3Beat[] = [
   },
   {
     p: 33, modes: 1, will: 1,
-    text: 'Plato thought exactly that made it dangerous.',
+    text: 'For Plato, that same thing made music dangerous.',
     dur: 1.8,
   },
   {
@@ -118,7 +118,7 @@ export const BEATS: Aes3Beat[] = [
           { id: 'ban', upto: 1, reads: 'banned every note of it from the city' },
         ],
       },
-      explain: 'The middle. He regulated rather than abolished, and the reason is the interesting part: he thought music shapes a character before you get the chance to argue with it. You cannot reason your way out of a tune you grew up inside.',
+      explain: 'The middle. Plato regulated music rather than banning it, and his reason is the interesting part. He thought music shapes a character before you get the chance to argue with it. You can’t reason your way out of a tune you grew up inside.',
       xp: 5,
     },
     dur: 1.0,
@@ -131,7 +131,7 @@ export const BEATS: Aes3Beat[] = [
         'Schopenhauer: music copies the will',
         'Plato regulated the modes, did not ban them',
       ],
-      closing: 'The next song that moves you echoes a question 2,400 years old.',
+      closing: 'The next song that moves you echoes a question twenty-four centuries old.',
     },
     dur: 2.8,
   },

@@ -35,7 +35,7 @@ export interface Logic23Beat extends BaseBeat {
 export const BEATS: Logic23Beat[] = [
   {
     p: 2, x: 44,
-    text: 'Four small words carry every argument you will ever check. Start with two.',
+    text: 'Four small words carry every argument you’ll ever check. Start with two.',
     dur: 4.2,
   },
   {
@@ -45,12 +45,12 @@ export const BEATS: Logic23Beat[] = [
   },
   {
     p: 36, x: 44, rows: 1, orCol: 1,
-    text: 'Take OR. In speech it often means one or the other, and in logic it means at least one.',
+    text: 'Take the word “or”. In speech it often means one or the other, but in logic it means at least one.',
     dur: 5.0,
   },
   {
     p: 160, x: 44, rows: 1, orCol: 1,
-    text: 'So taking both cake and pie is not cheating. It is the plainest way to keep the promise.',
+    text: 'So taking both cake and pie isn’t cheating. It’s the plainest way to keep the promise.',
     dur: 4.8,
   },
   {
@@ -64,7 +64,7 @@ export const BEATS: Logic23Beat[] = [
   },
   {
     p: 159, x: 44, rows: 1, orCol: 1, ifCol: 1,
-    text: 'Now the awkward one. IF P THEN Q is a promise about what follows P.',
+    text: 'Now the awkward one. The sentence “if P, then Q” is a promise about what follows P.',
     dur: 4.4,
   },
   {
@@ -104,7 +104,7 @@ export const BEATS: Logic23Beat[] = [
           { id: 'three', upto: 1, reads: 'three rows kept, and one broken', correct: true },
         ],
       },
-      explain: 'Three of the four. Only the row with P true and Q false breaks it. That is why "if pigs fly, I am the Pope" counts as true — the pigs never flew, so the promise was never tested.',
+      explain: 'Three of the four. Only the row with P true and Q false breaks it. That’s why “if pigs fly, I’m the Pope” counts as true. The pigs never flew, so the promise was never tested.',
       xp: 5,
     },
     dur: 1.0,

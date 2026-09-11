@@ -45,7 +45,7 @@ export const BEATS: Epistemology40Beat[] = [
   },
   {
     p: 168, x: 44, dock: 1,
-    text: 'It brings the instrument, the arithmetic, and a hundred quiet assumptions about the setup.',
+    text: 'It brings the lens, the sums, and a hundred unspoken assumptions about the setup.',
     dur: 4.6,
   },
   {
@@ -57,7 +57,7 @@ export const BEATS: Epistemology40Beat[] = [
     p: 163, x: 44, dock: 1, rope: 1, verdict: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what the failed test has refuted.',
-      explain: 'All of it. The bar came down across the whole dock, which is what the logic gives you — the theory only reached the evidence with help. Blaming the law alone is the tidy story, and saying nothing was refuted goes too far the other way.',
+      explain: 'All of it. The bar came down across the whole dock, and that’s what the logic gives you. The theory only reached the evidence with help. Blaming the law alone is the tidy story, and saying nothing was refuted goes too far the other way.',
       xp: 5,
     },
     dur: 1.0,
@@ -82,7 +82,7 @@ export const BEATS: Epistemology40Beat[] = [
   },
   {
     p: 382, x: 108, dock: 1, rope: 1,
-    text: 'Neptune was exactly where he pointed. Then Mercury wobbled, and the same move found nothing.',
+    text: 'Neptune turned up where he pointed. Then Mercury wobbled, and the same move found nothing.',
     dur: 4.8,
   },
   {
@@ -97,7 +97,7 @@ export const BEATS: Epistemology40Beat[] = [
           { id: 'lens', label: 'the lens', reads: 'the telescopes are out of true' },
         ],
       },
-      explain: 'The law. Einstein got Mercury right by replacing Newton, not by adding a planet. The trap is that the hidden-planet move had just worked brilliantly — same reasoning, same confidence, opposite answer. Nothing in the evidence says which case you are in.',
+      explain: 'The law. Einstein got Mercury right by replacing Newton, not by adding a planet. The trap is that the hidden-planet move had just worked brilliantly. Same reasoning, same confidence, opposite answer. Nothing in the evidence says which case you’re in.',
       xp: 5,
     },
     dur: 1.0,

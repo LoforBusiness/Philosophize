@@ -44,14 +44,14 @@ export const BEATS: Eth22Beat[] = [
   },
   {
     p: 379, x: 132, wants: 1, machine: 1,
-    text: 'Almost everybody says no, and most cannot say why. The picture is where the reason is.',
+    text: 'Almost everybody says no, and most can’t say why. The reason is in the picture.',
     dur: 4.0,
   },
   {
     p: 457, x: 132, wants: 1, machine: 1, live: 1,
     interact: {
       prompt: 'Tap the one thing the machine can actually deliver.',
-      explain: 'The feeling. Everything else on that row is something you wanted to BE true, not something you wanted to feel — and the tank changes what you experience without touching any of it. You would believe you had them.',
+      explain: 'The feeling. Everything else on that row is something you wanted to be true, not something you wanted to feel. The tank changes what you experience without touching any of it. You’d believe you had them.',
       xp: 5,
     },
     dur: 1.0,
@@ -99,7 +99,7 @@ export const BEATS: Eth22Beat[] = [
           { id: 'none', profile: [0.1, 0.1, 0.08, 0.08, 0.06], reads: 'nothing at all' },
         ],
       },
-      explain: 'High on the left and flat on the floor after it. The tank is very good at one column and cannot reach the others. Drawing it high all the way across is the hedonist answer, which is the position Nozick is arguing against.',
+      explain: 'High on the left and flat on the floor after it. The tank is very good at one column and can’t reach the others. Drawing it high all the way across is the hedonist answer, which is the position Nozick is arguing against.',
       xp: 5,
     },
     dur: 1.0,

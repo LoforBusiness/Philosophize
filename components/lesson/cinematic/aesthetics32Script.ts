@@ -22,12 +22,12 @@ export const BEATS: Aes32Beat[] = [
   {
     g: 440, rows: 1, mean: 0,
     dur: 4.0,
-    text: 'Nine years of a life, one bar each. This one starts badly and ends well — the last years are the best it ever had.',
+    text: 'Nine years of a life, one bar each. This one starts badly and saves its best years for last.',
   },
   {
     g: 2, rows: 2, mean: 0,
     dur: 2.9,
-    text: 'Here is the same life run backwards. Exactly the same nine years, in the opposite order.',
+    text: 'Here’s the same life run backwards. The same nine years, in the opposite order.',
     cite: 'The same years, reversed',
   },
   {
@@ -69,7 +69,7 @@ export const BEATS: Aes32Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap the life that goes better.',
-      explain: 'The rising one. All three hold exactly the same amount of good — that is what the line shows. If a life were only a total, all three would be equally good and equally good to hear about.',
+      explain: 'The rising one. All three hold the same amount of good — that’s what the line shows. If a life were only a total, all three would be equally good and equally good to hear about.',
       xp: 5,
     },
   },
@@ -88,7 +88,7 @@ export const BEATS: Aes32Beat[] = [
           { id: 'flat', profile: [0.55, 0.55, 0.55, 0.55], reads: 'it stays about the same throughout' },
         ],
       },
-      explain: 'The rising one, and almost everybody draws it. The totals are identical, so the strict view has to call the declining life exactly as good. Almost nobody can, and that reluctance is the evidence: the order carries a value of its own.',
+      explain: 'The rising one, and almost everybody draws it. The totals are identical, so the strict view has to call the declining life just as good. Almost nobody can, and that reluctance is the evidence: the order carries a value of its own.',
       xp: 5,
     },
   },
@@ -98,10 +98,10 @@ export const BEATS: Aes32Beat[] = [
       points: [
         'Rearranging the same goods can change how good a life is',
         'Endings reach backwards and recolour what came before',
-        'A total is blind to order; we plainly are not',
+        'A total ignores order, and people don’t',
         'This is why stories have shapes and not only contents',
       ],
-      closing: 'You are not living a pile of moments. You are living a shape, and you are somewhere in the middle of it.',
+      closing: 'You’re not living a pile of moments. You’re living a shape, and you’re somewhere in the middle of it.',
     },
     dur: 3.0,
   },

@@ -57,14 +57,14 @@ export const BEATS: Political41Beat[] = [
     p: 261, x: 28, book: 1, slots: 1, lift: 0.34, plates: 1, live: 1,
     interact: {
       prompt: 'Tap the one thing prerogative has none of.',
-      explain: 'A rule. It has a holder, the executive, and a purpose, the public good. What it cannot have is a written limit, because a limit precise enough to bind would have to describe the emergency in advance — and then ordinary law would already cover it.',
+      explain: 'A rule. It has a holder, the executive, and a purpose, the public good. What it can’t have is a written limit. A limit precise enough to bind would have to describe the emergency in advance. And then ordinary law would already cover it.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 447, x: 88, book: 1, slots: 1, lift: 0.34,
-    text: 'Legislatures are slow, and an emergency does not wait for a session.',
+    text: 'Legislatures are slow, and an emergency doesn’t wait for a session.',
     dur: 4.2,
   },
   {
@@ -100,7 +100,7 @@ export const BEATS: Political41Beat[] = [
           { id: 'open', profile: [0.82, 0.86, 0.9, 0.94], reads: 'a free hand from a calm Tuesday onward' },
         ],
       },
-      explain: 'A ramp. Tie the power to the need and it stays answerable, because the need is something other people can weigh. The switch is the dangerous shape. Whoever calls the emergency would be handing themselves everything at once.',
+      explain: 'A ramp. Tie the power to the need and it stays answerable, because the need is something other people can weigh. The jump from nothing to everything is the dangerous shape. Whoever calls the emergency would be handing themselves everything at once.',
       xp: 5,
     },
     dur: 1.0,

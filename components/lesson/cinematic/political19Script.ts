@@ -40,7 +40,7 @@ export const BEATS: Pol19Beat[] = [
   },
   {
     p: 443, x: 200, axis: 1, cost: 1,
-    text: 'The top panel is what it costs you. Across the whole distance, it is the price of the shoes.',
+    text: 'The top panel is what it costs you. Across the whole distance, it’s the price of the shoes.',
     cite: 'The cost',
     dur: 4.4,
   },
@@ -52,14 +52,14 @@ export const BEATS: Pol19Beat[] = [
   },
   {
     p: 383, x: 132, axis: 1, cost: 1, pull: 1, mark: 1,
-    text: 'Same child, same money, same certainty that the money helps. The only thing that changed is where you are standing.',
+    text: 'Same child, same money, same certainty that the money helps. The only thing that changed is where you’re standing.',
     dur: 4.6,
   },
   {
     p: 4, x: 132, axis: 1, cost: 1, pull: 1, mark: 1, live: 1,
     interact: {
       prompt: 'Tap the panel whose line moves when only the distance changes.',
-      explain: 'The lower one. Distance is doing all the work down there and none of it up here, and Singer asks what moral difference it could be tracking. Not knowing them, not seeing them, and nobody else helping either are facts about you.',
+      explain: 'The lower one. Distance is doing all the work down there and none of it up here. Singer asks what moral difference it could be tracking. Not knowing them, not seeing them, and nobody else helping either are facts about you.',
       xp: 5,
     },
     dur: 1.0,
@@ -79,7 +79,7 @@ export const BEATS: Pol19Beat[] = [
   },
   {
     p: 380, x: 268, axis: 1, cost: 1, pull: 1, mark: 1,
-    text: 'The trouble is where that principle stops. There is always one more preventable death for the price of one more thing you own.',
+    text: 'The trouble is where that principle stops. There’s always one more preventable death for the price of one more thing you own.',
     cite: 'How far does it go?',
     dur: 4.8,
   },
@@ -97,7 +97,7 @@ export const BEATS: Pol19Beat[] = [
           { id: 'stop', profile: [0.9, 0.9, 0.1, 0.04], reads: 'there is a line you can cross' },
         ],
       },
-      explain: 'Nearly flat, and that is the strongest objection — not selfishness. A rule that demands everything down to your last spare pound may be perfectly true and still unlivable. And a morality nobody can follow gets ignored instead of argued with. Singer knows, and takes the demand anyway.',
+      explain: 'Nearly flat, and that’s the strongest objection — not selfishness. A rule that demands everything down to your last spare pound may be true and still unlivable. And a morality nobody can follow gets ignored instead of argued with. Singer knows, and takes the demand anyway.',
       xp: 5,
     },
     dur: 1.0,

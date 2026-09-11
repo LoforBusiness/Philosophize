@@ -32,7 +32,7 @@ export const BEATS: Eth14Beat[] = [
   {
     g: 164, built: 0,
     dur: 1.8,
-    text: 'So is everybody else\'s.',
+    text: 'So is everybody else’s.',
   },
   {
     g: 13, built: 0,
@@ -54,7 +54,7 @@ export const BEATS: Eth14Beat[] = [
   {
     g: 399, built: 5, door: 1,
     dur: 4.8,
-    text: 'Locke leaves a door in it. If the thing behind the wall turns on you, the deal is void and you may walk out.',
+    text: 'Locke leaves a door in the wall. If what’s behind it turns on you, the deal is void and you may walk out.',
     cite: 'Locke cuts a door',
   },
   {
@@ -75,7 +75,7 @@ export const BEATS: Eth14Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap what the wall is built out of.',
-      explain: 'Your liberties. An authority built from what people handed over has exactly as much as they handed over. The board about the ruler\'s own power is the older answer, a king holding it in his own right. Replacing that answer is the whole point.',
+      explain: 'Your liberties. An authority built from what people handed over has exactly as much as they handed over. The board about the ruler’s own power is the older answer, a king holding it in his own right. Replacing that answer is the whole point.',
       xp: 5,
     },
   },
@@ -93,7 +93,7 @@ export const BEATS: Eth14Beat[] = [
           { id: 'resist', upto: 1, reads: 'whether you may ever resist the one you built', correct: true },
         ],
       },
-      explain: 'All of it on the left. Both men want the wall, so no wall at all is nobody position in this argument. They fall out over the door. Locke says a state that turns on you forfeits your obedience; Hobbes says the alternative is worse than anything it does.',
+      explain: 'All of it on the left. Both men want the wall, so no wall at all is nobody’s position in this argument. They fall out over the door. Locke says a state that turns on you forfeits your obedience. Hobbes says the alternative is worse than anything it does.',
       xp: 5,
     },
   },

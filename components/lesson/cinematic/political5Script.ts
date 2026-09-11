@@ -17,18 +17,18 @@ export interface Pol5Beat extends BaseBeat {
 export const BEATS: Pol5Beat[] = [
   {
     p: 443, city: 1, veil: 0,
-    text: 'What makes a whole society just? Plato asked it roughly 2,400 years ago — and we are still arguing.',
+    text: 'What makes a whole society just? Plato asked it some twenty-four centuries ago, and people are still arguing.',
     dur: 3.4,
   },
   {
     p: 13, city: 1,
-    text: 'Plato asks what a perfectly just city would look like. His answer: everyone does the work they are suited to, and nobody meddles.',
+    text: 'Plato asks what a just city would look like. His answer: everyone does the work they’re suited to, and nobody meddles.',
     cite: 'Plato’s just city',
     dur: 3.2,
   },
   {
     p: 13, city: 1,
-    text: 'Ruling goes to philosopher-kings, the only people he thinks actually know what good is.',
+    text: 'Ruling goes to philosopher-kings, the only people he thinks know the good.',
     dur: 2,
   },
   {
@@ -46,7 +46,7 @@ export const BEATS: Pol5Beat[] = [
   },
   {
     p: 467, city: 0, veil: 1,
-    text: 'Rawls asks it another way. What rules would you pick if you did not know who you were going to be?',
+    text: 'Rawls asks it another way. What rules would you pick if you didn’t know who you were going to be?',
     cite: 'Rawls’ veil of ignorance',
     dur: 2.9,
   },
@@ -67,14 +67,14 @@ export const BEATS: Pol5Beat[] = [
           { id: 'fair', label: 'fair rules', reads: 'to keep the rules fair', correct: true },
         ],
       },
-      explain: 'Fair rules. The veil hides your race, your class and your talents, so you cannot write the rules to suit the person you turn out to be. Equal liberties for everyone, and a gap in wealth only where the gap helps the worst off.',
+      explain: 'Fair rules. The veil hides your race, your class and your talents. So you can’t write the rules to suit the person you turn out to be. Equal liberties for everyone, and a gap in wealth only where the gap helps the worst off.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 5, veil: 0.3, city: 0.6, link: 1,
-    text: 'Watch the big questions link up. Hobbes asks why we build societies.',
+    text: 'Watch the big questions link up. Hobbes asks why people build societies.',
     cite: 'One long conversation',
     dur: 1.8,
   },

@@ -26,18 +26,18 @@ export interface Valid3Beat extends BaseBeat {
 export const BEATS: Valid3Beat[] = [
   {
     p: 2, link: 0, stamp: 0, flaw: 0, form: 0,
-    text: 'A perfectly logical argument can still be dead wrong. Flawless structure is not enough — you also need true premises.',
+    text: 'A perfectly logical argument can still be dead wrong. Flawless structure isn’t enough without true premises.',
     dur: 3.6,
   },
   {
     p: 459, link: 1, form: 0,
-    text: 'Two tests, and never confuse them. An argument is VALID when its shape will not let true premises lead to a false conclusion.',
+    text: 'Two tests, and never confuse them. An argument is valid when its shape won’t let true premises lead to a false conclusion.',
     cite: 'Validity vs Soundness',
     dur: 3.2,
   },
   {
     p: 459, link: 1, form: 0,
-    text: 'An argument is SOUND when it is valid and the premises are actually true.',
+    text: 'An argument is sound when it’s valid and the premises are actually true.',
     dur: 1.8,
   },
   {
@@ -48,12 +48,12 @@ export const BEATS: Valid3Beat[] = [
   },
   {
     p: 26, link: 1, stamp: 1, form: 1,
-    text: 'So all toasters are time machines. The form is flawless — perfectly VALID.',
+    text: 'So all toasters are time machines. The form is flawless, which makes the argument valid.',
     dur: 2.6,
   },
   {
     p: 38, link: 1, stamp: 1, flaw: 1, form: 1,
-    text: 'Yet the conclusion is false — because the premises are. Valid form, false premises: the argument is valid but not sound.',
+    text: 'Yet the conclusion is false because the premises are. Valid form, false premises: the argument is valid but not sound.',
     dur: 4.2,
   },
   {
@@ -75,14 +75,14 @@ export const BEATS: Valid3Beat[] = [
     interact: {
       prompt: 'An argument is VALID and its premises are actually TRUE. What is it?',
       explain:
-        'Valid form plus true premises equals SOUND, and a sound argument’s conclusion must be true.',
+        'Valid form plus true premises makes an argument sound, and a sound argument’s conclusion must be true.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 383, link: 1, stamp: 1, flaw: 1, form: 1,
-    text: 'Validity tests the form; soundness tests form and facts. To resist a valid argument, you cannot attack the logic — you must reject a premise.',
+    text: 'Validity tests the form, and soundness tests form and facts. To resist a valid argument, you can’t attack the logic, so you must reject a premise.',
     dur: 4.0,
   },
   {
@@ -97,7 +97,7 @@ export const BEATS: Valid3Beat[] = [
           { id: 'bad', reads: 'broken form, false conclusion' },
         ],
       },
-      explain: 'Broken form, true conclusion. Both halves of that sentence are true and neither has anything to do with the other, so the conclusion is true and the link is missing. A true conclusion cannot decide validity: it is something an argument can arrive at by accident.',
+      explain: 'Broken form, true conclusion. Both halves of that sentence are true, but neither has anything to do with the other. So the conclusion is true and the link is missing. A true conclusion can’t decide validity, since an argument can arrive at one by accident.',
       xp: 5,
     },
     dur: 1.0,

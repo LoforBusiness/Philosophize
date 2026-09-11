@@ -39,7 +39,7 @@ export const BEATS: Ethics28Beat[] = [
   },
   {
     p: 176, x: 24, rail: 1, blocks: 1, give: 0.5,
-    text: 'Always maximise happiness is a principle. Framing an innocent man is monstrous is a judgement about a case.',
+    text: 'A principle says “always maximise happiness”. A judgement about a case says “framing an innocent man is monstrous”.',
     dur: 5.0,
   },
   {
@@ -49,7 +49,7 @@ export const BEATS: Ethics28Beat[] = [
   },
   {
     p: 263, x: 24, rail: 1, blocks: 1, give: 0.94,
-    text: 'Rawls proposed going back and forth. Revise the rule, then the judgement, then the rule again.',
+    text: 'Rawls proposed going back and forth. You revise the rule, then the judgement, then the rule again.',
     dur: 5.0,
   },
   {
@@ -98,7 +98,7 @@ export const BEATS: Ethics28Beat[] = [
           { id: 'gut', upto: 1, reads: 'the rule bends to whatever you feel' },
         ],
       },
-      explain: 'Both move. Rawls called the method going back and forth: test the principle against considered judgments, and the judgments against the principle. Letting one side never bend is a foundation rather than an equilibrium.',
+      explain: 'Both move. Rawls called the method going back and forth. Test the principle against considered judgements, and the judgements against the principle. Letting one side never bend is a foundation rather than an equilibrium.',
       xp: 5,
     },
     dur: 1.0,

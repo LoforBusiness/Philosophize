@@ -57,7 +57,7 @@ export const BEATS: Metaphysics40Beat[] = [
     p: 161, x: 40, ledger: 1, written: 0.67, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what the rule puts on tomorrow\'s line.',
-      explain: 'One of the two, already. That is the rule applied to a day nobody has lived. Both at once is not something any logic offers, and leaving it blank is a real escape — it is the one Aristotle takes, and it costs him the rule.',
+      explain: 'One of the two, already. That’s the rule applied to a day nobody has lived. “Both at once” isn’t something any logic offers. “Nothing yet” is a real escape, and it’s the one Aristotle takes. It costs him the rule.',
       xp: 5,
     },
     dur: 1.0,
@@ -82,7 +82,7 @@ export const BEATS: Metaphysics40Beat[] = [
   },
   {
     p: 393, x: 104, ledger: 1, written: 1,
-    text: 'There is a cheaper door. Let the line be written, and deny that writing it forces anything.',
+    text: 'There’s a cheaper door. Let the line be written, and deny that writing it forces anything.',
     dur: 4.6,
   },
   {
@@ -96,7 +96,7 @@ export const BEATS: Metaphysics40Beat[] = [
           { id: 'open', reads: 'settled, and yet nothing is forced', holders: ['Boethius', 'William of Ockham'], correct: true },
         ],
       },
-      explain: 'The third. It is true that you will finish this sentence, and you are finishing it freely — truth is a record, not a rope. Aristotle took the second door and paid a law of logic for it. The first door takes the rope for granted.',
+      explain: 'Settled, and yet nothing is forced. It’s true that you’ll finish this sentence, and you’re finishing it freely. Truth is a record, not a rope. Aristotle chose “neither true nor false yet”, at the cost of a law of logic. Chrysippus takes the rope for granted.',
       xp: 5,
     },
     dur: 1.0,
@@ -111,7 +111,7 @@ export const BEATS: Metaphysics40Beat[] = [
         'Aristotle left that one line neither, for now',
         'The cheaper escape denies that true means forced',
       ],
-      closing: 'Every answer here costs something — a law of logic, or an open tomorrow. Working out which you would rather pay is the exercise.',
+      closing: 'Every answer here costs something — a law of logic, or an open tomorrow. Working out which you’d rather pay is the exercise.',
     },
     dur: 4.0,
   },

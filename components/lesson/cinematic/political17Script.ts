@@ -39,7 +39,7 @@ export const BEATS: Pol17Beat[] = [
   {
     g: 432, well: 1, turns: 4, blank: 1, taken: 1,
     dur: 4.8,
-    text: 'He is right about the signature. Almost nobody has ever agreed to the state they live under either, which is the awkward part.',
+    text: 'The newcomer is right about the signature. Almost nobody has ever agreed to the state they live under either, which is the awkward part.',
     cite: 'And he is right',
   },
   {
@@ -66,7 +66,7 @@ export const BEATS: Pol17Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap what creates the newcomer\'s duty.',
-      explain: 'The water he drank. Fair play needs no signature and no vote — it needs him to have taken the benefit of something other people are carrying. That is why the empty row is damning rather than an excuse: he is on the rota already, by drinking.',
+      explain: 'The water he drank. Fair play needs no signature and no vote. It needs him to have taken the benefit of something other people are carrying. That’s why the empty row is damning rather than an excuse: he’s on the rota already, by drinking.',
       xp: 5,
     },
   },
@@ -83,7 +83,7 @@ export const BEATS: Pol17Beat[] = [
           { id: 'benefit', label: 'taking the benefit', reads: 'from taking the benefit, signature or not', correct: true },
         ],
       },
-      explain: 'Taking the benefit. The first assumes consent is the only place a duty could come from, and that assumption is exactly what fair play drops. Hume had already shown consent could not carry the weight, because nobody was ever offered a genuine choice to refuse.',
+      explain: 'Taking the benefit. Answering “a signature” assumes consent is the only place a duty could come from. Fair play drops that assumption. Hume had already shown consent couldn’t carry the weight, because nobody was ever offered a genuine choice to refuse.',
       xp: 5,
     },
   },
@@ -96,7 +96,7 @@ export const BEATS: Pol17Beat[] = [
         'Taking the water puts you on the rota',
         'Free-riding is enjoying cooperation while refusing to cooperate',
       ],
-      closing: 'You never signed anything. You have been drinking from it your whole life.',
+      closing: 'You never signed anything. You’ve been drinking from it your whole life.',
     },
     dur: 3.0,
   },

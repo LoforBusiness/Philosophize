@@ -23,12 +23,12 @@ export interface Logic22Beat extends BaseBeat {
 export const BEATS: Logic22Beat[] = [
   {
     p: 379, x: 70,
-    text: 'For two thousand years "all swans are white" was simply true. Then someone sailed to Australia and saw a black one, and that was the end of it.',
+    text: 'For two thousand years the claim “all swans are white” held up. Then someone sailed to Australia and saw a black one, and that was the end of it.',
     dur: 4.4,
   },
   {
     p: 399, x: 168, claim: 1, field: 1,
-    text: 'Aristotle boiled talk about groups down to four shapes: all, none, some, and some-not. Here is the first one, with the group it is about underneath.',
+    text: 'Aristotle boiled talk about groups down to four shapes: all, none, some, and some-not. Here’s the first one, with the group it’s about underneath.',
     cite: 'A universal claim',
     dur: 4.8,
   },
@@ -53,15 +53,15 @@ export const BEATS: Logic22Beat[] = [
   },
   {
     p: 35, x: 168, claim: 1, field: 1, odd: 1, dead: 1,
-    text: 'One cat is not black. That is all it takes — the claim is finished, and the other seventeen do not help it in the slightest.',
+    text: 'One cat is not black, and that alone finishes the claim. The other seventeen don’t help it in the slightest.',
     cite: 'One is enough',
     dur: 4.4,
   },
   {
     p: 6, x: 124, claim: 1, field: 1, odd: 1, dead: 1,
     interact: {
-      prompt: 'Tap the pair that cannot both be true at once.',
-      explain: 'Contradictories: exactly one of them is true, always. "Some are" and "some are not" are perfectly happy together — a class where some passed and some failed makes both true.',
+      prompt: 'Tap the pair where exactly one must be true.',
+      explain: 'All black and some not black are contradictories: exactly one of them is true, always. “Some are” and “some are not” are happy together. A class where some passed and some failed makes both true.',
       xp: 5,
     },
     pick: 1,
@@ -79,7 +79,7 @@ export const BEATS: Logic22Beat[] = [
           { id: 'all', label: 'prove the negative', reads: 'prove that no cat is black' },
         ],
       },
-      explain: 'The trap is reaching for the sweeping opposite, "No cats are black" — a much stronger and separate claim. The contradictory of "all are" is only "some are not". One cat does it.',
+      explain: 'The trap is the bin “prove the negative”, reaching for the sweeping opposite, “no cats are black”. That’s a much stronger and separate claim. The contradictory of “all are” is only “some are not”. One cat does it.',
       xp: 5,
     },
     dur: 1.0,
@@ -93,7 +93,7 @@ export const BEATS: Logic22Beat[] = [
         'One counterexample refutes any universal claim',
         '"Some" and "some not" can both hold at once',
       ],
-      closing: 'The strongest claims are the easiest to kill. That is the trade you make by saying "all".',
+      closing: 'The strongest claims are the easiest to kill. That’s the trade you make by saying “all”.',
     },
     dur: 3.0,
   },

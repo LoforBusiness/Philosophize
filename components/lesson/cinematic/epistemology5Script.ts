@@ -23,7 +23,7 @@ export interface Epi5Beat extends BaseBeat {
 export const BEATS: Epi5Beat[] = [
   {
     p: 164, star: 0.4, power: 0, rungs: 2,
-    text: '"All men by nature desire to know. Aristotle opens his largest book with that line, and it is a claim about you.',
+    text: 'Aristotle opens his largest book with the line “All men by nature desire to know”. It’s a claim about you.',
     dur: 2.6,
   },
   {
@@ -33,24 +33,24 @@ export const BEATS: Epi5Beat[] = [
   },
   {
     p: 24, star: 0.8, rungs: 5,
-    text: 'The best kind of knowing, he says, is not the useful kind. It is the kind you want for no reason beyond wanting it.',
+    text: 'The best kind of knowing, he says, isn’t the useful kind. It’s the kind you want for no reason beyond wanting it.',
     cite: 'Aristotle, Metaphysics I',
     dur: 3.2,
   },
   {
     p: 24, star: 0.8, rungs: 5,
-    text: 'Aristotle calls knowing for its own sake the only free knowledge. It is in service of nothing.',
+    text: 'Aristotle calls knowing for its own sake the only free knowledge. It’s in service of nothing.',
     dur: 1.8,
   },
   {
     p: 19, star: 1, rungs: 5,
-    text: 'Aristotle\'s evidence is small and hard to argue with. You like looking at things.',
+    text: 'Aristotle’s evidence is small and hard to argue with. You like looking at things.',
     cite: 'The joy of sight',
     dur: 1.8,
   },
   {
     p: 19, star: 1, rungs: 5,
-    text: 'Not in order to get anything out of it — you just do, and that plain pleasure is where the whole ladder starts.',
+    text: 'Not to get anything out of it. You just do, and that plain pleasure is where the whole ladder starts.',
     dur: 3,
   },
   {
@@ -65,7 +65,7 @@ export const BEATS: Epi5Beat[] = [
     p: 467, star: 1, rungs: 5,
     // The cite plate carries `thaumazein`; the narration says what it means. A term
     // the reader can SEE spelled out does not also need spelling out in the prose (J7).
-    text: 'Their word is closer to being knocked off balance by something you cannot account for.',
+    text: 'Their word is closer to being knocked off balance by something you can’t account for.',
     dur: 2.6,
   },
   {
@@ -76,7 +76,7 @@ export const BEATS: Epi5Beat[] = [
   },
   {
     p: 37, star: 1, power: 1, rungs: 5,
-    text: 'Aristotle wanted to understand it. Bacon wanted to use it.',
+    text: 'Aristotle wanted to understand nature. Bacon wanted to use it.',
     dur: 1.8,
   },
   {
@@ -105,7 +105,7 @@ export const BEATS: Epi5Beat[] = [
           { id: 'born', upto: 1, reads: 'there from the start, in the nature', correct: true },
         ],
       },
-      explain: 'Nearly all of it is in the nature. Aristotle opens with all men by nature desire to know, and the middle is the tempting compromise. Nobody has to be trained to want to know what is behind a closed door.',
+      explain: 'Nearly all of it is in the nature. Aristotle opens with the line “all men by nature desire to know”. The middle is the tempting compromise. Nobody has to be trained to want to know what’s behind a closed door.',
       xp: 5,
     },
     dur: 1.0,
@@ -117,7 +117,7 @@ export const BEATS: Epi5Beat[] = [
       // back. Asking which of them HELD the position is the same tap and a real question (J8).
       prompt: 'One of these four wanted knowledge in order to make nature obey. Tap them.',
       explain:
-        'Bacon. He is the one who turned knowing into a tool. Aristotle is the trap, and he wanted the opposite — knowledge worth having even if it never did a thing for you.',
+        'Bacon. He’s the one who turned knowing into a tool. Aristotle is the trap. He wanted the opposite — knowledge worth having even if it never did a thing for you.',
       xp: 5,
     },
     dur: 1.0,

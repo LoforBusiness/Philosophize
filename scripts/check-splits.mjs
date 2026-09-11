@@ -50,7 +50,8 @@ const NAMES = /(?!^)\b[A-Z][a-z]{2,}\b/;
  * primary source to satisfy a checker is F42, and this rule stops at 7 partly to
  * leave them alone.
  */
-const STRANDED_BUDGET = 6;
+// 6 → 3 on 11 Sep 2026, when every lesson was rewritten to be read aloud (group AC).
+const STRANDED_BUDGET = 3;
 
 const stranded = [];
 let beats = 0;

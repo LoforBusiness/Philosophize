@@ -60,7 +60,7 @@ export const BEATS: Epistemology35Beat[] = [
   },
   {
     p: 13, x: 58, pens: 1, plaques: 1, chain: 1,
-    text: 'Here is the rule that makes the puzzle awkward. Know a thing.',
+    text: 'Here’s the rule that makes the puzzle awkward. Know a thing.',
     dur: 1.8,
   },
   {
@@ -89,24 +89,24 @@ export const BEATS: Epistemology35Beat[] = [
     p: 160, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1, live: 1,
     interact: {
       prompt: 'Tap the plate your evidence does not actually reach.',
-      explain: 'The last one. You looked at an animal and got "zebra" for free. Nothing you did looks any harder at the paint, so the chain that should carry you along it gives way at the end.',
+      explain: 'The last one. You looked at an animal and got the answer “zebra” for free. Nothing you did looked any harder at the paint. So the chain that should carry you through gives way at the end.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 167, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1,
-    text: 'Notice what did not happen. You never checked for paint.',
+    text: 'Notice what didn’t happen. You never checked for paint.',
     dur: 1.8,
   },
   {
     p: 167, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1,
-    text: 'You would think it strange to be asked, and you would still say you knew.',
+    text: 'You’d think it strange to be asked, and you’d still say you knew.',
     dur: 2.6,
   },
   {
     p: 386, x: 130, pens: 1, plaques: 1, chain: 1,
-    text: 'One way out says the mule was never a live option. Far-fetched enough, and your ordinary looking already counts as ruling it out.',
+    text: 'One way out says the mule was never a live option. If it’s far-fetched enough, your ordinary looking already counts as ruling it out.',
     dur: 4.6,
   },
   {

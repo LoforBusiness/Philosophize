@@ -34,7 +34,7 @@ export const BEATS: P9Beat[] = [
   },
   {
     vote: 1, tally: true, one: 22,
-    text: 'So they vote, and the count is honest, and the count is seven to one. Plato distrusted exactly this: steering a ship takes a trained pilot, not a show of hands.',
+    text: 'So they vote, and the count is honest, and the count is seven to one. Plato distrusted this: steering a ship takes a trained pilot, not a show of hands.',
     cite: 'Plato’s doubt',
     dur: 3.8,
   },
@@ -69,7 +69,7 @@ export const BEATS: P9Beat[] = [
   },
   {
     vote: 0, tally: true, advance: true, rights: true, one: 378,
-    text: 'Mill and Tocqueville both named the danger and both put the same thing in the way of it. A line the vote does not reach across — which is why a court can strike down a law the majority genuinely wanted.',
+    text: 'Mill and Tocqueville both named the danger, and both drew a line no vote can cross. That’s why a court can strike down a law the majority voted for.',
     cite: 'Mill, Tocqueville',
     dur: 5.0,
   },
@@ -85,7 +85,7 @@ export const BEATS: P9Beat[] = [
           { id: 'many', label: 'the many', reads: 'the many closing in on the few', correct: true },
         ],
       },
-      explain: 'The many, and that is what makes it so hard to see. A tyrant is the picture the word brings up, and this tyrant is the electorate. No coup, no soldiers — just a majority pressing on a minority, and every vote counted properly.',
+      explain: 'The many, and that’s what makes it so hard to see. A tyrant is the picture the word brings up, and this tyrant is the electorate. No coup, no soldiers — just a majority pressing on a minority, and every vote counted properly.',
     },
     dur: 4.6,
   },
@@ -94,7 +94,7 @@ export const BEATS: P9Beat[] = [
     interact: {
       prompt: 'The four voted fairly and they still cannot pass this line. Tap what is actually holding them.',
       explain:
-        'A right is a limit on what any vote may do. The trap is the first card: Mill loved liberty, so it sounds right that he would let the crowd decide. He argued the reverse — a sphere no majority may enter, however large.',
+        'A right is a limit on what any vote may do. The trap is thinking a more careful count or a bigger majority could get past it. Mill argued for a sphere no majority may enter, however large.',
     },
     dur: 4.8,
   },

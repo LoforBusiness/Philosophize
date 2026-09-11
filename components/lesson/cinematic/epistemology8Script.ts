@@ -79,7 +79,7 @@ export const BEATS: Epi8Beat[] = [
   },
   {
     p: 27, x: 196, tower: 4, pile: 1,
-    text: 'Block after block, and still no floor. Reasons marching backwards with nothing to land on has a name: the regress. It is the oldest crack in the whole idea of justification.',
+    text: 'Block after block, and still no floor. This march of reasons with nothing to land on is justification’s oldest crack: the regress.',
     cite: 'The regress',
     dur: 5.0,
   },
@@ -99,7 +99,7 @@ export const BEATS: Epi8Beat[] = [
     interact: {
       prompt: 'One of those three is what philosophers call FOUNDATIONALISM. Tap it.',
       explain:
-        'A foundation is the thing everything else sits on, and that sits on nothing. Foundationalists say a few beliefs are like that — the pain you feel right now, or two plus two — bedrock that ends the digging.',
+        'A foundation is the thing everything else sits on, and that sits on nothing. Foundationalists say a few beliefs are like that: the pain you feel right now, or two plus two. They’re bedrock that ends the digging.',
       xp: 5,
     },
     dur: 1.0,
@@ -112,7 +112,7 @@ export const BEATS: Epi8Beat[] = [
   },
   {
     p: 416, x: 176, esc: 1, land: 3,
-    text: 'Hit bedrock, and "why? finally has nowhere left to go.',
+    text: 'Hit bedrock, and the question “why?” finally has nowhere left to go.',
     dur: 1.8,
   },
   {
@@ -131,7 +131,7 @@ export const BEATS: Epi8Beat[] = [
           { id: 'fall', profile: [0.9, 0.7, 0.5, 0.3, 0.08], reads: 'the more beliefs, the shakier it gets' },
         ],
       },
-      explain: 'It climbs. A two-step loop really is empty, which is why circular reasoning is such a good insult. Coherentists argue a huge tightly knit web holds itself up. The sharper objection is not the shape but the drift: a perfect web can float free of the world.',
+      explain: 'It climbs. A two-step loop is empty, which is why circular reasoning is such a good insult. Coherentists argue a huge tightly knit web holds itself up. The sharper objection isn’t the shape but the drift: a perfect web can float free of the world.',
       xp: 5,
     },
     dur: 1.0,

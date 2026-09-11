@@ -34,12 +34,12 @@ export interface Aes22Beat extends BaseBeat {
 export const BEATS: Aes22Beat[] = [
   {
     p: 25, x: 200, screen: 1,
-    text: 'The lights go down. Green slime starts oozing towards the camera, and it is coming for you.',
+    text: 'The lights go down. Green slime starts oozing towards the camera, and it’s coming for you.',
     dur: 4.4,
   },
   {
     p: 2, x: 200, screen: 1, slime: 1, meters: 1, heart: 1,
-    text: 'Take the readings. The heart goes up.',
+    text: 'Take the readings. The heart rate goes up.',
     cite: 'Two instruments',
     dur: 1.8,
   },
@@ -63,7 +63,7 @@ export const BEATS: Aes22Beat[] = [
     p: 165, x: 132, screen: 1, slime: 1, meters: 1, heart: 1, live: 1,
     interact: {
       prompt: 'Tap what the paradox says a real emotion must have.',
-      explain: 'Belief. It is the claim doing the work and the one nobody notices making. Most people put the emotion in the racing heart, and if that were all it took the puzzle would already be over.',
+      explain: 'Belief. It’s the claim doing the work and the one nobody notices making. Most people put the emotion in the racing heart. If that were all it took, the puzzle would already be over.',
       xp: 5,
     },
     dur: 1.0,

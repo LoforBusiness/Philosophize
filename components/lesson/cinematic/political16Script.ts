@@ -36,7 +36,7 @@ export const BEATS: Pol16Beat[] = [
   {
     g: 465, cords: 4, cut: 2,
     dur: 4.2,
-    text: 'The car goes to the company and you could not afford one. The line sets the pace and you cannot stop it.',
+    text: 'The car goes to the company and you couldn’t afford one. The line sets the pace and you cannot stop it.',
     cite: 'Product and process',
   },
   {
@@ -74,7 +74,7 @@ export const BEATS: Pol16Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'The line sets the pace and you cannot stop. Tap the cord that cuts.',
-      explain: 'The work itself. Not setting your own pace severs you from the activity while you are inside it. That is why the day feels survived rather than lived. The cord to the thing you made was already cut, and by ownership rather than by speed.',
+      explain: 'The work itself. Not setting your own pace severs you from the activity while you’re inside it. That’s why the day feels survived rather than lived. The cord to the thing you made was already cut, and by ownership rather than by speed.',
       xp: 5,
     },
   },
@@ -92,7 +92,7 @@ export const BEATS: Pol16Beat[] = [
           { id: 'own', upto: 1, reads: 'a problem of ownership', correct: true },
         ],
       },
-      explain: 'Almost all of it on ownership. Calling it low pay collapses four severings into the one that is easiest to picture. Look at what a raise would reconnect: a better-paid worker still does not own the car, still cannot stop the line, and still competes with the man beside him.',
+      explain: 'Almost all of it on ownership. Calling it low pay collapses four severings into the one that’s easiest to picture. Look at what a raise would reconnect. A better-paid worker still doesn’t own the car or set the pace, and still competes with the man beside him.',
       xp: 5,
     },
   },

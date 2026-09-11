@@ -43,7 +43,7 @@ export const BEATS: Aesthetics29Beat[] = [
   },
   {
     p: 449, x: 24, trays: 1, book: 1, gives: 0.1,
-    text: 'Plato wanted the poets exiled. Art copies a copy, he argued, and stirs feeling over reason.',
+    text: 'Plato wanted the poets exiled. He argued that art copies a copy and stirs feeling over reason.',
     dur: 5.0,
   },
   {
@@ -97,7 +97,7 @@ export const BEATS: Aesthetics29Beat[] = [
           { id: 'text', upto: 1, reads: 'a textbook with invented characters' },
         ],
       },
-      explain: 'No new facts, but a deeper grasp. Plato called the poet a maker of images, twice removed from the truth. The reply is that a false story can still show a real thing clearly, which is understanding rather than information.',
+      explain: 'No new facts, but a deeper grasp. Plato called the poet a maker of images, twice removed from the truth. The reply is that a false story can still show a real thing, which is understanding rather than information.',
       xp: 5,
     },
     dur: 1.0,

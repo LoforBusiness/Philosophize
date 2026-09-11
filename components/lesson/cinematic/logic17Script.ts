@@ -37,7 +37,7 @@ export interface Log17Beat extends BaseBeat {
 export const BEATS: Log17Beat[] = [
   {
     p: 172, x: 200, pair: 1,
-    text: 'A man you cannot stand tells you two things. He really is dishonest, and you really do know it.',
+    text: 'A man you can’t stand tells you two things. He’s dishonest, and you know it for a fact.',
     dur: 4.2,
   },
   {
@@ -107,7 +107,7 @@ export const BEATS: Log17Beat[] = [
           { id: 'who', upto: 1, reads: 'the person, not the argument', correct: true },
         ],
       },
-      explain: 'All of it on the speaker, because they handed you nothing else. Bare testimony is worth exactly what the speaker is worth, so weighing the speaker is the rational thing to do. The mistake is weighing the speaker when reasons are sitting there to be read.',
+      explain: 'All of it on the speaker, because they handed you nothing else. Bare testimony is worth what the speaker is worth, so weighing the speaker is the rational thing to do. The mistake is weighing the speaker when reasons are sitting there to be read.',
       xp: 5,
     },
     dur: 1.0,

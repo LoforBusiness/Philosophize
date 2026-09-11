@@ -40,7 +40,7 @@ export const BEATS: Epi17Beat[] = [
   {
     g: 159, facts: 1, frame: 1, odd: 3,
     dur: 2.1,
-    text: 'They patch the frame, add a circle, and patch it again.',
+    text: 'Scientists patch the frame, add a circle, and patch it again.',
   },
   {
     g: 13, facts: 1, frame: 1, odd: 3,
@@ -77,7 +77,7 @@ export const BEATS: Epi17Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap what changed when the paradigm did.',
-      explain: 'The frame. Every dot is exactly where it was before the second one was drawn. Kuhn is not saying the facts are up for grabs. He is saying they arrive with a boundary already round them, and revolutions move the boundary.',
+      explain: 'The frame. Every dot is where it was before the second frame was drawn. Kuhn isn’t saying the facts are up for grabs. He’s saying they arrive with a boundary already round them, and revolutions move the boundary.',
       xp: 5,
     },
   },
@@ -96,7 +96,7 @@ export const BEATS: Epi17Beat[] = [
           { id: 'crisis', upto: 1, reads: 'enough of them to become a crisis', correct: true },
         ],
       },
-      explain: 'The far end. The near end is the version everybody is taught, and Kuhn wrote a book against it. Single results get absorbed, explained away, or set aside for later. What ends a paradigm is the accumulated weight of everything it could not explain.',
+      explain: 'The far end. The near end is the version everybody is taught, and Kuhn wrote a book against it. Single results get absorbed, explained away, or set aside for later. What ends a paradigm is the accumulated weight of everything it couldn’t explain.',
       xp: 5,
     },
   },

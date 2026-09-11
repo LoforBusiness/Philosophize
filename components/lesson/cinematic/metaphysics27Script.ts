@@ -48,14 +48,14 @@ export const BEATS: Metaphysics27Beat[] = [
   },
   {
     p: 264, x: 28, bags: 1, machine: 1,
-    text: 'David Hume saw only the pattern. A law is the best short summary of what always happens.',
+    text: 'David Hume saw only the pattern. For him, a law is the best short summary of what always happens.',
     dur: 5.0,
   },
   {
     p: 167, x: 28, bags: 1, machine: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap the objection to laws as patterns.',
-      explain: 'A fluke fits. If a law is only what always happens, the accidental bag counts as lawful too, and nothing explains why the run keeps going. A pattern that changed was never exceptionless. And nobody sees a necessity either, which is the Humean point rather than a reply to it.',
+      explain: 'A fluke fits. If a law is only what always happens, the accidental bag counts as lawful too. Then nothing explains why the run keeps going. A pattern that changed was never exceptionless. And nobody sees a necessity either, which is the Humean point rather than a reply to it.',
       xp: 5,
     },
     dur: 1.0,
@@ -80,7 +80,7 @@ export const BEATS: Metaphysics27Beat[] = [
   },
   {
     p: 448, x: 88, bags: 1, machine: 1,
-    text: 'A third answer keeps the must and moves it inside. Heavy things simply pull, by their nature.',
+    text: 'A third answer keeps the must and moves it inside. Heavy things pull by their nature.',
     dur: 5.0,
   },
   {
@@ -94,7 +94,7 @@ export const BEATS: Metaphysics27Beat[] = [
           { id: 'power', reads: 'a power the stone carries in itself' },
         ],
       },
-      explain: 'A law above the stone, forcing the fall. Something has to separate the machine-fed bag from the accidental one, and a bare pattern cannot. The powers answer keeps the must and puts the force inside the stone rather than above the world.',
+      explain: 'A law above the stone, forcing the fall. Something has to separate the machine-fed bag from the accidental one, and a bare pattern can’t. The powers answer keeps the must and puts the force inside the stone rather than above the world.',
       xp: 5,
     },
     dur: 1.0,
@@ -109,7 +109,7 @@ export const BEATS: Metaphysics27Beat[] = [
         'Armstrong added a real relation between properties',
         'A third view puts the power inside the objects',
       ],
-      closing: 'The sun rises every day, and the sun must rise, are not the same claim. Working out what the second one adds is the whole of this argument.',
+      closing: '“The sun rises every day” and “the sun must rise” are not the same claim. Working out what the second one adds is the whole of this argument.',
     },
     dur: 5.0,
   },

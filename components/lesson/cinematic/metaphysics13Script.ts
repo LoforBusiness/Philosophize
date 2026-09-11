@@ -23,7 +23,7 @@ export interface Meta13Beat extends BaseBeat {
 export const BEATS: Meta13Beat[] = [
   {
     p: 379, x: 70,
-    text: 'A scanner reads every atom of you, sends the data to Mars, builds a perfect copy there, and vaporises the original here. Step in?',
+    text: 'A scanner reads every atom of you, builds a perfect copy on Mars, and vaporises the original here. Step in?',
     dur: 4.4,
   },
   {
@@ -58,7 +58,7 @@ export const BEATS: Meta13Beat[] = [
   },
   {
     p: 29, x: 168, track: 1, fork: 1, both: 1, stuck: 1,
-    text: 'Try to put the label on one of them. Nothing chooses — the two branches are the same in every respect there is.',
+    text: 'Try to put the label on one of them. Nothing chooses, because the two branches are the same in every respect there is.',
     cite: 'The label sticks',
     dur: 3.5,
   },
@@ -89,7 +89,7 @@ export const BEATS: Meta13Beat[] = [
     p: 6, x: 124, track: 1, fork: 1, both: 1, stuck: 1, pick: 1,
     interact: {
       prompt: 'Tap the thing the fork actually broke.',
-      explain: 'Not continuity — that survived twice over, which is the whole problem. Identity is what cannot branch: a thing can only be identical to one thing, and here there are two equally good candidates.',
+      explain: 'Not continuity. That survived twice over, which is the whole problem. Identity is what cannot branch. A thing can only be identical to one thing, and here there are two equally good candidates.',
       xp: 5,
     },
     dur: 1.0,

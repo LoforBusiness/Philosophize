@@ -37,7 +37,7 @@ export const BEATS: Ethics37Beat[] = [
   },
   {
     p: 2, x: 54, posts: 1, cord: 1,
-    text: 'Now one speaker says four words. I promise I will.',
+    text: 'Now one speaker says four words: “I promise I will.”',
     dur: 2.4,
   },
   {
@@ -69,14 +69,14 @@ export const BEATS: Ethics37Beat[] = [
           { id: 'friend', upto: 1, reads: 'on her, she planned around your word', correct: true },
         ],
       },
-      explain: 'Nearly all of it on your friend. The practice does matter and it is the other main answer, but that answer makes the person you let down an afterthought. Scanlon puts her first: she relied on you, and the reliance is what you broke.',
+      explain: 'Nearly all of it on your friend. The practice does matter, and it’s the other main answer. But that answer makes the person you let down an afterthought. Scanlon puts her first: she relied on you, and the reliance is what you broke.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 467, x: 54, posts: 1, cord: 1, lean: 1,
-    text: 'Look what is leaning on the cord now. The other person cancelled a plan.',
+    text: 'Look what’s leaning on the cord now. The other person cancelled a plan.',
     dur: 2.9,
   },
   {
@@ -101,14 +101,14 @@ export const BEATS: Ethics37Beat[] = [
     p: 12, x: 54, posts: 1, lean: 1, cut: 1, unseen: 1, live: 1,
     interact: {
       prompt: 'You break it, and they never find out. Tap what was damaged anyway.',
-      explain: 'Their plans. They are already down, and they went down at the moment you decided rather than at the moment anyone noticed. Secrecy protects you from the consequences and does nothing about the wrong.',
+      explain: 'Their plans. They’re already down, and they went down at the moment you decided rather than at the moment anyone noticed. Secrecy protects you from the consequences and does nothing about the wrong.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 400, x: 126, posts: 1, lean: 1, cut: 1,
-    text: 'Which is the test that separates the two accounts. If the wrong were only to the practice, a breach nobody hears of costs almost nothing.',
+    text: 'Breaking a promise in secret is the test that separates the two accounts. If the wrong were only to the practice, a breach nobody hears of costs almost nothing.',
     dur: 4.8,
   },
   {

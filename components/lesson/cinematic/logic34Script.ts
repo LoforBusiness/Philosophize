@@ -24,7 +24,7 @@ export interface Logic34Beat extends BaseBeat {
 export const BEATS: Logic34Beat[] = [
   {
     p: 172, x: 50, n: 0,
-    text: 'A jar of marbles, and you want to know what fraction are dark. The dashed line is the true answer, and you are not allowed to look at it.',
+    text: 'A jar of marbles, and you want to know what fraction are dark. The dashed line is the true answer, and you’re not allowed to look at it.',
     dur: 4.2,
   },
   {
@@ -40,7 +40,7 @@ export const BEATS: Logic34Beat[] = [
   },
   {
     p: 418, x: 50, n: 0.45,
-    text: 'Pull more and the bracket closes fast. This part feels like progress, and it is the part everybody remembers about sample size.',
+    text: 'Pull more and the bracket closes fast. This part feels like progress, and it’s the part everybody remembers about sample size.',
     cite: 'The bracket closes',
     dur: 4.2,
   },
@@ -81,14 +81,14 @@ export const BEATS: Logic34Beat[] = [
           { id: 'waste', upto: 1, reads: 'paying for almost nothing' },
         ],
       },
-      explain: 'Sooner than it feels. The bracket does most of its closing early and then crawls. The last stretch of that rail costs enormously and buys a sliver. It is why a national poll asks about a thousand people rather than a million.',
+      explain: 'Sooner than it feels. The bracket does most of its closing early and then crawls. The last stretch of that rail costs enormously and buys a sliver. It’s why a national poll asks about a thousand people rather than a million.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 459, x: 50, n: 0.9, biased: 1,
-    text: 'Now the awkward one. Here is a huge sample, drawn only from people who answered the phone.',
+    text: 'Now the awkward one. Here’s a huge sample, drawn only from people who answered the phone.',
     cite: 'Tight, and wrong',
     dur: 3.3,
   },

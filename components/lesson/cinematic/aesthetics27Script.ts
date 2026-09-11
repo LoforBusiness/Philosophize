@@ -55,7 +55,7 @@ export const BEATS: Aesthetics27Beat[] = [
     p: 161, x: 28, wall: 1, meter: 1, shock: 0.85, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what the rule-breaking is for.',
-      explain: 'To wake you up. Shklovsky called it making the stone stony — breaking a form so the thing inside it is noticed again. Shock is the method rather than the aim, and a market grew round the work afterwards, which is not why anybody made it.',
+      explain: 'To wake you up. Shklovsky called it making the stone stony — breaking a form so the thing inside it is noticed again. Shock is the method rather than the aim. A market grew round the work afterwards, which is not why anybody made it.',
       xp: 5,
     },
     dur: 1.0,
@@ -97,7 +97,7 @@ export const BEATS: Aesthetics27Beat[] = [
           { id: 'spike', profile: [0.1, 0.92, 0.14, 0.1], reads: 'one scandal, and then nothing at all' },
         ],
       },
-      explain: 'It decays. Every broken rule is absorbed and becomes the convention the next generation breaks, which is why the movement has to keep moving. A flat line would mean Impressionism still upset people, and it sells postcards.',
+      explain: 'It decays. Every broken rule is absorbed and becomes the convention the next generation breaks. That’s why the movement has to keep moving. A flat line would mean Impressionism still upset people, and it sells postcards.',
       xp: 5,
     },
     dur: 1.0,

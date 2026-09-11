@@ -25,12 +25,12 @@ export interface M9Beat extends BaseBeat {
 export const BEATS: M9Beat[] = [
   {
     p: 379, x: 96, panels: 0,
-    text: 'Your brain weighs about three pounds and takes up space. Does the thought you are having right now weigh anything at all?',
+    text: 'Your brain weighs about three pounds and takes up space. Does the thought you’re having right now weigh anything at all?',
     dur: 3.6,
   },
   {
     p: 167, x: 96, panels: 1,
-    text: 'Descartes doubted everything he could, and could not doubt that he was thinking. So mind is a thing that thinks and takes up no space; body is a thing that takes up space and does not think.',
+    text: 'Descartes doubted everything he could, but he could not doubt he was thinking. So mind thinks and takes up no space, and body takes up space and does not think.',
     cite: 'Cartesian dualism',
     dur: 4.6,
   },
@@ -60,12 +60,12 @@ export const BEATS: M9Beat[] = [
   },
   {
     p: 13, x: 160, panels: 1, cross: 1, puzzle: true,
-    text: 'Descartes guessed the pineal gland; his critics answered that a mind with no size has nothing to push with.',
+    text: 'Descartes pointed to the pineal gland. His critics answered that a mind with no size has nothing to push with.',
     dur: 2.5,
   },
   {
     p: 33, x: 232, panels: 2,
-    text: 'So many philosophers close the gap instead. Damage a brain and the memory, the mood, even the character change with it.',
+    text: 'So physicalists close the gap instead. Damage a brain and the memory, the mood, even the character change with it.',
     cite: 'The physicalist reply',
     dur: 2.5,
   },
@@ -86,7 +86,7 @@ export const BEATS: M9Beat[] = [
           { id: 'two', label: 'a second kind of thing', reads: 'the mind is a second kind of thing entirely', correct: true },
         ],
       },
-      explain: 'A second kind of thing. Two substances, not one. The trap is the setting next to it: the mind is what the brain does sounds like a modest version of the same idea, and it is exactly the view Descartes spent the Meditations arguing against.',
+      explain: 'A second kind of thing. Two substances, not one. The trap is the “what the brain does” bin. It sounds like a modest version of the same idea, but it’s the view Descartes spent the Meditations arguing against.',
     },
     dur: 4.4,
   },
@@ -95,7 +95,7 @@ export const BEATS: M9Beat[] = [
     interact: {
       prompt: '"I think, therefore I am." Tap the label for what that sentence really establishes.',
       explain:
-        'A thinker, and no more: something is doing this thinking, so something exists. The trap is the second card. The leap from there to "and it is made of different stuff" is a further argument, and the one everybody has disputed since.',
+        'A thinker, and no more. Something is doing this thinking, so something exists. The trap is the card that says “a separate substance”. The leap from there to “and it’s made of different stuff” is a further argument. It’s the one everybody has disputed since.',
     },
     dur: 4.6,
   },
@@ -109,7 +109,7 @@ export const BEATS: M9Beat[] = [
         'Physicalists: mind is what a brain does',
       ],
       closing:
-        'Whatever the mind turns out to be, the seam between thought and matter is still the hardest one in philosophy to close.',
+        'Whatever the mind turns out to be, the seam between thought and matter is still philosophy’s hardest to close.',
     },
     dur: 4.0,
   },

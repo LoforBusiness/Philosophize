@@ -22,7 +22,7 @@ export const BEATS: Meta12Beat[] = [
   {
     g: 467, owner: 0, none: 0,
     dur: 3,
-    text: 'Look inward right now. There is a warmth, a sound, a thought about tomorrow, another thought about this sentence.',
+    text: 'Look inward right now. There’s a warmth, a sound, a thought about tomorrow, another thought about this sentence.',
   },
   {
     g: 467, owner: 0, none: 0,
@@ -32,7 +32,7 @@ export const BEATS: Meta12Beat[] = [
   {
     g: 2, owner: 1, none: 0,
     dur: 3.5,
-    text: 'Descartes says something is having them. Doubt everything you like: somebody is doing the doubting. That thinker is one continuing thing.',
+    text: 'Descartes says one continuing thinker is having them. Doubt everything you like: somebody is doing the doubting.',
     cite: 'A box for the owner',
   },
   {
@@ -67,7 +67,7 @@ export const BEATS: Meta12Beat[] = [
   {
     g: 378, owner: 1, none: 1,
     dur: 4.8,
-    text: 'Buddhism arrives at the same place by another road, and calls the fixed self anatta — an illusion. Which invites the obvious overreach, so let us put it on the table too.',
+    text: 'Buddhism reaches the same place by another road, and calls the fixed self anatta — an illusion. That invites the obvious overreach, so it goes on the table too.',
     cite: 'The overreach',
   },
   {
@@ -75,7 +75,7 @@ export const BEATS: Meta12Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap what is having these experiences.',
-      explain: 'The stream. Hume went looking for an owner and found only perceptions; anatta reaches the same place by another road. But notice what neither says — the experiences are plainly there. Only the extra thing underneath is missing.',
+      explain: 'The stream. Hume went looking for an owner and found only perceptions, and anatta reaches the same place by another road. Neither denies that the experiences are there. Only the extra thing underneath is missing.',
       xp: 5,
     },
   },
@@ -94,7 +94,7 @@ export const BEATS: Meta12Beat[] = [
           { id: 'soul', upto: 1, reads: 'one unchanging owner sitting behind it all' },
         ],
       },
-      explain: 'The middle, and the near end is the false step: reading no permanent soul as nothing at all. Hume keeps his bundle of perceptions and the Buddhist keeps the flow. Both deny the owner. Neither empties the rail.',
+      explain: 'The middle, and the near end is the false step: reading “no permanent soul” as “nothing at all”. Hume keeps his bundle of perceptions and the Buddhist keeps the flow. Both deny the owner. Neither empties the rail.',
       xp: 5,
     },
   },

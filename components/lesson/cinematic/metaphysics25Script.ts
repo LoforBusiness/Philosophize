@@ -38,12 +38,12 @@ export const BEATS: Metaphysics25Beat[] = [
   },
   {
     p: 30, x: 44, trunk: 1,
-    text: 'Up to this morning there is one road, and you were on it.',
+    text: 'Up to this morning your life runs along one road.',
     dur: 3.6,
   },
   {
     p: 36, x: 44, trunk: 1, roads: 1,
-    text: 'Then it forks. Philosophers call each way it could have gone a possible world.',
+    text: 'Then the road forks. Philosophers call each way things could have gone a possible world.',
     dur: 4.6,
   },
   {
@@ -55,14 +55,14 @@ export const BEATS: Metaphysics25Beat[] = [
     p: 161, x: 44, trunk: 1, roads: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what makes "you could have slept in" true.',
-      explain: 'A road exists where you did. The trunk is only what happened, and it cannot make a claim about what did not — that is the job the fork was invented for.',
+      explain: 'A road exists where you did. The trunk is only what happened, and it can’t make a claim about what didn’t happen. That’s the job the fork was invented for.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 159, x: 44, trunk: 1, roads: 1,
-    text: 'Necessary means on every road. Possible means on at least one of them.',
+    text: 'Necessary means true on every road. Possible means true on at least one.',
     dur: 4.6,
   },
   {
@@ -85,7 +85,7 @@ export const BEATS: Metaphysics25Beat[] = [
   },
   {
     p: 383, x: 100, trunk: 1, roads: 1,
-    text: 'Lewis meant it plainly. Real places, with a flesh and blood you on each of them.',
+    text: 'Lewis meant it word for word. Real places, with a flesh and blood you on each of them.',
     dur: 4.6,
   },
   {
@@ -100,7 +100,7 @@ export const BEATS: Metaphysics25Beat[] = [
           { id: 'talk', label: 'loose talk', reads: 'a way of speaking that stands for nothing' },
         ],
       },
-      explain: 'A story, for most philosophers. Lewis paid for his answer with an enormous world count, and the usual objection is that a road you can never reach does far less work than an ordinary description does.',
+      explain: 'A story, for most philosophers. Lewis paid for his answer with an enormous number of worlds. The usual objection is that a road you can never reach does far less work than an ordinary description.',
       xp: 5,
     },
     dur: 1.0,
@@ -114,7 +114,7 @@ export const BEATS: Metaphysics25Beat[] = [
         'Lewis said the other roads are concrete places',
         'Most say they are consistent descriptions instead',
       ],
-      closing: 'One small word can hide a whole argument. Say "could" again and notice how much it is carrying.',
+      closing: 'One small word can hide a whole argument. Say “could” again and notice how much it’s carrying.',
     },
     dur: 4.0,
   },

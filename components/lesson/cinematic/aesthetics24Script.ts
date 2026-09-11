@@ -54,7 +54,7 @@ export const BEATS: Aes24Beat[] = [
     p: 165, x: 132, panel: 1, copies: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what a perfect scan does not copy.',
-      explain: 'The history of being here. A scan takes the brushstrokes and the colours down to the cracks, so people reach for something visual and find nothing. What no scan can take is that this panel stood in this room through everything that happened.',
+      explain: 'The history of being here. A scan takes the brushstrokes and the colours down to the cracks. People reach for something visual and find nothing. What no scan can take is that this panel stood in this room through everything that happened.',
       xp: 5,
     },
     dur: 1.0,
@@ -79,7 +79,7 @@ export const BEATS: Aes24Beat[] = [
   },
   {
     p: 13, x: 268, panel: 1, copies: 1, plates: 1,
-    text: 'He was not only mourning. Cut loose from one room, a work reaches everybody, and it can argue rather than decorate.',
+    text: 'Benjamin wasn’t only mourning. Cut loose from one room, a work reaches everybody, and it can argue rather than decorate.',
     dur: 4.8,
   },
   {
@@ -96,7 +96,7 @@ export const BEATS: Aes24Beat[] = [
           { id: 'gone', profile: [1, 0.05, 0.04, 0.03, 0.02], reads: 'the first copy destroys it' },
         ],
       },
-      explain: 'It withers, and the first copy does not finish it. Benjamin chose the word withering, not killing, and he was not mourning either. Cut loose from one room, art reaches everybody, and that is counted as a gain.',
+      explain: 'It withers, and the first copy does not finish it. Benjamin chose the word withering, not killing, and he wasn’t mourning either. Cut loose from one room, art reaches everybody, and that’s counted as a gain.',
       xp: 5,
     },
     dur: 1.0,
@@ -110,7 +110,7 @@ export const BEATS: Aes24Beat[] = [
         'Reproduction makes it wither rather than snap',
         'What is lost in ritual is gained in reach',
       ],
-      closing: 'Authenticity is not in the pixels. It is in the object having stood somewhere.',
+      closing: 'Authenticity is not in the pixels. It’s in the object having stood somewhere.',
     },
     dur: 3.6,
   },

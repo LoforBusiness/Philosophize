@@ -73,13 +73,13 @@ export const BEATS: Meta2Beat[] = [
     // 167 = TALKING WITH THE HANDS, the narration loop (N2). The hook is somebody
     // talking to you, and this is what that looks like from the neck down.
     e: 167, x: 92, gone: 0.3,
-    text: 'That question has outlasted everyone who ever picked it up.',
+    text: 'Why something rather than nothing? The question has outlasted everyone who ever picked it up.',
     dur: 2.1,
   },
   {
     // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
     e: 456, x: 150, gone: 0.3, pr: 1,
-    text: 'Leibniz had a rule. Nothing is ever simply the case — there is always a reason for it.',
+    text: 'Leibniz had a rule. Nothing is without a reason.',
     cite: 'Leibniz, sufficient reason',
     dur: 2.1,
   },
@@ -107,7 +107,7 @@ export const BEATS: Meta2Beat[] = [
     // 379 = THE IDEA, PLAYED (N2) — it arrives and the finger goes up, once, as he
     // reaches the fork. Held (179) it would just be a man standing with a finger up.
     e: 379, x: 214, gone: 0.35, pr: 1,
-    text: 'Ask whether nothing was ever an option at all. Here is the fork he left: one way says it is, the other says it is not.',
+    text: 'Ask whether nothing was ever an option at all. Here’s the fork he left: one way says “it is”, the other says “it is not”.',
     dur: 3.1,
   },
   {
@@ -131,7 +131,7 @@ export const BEATS: Meta2Beat[] = [
     // fix — the sentence says he steps onto the second way and finds nothing, so
     // he walks out past the fork and recoils, once, on arrival.
     e: 318, x: 292, gone: 0.95, pr: 1,
-    text: 'So he tries it. He steps onto the second way — and there is nothing there to step onto.',
+    text: 'So he tries it. He steps onto the second way — and there’s nothing there to step onto.',
     cite: 'The second way',
     dur: 2.3,
   },
@@ -140,7 +140,7 @@ export const BEATS: Meta2Beat[] = [
     // fix — the sentence says he steps onto the second way and finds nothing, so
     // he walks out past the fork and recoils, once, on arrival.
     e: 318, x: 292, gone: 0.95, pr: 1,
-    text: 'What is not cannot be walked on, pointed at, or thought about. It does not have the decency to be an option.',
+    text: 'What is not cannot be walked on, pointed at, or thought about. It doesn’t have the decency to be an option.',
     dur: 2.7,
   },
   {
@@ -150,7 +150,7 @@ export const BEATS: Meta2Beat[] = [
     e: 178, x: 236, gone: 0.95, pr: 1, pick: 1,
     interact: {
       prompt: 'Two of these you can picture. Tap the one there is nothing to picture.',
-      explain: 'A unicorn does not exist, and you pictured it anyway — so not existing was never the problem. "Nothing at all" leaves the thought nothing to be about, and that is Parmenides\u2019 point.',
+      explain: 'A unicorn doesn’t exist, and you pictured it anyway. So not existing was never the problem. “Nothing at all” leaves the thought nothing to be about, and that’s Parmenides\u2019 point.',
       xp: 5,
     },
     dur: 1.0,
@@ -167,7 +167,7 @@ export const BEATS: Meta2Beat[] = [
           { id: 'must', label: 'something had to be', reads: 'something had to exist' },
         ],
       },
-      explain: 'Possible, and lost. Leibniz asks why something won, so nothing had to be a real option for it to beat. Parmenides sits at "never possible": nothing was never on the table, so being never had a rival and the question never opens.',
+      explain: 'Possible, and lost. Leibniz asks why something won, so nothing had to be a real option for it to beat. Parmenides sits at “never possible”. For him nothing was never on the table, so being never had a rival and the question never opens.',
       xp: 5,
     },
     dur: 1.0,
@@ -181,7 +181,7 @@ export const BEATS: Meta2Beat[] = [
         'Parmenides: what is not cannot be thought',
         'Reason settles this, not measurement',
       ],
-      closing: 'If nothing was never available, existence did not beat the alternative. There was not one.',
+      closing: 'If nothing was never available, existence didn’t beat the alternative. There was not one.',
     },
     dur: 2.8,
   },

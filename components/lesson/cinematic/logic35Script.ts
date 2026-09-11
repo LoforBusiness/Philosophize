@@ -32,7 +32,7 @@ export interface Logic35Beat extends BaseBeat {
 export const BEATS: Logic35Beat[] = [
   {
     p: 172, x: 62, rise: 0,
-    text: 'Two things, measured all summer. Watch the two lines move.',
+    text: 'Two things, measured all summer. Watch the two columns climb.',
     dur: 2.8,
   },
   {
@@ -42,24 +42,24 @@ export const BEATS: Logic35Beat[] = [
   },
   {
     p: 2, x: 62, rise: 1,
-    text: 'The shape is real and it is not a coincidence.',
+    text: 'The shape is real and it’s not a coincidence.',
     dur: 2,
   },
   {
     p: 13, x: 62, rise: 1, arrow: 1,
-    text: 'So here is the arrow everybody draws. Cones cause drownings.',
+    text: 'So here’s the arrow everybody draws. It says cones cause drownings.',
     dur: 2.1,
   },
   {
     p: 13, x: 62, rise: 1, arrow: 1,
-    text: 'Nobody believes it, and the data does not care what you believe.',
+    text: 'Nobody believes it, and the data doesn’t care what you believe.',
     dur: 2.5,
   },
   {
     p: 461, x: 62, rise: 1, arrow: 1, picks: 1, live: 1,
     interact: {
       prompt: 'Tap the thing that could be feeding both columns.',
-      explain: 'Heat. It sells cones and it fills the water, so both climb without either touching the other. Swimming lessons sit in the middle of a real chain, which makes it a mechanism. Holiday pay moves one column and not the other.',
+      explain: 'Summer heat. It sells cones and it fills the water, so both climb without either touching the other. Swimming lessons sit in the middle of a real chain, which makes it a mechanism. Holiday pay moves one column and not the other.',
       xp: 5,
     },
     dur: 1.0,
@@ -110,7 +110,7 @@ export const BEATS: Logic35Beat[] = [
           { id: 'coin', upto: 1, reads: 'a coin decides, so nothing else can be deciding', correct: true },
         ],
       },
-      explain: 'The far end. Size fixes noise, not bias: a huge biased study is confidently wrong. Listing causes only reaches the ones you thought of. A coin cuts every link at once, including the causes nobody has ever named — and those are the ones that get you.',
+      explain: 'The far end. Size fixes noise, not bias: a huge biased study is confidently wrong. Listing causes only reaches the ones you thought of. A coin cuts every link at once, including the causes nobody has ever named. Those are the ones that get you.',
       xp: 5,
     },
     dur: 1.0,
@@ -124,7 +124,7 @@ export const BEATS: Logic35Beat[] = [
         'Measuring only handles what you thought of',
         'Randomising cuts every incoming link at once',
       ],
-      closing: 'Next time two lines climb together, ask what season they are both standing in.',
+      closing: 'Next time two lines climb together, ask what season they’re both standing in.',
     },
     dur: 3.0,
   },

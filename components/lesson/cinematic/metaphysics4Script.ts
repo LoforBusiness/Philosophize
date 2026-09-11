@@ -24,12 +24,12 @@ export interface Meta4Beat extends BaseBeat {
 export const BEATS: Meta4Beat[] = [
   {
     p: 384, tokens: 0,
-    text: 'Say "nothing exists" and you have said too much. Parmenides found this snag 2,500 years ago — and it still bites.',
+    text: 'Say “nothing exists” and you’ve said too much. Parmenides found this snag twenty-five centuries ago, and it still bites.',
     dur: 3.4,
   },
   {
     p: 24, tokens: 1,
-    text: 'Try to deny non-being. The moment you think of nothing, you make it the object of a thought — and a thought needs something to be about.',
+    text: 'Try to deny non-being. Think of nothing, and it becomes the object of a thought, which needs something to be about.',
     cite: 'A self-defeating paradox',
     dur: 3.8,
   },
@@ -81,7 +81,7 @@ export const BEATS: Meta4Beat[] = [
         { text: 'Speaking it makes it something', correct: true },
         { text: 'Science proved space is full', correct: false },
       ],
-      explain: 'Every thought and word needs an object. "It is not" fails because what-is-not can be neither known nor said: try to think it, and you quietly convert it into a something.',
+      explain: 'Every thought and word needs an object. “It is not” fails because what-is-not can be neither known nor said. Try to think it, and you turn it into a something without noticing.',
       xp: 5,
     },
     dur: 1.0,
@@ -100,7 +100,7 @@ export const BEATS: Meta4Beat[] = [
           { id: 'none', upto: 1, reads: 'nothing at all, never once seen' },
         ],
       },
-      explain: 'A vacuum lands short of the far end, and the gap is the point. Empty space still has dimensions and quantum fields, so it is a something with very little in it. The nothing Parmenides means is the far end of the rail, and no experiment has gone there.',
+      explain: 'A vacuum lands short of the far end, and the gap is the point. Empty space still has dimensions and quantum fields, so it’s a something with very little in it. The nothing Parmenides means is the far end of the rail, and no experiment has gone there.',
       xp: 5,
     },
     dur: 1.0,

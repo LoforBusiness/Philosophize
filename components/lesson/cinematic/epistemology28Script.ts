@@ -63,7 +63,7 @@ export const BEATS: Epistemology28Beat[] = [
   },
   {
     p: 454, x: 82, track: 1, bars: 1, lean: 0.16,
-    text: 'Motivated reasoning almost never announces itself. You do not feel biased, you feel right.',
+    text: 'Motivated reasoning almost never announces itself. You don’t feel biased, you feel right.',
     dur: 4.8,
   },
   {

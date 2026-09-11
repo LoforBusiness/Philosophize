@@ -55,7 +55,7 @@ export const BEATS: Pol15Beat[] = [
   },
   {
     p: 383, x: 124, stages: 4, night: 1,
-    text: 'Now a protest that named the injustice, tried the courts, and broke the law — then went home by a back route. Lay it against the stair and count.',
+    text: 'Now a protest names the injustice, tries the courts and breaks the law, then goes home by a back route. Lay it against the stair and count.',
     cite: 'A protest, measured',
     dur: 4.8,
   },
@@ -71,7 +71,7 @@ export const BEATS: Pol15Beat[] = [
           { id: 'stunt', reads: 'open, yet dodging the cost' },
         ],
       },
-      explain: 'The trap is the other card, which is how the phrase is usually used. King and Rawls set a much narrower bar: public, nonviolent, penalty-accepting. Strip those and what is left is ordinary crime with a motive.',
+      explain: 'The trap is how the phrase is usually used. King and Rawls set a much narrower bar: public, nonviolent, penalty-accepting. Strip those and what’s left is ordinary crime with a motive.',
       xp: 5,
     },
     dur: 1.0,
@@ -80,7 +80,7 @@ export const BEATS: Pol15Beat[] = [
     p: 6, x: 124, stages: 4, night: 1, pick: 1,
     interact: {
       prompt: 'Tap the stage that protest skipped.',
-      explain: 'Accepting the penalty. That is the tread carrying the weight: staying to be punished is what turns a breach into an appeal addressed to everyone else\'s sense of justice, rather than an escape.',
+      explain: 'Accepting the penalty. That’s the tread carrying the weight. Staying to be punished turns a breach into an appeal to everyone else’s sense of justice, rather than an escape.',
       xp: 5,
     },
     dur: 1.0,

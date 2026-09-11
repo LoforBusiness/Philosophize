@@ -25,7 +25,7 @@ export const BEATS: Ethics31Beat[] = [
   {
     p: 383, rungs: 0, ladder: 0, duty: 1,
     dur: 4.2,
-    text: 'Something is on a shelf and you have been told to fetch it. The duty is lit, and at this point nobody has asked whether you can.',
+    text: 'Something is on a shelf and you’ve been told to fetch it. The duty is lit, and at this point nobody has asked whether you can.',
   },
   {
     p: 462, rungs: 4, ladder: 1, duty: 1,
@@ -41,7 +41,7 @@ export const BEATS: Ethics31Beat[] = [
   {
     p: 167, rungs: 7, ladder: 1, duty: 0,
     dur: 4.1,
-    text: 'The ladder ends. You stretch, and the shelf is still above your hand — genuinely, not lazily.',
+    text: 'The ladder ends. You stretch as far as you can, and the shelf is still above your hand.',
     cite: 'The ladder ends',
   },
   {
@@ -95,7 +95,7 @@ export const BEATS: Ethics31Beat[] = [
           { id: 'odd', reads: 'you could have, and undermined yourself anyway' },
         ],
       },
-      explain: 'You could not, and you arranged that. Read as a blanket excuse the principle would clear anybody who arranges their own helplessness. A driver who cannot brake because they chose to drink is still answerable: the inability is entirely real. And they are its author.',
+      explain: 'You could not, and you arranged that. Read as a blanket excuse, the principle would clear anybody who arranges their own helplessness. A driver who can’t brake because they chose to drink is still answerable. The inability is real, and they’re its author.',
       xp: 5,
     },
   },

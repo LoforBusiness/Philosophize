@@ -77,7 +77,7 @@ export const BEATS: Ethics29Beat[] = [
   },
   {
     p: 458, x: 80, scale: 1, line: 0.4,
-    text: 'Lavish praise for the second, quiet expectation of the first, and perhaps no blame at all for the third.',
+    text: 'Lavish praise for the kidney, quiet expectation of the fair share, and perhaps no blame at all for walking past.',
     dur: 5.0,
   },
   {
@@ -94,7 +94,7 @@ export const BEATS: Ethics29Beat[] = [
           { id: 'all', upto: 1, reads: 'give until it hurts, or stand condemned' },
         ],
       },
-      explain: 'Somewhere in the middle. A fair share is a duty and the kidney is a gift, which is the only arrangement that leaves room to admire the second. Push the line to the far end and every ordinary life becomes a moral failure.',
+      explain: 'Somewhere in the middle. A fair share is a duty and the kidney is a gift. Only that arrangement leaves room to admire the gift. Push the line to the far end and every ordinary life becomes a moral failure.',
       xp: 5,
     },
     dur: 1.0,

@@ -26,7 +26,7 @@ export interface E10Beat extends BaseBeat {
 export const BEATS: E10Beat[] = [
   {
     p: 462, x: 92, gauge: 0, needle: 0.62,
-    text: 'You are not certain the sun will rise tomorrow. You would still bet everything you own on it.',
+    text: 'You’re not certain the sun will rise tomorrow. You’d still bet everything you own on it.',
     dur: 2.7,
   },
   {
@@ -36,13 +36,13 @@ export const BEATS: E10Beat[] = [
   },
   {
     p: 383, x: 92, gauge: 1, band: 1, needle: 0.62,
-    text: 'One old answer draws the line at the very end of the scale: know it only if you could not possibly be wrong. Held strictly, that leaves almost nothing on the shelf — not the sunrise, not your own name.',
+    text: 'One old answer draws the line at absolute certainty, where you couldn’t possibly be wrong. Held strictly, that leaves almost nothing: not the sunrise, not your own name.',
     cite: 'The demand for certainty',
     dur: 5.0,
   },
   {
     p: 33, x: 92, gauge: 1, band: 2, needle: 0.62,
-    text: 'Fallibilism moves the line. You can genuinely know something and still admit you might be wrong.',
+    text: 'Fallibilism moves the line. You can know something and still admit you might be wrong.',
     cite: 'Fallibilism',
     dur: 3.1,
   },
@@ -80,7 +80,7 @@ export const BEATS: E10Beat[] = [
     interact: {
       prompt: 'Fallibilism draws the line somewhere on this gauge. Tap where knowledge begins.',
       explain:
-        'Well short of certainty, well past a guess. The trap is the right-hand flag: "know it only when you cannot be wrong" sounds like the rigorous answer, and it is the demand fallibilism rejects. Hold to it and you know nothing at all.',
+        'Well short of certainty, well past a guess. The trap is the right-hand flag. “Know it only when you cannot be wrong” sounds like the rigorous answer, but it’s the demand fallibilism rejects. Hold to it and you know nothing at all.',
     },
     dur: 4.6,
   },
@@ -98,7 +98,7 @@ export const BEATS: E10Beat[] = [
           { id: 'closed', upto: 1, reads: 'so firmly nothing could shake it' },
         ],
       },
-      explain: 'The middle, and the near end is the misreading. I might be wrong sounds like hedging and is not: it is a standing invitation to evidence. You can commit completely, act on it, and leave the door open at the same time.',
+      explain: 'The middle, and the near end is the misreading. Saying “I might be wrong” sounds like hedging and isn’t. It’s a standing invitation to evidence. You can commit fully, act on it, and leave the door open at the same time.',
     },
     dur: 4.4,
   },
@@ -112,7 +112,7 @@ export const BEATS: E10Beat[] = [
         'Socratic humility, grown wise and usable',
       ],
       closing:
-        'You have now circled the whole question of knowledge. Know boldly, doubt honestly, and never stop asking how you know.',
+        'Know boldly, doubt honestly, and never stop asking how you know.',
     },
     dur: 4.0,
   },

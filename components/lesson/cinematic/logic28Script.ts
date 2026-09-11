@@ -32,7 +32,7 @@ export interface Logic28Beat extends BaseBeat {
 export const BEATS: Logic28Beat[] = [
   {
     p: 426, x: 24, piers: 1,
-    text: 'Every big argument hides one small claim. Two cases are alike, so treat them alike.',
+    text: 'Every big argument hides one small claim. It says two cases are alike, so treat them alike.',
     dur: 4.8,
   },
   {
@@ -110,7 +110,7 @@ export const BEATS: Logic28Beat[] = [
         'One relevant difference can sink the whole argument',
         'A vivid comparison is not the same as evidence',
       ],
-      closing: 'Before an analogy convinces you, ask which likeness is doing the work, and whether it is the right one.',
+      closing: 'Before an analogy convinces you, ask which likeness is doing the work, and whether it’s the right one.',
     },
     dur: 5.0,
   },

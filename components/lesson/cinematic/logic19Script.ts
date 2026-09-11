@@ -54,7 +54,7 @@ export const BEATS: Log19Beat[] = [
     p: 165, x: 132, rule: 1, cards: 1, live: 1,
     interact: {
       prompt: 'Tap the card that could still break the rule.',
-      explain: 'The seven. Turning the seven is the only move that can come back with bad news, and a test that cannot fail is not a test. The four is safe whatever lies behind it, which is exactly why people reach for the four.',
+      explain: 'The seven. Turning the seven is the only move that can come back with bad news. A test that can’t fail is not a test. The four is safe whatever lies behind it, which is why people reach for the four.',
       xp: 5,
     },
     dur: 1.0,
@@ -97,7 +97,7 @@ export const BEATS: Log19Beat[] = [
           { id: 'confirm', upto: 1, reads: 'you are collecting yeses' },
         ],
       },
-      explain: 'Toward the cases that could go badly. A confirming case is cheap and there are always more of them. The only observation that changes anything is the one your belief forbids, so that is where the effort belongs.',
+      explain: 'Toward the cases that could go badly. A confirming case is cheap and there are always more of them. The only observation that changes anything is the one your belief forbids, so that’s where the effort belongs.',
       xp: 5,
     },
     dur: 1.0,

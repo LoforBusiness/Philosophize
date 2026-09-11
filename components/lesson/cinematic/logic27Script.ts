@@ -33,7 +33,7 @@ export interface Logic27Beat extends BaseBeat {
 export const BEATS: Logic27Beat[] = [
   {
     p: 356, x: 28, card: 1,
-    text: 'Read the card, then try to decide whether it is telling the truth.',
+    text: 'Read the card, then try to decide whether it’s telling the truth.',
     dur: 4.2,
   },
   {
@@ -48,7 +48,7 @@ export const BEATS: Logic27Beat[] = [
   },
   {
     p: 259, x: 28, card: 1, loop: 1, lamps: 1,
-    text: 'The culprit is the pointing. An ordinary sentence describes the world; this one describes itself.',
+    text: 'The culprit is the pointing. An ordinary sentence describes the world, but this one describes itself.',
     dur: 5.0,
   },
   {
@@ -93,7 +93,7 @@ export const BEATS: Logic27Beat[] = [
           { id: 'both', reads: 'let it be true and false together', holders: ['Graham Priest'] },
         ],
       },
-      explain: 'Cut the pointing. Tarski split the language in two, so truth for one level is only ever spoken at the next and the loop has nowhere to close. Leaving the card valueless works until somebody writes a card saying it is not true.',
+      explain: 'Cut the pointing. Tarski split the language in two, so truth for one level is only ever spoken at the next. The loop has nowhere to close. Leaving the card valueless works until somebody writes a card saying it is not true.',
       xp: 5,
     },
     dur: 1.0,

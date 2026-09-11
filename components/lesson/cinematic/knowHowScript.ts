@@ -46,7 +46,7 @@ export const BEATS: KnowHowBeat[] = [
   },
   {
     p: 435, x: 168, steps: 3,
-    text: 'Add the rest. Every line is accurate and you have memorised all of them.',
+    text: 'Add the rest. Every line is accurate and you’ve memorised all of them.',
     cite: 'The whole method',
     dur: 2.7,
   },
@@ -70,7 +70,7 @@ export const BEATS: KnowHowBeat[] = [
   },
   {
     p: 383, x: 168, steps: 3, done: 1,
-    text: 'Then the reading stops and the hands move, and the box fills. Ryle\'s point: not one line of that column is what filled it.',
+    text: 'Then the reading stops and the hands move, and the box fills. Ryle’s point: not one line of that column is what filled it.',
     cite: 'The doing',
     dur: 4.6,
   },
@@ -87,7 +87,7 @@ export const BEATS: KnowHowBeat[] = [
           { id: 'facts', upto: 1, reads: 'the facts, and none of the doing', correct: true },
         ],
       },
-      explain: 'Nearly all facts. The rival is a serious view — intellectualists argue a skill just is knowing enough facts about how — so the middle is not silly. Ryle answers with the expert who cannot state most of what they do and does it perfectly anyway.',
+      explain: 'Nearly all facts. The rival is a serious view. Intellectualists argue a skill just is knowing enough facts about how, so the middle isn’t silly. Ryle answers with the expert who can’t state most of what they do, and does it perfectly anyway.',
       xp: 5,
     },
     dur: 1.0,
@@ -96,7 +96,7 @@ export const BEATS: KnowHowBeat[] = [
     p: 6, x: 124, steps: 3, done: 1, pick: 1,
     interact: {
       prompt: 'The column is complete and correct. Tap what it still cannot hand you.',
-      explain: 'Instructions carry rules and reasons perfectly well. What they cannot hand over is the skill. That is why coaching happens in a pool, not a library.',
+      explain: 'Instructions can carry rules and reasons. What they can’t hand over is the skill. That’s why coaching happens in a pool, not a library.',
       xp: 5,
     },
     dur: 1.0,

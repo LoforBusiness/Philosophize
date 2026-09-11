@@ -20,12 +20,12 @@ export const BEATS: Logic12Beat[] = [
   {
     g: 5, lit: 0,
     dur: 4.0,
-    text: 'You are either with us or against us. Two doors, and you are told to pick one.',
+    text: 'Somebody says “you’re either with us or against us”. Two doors, and you’re told to pick one.',
   },
   {
     g: 457, lit: 0,
     dur: 4.4,
-    text: 'Both doors are real. Some people genuinely are with you, and some genuinely are against you — nothing has been made up here.',
+    text: 'Both doors are real, and nothing here is made up. Some people are with you, and some are against you.',
     cite: 'Both doors are real',
   },
   {
@@ -37,7 +37,7 @@ export const BEATS: Logic12Beat[] = [
   {
     g: 2, lit: 0,
     dur: 1.8,
-    text: 'You were simply put in a room with two doors.',
+    text: 'You were put in a room with two doors.',
   },
   {
     g: 147, lit: 0,
@@ -55,7 +55,7 @@ export const BEATS: Logic12Beat[] = [
   {
     g: 45, lit: 1,
     dur: 4.6,
-    text: 'Turn the lights on along the rest of the wall. Nothing was built just now — these were in the room before anyone made you an offer.',
+    text: 'Turn the lights on along the rest of the wall. Nothing was built just now: these doors were in the room before anyone made you an offer.',
     cite: 'The rest of the wall',
   },
   {
@@ -63,7 +63,7 @@ export const BEATS: Logic12Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap the door the offer had to keep dark to work.',
-      explain: 'The middle one. The claim only holds if being partly with and partly against is not available — so that is the door it has to hide. Saying nothing is not a third position; it is leaving the room.',
+      explain: 'The door marked “on this, not that”. The claim only holds if being partly with and partly against isn’t available. So the offer has to keep that door dark. Saying nothing is not a third position. It’s leaving the room.',
       xp: 5,
     },
   },
@@ -80,7 +80,7 @@ export const BEATS: Logic12Beat[] = [
           { id: 'never', label: 'always a trick', reads: 'never fair, every either-or is a trick' },
         ],
       },
-      explain: 'The other card over-corrects, and the light switch refutes it: on or off leaves nothing out and is perfectly good reasoning. What makes a disjunction legitimate is that its options are exhaustive — not how they are offered, or by whom.',
+      explain: 'The answer “always a trick” over-corrects, and a light switch refutes it. On or off leaves nothing out, and that’s good reasoning. What makes an either-or fair is that its options are exhaustive, not how they’re offered or by whom.',
       xp: 5,
     },
   },
@@ -93,7 +93,7 @@ export const BEATS: Logic12Beat[] = [
         'A real either/or has to leave nothing out',
         'Ask what the middle position would be, then look for it',
       ],
-      closing: 'When someone hands you two doors, the useful question is not which one. It is who drew the room.',
+      closing: 'When someone hands you two doors, the useful question is not which one. It’s who drew the room.',
     },
     dur: 3.0,
   },

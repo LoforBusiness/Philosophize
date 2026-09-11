@@ -21,7 +21,7 @@ export const BEATS: Pol14Beat[] = [
   {
     g: 384, rows: 1,
     dur: 4.0,
-    text: 'Start from any distribution you are willing to call just. Make it dead equal if you like — Nozick does not mind, and that is the point of letting you choose.',
+    text: 'Start from any distribution you’re willing to call just, dead equal if you like. Nozick doesn’t mind, and that’s the point of letting you choose.',
   },
   {
     g: 2, rows: 2,
@@ -37,7 +37,7 @@ export const BEATS: Pol14Beat[] = [
   {
     g: 447, rows: 3,
     dur: 4.4,
-    text: 'And the pattern is gone. He is vastly rich, everyone else is a dollar poorer, and nobody was wronged at any step of it.',
+    text: 'And the pattern is gone. He’s vastly rich, everyone else is a dollar poorer, and nobody was wronged at any step of it.',
     cite: 'The pattern is gone',
   },
   {
@@ -64,7 +64,7 @@ export const BEATS: Pol14Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap what holding the pattern in place would mean interrupting.',
-      explain: 'The trades. Nothing else here is available to stop — you cannot object to a start you chose, and the result is only where the trades led. Holding any pattern means preventing the middle row, over and over.',
+      explain: 'The trades. Nothing else is available to stop. You can’t object to a start you chose, and the result is only where the trades led. Holding any pattern means preventing the middle row, over and over.',
       xp: 5,
     },
   },
@@ -72,7 +72,7 @@ export const BEATS: Pol14Beat[] = [
     g: 165, rows: 3,
     dur: 1.0,
     interact: {
-      prompt: 'What is Nozick actually arguing with the footballer?',
+      prompt: 'What is Nozick arguing with the basketball star?',
       sort: {
         chip: 'Nozick\'s point',
         bins: [
@@ -81,7 +81,7 @@ export const BEATS: Pol14Beat[] = [
           { id: 'pattern', label: 'patterns stop exchange', reads: 'that holding any pattern means stopping free exchanges', correct: true },
         ],
       },
-      explain: 'Patterns stop exchange. The argument bites on ANY pattern, equal or not, and says nothing whatever about what a sportsman deserves. The reply from Rawls is that the target was never one distribution: it is the basic structure, the rules the exchanges run inside.',
+      explain: 'Patterns stop exchange. The argument bites on ANY pattern, equal or not, and says nothing whatever about what a sportsman deserves. Rawls replies that the target was never one distribution. It’s the basic structure, the rules the exchanges run inside.',
       xp: 5,
     },
   },
@@ -94,7 +94,7 @@ export const BEATS: Pol14Beat[] = [
         'Holding a pattern means interfering, and then again',
         'Rawls answers at the level of the rules, not the snapshot',
       ],
-      closing: 'Ask not only whether a distribution is fair, but what you would have to keep doing to keep it that way.',
+      closing: 'Don’t just ask whether a distribution is fair. Ask what you’d have to keep doing to keep it that way.',
     },
     dur: 3.0,
   },

@@ -28,12 +28,12 @@ export const BEATS: Epi21Beat[] = [
   },
   {
     p: 164, x: 70,
-    text: 'Take a moment and genuinely try.',
+    text: 'Take a moment and try your hardest.',
     dur: 1.8,
   },
   {
     p: 41, x: 168, dial: 1,
-    text: 'Here is the needle. It sits where your belief actually is, and at the moment it is parked hard against DOUBT.',
+    text: 'Here’s the needle. It sits where your belief is, and at the moment it’s parked hard against doubt.',
     cite: 'The gauge',
     dur: 3.9,
   },
@@ -44,7 +44,7 @@ export const BEATS: Epi21Beat[] = [
   },
   {
     p: 29, x: 124, dial: 1, will: 1,
-    text: 'Load the first tray with everything you have. Wanting rain.',
+    text: 'Load the first tray with everything you’ve got. Wanting rain.',
     cite: 'Effort',
     dur: 1.8,
   },
@@ -72,7 +72,7 @@ export const BEATS: Epi21Beat[] = [
   },
   {
     p: 384, x: 168, dial: 1, will: 1, ev: 1,
-    text: 'Now one thing in the other tray: rain on the window. You did nothing, wanted nothing, decided nothing — and the needle goes all the way across.',
+    text: 'Now one thing in the other tray: rain on the window. You did nothing, wanted nothing, decided nothing, yet the needle goes all the way across.',
     cite: 'Evidence',
     dur: 4.8,
   },
@@ -99,7 +99,7 @@ export const BEATS: Epi21Beat[] = [
           { id: 'will', upto: 1, reads: 'you choose beliefs like clothes' },
         ],
       },
-      explain: 'The middle. The near end slides from involuntary to not my responsibility, and Pascal saw the way past it. You cannot will yourself into believing. But you do choose the company, the habits and the reading that decide what ever reaches the tray.',
+      explain: 'The middle. The near end slides from “you can’t choose it” to “you’re not responsible for it”. Pascal saw the way past that. You can’t will yourself into believing. But you do choose the company, the habits and the reading that decide what ever reaches the tray.',
       xp: 5,
     },
     dur: 1.0,

@@ -56,7 +56,7 @@ export const BEATS: Political35Beat[] = [
           { id: 'full', upto: 1, reads: 'and we are outvoted forever' },
         ],
       },
-      explain: 'Slide to the far end and the living are permanently outvoted by everyone who comes after, which no society could run on. Slide to nothing and ten thousand years of waste is a free choice. The interesting part is that almost nobody stops at either end.',
+      explain: 'Slide to the far end and the living are permanently outvoted by everyone who comes after. No society could run on that. Slide to nothing and ten thousand years of waste is a free choice. The interesting part is that almost nobody stops at either end.',
       xp: 5,
     },
     dur: 1.0,
@@ -78,7 +78,7 @@ export const BEATS: Political35Beat[] = [
   },
   {
     p: 467, x: 52, chairs: 1, weight: 0.5, swap: 1,
-    text: 'Watch who is in the room now. Not the same three.',
+    text: 'Watch who’s in the room now. Not the same three.',
     dur: 2.2,
   },
   {
@@ -90,7 +90,7 @@ export const BEATS: Political35Beat[] = [
     p: 160, x: 52, chairs: 1, weight: 0.5, swap: 1, live: 1,
     interact: {
       prompt: 'The future is worse. Tap the person who ends up worse off.',
-      explain: 'There is nobody to tap, and the absence is the lesson. Everyone in the worse world owes their existence to the reckless choice, so no one there can say they would have been better off. The wrong is obvious and the victim is missing.',
+      explain: 'There’s nobody to tap, and the absence is the lesson. Everyone in the worse world owes their existence to the reckless choice. So no one there can say they’d have been better off. The wrong is obvious and the victim is missing.',
       xp: 5,
     },
     dur: 1.0,
@@ -110,7 +110,7 @@ export const BEATS: Political35Beat[] = [
   },
   {
     p: 383, x: 126, chairs: 1, weight: 0.8, swap: 1,
-    text: 'One reply drops the search for a victim. Some choices simply make the world go worse, and that is a reason not to make them.',
+    text: 'One reply drops the search for a victim. Some choices make the world go worse, and that’s a reason not to make them.',
     cite: 'Parfit, Reasons and Persons, 1984',
     dur: 4.6,
   },

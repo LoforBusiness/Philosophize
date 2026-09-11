@@ -29,7 +29,7 @@ export interface Ethics36Beat extends BaseBeat {
 export const BEATS: Ethics36Beat[] = [
   {
     p: 25, x: 56, book: 1,
-    text: 'Somebody wronged you. Here is what that leaves on the page: what happened, whose fault it was, and what you are owed.',
+    text: 'Somebody wronged you. Here’s what that leaves on the page: what happened, whose fault it was, and what you are owed.',
     dur: 4.2,
   },
   {
@@ -46,14 +46,14 @@ export const BEATS: Ethics36Beat[] = [
     p: 165, x: 56, book: 1, live: 1,
     interact: {
       prompt: 'Tap the line forgiving strikes out.',
-      explain: 'Only the third. Strike the first and you are forgetting. Strike the second and you are excusing — deciding they were not really responsible, which means there was never anything to forgive. Forgiveness needs the verdict to stand.',
+      explain: 'Only what you are owed. Strike what happened and you’re forgetting. Strike whose fault it was and you’re excusing, deciding they weren’t responsible after all. Then there was never anything to forgive. Forgiveness needs the verdict to stand.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 176, x: 56, book: 1, struck: 1, excuse: 1,
-    text: 'That line runs between forgiving and excusing, and people slide across the line constantly. Excusing says the person could not help it.',
+    text: 'People slide between forgiving and excusing constantly. Excusing says the person could not help it.',
     dur: 3.9,
   },
   {
@@ -95,14 +95,14 @@ export const BEATS: Ethics36Beat[] = [
           { id: 'take', label: 'he could demand it', reads: 'the wrongdoer could then take it for himself', correct: true },
         ],
       },
-      explain: 'He could demand it. Plenty of duties reach feelings: you can be obliged to stop nursing a grudge. The trouble is ownership. If the right apology forced the outcome, the wrongdoer could help himself to it, and the person wronged would be left holding nothing of their own.',
+      explain: 'He could demand it. Plenty of duties reach feelings: you can be obliged to stop nursing a grudge. The trouble is ownership. If the right apology forced forgiveness, the wrongdoer could help himself to it. The person wronged would be left holding nothing of their own.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 379, x: 130, book: 1, struck: 1, gift: 1,
-    text: 'None of that makes forgiveness easy, or owed, or always right. Forgiveness is simply one of the few things a wronged person still holds.',
+    text: 'None of that makes forgiveness easy, or owed, or always right. Forgiveness is one of the few things a wronged person still holds.',
     dur: 4.4,
   },
   {
@@ -114,7 +114,7 @@ export const BEATS: Ethics36Beat[] = [
         'It gives up resentment you are entitled to',
         'Forgiveness that is owed is not forgiveness',
       ],
-      closing: 'Forgiving changes nothing about what happened. That is exactly why the choice belongs to the person wronged, and to nobody waiting on them.',
+      closing: 'Forgiving changes nothing about what happened. That’s why the choice belongs to the person wronged, and to nobody waiting on them.',
     },
     dur: 3.2,
   },

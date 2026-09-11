@@ -38,12 +38,12 @@ export const BEATS: Met20Beat[] = [
   },
   {
     p: 2, x: 200, outer: 1, nest: 0.3, tally: 1,
-    text: 'Now suppose a civilisation like ours learns to run a world on a computer. Not one.',
+    text: 'Now suppose a civilisation like ours learns to run a world on a computer.',
     dur: 3.9,
   },
   {
     p: 2, x: 200, outer: 1, nest: 0.3, tally: 1,
-    text: 'Thousands, for research.',
+    text: 'Not one world. Thousands, for research.',
     dur: 1.8,
   },
   {
@@ -54,7 +54,7 @@ export const BEATS: Met20Beat[] = [
   },
   {
     p: 13, x: 132, outer: 1, nest: 1, tally: 1, token: 1,
-    text: 'Here is your token. Nobody aimed the token.',
+    text: 'Here’s your token. Nobody aimed the token.',
     dur: 1.9,
   },
   {
@@ -66,7 +66,7 @@ export const BEATS: Met20Beat[] = [
     p: 165, x: 132, outer: 1, nest: 1, tally: 1, token: 1, live: 1,
     interact: {
       prompt: 'Tap the frame your token is most likely inside.',
-      explain: 'The inner grid, if the count is right, and that is the whole argument. It is not a claim that the world feels fake. It is a claim about proportions: pick a mind at random from that picture and you will almost certainly pick a simulated one.',
+      explain: 'The inner grid, if the count is right, and that’s the whole argument. It is not a claim that the world feels fake. It’s a claim about proportions. Pick a mind at random from that picture and you’ll almost certainly pick a simulated one.',
       xp: 5,
     },
     dur: 1.0,
@@ -90,7 +90,7 @@ export const BEATS: Met20Beat[] = [
   },
   {
     p: 176, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
-    text: 'Watch it shrink.',
+    text: 'Watch the grid shrink.',
     dur: 1.8,
   },
   {
@@ -107,7 +107,7 @@ export const BEATS: Met20Beat[] = [
           { id: 'many', upto: 1, reads: 'billions, and you are almost certainly inside one' },
         ],
       },
-      explain: 'Attack the count. If nobody ever runs those worlds, or nobody lasts long enough to, the proportion never appears and the conclusion does not follow. How real it all feels is no help at all: a simulated morning would feel exactly like this one.',
+      explain: 'Attack the count. If nobody ever runs those worlds, or nobody lasts long enough to, the proportion never appears. Then the conclusion doesn’t follow. How real it all feels is no help at all. A simulated morning would feel just like this one.',
       xp: 5,
     },
     dur: 1.0,

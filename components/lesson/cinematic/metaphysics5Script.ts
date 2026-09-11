@@ -16,18 +16,18 @@ export interface Meta5Beat extends BaseBeat {
 export const BEATS: Meta5Beat[] = [
   {
     p: 462, stars: 0.7, q: 0,
-    text: 'There is something rather than nothing. Why? Leibniz framed the question; Heidegger called it the first one of all.',
+    text: 'There is something rather than nothing. Leibniz asked why, and Heidegger called it the first question of all.',
     dur: 3.6,
   },
   {
     p: 24, stars: 1, q: 1,
-    text: 'Heidegger called the question fundamental to all of metaphysics. Not why one thing exists, or another.',
+    text: 'Heidegger called the question fundamental to all of metaphysics. It isn’t about why one thing or another exists.',
     cite: 'The fundamental question',
     dur: 3.3,
   },
   {
     p: 24, stars: 1, q: 1,
-    text: 'Why there is anything at all to ask about.',
+    text: 'It asks why there’s anything at all to ask about.',
     dur: 1.9,
   },
   {
@@ -35,7 +35,7 @@ export const BEATS: Meta5Beat[] = [
     // The rule is drawn on stage in plain words — EVERY FACT NEEDS A REASON. Naming
     // it "the Principle of Sufficient Reason" over the top of that adds a term and
     // no meaning, and undoes the choice the scene already made (J7).
-    text: 'Leibniz pressed it hardest. Nothing is just true for no reason, he said.',
+    text: 'Leibniz pressed it hardest. He said nothing is just true for no reason.',
     cite: 'Leibniz, 1714',
     dur: 2.2,
   },
@@ -44,7 +44,7 @@ export const BEATS: Meta5Beat[] = [
     // The rule is drawn on stage in plain words — EVERY FACT NEEDS A REASON. Naming
     // it "the Principle of Sufficient Reason" over the top of that adds a term and
     // no meaning, and undoes the choice the scene already made (J7).
-    text: 'Every fact has one somewhere — so what is the reason for there being anything?',
+    text: 'Every fact has a reason somewhere. So what’s the reason for there being anything?',
     dur: 2.6,
   },
   {
@@ -62,7 +62,7 @@ export const BEATS: Meta5Beat[] = [
   },
   {
     p: 20, stars: 1, q: 0.4, psr: 1, dasein: 1,
-    text: 'And here is the strange part. You are a thing that wonders what it is.',
+    text: 'And here comes the strange part. You are a thing that wonders what it is.',
     cite: 'Dasein — being-there',
     dur: 2.3,
   },
@@ -85,7 +85,7 @@ export const BEATS: Meta5Beat[] = [
       },
       // Was "the leap is Kierkegaard's, the absurd is Camus's" — a leftover list of
       // two options that no longer exist, naming two thinkers for nothing.
-      explain: 'Wonder. Amazement that there is anything, rather than suspicion about what you are looking at. Doubt is Descartes at "doubt", and it asks something else entirely: not whether the world is here, but whether your eyes are telling the truth about it.',
+      explain: 'Wonder. Amazement that there’s anything, rather than suspicion about what you’re looking at. The “doubt” bin is Descartes’ question, and it asks something else. It doesn’t ask whether the world is here, but whether your eyes are telling the truth about it.',
       xp: 5,
     },
     dur: 1.0,
@@ -98,7 +98,7 @@ export const BEATS: Meta5Beat[] = [
         { text: 'Being-there', correct: true },
         { text: 'Decision', correct: false },
       ],
-      explain: 'Da means there and Sein means being. Being-there. It is deliberately plain: you are not a soul visiting a world, you are something already in the middle of one.',
+      explain: 'Da means there and Sein means being. Being-there. The word is plain on purpose. You are not a soul visiting a world. You’re something already in the middle of one.',
       xp: 5,
     },
     dur: 1.0,

@@ -31,7 +31,7 @@ export interface Epistemology30Beat extends BaseBeat {
 export const BEATS: Epistemology30Beat[] = [
   {
     p: 342, x: 24, disc: 1, edge: 0.1,
-    text: 'Thirty lessons in, the question quietly changed on you.',
+    text: 'Thirty lessons in, the question changed on you.',
     dur: 4.2,
   },
   {
@@ -53,7 +53,7 @@ export const BEATS: Epistemology30Beat[] = [
     p: 159, x: 24, disc: 1, edge: 0.6, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what Socratic wisdom actually is.',
-      explain: 'Knowing what you do not know. Socrates claimed no store of answers and no immunity from error, only an accurate view of where his own knowledge stopped. That is a working posture rather than modesty or despair.',
+      explain: 'Knowing what you don’t know. Socrates claimed no store of answers and no immunity from error. He claimed only an accurate view of where his own knowledge stopped. That’s a working posture rather than modesty or despair.',
       xp: 5,
     },
     dur: 1.0,
@@ -96,7 +96,7 @@ export const BEATS: Epistemology30Beat[] = [
           { id: 'spike', profile: [0.14, 0.92, 0.2, 0.16], reads: 'one confusing week and then clarity' },
         ],
       },
-      explain: 'It keeps opening. Every answer brings a question the reader could not have asked before, which is why the edge of what somebody knows they do not know grows faster than the middle. A shrinking line would mean philosophy runs out.',
+      explain: 'It keeps opening. Every answer brings a question you couldn’t have asked before. So the edge of what you know you don’t know grows faster than the middle. A shrinking line would mean philosophy runs out.',
       xp: 5,
     },
     dur: 1.0,

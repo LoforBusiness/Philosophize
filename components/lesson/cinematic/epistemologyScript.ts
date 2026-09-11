@@ -37,13 +37,13 @@ export const BEATS: EpistBeat[] = [
   {
     hpose: 3,
     locks: [1, 1, 1],
-    text: 'The standard recipe has three locks. The claim is TRUE.',
+    text: 'The standard recipe has three locks. The claim is true.',
     dur: 1.8,
   },
   {
     hpose: 3,
     locks: [1, 1, 1],
-    text: 'You BELIEVE it. And you have JUSTIFICATION — solid reasons.',
+    text: 'You believe it. And you have justification — solid reasons.',
     dur: 1.8,
   },
   {
@@ -136,7 +136,7 @@ export const BEATS: EpistBeat[] = [
         'Plato’s Theaetetus demanded an account',
         'Justification turns luck into knowing',
       ],
-      closing: 'Next time you say "I know," ask what justification actually backs it up.',
+      closing: 'Next time you say “I know”, ask what justification backs it up.',
     },
     dur: 2.8,
   },

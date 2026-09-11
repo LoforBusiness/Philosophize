@@ -59,10 +59,21 @@ const BEAT_SPLIT = /\n {2}\{\n/;
 const BEATS_BLOCK = /(export const BEATS[^=]*=\s*\[)([\s\S]*)(\n\];)/;
 
 const wordsOf = (s) => s.split(/\s+/).filter(Boolean);
-/** The same splitter check-words counts with, so the two can never disagree. */
+/**
+ * The same splitter check-words counts with, so the two can never disagree.
+ *
+ * AND IT USED TO DELETE A QUOTE MARK AT EVERY CUT (AC2). The split was
+ * `(?<=[.!?])["')\]]?\s+`: the optional closing mark sat in the SEPARATOR, so
+ * `"who am I becoming?" Every honest act` came out as `"who am I becoming?` and
+ * `Every honest act`, and a quoted question that the sentence carried on past
+ * was cut in two. This pass wrote 15 unbalanced beats and 2 half-sentences into
+ * the corpus on 31 Aug. Each beat is now its own audio clip, so a half-sentence
+ * is spoken as two. The mark stays in the lookbehind now, and a split needs the
+ * next sentence to actually start.
+ */
 const sentencesOf = (s) => s
   .replace(/\b(Mr|Mrs|Ms|Dr|St|e\.g|i\.e|vs|c)\./g, '$1<>')
-  .split(/(?<=[.!?])["')\]]?\s+/)
+  .split(/(?<=[.!?]["”’')\]]?)\s+(?=["“‘'(]?[A-Z0-9])/)
   .map((x) => x.replace(/<>/g, '.'))
   .filter((x) => wordsOf(x).length > 1);
 

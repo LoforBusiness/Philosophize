@@ -32,7 +32,7 @@ export const BEATS: Meta32Beat[] = [
   {
     g: 384, orbs: 1, tether: 0, tag: 0,
     dur: 4.4,
-    text: 'They are exactly alike. Same size, same metal, same age, same temperature — and there was never a moment when one existed and the other did not.',
+    text: 'They’re exactly alike. Same size, same metal, same age, same temperature, and neither one ever existed without the other.',
     cite: 'Alike in every way',
   },
   {
@@ -62,20 +62,20 @@ export const BEATS: Meta32Beat[] = [
   {
     g: 167, orbs: 1, tether: 1, tag: 1,
     dur: 2.9,
-    text: 'You can point at one sphere and call it A. But the label came from outside, carried in by you.',
+    text: 'You can point at one sphere and call it sphere A. But you carried the label in from outside.',
     cite: 'The label is ours',
   },
   {
     g: 167, orbs: 1, tether: 1, tag: 1,
     dur: 1.8,
-    text: 'Take the label away again and the universe is exactly as before.',
+    text: 'Take the label away again and nothing in the universe has changed.',
   },
   {
     g: 457, orbs: 1, tether: 1, tag: 0, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Tap the number of things in this universe.',
-      explain: 'Two. Everything true of one is true of the other, so Leibniz\'s principle says they are one thing — and they are plainly not. Max Black published this in 1952 and it has been argued over ever since.',
+      explain: 'Two. Everything true of one is true of the other, so Leibniz’s principle says they’re one thing. Yet you can count two. Max Black published this in 1952, and the argument hasn’t stopped since.',
       xp: 5,
     },
   },
@@ -92,7 +92,7 @@ export const BEATS: Meta32Beat[] = [
           { id: 'odd', reads: 'different, sharing one place' },
         ],
       },
-      explain: 'The same, in different places, and that is the argument. They are plainly two, so anything calling them one is ruled out by the setup. The only thing holding them apart is where each one is. If space is real, being here is a second fact about a sphere.',
+      explain: 'The same, in different places, and that’s the argument. They’re two, so anything calling them one is ruled out by the setup. The only thing holding them apart is where each one is. If space is real, being here is a second fact about a sphere.',
       xp: 5,
     },
   },

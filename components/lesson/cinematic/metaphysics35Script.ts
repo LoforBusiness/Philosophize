@@ -36,7 +36,7 @@ export interface Metaphysics35Beat extends BaseBeat {
 export const BEATS: Metaphysics35Beat[] = [
   {
     p: 172, x: 322, line: 1,
-    text: 'Here is your life drawn as a line. You are standing at the near end.',
+    text: 'Here’s your life drawn as a line. You’re standing at the near end.',
     dur: 3.2,
   },
   {
@@ -46,17 +46,17 @@ export const BEATS: Metaphysics35Beat[] = [
   },
   {
     p: 13, x: 322, line: 1, arc: 1,
-    text: 'You are a tourist with an unusual travel agent.',
+    text: 'You’re a tourist with an unusual travel agent.',
     dur: 1.8,
   },
   {
     p: 457, x: 120, line: 1, arc: 1, knot: 1,
-    text: 'So you arrive, and you stop your grandparents meeting. Then you are never born.',
+    text: 'So you arrive, and you stop your grandparents meeting. Then you’re never born.',
     dur: 2.5,
   },
   {
     p: 457, x: 120, line: 1, arc: 1, knot: 1,
-    text: 'Then nobody arrives. Then they meet, and you are born, and you arrive.',
+    text: 'Then nobody arrives. Then they meet, and you’re born, and you arrive.',
     dur: 2.3,
   },
   {
@@ -67,7 +67,7 @@ export const BEATS: Metaphysics35Beat[] = [
         { id: 'shot', text: '1925', correct: false },
         { id: 'born', text: '1975', correct: true },
       ],
-      explain: 'Your birth. The trip depends on it, and the trip is what undoes it — which is the loop, drawn on the line rather than argued about.',
+      explain: 'Your birth. The trip depends on it, and the trip is what undoes it. That’s the loop, drawn on the line rather than argued about.',
     },
     dur: 1.0,
   },
@@ -117,7 +117,7 @@ export const BEATS: Metaphysics35Beat[] = [
           { id: 'guard', upto: 1, reads: 'time itself steps in and stops you' },
         ],
       },
-      explain: 'Nothing has to push. The past already went one way, so every attempt to make it go otherwise fails, and each failure has its own dull local cause. A jam. A slip. The wrong street. Reliable failure looks like a guardian and needs none.',
+      explain: 'Nothing has to push. The past already went one way, so every attempt to make it go otherwise fails. Each failure has its own dull local cause: a jam, a slip, the wrong street. Reliable failure looks like a guardian and needs none.',
       xp: 5,
     },
     dur: 1.0,
@@ -131,7 +131,7 @@ export const BEATS: Metaphysics35Beat[] = [
         'A fixed past means you were always there',
         'A branch is a second history, not a changed one',
       ],
-      closing: 'Go back as often as you like. You cannot make it different, because there is nothing for "different" to be measured against.',
+      closing: 'Go back as often as you like. You can’t make it different, because there’s nothing for “different” to be measured against.',
     },
     dur: 3.0,
   },

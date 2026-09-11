@@ -42,7 +42,7 @@ export const BEATS: Political25Beat[] = [
   },
   {
     p: 36, x: 44, rooms: 1, reach: 0.46,
-    text: 'Law, work and citizenship were public, and open to argument.',
+    text: 'Law, work and the vote were public, and open to argument.',
     dur: 4.0,
   },
   {
@@ -61,12 +61,12 @@ export const BEATS: Political25Beat[] = [
   },
   {
     p: 159, x: 44, rooms: 1, reach: 0.46,
-    text: 'Feminist thinkers turned the line around. What is private is held there by public rules.',
+    text: 'Feminist thinkers turned the line around. What’s private is held there by public rules.',
     dur: 5.0,
   },
   {
     p: 62, x: 100, rooms: 1, reach: 0.46,
-    text: 'A mother leaves work when leave favours her and childcare costs more than she earns.',
+    text: 'A mother quits work when parental leave favours her and childcare costs more than she earns.',
     dur: 5.0,
   },
   {
@@ -84,7 +84,7 @@ export const BEATS: Political25Beat[] = [
   },
   {
     p: 383, x: 100, rooms: 1, reach: 0.46,
-    text: 'Susan Okin put the point to Rawls. Behind the veil you cannot know your gender either.',
+    text: 'Susan Okin put the point to Rawls. Behind the veil you can’t know your gender either.',
     dur: 5.0,
   },
   {
@@ -101,7 +101,7 @@ export const BEATS: Political25Beat[] = [
           { id: 'home', upto: 1, reads: 'through the door, to who does what at home', correct: true },
         ],
       },
-      explain: 'All the way through. Equal rights on paper leave the care, the money and the deciding exactly where they were — and those are what decide who can use a right outside.',
+      explain: 'All the way through. Equal rights on paper leave the care, the money and the deciding where they were. And those three decide who can use a right outside the front door.',
       xp: 5,
     },
     dur: 1.0,

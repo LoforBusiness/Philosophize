@@ -33,18 +33,18 @@ export const BEATS: Logic5Beat[] = [
   },
   {
     p: 27, machine: 1, run: 1,
-    text: 'An argument moves from premises — claims you grant — to a conclusion they force. Each move is an inference.',
+    text: 'An argument moves from premises, the claims you grant, to a conclusion they force. Each move is an inference.',
     cite: 'Premises → conclusion',
     dur: 3.2,
   },
   {
     p: 27, machine: 1, run: 1,
-    text: 'Feed the premises in; the conclusion comes out the other end.',
+    text: 'Feed the premises in, and the conclusion comes out the other end.',
     dur: 1.8,
   },
   {
     p: 459, machine: 1, run: 1,
-    text: 'Euclid drew a circle around A through B, another around B through A; they cross at C. AB equals AC, AB equals BC — so AC equals BC.',
+    text: 'Euclid’s circles around point A and point B cross at C, each through the other’s centre. Line AB equals line AC and line BC, so line AC equals line BC.',
     cite: 'Euclid, Elements I.1',
     dur: 4.1,
   },
@@ -78,7 +78,7 @@ export const BEATS: Logic5Beat[] = [
   },
   {
     climb: 1, ladder: 1, steps: 1,
-    text: 'Validity lives in the form, not the vibe. Spell out every inference and you can see exactly where the chain might break — then climb it, from the simplest step up.',
+    text: 'Validity lives in the form, not the vibe. Spell out every inference to see where the chain might break, and climb from the simplest step up.',
     cite: 'One rung at a time',
     dur: 4.4,
   },
@@ -86,7 +86,7 @@ export const BEATS: Logic5Beat[] = [
     p: 383, chute: 1,
     interact: {
       prompt: 'A proof "feels obviously right" but skips three steps. Which chute do you send it down?',
-      explain: 'Feeling obvious isn’t a check. Unstated steps are exactly where a hidden flaw can slip past you — so send it to be checked, not waved through.',
+      explain: 'Feeling obvious isn’t a check. Unstated steps are where a hidden flaw can slip past you. So send the proof to be checked, not waved through.',
       xp: 5,
     },
     dur: 1.0,

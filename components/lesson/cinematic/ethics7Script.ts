@@ -35,18 +35,18 @@ export const BEATS: Ethics7Beat[] = [
   },
   {
     p: 2, x: 170, laneA: 1, carB: -70,
-    text: 'Here is the first driver. Empty road, nothing ahead.',
+    text: 'Here’s the first driver. Empty road, nothing ahead.',
     cite: 'Road A',
     dur: 1.8,
   },
   {
     p: 2, x: 170, laneA: 1, carB: -70,
-    text: 'The driver looks down, looks up, and the road is exactly as she left it. She parks and never thinks about it again.',
+    text: 'The driver looks down, looks up, and the road is as she left it. She parks and never thinks about it again.',
     dur: 3.3,
   },
   {
     p: 6, x: 300, laneA: 1, laneB: 1, kid: 1, carB: 60,
-    text: 'Here is the second driver. Same phone, same road, same two seconds.',
+    text: 'Here’s the second driver. Same phone, same road, same two seconds.',
     cite: 'Road B',
     dur: 2,
   },
@@ -105,13 +105,13 @@ export const BEATS: Ethics7Beat[] = [
   },
   {
     p: 167, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
-    text: 'In 1976 Bernard Williams and Thomas Nagel named this clash: moral luck. Whether you end up a decent person or a criminal depends partly on which road you happened to drive down.',
+    text: 'In 1976 Bernard Williams and Thomas Nagel named this clash: moral luck. Whether you end up decent or criminal depends partly on which road you happened to take.',
     cite: 'Williams & Nagel · 1976',
     dur: 4.1,
   },
   {
     p: 167, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
-    text: 'Nagel stated the intuition we keep breaking.',
+    text: 'Nagel stated the intuition people keep breaking.',
     dur: 1.8,
   },
   {

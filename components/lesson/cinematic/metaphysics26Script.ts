@@ -44,7 +44,7 @@ export const BEATS: Metaphysics26Beat[] = [
   },
   {
     p: 435, x: 28, road: 1, jam: 1,
-    text: 'Here is a smaller case. No single car is a traffic jam.',
+    text: 'Here’s a smaller case. No single car is a traffic jam.',
     dur: 3.8,
   },
   {
@@ -56,7 +56,7 @@ export const BEATS: Metaphysics26Beat[] = [
     p: 167, x: 28, road: 1, jam: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap the test that tells the two apart.',
-      explain: 'Whether the parts settle it. Surprise is the wrong test — nobody predicted wetness either, and chemistry explains it perfectly well. A name is no test at all. Strong emergence needs a feature the parts could not have given you, however well you knew them.',
+      explain: 'Whether the parts settle it. Surprise is the wrong test. Nobody predicted wetness either, and chemistry explains it in full. A name is no test at all. Strong emergence needs a feature the parts couldn’t have given you, however well you knew them.',
       xp: 5,
     },
     dur: 1.0,
@@ -97,7 +97,7 @@ export const BEATS: Metaphysics26Beat[] = [
           { id: 'cars', upto: 1, reads: 'the jam is the cars, braking in order', correct: true },
         ],
       },
-      explain: 'All of it is cars. The jam has a speed and a direction and is still nothing but braking, in order, on a road. Putting anything to the right of that seam adds a thing no traffic report has ever needed.',
+      explain: 'It’s all cars. The jam has a speed and a direction and is still nothing but braking, in order, on a road. Putting anything to the right of that seam adds a thing no traffic report has ever needed.',
       xp: 5,
     },
     dur: 1.0,

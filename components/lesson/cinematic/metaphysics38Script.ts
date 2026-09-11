@@ -39,7 +39,7 @@ export const BEATS: Metaphysics38Beat[] = [
   },
   {
     p: 30, x: 52, days: 1, objects: 1,
-    text: 'Monday the clay is a lump. Tuesday the same clay is a vase. Wednesday the potter squashes the vase back into a lump.',
+    text: 'Monday the clay is a lump, and Tuesday the same clay is a vase. Wednesday the potter squashes the vase back into a lump.',
     dur: 4.4,
   },
   {
@@ -91,7 +91,7 @@ export const BEATS: Metaphysics38Beat[] = [
           { id: 'none', label: 'no thing at all', reads: 'only a shape, so nothing was made on Tuesday' },
         ],
       },
-      explain: 'A second thing, made of the clay. It is not free: two objects then sit in one place at one time, and philosophers who take this route say so. The rivals cost more. Watch the bars as you move the chip and you can see each bill being paid.',
+      explain: 'A second thing, made of the clay. It isn’t free. Two objects then sit in one place at one time, and philosophers who take this route say so. The rivals cost more. Watch the bars as you move the chip and you can see each bill being paid.',
       xp: 5,
     },
     dur: 1.0,

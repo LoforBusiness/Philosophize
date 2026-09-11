@@ -34,7 +34,7 @@ export interface Epistemology37Beat extends BaseBeat {
 export const BEATS: Epistemology37Beat[] = [
   {
     p: 462, x: 54, hull: 1,
-    text: 'An old ship, due to carry emigrants. Her owner has five separate reasons to doubt she is sound.',
+    text: 'An old ship, due to carry emigrants. Her owner has five separate reasons to doubt she’s sound.',
     dur: 3.8,
   },
   {
@@ -51,14 +51,14 @@ export const BEATS: Epistemology37Beat[] = [
           { id: 'mad', upto: 1, reads: 'and nobody ever sails', correct: false },
         ],
       },
-      explain: 'Wherever you set it, notice you set it above a feeling. He did not. He worked on himself until the doubts were quiet and then sent her out sincerely convinced, which is the part Clifford will not forgive.',
+      explain: 'Wherever you set it, notice you set it above a feeling. He did not. He worked on himself until the doubts were quiet, then sent her out sincerely convinced. That’s the part Clifford won’t forgive.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 13, x: 54, hull: 1, quiet: 1,
-    text: 'Watch what he actually did. He did not inspect her.',
+    text: 'Watch what he did. He did not inspect her.',
     dur: 1.9,
   },
   {
@@ -120,7 +120,7 @@ export const BEATS: Epistemology37Beat[] = [
         'A lucky outcome does not clear you',
         'Some beliefs must be held before they can be tested',
       ],
-      closing: 'He is easy to condemn from here. He did what anyone does when checking is expensive and the answer is one they cannot afford.',
+      closing: 'He’s easy to condemn from here. He did what anyone does when checking is expensive and the answer is one they can’t afford.',
     },
     dur: 3.2,
   },

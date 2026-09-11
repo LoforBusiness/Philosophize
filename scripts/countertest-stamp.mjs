@@ -74,6 +74,17 @@ run('prose swapped for the SAME length', () => {
   fs.writeFileSync(SCRIPT, s.replace(/text: '([^']{10,})'/, (m, b) => `text: '${'x'.repeat(b.length)}'`));
 }, 'same');
 
+// THE SUMMARY IS DECK PROSE TOO. The key list stopped at `label` for a fortnight,
+// and rewriting every lesson to be read aloud (group AC) made 103 stamps stale for
+// closings and points the stage never draws — the summary card unmounts it.
+run('a rewritten summary closing', () => {
+  fs.writeFileSync(SCRIPT, s.replace(/closing: '([^']{10,})'/, "closing: 'A different last word, and a longer one than before.'"));
+}, 'same');
+
+run('a rewritten summary point', () => {
+  fs.writeFileSync(SCRIPT, s.replace(/points: \[\s*'([^']{6,})'/, (m, b) => m.replace(b, 'A point rewritten from scratch')));
+}, 'same');
+
 // AND FOUR THAT MUST NOT BE.
 run('a changed channel value', () => {
   fs.writeFileSync(SCRIPT, s.replace(/\bx: 200\b/, 'x: 117'));

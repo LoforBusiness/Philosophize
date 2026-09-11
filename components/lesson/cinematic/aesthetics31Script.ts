@@ -53,7 +53,7 @@ export const BEATS: Aes31Beat[] = [
   {
     g: 40, strings: 1, playing: 1, clapA: 1, clapB: 1,
     dur: 2.8,
-    text: 'And the room is on its feet. Not one sound reaching anybody\'s ears had changed.',
+    text: 'And the room is on its feet. Not one sound reaching anybody’s ears had changed.',
     cite: 'The second time',
   },
   {
@@ -83,7 +83,7 @@ export const BEATS: Aes31Beat[] = [
           { id: 'dull', reads: 'easy, and it says nothing' },
         ],
       },
-      explain: 'Hard, and it says nothing: a real place, and difficulty with nothing to show for it. Strict formalism says the making never mattered, and the spliced recording embarrasses it. If that were true, finding out would change nothing. Difficulty and meaning are separate.',
+      explain: 'Hard, and it says nothing: a real place, and difficulty with nothing to show for it. Strict formalism says the making never mattered, and the second ovation embarrasses it. The same nine notes brought the room to its feet once three strings were gone. Difficulty and meaning are separate.',
       xp: 5,
     },
   },
@@ -93,10 +93,10 @@ export const BEATS: Aes31Beat[] = [
       points: [
         'A performance is admired as sound and as achievement',
         'Difficulty is evidence of skill, not a beauty of its own',
-        'The spliced recording shows how much the making matters',
+        'The second ovation shows how much the making matters',
         'Two values can point in different directions',
       ],
-      closing: 'When you applaud, notice what you are applauding. Half the time it is not the thing you heard.',
+      closing: 'When you applaud, notice what you’re applauding. Half the time it isn’t the thing you heard.',
     },
     dur: 3.0,
   },

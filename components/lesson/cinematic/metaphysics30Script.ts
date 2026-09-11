@@ -54,7 +54,7 @@ export const BEATS: Metaphysics30Beat[] = [
     p: 166, x: 24, cave: 1, charted: 0.55, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what is wrong with the charge against metaphysics.',
-      explain: 'It undermines itself. Only what science can test is meaningful is not a claim science can test, so the verdict against metaphysics quietly leans on metaphysics. Nothing here says science is shaky or that the answers are in.',
+      explain: 'It undermines itself. “Only what science can test is meaningful” is not a claim science can test. So the verdict against metaphysics leans on metaphysics without saying so. Nothing here says science is shaky or that the answers are in.',
       xp: 5,
     },
     dur: 1.0,

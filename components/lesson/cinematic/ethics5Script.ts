@@ -59,13 +59,13 @@ export const BEATS: Ethics5Beat[] = [
   },
   {
     x: 217, soc: 13, chart: 2,
-    text: 'Socrates never wrote a word down. Everything we have, a student wrote later.',
+    text: 'Socrates never wrote a word down. What survives of him was written later, by a student.',
     cite: 'Greece — Socrates',
     dur: 1.9,
   },
   {
     x: 217, soc: 13, chart: 2,
-    text: 'He walked up to people in Athens and asked them what virtue was. The city put him on trial and killed him for it.',
+    text: 'In Athens, he walked up to people and asked them what virtue was. The city put him on trial and killed him for it.',
     dur: 3.5,
   },
   {
@@ -76,7 +76,7 @@ export const BEATS: Ethics5Beat[] = [
   },
   {
     x: 265, soc: 5, chart: 3,
-    text: 'China’s is ren, something like humaneness. Confucius says it only ever grows between people.',
+    text: 'China’s word is ren, something like humaneness. Confucius says it grows only between people.',
     dur: 2.4,
   },
   {
@@ -96,7 +96,7 @@ export const BEATS: Ethics5Beat[] = [
     x: 265, soc: 4, fork: 1,
     interact: {
       prompt: 'Ren has to grow somewhere. Take the path Confucius would send you down.',
-      explain: 'Ren is shaped in real relationships: family, friends, ruler and citizen. Confucius has no interest in a virtue you could practise alone in a room.',
+      explain: 'Ren is shaped in real relationships: family, friends, ruler and citizen. Confucius has no use for a virtue you could practise alone in a room.',
       xp: 5,
     },
     dur: 1.0,
@@ -105,7 +105,7 @@ export const BEATS: Ethics5Beat[] = [
     x: 265, soc: 4, balance: 1,
     interact: {
       prompt: 'The "Axial Age" — tip the scale. Is it a proven fact, or an interpretive thesis?',
-      explain: 'The claim sounds like a fact with a date on it, and is really a reading of history. Jaspers noticed three places changing at once and argued that the timing meant something. Historians have argued back ever since.',
+      explain: 'The claim sounds like a fact with a date on it, but it’s a reading of history. Jaspers noticed three places changing at once and argued that the timing meant something. Historians have argued back ever since.',
       xp: 5,
     },
     dur: 1.0,
@@ -119,7 +119,7 @@ export const BEATS: Ethics5Beat[] = [
         'Dharma tied right action to duty and role',
         'Confucius rooted ethics in humane relationships',
       ],
-      closing: 'Not one of these thinkers wrote a word for us. Their pupils carried the questions forward anyway.',
+      closing: 'Not one of these thinkers wrote a word for you. Their pupils carried the questions forward anyway.',
     },
     dur: 2.8,
   },

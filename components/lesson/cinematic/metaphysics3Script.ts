@@ -22,18 +22,18 @@ export interface Meta3Beat extends BaseBeat {
 export const BEATS: Meta3Beat[] = [
   {
     p: 384, shadow: 0.9, form: 0, apple: 1,
-    text: 'Plato said the apple in your hand is only half-real. Not unreal — stuck between being and not-being.',
+    text: 'Plato said the apple in your hand is only half-real. It isn’t unreal, just stuck between being and not-being.',
     dur: 3.4,
   },
   {
     p: 167, shadow: 0.9, form: 0.15, apple: 1,
-    text: 'Heraclitus said everything flows, like a river you cannot step in twice. That troubled Plato.',
+    text: 'Heraclitus said everything flows, like a river you can’t step in twice. That troubled Plato.',
     cite: 'Being vs Becoming',
     dur: 1.9,
   },
   {
     p: 167, shadow: 0.9, form: 0.15, apple: 1,
-    text: 'You cannot know a thing that will not hold still, so he split the world in two. Being holds still and can be known.',
+    text: 'You can’t know a thing that won’t hold still, so he split the world in two. Being holds still and can be known.',
     dur: 3,
   },
   {
@@ -49,7 +49,7 @@ export const BEATS: Meta3Beat[] = [
   },
   {
     p: 418, shadow: 0.5, form: 0.7, apple: 1,
-    text: 'Plato says the wall is where we live, and the Forms are what is casting the shadows.',
+    text: 'Plato says the wall is where you live, and the Forms are what’s casting the shadows.',
     dur: 2.3,
   },
   {
@@ -67,7 +67,7 @@ export const BEATS: Meta3Beat[] = [
   },
   {
     p: 24, shadow: 0.15, form: 1, apple: 1,
-    text: 'Everything you can touch is a rough copy of something perfect. Two sticks are never exactly equal. The idea of Equality always is.',
+    text: 'Everything you can touch is a rough copy of something perfect. Two sticks are never exactly equal, but the idea of Equality always is.',
     cite: 'The theory of Forms',
     dur: 2.9,
   },
@@ -99,7 +99,7 @@ export const BEATS: Meta3Beat[] = [
           { id: 'form', upto: 1, reads: 'the Form is real, the apple borrows', correct: true },
         ],
       },
-      explain: 'Nearly all of it goes to the Form, and that is what feels backwards. Plato ranks the invisible above the touchable. Apples bruise and rot and stop being apples, so for him they hold less being than the one thing that never changes.',
+      explain: 'Nearly all of it goes to the Form, and that’s what feels backwards. Plato ranks the invisible above the touchable. Apples bruise and rot and stop being apples. So for him they hold less being than the one thing that never changes.',
       xp: 5,
     },
     dur: 1.0,

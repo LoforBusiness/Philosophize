@@ -27,12 +27,12 @@ export interface Logic10Beat extends BaseBeat {
 export const BEATS: Logic10Beat[] = [
   {
     p: 172, x: 34, arg: 1,
-    text: 'A friend says: “He is rich, so he must be happy.” You nod along. Two sentences went past you, and a third one never did.',
+    text: 'A friend says “he is rich, so he must be happy”, and you nod along. Two sentences went past you, and a third one never did.',
     dur: 3.8,
   },
   {
     p: 416, x: 96, arg: 1, slot: 1,
-    text: 'Nothing actually joins them. Being rich and being happy are different things, and the sentence that would tie one to the other was never said.',
+    text: 'Nothing actually joins them. Being rich and being happy are different things, and the sentence tying one to the other was never said.',
     cite: 'The gap',
     dur: 4.6,
   },
@@ -68,7 +68,7 @@ export const BEATS: Logic10Beat[] = [
   },
   {
     p: 30, x: 158, arg: 1, slot: 1, hid: 2,
-    text: 'Up it comes through the line, and once you can read the words you can see they are rubbish.',
+    text: 'Up it comes through the line, and once you can read the words you can see they’re rubbish.',
     dur: 3,
   },
   {
@@ -83,7 +83,7 @@ export const BEATS: Logic10Beat[] = [
           { id: 'never', label: 'never', reads: 'never, everybody leaves things out' },
         ],
       },
-      explain: 'Only when false. Hidden sounds like dishonest and usually is not: almost every real argument leaves something out, and nobody says all men are mortal out loud. It only fails when the thing left unsaid would not survive being said.',
+      explain: 'Only when false. The word “hidden” sounds like “dishonest”, but a hidden premise usually isn’t. Almost every real argument leaves something out, and nobody says “all men are mortal” out loud. It only fails when the thing left unsaid wouldn’t survive being said.',
       xp: 5,
     },
     dur: 1.0,
@@ -92,7 +92,7 @@ export const BEATS: Logic10Beat[] = [
     p: 165, x: 158, arg: 2, slot: 1, pick: 1,
     interact: {
       prompt: '“You should sleep more — you look exhausted.” Tap the premise this argument needs but never says.',
-      explain: 'The trap: the other two are true, and true is not the same as load-bearing. This argument only walks if looking tired is evidence of needing sleep. Deny that one bridge and it collapses — the general facts about sleep were never holding it up.',
+      explain: 'The trap: the other two are true, and true is not the same as load-bearing. This argument only walks if looking tired is evidence of needing sleep. Deny that one bridge and it collapses. The general facts about sleep were never holding it up.',
       xp: 5,
     },
     dur: 1.0,
@@ -107,7 +107,7 @@ export const BEATS: Logic10Beat[] = [
         'The hidden premise is where a weak argument hides',
         'Unstated is not the same as false — check it',
       ],
-      closing: 'You can now hear the sentence nobody said. That is usually where the argument breaks.',
+      closing: 'You can now hear the sentence nobody said. That’s usually where the argument breaks.',
     },
     dur: 3.0,
   },

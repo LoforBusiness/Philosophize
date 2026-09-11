@@ -21,7 +21,7 @@ export interface Logic26Beat extends BaseBeat {
 export const BEATS: Logic26Beat[] = [
   {
     p: 164, x: 70,
-    text: 'Here is a strange way to prove something is true. Begin by assuming it is false.',
+    text: 'Here’s a strange way to prove something is true. Begin by assuming it is false.',
     dur: 2.8,
   },
   {
@@ -31,24 +31,24 @@ export const BEATS: Logic26Beat[] = [
   },
   {
     p: 41, x: 168, links: 1,
-    text: 'Suppose there is a largest number. Call it N.',
+    text: 'Suppose there’s a largest number. Call it N.',
     cite: 'The assumption',
     dur: 1.8,
   },
   {
     p: 41, x: 168, links: 1,
-    text: 'Nothing wrong with supposing it — that is the whole move, and you are allowed to suppose anything at all.',
+    text: 'Nothing wrong with supposing it. That’s the whole move, and you’re allowed to suppose anything at all.',
     dur: 3.3,
   },
   {
     p: 40, x: 168, links: 3,
-    text: 'Now just follow it. N plus one is a number, and it is bigger than N.',
+    text: 'Now just follow it. N plus one is a number, and it’s bigger than N.',
     cite: 'Follow it honestly',
     dur: 2.3,
   },
   {
     p: 409, x: 168, links: 3,
-    text: 'So N is not the largest after all — and that is flatly at odds with what we assumed.',
+    text: 'So N is not the largest after all. That’s flatly at odds with what you assumed.',
     dur: 2.7,
   },
   {
@@ -71,7 +71,7 @@ export const BEATS: Logic26Beat[] = [
   },
   {
     p: 459, x: 168, links: 4, snap: 1,
-    text: 'The assumption was false. There is no largest number.',
+    text: 'The assumption was false. There’s no largest number.',
     dur: 1.8,
   },
   {
@@ -86,7 +86,7 @@ export const BEATS: Logic26Beat[] = [
           { id: 'assume', label: 'the start was false', reads: 'what you started from was false', correct: true },
         ],
       },
-      explain: 'The start was false, and the contradiction is the goal rather than the wreckage. If every step from your assumption was valid, the assumption is the only thing left to blame. "nothing" is the instinct this whole method is built to overturn.',
+      explain: 'The start was false, and the contradiction is the goal rather than the wreckage. If every step from your assumption was valid, the assumption is the only thing left to blame. The bin “nothing” is the instinct this whole method is built to overturn.',
       xp: 5,
     },
     dur: 1.0,
@@ -95,7 +95,7 @@ export const BEATS: Logic26Beat[] = [
     p: 383, x: 124, links: 4, snap: 1, pick: 1,
     interact: {
       prompt: 'The chain ends in an absurdity. Tap what it breaks.',
-      explain: 'Not the logic and not a middle step — every one of those was a valid move you would make again. The only thing that was ever optional is the thing you assumed at the top.',
+      explain: 'Not the rules of logic and not a middle step. Every one of those was a valid move you’d make again. The only thing that was ever optional is the thing you assumed at the top.',
       xp: 5,
     },
     dur: 1.0,

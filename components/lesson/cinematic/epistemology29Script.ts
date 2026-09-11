@@ -54,7 +54,7 @@ export const BEATS: Epistemology29Beat[] = [
     p: 164, x: 26, tiles: 1, wired: 0.9, fresh: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what a memorised test score cannot show.',
-      explain: 'Whether the pieces connect. A score measures recall of what is so, and understanding shows up exactly where recall runs out. More facts would be one more tile on a heap that was never short of tiles.',
+      explain: 'Whether the pieces connect. A score measures what you can recall, and understanding shows up where recall runs out. More facts would be one more tile on a heap that was never short of tiles.',
       xp: 5,
     },
     dur: 1.0,
@@ -108,7 +108,7 @@ export const BEATS: Epistemology29Beat[] = [
         'A grasp transfers to cases you have never met',
         'A stack of facts just sits there',
       ],
-      closing: 'Ask yourself whether you could explain it to somebody, and you will find out which of the two you have.',
+      closing: 'Ask yourself whether you could explain it to somebody, and you’ll find out which of the two you have.',
     },
     dur: 5.0,
   },

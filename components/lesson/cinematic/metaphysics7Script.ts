@@ -22,7 +22,7 @@ export interface Metaphysics7Beat extends BaseBeat {
 export const BEATS: Metaphysics7Beat[] = [
   {
     p: 462, x: 200,
-    text: 'You have never once been anywhere but right now. Not yesterday, not tomorrow — always now.',
+    text: 'You have never once been anywhere but right now. Not yesterday or tomorrow, but always now.',
     dur: 2.9,
   },
   {
@@ -32,7 +32,7 @@ export const BEATS: Metaphysics7Beat[] = [
   },
   {
     p: 47, x: 200, line: 1, spot: 1,
-    text: 'Draw time as a road. Three slices hang on it: yesterday, this second, tomorrow.',
+    text: 'Draw time as a road. Three slices hang along the road: yesterday, this second, tomorrow.',
     cite: 'The timeline',
     dur: 2.5,
   },
@@ -43,29 +43,29 @@ export const BEATS: Metaphysics7Beat[] = [
   },
   {
     p: 6, x: 70, line: 1, spot: 1,
-    text: 'So stroll to yesterday and point at it. Nothing there — just an empty frame.',
+    text: 'So stroll to yesterday and point at it. There’s nothing there but an empty frame.',
     cite: 'Yesterday',
     dur: 2.4,
   },
   {
     p: 6, x: 70, line: 1, spot: 1,
-    text: 'Yesterday is not filed away somewhere else. It is nowhere at all.',
+    text: 'Yesterday is not filed away somewhere else. It’s nowhere at all.',
     dur: 2,
   },
   {
     p: 41, x: 330, line: 1, spot: 1,
-    text: 'Tomorrow is worse. It has not been built yet.',
+    text: 'Tomorrow is worse. It hasn’t been built yet.',
     cite: 'Tomorrow',
     dur: 1.9,
   },
   {
     p: 41, x: 330, line: 1, spot: 1,
-    text: 'Another empty frame, waiting on a moment that has not happened.',
+    text: 'Another empty frame, waiting on a moment that hasn’t happened.',
     dur: 2.3,
   },
   {
     p: 458, x: 200, line: 1, spot: 1,
-    text: 'Only the middle frame is filled in — the one you are standing in. That view has a name: presentism.',
+    text: 'Only the middle frame is filled in — the one you’re standing in. That view has a name: presentism.',
     cite: 'Presentism',
     dur: 3.4,
   },
@@ -89,20 +89,20 @@ export const BEATS: Metaphysics7Beat[] = [
     p: 165, x: 70, line: 1, pick: 1,
     interact: {
       prompt: 'Every page of the book is already printed. On that view, tap the moments that are real.',
-      explain: 'If every page is already printed, no page gets to be more real than the others. Yesterday and tomorrow are not missing. They are pages you are simply not reading right now.',
+      explain: 'If every page is already printed, no page gets to be more real than the others. Yesterday and tomorrow are not missing. They’re pages you aren’t reading right now.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 33, x: 200, line: 1, solid: 1,
-    text: 'All three fill in at once. That is eternalism — the block universe.',
+    text: 'All three fill in at once. That’s eternalism — the block universe.',
     cite: 'Eternalism · the block universe',
     dur: 2.1,
   },
   {
     p: 33, x: 200, line: 1, solid: 1,
-    text: 'Every moment exists, and "now" is just where you are standing, the way "here" is just where you are.',
+    text: 'Every moment exists. The word “now” just means where you’re standing, as the word “here” means where you are.',
     dur: 3.1,
   },
   {
@@ -119,7 +119,7 @@ export const BEATS: Metaphysics7Beat[] = [
           { id: 'flow', upto: 1, reads: 'a moving now lights each slice' },
         ],
       },
-      explain: 'The middle. Already there sounds exactly like frozen, and it is not: the block is packed with differences between one slice and the next, and that is all change ever was. What the block denies is the far end — a travelling spotlight. The thing that moves is you.',
+      explain: 'The middle. “Already there” sounds like “frozen”, and it is not. The block is packed with differences between one slice and the next, and that’s all change ever was. What the block denies is the far end, a travelling spotlight. The thing that moves is you.',
       xp: 5,
     },
     dur: 1.0,
@@ -146,7 +146,7 @@ export const BEATS: Metaphysics7Beat[] = [
         'Augustine: easy to live, hard to explain',
         '"Now" may work like "here" — a viewpoint',
       ],
-      closing: 'Physics can time the ticks beautifully. It still cannot tell you why now feels like now.',
+      closing: 'Physics can time the ticks beautifully. It still can’t tell you why now feels like now.',
     },
     dur: 3.0,
   },

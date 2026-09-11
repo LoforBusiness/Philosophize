@@ -26,7 +26,7 @@ export interface Ethics11Beat extends BaseBeat {
 export const BEATS: Ethics11Beat[] = [
   {
     p: 31, x: 60,
-    text: 'Suppose happiness came in coins. Every pleasure you have ever had, poured onto one table and counted out like loose change.',
+    text: 'Suppose happiness came in coins. Every pleasure you’ve ever had, poured onto one table and counted out like loose change.',
     dur: 4.0,
   },
   {
@@ -37,12 +37,12 @@ export const BEATS: Ethics11Beat[] = [
   },
   {
     p: 168, x: 60, tok: 1,
-    text: 'Three pleasures, drawn the same size, because to him they are the same stuff.',
+    text: 'The three pleasures are drawn the same size. To him they’re the same stuff.',
     dur: 2.5,
   },
   {
     p: 380, x: 60, tok: 1, led: 1,
-    text: 'Bentham\'s felicific calculus scored each one for intensity, duration, certainty and reach. Then it added the column up. Push-pin ranks with poetry, he said, if the totals come out level.',
+    text: 'Bentham’s felicific calculus scored each for intensity, duration, certainty and reach, then added them up. He said push-pin is as good as poetry if the totals come out the same.',
     cite: 'The felicific calculus',
     dur: 5.4,
   },
@@ -83,7 +83,7 @@ export const BEATS: Ethics11Beat[] = [
           { id: 'kind', upto: 1, reads: 'some kinds outrank any amount of the others', correct: true },
         ],
       },
-      explain: 'The trap: reading Mill as Bentham with better manners. He broke the ledger. Higher pleasures differ in KIND, and judges who have tasted both prefer them — so a taller pile of lower ones does not simply outvote them.',
+      explain: 'The trap: reading Mill as Bentham with better manners. He broke the ledger. Higher pleasures differ in KIND, and judges who have tasted both prefer them. So a taller pile of lower ones can’t outvote them.',
       xp: 5,
     },
     dur: 1.0,
@@ -92,14 +92,14 @@ export const BEATS: Ethics11Beat[] = [
     p: 169, x: 126, tok: 1, led: 1, shelf: 1, up: 1, pick: 1,
     interact: {
       prompt: 'Three pleasures, one table. Tap the one Mill lifts onto the higher shelf.',
-      explain: 'The trap: intensity is not rank. The dessert and the bar game are real pleasures — push-pin was Bentham\'s own example — but neither had to be learned. Mill\'s higher pleasure is the one you trained yourself to hear, and nobody who can hear it trades it back.',
+      explain: 'The trap: intensity is not rank. The dessert and the bar game are real pleasures, and push-pin was Bentham’s own example. But neither had to be learned. Mill’s higher pleasure is the one you trained yourself to hear, and nobody who can hear it trades it back.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 163, x: 126, tok: 1, led: 2, shelf: 1, up: 1,
-    text: 'Two levels now, and the column below can no longer settle it. Mill\'s test is not the size of the total but the verdict of people who have honestly tasted both.',
+    text: 'Two levels now, and the column below can no longer settle it. Mill’s test is not the size of the total but the verdict of people who have tasted both.',
     cite: 'Competent judges',
     dur: 5.0,
   },

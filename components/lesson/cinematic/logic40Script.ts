@@ -57,7 +57,7 @@ export const BEATS: Logic40Beat[] = [
     p: 261, x: 36, tray: 1, checked: 0.67, rules: 1, links: 1, live: 1,
     interact: {
       prompt: 'Tap the stone the two rules disagree about.',
-      explain: 'The one nobody has checked. Grue was built to match green on every case already in the tray, so no checked stone can tell them apart. The disagreement stays invisible until you reach for the next one.',
+      explain: 'The one nobody has checked. Grue was built to match green on every case already in the tray. No checked stone can tell them apart. The disagreement stays invisible until you reach for the next one.',
       xp: 5,
     },
     dur: 1.0,
@@ -98,7 +98,7 @@ export const BEATS: Logic40Beat[] = [
           { id: 'green', upto: 1, reads: 'the stones back green, and grue is a trick' },
         ],
       },
-      explain: 'Down the middle. Every stone in the tray fits both rules, so the evidence has nothing to say. Somebody whose language began with grue would find green the fiddly word, the one that mentions a time. Goodman answered that green is simply the older habit.',
+      explain: 'Down the middle. Every stone in the tray fits both rules, so the evidence has nothing to say. Somebody whose language began with grue would find green the fiddly word, the one that mentions a time. Goodman answered that green is only the older habit.',
       xp: 5,
     },
     dur: 1.0,

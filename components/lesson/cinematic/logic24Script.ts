@@ -37,24 +37,24 @@ export const BEATS: Logic24Beat[] = [
   },
   {
     p: 259, x: 28, bench: 0.34,
-    text: 'Deduction runs from a rule to a conclusion that cannot be false.',
+    text: 'Deduction runs from a rule to a conclusion that can’t be false.',
     dur: 4.2,
   },
   {
     p: 438, x: 28, bench: 0.67, feed: 1,
-    text: 'Induction runs from many cases to a rule that is probably right.',
+    text: 'Induction runs from many cases to a rule that’s probably right.',
     dur: 4.2,
   },
   {
     p: 264, x: 28, bench: 1, feed: 1, out: 1,
-    text: 'Abduction runs from what you see to the likeliest reason you are seeing it.',
+    text: 'Abduction runs from what you see to the likeliest reason you’re seeing it.',
     dur: 4.8,
   },
   {
     p: 261, x: 28, bench: 1, feed: 1, out: 1, live: 1,
     interact: {
       prompt: 'A burst pipe, a flooded kitchen. Tap the engine.',
-      explain: 'Abduction. It feels like deduction because the answer is obvious, and obvious is not guaranteed — a blocked drain would flood the same floor. You are picking the likeliest reason for what you can see, and staying open to a better one.',
+      explain: 'Abduction. It feels like deduction because the answer is obvious, and obvious is not guaranteed. A blocked drain would flood the same floor. You’re picking the likeliest reason for what you can see, and staying open to a better one.',
       xp: 5,
     },
     dur: 1.0,
@@ -94,7 +94,7 @@ export const BEATS: Logic24Beat[] = [
           { id: 'abd', label: 'abduction', reads: 'the likeliest reason for what you saw' },
         ],
       },
-      explain: 'Induction. A pile of cases going to a rule is exactly what induction is for, and one black swan still breaks it. Deduction would need a rule already in hand, and abduction hunts for a cause rather than a pattern.',
+      explain: 'Induction. A pile of cases going to a rule is what induction is for, and one black swan still breaks it. Deduction would need a rule already in hand, and abduction hunts for a cause rather than a pattern.',
       xp: 5,
     },
     dur: 1.0,

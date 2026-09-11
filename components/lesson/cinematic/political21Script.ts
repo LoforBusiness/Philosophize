@@ -38,7 +38,7 @@ export const BEATS: Pol21Beat[] = [
   },
   {
     p: 447, x: 200, map: 1, claimed: 1,
-    text: 'The usual answer is that you agreed by staying. Carry on living here and you have accepted the terms.',
+    text: 'The usual answer is that you agreed by staying. Carry on living here and you’ve accepted the terms.',
     cite: 'Tacit consent',
     dur: 4.6,
   },
@@ -54,7 +54,7 @@ export const BEATS: Pol21Beat[] = [
   },
   {
     p: 400, x: 132, map: 1, claimed: 1, exit: 1,
-    text: 'There is exactly one square nobody has claimed, and you cannot live on it.',
+    text: 'There’s only one square nobody has claimed, and you can’t live on it.',
     cite: 'The open sea',
     dur: 3.8,
   },
@@ -62,7 +62,7 @@ export const BEATS: Pol21Beat[] = [
     p: 165, x: 132, map: 1, claimed: 1, exit: 1, live: 1,
     interact: {
       prompt: 'Tap the only ground no state claims.',
-      explain: 'The open sea, and the sea is no comfort. A choice counts as agreement only when refusing was really open to you. Leaving takes money, papers, a new language and another state at the far end. So almost everybody stays, whatever they think.',
+      explain: 'The open sea, and the sea is no comfort. A choice counts as agreement only when refusing was a real option. Leaving takes money, papers, a new language and another state at the far end. So almost everybody stays, whatever they think.',
       xp: 5,
     },
     dur: 1.0,
@@ -103,7 +103,7 @@ export const BEATS: Pol21Beat[] = [
           { id: 'refuse', label: 'a refusal you could take', reads: 'having a refusal you could actually take', correct: true },
         ],
       },
-      explain: 'A refusal you could take. Consent gets its force from the alternative being genuinely open, which is why a signature under threat binds nobody. "knowing the law" describes being informed, and being informed of a demand is not the same as accepting it.',
+      explain: 'A refusal you could take. Consent gets its force from the alternative being open in practice. That’s why a signature under threat binds nobody. The bin “knowing the law” describes being informed. Being informed of a demand is not the same as accepting it.',
       xp: 5,
     },
     dur: 1.0,

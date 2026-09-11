@@ -36,7 +36,7 @@ export interface Epistemology12Beat extends BaseBeat {
 export const BEATS: Epistemology12Beat[] = [
   {
     p: 2, x: 56, pipes: 0,
-    text: 'You have never seen an atom, and you were not there for your own birth. You would still bet money on both.',
+    text: 'You’ve never seen an atom, and you weren’t there for your own birth. You’d still bet money on both.',
     dur: 3.3,
   },
   {
@@ -46,7 +46,7 @@ export const BEATS: Epistemology12Beat[] = [
   },
   {
     p: 31, x: 56, pipes: 1,
-    text: 'Rain lands on your hand and you believe it is raining before you have thought about it. That pipe is short: the world touches you, and the belief is already in.',
+    text: 'Rain lands on your hand and you believe it’s raining before you’ve thought about it. That pipe is short: the world touches you, and the belief is already in.',
     cite: 'Pipe one · perception',
     dur: 5.0,
   },
@@ -76,7 +76,7 @@ export const BEATS: Epistemology12Beat[] = [
   },
   {
     p: 463, x: 124, pipes: 3,
-    text: 'The third pipe does not begin near you at all. It runs in from strangers — teachers, books, mapmakers, people long dead.',
+    text: 'The third pipe doesn’t begin near you at all. It runs in from strangers — teachers, books, mapmakers, people long dead.',
     cite: 'Pipe three · testimony',
     dur: 3.8,
   },
@@ -106,7 +106,7 @@ export const BEATS: Epistemology12Beat[] = [
     p: 386, x: 124, pipes: 3, token: 1, pick: 1,
     interact: {
       prompt: 'A new belief enters the tank: the Great Wall exists. Tap the pipe that delivered it.',
-      explain: 'The trap: it feels seen — films, photographs, a line on a map. Every one of those is a report from somebody else. You have never stood on that wall, and most of the tank is stacked out of beliefs exactly like it.',
+      explain: 'The trap: it feels seen — films, photographs, a line on a map. Every one of those is a report from somebody else. You’ve never stood on that wall, and most of the tank is stacked out of beliefs like it.',
       xp: 5,
     },
     dur: 1.0,
@@ -121,7 +121,7 @@ export const BEATS: Epistemology12Beat[] = [
         'Every pipe can deliver something false',
         'Hume called testimony necessary to human life',
       ],
-      closing: 'You are not an island of knowledge. You are a node in a web of trust.',
+      closing: 'You’re not an island of knowledge. You’re a node in a web of trust.',
     },
     dur: 3.2,
   },

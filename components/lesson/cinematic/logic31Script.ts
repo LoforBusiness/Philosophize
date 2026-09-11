@@ -38,7 +38,7 @@ export const BEATS: Logic31Beat[] = [
   {
     p: 2, flips: 7, scale: 1,
     dur: 3.8,
-    text: 'Now the feeling is loud: tails is DUE. Every part of you is certain the coin owes you one.',
+    text: 'Now the feeling is loud, and it says tails is due. Every part of you is certain the coin owes you one.',
     cite: 'Seven in a row',
   },
   {
@@ -74,7 +74,7 @@ export const BEATS: Logic31Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Seven heads are on the table. Tap the chance the next flip is heads.',
-      explain: 'Even, exactly as it was before the run started. The coin has no memory and no debts — nothing about it records what it has already done, so nothing about it can owe you a tails.',
+      explain: 'Fifty per cent, the same as before the run started. The coin has no memory and no debts. Nothing about it records what it’s already done, so nothing about it can owe you a tails.',
       xp: 5,
     },
   },
@@ -106,7 +106,7 @@ export const BEATS: Logic31Beat[] = [
         'Averages swamp runs, they never cancel them',
         'Monte Carlo, 1913: twenty-six blacks running',
       ],
-      closing: 'The wheel is not keeping score. Only you are.',
+      closing: 'The wheel isn’t keeping score. Only you are.',
     },
     dur: 3.0,
   },

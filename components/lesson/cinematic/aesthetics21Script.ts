@@ -49,7 +49,7 @@ export const BEATS: Aes21Beat[] = [
   },
   {
     p: 384, x: 132, works: 1, burn: 1,
-    text: 'Two of those three works survived that. You could print the novel again tomorrow from the text.',
+    text: 'Two of the three works survived. You could print the novel again tomorrow from the text.',
     dur: 4.2,
   },
   {
@@ -67,7 +67,7 @@ export const BEATS: Aes21Beat[] = [
     p: 4, x: 132, works: 1, burn: 1, gone: 1, live: 1,
     interact: {
       prompt: 'Tap the work that is actually gone.',
-      explain: 'The painting. A novel is a pattern that copies carry, so losing every copy loses the copies. A painting has no notation behind it: there is nothing to print from. And a perfect forgery would be a different object made later by somebody else.',
+      explain: 'The painting. A novel is a pattern that copies carry, so losing every copy loses the copies. A painting has no notation behind it: there’s nothing to print from. And a perfect forgery would be a different object made later by somebody else.',
       xp: 5,
     },
     dur: 1.0,
@@ -87,7 +87,7 @@ export const BEATS: Aes21Beat[] = [
   },
   {
     p: 380, x: 268, works: 1, burn: 1, gone: 1,
-    text: 'Then photography walks in and makes a mess of it. Prints from one negative, and people still queue for the first one.',
+    text: 'Then photography walks in and makes a mess of it. Many prints come from one negative, and people still queue for the first one.',
     dur: 4.8,
   },
   {
@@ -117,7 +117,7 @@ export const BEATS: Aes21Beat[] = [
         'The test is whether destroying every copy destroys the work',
         'Photography and printmaking sit awkwardly across the line',
       ],
-      closing: 'Burn the library and the novel survives. Burn the canvas and you have finished it.',
+      closing: 'Burn the library and the novel survives. Burn the canvas and you’ve finished it.',
     },
     dur: 3.4,
   },

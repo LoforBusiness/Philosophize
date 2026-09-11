@@ -44,12 +44,12 @@ export const BEATS: Eth17Beat[] = [
   },
   {
     p: 463, x: 200, maxim: 1, trust: 1,
-    text: 'That looks monstrous, and Kant knew it. His reason is not that lying is ugly.',
+    text: 'Kant’s answer looks monstrous, and he knew it. His reason is not that lying is ugly.',
     dur: 2.7,
   },
   {
     p: 463, x: 200, maxim: 1, trust: 1,
-    text: 'Kant\'s reason is that lying cannot be made a rule for all.',
+    text: 'Kant’s reason is that lying cannot be made a rule for all.',
     dur: 2.1,
   },
   {
@@ -80,14 +80,14 @@ export const BEATS: Eth17Beat[] = [
     p: 165, x: 132, maxim: 1, copies: 1, trust: 0.06, live: 1,
     interact: {
       prompt: 'Tap the thing the maxim needed, and used up.',
-      explain: 'Being believed. A lie only works while most people tell the truth, so it lives off a stock it does not refill. Hand the maxim to everybody and the stock is gone. The rule destroys the thing that made it worth breaking.',
+      explain: 'Being believed. A lie only works while most people tell the truth, so it lives off a stock it doesn’t refill. Hand the maxim to everybody and the stock is gone. The rule destroys the thing that made it worth breaking.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 453, x: 268, maxim: 1, copies: 1, trust: 0.06,
-    text: 'Constant pushed back at once. Tell the truth and your friend dies, so surely the blood is on your hands.',
+    text: 'Constant pushed back at once. Tell the truth and your friend dies, so the blood is on your hands.',
     cite: 'The obvious reply',
     dur: 4.6,
   },

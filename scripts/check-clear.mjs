@@ -220,7 +220,8 @@ const LIMIT = {
  * The wording pass took this from 174 to 72 and then stopped. 72 locks in what
  * it won, and the number may only go DOWN -- lower it as the rest is written.
  */
-const BUDGET = 72;
+// 72 → 31 on 11 Sep 2026, when every lesson was rewritten to be read aloud (group AC).
+const BUDGET = 31;
 
 const arg = process.argv.slice(2);
 const ALL = arg.includes('--all');

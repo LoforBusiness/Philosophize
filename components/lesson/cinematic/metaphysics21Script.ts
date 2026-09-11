@@ -39,23 +39,23 @@ export const BEATS: Met21Beat[] = [
   },
   {
     p: 462, x: 200, line: 1, past: 1, future: 1,
-    text: 'It is what is there.',
+    text: 'It’s what is there.',
     dur: 1.8,
   },
   {
     p: 2, x: 200, line: 1, past: 0.08, future: 0.08,
-    text: 'Presentism says only this instant exists. Yesterday is not kept in some other place.',
+    text: 'Presentism says only this instant exists. Yesterday isn’t kept in some other place.',
     cite: 'Presentism',
     dur: 2.8,
   },
   {
     p: 2, x: 200, line: 1, past: 0.08, future: 0.08,
-    text: 'Yesterday is nowhere at all, because yesterday is over.',
+    text: 'Yesterday is nowhere at all. It’s over.',
     dur: 1.8,
   },
   {
     p: 379, x: 132, line: 1, past: 1, future: 0.08,
-    text: 'The growing block keeps everything that has happened and says the future is not written yet. The line gets longer.',
+    text: 'The growing block keeps everything that’s happened and says the future isn’t written yet. The line gets longer.',
     cite: 'The growing block',
     dur: 4.8,
   },
@@ -63,7 +63,7 @@ export const BEATS: Met21Beat[] = [
     p: 165, x: 132, line: 1, past: 0.08, future: 0.08, live: 1,
     interact: {
       prompt: 'Tap the part presentism says is real.',
-      explain: 'Only the column you are standing in. It is the view most people start with and it has the hardest job: if the past does not exist, it is not obvious what makes a claim about it true, or what your memories are memories of.',
+      explain: 'Only the column you’re standing in. It’s the view most people start with, and it has the hardest job. If the past doesn’t exist, what makes a claim about it true? What are your memories memories of?',
       xp: 5,
     },
     dur: 1.0,
@@ -88,7 +88,7 @@ export const BEATS: Met21Beat[] = [
   },
   {
     p: 395, x: 268, line: 1, past: 1, future: 1,
-    text: 'Relativity leans this way. Two observers can disagree about what is happening now. That is awkward if only now exists.',
+    text: 'Relativity leans this way. Two observers can disagree about what’s happening now, and that’s awkward if only now exists.',
     dur: 4.8,
   },
   {
@@ -103,7 +103,7 @@ export const BEATS: Met21Beat[] = [
           { id: 'eternal', reads: 'eternalism: all of it', holders: ['Smart', 'Quine'], correct: true },
         ],
       },
-      explain: 'Eternalism: both halves furnished. The position nobody expects is the shrinking tree, a real future and a gone past, and it is a position, just an unpopular one. Seeing that it exists is what the four answers are for.',
+      explain: 'Eternalism: both halves furnished. The position nobody expects is the shrinking tree, with a real future and a gone past. It’s a position, just an unpopular one. Seeing that it exists is what the four answers are for.',
       xp: 5,
     },
     dur: 1.0,

@@ -40,7 +40,7 @@ export const BEATS: Met19Beat[] = [
   },
   {
     p: 2, x: 200, props: 1, peg: 0.16, strip: 0.4,
-    text: 'Take the colour away. It is still an apple.',
+    text: 'Take the colour away. It’s still an apple.',
     cite: 'Keep going',
     dur: 2.4,
   },
@@ -51,7 +51,7 @@ export const BEATS: Met19Beat[] = [
   },
   {
     p: 413, x: 132, props: 1, peg: 0.16, strip: 1,
-    text: 'That was the last plank. Either something stands there or nothing does, and philosophers have never agreed which.',
+    text: 'That was the last card. Either something stands there or nothing does, and philosophers have never agreed which.',
     dur: 4.6,
   },
   {
@@ -77,14 +77,14 @@ export const BEATS: Met19Beat[] = [
     p: 165, x: 132, props: 1, peg: 0.4, strip: 1, live: 1,
     interact: {
       prompt: 'Tap what is left after every card has come off.',
-      explain: 'The peg, if you are Locke, and it was never described because nothing can be said about a thing with no properties. Hume looked at the same picture and said the stack was all there was. The pile is the cards you removed, not the apple.',
+      explain: 'The peg, if you’re Locke. It was never described, because nothing can be said about a thing with no properties. Hume looked at the same picture and said the stack was all there was. The pile is the cards you removed, not the apple.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 453, x: 268, props: 1, peg: 0.4, strip: 0, twin: 1,
-    text: 'Here is the cost of saying there is no peg. A second apple, matching the first in every property there is.',
+    text: 'Here’s the cost of saying there’s no peg. A second apple, matching the first in every property there is.',
     cite: 'The twin',
     dur: 4.6,
   },
@@ -93,14 +93,14 @@ export const BEATS: Met19Beat[] = [
     interact: {
       prompt: 'Two things exactly alike. What is the case?',
       sort: {
-        chip: 'the two spheres',
+        chip: 'the two apples',
         bins: [
           { id: 'one', label: 'one, counted twice', reads: 'one thing, counted twice' },
           { id: 'two', label: 'two, identical', reads: 'two things, with nothing telling them apart', correct: true },
           { id: 'never', label: 'impossible', reads: 'no such case could happen' },
         ],
       },
-      explain: 'Two, plainly, and that is the bill bundle theory has to pay. If a thing simply is its properties, two with all the same properties are one thing. Saying they are two means something beyond the properties is counting — the peg the theory threw away.',
+      explain: 'Two, and that’s the bill bundle theory has to pay. If a thing is nothing but its properties, two with all the same properties are one thing. Saying they’re two means something beyond the properties is doing the counting. That’s the peg the theory threw away.',
       xp: 5,
     },
     dur: 1.0,
@@ -114,7 +114,7 @@ export const BEATS: Met19Beat[] = [
         'That something cannot be described, because describing is a property',
         'Two identical things are the hard case for the bundle view',
       ],
-      closing: 'Take away everything true of the apple and you are looking at the whole dispute.',
+      closing: 'Take away everything true of the apple and you’re looking at the whole dispute.',
     },
     dur: 3.4,
   },

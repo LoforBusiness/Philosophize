@@ -113,7 +113,21 @@ function layoutOf(file) {
  * structure on its own. Anything not on this list keeps invalidating, which is
  * the conservative direction.
  */
-const PROSE_KEYS = ['text', 'cite', 'explain', 'prompt', 'reads', 'author', 'work', 'era', 'label'];
+/*
+ * AND THE LIST STOPPED SHORT OF THE SUMMARY AND THE CONTROLS, FOR A FORTNIGHT.
+ *
+ * A summary's `closing`, `title` and `points`, and a control's `chip`, `lo`, `hi`,
+ * `left` and `right`, are all drawn in the deck — the summary card unmounts the
+ * stage (validate-cinematic says so where it counts beats) and every control lives
+ * in `styles.lower` (L6). Nobody edited them, so nothing went red. Then every
+ * lesson was rewritten to be read aloud (group AC), the closings with it, and 103
+ * must-box stamps and 43 tour stamps went stale in one afternoon for a change that
+ * cannot move a box. `scripts/restamp-deck-prose.mjs` migrated them, only where the
+ * old rule proved the measurement valid. Only QUOTED values go: `chip` and `left`
+ * are also numeric CHANNELS in two scenes, and a number here is never stripped.
+ */
+const PROSE_KEYS = ['text', 'cite', 'explain', 'prompt', 'reads', 'author', 'work', 'era', 'label',
+  'closing', 'title', 'chip', 'lo', 'hi', 'left', 'right'];
 
 function proselessScript(file) {
   const src = fs.readFileSync(file, 'utf8');
@@ -121,7 +135,12 @@ function proselessScript(file) {
     `\\b(${PROSE_KEYS.join('|')})(\\s*:\\s*)(['"\`])((?:\\\\.|(?!\\3)[^\\\\])*)\\3`,
     'g',
   );
-  return src.replace(re, (_m, key, sep, q, body) => `${key}${sep}${q}${q}`);
+  return src
+    .replace(re, (_m, key, sep, q) => `${key}${sep}${q}${q}`)
+    // A summary's points are an array of bare strings, so no key names each one.
+    .replace(/(points\s*:\s*\[)([\s\S]*?)(\])/g, (_m, open, body, close) => (
+      `${open}${body.replace(/(['"`])((?:\\.|(?!\1)[^\\])*)\1/g, '$1$1')}${close}`
+    ));
 }
 
 /** Files that decide what a lesson draws, in a stable order. */

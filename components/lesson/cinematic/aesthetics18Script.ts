@@ -33,23 +33,23 @@ export interface Aes18Beat extends BaseBeat {
 export const BEATS: Aes18Beat[] = [
   {
     p: 172, x: 200, curve: 1,
-    text: 'A piece of music everyone calls sad. Here is its shape: slow, low, and going down.',
+    text: 'A piece of music everyone calls sad. Here’s its shape: slow, low, and going down.',
     dur: 4.2,
   },
   {
     p: 384, x: 200, curve: 1, body: 1,
-    text: 'And here is a person who has had bad news. Same slope, drawn from the same numbers.',
+    text: 'And here’s a person who has had bad news. Same slope, drawn from the same numbers.',
     cite: 'Resemblance',
     dur: 4.2,
   },
   {
     p: 447, x: 132, curve: 1, body: 1, match: 1,
-    text: 'That is the whole theory. You hear the music as sad because it moves the way sadness moves.',
+    text: 'That’s the whole theory. You hear the music as sad because it moves the way sadness moves.',
     dur: 4.4,
   },
   {
     p: 395, x: 132, curve: 1, body: 1, match: 1, empty: 1,
-    text: 'Now the awkward panel. A shape is not a mood, and there is nobody inside the notes to be having one.',
+    text: 'Now the awkward panel. A shape is not a mood, and there’s nobody inside the notes to be having one.',
     cite: 'So who is sad?',
     dur: 4.8,
   },
@@ -57,7 +57,7 @@ export const BEATS: Aes18Beat[] = [
     p: 467, x: 132, curve: 1, body: 1, match: 1, empty: 1, live: 1,
     interact: {
       prompt: 'Tap the panel that holds what the music actually has.',
-      explain: 'The contour. A tune has a shape, a speed and a direction, and every one of those is in the notes. Nothing in the score is having an experience. The empty panel is empty because there is no one in there for it to be about.',
+      explain: 'The contour. A tune has a shape, a speed and a direction, and every one of those is in the notes. Nothing in the score is having an experience. The empty panel is empty because there’s no one in there for it to be about.',
       xp: 5,
     },
     dur: 1.0,
@@ -93,7 +93,7 @@ export const BEATS: Aes18Beat[] = [
           { id: 'you', upto: 1, reads: 'the notes carry a shape, you do the feeling', correct: true },
         ],
       },
-      explain: 'In the listener. The notes carry a shape, you recognise it, and the feeling happens in you. That is also why it is bearable: nothing has actually gone wrong in your life, so you get the shape of grief without the loss.',
+      explain: 'In the listener. The notes carry a shape, you recognise it, and the feeling happens in you. That’s also why it’s bearable. Nothing has gone wrong in your life, so you get the shape of grief without the loss.',
       xp: 5,
     },
     dur: 1.0,

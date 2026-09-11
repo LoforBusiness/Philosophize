@@ -65,7 +65,8 @@ const POINTER_CEIL = 0.12;
  * changes no word; eight were pronouns given their noun back; the rest were
  * reworded with every claim and every named term kept.
  */
-const HARD_BUDGET = 18;
+// 18 → 3 on 11 Sep 2026, when every lesson was rewritten to be read aloud (group AC).
+const HARD_BUDGET = 3;
 /**
  * The shortest piece worth scoring. Below this both tests are noise — see the note
  * at the loop. Twenty words is about two ordinary sentences of this corpus, which

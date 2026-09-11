@@ -51,7 +51,7 @@ export const BEATS: A9Beat[] = [
   },
   {
     p: 47, x: 144, boxes: true, stands: true,
-    text: 'One is in a supermarket and one is in a gallery. Nothing you can SEE tells you which is the art.',
+    text: 'One is in a supermarket and one is in a gallery. You can’t tell which is the art by looking.',
     dur: 2.7,
   },
   {
@@ -69,7 +69,7 @@ export const BEATS: A9Beat[] = [
   },
   {
     p: 5, x: 208, boxes: true, stands: true,
-    text: 'So the difference is not in the object. The difference is in what the object does: the argument the work makes, the moment it lands in, the history it answers.',
+    text: 'So the difference is not in the object. It’s in what the object does: the argument the work makes, the moment it lands in, the history it answers.',
     cite: 'Beauty dethroned',
     dur: 3.7,
   },
@@ -90,7 +90,7 @@ export const BEATS: A9Beat[] = [
           { id: 'never', label: 'discarded', reads: 'beauty was thrown out altogether' },
         ],
       },
-      explain: 'An option, not a condition. The trap is hearing "dethroned" as "banned." A work can still be beautiful, it just no longer has to be, because what made it art was never the beauty.',
+      explain: 'An option, not a condition. The trap is hearing “dethroned” as “banned”. A work can still be beautiful. It just no longer has to be, because what made it art was never the beauty.',
     },
     dur: 4.6,
   },

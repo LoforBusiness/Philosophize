@@ -52,7 +52,7 @@ export const BEATS: Epistemology38Beat[] = [
     p: 165, x: 52, roundels: 1, shots: 1, wide: 1, live: 1,
     interact: {
       prompt: 'Tap the true belief that is not knowledge.',
-      explain: 'The middle one. Its solid mark is on the bull, so the belief is true, and every near case it has is off the face. The third is wrong rather than lucky, which was never the puzzle: a plain mistake needs no theory.',
+      explain: 'The middle one. Its solid mark is on the bull, so the belief is true. But every near case it has is off the face. The third is wrong rather than lucky. A plain mistake was never the puzzle, and it needs no theory.',
       xp: 5,
     },
     dur: 1.0,
@@ -64,7 +64,7 @@ export const BEATS: Epistemology38Beat[] = [
   },
   {
     p: 35, x: 98, roundels: 1, shots: 1, wide: 1, names: 1,
-    text: 'A clock in the hall stopped at ten past four, and you look at it at ten past four. Careful method, true belief, and wrong at almost every other moment of the day.',
+    text: 'The hall clock stopped at ten past four, and you look at it at ten past four. Careful method, true belief, and wrong at almost any other moment.',
     dur: 5.0,
   },
   {
@@ -93,7 +93,7 @@ export const BEATS: Epistemology38Beat[] = [
           { id: 'skill', upto: 1, reads: 'the shooter earned it, so the misses were never near' },
         ],
       },
-      explain: 'Almost all luck. Watch the near shots close onto the bull as you hand the bar to the shooter: that is a picture of a method that would have worked a minute earlier. The stopped clock has no such picture, which is why the true belief it produced buys nothing.',
+      explain: 'Almost all luck. Watch the near shots close onto the bull as you hand the bar to the shooter. That’s a picture of a method that would have worked a minute earlier. The stopped clock has no such picture, which is why the true belief it produced buys nothing.',
       xp: 5,
     },
     dur: 1.0,
@@ -107,7 +107,7 @@ export const BEATS: Epistemology38Beat[] = [
         'A hit surrounded by misses is luck, not knowing',
         'The one case you have cannot tell them apart',
       ],
-      closing: 'Next time you are right about something, ask how much would have had to change for you to be wrong. If the answer is almost nothing, you got away with it.',
+      closing: 'Next time you’re right about something, ask how much would have had to change for you to be wrong. If the answer is almost nothing, you got away with it.',
     },
     dur: 3.2,
   },

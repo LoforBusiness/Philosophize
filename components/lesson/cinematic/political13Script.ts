@@ -22,7 +22,7 @@ export interface Pol13Beat extends BaseBeat {
 export const BEATS: Pol13Beat[] = [
   {
     p: 462, x: 70,
-    text: 'Mill gives exactly one reason for using power over a person against their will. To stop them harming somebody else.',
+    text: 'Mill gives only one reason for using power over a person against their will. To stop them harming somebody else.',
     dur: 3.3,
   },
   {
@@ -38,18 +38,18 @@ export const BEATS: Pol13Beat[] = [
   },
   {
     p: 41, x: 168, steps: 1,
-    text: 'The town wants them stopped, and here is the argument.',
+    text: 'The town wants them stopped, and here’s the argument.',
     dur: 1.8,
   },
   {
     p: 40, x: 168, steps: 3,
-    text: 'Three steps. Read them in order and it feels like a proof.',
+    text: 'Three steps. Read them in order and the argument feels like a proof.',
     cite: 'All three',
     dur: 1.9,
   },
   {
     p: 40, x: 168, steps: 3,
-    text: 'Each one seems to follow from the one before. And the conclusion is exactly what the town wanted.',
+    text: 'Each one seems to follow from the one before. And the conclusion is what the town wanted.',
     dur: 2.9,
   },
   {
@@ -67,7 +67,7 @@ export const BEATS: Pol13Beat[] = [
   },
   {
     p: 13, x: 124, steps: 3,
-    text: 'Mill grants the first: they are certainly offended. He grants the third — it is his own principle.',
+    text: 'Mill grants the first: they’re certainly offended. He grants the third, since it’s his own principle.',
     cite: 'One of these is smuggled',
     dur: 2.8,
   },
@@ -97,7 +97,7 @@ export const BEATS: Pol13Beat[] = [
           { id: 'none', reads: 'nobody objects and nobody is hurt: nothing at all' },
         ],
       },
-      explain: 'Nobody agreed to it, and somebody is really harmed. Offence scales with how many people mind; harm does not move when the count does. That is exactly why Mill will not let a headcount stand in for an injury.',
+      explain: 'Nobody agreed to it, and somebody is really harmed. Offence scales with how many people mind; harm does not move when the count does. That’s why Mill will not let a headcount stand in for an injury.',
       xp: 5,
     },
     dur: 1.0,
@@ -111,7 +111,7 @@ export const BEATS: Pol13Beat[] = [
         'Offence and disapproval are not harm',
         'The principle borders Berlin\'s protected area',
       ],
-      closing: 'The dangerous step in an argument is rarely the conclusion. It is the one nobody stopped to read.',
+      closing: 'The dangerous step in an argument is rarely the conclusion. It’s the one nobody stopped to read.',
     },
     dur: 3.0,
   },

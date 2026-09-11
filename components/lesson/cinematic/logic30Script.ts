@@ -32,7 +32,7 @@ export interface Logic30Beat extends BaseBeat {
 export const BEATS: Logic30Beat[] = [
   {
     p: 343, x: 24, built: 0.2,
-    text: 'You have spent a whole path taking arguments apart. Now build one on purpose.',
+    text: 'You’ve spent a whole path taking arguments apart. Now build one on purpose.',
     dur: 4.8,
   },
   {
@@ -47,14 +47,14 @@ export const BEATS: Logic30Beat[] = [
   },
   {
     p: 263, x: 24, built: 0.8,
-    text: 'Check the form holds, and only then check whether each premise is actually true.',
+    text: 'Check the form holds, and only then check whether each premise is true.',
     dur: 5.0,
   },
   {
     p: 164, x: 24, built: 0.8, plates: 1, live: 1,
     interact: {
       prompt: 'Tap the course that has to be laid first.',
-      explain: 'The conclusion. Everything above it is chosen for the job of forcing it, so a builder who starts anywhere else is collecting premises without knowing what they are for. Hidden assumptions and the stress test both come later.',
+      explain: 'The conclusion. Everything above it is chosen for the job of forcing it. A builder who starts anywhere else is collecting premises without knowing what they’re for. Hidden assumptions and the stress test both come later.',
       xp: 5,
     },
     dur: 1.0,
@@ -90,7 +90,7 @@ export const BEATS: Logic30Beat[] = [
         { text: 'You attacked it hardest yourself', correct: true },
         { text: 'Nobody has attacked it yet', correct: false },
       ],
-      explain: 'You attacked it first. An untested argument is not strong, it is merely unexamined, and the first serious critic finds what you never looked for. Every weak point you found is one a stranger cannot use.',
+      explain: 'You attacked it hardest yourself. An untested argument is not strong, only unexamined. The first serious critic finds what you never looked for. Every weak point you found is one a stranger can’t use.',
       xp: 5,
     },
     dur: 1.0,
@@ -105,7 +105,7 @@ export const BEATS: Logic30Beat[] = [
         'Confirm the form holds, then the premises',
         'Attack your own weakest premise first',
       ],
-      closing: 'You can build arguments now, and break them. That is what thinking for yourself comes to.',
+      closing: 'You can build arguments now, and break them. That’s what thinking for yourself comes to.',
     },
     dur: 5.0,
   },

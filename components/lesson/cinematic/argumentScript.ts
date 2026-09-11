@@ -71,14 +71,14 @@ export const BEATS: Beat[] = [
   {
     act: 1,
     vol: 3, reasons: 0,
-    text: 'Two people who do not agree.',
+    text: 'Two people who don’t agree.',
     dur: 2.2,
   },
   {
     act: 1,
     vol: 6, reasons: 0,
     say: [{ who: 'red', text: "YOU'RE WRONG!" }],
-    text: 'Watch closely. Not how loud the voices get, but what the words actually say.',
+    text: 'Watch closely. Not how loud the voices get, but what the words say.',
     dur: 2.6,
   },
   {
@@ -104,14 +104,14 @@ export const BEATS: Beat[] = [
     act: 2,
     narr: 0,                                       // open hand, back toward the fight
     vol: 10, reasons: 0,
-    text: 'Most people picture a shouting match when they hear the word argument.',
+    text: 'Most people picture a shouting match when they hear the word “argument”.',
     dur: 3.4,
   },
   {
     act: 2,
     narr: 1,                                       // emphatic — "no way to end"
     vol: 10, reasons: 0,
-    text: 'It is a quarrel. And a quarrel has no way to end — only a way to get louder.',
+    text: 'That’s a quarrel. And a quarrel has no way to end, only a way to get louder.',
     dur: 3.0,
   },
   {
@@ -125,7 +125,7 @@ export const BEATS: Beat[] = [
     act: 2,
     board: 'anatomy',
     narr: 3,                                       // count off the parts
-    text: 'Reasons — called premises — offered in support of a conclusion. That is the whole machine.',
+    text: 'Reasons, called premises, offered in support of a conclusion. That’s the whole machine.',
     dur: 3.0,
   },
   {
@@ -138,7 +138,7 @@ export const BEATS: Beat[] = [
         { id: 'b', text: '"Rents rose 40% while wages stayed flat."', correct: true },
       ],
       explain:
-        'The first attacks a person. The second offers something that could be checked, argued with, or shown false — that is what makes it a premise.',
+        'The first attacks a person. The second offers something you could check, argue with or prove false. That’s what makes it a premise.',
     },
     dur: 0.8,
   },
@@ -184,7 +184,7 @@ export const BEATS: Beat[] = [
     act: 3,
     board: 'loudness',
     narr: 0,                                       // open hand — the plain point
-    text: 'Which is worth saying plainly, because almost everyone behaves as though the opposite were true.',
+    text: 'Volume is not a reason. That’s worth saying plainly, because almost everyone behaves as though the opposite were true.',
     dur: 4.6,
   },
   {
@@ -208,14 +208,14 @@ export const BEATS: Beat[] = [
     act: 3,
     board: 'tworoads',
     narr: 5,                                       // sweep across the fork
-    text: 'People argue with two very different aims in view, as Schopenhauer saw.',
+    text: 'Schopenhauer saw that people argue with two very different aims.',
     dur: 4.4,
   },
   {
     act: 3,
     board: 'tworoads',
     narr: 2,                                       // present the board
-    text: 'To find out what is true — or simply to win. He was so struck by the second that he catalogued 38 tricks for winning when you are in the wrong.',
+    text: 'One aim is to find out what’s true. The other is to win, and Schopenhauer catalogued thirty-eight tricks for winning when you’re in the wrong.',
     cite: 'Schopenhauer, The Art of Being Right, 1831',
     dur: 3.2,
   },
@@ -230,7 +230,7 @@ export const BEATS: Beat[] = [
     act: 3,
     narr: 1,                                       // emphatic — the contradiction lands
     stack: 3,
-    text: 'He asked Meletus who improves the young, and kept asking until Meletus contradicted himself in front of the whole court. Socrates never raised his voice — he did not need to.',
+    text: 'Socrates kept asking Meletus who improves the young, until Meletus contradicted himself in front of the whole court. Socrates never raised his voice, and never needed to.',
     cite: 'Plato, Apology, c. 399 BCE',
     dur: 3.6,
   },
@@ -239,7 +239,7 @@ export const BEATS: Beat[] = [
   {
     act: 4,
     vol: 3, reasons: 0,
-    text: 'So give the two fighters the same disagreement — and reasons this time.',
+    text: 'So give the two fighters the same disagreement again, with reasons.',
     dur: 3.6,
   },
   {
@@ -253,19 +253,19 @@ export const BEATS: Beat[] = [
     act: 4,
     vol: 3, reasons: 2,
     say: [{ who: 'blue', text: 'Then why did rents fall where we built more?' }],
-    text: 'And a real counter — it engages the reason instead of the person.',
+    text: 'And here’s a real counter. It engages the reason instead of the person.',
     dur: 3.2,
   },
   {
     act: 4,
     vol: 3, reasons: 2,
-    text: 'Same two people. Same disagreement. Nobody threw a punch, and for the first time it can actually go somewhere.',
+    text: 'Same two people, same disagreement. Nobody threw a punch, and for the first time it can go somewhere.',
     dur: 3.4,
   },
   {
     act: 4,
     vol: 2, reasons: 2,
-    text: 'Mill went further: you do not really understand your own position until you understand theirs.',
+    text: 'Mill went further: you don’t fully understand your own position until you understand theirs.',
     cite: 'J.S. Mill, On Liberty, 1859',
     dur: 3.4,
   },

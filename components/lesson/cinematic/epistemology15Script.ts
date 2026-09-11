@@ -86,7 +86,7 @@ export const BEATS: Epi15Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'Tap the box where 7 + 5 = 12 belongs.',
-      explain: 'Known before you look, and it still adds something. That is the corner the old rule said was empty, and Kant thought mathematics lives in it — along with the claim that every event has a cause. Nothing you learn by unpacking the words gets you to twelve.',
+      explain: 'Known before you look, and it still adds something. That’s the corner the old rule said was empty. Kant thought mathematics lives in it, along with the claim that every event has a cause. Nothing you learn by unpacking the words gets you to twelve.',
       xp: 5,
     },
   },
@@ -104,7 +104,7 @@ export const BEATS: Epi15Beat[] = [
           { id: 'inside', upto: 1, reads: 'twelve was in there all along' },
         ],
       },
-      explain: 'Almost all of it is new, which is why the sum is not an empty definition. Turn seven, five and plus over as long as you like and twelve is not in any of them. Nor did you learn it by looking: nobody calls counting an experiment.',
+      explain: 'Almost all of it is new, which is why the sum isn’t an empty definition. Turn seven, five and plus over as long as you like and twelve isn’t in any of them. Nor did you learn it by looking: nobody calls counting an experiment.',
       xp: 5,
     },
   },

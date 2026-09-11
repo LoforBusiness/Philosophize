@@ -32,36 +32,36 @@ export interface Aesthetics35Beat extends BaseBeat {
 export const BEATS: Aesthetics35Beat[] = [
   {
     p: 25, x: 56, track: 1,
-    text: 'A joke is a piece of track. The setup runs you along it, and you already know where you are going.',
+    text: 'A joke is a piece of track. The setup runs you along it, and you already know where you’re going.',
     dur: 3.8,
   },
   {
     p: 466, x: 56, track: 1, split: 1,
-    text: 'Here is the setup. I told my doctor I broke my arm in two places.',
+    text: 'Here’s the setup line. “I told my doctor I broke my arm in two places.”',
     dur: 2.6,
   },
   {
     p: 394, x: 56, track: 1, split: 1,
-    text: 'You are in a surgery now, waiting for the diagnosis.',
+    text: 'You’re in a surgery now, waiting for the diagnosis.',
     dur: 1.8,
   },
   {
     p: 380, x: 56, track: 1, split: 1, live: 1,
     interact: {
       prompt: 'Three endings sit on three branches. Tap the one that lands.',
-      explain: 'He told me to stop going to those places. It fits perfectly and it is not the line you were on. That gap is the joke. The hospital ending fits and surprises nobody. The umbrella surprises and fits nothing, which is a mistake.',
+      explain: '“He told me to stop going to those places.” The punchline fits, and it’s not the line you were on. That gap is the joke. The hospital ending fits and surprises nobody. The umbrella surprises and fits nothing, which is a mistake.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 467, x: 56, track: 1, split: 1, run: 1,
-    text: 'Both readings had to fit. That is the part people miss.',
+    text: 'Both readings had to fit. That’s the part people miss.',
     dur: 2,
   },
   {
     p: 467, x: 56, track: 1, split: 1, run: 1,
-    text: 'A punchline that does not fit the setup is not surprising. It is wrong.',
+    text: 'A punchline that doesn’t fit the setup is not surprising. It’s wrong.',
     dur: 2.6,
   },
   {
@@ -89,7 +89,7 @@ export const BEATS: Aesthetics35Beat[] = [
   },
   {
     p: 167, x: 128, track: 1, split: 1, spoil: 1,
-    text: 'Which is why the old theories only half work. Hobbes said we laugh at someone beneath us.',
+    text: 'That’s why the old theories only half work. Hobbes said we laugh at someone beneath us.',
     dur: 3.3,
   },
   {
@@ -109,7 +109,7 @@ export const BEATS: Aesthetics35Beat[] = [
           { id: 'pun', label: 'a pun', reads: 'a pun is funny and humiliates nobody', correct: true },
         ],
       },
-      explain: 'A pun. Laughing alone is no trouble for the theory: you can feel superior with nobody watching. The pun is the problem. It is funny with nobody beneath anybody, and a theory of humour has to cover the whole range or it is a theory of something narrower.',
+      explain: 'A pun. Laughing alone is no trouble for the theory: you can feel superior with nobody watching. The pun is the problem. It’s funny with nobody beneath anybody. A theory of humour has to cover the whole range, or it’s a theory of something narrower.',
       xp: 5,
     },
     dur: 1.0,
@@ -123,7 +123,7 @@ export const BEATS: Aesthetics35Beat[] = [
         'Explaining hands over the second in advance',
         'Superiority and relief cover only some cases',
       ],
-      closing: 'Comedy is the one art whose success is measured by a noise you cannot help. No wonder it resists being explained by people writing carefully.',
+      closing: 'Comedy is the one art whose success is measured by a noise you can’t help. No wonder it resists being explained by people writing carefully.',
     },
     dur: 3.0,
   },

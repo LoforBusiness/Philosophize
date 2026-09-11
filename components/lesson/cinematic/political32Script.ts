@@ -29,7 +29,7 @@ export const BEATS: Pol32Beat[] = [
   {
     g: 466, fill: 1, result: 1, mark: 0, labels: 0,
     dur: 4.2,
-    text: 'And it is settled. The result would have been exactly the same if any one of these marks had never been made.',
+    text: 'And it’s settled. The result would have been the same if any one of these marks had never been made.',
     cite: 'Declared',
   },
   {
@@ -59,7 +59,7 @@ export const BEATS: Pol32Beat[] = [
   {
     g: 383, fill: 1, result: 1, mark: 1, labels: 1,
     dur: 4.8,
-    text: 'But deciding the winner is not the only thing a mark can do. Look at the gap between the two piles — the bit of the top row that has nothing under it.',
+    text: 'But deciding the winner is not the only thing a mark can do. Look at the gap between the two piles, where the top row has nothing under it.',
     cite: 'The gap',
   },
   {
@@ -84,7 +84,7 @@ export const BEATS: Pol32Beat[] = [
           { id: 'thin', reads: 'might decide, and nothing more' },
         ],
       },
-      explain: 'Never decides, still worth doing. The classic slip is but what if nobody voted: what everyone else does is already fixed, so that was never the choice in front of you. Deciding the result is one thing a mark can do, and it was never the only one.',
+      explain: 'Never decides, still worth doing. The classic slip is to ask “what if nobody voted?” What everyone else does is already fixed, so that was never the choice in front of you. Deciding the result is one thing a mark can do, and it was never the only one.',
       xp: 5,
     },
   },
@@ -97,7 +97,7 @@ export const BEATS: Pol32Beat[] = [
         '"If nobody voted" is not a choice anyone faces',
         'Some acts are worth doing for what they express',
       ],
-      closing: 'You are not one person deciding an election. You are one person deciding what the number says.',
+      closing: 'You’re not one person deciding an election. You’re one person deciding what the number says.',
     },
     dur: 3.0,
   },

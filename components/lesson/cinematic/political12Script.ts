@@ -28,7 +28,7 @@ export const BEATS: Pol12Beat[] = [
   },
   {
     p: 164, x: 70,
-    text: 'Isaiah Berlin spent an essay explaining why the phrase makes sense, and why that is worse.',
+    text: 'Isaiah Berlin spent an essay explaining why the phrase makes sense, and why that’s worse.',
     dur: 2.5,
   },
   {
@@ -45,7 +45,7 @@ export const BEATS: Pol12Beat[] = [
   },
   {
     p: 13, x: 124, door: 1, open: 1, neg: 1,
-    text: 'The definition says nothing about whether you can actually walk through the door.',
+    text: 'The definition says nothing about whether you can walk through the door.',
     dur: 2.6,
   },
   {
@@ -63,7 +63,7 @@ export const BEATS: Pol12Beat[] = [
   },
   {
     p: 29, x: 168, door: 1, open: 1, neg: 1, posi: 1,
-    text: 'Here is Berlin\'s worry. A regime announces that your real self wants the regime\'s plan.',
+    text: 'Here’s Berlin’s worry. A regime announces that your real self wants the regime’s plan.',
     cite: 'The second lamp',
     dur: 2.4,
   },
@@ -84,7 +84,7 @@ export const BEATS: Pol12Beat[] = [
           { id: 'pos', label: 'positive liberty', reads: 'positive liberty: being your own master', correct: true },
         ],
       },
-      explain: 'Positive liberty, and the comfortable answer is the middle. Berlin point is sharper and nastier than that: the claim is coherent. Once somebody else gets to define your real self, they can shrink your choices in the name of freedom and mean it.',
+      explain: 'Positive liberty, and the comfortable answer is “no freedom at all”. Berlin’s point is sharper and nastier than that: the claim is coherent. Once somebody else gets to define your real self, they can shrink your choices in freedom’s name and mean it.',
       xp: 5,
     },
     dur: 1.0,
@@ -93,7 +93,7 @@ export const BEATS: Pol12Beat[] = [
     p: 6, x: 124, door: 1, open: 1, neg: 1, posi: 1, pick: 1,
     interact: {
       prompt: 'The door is wide open and you still cannot choose. Tap the lamp that is lying.',
-      explain: 'The second lamp. Negative liberty is honestly met: nobody stands in the doorway. But nobody else can switch on your self-mastery for you. That is the whole force of Berlin\'s warning.',
+      explain: 'The second lamp. Negative liberty is honestly met: nobody stands in the doorway. But nobody else can switch on your self-mastery for you. That’s the whole force of Berlin’s warning.',
       xp: 5,
     },
     dur: 1.0,
@@ -107,7 +107,7 @@ export const BEATS: Pol12Beat[] = [
         'Berlin warned the two can openly conflict',
         '"Forcing people to be free" can mask coercion',
       ],
-      closing: 'An open door and a life you do not steer are two different things. Only one of them is measured at the door.',
+      closing: 'An open door and a life you don’t steer are two different things. Only one of them is measured at the door.',
     },
     dur: 3.0,
   },

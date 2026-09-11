@@ -35,7 +35,7 @@ export interface Log18Beat extends BaseBeat {
 export const BEATS: Log18Beat[] = [
   {
     p: 172, x: 200, crowd: 0.12, needle: 0.5,
-    text: 'One person says the water here is safe. You have no idea whether it is.',
+    text: 'One person says the water here is safe. You’ve no idea whether it is.',
     dur: 3.8,
   },
   {
@@ -45,7 +45,7 @@ export const BEATS: Log18Beat[] = [
   },
   {
     p: 465, x: 128, crowd: 1, gap: 1, needle: 0.5,
-    text: 'Here is the machinery. The handle is what they turn.',
+    text: 'Here’s the machinery. The handle is what they turn.',
     cite: 'Look at the middle',
     dur: 2.4,
   },
@@ -56,7 +56,7 @@ export const BEATS: Log18Beat[] = [
   },
   {
     p: 383, x: 128, crowd: 1, gap: 1, needle: 0.5,
-    text: 'There is a hole in the shaft. Nothing that happens on the left reaches the right.',
+    text: 'There’s a hole in the shaft. Nothing that happens on the left reaches the right.',
     dur: 3.8,
   },
   {
@@ -80,7 +80,7 @@ export const BEATS: Log18Beat[] = [
   },
   {
     p: 467, x: 128, crowd: 1, gap: 1, meshed: 1, needle: 0.78,
-    text: 'Here is the other kind of link. Somebody tested the water, and this shaft has no hole in it.',
+    text: 'Here’s the other kind of link. Somebody tested the water, and this shaft has no hole in it.',
     cite: 'What does reach it',
     dur: 4.2,
   },
@@ -119,7 +119,7 @@ export const BEATS: Log18Beat[] = [
         'Both are facts about the audience, not about the claim',
         'A story counts when it is evidence, not when it is moving',
       ],
-      closing: 'Ask what is on the other end of the handle before you pull it.',
+      closing: 'Ask what’s on the other end of the handle before you pull it.',
     },
     dur: 3.2,
   },

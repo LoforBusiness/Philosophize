@@ -33,7 +33,7 @@ export interface Ethics26Beat extends BaseBeat {
 export const BEATS: Ethics26Beat[] = [
   {
     p: 355, x: 28, rail: 0.4,
-    text: 'Kicking a rock is nothing, and kicking a dog is something. Where is the line?',
+    text: 'Kicking a rock is nothing, and kicking an animal is something. Where’s the line?',
     dur: 4.6,
   },
   {
@@ -48,14 +48,14 @@ export const BEATS: Ethics26Beat[] = [
   },
   {
     p: 258, x: 28, rail: 1, line: 1,
-    text: 'Here is the last of them, drawn. Everything but the person falls outside.',
+    text: 'Here’s the last of them, drawn. Everything but the person falls outside.',
     dur: 4.6,
   },
   {
     p: 163, x: 28, rail: 1, line: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what that last answer is accused of.',
-      explain: 'Speciesism. Being human is a biological label rather than a capacity, so on its own it is not the kind of thing that can ground a duty. You may resist the charge — but then you have to name what humanity tracks that matters.',
+      explain: 'Speciesism. Being human is a biological label rather than a capacity. On its own, a label is not the kind of thing that can ground a duty. You may resist the charge — but then you have to name what humanity tracks that matters.',
       xp: 5,
     },
     dur: 1.0,
@@ -95,7 +95,7 @@ export const BEATS: Ethics26Beat[] = [
           { id: 'human', label: 'is human', reads: 'the human species, and nothing else' },
         ],
       },
-      explain: 'Suffering. It is the one criterion that names a stake rather than a category, which is what a duty needs something to be about. Planning is the serious rival and it has a cost: it puts some humans outside the gate. Species alone names no stake at all.',
+      explain: 'Suffering. It’s the one criterion that names a stake rather than a category. A duty needs a stake to be about. Planning is the serious rival and it has a cost: it puts some humans outside the gate. Species alone names no stake at all.',
       xp: 5,
     },
     dur: 1.0,
@@ -110,7 +110,7 @@ export const BEATS: Ethics26Beat[] = [
         'Person and human are not the same category',
         'Species on its own names a label, not a stake',
       ],
-      closing: 'Drawing this line is one of the oldest acts in ethics, and one of the few where moving it has changed how whole populations are treated.',
+      closing: 'Drawing this line is one of the oldest acts in ethics. It’s also one of the few where moving it has changed how whole populations are treated.',
     },
     dur: 5.0,
   },

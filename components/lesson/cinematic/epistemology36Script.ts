@@ -44,7 +44,7 @@ export const BEATS: Epistemology36Beat[] = [
     p: 461, x: 56, shelf: 1, live: 1,
     interact: {
       prompt: 'Pick one. There is no wrong pair — take whichever you want.',
-      explain: 'You took the one on the right, and so did four shoppers in five. Nothing about it is better. It was last in line, and last is what a hand reaches for after looking at all four.',
+      explain: 'Four shoppers in five took the one on the right. Nothing about it is better. It was last in line, and last is what a hand reaches for after looking at all four.',
       xp: 5,
     },
     dur: 1.0,
@@ -66,12 +66,12 @@ export const BEATS: Epistemology36Beat[] = [
   },
   {
     p: 176, x: 56, shelf: 1, given: 1, real: 1,
-    text: 'The cause was position on the counter. Told as much, the shoppers said no.',
+    text: 'The cause was position in the row. Told as much, the shoppers said no.',
     dur: 2.4,
   },
   {
     p: 176, x: 56, shelf: 1, given: 1, real: 1,
-    text: 'Not defensively, not caught out. The reason was simply invisible from the inside.',
+    text: 'Not defensively, not caught out. The reason was invisible from the inside.',
     dur: 2.2,
   },
   {
@@ -114,7 +114,7 @@ export const BEATS: Epistemology36Beat[] = [
           { id: 'why', upto: 1, reads: 'it takes the reasons and leaves the feelings alone', correct: true },
         ],
       },
-      explain: 'Nearly all of it lands on the why. Being in pain and knowing it is untouched by any of this. What goes is the confident account of why you did something — a report about hidden machinery, delivered in the voice of a report about a feeling.',
+      explain: 'Nearly all of it lands on the why. Knowing you’re in pain isn’t touched by any of this. What goes is the confident account of why you did something. It’s a report about hidden machinery, delivered in the voice of a report about a feeling.',
       xp: 5,
     },
     dur: 1.0,
@@ -128,7 +128,7 @@ export const BEATS: Epistemology36Beat[] = [
         'The gap fills with a plausible story',
         'The story arrives feeling like a memory',
       ],
-      closing: 'The unsettling part is not the mistake. Being wrong felt exactly like being right, and that leaves a reader nothing to watch out for.',
+      closing: 'The unsettling part is not the mistake. Being wrong felt the same as being right, and that leaves you nothing to watch out for.',
     },
     dur: 3.2,
   },

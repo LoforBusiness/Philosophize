@@ -34,7 +34,7 @@ export interface Aesthetics40Beat extends BaseBeat {
 export const BEATS: Aesthetics40Beat[] = [
   {
     p: 424, x: 32,
-    text: 'Nobody hangs a dinner in a gallery. There is an old reason for that.',
+    text: 'Nobody hangs a dinner in a gallery. There’s an old reason for that.',
     dur: 4.2,
   },
   {
@@ -56,7 +56,7 @@ export const BEATS: Aesthetics40Beat[] = [
     p: 164, x: 32, pillars: 1, line: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap the reason the lower three were shut out.',
-      explain: 'Because the thing goes. A painting survives being looked at, so you can return to it and argue. Strength was never the claim — a smell can floor you. Privacy is the better objection of the other two, and it fails: two people taste one dish and disagree about it.',
+      explain: 'Because the thing goes. A painting survives being looked at, so you can return to it and argue. Strength was never the claim — a smell can floor you. Privacy is the better objection of the other two, and it fails. Two people taste one dish and disagree about it.',
       xp: 5,
     },
     dur: 1.0,
@@ -81,7 +81,7 @@ export const BEATS: Aesthetics40Beat[] = [
   },
   {
     p: 445, x: 92, pillars: 1, line: 1,
-    text: 'Diners argue about whether the fifth course earned its place. That is following a form.',
+    text: 'Diners argue about whether the fifth course earned its place. That’s following a form.',
     dur: 4.6,
   },
   {
@@ -98,7 +98,7 @@ export const BEATS: Aesthetics40Beat[] = [
           { id: 'work', upto: 1, reads: 'about something, and it repays attention', correct: true },
         ],
       },
-      explain: 'All the way, or the exclusion needs a better reason. A composed menu has structure, reference and a view, and people argue about it the way they argue about a film. Mere craft is the interesting objection — and craft is exactly what was once said about the novel.',
+      explain: 'All the way, or the exclusion needs a better reason. A composed menu has structure, reference and a view. People argue about it the way they argue about a film. Mere craft is the interesting objection — and craft is what was once said about the novel.',
       xp: 5,
     },
     dur: 1.0,
@@ -113,7 +113,7 @@ export const BEATS: Aesthetics40Beat[] = [
         'A composed meal has form, reference and an argument',
         'A vanishing object is a hard case, not a bar',
       ],
-      closing: 'Live music vanishes too, and nobody bars music for vanishing. The line was drawn once, and has been quietly moving ever since.',
+      closing: 'Live music vanishes too, and nobody bars music for vanishing. The line was drawn once, and has been moving ever since.',
     },
     dur: 4.4,
   },

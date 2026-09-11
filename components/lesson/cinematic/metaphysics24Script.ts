@@ -21,23 +21,23 @@ export interface Meta24Beat extends BaseBeat {
 export const BEATS: Meta24Beat[] = [
   {
     p: 164, x: 70,
-    text: 'Here is a heap of sand. Take one grain away.',
+    text: 'Here’s a heap of sand. Take one grain away.',
     dur: 1.8,
   },
   {
     p: 402, x: 70,
-    text: 'Still a heap — obviously, because one grain has never been the difference between a heap and no heap.',
+    text: 'Still a heap, of course. One grain has never been the difference between a heap and no heap.',
     dur: 3,
   },
   {
     p: 41, x: 168, grains: 18, lamp: 1,
-    text: 'So the rule is safe: removing a single grain never changes the verdict. Every step you are about to see is an application of a rule you just agreed to.',
+    text: 'So the rule is safe: removing a single grain never changes the verdict. Every step you’re about to see applies a rule you just agreed to.',
     cite: 'The rule',
     dur: 4.8,
   },
   {
     p: 383, x: 168, grains: 9, lamp: 1,
-    text: 'Keep applying it. Half of them gone and the lamp has not flickered, because at no point did one grain do anything.',
+    text: 'Keep applying it. Half the grains are gone and the lamp hasn’t flickered, because at no point did one grain do anything.',
     cite: 'Halfway',
     dur: 4.2,
   },
@@ -56,13 +56,13 @@ export const BEATS: Meta24Beat[] = [
   },
   {
     p: 29, x: 168, grains: 1, lamp: 1,
-    text: 'One grain, and the verdict is still HEAP. Every single step was fine and the destination is nonsense.',
+    text: 'One grain left, and the lamp still says it’s a heap. Every single step was fine and the destination is nonsense.',
     cite: 'One grain left',
     dur: 3,
   },
   {
     p: 29, x: 168, grains: 1, lamp: 1,
-    text: 'So something you agreed to is wrong, and it is not obvious which.',
+    text: 'So something you agreed to is wrong, and the culprit isn’t obvious.',
     dur: 2.2,
   },
   {
@@ -79,7 +79,7 @@ export const BEATS: Meta24Beat[] = [
           { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5, 0.5], reads: 'the word never settles at all' },
         ],
       },
-      explain: 'The trap is false precision. It makes 99 a non-heap and 100 a heap with no real difference between them, and it quietly replaces the vague word instead of explaining why the vague word resists a line.',
+      explain: 'The trap is false precision. It makes 99 grains a non-heap and 100 a heap, with no real difference between them. It swaps in a sharp definition without saying so, instead of explaining why the vague word resists a line.',
       xp: 5,
     },
     dur: 1.0,
@@ -88,7 +88,7 @@ export const BEATS: Meta24Beat[] = [
     p: 6, x: 124, grains: 1, lamp: 1, pick: 1,
     interact: {
       prompt: 'Tap the grain whose removal ended the heap.',
-      explain: 'There is not one, and that is the paradox rather than a failure to find it. Every removal was harmless on its own; the trouble is that the harmless steps add up to a conclusion nobody accepts.',
+      explain: 'There’s no such grain, and that’s the paradox rather than a failure to find it. Every removal was harmless on its own. The trouble is that the harmless steps add up to a conclusion nobody accepts.',
       xp: 5,
     },
     dur: 1.0,
@@ -102,7 +102,7 @@ export const BEATS: Meta24Beat[] = [
         'Epistemicism: a hidden sharp line we cannot know',
         'Other views: truth-gaps, or degrees of truth',
       ],
-      closing: 'Almost every useful word you own has a blurred edge like this one. The words work anyway, and that is the strange part.',
+      closing: 'Almost every useful word you own has a blurred edge like this one. The words work anyway, and that’s the strange part.',
     },
     dur: 3.0,
   },

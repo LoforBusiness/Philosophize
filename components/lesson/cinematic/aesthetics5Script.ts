@@ -18,7 +18,7 @@ export interface Aes5Beat extends BaseBeat {
 export const BEATS: Aes5Beat[] = [
   {
     p: 165, bird: 0, ego: 1, self: 0.74,
-    text: 'You look at the world all day, yet rarely see it. Aesthetics is attention training — it teaches the eye to wake up.',
+    text: 'You look at the world all day, yet rarely see it. Aesthetics trains your attention until the eye wakes up.',
     dur: 3.6,
   },
   {
@@ -29,7 +29,7 @@ export const BEATS: Aes5Beat[] = [
   },
   {
     p: 11, bird: 0, ego: 1, self: 0.88,
-    text: 'In the way of it sits what she calls the fat, relentless ego — and attention is what quiets it.',
+    text: 'The obstacle is what Murdoch calls the fat, relentless ego. Attention is what quiets it.',
     dur: 2.7,
   },
   {
@@ -69,20 +69,20 @@ export const BEATS: Aes5Beat[] = [
           { id: 'happens', upto: 1, reads: 'it takes hold of you', correct: true },
         ],
       },
-      explain: 'Almost all of it happens to you. Unselfing is not a technique. It arrives when a kestrel or a painting takes hold so completely that no room is left over for brooding. You can put yourself where unselfing might happen. You cannot perform it.',
+      explain: 'Almost all of it happens to you. Unselfing is not a technique. It arrives when a kestrel or a painting takes hold and leaves no room for brooding. You can put yourself where unselfing might happen. You cannot perform it.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 13, bird: 0, ego: 0, leaf: 1, self: 0.12,
-    text: 'Ruskin taught that drawing recovers "the innocence of the eye". You see patches of colour as they truly are, before the mind swaps in its idea.',
+    text: 'Ruskin wrote that drawing recovers “the innocence of the eye”. You see patches of colour as they are, before the mind swaps in its idea.',
     cite: 'Ruskin’s drawing lessons',
     dur: 3.8,
   },
   {
     p: 13, bird: 0, ego: 0, leaf: 1, self: 0.12,
-    text: 'Ruskin\'s students studied one leaf before any tree.',
+    text: 'Ruskin’s students studied one leaf before any tree.',
     dur: 1.8,
   },
   {
@@ -104,7 +104,7 @@ export const BEATS: Aes5Beat[] = [
         'Perception is a skill you can sharpen',
         'Aesthetics is attention, not just art',
       ],
-      closing: 'Aesthetics trains you to truly see what already surrounds you.',
+      closing: 'Aesthetics trains you to see what already surrounds you.',
     },
     dur: 2.8,
   },

@@ -33,7 +33,7 @@ export interface Logic29Beat extends BaseBeat {
 export const BEATS: Logic29Beat[] = [
   {
     p: 428, x: 24, beam: 1,
-    text: 'A china teapot orbits the Sun, between Earth and Mars. Prove that it does not.',
+    text: 'A china teapot orbits the sun, between Earth and Mars. Prove it doesn’t.',
     dur: 4.8,
   },
   {
@@ -55,7 +55,7 @@ export const BEATS: Logic29Beat[] = [
     p: 165, x: 24, beam: 1, load: 1, side: 0.5, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what is wrong with you cannot disprove it.',
-      explain: 'It hands the work to the wrong side. Failing to refute a claim is not evidence for the claim, and a guess does not become a fact by being hard to check. The move is a burden shift, and naming it out loud is the whole defence.',
+      explain: 'It hands the work to the wrong side. Failing to refute a claim is not evidence for the claim. A guess doesn’t become a fact by being hard to check. The move is a burden shift, and naming it out loud is the whole defence.',
       xp: 5,
     },
     dur: 1.0,
@@ -80,7 +80,7 @@ export const BEATS: Logic29Beat[] = [
   },
   {
     p: 457, x: 80, beam: 1, load: 1, side: 0.9,
-    text: 'A dragon no test can reach is the same picture as an empty garage. That is Sagan on the point.',
+    text: 'Sagan argues that a dragon no test can reach is the same picture as an empty garage.',
     dur: 5.0,
   },
   {
@@ -97,7 +97,7 @@ export const BEATS: Logic29Beat[] = [
           { id: 'claimant', upto: 1, reads: 'whoever makes the claim brings the evidence', correct: true },
         ],
       },
-      explain: 'Almost all of it on the claimant. An assertion is what creates the debt, and doubt takes on none of it. Splitting the burden evenly would make every unsupported claim halfway to true, which is how the dragon gets into the garage.',
+      explain: 'Almost all of it on the claimant. An assertion is what creates the debt, and doubt takes on none of it. Splitting the burden evenly would make every unsupported claim halfway to true. That’s how the dragon gets into the garage.',
       xp: 5,
     },
     dur: 1.0,

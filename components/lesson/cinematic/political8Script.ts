@@ -40,7 +40,7 @@ export const BEATS: Political8Beat[] = [
   },
   {
     p: 13, x: 170, pile: 1, marks: 1,
-    text: 'Nobody here cheated anybody. They were simply born different heights.',
+    text: 'Nobody here cheated anybody. They were born different heights.',
     cite: 'Same fence, different eyes',
     dur: 1.8,
   },
@@ -57,7 +57,7 @@ export const BEATS: Political8Beat[] = [
   },
   {
     p: 42, x: 100, carry: 1, pile: 1, marks: 1,
-    text: 'One each — you cannot get fairer than that. Can you?',
+    text: 'You can’t get fairer than one each. Can you?',
     dur: 2,
   },
   {
@@ -75,7 +75,7 @@ export const BEATS: Political8Beat[] = [
     p: 447, x: 170, mode: 1, marks: 1, pick: 1,
     interact: {
       prompt: 'The tallest could already see, so her crate is spare. Tap the onlooker who should get it.',
-      explain: 'Only the shortest was still blocked, so that is the one place a crate changes anything. Same three crates, nothing added — and now every pair of eyes clears the fence.',
+      explain: 'Only the shortest was still blocked, so that’s the one place a crate changes anything. Same three crates, nothing added — and now every pair of eyes clears the fence.',
       xp: 5,
     },
     dur: 1.0,
@@ -103,7 +103,7 @@ export const BEATS: Political8Beat[] = [
           { id: 'bad', reads: 'different shares, and somebody still cannot see' },
         ],
       },
-      explain: 'Identical crates, and one person staring at wood. Equal and identical are not the same word: the crates were perfectly equal in resources and left one person facing a plank. Equal shares and equal outcomes come apart, which is why the second arrangement is fairer.',
+      explain: 'Identical crates, and one person staring at wood. Equal and identical are not the same word. The crates were perfectly equal in resources and left one person facing a plank. Equal shares and equal outcomes come apart, which is why the second arrangement is fairer.',
       xp: 5,
     },
     dur: 1.0,

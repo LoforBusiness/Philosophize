@@ -56,7 +56,7 @@ export const BEATS: Political27Beat[] = [
     p: 162, x: 26, road: 1, entry: 1, conduct: 1, plates: 1, live: 1,
     interact: {
       prompt: 'Tap what the two gates hand down.',
-      explain: 'Two separate verdicts. A war can be right to start and wrong in the fighting, which is why the theory keeps the tests apart. One verdict would let a just cause excuse anything done under it, and the gates are not points to add up.',
+      explain: 'Two separate verdicts. A war can be right to start and wrong in the fighting. That’s why the theory keeps the tests apart. One verdict would let a just cause excuse anything done under it. And the gates are not points to add up.',
       xp: 5,
     },
     dur: 1.0,
@@ -95,7 +95,7 @@ export const BEATS: Political27Beat[] = [
           { id: 'none', label: 'fails both', reads: 'no standing to take up arms at all' },
         ],
       },
-      explain: 'The first gate, and not the second. Self-defence is a just cause, so going to war clears the first test. Deliberately killing civilians fails the second, however few die in total.',
+      explain: 'The first gate, and not the second. Self-defence is a just cause, so going to war clears the first test. Killing civilians on purpose fails the second, however few die in total.',
       xp: 5,
     },
     dur: 1.0,

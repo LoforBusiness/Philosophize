@@ -33,7 +33,7 @@ export interface Epistemology39Beat extends BaseBeat {
 export const BEATS: Epistemology39Beat[] = [
   {
     p: 25, x: 52, grid: 1,
-    text: 'Three judges hear one case. A verdict of liable needs two findings: a contract, and a breach.',
+    text: 'Three judges hear one case. A verdict of liable needs two findings: a contract existed, and it was broken.',
     dur: 4.2,
   },
   {
@@ -50,7 +50,7 @@ export const BEATS: Epistemology39Beat[] = [
     p: 4, x: 52, grid: 1, votes: 1, tally: 1, live: 1,
     interact: {
       prompt: 'Tap the majority cell that contradicts the other two.',
-      explain: 'The verdict. Two of three found a contract and two of three found a breach, and those two together mean liable — yet two of three voted not liable. Every row above holds together. Only the row made by counting does not.',
+      explain: 'The verdict. Two of three found a contract, and two of three found it broken. Together those mean liable, yet two of three voted not liable. Every row above holds together. Only the row made by counting does not.',
       xp: 5,
     },
     dur: 1.0,
@@ -62,7 +62,7 @@ export const BEATS: Epistemology39Beat[] = [
   },
   {
     p: 168, x: 98, grid: 1, votes: 1, tally: 1,
-    text: 'So a court has to choose what it counts. The verdict on its own, or the reasons, with the verdict derived.',
+    text: 'So a court has to choose what it counts. It can count the verdict alone, or count the reasons and let the verdict follow.',
     dur: 4.4,
   },
   {
@@ -91,7 +91,7 @@ export const BEATS: Epistemology39Beat[] = [
           { id: 'reasons', upto: 1, reads: 'settle the reasons, and let the verdict follow', correct: true },
         ],
       },
-      explain: 'Settle the reasons first. Watch the bottom cell turn over as you move: that is the repair working, and also the bill. The court now rules liable when two of its three judges voted the other way, and it must say why that is legitimate.',
+      explain: 'Settle the reasons first. Watch the bottom cell turn over as you move. That’s the repair working, and also the bill. The court now rules liable when two of its three judges voted the other way. It has to say why that’s legitimate.',
       xp: 5,
     },
     dur: 1.0,

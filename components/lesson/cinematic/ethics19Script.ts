@@ -46,7 +46,7 @@ export const BEATS: Eth19Beat[] = [
   },
   {
     p: 13, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
-    text: 'Mill thought there was one honest test, and it is the middle column. Not how risky the choice is.',
+    text: 'Mill thought there was one honest test, and it’s the middle column. Not how risky the choice is.',
     dur: 3.8,
   },
   {
@@ -76,7 +76,7 @@ export const BEATS: Eth19Beat[] = [
     p: 165, x: 132, doc: 1, rows: 1, affects: 1, taken: 1, live: 1,
     interact: {
       prompt: 'Tap the one line somebody else may sign.',
-      explain: 'Driving after drinking. Mill\'s test is not how risky the choice is. It is whether anybody else is in it. The other three are dangerous or foolish or both, and they are still yours. Danger to yourself never hands somebody else the pen.',
+      explain: 'Driving after drinking. Mill’s test is not how risky the choice is. It’s whether anybody else is in it. The other three are dangerous or foolish or both, and they’re still yours. Danger to yourself never hands somebody else the pen.',
       xp: 5,
     },
     dur: 1.0,
@@ -101,7 +101,7 @@ export const BEATS: Eth19Beat[] = [
           { id: 'save', upto: 1, reads: 'save them whatever they say' },
         ],
       },
-      explain: 'The near end, and this is the hardest case for the harm principle. Mill takes it anyway: a competent adult may make a choice that is plainly terrible for them and for nobody else. Overriding it treats a person as a thing to be managed.',
+      explain: 'The near end, and this is the hardest case for the harm principle. Mill takes it anyway. A competent adult may make a choice that’s terrible for them and for nobody else. Overriding it treats a person as a thing to be managed.',
       xp: 5,
     },
     dur: 1.0,
@@ -115,7 +115,7 @@ export const BEATS: Eth19Beat[] = [
         'Competence is what makes a refusal binding',
         'The rule is only worth having where it costs something',
       ],
-      closing: 'Three of those lines were never anybody else\'s to sign.',
+      closing: 'Three of those lines were never anybody else’s to sign.',
     },
     dur: 3.2,
   },

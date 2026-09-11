@@ -62,30 +62,30 @@ export const BEATS: Metaphysics8Beat[] = [
   },
   {
     p: 15, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'And there is the domino with your name on it. It goes over right on schedule.',
+    text: 'And there’s the domino with your name on it. It goes over right on schedule.',
     cite: 'Your domino',
     dur: 2.8,
   },
   {
     p: 15, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'The choice you are proudest of was a sentence physics started centuries ago.',
+    text: 'The choice you’re proudest of was a sentence physics started centuries ago.',
     dur: 2.2,
   },
   {
     p: 33, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'One camp simply refuses. A real choice snaps the chain, they say — you begin a brand-new line that nothing before you set going.',
+    text: 'One camp refuses. For them a real choice snaps the chain and starts a brand-new line that no earlier cause set going.',
     cite: 'The refusal',
     dur: 4,
   },
   {
     p: 33, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'That is libertarian free will.',
+    text: 'That’s libertarian free will.',
     dur: 1.8,
   },
   {
     // 8 (shrug), not 4 (think): the line opens "A third camp shrugs".
     p: 378, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'A third camp shrugs at the whole fight. Both sides picked the wrong test, they think.',
+    text: 'A third camp shrugs at the whole fight. They think both sides picked the wrong test.',
     cite: 'A third way',
     dur: 2.6,
   },
@@ -99,7 +99,7 @@ export const BEATS: Metaphysics8Beat[] = [
     p: 380, x: 200, chain: 1, front: 3, tags: 0, mark: 0, pick: 1,
     interact: {
       prompt: 'This camp agrees every domino falls, yours included. Tap what they say makes a choice FREE.',
-      explain: 'Free means the push came from inside you — your own wants — with nobody else’s hand on your arm. The chain is left standing exactly where it was.',
+      explain: 'Free means the push came from your own wants, with nobody else’s hand on your arm. The chain itself is left untouched.',
       xp: 5,
     },
     dur: 1.0,
@@ -116,7 +116,7 @@ export const BEATS: Metaphysics8Beat[] = [
           { id: 'lost', reads: 'the chain breaks and nobody is free either' },
         ],
       },
-      explain: 'Every link holds, and people are free anyway. These are two questions, not one. Compatible with free will sounds like something was rescued from the causes. Nothing was. Every domino still falls. The camp only changed the test from was it uncaused to was it forced.',
+      explain: 'Every link holds, and people are free anyway. These are two questions, not one. “Compatible with free will” sounds like something was rescued from the causes. Nothing was. Every domino still falls. The camp only changed the test from “was it uncaused?” to “was it forced?”',
       xp: 5,
     },
     dur: 1.0,
@@ -129,7 +129,7 @@ export const BEATS: Metaphysics8Beat[] = [
   },
   {
     p: 29, x: 140, chain: 1, front: 2, tags: 1, mark: 1,
-    text: 'You act freely when the push comes from your own wants — not from a hand on your arm.',
+    text: 'You act freely when the push comes from your own wants, not from a hand on your arm.',
     dur: 2.7,
   },
   {

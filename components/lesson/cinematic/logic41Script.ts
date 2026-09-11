@@ -40,7 +40,7 @@ export const BEATS: Logic41Beat[] = [
   },
   {
     p: 161, x: 28, outer: 1,
-    text: 'Is she more likely to be a bank teller, or a bank teller who is also an activist?',
+    text: 'Is she more likely to be a bank teller, or a bank teller who’s also an activist?',
     dur: 4.8,
   },
   {
@@ -98,7 +98,7 @@ export const BEATS: Logic41Beat[] = [
           { id: 'all', upto: 1, reads: 'all of them — every teller an activist' },
         ],
       },
-      explain: 'A slice. The inner box can touch the wall at most, when every teller is an activist, and it cannot break out. Nothing you learn about Linda moves that wall, because the description was never about how many tellers there are.',
+      explain: 'A slice. The inner box can touch the wall at most, when every teller is an activist, and it can’t break out. Nothing you learn about Linda moves that wall, because the description was never about how many tellers there are.',
       xp: 5,
     },
     dur: 1.0,
@@ -113,7 +113,7 @@ export const BEATS: Logic41Beat[] = [
         'Detail buys resemblance and costs probability',
         'A vivid story is the strongest form of the trap',
       ],
-      closing: 'A forecast with names, dates and a motive convinces where a bare one does not. Every detail added is one more way for the forecast to be wrong.',
+      closing: 'A forecast with names, dates and a motive convinces where a bare one doesn’t. Every detail added is one more way for the forecast to be wrong.',
     },
     dur: 4.6,
   },

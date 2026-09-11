@@ -30,12 +30,12 @@ export const BEATS: Log14Beat[] = [
   {
     g: 164, lines: 2,
     dur: 1.8,
-    text: 'Both lines are ones you would nod at.',
+    text: 'Both lines are ones you’d nod at.',
   },
   {
     g: 447, lines: 3,
     dur: 4.6,
-    text: 'So a ham sandwich beats eternal happiness. That is a valid shape applied to two true premises, and the answer is a joke.',
+    text: 'So a ham sandwich beats eternal happiness. That’s a valid shape applied to two true premises, and the answer is a joke.',
     cite: 'And therefore',
   },
   {
@@ -62,14 +62,14 @@ export const BEATS: Log14Beat[] = [
     dur: 1.0,
     interact: {
       prompt: 'One word here means two different things. Tap it.',
-      explain: 'Nothing. It is the only word in both premises, which is what lets the two lines join at all. And it carries a different sense in each. The other two chips mean the same thing every time, so neither could be the join that failed.',
+      explain: 'The word “nothing”. It’s the only word in both premises, which is what lets the two lines join at all. And it carries a different sense in each. The other two chips mean the same thing every time, so neither could be the join that failed.',
       xp: 5,
     },
   },
   {
     g: 176, lines: 3, mark: 1, gloss: 1,
     dur: 4.2,
-    text: 'In the first line it means no thing is better. In the second it means better than having nothing at all.',
+    text: 'In the first line, the word “nothing” means no thing is better. In the second, it means better than having nothing at all.',
     cite: 'Two words in one costume',
   },
   {
@@ -91,7 +91,7 @@ export const BEATS: Log14Beat[] = [
           { id: 'form', upto: 1, reads: 'the shape was invalid from the start' },
         ],
       },
-      explain: 'Almost all of it on the words. Run the same shape with a word that holds still and the argument works perfectly. That is what makes equivocation so dangerous. Validity is a promise about form, and the promise lapses once a word changes meaning halfway down.',
+      explain: 'Almost all of it on the words. Run the same shape with a word that holds still and the argument works. That’s what makes equivocation so dangerous. Validity is a promise about form, and the promise lapses once a word changes meaning halfway down.',
       xp: 5,
     },
   },
