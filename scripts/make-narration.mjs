@@ -27,9 +27,24 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ts = createRequire(import.meta.url)('typescript');
 const OUT = path.join(ROOT, 'lib', 'narration', 'manifest.ts');
 
-/** The narrated lessons, and the script each one plays. */
+/**
+ * The narrated lessons, and the script each one plays: the first two of every branch
+ * in reading order, and ethics-ethics-9, the first lesson narrated.
+ */
 const LESSONS = {
+  'logic-arguments-1': 'argumentScript.ts',
+  'logic-arguments-2': 'builderScript.ts',
+  'ethics-ethics-1': 'ethicsScript.ts',
+  'ethics-ethics-2': 'ethics2Script.ts',
   'ethics-ethics-9': 'ethics9Script.ts',
+  'epistemology-knowledge-1': 'epistemologyScript.ts',
+  'epistemology-knowledge-3': 'epistemology2Script.ts',
+  'metaphysics-being-1': 'metaphysicsScript.ts',
+  'metaphysics-being-2': 'metaphysics2Script.ts',
+  'aesthetics-aesthetics-1': 'aestheticsScript.ts',
+  'aesthetics-aesthetics-2': 'aesthetics2Script.ts',
+  'political-political-1': 'politicalScript.ts',
+  'political-political-2': 'political2Script.ts',
 };
 
 const FRAME_S = 0.01;
@@ -47,8 +62,12 @@ function beatsOf(file) {
   return mod.BEATS;
 }
 
-/** A spoken beat: a teaching line under the figure, and nothing else on it. */
-const spoken = (b) => typeof b.text === 'string' && b.text.trim().length > 0 && !b.quote && !b.interact && !b.summary;
+/**
+ * A spoken beat: a teaching line under the figure, and nothing else on it. The two
+ * lessons older than the shared player ask their questions as `tap` and `mc`.
+ */
+const spoken = (b) => typeof b.text === 'string' && b.text.trim().length > 0
+  && !b.quote && !b.interact && !b.summary && !b.tap && !b.mc;
 
 function readWav(file) {
   const buf = fs.readFileSync(file);

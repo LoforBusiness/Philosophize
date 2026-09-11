@@ -14,6 +14,9 @@ import { lessonXP } from '@/constants/xp';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
+import { narration } from '@/lib/narration';
+import { NARRATION } from '@/lib/narration/manifest';
+import NarrationText from './NarrationText';
 import Stickman from './Stickman';
 import BrickStructure, {
   BASE_LX, BASE_RX, BASE_Y, CENTER_X, KEY_X, KEY_Y, type StructState,
@@ -418,6 +421,27 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
   }, [hiding]);
   const stageStyle = useAnimatedStyle(() => ({ opacity: stageVis.value }));
 
+  // ── narration ──────────────────────────────────────────────────────────────
+  // The same three effects as CinematicPlayer, which this lesson predates: one clip
+  // per spoken beat, following `shown` (the paragraph on screen), cut by a tap.
+  const narrated = narration.isSupported() ? NARRATION[lesson.id] : undefined;
+  const narrationOn = useUserDataStore((s) => s.settings.narration);
+  const setUserSetting = useUserDataStore((s) => s.setSetting);
+  useEffect(() => {
+    if (!narrated) return;
+    narration.prepare(lesson.id);
+    return () => narration.release();
+  }, [narrated, lesson.id]);
+  useEffect(() => {
+    if (narrated) narration.stop();
+  }, [i, narrated]);
+  useEffect(() => {
+    if (!narrated) return;
+    const line = narrated[shown];
+    if (narrationOn && !done && line && BEATS[shown]?.text === line.text) narration.play(lesson.id, shown);
+    else narration.stop();
+  }, [narrated, narrationOn, shown, done, lesson.id]);
+
   // EVERY HOOK MUST BE ABOVE THIS LINE — see the same note in CinematicPlayer.
   // `done` flips on the last tap; hooks below here get skipped on that render,
   // React counts fewer than before and throws, taking down the reward Modal with
@@ -441,6 +465,17 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
         <View style={styles.track}>
           <Animated.View nativeID="beat-progress" style={[styles.fill, fillStyle]} />
         </View>
+        {narrated ? (
+          <Pressable
+            onPress={() => setUserSetting('narration', !narrationOn)}
+            hitSlop={12}
+            style={styles.close}
+            accessibilityRole="button"
+            accessibilityLabel={narrationOn ? 'Mute the narration' : 'Read this lesson aloud'}
+          >
+            <SketchIcon name={narrationOn ? 'volume-on' : 'volume-off'} size={20} color={INK} />
+          </Pressable>
+        ) : null}
       </View>
 
       {/* Tap anywhere to advance (an ancestor of the content, so scene taps bubble
@@ -510,7 +545,7 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
               <>
                 {beat.cite ? <Text style={styles.cite}>{beat.cite.toUpperCase()}</Text> : null}
                 {beat.text ? (
-                  <Text style={styles.narr}>{beat.text}</Text>
+                  <NarrationText text={beat.text} lessonId={lesson.id} beat={i} style={styles.narr} />
                 ) : null}
 
                 {beat.quote ? (

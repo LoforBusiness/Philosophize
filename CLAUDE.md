@@ -1718,16 +1718,27 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     both play after the last beat. `HEARD` in `lib/feedback.ts` decides, the
     player schedules nothing that is not heard, and `check:sound` fails the build
     on a third sound. Every haptic stayed.
-  - **And the first lesson speaks.** `ethics-ethics-9` ("When Both Choices Are
-    Wrong") reads its seven teaching lines aloud: a beat's own `text`, never a
-    quote, a question or the summary. The clips are in `assets/narration/`,
-    rendered through the character ledger, and `node scripts/make-narration.mjs`
-    writes `lib/narration/manifest.ts`, estimating when each word starts from the
-    clip's pauses because Chirp 3 HD returns no word timings. `NarrationText`
-    fades each word in on that estimate, the player plays a line when its paragraph
-    swaps in and cuts it on a tap, and a speaker button in that lesson's header
-    writes `settings.narration` (on by default). A lesson missing from the manifest
-    gets no voice, no button and no extra render, and so does the web.
+  - **And thirteen lessons speak.** `ethics-ethics-9` ("When Both Choices Are
+    Wrong") came first, then the first two lessons of every branch in reading
+    order. Each reads its teaching lines aloud: a beat's own `text`, never a quote,
+    a question or the summary. The clips are in `assets/narration/`, rendered
+    through the character ledger, and `node scripts/make-narration.mjs` writes
+    `lib/narration/manifest.ts`, estimating when each word starts from the clip's
+    pauses because Chirp 3 HD returns no word timings. `NarrationText` fades each
+    word in on that estimate, the player plays a line when its paragraph swaps in
+    and cuts it on a tap, and a speaker button in a narrated lesson's header writes
+    `settings.narration` (on by default). The two lessons older than the shared
+    player, `logic-arguments-1` and `-2`, carry their own copy of those three
+    effects and that button. A lesson missing from the manifest gets no voice, no
+    button and no extra render, and so does the web.
+  - **The clips are WAV, and that is a cost to pay down before the corpus is
+    narrated.** Chirp 3 HD does not render a line the same way twice (one came back
+    at 2.08s and then 2.20s), so word times measured on a WAV do not fit a separate
+    MP3 render of the same text. An MP3's own frames cannot be timed either: at
+    32 kbps every granule is full, pauses included. With no audio encoder in the
+    repo, the clips ship as 16-bit 24 kHz PCM, 48 KB a second. Before many more
+    lessons get a voice, encode the measured WAV locally, so the times and the
+    audio come from one render.
 - **Productive struggle.** Every lesson earns its payoff with a real question or dilemma. A good "trick" answer is tempting for a *nameable* reason — so the explanation should **name the bias/fallacy and say why the tempting choice fails.**
 - **Ground it in a real thinker.** Pair the concept with a primary-source `quote` card. Authenticity ("here is the sentence Descartes actually wrote") is what makes it feel valuable, not gamified trivia.
 - **Give it an arc.** Hook (provocation) → build → struggle → a "what you now know" payoff on the summary.
