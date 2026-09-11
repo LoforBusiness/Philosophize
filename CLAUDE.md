@@ -83,7 +83,7 @@ replacing the letterpress D.
 | Validation | Zod | 4.x | API boundary validation only |
 | Date math | date-fns | 4.x | Streak calculation |
 | Haptics | expo-haptics | ~56 | Live in the runners via `lib/feedback.ts` |
-| Sound | expo-audio | ~56 | Live since build 19; clips are GENERATED, not sampled (`scripts/make-sounds.mjs`) |
+| Sound | expo-audio | ~56 | Live since build 19. **Two sounds only since 2026-09-11**, the lesson reward and the rank-up, so nothing plays over the narration (`HEARD` in `lib/feedback.ts`, held by `check:sound`). Clips are GENERATED (`scripts/make-sounds.mjs`) |
 
 Every native-dependent module has a `stub.ts` + `index.web.ts` pair (`lib/ads`,
 `lib/purchases`, `lib/auth/social`) so the app still runs on web and in Expo Go,
@@ -1711,6 +1711,13 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
   - **What it could not do is listen.** A synthetic voice misplaces stress and
     misreads a name in a perfectly even tone, so AC11's listening pass, and a
     pronunciation list, wait for the audio.
+  - **And the app went quiet around the voice.** Every sound but two was removed
+    the same day: the footfalls, the gesture whooshes, the answer notes, the knock
+    and the clasp, the XP ticks, the badge bell, the streak seal and a scene's
+    struck object. What is left is the reward chime and the rank-up fanfare, and
+    both play after the last beat. `HEARD` in `lib/feedback.ts` decides, the
+    player schedules nothing that is not heard, and `check:sound` fails the build
+    on a third sound. Every haptic stayed.
 - **Productive struggle.** Every lesson earns its payoff with a real question or dilemma. A good "trick" answer is tempting for a *nameable* reason — so the explanation should **name the bias/fallacy and say why the tempting choice fails.**
 - **Ground it in a real thinker.** Pair the concept with a primary-source `quote` card. Authenticity ("here is the sentence Descartes actually wrote") is what makes it feel valuable, not gamified trivia.
 - **Give it an arc.** Hook (provocation) → build → struggle → a "what you now know" payoff on the summary.
@@ -1887,7 +1894,8 @@ validation script** that used to head this item is done — `npm run check`, see
 
 **Done since this list was written** — kept so nobody re-plans them: sensory
 polish shipped (haptics AND generated sound, both behind one `cue()` call in
-`lib/feedback.ts` and one Settings toggle); content grew
+`lib/feedback.ts` and one Settings toggle, with the sound cut to the reward and
+the rank-up on 2026-09-11 so nothing plays over the narration); content grew
 from 60 lessons to 192 across 28 units; Supabase cloud sync went live; 102
 cinematic lessons shipped; the app launched on Google Play with ads,
 subscriptions and a widget; the XP model was reconciled behind `lessonXP()`;

@@ -2,7 +2,7 @@ import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-aud
 import type { Cue, SoundProvider } from './types';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE SOUNDS, PLAYED.
+// THE SOUNDS, PLAYED. THERE ARE TWO.
 //
 // IMPORTS expo-audio AT MODULE SCOPE, which is exactly why nothing may import
 // this file directly — go through ./index, which wraps the require in a try. On a
@@ -11,10 +11,16 @@ import type { Cue, SoundProvider } from './types';
 // app is quiet until they update" and "the app crashes on launch for everyone
 // still on build 16". Same rule, same reason, as lib/notifications (§22).
 //
+// ONLY THE CUES lib/feedback.ts HEARS HAVE A CLIP. Since 11 Sep 2026 that is the
+// reward chime and the rank-up fanfare, so nothing plays over the lesson
+// narration, and the other sixteen clips were deleted. A cue with no clip here is
+// simply silent. `check:sound` holds this list and feedback.ts's HEARD table to the
+// same two.
+//
 // ── THE THREE DECISIONS THAT MATTER ─────────────────────────────────────────
 //
 // 1. `mixWithOthers`. The app must never take audio focus. Someone reading
-//    philosophy on a bus is very likely playing music, and a footstep that pauses
+//    philosophy on a bus is very likely playing music, and a chime that pauses
 //    their album is a reason to uninstall. Expo documents this mode as the one
 //    for "sound effects, UI feedback, or short audio clips", and on Android it
 //    means no focus request at all.
@@ -39,79 +45,39 @@ import type { Cue, SoundProvider } from './types';
 //    better one — the media volume slider, plus a Sound toggle in Settings.
 //
 // 3. PLAYERS ARE MADE ONCE AND REWOUND, not created per hit. `createAudioPlayer`
-//    decodes the file; doing that on every footfall would allocate a player twice
-//    a second while walking. Rewinding costs nothing.
+//    decodes the file, and doing that on every play would decode a clip that has
+//    already been decoded. Rewinding costs nothing.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Two footfalls, alternated — one sample repeated at walking cadence turns into a
-// typewriter within three steps.
 const SOURCES = {
-  stepA: require('../../assets/sound/step-a.wav'),
-  stepB: require('../../assets/sound/step-b.wav'),
-  impact: require('../../assets/sound/impact.wav'),
-  // Three gestures, by how the hand is actually moving — see gestures.ts.
-  whoosh1: require('../../assets/sound/whoosh-1.wav'),
-  whoosh2: require('../../assets/sound/whoosh-2.wav'),
-  whoosh3: require('../../assets/sound/whoosh-3.wav'),
   reward: require('../../assets/sound/reward.wav'),
-  // The correct-answer note, up the D triad. A run of right answers climbs it and
-  // then holds at the top — see `play`.
-  right1: require('../../assets/sound/right-1.wav'),
-  right2: require('../../assets/sound/right-2.wav'),
-  right3: require('../../assets/sound/right-3.wav'),
-  rethink: require('../../assets/sound/rethink.wav'),
-  keep: require('../../assets/sound/keep.wav'),
-  tick1: require('../../assets/sound/tick-1.wav'),
-  tick2: require('../../assets/sound/tick-2.wav'),
-  tick3: require('../../assets/sound/tick-3.wav'),
-  badge: require('../../assets/sound/badge.wav'),
   rankup: require('../../assets/sound/rankup.wav'),
-  seal: require('../../assets/sound/seal.wav'),
 } as const;
-
-/** The variant ladders. Indexed by the `step` argument; the last entry repeats. */
-const RIGHT = ['right1', 'right2', 'right3'] as const;
-const TICK = ['tick1', 'tick2', 'tick3'] as const;
-/** sleeve · fast hand · heavy swing — by the measured speed of the gesture. */
-const WHOOSH = ['whoosh1', 'whoosh2', 'whoosh3'] as const;
 
 type Key = keyof typeof SOURCES;
 
 const players: Partial<Record<Key, AudioPlayer>> = {};
 let ready = false;
 let enabled = true;
-let footToggle = 0;
 
 /**
  * The floor between two hits of the same cue, in ms.
  *
- * Without it a fast tapper machine-guns the same player: each hit rewinds the
- * clip to zero, so instead of overlapping taps you get one clip that never gets
- * past its attack — a buzz. Per-cue, because a footfall's natural rate is much
- * slower than a tap's.
+ * Only a runaway guard now: both sounds fire at most once a lesson. Without it a
+ * repeated call would rewind the clip to zero before it got past its attack, which
+ * is a buzz rather than a second chime.
  */
-const THROTTLE: Record<Cue, number> = {
-  step: 90, impact: 400, whoosh: 150,
-  rethink: 200, keep: 150,
-  // 25ms, well under the counter's own cadence: the throttle is here to stop a
-  // runaway, not to thin the run. Thinning it would make the count stutter.
-  tick: 25,
-  right: 200, reward: 400, badge: 200, rankup: 800,
-  // Once a day, and it takes the whole screen while it plays. The throttle
-  // is only a runaway guard here — nothing can legitimately strike the seal
-  // twice inside a second.
-  seal: 800,
-};
-const lastAt: Partial<Record<Cue, number>> = {};
+const THROTTLE: Record<Key, number> = { reward: 400, rankup: 800 };
+const lastAt: Partial<Record<Key, number>> = {};
 
 /**
  * Per-clip trim. The MIX is baked into the files — `finish(buf, peak)` in
- * scripts/make-sounds.mjs is where a cue's loudness relative to the others is
- * decided — so this only exists to lift the four that are meant to dominate the
- * moment they play in. Everything else shares one level on purpose: a per-cue
- * volume table is how a sound set drifts out of balance one nudge at a time.
+ * scripts/make-sounds.mjs is where a clip's loudness is decided — so this only
+ * sets how far each one sits above the default player level.
  */
-const LEVEL: Partial<Record<Key, number>> = { reward: 0.9, badge: 0.9, seal: 0.9, rankup: 0.95 };
+const LEVEL: Record<Key, number> = { reward: 0.9, rankup: 0.95 };
+
+const hasClip = (cue: Cue): cue is Key => Object.prototype.hasOwnProperty.call(SOURCES, cue);
 
 async function prepare() {
   if (ready) return;
@@ -128,10 +94,10 @@ async function prepare() {
   for (const k of Object.keys(SOURCES) as Key[]) {
     try {
       const p = createAudioPlayer(SOURCES[k]);
-      p.volume = LEVEL[k] ?? 0.65;
+      p.volume = LEVEL[k];
       players[k] = p;
     } catch {
-      // A single clip that will not decode leaves the rest working.
+      // A single clip that will not decode leaves the other working.
     }
   }
 }
@@ -153,25 +119,12 @@ export const realSound: SoundProvider = {
   isSupported: () => true,
   prepare,
   setEnabled: (on) => { enabled = on; },
-  play: (cue: Cue, step = 0) => {
-    if (!enabled) return;
+  play: (cue: Cue) => {
+    if (!enabled || !hasClip(cue)) return;
     const now = Date.now();
     if (now - (lastAt[cue] ?? 0) < THROTTLE[cue]) return;
     lastAt[cue] = now;
     if (!ready) { void prepare(); return; }
-    if (cue === 'step') {
-      footToggle ^= 1;
-      fire(footToggle ? 'stepA' : 'stepB');
-      return;
-    }
-    // A run of correct answers CLIMBS and then holds at the top — clamped, so a
-    // ten-question lesson does not need ten notes.
-    if (cue === 'right') { fire(RIGHT[Math.min(Math.max(step | 0, 0), RIGHT.length - 1)]); return; }
-    // The variant is the CALLER'S measurement, not a preference: how fast the hand
-    // was actually moving.
-    if (cue === 'whoosh') { fire(WHOOSH[Math.min(Math.max(step | 0, 0), WHOOSH.length - 1)]); return; }
-    // The counter CYCLES, so the rise is continuous however long the count runs.
-    if (cue === 'tick') { fire(TICK[(((step | 0) % TICK.length) + TICK.length) % TICK.length]); return; }
     fire(cue);
   },
   release: () => {

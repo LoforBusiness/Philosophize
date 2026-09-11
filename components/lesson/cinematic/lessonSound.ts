@@ -13,6 +13,14 @@
 // Deliberately the same shape as removing an entry from the CINEMATIC map (§17)
 // — one line, no other file involved, nothing downstream needs to know.
 //
+// ── AND SINCE 11 SEP 2026 ALMOST NONE OF IT IS HEARD ────────────────────────
+//
+// The lessons are going to be read aloud, so lib/feedback.ts now lets only two
+// moments make a sound: the reward chime and the rank-up fanfare, both after the
+// last beat. This gate still decides whether a lesson may sound at all; the player
+// also asks `heard()` before it schedules a footfall or a whoosh, so a silent one
+// costs nothing. Everything below describes machinery that is still intact.
+//
 // ── WHAT "ALL OF THEM" ACTUALLY MEANS, PER LESSON ───────────────────────────
 //
 // This gate is necessary but not sufficient, and the difference is the whole

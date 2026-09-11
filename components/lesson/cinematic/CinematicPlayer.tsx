@@ -23,7 +23,7 @@ import { WardrobeProvider } from './wardrobeContext';
 import Visitor from './Visitor';
 import { VISITOR } from '../../../data/lessonVisitor';
 import { toursOff } from './tourFlag';
-import { cue, touch } from '@/lib/feedback';
+import { cue, touch, heard } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import ChoiceCards, { seedFor } from './ChoiceCards';
 import DragScale from './DragScale';
@@ -132,10 +132,11 @@ export interface SceneApi {
   gazeY: SharedValue<number>;
   gazeOn: SharedValue<number>;
   /**
-   * Whether this lesson is allowed to make a noise (./lessonSound). The player
-   * already sounds everything the SHELL owns — beats, answers, quotes, footfalls
-   * — so a scene only needs this to voice something in its own staging: a thing
-   * struck, a door, a bell that is drawn ringing.
+   * Whether this lesson is allowed to make a noise (./lessonSound). A scene only
+   * needs it to voice something in its own staging — a thing struck, a door, a
+   * bell drawn ringing — and since 11 Sep 2026 none of those is heard: a cue fired
+   * from a scene is felt if it has a haptic, and never plays over the narration
+   * (lib/feedback.ts).
    *
    * Use it sparingly and only where the picture already shows the event. Rule A1
    * runs both ways: a sound for something the scene declined to draw describes a
@@ -162,8 +163,9 @@ export default function CinematicPlayer({
   band?: [number, number];
   /**
    * The scene's per-beat x track for the walking figure — the same array the scene
-   * already builds to drive `travelStance`. Given it, the player sounds a footfall
-   * at each foot plant (see ./footfalls). Omit it and the lesson walks silently.
+   * already builds to drive `travelStance`. Given it, the player knows where the
+   * figure is, and would sound a footfall at each foot plant (see ./footfalls) if
+   * footfalls were heard. Since 11 Sep 2026 they are not (lib/feedback.ts).
    *
    * OPT-IN PER LESSON rather than read off the beat, because `x` is a field each
    * script declares in its OWN beat interface and nothing guarantees all 102 mean
@@ -174,7 +176,8 @@ export default function CinematicPlayer({
   walk?: number[];
   /**
    * The scene's per-beat gesture-code track (`P` in most scenes). Given it, the
-   * player sounds a hand through the air wherever one genuinely sweeps — and
+   * player would sound a hand through the air wherever one genuinely sweeps, if
+   * whooshes were heard (since 11 Sep 2026 they are not) — and
    * chooses WHICH of the three gesture sounds by measuring how fast and for how
    * long it moves, so a flick and a swing differ without anyone deciding per beat.
    * See ./gestures.
@@ -267,12 +270,15 @@ export default function CinematicPlayer({
   // closure would sound the wrong note.
   const sounded = lessonHasSound(lesson.id);
   const run = useRef(0);
+  // A footfall or a whoosh is only scheduled if it is HEARD (lib/feedback.ts).
+  // Since 11 Sep 2026 neither is, so nothing plays over the narration, and the
+  // per-frame reaction below finds two empty tracks and returns at once.
   const plants = useMemo(
-    () => (sounded && walk ? footfallTrack(walk) : { steps: [], settle: [] }),
+    () => (sounded && walk && heard('step') ? footfallTrack(walk) : { steps: [], settle: [] }),
     [sounded, walk],
   );
   const gestures = useMemo(() => {
-    if (!sounded || !gesture) return [];
+    if (!sounded || !gesture || !heard('whoosh')) return [];
     // A beat either walks or gestures — never both (see ./gestures).
     const walked = gesture.map((_, k) => !!walk && k > 0 && Math.abs(walk[k] - walk[k - 1]) > 1);
     return swishTrack(gesture, walked, beats.map((b) => b.dur));

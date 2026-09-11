@@ -7,17 +7,18 @@
 //
 //   1. a clip that clicks, clips, or is silent — the defects that make an app
 //      sound broken rather than sound wrong
-//   2. a pitched clip that does not contain the note it was written from, which
-//      is how a "rising triad" quietly becomes three copies of one note
-//   3. a mix where the thing that fires ten times a minute is louder than the
-//      thing that fires once a lesson
-//   4. A FOOTSTEP THAT DOES NOT LAND ON THE FOOT. This is the one worth having.
-//      It does NOT re-derive footfalls.ts's formula — that would only prove the
-//      formula equals itself. It samples the pose `travelStance` actually returns,
-//      frame by frame, finds every moment a foot arrives on the ground, and asks
-//      whether the scheduled times are among them.
-//   5. a cue declared in one file and forgotten in another — no source, no
-//      throttle, or no haptic decision
+//   2. a pitched clip that does not contain the note it was written from
+//   3. A SOUND THAT COULD PLAY OVER THE NARRATION. Since 11 Sep 2026 only the
+//      reward chime and the rank-up fanfare are heard, both after a lesson's last
+//      beat. A third fails the build until somebody decides it is worth it.
+//   4. A FOOTSTEP THAT DOES NOT LAND ON THE FOOT. The footfall is silent now and
+//      the player schedules nothing while it is, but its timing is still held so it
+//      could come back without re-deriving any of this. It does NOT re-derive
+//      footfalls.ts's formula — it samples the pose `travelStance` actually
+//      returns, finds every moment a foot arrives on the ground, and asks whether
+//      the scheduled times are among them.
+//   5. a cue declared in one file and forgotten in another — no heard decision, no
+//      haptic decision, or a heard cue with no clip or no throttle
 //
 //   node scripts/validate-sound.mjs
 // ─────────────────────────────────────────────────────────────────────────────
@@ -138,118 +139,30 @@ function hasNote(clip, f, ratio = 20) {
   const q = power(x, OFF(f), rate);
   return { pass: p > q * ratio, ratio: q > 0 ? p / q : Infinity };
 }
-for (const [clip, note, label] of [
-  ['right-1', N.D5, 'D5'], ['right-2', N.Fs5, 'F#5'], ['right-3', N.A5, 'A5'],
-  ['tick-1', N.D6, 'D6'], ['tick-2', N.Fs6, 'F#6'], ['tick-3', N.A6, 'A6'],
-  ['badge', N.D4, 'D4'], ['reward', N.D5, 'D5'],
-]) {
+for (const [clip, note, label] of [['reward', N.D5, 'D5']]) {
   const r = hasNote(clip, note);
   ok(`${clip} is ${label}`, r.pass, `${r.ratio.toFixed(0)}× the off-note control`);
 }
 for (const [note, label] of [[N.D5, 'D5'], [N.Fs5, 'F#5'], [N.A5, 'A5'], [N.D6, 'D6']]) {
-  const r = hasNote('rankup', label === 'D6' ? note : note, 8);
+  const r = hasNote('rankup', note, 8);
   ok(`rankup contains ${label}`, r.pass, `${r.ratio.toFixed(0)}×`);
 }
 
-// The triads must actually CLIMB — three files that all sound the same note is
-// the exact way this feature fails silently.
-const dominant = (clip, cands) => {
-  const { x, rate } = clips[clip];
-  return cands.reduce((best, f) => (power(x, f, rate) > power(x, best, rate) ? f : best), cands[0]);
-};
-const tri = [N.D5, N.Fs5, N.A5];
-const triHi = [N.D6, N.Fs6, N.A6];
-const rightRun = ['right-1', 'right-2', 'right-3'].map((c) => dominant(c, tri));
-const tickRun = ['tick-1', 'tick-2', 'tick-3'].map((c) => dominant(c, triHi));
-ok('a run of right answers climbs', rightRun[0] < rightRun[1] && rightRun[1] < rightRun[2],
-  rightRun.map((f) => f.toFixed(0)).join(' → ') + ' Hz');
-ok('the XP counter climbs', tickRun[0] < tickRun[1] && tickRun[1] < tickRun[2],
-  tickRun.map((f) => f.toFixed(0)).join(' → ') + ' Hz');
-
-// ── 3. the mix is ordered by how often a thing fires ─────────────────────────
-head('the mix: frequent is quiet, rare is loud');
-const pk = (c) => Math.max(...clips[c].x.map(Math.abs));
-const order = [
-  ['tick-1', 'keep'], ['keep', 'right-1'],
-  // The three gestures sit with the world sounds, under everything earned.
-  ['whoosh-1', 'right-1'], ['whoosh-2', 'right-1'], ['whoosh-3', 'right-1'],
-  ['rethink', 'right-1'], ['right-1', 'impact'], ['impact', 'badge'], ['badge', 'rankup'],
-  // The seal fires ONCE A DAY, so it sits above everything that fires inside a
-  // lesson and below the two that are rarer than a day.
-  ['impact', 'seal'], ['seal', 'badge'],
-  // A walk ending is a shift of weight, not another footfall. If it ever gets as
-  // loud as a stride it stops being an arrival and becomes a stumble.
-  ['whoosh-1', 'step-a'],
-];
-for (const [quiet, loud] of order) {
-  ok(`${quiet} is quieter than ${loud}`, pk(quiet) < pk(loud),
-    `${pk(quiet).toFixed(2)} < ${pk(loud).toFixed(2)}`);
-}
-ok('a wrong answer is quieter than a right one', pk('rethink') < pk('right-1'),
-  `${pk('rethink').toFixed(2)} vs ${pk('right-1').toFixed(2)}`);
-ok('the world stays under the notes',
-  Math.max(pk('step-a'), pk('step-b'), pk('whoosh-1')) < pk('right-1'));
-
-// ── 3a2. THE CLIPS SOUND LIKE THE MATERIAL THEY CLAIM TO BE ──────────────────
+// ── 3. NOTHING IS HEARD BUT THE END OF A LESSON ──────────────────────────────
 //
-// "Sounds cheap" is not measurable, but two of its causes are, and both were
-// present in the first set.
+// The mix used to be checked here: frequent sounds quiet, rare sounds loud, across
+// eighteen clips. On 11 Sep 2026 sixteen of them were deleted so that nothing plays
+// over the lesson narration, and a loudness order between the two that are left —
+// which never play together, because a rank-up replaces the chime — would measure
+// nothing. The decision itself is held in section 5 instead.
+
+// ── 3a2. THE STRUCK TONES STAY AT 22.05 kHz ─────────────────────────────────
 //
-// A LEATHER HEEL is mostly edge — its character lives between 4 and 9 kHz. The
-// original footfall was low-passed noise in a 22.05 kHz file, so it had nothing up
-// there at all and could only ever read as a dull bump.
-//
-// A PREMIUM UI TAP is the opposite: warm body, no hiss. The original was
-// high-passed noise, which is the spectrum of static.
-//
-// So each is checked for the top-end content its material implies, and the two
-// must come out on OPPOSITE sides of the same measurement.
-head('the materials measure like their materials');
-
-// MEASURED OVER THE ATTACK, not the whole clip. A heel click lasts a few
-// milliseconds and the floor answering it rings for forty, so averaging across the
-// file reports the floor and says nothing about the shoe. The first 20ms is where
-// an ear decides what a percussive sound is made of.
-const ATTACK = 0.020;
-
-function bandEnergy(clip, lo, hi) {
-  const { x, rate } = clips[clip];
-  const to = Math.min(x.length, Math.round(ATTACK * rate));
-  let sum = 0;
-  const N = 24;
-  for (let k = 0; k < N; k++) {
-    const f = lo * Math.pow(hi / lo, k / (N - 1));
-    if (f >= rate / 2) break;
-    sum += Math.abs(power(x, f, rate, 0, to));
-  }
-  return sum;
-}
-function brightness(clip) {
-  const low = bandEnergy(clip, 200, 3500);
-  const high = bandEnergy(clip, 4000, 10000);
-  return high / (low + high || 1);
-}
-
-// The reference used to be the button tap, which no longer exists. `rethink` is
-// the right replacement and arguably the better one: a struck, damped wooden body
-// is the app's darkest percussive sound, so the two still bracket the range.
-const shoe = brightness('step-a');
-const dull = brightness('rethink');
-ok('a dress-shoe heel has real top end', shoe > 0.08,
-  `${(shoe * 100).toFixed(1)}% of its energy is above 4 kHz — the leather on the floor`);
-ok('a damped wooden knock has almost none', dull < 0.05,
-  `${(dull * 100).toFixed(1)}% above 4 kHz — body rather than edge`);
-ok('and they sit on opposite sides of that line', shoe > dull * 3,
-  `shoe ${(shoe * 100).toFixed(1)}% vs knock ${(dull * 100).toFixed(1)}%`);
-
-// The top end can only exist if the file has room for it. A 22.05 kHz clip is
-// capped at 11 kHz, which is where the whole set used to be.
-const percussive = ['step-a', 'step-b', 'keep',
-  'tick-1', 'rethink', 'impact', 'whoosh-1', 'whoosh-2', 'whoosh-3'];
-ok('every clip with a transient is 44.1 kHz',
-  percussive.every((c) => clips[c].rate === 44100),
-  percussive.filter((c) => clips[c].rate !== 44100).join(', ') || `${percussive.length} clips`);
-ok('the struck tones stay at 22.05 kHz', ['reward', 'rankup', 'badge', 'right-1'].every((c) => clips[c].rate === 22050),
+// The material checks that used to sit here compared a leather heel with a wooden
+// knock, and both clips were deleted on 11 Sep 2026. What still applies to the two
+// that are left is the rate.
+head('the struck tones stay at 22.05 kHz');
+ok('the struck tones stay at 22.05 kHz', ['reward', 'rankup'].every((c) => clips[c].rate === 22050),
   'their highest partial is a third of the way to that ceiling — the bytes would buy nothing');
 
 // ── 3a3. NO CLIP MAY HISS ────────────────────────────────────────────────────
@@ -299,18 +212,8 @@ for (const name of Object.keys(clips)) {
 }
 ok('no clip sustains noise past its attack', worstHiss < HISS,
   `worst is ${worstHissName} at flatness ${worstHiss.toFixed(3)} (limit ${HISS}) — the removed swish scored 0.474`);
-// A FOOTSTEP MUST BE ONE IMPACT. Reported as "an unnatural double sound, it
-// doesn't sound like walking", and it had three separate causes before it went
-// away — reverb taps reading as flutter, a forefoot modelled as a strike, and two
-// modes beating. Calibrated on the shipped shoe (0.00) against that same shoe
-// played twice 42ms apart (0.94).
-for (const c of ['step-a', 'step-b']) {
-  const d = doubling(clips[c].x);
-  ok(`${c} is a single impact`, d < 0.45, `double ${d.toFixed(2)} — a deliberate flam scores 0.94`);
-}
-const shoeFlat = lateFlatness('step-a').flat;
-ok('and the footfall is all attack, which is why it works', shoeFlat < 0.03,
-  `flatness ${shoeFlat.toFixed(3)} after 40ms — the noise in it is the heel, not a tail`);
+// The footfall's single-impact and all-attack checks went with its clips on
+// 11 Sep 2026; `doubling` in lib/dsp.mjs is still there if a footfall returns.
 
 // ── 3b. THE APP CAN ACTUALLY BE HEARD ────────────────────────────────────────
 //
@@ -549,27 +452,58 @@ for (const r of rows) {
     `${r.steps} strides · ${r.cadence.toFixed(2)}/sec average`);
 }
 
-// ── 5. no cue is declared in one file and forgotten in another ───────────────
-head('every cue is wired everywhere it has to be');
+// ── 5. ONLY THE END OF A LESSON IS HEARD, AND EVERY CUE IS DECIDED ───────────
+//
+// Decided 11 Sep 2026: every lesson is going to be read aloud by a voice that is on
+// by default, and nothing the app plays may land on top of it. So `HEARD` in
+// lib/feedback.ts lets two cues through, the reward chime and the rank-up fanfare,
+// which both play after a lesson's last beat. This section holds that decision and
+// the wiring under it: every cue has a heard decision and a haptic decision, every
+// heard cue has a clip and a throttle, no clip exists for a cue that is not heard,
+// and the lesson player schedules nothing it would not play.
+head('only the end of a lesson is heard');
 const typesSrc = fs.readFileSync(path.join(ROOT, 'lib/sound/types.ts'), 'utf8');
 const realSrc = fs.readFileSync(path.join(ROOT, 'lib/sound/real.ts'), 'utf8');
 const fbSrc = fs.readFileSync(path.join(ROOT, 'lib/feedback.ts'), 'utf8');
+const playerSrc = fs.readFileSync(path.join(ROOT, 'components/lesson/cinematic/CinematicPlayer.tsx'), 'utf8');
 
 const cues = [...typesSrc.matchAll(/^\s*\|\s*'([a-z]+)'/gm)].map((m) => m[1]);
 ok('the Cue union parsed', cues.length >= 10, cues.join(' · '));
 
-const throttle = realSrc.slice(realSrc.indexOf('const THROTTLE'), realSrc.indexOf('const lastAt'));
+const heardTable = fbSrc.slice(fbSrc.indexOf('const HEARD'), fbSrc.indexOf('export const heard'));
 const haptic = fbSrc.slice(fbSrc.indexOf('const HAPTIC'), fbSrc.indexOf('/** Read once per call'));
-const sources = realSrc.slice(realSrc.indexOf('const SOURCES'), realSrc.indexOf('const RIGHT'));
+const throttle = realSrc.slice(realSrc.indexOf('const THROTTLE'), realSrc.indexOf('const lastAt'));
+const sources = realSrc.slice(realSrc.indexOf('const SOURCES'), realSrc.indexOf('type Key'));
+ok('the heard table and the clip list were found', heardTable.length > 20 && sources.length > 20);
 
+const heardCues = [];
 for (const c of cues) {
-  const inThrottle = new RegExp(`\\b${c}\\s*:`).test(throttle);
-  const inHaptic = new RegExp(`\\b${c}\\s*:`).test(haptic);
+  const decided = new RegExp(`\\b${c}\\s*:\\s*(true|false)\\b`).exec(heardTable);
+  const isHeard = !!decided && decided[1] === 'true';
+  const hasClip = new RegExp(`\\b${c}\\s*:\\s*require\\(`).test(sources);
   const missing = [];
-  if (!inThrottle) missing.push('no throttle');
-  if (!inHaptic) missing.push('no haptic decision');
-  ok(`'${c}'`, missing.length === 0, missing.join(' · '));
+  if (!decided) missing.push('no heard decision');
+  if (!new RegExp(`\\b${c}\\s*:`).test(haptic)) missing.push('no haptic decision');
+  if (isHeard && !new RegExp(`\\b${c}\\s*:`).test(throttle)) missing.push('heard, but no throttle');
+  if (isHeard && !hasClip) missing.push('heard, but no clip');
+  if (!isHeard && hasClip) missing.push('a clip for a cue that is never heard');
+  if (isHeard) heardCues.push(c);
+  ok(`'${c}'${isHeard ? '  heard' : ''}`, missing.length === 0, missing.join(' · '));
 }
+
+// THE DECISION, HELD. A third sound fails here, and the fix is not to widen this
+// list but to decide first that it will not play over the narration.
+const ALLOWED = ['rankup', 'reward'];
+ok('only the lesson reward and the rank-up make a sound',
+  [...heardCues].sort().join() === ALLOWED.join(),
+  `heard: ${[...heardCues].sort().join(', ') || 'nothing'}`);
+
+// And the player does not schedule what it would not play: a footfall track built
+// for a silent cue is a callback per step for nothing, in every walking lesson.
+ok('the player only schedules footfalls and whooshes that are heard',
+  /heard\('step'\)/.test(playerSrc) && /heard\('whoosh'\)/.test(playerSrc),
+  'CinematicPlayer asks heard() before building either track');
+
 // Every file the player asks for must be on disk, and nothing on disk unused.
 const wanted = [...sources.matchAll(/assets\/sound\/([a-z0-9-]+)\.wav/g)].map((m) => m[1]).sort();
 const onDisk = files.map((f) => f.replace(/\.wav$/, '')).sort();
@@ -742,24 +676,6 @@ head('a walk lasts as long as the footfalls assume');
   if (wrong.length) console.log(`        worst: ${worstName} runs ${worstFactor.toFixed(2)}x fast, last step ${worstLate.toFixed(2)}s late`);
 }
 
-// ── 6. THE FOOTFALL IS THE MOST REPEATED SOUND IN THE APP ───────────────────
-//
-// It fires ten to forty times in a lesson where an answer note fires twice, so
-// "frequent is quiet" bites hardest here. Two numbers, both of which were wrong
-// before the rollout and neither of which anything was watching:
-head('the footfall knows how often it fires');
-{
-  const a = pk('step-a'), b = pk('step-b'), note = pk('right-1');
-  ok('a step stays well under an answer note', Math.max(a, b) <= note * 0.6,
-    `${Math.max(a, b).toFixed(2)} vs ${note.toFixed(2)} — ${Math.round((Math.max(a, b) / note) * 100)}% of it, was 81%`);
-  // The two alternate every stride, so any gap between them IS a limp. They were
-  // 28% apart — not by design, but because finish()'s 1ms fade-in landed on one
-  // variant's heel crack and just past the other's. The lead-in silence in
-  // make-sounds.mjs fixed the cause; this holds the result.
-  const gap = Math.abs(a - b) / Math.min(a, b);
-  ok('and the two feet weigh the same', gap <= 0.15, `${(gap * 100).toFixed(1)}% apart, was 28.5%`);
-}
-
 // The trial gate must name a lesson that exists and is actually wired cinematic.
 const gateSrc = fs.readFileSync(path.join(ROOT, 'components/lesson/cinematic/lessonSound.ts'), 'utf8');
 const trial = [...gateSrc.matchAll(/'([a-z0-9-]+)',\s*\/\//g)].map((m) => m[1]);
@@ -805,80 +721,13 @@ head('SOURCES ARE CC0');
   }
 }
 
-// ── WHAT MAKES A CLIP SOUND CHEAP, IN NUMBERS ────────────────────────────────
+// ── WHAT MADE A CLIP SOUND CHEAP ─────────────────────────────────────────────
 //
-// Nobody working on this can hear it, so the qualities that separate a real
-// recording from a synthetic approximation are measured rather than judged. Neither
-// of these is an aesthetic opinion; both are defects this app has actually had.
-//
-//   HIGH-FREQUENCY PRESENCE is the important one. The first set shipped entirely at
-//   22.05 kHz, putting the Nyquist limit at 11 kHz — and the snap of a heel, the
-//   edge of a fingertip and the tick of a counter all live between 4 and 10 kHz.
-//   make-sounds.mjs's own header records that this ceiling was "a large part of why
-//   the first set sounded cheap". A percussive clip with nothing up there is that
-//   defect, and it is a number instead of a feeling.
-//
-//   ATTACK SHARPNESS separates a struck thing from a swelling one, measured from
-//   10% to 90% of the envelope peak.
-head('QUALITY, MEASURED');
-{
-  const bandShare = (x, lo, hi, rate) => {
-    const n = Math.min(x.length, 4096);
-    const bins = 64;
-    let inBand = 0, total = 0;
-    for (let b = 0; b < bins; b++) {
-      const f = ((b + 0.5) * (rate / 2)) / bins;
-      let re = 0, im = 0;
-      const w = (2 * Math.PI * f) / rate;
-      for (let i = 0; i < n; i++) { re += x[i] * Math.cos(w * i); im += x[i] * Math.sin(w * i); }
-      const pw = (re * re + im * im) / (n * n);
-      total += pw;
-      if (f >= lo && f <= hi) inBand += pw;
-    }
-    return total > 0 ? inBand / total : 0;
-  };
-  const attackMs = (x, rate) => {
-    let peak = 0, at = 0;
-    for (let i = 0; i < x.length; i++) { const a = Math.abs(x[i]); if (a > peak) { peak = a; at = i; } }
-    if (peak <= 0) return Infinity;
-    let lo = at, hi = at;
-    for (let i = 0; i <= at; i++) { if (Math.abs(x[i]) >= 0.1 * peak) { lo = i; break; } }
-    for (let i = lo; i <= at; i++) { if (Math.abs(x[i]) >= 0.9 * peak) { hi = i; break; } }
-    return ((hi - lo) / rate) * 1000;
-  };
-
-  // How many percussive clips may carry nothing in the band that makes a strike
-  // audible on a phone. A HIGH-WATER MARK: it may go down and never up.
-  const THIN_BUDGET = 2;
-  const thin = [];
-  const PERCUSSIVE = ['step-a', 'step-b', 'impact', 'rethink', 'keep'];
-  for (const name of PERCUSSIVE) {
-    if (!clips[name]) continue;
-    // Reuse the clips the format pass already loaded, rather than opening a second
-    // reader over the same files. `clips[name].x` is the samples; `.rate` the rate.
-    const { x: data, rate } = clips[name];
-    const hf = bandShare(data, 4000, Math.min(11000, rate / 2 - 1), rate);
-    const ms = attackMs(data, rate);
-    // BUDGETS, NOT VERDICTS, in the style of this repo's other ratchets. The floor
-    // is where the current synthesised set already sits; the point is that a re-cut
-    // may only move it up. A real recording of the same object usually lands two to
-    // four times higher.
-    // A BUDGET, NOT A VERDICT, and it starts at two because two clips fail today.
-    //
-    // `impact` and `rethink` carry 99.5% and 99.7% of their energy BELOW 500 Hz and
-    // nothing measurable above 2 kHz. That is not the 22.05 kHz ceiling — both are
-    // 44.1 kHz files — it is the synthesis: two pure low thumps with no strike in
-    // them. A phone speaker rolls off hard under about 500 Hz, so on the device
-    // these two are probably close to inaudible while sounding fine in headphones,
-    // which is exactly the defect a person testing on good monitors never finds.
-    // They are first in line to be re-cut from a real recording (scripts/sound-cuts.mjs).
-    if (hf < 0.06) thin.push(`${name} ${(hf * 100).toFixed(1)}%`);
-    else ok(`${name}: energy in 4-11 kHz`, true, `${(hf * 100).toFixed(1)}%`);
-    ok(`${name}: attack within 12ms`, ms <= 12, `${ms.toFixed(1)}ms`);
-  }
-  ok(`at most ${THIN_BUDGET} clips are too low to hear on a phone`, thin.length <= THIN_BUDGET,
-    thin.length ? `${thin.join(', ')} — re-cut these first; lower the budget when you do` : 'none');
-}
+// A high-frequency and attack budget used to sit here for the percussive clips:
+// the footfalls, the impact, the knock and the clasp. All of them were deleted on
+// 11 Sep 2026, and a budget over clips that no longer exist would pass having
+// measured nothing, so it went with them. The two struck tones left are checked
+// above.
 
 // ── THE CUTTER STILL WORKS ───────────────────────────────────────────────────
 //

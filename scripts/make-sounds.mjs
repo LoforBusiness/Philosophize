@@ -639,13 +639,25 @@ const SET = {
   seal: atRate(LO, seal),
 };
 
+// ONLY WHAT THE APP LOADS IS WRITTEN. Since 11 Sep 2026 the app plays two sounds,
+// the reward chime and the rank-up fanfare, so nothing plays over the lesson
+// narration (lib/feedback.ts). Every recipe above is still BUILT, in its original
+// order, so the two that are written cannot change by a byte; only the clips
+// lib/sound/real.ts requires reach assets/sound/. The rest stay as the record of
+// how each sound was made.
+const loaded = new Set([...fs.readFileSync(path.join(ROOT, 'lib', 'sound', 'real.ts'), 'utf8')
+  .matchAll(/assets\/sound\/([a-z0-9-]+)\.wav/g)].map((m) => m[1]));
+
 fs.mkdirSync(OUT, { recursive: true });
 let total = 0;
+let written = 0;
 console.log('generated — no licence, no attribution, no provenance to track\n');
 for (const [name, { rate, data }] of Object.entries(SET)) {
+  if (!loaded.has(name)) continue;
   const buf = wav(data, rate);
   fs.writeFileSync(path.join(OUT, `${name}.wav`), buf);
   total += buf.length;
+  written += 1;
   const peak = Math.max(...data.map(Math.abs));
   console.log(
     `  ${name.padEnd(8)} ${String((data.length / rate * 1000).toFixed(0)).padStart(5)}ms  ` +

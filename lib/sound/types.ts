@@ -1,22 +1,27 @@
 /**
- * The cues the app can make. Deliberately a closed set rather than a filename:
- * a call site asks for a MOMENT, not for a file, so the sound behind "tap" can be
- * re-cut without touching the twenty places that tap.
+ * The moments the app can mark. Deliberately a closed set rather than a filename:
+ * a call site asks for a MOMENT, not for a file, so what that moment gets can
+ * change without touching the places that ask for it.
+ *
+ * A moment is felt, heard, or both, and lib/feedback.ts decides which. Since
+ * 11 Sep 2026 only `reward` and `rankup` are heard, so nothing plays over the
+ * lesson narration. The rest keep their haptics, and keep their names so a sound
+ * could come back without re-wiring a single call site.
  */
 export type Cue =
   // ── the world: physical, unpitched ─────────────────────────────────────────
-  | 'step'     // a footfall — alternates between two samples inside the provider
+  | 'step'     // a footfall
   | 'impact'   // something in the scene is struck
-  | 'whoosh'   // a hand through air; the VARIANT is chosen by measured speed
-  | 'rethink'  // a wooden knock: the answer was not that one
-  | 'keep'     // a clasp closing: a quote goes into the library
-  // ── what the reader earns: pitched, all of it in D ─────────────────────────
-  | 'right'    // a struck note; CLIMBS D→F#→A on a run (pass `step`)
-  | 'tick'     // the XP counter, cycling three rising pitches (pass `step`)
-  | 'reward'   // the chime at the end of a lesson
-  | 'badge'    // a low bell under a shimmer
-  | 'seal'     // a die pressed into paper: the day struck onto the streak
-  | 'rankup';  // the only fanfare in the app
+  | 'whoosh'   // a hand through air; the caller passes the measured speed
+  | 'rethink'  // the answer was not that one
+  | 'keep'     // a quote goes into the library
+  // ── what the reader earns ──────────────────────────────────────────────────
+  | 'right'    // a correct answer; the caller passes the run as `step`
+  | 'tick'     // the XP counter; the caller passes the count as `step`
+  | 'reward'   // the chime at the end of a lesson (heard)
+  | 'badge'    // a badge pressed onto the reward screen
+  | 'seal'     // the day struck onto the streak
+  | 'rankup';  // the only fanfare in the app (heard)
 
 export interface SoundProvider {
   /**
@@ -31,12 +36,11 @@ export interface SoundProvider {
   /** Load the clips. Safe to call repeatedly; only the first does work. */
   prepare(): Promise<void>;
   /**
-   * Fire a cue. Never throws, never awaits — call sites are in animations.
+   * Fire a cue. Never throws, never awaits — call sites are in animations. A cue
+   * the provider has no clip for is silent.
    *
-   * `step` selects a variant for the two cues that have one: how far up the triad
-   * a correct answer sounds (a run of them climbs), and where the XP counter is
-   * in its cycle. Ignored by every other cue. It is a NUMBER, not a pitch or a
-   * filename, so the call site never has to know what the sound is made of.
+   * `step` selected a variant for the cues that had a ladder (the answer note and
+   * the XP tick). Neither is heard now, so a provider may ignore it.
    */
   play(cue: Cue, step?: number): void;
   /** Master gate, driven by the Settings toggle. */

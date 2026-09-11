@@ -811,7 +811,7 @@ function SoundSection() {
         title="Sound & haptics"
         sub={
           soundSupported()
-            ? 'Footfalls, taps, and a chime when a lesson ends. Short, quiet, mixed under whatever else you are playing — and silent when your phone is.'
+            ? 'A chime when you finish a lesson and a fanfare when you rank up. Nothing else makes a sound, and taps answer with a small vibration.'
             : 'Taps answer with a small vibration. Sounds arrive with the next app update — they need a part of the app that only a new install can carry.'
         }
         last
@@ -821,11 +821,12 @@ function SoundSection() {
           onChange={(v) => {
             setSettingAll('soundEffects', v);
             sound.setEnabled(v);
-            // Answer the switch with the thing the switch controls. It used to
-            // preview the button tap; that sound no longer exists, so it previews
-            // the note a correct answer makes instead — which is a better sample
-            // of what turning this on actually gets you.
-            if (v) cue('right');
+            // Answer the switch with a sound it still controls. It used to preview
+            // the note a correct answer makes, and that note went silent with
+            // everything but the reward and the rank-up on 11 Sep 2026
+            // (lib/feedback.ts). A preview that makes no noise reads as a switch
+            // that does not work.
+            if (v) cue('reward');
           }}
         />
       </Row>
