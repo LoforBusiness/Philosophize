@@ -12,6 +12,7 @@ import BadgeEarned, { BadgeEarnedHeading } from '@/components/gamification/Badge
 import { RANKS, rankForXP, type RankDef } from '@/data/ranks';
 import type { BadgeDef } from '@/data/badges';
 import { getLessonUnitInfo } from '@/data';
+import { landOnBranch } from './lessonNav';
 import { useUserDataStore, previewDailyActivity, previewNewBadges, daysBetween, type DayInfo } from '@/stores/userDataStore';
 import { restDaysHeld } from '@/constants/streak';
 import NotifyPrompt from './NotifyPrompt';
@@ -313,14 +314,21 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   //
   // So: navigate only when we are NOT already there — a deep link into a lesson,
   // or anything else that left the stack somewhere unexpected.
+  //
+  // ── AND WHEN IT DOES NAVIGATE, IT PUSHES ─────────────────────────────────────
+  //
+  // This was `router.replace`, and Quick Start is what exposed it. From Home the
+  // lesson sits on the Learn tab's LIST, so `exitLesson()` pops back to the list —
+  // and replacing "the current screen" then replaced the LIST. The stack was left
+  // holding one branch with nothing under it: back fell through to Home, and the
+  // Learn tab could only show that branch again. `landOnBranch` pushes, anchored.
   const goToBranch = () => {
     const info = getLessonUnitInfo(lessonId);
     const slug = branchSlug ?? info?.branchSlug;
     if (!info || !slug) return;
     // The branch screen claims this once it is actually in front of the reader.
     markLessonFinished({ lessonId, unitId: info.unitId, branchSlug: slug });
-    const alreadyThere = !!path && path.includes(`/branches/${slug}`) && !path.includes('/lesson/');
-    if (!alreadyThere) router.replace(`/(app)/branches/${slug}`);
+    landOnBranch(slug, path);
   };
 
   const handleContinue = async () => {

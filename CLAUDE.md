@@ -1025,6 +1025,20 @@ they belong to, so the rule book has them and this file did not:
   holding the screen they left. The root stack is exempt on purpose — read the
   script's header before "fixing" that.
 
+  **AND DECLARING AN ANCHOR IS NOT LOADING ONE, which is why the report came back
+  after this rule shipped.** It was verified by loading a deep URL — the one
+  navigation that always honours the anchor. Replayed call for call against the
+  real router, Quick Start broke it two other ways: a plain `router.push` into a
+  Learn tab not yet built left `[LESSON]` with nothing under it, and the reward's
+  `router.replace` to the branch replaced the LIST, because after `exitLesson()`
+  pops a Quick Start lesson the list is what is on top. So every entry from
+  outside the stack goes through `components/lesson/lessonNav.ts` — `openLesson`
+  and `landOnBranch`, both pushing with `withAnchor: true`, neither ever replacing
+  — and `check:nav` holds that door too. The anchor writes `?initial=false` into
+  the pushed screen's params: inert on the phone and kept on purpose, because
+  nothing in this app handles the Android back button, so the list has to be
+  there from the push.
+
 **Cinematic lessons have their own rule book:** [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md) — figure scale and proportion, reach and joint rules, motion and end-poses, band/deck/box/wrap clipping, and the text-must-match-the-picture rule. Read it before authoring a cinematic lesson and run its Part 3 checks before calling one done.
 
 ---

@@ -7,6 +7,7 @@ import { CINEMATIC } from './branches/[branchSlug]/[pathSlug]/lesson/[lessonId]'
 import SketchIcon from '@/components/shared/SketchIcon';
 import { useUIStore } from '@/stores/uiStore';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { openLesson } from '@/components/lesson/lessonNav';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE LESSON TESTER — every lesson, one tap away, and none of them count.
@@ -100,8 +101,7 @@ export default function DevLessons() {
   // gate has to live in the screen, not only in whatever links to it.
   if (!devUnlocked) return <Redirect href="/(app)/settings" />;
 
-  const open = (r: Row) =>
-    router.push(`/(app)/branches/${r.branchSlug}/${r.unitSlug}/lesson/${r.id}?test=1` as never);
+  const open = (r: Row) => openLesson(r.branchSlug, r.unitSlug, r.id, '?test=1');
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>

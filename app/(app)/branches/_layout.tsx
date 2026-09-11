@@ -20,10 +20,27 @@ import { Stack } from 'expo-router';
 // URL, press the screen's own back arrow, and the page shows Home while the URL
 // still reads `/branches/logic` — the stack never moved, only the focused tab.
 //
-// `anchor` is what puts `index` under any deeper entry, so back always pops to
-// the list. (Expo Router 56 takes `anchor`; `initialRouteName` is the old name
-// for the same field.) It costs nothing on an ordinary tap-through from the
-// list, where the stack already had two entries.
+// `anchor` is what puts `index` under a deeper entry. (Expo Router 56 takes
+// `anchor`; `initialRouteName` is the old name for the same field.) It costs
+// nothing on an ordinary tap-through from the list, where the stack already had
+// two entries.
+//
+// ── AND IT WAS NOT ENOUGH, WHICH IS WHY components/lesson/lessonNav.ts EXISTS ─
+//
+// The same report came back after this line shipped, from Quick Start, and two
+// things were still wrong. Neither is visible to the URL test above, because
+// LOADING a URL is the one navigation that always honours the anchor:
+//
+//   · DECLARING an anchor is not LOADING it. A `router.push` into this tab before
+//     it has been built creates the stack from the pushed href alone unless the
+//     push passes `withAnchor: true`. Measured: `[LESSON]`, nothing under it.
+//   · A `replace` removes whatever is on top, and after `exitLesson()` pops a
+//     Quick Start lesson, what is on top is the LIST. The reward replaced it,
+//     leaving `[BRANCH]` — back fell through to Home, and this tab showed that
+//     branch for good.
+//
+// So every entry from outside this tab goes through `openLesson`, the landing
+// after a lesson goes through `landOnBranch`, and `npm run check:nav` holds both.
 export const unstable_settings = { anchor: 'index' };
 
 // Keeps branch / path / lesson screens inside this tab's own stack so they

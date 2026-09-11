@@ -9,6 +9,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { openLesson as openLessonRoute } from '@/components/lesson/lessonNav';
 import { MotiView, AnimatePresence } from 'moti';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { C, LIP } from '@/constants/design';
@@ -155,7 +156,9 @@ export default function PhilosopherSheet() {
 
   const openLesson = (l: (typeof lessons)[number]) => {
     close();
-    router.push(`/(app)/branches/${l.branchSlug}/${l.pathSlug}/lesson/${l.lessonId}` as never);
+    // The sheet opens over any tab, so this is an entry from OUTSIDE the Learn
+    // stack like Quick Start, and goes through the same anchored door.
+    openLessonRoute(l.branchSlug, l.pathSlug, l.lessonId);
   };
 
   return (

@@ -100,4 +100,77 @@ if (bad.length) {
   console.log('  keeps the deep screen, so the reader cannot get back to the list.');
 }
 console.log(bad.length ? '' : '\nevery nested stack that can be entered deep declares its anchor.\n');
-process.exit(bad.length ? 1 : 0);
+
+// ── DECLARING AN ANCHOR IS NOT LOADING ONE ──────────────────────────────────
+//
+// The rule above shipped, was verified, and the same report came back from Quick
+// Start. It was verified by LOADING a deep URL — and a URL load is the one
+// navigation that always honours the anchor. Replaying the real journey against
+// the real router found the two navigations that do not:
+//
+//   · a PUSH into the Learn tab before it has been built creates the stack from
+//     the href alone unless it passes `withAnchor: true` — `[LESSON]`, no list;
+//   · a REPLACE swaps whatever is on top, and after `exitLesson()` pops a Quick
+//     Start lesson what is on top is the LIST — the reward's replace left
+//     `[BRANCH]` with nothing under it.
+//
+// So entries from outside the branches stack have ONE door, lessonNav.ts, and
+// this holds the door: nothing outside the stack navigates to a deeper
+// `/branches/...` href directly, every push inside lessonNav is anchored, and
+// lessonNav never replaces. A navigation from INSIDE `app/(app)/branches/` is
+// exempt for the reason the first rule gives: the list is already underneath.
+const NAV = 'components/lesson/lessonNav.ts';
+const SCAN = ['app', 'components', 'lib', 'stores'];
+
+function sources(dir, out = []) {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) sources(p, out);
+    else if (/\.(tsx?|jsx?)$/.test(e.name)) out.push(p);
+  }
+  return out;
+}
+
+const entries = [];
+for (const f of SCAN.filter((d) => fs.existsSync(d)).flatMap((d) => sources(d))) {
+  const rel = f.replace(/\\/g, '/');
+  if (rel === NAV) continue;
+  if (rel.startsWith('app/(app)/branches/')) continue;
+  // Harness scaffolding: check:routes owns it, and it runs first.
+  if (/^app\/preview[^/]*\.tsx$/.test(rel)) continue;
+  const src = strip(fs.readFileSync(f, 'utf8'));
+  // A literal href one segment or more BELOW /branches. `'/(app)/branches'` on its
+  // own is the list, which cannot strand anybody, and is not matched.
+  const re = /router\.(push|navigate|replace)\(\s*[`'"][^`'"]*\/branches\/[^`'"]*[`'"]/g;
+  let m;
+  while ((m = re.exec(src))) entries.push({ rel, call: m[0].replace(/\s+/g, ' ').slice(0, 96) });
+}
+
+const door = [];
+if (!fs.existsSync(NAV)) door.push(`${NAV} is missing — there is no door`);
+else {
+  const navSrc = strip(fs.readFileSync(NAV, 'utf8'));
+  const pushes = [...navSrc.matchAll(/router\.push\(([\s\S]*?)\);/g)].map((x) => x[1]);
+  if (!pushes.length) door.push('lessonNav pushes nothing — the door opens onto nothing');
+  for (const p of pushes) {
+    if (!/withAnchor:\s*true/.test(p)) door.push(`a push without withAnchor: ${p.replace(/\s+/g, ' ').trim().slice(0, 80)}`);
+  }
+  if (/router\.(replace|navigate)\(/.test(navSrc)) {
+    door.push('lessonNav replaces or navigates — after a Quick Start lesson the screen on top is the LIST');
+  }
+}
+
+console.log('ENTRIES INTO THE LEARN STACK FROM OUTSIDE IT\n');
+if (!entries.length) console.log('  ok    nothing outside the branches stack opens a deeper /branches/ href directly');
+for (const e of entries) console.log(`  FAIL  ${e.rel}\n          ${e.call}`);
+if (!door.length) console.log(`  ok    ${NAV}: every push anchored, nothing replaced`);
+for (const d of door) console.log(`  FAIL  ${d}`);
+if (entries.length) {
+  console.log("\n  open a lesson with openLesson() and land after one with landOnBranch(), both");
+  console.log('  from components/lesson/lessonNav.ts — a plain push into an unbuilt tab leaves');
+  console.log('  no list under the lesson, and a replace can remove the list outright.');
+}
+
+const failed = bad.length + entries.length + door.length;
+console.log(failed ? `\ncheck:nav: ${failed} FAILING\n` : '\nthe Learn tab always has its list underneath.\n');
+process.exit(failed ? 1 : 0);

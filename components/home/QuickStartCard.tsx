@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { View, Text, StyleSheet, ImageBackground, type ImageSourcePropType } from 'react-native';
-import { router } from 'expo-router';
+import { openLesson } from '@/components/lesson/lessonNav';
 import { LinearGradient } from 'expo-linear-gradient';
 import PressableScale from '@/components/shared/PressableScale';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -68,8 +68,9 @@ export default function QuickStartCard({ style }: Props) {
 
   if (!pick) return null;
 
-  const open = () =>
-    router.push(`/(app)/branches/${pick.branch.slug}/${pick.unit.slug}/lesson/${pick.lesson.id}`);
+  // Through lessonNav, ANCHORED: pushed plainly from Home into a Learn tab not yet
+  // built, the lesson arrived with no branch list under it (see lessonNav.ts).
+  const open = () => openLesson(pick.branch.slug, pick.unit.slug, pick.lesson.id);
 
   return (
     <PressableScale onPress={open} style={[styles.card, style]}>
