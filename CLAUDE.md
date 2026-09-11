@@ -1724,8 +1724,8 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     a question or the summary. The clips are in `assets/narration/`, rendered
     through the character ledger, and `node scripts/make-narration.mjs` writes
     `lib/narration/manifest.ts`, estimating when each word starts from the clip's
-    pauses because Chirp 3 HD returns no word timings. `NarrationText` fades each
-    word in on that estimate, the player plays a line when its paragraph swaps in
+    pauses because Chirp 3 HD returns no word timings. `NarrationText` reveals the
+    line on that estimate, the player plays a line when its paragraph swaps in
     and cuts it on a tap, and a speaker button in a narrated lesson's header writes
     `settings.narration` (on by default). The two lessons older than the shared
     player, `logic-arguments-1` and `-2`, carry their own copy of those three
@@ -1739,11 +1739,12 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     repo, the clips ship as 16-bit 24 kHz PCM, 48 KB a second. Before many more
     lessons get a voice, encode the measured WAV locally, so the times and the
     audio come from one render.
-  - **And in two lessons the letters rise.** Asked for once the narrated lessons had
-    been heard: each letter fades in while it rises a third of the type's size, and a
-    word's letters start in turn across half the time the voice spends on it, so a
-    quick word is a quick ripple. It is on for `RISING_LESSONS` only
-    (`logic-arguments-1`, `ethics-ethics-1`) while it is tuned. A span cannot move on
+  - **And the letters rise, in every narrated lesson.** Asked for once the narrated
+    lessons had been heard: each letter fades in while it rises a third of the type's
+    size, and a word's letters start in turn across half the time the voice spends on
+    it, so a quick word is a quick ripple. `logic-arguments-1` and `ethics-ethics-1`
+    tried it first, and the same day it went to all thirteen, which left the word
+    fade it replaced with nothing to draw, so the fade is gone. A span cannot move on
     Android, so `RisingText` draws every letter as its own `Animated.Text` in a
     wrapping row of words, kept for the paragraph's whole life so it never reflows,
     and one frame callback per paragraph drives every letter from the moment the voice
@@ -1752,6 +1753,18 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     underline, carried on each letter, came out stepped as the letters rose. The band
     is laid under the letters now, and a name rises as one piece. `letterTimes` and
     `letterFrame` in `lib/narration/reveal.ts` hold the timing, with no imports.
+  - **A row of letters does not break lines exactly as text does, and cannot.**
+    Drawn through `NarrationText` in a browser, all 128 spoken lines read the same
+    words and names as a plain paragraph, and nothing sticks out sideways. But 4 of
+    them take one line more in a 390-wide phone's 342-point deck, and 7 in the
+    narrowest phone's 272. Measured on the lines that broke early, three things cost
+    the width: each word carries its 4.5-point trailing space, which text lets hang
+    past the margin; letters drawn apart lose their kerning, up to about a point a
+    word; and text can break after a hyphen, where a whole word cannot. The kerning
+    is the price of a letter that can move, so the match can get closer and never
+    exact. The extra line is 27 points of a deck that, on a narrated beat, holds only
+    the paragraph and at most a one-line citation; the tallest paragraph is 135 points
+    at 342 and 162 at 272.
 - **Productive struggle.** Every lesson earns its payoff with a real question or dilemma. A good "trick" answer is tempting for a *nameable* reason — so the explanation should **name the bias/fallacy and say why the tempting choice fails.**
 - **Ground it in a real thinker.** Pair the concept with a primary-source `quote` card. Authenticity ("here is the sentence Descartes actually wrote") is what makes it feel valuable, not gamified trivia.
 - **Give it an arc.** Hook (provocation) → build → struggle → a "what you now know" payoff on the summary.

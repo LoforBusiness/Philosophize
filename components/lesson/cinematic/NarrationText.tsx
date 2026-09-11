@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, type StyleProp, type TextStyle } from 'react-native';
+import { useMemo, useRef } from 'react';
+import { Text, type StyleProp, type TextStyle } from 'react-native';
 import { ERA, type EraKey } from '@/constants/design';
 import { eraGroupOfId } from '@/data/philosophers';
 import { LESSON_NAMES } from '@/data/lessonNames';
 import { narration } from '@/lib/narration';
 import { NARRATION } from '@/lib/narration/manifest';
 import { useNarrationStore } from '@/lib/narration/store';
-import { PENDING_MS, RISING_LESSONS, letterTimes, wordAlpha, withAlpha } from '@/lib/narration/reveal';
+import { letterTimes } from '@/lib/narration/reveal';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { INK, RULE } from './cinematicKit';
 import RisingText, { type RiseMode } from './RisingText';
@@ -43,22 +43,24 @@ import RisingText, { type RiseMode } from './RisingText';
 // behind every name would put six saturated blocks in a paragraph, which is the
 // rainbow that rebuild exists to have ended.
 //
-// ── ONE PARENT `<Text>`, ALWAYS ─────────────────────────────────────────────
+// ── ONE PARENT `<Text>`, UNLESS IT IS SPOKEN ────────────────────────────────
 //
 // The segments are nested Texts inside a single parent, because that is the only
 // arrangement in which the line breaks are computed across the whole paragraph.
 // Rendering the runs as siblings in a row lays each out independently and a
-// highlighted name can no longer share a line with the words around it.
+// highlighted name can no longer share a line with the words around it. A narrated
+// paragraph is the exception, and RisingText's header says why it has to be.
 //
-// ── AND IN A NARRATED LESSON, EACH WORD APPEARS AS IT IS SPOKEN ──────────────
+// ── AND IN A NARRATED LESSON, EACH LETTER RISES AS IT IS SPOKEN ─────────────
 //
-// Decided 11 Sep 2026. A paragraph whose beat has a clip in lib/narration starts
-// with every word laid out but transparent, and fades each one in on the time
-// scripts/make-narration.mjs estimated for it. The words are coloured rather than
-// hidden, so the lines break exactly where they will when the paragraph is whole,
-// and nothing moves as it fills in. A paragraph whose voice never starts is shown
-// whole after PENDING_MS; a muted lesson, the web, and every lesson without a clip
-// never enter this path at all.
+// Decided 11 Sep 2026. A paragraph whose beat has a clip in lib/narration is drawn
+// by RisingText: every letter is laid out from the start, and each one fades in and
+// rises into place on the time scripts/make-narration.mjs estimated for its word.
+// This file first faded whole words in; two lessons tried the rising letters, the
+// same day they went to every narrated lesson, and the fade had nothing left to draw.
+// A narrated paragraph keeps that layout whether the voice plays, is muted or never
+// starts (it is shown whole after PENDING_MS), so it never reflows in front of the
+// reader. A paragraph without a clip never enters that path at all.
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -141,14 +143,13 @@ export function runsOf(text: string, names: readonly (readonly [string, string])
 }
 
 /**
- * Where this paragraph is in its spoken line.
+ * Where this paragraph's line is being spoken.
  *
- * `spoken` drives the fade: `t` seconds in (negative while the voice has not
- * started), or null when every word should simply be shown. `mode` and `at` drive
- * the rising reveal in RISING_LESSONS instead, which keeps its own clock on the UI
- * thread, so for those this hook starts no timer at all.
+ * RisingText keeps its own clock on the UI thread, so all it needs from here is
+ * whether the voice is waiting, playing, cut off or not coming at all (`mode`), and
+ * when it started (`at`). Nothing here starts a timer.
  */
-function useSpokenClock(lessonId: string, beat: number | undefined, text: string, rising: boolean) {
+function useSpokenClock(lessonId: string, beat: number | undefined, text: string) {
   const line = beat == null ? undefined : NARRATION[lessonId]?.[beat];
   const on = useUserDataStore((s) => s.settings.narration);
   const narrates = !!line && line.text === text && on && narration.isSupported();
@@ -158,39 +159,13 @@ function useSpokenClock(lessonId: string, beat: number | undefined, text: string
   const phase = useNarrationStore((s) =>
     narrates && s.lessonId === lessonId && s.beat === beat && s.at >= mountedAt - 250 ? s.phase : null);
   const at = useNarrationStore((s) => (narrates && s.lessonId === lessonId && s.beat === beat ? s.at : 0));
-  const [now, setNow] = useState(mountedAt);
-
-  const waiting = phase === null || phase === 'idle';
-  const playing = phase === 'playing' && !!line && (now - at) / 1000 <= line.dur + 0.3;
-  const running = !rising && narrates && (playing || (waiting && now - mountedAt < PENDING_MS));
-
-  useEffect(() => {
-    if (!running) return;
-    let raf = 0;
-    let last = 0;
-    const tick = () => {
-      const t = Date.now();
-      // About twenty renders a second: each word steps through five shades as it
-      // fades, and a render per frame would buy nothing a reader can see.
-      if (t - last >= 45) { last = t; setNow(t); }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [running]);
 
   // What the rising reveal needs is where the voice is, never a time.
   const mode: RiseMode = !narrates || phase === 'failed' ? 'show'
     : phase === 'playing' ? 'play'
     : phase === 'stopped' ? 'freeze'
     : 'wait';
-
-  let spoken: { t: number; starts: readonly number[] } | null = null;
-  if (narrates && line && !rising) {
-    if (phase === 'playing') spoken = playing ? { t: (now - at) / 1000, starts: line.words } : null;
-    else if (waiting && now - mountedAt < PENDING_MS) spoken = { t: -1, starts: line.words };
-  }
-  return { spoken, mode, at };
+  return { mode, at };
 }
 
 export default function NarrationText({ text, lessonId, beat, focus, style, onPeek, openId }: Props) {
@@ -215,34 +190,14 @@ export default function NarrationText({ text, lessonId, beat, focus, style, onPe
   const marks = useRef<Record<number, Text | null>>({});
   const runs = useMemo(() => runsOf(text, names, focus), [text, names, focus]);
   const line = beat == null ? undefined : NARRATION[lessonId]?.[beat];
-  // A narrated line in a lesson trying the rising reveal draws with RisingText for the
-  // whole life of the paragraph, so it never reflows between waiting and finished.
-  const rising = RISING_LESSONS.includes(lessonId) && !!line && line.text === text;
-  const { spoken, mode, at } = useSpokenClock(lessonId, beat, text, rising);
+  // A narrated line draws with RisingText for the whole life of the paragraph, so it
+  // never reflows between waiting and finished.
+  const rising = !!line && line.text === text;
+  const { mode, at } = useSpokenClock(lessonId, beat, text);
   const times = useMemo(
     () => (rising && line ? letterTimes(line.words, text, line.dur) : null),
     [rising, line, text],
   );
-  const baseColor = useMemo(() => {
-    const c = StyleSheet.flatten(style)?.color;
-    return typeof c === 'string' ? c : INK;
-  }, [style]);
-  // Which word every character belongs to. Whitespace belongs to the word before it,
-  // so a struck maxim's band grows across the space as the next word arrives. Counted
-  // over the WHOLE text, because a run can end mid-word: "Sartre." is one spoken word
-  // and two runs, the name and its full stop.
-  const wordAt = useMemo(() => {
-    const out = new Int32Array(text.length);
-    let k = -1;
-    let inWord = false;
-    for (let c = 0; c < text.length; c += 1) {
-      const ws = /\s/.test(text[c]);
-      if (!ws && !inWord) k += 1;
-      inWord = !ws;
-      out[c] = Math.max(0, k);
-    }
-    return out;
-  }, [text]);
 
   // Below every hook on purpose: `rising` can differ between beats of one instance.
   if (rising && times) {
@@ -263,7 +218,7 @@ export default function NarrationText({ text, lessonId, beat, focus, style, onPe
 
   // The common case is a paragraph with nothing in it to pick out, and it must
   // cost exactly what it used to: one Text, no wrappers, no press handlers.
-  if (!spoken && runs.length === 1 && runs[0].kind === 'plain') {
+  if (runs.length === 1 && runs[0].kind === 'plain') {
     return <Text style={style}>{text}</Text>;
   }
 
@@ -277,60 +232,20 @@ export default function NarrationText({ text, lessonId, beat, focus, style, onPe
     });
   };
 
-  const alphaOf = (word: number) => (spoken ? wordAlpha(spoken.starts, word, spoken.t) : 1);
-  /** A run cut into pieces that each belong to one word, with where each starts in `text`. */
-  const piecesOf = (runText: string, start: number) => {
-    const out: { text: string; word: number }[] = [];
-    let s = 0;
-    for (let c = 1; c <= runText.length; c += 1) {
-      if (c === runText.length || wordAt[start + c] !== wordAt[start + s]) {
-        out.push({ text: runText.slice(s, c), word: wordAt[start + s] });
-        s = c;
-      }
-    }
-    return out;
-  };
-
-  let offset = 0;
   return (
     <Text ref={para} style={style}>
       {runs.map((run, k) => {
-        const start = offset;
-        offset += run.text.length;
-        if (run.kind === 'plain') {
-          if (!spoken) return <Text key={k}>{run.text}</Text>;
-          return (
-            <Text key={k}>
-              {piecesOf(run.text, start).map((p, j) => (
-                <Text key={j} style={{ color: withAlpha(baseColor, alphaOf(p.word)) }}>{p.text}</Text>
-              ))}
-            </Text>
-          );
-        }
+        if (run.kind === 'plain') return <Text key={k}>{run.text}</Text>;
         if (run.kind === 'focus') {
-          if (!spoken) {
-            return (
-              <Text key={k} style={{ fontWeight: '700', backgroundColor: RULE, color: INK }}>
-                {run.text}
-              </Text>
-            );
-          }
           return (
-            <Text key={k} style={{ fontWeight: '700' }}>
-              {piecesOf(run.text, start).map((p, j) => {
-                const a = alphaOf(p.word);
-                return (
-                  <Text key={j} style={{ backgroundColor: withAlpha(RULE, a), color: withAlpha(INK, a) }}>{p.text}</Text>
-                );
-              })}
+            <Text key={k} style={{ fontWeight: '700', backgroundColor: RULE, color: INK }}>
+              {run.text}
             </Text>
           );
         }
         const group = eraGroupOfId(run.pid) as EraKey | null;
         const hue = group ? ERA[group] : INK;
         const open = openId === run.pid;
-        // A name arrives as one piece, on its first word's time.
-        const a = alphaOf(wordAt[start]);
         return (
           <Text
             key={k}
@@ -366,10 +281,10 @@ export default function NarrationText({ text, lessonId, beat, focus, style, onPe
               anchor(k, (x) => onPeek(run.pid, x));
             } : undefined}
             style={{
-              color: withAlpha(hue, a),
+              color: hue,
               fontWeight: '700',
               textDecorationLine: 'underline',
-              textDecorationColor: withAlpha(hue, a),
+              textDecorationColor: hue,
               // The open one reads as held down rather than merely marked.
               backgroundColor: open ? `${hue}1A` : 'transparent',
             }}

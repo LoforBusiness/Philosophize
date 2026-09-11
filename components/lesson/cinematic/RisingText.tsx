@@ -10,9 +10,9 @@ import type { Run } from './NarrationText';
 // ─────────────────────────────────────────────────────────────────────────────
 // THE NARRATED PARAGRAPH, WITH EACH LETTER RISING INTO PLACE AS IT IS SPOKEN.
 //
-// Asked for on 11 Sep 2026 and on for two lessons first (RISING_LESSONS in
-// lib/narration/reveal.ts), so it can be tuned before it goes further. NarrationText
-// decides when a paragraph uses it; this draws it.
+// Asked for on 11 Sep 2026, tried in two lessons, and given to every narrated lesson
+// the same day. NarrationText decides when a paragraph uses it (any line with a
+// clip); this draws it.
 //
 // ── WHY THE PARAGRAPH IS NO LONGER ONE <Text> ───────────────────────────────
 //
