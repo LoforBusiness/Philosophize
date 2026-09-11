@@ -6,9 +6,10 @@ import { LESSON_NAMES } from '@/data/lessonNames';
 import { narration } from '@/lib/narration';
 import { NARRATION } from '@/lib/narration/manifest';
 import { useNarrationStore } from '@/lib/narration/store';
-import { PENDING_MS, wordAlpha, withAlpha } from '@/lib/narration/reveal';
+import { PENDING_MS, RISING_LESSONS, letterTimes, wordAlpha, withAlpha } from '@/lib/narration/reveal';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { INK, RULE } from './cinematicKit';
+import RisingText, { type RiseMode } from './RisingText';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE PARAGRAPH UNDER THE FIGURE, WITH TWO THINGS PICKED OUT OF IT.
@@ -82,7 +83,7 @@ interface Props {
   openId?: string | null;
 }
 
-type Run =
+export type Run =
   | { kind: 'plain'; text: string }
   | { kind: 'name'; text: string; pid: string }
   | { kind: 'focus'; text: string };
@@ -140,10 +141,14 @@ export function runsOf(text: string, names: readonly (readonly [string, string])
 }
 
 /**
- * Where this paragraph is in its spoken line: `t` seconds in (negative while the
- * voice has not started), or null when every word should simply be shown.
+ * Where this paragraph is in its spoken line.
+ *
+ * `spoken` drives the fade: `t` seconds in (negative while the voice has not
+ * started), or null when every word should simply be shown. `mode` and `at` drive
+ * the rising reveal in RISING_LESSONS instead, which keeps its own clock on the UI
+ * thread, so for those this hook starts no timer at all.
  */
-function useSpokenClock(lessonId: string, beat: number | undefined, text: string) {
+function useSpokenClock(lessonId: string, beat: number | undefined, text: string, rising: boolean) {
   const line = beat == null ? undefined : NARRATION[lessonId]?.[beat];
   const on = useUserDataStore((s) => s.settings.narration);
   const narrates = !!line && line.text === text && on && narration.isSupported();
@@ -157,7 +162,7 @@ function useSpokenClock(lessonId: string, beat: number | undefined, text: string
 
   const waiting = phase === null || phase === 'idle';
   const playing = phase === 'playing' && !!line && (now - at) / 1000 <= line.dur + 0.3;
-  const running = narrates && (playing || (waiting && now - mountedAt < PENDING_MS));
+  const running = !rising && narrates && (playing || (waiting && now - mountedAt < PENDING_MS));
 
   useEffect(() => {
     if (!running) return;
@@ -174,10 +179,18 @@ function useSpokenClock(lessonId: string, beat: number | undefined, text: string
     return () => cancelAnimationFrame(raf);
   }, [running]);
 
-  if (!narrates || !line) return null;
-  if (phase === 'playing') return playing ? { t: (now - at) / 1000, starts: line.words } : null;
-  if (waiting && now - mountedAt < PENDING_MS) return { t: -1, starts: line.words };
-  return null;
+  // What the rising reveal needs is where the voice is, never a time.
+  const mode: RiseMode = !narrates || phase === 'failed' ? 'show'
+    : phase === 'playing' ? 'play'
+    : phase === 'stopped' ? 'freeze'
+    : 'wait';
+
+  let spoken: { t: number; starts: readonly number[] } | null = null;
+  if (narrates && line && !rising) {
+    if (phase === 'playing') spoken = playing ? { t: (now - at) / 1000, starts: line.words } : null;
+    else if (waiting && now - mountedAt < PENDING_MS) spoken = { t: -1, starts: line.words };
+  }
+  return { spoken, mode, at };
 }
 
 export default function NarrationText({ text, lessonId, beat, focus, style, onPeek, openId }: Props) {
@@ -201,7 +214,15 @@ export default function NarrationText({ text, lessonId, beat, focus, style, onPe
   const para = useRef<Text>(null);
   const marks = useRef<Record<number, Text | null>>({});
   const runs = useMemo(() => runsOf(text, names, focus), [text, names, focus]);
-  const spoken = useSpokenClock(lessonId, beat, text);
+  const line = beat == null ? undefined : NARRATION[lessonId]?.[beat];
+  // A narrated line in a lesson trying the rising reveal draws with RisingText for the
+  // whole life of the paragraph, so it never reflows between waiting and finished.
+  const rising = RISING_LESSONS.includes(lessonId) && !!line && line.text === text;
+  const { spoken, mode, at } = useSpokenClock(lessonId, beat, text, rising);
+  const times = useMemo(
+    () => (rising && line ? letterTimes(line.words, text, line.dur) : null),
+    [rising, line, text],
+  );
   const baseColor = useMemo(() => {
     const c = StyleSheet.flatten(style)?.color;
     return typeof c === 'string' ? c : INK;
@@ -222,6 +243,23 @@ export default function NarrationText({ text, lessonId, beat, focus, style, onPe
     }
     return out;
   }, [text]);
+
+  // Below every hook on purpose: `rising` can differ between beats of one instance.
+  if (rising && times) {
+    return (
+      <RisingText
+        key={`${lessonId}:${beat}:${text}`}
+        text={text}
+        runs={runs}
+        times={times}
+        style={style}
+        mode={mode}
+        startAt={at}
+        onPeek={onPeek}
+        openId={openId}
+      />
+    );
+  }
 
   // The common case is a paragraph with nothing in it to pick out, and it must
   // cost exactly what it used to: one Text, no wrappers, no press handlers.

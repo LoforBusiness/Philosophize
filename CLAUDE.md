@@ -1739,6 +1739,19 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     repo, the clips ship as 16-bit 24 kHz PCM, 48 KB a second. Before many more
     lessons get a voice, encode the measured WAV locally, so the times and the
     audio come from one render.
+  - **And in two lessons the letters rise.** Asked for once the narrated lessons had
+    been heard: each letter fades in while it rises a third of the type's size, and a
+    word's letters start in turn across half the time the voice spends on it, so a
+    quick word is a quick ripple. It is on for `RISING_LESSONS` only
+    (`logic-arguments-1`, `ethics-ethics-1`) while it is tuned. A span cannot move on
+    Android, so `RisingText` draws every letter as its own `Animated.Text` in a
+    wrapping row of words, kept for the paragraph's whole life so it never reflows,
+    and one frame callback per paragraph drives every letter from the moment the voice
+    started, with nothing re-rendering while it plays. A contact sheet of the real
+    component caught the one thing that did not work: a maxim's band and a name's
+    underline, carried on each letter, came out stepped as the letters rose. The band
+    is laid under the letters now, and a name rises as one piece. `letterTimes` and
+    `letterFrame` in `lib/narration/reveal.ts` hold the timing, with no imports.
 - **Productive struggle.** Every lesson earns its payoff with a real question or dilemma. A good "trick" answer is tempting for a *nameable* reason — so the explanation should **name the bias/fallacy and say why the tempting choice fails.**
 - **Ground it in a real thinker.** Pair the concept with a primary-source `quote` card. Authenticity ("here is the sentence Descartes actually wrote") is what makes it feel valuable, not gamified trivia.
 - **Give it an arc.** Hook (provocation) → build → struggle → a "what you now know" payoff on the summary.
