@@ -3,7 +3,6 @@ import {
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
-import CritterView from './CritterView';
 import CinematicPlayer from './CinematicPlayer';
 import { BEATS } from './ethicsScript';
 import {
@@ -13,13 +12,15 @@ import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
-// The conscience that steps out of a figure and weighs the deed on a balance,
-// beside an animal that shares the instincts but never judges itself.
+// The conscience that steps out of a figure and weighs the deed on a balance.
 //
 // The hero visual is THE MORAL LEDGER — a two-column tally (ANIMAL · YOU) whose
 // rows fill in as the lesson builds: both columns tick for feeling and fairness,
 // and only YOU ticks for "judges itself". That single row is the whole lesson and
 // the answer to both graded questions, carried visually rather than said twice.
+// The ledger's ANIMAL column is the only animal in the lesson now: a dog stood at
+// the left edge until 11 Sep 2026, and it came out at the reader's request because
+// it never looked right.
 //
 // COMPOSITION / BAND. Everything is drawn inside one camera (scale 1.14 about
 // (196, 430), transform-origin CENTRE), so design y maps to screen y as
@@ -27,7 +28,6 @@ import { followMoves, kindOf, seedOf } from './camera';
 // Measured extremes across every beat, top to bottom:
 //   ledger top      y 260  →  47   (the opening headline shares this exact box)
 //   ledger bottom   y 348  → 147
-//   dog crown       y 441  → 254   (ear tip, measured over the whole gait cycle)
 //   figure crown    y 359  → 160
 //   ORIGIN? card    y 366  → 168   … bottom y 486 → 305
 //   ask caption     y 398  → 205
@@ -37,41 +37,22 @@ import { followMoves, kindOf, seedOf } from './camera';
 // so the band below is [40, 338] — everything the scene can draw, with margin.
 // Anything added later must be re-measured through the same map before it ships.
 //
-// ACROSS, which the list above never covered and the dog needed: at rest the
-// animal spans screen x 21 (nose) … 114 (tail), the balance beam starts at 100
-// and its left end never falls below screen y 434 against a dog crown of 442, and
-// the figure's own ink starts near 194. Everything horizontal here is measured
-// over the WHOLE gait cycle, not the standing pose — the legs swing ±0.20 wither.
+// ACROSS. The balance stands under the ledger's left edge and clear of the figure:
+// its pans span design x 58…190 (screen 15…165), the figure's own ink starts near
+// screen 194, and his reaching hand stops at design 220. The left pan cannot go much
+// further left without coming within a few pixels of the frame.
 
 const HUMAN_X = 250;
-const CRIT_X = 84;
 /**
- * Shoulder height on stage. A mid-sized dog beside a 103-unit person.
+ * Where the balance pivots. 124, not the 158 it was.
  *
- * 33, not the 40 it was. Filling the animal out AGAIN — a real belly, a haunch,
- * thigh thicker than shin, and a head raised clear of the barrel instead of fused
- * into it — took the dog from 1.50 wither units of crown to 1.75 and from 1.95
- * long to 2.22. At 40 that crown climbed to screen y 233 and, worse, its
- * hindquarters reached screen x 110 against a balance beam starting at 100: the
- * two overlapped, which is the "crammed together" the animal and the scales
- * looked. At 33 with CRIT_X out to 84 the crown sits at 255 (it was 254), the
- * nose at 12 and the rump at 95 — four pixels clear of the beam, and the shot
- * reads left to right as animal, balance, person.
- *
- * The earlier note, kept because the reasoning still holds:
- * 40, not the 46 it was. Filling the animal out (critters.ts) gave it a real
- * head and a muzzle that projects, which grew it from 1.31 wither units tall to
- * 1.49 and pushed its nose 0.36 further forward — at 46 that put the crown at
- * 70px against the person's 103, a Great Dane rather than the mid-sized dog this
- * line claims, and left the nose 7px off the frame edge. Dropping to 40 with
- * CRIT_X out to 94 restores the ORIGINAL framing to within a few pixels (nose at
- * screen x 21 against 26, crown 61px against 60, and the tail finishes its amble
- * at 34.4 where it used to finish at 34.7) while keeping the new build — because
- * `k` decides how big the animal is in the shot and the proportions inside
- * critters.ts decide whether it looks fed, and those are separate questions.
+ * At 158 the right pan reached design x 224, a hand's width from a figure who stands
+ * at 250 and reaches left, and the reader said the scale sat too close to him. With
+ * the dog gone the left of the stage is free, so the whole balance moved 34 units
+ * left: the right pan now stops at 190, and the left pan at 58 lines up under the
+ * ledger's left edge.
  */
-const CRIT_K = 33;
-const PIVOT_X = 158;
+const PIVOT_X = 124;
 const PIVOT_Y = 430;
 
 // ── the moral ledger (design space, inside the camera) ────────────────────────
@@ -139,14 +120,13 @@ function held(flags: number[]): number[] {
 
 const HPOSE = BEATS.map((b) => b.hpose ?? 0);
 const JUDGE = held(BEATS.map((b) => (b.judge ? 1 : 0)));
-const CRITTER = held(BEATS.map((b) => (b.critter ? 1 : 0)));
 const PLANT = BEATS.map((b) => (b.plant ? 1 : 0));
-const Q2 = BEATS.map((b) => (b.weigh === 'q2' ? 1 : 0));
 const ORIGINS = BEATS.map((b) => (b.origins ? 1 : 0));
 
 // How many ledger rows are written by each beat. Derived from the script's own
-// cues rather than hard beat numbers: the shared instincts appear with the animal,
-// and the third row — the one only we can tick — with the conscience.
+// cues rather than hard beat numbers: the shared instincts appear on the beat that
+// opens the animal comparison, and the third row — the one only we can tick — with
+// the conscience.
 const FIRST_CRIT = BEATS.findIndex((b) => b.critter);
 const FIRST_JUDGE = BEATS.findIndex((b) => b.judge);
 const LEDGER = BEATS.map((_, i) =>
@@ -187,7 +167,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics'));
 
 export default function EthicsScene({ clock, bt, bi, qv, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldHumanS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(2);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -198,15 +178,6 @@ export default function EthicsScene({ clock, bt, bi, qv, gazeX, gazeY, gazeOn }:
 
     const humanS = keepHeld(heldHumanS, mixStance(carryFrom(heldHumanS, n,hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
     const conOn = carry(cv, 0, n, JUDGE[p], JUDGE[n], tr);
-    const critOn = carry(cv, 1, n, CRITTER[p], CRITTER[n], tr);
-
-    // On Q2 the animal ambles off — the point that only the human stops to judge.
-    //
-    // 120, not 70. At 70 it stopped with its whole hindquarters still on screen
-    // and then simply faded out where it stood, which is not "walks away", it is
-    // "vanishes mid-stride". 120 design units puts its rearmost pixel at screen
-    // x -41, so it is genuinely gone before anything stops moving.
-    const critX = CRIT_X - (Q2[n] ? q * 120 : 0);
 
     // Ledger: a row that was already written stays solid; a row this beat ADDS
     // slides in over the beat's opening, so the tally reads as being filled out.
@@ -226,12 +197,9 @@ export default function EthicsScene({ clock, bt, bi, qv, gazeX, gazeY, gazeOn }:
       human: lookPose(humanS, HUMAN_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
       scaleOn: conOn,
       tip: Math.sin(t * 1.2) * 4 * conOn * (1 - (n === 6 ? q : 0)),  // settles level on a considered Q1
-      critOn,
-      critX,
-      critGait: Q2[n] ? q : 0,
       ledOn: cnt > 0 ? (was > 0 ? 1 : write) : 0,
       r0: row(0), r1: row(1), r2: row(2),
-      plant: carry(cv, 2, n, PLANT[p], PLANT[n], tr),
+      plant: carry(cv, 1, n, PLANT[p], PLANT[n], tr),
       grow: ease01(bt.value / 1.1),
       // the opening headline, assembling word by word
       askOn: askHere ? (askWas ? 1 : here) : askWas ? away : 0,
@@ -249,14 +217,6 @@ export default function EthicsScene({ clock, bt, bi, qv, gazeX, gazeY, gazeOn }:
 
   const DH = useDerivedValue<Bundle>(() => SCENE.value.human);
 
-  // The dog. It breathes, drifts its head, flicks an ear and wags whatever the
-  // beat is doing (A6), and only WALKS while it ambles off on Q2 — its legs cycle
-  // on the DISTANCE it has covered, never on the wall clock, so the stride matches
-  // the ground however fast the amble happens to be.
-  const CRIT_ON = useDerivedValue(() => SCENE.value.critOn);
-  const CRIT_XV = useDerivedValue(() => SCENE.value.critX);
-  const CRIT_GAIT = useDerivedValue(() => SCENE.value.critGait);
-  const CRIT_PHASE = useDerivedValue(() => (CRIT_X - SCENE.value.critX) / CRIT_K);
   const camStyle = useAnimatedStyle(() => {
     const c = SCENE.value.cam;
     return { transform: [{ translateX: STAGE_W / 2 - c.cx * c.s }, { translateY: STAGE_H / 2 - c.cy * c.s }, { scale: c.s }] };
@@ -270,7 +230,6 @@ export default function EthicsScene({ clock, bt, bi, qv, gazeX, gazeY, gazeOn }:
         <AskBanner S={SCENE} />
         <Origins S={SCENE} />
         <Sprout S={SCENE} />
-        <CritterView kind="dog" clock={clock} x={CRIT_XV} ground={GROUND} k={CRIT_K} dir={-1} gait={CRIT_GAIT} phase={CRIT_PHASE} opacity={CRIT_ON} />
         <Stickman D={DH} k={K_FIG} />
         <Scale S={SCENE} />
       </Animated.View>
@@ -438,7 +397,8 @@ const styles = StyleSheet.create({
     backgroundColor: PAPER,
   },
 
-  askWrap: { position: 'absolute', left: 96, top: 398, width: 116, alignItems: 'center' },
+  // Centred on the pivot, so the caption moves with the balance.
+  askWrap: { position: 'absolute', left: PIVOT_X - 58, top: 398, width: 116, alignItems: 'center' },
   askText: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },

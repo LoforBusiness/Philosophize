@@ -5,9 +5,10 @@ import type { BaseBeat } from './cinematicKit';
 // Right and Wrong". Theme: THE CONSCIENCE THAT STEPS OUT.
 //
 // A figure acts; then a faint second self — his conscience — steps out of him,
-// turns back, and weighs the deed on a balance. Beside him an animal shares the
-// raw materials of morality (it nuzzles, it cares) but never steps out of itself
-// to ask "was that right?". That reflective step is the whole lesson.
+// turns back, and weighs the deed on a balance. The ledger above him sets what an
+// animal shares, the raw materials of morality (it cares, it plays fair), beside
+// the one thing only a person does: step out of itself to ask "was that right?".
+// That reflective step is the whole lesson.
 //
 // The two graded questions are lifted from data/.../why-humans-care-about-right-
 // and-wrong.ts so scoring matches the card runner.
@@ -18,7 +19,10 @@ export interface EthicsBeat extends BaseBeat {
   hpose?: number;
   /** The conscience self has stepped out (and the balance is present). */
   judge?: boolean;
-  /** The animal is on stage (left). */
+  /**
+   * The animal comparison opens: the ledger writes its two shared rows from the
+   * first beat that sets this. No animal is drawn (one was, until 11 Sep 2026).
+   */
   critter?: boolean;
   /** A sprout — Aristotle's flourishing. */
   plant?: boolean;
@@ -121,7 +125,6 @@ export const BEATS: EthicsBeat[] = [
     dur: 1.0,
   },
   {
-    critter: true,
     judge: true,
     weigh: 'q2',
     interact: {
