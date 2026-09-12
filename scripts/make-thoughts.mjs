@@ -48,8 +48,9 @@ import path from 'node:path';
 import { loadFont, wrap } from './lib/ttfwidth.mjs';
 import { corpus } from './lib/gestures.mjs';
 import { loadTs } from './lib/loadts.mjs';
-import { loadRig, skullRise } from './lib/loadrig.mjs';
-import { sceneOf, walkOf, scaleOf, crownOf } from './lib/scenefig.mjs';
+import { loadRig, skullRise, loadHats } from './lib/loadrig.mjs';
+import { sceneOf, walkOf, scaleOf, crownOf, wordsOf, sealsOf, glyphBoxesOf, ANSWER_LIFT } from './lib/scenefig.mjs';
+import { windowOf } from './lib/tourrule.mjs';
 
 const DRY = process.argv.includes('--dry');
 const DIR = 'components/lesson/cinematic';
@@ -93,8 +94,17 @@ const TRAILS = [
   { discs: 1, h: 3 + 4 },
 ];
 
-const boxH = (text) => {
-  const rows = wrap(text, SIZE, INNER, INTER).length;
+// THE ANSWER LINE IS SET IN ITS OWN FACE, and has to be measured in it: a line that
+// fits two rows of Inter 500 can need three of a heavier weight, and a box that grows
+// a row grows UPWARD, into whatever the placement had just cleared.
+const faceOf = (style) => {
+  const m = KIT.match(new RegExp(`${style}:\\s*\\{[^}]*fontFamily:\\s*'Inter_(\\w+)'`));
+  if (!m) throw new Error(`cannot read the ${style} face`);
+  return loadFont(`node_modules/@expo-google-fonts/inter/${m[1]}/Inter_${m[1]}.ttf`);
+};
+const SAY_FACE = faceOf('sayText');
+const boxH = (text, face = INTER) => {
+  const rows = wrap(text, SIZE, INNER, face).length;
   return { rows, h: rows * LH + 2 * VPAD + 2 * BORDER };
 };
 
@@ -127,6 +137,21 @@ const SAY = existingSay();
 // precisely this reason.
 const { quipFor, visitorSays } = await loadTs('components/lesson/cinematic/quips.ts');
 const { VISITOR } = await loadTs('data/lessonVisitor.ts');
+// THE CAMERA'S FRAMES, so a bubble is never placed where the shot cuts it in half.
+const { TOURS } = await loadTs('components/lesson/cinematic/tours.ts');
+/** The ground every scene stands on: CinematicPlayer's default, and no scene passes another. */
+const GROUND_Y = 500;
+/**
+ * HOW FAR CLEAR OF HIS HEAD, OR HIS HAT, THE SMALLEST DISC MUST SIT.
+ *
+ * It was four units, and in the render that is not enough. A cap tilts, his head
+ * leans toward what he looks at and nods when the reader answers, and the smallest
+ * disc of `aesthetics-aesthetics-7` and `logic-arguments-21` came to rest on the cap
+ * itself (found 11 Sep 2026): a paper ring pressed into solid ink, which reads as the
+ * trail running behind his head. Ten keeps the trail his without touching him, and
+ * `check:thoughts` reads this number rather than repeating it.
+ */
+const CLEAR_MIN = 10;
 /** A standing figure's crown, with the ground at 500 — measured, not quoted. */
 const CROWN = 397;
 const GRADED = new Map();
@@ -150,10 +175,41 @@ const riseOf = (code) => {
   if (!RISE.has(code)) RISE.set(code, skullRise(RIG, MOVES, code));
   return RISE.get(code);
 };
-/** How far above the bare figure the costume reaches, per lesson (make:wardrobe). */
-const HAT = J.wardrobeReach || {};
+/**
+ * How far above his skull each figure's OWN hat rises — never the stage's widest
+ * costume, which is what `wardrobeReach` records (see `crownOf`).
+ */
+const HATS = await loadHats();
+/** How far a figure's box runs below the ground he stands on: half a limb stroke. */
+const FOOT = RIG.STR.limb / 2;
 
 const hit = (a, b) => a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + b[3] && b[1] < a[1] + a[3];
+
+// THE TRAIL, read out of the component: each disc's size and the gap under it, and
+// how far along the line to his head it leans. Smallest disc first, from the bottom.
+const PUFF = [3, 2, 1].map((n) => ({
+  size: pick(new RegExp(`puff${n}:\\s*\\{\\s*width:\\s*([\\d.]+)`)),
+  gap: n === 3 ? 0 : pick(new RegExp(`puff${n}:\\s*\\{[^}]*marginBottom:\\s*([\\d.]+)`)),
+}));
+const FAN = (() => {
+  const m = KIT.match(/const THINK_FAN = \[([^\]]+)\]/);
+  if (!m) throw new Error('cannot read THINK_FAN');
+  return m[1].split(',').map(Number).reverse();
+})();
+
+/** The discs of a trail as boxes, where `Thought` draws them for this placement. */
+function discsOf(x, tailY, n, headX) {
+  const out = [];
+  let bottom = tailY;
+  for (let k = 0; k < n; k += 1) {
+    const { size, gap } = PUFF[k];
+    bottom -= gap;
+    const c = x + (headX - x) * FAN[k];
+    out.push([c - size / 2, bottom - size, size, size]);
+    bottom -= size;
+  }
+  return out;
+}
 
 /**
  * The best place for a box of this size on this beat.
@@ -163,7 +219,7 @@ const hit = (a, b) => a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + 
  * the answer is always the one nearest his head that works, and "directly above,
  * touching" wins whenever it is available.
  */
-function place(items, w, h, bandTop, at, mx, head) {
+function place(items, w, h, bandTop, at, mx, head, windows = [], guard = []) {
   // WHOSE HEAD, AND WHERE THE TOP OF IT IS — `crownOf`, shared with the check
   // that re-derives this. The caller can name it outright instead: the second
   // figure's line is placed against his own cue, because a union puts the bubble
@@ -184,9 +240,10 @@ function place(items, w, h, bandTop, at, mx, head) {
   if (at) {
     cx = at.cx; crown = at.crown;
   } else {
-    const c = crownOf(items.filter((it) => it.k === 'fig'), mx, head.rise, head.hat);
+    const c = crownOf(items.filter((it) => it.k === 'fig'), mx, head.rise, head.hat, head.foot);
     if (!c) return null;
     ({ cx, crown } = c);
+    crown -= head.lift ?? 0;
   }
   // ── THE TRADE IS SCORED, NOT NESTED ───────────────────────────────────────
   //
@@ -205,14 +262,30 @@ function place(items, w, h, bandTop, at, mx, head) {
   // that changing the priority is one number rather than a re-shuffle.
   const OVER_ART = 26;
   const SHORT_TRAIL = 6;
+  // `guard` is what this box must also keep off, over art or not: the corners where
+  // an answer's seal is struck (`sealsOf`).
+  const words = [...wordsOf(items), ...guard];
   let best = null;
   for (const mode of ['all', 'text']) {
-    const block = items.filter((it) => it.k !== 'fig' && (mode === 'all' || it.k === 'text'));
-    for (let up = 4; up <= 96; up += 4) {
-      for (let d = 0; d <= 120; d += 6) {
+    // The padded words go in BOTH modes. Blocking only the raw text boxes in the
+    // fully-clear pass let a spot through that sat in a word's glyph slot, and the
+    // check — which holds the padded words — duly failed thirty-six of them.
+    const block = mode === 'all' ? [...items.filter((it) => it.k !== 'fig'), ...words] : words;
+    // CLOSE TO HIM, AND NO CLOSER THAN CLEAR_MIN. The tail starts CLEAR_MIN above his
+    // head or hat and may rise no further than FLOAT, and the box may slide no further
+    // sideways than its trail can lean (DRIFT). Past either it is not his, and a beat
+    // with nothing inside both shows no bubble. These used to be searched out to 96 up
+    // and 120 across and filtered afterwards for thoughts only, so an answer line could
+    // land a third of the stage away, in the answer cards.
+    for (let up = CLEAR_MIN; up <= FLOAT; up += 2) {
+      for (let d = 0; d <= DRIFT; d += 6) {
         for (const sx of d === 0 ? [0] : [-d, d]) {
-          const bx = cx + sx - w / 2;
-          if (bx < 6 || bx + w > 394) continue;
+          const rx = Math.round(cx + sx);
+          const bxr = rx - w / 2;
+          // WHERE THE COMPONENT WILL ACTUALLY DRAW IT. `Thought` clamps the box's centre
+          // to ten units inside the stage, so a placement cleared outside that range was
+          // drawn up to four units from where it had been cleared.
+          if (bxr < 10 || bxr + w > 390) continue;
           for (const t of TRAILS) {
             // ROUND FIRST, THEN TEST. The table stores integers and the first
             // version validated the unrounded position and rounded it on the way
@@ -221,11 +294,19 @@ function place(items, w, h, bandTop, at, mx, head) {
             // word by four tenths of a unit. A measurement is only as good as the
             // number that actually gets written down.
             const tailY = Math.round(crown - up);
-            const rx = Math.round(cx + sx);
-            const bxr = rx - w / 2;
             const top = tailY - t.h - h;
             if (top < bandTop + 2) continue;
+            // INSIDE EVERY FRAME THE CAMERA SHOWS ON THIS BEAT, with two units to
+            // spare. The camera is not moved to make room: a bubble a push would cut
+            // in half is placed where it will not, or not shown at all.
+            if (windows.some((win) => bxr < win.left + 2 || bxr + w > win.right - 2
+              || top < win.top + 2 || tailY > win.bottom - 2)) continue;
             if (block.some((it) => hit([bxr, top, w, h], it.b))) continue;
+            // AND THE TRAIL UNDER IT. Only the box was ever tested, so a disc could rest
+            // on a label: `aesthetics-aesthetics-2` put its trail on the "3" of 3 YOU FEEL
+            // IT (found in the render, 11 Sep 2026). Words only — a four-unit disc over a
+            // line of a diagram is not something a reader loses.
+            if (discsOf(rx, tailY, t.discs, Math.round(cx)).some((d) => words.some((it) => hit(d, it.b)))) continue;
             const cost = up * 2 + Math.abs(sx)
               + (mode === 'text' ? OVER_ART : 0) + (3 - t.discs) * SHORT_TRAIL;
             if (!best || cost < best.cost) {
@@ -319,25 +400,60 @@ for (const [id, beats] of Object.entries(J.words)) {
   const walk = await walkOf(id);
   const codes = CODES.get(id) || [];
   const k = scaleOf(id);
-  const hat = (HAT[id]?.up ?? 0);
+  const hat = HATS(id).lead * k;
+  // The lone "?", arrow or digit the probe does not record (`glyphBoxesOf`).
+  const glyphs = glyphBoxesOf(id);
+  // WHAT THE CAMERA SHOWS ON A BEAT, in a lesson that has one: the frame it rests on
+  // (its must-box) and every tour station it visits, both ends of a follow. A lesson
+  // without a camera shows its whole band, which `place` already keeps the box inside.
+  const cameraOn = /\bcamera=\{/.test(sceneOf(id) ?? '');
+  const mustWin = (k) => (J.boxes[id]?.[k] ? windowOf(J.boxes[id][k], band, GROUND_Y) : null);
+  const toured = (k) => !graded[k] && (TOURS[id]?.[k]?.length ?? 0) > 0;
+  // WHERE THE CAMERA LEAVES BEAT k. A beat with no tour of its own that is not a
+  // question does not travel at all — CinematicPlayer HOLDS the shot the camera was
+  // already drawing — so its frame is wherever the last beat that moved it left it.
+  // This model used the beat's own resting frame instead, and `epistemology-knowledge-7`
+  // hung beat 1's thought for a wide shot while the camera sat pushed in on beat 0's
+  // station, cutting the bubble off the picture (found in the render, 11 Sep 2026).
+  const leaves = (k) => {
+    if (toured(k)) {
+      const last = TOURS[id][k][TOURS[id][k].length - 1];
+      return windowOf(last.length === 10 ? last.slice(6, 10) : last.slice(0, 4), band, GROUND_Y);
+    }
+    if (k === 0 || graded[k]) return mustWin(k);
+    return leaves(k - 1);
+  };
+  const windowsAt = (i) => {
+    if (!cameraOn) return [];
+    if (toured(i)) {
+      return TOURS[id][i].flatMap((st) => [windowOf(st.slice(0, 4), band, GROUND_Y),
+        ...(st.length === 10 ? [windowOf(st.slice(6, 10), band, GROUND_Y)] : [])]);
+    }
+    const w = i === 0 || graded[i] ? mustWin(i) : leaves(i - 1);
+    return w ? [w] : [];
+  };
   const at = [];
   const cands = [];
   for (const [i, items] of beats.entries()) {
     // What this beat would actually draw: his thought, or — on a graded beat —
     // the longer of the two answer lines it could land on.
     let text = null;
+    let face = INTER;
     if (graded[i]) {
       const a = quipFor(id, i, true);
       const b = quipFor(id, i, false);
-      text = boxH(a).h >= boxH(b).h ? a : b;
+      face = SAY_FACE;
+      text = boxH(a, face).h >= boxH(b, face).h ? a : b;
     } else if (said[i]) text = said[i];
     if (!text) { at.push(null); continue; }
-    const { h } = boxH(text);
+    const { h } = boxH(text, face);
     // The band is passed IN, because a box above its top edge is not subtle, it
     // is gone (H59) — and checking it afterwards would throw away a placement a
-    // shorter trail could have saved.
-    const p = place(items, BOX_W, h, band[0], null, walk ? walk[i] : undefined,
-      { rise: riseOf(codes[i]) * k, hat });
+    // shorter trail could have saved. The camera's frames are passed in for the
+    // same reason.
+    const p = place([...items, ...glyphs], BOX_W, h, band[0], null, walk ? walk[i] : undefined,
+      { rise: riseOf(codes[i]) * k, hat, foot: FOOT * k, lift: graded[i] ? (ANSWER_LIFT[id] ?? 0) : 0 },
+      windowsAt(i), graded[i] ? sealsOf(items) : []);
     if (!p) { at.push(null); nowhere += 1; continue; }
     at.push([p.x, p.tailY, p.discs, p.headX]);
     // The answer line is not rationed — it is his reply to something the reader
@@ -359,8 +475,10 @@ for (const [id, beats] of Object.entries(J.words)) {
   const cue = VISITOR[id];
   if (cue && beats[cue.enter]) {
     const { h } = boxH(visitorSays(id));
-    const p = place(beats[cue.enter], BOX_W, h, band[0], { cx: cue.x, crown: CROWN });
-    if (p) { vis = [cue.enter, p.x, p.tailY, p.discs]; visLines += 1; }
+    const p = place([...beats[cue.enter], ...glyphs], BOX_W, h, band[0], { cx: cue.x, crown: CROWN - HATS(id).second }, undefined, undefined, windowsAt(cue.enter));
+    // HIS head x rides along, so the trail leans to him: the player used to be
+    // handed the box's own x as the head, and the discs hung straight down beside him.
+    if (p) { vis = [cue.enter, p.x, p.tailY, p.discs, p.headX]; visLines += 1; }
   }
   // ── AND NOW THE RATIONING, LAST, SO EVERY CANDIDATE WAS COSTED FIRST ─────
   //
@@ -401,7 +519,7 @@ console.log(`${rows.length} lessons`);
 console.log(`  ${shown} thought(s) shown — ${(shown / rows.length).toFixed(2)} a lesson, of ${shown + held} authored`);
 console.log(`  a thought's tail clears his head by:   ${stat(ups)}`);
 console.log(`  and sits sideways of it by:           ${stat(sides)}  (a trail leans ${DRIFT.toFixed(0)})`);
-console.log(`  an answer line's, which cannot move:   ${stat(replyUps)}`);
+console.log(`  ${replyUps.length} answer line(s) placed, clearing his head by: ${stat(replyUps)}`);
 console.log(`  ${floaters.length} answer line(s) more than ${FLOAT} clear of his head${floaters.length ? `: ${floaters.slice(0, 3).join(' · ')}` : ''}`);
 console.log(`  thoughts a lesson: ${[0, 1, 2].map((n) => `${perLesson.filter((v) => v === n).length}×${n}`).join(' · ')}`);
 console.log(`  ${clear} placement(s) sit in fully clear space`);

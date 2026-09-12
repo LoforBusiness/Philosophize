@@ -13,6 +13,7 @@ import {
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import { Shapes, ell, bar, tri, type Part } from './Silhouette';
 
 // A TERROR, A METER, AND WHAT HAPPENS NEXT — and a frame that changes exactly one
 // of the three (H64). All three are the Q1 targets, so the question is whether the
@@ -23,10 +24,10 @@ import { followMoves, kindOf, seedOf } from './camera';
 // · the CONSEQUENCE strip is x 30…240, y 240…276 — 210 × 36.
 // · the FEAR meter is x 30…240, y 296…332 — the same 210 × 36, deliberately, so
 //   the two readings read as a pair rather than as a caption and a gauge.
-// · the FRAME is x 254…396, y 292…500 and the SHAPE stands inside it at
-//   x 274…376, y 316…500, its three spikes topping out at y 298. The frame is
-//   fourteen units clear of the strips' column and the shape twenty inside the
-//   frame, so nothing touches anything (D23).
+// · the FRAME is x 254…396, y 292…500 and the SHAPE stands inside it in a
+//   102 × 184 box at x 274…376, y 316…500 — a creature, horns topping out at
+//   y 344. The frame is fourteen units clear of the strips' column and the shape
+//   twenty inside the frame, so nothing touches anything (D23).
 // · highest ink is the consequence strip at y 240; lowest is the ground at 500.
 //   The figure's crown is y 397 — below every strip and left of the frame.
 //
@@ -46,6 +47,29 @@ const FRAME_T = 292;
 const SHAPE_L = 274;
 const SHAPE_W = 102;
 const SHAPE_T = 316;
+
+/**
+ * THE SHAPE IN THE DARK, in its own 102 × 184 box.
+ *
+ * It was a rounded box with three spikes and two eyes: furniture with a face. The
+ * horror silhouette the references agree on is a TALL, NARROW mass with HIGH, HUNCHED
+ * shoulders and a small head sitting low and forward between them; arms LONGER than
+ * the torso, ending in long claws that break the outline; and clear paper between
+ * the arms and the body and between the legs — the gaps and the broken edge are what
+ * stop it reading as a block. Nothing inside it but two pale slits for eyes.
+ */
+const CREATURE: Part[] = [
+  bar(40, 120, 34, 181, 12, INK), bar(62, 120, 70, 181, 12, INK),
+  bar(34, 181, 23, 183, 5, INK), bar(70, 181, 81, 183, 5, INK),
+  bar(27, 58, 18, 92, 9, INK), bar(18, 92, 12, 128, 7.5, INK),
+  bar(12, 128, 5, 142, 2.4, INK), bar(12, 128, 10.5, 145, 2.4, INK), bar(12, 128, 17, 143, 2.4, INK),
+  bar(75, 58, 84, 92, 9, INK), bar(84, 92, 90, 128, 7.5, INK),
+  bar(90, 128, 97, 142, 2.4, INK), bar(90, 128, 91.5, 145, 2.4, INK), bar(90, 128, 85, 143, 2.4, INK),
+  ell(51, 90, 42, 74, INK), ell(38, 56, 28, 20, INK, -22), ell(64, 54, 28, 20, INK, 22),
+  ell(51, 44, 18, 20, INK),
+  tri(45, 33, 5, 9, 'up', INK, -16), tri(57, 33, 5, 9, 'up', INK, 16),
+  ell(47, 45, 4.4, 2.2, PAPER, 14), ell(55.5, 45, 4.4, 2.2, PAPER, -14),
+];
 
 const G = BEATS.map((b) => b.g ?? 0);
 const X = BEATS.map((b) => b.x ?? 160);
@@ -137,17 +161,10 @@ export default function Aesthetics17Scene({ clock, bt, bi, i, picked, onPick, pi
           id="shape" correct={false} picked={picked} onPick={onPick}
           style={styles.fill} disabled={!live || answered}
         >
-          <View
-            style={[
-              styles.shapeBody,
-              answered && picked === 'shape' && styles.pickWrong,
-            ]}
-          >
-            <View style={[styles.spike, { left: 10 }]} pointerEvents="none" />
-            <View style={[styles.spike, { left: 44, height: 26 }]} pointerEvents="none" />
-            <View style={[styles.spike, { left: 78 }]} pointerEvents="none" />
-            <View style={[styles.eye, { left: 26 }]} pointerEvents="none" />
-            <View style={[styles.eye, { left: 62 }]} pointerEvents="none" />
+          {/* A wrong pick marks the creature by form: it greys, rather than a box
+              round it changing its border. */}
+          <View style={styles.shapeBody} pointerEvents="none">
+            <Shapes parts={CREATURE} color={answered && picked === 'shape' ? SOFT : undefined} />
           </View>
         </Target>
       </Animated.View>
@@ -221,16 +238,7 @@ const styles = StyleSheet.create({
   shapeWrap: {
     position: 'absolute', left: SHAPE_L, top: SHAPE_T, width: SHAPE_W, height: 500 - SHAPE_T,
   },
-  shapeBody: {
-    flex: 1, borderWidth: 2.5, borderColor: INK, borderTopLeftRadius: 6, borderTopRightRadius: 6,
-    backgroundColor: STONE,
-  },
-  spike: {
-    position: 'absolute', top: -18, width: 14, height: 20,
-    borderLeftWidth: 7, borderRightWidth: 7, borderBottomWidth: 20,
-    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: INK,
-  },
-  eye: { position: 'absolute', top: 34, width: 10, height: 10, borderRadius: 5, backgroundColor: INK },
+  shapeBody: { flex: 1 },
 
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },

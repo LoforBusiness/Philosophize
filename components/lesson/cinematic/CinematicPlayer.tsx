@@ -24,7 +24,7 @@ import { GAZE } from './gazeTargets';
 import { WardrobeProvider } from './wardrobeContext';
 import Visitor from './Visitor';
 import { VISITOR } from '../../../data/lessonVisitor';
-import { toursOff } from './tourFlag';
+import { thoughtsOff, toursOff } from './tourFlag';
 import { cue, touch, heard } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import ChoiceCards, { seedFor } from './ChoiceCards';
@@ -998,17 +998,23 @@ export default function CinematicPlayer({
     setBubbles((bs) => (bs.some((b) => b.show) ? bs.map((b) => (b.show ? { ...b, show: false } : b)) : bs));
     const sweep = setTimeout(() => setBubbles((bs) => (bs.length ? bs.filter((b) => b.show) : bs)), EXIT_MS + 100);
     const clear = () => clearTimeout(sweep);
-    if (!text && !vis) return clear;
+    // Never while measure-must is recording: a bubble drawn there becomes stage text in
+    // the must-boxes, and every table built on them then steers round it (tourFlag.ts).
+    if ((!text && !vis) || thoughtsOff()) return clear;
     // 620ms IN — except on the beat the second figure walks in, where his line
     // is placed at the mark he is heading FOR. At 620ms he is still crossing the
     // stage and the bubble hangs over the spot he has not reached yet, which
     // reads as a caption waiting for him. His walk takes most of the beat
     // (`rig.moveTr` at the house base), so his line waits for it.
-    const delay = vis ? Math.max(620, (beat.dur ?? 4) * 1000 * 0.78) : 620;
+    // AND NOT BEFORE THE CAMERA HAS ARRIVED. A toured beat's first station travels for
+    // up to 1.2s, and make:thoughts placed the bubble inside the shot it arrives at —
+    // not inside every shot it passes through, which at 620ms it was still crossing.
+    const arrive = Math.round((tourData[i]?.trs[0] ?? 0) * 1000) + 80;
+    const delay = vis ? Math.max(620, arrive, (beat.dur ?? 4) * 1000 * 0.78) : Math.max(620, arrive);
     const t = setTimeout(() => {
       const next: Bub[] = [];
       if (text && here) next.push({ key: `t${i}`, text, kind: 'think', at: here, refX: walk ? walk[i] ?? 0 : undefined, show: true });
-      if (vis) next.push({ key: `v${i}`, text: visitorSays(lesson.id), kind: 'think', at: [vis[1], vis[2], vis[3], vis[1]], show: true });
+      if (vis) next.push({ key: `v${i}`, text: visitorSays(lesson.id), kind: 'think', at: [vis[1], vis[2], vis[3], vis[4] ?? vis[1]], show: true });
       setBubbles((bs) => [...bs, ...next]);
     }, delay);
     return () => { clear(); clearTimeout(t); };
@@ -1109,7 +1115,7 @@ export default function CinematicPlayer({
     // It is APPENDED rather than swapped in, and on a graded beat there is never
     // anything to displace: group O keeps a thought off a beat the reader is still
     // answering, so the stage is his to talk from.
-    if (spot) {
+    if (spot && !thoughtsOff()) {
       setBubbles((bs) => [...bs, {
         key: `a${i}`, text: quipFor(lesson.id, i, isCorrect), kind: 'say', at: spot,
         refX: walk ? walk[i] ?? 0 : undefined, show: true,

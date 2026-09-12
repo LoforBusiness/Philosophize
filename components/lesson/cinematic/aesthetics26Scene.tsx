@@ -12,6 +12,7 @@ import {
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import { Shapes, Outlined, ell, bar, type Part } from './Silhouette';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A LAWN FLAMINGO THAT NEVER MOVES, AND AN EYE BESIDE IT THAT DOES.
@@ -20,12 +21,14 @@ import { followMoves, kindOf, seedOf } from './camera';
 //
 // · the PLINTH is 160×26 at x 214 (214…374), y 400…426 — the filled STONE mass the
 //   bird stands on.
-// · the FLAMINGO is built from its field marks rather than from a silhouette: two
-//   LEGS of 3 wide at x 250 and x 262, y 356…400; a BODY of 52×34 at x 228
-//   (228…280), y 322…356, rounded to 17 so it is an oval and not a box; a NECK of
-//   8×50 at x 264, leaning 14° off vertical from its foot at y 324; a HEAD of
-//   18×14 at x 258, y 266…280; and a BEAK that turns DOWN — the one mark that
-//   makes the bird a flamingo rather than a heron.
+// · the FLAMINGO is the 1957 lawn ornament, head erect, taken from its reference
+//   rather than from memory: two straight METAL RODS with no joint and no feet
+//   (x 262 and 274, y 347…403 — a real flamingo's ankle bends halfway up, the toy's
+//   never does); a TEARDROP body, x 213…295, y 319…350, tapering back to a point;
+//   an S-CURVED neck of three bars rising off its breast; a small head at y 267…281;
+//   and a bill that turns sharply DOWN with a dark tip — the one mark that makes the
+//   bird a flamingo rather than a heron. One outline round the whole bird, so the neck
+//   grows out of the body instead of being laid across it.
 // · NOTHING IN THAT LIST RESPONDS TO THE READER. The lesson's claim is that the
 //   object barely changes and the attitude does, so a scene that made the bird
 //   tackier as the reader slid toward camp would be saying the opposite of the
@@ -51,17 +54,19 @@ const PLINTH_Y = 400;
 const PLINTH_W = 160;
 const PLINTH_H = 26;
 
-const BODY_X = 228;
-const BODY_Y = 322;
-const BODY_W = 52;
-const BODY_H = 34;
-const LEG_Y = 356;
-const LEG_H = 44;
-const NECK_X = 264;
-const NECK_Y = 274;
-const NECK_H = 50;
-const HEAD_X = 258;
-const HEAD_Y = 266;
+/** The two rods the ornament is pushed into the lawn on. */
+const FLAMINGO_RODS: Part[] = [bar(262, 349, 262, 403, 2.2, INK), bar(274, 347, 274, 403, 2.2, INK)];
+/** The moulded bird: body, tail, the three bars of the neck, the head and the bill's base. */
+const FLAMINGO: Part[] = [
+  ell(268, 334, 50, 27, STONE, -4), bar(250, 334, 231, 331, 12, STONE), bar(231, 331, 219, 328, 6, STONE),
+  bar(283, 327, 277, 309, 7, STONE), bar(277, 309, 283, 292, 6.5, STONE), bar(283, 292, 279, 278, 6, STONE),
+  ell(282, 274, 13, 10.5, STONE, 12), bar(287, 273, 293, 277, 5, STONE),
+];
+/** The dark tip of the down-turned bill, the raised eye, and the moulded wing edge. */
+const FLAMINGO_MARKS: Part[] = [
+  bar(293, 277, 292.2, 285.5, 3.4, INK), ell(282.5, 272.5, 2.6, 2.6, INK),
+  bar(249, 331, 263, 338, 1.6, INK), bar(263, 338, 280, 336, 1.6, INK),
+];
 
 const EYE_X = 140;
 const EYE_Y = 300;
@@ -143,14 +148,11 @@ export default function Aesthetics26Scene({ clock, bt, bi, i, picked, onPick, dr
 
       <Animated.View style={[StyleSheet.absoluteFill, birdStyle]} pointerEvents="none">
         <View style={styles.plinth} />
-        <View style={[styles.leg, { left: 250 }]} />
-        <View style={[styles.leg, { left: 262 }]} />
-        <View style={styles.birdBody} />
-        <View style={styles.neck} />
-        <View style={styles.birdHead} />
-        {/* THE DOWNTURNED BEAK — the one mark that makes it a flamingo and not a
+        <Shapes parts={FLAMINGO_RODS} />
+        <Outlined parts={FLAMINGO} width={2} line={INK} />
+        {/* THE DOWNTURNED BILL — the one mark that makes it a flamingo and not a
             heron, which is why it is drawn rather than implied. */}
-        <View style={styles.beak} />
+        <Shapes parts={FLAMINGO_MARKS} />
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, eyeStyle]} pointerEvents="none">
@@ -200,25 +202,6 @@ const styles = StyleSheet.create({
   plinth: {
     position: 'absolute', left: PLINTH_X, top: PLINTH_Y, width: PLINTH_W, height: PLINTH_H,
     borderWidth: 2, borderColor: INK, backgroundColor: STONE,
-  },
-  leg: { position: 'absolute', top: LEG_Y, width: 3, height: LEG_H, backgroundColor: INK },
-  birdBody: {
-    position: 'absolute', left: BODY_X, top: BODY_Y, width: BODY_W, height: BODY_H, borderRadius: 17,
-    borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
-  },
-  // PIVOTED AT ITS FOOT, so leaning the neck cannot lift it off the bird's body.
-  neck: {
-    position: 'absolute', left: NECK_X, top: NECK_Y, width: 8, height: NECK_H,
-    backgroundColor: INK, transformOrigin: '50% 100%', transform: [{ rotate: '14deg' }],
-  },
-  birdHead: {
-    position: 'absolute', left: HEAD_X, top: HEAD_Y, width: 18, height: 14, borderRadius: 7,
-    backgroundColor: INK,
-  },
-  beak: {
-    position: 'absolute', left: 250, top: 276, width: 0, height: 0,
-    borderLeftWidth: 5, borderRightWidth: 5, borderTopWidth: 13,
-    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: INK,
   },
 
   // THE ONE THING THE READER MOVES. Clipped, so a closing lid stays in its lens.

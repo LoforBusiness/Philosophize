@@ -13,6 +13,7 @@ import {
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
+import { Shapes, Outlined, ell, bar, rect, tri, type Part } from './Silhouette';
 
 // THE CONFIDENCE CHART. Hume's problem drawn as the picture it actually is: a bar
 // chart of the chicken's confidence climbing one fed morning at a time, a trend line
@@ -59,6 +60,32 @@ const TREND_ANG = '-33.69deg';
 const HEN_L = 120;
 const HEN_T = GROUND - 76;              // 424 — the hen stands on the ground line
 const FEED_X = [100, 108, 116];
+
+// ── THE HEN, in her own 88 × 76 box, facing right (the box is flipped to face the feed)
+//
+// She was a paper egg with a disc on top, a pill for a comb and a head as wide as
+// her body, and the whole of her bobbed up and down: a toy, not a bird. The reference
+// is specific about what makes a hen and not a rooster or a duck — a heavy body,
+// DEEPEST AT THE BREAST; a short tail of straight feathers rising at the top rear; a
+// small head with a small comb and a wattle; a short beak; and bare shanks dropping
+// from the rear half of the body with three toes forward. A tall comb or a long
+// curved tail is a rooster, long legs a wader.
+//
+// She PECKS FROM THE BASE OF HER NECK. The head turns forward and down about that
+// joint while the body holds still, which is what pecking is; moving the whole bird
+// was a hop. Outlined as one union, so the neck grows out of the body with no seam.
+const HEN_FEET: Part[] = [
+  bar(36, 58, 36, 72, 3, INK), bar(46, 58, 46, 72, 3, INK),
+  bar(36, 73, 44, 73.5, 2.4, INK), bar(46, 73, 54, 73.5, 2.4, INK),
+  bar(36, 73, 32.5, 72.5, 2, INK), bar(46, 73, 42.5, 72.5, 2, INK),
+];
+const HEN_BODY: Part[] = [rect(22, 30, 14, 24, PAPER, -35, 4), ell(41, 46, 56, 36, PAPER, 10)];
+/** In the neck's own 40 × 40 box, whose bottom centre is the pivot at (60, 36). */
+const HEN_HEAD: Part[] = [bar(19, 40, 22, 24, 12, PAPER), ell(24, 18, 17, 17, PAPER)];
+const HEN_COMB: Part[] = [ell(19.5, 9.5, 5, 5, INK), ell(23.5, 8, 5.5, 5.5, INK), ell(27.5, 9.5, 5, 5, INK)];
+const HEN_FACE: Part[] = [tri(35.5, 19, 8, 6, 'right', INK, 6), ell(32, 26, 4, 6, INK), ell(26.5, 16, 3.4, 3.4, INK)];
+/** How far the head turns down at the bottom of a peck. */
+const PECK_DEG = 45;
 
 const P_CODE = BEATS.map((b) => b.p ?? 0);
 const DAYS = BEATS.map((b) => b.days ?? 0);
@@ -108,8 +135,8 @@ export default function Epistemology7Scene({ clock, bt, bi, gazeX, gazeY, gazeOn
     opacity: SCENE.value.twist,
     transform: [{ scale: 0.82 + 0.18 * SCENE.value.twist }],
   }));
-  const henStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: SCENE.value.peck * 7 }, { scaleX: -1 }],
+  const peckStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${SCENE.value.peck * PECK_DEG}deg` }],
   }));
 
   return (
@@ -150,15 +177,21 @@ export default function Epistemology7Scene({ clock, bt, bi, gazeX, gazeY, gazeOn
         <View key={x} style={[styles.feed, { left: x }]} pointerEvents="none" />
       ))}
 
-      <Animated.View style={[styles.hen, henStyle]} pointerEvents="none">
-        <View style={styles.henBody} />
-        <View style={styles.henHead} />
-        <View style={styles.henComb} />
-        <View style={styles.henBeak} />
-        <View style={styles.henEye} />
-        <View style={[styles.henLeg, { left: 26 }]} />
-        <View style={[styles.henLeg, { left: 44 }]} />
-      </Animated.View>
+      {/* Both outlines first, then both fills, so the neck and the body share ONE
+          outline; the comb goes under the head's fill and the face over it. */}
+      <View style={styles.hen} pointerEvents="none">
+        <Shapes parts={HEN_FEET} />
+        <Outlined parts={HEN_BODY} width={3} line={INK} pass="line" />
+        <Animated.View style={[styles.henNeck, peckStyle]}>
+          <Outlined parts={HEN_HEAD} width={3} line={INK} pass="line" />
+          <Shapes parts={HEN_COMB} />
+        </Animated.View>
+        <Outlined parts={HEN_BODY} width={3} line={INK} pass="fill" />
+        <Animated.View style={[styles.henNeck, peckStyle]}>
+          <Outlined parts={HEN_HEAD} width={3} line={INK} pass="fill" />
+          <Shapes parts={HEN_FACE} />
+        </Animated.View>
+      </View>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
@@ -257,23 +290,10 @@ const styles = StyleSheet.create({
 
   // ── the yard ────────────────────────────────────────────────────────────────
   feed: { position: 'absolute', top: GROUND - 4, width: 4, height: 4, borderRadius: 2, backgroundColor: SOFT },
-  hen: { position: 'absolute', left: HEN_L, top: HEN_T, width: 88, height: 76 },
-  henBody: {
-    position: 'absolute', left: 7, top: 22, width: 68, height: 44, borderRadius: 25,
-    borderWidth: 3, borderColor: INK, backgroundColor: PAPER,
-  },
-  henHead: {
-    position: 'absolute', left: 48, top: 2, width: 30, height: 30, borderRadius: 15,
-    borderWidth: 3, borderColor: INK, backgroundColor: PAPER,
-  },
-  henComb: { position: 'absolute', left: 58, top: -5, width: 14, height: 10, borderRadius: 5, backgroundColor: INK },
-  henBeak: {
-    position: 'absolute', left: 76, top: 14, width: 0, height: 0,
-    borderTopWidth: 5, borderBottomWidth: 5, borderLeftWidth: 12,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
-  },
-  henEye: { position: 'absolute', left: 64, top: 11, width: 5, height: 5, borderRadius: 2.5, backgroundColor: INK },
-  henLeg: { position: 'absolute', top: 64, width: 3, height: 12, backgroundColor: INK },
+  // Flipped to face the farmer and the feed.
+  hen: { position: 'absolute', left: HEN_L, top: HEN_T, width: 88, height: 76, transform: [{ scaleX: -1 }] },
+  // PIVOTED AT ITS BOTTOM CENTRE, the base of her neck (Z4).
+  henNeck: { position: 'absolute', left: 40, top: -4, width: 40, height: 40, transformOrigin: '50% 100%' },
 });
 
 // Art runs from the chart titles (y 234) down to the farmer's ankles (y 508). The

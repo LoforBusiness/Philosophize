@@ -31,3 +31,21 @@ export function setToursOff(v: boolean) {
 export function toursOff(): boolean {
   return off;
 }
+
+// AND A SECOND SWITCH, FOR THE BUBBLES, FOR THE SAME HARNESS.
+//
+// The player draws the thought bubble and the answer reply inside the stage, and the
+// probe records every worded leaf there — so a lesson re-measured with bubbles live
+// records its own bubble as stage text, with the box and the trail as art. Its boxes
+// then protect the bubble, the camera frames it, and make:thoughts places the next
+// bubble clear of where the last one was: a table that feeds on its own output.
+// Five of twelve lessons re-measured on 2026-09-11 came back that way.
+let quiet = false;
+
+export function setThoughtsOff(v: boolean) {
+  quiet = v;
+}
+
+export function thoughtsOff(): boolean {
+  return quiet;
+}

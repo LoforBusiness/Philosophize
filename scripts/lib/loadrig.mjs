@@ -66,3 +66,34 @@ export function skullRise(RIG, MOVES, code, ground = 500) {
   }
   return ground - top;
 }
+
+let hats = null;
+
+/**
+ * HOW FAR ABOVE HIS SKULL EACH FIGURE'S OWN HAT RISES, per lesson, in rig units.
+ *
+ * `wardrobeReach` in `mustBoxes.ts.json` is the widest costume ON THE STAGE — the
+ * right number for growing every figure's must-box, and the wrong one for hanging a
+ * bubble off one man's head: a bare lead standing beside a second figure in a fez
+ * was treated as wearing the fez, and his bubbles hung ten units loose. This reads
+ * the lesson's [LEAD, SECOND] looks and each look's own reach instead.
+ *
+ * Resolves to `(id) => ({ lead, second })`. `wardrobe.ts` has no imports, so it
+ * transpiles on its own beside the rig.
+ */
+export async function loadHats() {
+  if (hats) return hats;
+  const { transform } = await import(
+    pathToFileURL(path.join(REPO, 'node_modules/sucrase/dist/index.js')).href
+  );
+  const tmp = path.join(os.tmpdir(), 'philosophize-rig');
+  fs.mkdirSync(tmp, { recursive: true });
+  const file = path.join(tmp, 'wardrobe.mjs');
+  fs.writeFileSync(file, transform(fs.readFileSync(path.join(REPO, `${SRC}/wardrobe.ts`), 'utf8'), { transforms: ['typescript'] }).code);
+  const W = await import(pathToFileURL(file).href);
+  const { loadTs } = await import('./loadts.mjs');
+  const { WARDROBE } = await loadTs(path.join(REPO, 'data/lessonWardrobe.ts'));
+  const up = (look) => W.reachOf(W.BY_ID[look] || { pieces: [] }).up;
+  hats = (id) => ({ lead: up(WARDROBE[id]?.[0] ?? 'plain'), second: up(WARDROBE[id]?.[1] ?? 'plain') });
+  return hats;
+}

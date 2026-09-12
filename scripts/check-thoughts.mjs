@@ -54,6 +54,12 @@ const INNER = BOX_W - 2 * PAD - 2 * BORDER - 1;
 console.log(`  the box is ${BOX_W} wide · ${INNER.toFixed(1)} of room for words at ${SIZE}px\n`);
 
 const INTER = loadFont('node_modules/@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf');
+/** The answer line is set in its own face (`sayText`), so it is measured in it. */
+const SAY_FACE = (() => {
+  const m = KIT.match(/sayText:\s*\{[^}]*fontFamily:\s*'Inter_(\w+)'/);
+  if (!m) { bad('could not read the answer line face out of cinematicKit'); return INTER; }
+  return loadFont(`node_modules/@expo-google-fonts/inter/${m[1]}/Inter_${m[1]}.ttf`);
+})();
 
 /** Quoted strings out of a TS array, comments stripped (L8). */
 function strings(src, name) {
@@ -78,9 +84,9 @@ const MAX_ROWS = 2;
 const tall = [];
 const widest = { line: '', w: 0 };
 for (const line of [...RIGHT, ...WRONG]) {
-  const rows = wrap(line, SIZE, INNER, INTER);
+  const rows = wrap(line, SIZE, INNER, SAY_FACE);
   for (const r of rows) {
-    const w = INTER.width(r, SIZE);
+    const w = SAY_FACE.width(r, SIZE);
     if (w > widest.w) { widest.w = w; widest.line = r; }
   }
   if (rows.length > MAX_ROWS) tall.push(`"${line}" wraps to ${rows.length}`);
@@ -90,6 +96,20 @@ if (!tall.length) {
     `widest row "${widest.line}" at ${widest.w.toFixed(0)} of ${INNER.toFixed(0)}`);
 } else {
   bad(`${tall.length} answer line(s) need a third row`, tall.slice(0, 4).join(' · '));
+}
+
+// ── 1b · AND BOTH FACES ARE ONES THE APP ACTUALLY LOADS ─────────────────────
+//
+// `sayText` named Inter_600SemiBold, and the root layout loads 400, 500 and 700 —
+// so every answer line fell back to the platform's own face (a serif in the
+// browser) and was measured here in a face it was never drawn in. Found in the
+// render on 11 Sep 2026; nothing read the name against the loader.
+const LAYOUT = read('app/_layout.tsx');
+for (const style of ['thoughtText', 'sayText']) {
+  const f = KIT.match(new RegExp(`${style}:\\s*\\{[^}]*fontFamily:\\s*'(\\w+)'`))?.[1];
+  if (!f) bad(`could not read ${style}'s face out of cinematicKit`);
+  else if (!new RegExp(`\\b${f}\\b`).test(LAYOUT)) bad(`${style} is set in ${f}, which app/_layout.tsx never loads`);
+  else ok(`${style} is set in ${f}, which the app loads`);
 }
 
 // ── 2 · THE JOKE IS ON THE ANSWER, NOT THE ANSWERER ─────────────────────────
@@ -185,30 +205,58 @@ else ok('no thought sits on a beat the reader is still answering (group O)');
 // the costume reach. A generator that silently stops avoiding words would leave
 // every table entry looking exactly as it does now.
 const J = JSON.parse(fs.readFileSync('components/lesson/cinematic/mustBoxes.ts.json', 'utf8'));
+const { wordsOf, sealsOf, glyphBoxesOf } = await import('./lib/scenefig.mjs');
 const TRAIL_H = { 3: 27.5, 2: 16, 1: 7 };
 const hits = (a, b) => a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + b[3] && b[1] < a[1] + a[3];
+// THE TRAIL'S DISCS, where `Thought` draws them: each disc's size and the gap under
+// it out of the component's styles, leaning toward his head by THINK_FAN. Smallest
+// disc first, from the bottom up.
+const PUFF = [3, 2, 1].map((n) => ({
+  size: num(new RegExp(`puff${n}:\\s*\\{\\s*width:\\s*([\\d.]+)`), `puff${n}'s size`),
+  gap: n === 3 ? 0 : num(new RegExp(`puff${n}:\\s*\\{[^}]*marginBottom:\\s*([\\d.]+)`), `puff${n}'s gap`),
+}));
+const FAN = (KIT.match(/const THINK_FAN = \[([^\]]+)\]/)?.[1] ?? '').split(',').map(Number).reverse();
+if (FAN.length !== 3 || FAN.some(Number.isNaN)) bad('could not read THINK_FAN out of cinematicKit');
+const discsOf = (x, tailY, n, headX) => {
+  const out = [];
+  let bottom = tailY;
+  for (let k = 0; k < n; k += 1) {
+    bottom -= PUFF[k].gap;
+    const c = x + (headX - x) * FAN[k];
+    out.push([c - PUFF[k].size / 2, bottom - PUFF[k].size, PUFF[k].size, PUFF[k].size]);
+    bottom -= PUFF[k].size;
+  }
+  return out;
+};
 const covered = [];
 let placed = 0;
 for (const l of LESSONS) {
   const row = THOUGHTS[l.id];
   const beats = J.words[l.id];
   if (!row || !beats) continue;
+  const glyphs = glyphBoxesOf(l.id);
   for (const [i, at] of row.at.entries()) {
     if (!at || !beats[i]) continue;
     const text = l.beats[i].graded ? 'Wrong, but in good company.' : row.say[i];
     if (!text) continue;
     placed += 1;
-    const rows = wrap(text, SIZE, INNER, INTER).length;
+    const rows = wrap(text, SIZE, INNER, l.beats[i].graded ? SAY_FACE : INTER).length;
     const h = rows * LH + 2 * VPAD + 2 * BORDER;
     const box = [at[0] - BOX_W / 2, at[1] - TRAIL_H[at[2]] - h, BOX_W, h];
-    for (const it of beats[i]) {
-      if (it.k !== 'text') continue;
-      if (hits(box, it.b)) { covered.push(`${l.id}[${i}] over "${(it.t || '').slice(0, 18)}"`); break; }
+    // THE TRAIL TOO. This held the box alone, and the render found a disc resting on
+    // the "3" of `aesthetics-aesthetics-2`'s 3 YOU FEEL IT that the box had cleared.
+    const parts = [box, ...discsOf(at[0], at[1], at[2], at[3])];
+    // Each word widened to its plate (`wordsOf`), so a row's lone numeral — which
+    // the probe does not record — is held along with the words it numbers.
+    // An ANSWER line also keeps off the corners where the ✕ or ✓ is struck.
+    const keep = [...wordsOf([...beats[i], ...glyphs]), ...(l.beats[i].graded ? sealsOf(beats[i]).map((s) => ({ ...s, t: 'a seal corner' })) : [])];
+    for (const it of keep) {
+      if (parts.some((p) => hits(p, it.b))) { covered.push(`${l.id}[${i}] over "${(it.t || '').slice(0, 18)}"`); break; }
     }
   }
 }
 if (covered.length) bad(`${covered.length} bubble(s) cover a word (D31)`, covered.slice(0, 3).join(' · '));
-else ok(`none of ${placed} placed bubbles covers a word (D31)`);
+else ok(`none of ${placed} placed bubbles covers a word, box or trail (D31)`);
 
 // ── 8 · HE THINKS TWICE A LESSON, NOT EVERY TIME THE READER TAPS ────────────
 //
@@ -252,8 +300,8 @@ else ok(`no lesson shows more than ${SHOW} thoughts`, `${thoughts} across ${LESS
 // median of 21 units clear of it with a p90 of 48. This re-derives the same two
 // answers the generator does — whose box, and where his head is inside it — and
 // holds what came out.
-const { loadRig, skullRise } = await import('./lib/loadrig.mjs');
-const { walkOf, scaleOf, crownOf } = await import('./lib/scenefig.mjs');
+const { loadRig, skullRise, loadHats } = await import('./lib/loadrig.mjs');
+const { walkOf, scaleOf, crownOf, ANSWER_LIFT } = await import('./lib/scenefig.mjs');
 const { RIG, MOVES } = await loadRig();
 const rise = new Map();
 const riseOf = (c) => {
@@ -275,10 +323,37 @@ const FLOAT = 20;
  * there was no single clamp left to read.
  */
 const DRIFT = num(/export const THINK_DRIFT = ([\d.]+);/, 'the drift limit');
-const HAT = J.wardrobeReach || {};
+/** His OWN hat, never the stage's widest costume (see `crownOf`). */
+const HATS = await loadHats();
+/**
+ * AND NO BUBBLE MAY SIT CLOSER TO HIS HEAD THAN THE GENERATOR ALLOWS.
+ *
+ * At four units clear the smallest disc came to rest on his cap in the render, so
+ * `make:thoughts` holds CLEAR_MIN, and this reads the same number out of it so the
+ * two cannot drift. Thoughts and answer lines alike, since both hang from his head.
+ */
+const CLEAR_MIN = (() => {
+  const m = read('scripts/make-thoughts.mjs').match(/const CLEAR_MIN = ([\d.]+);/);
+  if (!m) { bad('could not read CLEAR_MIN out of make-thoughts'); return null; }
+  return parseFloat(m[1]);
+})();
 const far = [];
 const adrift = [];
+const tight = [];
 const gaps = [];
+/**
+ * AND IT MUST BE AIMED AT SOMEBODY THE BEAT DRAWS.
+ *
+ * Every rule above measures a bubble against the head `walkOf` names, so when that
+ * answer is wrong they all agree with it. 84 scenes declare a walk track and stand
+ * nobody on it, and for seven of them the track's default was a number between two
+ * people: `aesthetics-aesthetics-4` hung every bubble at x 219 while its lead stood
+ * at 334, over the plinth and across the signature, and this file passed it. So the
+ * head x a bubble points at must fall inside one of that beat's recorded figures,
+ * thoughts and answer lines alike. A beat he WALKS is excused, because a must-box
+ * is one moment and the probe routinely catches him mid-walk.
+ */
+const astray = [];
 let unsure = 0;
 for (const l of LESSONS) {
   const row = THOUGHTS[l.id];
@@ -286,23 +361,34 @@ for (const l of LESSONS) {
   if (!row || !beats) continue;
   const walk = await walkOf(l.id);
   const k = scaleOf(l.id);
-  const hat = HAT[l.id]?.up ?? 0;
+  const hat = HATS(l.id).lead * k;
   for (const [i, a] of row.at.entries()) {
-    // Only his own THOUGHTS. An answer line cannot be declined — it is a reply to
-    // something the reader just did — so a hard rule over it would fail on stages
-    // that simply have no room, and the honest place for that number is the
-    // generator's own report.
-    if (!a || !beats[i] || !row.say[i] || l.beats[i].graded) continue;
+    if (a && beats[i]) {
+      const walks = !!walk && i > 0 && Math.abs((walk[i] ?? 0) - (walk[i - 1] ?? 0)) > 1;
+      const figs = beats[i].filter((it) => it.k === 'fig');
+      if (!walks && figs.length && !figs.some((f) => a[3] >= f.b[0] - 8 && a[3] <= f.b[0] + f.b[2] + 8)) {
+        astray.push(`${l.id}[${i}] aimed at x ${a[3]}`);
+      }
+    }
+    // HIS THOUGHTS AND HIS ANSWER LINES. An answer line used to be exempt, on the
+    // grounds that a reply to something the reader just did could not be declined.
+    // It can, and the render said it must be: `logic-arguments-8` slid its reply 114
+    // units into the answer cards and across the ✕ they had just been given. The
+    // generator now declines a reply with nowhere near his head, so the same rules
+    // hold for both.
+    if (!a || !beats[i] || !(row.say[i] || l.beats[i].graded)) continue;
     const c = crownOf(beats[i].filter((it) => it.k === 'fig'), walk ? walk[i] : undefined,
-      riseOf(l.beats[i].code) * k, hat);
+      riseOf(l.beats[i].code) * k, hat, (RIG.STR.limb / 2) * k);
     if (!c || !c.sure) { unsure += 1; continue; }
-    const gap = c.crown - a[1];
+    // An answer line clears the head the ANSWER stands him at (ANSWER_LIFT).
+    const gap = c.crown - (l.beats[i].graded ? (ANSWER_LIFT[l.id] ?? 0) : 0) - a[1];
     gaps.push(gap);
     // HALF A UNIT OF ROUNDING, and it is the generator's own (AB6 read backwards).
     // `make:thoughts` searches `up` in whole steps and then writes
     // `round(crown - up)`, so a placement it cleared at exactly 20 reads back here
     // as 20.4. The tolerance is the rounding, not a softened rule.
     if (gap > FLOAT + 0.5) far.push(`${l.id}[${i}] ${gap.toFixed(1)} clear`);
+    if (CLEAR_MIN !== null && gap < CLEAR_MIN - 0.5) tight.push(`${l.id}[${i}] ${gap.toFixed(1)} clear`);
     const side = Math.abs(a[0] - a[3]);
     if (side > DRIFT) adrift.push(`${l.id}[${i}] ${side.toFixed(0)} sideways`);
   }
@@ -315,6 +401,14 @@ if (far.length) bad(`${far.length} thought(s) hang more than ${FLOAT} units clea
 // crown falls back to the union and this declines to judge it, so the count of
 // what it skipped is printed beside the count of what it held.
 else ok(`every thought hangs within ${FLOAT} units of his head`, `${gaps.length} measured, median ${med.toFixed(0)} · ${unsure} skipped, no figure the walk track names`);
+
+if (CLEAR_MIN !== null) {
+  if (tight.length) bad(`${tight.length} bubble(s) sit closer than ${CLEAR_MIN} units to his head`, tight.slice(0, 4).join(' · '));
+  else ok(`every bubble keeps at least ${CLEAR_MIN} units off his head and hat`);
+}
+
+if (astray.length) bad(`${astray.length} bubble(s) aimed where the beat draws nobody`, astray.slice(0, 4).join(' · '));
+else ok('every bubble is aimed at a figure the beat draws', 'walking beats excused, a must-box is one moment');
 
 if (DRIFT === null) bad('could not read the drift limit out of cinematicKit');
 else if (adrift.length) bad(`${adrift.length} thought(s) sit further sideways than the trail can lean`, adrift.slice(0, 4).join(' · '));

@@ -13,6 +13,7 @@ import {
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import { Shapes, ell, bar, tri, type Part } from './Silhouette';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A WINDOW WITH A HOVERING KESTREL, AND A MIRROR SLIDING ACROSS IT.
@@ -21,10 +22,11 @@ import { followMoves, kindOf, seedOf } from './camera';
 //
 // · the WINDOW is a 200×130 frame at x 130 (130…330), y 254…384: a 4-thick ink
 //   surround on a PAPER pane, with a 3-wide ink mullion down the middle at x 228.
-// · the KESTREL hovers centred on (230, 312) and never moves. Its two field marks
-//   are the ones every reference gives and the ones a shape has to have to read as
-//   this bird: LONG POINTED wings, drawn as 52-long tapered triangles either side,
-//   and a FANNED tail, a trapezoid widening 10 → 28 below the body.
+// · the KESTREL hovers in the RIGHT-HAND PANE, centred on (279, 312), and never
+//   moves. It is aesthetics5's bird at 0.62 — the same two field marks every
+//   reference gives, LONG POINTED wings of an arm and a tapering hand, and a tail
+//   FANNED into five feathers — held in a raised V. It used to hang dead centre, so
+//   the mullion ran straight down through its body and cut the bird in two.
 // · the MIRROR is a STONE panel filling the pane from the left, 192 × self wide, on
 //   the same top edge, with a PAPER glint across it. At self 1 the bird is entirely
 //   behind a reflection, which is the answer the far end of the bar states.
@@ -46,8 +48,19 @@ const WIN_W = 200;
 const WIN_H = 130;
 const PANE = 4;
 
-const BIRD_X = 230;
+const BIRD_X = 279;
 const BIRD_Y = 312;
+/** The bird is drawn in aesthetics5's 108 × 78 box and scaled to fit a pane. */
+const BIRD_K = 0.62;
+// The five feathers leave one root at (54, 44) at −26°, −13°, 0°, 13° and 26°, 19 long.
+const KESTREL: Part[] = [
+  bar(54, 44, 45.67, 61.08, 7, INK), bar(54, 44, 49.73, 62.51, 7, INK), bar(54, 44, 54, 63, 7, INK),
+  bar(54, 44, 58.27, 62.51, 7, INK), bar(54, 44, 62.33, 61.08, 7, INK),
+  ell(54, 36, 21, 31, INK),
+  ell(54, 16, 15, 15, INK),
+  ell(50.3, 14.2, 3.4, 3.4, PAPER),
+  tri(46.4, 19.6, 4.2, 5.4, 'down', INK, 28),
+];
 
 const CAP_T = 240;
 const NAME = ['A MIRROR', 'A KESTREL'];
@@ -124,11 +137,17 @@ export default function Aesthetics30Scene({ clock, bt, bi, i, picked, onPick, dr
       <Animated.View style={[StyleSheet.absoluteFill, winStyle]} pointerEvents="none">
         <View style={styles.pane} />
 
-        <View style={styles.wingL} />
-        <View style={styles.wingR} />
-        <View style={styles.tail} />
-        <View style={styles.birdBody} />
-        <View style={styles.birdHead} />
+        <View style={styles.bird}>
+          <View style={[styles.wing, styles.wingLeft]}>
+            <View style={styles.wingArmL} />
+            <View style={styles.wingTipL} />
+          </View>
+          <View style={[styles.wing, styles.wingRight]}>
+            <View style={styles.wingArmR} />
+            <View style={styles.wingTipR} />
+          </View>
+          <Shapes parts={KESTREL} />
+        </View>
 
         <Animated.View style={[styles.mirror, mirrorStyle]}>
           <View style={styles.glint} />
@@ -191,26 +210,26 @@ const styles = StyleSheet.create({
     position: 'absolute', left: WIN_X, top: WIN_Y, width: WIN_W, height: WIN_H,
     borderWidth: PANE, borderColor: INK,
   },
-  mullion: { position: 'absolute', left: BIRD_X - 2, top: WIN_Y + PANE, width: 3, height: WIN_H - PANE * 2, backgroundColor: RULE },
+  mullion: { position: 'absolute', left: WIN_X + WIN_W / 2 - 2, top: WIN_Y + PANE, width: 3, height: WIN_H - PANE * 2, backgroundColor: RULE },
 
-  // THE TWO FIELD MARKS: long POINTED wings, and a FANNED tail. A kestrel drawn
-  // with even bars for wings is a scarecrow (Z, aesthetics5).
-  birdBody: { position: 'absolute', left: BIRD_X - 7, top: BIRD_Y - 16, width: 14, height: 32, borderRadius: 7, backgroundColor: INK },
-  birdHead: { position: 'absolute', left: BIRD_X - 6.5, top: BIRD_Y - 26, width: 13, height: 13, borderRadius: 6.5, backgroundColor: INK },
-  wingL: {
-    position: 'absolute', left: BIRD_X - 59, top: BIRD_Y - 14, width: 0, height: 0,
-    borderTopWidth: 7, borderBottomWidth: 7, borderRightWidth: 52,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+  // THE BIRD, in aesthetics5's 108 × 78 box, scaled about its centre into the pane.
+  // Its wings are held in a raised V rather than beating: a kestrel holding still.
+  bird: {
+    position: 'absolute', left: BIRD_X - 54, top: BIRD_Y - 39, width: 108, height: 78,
+    transform: [{ scale: BIRD_K }],
   },
-  wingR: {
-    position: 'absolute', left: BIRD_X + 7, top: BIRD_Y - 14, width: 0, height: 0,
-    borderTopWidth: 7, borderBottomWidth: 7, borderLeftWidth: 52,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
+  wing: { position: 'absolute', top: 26, width: 54, height: 13 },
+  wingLeft: { left: -9, transformOrigin: '100% 50%', transform: [{ rotate: '10deg' }] },
+  wingRight: { left: 63, transformOrigin: '0% 50%', transform: [{ rotate: '-10deg' }] },
+  wingArmL: { position: 'absolute', left: 26, top: 0.5, width: 28, height: 12, borderRadius: 4, backgroundColor: INK },
+  wingArmR: { position: 'absolute', left: 0, top: 0.5, width: 28, height: 12, borderRadius: 4, backgroundColor: INK },
+  wingTipL: {
+    position: 'absolute', left: 0, top: 0.5, width: 0, height: 0,
+    borderTopWidth: 12, borderLeftWidth: 27, borderTopColor: INK, borderLeftColor: 'transparent',
   },
-  tail: {
-    position: 'absolute', left: BIRD_X - 5, top: BIRD_Y + 14, width: 10, height: 0,
-    borderBottomWidth: 22, borderLeftWidth: 9, borderRightWidth: 9,
-    borderBottomColor: INK, borderLeftColor: 'transparent', borderRightColor: 'transparent',
+  wingTipR: {
+    position: 'absolute', left: 27, top: 0.5, width: 0, height: 0,
+    borderTopWidth: 12, borderRightWidth: 27, borderTopColor: INK, borderRightColor: 'transparent',
   },
 
   mirror: {

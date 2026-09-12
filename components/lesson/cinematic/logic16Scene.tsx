@@ -12,6 +12,7 @@ import {
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { Shapes, ell, bar, rect, tri, type Part } from './Silhouette';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -27,8 +28,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 //   30 · 88 · 146 · 204 · 262 · 320 — so the run ends at x 372 and the whole
 //   picture is inside the 400 stage with 28 either side.
 //   Inside each: a horizon rule at panel y 62 (stage y 326); a 16px sun that
-//   climbs from y 318 to y 280 as that morning plays; and the CROW, a 7px disc
-//   at panel x 11, stage y 330, which is the mark that goes missing.
+//   climbs from y 318 to y 280 as that morning plays; and the CROW, perched on
+//   the horizon at panel x 1…24, y 42…62, which is the mark that goes missing.
 // · the DAY LABELS are at y 346…356, one under each panel.
 // · the THREE CANDIDATES replace the strip in place on the question beat — same
 //   y 264…342, 108 wide at x 30 · 146 · 262. Nothing new is added below, so the
@@ -56,7 +57,25 @@ const HORIZON = PANEL_Y + 62;
 const SUN_LOW = PANEL_Y + 54;
 const SUN_HIGH = PANEL_Y + 16;
 const SUN_D = 16;
-const CROW_D = 7;
+
+/**
+ * THE CROW, perched on the horizon at dawn, facing the sun — in panel coordinates.
+ *
+ * It was a 7-unit disc, and a dot is not a bird: remove the word CROW from the claim
+ * and nothing on the strip said what was missing on the sixth morning (Z1). A crow in
+ * silhouette is told from every other black bird by three things the reference
+ * names: a HEAVY bill "relatively long and thick", a flat crown, and a LONG, SQUARED
+ * tail reaching past the folded wings — a thin bill reads as a starling and a short
+ * tail as a pigeon. Everything else here is a body and two legs.
+ */
+const CROW: Part[] = [
+  bar(11.2, PANEL_H - 22.5, 10.8, PANEL_H - 16, 1.5, INK),
+  bar(13.8, PANEL_H - 22.5, 14.2, PANEL_H - 16, 1.5, INK),
+  rect(4.9, PANEL_H - 22.8, 10.5, 4, INK, 133.6, 0.6),
+  ell(11.5, PANEL_H - 27.5, 15, 8.6, INK, -18),
+  ell(17.2, PANEL_H - 32.8, 7, 6.4, INK),
+  tri(21.8, PANEL_H - 32.1, 5.8, 3.8, 'right', INK, 10),
+];
 
 const CAND_Y = PANEL_Y;
 const CAND_W = 108;
@@ -221,7 +240,9 @@ function Morning({ S, index }: { S: SharedValue<any>; index: number }) {
       <View style={[styles.panel, { left }]} />
       <View style={[styles.horizon, { left: left + 6 }]} />
       <Animated.View style={[styles.sun, { left: left + (PANEL_W - SUN_D) / 2 }, sunStyle]} />
-      <Animated.View style={[styles.crow, { left: left + 11 }, crowStyle]} />
+      <Animated.View style={[styles.crowWrap, { left }, crowStyle]}>
+        <Shapes parts={CROW} />
+      </Animated.View>
       <Text style={[styles.day, { left }]} pointerEvents="none">{DAYS[index]}</Text>
     </View>
   );
@@ -254,10 +275,7 @@ const styles = StyleSheet.create({
     position: 'absolute', top: SUN_LOW, width: SUN_D, height: SUN_D, borderRadius: SUN_D / 2,
     borderWidth: 2, borderColor: INK,
   },
-  crow: {
-    position: 'absolute', top: HORIZON + 4, width: CROW_D, height: CROW_D, borderRadius: CROW_D / 2,
-    backgroundColor: INK,
-  },
+  crowWrap: { position: 'absolute', top: PANEL_Y, width: PANEL_W, height: PANEL_H },
   day: {
     position: 'absolute', top: PANEL_Y + PANEL_H + 4, width: PANEL_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,

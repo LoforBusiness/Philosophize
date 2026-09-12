@@ -15,6 +15,7 @@ import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import { Shapes, ell, bar, tri, type Part } from './Silhouette';
 
 // A claim card over a field of eighteen cats, stage right; the figure downstage left.
 //
@@ -46,6 +47,34 @@ const ANS_SLOP = (ANS_PITCH - ANS_H) / 2;
 
 /** The one that goes hollow. Middle of the field, so it is not mistaken for an edge. */
 const ODD = 8;
+
+/**
+ * A CAT, SITTING IN PROFILE, in its own DOT × DOT cell.
+ *
+ * These were eighteen discs under the claim ALL CATS ARE BLACK, so the field said
+ * "dots" and only the card said "cats" (Z1). The reference gives a sitting cat as a
+ * soft triangle of stacked masses — a broad haunch, a narrower upright chest that
+ * runs down to the paws, a small head — with two POINTED ears and the tail wrapped
+ * along the ground in front of the feet. Round ears read as a bear or a mouse, and no
+ * haunch reads as a penguin.
+ *
+ * The chest runs to the ground rather than carrying separate front legs, and a
+ * fourth mass bridges it to the haunch, so the WHITE cat — the same masses in PAPER,
+ * one unit inset — is one clean shape with a black outline and no seam through it.
+ */
+const CAT_BODY: Part[] = [
+  ell(8, 13.5, 12.5, 11.5, INK),
+  ell(12.4, 12.8, 8.4, 14, INK, -6),
+  ell(10.5, 14, 11, 10, INK),
+  ell(13.2, 5.2, 7.6, 7.2, INK),
+];
+const CAT: Part[] = [
+  ...CAT_BODY,
+  tri(10.7, 1.6, 3.6, 4.4, 'up', INK, -14),
+  tri(15.5, 1.3, 3.6, 4.4, 'up', INK, 12),
+  bar(3.5, 18.6, 16.5, 19.4, 2.2, INK),
+  bar(16.5, 19.4, 18.6, 17.7, 2, INK),
+];
 
 const ANSWERS = [
   { id: 'contra', label: 'ALL BLACK  ·  SOME NOT BLACK', correct: true },
@@ -121,12 +150,14 @@ export default function Logic22Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
 
       <Animated.View style={[styles.fieldWrap, fieldStyle]} pointerEvents="none">
         {Array.from({ length: COLS * ROWS }, (_, k) => (
-          <View key={k} style={[styles.dot, { left: dotLeft(k), top: dotTop(k) }]} />
+          <View key={k} style={[styles.cat, { left: dotLeft(k), top: dotTop(k) }]}>
+            <Shapes parts={CAT} />
+          </View>
         ))}
-        {/* the exception, drawn OVER its own dot so the field beneath is untouched */}
-        <Animated.View
-          style={[styles.dotHollow, { left: dotLeft(ODD), top: dotTop(ODD) }, oddStyle]}
-        />
+        {/* the exception, drawn OVER its own cat so the field beneath is untouched */}
+        <Animated.View style={[styles.cat, { left: dotLeft(ODD), top: dotTop(ODD) }, oddStyle]}>
+          <Shapes parts={CAT_BODY} grow={-1} color={PAPER} />
+        </Animated.View>
       </Animated.View>
 
       {showPick &&
@@ -182,13 +213,7 @@ const styles = StyleSheet.create({
   },
 
   fieldWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
-  dot: {
-    position: 'absolute', width: DOT, height: DOT, borderRadius: DOT / 2, backgroundColor: INK,
-  },
-  dotHollow: {
-    position: 'absolute', width: DOT, height: DOT, borderRadius: DOT / 2,
-    backgroundColor: PAPER, borderWidth: 2.5, borderColor: INK,
-  },
+  cat: { position: 'absolute', width: DOT, height: DOT },
 
   ans: { position: 'absolute', left: BD_L, width: BD_W },
   ansInner: {

@@ -1757,7 +1757,11 @@ export const styles = StyleSheet.create({
   // struck the other way up — ink ground, paper type — the same inversion the
   // shout bubble uses, and the reason the two never read as the same event.
   sayBox: { backgroundColor: INK, borderColor: INK },
-  sayText: { fontFamily: 'Inter_600SemiBold', color: PAPER },
+  // 700, NOT 600: the root layout loads Inter 400, 500 and 700 and nothing else, so
+  // the 600 this named fell back to the platform's own face on every answer line —
+  // a serif in the browser — while make:thoughts sized the box for Inter. check:thoughts
+  // now reads this name against the loader.
+  sayText: { fontFamily: 'Inter_700Bold', color: PAPER },
   trail: { alignItems: 'center', marginTop: 3 },
   puff: { backgroundColor: PAPER, borderColor: INK, borderWidth: 1.5 },
   puff1: { width: 9, height: 9, borderRadius: 4.5, marginBottom: 2.5 },

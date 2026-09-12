@@ -15,6 +15,7 @@ import {
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import { Shapes, ell, bar, tri, type Part } from './Silhouette';
 
 // THE ATTENTION METER AND THE FRAME. Murdoch's argument drawn instead of asserted:
 //
@@ -63,6 +64,29 @@ const CAP_T = IN_T + 2;               // 318 … 333 — the caption / tap-me ro
 
 // ── what the frame holds ─────────────────────────────────────────────────────
 const BIRD_L = 232, BIRD_T = 348, BIRD_W = 108, BIRD_H = 78;   // hover ±7 → 341 … 433
+
+/**
+ * THE KESTREL'S BODY, HEAD AND TAIL, in its own 108 × 78 box. The wings are Views
+ * below, because they beat.
+ *
+ * THE TAIL IS A FAN OF FEATHERS, AND THAT IS THE FIELD MARK. A hovering kestrel
+ * "extends the tips of its wings and FANS its tail feathers … angled downwards" —
+ * so five feathers spread from one root, overlapping hard enough to read as one
+ * wedge with a scalloped end. It was a trapezoid, and before that a bar hanging
+ * straight down, which read as a leg; a wedge with a separate rounded end read as a
+ * pedestal. The head is small on a short neck, the bill hooked and pointing DOWN:
+ * "while hovering, kestrels keep their head still and their eyes fixed on the
+ * ground."
+ */
+// The five feathers leave one root at (54, 44) at −26°, −13°, 0°, 13° and 26°, 19 long.
+const KESTREL: Part[] = [
+  bar(54, 44, 45.67, 61.08, 7, INK), bar(54, 44, 49.73, 62.51, 7, INK), bar(54, 44, 54, 63, 7, INK),
+  bar(54, 44, 58.27, 62.51, 7, INK), bar(54, 44, 62.33, 61.08, 7, INK),
+  ell(54, 36, 21, 31, INK),
+  ell(54, 16, 15, 15, INK),
+  ell(50.3, 14.2, 3.4, 3.4, PAPER),
+  tri(46.4, 19.6, 4.2, 5.4, 'down', INK, 28),
+];
 const LEAF_L = 158, LEAF_T = 338, LEAF_W = 58, LEAF_H = 120;   // 338 … 458
 const WORD_L = 236, WORD_T = 356, WORD_W = 136, WORD_H = 62;   // 356 … 418
 
@@ -216,16 +240,14 @@ export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick, dra
       {/* ── the hovering kestrel ─────────────────────────────────────────────── */}
       <Animated.View style={[styles.bird, birdStyle]} pointerEvents="none">
         <Animated.View style={[styles.wing, styles.wingLeft, wingL]}>
+          <View style={styles.wingArmL} />
           <View style={styles.wingTipL} />
         </Animated.View>
         <Animated.View style={[styles.wing, styles.wingRight, wingR]}>
+          <View style={styles.wingArmR} />
           <View style={styles.wingTipR} />
         </Animated.View>
-        <View style={styles.birdTail} />
-        <View style={styles.birdBody} />
-        <View style={styles.birdHead} />
-        <View style={styles.birdBeak} />
-        <View style={styles.birdEye} />
+        <Shapes parts={KESTREL} />
       </Animated.View>
 
       {/* ── Ruskin's single leaf ─────────────────────────────────────────────── */}
@@ -355,57 +377,32 @@ const styles = StyleSheet.create({
 
   // ── the kestrel ─────────────────────────────────────────────────────────────
   bird: { position: 'absolute', left: BIRD_L, top: BIRD_T, width: BIRD_W, height: BIRD_H },
-  birdBody: { position: 'absolute', left: 42, top: 20, width: 24, height: 36, borderRadius: 12, backgroundColor: INK },
-  birdHead: { position: 'absolute', left: 43, top: 2, width: 22, height: 22, borderRadius: 11, backgroundColor: INK },
-  birdEye: { position: 'absolute', left: 47, top: 9, width: 4.5, height: 4.5, borderRadius: 2.25, backgroundColor: PAPER },
-  // ANGLED DOWN, because that is what the bird is DOING. The reference: "while
-  // hovering, kestrels keep their head still and their eyes fixed on the ground."
-  // A beak level with the horizon is a bird looking for nothing.
-  birdBeak: {
-    position: 'absolute', left: 33, top: 13, width: 0, height: 0,
-    borderTopWidth: 4, borderBottomWidth: 4, borderRightWidth: 10,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
-    transform: [{ rotate: '26deg' }],
-  },
-  // ── THE TAIL IS A FAN, AND THAT IS THE FIELD MARK ─────────────────────────
+  // ── A FALCON'S WING IS LONG, NARROW AND POINTED ───────────────────────────
   //
-  // It was a 12x24 rounded bar hanging straight down, which reads as a leg. The
-  // reference is unambiguous about the one thing a hovering kestrel always shows:
-  // "to maintain position without dropping, they extend the tips of their wings
-  // and FAN their tail feathers ... nearly always shows fan-shaped tail-band when
-  // hovering." A triangle whose apex is hidden behind the body comes out as the
-  // spread trapezoid a fanned tail actually is.
-  birdTail: {
-    position: 'absolute', left: 37, top: 34, width: 0, height: 0,
-    borderLeftWidth: 17, borderRightWidth: 17, borderBottomWidth: 44,
-    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: INK,
-  },
-  // ── A FALCON'S WING IS POINTED ────────────────────────────────────────────
-  //
-  // This was a uniform rounded bar, and a uniform bar sticking out of a body at a
-  // shallow angle is an ARM — which, with the old straight-down tail, is why the
-  // whole thing read as a scarecrow rather than a bird. Every reference for this
-  // bird says the same two words: "long, pointed wings ... a delicate, dagger-like
-  // form", which is what separates a falcon from a broad-winged hawk.
+  // "Long, pointed wings … a delicate, dagger-like form", and a span of 2.1–2.3
+  // times the bird's length. Each wing is an ARM of even chord out from the
+  // shoulder and a HAND that tapers to a point along a straight leading edge: a
+  // single triangle from the shoulder was a bow tie, and a uniform bar was an arm
+  // on a scarecrow.
   //
   // THE PIVOT LIVES ON A WRAPPER, and it has to. A CSS triangle is a zero-size box
   // with borders, so a percentage `transformOrigin` on the triangle itself resolves
-  // against nothing and collapses the flap to a corner spin. The wrapper carries
-  // the real 42x13 and the rotation; the triangle inside it is the shape.
-  // AT THE SHOULDER, NOT THE NECK. At top 22 the wings left the body immediately
-  // under the head and read as ears.
-  wing: { position: 'absolute', top: 29, width: 42, height: 13 },
-  wingLeft: { left: 2, transformOrigin: '100% 50%' },
-  wingRight: { left: 64, transformOrigin: '0% 50%' },
+  // against nothing and collapses the flap to a corner spin (Z4). The wrapper is
+  // the real 54 × 13 and carries the rotation. AT THE SHOULDER, NOT THE NECK.
+  wing: { position: 'absolute', top: 26, width: 54, height: 13 },
+  wingLeft: { left: -9, transformOrigin: '100% 50%' },
+  wingRight: { left: 63, transformOrigin: '0% 50%' },
+  wingArmL: { position: 'absolute', left: 26, top: 0.5, width: 28, height: 12, borderRadius: 4, backgroundColor: INK },
+  wingArmR: { position: 'absolute', left: 0, top: 0.5, width: 28, height: 12, borderRadius: 4, backgroundColor: INK },
   wingTipL: {
-    position: 'absolute', left: 0, top: 0, width: 0, height: 0,
-    borderTopWidth: 6.5, borderBottomWidth: 6.5, borderRightWidth: 42,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+    position: 'absolute', left: 0, top: 0.5, width: 0, height: 0,
+    borderTopWidth: 12, borderLeftWidth: 27,
+    borderTopColor: INK, borderLeftColor: 'transparent',
   },
   wingTipR: {
-    position: 'absolute', left: 0, top: 0, width: 0, height: 0,
-    borderTopWidth: 6.5, borderBottomWidth: 6.5, borderLeftWidth: 42,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
+    position: 'absolute', left: 27, top: 0.5, width: 0, height: 0,
+    borderTopWidth: 12, borderRightWidth: 27,
+    borderTopColor: INK, borderRightColor: 'transparent',
   },
 
   // ── Ruskin's leaf ───────────────────────────────────────────────────────────

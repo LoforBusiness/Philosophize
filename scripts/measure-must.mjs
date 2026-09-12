@@ -148,7 +148,7 @@ import { getLessonById } from '@/data/index';
 import { CINEMATIC } from './(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId]';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { setToursOff } from '@/components/lesson/cinematic/tourFlag';
+import { setThoughtsOff, setToursOff } from '@/components/lesson/cinematic/tourFlag';
 
 export default function PreviewFrame() {
   const [go, setGo] = useState(false);
@@ -162,6 +162,11 @@ export default function PreviewFrame() {
   // the recording through a gated clock would measure a timeline the tours had
   // already moved — and every regeneration would shift it further. See tourFlag.ts.
   setToursOff(q?.get('notour') === '1');
+  // AND NEVER WITH A BUBBLE UP. The player draws the thought and the answer reply
+  // inside the stage, so a live one is recorded as stage text and its box and trail as
+  // art — and every table derived from these boxes then protects the bubble. 29 stored
+  // rows carried one when this went in. Unconditional: no reading here wants it.
+  setThoughtsOff(true);
   const id = q?.get('id') ?? '';
   const found = getLessonById(id);
   const Comp = (CINEMATIC as Record<string, any>)[id];

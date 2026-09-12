@@ -14,6 +14,25 @@ import {
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
+import { Shapes, bar, tri, type Part } from './Silhouette';
+
+/**
+ * THE DEMON'S HORNS AND TAIL, riding his head (anchor 24 above its centre) and his
+ * pelvis.
+ *
+ * Descartes' evil demon has no iconography of its own; it is drawn as the stock
+ * devil, whose marks are curved GOAT horns — thick at the root, curving out and up —
+ * and a long thin tail ending in an ARROW. These were two straight thin triangles and
+ * a forked stick: the horns read as ears or antennae.
+ */
+const HORNS: Part[] = [
+  bar(-11, 10, -18, 3, 8, INK), bar(-18, 3, -21, -6, 6, INK), bar(-21, -6, -18, -13, 3.6, INK),
+  bar(11, 10, 18, 3, 8, INK), bar(18, 3, 21, -6, 6, INK), bar(21, -6, 18, -13, 3.6, INK),
+];
+const TAIL: Part[] = [
+  bar(-2, 2, -16, 10, 2.4, INK), bar(-16, 10, -28, 4, 2.2, INK), bar(-28, 4, -32, -6, 2, INK),
+  tri(-33.5, -10.5, 8, 9, 'up', INK, -22),
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE DOUBT AUDIT.
@@ -213,14 +232,10 @@ export default function Epistemology2Scene({ clock, bt, bi, pickPos, i }: SceneA
 
       {/* the demon's horns and tail, riding its head and pelvis */}
       <Animated.View style={[styles.anchor, horns]}>
-        <View style={[styles.horn, { left: -14, transform: [{ rotate: '-24deg' }] }]} />
-        <View style={[styles.horn, { left: 8, transform: [{ rotate: '24deg' }] }]} />
+        <Shapes parts={HORNS} />
       </Animated.View>
       <Animated.View style={[styles.anchor, tail]}>
-        <View style={[styles.tailSeg, { left: -2, top: -3, width: 20, transform: [{ rotate: '165deg' }] }]} />
-        <View style={[styles.tailSeg, { left: -21, top: 2, width: 16, transform: [{ rotate: '215deg' }] }]} />
-        <View style={[styles.tailFork, { left: -34, top: -8, transform: [{ rotate: '200deg' }] }]} />
-        <View style={[styles.tailFork, { left: -34, top: -8, transform: [{ rotate: '252deg' }] }]} />
+        <Shapes parts={TAIL} />
       </Animated.View>
     </Animated.View>
   );
@@ -344,13 +359,6 @@ const styles = StyleSheet.create({
   haloOuter: { position: 'absolute', left: -34, top: -34, width: 68, height: 68, borderRadius: 34, borderWidth: 2, borderColor: INK },
   haloInner: { position: 'absolute', left: -22, top: -22, width: 44, height: 44, borderRadius: 22, borderWidth: 1.2, borderColor: SOFT },
 
-  horn: {
-    position: 'absolute', top: -8, width: 0, height: 0,
-    borderLeftWidth: 3.5, borderRightWidth: 3.5, borderBottomWidth: 12,
-    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: INK,
-  },
-  tailSeg: { position: 'absolute', height: 2.2, backgroundColor: INK, transformOrigin: '0% 50%' },
-  tailFork: { position: 'absolute', width: 9, height: 2, backgroundColor: INK, transformOrigin: '0% 50%' },
 });
 
 // BAND. Measured against every beat, not just the first.

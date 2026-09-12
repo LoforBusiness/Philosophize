@@ -306,6 +306,15 @@ for (const f of fs.readdirSync(DIR).filter((x) => x.endsWith('.tsx'))) {
               const bt = prop(b, 'top', t), bh = prop(b, 'height', t);
               if (bt == null || bh == null) continue;
               if (myTop < bt || myTop >= bt + bh) continue;      // caption is not on this plate
+              // A CAPTION DOES NOT SIT ON A PLATE NARROWER THAN ITSELF. Every `top` here
+              // is local to its own parent, so containment alone pairs a caption with
+              // any small piece in the scene that happens to share its numbers:
+              // aesthetics30's answer label (top 7, 90 wide) was put "on" the kestrel's
+              // 28-wide wing arm (top 0.5, 12 tall) and reported cut into 5.5. A plate
+              // WIDER than its caption is kept — a padded label inside a card is the
+              // ordinary case — so this removes only pairings that cannot be real.
+              const bw = prop(b, 'width', t);
+              if (bw != null && bw < width - 1) continue;
               const avail = bt + bh - myTop;
               if (room4 == null || avail < room4) room4 = avail; // the tightest plate wins
             }

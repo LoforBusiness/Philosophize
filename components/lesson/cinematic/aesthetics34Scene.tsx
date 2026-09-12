@@ -89,6 +89,24 @@ const STROKES: readonly Stroke[] = [
  */
 const KEEP = [1.00, 0.94, 0.62, 0.98, 0.90, 0.86, 0.82, 0.30, 0.24, 0.20, 0.12];
 
+/** How many strokes the rail strips: the script's strip 1 is "three left". */
+const GOES = 8;
+/** How much of the rail one stroke takes to fade. */
+const FADE = 0.1;
+/**
+ * Where on the rail each stroke starts to go, by its RANK in `KEEP`.
+ *
+ * THIS WAS BACKWARDS FOR THE LIFE OF THE LESSON. The fade began at `1 − KEEP`, so the
+ * back line (KEEP 1.00) started fading at strip 0 and the tail (0.12) at 0.88: the
+ * horns and the head went first and a reader stripping the bull watched it lose the
+ * very strokes the lesson says survive. Ranked instead, the eight weakest go one after
+ * another along the rail, and the back, the near horn and the head never go.
+ */
+const START = KEEP.map((v) => {
+  const rank = KEEP.filter((w) => w < v).length;
+  return rank < GOES ? (rank * (1 - FADE)) / (GOES - 1) : 2;
+});
+
 /** How thick a stroke is drawn. */
 const NIB = 4;
 
@@ -152,9 +170,9 @@ export default function Aesthetics34Scene({ clock, bt, bi, i, dragPos, gazeX, ga
  */
 function Stroke({ k, s, SCENE }: { k: number; s: Stroke; SCENE: { value: { strip: number } } }) {
   const style = useAnimatedStyle(() => {
-    // A stroke fades once the stripping passes its keep value. The 0.14 window is
+    // A stroke fades once the stripping passes its own START. The FADE window is
     // what makes them go one at a time rather than all dissolving together.
-    const d = (SCENE.value.strip - (1 - KEEP[k])) / 0.14;
+    const d = (SCENE.value.strip - START[k]) / FADE;
     const gone = d <= 0 ? 0 : d >= 1 ? 1 : d;
     return { opacity: 1 - gone };
   });

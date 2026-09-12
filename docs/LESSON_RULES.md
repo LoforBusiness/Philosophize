@@ -7783,12 +7783,16 @@ Anchored on the head it is **median 4, p90 4, worst 20**.
 scene, so it is in front, and an arm crossing a balloon is what every comic has
 always done. A balloon parked in empty paper is what reads as a mistake.
 
-Both directions are bounded rather than trusted (`LIFT_CAP`): the anchor is never
-above the box, because he is inside it, and never more than 46 units down into it,
-so a scene that transforms its figure can put a bubble over his own arm but never
-onto his face. `check:thoughts` §9 re-derives all of it and **says how many it had
-to skip**, because the walk track names no figure in a handful of scenes and a
-check that quietly measured less would read as a check that found less.
+**The head is derived, not capped.** The anchor is never above the box, because he
+is inside it; below that it is the rig's arithmetic and nothing else. The box bottom
+is the round end of his shin, half a limb stroke under the ground; the skull rises
+by `skullRise` for the beat's own move; and only his OWN costume adds its reach,
+never the widest one on the stage. A 46-unit limit into the box stood in for all of
+that until the render showed boxes whose tops run 72–116 units above the skull,
+where the limit left the bubble floating 30 to 70 units over him. Derived, 93
+bubbles land a median 0.6 units from the drawn head and none further than 5.5.
+`check:thoughts` §9 re-derives all of it, and fails a bubble aimed where the beat
+draws no figure rather than quietly measuring less.
 
 ### AB11 · A phase change must not be a remount
 

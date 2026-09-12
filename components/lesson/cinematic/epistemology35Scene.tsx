@@ -12,6 +12,7 @@ import {
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import { Shapes, Outlined, ell, bar, type Part } from './Silhouette';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO PENS DRAWN THE SAME, AND A CHAIN THAT WILL NOT REACH.
@@ -23,9 +24,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 //   x 288…296), ending at 392 — level with the fence. It is the argument, drawn as
 //   an argument.
 // · the two PENS sit at y 330…434: rails at x 116…236 and x 260…380, each a
-//   3-thick frame. Inside each, an animal 76 wide × 46 tall at y 356 — SAME
-//   shape, SAME stripes in both, because the reader's evidence does not tell
-//   them apart. Only the plaques at y 440…452 differ.
+//   3-thick frame. Inside each, a ZEBRA about 80 wide × 60 tall — SAME drawing,
+//   SAME stripes in both, because the reader's evidence does not tell them apart.
+//   Only the plaques at y 440…452 differ.
 // · the RELEVANCE FENCE is a 3-thick upright the drag slides across x 96…392 at
 //   y 320…440, so the reader can see how much of the zoo it is being asked to
 //   exclude.
@@ -34,9 +35,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 //
 // Ink runs y 244 (the first plate) … y 500 (ground). BAND 238…512 = 274 (H59).
 //
-// STRIPES ARE FIVE VIEWS EACH, not an image and not an <Svg>: ten Views for both
-// animals together, which is nothing, and they can be drawn identically by
-// construction rather than by two artists agreeing (§17 rule 7).
+// THE ZEBRA IS ONE PART LIST, drawn in both pens, so the two are identical by
+// construction rather than by two artists agreeing — and Views rather than an <Svg>,
+// so the camera and the thought bubble can see it (§17 rule 7, ./Silhouette).
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
@@ -61,12 +62,41 @@ const PEN_Y = 330;
 const PEN_H = 104;
 const PEN_X = [116, 260];
 const PEN_W = 120;
-const ANIMAL_Y = 356;
-// Stripes on the BARREL only — a stripe running down a leg or across the neck at
-// this size closes the gap and the animal turns back into a grille.
-const STRIPES = [48, 57, 66, 75];
-/** Fore pair, hind pair. */
-const LEG_X = [44, 54, 74, 82];
+
+// ── A PLAINS ZEBRA, facing left, in pen coordinates ─────────────────────────
+//
+// It was a rounded box with five bars through it and the word ZEBRA underneath: a
+// barcode (Z1). The reference builds a zebra "closer to a donkey than a horse — more
+// heavily built, with a visibly rounded belly, shorter legs and a bigger head", and
+// gives the marks that separate it from a striped horse: a MANE that stands up like
+// a brush, UPRIGHT rounded ears, a dark MUZZLE, a tail that is a bare stalk with its
+// tuft beginning halfway down, and stripes that run VERTICAL on the forequarters,
+// swing toward HORIZONTAL over the hindquarters and band the legs across.
+const ZEBRA_LEGS: Part[] = [
+  bar(47, 50, 46, 72, 5, PAPER), bar(53, 50, 54, 71, 4.2, PAPER),
+  bar(78, 50, 79, 72, 5, PAPER), bar(84, 50, 83, 71, 4.2, PAPER),
+];
+const ZEBRA_LEG_BANDS: Part[] = [
+  [44, 59, 49, 59], [44, 65, 49, 65], [51, 60, 56, 60], [51, 66, 56, 66],
+  [76, 60, 81, 60], [76, 66, 81, 66], [81, 61, 86, 61], [81, 67, 86, 67],
+].map(([x1, y1, x2, y2]) => bar(x1, y1, x2, y2, 1.9, INK));
+const ZEBRA_TAIL: Part[] = [bar(88, 40, 93, 53, 2, INK), ell(93.6, 57, 4, 8, INK, -10)];
+/** Barrel, rump, chest, neck, head and muzzle — one outline round the lot. */
+const ZEBRA: Part[] = [
+  ell(64, 43, 48, 22, PAPER), ell(80, 41, 18, 19, PAPER), ell(47, 44, 18, 19, PAPER),
+  bar(46, 38, 34, 22, 12, PAPER), bar(33, 21, 20, 35, 10, PAPER), ell(19, 35, 9, 8, PAPER),
+];
+const ZEBRA_MARKS: Part[] = [
+  ell(18.5, 35.5, 7.5, 6.8, INK),                                          // the dark muzzle
+  bar(35.5, 15, 34, 8, 3.6, INK), bar(31.5, 16, 28.5, 9.5, 3.4, INK),      // upright ears
+  bar(36, 17, 46, 31, 3.4, INK),                                           // the standing mane
+  ell(29, 23.5, 2.4, 2.4, INK),
+  bar(52, 35.5, 52, 50.5, 3, INK), bar(58, 34.4, 58, 51.6, 3, INK), bar(64, 34, 64, 52, 3, INK),
+  bar(69, 35, 75, 50, 2.8, INK), bar(74, 33, 82, 47, 2.8, INK),
+  bar(78, 36, 87.5, 40, 2.6, INK), bar(76, 43.5, 87, 47, 2.6, INK),
+  bar(43, 36, 43, 52, 2.6, INK),
+  bar(38.4, 36.2, 46.4, 30.2, 2.4, INK), bar(34.8, 31.4, 42.8, 25.4, 2.4, INK),
+];
 
 const FENCE_LO = 96;
 const FENCE_HI = 392;
@@ -149,15 +179,11 @@ export default function Epistemology35Scene({ clock, bt, bi, qv, i, picked, onPi
       <Animated.View style={[StyleSheet.absoluteFill, pensStyle]} pointerEvents="none">
         {PEN_X.map((px) => (
           <View key={px} style={[styles.pen, { left: px }]}>
-            {LEG_X.map((lx) => <View key={`leg${lx}`} style={[styles.leg, { left: lx }]} />)}
-            <View style={styles.tail} />
-            <View style={styles.animalBody} />
-            <View style={styles.neck} />
-            <View style={styles.head} />
-            <View style={styles.ear} />
-            {STRIPES.map((sx) => (
-              <View key={sx} style={[styles.stripe, { left: sx }]} />
-            ))}
+            <Outlined parts={ZEBRA_LEGS} width={1.4} line={INK} />
+            <Shapes parts={ZEBRA_LEG_BANDS} />
+            <Shapes parts={ZEBRA_TAIL} />
+            <Outlined parts={ZEBRA} width={2} line={INK} />
+            <Shapes parts={ZEBRA_MARKS} />
           </View>
         ))}
       </Animated.View>
@@ -253,51 +279,6 @@ const styles = StyleSheet.create({
     position: 'absolute', top: PEN_Y, width: PEN_W, height: PEN_H,
     borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
-  // ── IT HAS TO BE AN ANIMAL ────────────────────────────────────────────────
-  //
-  // This was a 76x46 rounded rectangle with five vertical bars through it, and the
-  // plaque underneath said ZEBRA. Rendered, it is a barcode — or a radiator — and
-  // the label was carrying the entire meaning, which is §13's cheese finding
-  // exactly. The lesson still turns on the two pens being INDISTINGUISHABLE, and
-  // they are: both are drawn from these same styles by construction, so there is
-  // no artist to disagree with themselves.
-  //
-  // A quadruped needs four things before stripes are worth adding: a barrel, a
-  // neck at an angle, a head at the end of it, and legs under it. All of it fits
-  // the 76x46 the composition already allowed, with the legs reaching down into
-  // the pen's own floor space.
-  animalBody: {
-    position: 'absolute', left: 40, top: ANIMAL_Y - PEN_Y + 4, width: 46, height: 22,
-    borderRadius: 9, borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
-  },
-  // THE PIVOT IS AT THE SHOULDER, NOT THE MIDDLE. Rotating a neck about its own
-  // centre swings BOTH ends, so the first build left the head floating twenty
-  // units clear of a barrel the neck no longer reached. Pinning the origin to the
-  // bottom edge means the end that is buried in the barrel stays buried whatever
-  // the angle, and only the head end travels.
-  neck: {
-    position: 'absolute', left: 38, top: ANIMAL_Y - PEN_Y - 2, width: 11, height: 20,
-    borderRadius: 4, borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
-    transformOrigin: '50% 100%', transform: [{ rotate: '-30deg' }],
-  },
-  head: {
-    position: 'absolute', left: 18, top: ANIMAL_Y - PEN_Y - 5, width: 21, height: 11,
-    borderRadius: 5, borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
-    transform: [{ rotate: '-14deg' }],
-  },
-  ear: {
-    position: 'absolute', left: 33, top: ANIMAL_Y - PEN_Y - 9, width: 5, height: 8,
-    borderRadius: 2, backgroundColor: INK, transform: [{ rotate: '-16deg' }],
-  },
-  leg: { position: 'absolute', top: ANIMAL_Y - PEN_Y + 24, width: 5, height: 20, backgroundColor: INK },
-  // A TAIL HANGS. Pivoted at its own top so it swings back and DOWN off the rump;
-  // rotated about its centre it stood up over the barrel and read as a second ear.
-  tail: {
-    position: 'absolute', left: 84, top: ANIMAL_Y - PEN_Y + 10, width: 3.5, height: 18,
-    borderRadius: 2, backgroundColor: INK,
-    transformOrigin: '50% 0%', transform: [{ rotate: '24deg' }],
-  },
-  stripe: { position: 'absolute', top: ANIMAL_Y - PEN_Y + 6, width: 4.5, height: 18, backgroundColor: INK, borderRadius: 1.5 },
 
   plaque: {
     position: 'absolute', top: 440, width: PEN_W, textAlign: 'center',

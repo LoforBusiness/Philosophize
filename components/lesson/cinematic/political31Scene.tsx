@@ -16,6 +16,7 @@ import {
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import { Shapes, Outlined, ell, bar, rect, type Part } from './Silhouette';
 
 // A FIELD THAT DIES WHILE YOU WATCH — twenty-one blades falling together, the first
 // mass animation in the app — with the arithmetic laid over it at the end. The answer
@@ -26,8 +27,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 //   ground line at 500. Blade heights run 26–50, so the tallest ink the field can
 //   ever reach is y 450.
 // · four animals sit on it at x 136 / 196 / 256 / 316, each 50 wide on a 60 pitch
-//   so they stand 10 apart; the barrel is 34 × 19 at y 470…489 with legs down to
-//   the ground and a grazing head reaching y 492 and x +50. Everything they draw
+//   so they stand 10 apart; the barrel is 32 × 17 at y 471…488 with legs down to
+//   the ground and a grazing head reaching y 492 and x +47. Everything they draw
 //   is inside y 470…500, so the band is unaffected.
 // · the sum sits above the field: the GAIN box x 118…190 and the COST box x 202…362,
 //   both y 314…356. The cost box holds four cells at rel x 5 / 43 / 81 / 119, 35 wide
@@ -50,24 +51,45 @@ const BLADE = Array.from(
 
 const HERD_X = [136, 196, 256, 316];
 /**
- * The animals are 50 wide on a 60 pitch, of which the BARREL is 34.
+ * The animals are 50 wide on a 60 pitch, grazing, facing right, in a 50 × 30 box.
  *
- * They used to be a 40 × 20 rounded box on two 3-wide legs, with no head and no
- * tail — which is to say they were drawn with the same recipe as the GAIN and
- * COST boxes twenty lines below, and read as exactly that: four empty crates
- * standing in the field. The legs were the giveaway. A blade of grass here is 4
- * wide, so the cattle were standing on legs THINNER than the grass they were
- * eating, and they disappeared into the comb.
+ * They used to be a 40 × 20 rounded box on two 3-wide legs, and then a rounded box
+ * with a head on it — drawn with the same recipe as the GAIN and COST boxes below,
+ * and reading as crates or a bench. The reference gives a grazing cow as: a deep
+ * box barrel with a LEVEL back and the hip bones making CORNERS at the rear of the
+ * top line; the neck running forward and DOWN so the broad muzzle rests on the grass
+ * ahead of the forefeet; a dewlap under the neck; an udder between the hind legs;
+ * short straight legs; horn stubs and an ear at the poll; and a tail that is a thin
+ * cord ending in a switch. A long neck and slender legs read as a horse or a deer.
  *
- * Now: four legs (6 near, 4.5 off-side — the depth cue critters.ts uses), a head
- * carried low over the grass, an ear and a tail. Still OUTLINED rather than
- * filled, and that part is not a style choice — see the note on the barrel.
+ * The OFF-SIDE legs recede in SOFT, which is the depth cue that stops four legs
+ * reading as one black slab. Still OUTLINED rather than filled, and that part is not
+ * a style choice — see the note on the barrel.
  */
 const BEAST_W = 50;
-const BODY_W = 34;
-const BODY_H = 19;
 const BODY_T = 470;
-const LEG_T = 15;
+const COW_LEGS: Part[] = [
+  bar(14, 13, 14.5, 29.5, 3.6, SOFT), bar(36.5, 14, 37, 29.5, 3.6, SOFT),
+  bar(7, 13, 7, 30, 4.8, INK), bar(29.5, 13, 29.5, 30, 4.8, INK),
+  bar(2.5, 4, 1.2, 18, 1.4, INK), ell(1.2, 20.5, 3.4, 5.4, INK),
+];
+/**
+ * THE BARREL STAYS TONED WITH AN INK OUTLINE, and that is load-bearing rather than
+ * decorative. They are the only animals standing IN the hero: the field is 21 blades
+ * over x 112…356 and the four of them cover about 70% of that width in the y 470…500
+ * band, so filling them in blacks out the bottom of most of the grass. The short
+ * blades (26 tall, topping out at y 474) would vanish entirely, and a field dying is
+ * the one thing this scene has to show.
+ */
+const COW: Part[] = [
+  rect(19, 9.5, 32, 13, STONE, 0, 4), ell(20, 13.5, 29, 9, STONE), rect(6, 3.2, 8, 5, STONE, 0, 1.5),
+  ell(13, 17.5, 7, 4.5, STONE), bar(31, 7, 36.5, 13, 9.5, STONE), ell(34, 14.5, 6, 5, STONE),
+  rect(40, 17.5, 9, 12, STONE, -28, 3.5),
+];
+const COW_MARKS: Part[] = [
+  ell(42.8, 23, 8, 6.4, INK),                                              // the broad muzzle, in the grass
+  bar(34.5, 9, 39.5, 8.5, 2.6, INK), bar(38.5, 9.5, 40.5, 5.8, 2, INK),    // ear and horn stub
+];
 
 // 64 wide left "ALL YOURS" only 7% of clear air inside its inset kicker (D30).
 const GAIN = { left: 118, top: 314, width: 72, height: 42 };
@@ -208,20 +230,14 @@ function Beast({ k, left, SCENE }: { k: number; left: number; SCENE: { value: { 
     return { opacity: a, transform: [{ translateX: (1 - a) * 14 }] };
   });
   return (
-    // ORDER IS THE DRAWING. The legs and tail go down first so the barrel's paper
-    // fill cuts them off cleanly where they enter the body, and the head goes last
-    // so IT crosses the barrel's outline rather than the other way round — which is
-    // the difference between an animal with a head and a box with a bubble on it.
+    // ORDER IS THE DRAWING. The legs and tail go down first so the barrel's fill
+    // cuts them off cleanly where they enter the body, and the barrel, neck and
+    // head share ONE outline, so the head grows out of the body rather than being a
+    // box with a bubble on it.
     <Animated.View style={[styles.beast, { left }, st]} pointerEvents="none">
-      <View style={[styles.leg, { left: 6 }]} />
-      <View style={[styles.legFar, { left: 12.5 }]} />
-      <View style={[styles.leg, { left: 23 }]} />
-      <View style={[styles.legFar, { left: 29.5 }]} />
-      <View style={styles.tail} />
-      <View style={styles.body} />
-      <View style={styles.ear} />
-      <View style={styles.head} />
-      <View style={styles.muzzle} />
+      <Shapes parts={COW_LEGS} />
+      <Outlined parts={COW} width={2} line={INK} />
+      <Shapes parts={COW_MARKS} />
     </Animated.View>
   );
 }
@@ -249,33 +265,6 @@ const styles = StyleSheet.create({
   blade: { position: 'absolute', width: GRASS_W, backgroundColor: INK, transformOrigin: '50% 100%' },
 
   beast: { position: 'absolute', top: BODY_T, width: BEAST_W, height: GROUND - BODY_T },
-  // THE BARREL STAYS PAPER-FILLED WITH AN INK OUTLINE, and that is load-bearing
-  // rather than decorative. Every other animal in the app is solid ink (the dog in
-  // ethics-1, the kestrel in aesthetics-5) and these were the odd ones — but they
-  // are the only animals standing IN the hero. The field is 21 blades over x
-  // 112…356 and the four of them cover about 70% of that width in the y 470…500
-  // band, so filling them in blacks out the bottom of most of the grass. The short
-  // blades (26 tall, topping out at y 474) would vanish entirely, and a field
-  // dying is the one thing this scene has to show.
-  body: {
-    position: 'absolute', left: 3, top: 0, width: BODY_W, height: BODY_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 7, backgroundColor: STONE,
-  },
-  // Carried LOW — cattle on a common are eating it, and a head at grazing height
-  // also keeps the ear and the muzzle down among the blades where the outline has
-  // something to read against.
-  head: {
-    position: 'absolute', left: 33, top: 9, width: 14, height: 13,
-    borderWidth: 2, borderColor: INK, borderRadius: 5.5, backgroundColor: PAPER,
-  },
-  muzzle: { position: 'absolute', left: 45, top: 15, width: 5, height: 4.5, borderRadius: 2, backgroundColor: INK },
-  ear: { position: 'absolute', left: 35.5, top: 5, width: 3.5, height: 7, borderRadius: 1.75, backgroundColor: INK },
-  tail: { position: 'absolute', left: 0, top: 1, width: 3, height: 8, borderRadius: 1.5, backgroundColor: INK },
-  // 6 for the near legs and 4.5 for the off-side pair, the same depth cue the dog
-  // uses. Both must stay clear of the 4-wide grass blade, which is what the old
-  // 3-wide leg failed at.
-  leg: { position: 'absolute', top: LEG_T, width: 6, height: GROUND - BODY_T - LEG_T, backgroundColor: INK },
-  legFar: { position: 'absolute', top: LEG_T, width: 4.5, height: GROUND - BODY_T - LEG_T, backgroundColor: INK },
 
   gain: { position: 'absolute', ...GAIN },
   cost: { position: 'absolute', ...COST },

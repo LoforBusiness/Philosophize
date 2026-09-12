@@ -1413,6 +1413,45 @@ they belong to, so the rule book has them and this file did not:
 > sitting inside a budget of 6 where they hid the three that are real. Exempting
 > them by stem took the budget DOWN to 3.
 
+> **AND THEN THE REST OF THE ZOO.** A round later the reader found the same fault in
+> a lesson the four above had not reached — *"one of the lessons has a bird and does
+> not like a bird at all … if there is an animal … it needs to be referenced online or
+> to have an actual real looking figure to it."* Every animal in the corpus is drawn
+> against a reference now, in twelve lessons: the kestrel twice (`aesthetics5`,
+> `aesthetics30`), the flamingo (`aesthetics26`), the stripped bull (`aesthetics34`),
+> the creature (`aesthetics17`), the crow (`logic16`), the cats (`logic22`), the hen
+> (`epistemology7`), the zebra (`epistemology35`), the demon (`epistemology2`), the
+> herd (`political31`) and the ladder of minds — particle, ant, mouse, brain
+> (`metaphysics28`). Each was judged on a contact sheet of every beat. Real objects
+> are the next pass, in reading order; a labelled diagram plate stays a diagram.
+>
+> - **AN ANIMAL IS A PART LIST NOW, NOT A PILE OF STYLES.** `Silhouette.tsx` draws
+>   one from `ell`, `rect`, `bar` and `tri` parts in its own units — Views, never SVG,
+>   because the must-box probe cannot see inside an `<Svg>` and the camera, the gaze
+>   and the bubbles are all built on what it records. Three rules came out of the
+>   drafts: an ellipse is a CIRCLE, SCALED, since Android clamps a corner radius to
+>   half the short side and a wide oval drawn with one comes out a capsule; a
+>   triangle sits in a sized wrapper, because a border triangle has a zero box and
+>   turns about nothing; and an outline is every part drawn once in the line colour,
+>   grown by the line's width, and then every part again in the fill — so parts that
+>   touch share ONE outline instead of each ruling a seam across the body.
+> - **`Silhouette.tsx` is in `muststamp`'s SHARED list, whole.** It has no
+>   StyleSheet, and a change to how a part is sized resizes the animal in every scene
+>   that draws one.
+> - **THE BULL WAS STRIPPED BACKWARDS FOR THE LIFE OF THE LESSON.** `aesthetics34`
+>   began each stroke's fade at `1 − KEEP`, so the back line and the horns went FIRST
+>   and a reader stripping the bull watched it lose exactly the strokes the lesson
+>   says survive. It fades by rank now: the eight weakest go one after another, and
+>   the back, the near horn and the head never go. Nothing counted could have seen
+>   it; watching every stroke of the redraw did.
+> - **AND THE KESTREL BROKE A CHECKER, NOT A LESSON.** `check:fits` finds the plate a
+>   caption sits on by asking which style's `top` and `height` contain the caption's
+>   `top` — and every `top` is local to its own parent. `aesthetics30`'s answer
+>   label, 7 down inside its target, landed "on" the new wing arm, 0.5 down inside
+>   the bird, and was reported cut into 5.5 units. A caption cannot sit on a plate
+>   narrower than itself, so those pairings are dropped — counter-tested against
+>   HEAD's checker on a label that really does wrap off its plate, which both catch.
+
 > **AND THE PICTURE IS A PHOTOGRAPH BETWEEN TAPS — MEASURED IN PIXELS, NOT GREP.**
 > Counted from the source, 166 of 184 scenes read the monotonic clock for nothing
 > but the figure. That number finds candidates and is not the measurement: a grep
@@ -3365,10 +3404,11 @@ the head mostly in X and judging it on `y` alone under-reads it by half.
 
 That is group **AB** of the rule book, and the point of it is that **he is
 learning too** — not presenting the material, but the other student. 1,020
-authored thoughts, 329 of them shown, plus a line back on every answer.
+authored thoughts, 279 of them shown, plus a line back on an answer wherever one
+can sit near his head without touching it or a word (316 of them).
 
 **THE THIRTY LESSONS THAT FINISHED THE TAKEOVER CARRY NO THOUGHT LINES**, which is
-why 80 lessons now show none against 29 before. `say` is AUTHORED and the
+part of why 94 lessons show none. `say` is AUTHORED and the
 generator only chooses among what has been written, so a new lesson gets a bubble
 only once somebody writes it one — the split this section already argues for,
 seen from the other side.
@@ -3616,6 +3656,76 @@ covers a word.
 > measurement, then go and look bigger."* Reading the DOM said the discs were 71
 > units to the left of where they should be; the sheet only said the bubble looked
 > a bit off.
+
+> **AND THEN IT WAS IN THE MIDDLE OF THE SCREEN, WITH ITS DOTS ON HIS HEAD.** The
+> reader: *"the thinking bubble … sometimes is in the middle of the screen. I don't
+> know if this is because of the camera movement … I don't want you to change any of
+> the camera movement"*, and *"so no dots that go towards the stickman aren't behind
+> his head."* Measured bubble by bubble against the page — a render probe reading
+> every disc against the head and hat actually drawn — the offline model the table
+> is built from was wrong in exactly the directions that produce both.
+>
+> - **IN SEVEN LESSONS IT WAS AIMED AT NOBODY.** `walkOf` trusted a declared `X`
+>   track that no pose call stands anyone on, and fell back to the union of every
+>   figure — so `aesthetics-aesthetics-4` hung all four bubbles at x 219 while its
+>   lead stood at 334. It reads the lead's own `lookPose`/`reactPose` now, and
+>   `check:thoughts` fails any bubble aimed where the beat draws no figure.
+> - **THE HEAD WAS NOT WHERE THE MODEL PUT IT, FOUR WAYS.** The bottom of a figure's
+>   box is the end of the shin stroke, 5.5 below the ground, so every skull sat 5.5
+>   low; `wardrobeReach` is the stage's WIDEST costume, so a bare lead beside a fez
+>   was hung for the fez; a cap 46 units below the box top pinned the crown to boxes
+>   whose tops run 72–116 units above the skull; and `scaleOf` read `K_FIG * 1.08`
+>   as 1 and took a crowd's first `<Stickman>` for the lead. Across 50 bubbles the
+>   old crown was a median 5.6 units off with a p90 of 30; corrected, 93 bubbles
+>   land a median 0.6 units from the drawn head and none further than 5.5.
+> - **THE CAMERA HOLDS, AND THE MODEL DID NOT.** A beat with no tour of its own that
+>   is not a question does not move the camera at all — the player keeps the shot it
+>   was drawing — and the table placed that beat's bubble for its own resting frame.
+>   `epistemology-knowledge-7` hung beat 1's thought for a wide shot while the camera
+>   sat pushed in from beat 0, 136px off the picture. `make:thoughts` follows the hold
+>   now, a bubble on a toured beat waits until its station has arrived, and the
+>   camera itself is untouched.
+> - **THE WORDS IT COULD NOT SEE.** Only the box was ever tested, never the trail's
+>   discs; the must-box probe records no one-character word, so a lone "?" or a row's
+>   "3" was invisible (`glyphBoxesOf` reads them out of the scene, and `wordsOf` gives
+>   every word a glyph slot either side); the ✓ or ✕ an answer strikes on a plate's
+>   corner was never measured at all (`sealsOf`); and `politicalScene` raises its
+>   sovereign 30 units as the answer lands (`ANSWER_LIFT` — the one scene that does).
+> - **AND THE ANSWER LINE WAS SET IN A FACE THE APP NEVER LOADS.** `sayText` named
+>   `Inter_600SemiBold`, the root layout loads 400, 500 and 700, so every answer line
+>   fell back to the platform's face and was measured in one it was never drawn in.
+>   It is 700, and `check:thoughts` reads both names against the loader.
+>
+> **THE PRICE IS A QUIETER MASCOT, AND IT IS THE RIGHT ONE.** 326 thoughts shown
+> became 279, 450 answer lines 316, and 25 second-figure lines 17 — counted after the
+> two fixes below, which between them gave back nine thoughts, one answer line and one
+> second-figure line, with the twelve redrawn animals re-measured alongside. Each one withdrawn
+> had nowhere near his head that kept off his hat and every word inside the frame the
+> camera actually shows — and a bubble that covers a word or rests on his head is
+> the complaint, where one that does not appear reads as him listening. The committed
+> table failed the corrected check on all five of its rules before a line changed.
+>
+> **AND THE BOXES HAD BEEN RECORDING THE BUBBLE.** Re-measuring the redrawn animals
+> brought rows back with *"The fat, relentless ego."* written on them — the lesson's
+> own thought, which the player draws inside the stage, recorded by the must-box
+> probe as a stage word, with its box and its trail as art. Nothing in the probe or in
+> `measure-must`'s route turned bubbles off, so every lesson measured since group AB
+> had its own bubble on file: **29 of 246**, and lessons 38 and 39 of every branch
+> carried several lines each, from when a thought sat on nearly every beat. Each of
+> those tables then steered round a ghost: the camera framed it, the gaze looked at
+> it, and `make:thoughts` placed the next bubble clear of where the last one had
+> been. `tourFlag.ts` has a second switch, the route sets it unconditionally, and all
+> 29 were re-measured with it. No stamp moved, because the probe did not change —
+> only what was on the stage while it read.
+>
+> **AND A SEAL IS STRUCK ON EVERY TARGET, NOT ONLY ON A SMALL PLATE.** `sealsOf`
+> found a seal's corner by looking for a plate under 80 units carrying its own label,
+> and `aesthetics-aesthetics-18`'s answers are 130×92 panels captioned from above —
+> so *"That's the one. Naturally."* sat across the ✓ on THE MUSIC. A live `Target`
+> draws a halo three units outside its box and a pip inside its top-right corner, the
+> probe records both on the beat being asked, and the pair gives the box back exactly.
+> Nine more answer lines in seven lessons were sitting on a seal the old rule could
+> not see.
 
 > **AND THE FIRST LIVING SHELF FINALLY GOT ITS ARMS (N15).** *"the stickman does 3
 > times in a row of his hands, and I don't like that movement of the hands, it

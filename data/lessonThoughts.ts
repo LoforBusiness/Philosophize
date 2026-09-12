@@ -48,7 +48,11 @@ export interface LessonThoughts {
   /** One entry per beat: what he is thinking, or null for the beats he is just listening. */
   say: (string | null)[];
   /**
-   * The SECOND figure's line as he walks in: `[beat, x, tailY, discs]`.
+   * The SECOND figure's line as he walks in: `[beat, x, tailY, discs, headX]`.
+   *
+   * `headX` is where HE stands, so the trail leans to him. Without it the player was
+   * handed the box's own x as the head, and a box slid clear of the stage edge hung
+   * its discs straight down beside him rather than toward him.
    *
    * Only the 24 lessons where a visitor arrives (AA8), and only on his entrance
    * beat — never on the question itself, because a second figure staking a claim
@@ -57,48 +61,48 @@ export interface LessonThoughts {
    * named positions and a `split` divides one thing in two, so his meaning is
    * fixed by the CONTROL — he disagrees — whatever the lesson is about.
    */
-  vis?: [number, number, number, number];
+  vis?: [number, number, number, number, number?];
 }
 
 export const THOUGHTS: Record<string, LessonThoughts> = {
   'aesthetics-aesthetics-1': {
-    at: [null, null, null, null, null, null, null, null, null, null, [262, 398, 1, 262], null, null, null, [262, 397, 1, 262], null],
+    at: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
     say: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   },
   'epistemology-knowledge-1': {
-    at: [null, null, null, null, null, null, null, null, null, null, [300, 398, 3, 300], [300, 398, 3, 300], null],
+    at: [null, null, null, null, null, null, null, null, null, null, [300, 387, 2, 300], [300, 387, 2, 300], null],
     say: [null, null, null, null, null, null, null, null, null, null, null, null, null],
   },
   'metaphysics-being-1': {
-    at: [null, null, null, null, null, null, null, null, null, [328, 394, 3, 340], [328, 394, 3, 340], null],
+    at: [null, null, null, null, null, null, null, null, null, [316, 387, 3, 340], [316, 387, 3, 340], null],
     say: [null, null, null, null, null, null, null, null, null, null, null, null],
   },
   'ethics-ethics-1': {
-    at: [null, null, null, null, null, null, null, null, null, null, null, [250, 219, 3, 250], [250, 219, 3, 250], null, null, null],
+    at: [null, null, null, null, null, null, null, null, null, null, null, [232, 208, 2, 250], [232, 208, 2, 250], null, null, null],
     say: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   },
   'political-political-1': {
-    at: [null, null, null, null, null, null, null, [200, 398, 3, 200], null, null, [200, 368, 2, 200], null],
+    at: [null, null, null, null, null, null, null, [200, 357, 1, 200], null, null, null, null],
     say: [null, null, null, null, null, null, null, null, null, null, null, null],
   },
   'epistemology-knowledge-3': {
-    at: [null, null, null, null, null, null, null, null, null, null, null, null],
+    at: [null, null, null, [272, 377, 2, 272], null, null, null, null, null, null, null, null],
     say: [null, 'Certain isn’t the same as true.', null, 'A demon. Really?', 'Doubt at maximum.', null, 'So the demon is a tool.', 'One refuses to crack.', 'Doubt that rebuilds.', null, null, null],
   },
   'ethics-ethics-2': {
-    at: [null, [216, 372, 3, 258], null, null, null, null, null, null, null, null, null, null, null, null, null],
+    at: [null, null, null, null, [262, 386, 2, 262], null, null, null, null, [262, 386, 2, 262], null, null, null, null, null],
     say: [null, 'Three verdicts. One wallet.', null, 'Not three religions.', 'I use all three.', null, 'Everyone counts the same.', null, 'Would I want that rule?', 'It eats itself.', null, 'Who am I becoming, then.', null, null, null],
   },
   'metaphysics-being-2': {
-    at: [null, null, [150, 337, 2, 150], null, null, null, null, null, null, null, null, null, null],
+    at: [null, null, null, [150, 378, 3, 150], null, null, [214, 376, 3, 214], null, null, null, null, [236, 378, 3, 236], null],
     say: [null, null, 'Always a reason.', 'Why anything at all?', 'Nothing was simpler.', null, 'Was nothing ever on offer?', null, 'There’s nothing to step on.', 'You can’t point at it.', null, null, null],
   },
   'aesthetics-aesthetics-2': {
-    at: [null, [202, 328, 3, 202], null, [202, 328, 3, 202], null, [202, 325, 3, 202], null, null, [202, 329, 3, 202], null],
+    at: [null, null, null, null, null, null, [292, 377, 1, 292], null, null, null],
     say: [null, 'Art as an infection.', 'I catch the feeling.', 'The room was frightened.', null, null, 'Packed into lines.', 'Nothing else does that.', null, null],
   },
   'logic-arguments-4': {
-    at: [null, null, null, [76, 383, 3, 76], null, null, null, [76, 383, 3, 76], null, [76, 383, 3, 76], [76, 385, 3, 76], null],
+    at: [null, null, null, null, null, [76, 367, 2, 76], null, null, null, null, null, null],
     say: [null, 'Two different rulers.', null, 'Wrong ruler, wrong verdict.', null, 'That one locks shut.', null, 'And that one only leans.', null, null, null, null],
   },
   'political-political-2': {
@@ -106,310 +110,310 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'Bodies, or minds.', null, 'Entitled to be obeyed.', 'One ship, or a fleet.', 'Only legitimacy splits them.', null, 'Custom and bloodline.', 'Or rules and offices.', null, null, null],
   },
   'logic-arguments-3': {
-    at: [null, [72, 398, 2, 60], null, null, null, [72, 399, 1, 60], null, [72, 398, 1, 60], null, [72, 399, 1, 60], null],
+    at: [null, null, null, null, null, null, null, null, null, null, null],
     say: [null, 'Shape, not truth.', null, null, 'But toasters aren’t gold.', 'Ah. Valid, not sound.', null, null, 'So go at the premises.', null, null],
   },
   'ethics-ethics-4': {
-    at: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    at: [null, null, [118, 315, 1, 118], null, [118, 315, 1, 118], null, null, null, null, null, null, null, [100, 317, 1, 118], [100, 315, 1, 118], null],
     say: [null, 'That is a bigger claim.', 'They do differ.', 'Right because they say so?', 'That’s the slide.', null, null, 'Some things hold anyway.', 'Differing isn’t equal.', 'Every society, the same few.', null, 'A shared floor.', null, null, null],
   },
   'ethics-ethics-3': {
-    at: [null, null, null, [76, 398, 3, 58], null, null, null, null, null, null, [76, 398, 3, 58], null, [76, 398, 3, 58], [76, 399, 3, 58], null],
+    at: [null, null, null, [82, 378, 3, 58], null, null, null, null, null, null, [76, 378, 3, 58], null, null, null, null],
     say: [null, 'Same goal. They split.', null, 'One instead of five.', null, 'Five outweigh one.', null, 'Not a sum, then.', 'Duty, whatever follows.', 'Who do I become?', 'What would a wise one do?', null, null, null, null],
   },
   'epistemology-knowledge-4': {
-    at: [null, null, null, null, null, null, null, null, null, [196, 364, 3, 196], [196, 364, 1, 196], null, [166, 316, 3, 196], null],
+    at: [null, [96, 386, 2, 96], null, null, null, null, [96, 388, 2, 96], null, null, [96, 386, 2, 96], null, null, null, null],
     say: [null, 'Blank paper.', null, 'Burned, then I know hot.', null, 'Never had to be shown.', 'Before any burn.', 'The boy already knew.', 'Learning is remembering?', null, 'Both half right.', 'The mind has shapes.', null, null],
   },
   'metaphysics-being-3': {
-    at: [null, null, null, [156, 398, 2, 132], null, null, null, [156, 398, 2, 132], null, [132, 398, 2, 132], [132, 399, 2, 132], null],
+    at: [null, null, null, [156, 388, 1, 132], null, null, null, [156, 389, 1, 132], null, [132, 387, 1, 132], [132, 388, 1, 132], null],
     say: [null, 'You can’t step in twice.', 'So he split the world.', 'Becoming never holds.', 'Shadows for the real thing.', 'The wall is where we live.', null, 'Never quite equal.', 'The copy is only good.', null, null, null],
   },
   'epistemology-knowledge-5': {
-    at: [null, null, null, null, [76, 398, 3, 76], null, null, null, null, [76, 398, 2, 76], null, [76, 393, 3, 76], [76, 396, 3, 76], null],
+    at: [null, null, null, null, [76, 386, 3, 76], null, null, [76, 387, 2, 76], null, null, null, [76, 381, 2, 76], [76, 384, 2, 76], null],
     say: [null, 'Nobody taught me that.', 'Not the useful kind.', 'Free knowledge.', 'I do just look.', 'And that is the evidence.', null, 'Knocked off balance.', 'Knowledge as power, then.', 'Understand it, or use it.', null, null, null, null],
   },
   'metaphysics-being-4': {
-    at: [null, null, [326, 388, 3, 344], null, null, null, [326, 388, 3, 344], null, [326, 388, 3, 344], [326, 388, 3, 344], null],
+    at: [null, null, [320, 376, 3, 344], null, null, null, [320, 377, 3, 344], null, [320, 377, 3, 344], [320, 376, 3, 344], null],
     say: [null, 'Thinking it makes it a thing.', 'Every grab turns it real.', null, 'It can’t be said at all.', null, 'Then nothing can change.', 'Motion as illusion.', null, null, null],
   },
   'aesthetics-aesthetics-3': {
-    at: [null, null, null, [326, 398, 2, 344], null, null, null, null, [326, 398, 1, 344], null, [326, 398, 2, 344], null],
+    at: [null, [320, 388, 1, 344], null, [320, 386, 1, 344], null, null, null, null, null, null, [320, 387, 1, 344], null],
     say: [null, 'Not one, anywhere.', 'It hurts and I go anyway.', 'He never says what.', 'Nobody looks away.', 'Drawn well, I can look.', null, 'It never argues.', 'Dangerous, then.', null, null, null],
   },
   'aesthetics-aesthetics-4': {
-    at: [null, null, null, null, [219, 388, 3, 219], null, null, null, [219, 388, 3, 219], null, [219, 388, 3, 219], [219, 388, 3, 219], null],
+    at: [null, null, null, null, [322, 376, 3, 334], null, null, null, [322, 376, 3, 334], null, [322, 376, 2, 334], [322, 376, 2, 334], null],
     say: [null, 'So what makes it art?', 'Copy the world, then.', 'Or carry a feeling.', 'He just signed it.', 'The maker chose it.', 'Choosing was the work.', null, 'It fits neither.', 'Asking is already the work.', null, null, null],
   },
   'political-political-3': {
-    at: [null, null, [200, 388, 3, 200], null, [200, 388, 3, 200], null, null, null, null, [200, 388, 3, 200], [200, 388, 3, 200], null],
+    at: [null, null, null, [78, 376, 3, 66], null, null, null, [78, 376, 1, 66], null, [78, 376, 1, 66], [78, 377, 2, 66], null],
     say: [null, 'Compelled, or owed.', 'No rules at all.', 'So they covenant.', 'Only while it guards them.', null, null, 'What everyone truly shares.', 'Rules I gave myself.', null, null, null],
   },
   'logic-arguments-6': {
-    at: [null, null, [76, 375, 3, 58], null, [76, 375, 3, 58], null, [76, 374, 3, 58], [76, 375, 3, 58], null],
+    at: [null, null, null, null, null, null, null, null, null],
     say: [null, null, 'So Q rides on P.', 'It doesn’t say it rains.', 'Only the link, then.', null, null, null, null],
   },
   'logic-arguments-5': {
-    at: [[76, 398, 3, 76], null, null, null, [76, 398, 3, 76], null, [76, 399, 3, 76], null, [76, 398, 3, 76], null],
+    at: [[76, 386, 3, 76], null, null, null, [76, 386, 3, 76], null, [76, 387, 3, 76], null, [76, 386, 3, 76], null],
     say: ['One weak link.', null, null, 'Two circles, one point.', 'Every step shown.', null, null, 'Not the vibe, then.', null, null],
   },
   'ethics-ethics-5': {
-    at: [null, null, null, null, null, null, null, null, [265, 398, 1, 265], [265, 398, 2, 265], null],
+    at: [null, null, null, null, null, null, null, null, null, [265, 386, 1, 265], null],
     say: [null, null, null, null, null, null, null, null, null, null, null],
   },
   'political-political-4': {
-    at: [null, [196, 385, 1, 196], null, null, [196, 384, 2, 196], null, null, null, null, null, null],
+    at: [null, [196, 386, 2, 196], null, null, [196, 386, 2, 196], null, null, null, null, null, null],
     say: [null, 'Left alone, then.', 'Only to stop harm.', 'My business, apparently.', 'Now it’s theirs.', null, 'Being my own master.', 'Empower, or leave alone?', null, null, null],
   },
   'metaphysics-being-6': {
-    at: [null, null, null, null, null, null, null, null, [126, 358, 3, 60], [126, 359, 3, 60], null],
+    at: [null, [78, 386, 1, 60], null, null, null, null, null, [78, 386, 1, 60], null, null, null],
     say: [null, 'Plank by plank.', null, null, 'Two kinds of same.', 'It keeps the second.', 'Every cell, replaced.', 'Still call it me.', null, null, null],
   },
   'aesthetics-aesthetics-6': {
-    at: [null, null, null, [76, 399, 2, 70], null, null, [76, 398, 1, 70], null, [76, 398, 1, 70], null, [76, 398, 1, 70], null],
+    at: [null, null, null, [76, 387, 1, 70], null, null, null, null, null, null, null, null],
     say: [null, 'Small and smooth.', 'Terror, and I stay.', 'Safe on the cliff.', 'Danger at a distance.', null, null, 'So the awe is inward.', 'My mind made room.', 'I am the vast thing.', null, null],
   },
   'ethics-ethics-6': {
-    at: [null, null, null, [183, 308, 3, 183], null, null, [183, 309, 3, 183], null, [183, 309, 3, 183], [183, 310, 3, 183], null],
+    at: [null, [150, 297, 3, 150], null, null, null, null, [150, 297, 3, 150], null, [150, 297, 3, 150], [150, 298, 3, 150], null],
     say: [null, 'Same numbers, though.', null, 'Shove him? No.', 'I’d pull, not push.', 'The arithmetic is identical.', 'A threat, or an instrument.', null, null, null, null],
   },
   'epistemology-knowledge-6': {
-    at: [null, null, [76, 388, 3, 64], null, [76, 389, 3, 64], null, [76, 388, 3, 64], null, null, [76, 388, 3, 64], null],
+    at: [null, null, [76, 376, 3, 64], null, [76, 377, 3, 64], null, [76, 376, 3, 64], null, null, [76, 377, 3, 64], null],
     say: [null, 'A reason against it too.', 'Then nothing is secure.', 'So he simply stopped.', 'Calm, not despair.', null, null, 'Is THAT known, though?', 'Doubt softly, then.', null, null],
   },
   'epistemology-knowledge-7': {
-    at: [null, null, null, [76, 398, 3, 58], null, null, null, [76, 398, 3, 58], null, [76, 399, 3, 58], [76, 395, 3, 58], null],
+    at: [null, null, null, null, null, null, null, null, null, [82, 387, 3, 58], [82, 383, 3, 58], null],
     say: [null, 'What gives me the right?', 'Seen, to unseen.', 'Science does it constantly.', 'Because it always has.', 'The past vouching for it.', null, 'The chicken was sure too.', 'More is no guarantee.', null, null, null],
   },
   'metaphysics-being-5': {
-    at: [null, null, null, [74, 398, 1, 62], null, null, [74, 394, 1, 62], null, [74, 399, 2, 62], [74, 399, 2, 62], null],
+    at: [null, null, null, null, null, null, null, null, null, null, null],
     say: [null, 'Not why THIS thing.', 'Why anything to ask about.', 'True for no reason?', 'So what is the reason?', null, 'I am a thing that wonders.', 'The universe turns round.', null, null, null],
   },
   'aesthetics-aesthetics-5': {
-    at: [null, null, [74, 399, 3, 62], null, [74, 400, 1, 62], null, [74, 398, 1, 62], null, null, [74, 399, 1, 62], null],
+    at: [null, null, [80, 387, 2, 62], null, [80, 388, 3, 62], null, [80, 386, 3, 62], null, null, [80, 387, 3, 62], null],
     say: [null, 'A just and loving look.', 'The fat, relentless ego.', 'Then — kestrel.', 'Nothing left but kestrel.', null, null, 'Patches, before things.', 'One leaf, before a tree.', null, null],
   },
   'political-political-5': {
-    at: [null, null, [78, 382, 3, 78], null, null, null, [78, 391, 3, 78], null, [78, 386, 3, 78], null, [78, 383, 3, 78], null],
+    at: [null, null, null, null, null, null, null, null, null, null, null, null],
     say: [null, 'Everyone at their own work.', 'Only they know what is good?', null, 'Not knowing who I’d be.', 'Suddenly I’d be fairer.', null, 'Why we build them.', 'What makes them legitimate.', 'And what justice demands.', null, null],
   },
   'political-political-6': {
-    at: [null, null, [76, 388, 3, 46], null, [76, 388, 3, 46], null, [76, 388, 3, 46], [76, 388, 3, 46], null],
+    at: [null, null, null, null, null, null, [76, 376, 3, 46], [76, 377, 3, 46], null],
     say: [null, 'Not knowing who I’ll be.', 'Liberties come first.', null, 'Not necessarily, though.', 'Better than under equal pay.', null, null, null],
   },
   'logic-arguments-7': {
-    at: [null, null, [144, 353, 3, 168], null, null, [124, 355, 3, 124], null, [124, 355, 3, 124], null, null, [124, 354, 3, 124], null, null, null, null],
+    at: [null, null, [144, 376, 3, 168], null, null, [124, 376, 3, 124], null, [124, 376, 3, 124], null, null, [124, 377, 3, 124], null, null, null, null],
     say: [null, null, 'Just a promise.', null, null, null, 'Rain, so wet. Easy.', 'And I never looked.', null, 'Dry. So no rain?', null, 'Backwards, and still safe.', null, null, null],
   },
   'logic-arguments-8': {
-    at: [null, [230, 352, 3, 230], null, null, [152, 351, 3, 152], null, [254, 352, 3, 152], null, null, null, null, null, [152, 352, 3, 152], null, null, null],
+    at: [null, [230, 367, 3, 230], null, null, [152, 367, 3, 152], null, null, null, null, null, null, null, [152, 368, 3, 152], null, null, null],
     say: [null, 'Rain. Obviously.', null, null, 'Wait — backwards?', null, null, 'A sprinkler. Of course.', null, null, 'Anything else could do it.', null, null, 'Two causes, one street.', null, null],
   },
   'ethics-ethics-7': {
-    at: [null, null, null, [170, 398, 3, 170], null, null, [300, 398, 3, 300], null, [170, 398, 2, 170], null, null, [90, 399, 3, 90], null, null, null, null],
+    at: [null, null, null, null, null, [300, 386, 3, 300], null, null, null, [170, 387, 3, 170], null, [90, 387, 3, 90], null, null, null, null],
     say: [null, 'Same two seconds.', null, 'Nothing happened.', null, 'Only the road differs.', 'Same shrug, same speed.', 'Nothing inside them differs.', null, 'Only luck, then.', 'One stands trial.', null, 'Moral luck, it’s called.', null, null, null],
   },
   'ethics-ethics-9': {
-    at: [null, null, null, null, [124, 398, 3, 124], null, [168, 398, 2, 168], null, [124, 398, 3, 124], [124, 398, 3, 124], null],
+    at: [null, null, null, null, [124, 386, 3, 124], null, [168, 387, 1, 168], null, [124, 386, 3, 124], [124, 387, 3, 124], null],
     say: [null, 'A mark either way.', null, 'Leaving would break her.', 'Neither outranks.', null, 'He was right, probably.', 'The other claim hasn’t moved.', null, null, null],
   },
   'ethics-ethics-8': {
-    at: [null, null, null, [80, 388, 3, 80], null, null, null, null, [182, 379, 3, 182], null, null, null, [106, 388, 3, 112], null, [106, 388, 3, 112], null, null, null],
+    at: [null, null, null, [80, 376, 3, 80], null, null, null, null, null, null, null, null, [112, 376, 3, 112], null, [112, 377, 3, 112], null, null, null],
     say: [null, 'Or just go and sit.', 'Step back. Be impartial.', 'Nobody’s name in them.', 'No box fits her.', 'The one you know.', 'No theory said a word.', 'Something already knows.', null, 'Bonds, not boxes.', 'A different voice.', null, null, 'It grows out of being cared for.', 'Long before any rulebook.', 'Not endless self-sacrifice.', 'Rules, and then the person.', null],
   },
   'epistemology-knowledge-31': {
-    at: [null, [236, 337, 1, 236], null, [236, 337, 1, 236], null, null, null, null, null, null, null, null],
+    at: [null, null, null, [236, 381, 3, 236], null, [236, 381, 3, 236], null, null, null, [266, 375, 3, 236], [236, 382, 3, 236], null],
     say: [null, 'That’s all I have.', 'There it is. The turn.', 'Clear as anything.', 'But is the memory good?', 'Same cabinet, same stuff.', null, 'Signed by memory.', 'The door is still over there.', null, null, null],
   },
   'logic-arguments-31': {
-    at: [null, null, null, [96, 398, 3, 96], null, null, [96, 398, 3, 96], null, [96, 398, 3, 96], [96, 398, 3, 96], null],
+    at: [null, null, null, [96, 386, 3, 96], null, null, [96, 386, 3, 96], null, [96, 386, 3, 96], [96, 386, 3, 96], null],
     say: [null, 'Three. Interesting.', 'The needle hasn’t moved.', 'Tails is DUE, surely.', 'The needle again.', null, 'Twenty-six blacks.', 'The wheel didn’t know.', null, null, null],
   },
   'ethics-ethics-32': {
-    at: [null, null, [191, 372, 3, 191], null, [191, 373, 3, 191], [191, 372, 3, 191], [191, 353, 3, 191], null],
+    at: [null, null, [300, 386, 3, 300], null, [300, 386, 3, 300], [300, 386, 3, 300], [300, 386, 3, 300], null],
     say: [null, 'The reasons sit behind it.', 'Only the card crossed.', null, 'Now the card is no use.', null, null, null],
   },
   'ethics-ethics-31': {
-    at: [null, null, null, [120, 398, 3, 120], null, null, [120, 398, 3, 120], null, [120, 398, 3, 120], [120, 398, 3, 120], null],
+    at: [null, null, null, [120, 387, 3, 120], null, null, [120, 386, 3, 120], null, [120, 386, 3, 120], [120, 386, 3, 120], null],
     say: [null, 'Four rungs closer.', 'Nothing needed to change.', 'Genuinely out of reach.', 'The lamp went out.', null, 'Back on. I didn’t change.', 'It was tracking the reach.', null, null, null],
-    vis: [8, 75, 393, 3],
+    vis: [8, 75, 387, 3, 45],
   },
   'logic-arguments-32': {
-    at: [null, null, null, null, null, null, null, null, null, null],
+    at: [null, [310, 386, 1, 316], null, null, null, null, null, null, null, null],
     say: [null, 'Sounds like yes or no.', 'Yes — so I was cheating.', 'Nobody even claimed it.', 'No is worse.', 'Both doors are traps.', null, null, null, null],
   },
   'epistemology-knowledge-32': {
-    at: [null, null, [74, 383, 3, 56], null, null, null, [74, 383, 3, 56], null, [74, 391, 3, 56], [74, 380, 3, 56], null],
+    at: [null, null, null, [80, 382, 3, 56], null, null, [80, 383, 3, 56], null, [80, 386, 3, 56], [80, 383, 3, 56], null],
     say: [null, 'Nothing on it is false.', 'Nothing on it at all.', 'Every rock, then.', 'The tide would beat me.', null, 'One to one. Perfect.', 'And it shows one rock.', null, null, null],
   },
   'metaphysics-being-13': {
-    at: [null, [168, 388, 3, 168], null, [124, 388, 3, 124], null, null, null, [124, 388, 3, 124], [124, 388, 3, 124], null],
+    at: [null, [168, 386, 3, 168], null, [124, 386, 3, 124], null, null, null, [124, 387, 3, 124], [124, 386, 3, 124], null],
     say: [null, 'A chain, not a body.', 'Now there are two of me.', 'Neither is the copy.', null, 'Nothing chooses.', 'Identity has to pick one.', null, null, null],
-    vis: [6, 76, 393, 3],
+    vis: [6, 82, 377, 3, 46],
   },
   'political-political-12': {
-    at: [null, null, null, [124, 391, 3, 124], null, null, [150, 395, 3, 168], null, [124, 393, 3, 124], [124, 393, 3, 124], null],
+    at: [null, [76, 386, 3, 70], null, null, [124, 386, 3, 124], null, null, null, [124, 387, 3, 124], [124, 386, 3, 124], null],
     say: [null, 'Why that is dangerous.', 'How many doors are open.', 'Nothing is blocking me.', 'But can I walk through it?', null, 'My real self wants this?', 'And calls it freedom.', null, null, null],
   },
   'logic-arguments-22': {
-    at: [null, null, [124, 396, 3, 124], null, [150, 396, 3, 168], [124, 396, 3, 124], [124, 395, 3, 124], null],
+    at: [null, null, null, null, [150, 389, 3, 168], [124, 386, 3, 124], [124, 387, 3, 124], null],
     say: [null, 'All, none, some, some not.', 'A promise about every one.', null, 'One cat finishes it.', null, null, null],
   },
   'metaphysics-being-15': {
-    at: [null, null, [168, 398, 3, 168], null, [124, 398, 3, 124], null, null, [124, 399, 1, 124], [124, 398, 1, 124], null],
+    at: [null, [76, 386, 3, 70], null, null, [124, 386, 3, 124], null, null, null, null, null],
     say: [null, 'What did I actually see?', 'It moved. It touched.', 'Three plain things.', 'Slow it down and look.', null, 'No glue anywhere.', null, null, null],
   },
   'aesthetics-aesthetics-19': {
-    at: [null, null, null, [124, 394, 3, 124], null, null, [168, 391, 3, 168], null, [124, 394, 3, 124], [124, 395, 3, 124], null],
+    at: [null, null, null, [124, 386, 3, 124], null, null, [156, 386, 3, 168], null, [124, 387, 3, 124], [124, 386, 3, 124], null],
     say: [null, 'Nobody signed the pipe.', 'Frame it and I look.', 'Flat, buggy, no view.', 'That glance was the whole thing.', null, 'One of the densest there is.', 'The verdict moved, not it.', null, null, null],
   },
   'ethics-ethics-18': {
-    at: [null, null, [168, 391, 3, 168], null, [124, 392, 3, 124], null, null, [124, 393, 3, 124], [124, 392, 3, 124], null],
+    at: [null, null, [162, 386, 3, 168], null, [124, 386, 3, 124], null, null, [124, 386, 3, 124], [124, 387, 3, 124], null],
     say: [null, 'The reason was reason.', 'So they were outside.', 'Infants can’t reason.', 'Nobody puts them outside.', null, 'Can they suffer, then.', null, null, null],
   },
   'metaphysics-being-24': {
-    at: [null, [76, 393, 3, 70], null, null, null, [168, 393, 3, 168], null, [124, 394, 3, 124], [124, 393, 3, 124], null],
+    at: [null, [76, 381, 3, 70], null, null, null, [168, 382, 3, 168], null, [124, 382, 3, 124], [124, 381, 3, 124], null],
     say: [null, 'One grain never matters.', 'Every step is safe.', 'Half gone, still a heap.', null, 'One grain. Still HEAP.', 'Something I agreed is wrong.', null, null, null],
   },
   'political-political-13': {
-    at: [null, null, null, [168, 385, 3, 168], null, null, null, [124, 383, 3, 124], null, [124, 383, 3, 124], [124, 376, 3, 124], null],
+    at: [null, null, null, null, null, [168, 376, 3, 168], null, [124, 376, 3, 124], null, [124, 376, 3, 124], [124, 377, 3, 124], null],
     say: [null, 'Not for their own good.', 'Nobody is assaulted.', 'And here is the argument.', 'It feels like a proof.', 'Exactly what they wanted.', null, 'He grants one and three.', 'So it all rests on the middle.', null, null, null],
   },
   'political-political-15': {
-    at: [null, [168, 388, 3, 168], null, [168, 388, 3, 168], null, null, [124, 388, 3, 124], [124, 388, 3, 124], null],
+    at: [null, [168, 386, 3, 168], null, [168, 386, 3, 168], null, null, [124, 387, 3, 124], [124, 386, 3, 124], null],
     say: [null, 'Try the lawful routes first.', 'That is where most fall over.', 'In daylight. And then stay.', null, 'Ran when it was over.', null, null, null],
-    vis: [5, 74, 393, 3],
+    vis: [5, 80, 377, 3, 44],
   },
   'logic-arguments-26': {
-    at: [null, null, null, [168, 384, 3, 168], null, null, null, [168, 384, 3, 168], null, [124, 387, 3, 124], [124, 387, 3, 124], null],
+    at: [null, [76, 386, 3, 70], null, null, null, null, null, [156, 386, 2, 168], null, [124, 387, 3, 124], [124, 386, 3, 124], null],
     say: [null, 'Then be reasonable.', 'Call it N.', 'I’m allowed to suppose it.', 'N plus one is bigger.', 'So N wasn’t the largest.', null, 'Every step after was valid.', 'The assumption failed.', null, null, null],
   },
   'logic-arguments-25': {
-    at: [null, [76, 388, 3, 70], null, [168, 388, 3, 168], null, null, [124, 388, 3, 124], [124, 388, 3, 124], null],
+    at: [null, [88, 376, 3, 70], null, [168, 376, 2, 168], null, null, [124, 376, 3, 124], [124, 377, 3, 124], null],
     say: [null, 'Almost everyone is wrong.', 'One in ten thousand.', 'It catches that one.', null, '1% of a big number.', null, null, null],
   },
   'ethics-ethics-23': {
-    at: [null, null, null, [124, 398, 3, 124], null, [162, 398, 3, 168], null, [124, 398, 3, 124], [124, 399, 3, 124], null],
+    at: [null, null, null, [124, 386, 3, 124], null, [168, 387, 3, 168], null, [124, 386, 3, 124], [124, 387, 3, 124], null],
     say: [null, 'Not a hard question.', 'Not even a decision.', 'Eight thousand miles off.', null, 'The cost is the same.', 'Only the distance differs.', null, null, null],
   },
   'aesthetics-aesthetics-11': {
-    at: [null, null, [168, 380, 3, 168], null, [124, 383, 3, 124], null, null, [124, 381, 3, 124], [124, 380, 3, 124], null],
+    at: [null, [76, 386, 3, 70], null, null, [124, 392, 3, 124], null, null, [124, 386, 3, 124], [124, 388, 3, 124], null],
     say: [null, 'Nine seconds.', 'Not similar. Identical.', 'Everything you could measure.', 'Only the plaques differ.', null, 'So it isn’t in the picture.', null, null, null],
   },
   'aesthetics-aesthetics-16': {
-    at: [null, [150, 393, 3, 168], null, [124, 393, 3, 124], null, null, [124, 395, 3, 124], [124, 395, 3, 124], null],
+    at: [null, [132, 386, 3, 168], null, [124, 387, 3, 124], null, null, [124, 387, 3, 124], [124, 386, 3, 124], null],
     say: [null, 'Not one mark has moved.', 'It happens to me, then.', 'He despised the man.', null, 'Longer than the painting.', null, null, null],
   },
   'epistemology-knowledge-2': {
-    at: [null, null, [168, 364, 2, 168], null, null, [168, 359, 3, 168], null, null, [124, 364, 3, 124], [124, 364, 3, 124], null],
+    at: [null, null, [168, 386, 3, 168], null, [168, 386, 3, 168], null, null, null, [124, 387, 3, 124], [124, 386, 3, 124], null],
     say: [null, 'Now get in.', 'Precise and true.', null, 'I’ve memorised all of them.', 'Nothing has arrived.', null, 'The hands had to move.', null, null, null],
   },
   'epistemology-knowledge-21': {
-    at: [null, null, [168, 364, 3, 168], null, null, null, [124, 364, 3, 124], null, null, [124, 365, 3, 124], [124, 364, 3, 124], null],
+    at: [null, null, null, null, [124, 387, 3, 124], null, [124, 387, 3, 124], null, null, [124, 387, 3, 124], [124, 388, 3, 124], null],
     say: [null, 'Genuinely try.', 'It hasn’t moved.', null, 'Wanting it.', 'Deciding on it.', 'The needle still won’t move.', null, 'And I did nothing at all.', null, null, null],
   },
   'epistemology-knowledge-13': {
-    at: [null, [76, 353, 3, 70], null, null, null, [150, 351, 3, 168], null, [124, 354, 3, 124], [124, 354, 3, 124], null],
+    at: [null, [76, 386, 3, 70], null, null, null, [168, 387, 1, 168], null, [124, 387, 3, 124], [124, 386, 3, 124], null],
     say: [null, 'No, flatly.', null, 'Better odds than most things.', null, 'So strike them all.', 'But I know it has a winner.', null, null, null],
   },
   'epistemology-knowledge-8': {
-    at: [null, null, null, null, null, null, null, [98, 381, 3, 98], null, null, null, [98, 381, 3, 98], null, [98, 381, 3, 98], null, null, [176, 378, 3, 176], null, null],
+    at: [null, null, null, null, null, null, null, [98, 386, 3, 98], null, null, null, [98, 386, 3, 98], null, [98, 386, 3, 98], null, null, [176, 387, 3, 176], null, null],
     say: [null, 'And why again.', 'How long can he keep it up?', 'Another belief underneath.', null, 'Support goes under.', 'Now that needs propping.', 'Why trust the timetable?', 'Why trust the city?', 'Here comes the next why.', 'Still no floor.', 'On for ever, then.', 'Or a circle. Or bedrock.', null, 'A handful hold themselves up.', 'Nowhere left to go.', null, null, null],
   },
   'epistemology-knowledge-9': {
-    at: [null, [208, 336, 3, 208], null, null, null, null, [148, 336, 3, 148], null, null, null, [148, 338, 3, 148], null, [148, 337, 3, 148], null, null, null, null, null],
+    at: [null, [208, 381, 3, 208], null, null, null, null, null, null, null, null, [154, 383, 3, 148], null, [154, 382, 2, 148], null, null, null, null, null],
     say: [null, 'What am I claiming?', 'Just sitting there being it.', null, 'That sketch is a belief.', 'What makes it a good one?', null, 'It matches how things are.', 'Truth is the fit.', null, 'So go and check.', 'Compare it with what?', null, 'Locks into the rest.', 'Fitting the whole web.', 'Or just: it keeps working.', 'And never strands me.', null],
   },
   'metaphysics-being-7': {
-    at: [null, null, null, [200, 388, 3, 200], null, null, null, null, null, [200, 388, 3, 200], null, null, [76, 386, 3, 70], null, null, [200, 387, 3, 200], null, null],
+    at: [null, null, null, null, null, [76, 376, 3, 70], null, null, null, null, null, [76, 376, 2, 70], null, null, null, [200, 376, 2, 200], null, null],
     say: [null, 'So where is yesterday?', 'Three slices on a road.', 'Rooms I could stroll between.', 'Just an empty frame.', 'Nowhere at all.', 'Tomorrow isn’t built.', null, 'Only the middle is filled.', 'One lit slice, moving.', 'Think of a book, then.', 'Page four hundred is set.', null, 'All three at once.', 'Now is just where I stand.', null, null, null],
   },
   'aesthetics-aesthetics-7': {
-    at: [null, [90, 388, 3, 90], null, null, null, null, null, null, null, [170, 388, 1, 170], null, null, [250, 388, 1, 250], null, [160, 388, 2, 160], null],
+    at: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
     say: [null, 'On what grounds, though.', 'Three seconds. Thirty years.', 'A feeling isn’t a reason.', 'Scrape it. Nothing there.', 'In the mind doing the looking.', null, 'Then his mind counts too.', 'Something in me refuses.', null, 'Practice and comparison.', 'They agree: a standard.', 'A taster really does taste it.', 'It’ll show me more then.', null, null],
   },
   'metaphysics-being-8': {
-    at: [null, null, null, null, [232, 401, 2, 232], null, null, [140, 399, 2, 140], null, null, null, null, null, [200, 399, 3, 200], null, null, null, null],
+    at: [null, null, null, null, [232, 389, 3, 232], null, null, null, null, null, null, [200, 386, 3, 200], null, [200, 387, 3, 200], null, null, null, null],
     say: [null, 'Pushed by the one before.', 'Long before I existed.', 'Here it comes.', 'Never once, then.', null, 'Right on schedule.', 'Physics started it.', 'A choice snaps the chain?', null, 'Both picked the wrong test.', 'So what else could it be?', null, null, 'Hume, and later Frankfurt.', 'From my own wants.', null, null],
   },
   'aesthetics-aesthetics-8': {
-    at: [null, null, null, null, null, [148, 394, 3, 148], null, null, null, null, null, [74, 399, 3, 68], null, [148, 398, 3, 148], null, null, null, [148, 398, 3, 148], null],
+    at: [null, [148, 387, 3, 148], null, null, null, null, null, null, null, null, null, [80, 387, 2, 68], null, [148, 386, 1, 148], null, null, null, [148, 386, 2, 148], null],
     say: [null, 'Same canvas.', 'Two different reasons.', 'Glasses for each.', 'They change what I notice.', 'A block, an edge.', 'What it’s OF has gone quiet.', null, 'Same canvas. New painting.', 'Blocks into strokes.', 'Catching a mood, then.', null, 'Every real work has it.', 'Significant form.', null, 'Handing a feeling over.', 'He finds it by painting it.', null, null],
   },
   'political-political-7': {
-    at: [null, null, null, null, [184, 379, 3, 190], null, null, null, [184, 376, 3, 190], null, [184, 377, 3, 190], null, null, null, [178, 377, 3, 262], null, null, null],
+    at: [null, null, null, [190, 387, 2, 190], null, null, null, null, null, null, null, null, [324, 386, 2, 330], null, null, null, null, null],
     say: [null, 'A government? Paper?', 'Or mine before any vote.', 'Mine the moment I exist.', 'Guard them, not hand them.', 'Written down and signed.', 'No signature, no right.', null, 'And the law is enforced.', 'It really is real.', null, 'The speech is still there.', 'They can break it.', 'Not un-give it.', null, 'Then quietly stopped.', 'If rights come from reasoning —', null],
   },
   'political-political-8': {
-    at: [null, null, null, null, null, [100, 400, 3, 100], null, null, null, [170, 398, 2, 170], null, null, [100, 399, 3, 100], null, [170, 396, 3, 170], null, null, null],
+    at: [null, null, null, null, null, [100, 389, 3, 100], null, null, null, [164, 387, 1, 170], null, null, [100, 387, 3, 100], null, [164, 384, 3, 170], null, null, null],
     say: [null, null, 'Watch it fall apart.', 'Nobody cheated anyone.', 'One sees a plank of wood.', 'Three crates, three people.', 'You can’t get fairer. Can you?', 'Nobody favoured, nobody skipped.', 'And he’s still at the wood.', null, 'Nothing added or thrown away.', 'Dead level.', null, 'Equal resources?', 'Or equal chances.', 'What each can actually do.', null, null],
   },
   'metaphysics-being-9': {
-    at: [null, null, [96, 347, 2, 96], null, null, null, [232, 345, 2, 232], null, [232, 346, 2, 232], [250, 346, 2, 232], null],
+    at: [null, null, [96, 378, 3, 96], null, null, null, [232, 377, 3, 232], null, [232, 377, 3, 232], [262, 377, 3, 232], null],
     say: [null, 'He couldn’t doubt the thinking.', 'Two substances, then.', null, 'How does it push?', 'The pineal gland. Really?', 'Damage a brain, lose the memory.', 'Something the brain does.', null, null, null],
   },
   'logic-arguments-9': {
-    at: [null, null, null, null, null, null, null, null, null, null],
+    at: [null, null, [96, 386, 2, 96], null, null, [96, 386, 2, 96], null, null, [96, 387, 2, 96], null],
     say: [null, null, 'Whose mouth doesn’t matter.', 'That isn’t what they said.', 'He built it to knock it.', 'The claim never moved.', null, null, null, null],
   },
   'epistemology-knowledge-10': {
-    at: [null, null, null, [92, 388, 3, 92], null, null, [160, 388, 3, 160], null, [228, 368, 3, 228], [228, 389, 3, 228], null],
+    at: [null, null, null, [92, 376, 2, 92], null, null, null, [160, 376, 2, 160], null, [228, 378, 2, 228], null],
     say: [null, 'So do I know, or not?', 'Only if you can’t be wrong.', 'Know it, and admit I might.', 'Both in the room at once.', null, 'Science never claims it.', 'Changing its mind is the method.', null, null, null],
   },
   'ethics-ethics-10': {
-    at: [null, null, null, [268, 398, 3, 268], null, [268, 398, 3, 268], null, [268, 382, 3, 268], [268, 382, 3, 268], null],
+    at: [null, null, null, [268, 386, 3, 268], null, null, [268, 387, 3, 268], null, null, null],
     say: [null, 'Nobody deliberates.', 'No comparison to make.', 'So why did that need no thought?', null, 'Nine thousand kilometres off.', 'It doesn’t stop at the bank.', null, null, null],
   },
   'logic-arguments-10': {
-    at: [null, [96, 398, 2, 96], null, [96, 398, 3, 96], null, null, null, [158, 398, 3, 158], [158, 399, 3, 158], null],
+    at: [null, null, null, null, null, null, [158, 386, 2, 158], [158, 386, 2, 158], [158, 387, 2, 158], null],
     say: [null, 'Nothing joins them.', null, 'There it is.', null, 'All of them? Really?', 'Said aloud, it’s rubbish.', null, null, null],
   },
   'aesthetics-aesthetics-9': {
-    at: [null, null, null, null, null, [192, 319, 1, 144], null, [202, 312, 3, 208], null, [202, 314, 3, 208], [202, 314, 3, 208], null],
+    at: [null, null, null, [80, 386, 3, 80], null, null, null, [208, 386, 3, 208], null, [208, 386, 3, 208], [208, 386, 3, 208], null],
     say: [null, 'The rest was something else.', 'A copy of a box.', 'Just a box.', 'The question that broke it.', 'Nothing I can SEE.', null, 'Not in the object, then.', 'One option among many.', null, null, null],
   },
   'political-political-9': {
-    at: [null, null, [324, 387, 2, 330], null, [324, 401, 3, 330], null, null, [324, 387, 2, 330], [324, 390, 2, 330], null],
+    at: [null, null, [306, 397, 2, 330], null, [306, 409, 3, 330], null, null, [312, 397, 2, 330], null, null],
     say: [null, 'Seven to one. Honest.', 'Whoever flatters best.', 'The procedure held.', 'Working, not failing.', null, 'Both named the danger.', null, null, null],
   },
   'logic-arguments-11': {
-    at: [null, null, [72, 388, 3, 48], null, null, [110, 388, 3, 116], null, [110, 388, 3, 116], [98, 388, 3, 116], null],
+    at: [null, null, [78, 376, 3, 48], null, null, null, null, null, [98, 376, 3, 116], null],
     say: [null, null, 'Nothing smuggled yet.', null, null, 'Every link holds.', 'That’s what makes it a trap.', null, null, null],
   },
   'ethics-ethics-11': {
-    at: [null, null, null, [72, 398, 3, 60], null, [126, 398, 3, 126], null, [126, 398, 3, 126], [126, 399, 3, 126], null, null],
+    at: [null, null, [78, 386, 3, 60], null, null, [126, 386, 3, 126], null, [126, 387, 3, 126], [126, 387, 3, 126], null, null],
     say: [null, 'A bar game and a symphony.', 'The same stuff, to him.', 'Intensity, duration, reach.', 'His own student refused.', 'Not on one level.', null, null, null, 'The column can’t settle it.', null],
   },
   'ethics-ethics-12': {
-    at: [null, null, [112, 388, 3, 124], null, null, [112, 388, 3, 124], null, [112, 388, 3, 124], [112, 384, 3, 124], null],
+    at: [null, null, [94, 376, 3, 124], null, null, [94, 377, 3, 124], null, [94, 376, 3, 124], [76, 376, 3, 124], null],
     say: [null, 'Knowing I can’t repay.', 'Not what it costs me.', 'Hand it to everyone.', null, 'Nobody believes one now.', 'Nothing left to break.', null, null, null],
   },
   'epistemology-knowledge-11': {
-    at: [null, null, null, null, [154, 362, 1, 154], null, [154, 362, 1, 154], null, null, null, [226, 362, 3, 226], [226, 363, 3, 226], null],
+    at: [null, null, null, null, [154, 386, 3, 154], null, [154, 386, 3, 154], null, null, null, [226, 387, 2, 226], [226, 388, 2, 226], null],
     say: [null, 'For a worse reason.', 'The other has moved on.', 'Stopped twelve hours ago.', 'But I believed it.', 'And a clock is a fair reason.', 'All three, then.', null, 'One instant, never again.', 'The match was an accident.', null, null, null],
   },
   'epistemology-knowledge-12': {
-    at: [null, null, null, null, null, null, null, null, [190, 398, 3, 124], [190, 398, 3, 124], null],
+    at: [null, null, null, null, null, null, null, null, null, null, null],
     say: [null, 'So how did they get in?', 'Before I’ve thought at all.', 'The toast is long gone.', 'Longer, and it bends.', null, 'In from strangers.', 'Look what it does.', null, null, null],
   },
   'metaphysics-being-10': {
-    at: [null, null, null, null, [124, 382, 3, 124], null, null, null, [124, 379, 3, 124], null, [124, 379, 3, 124], [124, 382, 3, 124], null],
+    at: [null, null, null, null, [124, 386, 3, 124], null, null, null, [124, 384, 3, 124], null, [124, 387, 3, 124], [124, 386, 3, 124], null],
     say: [null, 'So where is the redness?', 'Give it a card.', 'Where does the card go?', 'Above every red thing.', 'Only in the things.', 'No red object, no redness.', null, 'Just a word we hang on.', 'It touches none of them.', null, null, null],
   },
   'metaphysics-being-11': {
-    at: [null, null, null, null, null, [110, 327, 1, 110], null, null, null, null, [110, 325, 1, 110], null],
+    at: [null, null, null, null, null, [110, 343, 1, 110], null, null, null, [110, 340, 2, 110], null, null],
     say: [null, 'Holding on to what?', 'A prince and a cobbler.', 'Every room, every promise.', 'Neither body moved.', 'Only the memories.', null, null, null, 'The names crossed the floor.', 'It went where they went.', null],
   },
   'aesthetics-aesthetics-10': {
-    at: [null, null, null, [110, 388, 3, 110], null, [110, 388, 3, 110], null, [182, 364, 3, 110], [182, 364, 3, 110], null],
+    at: [null, null, null, [104, 376, 3, 110], null, [104, 376, 3, 110], null, null, null, null],
     say: [null, 'Making cruelty look glorious.', 'The craft verdict is easy.', 'A book is well written, or not.', null, 'What it invites isn’t a side issue.', 'If it asks and I refuse —', null, null, null],
   },
   'aesthetics-aesthetics-12': {
-    at: [null, null, null, null, null, null, null, [74, 352, 3, 62], [74, 352, 3, 62], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, 'This is grief, clearly.', 'No hint of a joke.', 'Every mark says the same.', null, 'He says it was a joke.', 'The box still won’t open.', null, null, null],
   },
   'political-political-10': {
-    at: [null, null, null, null, [108, 398, 3, 108], null, null, null, null, [108, 398, 3, 108], null, [108, 400, 3, 108], [108, 398, 3, 108], null],
+    at: [null, null, null, null, [108, 386, 3, 108], null, null, [108, 386, 3, 108], null, null, null, [108, 388, 3, 108], [108, 386, 3, 108], null],
     say: [null, 'The picture won’t tell me.', 'The world lies unowned.', 'He bolts on a condition.', 'Never only a pile.', 'Traded, and handed on.', 'Was every step clean?', 'Then it’s hers, however tall.', null, 'Lay a level across the tops.', 'Only if it lifts the bottom.', null, null, null],
   },
   'political-political-11': {
@@ -417,15 +421,15 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'Then I’ve decided the state.', 'An instrument, not a history.', 'Everyone can kill everyone.', 'Too strong to be argued with.', null, 'We already owe each other.', 'They keep what they came with.', 'Property taught us to compare.', 'Nobody at the top at all.', 'Freedom handed back.', null, null, null],
   },
   'logic-arguments-12': {
-    at: [null, null, [74, 398, 3, 44], null, null, [74, 398, 3, 44], [74, 398, 3, 44], [74, 395, 3, 44], null],
+    at: [null, null, [80, 386, 3, 44], null, null, null, null, null, null],
     say: [null, 'Both doors are real.', 'But only two?', null, null, 'There was a whole wall.', null, null, null],
   },
   'epistemology-knowledge-14': {
-    at: [null, null, [72, 388, 3, 48], null, [72, 388, 3, 48], null, [72, 388, 3, 48], [72, 388, 3, 48], null],
+    at: [null, null, [78, 376, 3, 48], null, [78, 376, 3, 48], null, [78, 376, 3, 48], [78, 377, 3, 48], null],
     say: [null, 'Every check is on this side.', 'Inferred, not observed.', null, 'Watch the screen.', 'Nothing moved. Nothing would.', null, null, null],
   },
   'ethics-ethics-13': {
-    at: [null, null, [76, 399, 2, 40], null, [76, 404, 3, 40], [76, 398, 2, 40], [76, 398, 2, 40], null],
+    at: [null, null, [76, 387, 1, 40], null, [76, 393, 2, 40], null, null, null],
     say: [null, 'Run from what shouldn’t.', 'Or charge at what shouldn’t.', null, 'Somewhere along here.', null, null, null],
   },
   'political-political-14': {
@@ -433,11 +437,11 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'A dollar each, freely.', 'Every transfer is free.', 'And the pattern is gone.', null, 'Reach in and stop them.', null, null, null],
   },
   'metaphysics-being-12': {
-    at: [null, null, null, [76, 398, 3, 46], null, [76, 400, 3, 46], null, null, [76, 397, 3, 46], [76, 399, 3, 46], null],
+    at: [null, null, null, null, null, null, null, null, [76, 386, 2, 46], [76, 387, 2, 46], null],
     say: [null, 'The stream is easy.', 'Somebody is having them.', 'A box for the owner.', 'He never caught it.', 'The box stays empty.', null, 'An illusion, they say.', null, null, null],
   },
   'aesthetics-aesthetics-13': {
-    at: [null, null, [76, 398, 3, 46], null, [76, 398, 3, 46], null, null, [76, 399, 3, 46], [76, 399, 3, 46], null],
+    at: [null, null, [76, 387, 2, 46], null, [76, 386, 2, 46], null, null, [76, 388, 3, 46], [76, 388, 3, 46], null],
     say: [null, 'No expert could tell.', 'No brushstroke to find.', 'Where each has been, then.', 'Starts last year and stops.', null, 'Not a single canvas changed.', null, null, null],
   },
   'political-political-32': {
@@ -445,15 +449,15 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'The same either way.', 'Worse than the drive there.', 'I knew that going in.', null, 'Look at the gap, then.', null, null, null],
   },
   'metaphysics-being-32': {
-    at: [null, null, null, [74, 398, 3, 56], null, null, [74, 398, 3, 56], null, [74, 398, 3, 56], [74, 399, 3, 56], null],
+    at: [null, null, null, null, null, null, null, null, [80, 387, 3, 56], [80, 387, 3, 56], null],
     say: [null, 'Just these two.', 'Alike all the way down.', 'Even the relations match.', 'Both descriptions are true.', null, 'The label came from outside.', 'Take it away. Nothing changed.', null, null, null],
   },
   'aesthetics-aesthetics-32': {
-    at: [null, null, [72, 398, 3, 60], null, null, [72, 398, 3, 60], null, [72, 398, 3, 60], [72, 402, 3, 60], null],
+    at: [null, null, [78, 386, 3, 60], null, null, null, null, [78, 387, 3, 60], [78, 388, 3, 60], null],
     say: [null, 'Same years, reversed.', 'Nothing added or taken.', 'Never bad, never remarkable.', null, 'All three hold the same.', 'And I can still rank them.', null, null, null],
   },
   'aesthetics-aesthetics-31': {
-    at: [null, null, [76, 398, 2, 70], null, [76, 398, 1, 70], null, [76, 398, 1, 70], [76, 399, 1, 70], null],
+    at: [null, null, null, null, null, null, null, null, null],
     say: [null, 'Nobody stands up.', 'Same nine notes.', null, 'And now they’re on their feet.', 'Only the meter moved.', null, null, null],
   },
   'metaphysics-being-31': {
@@ -461,55 +465,55 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'Nothing was added.', 'Three more things, though.', 'You can count them.', 'Same as with objects.', null, 'So what did I count?', 'Cheese, ring, or gap.', null, null, null],
   },
   'political-political-31': {
-    at: [null, null, [74, 398, 3, 56], null, null, [74, 398, 2, 56], null, [74, 398, 2, 56], [74, 399, 2, 56], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, 'The wear is shared.', 'I’d be daft not to.', 'So does everyone.', null, 'One whole unit of gain.', 'One unit of harm, quartered.', null, null, null],
   },
   'logic-arguments-34': {
-    at: [null, null, null, [74, 396, 3, 50], null, [74, 397, 3, 50], null, [74, 396, 3, 50], null, null, [74, 395, 3, 50], null],
+    at: [null, null, null, null, null, null, null, [80, 387, 3, 50], null, [80, 386, 3, 50], [80, 385, 3, 50], null],
     say: [null, 'A handful. Very wrong.', null, 'This feels like progress.', 'Four times, half the bracket.', 'Square root, not in step.', null, null, 'Only people who answered.', 'Tight around the wrong one.', null, null],
   },
   'epistemology-knowledge-33': {
-    at: [null, null, [74, 400, 3, 56], null, [74, 398, 3, 56], null, [74, 398, 3, 56], null, [74, 398, 3, 56], null],
+    at: [null, null, [80, 388, 3, 56], null, [80, 387, 3, 56], null, [80, 387, 3, 56], null, [80, 386, 3, 56], null],
     say: [null, 'Nobody blinks.', 'Now a cheque is riding on it.', 'And I got out to check.', 'Same evidence as before.', null, null, 'A height for this Saturday.', null, null],
   },
   'metaphysics-being-33': {
-    at: [null, null, null, [74, 374, 3, 62], null, [74, 376, 3, 62], null, [74, 374, 3, 62], null, null, [74, 375, 3, 62], null],
+    at: [null, null, null, [104, 386, 3, 62], null, [104, 387, 3, 62], null, [80, 387, 3, 62], null, null, [80, 386, 3, 62], null],
     say: [null, 'That needs no explaining.', 'Now run it backwards.', 'I knew that was wrong.', 'Every collision is legal.', 'The same laws exactly.', null, null, 'Order is rare.', 'It never wanders back.', null, null],
   },
   'metaphysics-being-34': {
-    at: [null, null, null, null, [76, 388, 3, 58], null, [76, 388, 3, 58], null, [76, 388, 3, 58], null, null, [76, 388, 3, 58], null],
+    at: [null, [76, 376, 3, 58], null, null, null, [76, 371, 3, 58], null, null, [76, 376, 3, 58], null, null, [76, 376, 3, 58], null],
     say: [null, 'Ask it anyway.', 'Not who owns it.', 'Not the legs, then.', 'The wood does.', 'Underneath, not earlier.', 'And under that, molecules.', null, null, 'Resting on nothing.', 'What holds what up.', null, null],
   },
   'epistemology-knowledge-34': {
-    at: [null, null, null, [72, 388, 3, 54], null, null, null, [72, 388, 3, 54], null, [72, 387, 3, 54], null, [72, 388, 3, 54], null],
+    at: [null, [78, 376, 3, 54], null, null, null, null, null, null, null, [78, 376, 3, 54], null, [78, 376, 3, 54], null],
     say: [null, 'How often it holds.', 'They agree down here.', 'Nobody goes wrong there.', 'Now say certain.', 'The space between them.', 'Not the same as right.', 'Half, and says half. Level.', null, null, 'Fix it from either end.', null, null],
   },
   'logic-arguments-33': {
-    at: [null, null, null, [76, 388, 3, 52], null, [76, 388, 3, 52], null, [76, 388, 3, 52], null, null, [76, 388, 3, 52], null],
+    at: [null, null, null, null, null, [76, 377, 3, 52], null, [76, 376, 3, 52], null, null, [76, 376, 3, 52], null],
     say: [null, 'Now it behaves.', 'Every dot, exactly.', 'Nothing unexplained.', 'Nowhere near the new one.', 'It learned my errors.', null, null, 'Fewer moving parts.', 'Each one can be wrong.', null, null],
   },
   'ethics-ethics-33': {
-    at: [null, null, [72, 388, 3, 48], null, [72, 388, 3, 48], null, [72, 389, 3, 48], null, null, [72, 388, 3, 48], null],
+    at: [null, null, null, null, null, null, [78, 377, 3, 48], [78, 377, 3, 48], null, [78, 376, 3, 48], null],
     say: [null, 'That much is easy.', 'There’s still one more.', 'What says I may stop?', 'Until the columns are level.', null, null, 'Not a wider life.', 'A narrowed one.', null, null],
   },
   'aesthetics-aesthetics-33': {
-    at: [null, null, [76, 398, 3, 52], null, [76, 398, 3, 52], null, [76, 398, 3, 52], null, [76, 398, 3, 52], null],
+    at: [null, null, [76, 386, 3, 52], null, null, null, [76, 386, 3, 52], null, [76, 387, 3, 52], null],
     say: [null, 'Paint, glaze, varnish, dirt.', 'Nobody objects to that.', 'Now the argument starts.', 'Scrubbed off for ever.', null, null, 'No layer is the original.', null, null],
   },
   'political-political-33': {
-    at: [null, null, null, [76, 388, 3, 52], null, [76, 388, 3, 52], null, [76, 388, 3, 52], null, [76, 387, 3, 52], null],
+    at: [null, null, null, null, null, null, null, [76, 376, 3, 52], [76, 381, 3, 52], [76, 375, 3, 52], null],
     say: [null, 'Every argument, then.', 'One wants the doors shut.', 'Tolerance ending tolerance.', 'So shut them.', 'Now I’m the thing I feared.', null, null, 'Not belief. Method.', null, null],
   },
   'political-political-34': {
-    at: [null, null, null, null, null, [74, 324, 3, 50], null, null, [74, 326, 3, 50], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, 'That one’s easy.', 'The river doesn’t stop there.', 'And too far away is worse.', null, null, 'As small as possible.', 'And no smaller.', null, null],
   },
   'ethics-ethics-34': {
-    at: [null, null, [76, 398, 3, 46], null, [76, 398, 3, 46], null, [76, 398, 3, 46], null, [76, 398, 3, 46], null],
+    at: [null, null, null, null, null, null, [76, 387, 3, 46], null, [76, 387, 3, 46], null],
     say: [null, 'A little less each.', 'More of it, so higher.', 'Only just worth living.', 'He couldn’t accept it.', null, null, 'Try the average, then.', null, null],
   },
   'aesthetics-aesthetics-34': {
-    at: [null, [74, 388, 3, 50], null, [74, 388, 3, 50], null, [74, 388, 3, 50], null, [74, 388, 3, 50], null],
+    at: [null, [80, 376, 3, 50], null, [80, 376, 3, 50], null, [80, 377, 3, 50], null, [80, 376, 3, 50], null],
     say: [null, 'Not resemblance, then.', 'Eleven plates, fewer lines.', 'Still unmistakably a bull.', null, null, 'I was taught how one goes.', null, null],
   },
   'logic-arguments-2': {
@@ -521,553 +525,545 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   },
   'political-political-35': {
-    at: [null, null, [76, 398, 3, 52], null, [76, 398, 3, 52], null, null, null, [76, 399, 3, 52], null, [126, 398, 3, 126], null],
+    at: [null, null, [76, 387, 2, 52], null, [76, 386, 2, 52], null, [76, 387, 2, 52], null, [76, 387, 2, 52], null, null, null],
     say: [null, 'Nine empty chairs.', null, 'Now the strange part.', 'Other jobs, other lives.', 'Other children.', 'Not the same three.', 'They’d never have been born.', null, null, 'Maybe there is no victim.', null],
   },
   'aesthetics-aesthetics-35': {
-    at: [null, null, null, [74, 398, 3, 56], null, [74, 398, 3, 56], null, null, [74, 398, 3, 56], null, null, [128, 398, 3, 128], null],
+    at: [null, null, null, [80, 386, 3, 56], null, [80, 387, 3, 56], null, null, null, [128, 387, 3, 128], null, [128, 386, 3, 128], null],
     say: [null, 'Two places. Right.', 'A surgery, obviously.', null, 'Both readings had to fit.', 'Wrong isn’t surprising.', null, 'No jolt this time.', 'That’s what explaining does.', 'Laughing at someone?', 'Or letting out pressure.', null, null],
   },
   'logic-arguments-35': {
-    at: [null, null, null, [74, 398, 3, 62], null, [74, 398, 3, 62], null, [74, 398, 3, 62], null, null, null, [82, 398, 3, 130], null],
+    at: [null, null, null, [80, 386, 3, 62], null, [80, 387, 3, 62], null, [80, 387, 3, 62], null, null, null, [82, 387, 3, 130], null],
     say: [null, 'Week for week.', 'Not a coincidence.', 'Cones cause drownings?', 'The data doesn’t care.', null, 'Take the summer out.', 'It was never there.', null, 'Feet and reading. Same trick.', 'Smokers drank coffee.', null, null],
   },
   'metaphysics-being-35': {
-    at: [null, null, null, [120, 389, 2, 120], null, null, null, [120, 389, 2, 120], null, [120, 388, 3, 120], [132, 389, 2, 210], null],
+    at: [null, null, null, [120, 387, 2, 120], null, null, null, [120, 386, 1, 120], null, [120, 386, 3, 120], null, null],
     say: [null, 'Nothing broken yet.', 'A tourist, then.', 'So I’m never born.', 'Then I am. Then I’m not.', null, null, null, 'I was always there.', 'It always jammed.', null, null],
   },
   'ethics-ethics-35': {
-    at: [null, null, null, [72, 399, 3, 54], null, [72, 398, 3, 54], null, [132, 398, 3, 132], [132, 398, 3, 132], null],
+    at: [null, null, null, [78, 387, 3, 54], null, [78, 386, 3, 54], null, [132, 386, 3, 132], [132, 387, 3, 132], null],
     say: [null, 'Hands in his pockets.', 'Surely the first is worse.', 'Same motive, though.', 'Same result too.', null, null, 'Real cases aren’t this tidy.', null, null],
   },
   'epistemology-knowledge-35': {
-    at: [null, [76, 393, 3, 58], null, [76, 397, 3, 58], null, null, [76, 396, 3, 58], null, null, [130, 397, 3, 130], null, null],
+    at: [null, [76, 387, 3, 58], null, [76, 388, 3, 58], null, null, [76, 388, 3, 58], null, null, [130, 388, 3, 130], null, null],
     say: [null, null, 'Know the thing.', 'And know what it rules out.', 'Closure, then.', null, null, 'I never checked for paint.', 'And I’d still say I knew.', 'Never a live option?', null, null],
   },
   'political-political-36': {
-    at: [null, [76, 388, 3, 52], null, [76, 388, 3, 52], null, null, [76, 388, 3, 52], null, [84, 388, 3, 84], null, null],
+    at: [null, [76, 376, 3, 52], null, [76, 377, 3, 52], null, null, [76, 377, 3, 52], null, [84, 376, 3, 84], null, null],
     say: [null, null, 'Nobody asked that question.', 'One guard, every cell.', 'And nobody in the tower.', null, null, 'No case was ever brought.', 'The range shrank.', 'Room to be unfinished.', null],
   },
   'aesthetics-aesthetics-36': {
-    at: [null, null, [72, 398, 3, 54], null, [72, 398, 3, 54], null, null, null, [128, 398, 3, 128], null, [128, 398, 3, 128], null],
+    at: [null, null, [78, 387, 3, 54], null, [78, 386, 3, 54], null, null, null, [128, 386, 3, 128], null, [140, 386, 3, 128], null],
     say: [null, 'It’s all really there.', null, 'No pixel moved.', 'Both true, and they disagree.', 'Light came off the thing.', 'Seeing it, not a record.', null, null, 'You know a painter chose.', 'You forget a photographer did.', null],
   },
   'ethics-ethics-36': {
-    at: [null, null, null, [74, 388, 3, 56], null, [74, 388, 3, 56], null, [130, 388, 3, 130], null, [130, 389, 3, 130], null, null],
+    at: [null, [80, 376, 3, 56], null, [80, 377, 3, 56], null, [80, 376, 3, 56], null, null, null, [82, 377, 3, 130], null, null],
     say: [null, 'Yesterday hasn’t changed.', 'So what did it do?', null, 'Excusing says they couldn’t.', 'Forgiving says they could.', null, 'The resentment was mine.', 'So mine to give up.', null, 'Not easy, and not owed.', null],
   },
   'logic-arguments-36': {
-    at: [null, [76, 388, 3, 58], null, [76, 389, 3, 58], null, [76, 388, 3, 58], null, [104, 388, 3, 104], null],
+    at: [null, [76, 376, 3, 58], null, [76, 378, 3, 58], null, [76, 377, 3, 58], null, [104, 376, 3, 104], null],
     say: [null, null, 'As much as the search.', 'Two squares of a forest.', null, null, 'Only half true, then.', 'A way of ignoring a result.', null],
   },
   'epistemology-knowledge-36': {
-    at: [null, null, [74, 398, 3, 56], null, [74, 398, 3, 56], null, null, null, null, null, [74, 398, 3, 56], null, [128, 398, 3, 128], null],
+    at: [null, null, [80, 387, 3, 56], null, [80, 386, 3, 56], null, null, null, null, null, [80, 386, 3, 56], null, [128, 386, 3, 128], null],
     say: [null, 'All four the same.', null, 'Everyone had a reason.', 'Better knit, apparently.', 'Nicer feel.', 'It was the position.', 'Invisible from inside.', null, 'They weren’t lying.', 'The reason was hidden.', 'So the gap fills itself.', null, null],
   },
   'metaphysics-being-36': {
-    at: [null, [72, 398, 3, 54], null, [72, 398, 1, 54], null, null, [72, 398, 3, 54], null, [86, 398, 1, 128], null, null],
+    at: [null, [78, 383, 3, 54], null, [78, 384, 3, 54], null, null, [78, 384, 3, 54], null, [128, 383, 3, 128], null, null],
     say: [null, null, 'Everyone shifts up one.', 'Room 1 is empty.', 'No last room to fall off.', null, null, 'The part equals the whole.', 'The maths is fine.', 'Buildable is another matter.', null],
   },
   'ethics-ethics-37': {
-    at: [null, null, [72, 398, 3, 54], null, null, [72, 398, 3, 54], null, [72, 398, 3, 54], null, [72, 398, 3, 54], null, null],
+    at: [null, null, [78, 387, 3, 54], null, [78, 387, 3, 54], [78, 387, 3, 54], null, null, null, [78, 387, 3, 54], null, null],
     say: [null, 'Four words.', 'There’s the cord.', 'No money, no law.', 'A duty out of a sound.', null, 'She cancelled a plan.', 'And told a friend.', null, null, 'Then who was wronged?', null],
-    vis: [4, 153, 393, 3],
+    vis: [4, 153, 387, 3, 153],
   },
   'political-political-37': {
-    at: [null, null, null, [72, 398, 3, 54], null, [72, 398, 3, 54], null, [72, 398, 3, 54], null, [102, 397, 3, 126], null, null],
+    at: [null, null, null, [78, 387, 3, 54], null, [78, 386, 3, 54], null, [78, 387, 3, 54], null, [102, 386, 3, 126], null, null],
     say: [null, 'Across the country.', 'Across a room.', null, 'Having it is one thing.', 'Using it is another.', null, null, 'Both defend the right.', 'They differ on whose.', 'Drawn without announcing it.', null],
   },
   'logic-arguments-37': {
-    at: [null, [74, 398, 3, 56], null, [74, 398, 3, 56], null, null, [74, 398, 3, 56], null, [128, 398, 3, 128], null, null],
+    at: [null, null, null, [80, 387, 3, 56], null, [80, 386, 3, 56], null, null, [128, 386, 3, 128], [128, 385, 3, 128], null],
     say: [null, 'Shave yourself, he leaves you.', 'Don’t, and he shaves you.', null, 'So who shaves the barber?', 'Collections of collections.', 'Does it contain itself?', null, null, 'Frege added an appendix.', null],
   },
   'metaphysics-being-37': {
-    at: [null, null, [74, 398, 3, 56], null, [74, 398, 3, 56], null, null, [74, 398, 3, 56], null, [86, 398, 3, 128], null],
+    at: [null, null, null, null, null, null, null, null, null, null, null],
     say: [null, 'Say what it means, then.', null, 'Struck, therefore breaks.', 'Down comes the hammer.', 'The sorcerer toughens it.', 'Still just as fragile.', null, null, 'True of what never happened.', null],
   },
   'epistemology-knowledge-37': {
-    at: [null, [72, 388, 3, 54], null, [72, 388, 3, 54], null, null, [72, 388, 3, 54], null, [126, 388, 3, 126], null, null],
+    at: [null, [78, 376, 3, 54], null, [78, 376, 3, 54], null, null, [78, 376, 3, 54], null, [126, 376, 3, 126], null, null],
     say: [null, null, 'He never inspected her.', 'Put the doubts down.', 'And grieved sincerely.', null, 'Same hull. Same cracks.', 'The verdict hasn’t moved.', null, 'It rides on other people.', null],
   },
   'aesthetics-aesthetics-37': {
-    at: [null, [72, 379, 3, 54], [72, 379, 3, 54], null, null, null, [72, 379, 3, 54], null, [126, 378, 3, 126], null],
+    at: [null, null, [78, 377, 3, 54], [78, 376, 3, 54], null, null, [78, 376, 3, 54], null, [108, 377, 3, 126], null],
     say: [null, 'Nothing above the line.', null, 'Burn it and it survives.', null, 'Learned note for note.', null, 'Depends what stood behind.', 'Not what the sounds are.', null],
   },
   'ethics-ethics-16': {
-    at: [null, null, null, null, null, null, null, null],
+    at: [null, null, [128, 367, 3, 128], null, [128, 367, 3, 128], null, [128, 367, 3, 128], null],
     say: [null, 'Same hand, same notes.', 'Neither one was free?', null, 'Doing what I want.', null, null, null],
   },
   'aesthetics-aesthetics-17': {
-    at: [null, [160, 391, 3, 160], null, null, [160, 388, 2, 160], null, [160, 388, 3, 160], [160, 388, 3, 160], null],
+    at: [null, null, null, null, null, null, [148, 377, 1, 160], [148, 376, 1, 160], null],
     say: [null, 'And I pay for it.', 'The meter doesn’t care.', null, 'Worked through and released.', 'Or the fee for finding out.', null, null, null],
   },
   'ethics-ethics-15': {
-    at: [null, null, null, [74, 376, 3, 38], null, null, null, [74, 376, 3, 38], null, [74, 388, 3, 38], [74, 376, 3, 38], null],
+    at: [null, null, null, [80, 377, 3, 38], null, null, null, [80, 376, 3, 38], null, [80, 376, 1, 38], [80, 376, 3, 38], null],
     say: [null, 'Hold it up and check.', 'Now add a moral word.', 'The beam didn’t move.', 'No extra fact, then.', 'A wince set down in ink.', null, 'Maybe the scale is wrong.', 'A poor scale, then.', null, null, null],
   },
   'aesthetics-aesthetics-14': {
-    at: [null, null, null, [76, 388, 3, 46], null, [76, 388, 3, 46], null, null, [76, 388, 3, 46], [76, 388, 3, 46], null],
+    at: [null, null, null, [76, 377, 3, 46], null, [76, 376, 3, 46], null, null, [76, 376, 3, 46], [76, 376, 3, 46], null],
     say: [null, 'Nothing wrong with it.', 'One tastes iron.', 'Not the same complaint.', 'Taste really does differ.', 'But not all equally good.', null, 'A key at the bottom.', null, null, null],
   },
   'ethics-ethics-14': {
     at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, 'So is everyone else’s.', 'That’s the whole problem.', 'Everyone else has it too.', 'Part of mine into a wall.', 'There’s a door in it.', null, null, null, null],
-    vis: [7, 287, 393, 3],
+    vis: [7, 299, 377, 2, 257],
   },
   'aesthetics-aesthetics-15': {
-    at: [null, null, null, [74, 398, 3, 44], null, null, [74, 399, 3, 44], null, [74, 399, 3, 44], null, null, [74, 398, 3, 44], null],
+    at: [null, null, null, [80, 387, 3, 44], null, null, [80, 387, 3, 44], null, [80, 387, 3, 44], null, null, [80, 386, 3, 44], null],
     say: [null, 'Which one is beauty.', 'Strip away every stake.', 'Then that was beauty.', 'To own it.', 'Or sell it.', 'Or be seen beside it.', null, null, 'The rose didn’t change.', 'It’s aimed at me.', null, null],
   },
   'epistemology-knowledge-17': {
-    at: [null, null, [74, 398, 3, 44], null, [74, 398, 3, 44], null, null, [74, 399, 3, 44], [74, 398, 3, 44], null],
+    at: [null, null, [80, 387, 3, 44], null, [80, 386, 3, 44], null, null, [80, 387, 3, 44], [80, 386, 3, 44], null],
     say: [null, 'Nobody throws it away.', 'Patch, and patch again.', 'Not testing everything.', 'A paradigm, he called it.', null, 'Then it all goes at once.', null, null, null],
   },
   'logic-arguments-13': {
-    at: [null, [326, 398, 3, 356], null, [326, 398, 3, 356], null, null, [326, 398, 3, 356], [326, 398, 3, 356], null],
+    at: [null, null, [320, 387, 3, 356], null, null, [320, 386, 3, 356], null, [320, 386, 3, 356], null],
     say: [null, 'Nobody argued for that.', 'Every gap is a jump.', 'The steps looked fine.', null, 'Some slopes are real, then.', null, null, null],
   },
   'logic-arguments-14': {
-    at: [null, [74, 398, 3, 44], null, null, null, [74, 398, 2, 44], null, [74, 398, 1, 44], null, null],
+    at: [null, [80, 386, 3, 44], null, [80, 386, 1, 44], null, [80, 387, 1, 44], null, null, null, null],
     say: [null, 'Both sound right.', 'That can’t be right.', 'The form isn’t the fault.', null, null, 'Two meanings, one word.', 'It never joined.', null, null],
   },
   'epistemology-knowledge-15': {
-    at: [null, null, null, [74, 398, 2, 44], null, null, null, [74, 398, 3, 44], null, [74, 398, 2, 44], [74, 398, 2, 44], null],
+    at: [null, [80, 386, 3, 44], null, null, null, null, null, [80, 386, 3, 44], null, [80, 387, 1, 44], [80, 386, 1, 44], null],
     say: [null, 'Or only unpack a word.', 'Bachelors are unmarried.', 'The fourth should be empty.', 'Look, and learn nothing new.', 'Learn something, and look.', null, 'Seven plus five.', 'I ran no experiment.', null, null, null],
   },
   'logic-arguments-15': {
-    at: [null, [74, 384, 3, 44], null, [74, 384, 3, 44], null, null, [74, 384, 3, 44], [74, 384, 3, 44], null],
+    at: [null, [80, 376, 3, 44], null, [80, 376, 3, 44], null, null, [80, 372, 3, 44], [80, 372, 3, 44], null],
     say: [null, 'Both true, though.', 'Two people. A nation.', 'I was there, so I know.', null, 'Big enough, and fair.', null, null, null],
   },
   'epistemology-knowledge-16': {
-    at: [null, [74, 398, 2, 44], null, [74, 398, 3, 44], null, null, [74, 399, 3, 44], [74, 398, 3, 44], null],
+    at: [null, [80, 386, 1, 44], null, [80, 386, 3, 44], null, null, [80, 387, 3, 44], [80, 386, 3, 44], null],
     say: [null, 'Two of them are narrow.', 'The third allows everything.', 'Usually said as a boast.', null, 'One narrow bar survived.', null, null, null],
   },
   'political-political-18': {
-    at: [null, [74, 398, 3, 44], null, [74, 398, 3, 44], null, null, [74, 399, 3, 44], [74, 398, 3, 44], null],
+    at: [null, null, null, null, null, null, [80, 387, 3, 44], [80, 386, 3, 44], null],
     say: [null, 'One crosses the city.', 'The other gets nowhere.', 'The resource was equal.', null, 'Measure what they can do.', null, null, null],
   },
   'metaphysics-being-16': {
-    at: [null, [74, 398, 1, 44], null, null, null, null, null, [74, 367, 3, 44], [74, 366, 3, 44], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, 'One is behind it.', 'The other is dragged.', 'A desire about a desire.', 'Views about what I want.', null, 'Whether the man is behind it.', null, null, null],
   },
   'metaphysics-being-14': {
-    at: [null, null, null, [74, 384, 3, 44], null, null, [74, 384, 3, 44], null, [74, 384, 3, 44], [74, 384, 3, 44], null],
+    at: [null, null, null, null, null, null, null, null, null, null, null],
     say: [null, 'Two rows fill completely.', 'Two come out patchy.', 'It couldn’t be otherwise.', 'It just happens here.', null, 'One I could work out.', 'The other took a lab.', null, null, null],
   },
   'metaphysics-being-17': {
-    at: [null, [74, 388, 3, 44], null, [74, 388, 3, 44], null, null, [74, 388, 3, 44], [74, 388, 3, 44], null],
+    at: [null, [80, 376, 3, 44], null, [80, 376, 3, 44], null, null, [80, 377, 2, 44], [80, 376, 2, 44], null],
     say: [null, 'The wall is complete.', 'Never seen any.', 'Something arrives.', null, 'Why is there anything it’s like?', null, null, null],
   },
   'political-political-16': {
-    at: [null, null, [74, 388, 3, 50], null, [74, 388, 3, 50], null, null, [74, 388, 3, 50], [74, 388, 3, 50], null],
+    at: [null, null, [80, 377, 3, 50], null, [80, 376, 3, 50], null, null, [80, 376, 3, 50], [80, 376, 3, 50], null],
     say: [null, 'Four cords.', 'The line sets the pace.', 'Two cords gone.', 'And the other two follow.', null, 'Not about the wage.', null, null, null],
   },
   'political-political-17': {
-    at: [null, null, [76, 398, 3, 52], null, [76, 398, 3, 52], [76, 399, 3, 52], [76, 398, 3, 52], null],
+    at: [null, null, [76, 387, 3, 52], null, [76, 386, 3, 52], [76, 387, 3, 52], [76, 386, 3, 52], null],
     say: [null, 'His row is empty.', 'He’s right about that.', null, 'Stop asking about signatures.', null, null, null],
   },
   'logic-arguments-16': {
-    at: [null, null, null, [132, 398, 1, 132], null, null, [144, 315, 3, 132], [132, 398, 1, 132], null, [250, 314, 3, 250], null],
+    at: [null, null, null, null, null, null, null, null, null, null, null],
     say: [null, 'Five out of five.', 'Nobody believes that.', 'But we all do it.', 'Before isn’t because.', null, null, 'Sun’s up anyway.', null, null, null],
-    vis: [8, 146, 313, 3],
   },
   'logic-arguments-17': {
-    at: [null, null, null, null, null, null, null, null, [268, 322, 1, 268], [190, 322, 1, 268], null],
+    at: [null, [206, 364, 3, 200], null, null, null, null, null, null, null, null, null],
     say: [null, 'One prints its reasons.', 'The other just asserts.', 'He is dishonest, though.', 'That felt like winning.', 'It touched no reason.', null, null, 'One had parts. One didn’t.', null, null],
   },
   'logic-arguments-18': {
-    at: [null, [200, 366, 3, 200], null, [128, 364, 3, 128], null, [128, 366, 3, 128], null, null, [298, 372, 1, 268], null],
+    at: [null, null, null, null, null, null, null, null, [316, 386, 2, 268], null],
     say: [null, 'Everyone says so.', null, 'Is the water safe?', 'The shaft has a hole.', null, 'Somebody tested it.', null, null, null],
   },
   'ethics-ethics-19': {
-    at: [null, null, null, null, null, null, [198, 309, 2, 132], null, [214, 320, 3, 268], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, 'Somebody else signed.', 'Not how risky.', 'Who else is in it.', null, 'Only one was free.', null, 'Expensive at the end.', null, null],
   },
   'ethics-ethics-17': {
-    at: [null, [200, 398, 1, 200], null, [200, 398, 1, 200], null, null, null, [132, 399, 2, 132], null, [268, 398, 3, 268], null],
+    at: [null, null, null, [200, 389, 2, 200], null, null, null, null, [268, 387, 2, 268], [268, 387, 2, 268], null],
     say: [null, 'Even then?', 'He knew how it looks.', 'Not a rule for all.', 'Hand a copy to everybody.', 'Then nobody expects truth.', null, null, 'Surely the friend matters.', null, null],
-    vis: [8, 325, 393, 2],
+    vis: [8, 325, 387, 2, 349],
   },
   'epistemology-knowledge-18': {
-    at: [null, null, null, null, null, [132, 342, 3, 132], null, null, [268, 341, 3, 268], null],
+    at: [null, [200, 386, 1, 200], null, [132, 387, 1, 132], null, [132, 387, 1, 132], null, null, [268, 386, 1, 268], null],
     say: [null, 'Tied to everything.', 'Tied to one memory.', 'Same report, both markers.', 'It shouldn’t move both.', null, 'Proportion to what holds it.', null, null, null],
   },
   'ethics-ethics-20': {
-    at: [null, null, [132, 380, 3, 132], null, [132, 381, 3, 132], [132, 380, 3, 132], null, [268, 380, 3, 268], null],
+    at: [null, null, null, null, null, null, null, null, null],
     say: [null, 'Two hundred years out.', 'Some of that is fair.', 'A rate on the date itself.', null, 'Nobody chose their year.', null, null, null],
   },
   'epistemology-knowledge-19': {
-    at: [null, [200, 364, 2, 200], null, null, [132, 364, 1, 132], null, [132, 364, 2, 132], null, [268, 364, 2, 268], null],
+    at: [null, [200, 380, 3, 200], null, null, null, null, null, null, null, null],
     say: [null, 'Cut to fit one door.', 'A heart doctor on diet.', 'The credentials are real.', 'Just the wrong door.', null, null, 'Both qualified. Opposite.', null, null],
   },
   'metaphysics-being-18': {
-    at: [null, [200, 315, 3, 200], null, [132, 315, 2, 132], null, [132, 315, 2, 132], null, null, [268, 315, 3, 268], null],
+    at: [null, null, [132, 368, 2, 132], null, null, null, [132, 367, 1, 132], null, null, null],
     say: [null, 'Point at the apple. Easy.', 'Not three apples.', 'Not the chalk mark.', 'Prime before anyone counted.', null, 'So where does it live?', null, null, null],
   },
   'epistemology-knowledge-20': {
-    at: [null, null, null, [132, 388, 1, 132], null, null, [132, 340, 3, 132], null, [268, 388, 1, 268], [268, 388, 1, 268], null],
+    at: [null, null, null, null, null, null, null, null, null, null, null],
     say: [null, 'Three more. Better.', 'Right to climb.', 'All the same post.', 'Nobody retracted.', 'It was never four.', null, null, 'Built to show me my own.', null, null],
-    vis: [8, 327, 393, 3],
   },
   'metaphysics-being-19': {
-    at: [null, null, [200, 369, 2, 200], null, [132, 369, 3, 132], null, [132, 369, 3, 132], null, null, null],
+    at: [null, null, [194, 386, 3, 200], null, [132, 387, 3, 132], null, null, null, null, null],
     say: [null, 'Still an apple.', 'And still.', 'That was the last plank.', 'Something underneath?', null, null, 'Then which is which?', null, null],
   },
   'metaphysics-being-20': {
-    at: [null, null, null, [132, 385, 3, 132], null, null, [132, 386, 3, 132], null, [268, 385, 3, 268], null, [268, 385, 3, 268], null],
+    at: [null, null, [200, 377, 3, 200], null, [132, 377, 3, 132], null, [132, 378, 3, 132], null, null, null, null, null],
     say: [null, 'Thousands of them.', 'Count the minds.', 'Most are in a machine.', 'Nobody aimed it.', 'Where the minds are.', null, null, 'Two say it never gets built.', 'Watch it shrink.', null, null],
   },
   'aesthetics-aesthetics-18': {
-    at: [null, null, [132, 398, 1, 132], null, [132, 398, 3, 132], null, [268, 398, 1, 268], [268, 398, 1, 268], null],
+    at: [null, [200, 389, 3, 200], null, null, null, null, null, [268, 388, 3, 268], null],
     say: [null, 'Same slope. Same numbers.', 'It moves the way sadness does.', 'Nobody is inside the notes.', null, null, 'So why pay to sit in it?', null, null],
-    vis: [6, 329, 393, 3],
   },
   'aesthetics-aesthetics-20': {
-    at: [null, [248, 392, 1, 200], null, null, null, [246, 393, 2, 132], null, [268, 392, 1, 268], [268, 392, 1, 268], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, 'A textbook is faster.', 'A camera does that.', 'Wallpaper is cheaper.', 'Nothing came for the fourth.', null, null, 'Replaceable, and still worth it.', null, null],
   },
   'aesthetics-aesthetics-21': {
-    at: [null, null, null, [132, 386, 3, 132], null, [132, 386, 3, 132], null, [268, 386, 3, 268], [268, 386, 3, 268], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, 'All of it burning.', 'Two of them came back.', 'No text to print it from.', 'The object was the work.', null, null, 'Photography ruins the line.', null, null],
-    vis: [7, 327, 385, 3],
   },
   'political-political-19': {
-    at: [null, null, [132, 378, 3, 132], null, [132, 378, 3, 132], null, [268, 377, 3, 268], [268, 376, 3, 268], null],
+    at: [null, null, [132, 381, 3, 132], null, [132, 381, 3, 132], null, [268, 381, 3, 268], [268, 381, 3, 268], null],
     say: [null, 'Same price throughout.', 'But the feeling drops.', 'Only the distance changed.', null, null, 'Always one more.', null, null],
   },
   'political-political-20': {
-    at: [null, null, null, null, null, null, null, null, [214, 308, 3, 268], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, 'Neither will budge.', 'The normal result?', 'The law lands on both.', 'A reason they could weigh.', null, null, 'The shelf is very small.', null, null],
   },
   'political-political-21': {
-    at: [null, null, null, [132, 393, 2, 132], null, [132, 394, 1, 132], null, [268, 393, 2, 268], null, [268, 393, 1, 268], null],
+    at: [null, null, null, [132, 381, 1, 132], null, null, null, null, null, null, null],
     say: [null, 'Agreed by staying?', 'Somebody governs that too.', 'And the next.', 'Nowhere left to stand.', null, null, 'Not a call to riot.', 'Just never earned.', null, null],
   },
   'aesthetics-aesthetics-22': {
-    at: [null, [200, 398, 1, 200], null, [132, 398, 1, 132], null, [132, 399, 1, 132], null, null, null, [268, 398, 1, 268], null],
+    at: [null, null, [200, 386, 3, 200], null, null, [132, 387, 3, 132], [132, 388, 3, 132], null, null, [268, 386, 3, 268], null],
     say: [null, 'The heart goes up.', 'I believe none of it.', 'All three seem true.', 'One of them has to go.', null, 'Playing a game, then.', null, 'Imagining is enough.', null, null],
-    vis: [8, 156, 393, 3],
+    vis: [8, 156, 387, 3, 156],
   },
   'aesthetics-aesthetics-24': {
-    at: [null, null, null, [132, 375, 3, 132], null, null, null, [268, 374, 3, 268], null],
+    at: [null, null, null, null, null, null, null, null, null],
     say: [null, 'Everywhere at once.', 'The aura, he called it.', null, 'A film has no original.', null, 'It reaches everybody now.', null, null],
   },
   'aesthetics-aesthetics-23': {
-    at: [null, null, [218, 341, 3, 200], null, [132, 344, 3, 132], null, [132, 344, 3, 132], null, null, [268, 336, 3, 268], null],
+    at: [null, null, [200, 377, 1, 200], null, null, null, null, null, null, null, null],
     say: [null, 'Say what it was about.', 'A mood, easily.', 'The title did that.', null, 'Not about anything.', 'A shape made of tones.', null, 'It copies the wanting.', null, null],
   },
   'epistemology-knowledge-23': {
-    at: [null, [200, 380, 3, 200], null, [150, 380, 3, 132], null, null, [268, 380, 3, 268], [268, 380, 3, 268], null],
+    at: [null, null, null, null, null, null, [298, 382, 3, 268], null, null],
     say: [null, 'Wider isn’t looser.', 'The mouth hasn’t moved.', null, 'Then the mesh does nothing.', null, 'Two settings at once.', null, null],
-    vis: [6, 327, 393, 3],
+    vis: [6, 321, 377, 3, 357],
   },
   'epistemology-knowledge-24': {
-    at: [null, [218, 379, 3, 200], null, null, [216, 378, 3, 132], null, [274, 383, 1, 268], null, [268, 383, 3, 268], null],
+    at: [null, null, null, null, null, null, [274, 386, 1, 268], null, [286, 386, 3, 268], null],
     say: [null, 'Not how clever. How sure.', null, 'That bar is longer.', null, null, 'It runs both ways.', 'Confidence isn’t knowledge.', null, null],
   },
   'epistemology-knowledge-22': {
-    at: [null, [200, 393, 3, 200], null, [132, 393, 3, 132], null, [132, 394, 2, 132], null, null, null, [268, 393, 1, 268], null],
+    at: [null, [200, 381, 2, 200], null, null, null, [132, 382, 1, 132], [132, 381, 1, 132], null, null, [268, 381, 3, 268], null],
     say: [null, 'One just guesses.', 'Nothing to choose today.', 'One is a road.', 'The other is stepping stones.', null, 'Tie them down, then.', null, 'It’s in every other day.', null, null],
   },
   'ethics-ethics-21': {
-    at: [null, null, null, [132, 362, 3, 132], null, null, null, null, [268, 362, 3, 268], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, 'Two arrows. One aimed.', 'So the aim is the thing.', null, 'Ah. Now it is the means.', null, 'Through it, or past it.', null, null, null],
   },
   'ethics-ethics-22': {
-    at: [null, [200, 373, 3, 200], null, [132, 373, 3, 132], null, [132, 373, 3, 132], null, null, [268, 373, 3, 268], null],
+    at: [null, [200, 381, 3, 200], null, null, null, [132, 382, 3, 132], null, null, [268, 382, 3, 268], null],
     say: [null, 'Indistinguishable, though.', 'I’d say no as well.', null, 'The other four aren’t off.', 'Never plugged in.', null, 'So pleasure isn’t all of it.', null, null],
   },
   'ethics-ethics-24': {
-    at: [null, null, [200, 363, 3, 200], null, [132, 363, 3, 132], [132, 364, 3, 132], null, null, [268, 360, 3, 268], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, 'Stop him. Stop others.', 'Mend him. Or repay him.', 'Ninety, and harmless.', 'Three have nothing to hold.', null, null, 'The same trick backwards.', null, null],
   },
   'logic-arguments-19': {
-    at: [null, [200, 398, 3, 200], null, [132, 399, 3, 132], null, [268, 398, 3, 268], null, [268, 398, 3, 268], null],
+    at: [null, [200, 386, 3, 200], null, null, [132, 386, 3, 132], null, null, [268, 386, 3, 268], null],
     say: [null, 'The vowel and the even.', 'A consonant is allowed.', null, 'A vowel behind the seven.', 'Only a no can test it.', null, null, null],
-    vis: [6, 157, 393, 3],
   },
   'logic-arguments-20': {
-    at: [null, null, [200, 381, 3, 200], null, [132, 381, 1, 132], null, [268, 382, 1, 268], null, [268, 381, 1, 268], null],
+    at: [null, null, [200, 386, 3, 200], null, null, [132, 386, 2, 132], null, null, [268, 387, 1, 268], null],
     say: [null, 'Same claim, less support.', 'One leg left.', 'Not a lie. Just the weakest.', null, 'The real one never moved.', 'Take on the strongest.', null, null, null],
   },
   'logic-arguments-21': {
-    at: [null, null, [200, 388, 3, 200], null, [132, 388, 3, 132], null, [268, 388, 3, 268], null, [268, 388, 3, 268], null],
+    at: [null, null, [200, 379, 2, 200], null, [132, 378, 2, 132], null, [268, 377, 2, 268], null, [268, 378, 2, 268], null],
     say: [null, 'Take it away and see.', 'Now switch it on alone.', 'A spark would do as well.', null, 'Tuesday fails both.', 'Four boxes, not two.', null, null, null],
-    vis: [7, 327, 393, 3],
+    vis: [7, 321, 387, 3, 351],
   },
   'metaphysics-being-21': {
-    at: [null, [200, 388, 3, 200], null, [200, 388, 3, 200], null, [132, 388, 3, 132], null, null, null, [268, 388, 3, 268], null],
+    at: [null, [200, 387, 3, 200], null, [200, 386, 3, 200], null, [132, 387, 1, 132], null, null, null, [268, 386, 2, 268], null],
     say: [null, 'What is there, then.', 'Only this instant.', 'Yesterday is nowhere.', 'The future isn’t written.', null, 'Now is just where I am.', null, 'Relativity leans this way.', null, null],
-    vis: [8, 71, 393, 3],
   },
   'metaphysics-being-22': {
-    at: [null, null, [212, 362, 3, 200], null, [132, 337, 3, 132], null, null, [268, 361, 3, 268], [268, 360, 3, 268], null],
+    at: [null, [200, 381, 1, 200], null, [120, 381, 1, 132], [84, 381, 1, 132], null, null, null, [220, 381, 1, 268], null],
     say: [null, 'Same world, same laws.', 'Same way each time.', 'Never a live option.', null, 'Not about the replay.', null, 'Then nothing decided it.', null, null],
   },
   'metaphysics-being-23': {
-    at: [null, [200, 327, 3, 200], null, [132, 327, 3, 132], null, null, null, [268, 327, 3, 268], null, [268, 327, 3, 268], null],
+    at: [null, [200, 376, 3, 200], null, null, null, [174, 377, 3, 132], null, null, null, null, null],
     say: [null, 'No original plank left.', 'He built a second one.', null, 'Use points left.', 'Wood points right.', null, 'When do parts make a thing?', 'A pile isn’t a ship.', null, null],
   },
   'political-political-22': {
-    at: [null, null, null, [132, 388, 3, 132], [132, 388, 2, 132], [132, 388, 2, 132], null, null, [160, 388, 3, 268], null],
+    at: [null, null, null, [132, 386, 2, 132], [132, 387, 1, 132], [132, 386, 2, 132], null, null, null, null],
     say: [null, 'Her day is her own.', 'But he holds the switch.', 'Nothing she could do.', null, 'Interfering, or able to.', null, 'Not manners. Courts.', null, null],
   },
   'political-political-24': {
-    at: [null, [200, 382, 2, 200], null, [132, 382, 2, 132], null, null, [268, 379, 3, 268], [268, 382, 3, 268], null],
+    at: [null, [200, 386, 2, 200], null, [132, 387, 2, 132], null, null, [268, 386, 3, 268], [268, 386, 2, 268], null],
     say: [null, 'Not a courtesy on top.', 'Five generations later.', null, 'Trapped inside a picture.', null, 'Identical, or recognised.', null, null],
   },
   'political-political-23': {
-    at: [null, null, [224, 398, 3, 200], null, [174, 379, 3, 132], null, null, [268, 399, 3, 268], [268, 399, 3, 268], null],
+    at: [null, null, [248, 386, 3, 200], null, null, null, null, null, [292, 387, 3, 268], null],
     say: [null, 'That one I never chose.', 'Forget all of it, then.', 'A chooser is still in there.', null, 'Nothing neutral underneath.', null, 'Chosen from nowhere.', null, null],
-    vis: [7, 326, 393, 3],
   },
   'logic-arguments-39': {
-    at: [[76, 388, 3, 58], null, [76, 388, 3, 58], null, [76, 388, 3, 58], null, null, [106, 388, 3, 106], null],
+    at: [[76, 376, 3, 58], null, [76, 377, 3, 58], null, [76, 376, 3, 58], null, null, [100, 376, 3, 106], null],
     say: ['Some sentences bite themselves.', 'Three claims, one test.', null, 'It is asking for it.', 'There goes the plank.', 'No evidence needed at all.', 'Harsh. Also correct.', null, null],
-    vis: [6, 71, 393, 3],
+    vis: [6, 77, 387, 3, 47],
   },
   'epistemology-knowledge-39': {
-    at: [null, null, null, [76, 346, 3, 52], null, null, null, [74, 350, 3, 98], null],
+    at: [null, null, null, null, null, null, null, null, null],
     say: ['Two findings, one verdict.', 'Every row holds together.', 'Now count downward.', null, 'Nobody made a mistake.', 'Reasons, or the verdict?', 'The many, together.', null, null],
   },
   'logic-arguments-38': {
-    at: [null, [72, 372, 3, 60], null, [72, 371, 3, 60], [72, 375, 3, 60], null, null, [88, 378, 3, 100], null],
+    at: [null, null, null, null, null, null, [82, 387, 2, 100], null, null],
     say: ['Three steps. Watch them.', 'Greater than anything else.', 'He changed one word.', null, 'Identical. I checked twice.', 'Broken before the island.', 'Rude, and fair.', null, null],
   },
   'ethics-ethics-38': {
-    at: [null, null, null, [76, 346, 3, 46], null, null, null, [90, 342, 3, 90], null],
+    at: [null, [76, 387, 3, 46], null, [76, 389, 3, 46], null, [90, 389, 3, 90], null, [90, 388, 3, 90], null],
     say: ['Both children. Only one me.', 'The scale never asks whose.', 'Three reasons to lean.', null, 'Even your own mother?', 'The tie was the reason.', 'One thought too many.', null, null],
   },
   'epistemology-knowledge-38': {
-    at: [null, [76, 396, 3, 52], null, [76, 399, 3, 52], null, [98, 398, 3, 98], null, [98, 398, 3, 98], null],
+    at: [null, [76, 385, 3, 52], null, [76, 388, 3, 52], null, [80, 387, 3, 98], null, [80, 388, 3, 98], null],
     say: ['Two of three were right.', 'The hollow ones nearly happened.', 'A hit and an aim look alike.', null, 'Nearest cases, not all cases.', 'A stopped clock is right once.', 'Tie it down, said Plato.', null, null],
   },
   'ethics-ethics-39': {
-    at: [null, null, [76, 348, 3, 52], null, null, null, null, [98, 349, 3, 98], null],
+    at: [[76, 376, 3, 52], null, [76, 377, 3, 52], null, null, [98, 376, 3, 98], null, [98, 378, 3, 98], null],
     say: ['One more. Every time.', 'Judge, intend, act.', null, 'Stuck on the last step.', 'So nobody ever slips?', 'Knowledge, but asleep.', 'Ovid knew the feeling.', null, null],
   },
   'metaphysics-being-39': {
-    at: [null, [76, 388, 1, 52], null, [76, 388, 3, 52], null, [92, 387, 1, 98], null, [92, 388, 3, 98], null],
+    at: [null, null, [76, 389, 3, 52], null, null, null, [80, 388, 3, 98], [80, 388, 3, 98], null],
     say: ['Nobody is a lot of people.', 'Not one of them watered it.', 'Every answer is the same.', null, 'The king did not water it.', 'Hume in a single line.', 'If the first had not been.', null, null],
-    vis: [6, 299, 353, 3],
+    vis: [6, 305, 377, 2, 287],
   },
   'metaphysics-being-38': {
-    at: [null, null, null, [76, 348, 3, 52], null, null, null, [86, 349, 3, 98], null],
+    at: [null, [76, 376, 3, 52], null, [76, 377, 3, 52], null, [98, 376, 3, 98], null, [98, 378, 3, 98], null],
     say: ['Same clay all week.', 'A vase on Tuesday only.', 'Two bars, two lengths.', null, 'A fact about dates.', 'Two names, or two things.', 'Kripke settles the form.', null, null],
   },
   'aesthetics-aesthetics-38': {
-    at: [null, [76, 395, 3, 52], null, [76, 399, 3, 52], null, [98, 398, 3, 98], null, [98, 398, 3, 98], null],
+    at: [null, [76, 386, 3, 52], null, [76, 387, 3, 52], null, [98, 387, 3, 98], null, [98, 387, 3, 98], null],
     say: ['Seen it. Still gripped.', 'Knowing is flat. Feeling is not.', 'Three claims, one too many.', null, 'Athens knew the endings.', 'Not forgetting, then.', 'Poetic faith. Good phrase.', null, null],
   },
   'political-political-38': {
-    at: [null, [76, 398, 1, 52], null, [76, 398, 2, 52], null, [98, 398, 2, 98], null, [98, 400, 3, 98], null],
+    at: [null, [88, 387, 2, 52], null, [88, 383, 1, 52], null, [98, 387, 1, 98], null, [98, 388, 1, 98], null],
     say: ['A vote nobody mentioned.', 'How much slack?', 'Three things he might owe.', null, 'He told them to their faces.', 'And they threw him out.', 'He owes you his judgement.', null, null],
   },
   'aesthetics-aesthetics-39': {
-    at: [null, [76, 398, 1, 52], null, [76, 399, 3, 52], null, [92, 398, 2, 98], null, [98, 398, 2, 98], null],
+    at: [null, [76, 388, 3, 52], null, [76, 388, 3, 52], null, [92, 388, 3, 98], null, [92, 387, 3, 98], null],
     say: ['Same wood, same hands.', 'Look at the route instead.', 'And here is what came out.', null, 'The line is in the making.', 'Kant said it first.', 'Free, or mercenary.', null, null],
   },
   'political-political-39': {
-    at: [null, null, null, [76, 352, 3, 52], null, [74, 388, 1, 98], null, [74, 348, 3, 98], null],
+    at: [null, [88, 368, 3, 52], null, [88, 367, 3, 52], null, [98, 368, 3, 98], null, [98, 368, 3, 98], null],
     say: ['One of the forty.', 'And now it binds me.', 'Four offers. Read them.', null, 'Comply, or agree?', 'Locke on the count.', 'The greater force carries it.', null, null],
   },
   'epistemology-knowledge-25': {
-    at: [null, null, null, null, [74, 365, 3, 44], null, null, null, null, [82, 320, 3, 100], null],
+    at: [null, null, null, null, null, null, null, null, null, null, null],
     say: [null, null, null, null, null, null, null, null, null, null, null],
   },
   'political-political-25': {
-    at: [null, null, null, null, [74, 389, 3, 44], null, null, null, null, [100, 388, 3, 100], null],
+    at: [null, null, null, null, [80, 377, 3, 44], null, null, null, null, [100, 368, 3, 100], null],
     say: [null, null, null, null, null, null, null, null, null, null, null],
   },
   'logic-arguments-23': {
-    at: [null, null, null, null, [74, 399, 3, 44], null, null, null, null, [100, 398, 3, 100], null],
+    at: [null, null, null, null, [80, 388, 3, 44], null, null, null, null, [100, 387, 3, 100], null],
     say: [null, null, null, null, null, null, null, null, null, null, null],
-    vis: [8, 76, 393, 3],
   },
   'ethics-ethics-25': {
-    at: [null, null, null, null, [76, 399, 1, 40], null, null, null, null, [72, 398, 3, 96], null],
+    at: [null, null, null, null, [76, 388, 3, 40], null, null, null, null, [96, 386, 3, 96], null],
     say: [null, null, null, null, null, null, null, null, null, null, null],
   },
   'metaphysics-being-25': {
-    at: [null, null, null, null, [74, 399, 3, 44], null, null, null, null, [100, 398, 3, 100], null],
+    at: [null, null, null, null, [80, 388, 3, 44], null, null, null, null, [100, 387, 3, 100], null],
     say: [null, null, null, null, null, null, null, null, null, null, null],
   },
   'aesthetics-aesthetics-25': {
-    at: [null, null, null, null, [76, 389, 3, 40], null, null, null, null, [90, 388, 3, 96], null],
+    at: [null, null, null, null, [76, 377, 3, 40], null, null, null, null, [78, 376, 3, 96], null],
     say: [null, null, null, null, null, null, null, null, null, null, null],
   },
   'metaphysics-being-40': {
-    at: [null, null, null, null, [76, 399, 3, 40], null, null, null, [80, 354, 3, 104], null],
+    at: [null, null, null, null, [76, 388, 3, 40], null, null, null, [80, 387, 3, 104], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'metaphysics-being-41': {
-    at: [null, null, null, null, [76, 388, 3, 28], null, null, null, [88, 388, 3, 88], null],
+    at: [null, null, null, null, [76, 377, 3, 28], null, null, null, [88, 376, 3, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'epistemology-knowledge-40': {
-    at: [null, null, null, null, [74, 388, 3, 44], null, null, null, [72, 388, 3, 108], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'epistemology-knowledge-41': {
-    at: [null, null, null, null, [76, 398, 3, 28], null, null, null, [88, 398, 3, 88], null],
+    at: [null, null, null, null, [76, 387, 3, 28], null, null, null, [88, 387, 3, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'logic-arguments-40': {
-    at: [null, null, null, null, [72, 388, 3, 36], null, null, null, [96, 388, 3, 96], null],
+    at: [null, null, null, null, [78, 387, 3, 36], null, null, null, [96, 386, 3, 96], null],
     say: [null, null, null, null, null, null, null, null, null, null],
-    vis: [7, 74, 393, 3],
+    vis: [7, 80, 377, 3, 32],
   },
   'logic-arguments-41': {
-    at: [null, null, null, null, [76, 398, 3, 28], null, null, null, [82, 398, 3, 88], null],
+    at: [null, null, null, null, [76, 387, 3, 28], null, null, null, [82, 387, 3, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'ethics-ethics-40': {
-    at: [null, null, null, null, [72, 388, 3, 36], null, null, null, [96, 388, 2, 96], null],
+    at: [null, null, null, null, [78, 387, 3, 36], null, null, null, [96, 386, 1, 96], null],
     say: [null, null, null, null, null, null, null, null, null, null],
-    vis: [7, 76, 393, 3],
+    vis: [7, 76, 377, 3, 34],
   },
   'ethics-ethics-41': {
-    at: [null, null, null, null, [76, 398, 3, 28], null, null, null, [88, 398, 3, 88], null],
+    at: [null, null, null, null, [76, 387, 3, 28], null, null, null, [88, 387, 3, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'aesthetics-aesthetics-40': {
-    at: [null, null, null, null, [74, 387, 3, 32], null, null, null, [80, 389, 3, 92], null],
+    at: [null, null, null, null, [80, 376, 3, 32], null, null, null, [80, 378, 3, 92], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'aesthetics-aesthetics-41': {
-    at: [null, null, null, null, [76, 399, 3, 28], null, null, null, [88, 398, 3, 88], null],
+    at: [null, null, null, null, [76, 388, 3, 28], null, null, null, [88, 387, 3, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'political-political-40': {
-    at: [null, null, null, null, [74, 398, 3, 32], null, null, null, [80, 398, 3, 92], null],
+    at: [null, null, null, null, [80, 387, 3, 32], null, null, null, [80, 387, 3, 92], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'political-political-41': {
-    at: [null, null, null, null, [76, 398, 3, 28], null, null, null, [88, 398, 3, 88], null],
+    at: [null, null, null, null, [76, 387, 3, 28], null, null, null, [88, 387, 3, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'metaphysics-being-27': {
-    at: [null, null, null, null, [76, 388, 3, 28], null, null, null, [82, 388, 3, 88], null],
+    at: [null, null, null, null, [76, 387, 3, 28], null, null, null, [82, 386, 3, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
-    vis: [7, 72, 393, 3],
+    vis: [7, 78, 377, 3, 30],
   },
   'metaphysics-being-26': {
-    at: [null, null, null, null, [76, 398, 3, 28], null, null, null, [88, 398, 3, 88], null],
+    at: [null, null, null, null, [76, 387, 3, 28], null, null, null, [88, 387, 3, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
-    vis: [7, 72, 393, 3],
+    vis: [7, 78, 387, 3, 30],
   },
   'metaphysics-being-28': {
-    at: [null, null, null, null, [74, 388, 3, 26], null, null, null, [82, 388, 3, 82], null],
+    at: [null, null, null, null, null, null, null, null, [82, 376, 3, 82], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'metaphysics-being-29': {
-    at: [null, null, null, null, [72, 395, 3, 24], null, null, null, [74, 398, 3, 80], null],
+    at: [null, null, null, null, null, null, null, null, [80, 387, 3, 80], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'metaphysics-being-30': {
-    at: [null, null, null, null, [72, 399, 3, 24], null, null, null, [80, 398, 3, 80], null],
+    at: [null, null, null, null, null, null, null, null, [80, 387, 3, 80], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'epistemology-knowledge-26': {
-    at: [null, null, null, null, [76, 398, 3, 28], null, null, null, [88, 398, 3, 88], null],
+    at: [null, null, null, null, [76, 387, 2, 28], null, null, null, [88, 386, 2, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'epistemology-knowledge-27': {
-    at: [null, null, null, null, [76, 398, 1, 28], null, null, null, [88, 398, 1, 88], null],
+    at: [null, null, null, null, [76, 387, 2, 28], null, null, null, [88, 387, 2, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'epistemology-knowledge-28': {
-    at: [null, null, null, null, [74, 399, 3, 26], null, null, null, [82, 398, 3, 82], null],
+    at: [null, null, null, null, null, null, null, null, [82, 387, 3, 82], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'epistemology-knowledge-29': {
-    at: [null, null, null, null, [74, 398, 3, 26], null, null, null, [80, 392, 3, 80], null],
+    at: [null, null, null, null, null, null, null, null, [80, 384, 3, 80], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'epistemology-knowledge-30': {
-    at: [null, null, null, null, [72, 398, 3, 24], null, null, null, [80, 398, 3, 80], null],
+    at: [null, null, null, null, null, null, null, null, [80, 386, 3, 80], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'logic-arguments-24': {
-    at: [null, null, null, null, [76, 398, 3, 28], null, null, null, [82, 398, 3, 88], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'logic-arguments-27': {
-    at: [null, null, null, null, [76, 388, 3, 28], null, null, null, [76, 388, 3, 88], null],
+    at: [null, null, null, null, [76, 387, 3, 28], null, null, null, [76, 386, 3, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
-    vis: [7, 71, 393, 3],
+    vis: [7, 77, 377, 3, 29],
   },
   'logic-arguments-28': {
-    at: [null, null, null, null, [72, 378, 3, 24], null, null, null, [80, 380, 3, 80], null],
+    at: [null, null, null, null, null, null, null, null, [80, 381, 3, 80], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'logic-arguments-29': {
-    at: [null, null, null, null, [72, 395, 2, 24], null, null, null, [80, 400, 3, 80], null],
+    at: [null, null, null, null, null, null, null, null, [80, 388, 3, 80], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'logic-arguments-30': {
-    at: [null, null, null, null, [72, 398, 3, 24], null, null, null, [80, 399, 3, 80], null],
+    at: [null, null, null, null, null, null, null, null, [80, 387, 3, 80], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'ethics-ethics-27': {
-    at: [null, null, null, null, [72, 398, 3, 24], null, null, null, [84, 398, 3, 84], null],
+    at: [null, null, null, null, null, null, null, null, [84, 387, 3, 84], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'ethics-ethics-26': {
-    at: [null, null, null, null, [76, 398, 3, 28], null, null, null, [82, 398, 3, 88], null],
+    at: [null, null, null, null, [76, 381, 3, 28], null, null, null, [88, 381, 3, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'ethics-ethics-28': {
-    at: [null, null, null, null, [72, 399, 3, 24], null, null, null, [78, 368, 3, 78], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'ethics-ethics-29': {
-    at: [null, null, null, null, [72, 391, 3, 24], null, null, null, [80, 392, 3, 80], null],
+    at: [null, null, null, null, null, null, null, null, [80, 388, 3, 80], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'ethics-ethics-30': {
-    at: [null, null, null, null, [72, 386, 3, 24], null, null, null, [80, 399, 3, 80], null],
+    at: [null, null, null, null, null, null, null, null, [80, 387, 3, 80], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'aesthetics-aesthetics-26': {
-    at: [null, null, null, null, [76, 366, 3, 28], null, null, null, [88, 368, 3, 88], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'aesthetics-aesthetics-27': {
-    at: [null, null, null, null, [76, 399, 3, 28], null, null, null, [88, 400, 3, 88], null],
+    at: [null, null, null, null, [76, 388, 3, 28], null, null, null, [88, 388, 3, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'aesthetics-aesthetics-28': {
-    at: [null, null, null, null, [74, 399, 3, 26], null, null, null, [82, 398, 3, 82], null],
+    at: [null, null, null, null, null, null, null, null, [82, 387, 3, 82], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'aesthetics-aesthetics-29': {
-    at: [null, null, null, null, [72, 398, 3, 24], null, null, null, [80, 398, 2, 80], null],
+    at: [null, null, null, null, null, null, null, null, [80, 387, 3, 80], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'aesthetics-aesthetics-30': {
-    at: [null, null, null, null, [72, 389, 3, 24], null, null, null, [80, 388, 3, 80], null],
+    at: [null, null, null, null, null, null, null, null, [80, 377, 3, 80], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'political-political-26': {
-    at: [null, null, null, null, [76, 387, 3, 28], null, null, null, [88, 388, 3, 88], null],
+    at: [null, null, null, null, [76, 386, 3, 28], null, null, null, [88, 387, 3, 88], null],
     say: [null, null, null, null, null, null, null, null, null, null],
-    vis: [7, 75, 393, 3],
+    vis: [7, 75, 377, 3, 33],
   },
   'political-political-27': {
-    at: [null, null, null, null, [74, 395, 3, 26], null, null, null, [82, 392, 3, 82], null],
+    at: [null, null, null, null, null, null, null, null, [82, 388, 3, 82], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'political-political-28': {
-    at: [null, null, null, null, null, [72, 398, 3, 24], null, null, [78, 399, 3, 78], null],
+    at: [null, null, null, null, null, null, null, null, [78, 388, 3, 78], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'political-political-29': {
-    at: [null, null, null, null, [72, 399, 3, 24], null, null, null, [80, 390, 3, 80], null],
+    at: [null, null, null, null, null, null, null, null, [80, 387, 3, 80], null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
   'political-political-30': {
-    at: [null, null, null, null, [72, 398, 3, 24], null, null, null, [74, 399, 3, 80], null],
+    at: [null, null, null, null, null, null, null, null, null, null],
     say: [null, null, null, null, null, null, null, null, null, null],
   },
 };

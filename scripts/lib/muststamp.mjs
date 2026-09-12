@@ -54,8 +54,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-/** Shared components that decide the SIZE of what a scene draws. */
-const SHARED = ['Target.tsx'];
+/**
+ * Shared components that decide the SIZE of what a scene draws. `Silhouette.tsx`
+ * draws the animals from part lists, so a change to how a part is sized resizes the
+ * animal in every scene that imports it. It has no StyleSheet, so it hashes whole.
+ */
+const SHARED = ['Target.tsx', 'Silhouette.tsx'];
 
 /**
  * ONLY THE PART OF A SHARED COMPONENT THAT DECIDES LAYOUT.
