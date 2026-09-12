@@ -18,6 +18,9 @@
 // Every item is judged before anything is copied, so a job goes in whole or not at all.
 // A refused take is rendered again, never repaired: cutting a burst out leaves the
 // garbled speech the model made around it, and the word times come from this WAV.
+// And the retake is a different REQUEST. Asked twice for the same words with the same
+// settings, Google returned the refused take of ethics-ethics-8 beat 9 byte for byte;
+// stating the default sample rate, 24000, outright made it render the line afresh.
 //
 // Then: FFMPEG=<path> node scripts/encode-narration.mjs, node scripts/make-narration.mjs,
 // and npm run check:narration.
@@ -76,7 +79,7 @@ for (const it of items) {
 }
 
 if (refused) {
-  console.log(`\n${refused} of ${items.length} refused, so nothing was installed. Render a refused line again; do not repair it.`);
+  console.log(`\n${refused} of ${items.length} refused, so nothing was installed. Render a refused line again, as a request that differs from the refused one (an identical request can come back as the same broken take, byte for byte); do not repair it.`);
   process.exit(1);
 }
 if (DRY) {

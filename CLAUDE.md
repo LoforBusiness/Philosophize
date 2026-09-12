@@ -1710,7 +1710,7 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
   Decided 11 Sep 2026: every narration beat will be read by Google's Chirp 3 HD
   voice (Algieba, British English), on by default and mutable, with each word
   appearing on screen as the voice reaches it. The writing had to change first,
-  because a lesson written today is the one that voice will read, and forty-four
+  because a lesson written today is the one that voice will read, and eighty-five
   lessons speak now (below). So a sentence is heard once with no going back, and
   every word on screen has to be a word the voice says. **Groups AC and AD** of the
   rule book are the result, researched before a line changed — broadcast writing
@@ -1757,9 +1757,10 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     both play after the last beat. `HEARD` in `lib/feedback.ts` decides, the
     player schedules nothing that is not heard, and `check:sound` fails the build
     on a third sound. Every haptic stayed.
-  - **And forty-four lessons speak.** `ethics-ethics-9` ("When Both Choices Are
+  - **And eighty-five lessons speak.** `ethics-ethics-9` ("When Both Choices Are
     Wrong") came first, then the first two lessons of every branch in reading
-    order, then the rest of every branch's first unit. Each reads its teaching
+    order, then the rest of every branch's first unit, then every branch's second
+    unit. Each reads its teaching
     lines aloud: a beat's own `text`, never a quote,
     a question or the summary. The clips are in `assets/narration/`, rendered
     through the character ledger, and `node scripts/make-narration.mjs` writes
@@ -1779,10 +1780,10 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     `FFMPEG=<path> node scripts/encode-narration.mjs` encodes each one locally to a
     64 kbps mono MP3 that carries the WAV's SHA-256. `make-narration` refuses an MP3
     whose WAV has changed, and the manifest requires only MP3s, so no narration WAV
-    is bundled: a real Android export ships 402 MP3s in 15.8 MB where the WAVs are
-    93.3 MB. Every MP3 decodes to exactly its WAV's length with no shift, so the
-    times still land. ffmpeg is not a dependency; point `FFMPEG` at any build with
-    libmp3lame.
+    is bundled: the 710 MP3s come to 27.5 MB where their WAVs are 162.1 MB (a real
+    Android export shipped the first 402 in 15.8 MB). Every MP3 decodes to exactly its
+    WAV's length with no shift, so the times still land. ffmpeg is not a dependency;
+    point `FFMPEG` at any build with libmp3lame.
   - **A clause matched to the wrong pause is thrown out.** The estimator gives each
     clause boundary the nearest pause, in order, and a comma the voice reads straight
     through leaves its pause to the next boundary. In `political-political-4` beat 6
@@ -1810,7 +1811,12 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     new letters. Two spectral measures of garble were built and deleted, because
     neither ranked the known-bad line first, so a garble without a burst is still
     AC11's to hear. `node scripts/countertest-narration.mjs` puts 22 defects back and
-    stays silent on a good take's own clipping. Rules AC13–AC16.
+    stays silent on a good take's own clipping. Rules AC13–AC16. **It caught the next
+    one the same day, before any reader could.** Of the 308 takes for the second units,
+    the door refused `ethics-ethics-8` beat 9, a 200 ms burst where "Carol" should
+    start. Asked again for the same words with the same settings, Google sent back that
+    broken take byte for byte, so a retake has to be a different request: stating the
+    default sample rate outright changed no word and no format, and came back clean.
   - **And the letters rise, in every narrated lesson.** Asked for once the narrated
     lessons had been heard: each letter fades in while it rises a third of the type's
     size, and a word's letters start in turn across half the time the voice spends on
@@ -1833,7 +1839,9 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     same words and names as a plain paragraph, and nothing sticks out sideways. But 4
     of them take one line more in a 390-wide phone's 342-point deck, and 7 in the
     narrowest phone's 272. The 274 lines the rest of the first units added came out
-    the same way, 10 of them a line taller at 342, so 14 of 402 in all; a name of
+    the same way, 10 of them a line taller at 342, so 14 of 402 in all. The 308 lines
+    of the second units did too: 18 a line taller at 342 and 19 at 272, the same words
+    and names, nothing sideways, and no paragraph taller than the ones before. A name of
     several words counts there as one tap target a word. Measured on the lines that
     broke early, three things cost
     the width: each word carries its 4.5-point trailing space, which text lets hang

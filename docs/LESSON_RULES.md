@@ -1252,7 +1252,7 @@ beats.
 **F44b. `text` is written to be spoken, word for word, and the screen follows the
 voice.** Narration is read aloud by Google's Chirp 3 HD voice (Algieba, British
 English), on by default and mutable, and each word's letters rise on screen as the
-voice reaches it. The whole first unit of every branch speaks today, and the rest
+voice reaches it. The first two units of every branch speak today, and the rest
 will. What is spoken is a beat's own `text`, on a beat that carries no quote, no
 question and no summary. The `text` on those beats is shown and never voiced, and so
 are `cite`, `quote.text`, prompts and their choices, because reading a question's
@@ -8099,9 +8099,9 @@ cane, three the monocle, and three are a hat on its own.
 
 **Decided on 11 Sep 2026:** every lesson's narration will be spoken by Google's
 Chirp 3 HD voice — Algieba, British English — on by default and mutable, with **each
-word's letters rising on screen as the voice reaches it**. Forty-four lessons speak
-today, the whole first unit of every branch and `ethics-ethics-9`; the rules apply to
-every lesson now, because a lesson written today is the one that voice will read.
+word's letters rising on screen as the voice reaches it**. Eighty-five lessons speak
+today, the first two units of every branch; the rules apply to every lesson now,
+because a lesson written today is the one that voice will read.
 That changes what a sentence is for.
 It is heard once, with no going back, at about 155 words a minute against the 238
 an adult reads silently; and every word the reader sees has to be a word the voice
@@ -8317,9 +8317,22 @@ line, and `MAX_PAUSE_S` and `MAX_EDGE_SILENCE_S` for a stall. It prints the corp
 worst value beside every limit on every run, so the margins are read rather than
 remembered.
 
+**The limits met a second burst the same day, and held.** Of the 308 takes rendered for
+the second units, `ethics-ethics-8` beat 9 carried a 200 ms blast where "Carol" should
+start: a run of 31, 429 clipped samples inside 50 ms, −2.9 dBFS. `install-narration`
+refused it before anything was copied. The other 307 stayed inside every limit, and
+across all 709 good lines the worst are now a run of 7, 19 clipped in 50 ms and −6.6
+dBFS, clear of every limit on the good side and of both bursts on the other.
+
 - **A broken take is rendered again, never repaired.** Cutting a burst out leaves the
   garbled speech the model made around it, and the word times are measured on that
   WAV. The second take cost 153 characters and came back clean.
+- **And the retake has to be a different request.** Asked for the same words with the
+  same settings a second time, Google sent back the broken take byte for byte, so a
+  retake that repeats its request can pay for the same burst twice. Stating the default
+  sample rate outright, 24,000, changes no word and no format, and that request came
+  back as a new, clean take. Compare the retake's SHA-256 with the refused one before
+  judging it.
 - **A take comes into the app through `node scripts/install-narration.mjs <job> <dir>`**,
   which judges every item before anything is copied. `make-narration` refuses the same
   lines through the same function in `scripts/lib/narration.mjs`, so the generator and
@@ -8363,8 +8376,8 @@ came back at 2.08 seconds and then 2.20 — so word times fit only the render th
 measured on. The 24 kHz WAV is the master and stays in `assets/narration/`, where
 nothing requires it and so nothing bundles it. `FFMPEG=<path> node
 scripts/encode-narration.mjs` encodes each one to a 64 kbps mono MP3 carrying the WAV's
-SHA-256, and the app plays only those: 402 MP3s come to 15.8 MB where the WAVs are
-93.3 MB. `check:narration` fails **STALE MP3** on a WAV changed since its MP3 was made.
+SHA-256, and the app plays only those: the 710 MP3s come to 27.5 MB where their WAVs
+are 162.1 MB. `check:narration` fails **STALE MP3** on a WAV changed since its MP3 was made.
 
 The times are estimated from the clip's pauses, and a clause matching that gives any
 clause under 0.4 or over 2.5 times the line's own pace is thrown out for an even spread

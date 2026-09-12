@@ -28,9 +28,10 @@ export const MANIFEST = path.join(ROOT, 'lib', 'narration', 'manifest.ts');
 const SCRIPTS = path.join(ROOT, 'components', 'lesson', 'cinematic');
 
 /**
- * The narrated lessons, and the script each one plays: the whole first unit of every
- * branch, in reading order, and ethics-ethics-9, the first lesson narrated. A lesson
- * added here needs its lines rendered and installed before make-narration will run.
+ * The narrated lessons, and the script each one plays: the first two units of every
+ * branch, in reading order. ethics-ethics-9 was the first lesson narrated, a day before
+ * the rest of its unit. A lesson added here needs its lines rendered and installed
+ * before make-narration will run.
  */
 export const LESSONS = {
   'logic-arguments-1': 'argumentScript.ts',
@@ -41,12 +42,23 @@ export const LESSONS = {
   'logic-arguments-6': 'logic6Script.ts',
   'logic-arguments-7': 'logic7Script.ts',
   'logic-arguments-8': 'logic8Script.ts',
+  'logic-arguments-9': 'logic9Script.ts',
+  'logic-arguments-10': 'logic10Script.ts',
+  'logic-arguments-11': 'logic11Script.ts',
+  'logic-arguments-12': 'logic12Script.ts',
+  'logic-arguments-13': 'logic13Script.ts',
+  'logic-arguments-14': 'logic14Script.ts',
+  'logic-arguments-32': 'logic32Script.ts',
   'ethics-ethics-1': 'ethicsScript.ts',
   'ethics-ethics-2': 'ethics2Script.ts',
   'ethics-ethics-3': 'ethics3Script.ts',
   'ethics-ethics-4': 'ethics4Script.ts',
   'ethics-ethics-5': 'ethics5Script.ts',
+  'ethics-ethics-6': 'ethics6Script.ts',
+  'ethics-ethics-7': 'ethics7Script.ts',
+  'ethics-ethics-8': 'ethics8Script.ts',
   'ethics-ethics-9': 'ethics9Script.ts',
+  'ethics-ethics-10': 'ethics10Script.ts',
   'epistemology-knowledge-1': 'epistemologyScript.ts',
   'epistemology-knowledge-3': 'epistemology2Script.ts',
   'epistemology-knowledge-4': 'epistemology4Script.ts',
@@ -57,11 +69,24 @@ export const LESSONS = {
   'epistemology-knowledge-9': 'epistemology9Script.ts',
   'epistemology-knowledge-10': 'epistemology10Script.ts',
   'epistemology-knowledge-2': 'knowHowScript.ts',
+  'epistemology-knowledge-11': 'epistemology11Script.ts',
+  'epistemology-knowledge-12': 'epistemology12Script.ts',
+  'epistemology-knowledge-14': 'epistemology14Script.ts',
+  'epistemology-knowledge-15': 'epistemology15Script.ts',
+  'epistemology-knowledge-13': 'epistemology13Script.ts',
   'metaphysics-being-1': 'metaphysicsScript.ts',
   'metaphysics-being-2': 'metaphysics2Script.ts',
   'metaphysics-being-3': 'metaphysics3Script.ts',
   'metaphysics-being-4': 'metaphysics4Script.ts',
   'metaphysics-being-5': 'metaphysics5Script.ts',
+  'metaphysics-being-6': 'metaphysics6Script.ts',
+  'metaphysics-being-7': 'metaphysics7Script.ts',
+  'metaphysics-being-8': 'metaphysics8Script.ts',
+  'metaphysics-being-9': 'metaphysics9Script.ts',
+  'metaphysics-being-10': 'metaphysics10Script.ts',
+  'metaphysics-being-11': 'metaphysics11Script.ts',
+  'metaphysics-being-12': 'metaphysics12Script.ts',
+  'metaphysics-being-13': 'metaphysics13Script.ts',
   'aesthetics-aesthetics-1': 'aestheticsScript.ts',
   'aesthetics-aesthetics-2': 'aesthetics2Script.ts',
   'aesthetics-aesthetics-3': 'aesthetics3Script.ts',
@@ -72,11 +97,28 @@ export const LESSONS = {
   'aesthetics-aesthetics-8': 'aesthetics8Script.ts',
   'aesthetics-aesthetics-9': 'aesthetics9Script.ts',
   'aesthetics-aesthetics-10': 'aesthetics10Script.ts',
+  'aesthetics-aesthetics-12': 'aesthetics12Script.ts',
+  'aesthetics-aesthetics-13': 'aesthetics13Script.ts',
+  'aesthetics-aesthetics-14': 'aesthetics14Script.ts',
+  'aesthetics-aesthetics-15': 'aesthetics15Script.ts',
+  'aesthetics-aesthetics-17': 'aesthetics17Script.ts',
+  'aesthetics-aesthetics-18': 'aesthetics18Script.ts',
+  'aesthetics-aesthetics-19': 'aesthetics19Script.ts',
+  'aesthetics-aesthetics-20': 'aesthetics20Script.ts',
+  'aesthetics-aesthetics-11': 'aesthetics11Script.ts',
+  'aesthetics-aesthetics-16': 'aesthetics16Script.ts',
+  'aesthetics-aesthetics-31': 'aesthetics31Script.ts',
   'political-political-1': 'politicalScript.ts',
   'political-political-2': 'political2Script.ts',
   'political-political-3': 'political3Script.ts',
   'political-political-4': 'political4Script.ts',
   'political-political-5': 'political5Script.ts',
+  'political-political-6': 'political6Script.ts',
+  'political-political-7': 'political7Script.ts',
+  'political-political-8': 'political8Script.ts',
+  'political-political-9': 'political9Script.ts',
+  'political-political-10': 'political10Script.ts',
+  'political-political-31': 'political31Script.ts',
 };
 
 /** A beat's clip, named: "metaphysics-being-4/beat-04". */
@@ -170,6 +212,11 @@ export function headerFaults(w) {
 // the corpus's worst value beside every limit on each run, so the margins can be read
 // rather than remembered.
 //
+// THE SECOND UNITS TESTED THEM THE SAME DAY. Of 308 new takes, one was a second burst
+// (ethics-ethics-8 beat 9: a 200 ms blast where "Carol" should start, a run of 31, 429
+// clipped in 50 ms, −2.9 dBFS) and install-narration refused it. The other 307 stayed
+// inside every limit, and the worst good values below are across all 709 good lines.
+//
 // WHAT THESE CANNOT HEAR is a take that garbles without a burst. Two spectral measures
 // were built for it (flatness over a stretch, and its share of the loud frames) and both
 // ranked the known-bad line 41st and 132nd, so neither is here. Listening (AC11) still
@@ -179,29 +226,29 @@ export function headerFaults(w) {
 export const CLIP_LEVEL = 32000;
 /**
  * The longest run of clipped samples a take may carry. Chirp's own peaks touch the
- * ceiling for a sample or a few: 4 at worst across the good lines. The broken take ran
- * 48. Twelve is half a millisecond.
+ * ceiling for a sample or a few: 7 at worst across the good lines. The two broken takes
+ * ran 48 and 31. Twelve is half a millisecond.
  */
 export const MAX_CLIP_RUN = 12;
-/** Clipped samples inside any 50 ms: 16 at worst in a good line, 842 in the broken take. */
+/** Clipped samples inside any 50 ms: 19 at worst in a good line, 842 and 429 in the broken takes. */
 export const MAX_CLIPS_IN_50MS = 64;
 /**
  * The loudest any 50 ms may average, in dB below full scale. Speech is peaks and
- * valleys, so even Chirp's loudest syllable averages about 7 dB under its peak: −7.3 at
- * worst. A burst is flat against the ceiling, and the broken take's measured −1.1.
+ * valleys, so even Chirp's loudest syllable averages about 7 dB under its peak: −6.6 at
+ * worst. A burst is flat against the ceiling, and the broken takes measured −1.1 and −2.9.
  */
 export const BURST_DBFS = -4;
 /**
- * Seconds of speech per unit of word weight: 0.118 to 0.379 across the good lines, with
- * a median of 0.182. Outside this band a take has lost words or repeated them, or the
- * clip belongs to another line. Coarse on purpose: no bad take of that kind has been
- * measured yet, so it is set well outside the good ones.
+ * Seconds of speech per unit of word weight: 0.107 to 0.379 across the good lines.
+ * Outside this band a take has lost words or repeated them, or the clip belongs to
+ * another line. Coarse on purpose: no bad take of that kind has been measured yet, so it
+ * is set well outside the good ones.
  */
 export const PACE_MIN = 0.09;
 export const PACE_MAX = 0.5;
-/** The longest silence inside the speech: 1.14s at worst in a good line. */
+/** The longest silence inside the speech: 1.50s at worst in a good line. */
 export const MAX_PAUSE_S = 2.5;
-/** Silence before the voice starts or after it stops: 0.27s at worst. */
+/** Silence before the voice starts or after it stops: 0.28s at worst. */
 export const MAX_EDGE_SILENCE_S = 1;
 
 const WINDOW_S = 0.05;
