@@ -927,14 +927,14 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **fifty-five** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **fifty-six** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
 `check-routes` · `check-nav` · `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-echo` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` · `check-wardrobe` ·
 `check-camera` · `check-tour` · `check-space` · `check-controls` · `check-shade` · `check-lift` · `check-fits` ·
-`check-plainwords` · `check-voice` · `check-ear` · `check-streak` · `check-quips` ·
+`check-plainwords` · `check-voice` · `check-ear` · `check-narration` · `check-streak` · `check-quips` ·
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
@@ -1709,9 +1709,9 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
   **AND THEN THE LESSONS WERE GIVEN A VOICE, WHICH CHANGED WHAT A SENTENCE IS FOR.**
   Decided 11 Sep 2026: every narration beat will be read by Google's Chirp 3 HD
   voice (Algieba, British English), on by default and mutable, with each word
-  appearing on screen as the voice reaches it. The audio pipeline is still being
-  built; the writing had to change first, because a lesson written today is the
-  one that voice will read. So a sentence is heard once with no going back, and
+  appearing on screen as the voice reaches it. The writing had to change first,
+  because a lesson written today is the one that voice will read, and forty-four
+  lessons speak now (below). So a sentence is heard once with no going back, and
   every word on screen has to be a word the voice says. **Groups AC and AD** of the
   rule book are the result, researched before a line changed — broadcast writing
   for the ear, Google's own Chirp documentation, the multimedia-learning evidence,
@@ -1749,7 +1749,7 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     rule proved valid, after a diagnostic found none stale for any other reason.
   - **What it could not do is listen.** A synthetic voice misplaces stress and
     misreads a name in a perfectly even tone, so AC11's listening pass, and a
-    pronunciation list, wait for the audio.
+    pronunciation list, are owed on every voiced lesson.
   - **And the app went quiet around the voice.** Every sound but two was removed
     the same day: the footfalls, the gesture whooshes, the answer notes, the knock
     and the clasp, the XP ticks, the badge bell, the streak seal and a scene's
@@ -1790,6 +1790,27 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     any clause under 0.4 or over 2.5 times the line's own pace now falls back to an
     even spread over the speech. Across 402 lines that changed exactly two, both
     newly narrated, and none of the lines already heard.
+  - **A take can break, and nothing had measured one until a reader heard it.**
+    *"There is, like, a loud sound, and then the voice becomes extremely
+    distorted"*, not quite halfway through `metaphysics-being-4`. The player was
+    innocent: beat 4's WAV, and so the MP3 made from it, carried a quarter-second
+    burst at 5.25s — 2,502 samples pinned at full scale — and speech smeared into
+    noise after it. Chirp 3 HD renders a line differently every time, and now and
+    then badly. A second take of the same words fixed it, and across all 402 lines it
+    was the only broken one: the worst good line clips for 4 samples running where
+    the burst clipped for 48, and its loudest 50 ms is −7.3 dBFS where the burst was
+    −1.1. **`npm run check:narration` now holds every line** to limits set between the
+    two, in `scripts/lib/narration.mjs`, plus a pace band for its words and a stall
+    limit — and it holds that **each clip still says its beat's words**:
+    `assets/narration/renders.json` records the words each WAV was rendered from,
+    `node scripts/install-narration.mjs <job> <dir>` is the only way a take comes in,
+    and `make-narration` refuses whatever the check refuses, through the same
+    function. A voiced beat that is rewritten or renumbered now fails the build, where
+    before it would have gone quietly silent in the app or spoken the old words under
+    new letters. Two spectral measures of garble were built and deleted, because
+    neither ranked the known-bad line first, so a garble without a burst is still
+    AC11's to hear. `node scripts/countertest-narration.mjs` puts 22 defects back and
+    stays silent on a good take's own clipping. Rules AC13–AC16.
   - **And the letters rise, in every narrated lesson.** Asked for once the narrated
     lessons had been heard: each letter fades in while it rises a third of the type's
     size, and a word's letters start in turn across half the time the voice spends on
@@ -3403,7 +3424,7 @@ the head mostly in X and judging it on `y` alone under-reads it by half.
 > right.
 
 That is group **AB** of the rule book, and the point of it is that **he is
-learning too** — not presenting the material, but the other student. 1,020
+learning too** — not presenting the material, but the other student. 1,113
 authored thoughts, 279 of them shown, plus a line back on an answer wherever one
 can sit near his head without touching it or a word (316 of them).
 
@@ -3451,7 +3472,7 @@ other position — whatever the lesson is about.
 
 `npm run check:thoughts` holds all of it offline against the real `.ttf`: every
 line fits two rows, no wrong-answer line is aimed at the reader (§7), no thought
-sits on a beat still being answered (group O), and none of 1,272 placed bubbles
+sits on a beat still being answered (group O), and none of 595 placed bubbles
 covers a word.
 
 > **AND THEN THE BUBBLES DID NOT FOLLOW HIM, WHICH WAS THREE DEFECTS AND NOT ONE.**

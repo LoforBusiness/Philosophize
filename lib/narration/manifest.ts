@@ -1635,9 +1635,9 @@ export const NARRATION: Record<string, Record<number, NarratedLine>> = {
     },
     4: {
       clip: require('../../assets/narration/metaphysics-being-4/beat-04.mp3'),
-      dur: 10.08,
+      dur: 9.52,
       text: "Parmenides throws out the second, because what is not can be neither known nor said. So only what is counts as real, and change is a trick of the senses.",
-      words: [0.04, 0.73, 0.93, 1.13, 1.34, 2.12, 2.68, 2.89, 3.11, 3.32, 3.54, 3.75, 4.14, 4.35, 4.57, 5.24, 5.54, 6.07, 6.37, 6.67, 6.97, 7.26, 7.87, 8.08, 8.45, 8.66, 8.87, 9.23, 9.44, 9.65],
+      words: [0.05, 0.80, 1.02, 1.24, 1.46, 2.27, 2.86, 3.08, 3.31, 3.53, 3.76, 3.98, 4.39, 4.61, 4.84, 5.48, 5.72, 6.15, 6.40, 6.64, 6.88, 7.12, 7.74, 7.92, 8.25, 8.43, 8.61, 8.79, 8.97, 9.15],
     },
     6: {
       clip: require('../../assets/narration/metaphysics-being-4/beat-06.mp3'),

@@ -19,19 +19,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { ASSETS as DIR, tagOf } from './lib/narration.mjs';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DIR = path.join(ROOT, 'assets', 'narration');
 const FFMPEG = process.env.FFMPEG || 'ffmpeg';
 const FORCE = process.argv.includes('--force');
 /** Mono speech at 24 kHz: 64 kbps keeps the voice, at a sixth of the WAV's size. */
 const BITRATE = '64k';
-
-/** What an MP3 must carry to count as encoded from this WAV. Mirrored in make-narration. */
-const tagOf = (wav) => `wav-sha256:${crypto.createHash('sha256').update(wav).digest('hex')}`;
 
 let encoded = 0, skipped = 0, failed = 0, wavBytes = 0, mp3Bytes = 0;
 for (const lesson of fs.readdirSync(DIR).sort()) {

@@ -9,6 +9,12 @@
 // never calls Google: the clips are rendered through the character ledger
 // (scripts/lib/ttsledger.mjs), and this only measures what was rendered.
 //
+// It refuses to write while any line fails what check:narration holds: a take that
+// bursts, clips, stalls or runs at the wrong pace for its words, a take whose render
+// record (assets/narration/renders.json, written by scripts/install-narration.mjs)
+// names other words or another WAV, and an MP3 not encoded from its WAV. Both call
+// lineFaults() in scripts/lib/narration.mjs, so they cannot disagree about a line.
+//
 // WHAT IS SPOKEN is a beat's own `text`, the teaching line under the figure. A quote
 // beat, a question (its prompt and its explanation) and the summary card are not
 // narrated. That was the user's call on 11 Sep 2026, for the first narrated lesson.
@@ -21,109 +27,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const ts = createRequire(import.meta.url)('typescript');
-const OUT = path.join(ROOT, 'lib', 'narration', 'manifest.ts');
-/** What an MP3 carries once it is encoded from a WAV. Mirrored in scripts/encode-narration.mjs. */
-const tagOf = (wav) => `wav-sha256:${crypto.createHash('sha256').update(wav).digest('hex')}`;
-
-/**
- * The narrated lessons, and the script each one plays: the whole first unit of every
- * branch, in reading order, and ethics-ethics-9, the first lesson narrated.
- */
-const LESSONS = {
-  'logic-arguments-1': 'argumentScript.ts',
-  'logic-arguments-2': 'builderScript.ts',
-  'logic-arguments-3': 'valid3Script.ts',
-  'logic-arguments-4': 'strong4Script.ts',
-  'logic-arguments-5': 'logic5Script.ts',
-  'logic-arguments-6': 'logic6Script.ts',
-  'logic-arguments-7': 'logic7Script.ts',
-  'logic-arguments-8': 'logic8Script.ts',
-  'ethics-ethics-1': 'ethicsScript.ts',
-  'ethics-ethics-2': 'ethics2Script.ts',
-  'ethics-ethics-3': 'ethics3Script.ts',
-  'ethics-ethics-4': 'ethics4Script.ts',
-  'ethics-ethics-5': 'ethics5Script.ts',
-  'ethics-ethics-9': 'ethics9Script.ts',
-  'epistemology-knowledge-1': 'epistemologyScript.ts',
-  'epistemology-knowledge-3': 'epistemology2Script.ts',
-  'epistemology-knowledge-4': 'epistemology4Script.ts',
-  'epistemology-knowledge-5': 'epistemology5Script.ts',
-  'epistemology-knowledge-6': 'epistemology6Script.ts',
-  'epistemology-knowledge-7': 'epistemology7Script.ts',
-  'epistemology-knowledge-8': 'epistemology8Script.ts',
-  'epistemology-knowledge-9': 'epistemology9Script.ts',
-  'epistemology-knowledge-10': 'epistemology10Script.ts',
-  'epistemology-knowledge-2': 'knowHowScript.ts',
-  'metaphysics-being-1': 'metaphysicsScript.ts',
-  'metaphysics-being-2': 'metaphysics2Script.ts',
-  'metaphysics-being-3': 'metaphysics3Script.ts',
-  'metaphysics-being-4': 'metaphysics4Script.ts',
-  'metaphysics-being-5': 'metaphysics5Script.ts',
-  'aesthetics-aesthetics-1': 'aestheticsScript.ts',
-  'aesthetics-aesthetics-2': 'aesthetics2Script.ts',
-  'aesthetics-aesthetics-3': 'aesthetics3Script.ts',
-  'aesthetics-aesthetics-4': 'aesthetics4Script.ts',
-  'aesthetics-aesthetics-5': 'aesthetics5Script.ts',
-  'aesthetics-aesthetics-6': 'aesthetics6Script.ts',
-  'aesthetics-aesthetics-7': 'aesthetics7Script.ts',
-  'aesthetics-aesthetics-8': 'aesthetics8Script.ts',
-  'aesthetics-aesthetics-9': 'aesthetics9Script.ts',
-  'aesthetics-aesthetics-10': 'aesthetics10Script.ts',
-  'political-political-1': 'politicalScript.ts',
-  'political-political-2': 'political2Script.ts',
-  'political-political-3': 'political3Script.ts',
-  'political-political-4': 'political4Script.ts',
-  'political-political-5': 'political5Script.ts',
-};
+import {
+  ROOT, ASSETS, MANIFEST as OUT, LESSONS, beatsOf, spoken, wordWeight, keyOf, lineFaults, readRenders,
+} from './lib/narration.mjs';
 
 const FRAME_S = 0.01;
 /** Twelve quiet frames in a row inside the speech is a pause, not a consonant. */
 const PAUSE_FRAMES = 12;
-
-function beatsOf(file) {
-  const src = fs.readFileSync(path.join(ROOT, 'components', 'lesson', 'cinematic', file), 'utf8');
-  const js = ts.transpileModule(src, {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
-  }).outputText;
-  const mod = {};
-  new Function('exports', 'require', js)(mod, () => ({}));
-  if (!Array.isArray(mod.BEATS)) throw new Error(`${file}: no BEATS export`);
-  return mod.BEATS;
-}
-
-/**
- * A spoken beat: a teaching line under the figure, and nothing else on it. The two
- * lessons older than the shared player ask their questions as `tap` and `mc`.
- */
-const spoken = (b) => typeof b.text === 'string' && b.text.trim().length > 0
-  && !b.quote && !b.interact && !b.summary && !b.tap && !b.mc;
-
-function readWav(file) {
-  const buf = fs.readFileSync(file);
-  if (buf.toString('ascii', 0, 4) !== 'RIFF' || buf.toString('ascii', 8, 12) !== 'WAVE') throw new Error(`${file}: not a WAV`);
-  let off = 12, fmt = null, data = null;
-  while (off + 8 <= buf.length) {
-    const id = buf.toString('ascii', off, off + 4);
-    const size = buf.readUInt32LE(off + 4);
-    const body = off + 8;
-    if (id === 'fmt ') {
-      fmt = { format: buf.readUInt16LE(body), channels: buf.readUInt16LE(body + 2), rate: buf.readUInt32LE(body + 4), bits: buf.readUInt16LE(body + 14) };
-    }
-    if (id === 'data') { data = buf.subarray(body, Math.min(buf.length, body + size)); break; }
-    off = body + size + (size % 2);
-  }
-  if (!fmt || !data || fmt.format !== 1 || fmt.bits !== 16 || fmt.channels !== 1) throw new Error(`${file}: expected 16-bit mono PCM`);
-  const n = Math.floor(data.length / 2);
-  const samples = new Float64Array(n);
-  for (let j = 0; j < n; j += 1) samples[j] = data.readInt16LE(j * 2) / 32768;
-  return { rate: fmt.rate, samples };
-}
 
 function wordStarts(samples, rate, text) {
   const tokens = text.match(/\S+/g) || [];
@@ -160,12 +70,9 @@ function wordStarts(samples, rate, text) {
   segs.push([from, last + 1]);
 
   // A number is read out digit-group by digit-group ("nineteen forty"), so it weighs
-  // what its digits do; a word weighs its vowel groups.
-  const weight = (w) => {
-    const digits = (w.match(/\d/g) || []).length;
-    if (digits) return digits;
-    return Math.max(1, (w.toLowerCase().match(/[aeiouy]+/g) || []).length) + 0.25;
-  };
+  // what its digits do; a word weighs its vowel groups. The PACE limit in
+  // scripts/lib/narration.mjs divides by the same weight.
+  const weight = wordWeight;
   // Spread words over the SPEECH in a list of segments, skipping the pauses between.
   const place = (idx, list) => {
     const total = list.reduce((n, [a, b]) => n + (b - a), 0);
@@ -255,23 +162,30 @@ function wordStarts(samples, rate, text) {
 
 let fails = 0;
 const blocks = [];
+const renders = readRenders();
 for (const [lessonId, scriptFile] of Object.entries(LESSONS)) {
   const beats = beatsOf(scriptFile);
   const entries = [];
   beats.forEach((b, i) => {
     if (!spoken(b)) return;
-    const base = `assets/narration/${lessonId}/beat-${String(i).padStart(2, '0')}`;
-    const wavAbs = path.join(ROOT, `${base}.wav`);
-    const mp3Abs = path.join(ROOT, `${base}.mp3`);
+    const key = keyOf(lessonId, i);
+    const base = `assets/narration/${key}`;
+    const wavAbs = path.join(ASSETS, `${key}.wav`);
+    const mp3Abs = path.join(ASSETS, `${key}.mp3`);
     if (!fs.existsSync(wavAbs)) { console.log(`  MISSING ${base}.wav`); fails += 1; return; }
-    // The app plays the MP3, and the word times are measured on the WAV. They must be
-    // one render, so an MP3 not encoded from this exact WAV is refused.
-    if (!fs.existsSync(mp3Abs) || !fs.readFileSync(mp3Abs).includes(tagOf(fs.readFileSync(wavAbs)))) {
-      console.log(`  STALE ${base}.mp3: missing, or not encoded from this WAV (run scripts/encode-narration.mjs)`);
+    // The app plays the MP3 and the word times are measured on the WAV, so the two must be
+    // one render. The take must also be clean, and recorded as rendered from these very
+    // words. check:narration judges a line with the same function, so the two agree.
+    const wav = fs.readFileSync(wavAbs);
+    const mp3 = fs.existsSync(mp3Abs) ? fs.readFileSync(mp3Abs) : null;
+    const { faults, w } = lineFaults({ text: b.text, wav, mp3, record: renders[key] });
+    if (faults.length) {
+      for (const f of faults) console.log(`  ${f.kind} ${base}: ${f.say}`);
       fails += 1;
       return;
     }
-    const { rate, samples } = readWav(wavAbs);
+    const rate = w.rate;
+    const samples = Float64Array.from(w.pcm, (v) => v / 32768);
     const dur = samples.length / rate;
     const words = wordStarts(samples, rate, b.text);
     const tokens = b.text.match(/\S+/g) || [];

@@ -241,9 +241,10 @@ And it is alive, by A6: breath in the chest and not the belly, a head drift, an
 ear that flicks, a tail that wags, and a gait cycled on DISTANCE rather than on
 the wall clock (a walk driven by `t` slides its feet the moment speed changes).
 
-> **Draw it in plain Node before it reaches a device.** `critters.ts` has zero
-> imports for the same reason `rig.ts` does, so a contact sheet of every pose
-> answers "is this a dog?" without Metro. Two passes have already been rejected on
+> **A lesson animal is drawn from a part list in `Silhouette.tsx` now (Z9)**, and a
+> redraw is judged on a sheet of every beat, `npm run sheet:beats <id>`. This note is
+> from the first dog, drawn with `critters.ts`, which no lesson imports any more: a
+> contact sheet of every pose answered "is this a dog?" without Metro. Two passes were rejected on
 > that sheet: the first had no elbow, so the forelegs were one vertical post, and
 > the second still read as a deer — spike tail, horn ear, a solid wedge for a
 > ribcage. **A stick-dog is harder than a stick-person**, because a person is
@@ -1249,13 +1250,15 @@ dilemma scenario ≤ 80 · quote ≈ 28. A beat that needs more words needs to b
 beats.
 
 **F44b. `text` is written to be spoken, word for word, and the screen follows the
-voice.** Every narration beat will be read aloud by Google's Chirp 3 HD voice
-(Algieba, British English), on by default and mutable, with each word appearing on
-screen as the voice reaches it — decided 11 Sep 2026, with the audio pipeline still
-being built.
-`cite`, `quote.text`, prompts and their choices are never spoken — reading a
-question's options aloud gives the trap away by intonation. So `text` is written for
-the ear first and is exactly what the voice says. **Group AC is the rule set** and
+voice.** Narration is read aloud by Google's Chirp 3 HD voice (Algieba, British
+English), on by default and mutable, and each word's letters rise on screen as the
+voice reaches it. The whole first unit of every branch speaks today, and the rest
+will. What is spoken is a beat's own `text`, on a beat that carries no quote, no
+question and no summary. The `text` on those beats is shown and never voiced, and so
+are `cite`, `quote.text`, prompts and their choices, because reading a question's
+options aloud gives the trap away by intonation. Write every `text` for the ear
+anyway, since any beat may be voiced later. A voiced `text` is exactly what the voice
+says, so **changing one means rendering it again** (AC14). **Group AC is the rule set** and
 `npm run check:ear` holds it; the short form is whole sentences a beat with their
 quotes closed inside it, no capitals for emphasis, contractions by default, numbers
 and symbols as they are said, a pause is a full stop, and at most 30 words a beat.
@@ -4058,6 +4061,13 @@ to get wrong and impossible to see in the source:
       contractions unless the *not* is the point; a quoted phrase framed in words,
       and the speaker named first; no semicolons, ellipses or parentheses, and at
       most one dash; at most 30 words and two sentences a beat. `npm run check:ear`.
+- [ ] **A voiced lesson is voiced again when its words or its beats change** (AC14,
+      AC16): render the changed lines through the character ledger, then
+      `node scripts/install-narration.mjs <job> <dir>`, `encode-narration`,
+      `make-narration`, and `npm run check:narration`. A take the install refuses is
+      rendered again, never edited (AC13).
+- [ ] **Every new take is listened to**, once with eyes closed and once reading along
+      (AC11). The check hears a burst; it cannot hear a misread name.
 - [ ] **It does not read as generated** (group AD): no ", highlighting…" tails, no
       "serves as", no unnamed sources or staged complexity; an adverb only where it
       changes the claim; a negation knocks down something somebody holds. Read
@@ -4196,9 +4206,14 @@ had no section for.
 - [ ] **A new WARDROBE piece hangs off something the eye can see** — on the skull,
       on a drawn cord, or in the hand. A piece merely NEAR him is a box that follows
       him, and `paper: true` is a gap, not a strap (AA9).
+- [ ] **An animal is a part list in `Silhouette.tsx`** (Z9), never an `<Svg>`, and it
+      is judged on `npm run sheet:beats <id>` against a reference, not from memory.
+- [ ] **A harness that writes stored boxes switches the bubbles off** (AB14), as
+      `measure-must.mjs` does, or it records the lesson's own thought as stage words.
 - [ ] **Editing `moves.ts` or `wardrobe.ts` moves the stored figure boxes, and no
-      stamp will tell you** — `muststamp` hashes the scene, the script and the
-      probe, and neither file is any of the three. Run `npm run make:wardrobe`,
+      stamp will tell you** — `muststamp` hashes the scene, the script without its
+      prose, the probe and the shared `Target.tsx` and `Silhouette.tsx`, and neither
+      file is any of those. Run `npm run make:wardrobe`,
       which grows them for both and records what it applied so a second run is a
       no-op (N15, H60d).
 - [ ] **Then the chain, once, in order**: `make:visitor` → `make:wardrobe` →
@@ -4235,10 +4250,11 @@ had no section for.
 **Run the shape check first — it costs a second and needs no browser.**
 
 ```
-npm run check          # tsc + fifty-five validators, this file's checker included
+npm run check          # tsc + fifty-six validators, this file's checker included
 npm run check:cinematic
 npm run check:tour     # group K, offline, against each lesson's own band
 npm run check:ear      # groups AC and AD — the narration is heard, and must not read as generated
+npm run check:narration  # group AC's clips — each is its beat's words, rendered clean (AC13–AC16)
 npm run check:rules    # THIS FILE, against the code it describes (U8)
 ```
 
@@ -4249,6 +4265,14 @@ npm run check:rules    # THIS FILE, against the code it describes (U8)
 > two-fragment opener. Its first run caught the fragment rule defining a fragment as
 > two words, which could not see the catalogue's own example. Run it after touching
 > `scripts/lib/earrules.mjs`.
+
+> **`check:narration` listens to the clips, and it has a counter-test too.** `node
+> scripts/countertest-narration.mjs` copies one voiced lesson into a temporary folder,
+> damages one thing at a time (a clipped run, a pile of clipped samples, a burst, a
+> take that lost its words, a stall, a wrong header, a stale MP3, a rewritten line, a
+> renumbered beat, a stray file) and runs the real check on the copy. A stage counts
+> only when the right KIND of finding comes back, and the check must stay silent on a
+> good take's own clipping. Run it after touching `scripts/lib/narration.mjs`.
 
 > **`check:rules` is the one to run after editing this file, not before.** It holds
 > the things that go stale on their own — a rule id used twice, a command that is
@@ -4328,6 +4352,8 @@ lesson with tours switched OFF (`?notour=1`), because measuring through a gated 
 reads less content per beat, shrinks the boxes, and generates tighter tours next time
 — a ratchet, turning the wrong way, and invisible in the output. The browser harnesses
 measure the scene's own timeline; the tour built on top of it is proved offline.
+`measure-must.mjs` also switches the thought bubbles off, for the same reason and
+worse: a bubble left on the stage is recorded as the lesson's own words (AB14).
 
 **Sheet the WHOLE vocabulary before trusting any of it.** Rendering all 50 gestures
 into one grid takes seconds and is the only thing that finds a pose which is *valid*
@@ -4703,8 +4729,10 @@ y 517, so it spans nearly the whole design space by construction.
 > Do not trust those figures here; run the script. They are a snapshot of a moving
 > repo and the whole point of the script is that it re-derives them.
 
-**Measured data rots, so it is stamped.** `MUST_STAMP` fingerprints the scene and
-script each box was taken from, and `check:cinematic` fails when one diverges —
+**Measured data rots, so it is stamped.** `MUST_STAMP` fingerprints what each box
+was taken from: the scene, the script without its prose, the probe, and the shared
+components the scene imports (`Target.tsx`'s styles and `Silhouette.tsx` whole). And
+`check:cinematic` fails when one diverges —
 because the dangerous direction is silent. A box that has gone stale and *too
 small* still looks like a guarantee while letting a push crop the very label it was
 recorded to protect. **Re-run `node scripts/measure-must.mjs` after changing a
@@ -4716,10 +4744,12 @@ scene's layout.**
 > shot has to hold both, so the two contains are applied in series — each only
 > loosens, so the order does not matter.
 
-**What is still on the author.** The measurement sees words. A diagram made of
-lines, an unlabelled prop the narration points at, a bar that fills — none of those
-carry text, so none of them are in the table. If a beat's text names something the
-scene draws without words, give that beat a `must` by hand.
+**What is still on the author.** The probe records each figure, every leaf with two
+or more characters as text, and every leaf with a background or a border as art. It
+cannot see inside an `<Svg>`, and it cannot see a lone character — a "?", a digit, an
+arrow — which is why the bubbles read those out of the scene instead (AB16). If a
+beat's text names something the scene draws either way, give that beat a `must` by
+hand.
 
 ### R10 · A pick is not a quantity, and dressing one as the other is the whole defect
 
@@ -4891,9 +4921,11 @@ the offset it recorded — which is how a thought came to REST 154 units to his 
 ("90 of 940 placements record a figure centre more than 40 units from their own beat's
 x"). It was never noise. It is the probe reading mid-walk.
 
-**Anchor on where the beat LEAVES him** — `walkOf(id)[i]`, the scene's own
-`const X = BEATS.map(b => b.x ?? DEFAULT)` rebuilt offline, which is the array
-`CinematicPlayer` itself settles on. That is where he stands while the reader reads,
+**Anchor on where the beat LEAVES him** — `walkOf(id)[i]`: the scene's own
+`const X = BEATS.map(b => b.x ?? DEFAULT)` rebuilt offline where a pose call actually
+stands someone on it, and otherwise the one constant his own `lookPose` or
+`reactPose` names, because 84 scenes declare a track that nobody stands on. That is
+where he stands while the reader reads,
 and on a still beat the two agree to within 13 units either way. Use the recorded BOX
 only for what does not move during a beat: his feet, and from those his skull.
 
@@ -5565,6 +5597,12 @@ them deliberate: `logic21` draws *A MATCH IN / PETROL* across two lines inside i
 chip and it reads perfectly. So the rule pairs the caption with the plate whose
 vertical span contains it and asks whether the wrapped lines fit between the
 caption's top and the plate's bottom.
+
+**And only with a plate at least as wide as the caption.** Every `top` is local to
+its own parent, so containment alone paired `aesthetics30`'s answer label, 7 down
+inside its target, with the kestrel's new wing arm, 0.5 down inside the bird, and
+reported the label cut into 5.5 units. A caption cannot sit on a plate narrower than
+itself, and a label that really does wrap off its plate is still caught.
 
 **A label that exactly fills its box has already failed.** 76.07 into 76 was
 swallowed by a 0.5px tolerance. Text measurement is not bit-identical across
@@ -7218,6 +7256,41 @@ The two that were done are the two where the drawn subject is in motion by natur
 `rotate` swings about the middle of the 400×560 design space and throws the ship
 off its own water. `transformOrigin` in px, at the waterline amidships.
 
+## Z9 · An animal is a part list, drawn as Views
+
+`Silhouette.tsx` draws every lesson animal from parts in its own units — `ell`,
+`rect`, `bar` and `tri` — taken from the reference's field marks (Z5). Twelve lessons'
+animals were redrawn that way, each judged on a sheet of every beat, and three rules
+came out of the drafts:
+
+- **An ellipse is a circle, scaled.** Android clamps a corner radius to half the short
+  side, so a wide oval drawn with one comes out a capsule.
+- **A triangle sits in a sized wrapper**, because a border triangle has a zero-size box
+  and turns about nothing (Z4).
+- **An outline is every part drawn once in the line colour, grown by the line's width,
+  and then every part again in the fill.** Parts that touch share one outline, where
+  outlining each part rules a seam across the body.
+
+**Never an `<Svg>`.** The must-box probe cannot see inside one, and the camera, the gaze
+and the bubbles are all built on what it records. `Silhouette.tsx` has no StyleSheet,
+so `scripts/lib/muststamp.mjs` hashes it WHOLE for every scene that imports it: any edit
+to it, a comment included, marks those lessons stale. That is right, because a change
+to how a part is sized resizes the animal in all of them.
+
+## Z10 · A reveal that takes parts away takes them in the order the lesson ranks them
+
+`aesthetics34` strips a bull down to its essential strokes, and for the life of the
+lesson it stripped them backwards. Each stroke's fade began at `1 − KEEP`, so the back
+line and the horns — the strokes the lesson says survive — went FIRST, and a reader
+watched the bull lose exactly what the words said it keeps. It fades by rank now:
+`START` comes from `KEEP`, the eight weakest strokes go one after another, and the
+back, the near horn and the head never go.
+
+**Nothing counted could have seen it.** Every stroke faded and every number was in
+range. Watching every step of the redraw did. A reveal that removes, adds or re-orders
+parts is judged on `npm run sheet:beats <id>`, against the sentence that says which
+parts matter.
+
 ---
 
 ## Group AA — what the figure wears, and what he does when you answer
@@ -7666,8 +7739,12 @@ fully clear spot and only spends the licence when it must.
   leaves 48 units between its VALID MEANS block and his crown where a box and a
   full trail need 62. Shortening the trail is a smaller loss than showing nothing,
   and it is worth another eight lessons.
-- **The gap to his crown.** Minimising it is what makes the bubble read as HIS.
-  Median 4 units.
+- **The gap to his crown.** Near is what makes the bubble read as HIS, and touching is
+  what makes it read as part of him. At four units the smallest disc of
+  `aesthetics-aesthetics-7` and `logic-arguments-21` came to rest on his cap, a paper
+  ring pressed into ink that reads as the trail running behind his head. The tail
+  sits at least `CLEAR_MIN` (10) units clear of his head or his hat and at most 20,
+  and `check:thoughts` reads the number out of `make:thoughts` rather than repeating it.
 
 ### AB4 · The trade is scored, not nested
 
@@ -7690,8 +7767,9 @@ which a scene need not pass. Where it was missing the bubble fell back to the
 middle of the stage and landed across `logic-arguments-5`'s PREMISE plate. The
 placement was correct and was applied in a different coordinate system.
 
-The table stores absolute stage coordinates now, measured out of `mustBoxes` and
-applied unchanged.
+The table stores absolute stage coordinates now, measured out of `mustBoxes`. The
+player applies them unchanged on a beat where he stands still; while he walks, the
+box rides his live x and lands on the measured spot as he arrives.
 
 ### AB6 · Round before you validate, not after
 
@@ -7767,9 +7845,12 @@ They were, and the height was measured against the wrong thing **twice over**:
   `ethics-ethics-6` draws twenty-five. Taking the union anchored his thought on
   the top of the tallest person on stage — 148 units above his own head. Mount
   order cannot break the tie either: that is PAINT order, and `check:nod` already
-  records a two-figure scene mounting its lead LAST. What settles it is the track
-  the RUNTIME uses — every scene passes `walk={X}` and the player derives the live
-  figure x from that same array, so the box his x lands in is his.
+  records a two-figure scene mounting its lead LAST. What settles it is where he
+  stands: `walkOf` reads the scene's `X` track where a pose call stands someone on it,
+  and otherwise the constant his own `lookPose` or `reactPose` names (84 scenes
+  declare a track nobody stands on). The box his x lands in is his, and where it
+  lands in none, the nearest box still gives his feet (`crownOf`, in
+  `scripts/lib/scenefig.mjs`).
 - **A BOX TOP IS NOT A SKULL.** The box is the union of his LIMB Views, so a beat
   where he lifts a hand, points, or wears a hat reports a top a **median of
   fourteen units** above his head and as much as ninety. Hung four units above
@@ -7777,7 +7858,8 @@ They were, and the height was measured against the wrong thing **twice over**:
 
 Measured against his real head — `skullRise` poses the beat's own move code in
 plain Node — the shipped table sat a **median 21 units clear of it, p90 48**.
-Anchored on the head it is **median 4, p90 4, worst 20**.
+Anchored on the head, every one of 595 placed bubbles sits between `CLEAR_MIN` (10)
+and 20 units clear of it, median 10 (AB3).
 
 **A raised arm through the bubble is not a fault.** The bubble is drawn after the
 scene, so it is in front, and an arm crossing a balloon is what every comic has
@@ -7837,9 +7919,10 @@ where he lands: the box crosses a third of the stage away from the man it belong
 to, and the follow rule reported it keeping 13% of his travel.
 
 **The trail sets the limit, and it is geometry rather than taste.** `Thought`
-leans the trail back toward his head and clamps that lean to `half - 14` — so past
-about 51 units the trail is hard against its stop and no longer points at him. The
-bubble stops being his and becomes a caption that happens to be nearby.
+leaned the trail back toward his head and clamped that lean to `half - 14`, so past
+about 51 units the trail was hard against its stop and no longer pointed at him. The
+bubble stops being his and becomes a caption that happens to be nearby. The trail is
+a chain now (AB13), and the limit is stated once, as `THINK_DRIFT` (51).
 
 Nine thoughts of 339 sat beyond 40 units and five beyond 51, so **declining them
 costs almost nothing** — which is the licence AB9's rationing keeps buying: with
@@ -7886,6 +7969,59 @@ component up, so an unanchored pattern answered 20 where the truth was 14 — an
 then the discs began fanning and there was no single clamp left to read. A number
 two files depend on is written down once.
 
+### AB14 · The stage is measured with the bubbles off
+
+The player draws thoughts and answer lines inside `#stage-clip`, so a probe reading the
+stage records a live bubble as words and art. Re-measuring the redrawn animals brought
+rows back with *"The fat, relentless ego."* written on them — the lesson's own thought.
+**29 of 246 lessons** had their bubble on file, some with several lines from when a
+thought sat on nearly every beat, and every table built from those boxes steered round
+a ghost: the camera framed it, the gaze looked at it, and `make:thoughts` placed the
+next bubble clear of where the last one had been — a generator reading its own output.
+
+`measure-must.mjs` sets `setThoughtsOff(true)` from `tourFlag.ts` unconditionally, as it
+turns the tour off, and the player draws no bubble while it is set. **Any new harness
+that writes stored boxes sets it too.** No stamp can see this rule broken — the probe
+does not change, only what is on the stage while it reads — so the evidence is a
+must-box row carrying words the scene never draws, and this note is the whole of the
+enforcement (U2).
+
+### AB15 · A bubble sits inside the shot the camera actually holds
+
+A beat with no tour of its own that is not a question does not move the camera: the
+player keeps the shot it was drawing. So `make:thoughts` places a bubble against the
+frame the last moving beat LEFT, not against the beat's own resting frame.
+`epistemology-knowledge-7` hung beat 1's thought for a wide shot while the camera sat
+pushed in from beat 0, 136 pixels off the picture. On a toured beat the player holds
+the bubble back until its station has arrived, so it never appears over a frame that
+is still travelling.
+
+**The camera is never moved to make room.** A bubble that would be cut is not shown,
+which reads as him listening; one sliced by the frame reads as a fault. `npm run
+check:bubble` measures the result in a browser.
+
+### AB16 · What the probe cannot see, the placement reads from the source
+
+The must-box probe records figures, words of two or more characters and painted Views
+(H60c). Four more things a bubble has to keep off were found in the render, and each
+is read from the scene or the component instead:
+
+- **A one-character mark** — a "?", a row's "3", an arrow. `glyphBoxesOf` reads them out
+  of the scene, and every word is padded by `GLYPH_SLOT` either side.
+- **A seal**, the ✓ or ✕ an answer strikes on a corner. `sealsOf` finds its corner on
+  every small labelled plate AND on every live `Target`, whose box comes back exactly
+  from the halo and pip the probe records on the beat being asked. The first rule
+  looked at small plates only, and `aesthetics-aesthetics-18`'s answers are 130×92
+  panels: nine answer lines in seven lessons sat on a seal it could not see.
+- **An answer that moves the figure.** `ANSWER_LIFT` holds the one scene that raises
+  its lead as the answer lands.
+- **The face.** A bubble is measured in the font its style names, so a style set in a
+  face the root layout never loads is measured in one font and drawn in another. The
+  answer line did exactly that. `check:thoughts` fails a face `app/_layout.tsx` does
+  not load.
+
+`npm run check:thoughts` re-derives all four offline.
+
 ### N15 · The first living shelf gets its arms — and the boxes get the bill
 
 Rule 1b has said since it was written that acts 59–78 hang the hands at x ±6,
@@ -7912,7 +8048,7 @@ All nine are out at 13–17 now. Two were not a simple move:
   coming up to a shoulder actually does.
 
 **AND THE BILL IS PAID ARITHMETICALLY, NOT WITH A BROWSER.** `muststamp` hashes the
-scene, the script and the probe; `moves.ts` is none of the three, so a wider act
+scene, the script, the probe and two shared components; `moves.ts` is none of them, so a wider act
 leaves every stored box holding it silently too small and nothing goes red.
 `make:wardrobe` now grows those boxes the same way it grows them for a costume,
 recording what it applied so a second run is a no-op — 903 boxes in 145 lessons,
@@ -7963,9 +8099,10 @@ cane, three the monocle, and three are a hat on its own.
 
 **Decided on 11 Sep 2026:** every lesson's narration will be spoken by Google's
 Chirp 3 HD voice — Algieba, British English — on by default and mutable, with **each
-word appearing on screen as the voice reaches it**. The audio pipeline is still being
-built; the rules apply now, because a lesson written today is the one that voice will
-read. That changes what a sentence is for.
+word's letters rising on screen as the voice reaches it**. Forty-four lessons speak
+today, the whole first unit of every branch and `ethics-ethics-9`; the rules apply to
+every lesson now, because a lesson written today is the one that voice will read.
+That changes what a sentence is for.
 It is heard once, with no going back, at about 155 words a minute against the 238
 an adult reads silently; and every word the reader sees has to be a word the voice
 says, or the reveal and the voice come apart.
@@ -8011,7 +8148,7 @@ All four are zeros in `check:ear`.
 
 ### AC2 · A beat holds whole sentences, and its quotation marks close inside it
 
-Each beat becomes its own audio clip, and a clip ends on a sentence's final fall.
+Each spoken beat becomes its own clip, and a clip ends on a sentence's final fall.
 So `Not "what do I do?` on one tap and `but "who am I becoming?` on the next is
 heard as two sentences, the second starting with "but".
 
@@ -8134,11 +8271,14 @@ pronunciation belongs in the voice's own list (Chirp 3 HD takes IPA through
 J5 said a sentence that sounds wrong said aloud is wrong on the page. It will
 literally be said aloud, by a voice that never stumbles to warn you: it stresses the
 wrong word, reads "read" in the wrong tense and a name in the wrong language, all in
-the same even tone. Until the audio exists, read every beat aloud in a flat voice.
-Once it exists, listen with eyes closed once and reading along once, and keep the
-words it got wrong for the pronunciation list.
+the same even tone. In a lesson not yet voiced, read every beat aloud in a flat
+voice. In a voiced one, listen to every new take with eyes closed once and reading
+along once, and keep the words it got wrong for the pronunciation list.
 
-Not countable.
+**The half that can be counted now is.** `check:narration` hears a burst, a clipped
+take, a stall and a take the wrong length for its words (AC13). It cannot hear a
+garble without a burst, a stress in the wrong place or a name read in the wrong
+language, and nothing but listening can.
 
 ### AC12 · What the first round of advice got wrong, recorded so it is not re-proposed
 
@@ -8154,6 +8294,96 @@ Four suggestions sound right and were checked against the evidence first:
 - **"Vary sentence length — human writing is bursty."** Burstiness is a detector's
   term for how predictable text is, not sentence length, and GPTZero stopped
   relying on it. The corpus already runs from two words to twenty (AD8).
+
+### AC13 · A take is measured before it ships, and a broken one is rendered again
+
+> *"there is, like, a loud sound, and then the voice becomes extremely distorted and
+> sounds quite bad."*
+
+Not quite halfway through `metaphysics-being-4`, beat 4's clip carried a quarter-second
+burst at 5.25 seconds — 2,502 samples pinned at full scale, in runs up to 48 long — and
+the speech after it was smeared into noise. The player had played exactly what Google
+sent. Chirp 3 HD never renders a line the same way twice, so a broken take is bad luck,
+and nothing between the render and the phone had ever measured one.
+
+**Measured across all 402 lines, it was the only one.** A good take touches the ceiling
+for at most 4 samples running, with at most 16 clipped samples in any 50 ms, and its
+loudest 50 ms averages −7.3 dBFS at worst, because speech is peaks and valleys. The
+broken take ran 48, put 842 inside 50 ms, and averaged −1.1. `npm run check:narration`
+holds every line to limits set well clear of both — `MAX_CLIP_RUN`,
+`MAX_CLIPS_IN_50MS` and `BURST_DBFS` — plus a pace band for its words (`PACE_MIN`,
+`PACE_MAX`), which catches a take that lost or repeated words or belongs to another
+line, and `MAX_PAUSE_S` and `MAX_EDGE_SILENCE_S` for a stall. It prints the corpus's
+worst value beside every limit on every run, so the margins are read rather than
+remembered.
+
+- **A broken take is rendered again, never repaired.** Cutting a burst out leaves the
+  garbled speech the model made around it, and the word times are measured on that
+  WAV. The second take cost 153 characters and came back clean.
+- **A take comes into the app through `node scripts/install-narration.mjs <job> <dir>`**,
+  which judges every item before anything is copied. `make-narration` refuses the same
+  lines through the same function in `scripts/lib/narration.mjs`, so the generator and
+  the check cannot disagree about a line.
+- **Two spectral measures of garble were built and deleted.** Flatness over a stretch,
+  and its share of the loud frames, ranked the known-bad line 41st and 132nd; a metric
+  that disagrees with the answer already known is deleted, not believed (Part 3). A
+  take that garbles without a burst is still AC11's to hear.
+
+`node scripts/countertest-narration.mjs` stages each limit on its own and the burst a
+reader heard, and stays silent on a good take's own clipping: seventeen samples in runs
+of at most four.
+
+### AC14 · A clip says the words on screen, and a rewritten line is rendered again
+
+The manifest cannot tell you a clip still says its beat. `make-narration` copies a
+beat's CURRENT text into it and times the clip against that text, so a voiced beat
+rewritten and regenerated reveals letters for words the voice never says, while every
+other check agrees. Rewritten and not regenerated, it goes quietly silent: the player
+voices a line only when the manifest's text is the script's. Both are A1, read aloud.
+
+So `assets/narration/renders.json` records, for every installed WAV, the words it was
+rendered from and its SHA-256. `install-narration` writes it and nothing else does.
+`check:narration` fails **REWORDED** on a take rendered from words the beat has since
+lost, **RECORD** on a WAV that is not the take its record names or a take with no
+record, and **MANIFEST** on a manifest older than its script.
+
+**Editing a voiced beat is therefore four steps and a check:** render the new words
+through the character ledger, `install-narration`, `encode-narration`,
+`make-narration`, then `npm run check:narration`. The maxim (`check:focus`) and the name
+index (`make:names`) still follow the words as they always did.
+
+The 402 records written on 12 Sep 2026 were not assumed: each line's text was matched
+word for word to the render job that made it, and to a ledger entry of exactly its
+byte count.
+
+### AC15 · A clip is timed on its WAV and ships as the MP3 made from it
+
+Chirp 3 HD returns no word timings and never renders a line the same way twice — one
+came back at 2.08 seconds and then 2.20 — so word times fit only the render they were
+measured on. The 24 kHz WAV is the master and stays in `assets/narration/`, where
+nothing requires it and so nothing bundles it. `FFMPEG=<path> node
+scripts/encode-narration.mjs` encodes each one to a 64 kbps mono MP3 carrying the WAV's
+SHA-256, and the app plays only those: 402 MP3s come to 15.8 MB where the WAVs are
+93.3 MB. `check:narration` fails **STALE MP3** on a WAV changed since its MP3 was made.
+
+The times are estimated from the clip's pauses, and a clause matching that gives any
+clause under 0.4 or over 2.5 times the line's own pace is thrown out for an even spread
+over the speech: a comma the voice reads straight through hands its pause to the next
+boundary, and every clause after it slides.
+
+### AC16 · In a voiced lesson, a beat's number is its clip's name
+
+A clip is `beat-NN`, the beat's index in its script. Inserting, removing or splitting a
+beat renumbers every beat after it, so every later clip is suddenly filed under
+another line's words — the same trap a hand-written shot list fell into when the J12
+splitter changed how many beats a lesson had. `check:narration` catches all three
+shapes: **REWORDED** for a clip under words it was not rendered from, **MISSING** for a
+spoken beat with no clip, and **NOT SPOKEN** for a clip left on a question, a quote or
+the summary. **ORPHAN** fails a record or a file no line plays.
+
+The cheap repair is to rename the later clips AND their records along with their beats
+— the record carries the words, so the check proves the rename right — and to render
+only the lines whose words actually changed.
 
 ---
 
