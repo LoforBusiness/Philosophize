@@ -4,9 +4,10 @@
 //   node scripts/make-narration.mjs
 //
 // Reads assets/narration/<lesson id>/beat-NN.wav and the lesson's script, and writes
-// lib/narration/manifest.ts. It never calls Google: the clips are rendered through
-// the character ledger (scripts/lib/ttsledger.mjs), and this only measures what was
-// rendered.
+// lib/narration/manifest.ts. Each beat plays the beat-NN.mp3 that
+// scripts/encode-narration.mjs made from its WAV; the WAV itself is never bundled. It
+// never calls Google: the clips are rendered through the character ledger
+// (scripts/lib/ttsledger.mjs), and this only measures what was rendered.
 //
 // WHAT IS SPOKEN is a beat's own `text`, the teaching line under the figure. A quote
 // beat, a question (its prompt and its explanation) and the summary card are not
@@ -20,31 +21,65 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ts = createRequire(import.meta.url)('typescript');
 const OUT = path.join(ROOT, 'lib', 'narration', 'manifest.ts');
+/** What an MP3 carries once it is encoded from a WAV. Mirrored in scripts/encode-narration.mjs. */
+const tagOf = (wav) => `wav-sha256:${crypto.createHash('sha256').update(wav).digest('hex')}`;
 
 /**
- * The narrated lessons, and the script each one plays: the first two of every branch
- * in reading order, and ethics-ethics-9, the first lesson narrated.
+ * The narrated lessons, and the script each one plays: the whole first unit of every
+ * branch, in reading order, and ethics-ethics-9, the first lesson narrated.
  */
 const LESSONS = {
   'logic-arguments-1': 'argumentScript.ts',
   'logic-arguments-2': 'builderScript.ts',
+  'logic-arguments-3': 'valid3Script.ts',
+  'logic-arguments-4': 'strong4Script.ts',
+  'logic-arguments-5': 'logic5Script.ts',
+  'logic-arguments-6': 'logic6Script.ts',
+  'logic-arguments-7': 'logic7Script.ts',
+  'logic-arguments-8': 'logic8Script.ts',
   'ethics-ethics-1': 'ethicsScript.ts',
   'ethics-ethics-2': 'ethics2Script.ts',
+  'ethics-ethics-3': 'ethics3Script.ts',
+  'ethics-ethics-4': 'ethics4Script.ts',
+  'ethics-ethics-5': 'ethics5Script.ts',
   'ethics-ethics-9': 'ethics9Script.ts',
   'epistemology-knowledge-1': 'epistemologyScript.ts',
   'epistemology-knowledge-3': 'epistemology2Script.ts',
+  'epistemology-knowledge-4': 'epistemology4Script.ts',
+  'epistemology-knowledge-5': 'epistemology5Script.ts',
+  'epistemology-knowledge-6': 'epistemology6Script.ts',
+  'epistemology-knowledge-7': 'epistemology7Script.ts',
+  'epistemology-knowledge-8': 'epistemology8Script.ts',
+  'epistemology-knowledge-9': 'epistemology9Script.ts',
+  'epistemology-knowledge-10': 'epistemology10Script.ts',
+  'epistemology-knowledge-2': 'knowHowScript.ts',
   'metaphysics-being-1': 'metaphysicsScript.ts',
   'metaphysics-being-2': 'metaphysics2Script.ts',
+  'metaphysics-being-3': 'metaphysics3Script.ts',
+  'metaphysics-being-4': 'metaphysics4Script.ts',
+  'metaphysics-being-5': 'metaphysics5Script.ts',
   'aesthetics-aesthetics-1': 'aestheticsScript.ts',
   'aesthetics-aesthetics-2': 'aesthetics2Script.ts',
+  'aesthetics-aesthetics-3': 'aesthetics3Script.ts',
+  'aesthetics-aesthetics-4': 'aesthetics4Script.ts',
+  'aesthetics-aesthetics-5': 'aesthetics5Script.ts',
+  'aesthetics-aesthetics-6': 'aesthetics6Script.ts',
+  'aesthetics-aesthetics-7': 'aesthetics7Script.ts',
+  'aesthetics-aesthetics-8': 'aesthetics8Script.ts',
+  'aesthetics-aesthetics-9': 'aesthetics9Script.ts',
+  'aesthetics-aesthetics-10': 'aesthetics10Script.ts',
   'political-political-1': 'politicalScript.ts',
   'political-political-2': 'political2Script.ts',
+  'political-political-3': 'political3Script.ts',
+  'political-political-4': 'political4Script.ts',
+  'political-political-5': 'political5Script.ts',
 };
 
 const FRAME_S = 0.01;
@@ -182,16 +217,33 @@ function wordStarts(samples, rate, text) {
     }
   }
 
+  // A matching can take the pauses in order and still be wrong. A comma the voice reads
+  // straight through leaves its pause to the next boundary, and every clause after it
+  // slides. So the matched clauses are held against the line's own pace, and a matching
+  // that gives any real clause under 0.4 or over 2.5 times it is dropped for the plain
+  // spread over the speech. Found on 11 Sep 2026: political-political-4 beat 6 had
+  // "or untaught to act." piled into the last 40ms of its clip.
+  let matched = null;
   if (chosen) {
+    matched = new Array(tokens.length).fill(first);
     let s0 = 0;
     phrases.forEach((ph, p) => {
       const s1 = p < chosen.length ? chosen[p] + 1 : segs.length;
-      for (const [k, at] of place(ph, segs.slice(s0, s1))) starts[k] = at;
+      for (const [k, at] of place(ph, segs.slice(s0, s1))) matched[k] = at;
       s0 = s1;
     });
-  } else {
-    for (const [k, at] of everywhere) starts[k] = at;
+    const linePace = (last + 1 - first) / tokens.reduce((n, w) => n + weight(w), 0);
+    const plausible = phrases.every((ph, p) => {
+      const w = ph.reduce((n, k) => n + weight(tokens[k]), 0);
+      if (w < 3) return true;
+      const to = p + 1 < phrases.length ? matched[phrases[p + 1][0]] : last + 1;
+      const ratio = (to - matched[ph[0]]) / w / linePace;
+      return ratio >= 0.4 && ratio <= 2.5;
+    });
+    if (!plausible) matched = null;
   }
+  if (matched) matched.forEach((at, k) => { starts[k] = at; });
+  else for (const [k, at] of everywhere) starts[k] = at;
 
   let prev = 0;
   return starts.map((f) => {
@@ -208,15 +260,23 @@ for (const [lessonId, scriptFile] of Object.entries(LESSONS)) {
   const entries = [];
   beats.forEach((b, i) => {
     if (!spoken(b)) return;
-    const rel = `assets/narration/${lessonId}/beat-${String(i).padStart(2, '0')}.wav`;
-    const abs = path.join(ROOT, rel);
-    if (!fs.existsSync(abs)) { console.log(`  MISSING ${rel}`); fails += 1; return; }
-    const { rate, samples } = readWav(abs);
+    const base = `assets/narration/${lessonId}/beat-${String(i).padStart(2, '0')}`;
+    const wavAbs = path.join(ROOT, `${base}.wav`);
+    const mp3Abs = path.join(ROOT, `${base}.mp3`);
+    if (!fs.existsSync(wavAbs)) { console.log(`  MISSING ${base}.wav`); fails += 1; return; }
+    // The app plays the MP3, and the word times are measured on the WAV. They must be
+    // one render, so an MP3 not encoded from this exact WAV is refused.
+    if (!fs.existsSync(mp3Abs) || !fs.readFileSync(mp3Abs).includes(tagOf(fs.readFileSync(wavAbs)))) {
+      console.log(`  STALE ${base}.mp3: missing, or not encoded from this WAV (run scripts/encode-narration.mjs)`);
+      fails += 1;
+      return;
+    }
+    const { rate, samples } = readWav(wavAbs);
     const dur = samples.length / rate;
     const words = wordStarts(samples, rate, b.text);
     const tokens = b.text.match(/\S+/g) || [];
-    if (words.length !== tokens.length) { console.log(`  FAIL ${rel}: ${words.length} times for ${tokens.length} words`); fails += 1; return; }
-    entries.push({ i, rel, dur, words, text: b.text });
+    if (words.length !== tokens.length) { console.log(`  FAIL ${base}.wav: ${words.length} times for ${tokens.length} words`); fails += 1; return; }
+    entries.push({ i, rel: `${base}.mp3`, dur, words, text: b.text });
     console.log(`  ${lessonId} beat ${i}  ${dur.toFixed(2)}s  ${tokens.map((w, k) => `${w}@${words[k].toFixed(2)}`).join(' ')}`);
   });
   blocks.push({ lessonId, entries });

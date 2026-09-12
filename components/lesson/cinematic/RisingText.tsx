@@ -64,8 +64,12 @@ interface Props {
 
 /** A stretch of one word that belongs to one run. */
 type Seg = { run: Run | undefined; from: number; to: number };
-/** A word, the runs inside it, and what kind of space follows it. */
-type Word = { from: number; to: number; segs: Seg[]; pid: string | null; space: 'none' | 'plain' | 'band' };
+/**
+ * A word, the runs inside it, and what kind of space follows it: none, an ordinary
+ * one, one inside a struck maxim (it carries the band), or one inside a name of more
+ * than one word (it carries the name's rule).
+ */
+type Word = { from: number; to: number; segs: Seg[]; pid: string | null; space: 'none' | 'plain' | 'band' | 'name' };
 
 /** A time no letter is still arriving at, in either direction. */
 const FAR = 1e6;
@@ -189,13 +193,16 @@ export default function RisingText({ text, runs, times, style, mode, startAt, on
       for (const s of segs) {
         if (s.run && s.run.kind === 'name') { pid = s.run.pid; break; }
       }
+      // A name run never ends on a space, so a space that belongs to one is inside it.
       const after = runAt[to];
       list.push({
         from,
         to,
         segs,
         pid,
-        space: m[2].length === 0 ? 'none' : after && after.kind === 'focus' ? 'band' : 'plain',
+        space: m[2].length === 0 ? 'none'
+          : after && after.kind === 'name' ? 'name'
+          : after && after.kind === 'focus' ? 'band' : 'plain',
       });
     }
     return list;
@@ -255,9 +262,13 @@ export default function RisingText({ text, runs, times, style, mode, startAt, on
                       {text.slice(s.from, s.to)}
                     </Text>
                   ))}
+                  {/* The space between two words of one name rises with the first of
+                      them and carries the name's rule, so "John Stuart Mill" is
+                      underlined as one name rather than as three. */}
+                  {w.space === 'name' ? <Text style={nameStyle(pid)}>{SPACE}</Text> : null}
                 </Text>
               </Piece>
-              {w.space !== 'none' ? space : null}
+              {w.space === 'plain' || w.space === 'band' ? space : null}
             </Pressable>
           );
         }

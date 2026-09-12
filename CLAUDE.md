@@ -1718,9 +1718,10 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     both play after the last beat. `HEARD` in `lib/feedback.ts` decides, the
     player schedules nothing that is not heard, and `check:sound` fails the build
     on a third sound. Every haptic stayed.
-  - **And thirteen lessons speak.** `ethics-ethics-9` ("When Both Choices Are
+  - **And forty-four lessons speak.** `ethics-ethics-9` ("When Both Choices Are
     Wrong") came first, then the first two lessons of every branch in reading
-    order. Each reads its teaching lines aloud: a beat's own `text`, never a quote,
+    order, then the rest of every branch's first unit. Each reads its teaching
+    lines aloud: a beat's own `text`, never a quote,
     a question or the summary. The clips are in `assets/narration/`, rendered
     through the character ledger, and `node scripts/make-narration.mjs` writes
     `lib/narration/manifest.ts`, estimating when each word starts from the clip's
@@ -1731,33 +1732,50 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     player, `logic-arguments-1` and `-2`, carry their own copy of those three
     effects and that button. A lesson missing from the manifest gets no voice, no
     button and no extra render, and so does the web.
-  - **The clips are WAV, and that is a cost to pay down before the corpus is
-    narrated.** Chirp 3 HD does not render a line the same way twice (one came back
-    at 2.08s and then 2.20s), so word times measured on a WAV do not fit a separate
-    MP3 render of the same text. An MP3's own frames cannot be timed either: at
-    32 kbps every granule is full, pauses included. With no audio encoder in the
-    repo, the clips ship as 16-bit 24 kHz PCM, 48 KB a second. Before many more
-    lessons get a voice, encode the measured WAV locally, so the times and the
-    audio come from one render.
+  - **The app ships MP3s encoded from the WAVs the times were measured on.** Chirp 3
+    HD does not render a line the same way twice (one came back at 2.08s and then
+    2.20s), so word times measured on a WAV do not fit a separate MP3 render of the
+    same text, and an MP3's own frames cannot be timed: at 32 kbps every granule is
+    full, pauses included. So the WAV is the master and stays in the repo, and
+    `FFMPEG=<path> node scripts/encode-narration.mjs` encodes each one locally to a
+    64 kbps mono MP3 that carries the WAV's SHA-256. `make-narration` refuses an MP3
+    whose WAV has changed, and the manifest requires only MP3s, so no narration WAV
+    is bundled: a real Android export ships 402 MP3s in 15.8 MB where the WAVs are
+    93.3 MB. Every MP3 decodes to exactly its WAV's length with no shift, so the
+    times still land. ffmpeg is not a dependency; point `FFMPEG` at any build with
+    libmp3lame.
+  - **A clause matched to the wrong pause is thrown out.** The estimator gives each
+    clause boundary the nearest pause, in order, and a comma the voice reads straight
+    through leaves its pause to the next boundary. In `political-political-4` beat 6
+    that piled "or untaught to act." into the clip's last 40ms. A matching that gives
+    any clause under 0.4 or over 2.5 times the line's own pace now falls back to an
+    even spread over the speech. Across 402 lines that changed exactly two, both
+    newly narrated, and none of the lines already heard.
   - **And the letters rise, in every narrated lesson.** Asked for once the narrated
     lessons had been heard: each letter fades in while it rises a third of the type's
     size, and a word's letters start in turn across half the time the voice spends on
     it, so a quick word is a quick ripple. `logic-arguments-1` and `ethics-ethics-1`
-    tried it first, and the same day it went to all thirteen, which left the word
-    fade it replaced with nothing to draw, so the fade is gone. A span cannot move on
-    Android, so `RisingText` draws every letter as its own `Animated.Text` in a
+    tried it first, and the same day it went to every narrated lesson, which left the
+    word fade it replaced with nothing to draw, so the fade is gone. A span cannot
+    move on Android, so `RisingText` draws every letter as its own `Animated.Text` in a
     wrapping row of words, kept for the paragraph's whole life so it never reflows,
     and one frame callback per paragraph drives every letter from the moment the voice
     started, with nothing re-rendering while it plays. A contact sheet of the real
     component caught the one thing that did not work: a maxim's band and a name's
     underline, carried on each letter, came out stepped as the letters rose. The band
-    is laid under the letters now, and a name rises as one piece. `letterTimes` and
-    `letterFrame` in `lib/narration/reveal.ts` hold the timing, with no imports.
+    is laid under the letters now, and a name rises as one piece. A name of more than
+    one word is one piece a word, so the space inside it carries the name's rule and
+    rises with the word before it; without that, "John Stuart Mill" would be
+    underlined as three names. `letterTimes` and `letterFrame` in
+    `lib/narration/reveal.ts` hold the timing, with no imports.
   - **A row of letters does not break lines exactly as text does, and cannot.**
-    Drawn through `NarrationText` in a browser, all 128 spoken lines read the same
-    words and names as a plain paragraph, and nothing sticks out sideways. But 4 of
-    them take one line more in a 390-wide phone's 342-point deck, and 7 in the
-    narrowest phone's 272. Measured on the lines that broke early, three things cost
+    Drawn through `NarrationText` in a browser, the first 128 spoken lines read the
+    same words and names as a plain paragraph, and nothing sticks out sideways. But 4
+    of them take one line more in a 390-wide phone's 342-point deck, and 7 in the
+    narrowest phone's 272. The 274 lines the rest of the first units added came out
+    the same way, 10 of them a line taller at 342, so 14 of 402 in all; a name of
+    several words counts there as one tap target a word. Measured on the lines that
+    broke early, three things cost
     the width: each word carries its 4.5-point trailing space, which text lets hang
     past the margin; letters drawn apart lose their kerning, up to about a point a
     word; and text can break after a hyphen, where a whole word cannot. The kerning
