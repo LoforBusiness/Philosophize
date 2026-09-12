@@ -892,6 +892,12 @@ Both are required. Get them from your Supabase project → Settings → API.
    `npm run make:names` (the deck colours philosopher names off a generated
    index, and a new lesson naming somebody is invisible to it until you do) and
    `npm run check`
+9. Give it its voice (LESSON_RULES AC17): add it to `LESSONS` in
+   `scripts/lib/narration.mjs`, render its spoken beats through the character
+   ledger, `node scripts/install-narration.mjs <job> <dir>`, then
+   `FFMPEG=<path> node scripts/encode-narration.mjs` and
+   `node scripts/make-narration.mjs`. Every lesson in the app speaks, and
+   `check:narration` fails **UNVOICED** until this one does.
 
 **Where a lesson lands changes what it means.** Units are contiguous slices of a
 branch in teaching order, and `lessonsByUnit` counts completions **by position**.
@@ -1710,8 +1716,8 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
   Decided 11 Sep 2026: every narration beat will be read by Google's Chirp 3 HD
   voice (Algieba, British English), on by default and mutable, with each word
   appearing on screen as the voice reaches it. The writing had to change first,
-  because a lesson written today is the one that voice will read, and eighty-five
-  lessons speak now (below). So a sentence is heard once with no going back, and
+  because a lesson written today is the one that voice will read, and every lesson
+  speaks now (below). So a sentence is heard once with no going back, and
   every word on screen has to be a word the voice says. **Groups AC and AD** of the
   rule book are the result, researched before a line changed — broadcast writing
   for the ear, Google's own Chirp documentation, the multimedia-learning evidence,
@@ -1757,33 +1763,37 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     both play after the last beat. `HEARD` in `lib/feedback.ts` decides, the
     player schedules nothing that is not heard, and `check:sound` fails the build
     on a third sound. Every haptic stayed.
-  - **And eighty-five lessons speak.** `ethics-ethics-9` ("When Both Choices Are
+  - **And every lesson speaks, all 246.** `ethics-ethics-9` ("When Both Choices Are
     Wrong") came first, then the first two lessons of every branch in reading
     order, then the rest of every branch's first unit, then every branch's second
-    unit. Each reads its teaching
+    unit, and then the other 161 lessons at once. Each reads its teaching
     lines aloud: a beat's own `text`, never a quote,
-    a question or the summary. The clips are in `assets/narration/`, rendered
-    through the character ledger, and `node scripts/make-narration.mjs` writes
-    `lib/narration/manifest.ts`, estimating when each word starts from the clip's
-    pauses because Chirp 3 HD returns no word timings. `NarrationText` reveals the
-    line on that estimate, the player plays a line when its paragraph swaps in
-    and cuts it on a tap, and a speaker button in a narrated lesson's header writes
-    `settings.narration` (on by default). The two lessons older than the shared
-    player, `logic-arguments-1` and `-2`, carry their own copy of those three
-    effects and that button. A lesson missing from the manifest gets no voice, no
-    button and no extra render, and so does the web.
-  - **The app ships MP3s encoded from the WAVs the times were measured on.** Chirp 3
-    HD does not render a line the same way twice (one came back at 2.08s and then
-    2.20s), so word times measured on a WAV do not fit a separate MP3 render of the
-    same text, and an MP3's own frames cannot be timed: at 32 kbps every granule is
-    full, pauses included. So the WAV is the master and stays in the repo, and
-    `FFMPEG=<path> node scripts/encode-narration.mjs` encodes each one locally to a
-    64 kbps mono MP3 that carries the WAV's SHA-256. `make-narration` refuses an MP3
-    whose WAV has changed, and the manifest requires only MP3s, so no narration WAV
-    is bundled: the 710 MP3s come to 27.5 MB where their WAVs are 162.1 MB (a real
-    Android export shipped the first 402 in 15.8 MB). Every MP3 decodes to exactly its
-    WAV's length with no shift, so the times still land. ffmpeg is not a dependency;
-    point `FFMPEG` at any build with libmp3lame.
+    a question or the summary, 1,718 lines in all. The WAV masters are in
+    `assets/narration/`, rendered through the character ledger, and `node
+    scripts/make-narration.mjs` writes `lib/narration/manifest.ts`, estimating when
+    each word starts from the line's pauses because Chirp 3 HD returns no word
+    timings. `NarrationText` reveals the line on that estimate, the player plays a
+    line when its paragraph swaps in and cuts it on a tap, and a speaker button in a
+    narrated lesson's header writes `settings.narration` (on by default). The two
+    lessons older than the shared player, `logic-arguments-1` and `-2`, carry their
+    own copy of those three effects and that button. `check:narration` fails
+    **UNVOICED** on any lesson the app can open that is missing from its table
+    (LESSON_RULES AC17), so a new lesson ships with its voice. The web stays silent.
+  - **A lesson ships ONE audio file, because EAS Update takes at most 1,000 assets in
+    an update.** Narration shipped a clip a line until 85 lessons had put 710 clips
+    into an update of 809 assets, and the whole library is 1,718 lines, which could
+    never have been published. Chirp 3 HD does not render a line the same way twice
+    (one came back at 2.08s and then 2.20s), so word times fit only the WAV they were
+    measured on, and that WAV stays in the repo as the master: 1,718 of them, 385.5 MB,
+    none bundled. `FFMPEG=<path> node scripts/encode-narration.mjs` lays a lesson's
+    lines end to end, 0.4s of silence apart (`GAP_S`), and encodes them once as a
+    64 kbps mono `lesson.mp3` whose ID3 comment lists every line's WAV hash and
+    offset. The manifest gives each line an `at`, and `lib/narration/real.ts` seeks
+    there and pauses at the line's end, so a pause that lands late lands in the
+    silence. 246 files come to 69.0 MB, and a real Android export bundles 364 assets.
+    Decoded, every line sits exactly on its start, and the 710 lines already heard kept
+    their word times to the hundredth. ffmpeg is not a dependency; point `FFMPEG` at
+    any build with libmp3lame.
   - **A clause matched to the wrong pause is thrown out.** The estimator gives each
     clause boundary the nearest pause, in order, and a comma the voice reads straight
     through leaves its pause to the next boundary. In `political-political-4` beat 6
@@ -1811,12 +1821,14 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     new letters. Two spectral measures of garble were built and deleted, because
     neither ranked the known-bad line first, so a garble without a burst is still
     AC11's to hear. `node scripts/countertest-narration.mjs` puts 22 defects back and
-    stays silent on a good take's own clipping. Rules AC13–AC16. **It caught the next
-    one the same day, before any reader could.** Of the 308 takes for the second units,
-    the door refused `ethics-ethics-8` beat 9, a 200 ms burst where "Carol" should
-    start. Asked again for the same words with the same settings, Google sent back that
-    broken take byte for byte, so a retake has to be a different request: stating the
-    default sample rate outright changed no word and no format, and came back clean.
+    stays silent on a good take's own clipping. Rules AC13–AC17. **It caught three more
+    the same day, before any reader could.** Of the 1,316 takes rendered after the first
+    402, the door refused `ethics-ethics-8` beat 9, `political-political-12` beat 2 and
+    `political-political-16` beat 4, each one a blast on the first word after a
+    sentence-ending pause. Asked again for the same words with the same settings, Google
+    sends back the same broken bytes, so a retake has to be a request it has not seen:
+    the default sample rate stated outright was new enough twice, and the third needed a
+    speaking rate of 0.99.
   - **And the letters rise, in every narrated lesson.** Asked for once the narrated
     lessons had been heard: each letter fades in while it rises a third of the type's
     size, and a word's letters start in turn across half the time the voice spends on
@@ -1840,9 +1852,10 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     of them take one line more in a 390-wide phone's 342-point deck, and 7 in the
     narrowest phone's 272. The 274 lines the rest of the first units added came out
     the same way, 10 of them a line taller at 342, so 14 of 402 in all. The 308 lines
-    of the second units did too: 18 a line taller at 342 and 19 at 272, the same words
-    and names, nothing sideways, and no paragraph taller than the ones before. A name of
-    several words counts there as one tap target a word. Measured on the lines that
+    of the second units did too, 18 a line taller at 342 and 19 at 272, and so did the
+    1,008 lines of the other 161 lessons, 52 at 342 and 51 at 272. Every one read the
+    same words and names, nothing stuck out sideways, and no paragraph came out taller
+    than the ones before. A name of several words counts there as one tap target a word. Measured on the lines that
     broke early, three things cost
     the width: each word carries its 4.5-point trailing space, which text lets hang
     past the margin; letters drawn apart lose their kerning, up to about a point a
@@ -4020,6 +4033,13 @@ the allowance a build queues or is refused, never billed.
    when nobody is touching the tree. If they are, either wait, or ask them to
    stop and confirm before you start — a five-minute publish window is long
    enough for a whole feature to land in it.
+4. **An update carries at most 1,000 assets.** EAS Update refuses more (Expo's own
+   note, `expo/fyi` eas-update-asset-limits), and nothing in this repo warned before
+   it mattered: narration shipped a clip a line until 85 lessons had put 710 clips into
+   an update of 809 assets. It ships one file a lesson now (LESSON_RULES AC15), and a
+   real Android export bundles 364. `eas update` prints the count as `Assets (N)`,
+   listing each asset twice. Anything that adds a file per something numerous is
+   counted against this before it is built.
 
 ---
 

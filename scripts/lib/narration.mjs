@@ -1,11 +1,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// NARRATION, SHARED: WHICH LESSONS SPEAK, WHAT EACH BEAT SAYS, AND WHETHER A CLIP IS
-// FIT TO SHIP.
+// NARRATION, SHARED: WHICH LESSONS SPEAK, WHAT EACH BEAT SAYS, WHERE EACH LINE SITS IN
+// ITS LESSON'S AUDIO, AND WHETHER A TAKE IS FIT TO SHIP.
 //
 // scripts/install-narration.mjs takes a render into assets, scripts/encode-narration.mjs
-// makes the MP3s, scripts/make-narration.mjs writes the manifest and
+// makes each lesson's MP3, scripts/make-narration.mjs writes the manifest and
 // scripts/check-narration.mjs holds all of it in `npm run check`. All four read this
-// file, so one table, one reading of a WAV and one set of limits serve them all.
+// file, so one table, one reading of a WAV, one layout and one set of limits serve them
+// all.
 //
 // WHY A CLIP IS MEASURED AT ALL. On 12 Sep 2026 a reader heard, part way through
 // metaphysics-being-4, "a loud sound, and then the voice becomes extremely distorted".
@@ -15,6 +16,11 @@
 // broken take is bad luck, and nothing between the render and the phone had measured
 // one. The fix was a second take of the same words. The limits below make the next
 // broken take a build error instead of something a reader finds.
+//
+// WHY A LESSON SHIPS AS ONE FILE. EAS Update takes at most 1,000 assets in one update.
+// With a clip a line, the first 85 lessons had already put 710 narration clips into an
+// update of 809 assets, and the whole library is 1,718 lines. So each line stays a WAV
+// master here, and a lesson ships one MP3 with its lines laid end to end (layoutOf).
 // ─────────────────────────────────────────────────────────────────────────────
 import fs from 'node:fs';
 import path from 'node:path';
@@ -28,10 +34,10 @@ export const MANIFEST = path.join(ROOT, 'lib', 'narration', 'manifest.ts');
 const SCRIPTS = path.join(ROOT, 'components', 'lesson', 'cinematic');
 
 /**
- * The narrated lessons, and the script each one plays: the first two units of every
- * branch, in reading order. ethics-ethics-9 was the first lesson narrated, a day before
- * the rest of its unit. A lesson added here needs its lines rendered and installed
- * before make-narration will run.
+ * The narrated lessons, and the script each one plays: every lesson in the app, each
+ * branch in reading order. A lesson added here needs its lines rendered and installed
+ * before make-narration will run, and check:narration fails on a lesson the app can open
+ * that is missing from this table.
  */
 export const LESSONS = {
   'logic-arguments-1': 'argumentScript.ts',
@@ -49,6 +55,32 @@ export const LESSONS = {
   'logic-arguments-13': 'logic13Script.ts',
   'logic-arguments-14': 'logic14Script.ts',
   'logic-arguments-32': 'logic32Script.ts',
+  'logic-arguments-15': 'logic15Script.ts',
+  'logic-arguments-16': 'logic16Script.ts',
+  'logic-arguments-17': 'logic17Script.ts',
+  'logic-arguments-18': 'logic18Script.ts',
+  'logic-arguments-19': 'logic19Script.ts',
+  'logic-arguments-20': 'logic20Script.ts',
+  'logic-arguments-31': 'logic31Script.ts',
+  'logic-arguments-21': 'logic21Script.ts',
+  'logic-arguments-22': 'logic22Script.ts',
+  'logic-arguments-23': 'logic23Script.ts',
+  'logic-arguments-24': 'logic24Script.ts',
+  'logic-arguments-25': 'logic25Script.ts',
+  'logic-arguments-26': 'logic26Script.ts',
+  'logic-arguments-27': 'logic27Script.ts',
+  'logic-arguments-28': 'logic28Script.ts',
+  'logic-arguments-29': 'logic29Script.ts',
+  'logic-arguments-30': 'logic30Script.ts',
+  'logic-arguments-33': 'logic33Script.ts',
+  'logic-arguments-34': 'logic34Script.ts',
+  'logic-arguments-35': 'logic35Script.ts',
+  'logic-arguments-36': 'logic36Script.ts',
+  'logic-arguments-37': 'logic37Script.ts',
+  'logic-arguments-38': 'logic38Script.ts',
+  'logic-arguments-39': 'logic39Script.ts',
+  'logic-arguments-40': 'logic40Script.ts',
+  'logic-arguments-41': 'logic41Script.ts',
   'ethics-ethics-1': 'ethicsScript.ts',
   'ethics-ethics-2': 'ethics2Script.ts',
   'ethics-ethics-3': 'ethics3Script.ts',
@@ -59,6 +91,37 @@ export const LESSONS = {
   'ethics-ethics-8': 'ethics8Script.ts',
   'ethics-ethics-9': 'ethics9Script.ts',
   'ethics-ethics-10': 'ethics10Script.ts',
+  'ethics-ethics-11': 'ethics11Script.ts',
+  'ethics-ethics-12': 'ethics12Script.ts',
+  'ethics-ethics-13': 'ethics13Script.ts',
+  'ethics-ethics-14': 'ethics14Script.ts',
+  'ethics-ethics-15': 'ethics15Script.ts',
+  'ethics-ethics-16': 'ethics16Script.ts',
+  'ethics-ethics-17': 'ethics17Script.ts',
+  'ethics-ethics-18': 'ethics18Script.ts',
+  'ethics-ethics-19': 'ethics19Script.ts',
+  'ethics-ethics-20': 'ethics20Script.ts',
+  'ethics-ethics-21': 'ethics21Script.ts',
+  'ethics-ethics-22': 'ethics22Script.ts',
+  'ethics-ethics-23': 'ethics23Script.ts',
+  'ethics-ethics-24': 'ethics24Script.ts',
+  'ethics-ethics-25': 'ethics25Script.ts',
+  'ethics-ethics-26': 'ethics26Script.ts',
+  'ethics-ethics-27': 'ethics27Script.ts',
+  'ethics-ethics-28': 'ethics28Script.ts',
+  'ethics-ethics-29': 'ethics29Script.ts',
+  'ethics-ethics-30': 'ethics30Script.ts',
+  'ethics-ethics-31': 'ethics31Script.ts',
+  'ethics-ethics-32': 'ethics32Script.ts',
+  'ethics-ethics-33': 'ethics33Script.ts',
+  'ethics-ethics-34': 'ethics34Script.ts',
+  'ethics-ethics-35': 'ethics35Script.ts',
+  'ethics-ethics-36': 'ethics36Script.ts',
+  'ethics-ethics-37': 'ethics37Script.ts',
+  'ethics-ethics-38': 'ethics38Script.ts',
+  'ethics-ethics-39': 'ethics39Script.ts',
+  'ethics-ethics-40': 'ethics40Script.ts',
+  'ethics-ethics-41': 'ethics41Script.ts',
   'epistemology-knowledge-1': 'epistemologyScript.ts',
   'epistemology-knowledge-3': 'epistemology2Script.ts',
   'epistemology-knowledge-4': 'epistemology4Script.ts',
@@ -74,6 +137,32 @@ export const LESSONS = {
   'epistemology-knowledge-14': 'epistemology14Script.ts',
   'epistemology-knowledge-15': 'epistemology15Script.ts',
   'epistemology-knowledge-13': 'epistemology13Script.ts',
+  'epistemology-knowledge-16': 'epistemology16Script.ts',
+  'epistemology-knowledge-17': 'epistemology17Script.ts',
+  'epistemology-knowledge-18': 'epistemology18Script.ts',
+  'epistemology-knowledge-19': 'epistemology19Script.ts',
+  'epistemology-knowledge-20': 'epistemology20Script.ts',
+  'epistemology-knowledge-22': 'epistemology22Script.ts',
+  'epistemology-knowledge-23': 'epistemology23Script.ts',
+  'epistemology-knowledge-24': 'epistemology24Script.ts',
+  'epistemology-knowledge-25': 'epistemology25Script.ts',
+  'epistemology-knowledge-21': 'epistemology21Script.ts',
+  'epistemology-knowledge-31': 'epistemology31Script.ts',
+  'epistemology-knowledge-26': 'epistemology26Script.ts',
+  'epistemology-knowledge-27': 'epistemology27Script.ts',
+  'epistemology-knowledge-28': 'epistemology28Script.ts',
+  'epistemology-knowledge-29': 'epistemology29Script.ts',
+  'epistemology-knowledge-30': 'epistemology30Script.ts',
+  'epistemology-knowledge-32': 'epistemology32Script.ts',
+  'epistemology-knowledge-33': 'epistemology33Script.ts',
+  'epistemology-knowledge-34': 'epistemology34Script.ts',
+  'epistemology-knowledge-35': 'epistemology35Script.ts',
+  'epistemology-knowledge-36': 'epistemology36Script.ts',
+  'epistemology-knowledge-37': 'epistemology37Script.ts',
+  'epistemology-knowledge-38': 'epistemology38Script.ts',
+  'epistemology-knowledge-39': 'epistemology39Script.ts',
+  'epistemology-knowledge-40': 'epistemology40Script.ts',
+  'epistemology-knowledge-41': 'epistemology41Script.ts',
   'metaphysics-being-1': 'metaphysicsScript.ts',
   'metaphysics-being-2': 'metaphysics2Script.ts',
   'metaphysics-being-3': 'metaphysics3Script.ts',
@@ -87,6 +176,34 @@ export const LESSONS = {
   'metaphysics-being-11': 'metaphysics11Script.ts',
   'metaphysics-being-12': 'metaphysics12Script.ts',
   'metaphysics-being-13': 'metaphysics13Script.ts',
+  'metaphysics-being-14': 'metaphysics14Script.ts',
+  'metaphysics-being-15': 'metaphysics15Script.ts',
+  'metaphysics-being-16': 'metaphysics16Script.ts',
+  'metaphysics-being-17': 'metaphysics17Script.ts',
+  'metaphysics-being-18': 'metaphysics18Script.ts',
+  'metaphysics-being-19': 'metaphysics19Script.ts',
+  'metaphysics-being-31': 'metaphysics31Script.ts',
+  'metaphysics-being-20': 'metaphysics20Script.ts',
+  'metaphysics-being-21': 'metaphysics21Script.ts',
+  'metaphysics-being-22': 'metaphysics22Script.ts',
+  'metaphysics-being-23': 'metaphysics23Script.ts',
+  'metaphysics-being-24': 'metaphysics24Script.ts',
+  'metaphysics-being-25': 'metaphysics25Script.ts',
+  'metaphysics-being-26': 'metaphysics26Script.ts',
+  'metaphysics-being-27': 'metaphysics27Script.ts',
+  'metaphysics-being-28': 'metaphysics28Script.ts',
+  'metaphysics-being-29': 'metaphysics29Script.ts',
+  'metaphysics-being-30': 'metaphysics30Script.ts',
+  'metaphysics-being-32': 'metaphysics32Script.ts',
+  'metaphysics-being-33': 'metaphysics33Script.ts',
+  'metaphysics-being-34': 'metaphysics34Script.ts',
+  'metaphysics-being-35': 'metaphysics35Script.ts',
+  'metaphysics-being-36': 'metaphysics36Script.ts',
+  'metaphysics-being-37': 'metaphysics37Script.ts',
+  'metaphysics-being-38': 'metaphysics38Script.ts',
+  'metaphysics-being-39': 'metaphysics39Script.ts',
+  'metaphysics-being-40': 'metaphysics40Script.ts',
+  'metaphysics-being-41': 'metaphysics41Script.ts',
   'aesthetics-aesthetics-1': 'aestheticsScript.ts',
   'aesthetics-aesthetics-2': 'aesthetics2Script.ts',
   'aesthetics-aesthetics-3': 'aesthetics3Script.ts',
@@ -108,6 +225,26 @@ export const LESSONS = {
   'aesthetics-aesthetics-11': 'aesthetics11Script.ts',
   'aesthetics-aesthetics-16': 'aesthetics16Script.ts',
   'aesthetics-aesthetics-31': 'aesthetics31Script.ts',
+  'aesthetics-aesthetics-21': 'aesthetics21Script.ts',
+  'aesthetics-aesthetics-22': 'aesthetics22Script.ts',
+  'aesthetics-aesthetics-23': 'aesthetics23Script.ts',
+  'aesthetics-aesthetics-24': 'aesthetics24Script.ts',
+  'aesthetics-aesthetics-25': 'aesthetics25Script.ts',
+  'aesthetics-aesthetics-26': 'aesthetics26Script.ts',
+  'aesthetics-aesthetics-27': 'aesthetics27Script.ts',
+  'aesthetics-aesthetics-28': 'aesthetics28Script.ts',
+  'aesthetics-aesthetics-29': 'aesthetics29Script.ts',
+  'aesthetics-aesthetics-30': 'aesthetics30Script.ts',
+  'aesthetics-aesthetics-32': 'aesthetics32Script.ts',
+  'aesthetics-aesthetics-33': 'aesthetics33Script.ts',
+  'aesthetics-aesthetics-34': 'aesthetics34Script.ts',
+  'aesthetics-aesthetics-35': 'aesthetics35Script.ts',
+  'aesthetics-aesthetics-36': 'aesthetics36Script.ts',
+  'aesthetics-aesthetics-37': 'aesthetics37Script.ts',
+  'aesthetics-aesthetics-38': 'aesthetics38Script.ts',
+  'aesthetics-aesthetics-39': 'aesthetics39Script.ts',
+  'aesthetics-aesthetics-40': 'aesthetics40Script.ts',
+  'aesthetics-aesthetics-41': 'aesthetics41Script.ts',
   'political-political-1': 'politicalScript.ts',
   'political-political-2': 'political2Script.ts',
   'political-political-3': 'political3Script.ts',
@@ -119,12 +256,44 @@ export const LESSONS = {
   'political-political-9': 'political9Script.ts',
   'political-political-10': 'political10Script.ts',
   'political-political-31': 'political31Script.ts',
+  'political-political-11': 'political11Script.ts',
+  'political-political-12': 'political12Script.ts',
+  'political-political-13': 'political13Script.ts',
+  'political-political-14': 'political14Script.ts',
+  'political-political-15': 'political15Script.ts',
+  'political-political-16': 'political16Script.ts',
+  'political-political-17': 'political17Script.ts',
+  'political-political-18': 'political18Script.ts',
+  'political-political-19': 'political19Script.ts',
+  'political-political-20': 'political20Script.ts',
+  'political-political-21': 'political21Script.ts',
+  'political-political-22': 'political22Script.ts',
+  'political-political-23': 'political23Script.ts',
+  'political-political-24': 'political24Script.ts',
+  'political-political-25': 'political25Script.ts',
+  'political-political-26': 'political26Script.ts',
+  'political-political-27': 'political27Script.ts',
+  'political-political-28': 'political28Script.ts',
+  'political-political-29': 'political29Script.ts',
+  'political-political-30': 'political30Script.ts',
+  'political-political-32': 'political32Script.ts',
+  'political-political-33': 'political33Script.ts',
+  'political-political-34': 'political34Script.ts',
+  'political-political-35': 'political35Script.ts',
+  'political-political-36': 'political36Script.ts',
+  'political-political-37': 'political37Script.ts',
+  'political-political-38': 'political38Script.ts',
+  'political-political-39': 'political39Script.ts',
+  'political-political-40': 'political40Script.ts',
+  'political-political-41': 'political41Script.ts',
 };
 
-/** A beat's clip, named: "metaphysics-being-4/beat-04". */
+/** A beat's line, named: "metaphysics-being-4/beat-04". Its WAV master is that name. */
 export const keyOf = (lessonId, i) => `${lessonId}/beat-${String(i).padStart(2, '0')}`;
-/** The path the manifest requires that clip by. */
-export const requireOf = (lessonId, i) => `../../assets/narration/${keyOf(lessonId, i)}.mp3`;
+/** The one audio file a lesson ships, in its own folder. */
+export const LESSON_CLIP = 'lesson.mp3';
+/** The path the manifest requires a lesson's audio by. Every line of the lesson names it. */
+export const requireOf = (lessonId) => `../../assets/narration/${lessonId}/${LESSON_CLIP}`;
 
 export function beatsOf(file) {
   const ts = createRequire(import.meta.url)('typescript');
@@ -159,8 +328,6 @@ export const wordWeight = (w) => {
 export const weightOf = (text) => (text.match(/\S+/g) || []).reduce((n, w) => n + wordWeight(w), 0);
 
 export const sha256hex = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
-/** What an MP3 carries once scripts/encode-narration.mjs has encoded it from this WAV. */
-export const tagOf = (wav) => `wav-sha256:${sha256hex(wav)}`;
 
 // ── READING A WAV ────────────────────────────────────────────────────────────
 
@@ -205,6 +372,56 @@ export function headerFaults(w) {
   return out;
 }
 
+// ── WHERE EACH LINE SITS IN ITS LESSON'S AUDIO ───────────────────────────────
+//
+// A lesson's spoken lines, in beat order, end to end with GAP_S of silence between one
+// line and the next. The player seeks to a line's `at` and pauses at `at + dur`, and a
+// pause that lands a little late lands in the gap rather than on the next line's first
+// word. encode-narration builds the file from this layout, make-narration writes `at`
+// from it and check:narration holds both to it, so none of the three can place a line
+// somewhere the others do not.
+
+/** Silence between one line and the next in a lesson's file. */
+export const GAP_S = 0.4;
+export const GAP_SAMPLES = Math.round(WAV_RATE * GAP_S);
+
+/** Where each line starts: `start` in samples, `at` in seconds to the millisecond. */
+export function layoutOf(lines) {
+  let start = 0;
+  return lines.map(({ beat, samples }) => {
+    const out = { beat, start, at: Math.round((start / WAV_RATE) * 1000) / 1000 };
+    start += samples + GAP_SAMPLES;
+    return out;
+  });
+}
+
+/**
+ * A lesson's spoken lines as its WAV masters stand now: for each, its beat, key, text,
+ * WAV and length, and, when no spoken beat is missing its WAV, where it starts. `dir`
+ * is the assets folder, which the counter-test stages elsewhere.
+ */
+export function lessonLines(lessonId, dir = ASSETS) {
+  const beats = beatsOf(LESSONS[lessonId]);
+  const lines = [];
+  const missing = [];
+  beats.forEach((b, i) => {
+    if (!spoken(b)) return;
+    const key = keyOf(lessonId, i);
+    const file = path.join(dir, `${key}.wav`);
+    if (!fs.existsSync(file)) { missing.push(i); return; }
+    const wav = fs.readFileSync(file);
+    const w = parseWav(wav);
+    lines.push({ beat: i, key, text: b.text, wav, samples: w.pcm ? w.pcm.length : 0 });
+  });
+  if (!missing.length) layoutOf(lines).forEach((l, k) => { lines[k].start = l.start; lines[k].at = l.at; });
+  return { beats, lines, missing };
+}
+
+/** A line's entry in its lesson MP3's tag: its beat, its WAV's SHA-256 and where it starts. */
+export const entryOf = (beat, sha, at) => `beat-${String(beat).padStart(2, '0')}=${sha}@${at.toFixed(3)}`;
+/** The ID3 comment a lesson's MP3 carries. Every entry ends in ';', so none is a prefix of another. */
+export const lessonTagOf = (entries) => `narration-lesson:${entries.map((e) => `${e};`).join('')}`;
+
 // ── IS THE TAKE CLEAN ────────────────────────────────────────────────────────
 //
 // Calibrated on 12 Sep 2026 against 402 rendered lines: the broken take above and 401
@@ -212,10 +429,18 @@ export function headerFaults(w) {
 // the corpus's worst value beside every limit on each run, so the margins can be read
 // rather than remembered.
 //
-// THE SECOND UNITS TESTED THEM THE SAME DAY. Of 308 new takes, one was a second burst
-// (ethics-ethics-8 beat 9: a 200 ms blast where "Carol" should start, a run of 31, 429
-// clipped in 50 ms, −2.9 dBFS) and install-narration refused it. The other 307 stayed
-// inside every limit, and the worst good values below are across all 709 good lines.
+// THE REST OF THE LIBRARY TESTED THEM THE SAME DAY. Of the 1,316 takes rendered after
+// those 402, install-narration refused three, and every one was a blast on the first
+// word after a sentence-ending pause: ethics-ethics-8 beat 9 (a run of 31, 429 clipped in
+// 50 ms, −2.9 dBFS), political-political-12 beat 2 (a run of 60, 836, −1.0) and
+// political-political-16 beat 4 (159 clipped in 50 ms, −5.1). The worst good values below
+// are across all 1,718 good lines.
+//
+// A RETAKE MUST BE A REQUEST GOOGLE HAS NOT SEEN. Asked for the same words with the same
+// settings, it returns the same bytes. Stating the default sample rate outright was new
+// enough for two of those three lines; political-political-16 beat 4 came back identical
+// with that, and again with the default speaking rate stated, and only a speaking rate of
+// 0.99 gave a new take. Compare a retake's SHA-256 with the refused one before judging it.
 //
 // WHAT THESE CANNOT HEAR is a take that garbles without a burst. Two spectral measures
 // were built for it (flatness over a stretch, and its share of the loud frames) and both
@@ -359,11 +584,12 @@ export function writeRenders(records, dir = ASSETS) {
 
 /**
  * Everything that makes one installed line unfit to ship: its WAV's header, whether its
- * render record names these words and this WAV, whether its MP3 was encoded from this
- * WAV, and whether the take is clean. make-narration and check-narration both call this,
- * so the two cannot disagree about a line.
+ * render record names these words and this WAV, whether its lesson's MP3 lists this WAV at
+ * this offset, and whether the take is clean. `clip` is the lesson's MP3 (or null when
+ * there is none). make-narration and check-narration both call this, so the two cannot
+ * disagree about a line.
  */
-export function lineFaults({ text, wav, mp3, record }) {
+export function lineFaults({ text, wav, record, clip, beat, at }) {
   const faults = [];
   const w = parseWav(wav);
   for (const say of headerFaults(w)) faults.push({ kind: 'HEADER', say });
@@ -373,7 +599,9 @@ export function lineFaults({ text, wav, mp3, record }) {
     if (record.text !== text) faults.push({ kind: 'REWORDED', say: `the take was rendered from "${record.text}": the voice would say words the screen no longer shows, so render the line again` });
     if (record.wav !== sha) faults.push({ kind: 'RECORD', say: 'this WAV is not the take its record names: install takes with scripts/install-narration.mjs' });
   }
-  if (!mp3 || !mp3.includes(`wav-sha256:${sha}`)) faults.push({ kind: 'STALE MP3', say: 'missing, or not encoded from this WAV: run scripts/encode-narration.mjs' });
+  if (!clip || !clip.includes(`${entryOf(beat, sha, at)};`)) {
+    faults.push({ kind: 'STALE MP3', say: `its lesson's ${LESSON_CLIP} is missing, or does not hold this WAV at ${at.toFixed(3)}s: run scripts/encode-narration.mjs` });
+  }
   let m = null;
   if (w.pcm && w.pcm.length && w.rate) {
     m = measureAudio(w.pcm, w.rate);
@@ -406,17 +634,19 @@ export function parseManifest(src) {
     m = lines[k].match(/^ {4}(\d+): \{$/);
     if (!m || !lesson) continue;
     const clip = (lines[k + 1] || '').match(/^ {6}clip: require\('([^']+)'\),$/);
-    const dur = (lines[k + 2] || '').match(/^ {6}dur: ([\d.]+),$/);
-    const text = (lines[k + 3] || '').match(/^ {6}text: (".*"),$/);
-    const words = (lines[k + 4] || '').match(/^ {6}words: \[([^\]]*)\],$/);
-    if (!clip || !dur || !text || !words) { problems.push(`${lesson} beat ${m[1]}: an entry not in the shape make-narration writes`); continue; }
+    const at = (lines[k + 2] || '').match(/^ {6}at: ([\d.]+),$/);
+    const dur = (lines[k + 3] || '').match(/^ {6}dur: ([\d.]+),$/);
+    const text = (lines[k + 4] || '').match(/^ {6}text: (".*"),$/);
+    const words = (lines[k + 5] || '').match(/^ {6}words: \[([^\]]*)\],$/);
+    if (!clip || !at || !dur || !text || !words) { problems.push(`${lesson} beat ${m[1]}: an entry not in the shape make-narration writes`); continue; }
     lessons.get(lesson).set(Number(m[1]), {
       clip: clip[1],
+      at: Number(at[1]),
       dur: Number(dur[1]),
       text: JSON.parse(text[1]),
       words: words[1].trim() ? words[1].split(',').map(Number) : [],
     });
-    k += 4;
+    k += 5;
   }
   const requires = (src.match(/require\(/g) || []).length;
   const read = [...lessons.values()].reduce((n, l) => n + l.size, 0);

@@ -512,5 +512,5 @@ export const MUST_STAMP: Record<string, string> = {
   'political-political-6': '7cf6e9efa775',
   'political-political-7': 'df8c6c048a48',
   'political-political-8': '9c9f5f7737f7',
-  'political-political-9': '3a0442454d24',
+  'political-political-9': 'a08764369c8a',
 };

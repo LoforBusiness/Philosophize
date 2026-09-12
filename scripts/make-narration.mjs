@@ -1,34 +1,36 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// NARRATION: WHICH CLIP PLAYS FOR WHICH BEAT, AND WHEN EACH WORD STARTS.
+// NARRATION: WHERE EACH BEAT'S LINE SITS IN ITS LESSON'S AUDIO, AND WHEN EACH WORD STARTS.
 //
 //   node scripts/make-narration.mjs
 //
 // Reads assets/narration/<lesson id>/beat-NN.wav and the lesson's script, and writes
-// lib/narration/manifest.ts. Each beat plays the beat-NN.mp3 that
-// scripts/encode-narration.mjs made from its WAV; the WAV itself is never bundled. It
-// never calls Google: the clips are rendered through the character ledger
-// (scripts/lib/ttsledger.mjs), and this only measures what was rendered.
+// lib/narration/manifest.ts. A lesson ships ONE audio file, lesson.mp3, which
+// scripts/encode-narration.mjs builds from those WAVs laid end to end; each beat plays
+// its stretch of it, from `at` for `dur` seconds. The WAVs themselves are never bundled.
+// It never calls Google: the lines are rendered through the character ledger, and this
+// only measures what was rendered.
 //
 // It refuses to write while any line fails what check:narration holds: a take that
 // bursts, clips, stalls or runs at the wrong pace for its words, a take whose render
 // record (assets/narration/renders.json, written by scripts/install-narration.mjs)
-// names other words or another WAV, and an MP3 not encoded from its WAV. Both call
-// lineFaults() in scripts/lib/narration.mjs, so they cannot disagree about a line.
+// names other words or another WAV, and a lesson MP3 that does not list this very WAV
+// at this very offset. Both call lineFaults() in scripts/lib/narration.mjs, and both
+// place lines with its layoutOf(), so they cannot disagree about a line.
 //
 // WHAT IS SPOKEN is a beat's own `text`, the teaching line under the figure. A quote
 // beat, a question (its prompt and its explanation) and the summary card are not
 // narrated. That was the user's call on 11 Sep 2026, for the first narrated lesson.
 //
-// THE WORD TIMES ARE ESTIMATES, because Chirp 3 HD returns none. The clip is cut
+// THE WORD TIMES ARE ESTIMATES, because Chirp 3 HD returns none. The line's WAV is cut
 // into speech and silence on 10ms frames; each sentence or clause is matched to the
 // pause nearest where its words' share of the speech says it should end; and inside
 // that span each word gets time in proportion to its syllables. That is good to
-// about a word, which is what a reveal needs.
+// about a word, which is what a reveal needs. They count from the start of the line.
 // ─────────────────────────────────────────────────────────────────────────────
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  ROOT, ASSETS, MANIFEST as OUT, LESSONS, beatsOf, spoken, wordWeight, keyOf, lineFaults, readRenders,
+  ROOT, ASSETS, MANIFEST as OUT, LESSONS, LESSON_CLIP, wordWeight, keyOf, lineFaults, readRenders, lessonLines, requireOf,
 } from './lib/narration.mjs';
 
 const FRAME_S = 0.01;
@@ -163,36 +165,34 @@ function wordStarts(samples, rate, text) {
 let fails = 0;
 const blocks = [];
 const renders = readRenders();
-for (const [lessonId, scriptFile] of Object.entries(LESSONS)) {
-  const beats = beatsOf(scriptFile);
+for (const lessonId of Object.keys(LESSONS)) {
+  const { lines, missing } = lessonLines(lessonId);
+  for (const i of missing) { console.log(`  MISSING assets/narration/${keyOf(lessonId, i)}.wav`); fails += 1; }
+  if (missing.length) continue;
+  const clipAbs = path.join(ASSETS, lessonId, LESSON_CLIP);
+  const clip = fs.existsSync(clipAbs) ? fs.readFileSync(clipAbs) : null;
   const entries = [];
-  beats.forEach((b, i) => {
-    if (!spoken(b)) return;
-    const key = keyOf(lessonId, i);
-    const base = `assets/narration/${key}`;
-    const wavAbs = path.join(ASSETS, `${key}.wav`);
-    const mp3Abs = path.join(ASSETS, `${key}.mp3`);
-    if (!fs.existsSync(wavAbs)) { console.log(`  MISSING ${base}.wav`); fails += 1; return; }
-    // The app plays the MP3 and the word times are measured on the WAV, so the two must be
-    // one render. The take must also be clean, and recorded as rendered from these very
-    // words. check:narration judges a line with the same function, so the two agree.
-    const wav = fs.readFileSync(wavAbs);
-    const mp3 = fs.existsSync(mp3Abs) ? fs.readFileSync(mp3Abs) : null;
-    const { faults, w } = lineFaults({ text: b.text, wav, mp3, record: renders[key] });
+  for (const l of lines) {
+    const base = `assets/narration/${l.key}`;
+    // The app plays the lesson's MP3 and the word times are measured on the WAV, so the
+    // MP3 must be built from this WAV, at this offset. The take must also be clean, and
+    // recorded as rendered from these very words. check:narration judges a line with
+    // the same function, so the two agree.
+    const { faults, w } = lineFaults({ text: l.text, wav: l.wav, record: renders[l.key], clip, beat: l.beat, at: l.at });
     if (faults.length) {
       for (const f of faults) console.log(`  ${f.kind} ${base}: ${f.say}`);
       fails += 1;
-      return;
+      continue;
     }
     const rate = w.rate;
     const samples = Float64Array.from(w.pcm, (v) => v / 32768);
     const dur = samples.length / rate;
-    const words = wordStarts(samples, rate, b.text);
-    const tokens = b.text.match(/\S+/g) || [];
-    if (words.length !== tokens.length) { console.log(`  FAIL ${base}.wav: ${words.length} times for ${tokens.length} words`); fails += 1; return; }
-    entries.push({ i, rel: `${base}.mp3`, dur, words, text: b.text });
-    console.log(`  ${lessonId} beat ${i}  ${dur.toFixed(2)}s  ${tokens.map((w, k) => `${w}@${words[k].toFixed(2)}`).join(' ')}`);
-  });
+    const words = wordStarts(samples, rate, l.text);
+    const tokens = l.text.match(/\S+/g) || [];
+    if (words.length !== tokens.length) { console.log(`  FAIL ${base}.wav: ${words.length} times for ${tokens.length} words`); fails += 1; continue; }
+    entries.push({ i: l.beat, at: l.at, dur, words, text: l.text });
+    console.log(`  ${lessonId} beat ${l.beat}  @${l.at.toFixed(3)}s  ${dur.toFixed(2)}s  ${tokens.map((t, k) => `${t}@${words[k].toFixed(2)}`).join(' ')}`);
+  }
   blocks.push({ lessonId, entries });
 }
 if (fails) {
@@ -204,7 +204,8 @@ const body = blocks.map(({ lessonId, entries }) => [
   `  ${JSON.stringify(lessonId)}: {`,
   ...entries.map((e) => [
     `    ${e.i}: {`,
-    `      clip: require('../../${e.rel}'),`,
+    `      clip: require('${requireOf(lessonId)}'),`,
+    `      at: ${e.at.toFixed(3)},`,
     `      dur: ${e.dur.toFixed(2)},`,
     `      text: ${JSON.stringify(e.text)},`,
     `      words: [${e.words.map((w) => w.toFixed(2)).join(', ')}],`,
@@ -215,13 +216,14 @@ const body = blocks.map(({ lessonId, entries }) => [
 
 fs.writeFileSync(OUT, `// GENERATED by scripts/make-narration.mjs. Do not edit by hand.
 //
-// Which lessons are narrated, the clip for each spoken beat, and when each word of it
-// starts (estimated from the clip; see the script). A lesson that is not here is not
-// narrated, and plays exactly as it did before narration existed.
+// Which lessons are narrated, and for each spoken beat: the lesson's one audio file,
+// where the beat's line starts in it, how long the line runs, and when each word of it
+// starts (estimated from the line's WAV; see the script). A lesson that is not here is
+// not narrated, and plays exactly as it did before narration existed.
 import type { NarratedLine } from './types';
 
 export const NARRATION: Record<string, Record<number, NarratedLine>> = {
 ${body}
 };
 `);
-console.log(`\nwrote ${path.relative(ROOT, OUT)}: ${blocks.reduce((n, b) => n + b.entries.length, 0)} line(s) in ${blocks.length} lesson(s)`);
+console.log(`\nwrote ${path.relative(ROOT, OUT)}: ${blocks.reduce((n, b) => n + b.entries.length, 0)} line(s) in ${blocks.length} lesson(s), one audio file each`);

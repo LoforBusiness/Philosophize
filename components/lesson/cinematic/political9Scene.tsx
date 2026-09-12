@@ -164,7 +164,7 @@ export default function Political9Scene({ clock, bt, bi, i, picked, onPick }: Sc
       <Animated.View style={[styles.tally, tallyStyle]} pointerEvents="none">
         <Text style={styles.tallyTag}>THE VOTE</Text>
         <View style={styles.tallyRow}>
-          <Text style={styles.tallyBig}>7</Text>
+          <Text style={styles.tallyBig}>4</Text>
           <Text style={styles.tallyDash}>—</Text>
           <Text style={styles.tallyBig}>1</Text>
         </View>

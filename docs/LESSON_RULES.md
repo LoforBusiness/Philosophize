@@ -1252,8 +1252,8 @@ beats.
 **F44b. `text` is written to be spoken, word for word, and the screen follows the
 voice.** Narration is read aloud by Google's Chirp 3 HD voice (Algieba, British
 English), on by default and mutable, and each word's letters rise on screen as the
-voice reaches it. The first two units of every branch speak today, and the rest
-will. What is spoken is a beat's own `text`, on a beat that carries no quote, no
+voice reaches it. Every lesson speaks today, and a new one ships with its voice
+(AC17). What is spoken is a beat's own `text`, on a beat that carries no quote, no
 question and no summary. The `text` on those beats is shown and never voiced, and so
 are `cite`, `quote.text`, prompts and their choices, because reading a question's
 options aloud gives the trap away by intonation. Write every `text` for the ear
@@ -8099,9 +8099,9 @@ cane, three the monocle, and three are a hat on its own.
 
 **Decided on 11 Sep 2026:** every lesson's narration will be spoken by Google's
 Chirp 3 HD voice — Algieba, British English — on by default and mutable, with **each
-word's letters rising on screen as the voice reaches it**. Eighty-five lessons speak
-today, the first two units of every branch; the rules apply to every lesson now,
-because a lesson written today is the one that voice will read.
+word's letters rising on screen as the voice reaches it**. Every lesson speaks today,
+all 246, and a new lesson ships with its voice (AC17), so the rules apply to a lesson
+before a word of it is written.
 That changes what a sentence is for.
 It is heard once, with no going back, at about 155 words a minute against the 238
 an adult reads silently; and every word the reader sees has to be a word the voice
@@ -8317,22 +8317,26 @@ line, and `MAX_PAUSE_S` and `MAX_EDGE_SILENCE_S` for a stall. It prints the corp
 worst value beside every limit on every run, so the margins are read rather than
 remembered.
 
-**The limits met a second burst the same day, and held.** Of the 308 takes rendered for
-the second units, `ethics-ethics-8` beat 9 carried a 200 ms blast where "Carol" should
-start: a run of 31, 429 clipped samples inside 50 ms, −2.9 dBFS. `install-narration`
-refused it before anything was copied. The other 307 stayed inside every limit, and
-across all 709 good lines the worst are now a run of 7, 19 clipped in 50 ms and −6.6
-dBFS, clear of every limit on the good side and of both bursts on the other.
+**The limits met three more broken takes the same day, and held.** Rendering the rest of
+the library, 1,316 takes more, `install-narration` refused three, and every one was a
+blast on the first word after a sentence-ending pause: `ethics-ethics-8` beat 9 where
+"Carol" should start (a run of 31, 429 clipped samples inside 50 ms, −2.9 dBFS),
+`political-political-12` beat 2 where "That" should start (a run of 60, 836, −1.0), and
+`political-political-16` beat 4 where "Nothing" should start (159 clipped in 50 ms,
+−5.1). Across all 1,718 good lines the worst are now a run of 7, 25 clipped in 50 ms and
+−6.6 dBFS, clear of every limit on the good side and of every broken take on the other.
 
 - **A broken take is rendered again, never repaired.** Cutting a burst out leaves the
   garbled speech the model made around it, and the word times are measured on that
   WAV. The second take cost 153 characters and came back clean.
-- **And the retake has to be a different request.** Asked for the same words with the
-  same settings a second time, Google sent back the broken take byte for byte, so a
-  retake that repeats its request can pay for the same burst twice. Stating the default
-  sample rate outright, 24,000, changes no word and no format, and that request came
-  back as a new, clean take. Compare the retake's SHA-256 with the refused one before
-  judging it.
+- **And the retake has to be a request Google has not seen.** Asked for the same words
+  with the same settings a second time, Google sends back the broken take byte for byte,
+  so a retake that repeats its request pays for the same burst twice. Stating the
+  default sample rate outright, 24,000, was new enough for two of the three lines.
+  `political-political-16` beat 4 came back identical with that, and again with the
+  default speaking rate stated; a speaking rate of 0.99, which no ear can tell from
+  normal, gave a new and clean take. Compare the retake's SHA-256 with the refused one
+  before judging it.
 - **A take comes into the app through `node scripts/install-narration.mjs <job> <dir>`**,
   which judges every item before anything is copied. `make-narration` refuses the same
   lines through the same function in `scripts/lib/narration.mjs`, so the generator and
@@ -8369,34 +8373,61 @@ The 402 records written on 12 Sep 2026 were not assumed: each line's text was ma
 word for word to the render job that made it, and to a ledger entry of exactly its
 byte count.
 
-### AC15 · A clip is timed on its WAV and ships as the MP3 made from it
+### AC15 · A line is timed on its WAV, and a lesson ships as one MP3 built from them
 
 Chirp 3 HD returns no word timings and never renders a line the same way twice — one
 came back at 2.08 seconds and then 2.20 — so word times fit only the render they were
-measured on. The 24 kHz WAV is the master and stays in `assets/narration/`, where
-nothing requires it and so nothing bundles it. `FFMPEG=<path> node
-scripts/encode-narration.mjs` encodes each one to a 64 kbps mono MP3 carrying the WAV's
-SHA-256, and the app plays only those: the 710 MP3s come to 27.5 MB where their WAVs
-are 162.1 MB. `check:narration` fails **STALE MP3** on a WAV changed since its MP3 was made.
+measured on. Each line's 24 kHz WAV is the master and stays in `assets/narration/`,
+where nothing requires it and so nothing bundles it: 1,718 of them, 385.5 MB.
 
-The times are estimated from the clip's pauses, and a clause matching that gives any
+**A lesson ships ONE file, because EAS Update takes at most 1,000 assets in an update.**
+A clip a line had already put 710 narration clips into an update of 809 assets with 85
+lessons voiced, and the whole library is 1,718 lines, so it could never have shipped.
+`FFMPEG=<path> node scripts/encode-narration.mjs` lays a lesson's spoken lines end to end
+in beat order, `GAP_S` (0.4 seconds) of silence apart, and encodes them once as a 64 kbps
+mono `lesson.mp3`: 246 files in 69.0 MB, and a real Android export bundles 364 assets in
+all. The file's ID3 comment lists every line's beat, its WAV's SHA-256 and where it
+starts. `make-narration` writes each line's `at` from the same layout, and the player
+seeks there and pauses at `at + dur`, so the gap is what a late pause lands in. Decoded,
+all 1,718 lines sit exactly on their starts in the layout, each `at` in the manifest is
+that start rounded to the millisecond, and the gaps are silent.
+
+`check:narration` fails **STALE MP3** on a lesson file that does not list a line's
+current WAV at its offset, **OFFSET** on a manifest line that starts anywhere else, and
+**ORPHAN** on a one-line clip left over from before.
+
+The times are estimated from the line's pauses, and a clause matching that gives any
 clause under 0.4 or over 2.5 times the line's own pace is thrown out for an even spread
 over the speech: a comma the voice reads straight through hands its pause to the next
 boundary, and every clause after it slides.
 
-### AC16 · In a voiced lesson, a beat's number is its clip's name
+### AC16 · In a voiced lesson, a beat's number is its line's name
 
-A clip is `beat-NN`, the beat's index in its script. Inserting, removing or splitting a
-beat renumbers every beat after it, so every later clip is suddenly filed under
-another line's words — the same trap a hand-written shot list fell into when the J12
-splitter changed how many beats a lesson had. `check:narration` catches all three
-shapes: **REWORDED** for a clip under words it was not rendered from, **MISSING** for a
-spoken beat with no clip, and **NOT SPOKEN** for a clip left on a question, a quote or
-the summary. **ORPHAN** fails a record or a file no line plays.
+A line's WAV master is `beat-NN`, the beat's index in its script, and so is its entry in
+the manifest and in its lesson file's tag. Inserting, removing or splitting a beat
+renumbers every beat after it, so every later line is suddenly filed under another
+line's words — the same trap a hand-written shot list fell into when the J12 splitter
+changed how many beats a lesson had. `check:narration` catches all three shapes:
+**REWORDED** for a take under words it was not rendered from, **MISSING** for a spoken
+beat with no line, and **NOT SPOKEN** for a line left on a question, a quote or the
+summary. **ORPHAN** fails a record or a file no line plays.
 
-The cheap repair is to rename the later clips AND their records along with their beats
-— the record carries the words, so the check proves the rename right — and to render
-only the lines whose words actually changed.
+The cheap repair is to rename the later WAVs AND their records along with their beats
+— the record carries the words, so the check proves the rename right — then encode and
+run `make-narration`, and render only the lines whose words actually changed.
+
+### AC17 · Every lesson speaks, and a new lesson ships with its voice
+
+Since 12 Sep 2026 every lesson the app can open is narrated, all 246.
+`check:narration` reads the lesson route's `CINEMATIC` map and fails **UNVOICED** on any
+lesson missing from the `LESSONS` table in `scripts/lib/narration.mjs`: a lesson left
+out would play in silence, with no mute button, and nothing else in the suite would
+notice.
+
+So a new lesson is not finished when its scene is. Its spoken beats are rendered through
+the character ledger, installed with `install-narration`, encoded, and timed with
+`make-narration` in the same commit that adds its `CINEMATIC` entry — and listened to
+(AC11).
 
 ---
 

@@ -3,7 +3,7 @@ import type { BaseBeat } from './cinematicKit';
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic political-political-9, "Democracy and Its Critics" — the tyranny of
 // the majority. Four figures on the left and one on the right. The four vote, the
-// tally comes up seven to one, and then they simply walk toward the one. What
+// tally comes up four to one, and then they simply walk toward the one. What
 // stops them is not a better argument and not a bigger vote: it is a line drawn
 // across the floor that the count does not reach past.
 //
@@ -34,7 +34,7 @@ export const BEATS: P9Beat[] = [
   },
   {
     vote: 1, tally: true, one: 22,
-    text: 'So they vote, and the count is honest, and the count is seven to one. Plato distrusted this: steering a ship takes a trained pilot, not a show of hands.',
+    text: 'So they vote, and the count is honest, and the count is four to one. Plato distrusted this: steering a ship takes a trained pilot, not a show of hands.',
     cite: 'Plato’s doubt',
     dur: 3.8,
   },

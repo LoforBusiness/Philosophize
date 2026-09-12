@@ -374,7 +374,7 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
   },
   'political-political-9': {
     at: [null, null, [306, 397, 2, 330], null, [306, 409, 3, 330], null, null, [312, 397, 2, 330], null, null],
-    say: [null, 'Seven to one. Honest.', 'Whoever flatters best.', 'The procedure held.', 'Working, not failing.', null, 'Both named the danger.', null, null, null],
+    say: [null, 'Four to one. Honest.', 'Whoever flatters best.', 'The procedure held.', 'Working, not failing.', null, 'Both named the danger.', null, null, null],
   },
   'logic-arguments-11': {
     at: [null, null, [78, 376, 3, 48], null, null, null, null, null, [98, 376, 3, 116], null],
