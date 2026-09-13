@@ -101,7 +101,9 @@ export default function Metaphysics37Scene({ clock, bt, bi, i, picked, onPick, d
       t,
       shelfOn: carry(cv, 1, n, SHELF[p], SHELF[n], tr),
       hammerOn: carry(cv, 2, n, HAMMER[p], HAMMER[n], tr),
-      swing: swinging ? ease01((bt.value - 0.3) / 0.9) : carry(cv, 3, n, SWING[p], SWING[n], tr),
+      // Through the carry on the swinging beat too, so the hold after it starts from
+      // the glass and not from the top of the swing (C20c).
+      swing: carry(cv, 3, n, SWING[p], SWING[n], swinging ? ease01((bt.value - 0.3) / 0.9) : tr),
       wardOn: carry(cv, 4, n, WARD[p], WARD[n], tr),
       labelsOn: carry(cv, 5, n, LABELS[p], LABELS[n], tr),
       // The rail reads the reader's thumb only on its own beat.

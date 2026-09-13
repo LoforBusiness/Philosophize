@@ -249,9 +249,17 @@ const PROBE = `(() => {
       order += 1;
       const cs = getComputedStyle(el);
       if (cs.display === 'none' || cs.visibility === 'hidden') continue;
-      const rr = el.getBoundingClientRect();
-      if (rr.width < 1 || rr.height < 1) continue;
       const leafText = el.children.length === 0 && (el.textContent || '').trim().length >= 2;
+      // A WORD COVERS ITS LETTERS, NOT ITS BOX. A caption is laid out in a box as
+      // wide as its style says, and its glyphs sit centred or aligned somewhere
+      // inside it. aesthetics-36 hangs two prints side by side with a caption under
+      // each, THOUSANDS TURN OUT in 144 to 264 and NOBODY CAME in 262 to 382: two
+      // units of BOX in common and more than twenty units of paper between the
+      // letters, and every beat reported the first struck by the second. The word
+      // under test was already measured by its ink (inked, above); a word laid over
+      // it is now measured the same way. A panel or a rule is still its box.
+      const rr = leafText ? inked(el) : el.getBoundingClientRect();
+      if (rr.width < 1 || rr.height < 1) continue;
       // OPACITY COUNTS FOR WORDS TOO. Scenes cross-fade constantly, so a caption on
       // its way out is still in the DOM at opacity 0 — and counting it as something
       // that covers its neighbour invents a collision on every transition.
@@ -313,22 +321,36 @@ const PROBE = `(() => {
       let rot = 0;
       for (let a = el; a && a !== document.body; a = a.parentElement) {
         const t = getComputedStyle(a).transform;
-        if (t && t !== 'none') {
-          const m = t.match(/matrix\(([^)]+)\)/);
-          if (m) {
-            const v = m[1].split(',').map(Number);
-            if (v.length >= 4) rot += Math.atan2(v[1], v[0]);
-          }
+        // NO BACKSLASH IN THIS PROBE. It is a template literal, so a regex written here as
+        // matrix, backslash, bracket reached the page with its backslashes gone: the group
+        // swallowed the bracket, the first number parsed as NaN, the angle came out NaN, and
+        // no tilted element was ever treated as tilted. logic-30's hammer head reported four
+        // struck words through that for as long as this block existed. Slice instead.
+        if (t && (t.startsWith('matrix(') || t.startsWith('matrix3d('))) {
+          const v = t.slice(t.indexOf('(') + 1, t.lastIndexOf(')')).split(',').map(Number);
+          if (v.length >= 4 && Number.isFinite(v[0]) && Number.isFinite(v[1])) rot += Math.atan2(v[1], v[0]);
         }
         if (a === clipEl) break;
       }
       let dx = 0, dy = 0;
+      // AND PAST A FEW DEGREES IT IS A ROTATED RECTANGLE, SO IT IS TESTED AS ONE.
+      //
+      // Deflating the rect to a centred W x H is right for a lintel settled by three
+      // degrees and wrong for a hammer drawn back by fifty: the solve returns a W wider
+      // than the rect, the old guard threw it away, and the whole bounding box stood in
+      // for the slab. logic-30's hammer head, drawn back over its tower, reported the
+      // caption and the top course struck on four beats while the slab itself stayed
+      // three to fifteen units clear of both (S13). So a tilted element is carried as
+      // what it is, its centre, half-sizes and angle, and a word is tested against that.
+      let poly = null;
       const cA = Math.abs(Math.cos(rot)), sA = Math.abs(Math.sin(rot));
       if (sA > 0.004 && Math.abs(cA * cA - sA * sA) > 1e-6) {
         const den = cA * cA - sA * sA;
         const W = (rr.width * cA - rr.height * sA) / den;
         const H = (rr.height * cA - rr.width * sA) / den;
-        if (W > 0 && H > 0 && W <= rr.width + 0.5 && H <= rr.height + 0.5) {
+        if (W > 0 && H > 0 && Math.abs(den) > 0.05) {
+          poly = { cx: rr.left + rr.width / 2, cy: rr.top + rr.height / 2, hw: W / 2, hh: H / 2, rot };
+        } else if (W > 0 && H > 0 && W <= rr.width + 0.5 && H <= rr.height + 0.5) {
           dx = (rr.width - W) / 2; dy = (rr.height - H) / 2;
         }
       }
@@ -345,10 +367,17 @@ const PROBE = `(() => {
       cx0 = Math.max(cx0, CR.left); cy0 = Math.max(cy0, CR.top);
       cx1 = Math.min(cx1, CR.right); cy1 = Math.min(cy1, CR.bottom);
       if (cx1 - cx0 < 1 || cy1 - cy0 < 1) continue;
-      painted.push({ el, order, x: cx0, y: cy0, w: cx1 - cx0, h: cy1 - cy0, frame });
+      painted.push({ el, order, x: cx0, y: cy0, w: cx1 - cx0, h: cy1 - cy0, frame, poly });
     }
   }
   const orderOf = (el) => { let i = 0; for (const p of painted) { if (p.el === el) return p.order; i += 1; } return -1; };
+  // Is a screen point on a tilted slab, inset by some units from its edge? The point is
+  // turned back by the slab's own angle about its centre and compared with its half-sizes.
+  const inSlab = (p, x, y, inset) => {
+    const ddx = x - p.poly.cx, ddy = y - p.poly.cy;
+    const c = Math.cos(p.poly.rot), s = Math.sin(p.poly.rot);
+    return Math.abs(ddx * c + ddy * s) <= p.poly.hw - inset && Math.abs(-ddx * s + ddy * c) <= p.poly.hh - inset;
+  };
 
   for (const d of nodes) {
     if (d.children.length !== 0) continue;
@@ -625,7 +654,45 @@ const PROBE = `(() => {
         // text; whichever is on top is not covering anything the reader wanted.
         if (bothWords && (p.el.textContent || '').trim() === txt
             && Math.abs(p.x - r.left) < 2 && Math.abs(p.y - r.top) < 2) return false;
+        // A MARK THE SCENE DECLARES IS NOT A DEFECT. check:cover's convention, read here
+        // too: a nativeID (the DOM id) beginning strike or crossout, on the mark or on a
+        // group round it, says the line through the words is the point. valid3's forbidden
+        // pairing, PREMISES TRUE over CONCLUSION FALSE, is crossed out and stamped
+        // IMPOSSIBLE, which is the definition of validity drawn, and its two crosses say so
+        // by id. They went unreported only while every tilt read as NaN: a tilted cross
+        // was judged by its box, which covers the words' centres, and the pixels then
+        // cleared it. Measured as the thin line it is, it strikes an edge, and edges are
+        // settled by geometry alone.
+        // The mark and three ancestors, exactly as check:cover walks it, so one id cannot
+        // excuse a whole scene and the two checks cannot disagree about what is declared.
+        let declared = false;
+        for (let a = p.el, k = 0; a && k < 4; a = a.parentElement, k += 1) {
+          const nid = a.id || '';
+          if (nid.startsWith('strike') || nid.startsWith('crossout')) { declared = true; break; }
+        }
+        if (declared) return false;
         if (ox <= 1 || oy <= (bothWords ? 4 : 1)) return false;
+        // A TILTED SLAB IS SAMPLED ACROSS THE WORD, not boxed. A sample counts when it
+        // lies on the slab, inside whatever clips it, and (for an outline) on its band
+        // rather than its open interior. The same share rule as below then applies: a
+        // crossing of a third of the word's width or height strikes it, a corner does not.
+        if (p.poly) {
+          const band = p.frame ? p.frame + 1 : 0;
+          const cols = Math.max(12, Math.ceil(r.width / 2)), rows = Math.max(6, Math.ceil(r.height));
+          let colsHit = 0;
+          const rowHit = [];
+          for (let ci = 0; ci < cols; ci += 1) {
+            let any = false;
+            for (let ri = 0; ri < rows; ri += 1) {
+              const sx = r.left + (ci + 0.5) * r.width / cols, sy = r.top + (ri + 0.5) * r.height / rows;
+              if (sx < p.x || sx > p.x + p.w || sy < p.y || sy > p.y + p.h) continue;
+              if (!inSlab(p, sx, sy, 0) || (band && inSlab(p, sx, sy, band))) continue;
+              any = true; rowHit[ri] = true;
+            }
+            if (any) colsHit += 1;
+          }
+          return Math.max(colsHit / cols, rowHit.filter(Boolean).length / rows) >= 0.35;
+        }
         // A GRAZE ALONG A BOX EDGE IS NOT A STRIKE, BECAUSE A TEXT BOX IS NOT ITS
         // INK. Every label here carries leading above and below the glyphs, so a
         // marker resting on a caption's box overlaps it by a unit or two and
@@ -669,10 +736,15 @@ const PROBE = `(() => {
         if (t) return 'the words ' + JSON.stringify(t.slice(0, 24));
         // WHERE, not just how big. A dimension alone cannot be matched back to a
         // style, so every remaining finding needed its own browser run to place.
+        // A TILTED STRIKER SAYS SO, because its rect is not its shape and a finding is
+        // otherwise read as the rect.
+        const tilt = p.poly ? ' tilted ' + Math.round(p.poly.rot * 180 / Math.PI) + 'deg' : '';
         return Math.round(p.w) + 'x' + Math.round(p.h) + ' ' + (p.el.tagName || 'box').toLowerCase()
-          + toScene(p.x, p.y, p.w, p.h);
+          + toScene(p.x, p.y, p.w, p.h) + tilt;
       };
-      const atCentre = hits.find((p) => cx >= p.x && cx <= p.x + p.w && cy >= p.y && cy <= p.y + p.h);
+      const atCentre = hits.find((p) => (p.poly
+        ? inSlab(p, cx, cy, 0) && !(p.frame && inSlab(p, cx, cy, p.frame + 1))
+        : cx >= p.x && cx <= p.x + p.w && cy >= p.y && cy <= p.y + p.h));
       if (atCentre) coveredBy = name(atCentre);
       else if (hits.length) struckBy = name(hits[0]);
     } catch (e) { coveredBy = ''; struckBy = ''; }
@@ -1056,14 +1128,32 @@ function allIds() {
   let done = 0;
   const auditOne = async (T, id, first, nBeats) => {
     const { evaluate, tap, answerScene, answerDeck, answerControl, stamp, settle, send, shoot } = T;
-    await send('Page.navigate', { url: `${BASE}?id=${encodeURIComponent(id)}&notour=1` });
+    const url = `${BASE}?id=${encodeURIComponent(id)}&notour=1`;
+    await send('Page.navigate', { url });
     let up = false;
+    let reloads = 0;
     const patience = first ? STAGE_TRIES_FIRST : STAGE_TRIES;
+    // A ROUTE METRO HAS NOT REGISTERED YET DOES NOT BECOME ONE BY WAITING. claimRoute writes
+    // the preview route as the run starts, and its own note says what follows: a page that
+    // asks for the route before Metro's route table has caught up is served the not-found
+    // screen, and it goes on showing that however long the stage is waited on, because
+    // nothing reloads it. A one-lesson run has only that first page to lose. So a not-found
+    // page is asked for again every five seconds; a page that is merely slow is left alone,
+    // because reloading it would only start the slow load over.
+    const notFound = `!!document.body && (document.body.innerText || '').includes("This screen doesn't exist")`;
     for (let i = 0; i < patience; i += 1) {
       if (await evaluate("!!document.getElementById('stage-clip')")) { up = true; break; }
+      if (i % 10 === 9 && await evaluate(notFound)) { reloads += 1; await send('Page.navigate', { url }); }
       await wait(500);
     }
-    if (!up) { report.push({ id, beats: [], stepped: 0, blank: true }); console.log(`  ${String(++done).padStart(3)}/${ids.length}  ${id.padEnd(34)} NEVER RENDERED A STAGE`); return; }
+    if (!up) {
+      // WHAT THE PAGE SHOWED INSTEAD, because "never rendered" is three different failures:
+      // a route Metro never registered, a bundle that threw, and a machine too slow to load.
+      const saw = await evaluate(`(document.body && document.body.innerText || '').split('\\n').join(' ').slice(0, 60)`);
+      report.push({ id, beats: [], stepped: 0, blank: true, saw, reloads });
+      console.log(`  ${String(++done).padStart(3)}/${ids.length}  ${id.padEnd(34)} NEVER RENDERED A STAGE (${reloads} reload(s); the page said "${saw}")`);
+      return;
+    }
     await wait(1200);
 
     const beats = [];
@@ -1360,7 +1450,27 @@ function allIds() {
     console.log('      READ_DEBUG=1 prints what the page threw. A zero here is not a pass.');
   }
 
+  // ── AND A SWEEP THAT FINDS SOMETHING FAILS ─────────────────────────────────
+  //
+  // This exited 0 on every finding it ever printed, so "check-readable exit 0" read as
+  // a pass on the day it listed 29 struck words across ten lessons, and the reader
+  // found them first (S13). Each class settled by pixels or by geometry is a high-water
+  // mark now, like every other budget in the suite. BLANK stays a report: its own note
+  // above calls it a place to look, and logic-19's lettered cards are a disagreement
+  // nobody has settled. A partial list can only find fewer, so the same numbers hold
+  // for a targeted run.
+  const BUDGET = { TINY: 0, CUT: 0, FAINT: 0, SPILL: 0, UNDER: 0, STRIKE: 0 };
+  const over = Object.keys(BUDGET).filter((k) => count(k) > BUDGET[k]);
+  console.log('');
+  for (const k of Object.keys(BUDGET)) {
+    console.log(`  ${count(k) > BUDGET[k] ? 'FAIL' : 'ok  '}  ${k.padEnd(6)} ${String(count(k)).padStart(3)} words, budget ${BUDGET[k]}`);
+  }
+  if (over.length) {
+    console.log('  A finding that does not come back when its lesson is swept alone, at LANES=1, is');
+    console.log('  the machine rather than the lesson. Sweep it alone before changing a scene.');
+  }
+
   if (outPath) fs.writeFileSync(outPath, JSON.stringify(report, null, 1));
   cleanup();
-  process.exit(dead.length ? 1 : 0);
+  process.exit(dead.length || over.length ? 1 : 0);
 })();

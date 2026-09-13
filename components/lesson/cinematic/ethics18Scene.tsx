@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics18Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -80,6 +80,11 @@ const WIDE = BEATS.map((b) => b.wide ?? 0);
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
+// HOW WIDE THE LINE IS DRAWN, in the SORT'S OWN ORDER: can it reason · can it talk
+// · can it suffer. Reason and speech both leave the animals outside the line; only
+// suffering takes them in, which is the lesson's own answer.
+const WIDE_AT = [0, 0, 1];
+
 export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
@@ -104,13 +109,18 @@ export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick, pickPo
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
-    const wide = carry(cv, 0, n, WIDE[p], WIDE[n], wideFade ? grow : tr);
+    // R7b — the chip moves the line. Each bin is a different test for who counts,
+    // and the line on the board travels with it, so the reader can see who each
+    // criterion leaves outside before they commit to one.
+    //
+    // IT USED TO MOVE THE BOARD'S OPACITY. The control was wired into `board`, the
+    // fade of the whole board layer, so on the question the line stood still while
+    // INSIDE ETHICS, OUTSIDE and both chips sat at half opacity under the resting
+    // chip (D35), and the reaction this comment describes never happened.
+    const wide = carry(cv, 0, n, WIDE[p], reacting ? pickAt(WIDE_AT, pickPos.value) : WIDE[n], wideFade ? grow : tr);
     return {
       fig: lookPose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
-      // R7b — the arm moves the line. Each setting is a different test for who
-      // counts, and the line on the board travels with it, so the reader can see
-      // who each criterion leaves outside before they commit to one.
-      board: carry(cv, 2, n, LINEV[p], reacting ? pickPos.value : LINEV[n], tr, lineFade ? grow : 1),
+      board: carry(cv, 2, n, LINEV[p], LINEV[n], tr, lineFade ? grow : 1),
       wide,
       line: lerp(LINE_NARROW, LINE_WIDE, wide),
       test: testOn ? (testFade ? grow : 1) : 0,

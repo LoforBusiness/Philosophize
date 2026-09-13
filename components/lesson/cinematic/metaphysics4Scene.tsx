@@ -21,11 +21,14 @@ import { followMoves, kindOf, seedOf } from './camera';
 // COMPOSITION / OCCLUSION CONTRACT
 //   · The figure stands at x = 344 on GROUND = 500, so it spans about x 296–392
 //     and y 353–500 (crown ≈ 361, a little higher on a bobbing gesture).
-//   · The VOID hangs directly ABOVE that figure — centre (338, 288), rim ø106 —
+//   · The VOID hangs directly ABOVE that figure — centre (338, 294), rim ø106 —
 //     so the reaching gestures (24, 35) read as grabbing INTO it, and it never
-//     covers the body (its rim bottoms out at y 343 on its breath, the crown sits
+//     covers the body (its rim bottoms out at y 350 on its breath, the crown sits
 //     at 361+). At 106 units across it is the one object that must read instantly,
 //     so it is drawn well past the ~90-unit "reads at a glance" floor.
+//   · Its rim TOPS out at 294 − 53×1.05 = 238.4 on the same breath, four units
+//     under the foot of WHAT-IS-NOT. With the centre at 288 it reached 232.4, and
+//     every breath drew the ring through the bottom of -IS- (S9).
 //   · The LEDGER owns x 14–238, well left of the figure. Its rows are the whole
 //     lesson: what you SAID, and the something it BECAME — closed off by a TALLY
 //     that keeps the score of the trap: every grab counted, no escapes. Three
@@ -37,7 +40,7 @@ import { followMoves, kindOf, seedOf } from './camera';
 //     of the letterboxed 1.15×.
 
 const FIG_X = 344;
-const VOID = { x: 338, y: 288 };
+const VOID = { x: 338, y: 294 };
 const VOID_CORE = 84;
 const VOID_RIM = 106;
 
@@ -307,16 +310,16 @@ const styles = StyleSheet.create({
   // slash draws itself ACROSS the void instead of growing out of its middle. Its
   // length is the core's diameter and its colour is PAPER, so it reads as a stroke
   // cut through the black disc — the second way, barred. Left end solved from the
-  // centre: left = 338 − 42·cos24° = 299.63, top = 288 + 42·sin24° − 3 = 302.08.
+  // centre: left = 338 − 42·cos24° = 299.63, top = 294 + 42·sin24° − 3 = 308.08.
   slash: {
-    position: 'absolute', left: 299.63, top: 302.08, width: VOID_CORE, height: 6,
+    position: 'absolute', left: 299.63, top: 308.08, width: VOID_CORE, height: 6,
     backgroundColor: PAPER, borderRadius: 3, transformOrigin: '0% 50%',
   },
 });
 
 // MEASURED BAND, top and bottom.
 //   TOP    the ledger title and the void label, both at y 224. The void's rim tops
-//          out at 288 − 53×1.05 = 232.4 at the peak of its breath, and the figure's
+//          out at 294 − 53×1.05 = 238.4 at the peak of its breath, and the figure's
 //          crown never rises above ~358 even on the reaching gestures (the raised
 //          fists clamp to the arm's reach at y ≈ 367).
 //   BOTTOM the ground line at 501.5, and — the true extreme — the ankle JOINTS,

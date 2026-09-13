@@ -20,8 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 //
 // · a SYSTEM is a score stave above a performance line: five 1-thick rules 6
 //   apart, and a heavier 2-thick performance rule 34 below the lowest.
-//   Composed system at y 264 (stave) / 328 (performance); improvised system at
-//   y 366 / 430. Both run x 136…372.
+//   Composed system at y 273 (stave) / 337 (performance); improvised system at
+//   y 375 / 439. Both run x 136…372.
 // · eight NOTES per row: 9-wide discs at x 150 stepping 28. A composed note sits
 //   on the stave AND on the performance line, joined by a 1-thick stem, because
 //   the performance is of something. An improvised note sits only on the
@@ -29,7 +29,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // · the TRANSCRIBE MOVE lifts each improvised note from its performance line up
 //   to the empty stave above it — a 64-unit rise, the same gap the composed
 //   system already shows, so the two end up drawn identically.
-// · the ROW LABELS sit left of each system at x 136, y 250 and y 352.
+// · the ROW LABELS sit over each system at x 136, y 250 and y 352, and each stave
+//   starts 23 below its label, so the answer ring's halo clears the label (S13).
 // · the figure stands at x 54 and walks to 126; crown ~397, left of x 136.
 //
 // Ink runs y 250 (the first label) … y 500 (ground). BAND 244…512 = 268 puts the
@@ -46,8 +47,12 @@ const BASE_TR = 0.85;
 
 const SYS_X = 136;
 const SYS_W = 236;
-const STAVE_Y = [264, 366];
-const PERF_Y = [328, 430];
+// 9 lower than first drawn (S13). The answer ring starts 8 above its stave and its halo
+// 3 above that, so at 264 the halo ruled through the foot of the row's label on the graded
+// beat, and an answered row, which rises 10, put its top rule through the label as well.
+// At 273 the halo clears the label by 3 and a risen stave clears it by 4.
+const STAVE_Y = [273, 375];
+const PERF_Y = [337, 439];
 const NOTE_X = [150, 178, 206, 234, 262, 290, 318, 346];
 const LIFT = 64;
 
@@ -95,7 +100,9 @@ export default function Aesthetics37Scene({ clock, bt, bi, i, picked, onPick, dr
       t,
       stavesOn: carry(cv, 1, n, STAVES[p], STAVES[n], tr),
       scoreOn: carry(cv, 2, n, SCORE[p], SCORE[n], tr),
-      played: arriving ? ease01((bt.value - 0.2) / 1.6) : carry(cv, 3, n, PLAYED[p], PLAYED[n], tr),
+      // Through the carry while arriving too, or the beat after plays the solo again
+      // from its first note (C20c).
+      played: carry(cv, 3, n, PLAYED[p], PLAYED[n], arriving ? ease01((bt.value - 0.2) / 1.6) : tr),
       // Reader's thumb on the drag beat, the script's own track everywhere else.
       lift: LIVE_D[n] === 1 ? clamp01(dragPos.value) : carry(cv, 4, n, LIFTED[p], LIFTED[n], tr),
     };
@@ -197,7 +204,9 @@ const styles = StyleSheet.create({
   note: { position: 'absolute', width: 9, height: 9, borderRadius: 4.5, backgroundColor: INK },
   stem: { position: 'absolute', width: 1.5, backgroundColor: SOFT },
 
-  hit: { position: 'absolute', left: SYS_X - 6, width: SYS_W + 12, height: 84 },
+  // 82, not 84: the first row's halo then ends at 350, three clear of the second row's
+  // label at 353, and the ring's foot still passes 3 under the notes on its rule.
+  hit: { position: 'absolute', left: SYS_X - 6, width: SYS_W + 12, height: 82 },
   hitBox: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: 4 },
   hitWrong: { borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed' },
 });

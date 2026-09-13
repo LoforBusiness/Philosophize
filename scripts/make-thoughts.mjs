@@ -486,7 +486,12 @@ for (const [id, beats] of Object.entries(J.words)) {
   // draw the answer line, and the entrance beat draws the visitor's.
   const busy = [...at.keys()].filter((i) => graded[i] && at[i]);
   if (vis) busy.push(vis[0]);
-  const keep = new Set(choosePair(cands, at.length, busy));
+  // AND NEVER ON THE BEAT HE SPEAKS. `busy` only made that beat a worse choice, so
+  // where it was still the best one the mascot's thought went up beside the
+  // visitor's line, and in three lessons the two boxes lay across each other
+  // (check:thoughts 7b). One figure talks at a time.
+  const free = vis ? cands.filter((c) => c.i !== vis[0]) : cands;
+  const keep = new Set(choosePair(free, at.length, busy));
   for (const c of cands) {
     if (keep.has(c.i)) { shown += 1; ups.push(c.up); sides.push(c.side); } else { at[c.i] = null; held += 1; }
   }

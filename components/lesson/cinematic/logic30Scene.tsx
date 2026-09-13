@@ -173,8 +173,13 @@ const styles = StyleSheet.create({
   // rather than on bare page.
   floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
+  // ONE LINE, AND LEFT OF THE HAMMER. In a box 168 wide this caption measured 198
+  // against the real .ttf, so it wrapped, and its second line, COURSE BY COURSE at
+  // y 252…262, was ruled through by the top course's border at 258 from the beat
+  // that course arrives (S9). At 240 it holds one line, and centred on x 190 its ink
+  // ends at 289, clear of the hammer head's left edge at 293.5 on the same row.
   cap: {
-    position: 'absolute', left: CRS_X - 20, top: CAP_T, width: CRS_W + 40, textAlign: 'center',
+    position: 'absolute', left: 70, top: CAP_T, width: 240, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
 

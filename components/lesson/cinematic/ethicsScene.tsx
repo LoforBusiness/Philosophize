@@ -191,6 +191,14 @@ export default function EthicsScene({ clock, bt, bi, qv, gazeX, gazeY, gazeOn }:
     const here = ease01(bt.value / 0.6);
     const askHere = cnt === 0 ? 1 : 0;      // the headline lives where the ledger will
     const askWas = was === 0 ? 1 : 0;
+    // ONLY WHAT CHANGED MOVES (C20c). The headline writes itself, the origin card
+    // fills row by row and the sprout grows on the beat each ARRIVES — the lesson's
+    // first, or the first after a beat without it — and each holds finished after,
+    // fading out finished too. Keyed to `bt` alone, all three played again on every
+    // tap they were still on stage for.
+    const askWrites = askHere === 1 && (n === 0 || askWas === 0);
+    const origWrites = ORIGINS[n] === 1 && (n === 0 || ORIGINS[p] === 0);
+    const plants = PLANT[n] === 1 && (n === 0 || PLANT[p] === 0);
 
     return {
       cam: { s: lerp(prv.s, cur.s, tr), cx: lerp(prv.cx, cur.cx, tr), cy: lerp(prv.cy, cur.cy, tr) },
@@ -200,18 +208,18 @@ export default function EthicsScene({ clock, bt, bi, qv, gazeX, gazeY, gazeOn }:
       ledOn: cnt > 0 ? (was > 0 ? 1 : write) : 0,
       r0: row(0), r1: row(1), r2: row(2),
       plant: carry(cv, 1, n, PLANT[p], PLANT[n], tr),
-      grow: ease01(bt.value / 1.1),
+      grow: plants ? ease01(bt.value / 1.1) : 1,
       // the opening headline, assembling word by word
       askOn: askHere ? (askWas ? 1 : here) : askWas ? away : 0,
-      w0: ease01((bt.value - 0.15) / 0.4),
-      w1: ease01((bt.value - 0.45) / 0.4),
-      w2: ease01((bt.value - 0.75) / 0.4),
-      wRule: ease01((bt.value - 1.15) / 0.5),
+      w0: askWrites ? ease01((bt.value - 0.15) / 0.4) : 1,
+      w1: askWrites ? ease01((bt.value - 0.45) / 0.4) : 1,
+      w2: askWrites ? ease01((bt.value - 0.75) / 0.4) : 1,
+      wRule: askWrites ? ease01((bt.value - 1.15) / 0.5) : 1,
       // the three-source card, one row at a time
       origOn: ORIGINS[n] ? (ORIGINS[p] ? 1 : here) : ORIGINS[p] ? away : 0,
-      o0: ease01((bt.value - 0.25) / 0.45),
-      o1: ease01((bt.value - 0.6) / 0.45),
-      o2: ease01((bt.value - 0.95) / 0.45),
+      o0: origWrites ? ease01((bt.value - 0.25) / 0.45) : 1,
+      o1: origWrites ? ease01((bt.value - 0.6) / 0.45) : 1,
+      o2: origWrites ? ease01((bt.value - 0.95) / 0.45) : 1,
     };
   });
 

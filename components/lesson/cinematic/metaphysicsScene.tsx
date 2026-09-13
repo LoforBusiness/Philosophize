@@ -158,11 +158,14 @@ export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, i, gazeX,
       // fades UP late (bt 0.7, by which point the outgoing rule card is at 7%) and
       // DOWN fast (gone by bt 0.3, while the incoming chain is still at ~34%), so
       // two cards are never both legible in the same 60 units of stage.
+      // And it writes itself — fade up, then the strike — only on the beat it ARRIVES.
+      // On a second beat of it the card holds, struck, where it used to be written
+      // and struck out again behind the reader (C20c).
       noth:
         ERASE[n] > 0
-          ? ease01((bt.value - 0.7) / 0.45)
+          ? (n > 0 && ERASE[p] > 0 ? 1 : ease01((bt.value - 0.7) / 0.45))
           : ERASE[p] > 0 ? clamp01(1 - bt.value / 0.3) : 0,
-      nothX: ERASE[n] > 0 ? ease01((bt.value - 1.7) / 0.6) : 1,
+      nothX: ERASE[n] > 0 && !(n > 0 && ERASE[p] > 0) ? ease01((bt.value - 1.7) / 0.6) : 1,
     };
   });
 

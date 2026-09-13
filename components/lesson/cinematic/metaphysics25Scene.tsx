@@ -22,7 +22,7 @@ import { followMoves, kindOf, seedOf } from './camera';
 //   the fork, so the picture is read bottom-to-top like a life.
 // · the NODE is a disc of 18 at x 191, y 379, where the roads leave.
 // · a SPAN of 8 tall at y 380, x 132…292, carries the four ROADS: 6-wide bars at
-//   x 132, 186, 240, 292, each rising y 300…380, each topped by a PLATE of 46×24
+//   x 132, 186, 240, 292, each rising y 306…380, each topped by a PLATE of 46×30
 //   at y 276. Roads rather than branches, drawn as verticals off one span, because
 //   a rotated line at this size reads as a crack rather than a fork.
 // · THE SECOND ROAD IS SOLID and the other three are DASHED. That is the whole
@@ -51,14 +51,20 @@ const SPAN_R = 298;
 
 const ROAD_X = [132, 186, 240, 292];
 const ROAD_W = 6;
-const ROAD_TOP = 300;
 const ROAD_N = 4;
 /** The one that happened. Everything else in the scene is drawn thin. */
 const WALKED = 1;
 
 const HEAD_Y = 276;
 const HEAD_W = 46;
-const HEAD_H = 24;
+// TWO LINES TALL. CAUGHT IT measures 51.1 and MISSED IT 46.5 against the real .ttf,
+// in plates 46 wide that the road spacing (54 · 54 · 52) will not let grow, so both
+// wrap. At 24 tall with the words set 7 down, the second line landed across the
+// plate's bottom edge and the top of its road (S8). At 30 a two-line label fits and
+// a one-line label sits centred.
+const HEAD_H = 30;
+/** Each road rises from the span to the foot of its plate. */
+const ROAD_TOP = HEAD_Y + HEAD_H;
 const HEAD_CAP = ['SLEPT IN', 'CAUGHT IT', 'WALKED', 'MISSED IT'];
 
 const PLATE_X = [106, 202, 298];
@@ -193,12 +199,21 @@ function Road({ S, left, index, walked, label }: {
   const plate = useAnimatedStyle(() => ({
     opacity: clamp01(S.value.roads * ROAD_N - index) * (walked ? 1 : Math.max(0.25, S.value.solid)),
   }));
+  // THE NAME IS NOT THINNED WITH ITS ROAD (D35). It sat inside the plate and took the
+  // plate's 0.45, so SLEPT IN, WALKED and MISSED IT reached the reader at 2.9:1 on
+  // every beat from the third on. The dashes already say "nobody walked this"; the
+  // word only has to be there or not, and it is gone below a solidity of 0.2, which
+  // is where the graded beat's "loose talk" setting takes the road.
+  const word = useAnimatedStyle(() => ({
+    opacity: clamp01(S.value.roads * ROAD_N - index) * (walked ? 1 : clamp01((S.value.solid - 0.2) / 0.15)),
+  }));
   return (
     <>
       <Animated.View style={[styles.road, { left }, bar]} pointerEvents="none" />
-      <Animated.View style={[walked ? styles.headWalked : styles.headThin, { left: left + ROAD_W / 2 - HEAD_W / 2 }, plate]} pointerEvents="none">
-        <Text style={walked ? styles.headTextWalked : styles.headText}>{label}</Text>
-      </Animated.View>
+      <View style={[styles.head, { left: left + ROAD_W / 2 - HEAD_W / 2 }]} pointerEvents="none">
+        <Animated.View style={[walked ? styles.headWalked : styles.headThin, plate]} />
+        <Animated.Text style={[styles.headText, word]}>{label}</Animated.Text>
+      </View>
     </>
   );
 }
@@ -230,22 +245,25 @@ const styles = StyleSheet.create({
   span: { position: 'absolute', left: SPAN_L, top: SPAN_Y - 4, width: SPAN_R - SPAN_L + ROAD_W, height: 8, backgroundColor: INK },
   road: { position: 'absolute', top: ROAD_TOP, width: ROAD_W, height: SPAN_Y - ROAD_TOP, backgroundColor: INK },
 
-  headWalked: {
+  // ONE BOX HOLDS A PLATE AND ITS NAME (S12). The plate is its absolute child and the
+  // name sits in flow, centred, so the two cannot come apart while each takes its
+  // own opacity: the plate thins with its road and the name is there or not (D35).
+  head: {
     position: 'absolute', top: HEAD_Y, width: HEAD_W, height: HEAD_H,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  headWalked: {
+    position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
     borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
   },
   // A ROAD NOBODY WALKED IS DRAWN THIN, and the dashes are the claim rather than
   // a style: a boundary with nothing inside it (§13's cheese, read the other way).
   headThin: {
-    position: 'absolute', top: HEAD_Y, width: HEAD_W, height: HEAD_H,
+    position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
     borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 3,
   },
   headText: {
-    position: 'absolute', left: 0, top: 7, width: HEAD_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false,
-  },
-  headTextWalked: {
-    position: 'absolute', left: 0, top: 7, width: HEAD_W, textAlign: 'center',
+    width: HEAD_W - 2, textAlign: 'center', lineHeight: 10,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },
 

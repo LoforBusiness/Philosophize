@@ -27,7 +27,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // · the WEIGHT is a 30×24 STONE block riding the beam, at 100 units either side
 //   of the pivot at the extremes. It is what makes the tilt mean something: a
 //   beam that leans with nothing on it is a preference, not a burden.
-// · TWO NAMES of 104 under the land at y 396, centred on x 120 and x 320.
+// · TWO NAMES of 104 under the land at y 396, centred on x 150 and x 290, clear of
+//   the figure's head, which reaches x 105 on that same row at his walked mark.
 // · the LAND is a RULE band 260×8 at x 90 (90…350), y 382…390.
 // · THREE PLATES of 90×34 at x 124 · 216 · 308 (124…398), top y 452, two lines.
 // · the figure stands at x 24 and walks to 80; his crown is at y 397, under the
@@ -61,7 +62,11 @@ const LAND_Y = 382;
 const LAND_W = 260;
 
 const NAME = ['THE CLAIMANT', 'THE DOUBTER'];
-const NAME_MID = [130, 310];
+// PULLED IN TOWARD THE PIVOT. At 130 the claimant's name began at x 94 on the row
+// of his crown (397), and his head reaches x 105 at the walked mark, so from the
+// fifth beat on the T of THE was painted under his head (S9). At 150 it begins at
+// 114. The doubter comes in by the same twenty, so the pair stays even about 220.
+const NAME_MID = [150, 290];
 const NAME_W = 104;
 const NAME_T = 396;
 

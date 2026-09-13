@@ -93,6 +93,21 @@ function Lens({ S, k }: { S: { value: { lenses: number; clash: number } }; k: nu
   );
 }
 
+/**
+ * One lens's name, arriving WITH its lens — D35 applied a word at a time. The three
+ * names used to share one layer at `lenses * 1.6`, so on the beat that puts up the
+ * first lens all three read at 0.53, DUTIES and CHARACTER naming lenses that were
+ * not drawn yet.
+ */
+function LensName({ S, k }: { S: { value: { lenses: number } }; k: number }) {
+  const st = useAnimatedStyle(() => ({ opacity: clamp01(S.value.lenses * 3 - k) }));
+  return (
+    <Animated.Text style={[styles.capText, { left: LENS_MID[k] - CAP_W / 2 }, st]} pointerEvents="none">
+      {LENS_CAP[k]}
+    </Animated.Text>
+  );
+}
+
 export default function Ethics30Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -124,18 +139,13 @@ export default function Ethics30Scene({ clock, bt, bi, i, picked, onPick, gazeX,
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.cards && LIVE[i] === 1;
 
   const cardStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.card }));
-  const namesStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.lenses * 1.6) }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
 
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
 
-      <Animated.View style={[StyleSheet.absoluteFill, namesStyle]} pointerEvents="none">
-        {LENS_MID.map((mx, k) => (
-          <Text key={mx} style={[styles.capText, { left: mx - CAP_W / 2 }]}>{LENS_CAP[k]}</Text>
-        ))}
-      </Animated.View>
+      {LENS_MID.map((mx, k) => <LensName key={LENS_CAP[k]} S={SCENE} k={k} />)}
 
       {LENS_MID.map((mx, k) => <Lens key={mx} S={SCENE} k={k} />)}
 

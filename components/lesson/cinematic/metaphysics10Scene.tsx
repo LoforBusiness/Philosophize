@@ -164,7 +164,10 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, g
       str: (strOn ? 1 : 0) * (strFade ? grow : 1),
       slots: (slotsOn ? 1 : 0) * (slotsFade ? grow : 1),
       cardV: on ? (was ? 1 : grow) : (was ? 1 - grow : 0),
-      cardT: was ? carry(cv, 1, n, CARD_TOP[p], CARD_TOP[n], tr) : CARD_TOP[n],
+      // Always through the carry, so it REMEMBERS where the card was drawn. A card
+      // that arrived used to be put at its home without the carry hearing of it, so
+      // the next beat slid it in again from wherever it had last been seen (C20c).
+      cardT: carry(cv, 1, n, CARD_TOP[p], CARD_TOP[n], was ? tr : 1),
     };
   });
 

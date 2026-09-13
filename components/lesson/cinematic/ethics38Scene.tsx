@@ -21,9 +21,11 @@ import { followMoves, kindOf, seedOf } from './camera';
 // · the BEAM is 180×8 at y 296, pivoting about its own centre at x 250, so its
 //   ends sit at x 160 and x 340. It leans ±11° with `tilt`.
 // · a PAN 74×32 hangs under each end on a 2-wide cord (y 304…322), so the pans
-//   occupy x 123…197 and x 303…377 — clear of the figure's 116 on one side and
+//   occupy x 160…234 and x 266…340 — clear of the figure's 116 on one side and
 //   of the stage's edge on the other. EACH PAN COUNTER-ROTATES BY THE BEAM'S OWN
 //   ANGLE, because a pan that tips with the beam is a tray, not a balance.
+// · each pan's NAME hangs UNDER it, y 357…365 while level. Inside the pan it sat in
+//   the band the tie block grows up through, and was painted over by it (S9).
 // · one identical DISC of 14 sits in each pan. They are drawn from one style, so
 //   the picture cannot say which life is which except by the pan's name.
 // · the TIE BLOCK grows on the left pan as `tilt` turns — 0…22 tall, scaled from
@@ -56,6 +58,8 @@ const PAN_W = 74;
 const PAN_H = 32;
 const DISC = 14;
 const TIE_H = 22;
+/** The row under each pan that carries its name. */
+const NAME_H = 14;
 
 const COL_X = 242;
 const COL_W = 16;
@@ -124,10 +128,14 @@ export default function Ethics38Scene({ clock, bt, bi, i, picked, onPick, dragPo
 
   const beamOnStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.beamOn }));
   const weightsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.weightsOn }));
-  const beamStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${LEAN * SCENE.value.tilt}deg` }] }));
+  // THE NEAR PAN GOES DOWN. `tilt` is how far the beam leans toward the near pan,
+  // and the near pan is the one the tie block grows in. A positive rotate turns
+  // clockwise on screen, which RAISES the left end, so for the life of the lesson
+  // the pan taking on the extra weight rose as the weight grew (A1).
+  const beamStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${-LEAN * SCENE.value.tilt}deg` }] }));
   // BOTH PANS COUNTER-ROTATE BY THE SAME ANGLE, so one style serves both — a pan
   // that tips with the beam is a tray, and this is what keeps them hanging.
-  const armStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${-LEAN * SCENE.value.tilt}deg` }] }));
+  const armStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${LEAN * SCENE.value.tilt}deg` }] }));
   const tieStyle = useAnimatedStyle(() => ({ transform: [{ scaleY: SCENE.value.tilt }] }));
 
   return (
@@ -219,14 +227,18 @@ const styles = StyleSheet.create({
   },
 
   /** One end of the beam: the cord, the pan, its name, its life and its weight. */
-  arm: { position: 'absolute', top: BEAM_H, width: PAN_W, height: CORD_H + PAN_H, transformOrigin: '50% 0%' },
+  // THE ARM IS TALL ENOUGH TO HOLD THE PAN'S NAME, which hangs UNDER the pan rather
+  // than in it. It sat 20 down inside the pan, and the tie block grows up from the
+  // pan's floor through exactly that band, so from half way along the rail MY CHILD
+  // was painted over by the weight it names (S9). A shorter arm would clip the name.
+  arm: { position: 'absolute', top: BEAM_H, width: PAN_W, height: CORD_H + PAN_H + NAME_H, transformOrigin: '50% 0%' },
   cord: { position: 'absolute', left: PAN_W / 2 - 1, top: 0, width: 2, height: CORD_H, backgroundColor: INK },
   pan: {
     position: 'absolute', left: 0, top: CORD_H, width: PAN_W, height: PAN_H,
     borderWidth: 2, borderColor: INK, borderBottomLeftRadius: 10, borderBottomRightRadius: 10, backgroundColor: PAPER,
   },
   panText: {
-    position: 'absolute', left: 0, top: CORD_H + 20, width: PAN_W, textAlign: 'center',
+    position: 'absolute', left: 0, top: CORD_H + PAN_H + 3, width: PAN_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
   disc: {

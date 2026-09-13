@@ -73,7 +73,12 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // WHICH WAY HE IS POINTING, read off the same x track he walks along.
 const DIR = dirsFrom(X, 1);
 const P = BEATS.map((b) => b.p ?? 0);
-const WALL = BEATS.map((b) => b.wall ?? 0);
+// WHOLE WORKS ONLY (D35, S13). The script counts the wall in quarters and wrote 0.3 and
+// 0.6 for one work and two, and each frame fades in across its own quarter, so those
+// beats left the next frame and its date at 0.2 and 0.4 of their strength: 1950 read at
+// 1.7:1 on the second beat. Rounded to the nearest whole work a frame is up or it is not,
+// and the fade between beats is untouched.
+const WALL = BEATS.map((b) => Math.round((b.wall ?? 0) * 4) / 4);
 const METER = BEATS.map((b) => b.meter ?? 0);
 const SHOCK = BEATS.map((b) => b.shock ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));

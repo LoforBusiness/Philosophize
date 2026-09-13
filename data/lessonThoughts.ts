@@ -573,7 +573,7 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, null, 'Everyone shifts up one.', 'Room 1 is empty.', 'No last room to fall off.', null, null, 'The part equals the whole.', 'The maths is fine.', 'Buildable is another matter.', null],
   },
   'ethics-ethics-37': {
-    at: [null, null, [78, 387, 3, 54], null, [78, 387, 3, 54], [78, 387, 3, 54], null, null, null, [78, 387, 3, 54], null, null],
+    at: [null, null, [78, 387, 3, 54], null, null, [78, 387, 3, 54], null, null, null, [78, 387, 3, 54], null, null],
     say: [null, 'Four words.', 'There’s the cord.', 'No money, no law.', 'A duty out of a sound.', null, 'She cancelled a plan.', 'And told a friend.', null, null, 'Then who was wronged?', null],
     vis: [4, 153, 387, 3, 153],
   },
@@ -687,7 +687,7 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'Somebody else signed.', 'Not how risky.', 'Who else is in it.', null, 'Only one was free.', null, 'Expensive at the end.', null, null],
   },
   'ethics-ethics-17': {
-    at: [null, null, null, [200, 389, 2, 200], null, null, null, null, [268, 387, 2, 268], [268, 387, 2, 268], null],
+    at: [null, null, null, [200, 389, 2, 200], null, null, null, null, null, [268, 387, 2, 268], null],
     say: [null, 'Even then?', 'He knew how it looks.', 'Not a rule for all.', 'Hand a copy to everybody.', 'Then nobody expects truth.', null, null, 'Surely the friend matters.', null, null],
     vis: [8, 325, 387, 2, 349],
   },
@@ -757,7 +757,7 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'Say what it was about.', 'A mood, easily.', 'The title did that.', null, 'Not about anything.', 'A shape made of tones.', null, 'It copies the wanting.', null, null],
   },
   'epistemology-knowledge-23': {
-    at: [null, null, null, null, null, null, [298, 382, 3, 268], null, null],
+    at: [null, null, null, null, null, null, null, null, null],
     say: [null, 'Wider isn’t looser.', 'The mouth hasn’t moved.', null, 'Then the mesh does nothing.', null, 'Two settings at once.', null, null],
     vis: [6, 321, 377, 3, 357],
   },
@@ -786,7 +786,7 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'The vowel and the even.', 'A consonant is allowed.', null, 'A vowel behind the seven.', 'Only a no can test it.', null, null, null],
   },
   'logic-arguments-20': {
-    at: [null, null, [200, 386, 3, 200], null, null, [132, 386, 2, 132], null, null, [268, 387, 1, 268], null],
+    at: [null, null, [200, 386, 3, 200], null, null, null, null, null, [268, 387, 1, 268], null],
     say: [null, 'Same claim, less support.', 'One leg left.', 'Not a lie. Just the weakest.', null, 'The real one never moved.', 'Take on the strongest.', null, null, null],
   },
   'logic-arguments-21': {

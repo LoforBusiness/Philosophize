@@ -106,7 +106,11 @@ export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick, 
       // R7b — the knob IS the needle. The rail runs from barely believed to beyond
       // question and so does the gauge on stage, so the reader sets the confidence
       // they are being asked about rather than reading about it.
-      needle: SC_L + carry(cv, 2, n, NEEDLE[p], reacting ? dragPos.value : NEEDLE[n], ease01(clamp01(bt.value / 1.4)), SC_W),
+      // The gauge's width multiplies OUTSIDE the carry. `carry` remembers the value it
+      // returns, multiplier and all, so a width passed in as its multiplier was
+      // multiplied in again on every beat: the needle's first frame landed tens of
+      // thousands of units off the stage and slid back over 1.4s (C20c).
+      needle: SC_L + SC_W * carry(cv, 2, n, NEEDLE[p], reacting ? dragPos.value : NEEDLE[n], ease01(clamp01(bt.value / 1.4))),
       t,
     };
   });

@@ -184,8 +184,14 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick, pick
     const s = carryHands(s0, held);
     const dir = facing(DIR[p], DIR[n], bt.value);
     const grip = gripAt(s, { x: fx, groundY: GROUND, k: K_FIG, dir });
-    // It comes OFF the pile on the fetch beat and goes TO the ground from then on.
-    const rest = n <= 2 ? PILE_PT : DROP_PT;
+    // It comes OFF the pile on the fetch beat and goes TO the ground from then on —
+    // "from then on" read off HELD, not off a beat number. It was `n <= 2`, written
+    // when the fetch was beat 2; the beats were later split and the fetch is beat 5
+    // now, so from beat 3 the crate sat by the fence before he had gone for it, and on
+    // beat 5 he lifted it from there, sliding across the stage into his hands.
+    let fetched = false;
+    for (let k = 0; k < n; k++) if (HELD[k] > 0) fetched = true;
+    const rest = fetched ? DROP_PT : PILE_PT;
 
     return {
       fig: lookPose(s, fx, GROUND, K_FIG, dir, 1, gazeX.value, gazeY.value, gazeOn.value),

@@ -7,7 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import { BEATS } from './metaphysics2Script';
 import {
-  dirsFrom, WALK, ease01, lerp, mixStance, moveTr, pose, strideStance, type Bundle, } from './rig';
+  clamp01, dirsFrom, WALK, ease01, lerp, mixStance, moveTr, pose, strideStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
@@ -44,7 +44,7 @@ import type { SceneApi } from './CinematicPlayer';
 // · the three posted claims   y 302…340, x  20…380 — Q1 only, three Targets
 //   (CLAIM_L is derived: (400 - (112*3 + 12*2)) / 2 = 20, so the row is centred)
 // · BOTH sign plates          y 356…382 — above the crown, by 13 units
-// · both posts                y 382…500, at x 292 (IT IS) and x 364 (IT IS NOT)
+// · both posts                y 382…500, at x 292 (IT IS) and x 360 (IT IS NOT)
 // · the traveller             crown y 395, feet 500, on every beat and phase
 // · he WALKS x 92 → 150 → 214 → 292 → 236; widest body span x 69…312
 // · the road, ticks and fork  y 493…507
@@ -74,7 +74,10 @@ const GONE = BEATS.map((b) => b.gone ?? 0);
 const PR = BEATS.map((b) => b.pr ?? 0);
 
 const SIGN_IS_X = 292;
-const SIGN_NOT_X = 364;
+// 360 and not 364, with a plate 62 wide and not 68. The plate is its own element now
+// (S12), so the camera's measurement sees it, and at 364 it reached x 398, past the frame
+// the camera tables were built on. Here it ends at 391 and stays 7 clear of the IS sign.
+const SIGN_NOT_X = 360;
 
 // The road forks at x 306. Everything left of it is solid ground the traveller can
 // actually walk; everything right of it is drawn only as dashes, and dissolves.
@@ -132,6 +135,17 @@ export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick, ga
     const flick = 0.75 + 0.25 * Math.sin(SCENE.value.t * 5.0);
     return { opacity: (1 - SCENE.value.gone) * flick };
   });
+  // The sign's PLATE flickers with the road: the same numbers, one style per view.
+  const notPlate = useAnimatedStyle(() => {
+    const flick = 0.75 + 0.25 * Math.sin(SCENE.value.t * 5.0);
+    return { opacity: (1 - SCENE.value.gone) * flick };
+  });
+  // AND ITS NAME IS THERE OR IT IS NOT (D35, S13). It rode the flicker too, so on the
+  // eight beats the second way still stands IT IS NOT swam between 0.33 and 0.65, a
+  // word the reader could catch only every other second. The dashes and the plate
+  // carry the failing; the name stays readable while the way still stands (`gone`
+  // 0.35) and is absent once it has gone (0.95).
+  const notWord = useAnimatedStyle(() => ({ opacity: clamp01((0.6 - SCENE.value.gone) / 0.2) }));
   const principle = useAnimatedStyle(() => ({
     opacity: SCENE.value.pr,
     transform: [{ translateX: (1 - SCENE.value.pr) * -14 }],
@@ -204,8 +218,11 @@ export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick, ga
         {DASHES.map((x) => <View key={x} style={[styles.roadDash, { left: x }]} />)}
         {GHOST_TICKS.map((x) => <View key={x} style={[styles.ghostTick, { left: x }]} />)}
         <View style={styles.postNot} />
-        <View style={styles.signNot}><Text style={styles.signNotText}>IT IS NOT</Text></View>
       </Animated.View>
+      <View style={styles.signNot} pointerEvents="none">
+        <Animated.View style={[styles.signNotPlate, notPlate]} />
+        <Animated.Text style={[styles.signNotText, notWord]}>IT IS NOT</Animated.Text>
+      </View>
 
       <Stickman D={DT} k={K_FIG} />
     </Animated.View>
@@ -269,17 +286,21 @@ const styles = StyleSheet.create({
   },
 
   postNot: { position: 'absolute', left: SIGN_NOT_X - 1, top: 382, width: 2, height: GROUND - 382, backgroundColor: SOFT },
+  // ONE BOX, the plate its child (S12), so the plate can flicker while the name does not.
   signNot: {
-    position: 'absolute', left: SIGN_NOT_X - 34, top: 356, width: 68, height: 26,
-    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 3,
+    position: 'absolute', left: SIGN_NOT_X - 31, top: 356, width: 62, height: 26,
     alignItems: 'center', justifyContent: 'center',
   },
-  // 11 / 0.4, not 11.5 / 0.6: "IT IS NOT" measures ~62 units at the larger setting
-  // inside a 65-unit interior, and a wrap would put a second line outside the
-  // 26-tall plate. This keeps one comfortable line with room to spare.
+  signNotPlate: {
+    position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 3,
+  },
+  // 11 / 0.4, not 11.5 / 0.6: "IT IS NOT" measures ~62 units at the larger setting,
+  // which is the whole 62-unit sign, and a wrap would put a second line outside the
+  // 26-tall plate. At this setting it measures 53, one line with room to spare.
   signNotText: {
-    // INK: this sign rides a ghost road that fades away, and SOFT is 5.3:1 at full
-    // strength — under 3:1 the moment anything dims it (D35).
+    // INK on the page: the plate around this name thins and flickers with its road,
+    // and the name itself no longer does (D35).
     fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14.5, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },

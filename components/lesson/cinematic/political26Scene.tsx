@@ -49,14 +49,20 @@ const STAMP_X = 166;
 const STAMP_Y = 302;
 const STAMP_D = 30;
 
-const SRC_X = [136, 206];
+// NARROWER, AND FURTHER LEFT. At 60 wide from x 136 the table ran to 266, under
+// the answer column's left edge at 256, and the column's third plate was painted
+// straight across the NG of REASONING (S9). At 56 wide from x 128 the pair ends at
+// 248, eight units short of the plates, and the figure's widest span at the walked
+// mark (113) still clears the ballot box by fifteen.
+const SRC_X = [128, 192];
 const SRC_Y = 380;
-const SRC_W = 60;
+const SRC_W = 56;
 const SRC_H = 46;
 const SRC_CAP = ['COUNTING', 'REASONING'];
 const SRC_LABEL_Y = 432;
 
-const FEED_X = [164, 234];
+/** Each feed's left edge, two units left of its source's centre: its width grows rightward. */
+const FEED_X = [154, 218];
 const FEED_Y = 336;
 const FEED_H = 44;
 const FEED_THIN = 3;
@@ -168,12 +174,12 @@ export default function Political26Scene({ clock, bt, bi, i, picked, onPick, dra
         <View style={[styles.source, { left: SRC_X[0] }]} />
         {/* THE SLOT — a ballot box is a box you cannot see into, with one way in. */}
         <View style={styles.slot} />
-        <Text style={[styles.sourceText, { left: SRC_X[0] - 5 }]}>{SRC_CAP[0]}</Text>
+        <Text style={[styles.sourceText, { left: SRC_X[0] - 4 }]}>{SRC_CAP[0]}</Text>
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, tableStyle]} pointerEvents="none">
         <View style={[styles.source, styles.round, { left: SRC_X[1] }]} />
-        <Text style={[styles.sourceText, { left: SRC_X[1] - 5 }]}>{SRC_CAP[1]}</Text>
+        <Text style={[styles.sourceText, { left: SRC_X[1] - 4 }]}>{SRC_CAP[1]}</Text>
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
@@ -234,9 +240,11 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, backgroundColor: STONE,
   },
   round: { borderTopLeftRadius: 22, borderTopRightRadius: 22 },
-  slot: { position: 'absolute', left: SRC_X[0] + 16, top: SRC_Y + 8, width: 28, height: 4, backgroundColor: INK },
+  slot: { position: 'absolute', left: SRC_X[0] + (SRC_W - 28) / 2, top: SRC_Y + 8, width: 28, height: 4, backgroundColor: INK },
+  // Four units either side of its source rather than five: at five the two name
+  // boxes overlapped by two units in the gap between the sources.
   sourceText: {
-    position: 'absolute', top: SRC_LABEL_Y, width: SRC_W + 10, textAlign: 'center',
+    position: 'absolute', top: SRC_LABEL_Y, width: SRC_W + 8, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,
   },
 

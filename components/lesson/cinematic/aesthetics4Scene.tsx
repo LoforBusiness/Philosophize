@@ -10,7 +10,7 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics4Script';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld,
-  useCarry, carry, STONE, reactPose,
+  useCarry, carry, pickAt, STONE, reactPose,
 } from './cinematicKit';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -82,6 +82,13 @@ const X = BEATS.map((b) => b.x ?? 219);
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
+
+// WHERE THE PLACARD IS, in the SORT'S OWN ORDER: saying so · real skill · the art
+// world. `pickPos` runs across the bins as the author wrote them and rests on the
+// middle one before the reader moves the chip, so read straight off it the placard
+// sat at half opacity and nine-tenths size under "real skill": CONFERRED at 7.9px
+// and 0.5 (D35), on the one setting the comment in SCENE says cannot confer it (A1).
+const ART_AT = [0, 0, 1];
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics4'));
 
 export default function Aesthetics4Scene({ clock, bt, bi, pickPos, i }: SceneApi) {
@@ -112,7 +119,7 @@ export default function Aesthetics4Scene({ clock, bt, bi, pickPos, i }: SceneApi
       // R7b — the arm hangs the ART placard. Only the far setting can put it there:
       // saying the word does not, and skill does not, and the placard appears exactly
       // when the reader reaches the artworld.
-      art: carry(cv, 4, n, ART[p], reacting ? pickPos.value : ART[n], tr),
+      art: carry(cv, 4, n, ART[p], reacting ? pickAt(ART_AT, pickPos.value) : ART[n], tr),
       askOn: ease01(clamp01((ask - 0.55) / 0.45)),
       testsOn: ease01(clamp01((1 - ask - 0.55) / 0.45)),
     };

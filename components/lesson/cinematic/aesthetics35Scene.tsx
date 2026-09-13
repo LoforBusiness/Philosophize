@@ -89,7 +89,9 @@ export default function Aesthetics35Scene({ clock, bt, bi, qv, i, picked, onPick
     // The train runs on the beat that says it runs, and HOLDS at the far end after
     // — a train that slid back to the junction between beats would be telling the
     // reader the joke had un-happened.
-    const runNow = RUN[n] > 0 && RUN[p] === 0 ? ease01((bt.value - 0.2) / 1.3) : carry(cv, 0, n, RUN[p], RUN[n], tr);
+    // Through the carry on the running beat too: run without it, the carry still
+    // held the train at the junction, and the beat after ran it again (C20c).
+    const runNow = carry(cv, 0, n, RUN[p], RUN[n], RUN[n] > 0 && RUN[p] === 0 ? ease01((bt.value - 0.2) / 1.3) : tr);
 
     return {
       fig: lookPose(figS, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),

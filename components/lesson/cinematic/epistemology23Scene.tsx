@@ -59,8 +59,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 //   the 202-unit interior, and at 40 the outer two bars stood outside the sieve. Nothing about the mesh moves the
 //   shutters and nothing about the shutters moves the mesh, which is the claim
 //   the whole scene exists to make.
-// · the TRAY is 168×28 at x 116…284, y 346…374, and it FILLS: what survives the
-//   mesh piles up in it.
+// · the TRAY is 168×36 at x 116…284, y 346…382, and it FILLS: what survives the
+//   mesh piles up in it, under a band at its top that carries its name and that
+//   nothing piles into (S13).
 // · THE THREE PART NAMES LIVE IN THE MARGIN, x 6…88, each on a hairline leader to
 //   the part it names. That is the fix for the collisions above and it is also
 //   what a labelled instrument looks like — nothing is printed across the
@@ -70,7 +71,7 @@ import { followMoves, kindOf, seedOf } from './camera';
 //   two settings, so a disc that is turned away is turned away AT the shutter and
 //   a disc that is caught is caught AT the mesh.
 // · the FIGURE walks x 200 → 132 → 268 on GROUND 500; crown ≈ 397, and the tray
-//   ends at y 374, so 23 units stay clear at every stop. A claim falls 12 units
+//   ends at y 382, so 15 units stay clear at every stop. A claim falls 12 units
 //   to a shutter, 62 to the mesh and 115 to the tray — every fall positive.
 //
 // Ink runs y 200 (the chute) … y 500. BAND 196…512 = 316, with the 103-unit
@@ -103,7 +104,13 @@ const SIEVE_BOT = 332;
 const TRAY_X = 116;
 const TRAY_Y = 346;
 const TRAY_W = 168;
-const TRAY_H = 28;
+// TALLER BY A BAND FOR ITS NAME. At 28 the label sat 9 down and the pile grew up to
+// 21, so on a beat that filled the tray WHAT YOU BELIEVE was either lost in ink
+// (1.7:1) or cut across the middle by the pile's top edge (S13). The name rides the
+// top LABEL_ROOM units now and the pile stops under it.
+const TRAY_H = 36;
+/** The band under the rim that carries WHAT YOU BELIEVE; nothing piles into it. */
+const LABEL_ROOM = 13;
 
 const DROPS = 12;
 const DOT = 8;
@@ -199,7 +206,7 @@ export default function Epistemology23Scene({ clock, bt, bi, i, picked, onPick, 
   // lesson's own arithmetic, drawn.
   const pile = useAnimatedStyle(() => {
     const through = SCENE.value.mouth * (1 - SCENE.value.mesh * 0.82);
-    return { height: (TRAY_H - 7) * clamp01(through) * SCENE.value.fall };
+    return { height: (TRAY_H - 7 - LABEL_ROOM) * clamp01(through) * SCENE.value.fall };
   });
 
   const bars: number[] = [];
@@ -429,8 +436,10 @@ const styles = StyleSheet.create({
     position: 'absolute', left: TRAY_X + 4, width: TRAY_W - 8,
     bottom: STAGE_H - (TRAY_Y + TRAY_H) + 3.5, backgroundColor: INK, opacity: 0.82, borderRadius: 1,
   },
+  // In the top band, over nothing but the tray's own stone: 349…360, where the
+  // pile's highest edge is 362.5.
   trayText: {
-    position: 'absolute', left: TRAY_X, top: TRAY_Y + 9, width: TRAY_W, textAlign: 'center',
+    position: 'absolute', left: TRAY_X, top: TRAY_Y + 3, width: TRAY_W, textAlign: 'center', lineHeight: 11,
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.9, color: INK, includeFontPadding: false,
   },
 

@@ -933,7 +933,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **fifty-six** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **fifty-seven** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -944,7 +944,22 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-turn` · `check-moves` · `check-life` · `check-thoughts` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-thoughts` · `check-rules`.
+
+> **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
+> replays the figure, and a prop's animation was invisible to every check unless it
+> was spelled `lerp(T[p], T[n], …)` — so C20c, *only animate what changed*, was a rule
+> nobody measured, until a reader watched a straw man in `logic-arguments-9` get
+> knocked over again on every tap. It loads each real scene in plain Node with React,
+> React Native and Reanimated stood in (a hook store, a once-per-frame derived value,
+> styles it can call; `rig`, `moves`, `camera`, `cinematicKit` and the scripts are the
+> real modules), plays all 244 lessons in about 25 seconds, and fails on anything that
+> jumps at a beat change and would still jump if that beat had changed nothing (C20c),
+> on a painted box only as tall as its padding, and on words that stay put while their
+> plate tips (S12). Its first run found 13 more lessons repeating something; all are
+> fixed. One-frame CUTS where a beat really does change are a separate class, held at
+> 302 in 41 lessons by `CUT_BUDGET`, and `node scripts/countertest-replay.mjs` puts
+> each defect back.
 
 > **`check-rules` is the newest and it is not about a lesson at all — it is about
 > the file lessons are written FROM.** `docs/LESSON_RULES.md` is what an author
@@ -5617,6 +5632,26 @@ browser at it; the first transform can take longer than a navigation timeout.
   failure §21 already records three times over, arriving by a fourth route.
   A dead probe is a finding now: the lesson is marked, the summary says so, and the
   run exits non-zero. `READ_DEBUG=1` prints what the page actually threw.
+
+  **AND A SWEEP THAT FINDS SOMETHING NOW FAILS, WHICH IT NEVER DID.** It exited 0 on
+  every finding it ever printed, so "check-readable exit 0" read as a pass on the day
+  it listed 29 struck words across ten lessons, and a reader found them first
+  (LESSON_RULES S13). TINY, CUT, FAINT, SPILL, UNDER and STRIKE are high-water marks in
+  its `BUDGET` now, like every other budget in the suite; BLANK stays a report. **Sweep
+  a finding's lesson ALONE at `LANES=1` before changing its scene.** The first full
+  sweep under the gate named six lessons, and two of them, a CUT in
+  `epistemology-knowledge-34` and a FAINT in `logic-arguments-8`, did not come back on
+  their own: that was the machine, not the lesson. A third, `logic-arguments-30`, was the
+  CHECKER: the probe is a template literal, so the regex reading a tilt out of
+  `matrix(…)` lost its backslashes in the page, every angle came out NaN, and every
+  tilted element was judged by its box (LESSON_RULES S13). `node
+  scripts/countertest-readable.mjs` puts real collisions back, and wants a quiet machine.
+  **Its sweeps then read one beat at random, and the route was the reason.** `claimRoute`
+  returns `wrote` for exactly this case, and `check:readable` went straight past it: it
+  navigated before Metro had registered the preview route it had just written, and waited
+  110 seconds on the not-found screen without ever reloading it. A one-lesson run has only
+  that first page to lose. It reloads a not-found screen every five seconds now and says
+  what the page showed when a stage never comes, and with that both cases passed.
 
   **A RULE THAT REMOVES EVIDENCE CAN BREAK A RULE THAT COUNTS IT.** The same file
   had a guard that dropped a word outright when the paint stack put another word

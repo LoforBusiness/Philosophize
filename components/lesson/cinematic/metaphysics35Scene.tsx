@@ -128,7 +128,7 @@ export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPic
       // The tie parts on the beat that snaps, and STAYS parted — a contradiction
       // that re-knots itself while the reader is still looking at it would undo the
       // one thing this beat is for.
-      snap: SNAP[n] === 1 ? ease01((bt.value - 0.35) / 0.8) : 0,
+      snap: SNAP[n] === 1 ? (n > 0 && SNAP[p] === 1 ? 1 : ease01((bt.value - 0.35) / 0.8)) : 0,
       branchOn: carry(cv, 4, n, BRANCH[p], BRANCH[n], tr),
       // On the graded beat the surviving link closes as the answer lands.
       seal: LIVE[n] === 1 ? ease01(q) : 0,

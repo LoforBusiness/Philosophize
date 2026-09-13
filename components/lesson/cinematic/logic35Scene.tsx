@@ -27,7 +27,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 //   across its middle at x 232, which is the only mark in the scene that means
 //   "no" — and it is a stroke, not a colour (§19).
 // · the THIRD CAUSE box is 96×32 at x 190, y 430…462, below the base line, with
-//   two 2-thick arrows rising from its top corners to each column's foot.
+//   two 2-thick arrows 24 long rising from its top corners toward each column; at
+//   38 degrees their tips stop at y 411, under the column labels rather than in them.
 // · the THREE CANDIDATES are 100×26 boxes at x 150, stacked at y 286, 318, 350 —
 //   they occupy the same air the arrow does, so they only ever appear on the beat
 //   the arrow is being questioned, and the arrow's own beat is over by then.
@@ -114,14 +115,16 @@ export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dra
     return {
       fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
-      // Climbing on their own beat, held everywhere after it.
-      grow: CLIMB[n] === 1 ? ease01((bt.value - 0.2) / 1.5) : carry(cv, 1, n, RISE[p], RISE[n], tr),
+      // Climbing on their own beat, held everywhere after it — and through the carry
+      // while climbing too, or the beat after climbs them again from the floor (C20c).
+      grow: carry(cv, 1, n, RISE[p], RISE[n], CLIMB[n] === 1 ? ease01((bt.value - 0.2) / 1.5) : tr),
       arrowOn: carry(cv, 2, n, ARROW[p], ARROW[n], tr),
       picksOn: carry(cv, 3, n, PICKS[p], PICKS[n], tr),
       // R7c — the hidden hand under both columns is the thing being cut. A bigger
       // study leaves it exactly where it was; a coin takes it away.
       underOn: carry(cv, 4, n, UNDER[p], reacting ? 1 - dragPos.value : UNDER[n], tr),
-      cut: CUT[n] === 1 ? ease01((bt.value - 0.25) / 0.5) : 0,
+      // The cut is made once, on the beat that makes it, and stays made.
+      cut: CUT[n] === 1 ? (n > 0 && CUT[p] === 1 ? 1 : ease01((bt.value - 0.25) / 0.5)) : 0,
       // The right candidate fills as the answer lands.
       lit: LIVE[n] === 1 ? ease01(q) : 0,
     };
@@ -133,7 +136,9 @@ export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dra
 
   const arrowStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.arrowOn }));
   const underStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.underOn }));
-  const cutStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.cut, transform: [{ scaleY: SCENE.value.cut }] }));
+  // The cut stays made, but it is only SEEN while the arrow it cuts is: on the beats after
+  // the arrow fades it hung alone under the caption, a stroke negating nothing (A1).
+  const cutStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.cut * SCENE.value.arrowOn, transform: [{ scaleY: SCENE.value.cut }] }));
 
   return (
     <View style={styles.scene}>
@@ -264,7 +269,10 @@ const styles = StyleSheet.create({
     position: 'absolute', left: THIRD_X, top: THIRD_Y + 11, width: 96, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
-  feedArm: { position: 'absolute', top: BASE_Y + 4, width: 2, height: 34, backgroundColor: INK, transformOrigin: '50% 100%' },
+  // 24 long and not 34, standing on the box at 430 (S13). At 34 and 38 degrees each arm's
+  // tip reached y 403, inside its column's label (ink 399…406), so DROWNINGS was ruled
+  // through on every beat the box stood. At 24 the tips stop at 411, pointing at the names.
+  feedArm: { position: 'absolute', top: BASE_Y + 14, width: 2, height: 24, backgroundColor: INK, transformOrigin: '50% 100%' },
 });
 
 export function Logic35Lesson({ lesson }: { lesson: Lesson }) {

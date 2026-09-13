@@ -739,6 +739,51 @@ dropped to empty and swept back in behind the reader every time they moved on.
 The fix is always the same shape: give the element its PREVIOUS beat's state as well
 as its current one, hold what is unchanged, animate only the difference.
 
+**AND C20c IS MEASURED NOW, BY RUNNING THE SCENES — `npm run check:replay`.** For as
+long as this rule existed nothing checked it, and a reader found what that costs on
+`logic-arguments-9`: *"it looks as if an animation above the stickman keeps on
+repeating itself"*. A straw copy knocked over on beat 3 stood back up and fell again on
+beats 4 and 5, because its fall was `STRAW[n] === 2 ? ease01((bt − 1.15) / 0.7) : 0`.
+`check:smooth` replays the FIGURE, and sees a prop only when it is spelled
+`lerp(T[p], T[n], …)`.
+
+`check:replay` loads every real scene in plain Node — React, React Native and
+Reanimated stood in by a hook store, a derived value computed once a frame and styles
+it can call; `rig`, `moves`, `camera`, `cinematicKit` and the script are the real
+modules — and plays each lesson as a patient reader does. At every beat change it holds
+each visible element's first frame against the frame the old beat would have drawn next,
+and puts every jump to the one question this rule asks: **played again with that beat
+given the previous beat's channels, does it still move?** If it does, it moves where
+nothing changed, and the build fails. A one-shot keyed to a channel that DID change — a
+stamp that strikes on the beats its script marks — is a pulse, and is not counted.
+
+Its first run found **13 more lessons**, in four shapes, each with one fix:
+
+- **Timed from `bt` alone** — ethics-1's headline, metaphysics-1's struck card,
+  metaphysics-35's tie, epistemology-35's link, logic-35's cut. Animate only when the
+  track differs from the previous beat, and hold after.
+- **An arrival that bypasses the carry** — aesthetics-35's train, aesthetics-37's solo,
+  ethics-37's cord, metaphysics-37's hammer, logic-35's columns, metaphysics-10's card.
+  `arriving ? ease : carry(cv, k, n, T[p], T[n], tr)` never tells the carry where the prop
+  got to, so the beat after starts again from its last memory. Pass the arrival as the
+  carry's own travel: `carry(cv, k, n, T[p], T[n], arriving ? ease : tr)`.
+- **A reveal multiplied OUTSIDE the carry** — metaphysics-9's thought: `carry(…) * ease(bt)`
+  starts from nothing on every tap.
+- **A multiplier that is not a fade** — epistemology-10's needle. `carry` remembers the
+  value it RETURNS, multiplier and all, so a width passed as its last argument compounds
+  on every beat; that needle's first frame landed 63,000 units off the stage.
+  A scale factor multiplies outside.
+
+And one was a picture, not a timing: `political8`'s crate chose where it rests by
+`n <= 2`, written when the fetch was beat 2. The beats were later split, the fetch is beat
+5, and from beat 3 the crate sat by the fence before he had gone for it. **A beat number
+written into a scene is a channel nobody can see** — derive it from the track (there,
+`HELD`).
+
+Every timing fix left each beat's resting picture exactly as it was — 11,235 settled
+values compared — so those lessons were re-stamped rather than re-measured. Budget 0;
+`node scripts/countertest-replay.mjs` puts each shape back.
+
 **C20d. A reaction must be DELAYED past the action that causes it.** Two figures
 driven by the same `u` peak together, so a punch and the head that answers it arrive
 at the same instant — the head has already gone by the time the fist gets there and
@@ -4155,8 +4200,18 @@ to get wrong and impossible to see in the source:
       custom loop) as well as the walk (B14); every figure has a reason (B15).
 - [ ] Every x change routed through `travelStance`, never lerped under a stand, and
       the track monotonic so nobody flips facing in one frame (C18).
-- [ ] Nothing driven by `bt` replays on a beat where it did not change (C20c); any
-      reaction offset past the action that causes it (C20d).
+- [ ] Nothing driven by `bt` replays on a beat where it did not change (C20c) —
+      `npm run check:replay` runs the scene and fails if it does; any reaction offset
+      past the action that causes it (C20d).
+- [ ] A plate and its words are one box: the words sit inside it and move with it, and
+      nothing painted is only as tall as its padding (S12).
+- [ ] Every word clears the EXTREME of everything that moves near it — a breath's peak,
+      a fall's path and landing, a rotated corner, a fill at full height, the figure at
+      each mark, a ring's halo and an answer's rise, a flicker's low, a second line if it
+      can wrap — and a word a control drives is legible or absent at the control's rest
+      as well as its ends (S13). A fix keeps every stored must-box inside what it was, or
+      the camera moves with it. `npm run check:readable` renders it and fails on what it
+      finds.
 - [ ] Two-figure distances derived from intent + `MOVE_ADV`, not hand-typed (B9);
       anything pointing at a figure aimed via `headAt` (B9b).
 - [ ] Figures arrive at full opacity from off-stage, never fade up on screen (C20b).
@@ -6357,6 +6412,190 @@ With all of that, the corpus reads **186 lessons · 509 target-beats · 0 BLANK*
 with no lesson left unaudited. The nine hollow readings that remain are all either
 sparse-but-complete art — a rubble heap, an ash heap, a provenance rail — or a card
 caught mid-lift, which is why hollow reports and does not fail.
+
+## S12 · A plate holds its words — one box, never a plate and a layer on top of it
+
+A reader on `logic-arguments-9`: *"the box isn't made correctly so it cuts off
+words"*. The straw copy was drawn as two siblings: an empty stone tag, and a
+transparent layer at the same left and top carrying the words, so that the words
+would not dim with the tag. **An empty View with no height is only as tall as its
+padding**, so the tag was a 13-unit bar ruled through three lines of text — and when
+the copy was knocked over, the bar tipped 16° and the words stood still.
+
+Nothing could see it. `check:fits` pairs a caption with its plate by the plate's
+declared `top` and `height`, and this plate declared no height. `check:readable`'s
+STRIKE looks for something painted ON TOP of a word, and the bar was painted under.
+
+**The rule: a plate and its words are ONE box.** The words sit inside it and give it
+its height, and whatever the plate does — tip, slide, fade — the words do with it.
+Where the plate has to recede and the words must not (D35), the recede is a CHILD laid
+under the words at the box's own size, never a sibling:
+
+    <Animated.View style={[styles.tag, tagStyle]}>            // position, width, padding, tip
+      <Animated.View style={[styles.tagPlate, plateStyle]} />  // fill and rule, all four sides at 0
+      <Text style={styles.tagText}>…</Text>                    // in flow: it sizes the box
+    </Animated.View>
+
+`npm run check:replay` holds both halves by running the scene (the note under C20c
+says how). **STRIP** is a painted View with no children and nothing giving it a
+height. **DETACH** is a words layer that paints nothing, anchored at a plate's left
+and top, that does not move when the plate tips or slides. A fill that WIPES in under
+its words — a `scaleX` from the edge, as `political4`'s stamped cards do — is the
+design and stays silent; so does an orb that carries its own letter. Both are 0 across
+the corpus, and `node scripts/countertest-replay.mjs` puts the straw copy back to
+prove the check still sees it.
+
+---
+
+## S13 · A word must be clear at the EXTREME of everything that moves near it
+
+A reader on `logic-arguments-9`: *"it cuts off words"*. Fixing that lesson and then
+sweeping the whole corpus with `check:readable` found the same complaint in fifteen
+more lessons, and not one of them shows in a still of the moment the author had in
+mind. Every layout had been checked at ONE value of what moves near the word, and the
+word was clear there. The defect was always at another value:
+
+- **the top of a breath** — `metaphysics4`'s void breathes to 1.05, and at the peak its
+  rim crossed the foot of WHAT-IS-NOT. The file's own header computed that peak (232.4)
+  and never set it beside the label's ink;
+- **a fall's path and where it lands** — `logic20`'s strike bar drops through its
+  caption's row and comes to rest on the baseline, and the board it knocks over lifts
+  a corner into the same letters;
+- **a fill at its full height** — `ethics38`'s tie block and `epistemology23`'s pile grow
+  up through the name printed in the same pan and the same tray;
+- **the figure at his mark** — `logic29` sets its names on the row of his crown, and
+  where he stops his head is painted over the T of THE;
+- **a neighbour's column** — `political26`'s answer plates overlapped its table by ten
+  units, so the third plate was painted across the end of REASONING;
+- **a second line** — `logic30`'s caption measures 198 in a box of 168, and
+  `metaphysics25`'s CAUGHT IT and MISSED IT are wider than their 46-unit plates. The
+  second line lands on whatever is under the box;
+- **a control at rest** — `pickPos` rests BETWEEN two options before the reader moves
+  anything, so a word driven straight off it sits at half: `aesthetics4`'s CONFERRED at
+  0.5 and 7.9px, `aesthetics11`'s IDENTICAL tag, `political15`'s THIS PROTEST at half
+  opacity and half height, and `ethics18`'s whole board, whose control had been wired
+  to the board's fade instead of the line its own comment describes;
+- **a word before its thing** — `ethics30` put all three lens names up at 0.53 on the
+  beat that draws the first lens;
+- **another bubble** — the second figure's line and the mascot's thought on one beat in
+  three lessons, which `check:thoughts` 7b now holds, and in `logic20` a thought placed
+  against a board the must-box probe had recorded before it tipped.
+
+A second full sweep, once those were fixed, found three more of the same shape:
+
+- **a ring's halo, and the row that rises inside it** — `aesthetics37` printed each row's
+  name 6 units above its answer ring, and `Target` draws a halo 3 units outside the ring,
+  so on the graded beat the halo ruled through the foot of both names. An answered row
+  rises 10, which would have put its top stave line through them as well;
+- **the low of a flicker** — `metaphysics2`'s IT IS NOT rode its road's flicker, so on the
+  beats that road still stands the name swam between about a third and two thirds of its
+  strength;
+- **a track between its steps** — `aesthetics27`'s script counts the wall in quarters and
+  wrote 0.3 and 0.6 for one work and two, which left the next frame and its date at 0.2
+  and 0.4: 1950 at 1.7:1.
+
+And once the checker could see a tilted shape (below), a third sweep found one more:
+
+- **a tilted arm's tip** — `logic35`'s two feed arms rise from its third-cause box at 38
+  degrees, and at 34 units long each tip ended inside its column's label: DROWNINGS was
+  ruled through on every beat the box stood, and CONES was grazed.
+
+### The rule
+
+**For every word on the stage, run everything that moves near it to its extreme — the
+top of a breath, both ends of a fall, a rotation's corners, a fill at full height, the
+figure at every mark, the halo of every ring and the rise of every answer, the low of
+every flicker, a second line if the words can wrap — and the word must be clear
+at each.** A control moves too, and its extremes are its two ends AND its rest. A word
+the control drives is legible or absent at all three (D35): read the control through
+`pickAt` with a per-option table, never straight, and `carry` the reading so the
+question's arrival is a transition rather than a step (group L).
+
+### What the fixes look like
+
+- **Move the word out of the path when the path is the lesson.** The strike is the
+  argument in `logic20`, so the caption went right of it — ending at x 357, inside the
+  frame the camera was built on, not at the board's edge nine units further.
+- **A label on a fill that grows gets a band the fill never enters.** `epistemology23`
+  first laid a PAPER copy of WHAT YOU BELIEVE inside a clip the size of the pile, and on a
+  part-filled pile the light-to-dark edge ran straight across the letters, which reads
+  as a strike. The tray is 36 tall now, the name rides its top 13 units (349…360), and
+  the pile stops at 362.5.
+- **Stay inside the frame the camera was built on, and move the other thing when the word
+  cannot move.** The player pulls a shot out until each beat's stored must-box fits
+  (`containShot`), so a fix that grows a stored box changes the camera. `aesthetics37`'s
+  names could not rise without growing every beat's box, so both staff systems moved 9
+  down instead and the rings went from 84 to 82 tall: the halo clears each name by 3 and
+  a risen stave clears it by 4. `metaphysics2`'s plate became an element the probe can
+  see, and at 68 wide it reached past the stored box, so the sign stands at x 360 and is
+  62 wide.
+- **A step track is written in whole steps.** `aesthetics27` rounds the wall to the
+  nearest quarter, so a frame is up or it is not; the fade between beats is untouched.
+- **A name hangs under what it names when the inside is taken.** `ethics38`'s pan names
+  sit under the pans, inside the arm, so they still ride its counter-rotation.
+- **A plate that has to thin keeps its word at full strength** — S12's shape, the recede
+  a child under the words and the word on its own opacity (`metaphysics25`).
+- **One figure talks at a time.** `make:thoughts` no longer offers the mascot a thought
+  on the beat the second figure speaks.
+
+### And one animation was running backwards
+
+Rendering those beats found an A1 fault that no word-check could. `ethics38` documents
+`tilt` as the beam leaning toward the near pan, and a positive `rotate` turns clockwise
+on screen, which LIFTS the left end — so for the life of the lesson the pan the tie
+block grows in rose as it got heavier. **A sign is a claim**, and only a render of the
+beat can hold it against the sentence.
+
+**And a stroke outlived the thing it struck.** `logic35` cuts its false arrow with a short
+stroke that is made once and stays made, and the render of its last three beats showed
+that stroke hanging alone under the caption after the arrow had faded: a mark meaning
+"no", negating nothing. It is seen now only while the arrow is. The same render is how
+the arms were judged: at 24 units long they stop at y 411, under the names they point at.
+
+### And the checker was wrong the other way twice
+
+`check:readable` measured the word under test by its INK and the word laid over it by
+its BOX. `aesthetics36`'s two print captions share two units of box and have more than
+twenty units of paper between their letters, and seven beats reported THOUSANDS TURN
+OUT struck by NOBODY CAME. Both are measured by their ink now.
+
+**And it judged a tilted shape by its box.** `logic30`'s hammer head, drawn back 27 and
+then 54 degrees over its tower, reported the caption and the top course struck on four
+beats. Rotated about its pivot, the head's real edge stays 6 to 19 units clear of both
+words; only its axis-aligned box reached them. The checker already had code to turn a
+tilted element back into a rectangle, and it never ran: the probe is a template literal,
+so the regex that read the angle out of `matrix(…)` reached the page with its backslashes
+gone, every angle came out NaN, and every tilted element was tested as its box for as
+long as that code existed. It reads the angle by slicing the string now, samples a
+tilted element as the rotated rectangle it is, and names a tilted striker as tilted. The
+real hammer reads silent on all ten beats. **Inside the probe a regex is written with its
+backslashes doubled, or not at all** — the `rgba` parser beside it always was.
+
+**And a mark the scene declares is not a finding.** Once tilt was measured, `valid3`'s
+forbidden pairing reported twenty struck words. PREMISES TRUE over CONCLUSION FALSE is
+crossed out with a drawn ✗ and stamped IMPOSSIBLE, which is the definition of validity
+drawn, and its two crosses had passed only because their boxes covered the words'
+centres and the pixels then cleared them. `check:readable` now reads the convention
+`check:cover` already had: a nativeID beginning `strike` or `crossout`, on the mark or on
+one of its three nearest ancestors, says the line through the words is the point. Both
+checks walk the same four levels, so they cannot disagree about what is declared.
+
+`node scripts/countertest-readable.mjs` puts both back. NOBODY CAME is pulled forty units
+into its neighbour, and the hammer's pivot moves thirty units left so that the head
+really does lie across TRUE PREMISES. Each case holds three readings: the near miss
+silent, the collision struck (seven beats, and four), the restored scene silent again.
+
+**It failed three ways before it passed, and none of them was the detector.** Its first
+run reported the collision clean, because renders were loading the machine and Metro was
+still serving the scene from before the edit. A thirty-second wait on a quiet machine
+then left two staged sweeps reading one beat, so it fetches the bundle now until Metro
+serves the staged line, and again until the line is gone. And sweeps still read one beat
+at random, because `check:readable` navigated before Metro had registered the preview
+route it had just written, and then waited on the not-found screen without reloading it;
+it reloads that screen now. A counter-test that measures nothing has to fail as loudly
+as one that measures wrong, so it prints what the checker said about any sweep that did
+not reach its beats.
+
 ---
 
 ## C18 · A figure that walks left has to turn and face left

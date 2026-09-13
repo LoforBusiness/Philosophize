@@ -151,8 +151,9 @@ export default function Epistemology35Scene({ clock, bt, bi, qv, i, picked, onPi
       chainOn: carry(cv, 3, n, CHAIN[p], CHAIN[n], tr),
       fenceOn: carry(cv, 4, n, SCAN[p], SCAN[n], tr),
       fenceX: FENCE_LO + (FENCE_HI - FENCE_LO) * scan,
-      // The second link parts on the beat that shows the gap, and stays parted.
-      gap: GAP[n] === 1 ? ease01((bt.value - 0.3) / 0.75) : 0,
+      // The second link parts on the beat that shows the gap, and stays parted — held
+      // parted on the beats after, where it used to close and part again (C20c).
+      gap: GAP[n] === 1 ? (n > 0 && GAP[p] === 1 ? 1 : ease01((bt.value - 0.3) / 0.75)) : 0,
       // The reached plates fill in as the answer lands on the graded beat.
       lit: LIVE[n] === 1 && GAP[n] === 1 ? ease01(q) : 0,
     };

@@ -102,7 +102,9 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
       fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       postsOn: carry(cv, 1, n, POSTS[p], POSTS[n], tr),
-      cord: arriving ? ease01((bt.value - 0.25) / 0.7) : carry(cv, 2, n, CORD[p], CORD[n], tr),
+      // Through the carry while it is drawn too, or the beat after draws it again
+      // (C20c).
+      cord: carry(cv, 2, n, CORD[p], CORD[n], arriving ? ease01((bt.value - 0.25) / 0.7) : tr),
       // R7b — the seam leans the week on the promise. Slide toward ON YOUR FRIEND and
       // the four plans tip onto the cord; slide to the practice and they stand up on
       // their own, with nobody in particular relying on you.

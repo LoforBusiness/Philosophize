@@ -29,6 +29,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 //   y 254 and the board rotates 14° off true as it lands. Only the left board
 //   ever moves; the other two are untouched for the whole lesson, which is the
 //   point being made about what was and was not answered.
+// · the CAPTION is right-aligned over the last two boards, its ink ≈ x 199…357 at
+//   y 236. The strike falls through x 32…132 and the left board's top corner rises
+//   to y 244 as it goes over, so nothing may be printed above the left board.
 // · the FIGURE walks x 200 → 132 → 268 on GROUND 500; crown ≈ 397, and the struts
 //   end at y 358, so 39 units stay clear at every stop.
 //
@@ -194,8 +197,13 @@ const styles = StyleSheet.create({
   // political7 and political8 both stand their subject on a filled mass.
   floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
 
+  // RIGHT OF THE BLOW. It sat at x 34, which is the one column the strike falls
+  // through: the bar crossed the caption on its way down, came to rest on its
+  // baseline, and the left board's top corner rose into it as the board went over
+  // (S9). Nothing moves above the other two boards. It ends at x 357, where the last
+  // board's sentence ends, so it stays inside the frame the camera was built on.
   cap: {
-    position: 'absolute', left: 34, top: 236, width: 240,
+    position: 'absolute', left: 117, top: 236, width: 240, textAlign: 'right',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.3, color: SOFT, includeFontPadding: false,
   },
 

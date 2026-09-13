@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics11Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, STONE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, STONE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
@@ -79,6 +79,14 @@ const FRAMES = BEATS.map((b) => b.frames ?? 0);
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
+// WHETHER THE TAG STAYS, in the SORT'S OWN ORDER: nothing · hours spent · a
+// feeling. Only "nothing" leaves the two works identical. The tag used to take
+// `1 - pickPos` straight, and `pickPos` rests on the middle bin before the reader
+// moves the chip, so IDENTICAL, MARK FOR MARK stood at half opacity and 7.9px on
+// the question beat: a word the reader could not read, at a setting the lesson
+// gives no half-answer for (D35).
+const SAME_AT = [1, 0, 0];
+
 function Canvas({ left }: { left: number }) {
   return (
     <View style={[styles.frameInner, { left }]} pointerEvents="none">
@@ -121,7 +129,7 @@ export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick, pi
       // R7c — the IDENTICAL tag across both frames is the claim the lever answers.
       // At 'nothing; identical surfaces, identical works' it stays struck; it lifts as
       // the reader says the maker put something in.
-      same: (sameOn ? (sameFade ? grow : 1) : 0) * (reacting ? 1 - pickPos.value * tr : 1),
+      same: (sameOn ? (sameFade ? grow : 1) : 0) * (reacting ? 1 - (1 - pickAt(SAME_AT, pickPos.value)) * tr : 1),
     };
   });
 

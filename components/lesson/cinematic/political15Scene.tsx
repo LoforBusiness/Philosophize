@@ -5,7 +5,7 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
@@ -70,17 +70,17 @@ const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
 // sentences, so each row below is read straight off one option's own words.
 // night stays over the option that is done HIDDEN
 const POLL_NIGHT = [1, 0, 1, 0];
+const NIGHT = BEATS.map((b) => b.night ?? 0);
 
 export default function Political15Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
   const shown = cur.stages ?? 0;
   const prevShown = prev?.stages ?? 0;
-  const nightOn = (cur.night ?? 0) > 0;
   const nightFade = (cur.night ?? 0) !== (prev?.night ?? 0);
 
   const SCENE = useDerivedValue(() => {
@@ -100,7 +100,11 @@ export default function Political15Scene({ clock, bt, bi, i, picked, onPick, pic
       fill: carry(cv, 1, n, NSTAGES[p], NSTAGES[n], grow),
       // R7c — the pad's x axis runs HIDDEN → DONE IN THE OPEN, and the night laid over
       // the stair is what hidden looks like. Move the token right and it lifts.
-      night: (nightOn ? (nightFade ? grow : 1) : 0) * (reacting ? pickAt(POLL_NIGHT, pickPos.value) : 1),
+      // CARRIED, because it used to STEP. The ballot's reading was multiplied straight
+      // in on the frame the question arrived, so the rail and its label dropped from
+      // full to the resting option's value in one frame (group L). Carried, the night
+      // eases from wherever it was drawn to the reading, and back out again after.
+      night: carry(cv, 2, n, NIGHT[p], reacting ? pickAt(POLL_NIGHT, pickPos.value) : NIGHT[n], nightFade ? grow : tr),
     };
   });
 
@@ -111,6 +115,12 @@ export default function Political15Scene({ clock, bt, bi, i, picked, onPick, pic
     opacity: SCENE.value.night,
     transform: [{ scaleY: SCENE.value.night }],
   }));
+  // THE LABEL IS LEGIBLE OR ABSENT, AND A WORD IS NEVER SQUASHED (D35). It rode the
+  // rail's own style, so on the question, where the ballot rests between a hidden
+  // option and an open one and `night` reads 0.5, THIS PROTEST stood at half
+  // opacity and half HEIGHT: five units of type. It arrives once the rail is most of
+  // the way in and is gone below that.
+  const nightLabStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.night - 0.6) / 0.3) }));
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -122,7 +132,7 @@ export default function Political15Scene({ clock, bt, bi, i, picked, onPick, pic
 
       {/* what the night-time protest actually did: three stages and out */}
       <Animated.View style={[styles.night, nightStyle]} pointerEvents="none" />
-      <Animated.Text style={[styles.nightLab, nightStyle]} numberOfLines={1} pointerEvents="none">
+      <Animated.Text style={[styles.nightLab, nightLabStyle]} numberOfLines={1} pointerEvents="none">
         THIS PROTEST
       </Animated.Text>
 

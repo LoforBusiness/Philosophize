@@ -120,7 +120,12 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick, pi
     // The thought sets out and STOPS. It eases toward the far panel and arrives at
     // 0.86 of the way — close enough to be trying, short enough that the strip of
     // paper it cannot cross is the thing you actually look at.
-    const reach = carry(cv, 0, n, CROSS[p], CROSS[n], tr) * ease01(clamp01(bt.value / 1.5)) * 0.86;
+    // It sets out on the beat that SENDS it, and on a beat that keeps it there it
+    // stays where it stopped. The slow reach used to multiply the carry from outside,
+    // so it started from nothing on every tap and the thought set out again (C20c);
+    // as the carry's own travel, a held thought holds and a leaving one draws back.
+    const sets = CROSS[n] > 0 && (n === 0 || CROSS[p] <= 0);
+    const reach = carry(cv, 0, n, CROSS[p], CROSS[n], sets ? ease01(clamp01(bt.value / 1.5)) : tr) * 0.86;
 
     return {
       fig: lookPose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),

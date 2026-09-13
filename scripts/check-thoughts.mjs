@@ -258,6 +258,35 @@ for (const l of LESSONS) {
 if (covered.length) bad(`${covered.length} bubble(s) cover a word (D31)`, covered.slice(0, 3).join(' · '));
 else ok(`none of ${placed} placed bubbles covers a word, box or trail (D31)`);
 
+// ── 7b · AND TWO BUBBLES ON ONE BEAT DO NOT LIE ACROSS EACH OTHER ───────────
+//
+// The second figure speaks on the beat he walks in, and nothing kept the mascot's
+// own thought off that beat. Section 7 holds a bubble against the WORDS on the
+// stage, and the other bubble is not a stage word — the must-box probe is told not
+// to record bubbles at all — so in three lessons the two sat on top of each other
+// while every bubble passed: `ethics-ethics-37` put "A duty out of a sound." under
+// "Say that again slowly." Found by check:readable's STRIKE, 12 Sep 2026.
+const { visitorSays } = await loadTs('components/lesson/cinematic/quips.ts');
+const partsOf = (at, text) => {
+  const rows = wrap(text, SIZE, INNER, INTER).length;
+  const h = rows * LH + 2 * VPAD + 2 * BORDER;
+  return [[at[0] - BOX_W / 2, at[1] - TRAIL_H[at[2]] - h, BOX_W, h], ...discsOf(at[0], at[1], at[2], at[3])];
+};
+const crossed = [];
+let bothOnOne = 0;
+for (const l of LESSONS) {
+  const row = THOUGHTS[l.id];
+  if (!row?.vis) continue;
+  const i = row.vis[0];
+  if (!row.at[i] || !row.say[i]) continue;
+  bothOnOne += 1;
+  const mine = partsOf(row.at[i], row.say[i]);
+  const his = partsOf([row.vis[1], row.vis[2], row.vis[3], row.vis[4] ?? row.vis[1]], visitorSays(l.id));
+  if (mine.some((a) => his.some((b) => hits(a, b)))) crossed.push(`${l.id}[${i}] "${row.say[i]}" under "${visitorSays(l.id)}"`);
+}
+if (crossed.length) bad(`${crossed.length} thought(s) lie across the second figure's line on the same beat`, crossed.slice(0, 3).join(' · '));
+else ok(`no thought lies across the second figure's line`, `${bothOnOne} beat(s) carry both`);
+
 // ── 8 · HE THINKS TWICE A LESSON, NOT EVERY TIME THE READER TAPS ────────────
 //
 // The first version drew a bubble on every beat that had a line: 1,113 of them,
