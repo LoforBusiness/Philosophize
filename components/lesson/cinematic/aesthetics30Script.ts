@@ -31,36 +31,36 @@ export interface Aesthetics30Beat extends BaseBeat {
 export const BEATS: Aesthetics30Beat[] = [
   {
     p: 345, x: 24, window: 1, self: 0.8,
-    text: 'You could live without beauty. Food keeps you alive and shelter keeps you safe.',
+    text: 'Beauty seems inessential to survival. Food keeps a person alive, and shelter keeps them safe.',
     dur: 4.8,
   },
   {
     p: 168, x: 24, window: 1, self: 0.8,
-    text: 'So what does beauty keep? One answer calls it decoration, and the first thing cut when life gets hard.',
+    text: 'What, then, is beauty for? One answer treats it as decoration, the first thing given up when life gets hard.',
     dur: 5.0,
   },
   {
     p: 450, x: 24, window: 1, self: 0.15,
-    text: 'Iris Murdoch answered differently. A kestrel hovering pulls a person straight out of their own head.',
+    text: 'Iris Murdoch gave a different answer. A hovering kestrel, she wrote, can end a person’s anxious brooding.',
     dur: 5.0,
   },
   {
     p: 261, x: 24, window: 1, self: 0.15,
-    text: 'Murdoch called it unselfing. The anxious ego steps back and something real outside it takes the room.',
+    text: 'Murdoch called the change unselfing. The brooding self disappears, and attention rests on something real.',
     dur: 5.0,
   },
   {
     p: 158, x: 24, window: 1, self: 0.15, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what unselfing means.',
-      explain: 'Attending to something real. The ego steps back because the bird has taken the room. That’s not the same as forgetting who you are or deciding you do not matter. Murdoch calls the shift moral training for attending to other people.',
+      prompt: 'In unselfing, what happens to a person’s attention?',
+      explain: 'Attending to something real. The anxious self fades because attention is fixed on the kestrel. Unselfing doesn’t mean losing your identity or thinking you don’t matter. For Murdoch, such attention trains a person to see others justly.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 469, x: 80, window: 1, self: 0.15,
-    text: 'Travellers in Florence have reported dizziness and racing hearts. Beauty can land like an event.',
+    text: 'Visitors to Florence have reported dizziness and a racing heart in front of its art. Beauty can affect a person with physical force.',
     dur: 5.0,
   },
   {
@@ -77,24 +77,24 @@ export const BEATS: Aesthetics30Beat[] = [
   },
   {
     p: 463, x: 80, window: 1, self: 0.15,
-    text: 'Learning to attend properly to a bird is practice for attending properly to a person.',
+    text: 'For Murdoch, learning to attend properly to a bird is practice for attending properly to a person.',
     dur: 5.0,
   },
   {
     p: 160, x: 80, window: 1,
     interact: {
-      prompt: 'Where does the attention sit while beauty works?',
+      prompt: 'When beauty unselfs a person, how is attention divided between self and world?',
       split: {
         left: 'THE SELF',
         right: 'THE WORLD',
         start: 0.92,
         zones: [
-          { id: 'out', upto: 0.35, reads: 'the ego steps back and the bird appears', correct: true },
-          { id: 'half', upto: 0.7, reads: 'half looking, half checking on yourself' },
-          { id: 'in', upto: 1, reads: 'the kestrel is only a mirror after all' },
+          { id: 'out', upto: 0.35, reads: 'attention rests on the kestrel, not the self', correct: true },
+          { id: 'half', upto: 0.7, reads: 'divided between the kestrel and oneself' },
+          { id: 'in', upto: 1, reads: 'on the self, using the kestrel as a mirror' },
         ],
       },
-      explain: 'Almost all of it on the world. Murdoch calls beauty the checking of selfishness, so a reader still monitoring themselves has not been unselfed at all. The bird is doing the work. It can only do the work while it’s what you’re looking at.',
+      explain: 'Attention rests on the kestrel, not the self. Murdoch calls the appreciation of beauty a checking of selfishness. So a person still watching their own reactions hasn’t been unselfed. The kestrel checks selfishness only while it holds attention.',
       xp: 5,
     },
     dur: 1.0,
@@ -104,12 +104,12 @@ export const BEATS: Aesthetics30Beat[] = [
     summary: {
       title: 'What Beauty Is For',
       points: [
-        'Is beauty a luxury, or a basic human need',
-        'Beauty can land with the force of an event',
-        'Murdoch: it unselfs you, and that is moral training',
+        'Beauty may be a need rather than a luxury',
+        'Beauty can affect a person with physical force',
+        'Murdoch: beauty unselfs, which trains moral attention',
         'A flourishing life may need room for the beautiful',
       ],
-      closing: 'You’ve seen what beauty can do to a life. The harder part is letting it stop you in your tracks.',
+      closing: 'For Murdoch, attending to beauty is a moral exercise. It trains the attention that seeing other people justly requires.',
     },
     dur: 5.0,
   },

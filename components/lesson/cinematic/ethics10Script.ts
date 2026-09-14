@@ -37,23 +37,23 @@ export interface Et10Beat extends BaseBeat {
 export const BEATS: Et10Beat[] = [
   {
     p: 447, x: 88,
-    text: 'You’re walking past a shallow pond in good shoes. There’s a small child face-down in it, and nobody else anywhere.',
+    text: 'Suppose you pass a shallow pond, wearing expensive shoes, and see a child drowning. No one else is nearby.',
     dur: 3.8,
   },
   {
     p: 14, x: 168,
-    text: 'Nobody deliberates. You do not price the shoes against the child.',
+    text: 'Almost everyone judges that you must wade in. The cost of ruined shoes is trivial beside a child’s life.',
     cite: 'Singer’s drowning child',
     dur: 1.8,
   },
   {
     p: 14, x: 168,
-    text: 'There’s no comparison to make. Peter Singer’s whole argument starts from the fact that you already know this.',
+    text: 'Peter Singer’s argument begins from that shared judgement. It then asks what principle explains the reaction.',
     dur: 3,
   },
   {
-    p: 395, x: 268, wading: true, reach: 1,
-    text: 'So you’re in the water, shoes and all. Now Singer asks the awkward question: which part of that reasoning was about the child being near you?',
+    p: 31, x: 268, wading: true, reach: 1,
+    text: 'So you wade in, despite the shoes. Singer then asks an uncomfortable question: did your reason depend on the child being near you?',
     dur: 4.4,
   },
   {
@@ -71,52 +71,52 @@ export const BEATS: Et10Beat[] = [
   },
   {
     p: 467, x: 268, wading: true, far: true,
-    text: 'There’s another child. Same danger, same small cost to you, nine thousand kilometres further off.',
+    text: 'Now suppose another child faces the same danger nine thousand kilometres away, and helping costs you just as little.',
     cite: 'Famine, Affluence, and Morality',
     dur: 2.1,
   },
   {
     p: 467, x: 268, wading: true, far: true,
-    text: 'The argument that got you into the pond doesn’t obviously stop at the bank. Effective altruism started right there.',
+    text: 'If distance makes no moral difference, the duty extends to the distant child. The argument helped inspire effective altruism.',
     dur: 3.1,
   },
   {
     p: 440, x: 268, wading: true, far: true, factors: true,
     interact: {
-      prompt: 'One child is near, one far. Tap the difference Singer says carries no moral weight.',
+      prompt: 'Which of these factors does Singer argue carries no moral weight?',
       explain:
-        'Distance. It changes how the case feels and nothing about what’s at stake. The other two are not decoys. Singer’s principle needs both: help you can actually give, at a cost that isn’t itself serious.',
+        'How far away the child is. On Singer’s view, distance changes how a case feels but not what’s at stake. The other two factors matter to his principle: you must be able to help, at no comparable moral cost.',
     },
     dur: 4.8,
   },
   {
     p: 378, x: 268, wading: true, far: true,
     interact: {
-      prompt: 'How much must you accept for the argument to work?',
+      prompt: 'How much moral theory must you accept for Singer’s argument to succeed?',
       drag: {
         lo: 'ONE MODEST PREMISE',
         hi: 'ALL OF SINGER’S ETHICS',
         start: 1,
         zones: [
-          { id: 'modest', upto: 0.3, reads: 'prevent something terrible at small cost to yourself', correct: true },
-          { id: 'mid', upto: 0.66, reads: 'weigh every consequence of everything you do' },
-          { id: 'all', upto: 1, reads: 'maximise the happiness of everyone, always' },
+          { id: 'modest', upto: 0.3, reads: 'a duty to prevent grave harm at small cost', correct: true },
+          { id: 'mid', upto: 0.66, reads: 'consequences are all that matter morally' },
+          { id: 'all', upto: 1, reads: 'always maximise total happiness' },
         ],
       },
-      explain: 'The near end, and it is why the argument is so hard to shake. Knowing Singer is a utilitarian makes it tempting to assume the argument must be one too. It needs far less than that, and almost nobody wants to deny the premise out loud.',
+      explain: 'A duty to prevent grave harm at small cost. Singer is a utilitarian, so the argument is often assumed to be utilitarian too. Yet the argument needs only the modest premise, which few people will deny.',
     },
     dur: 4.8,
   },
   {
     summary: {
-      title: 'Bringing Ethics to Life',
+      title: 'Distance and the Duty to Help',
       points: [
-        'Distance need not weaken a moral duty',
-        'Singer: the far child has the same claim',
-        'Effective altruism asks where good goes furthest',
-        'Critics: an ethics must stay livable',
+        'Singer argues distance doesn’t weaken the duty to help',
+        'Singer holds that the far child has the same claim',
+        'Effective altruism asks where help does the most good',
+        'Critics object that the duty becomes too demanding',
       ],
-      closing: 'Theory ends where action begins, and the hard part is what you do tomorrow.',
+      closing: 'If Singer is right, the argument bears directly on how much you should give to distant strangers.',
     },
     dur: 4.0,
   },

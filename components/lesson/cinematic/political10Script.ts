@@ -28,45 +28,45 @@ export interface Political10Beat extends BaseBeat {
 export const BEATS: Political10Beat[] = [
   {
     p: 164, x: 44,
-    text: 'Three people, three piles, and the tallest is three times the shortest. Is that unjust?',
+    text: 'Consider three people whose holdings differ: the largest pile is three times the smallest. Is that distribution unjust?',
     dur: 1.8,
   },
   {
     p: 164, x: 44,
-    text: 'Stare at it as long as you like: the picture on its own will not tell you.',
+    text: 'The sizes of the piles alone don’t settle the question. Locke, Nozick and Rawls each look for something different.',
     dur: 2,
   },
   {
     p: 37, x: 44,
-    text: 'Locke starts before the piles exist. The world lies there unowned.',
+    text: 'John Locke begins before anything is owned. In his account, the earth is first given to humankind in common.',
     cite: 'Locke · labour',
     dur: 1.8,
   },
   {
     p: 37, x: 44,
-    text: 'You work a patch, the work is yours, so the patch is yours too. But he builds a brake into the rule: leave enough, and as good, for everyone else.',
+    text: 'You own your labour, so land you mix your labour with becomes yours. Locke adds a proviso: enough, and as good, must be left for others.',
     dur: 3.6,
   },
   {
     p: 13, x: 108, tape: 1,
-    text: 'So a pile is never only a pile. Under every one runs a record of how it got there.',
+    text: 'So every holding has a history as well as a size. The history records how it was acquired and passed on.',
     cite: 'The record',
     dur: 2.7,
   },
   {
     p: 13, x: 108, tape: 1,
-    text: 'Taken from the common, traded, traded again, handed on as a gift.',
+    text: 'This one was taken from common land, traded twice and then given as a gift.',
     dur: 1.8,
   },
   {
     p: 168, x: 108, tape: 1, ptr: 4,
-    text: 'Nozick reads only that strip. Was every step clean — a fair taking, then free trades, then a gift nobody was forced to give?',
+    text: 'Robert Nozick looks only at this history. He asks whether the first taking was just and every transfer free.',
     cite: 'Nozick · the entitlement view',
     dur: 3.2,
   },
   {
     p: 168, x: 108, tape: 1, ptr: 4,
-    text: 'Then the pile at the end is hers, however tall it stands.',
+    text: 'If every step was just, Nozick holds, the final holding is just, however large.',
     dur: 1.8,
   },
   {
@@ -84,19 +84,19 @@ export const BEATS: Political10Beat[] = [
   },
   {
     p: 47, x: 108, tape: 1, ptr: 4, ruler: 1,
-    text: 'Rawls never looks at the strip at all. Lay a level across the tops and read one number — how high is the shortest pile?',
+    text: 'John Rawls judges the distribution rather than its history. He asks how well the least advantaged fare.',
     cite: 'Rawls · the floor',
     dur: 3,
   },
   {
     p: 47, x: 108, tape: 1, ptr: 4, ruler: 1,
-    text: 'Inequality is fine by him, but only if it lifts whoever ends up at the bottom.',
+    text: 'Rawls permits inequality only if it improves the position of whoever is worst off.',
     dur: 2,
   },
   {
     p: 177, x: 108, tape: 1, ptr: 4, ruler: 1,
     interact: {
-      prompt: 'How much does Locke let you take from the common land?',
+      prompt: 'Under Locke’s proviso, how much of the common land may one person take?',
       drag: {
         lo: 'NOTHING AT ALL',
         hi: 'ALL YOU CAN REACH',
@@ -104,10 +104,10 @@ export const BEATS: Political10Beat[] = [
         zones: [
           { id: 'none', upto: 0.26, reads: 'nothing, the land stays common' },
           { id: 'enough', upto: 0.74, reads: 'as much as leaves enough for others', correct: true },
-          { id: 'all', upto: 1, reads: 'everything you can get your hands on' },
+          { id: 'all', upto: 1, reads: 'all you can take, whatever is left for others' },
         ],
       },
-      explain: 'The middle. The brake is built into the theory, not bolted on later. Defending property sounds like defending endless grabbing. Locke allows the taking only while enough, and as good, is left for everybody behind you.',
+      explain: 'As much as leaves enough for others. A labour theory of property can seem to permit unlimited taking. Locke allows it only while enough, and as good, remains for others.',
       xp: 5,
     },
     dur: 1.0,
@@ -115,8 +115,8 @@ export const BEATS: Political10Beat[] = [
   {
     p: 30, x: 108, tape: 1, ptr: 4, ruler: 1, plates: 1,
     interact: {
-      prompt: 'Nozick has to rule on this stack. Tap the one thing he actually reads.',
-      explain: 'He judges the history, never the shape. Clean taking, free trades, a real gift — then the stack is hers however lopsided it looks. The trap: an ugly pattern feels like proof of injustice, and a tidy one cannot launder a stolen holding.',
+      prompt: 'To decide whether these holdings are just, what does Nozick’s theory examine?',
+      explain: 'The history tape. Nozick judges holdings by how they came about, not by how unequal they look. If each step was just, the result is just. But a neat pattern can’t make a stolen holding just.',
       xp: 5,
     },
     dur: 1.0,
@@ -124,14 +124,14 @@ export const BEATS: Political10Beat[] = [
   {
     p: 445, x: 108, tape: 1, ptr: 4, ruler: 1,
     summary: {
-      title: 'Who Owns What, and Why',
+      title: 'Property and Distributive Justice',
       points: [
-        'Locke: work makes it yours, within a limit',
-        'Nozick: judge the record, never the pattern',
-        'Rawls: judge the pattern by its shortest column',
-        'Every economy runs on one of these answers',
+        'Locke: labour creates property, within a proviso',
+        'Nozick: judge holdings by their history',
+        'Rawls: judge a distribution by its worst off',
+        'Nozick and Rawls reach opposite verdicts on one distribution',
       ],
-      closing: 'Political philosophy keeps circling two questions: who may rule, and who may own.',
+      closing: 'Two questions recur throughout political philosophy: who may rule, and who may own property.',
     },
     dur: 3.0,
   },

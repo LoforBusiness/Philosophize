@@ -18,29 +18,29 @@ export interface Aes5Beat extends BaseBeat {
 export const BEATS: Aes5Beat[] = [
   {
     p: 165, bird: 0, ego: 1, self: 0.74,
-    text: 'You look at the world all day, yet rarely see it. Aesthetics trains your attention until the eye wakes up.',
+    text: 'You look at the world all day, yet rarely attend to it closely. Iris Murdoch and John Ruskin both treated such attention as a skill.',
     dur: 3.6,
   },
   {
     p: 11, bird: 0, ego: 1, self: 0.88,
-    text: 'Murdoch took the idea from Simone Weil. Attention is a just and loving look at one real thing.',
+    text: 'Murdoch borrowed the concept of attention from Simone Weil. Attention is a just and loving look at one real thing.',
     cite: 'Attention as a skill',
     dur: 2.5,
   },
   {
     p: 11, bird: 0, ego: 1, self: 0.88,
-    text: 'The obstacle is what Murdoch calls the fat, relentless ego. Attention is what quiets it.',
+    text: 'Murdoch calls the obstacle “the fat relentless ego”, a self absorbed in its own concerns. Attention draws the mind away from it.',
     dur: 2.7,
   },
   {
     p: 164, bird: 1, ego: 0, self: 0.06,
-    text: 'A woman is at a window, brooding over a bruise to her pride, when she sees a hovering kestrel. In a moment the brooding is gone.',
+    text: 'Murdoch describes gazing out of a window, brooding on a blow to her prestige, when she sees a kestrel.',
     cite: 'Murdoch and the kestrel',
     dur: 3.8,
   },
   {
     p: 415, bird: 1, ego: 0, self: 0.06,
-    text: 'Nothing left but kestrel. She called that unselfing.',
+    text: 'The brooding self is lost for a moment, and only the kestrel remains. Murdoch calls this unselfing.',
     dur: 1.8,
   },
   {
@@ -59,30 +59,30 @@ export const BEATS: Aes5Beat[] = [
   {
     p: 384, bird: 1, ego: 0, self: 0.06,
     interact: {
-      prompt: 'Who does the unselfing?',
+      prompt: 'Is unselfing something you do, or something that happens to you?',
       split: {
         left: 'IT HAPPENS TO YOU', right: 'YOU DO IT',
         start: 0.04,
         zones: [
           { id: 'do', upto: 0.3, reads: 'a technique you practise and then perform' },
-          { id: 'both', upto: 0.66, reads: 'you begin, the work takes over' },
-          { id: 'happens', upto: 1, reads: 'it takes hold of you', correct: true },
+          { id: 'both', upto: 0.66, reads: 'partly effort, partly something that takes hold' },
+          { id: 'happens', upto: 1, reads: 'something outside you absorbs your attention', correct: true },
         ],
       },
-      explain: 'Almost all of it happens to you. Unselfing is not a technique. It arrives when a kestrel or a painting takes hold and leaves no room for brooding. You can put yourself where unselfing might happen. You cannot perform it.',
+      explain: 'Something outside you absorbs your attention. For Murdoch, unselfing isn’t a technique you perform. It occurs when a kestrel or a painting holds your attention and the brooding self falls away. You can seek out such occasions, but unselfing itself happens to you.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 13, bird: 0, ego: 0, leaf: 1, self: 0.12,
-    text: 'Ruskin wrote that drawing recovers “the innocence of the eye”. You see patches of colour as they are, before the mind swaps in its idea.',
+    text: 'John Ruskin wrote that painting depends on recovering “the innocence of the eye”. The innocent eye sees flat patches of colour before the mind names them.',
     cite: 'Ruskin’s drawing lessons',
     dur: 3.8,
   },
   {
     p: 13, bird: 0, ego: 0, leaf: 1, self: 0.12,
-    text: 'Ruskin’s students studied one leaf before any tree.',
+    text: 'Ruskin’s drawing exercises therefore begin with a single leaf, and only later reach a whole tree.',
     dur: 1.8,
   },
   {
@@ -90,21 +90,21 @@ export const BEATS: Aes5Beat[] = [
     // Answered ON the stage: the three GOAL cards inside the frame are the options,
     // so the reader picks an aim for the exercise instead of reading a list.
     interact: {
-      prompt: 'Ruskin had students draw a single leaf for hours. What was the real goal?',
-      explain: 'The trap: "drawing class, so the goal is a good drawing." For Ruskin the payoff was sharpened vision — "the innocence of the eye" — not a masterpiece.',
+      prompt: 'Why start with a single leaf rather than a whole tree?',
+      explain: 'Retrain the eye. Ruskin wanted students to see colour as it appears, not the idea the mind supplies. A fine drawing was a by-product, and practice was only the means. His goal was “the innocence of the eye”.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Aesthetics Changes How You See',
+      title: 'Attention and the Innocent Eye',
       points: [
         'Murdoch: loving attention dissolves the ego',
-        'Perception is a skill you can sharpen',
-        'Aesthetics is attention, not just art',
+        'Ruskin: perception is a skill that can be trained',
+        'Aesthetic attention extends beyond art to nature',
       ],
-      closing: 'Aesthetics trains you to see what already surrounds you.',
+      closing: 'For Murdoch and Ruskin, aesthetic attention means seeing the thing in front of you, not your idea of it.',
     },
     dur: 2.8,
   },

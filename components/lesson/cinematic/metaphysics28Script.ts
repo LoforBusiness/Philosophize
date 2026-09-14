@@ -34,36 +34,36 @@ export interface Metaphysics28Beat extends BaseBeat {
 export const BEATS: Metaphysics28Beat[] = [
   {
     p: 424, x: 26, field: 1,
-    text: 'Your mind came from somewhere. The usual answer is that dead matter got organised enough.',
+    text: 'Where does consciousness come from? The usual answer is that matter becomes conscious once it’s organised enough.',
     dur: 4.8,
   },
   {
     p: 171, x: 26, field: 1, rail: 1, glow: 0.15,
-    text: 'Panpsychism answers differently. Mind was there all along, faint, at the bottom of nature.',
+    text: 'Panpsychism disagrees. It holds that some simple form of experience exists at the most basic level of nature.',
     dur: 4.8,
   },
   {
     p: 437, x: 26, field: 1, rail: 1, glow: 0.5,
-    text: 'Not that rocks ponder or electrons dream. The simplest bits of matter carry the smallest spark.',
+    text: 'Panpsychists don’t claim that rocks think. They claim that fundamental particles have the simplest form of experience.',
     dur: 5.0,
   },
   {
     p: 260, x: 26, field: 1, rail: 1, glow: 0.9,
-    text: 'Physics says what matter does, never what matter is in itself. Panpsychism fills the gap with experience.',
+    text: 'Physics describes what matter does, not what matter is in itself. Panpsychists propose that its intrinsic nature is experience.',
     dur: 5.0,
   },
   {
     p: 163, x: 26, field: 1, rail: 1, glow: 0.9, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what the combination problem asks.',
-      explain: 'How many minds make one. Grant every particle a flicker and the question remains. Why do billions of them fuse into a single point of view? Panpsychism trades the hard problem for that one.',
+      prompt: 'What question does the combination problem raise for panpsychism?',
+      explain: 'How many minds make one. Suppose every particle has experience. How do billions of tiny minds join to form one mind? William James raised this problem in 1890.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 453, x: 82, field: 1, rail: 1, glow: 0.9,
-    text: 'Leibniz called the simplest things monads, each one shut, each one with a view of its own.',
+    text: 'Leibniz called the simplest substances monads. Each has its own perceptions and is closed to outside influence.',
     dur: 5.0,
   },
   {
@@ -81,25 +81,25 @@ export const BEATS: Metaphysics28Beat[] = [
   },
   {
     p: 449, x: 82, field: 1, rail: 1, glow: 0.9,
-    text: 'An emergentist answers that mind appears only once matter is organised richly enough.',
+    text: 'Emergentism answers instead that experience appears only once matter reaches a certain level of organisation.',
     dur: 4.8,
   },
   {
     p: 178, x: 82, field: 1, rail: 1,
     interact: {
-      prompt: 'Draw what panpsychism says about experience as matter gets organised.',
+      prompt: 'Which curve shows what panpsychism says about experience as organisation increases?',
       plot: {
         cols: ['PARTICLE', 'INSECT', 'MOUSE', 'BRAIN'],
-        axis: 'HOW BRIGHT',
+        axis: 'HOW MUCH EXPERIENCE',
         start: [0.5, 0.5, 0.5, 0.5],
         shapes: [
-          { id: 'dimmer', profile: [0.14, 0.36, 0.62, 0.94], reads: 'a flicker that was never quite dark', correct: true },
-          { id: 'switch', profile: [0.04, 0.06, 0.5, 0.95], reads: 'nothing, and then suddenly a mind' },
-          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5], reads: 'the same faint glow all the way up' },
-          { id: 'dark', profile: [0.06, 0.06, 0.06, 0.06], reads: 'no inner glow anywhere to explain' },
+          { id: 'dimmer', profile: [0.14, 0.36, 0.62, 0.94], reads: 'some experience at every level, rising', correct: true },
+          { id: 'switch', profile: [0.04, 0.06, 0.5, 0.95], reads: 'none until a threshold, then a sharp rise' },
+          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5], reads: 'the same amount at every level' },
+          { id: 'dark', profile: [0.06, 0.06, 0.06, 0.06], reads: 'almost none at any level' },
         ],
       },
-      explain: 'Never quite dark. Panpsychism puts a trace of experience at the bottom, so a brain only turns the dimmer up. A switch would be emergentism, and a flat line would leave a mouse and a person equally awake.',
+      explain: 'Some experience at every level, rising. On this view even a particle has a trace of experience, and brains have much more. A sudden jump from none would be emergentism.',
       xp: 5,
     },
     dur: 1.0,
@@ -107,14 +107,14 @@ export const BEATS: Metaphysics28Beat[] = [
   {
     p: 323, x: 82, field: 1, rail: 1, glow: 0.7,
     summary: {
-      title: 'A Spark in Everything',
+      title: 'Mind at the Base of Nature',
       points: [
         'Panpsychism makes experience a basic feature of matter',
-        'The motive is the hard problem, not mysticism',
-        'A brain gathers faint flickers into a rich mind',
-        'The combination problem is the standing objection',
+        'Its motive is the hard problem of consciousness',
+        'On panpsychism, brains combine simple experiences into rich ones',
+        'The combination problem is its main objection',
       ],
-      closing: 'Mind from no-mind and mind everywhere are both strange, and one of the two may be true.',
+      closing: 'Experience arising from non-experiential matter and experience everywhere are both surprising claims. Panpsychists argue the second is less mysterious.',
     },
     dur: 5.0,
   },

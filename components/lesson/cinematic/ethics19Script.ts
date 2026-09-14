@@ -35,23 +35,23 @@ export interface Eth19Beat extends BaseBeat {
 export const BEATS: Eth19Beat[] = [
   {
     p: 172, x: 200, doc: 1, rows: 1,
-    text: 'Four decisions, all about the same life. Yours.',
+    text: 'Consider four decisions, each about your own life, and who is entitled to make them.',
     dur: 3.4,
   },
   {
     p: 45, x: 200, doc: 1, rows: 1, taken: 1,
-    text: 'Now watch the last column. Somebody has signed three of them off on your behalf, for your own good.',
+    text: 'Paternalism is interfering with a person’s choices for their own good. Here, the state has decided three of them for you.',
     cite: 'Paternalism',
     dur: 4.6,
   },
   {
     p: 13, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
-    text: 'Mill thought there was one honest test, and it’s the middle column. Not how risky the choice is.',
+    text: 'John Stuart Mill proposed a single test, and it doesn’t concern how risky a choice is.',
     dur: 3.8,
   },
   {
     p: 13, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
-    text: 'Who else is in it.',
+    text: 'The test asks whether the choice harms anyone other than the person making it.',
     dur: 1.8,
   },
   {
@@ -69,28 +69,28 @@ export const BEATS: Eth19Beat[] = [
   },
   {
     p: 384, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
-    text: 'Three of these signatures were not written freely. The fourth one was.',
+    text: 'Three rows are signed by the state, and one by you. Mill’s test asks which of these signatures is legitimate.',
     dur: 4.0,
   },
   {
     p: 165, x: 132, doc: 1, rows: 1, affects: 1, taken: 1, live: 1,
     interact: {
-      prompt: 'Tap the one line somebody else may sign.',
-      explain: 'Driving after drinking. Mill’s test is not how risky the choice is. It’s whether anybody else is in it. The other three are dangerous or foolish or both, and they’re still yours. Danger to yourself never hands somebody else the pen.',
+      prompt: 'By Mill’s harm principle, which decision may the state rightly make for you?',
+      explain: 'Driving after drinking, because it endangers other people. Mill’s test is harm to others, not risk to yourself. Unhealthy food and riding without a helmet are risky, but the risk falls on you.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 467, x: 268, doc: 1, rows: 1, affects: 1,
-    text: 'The rule is easy while the choices are small. It gets expensive at the end of a life.',
+    text: 'The harm principle is easy to accept while the choices are small. It’s hardest to accept when refusing treatment will end a life.',
     cite: 'The hard case',
     dur: 4.2,
   },
   {
     p: 383, x: 268, doc: 1, rows: 1, affects: 1,
     interact: {
-      prompt: 'What does the harm principle actually allow here?',
+      prompt: 'If a competent adult refuses life-saving treatment, what does the harm principle permit?',
       drag: {
         lo: 'THE REFUSAL STANDS',
         hi: 'SAVE THEM ANYWAY',
@@ -101,21 +101,21 @@ export const BEATS: Eth19Beat[] = [
           { id: 'save', upto: 1, reads: 'save them whatever they say' },
         ],
       },
-      explain: 'The near end, and this is the hardest case for the harm principle. Mill takes it anyway. A competent adult may make a choice that’s terrible for them and for nobody else. Overriding it treats a person as a thing to be managed.',
+      explain: 'Their refusal stands, however bad the choice looks. This is the hardest case for the harm principle, yet Mill’s test still applies. A competent adult’s choice that harms no one else is theirs to make.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Who Holds the Pen',
+      title: 'The Harm Principle',
       points: [
-        'The harm principle asks who else your choice reaches',
-        'Risk to yourself is not a licence for anyone else',
+        'The harm principle asks whether a choice harms others',
+        'Risk to yourself doesn’t justify interference by others',
         'Competence is what makes a refusal binding',
-        'The rule is only worth having where it costs something',
+        'The principle is tested most where it costs a life',
       ],
-      closing: 'Three of those lines were never anybody else’s to sign.',
+      closing: 'By Mill’s test, only the decision that endangers others was the state’s to make.',
     },
     dur: 3.2,
   },

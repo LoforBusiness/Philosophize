@@ -33,36 +33,36 @@ export interface Aesthetics41Beat extends BaseBeat {
 export const BEATS: Aesthetics41Beat[] = [
   {
     p: 423, x: 28, wall: 1, art: 1,
-    text: 'Point at the edge of a painting, then say whether your finger is on it.',
+    text: 'Suppose you point at the edge of a painting. Is your finger on the painting or off it?',
     dur: 4.4,
   },
   {
     p: 262, x: 28, wall: 1, art: 1,
-    text: 'The canvas is the work and the wall is the room. The frame is the trouble.',
+    text: 'The canvas belongs to the work, and the wall belongs to the room. The frame is the difficult case.',
     dur: 4.2,
   },
   {
     p: 425, x: 28, wall: 1, art: 1,
-    text: 'Kant had a word for it. A parergon is a thing beside the work, like drapery on a statue.',
+    text: 'Immanuel Kant called such things parerga, things beside the work. Frames on pictures and the clothing on statues are his examples.',
     dur: 5.0,
   },
   {
     p: 169, x: 28, wall: 1, art: 1,
-    text: 'A frame is not a part. The painting would be the same painting without one.',
+    text: 'A frame is not part of the painting. The painting would be the same painting without one.',
     dur: 4.4,
   },
   {
     p: 161, x: 28, wall: 1, art: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap the one Kant meant.',
-      explain: 'The frame. The canvas is the work and the wall is the room, so neither is puzzling. A parergon is the thing that won’t settle into either box. A frame is the clearest case there is.',
+      prompt: 'Which of the three is Kant’s example of a parergon?',
+      explain: 'The frame. The canvas is the work and the wall is part of the room, so neither is puzzling. A parergon sits at the border between the work and its surroundings, and a frame is Kant’s own example.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 441, x: 88, wall: 1, art: 1,
-    text: 'The frame is not outside either. A gilt frame and a steel one make the same canvas read differently.',
+    text: 'The frame is not outside the work either. A gilt frame and a steel frame change how the same canvas is seen.',
     dur: 5.0,
   },
   {
@@ -80,22 +80,22 @@ export const BEATS: Aesthetics41Beat[] = [
   },
   {
     p: 444, x: 88, wall: 1, art: 1,
-    text: 'And the border keeps widening. The title, the wall card, the height, the museum itself.',
+    text: 'The boundary problem extends outward, to the title, the wall label, the hanging height and the museum itself.',
     dur: 4.8,
   },
   {
     p: 267, x: 88, wall: 1, art: 1, ring: 1,
     interact: {
-      prompt: 'What is the frame, then?',
+      prompt: 'Does the frame belong to the work, to the room, or to neither?',
       sort: {
         chip: 'the frame',
         bins: [
-          { id: 'room', label: 'the room', reads: 'furniture — a curator may swap it at will' },
-          { id: 'work', label: 'the work', reads: 'part of the work, so reframing makes another' },
-          { id: 'edge', label: 'neither', reads: 'a boundary, which is not on either side', correct: true },
+          { id: 'room', label: 'the room', reads: 'furniture that a curator may replace freely' },
+          { id: 'work', label: 'the work', reads: 'part of the work, so reframing creates another' },
+          { id: 'edge', label: 'neither', reads: 'a boundary, belonging to neither side', correct: true },
         ],
       },
-      explain: 'Neither. Put it inside and reframing becomes a new artwork, which nobody believes. Put it outside and you can’t say why gilt and steel change the reading. Marking a boundary is its job, and a boundary does not sit on one side of itself.',
+      explain: 'The frame belongs to neither. If it were inside the work, reframing would create a new artwork, which seems false. If it were outside, gilt and steel frames couldn’t change how the canvas is seen. Jacques Derrida argues that the parergon is neither inside nor outside the work.',
       xp: 5,
     },
     dur: 1.0,
@@ -103,14 +103,14 @@ export const BEATS: Aesthetics41Beat[] = [
   {
     p: 437, x: 88, wall: 1, art: 1,
     summary: {
-      title: 'The Edge',
+      title: 'Where the Work Ends',
       points: [
         'Kant called frames and drapery parerga',
         'They are neither in the work nor simply outside',
-        'The border keeps widening — title, wall, museum',
-        'A boundary cannot sit on one side of itself',
+        'The same question arises for titles, labels and museums',
+        'A boundary belongs to neither of the sides it divides',
       ],
-      closing: 'Next time something moves you in a gallery, ask how much of the effect was hung on the wall. And how much was the wall.',
+      closing: 'The effect of a work in a gallery can depend on its frame, label and setting. Where the work itself ends remains disputed.',
     },
     dur: 4.6,
   },

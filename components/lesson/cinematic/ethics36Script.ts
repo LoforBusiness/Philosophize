@@ -29,36 +29,36 @@ export interface Ethics36Beat extends BaseBeat {
 export const BEATS: Ethics36Beat[] = [
   {
     p: 25, x: 56, book: 1,
-    text: 'Somebody wronged you. Here’s what that leaves on the page: what happened, whose fault it was, and what you are owed.',
+    text: 'Suppose someone wrongs you. The wrong leaves three things behind: what happened, whose fault it was, and what you are owed.',
     dur: 4.2,
   },
   {
     p: 432, x: 56, book: 1,
-    text: 'Now you say you forgive them. Nothing about yesterday has changed.',
+    text: 'Now suppose you forgive the person who wronged you.',
     dur: 2.6,
   },
   {
     p: 404, x: 56, book: 1,
-    text: 'So what did the sentence do?',
+    text: 'Forgiving leaves the past unchanged. So what does forgiveness change?',
     dur: 1.8,
   },
   {
     p: 165, x: 56, book: 1, live: 1,
     interact: {
-      prompt: 'Tap the line forgiving strikes out.',
-      explain: 'Only what you are owed. Strike what happened and you’re forgetting. Strike whose fault it was and you’re excusing, deciding they weren’t responsible after all. Then there was never anything to forgive. Forgiveness needs the verdict to stand.',
+      prompt: 'What does forgiving cancel: what happened, whose fault it was, or what you are owed?',
+      explain: 'What you are owed. Cancelling what happened would be forgetting. Cancelling whose fault it was would be excusing, which denies there was anything to forgive. So forgiveness requires the judgement of fault to stand.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 176, x: 56, book: 1, struck: 1, excuse: 1,
-    text: 'People slide between forgiving and excusing constantly. Excusing says the person could not help it.',
+    text: 'Forgiving is often confused with excusing. To excuse someone is to judge the person not responsible for the wrong.',
     dur: 3.9,
   },
   {
     p: 176, x: 56, book: 1, struck: 1, excuse: 1,
-    text: 'Forgiving says the person could.',
+    text: 'Forgiving, by contrast, assumes that the person was responsible for the wrong.',
     dur: 1.8,
   },
   {
@@ -75,12 +75,12 @@ export const BEATS: Ethics36Beat[] = [
   },
   {
     p: 459, x: 130, book: 1, struck: 1, gift: 1,
-    text: 'Forgiveness is a gift, and a gift has an owner. The resentment was yours by right.',
+    text: 'On Jeffrie Murphy’s account, resentment is a fitting response to a wrong, and you’re entitled to it.',
     dur: 2.9,
   },
   {
     p: 459, x: 130, book: 1, struck: 1, gift: 1,
-    text: 'Giving the resentment up is yours to do.',
+    text: 'Forgiveness is therefore a gift, which only the wronged person may give or withhold.',
     dur: 1.8,
   },
   {
@@ -90,31 +90,31 @@ export const BEATS: Ethics36Beat[] = [
       sort: {
         chip: 'a duty to forgive',
         bins: [
-          { id: 'feel', label: 'feelings are not duties', reads: 'feelings can never be duties' },
+          { id: 'feel', label: 'feelings aren’t duties', reads: 'feelings can never be duties' },
           { id: 'time', label: 'it takes time', reads: 'forgiving takes time, and duties fall due at once' },
-          { id: 'take', label: 'he could demand it', reads: 'the wrongdoer could then take it for himself', correct: true },
+          { id: 'take', label: 'it becomes demandable', reads: 'the wrongdoer could then claim it by right', correct: true },
         ],
       },
-      explain: 'He could demand it. Plenty of duties reach feelings: you can be obliged to stop nursing a grudge. The trouble is ownership. If the right apology forced forgiveness, the wrongdoer could help himself to it. The person wronged would be left holding nothing of their own.',
+      explain: 'The wrongdoer could then claim it by right. If the right apology obliged you to forgive, forgiveness would no longer be yours to give. Feelings can fall under duties, as when you’re obliged not to cultivate hatred.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 379, x: 130, book: 1, struck: 1, gift: 1,
-    text: 'None of that makes forgiveness easy, or owed, or always right. Forgiveness is one of the few things a wronged person still holds.',
+    text: 'This account doesn’t make forgiveness easy, owed or always right. It explains why only the person wronged can choose to forgive.',
     dur: 4.4,
   },
   {
     summary: {
-      title: 'The Debt You Choose to Cancel',
+      title: 'What Forgiveness Gives Up',
       points: [
         'Forgiving is not excusing and not forgetting',
         'The wrong has to stand as a wrong',
-        'It gives up resentment you are entitled to',
+        'Forgiving gives up a resentment you’re entitled to',
         'Forgiveness that is owed is not forgiveness',
       ],
-      closing: 'Forgiving changes nothing about what happened. That’s why the choice belongs to the person wronged, and to nobody waiting on them.',
+      closing: 'Forgiving leaves the facts and the fault in place. It gives up only the resentment, which only the person wronged can give up.',
     },
     dur: 3.2,
   },

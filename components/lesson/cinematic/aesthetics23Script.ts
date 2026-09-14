@@ -35,44 +35,44 @@ export interface Aes23Beat extends BaseBeat {
 export const BEATS: Aes23Beat[] = [
   {
     p: 462, x: 200, stave: 1,
-    text: 'Seven notes, no words. It can move you to tears.',
+    text: 'A melody of seven notes has no words. Yet it can move a listener to tears.',
     dur: 2.4,
   },
   {
     p: 462, x: 200, stave: 1,
-    text: 'Now try to say what it was about.',
+    text: 'What, then, is the melody about? Music might mean something in two different ways.',
     dur: 2,
   },
   {
     p: 466, x: 200, stave: 1, plates: 1, point: 1, aim: 0,
-    text: 'A mood, easily. Slow drooping lines sound sorrowful, the way a slow drooping person does.',
+    text: 'The first way is expression. Peter Kivy argues that a slow, falling melody sounds sad because it resembles a sad person’s bearing.',
     cite: 'Expression',
     dur: 4.4,
   },
   {
     p: 379, x: 132, stave: 1, plates: 1, point: 1, aim: 1,
-    text: 'A bird, sometimes. Trilling violins can imitate birdsong, though the printed title is doing most of the pointing.',
+    text: 'The second way is representation, which means being about something. Violins can imitate birdsong, but a title usually names the bird.',
     cite: 'Representation',
     dur: 4.8,
   },
   {
     p: 165, x: 132, stave: 1, plates: 1, point: 1, aim: 1, live: 1,
     interact: {
-      prompt: 'Tap where a fugue with no title points.',
-      explain: 'At nothing outside itself. A mood is the tempting answer, and the fugue may well have one. But having a mood is not pointing at anything. Strip the title off the birdsong piece and you get lively trills.',
+      prompt: 'What is a fugue without a title about?',
+      explain: 'Nothing outside itself. A mood is tempting, and the fugue may well express one. But expressing a mood isn’t being about something. Without its title, even the birdsong piece is only a sequence of trills.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 176, x: 132, stave: 1, plates: 1, point: 1, aim: 2,
-    text: 'Most instrumental music works this way. The music is not about anything.',
+    text: 'Music that represents nothing is called absolute music. Most instrumental music is absolute in this sense.',
     cite: 'Absolute music',
     dur: 2.6,
   },
   {
     p: 176, x: 132, stave: 1, plates: 1, point: 1, aim: 2,
-    text: 'The music is a shape made of tones.',
+    text: 'Such music has no subject beyond its own patterns of tones.',
     dur: 1.8,
   },
   {
@@ -90,22 +90,22 @@ export const BEATS: Aes23Beat[] = [
   },
   {
     p: 399, x: 268, stave: 1, plates: 1, point: 1, aim: 2,
-    text: 'That’s the grand objection. Music points at nothing you can see because it copies the wanting underneath everything.',
+    text: 'Arthur Schopenhauer held that music does represent. It copies no visible thing, but the will hidden behind all things.',
     dur: 4.6,
   },
   {
     p: 383, x: 268, stave: 1, plates: 1, point: 1, aim: 2,
     interact: {
-      prompt: 'Where does most instrumental music belong?',
+      prompt: 'Which description fits most instrumental music?',
       sort: {
         chip: 'instrumental music',
         bins: [
-          { id: 'nothing', label: 'no mood', reads: 'no mood, no object, only shape' },
-          { id: 'mood', label: 'mood, no object', reads: 'has a mood, points at nothing', correct: true },
-          { id: 'objects', label: 'names things', reads: 'names things the way words do' },
+          { id: 'nothing', label: 'no mood', reads: 'expresses no mood and represents nothing' },
+          { id: 'mood', label: 'mood, no object', reads: 'expresses a mood but represents nothing', correct: true },
+          { id: 'objects', label: 'represents things', reads: 'represents things, as words do' },
         ],
       },
-      explain: 'Mood, no object, and it’s two jobs rather than one. A slow line sounds sorrowful without being about anything. Naming an object takes a title, and once you notice that, the title is doing the pointing.',
+      explain: 'Mood, no object. A slow, falling line sounds sorrowful without being about anything. So it expresses a mood but represents nothing. Denying it any mood ignores its sorrow, and representing an object usually needs a title.',
       xp: 5,
     },
     dur: 1.0,
@@ -114,12 +114,12 @@ export const BEATS: Aes23Beat[] = [
     summary: {
       title: 'Mood Without An Object',
       points: [
-        'Expressing is having a mood',
-        'Representing is being about something else',
+        'Expression: music has a character, such as sorrow',
+        'Representation: music is about something beyond itself',
         'Most instrumental music does the first and not the second',
-        'Titles carry far more of the pointing than the notes do',
+        'Where music represents, a title usually supplies the subject',
       ],
-      closing: 'Music moves you and is about nothing. Take that as the interesting part, not as a shortfall.',
+      closing: 'Instrumental music can express sorrow without representing anything. Expression and representation are separate kinds of meaning.',
     },
     dur: 3.6,
   },

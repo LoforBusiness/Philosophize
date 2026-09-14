@@ -12,6 +12,8 @@ import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import { C, RADIUS, LIP } from '@/constants/design';
 import { ease01, pose, seg, type Bundle, type Stance } from './rig';
 import { gazeAt } from './moves';
+import { METAL } from '@/components/shared/tone';
+import { VerdictSeal, XpCoin, useQuestionAccent } from './QuestionParts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared kit for cinematic lessons — the parts that are identical across every
@@ -295,17 +297,24 @@ export interface PlotShape {
   id: string;
   /** One value per column, 0..1. Must be the same length as `cols`. */
   profile: number[];
-  /** What the readout calls this shape while the drawn curve is nearest to it. */
+  /** The caption on this shape's tile. At most 42 characters. */
   reads: string;
   correct?: boolean;
 }
 
-/** A graded question answered by drawing a curve across a few columns. */
+/**
+ * A graded question answered by choosing the SHAPE of a relationship (see ./TrendPick).
+ *
+ * It used to be drawn column by column and committed with a button, which a reader
+ * found too slow for what it asks. Each shape is now drawn for the reader as a small
+ * graph on its own tile, and one tap chooses it. The block keeps its name so every
+ * scene that reacts to a plot beat still does.
+ */
 export interface PlotBlock {
-  /** The column labels, left to right. Three to six. */ cols: string[];
-  /** What the vertical axis measures, shown up its left side. */ axis: string;
-  /** Where each column starts, 0..1. Same length as `cols`. */ start: number[];
-  /** The shapes this question knows. The drawn curve is scored to the nearest. */
+  /** The column labels, left to right. The first and last name the range above the tiles. */ cols: string[];
+  /** What the vertical axis measures, named above the tiles. At most 24 characters. */ axis: string;
+  /** Where the scene's `dragPos` sits before a choice: the mean of these. */ start: number[];
+  /** The shapes offered, three or four, each drawn on its own tile. */
   shapes: PlotShape[];
 }
 
@@ -463,7 +472,7 @@ export interface InteractBlock {
    * an old branch still compiles; `check:rotation` fails on a new one.
    */
   lever?: LeverBlock;
-  /** A curve the reader draws across columns (see ./ShapePlot). */
+  /** The shape of a relationship, chosen from drawn graphs in one tap (see ./TrendPick). */
   plot?: PlotBlock;
   /** One bar divided between two sides (see ./SplitBar). */
   split?: SplitBlock;
@@ -526,6 +535,28 @@ export interface BaseBeat {
 
 /** Beats that hold the reader until they answer, rather than until they tap. */
 export function gates(b: BaseBeat) { return Boolean(b.tap || b.mc || b.interact); }
+
+/**
+ * ONE BEAT, ONE PLACE TO ANSWER (E41).
+ *
+ * True when a graded beat is answered ON THE STAGE, which is when its `interact`
+ * declares none of the controls the player draws below the picture. The player
+ * gates a scene's picks and its Targets' rings on this, so no scene can leave a
+ * stage answer live under a question that is asked below.
+ *
+ * Ten scenes did exactly that. They switched their Targets on for any graded beat
+ * (`const showPick = !!cur.interact`), so on a beat asking a split, a sort or a
+ * poll the reader could also tap the stage. The tap was graded against the STAGE
+ * question's answer, the control below locked as though answered, and the stage
+ * question then asked again on the next tap.
+ *
+ * A new control's key goes in this list in the commit that adds the control, and
+ * `check:shape` fails until it does.
+ */
+export function stageAnswered(b: BaseBeat) {
+  const q = b.interact;
+  return Boolean(q && !q.cards && !q.drag && !q.lever && !q.plot && !q.split && !q.field && !q.poll && !q.sort);
+}
 
 // ── NOTHING MAY TELEPORT (group L) ────────────────────────────────────────────
 //
@@ -1380,12 +1411,22 @@ export function Thought({
  * no stake to name, and saying so would be a lie the reward screen then
  * contradicts.
  */
-export function QKicker({ graded }: { graded?: boolean }) {
+export function QKicker({ graded, index, total }: { graded?: boolean; index?: number; total?: number }) {
+  const accent = useQuestionAccent();
+  // THE NUMBER IS WHERE YOU ARE. "Question 1 of 2" is a count a reader can hold,
+  // and it is the smallest thing that makes a lesson read as a round with a score
+  // rather than a page with a form on it.
+  const label = !graded ? 'YOUR TURN' : index && total ? `QUESTION ${index} OF ${total}` : 'QUESTION';
   return (
-    <View style={styles.kicker}>
-      <Text style={styles.kickerText}>
-        {graded ? `QUESTION  \u00b7  +${XP_PER_CORRECT_ANSWER} XP` : 'YOUR TURN'}
-      </Text>
+    <View style={styles.kickRow}>
+      <View style={[styles.kicker, { backgroundColor: accent.base, borderBottomColor: accent.rim }]}>
+        <Text style={styles.kickerText}>{label}</Text>
+      </View>
+      {graded ? (
+        <View style={styles.stake}>
+          <Text style={styles.stakeText}>{`+${XP_PER_CORRECT_ANSWER} XP`}</Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -1399,14 +1440,22 @@ export function QKicker({ graded }: { graded?: boolean }) {
 export function Reveal({ correct, graded, explain }: {
   correct: boolean; graded?: boolean; explain: string;
 }) {
+  // It says WHICH of the two things happened before anything else, with a stamp,
+  // and a right answer pays out in gold where it was earned.
   return (
     <Animated.View
       style={[styles.explain, correct ? styles.explainRight : styles.explainWrong]}
       entering={FadeInDown.duration(300)}
     >
-      <Text style={[styles.explainHead, correct ? styles.explainHeadRight : styles.explainHeadWrong]}>
-        {correct ? (graded ? CORRECT_LABEL : 'That\u2019s the one') : 'Not quite'}
-      </Text>
+      <View style={styles.explainTop}>
+        <View style={styles.explainSeal}>
+          <VerdictSeal correct={correct} size={22} delay={80} style={styles.explainSealAt} />
+        </View>
+        <Text style={[styles.explainHead, correct ? styles.explainHeadRight : styles.explainHeadWrong]}>
+          {correct ? (graded ? 'CORRECT' : 'THAT’S THE ONE') : 'NOT QUITE'}
+        </Text>
+        {correct && graded ? <XpCoin delay={260} style={styles.explainCoin} /> : null}
+      </View>
       <Text style={styles.explainText}>{explain}</Text>
     </Animated.View>
   );
@@ -1486,9 +1535,11 @@ export function Choices({
 // tappable targets live in the SCENE, which calls onPick — so this panel has no
 // buttons of its own. `answered`/`correct` are owned by the player.
 export function InteractPanel({
-  prompt, explain, answered, correct, targets = 0, inScene = true,
+  prompt, explain, answered, correct, targets = 0, inScene = true, index, total,
 }: {
   prompt: string; explain: string; answered: boolean; correct: boolean; targets?: number;
+  /** Which graded question of the lesson this is, from 1, and how many there are. */
+  index?: number; total?: number;
   /**
    * Is this question answered on the STAGE?
    *
@@ -1516,10 +1567,19 @@ export function InteractPanel({
     : targets === 1
       ? 'Tap the outlined part above ↑'
       : 'Answer in the scene above ↑';
+  // ONCE A CONTROL BELOW THE FIGURE IS ANSWERED, THE QUESTION GIVES ITS LINE TO THE
+  // ANSWER. The control shares one fixed box with this panel (L6), and answering a
+  // poll opens a holder line under every row at once. Rendered for all 278 of them,
+  // a phone 780 tall cut off the end of the explanation in 28 to 45 questions, by
+  // width. The control still shows the options with the verdict struck on them, so
+  // the prompt was the one thing on screen the reader no longer needed; without it,
+  // five in six of those fit. A stage question keeps its prompt: its deck has room,
+  // and nothing on the stage says in words what was asked.
+  const showPrompt = !(answered && !inScene);
   return (
     <Animated.View style={styles.qWrap} layout={LinearTransition.duration(300)}>
-      {!answered ? <QKicker graded /> : null}
-      <Text style={styles.prompt}>{prompt}</Text>
+      {!answered ? <QKicker graded index={index} total={total} /> : null}
+      {showPrompt ? <Text style={styles.prompt}>{prompt}</Text> : null}
       {!answered && inScene ? (
         <Text style={styles.interactHint}>{hint}</Text>
       ) : !answered ? null : (
@@ -1787,12 +1847,21 @@ export const styles = StyleSheet.create({
    *  silently — the narration simply stopped and a prompt appeared in the same
    *  place, in a slightly heavier face. This announces it, and on a graded beat
    *  it names the stake, derived from constants/xp rather than typed (H63). */
+  kickRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+  // The lesson's branch colour, on a lip of its own rim: the question announces
+  // itself in the same material as the controls it asks you to use.
   kicker: {
-    alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center',
-    borderRadius: RADIUS.pill, paddingHorizontal: 9, paddingVertical: 3,
-    marginBottom: 8, backgroundColor: INK,
+    flexDirection: 'row', alignItems: 'center',
+    borderRadius: RADIUS.pill, paddingHorizontal: 10, paddingVertical: 3,
+    borderBottomWidth: 2,
   },
   kickerText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.4, color: PAPER },
+  // THE STAKE, in gold, because XP is already struck in gold everywhere else.
+  stake: {
+    borderRadius: RADIUS.pill, paddingHorizontal: 8, paddingVertical: 2,
+    backgroundColor: METAL.GOLD.lit, borderWidth: 1.5, borderColor: METAL.GOLD.base,
+  },
+  stakeText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.8, color: INK },
 
   prompt: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 16, color: INK, marginBottom: 8, lineHeight: 21 },
   interactHint: { fontFamily: 'Inter_500Medium', fontSize: 12, letterSpacing: 0.5, color: SOFT, fontStyle: 'italic' },
@@ -1828,13 +1897,19 @@ export const styles = StyleSheet.create({
   // A bare 2px rule down the left, in ink, whatever had just happened. It read
   // the same for "you got it" and for "not quite", which is the one moment in a
   // lesson where the reader most wants to be told which of those it was.
+  // A STRUCK CARD, not a tinted box with a rule down one side: a border all the
+  // way round and a heavier foot, the same lip every answer control stands on.
   explain: {
-    marginTop: 4, borderRadius: RADIUS.card, borderLeftWidth: 5,
-    paddingLeft: 12, paddingRight: 12, paddingVertical: 10,
+    marginTop: 4, borderRadius: RADIUS.card, borderWidth: 1.5, borderBottomWidth: 4,
+    paddingHorizontal: 12, paddingTop: 8, paddingBottom: 9,
   },
-  explainRight: { backgroundColor: RIGHT_BG, borderLeftColor: RIGHT },
-  explainWrong: { backgroundColor: WRONG_BG, borderLeftColor: WRONG },
-  explainHead: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.2, color: INK, marginBottom: 4 },
+  explainRight: { backgroundColor: RIGHT_BG, borderColor: RIGHT },
+  explainWrong: { backgroundColor: WRONG_BG, borderColor: WRONG },
+  explainTop: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 5, minHeight: 22 },
+  explainSeal: { width: 22, height: 22 },
+  explainSealAt: { left: 0, top: 0 },
+  explainCoin: { marginLeft: 'auto' },
+  explainHead: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.4, color: INK },
   explainHeadRight: { color: RIGHT },
   explainHeadWrong: { color: WRONG },
   explainText: { fontFamily: 'Inter_400Regular', fontSize: 13.5, color: INK, lineHeight: 20, opacity: 0.82 },

@@ -34,36 +34,36 @@ export interface Ethics38Beat extends BaseBeat {
 export const BEATS: Ethics38Beat[] = [
   {
     p: 164, x: 46, beam: 1,
-    text: 'Two children are in the water and you can reach one. One of them is yours.',
+    text: 'Suppose two children are drowning and you can save only one. One of them is your own child.',
     dur: 3.8,
   },
   {
     p: 2, x: 46, beam: 1,
-    text: 'Every modern moral theory starts by refusing to look at that. A life is a life, and whose it is stays off the scale.',
+    text: 'Impartial moral theories set aside whose child is whose. Each life counts equally, whoever it belongs to.',
     dur: 4.4,
   },
   {
     p: 36, x: 46, beam: 1, weights: 1,
-    text: 'So the interesting work is in the reasons you may put on the pan.',
+    text: 'The question is which reasons for favouring one child an impartial rule can accept.',
     dur: 3.2,
   },
   {
     p: 159, x: 46, beam: 1, weights: 1, live: 1,
     interact: {
-      prompt: 'Tap the reason an impartial rule may not take.',
-      explain: 'She is mine. The other two are facts a stranger could weigh as well as you: who’s nearer, and what good follows. A relation to you can’t be read off from outside. That’s why an impartial rule won’t have it.',
+      prompt: 'Which of the three reasons can an impartial rule not accept?',
+      explain: 'She is mine. Nearness and the good that follows are facts anyone could weigh equally. A relation to you gives a reason only to you, and an impartial rule excludes such reasons.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 176, x: 46, beam: 1, weights: 1,
-    text: 'William Godwin took that to the end. He wrote: save the archbishop over the chambermaid, even if the chambermaid is your mother.',
+    text: 'William Godwin accepted the strictest version. Faced with a fire, he said, save Archbishop Fénelon rather than his maid, even if she is your mother.',
     dur: 4.6,
   },
   {
     p: 35, x: 90, beam: 1, weights: 1, tilt: 0.35,
-    text: 'Almost nobody believes him, and the reply is not sentiment. The tie was a reason all along.',
+    text: 'Bernard Williams replies that the tie itself is a reason. A parent who saves their own child needs no impartial permission.',
     dur: 4.0,
   },
   {
@@ -82,32 +82,32 @@ export const BEATS: Ethics38Beat[] = [
   {
     p: 21, x: 90, beam: 1, tilt: 0.35,
     interact: {
-      prompt: 'How much may being yours weigh?',
+      prompt: 'How much weight may the fact that a child is yours carry?',
       drag: {
         lo: 'nothing', hi: 'everything',
         start: 0.05,
         zones: [
-          { id: 'none', upto: 0.22, reads: 'nothing at all, so you need a permission first' },
-          { id: 'some', upto: 0.52, reads: 'a little, and you would still have to argue for it' },
-          { id: 'lots', upto: 0.84, reads: 'a lot, and no further reason is wanted', correct: true },
-          { id: 'all', upto: 1, reads: 'everything, and a stranger weighs nothing at all' },
+          { id: 'none', upto: 0.22, reads: 'none, so saving your child needs impartial permission' },
+          { id: 'some', upto: 0.52, reads: 'a little, and only with further justification' },
+          { id: 'lots', upto: 0.84, reads: 'a great deal, with no further reason needed', correct: true },
+          { id: 'all', upto: 1, reads: 'everything, so a stranger counts for nothing' },
         ],
       },
-      explain: 'A lot, and no further reason is wanted. Set it at nothing and saving your own child becomes something you must first be licensed to do. Set it at everything and the far pan is empty, which no partialist has claimed.',
+      explain: 'A great deal, with no further reason needed. At nothing, saving your own child would first need an impartial licence. At everything, a stranger’s life would count for nothing, which no defender of partiality claims.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'A Thumb on the Scale',
+      title: 'The Weight of Being Yours',
       points: [
         'Impartial rules weigh a life without asking whose it is',
-        'A tie to you is the reason they cannot take',
-        'Most people act on it anyway, and defend it',
-        'Needing a rule to permit it is the odd part',
+        'A personal tie is the reason impartial rules exclude',
+        'Godwin applied the impartial verdict even to your own mother',
+        'Williams: needing permission to favour your own is one thought too many',
       ],
-      closing: 'The interesting question is not whether you’d save your own. The question is what you take yourself to be doing.',
+      closing: 'The question is not whether you would save your own child, but what reason you would be acting on.',
     },
     dur: 3.2,
   },

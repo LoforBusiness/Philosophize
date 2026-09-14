@@ -37,53 +37,37 @@ import path from 'node:path';
 const DIR = 'components/lesson/cinematic';
 const HARD_BUDGET = 0;
 
-/** hard word -> what to say instead. Add a pair, never a bare word. */
+/**
+ * INFLATED word -> the plainer word that means exactly the same. Add a pair, never a
+ * bare word.
+ *
+ * NARROWED ON 13 SEP 2026, when the owner asked for intellectual, informative wording
+ * (LESSON_RULES group V, J15). The list used to forbid precise words the subject
+ * needs — tenable, cogent, culpability, salient, intelligible, irrefutable — alongside
+ * inflated ones. A precise word is welcome when the sentence makes its meaning clear;
+ * what stays banned is diction that says nothing a plainer word does not.
+ */
 const PLAIN = new Map(Object.entries({
-  antecedent: 'the "if" part',
-  exculpating: 'excusing',
-  intelligible: 'able to be understood',
-  misrecognition: 'seeing someone wrongly',
-  nonrecognition: 'not seeing someone at all',
-  unrefutable: 'impossible to prove wrong',
-  irrefutable: 'impossible to prove wrong',
-  innocuous: 'harmless',
-  pernicious: 'harmful',
-  emanation: 'something given off',
-  indissoluble: 'that cannot be broken up',
-  manifoldness: 'a great many things at once',
-  imprescriptible: 'that cannot be taken away',
-  ascertain: 'find out',
   utilise: 'use',
   utilize: 'use',
   commence: 'begin',
   endeavour: 'try',
-  elucidate: 'make clear',
+  ascertain: 'find out',
   ameliorate: 'improve',
   efficacious: 'effective',
-  ubiquitous: 'everywhere',
-  disparate: 'different',
-  salient: 'important',
-  cogent: 'convincing',
-  veracity: 'truth',
-  culpability: 'blame',
-  requisite: 'needed',
-  myriad: 'many',
-  paucity: 'too few',
-  extant: 'still around',
-  nascent: 'just beginning',
-  tenable: 'defensible',
-  untenable: 'impossible to defend',
-  purport: 'claim',
-  obviate: 'remove the need for',
-  promulgate: 'announce',
-  delineate: 'set out',
-  juxtapose: 'set side by side',
-  concomitant: 'that comes with it',
+  elucidate: 'explain',
   heretofore: 'until now',
   notwithstanding: 'even so',
   aforementioned: 'the one above',
+  myriad: 'many',
+  paucity: 'too few',
+  promulgate: 'announce',
+  obviate: 'remove the need for',
+  purport: 'claim',
   vis: 'compared with',
   qua: 'as',
+  manifoldness: 'variety',
+  unrefutable: 'irrefutable',
 }));
 
 /**

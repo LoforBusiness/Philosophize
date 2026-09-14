@@ -181,11 +181,18 @@ function pieces() {
 const LIMIT = {
   reads: { words: 9, clause: 2, abstract: 0.10 },
   rail: { words: 5, clause: 0, abstract: 0.15 },
-  prompt: { words: 26, clause: 2.5, perSentence: true, abstract: 0.10 },
+  // PROSE GOT ONE CLAUSE MARK MORE, AND A LITTLE MORE ABSTRACTION, ON 13 SEP 2026.
+  // Every lesson was rewritten as a clear lecture (group V), which states a claim and
+  // qualifies it in one sentence ("Sextus Empiricus holds that suspending judgement
+  // brings not despair but tranquillity, or ataraxia") and names the term it teaches.
+  // J1 still holds every sentence to twenty words, so the third mark buys precision,
+  // not length. A READOUT did not move: it is read in motion, and a "but" there is
+  // still what a thumb cannot hold.
+  prompt: { words: 26, clause: 3, perSentence: true, abstract: 0.14 },
   // Prose length belongs to check-words; only shape and abstraction here.
-  explain: { words: null, clause: 2.5, perSentence: true, abstract: 0.12 },
-  beat: { words: null, clause: 2.5, perSentence: true, abstract: 0.12 },
-  closing: { words: null, clause: 2.5, perSentence: true, abstract: 0.12 },
+  explain: { words: null, clause: 3, perSentence: true, abstract: 0.16 },
+  beat: { words: null, clause: 3, perSentence: true, abstract: 0.16 },
+  closing: { words: null, clause: 3, perSentence: true, abstract: 0.16 },
 };
 
 /**
@@ -221,7 +228,9 @@ const LIMIT = {
  * it won, and the number may only go DOWN -- lower it as the rest is written.
  */
 // 72 → 31 on 11 Sep 2026, when every lesson was rewritten to be read aloud (group AC).
-const BUDGET = 31;
+// 31 → 1 on 13 Sep 2026, after the lecture rewrite (group V): the prose limits moved
+// once, as recorded above LIMIT, and every piece still over them was rewritten (V11).
+const BUDGET = 1;
 
 const arg = process.argv.slice(2);
 const ALL = arg.includes('--all');

@@ -35,36 +35,36 @@ export interface Logic39Beat extends BaseBeat {
 export const BEATS: Logic39Beat[] = [
   {
     p: 25, x: 58, planks: 1,
-    text: 'Most claims need evidence before you can argue with them. A few need nothing but themselves.',
+    text: 'Most claims can be refuted only with outside evidence. A few can be refuted by applying them to themselves.',
     dur: 4.0,
   },
   {
     p: 47, x: 58, planks: 1,
-    text: 'Three claims, one to a plank. The test is to hold each one to the standard it sets.',
+    text: 'Consider three claims, each on its own plank. The test is whether each claim meets the standard it sets.',
     dur: 3.6,
   },
   {
     p: 165, x: 58, planks: 1, live: 1,
     interact: {
-      prompt: 'Tap the claim that cannot survive its own test.',
-      explain: 'Only the middle plank is about claims, so only it lands inside its own scope. “Every event has a cause” is about events. “Some claims are false” is happily one of them. A claim has to cover itself before it can convict itself.',
+      prompt: 'Which of the three claims fails the standard it sets?',
+      explain: 'The claim that nothing can be proved. Only this claim is about all claims, so only it falls within its own scope. “Every event has a cause” is about events. “Some claims are false” can include itself without contradiction.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 379, x: 58, planks: 1, saw: 1,
-    text: 'The sentence “nothing can be proved” is itself a claim, so it invites the one question it forbids.',
+    text: 'The claim “nothing can be proved” is itself a claim, so it falls within its own scope. The claim must therefore meet its own demand for proof.',
     dur: 3.8,
   },
   {
     p: 384, x: 58, planks: 1, saw: 1, snap: 1,
-    text: 'Prove it, and something can be proved. Don’t, and you’re asking to be believed on nothing.',
+    text: 'If the claim is proved, then something can be proved, so the claim is false. If it isn’t proved, it has no support.',
     dur: 4.0,
   },
   {
     p: 168, x: 106, planks: 1, saw: 1, snap: 1,
-    text: 'No outside evidence went into the verdict. The sentence did the whole job.',
+    text: 'Either way, the claim can’t be defended, and no outside evidence was needed. Such a claim is called self-refuting.',
     dur: 3.2,
   },
   {
@@ -83,29 +83,29 @@ export const BEATS: Logic39Beat[] = [
   {
     p: 176, x: 106, planks: 1, saw: 1, snap: 1,
     interact: {
-      prompt: 'A claim has convicted itself. What follows?',
+      prompt: 'What follows when a claim fails the standard it sets for all claims?',
       poll: {
         options: [
-          { id: 'false', reads: 'it is false, and nothing else is needed', holders: ['Plato', 'Aristotle'], correct: true },
-          { id: 'rule', reads: 'it was a rule rather than a claim', holders: ['A. J. Ayer'] },
-          { id: 'exempt', reads: 'it holds, if it exempts itself', holders: ['Bertrand Russell'] },
+          { id: 'false', reads: 'it refutes itself, with no outside evidence needed', holders: ['Plato', 'Aristotle'], correct: true },
+          { id: 'rule', reads: 'it was a definition, not a claim', holders: ['A.J. Ayer'] },
+          { id: 'exempt', reads: 'it holds, provided it excludes itself', holders: ['Bertrand Russell'] },
         ],
       },
-      explain: 'It’s false. No data and no shared premise were needed, only the sentence. Calling it a rule, or writing in an exception, are real replies. Both cost the same thing: a rule excused from its own standard is one nobody else need accept.',
+      explain: 'The claim refutes itself, with no outside evidence needed. Its own standard is enough to defeat it. Exempting the claim avoids refutation, but only if the exemption can be justified rather than declared.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Turning It Round',
+      title: 'Self-Refuting Claims',
       points: [
-        'A claim about all claims covers itself',
-        'Apply it to itself and read the result',
-        'Convicting itself makes it false, cheaply',
-        'The escape is an exception, and it costs',
+        'A claim about all claims falls within its own scope',
+        'Test such a claim by applying it to itself',
+        'A self-refuting claim fails without outside evidence',
+        'Exempting the claim needs a justification, not a declaration',
       ],
-      closing: 'It’s the shortest refutation there is, and it needs no ground you have to share first. Try it on the next sweeping claim you meet.',
+      closing: 'Self-refutation needs no shared premises, only the claim itself. Apply the test to any claim about all claims.',
     },
     dur: 3.2,
   },

@@ -24,29 +24,29 @@ export interface Meta4Beat extends BaseBeat {
 export const BEATS: Meta4Beat[] = [
   {
     p: 384, tokens: 0,
-    text: 'Say “nothing exists” and you’ve said too much. Parmenides found this snag twenty-five centuries ago, and it still bites.',
+    text: 'To say “nothing exists” is already to speak about something. Parmenides identified this problem in the fifth century BCE.',
     dur: 3.4,
   },
   {
     p: 24, tokens: 1,
-    text: 'Try to deny non-being. Think of nothing, and it becomes the object of a thought, which needs something to be about.',
+    text: 'Suppose you try to think of nothing. It becomes the object of your thought, and a thought must be about something.',
     cite: 'A self-defeating paradox',
     dur: 3.8,
   },
   {
     p: 24, tokens: 1,
-    text: 'Each grab at nothing turns it into a thing.',
+    text: 'Each attempt to refer to nothing turns it into something, such as the object of a thought.',
     dur: 1.8,
   },
   {
     p: 459, tokens: 2, barred: 1,
-    text: 'At Elea, Parmenides set out two ways. The way that is, and the way that is not.',
+    text: 'Parmenides of Elea described two ways of inquiry. One holds that it is, and the other that it is not.',
     cite: 'Parmenides, On Nature',
     dur: 1.8,
   },
   {
     p: 459, tokens: 2, barred: 1,
-    text: 'Parmenides throws out the second, because what is not can be neither known nor said. So only what is counts as real, and change is a trick of the senses.',
+    text: 'Parmenides rejects the second way, because what is not can be neither known nor said. So only what is can be real.',
     dur: 3.5,
   },
   {
@@ -64,24 +64,24 @@ export const BEATS: Meta4Beat[] = [
   },
   {
     p: 15, tokens: 3, barred: 1, frozen: 1,
-    text: 'Follow it and the world freezes. To change, a thing would have to pass into or out of not-being, and that road is closed.',
+    text: 'This conclusion rules out change. To change, a thing would have to pass into or out of not-being, which Parmenides has excluded.',
     cite: 'Change becomes impossible',
     dur: 3.4,
   },
   {
     p: 15, tokens: 3, barred: 1, frozen: 1,
-    text: 'So motion itself becomes an illusion. Aristotle later loosened the knot.',
+    text: 'So motion itself is false, a mere show put on by the senses. Aristotle later replied that “being” is said in more than one way, including potential and actual being.',
     dur: 1.8,
   },
   {
     p: 165, tokens: 3, barred: 1, frozen: 1,
     interact: {
-      prompt: 'Why did Parmenides claim that non-being cannot exist?',
+      prompt: 'What makes the thought of pure non-being self-defeating?',
       cards: [
-        { text: 'Speaking it makes it something', correct: true },
-        { text: 'Science proved space is full', correct: false },
+        { text: 'Naming it turns it into something', correct: true },
+        { text: 'Physics shows space is never empty', correct: false },
       ],
-      explain: 'Every thought and word needs an object. “It is not” fails because what-is-not can be neither known nor said. Try to think it, and you turn it into a something without noticing.',
+      explain: 'Naming it turns it into something. Every thought needs an object, so thinking of what is not treats it as something. Whether space is ever empty is a separate question for physics.',
       xp: 5,
     },
     dur: 1.0,
@@ -89,32 +89,32 @@ export const BEATS: Meta4Beat[] = [
   {
     p: 383, tokens: 3, barred: 1, frozen: 1,
     interact: {
-      prompt: 'How empty is a physicist\'s vacuum, really?',
+      prompt: 'How close to absolute nothingness is a physical vacuum?',
       drag: {
-        lo: 'FULL OF STUFF',
-        hi: 'ABSOLUTELY NOTHING',
+        lo: 'FULL OF MATTER',
+        hi: 'ABSOLUTE NOTHINGNESS',
         start: 0,
         zones: [
           { id: 'air', upto: 0.3, reads: 'air, dust and light' },
-          { id: 'vacuum', upto: 0.74, reads: 'still space and fields, no matter', correct: true },
-          { id: 'none', upto: 1, reads: 'nothing at all, never once seen' },
+          { id: 'vacuum', upto: 0.74, reads: 'space and fields, with no matter', correct: true },
+          { id: 'none', upto: 1, reads: 'nothing at all, not even space or fields' },
         ],
       },
-      explain: 'A vacuum lands short of the far end, and the gap is the point. Empty space still has dimensions and quantum fields, so it’s a something with very little in it. The nothing Parmenides means is the far end of the rail, and no experiment has gone there.',
+      explain: 'Space and fields, with no matter. A physical vacuum still has spatial dimensions and quantum fields, so it’s something with very little in it. Parmenides’ non-being would lack even space and fields, and no experiment can produce that.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Trap of Non-Being',
+      title: 'The Problem of Non-Being',
       points: [
         'Naming nothing seems to make it something',
         'Parmenides: what-is-not cannot be thought',
-        'His logic implies change is illusion',
-        'Aristotle split "being" into many senses',
+        'Parmenides’ argument implies that change is an illusion',
+        'Aristotle: “being” has many meanings, not one',
       ],
-      closing: 'Nothing looks like the simplest idea going, yet it stays one of philosophy’s slipperiest.',
+      closing: 'Nothingness seems a simple idea, yet it has proved very hard to think without treating it as something.',
     },
     dur: 2.8,
   },

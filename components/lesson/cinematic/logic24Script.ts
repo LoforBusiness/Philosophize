@@ -32,36 +32,36 @@ export interface Logic24Beat extends BaseBeat {
 export const BEATS: Logic24Beat[] = [
   {
     p: 356, x: 28,
-    text: 'Sherlock Holmes never deduced anything. He guessed, brilliantly.',
+    text: 'Sherlock Holmes calls his method deduction. Most of his conclusions are in fact inferences to the best explanation.',
     dur: 4.0,
   },
   {
     p: 259, x: 28, bench: 0.34,
-    text: 'Deduction runs from a rule to a conclusion that can’t be false.',
+    text: 'Deduction moves from premises to a conclusion that must be true if the premises are true.',
     dur: 4.2,
   },
   {
     p: 438, x: 28, bench: 0.67, feed: 1,
-    text: 'Induction runs from many cases to a rule that’s probably right.',
+    text: 'Induction moves from many observed cases to a general rule that’s probably true, but not certain.',
     dur: 4.2,
   },
   {
     p: 264, x: 28, bench: 1, feed: 1, out: 1,
-    text: 'Abduction runs from what you see to the likeliest reason you’re seeing it.',
+    text: 'Abduction moves from an observation to the hypothesis that would best explain it.',
     dur: 4.8,
   },
   {
     p: 261, x: 28, bench: 1, feed: 1, out: 1, live: 1,
     interact: {
-      prompt: 'A burst pipe, a flooded kitchen. Tap the engine.',
-      explain: 'Abduction. It feels like deduction because the answer is obvious, and obvious is not guaranteed. A blocked drain would flood the same floor. You’re picking the likeliest reason for what you can see, and staying open to a better one.',
+      prompt: 'Which form of reasoning concludes from a flooded kitchen that a pipe has burst?',
+      explain: 'Abduction. The conclusion feels certain, but a blocked drain could flood the same floor, so the evidence doesn’t guarantee it. That rules out deduction. Abduction infers the likeliest explanation and stays open to a better one.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 424, x: 88, bench: 1, feed: 1, out: 1,
-    text: 'Look at what comes out. Deduction hands back the shape you fed it.',
+    text: 'A deduction’s conclusion already sits inside the premises that feed it. The inference just states what they say.',
     dur: 4.4,
   },
   {
@@ -79,22 +79,22 @@ export const BEATS: Logic24Beat[] = [
   },
   {
     p: 448, x: 88, bench: 1, feed: 1, out: 1,
-    text: 'That certainty has a price. A guaranteed conclusion tells you nothing new.',
+    text: 'Deduction’s certainty has a cost. The conclusion adds no fact that the premises did not already give.',
     dur: 4.4,
   },
   {
     p: 168, x: 88, bench: 1, feed: 1, out: 1,
     interact: {
-      prompt: 'Every sunrise so far. Which engine takes it?',
+      prompt: 'Which form of reasoning concludes, from every sunrise so far, that the sun will rise tomorrow?',
       sort: {
-        chip: 'a thousand sunrises',
+        chip: 'every sunrise so far',
         bins: [
-          { id: 'ded', label: 'deduction', reads: 'the conclusion could not have been false' },
-          { id: 'ind', label: 'induction', reads: 'many cases, so probably the rule', correct: true },
-          { id: 'abd', label: 'abduction', reads: 'the likeliest reason for what you saw' },
+          { id: 'ded', label: 'deduction', reads: 'a conclusion guaranteed by the premises' },
+          { id: 'ind', label: 'induction', reads: 'from many cases to a probable rule', correct: true },
+          { id: 'abd', label: 'abduction', reads: 'the best account of what happened' },
         ],
       },
-      explain: 'Induction. A pile of cases going to a rule is what induction is for, and one black swan still breaks it. Deduction would need a rule already in hand, and abduction hunts for a cause rather than a pattern.',
+      explain: 'Induction. It moves from many cases to a general rule, and one contrary case could still overturn that rule. Deduction would need the rule as a premise from the start. Abduction looks for the best explanation of one event rather than a pattern.',
       xp: 5,
     },
     dur: 1.0,
@@ -102,14 +102,14 @@ export const BEATS: Logic24Beat[] = [
   {
     p: 322, x: 88, bench: 1, feed: 1, out: 1,
     summary: {
-      title: 'Three Engines',
+      title: 'Deduction, Induction, Abduction',
       points: [
         'Deduction is certain and adds nothing new',
         'Induction generalises from cases and may fail',
-        'Abduction reaches for the best explanation',
-        'Detective work is nearly all the third one',
+        'Abduction infers the best explanation',
+        'Most detective reasoning is abductive',
       ],
-      closing: 'Match the engine to the job. Certainty, a generalisation, or the best guess available at the time.',
+      closing: 'Each form of reasoning yields something different: certainty, a probable rule, or the best available explanation.',
     },
     dur: 4.6,
   },

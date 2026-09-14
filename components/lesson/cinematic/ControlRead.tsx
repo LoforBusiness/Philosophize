@@ -97,9 +97,14 @@ interface Props {
    * thread by each layer's own animated style.
    */
   idx: SharedValue<number>;
+  /**
+   * The reading's ink. The controls pass the lesson's branch tone for text
+   * (./questionTone `text`), which is darker than the hue so it clears 4.5:1.
+   */
+  color?: string;
 }
 
-export default function ControlRead({ texts, idx }: Props) {
+export default function ControlRead({ texts, idx, color = INK }: Props) {
   return (
     // `nativeID` for the same reason every control carries one (S6): a harness
     // that has to guess which box is the reading will eventually guess a
@@ -108,20 +113,20 @@ export default function ControlRead({ texts, idx }: Props) {
       {texts.map((t, i) => (
         // Keyed on BOTH so a beat whose readings change length remounts cleanly,
         // and a beat that merely reorders them does not.
-        <Layer key={`${i}:${t}`} text={t} i={i} idx={idx} />
+        <Layer key={`${i}:${t}`} text={t} i={i} idx={idx} color={color} />
       ))}
     </View>
   );
 }
 
 /** One reading, faded in when it is the current one. */
-function Layer({ text, i, idx }: { text: string; i: number; idx: SharedValue<number> }) {
+function Layer({ text, i, idx, color }: { text: string; i: number; idx: SharedValue<number>; color: string }) {
   const st = useAnimatedStyle(() => ({
     opacity: withTiming(Math.round(idx.value) === i ? 1 : 0, { duration: XFADE }),
   }));
   return (
     <Animated.View style={[styles.layer, st]} pointerEvents="none">
-      <Text style={styles.word} numberOfLines={2}>{text}</Text>
+      <Text style={[styles.word, { color }]} numberOfLines={2}>{text}</Text>
     </Animated.View>
   );
 }

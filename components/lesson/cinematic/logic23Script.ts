@@ -35,41 +35,41 @@ export interface Logic23Beat extends BaseBeat {
 export const BEATS: Logic23Beat[] = [
   {
     p: 2, x: 44,
-    text: 'Four small words carry every argument you’ll ever check. Start with two.',
+    text: 'Propositional logic uses four basic connectives: and, or, not, and if. Each builds a compound claim from simpler ones.',
     dur: 4.2,
   },
   {
     p: 30, x: 44, rows: 1,
-    text: 'P and Q are either true or false. Four rows cover every way that can go.',
+    text: 'Take two claims, P and Q, each either true or false. A truth table lists all four combinations, one per row.',
     dur: 4.4,
   },
   {
     p: 36, x: 44, rows: 1, orCol: 1,
-    text: 'Take the word “or”. In speech it often means one or the other, but in logic it means at least one.',
+    text: 'In everyday speech, the word “or” often means one but not both. In logic, the claim “P or Q” is true when at least one part is true.',
     dur: 5.0,
   },
   {
     p: 160, x: 44, rows: 1, orCol: 1,
-    text: 'So taking both cake and pie isn’t cheating. It’s the plainest way to keep the promise.',
+    text: 'So the claim “it will rain or snow” is true on a day with both. This is called inclusive disjunction.',
     dur: 4.8,
   },
   {
     p: 161, x: 44, rows: 1, orCol: 1, live: 1,
     interact: {
-      prompt: 'Tap the only row where P or Q comes out false.',
-      explain: 'The bottom row, where both lamps are out. OR asks for at least one, so the only way to fail it is to bring nothing.',
+      prompt: 'In which row of the table is “P or Q” false?',
+      explain: 'The bottom row, where P and Q are both false. The claim “P or Q” needs at least one true part, so it’s false only when neither part is true.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 159, x: 44, rows: 1, orCol: 1, ifCol: 1,
-    text: 'Now the awkward one. The sentence “if P, then Q” is a promise about what follows P.',
+    text: 'The claim “if P, then Q” is called a conditional. It says that whenever P is true, Q is true as well.',
     dur: 4.4,
   },
   {
     p: 62, x: 100, rows: 1, ifCol: 1,
-    text: 'It breaks in one place only: P happens and Q does not.',
+    text: 'A conditional is false in only one case: when P is true and Q is false.',
     dur: 3.6,
   },
   {
@@ -87,38 +87,38 @@ export const BEATS: Logic23Beat[] = [
   },
   {
     p: 383, x: 100, rows: 1, ifCol: 1,
-    text: 'When P never happens, the promise was never called on. Nothing was broken.',
+    text: 'When P is false, the conditional isn’t falsified. So the material conditional of classical logic counts it as true.',
     dur: 4.2,
   },
   {
     p: 21, x: 100, rows: 1, ifCol: 1,
     interact: {
-      prompt: 'How much of this table does IF P THEN Q keep?',
+      prompt: 'In how many of the four rows is “if P, then Q” true?',
       split: {
-        left: 'KEEPS IT',
-        right: 'BREAKS IT',
+        left: 'TRUE',
+        right: 'FALSE',
         start: 0.5,
         zones: [
-          { id: 'half', upto: 0.38, reads: 'half kept, half broken' },
-          { id: 'most', upto: 0.62, reads: 'a bit more kept than broken' },
-          { id: 'three', upto: 1, reads: 'three rows kept, and one broken', correct: true },
+          { id: 'half', upto: 0.38, reads: 'true in at most one row' },
+          { id: 'most', upto: 0.62, reads: 'true in two rows, false in two' },
+          { id: 'three', upto: 1, reads: 'true in three rows, false in one', correct: true },
         ],
       },
-      explain: 'Three of the four. Only the row with P true and Q false breaks it. That’s why “if pigs fly, I’m the Pope” counts as true. The pigs never flew, so the promise was never tested.',
+      explain: 'True in three rows, false in one. Only P true with Q false makes the conditional false. So the claim “if Paris is in Spain, then snow is black” counts as true. Reading “if” as “and” gives one row, and as “if and only if” gives two.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Four Rows, Two Surprises',
+      title: 'Truth Tables for Or and If',
       points: [
-        'AND needs both; OR needs at least one',
-        'NOT flips a value and nothing else',
-        'IF breaks only when P holds and Q fails',
-        'A false P leaves the whole IF standing',
+        '“And” needs both parts true, and “or” at least one',
+        '“Not” reverses a truth value',
+        'A conditional is false only when P is true and Q false',
+        'A false P makes the whole conditional true',
       ],
-      closing: 'A truth table is a lie detector. Feed it the parts and read the whole off the bottom.',
+      closing: 'A truth table settles the truth of a compound claim from the truth values of its parts.',
     },
     dur: 4.0,
   },

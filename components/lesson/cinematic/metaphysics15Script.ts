@@ -22,29 +22,29 @@ export interface Meta15Beat extends BaseBeat {
 export const BEATS: Meta15Beat[] = [
   {
     p: 462, x: 70,
-    text: 'One ball rolls up and strikes another, and the second rolls away. You’ve watched that ten thousand times.',
+    text: 'Consider one ball striking another, which then rolls away. The first ball seems to make the second one move.',
     dur: 3.5,
   },
   {
     p: 462, x: 70,
-    text: 'Hume asks what exactly you saw.',
+    text: 'David Hume asks what observation reveals when one event causes another.',
     dur: 1.8,
   },
   {
     p: 41, x: 168, balls: 1,
-    text: 'You saw the first ball move. You saw it touch.',
-    cite: 'What you saw',
+    text: 'You observe the first ball moving, and then its contact with the second ball.',
+    cite: 'What is observed',
     dur: 1.8,
   },
   {
     p: 41, x: 168, balls: 1,
-    text: 'You saw the second move. Three things, all of them plain, none of them the thing you’re after.',
+    text: 'Then the second ball moves. You see contact and one event after another, but you never see the necessary connection.',
     dur: 3.2,
   },
   {
     p: 383, x: 124, balls: 1, gap: 1,
-    text: 'Between the touch and the movement is where the causing is supposed to live. Slow the film to a single frame and look straight at it.',
-    cite: 'The gap',
+    text: 'A necessary connection is a link that makes the effect follow. If such a link can be observed, it must lie between contact and motion.',
+    cite: 'Where the connection should be',
     dur: 4.4,
   },
   {
@@ -62,25 +62,25 @@ export const BEATS: Meta15Beat[] = [
   },
   {
     p: 34, x: 168, balls: 1, gap: 1, found: 1,
-    text: 'Nothing but one thing after another, over and over, with no glue anywhere. Hume answers that the glue is real, and that the glue is in you.',
-    cite: 'Not found',
+    text: 'Hume finds the two events conjoined but never observed to be connected. So the idea of connection can’t come from the objects.',
+    cite: 'Conjoined, never connected',
     dur: 4.6,
   },
   {
     p: 165, x: 124, balls: 1, gap: 1, found: 2,
     interact: {
-      prompt: 'How much of the cause do you actually see?',
+      prompt: 'If no link between events is ever observed, what does a claim about cause contain?',
       drag: {
-        lo: 'ONE THING THEN ANOTHER',
-        hi: 'THE PUSH ITSELF',
+        lo: 'SUCCESSION ALONE',
+        hi: 'AN OBSERVED FORCE',
         start: 1,
         zones: [
-          { id: 'events', upto: 0.3, reads: 'one thing, then the other' },
-          { id: 'habit', upto: 0.74, reads: 'both things, plus your habit of expecting', correct: true },
-          { id: 'force', upto: 1, reads: 'the push itself, plainly visible' },
+          { id: 'events', upto: 0.3, reads: 'one event followed by another, and nothing more' },
+          { id: 'habit', upto: 0.74, reads: 'both events, plus a learned habit of expectation', correct: true },
+          { id: 'force', upto: 1, reads: 'an observed force passing from one to the other' },
         ],
       },
-      explain: 'The middle, and the extra part is inside you. Hume keeps the events and the pattern. What he denies is the far end: nobody has ever seen the push. Pair two things often enough, build a habit of expecting the second, and call that tug necessity.',
+      explain: 'Both events, plus a learned habit of expectation. After seeing the pair many times, the mind comes to expect the second event. Hume traces the idea of necessary connection to that habit. No force between the balls is ever seen.',
       xp: 5,
     },
     dur: 1.0,
@@ -88,22 +88,22 @@ export const BEATS: Meta15Beat[] = [
   {
     p: 6, x: 124, balls: 1, gap: 1, found: 2, pick: 1,
     interact: {
-      prompt: 'The search found it on the second pass. Tap where.',
-      explain: 'In the observer. Constant conjunction trains an expectation. And the felt push of that expectation is what you then report as seeing one thing make another happen.',
+      prompt: 'If necessary connection isn’t observed in the objects, where must it come from?',
+      explain: 'The mind. Repeated conjunction produces a habit of expecting the second event. Hume holds that the idea of necessity is copied from this felt expectation, not from the gap.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'What You Now Know',
+      title: 'Hume’s Account of Necessary Connection',
       points: [
-        'We observe succession, never the connection itself',
-        'Constant conjunction trains the mind to expect',
-        'Causal power is projected habit, not perception',
+        'Observation shows succession, never the connection itself',
+        'Constant conjunction produces a habit of expectation',
+        'Hume traces necessary connection to that felt expectation',
         'Causal necessity is not logical necessity',
       ],
-      closing: 'The glue is real enough. It’s just on your side of the glass.',
+      closing: 'Hume concludes that necessity is something that exists in the mind, not in objects.',
     },
     dur: 3.0,
   },

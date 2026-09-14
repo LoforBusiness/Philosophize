@@ -28,24 +28,24 @@ export const BEATS: Epi16Beat[] = [
   {
     g: 379, results: 5,
     dur: 4.6,
-    text: 'Here’s every answer the 1919 eclipse could have come back with. Starlight bends by this much, or that much, or not at all.',
+    text: 'During the total eclipse of 1919, astronomers measured how much starlight bends near the sun. The result could have been none, or any amount.',
   },
   {
     g: 45, results: 5, bars: 3,
     dur: 5.0,
-    text: 'Now three theories, each drawn as wide as the answers it allows. Two of them have bet almost the whole row on being right.',
+    text: 'Each of three theories is drawn as wide as the results it permits. Two permit only a narrow range, so they forbid almost every result.',
     cite: 'What each one permits',
   },
   {
     g: 13, results: 5, bars: 3,
     dur: 2.9,
-    text: 'The third allows everything. Whatever came back, it would have fitted.',
-    cite: 'And one that allows everything',
+    text: 'The third permits every possible result, so any measurement would have fitted it.',
+    cite: 'One that permits everything',
   },
   {
     g: 13, results: 5, bars: 3,
     dur: 1.9,
-    text: 'That’s usually said as a boast.',
+    text: 'Karl Popper argued that this apparent strength is in fact a weakness.',
   },
   {
     g: 456, results: 5, bars: 3,
@@ -63,15 +63,15 @@ export const BEATS: Epi16Beat[] = [
   {
     g: 380, results: 5, bars: 3, found: 1,
     dur: 4.8,
-    text: 'The eclipse came back at one and three-quarter seconds of arc. One narrow bar survived and one narrow bar died.',
+    text: 'The results matched Einstein’s prediction of about one and three-quarter seconds of arc. His theory survived, and the prediction of half that bend was refuted.',
     cite: 'May 1919',
   },
   {
     g: 165, results: 5, bars: 3, found: 1, pick: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Tap the theory that nothing could ever have refuted.',
-      explain: 'The wide one. It permits every result on the row, so no result can count against it. It also learned nothing from the eclipse either way. The two narrow bars each risked almost everything on a single reading. That’s what made the measurement worth taking.',
+      prompt: 'Which theory could no possible result have refuted?',
+      explain: 'Fits any result. The theory permits every result on the row, so no measurement could count against it. The two narrow theories each risked refutation on one reading, which is what made the eclipse a genuine test.',
       xp: 5,
     },
   },
@@ -79,18 +79,18 @@ export const BEATS: Epi16Beat[] = [
     g: 442, results: 5, bars: 3, found: 1,
     dur: 1.0,
     interact: {
-      prompt: 'A theory that fits every possible outcome. Strength or flaw?',
+      prompt: 'On Popper’s view, how much should a scientific theory rule out?',
       drag: {
         lo: 'FORBIDS NOTHING',
         hi: 'FORBIDS ALMOST ALL',
         start: 0,
         zones: [
           { id: 'safe', upto: 0.3, reads: 'fits every outcome, so it risks nothing' },
-          { id: 'good', upto: 0.72, reads: 'rules out a great deal, and could be caught', correct: true },
-          { id: 'wild', upto: 1, reads: 'rules out so much it is already refuted' },
+          { id: 'good', upto: 0.72, reads: 'rules out a great deal, and could be refuted', correct: true },
+          { id: 'wild', upto: 1, reads: 'rules out so much that it’s already refuted' },
         ],
       },
-      explain: 'The middle. The near end is what almost everyone says first, and it’s why bad theories survive so long. A claim nothing could ever prove wrong sounds unbeaten. It’s closer to never having entered. A claim that rules out no result tells you nothing about which result you’ll get.',
+      explain: 'Rules out a great deal, and could be refuted. A theory that forbids nothing can’t be refuted, but it tells you nothing about what to expect. One that forbids the result that occurs is already refuted.',
       xp: 5,
     },
   },
@@ -98,12 +98,12 @@ export const BEATS: Epi16Beat[] = [
     summary: {
       title: 'A Theory Must Risk Something',
       points: [
-        'Science advances by trying to refute, not to confirm',
+        'Popper: science advances by attempted refutation, not confirmation',
         'A scientific claim forbids some observable result',
-        'Fitting every outcome is emptiness, not strength',
-        'Einstein named the result that would have killed his theory',
+        'Fitting every possible outcome is a flaw, not a strength',
+        'Einstein’s theory risked refutation by the 1919 eclipse',
       ],
-      closing: 'A real theory is strong because it can be broken. The theory dares the world to prove it wrong.',
+      closing: 'For Popper, a scientific theory earns its value by ruling out results that could refute it.',
     },
     dur: 3.0,
   },

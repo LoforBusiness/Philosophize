@@ -26,34 +26,34 @@ export interface Pol2Beat extends BaseBeat {
 export const BEATS: Pol2Beat[] = [
   {
     r: 161, sub: 8, podium: false, chart: 1,
-    text: 'Force can make you obey. Can it make you agree?',
+    text: 'Force can compel obedience. Can force alone make people accept that a command is rightful?',
     dur: 1.8,
   },
   {
     r: 161, sub: 8, podium: false, chart: 1,
-    text: 'Power bends bodies, but authority wins minds. They are not the same thing.',
+    text: 'Power controls bodies through the threat of force. Authority also commands minds, because the people who obey accept it as rightful.',
     dur: 2,
   },
   {
     r: 13, sub: 18, podium: false, chart: 2,
-    text: 'Weber split two ideas people usually blur together. Power gets its way despite resistance, by threat or force, and a mugger has it.',
-    cite: 'Weber: power vs authority',
+    text: 'Max Weber distinguished power from authority. Power is carrying out your will despite resistance, as a mugger does.',
+    cite: 'Power and authority',
     dur: 3.1,
   },
   {
     r: 13, sub: 18, podium: false, chart: 2,
-    text: 'Authority is being obeyed because people think you’re entitled to be.',
+    text: 'Authority is power that people accept as legitimate. They obey because they believe the ruler is entitled to command.',
     dur: 1.8,
   },
   {
     r: 7, sub: 4, podium: true, chart: 2,
-    text: 'Augustine sharpened the point. A captured pirate told Alexander, “With one ship I’m a robber, and you with a fleet are an emperor.”',
-    cite: 'Augustine, City of God, IV.4',
+    text: 'Augustine tells of a pirate captured by Alexander the Great. The pirate said that a lone ship makes a man a robber, while a whole fleet makes him an emperor.',
+    cite: 'Augustine, The City of God',
     dur: 3.3,
   },
   {
     r: 7, sub: 4, podium: true, chart: 2,
-    text: 'Both take by threat — only legitimacy tells them apart.',
+    text: 'Without justice, Augustine says, a kingdom is a band of robbers. Both take by threat, and only legitimacy tells them apart.',
     dur: 1.8,
   },
   {
@@ -70,13 +70,13 @@ export const BEATS: Pol2Beat[] = [
   },
   {
     r: 168, sub: 0, podium: true, chart: 2, ledger: true,
-    text: 'Weber sorted legitimacy into three sources. Tradition leans on custom and bloodline.',
+    text: 'Weber named three sources of legitimate power. One kind rests on custom and birth, as in a hereditary monarchy.',
     cite: 'Weber’s three types',
     dur: 1.8,
   },
   {
     r: 409, sub: 0, podium: true, chart: 2, ledger: true,
-    text: 'Charisma runs on devotion to one person. The third kind rests on rules and offices, where power sits in the job rather than the holder.',
+    text: 'Charisma rests on devotion to one person. Rational-legal authority rests on law, so it stays with the office when the holder goes.',
     dur: 3.2,
   },
   {
@@ -86,7 +86,7 @@ export const BEATS: Pol2Beat[] = [
     interact: {
       prompt: 'Which type of authority best fits an elected president?',
       explain:
-        'A president is obeyed because of the office and the vote that filled it. Not because of family, and not because of charm. Weber called this rational-legal authority.',
+        'Rational-legal. A president is obeyed because of the office and the vote that filled it. The orders don’t bind because of custom, bloodline or devotion. Raw force isn’t authority at all.',
       xp: 5,
     },
     dur: 1.0,
@@ -94,16 +94,16 @@ export const BEATS: Pol2Beat[] = [
   {
     r: 16, sub: 19, podium: true, chart: 2, ledger: true,
     interact: {
-      prompt: 'Where does the mayor’s authority actually come from?',
+      prompt: 'A charismatic mayor wins a landslide election. What makes the mayor’s commands legitimate?',
       sort: {
         chip: 'the mayor',
         bins: [
-          { id: 'person', label: 'the person', reads: 'the person, who is magnetic' },
-          { id: 'custom', label: 'tradition', reads: 'the way it has always been done' },
-          { id: 'office', label: 'the office', reads: 'the lawful office they now hold', correct: true },
+          { id: 'person', label: 'charisma', reads: 'devotion to the mayor as a person' },
+          { id: 'custom', label: 'tradition', reads: 'custom, the way things have always been done' },
+          { id: 'office', label: 'the office', reads: 'the lawful office the mayor now holds', correct: true },
         ],
       },
-      explain: 'The office. Charisma may well have won the vote, but it is not what makes an order binding afterwards. That flows from the office. Real leaders blend all three, so the question is always which one is doing the work.',
+      explain: 'The office. Charisma may help a candidate win votes, but it doesn’t make the mayor’s orders binding. That legitimacy comes from the lawful office. Weber’s types are ideal types, pure models that real leaders combine. The question is which one grounds the obligation.',
       xp: 5,
     },
     dur: 1.0,
@@ -113,12 +113,12 @@ export const BEATS: Pol2Beat[] = [
     summary: {
       title: 'Where Political Power Comes From',
       points: [
-        'Power forces action; authority is obeyed as legitimate',
+        'Power compels, but authority is obeyed as legitimate',
         'Weber’s types: tradition, charisma, rational-legal',
-        'They are ideal types; real regimes blend them',
-        'Charisma is unstable until routinized into law',
+        'Real regimes blend these ideal types',
+        'Charisma is unstable until routinised into rules',
       ],
-      closing: 'Rule that lasts rests on being accepted, not on force alone.',
+      closing: 'For Weber, stable rule depends on belief in its legitimacy, not on force alone.',
     },
     dur: 2.8,
   },

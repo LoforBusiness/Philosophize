@@ -34,36 +34,36 @@ export interface Aesthetics40Beat extends BaseBeat {
 export const BEATS: Aesthetics40Beat[] = [
   {
     p: 424, x: 32,
-    text: 'Nobody hangs a dinner in a gallery. There’s an old reason for that.',
+    text: 'Galleries hang paintings, not dinners. Philosophers have long given a reason for the difference.',
     dur: 4.2,
   },
   {
     p: 172, x: 32, pillars: 0.4,
-    text: 'Hegel split the senses in two. Sight and hearing went on one side.',
+    text: 'G. W. F. Hegel divided the senses into two groups. Sight and hearing, he held, can carry art.',
     dur: 4.0,
   },
   {
     p: 435, x: 32, pillars: 1,
-    text: 'Smell, taste and touch went on the other, and stayed there for two centuries.',
+    text: 'Smell, taste and touch were excluded, a division already discussed by Plato.',
     dur: 4.4,
   },
   {
     p: 257, x: 32, pillars: 1, line: 1,
-    text: 'Looking leaves a painting standing. Eating does not leave the dinner standing.',
+    text: 'Looking leaves a painting intact, but eating consumes a dinner. Hegel held that works of art must keep their independence from the viewer.',
     dur: 4.4,
   },
   {
     p: 164, x: 32, pillars: 1, line: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap the reason the lower three were shut out.',
-      explain: 'Because the thing goes. A painting survives being looked at, so you can return to it and argue. Strength was never the claim — a smell can floor you. Privacy is the better objection of the other two, and it fails. Two people taste one dish and disagree about it.',
+      prompt: 'Why are smell, taste and touch excluded from art’s theoretical senses?',
+      explain: 'The object is eaten. A painting survives being looked at, so viewers can return to it and dispute it. Weakness was never the claim, since a smell can overwhelm. Privacy fails as a reason, because two people can taste one dish and disagree about it.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 442, x: 92, pillars: 1, line: 1,
-    text: 'A tasting menu opens somewhere, develops, quotes an older dish and closes.',
+    text: 'Consider a tasting menu. It opens, develops a theme, alludes to an older dish and concludes.',
     dur: 4.4,
   },
   {

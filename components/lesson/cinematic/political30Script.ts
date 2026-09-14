@@ -33,36 +33,36 @@ export interface Political30Beat extends BaseBeat {
 export const BEATS: Political30Beat[] = [
   {
     p: 346, x: 24, stack: 1,
-    text: 'Picture the perfect society, or abolish the nearest injustice. Every theory meets this question in the end.',
+    text: 'Theories of justice divide over their target: an ideal of perfect justice, or the removal of existing injustice.',
     dur: 5.0,
   },
   {
     p: 167, x: 24, stack: 1,
-    text: 'Ideal theory asks what perfect justice would look like. Rawls began there and built the model first.',
+    text: 'Ideal theory describes what perfect justice would require. John Rawls begins there and treats it as a guide to reform.',
     dur: 5.0,
   },
   {
     p: 451, x: 24, stack: 1, cleared: 0.2,
-    text: 'Non-ideal theory starts from the world as it is. Amartya Sen asks what to do about the wrongs already standing.',
+    text: 'Non-ideal theory begins from the world as it is. Amartya Sen argues that justice advances by removing manifest injustices.',
     dur: 5.0,
   },
   {
     p: 260, x: 24, stack: 1, cleared: 0.4,
-    text: 'To judge one painting better than another, you do not first need the greatest painting there is.',
+    text: 'In Sen’s analogy, to judge one painting better than another, you do not first need the greatest painting there is.',
     dur: 5.0,
   },
   {
     p: 157, x: 24, stack: 1, cleared: 0.4, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what the painting analogy is meant to show.',
-      explain: 'No perfect ideal is needed. Sen is making a point about method. Comparing two arrangements does not require naming the best one there could be. Art can be ranked, and the argument doesn’t say the ideal is worthless.',
+      prompt: 'What does Sen’s painting analogy show about judging justice?',
+      explain: 'No ideal is needed. Sen’s point concerns method: ranking two social arrangements doesn’t require knowing the best possible one. The analogy assumes that art can be ranked, and it doesn’t show that ideal theory is useless.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 347, x: 80, stack: 1, cleared: 0.6,
-    text: 'People suffering now cannot wait for a blueprint that may never arrive.',
+    text: 'Sen argues that Adam Smith and Mary Wollstonecraft opposed slavery without needing to agree on perfect justice.',
     dur: 4.6,
   },
   {
@@ -80,25 +80,25 @@ export const BEATS: Political30Beat[] = [
   },
   {
     p: 464, x: 80, stack: 1, cleared: 0.6,
-    text: 'Rawls answers that without a target, reform drifts. A compass is not a fantasy.',
+    text: 'Rawls holds that non-ideal theory needs an ideal. Without one, it lacks an aim by which to judge reforms.',
     dur: 4.8,
   },
   {
     p: 161, x: 80, stack: 1,
     interact: {
-      prompt: 'Draw how much injustice a run of real reforms takes off.',
+      prompt: 'Which curve shows how much injustice a series of real reforms removes over time?',
       plot: {
         cols: ['NOW', 'A DECADE', 'A CENTURY', 'FURTHER ON'],
-        axis: 'HOW MUCH REMOVED',
+        axis: 'INJUSTICE REMOVED',
         start: [0.5, 0.5, 0.5, 0.5],
         shapes: [
-          { id: 'climb', profile: [0.12, 0.4, 0.68, 0.9], reads: 'one wrong at a time, and the stack falls', correct: true },
-          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5], reads: 'nothing shifts until the blueprint arrives' },
-          { id: 'leap', profile: [0.06, 0.08, 0.1, 0.95], reads: 'nothing, and then a perfect society' },
-          { id: 'fall', profile: [0.9, 0.62, 0.36, 0.1], reads: 'every reform puts a wrong back on' },
+          { id: 'climb', profile: [0.12, 0.4, 0.68, 0.9], reads: 'steady removal, one injustice at a time', correct: true },
+          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5], reads: 'no change until a blueprint exists' },
+          { id: 'leap', profile: [0.06, 0.08, 0.1, 0.95], reads: 'nothing, then perfect justice all at once' },
+          { id: 'fall', profile: [0.9, 0.62, 0.36, 0.1], reads: 'each reform adds an injustice back' },
         ],
       },
-      explain: 'One wrong at a time. Comparative reforms are how a society gets less unjust in practice. Each one is real whether or not perfect justice is ever described. A flat line waits for a blueprint while the stack stays where it is.',
+      explain: 'Steady removal, one injustice at a time. On Sen’s view, each reform makes a society less unjust, even if perfect justice is never defined. The flat curve assumes that nothing improves without a blueprint.',
       xp: 5,
     },
     dur: 1.0,
@@ -106,14 +106,14 @@ export const BEATS: Political30Beat[] = [
   {
     p: 301, x: 80, stack: 1, cleared: 0.9,
     summary: {
-      title: 'Blueprint or Repair',
+      title: 'Ideal and Non-Ideal Theory',
       points: [
-        'Ideal theory maps the perfectly just society',
-        'Non-ideal theory tackles the injustice standing now',
-        'Sen: options can be ranked without a perfect ideal',
-        'A just society needs both the vision and the work',
+        'Ideal theory describes what perfect justice would require',
+        'Non-ideal theory addresses injustice in the actual world',
+        'Sen: alternatives can be ranked without a perfect ideal',
+        'Rawls: reform needs an ideal to aim at',
       ],
-      closing: 'You have the questions now. A just society is not found, but argued for, and then built.',
+      closing: 'The dispute is whether justice is better pursued by describing an ideal or by comparing real alternatives.',
     },
     dur: 5.0,
   },

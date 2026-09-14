@@ -26,18 +26,18 @@ export interface Meta6Beat extends BaseBeat {
 export const BEATS: Meta6Beat[] = [
   {
     p: 443, swap: 0, two: 0, orig: 1,
-    text: 'Swap every plank of a ship, one at a time. When no original wood is left, is it the same ship or a new one?',
+    text: 'Suppose every plank of a ship is replaced, one at a time. When no original wood remains, is it the same ship?',
     dur: 3.6,
   },
   {
     p: 36, swap: 1, orig: 0.06,
-    text: 'Athens kept Theseus’s ship for centuries, replacing each rotted plank with a fresh one. In the end, not one original board remained.',
+    text: 'Plutarch reports that the Athenians preserved the ship of Theseus, replacing decayed timbers with new ones.',
     cite: 'The Ship of Theseus',
     dur: 3.9,
   },
   {
     p: 36, swap: 1, orig: 0.06,
-    text: 'Plutarch reports the quarrel it started.',
+    text: 'Plutarch adds that philosophers disputed whether it remained the same ship.',
     dur: 1.8,
   },
   {
@@ -55,35 +55,35 @@ export const BEATS: Meta6Beat[] = [
   },
   {
     p: 459, swap: 1, orig: 0,
-    text: 'Philosophers split the word “same” in two. Qualitative sameness is sharing every feature, like two new coins.',
+    text: 'Philosophers distinguish two senses of the word “same”. Two new coins can be qualitatively identical, sharing every feature.',
     cite: 'Two senses of sameness',
     dur: 2.5,
   },
   {
     p: 459, swap: 1, orig: 0,
-    text: 'Numerical sameness is being the one thing you were yesterday. The ship keeps the second and loses the first.',
+    text: 'Numerical identity is being one and the same thing over time. The repaired ship seems to keep numerical identity even as its material changes.',
     dur: 2.7,
   },
   {
     p: 22, swap: 1, orig: 0, you: 1,
-    text: 'You’re the living proof. Almost every cell in your body has been replaced since you were the toddler in your old photos.',
-    cite: 'Your own riddle',
+    text: 'The same puzzle applies to you. Most of your cells have been replaced since you were a young child.',
+    cite: 'Personal identity',
     dur: 4.1,
   },
   {
     p: 403, swap: 1, orig: 0, you: 1,
-    text: 'Yet you call that child yourself.',
+    text: 'Yet you still regard that child as numerically identical to yourself.',
     dur: 1.8,
   },
   {
     p: 165, swap: 1, orig: 0,
     interact: {
-      prompt: 'Why does the Ship of Theseus threaten the idea of identity over time?',
+      prompt: 'Why does the Ship of Theseus challenge identity over time?',
       cards: [
-        { text: 'Every part can change', correct: true },
-        { text: 'Wooden ships rot quickly', correct: false },
+        { text: 'Every part is replaced', correct: true },
+        { text: 'It no longer looks the same', correct: false },
       ],
-      explain: 'If a thing keeps its identity after every part is replaced, identity can’t rest on the parts alone. That’s what makes the case so puzzling.',
+      explain: 'Every part is replaced. If the ship survives the replacement, the ship’s identity can’t consist in its parts. The ship barely changes in appearance, so the puzzle isn’t about looking different.',
       xp: 5,
     },
     dur: 1.0,
@@ -91,31 +91,31 @@ export const BEATS: Meta6Beat[] = [
   {
     p: 384, swap: 0.4, two: 1, orig: 0,
     interact: {
-      prompt: 'How does the claim divide between the two ships?',
+      prompt: 'When the old planks are rebuilt into a second ship, which ship is the original?',
       split: {
         left: 'UNBROKEN USE', right: 'THE ORIGINAL PLANKS',
         start: 0.04,
         zones: [
-          { id: 'wood', upto: 0.3, reads: 'the rebuilt one, same wood' },
-          { id: 'both', upto: 0.7, reads: 'neither wins, it depends on your test', correct: true },
-          { id: 'use', upto: 1, reads: 'the one still sailing, never stopped' },
+          { id: 'wood', upto: 0.3, reads: 'the rebuilt ship, made of the original planks' },
+          { id: 'both', upto: 0.7, reads: 'each has a claim, depending on the criterion', correct: true },
+          { id: 'use', upto: 1, reads: 'the ship in continuous use' },
         ],
       },
-      explain: 'The seam belongs in the middle. Each ship holds half of what anyone means by “the same ship”. One keeps the wood, the other keeps the unbroken use. Push the seam to either end and you haven’t found the answer. You’ve chosen which test counts.',
+      explain: 'Each has a claim, depending on the criterion. The ship in continuous use has unbroken continuity, and the rebuilt ship has the original planks. Thomas Hobbes, who added the rebuilt ship, held that identity depends on the name under which a thing is considered.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Identity Is Stranger Than It Looks',
+      title: 'The Ship of Theseus',
       points: [
-        'Theseus’s ship: parts replaced, identity questioned',
-        'Qualitative versus numerical sameness',
+        'The Ship of Theseus: every part replaced',
+        'Qualitative versus numerical identity',
         'Heraclitus: all things flow',
-        'You change matter yet stay you',
+        'Your body’s matter changes, yet you persist',
       ],
-      closing: 'Maybe a thing is not its stuff but its story — the unbroken thread tying each stage to the next.',
+      closing: 'On a continuity view, identity lies in the unbroken chain linking each stage to the next.',
     },
     dur: 2.8,
   },

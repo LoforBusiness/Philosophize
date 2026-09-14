@@ -22,34 +22,34 @@ export interface Meta3Beat extends BaseBeat {
 export const BEATS: Meta3Beat[] = [
   {
     p: 384, shadow: 0.9, form: 0, apple: 1,
-    text: 'Plato said the apple in your hand is only half-real. It isn’t unreal, just stuck between being and not-being.',
+    text: 'Plato holds that an apple in your hand is only partly real. It lies between what fully is and what is not.',
     dur: 3.4,
   },
   {
     p: 167, shadow: 0.9, form: 0.15, apple: 1,
-    text: 'Heraclitus said everything flows, like a river you can’t step in twice. That troubled Plato.',
-    cite: 'Being vs Becoming',
+    text: 'Heraclitus held that all things flow, like a river you can’t step into twice. Plato accepted this of perceptible things.',
+    cite: 'Being and Becoming',
     dur: 1.9,
   },
   {
     p: 167, shadow: 0.9, form: 0.15, apple: 1,
-    text: 'You can’t know a thing that won’t hold still, so he split the world in two. Being holds still and can be known.',
+    text: 'Knowledge needs an object that doesn’t change, so Plato divided reality in two. Being is unchanging, and it can be known.',
     dur: 3,
   },
   {
     p: 167, shadow: 0.9, form: 0.15, apple: 1,
-    text: 'Becoming never does.',
+    text: 'Becoming is always changing, so it’s grasped only by opinion, through the senses.',
     dur: 1.8,
   },
   {
     p: 34, shadow: 0.5, form: 0.7, apple: 1,
-    text: 'Prisoners chained since birth take flickering shadows for the real world. One gets free, climbs into daylight, and sees the things themselves.',
+    text: 'In Plato’s allegory of the cave, prisoners chained since childhood take shadows for reality. One is freed and forced up into daylight, where he sees the things themselves.',
     cite: 'The Republic, Book VII',
     dur: 2.9,
   },
   {
     p: 418, shadow: 0.5, form: 0.7, apple: 1,
-    text: 'Plato says the wall is where you live, and the Forms are what’s casting the shadows.',
+    text: 'Plato holds that the cave is the world of the senses. The things outside it, lit by the sun, stand for the Forms.',
     dur: 2.3,
   },
   {
@@ -67,21 +67,21 @@ export const BEATS: Meta3Beat[] = [
   },
   {
     p: 24, shadow: 0.15, form: 1, apple: 1,
-    text: 'Everything you can touch is a rough copy of something perfect. Two sticks are never exactly equal, but the idea of Equality always is.',
+    text: 'Every physical thing is an imperfect copy of a Form. Equal sticks fall short of the Form of Equal, which is never unequal.',
     cite: 'The theory of Forms',
     dur: 2.9,
   },
   {
     p: 24, shadow: 0.15, form: 1, apple: 1,
-    text: 'And you can know the thing that never changes, where the copy is only ever a good guess.',
+    text: 'So knowledge is possible only of the unchanging Forms. Of changing things, there can be only opinion.',
     dur: 2.3,
   },
   {
     p: 383, shadow: 0.15, form: 1, apple: 1,
     interact: {
-      prompt: 'Plato ranks these against each other. Tap whichever one he calls most real.',
+      prompt: 'On Plato’s view that reality requires permanence, which of these is most real?',
       explain:
-        'For Plato the Forms enjoy the fullest being because they never change. The apple bruises and rots; its shadow and its portrait are fainter still — images of a copy.',
+        'The eternal Form. For Plato, the Forms have the fullest being because they never change. The apple itself seems most real, but it bruises and rots. Its shadow and its painting are images of a copy, and less real still.',
       xp: 5,
     },
     dur: 1.0,
@@ -89,31 +89,31 @@ export const BEATS: Meta3Beat[] = [
   {
     p: 165, shadow: 0.15, form: 1, apple: 1,
     interact: {
-      prompt: 'Where does Plato put the reality?',
+      prompt: 'What does the theory of Forms imply about the apple’s reality, compared with its Form?',
       split: {
         left: 'THE FORM', right: 'THE APPLE',
         start: 0.5,
         zones: [
-          { id: 'apple', upto: 0.34, reads: 'the thing you can hold is the real one' },
+          { id: 'apple', upto: 0.34, reads: 'the apple you can hold is fully real' },
           { id: 'even', upto: 0.62, reads: 'equally real, each in its own way' },
-          { id: 'form', upto: 1, reads: 'the Form is real, the apple borrows', correct: true },
+          { id: 'form', upto: 1, reads: 'the Form is fully real, the apple only partly', correct: true },
         ],
       },
-      explain: 'Nearly all of it goes to the Form, and that’s what feels backwards. Plato ranks the invisible above the touchable. Apples bruise and rot and stop being apples. So for him they hold less being than the one thing that never changes.',
+      explain: 'The Form is fully real, the apple only partly. It seems natural to count the touchable apple as most real, but Plato reverses that ranking. The apple changes and decays, so it has less being than the unchanging Form it copies.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Reality May Go Deeper Than It Looks',
+      title: 'Plato’s Being and Becoming',
       points: [
-        'Plato split reality: Being and Becoming',
-        'Forms are eternal, unchanging, knowable',
-        'Physical things are deficient copies',
-        'Materialism counters: only matter is real',
+        'Plato divides reality into Being and Becoming',
+        'The Forms are eternal, unchanging and knowable',
+        'Sensible things are imperfect copies of the Forms',
+        'Materialists reply that only matter is real',
       ],
-      closing: 'If the most real things are the ones you can never touch, what does that make the world you see?',
+      closing: 'If Plato is right, the world you perceive is less real than the Forms, which only reason can grasp.',
     },
     dur: 2.8,
   },

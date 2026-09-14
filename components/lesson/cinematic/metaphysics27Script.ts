@@ -33,36 +33,36 @@ export interface Metaphysics27Beat extends BaseBeat {
 export const BEATS: Metaphysics27Beat[] = [
   {
     p: 349, x: 28, bags: 0.5,
-    text: 'Gravity has never once failed. Never failing is different from having to hold.',
+    text: 'Gravity has never failed. Yet never failing is different from having to hold.',
     dur: 4.6,
   },
   {
     p: 159, x: 28, bags: 1,
-    text: 'Here are two bags. Every marble in each of them is blue.',
+    text: 'Consider two bags of marbles. Every marble in both bags is blue.',
     dur: 3.8,
   },
   {
     p: 435, x: 28, bags: 1, machine: 1,
-    text: 'In the second, a machine paints each one on the way in. In the first it just happened.',
+    text: 'In the second bag, a machine paints each marble blue before it enters. In the first, every marble is blue by accident.',
     dur: 5.0,
   },
   {
     p: 264, x: 28, bags: 1, machine: 1,
-    text: 'David Hume saw only the pattern. For him, a law is the best short summary of what always happens.',
+    text: 'David Hume found no necessary connection between events. For him, a law is only a pattern that always holds.',
     dur: 5.0,
   },
   {
     p: 167, x: 28, bags: 1, machine: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap the objection to laws as patterns.',
-      explain: 'A fluke fits. If a law is only what always happens, the accidental bag counts as lawful too. Then nothing explains why the run keeps going. A pattern that changed was never exceptionless. And nobody sees a necessity either, which is the Humean point rather than a reply to it.',
+      prompt: 'Which objection counts against treating laws as mere patterns?',
+      explain: 'A fluke fits. If a law is only what always happens, the accidental bag is as lawful as the machine-fed one. The claim that laws change misdescribes the view, since a pattern that changed was never exceptionless.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 447, x: 88, bags: 1, machine: 1,
-    text: 'David Armstrong answered that a law is a real relation. Being heated makes a metal expand.',
+    text: 'David Armstrong held that a law is a link of necessitation between properties, such as heat and volume.',
     dur: 5.0,
   },
   {
@@ -80,21 +80,21 @@ export const BEATS: Metaphysics27Beat[] = [
   },
   {
     p: 448, x: 88, bags: 1, machine: 1,
-    text: 'A third answer keeps the must and moves it inside. Heavy things pull by their nature.',
+    text: 'Dispositional essentialism puts the necessity inside things. Mass attracts because attracting is part of what mass is.',
     dur: 5.0,
   },
   {
     p: 176, x: 88, bags: 1, machine: 1,
     interact: {
-      prompt: 'What makes the stone fall every time?',
+      prompt: 'Which account treats a law as governing objects, rather than flowing from their natures?',
       poll: {
         options: [
-          { id: 'pattern', reads: 'nothing does — the pattern simply repeats', holders: ['David Hume'] },
-          { id: 'law', reads: 'a law above the stone, forcing the fall', holders: ['David Armstrong'], correct: true },
-          { id: 'power', reads: 'a power the stone carries in itself' },
+          { id: 'pattern', reads: 'nothing: a law only records a regularity', holders: ['David Hume', 'David Lewis'] },
+          { id: 'law', reads: 'a relation between properties, forcing the fall', holders: ['David Armstrong', 'Fred Dretske'], correct: true },
+          { id: 'power', reads: 'a power the stone has by its nature', holders: ['Alexander Bird', 'Brian Ellis'] },
         ],
       },
-      explain: 'A law above the stone, forcing the fall. Something has to separate the machine-fed bag from the accidental one, and a bare pattern can’t. The powers answer keeps the must and puts the force inside the stone rather than above the world.',
+      explain: 'A relation between properties, forcing the fall. The law links two properties, so it holds in every case and a fluke has no such link. The powers view puts the force inside each thing.',
       xp: 5,
     },
     dur: 1.0,
@@ -102,14 +102,14 @@ export const BEATS: Metaphysics27Beat[] = [
   {
     p: 322, x: 88, bags: 1, machine: 1,
     summary: {
-      title: 'Pattern or Power',
+      title: 'Three Accounts of Natural Law',
       points: [
-        'Hume made a law an exceptionless pattern and no more',
-        'A pattern alone cannot separate a law from a fluke',
-        'Armstrong added a real relation between properties',
-        'A third view puts the power inside the objects',
+        'The regularity view: a law is only an exceptionless pattern',
+        'A pattern alone can’t separate a law from an accidental regularity',
+        'Armstrong: a law is necessitation between properties',
+        'Dispositional essentialism: the necessity lies in objects’ powers',
       ],
-      closing: '“The sun rises every day” and “the sun must rise” are not the same claim. Working out what the second one adds is the whole of this argument.',
+      closing: 'The claim “the sun rises every day” differs from the claim “the sun must rise”. These accounts disagree about what the second adds.',
     },
     dur: 5.0,
   },

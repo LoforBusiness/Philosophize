@@ -33,38 +33,38 @@ export interface Met23Beat extends BaseBeat {
 export const BEATS: Met23Beat[] = [
   {
     p: 25, x: 200, ships: 1,
-    text: 'A ship kept in service for centuries. Whenever a plank rots, the dockyard takes it out and puts a new one in.',
+    text: 'Consider a ship kept in service for centuries. Whenever a plank rots, it’s removed and replaced with a new one.',
     dur: 4.8,
   },
   {
     p: 443, x: 200, ships: 1, swap: 1,
-    text: 'Do that long enough and no original plank is left. Same name, same berth, same crew, no old wood.',
+    text: 'Eventually no original plank remains. The ship keeps the same name, berth and crew, but none of the original wood.',
     cite: 'The repaired ship',
     dur: 4.6,
   },
   {
     p: 379, x: 132, ships: 1, swap: 1, built: 1,
-    text: 'Then a collector admits he kept every plank they threw away, and has built a second ship out of them.',
+    text: 'Thomas Hobbes extended the puzzle. Suppose someone kept every discarded plank and reassembled them into a second ship.',
     dur: 4.6,
   },
   {
     p: 457, x: 132, ships: 1, swap: 1, built: 1, live: 1,
     interact: {
-      prompt: 'Tap the ship made of the wood that first went to sea.',
-      explain: 'The one on the right, built from the cast-offs. Notice how little that settles. The left hull kept the name, the berth and the crew. None of those are wood, and that’s the split the puzzle is prising open.',
+      prompt: 'Which ship is made of the wood that first went to sea?',
+      explain: 'The reassembled ship, built from the discarded planks. That fact alone doesn’t settle which ship is the original. The repaired ship kept the name, the berth and the crew, and none of those is wood.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 467, x: 132, ships: 1, swap: 1, built: 1,
-    text: 'Two tests that normally agree. Unbroken use points left.',
-    cite: 'Two readings of same',
+    text: 'Two tests of sameness, which normally agree, come apart here. Continuous use favours the repaired ship.',
+    cite: 'Two tests of sameness',
     dur: 1.9,
   },
   {
     p: 467, x: 132, ships: 1, swap: 1, built: 1,
-    text: 'Original wood points right. Nothing on the stage decides between the two.',
+    text: 'Sameness of material favours the reassembled ship. No further fact about the ships decides between the two tests.',
     dur: 2.5,
   },
   {
@@ -81,43 +81,43 @@ export const BEATS: Met23Beat[] = [
   },
   {
     p: 13, x: 268, ships: 1, swap: 1, built: 1,
-    text: 'Under it sits a harder question. When do parts make one thing at all?',
+    text: 'The puzzle rests on a deeper question, the special composition question. When do many parts compose one object?',
     dur: 2.9,
   },
   {
     p: 13, x: 268, ships: 1, swap: 1, built: 1,
-    text: 'A pile of planks is not a ship.',
+    text: 'A pile of planks is not a ship, although it contains the same material.',
     dur: 1.8,
   },
   {
     p: 41, x: 268, ships: 1, swap: 1, built: 1,
     interact: {
-      prompt: 'Draw how the continuity view rates the repaired hull.',
+      prompt: 'Which curve shows how the continuity view rates the repaired ship as planks are replaced?',
       plot: {
         axis: 'STILL THE SHIP',
         cols: ['NONE OUT', 'A QUARTER', 'HALF', 'MOST', 'ALL OUT'],
         start: [0.5, 0.5, 0.5, 0.5, 0.5],
         shapes: [
-          { id: 'stays', profile: [1, 0.95, 0.9, 0.86, 0.82], reads: 'it stays the ship throughout', correct: true },
-          { id: 'slides', profile: [1, 0.75, 0.5, 0.25, 0.02], reads: 'it fades out as the wood goes' },
-          { id: 'cliff', profile: [1, 0.98, 0.96, 0.92, 0.04], reads: 'one last plank ends it' },
+          { id: 'stays', profile: [1, 0.95, 0.9, 0.86, 0.82], reads: 'the same ship after every replacement', correct: true },
+          { id: 'slides', profile: [1, 0.75, 0.5, 0.25, 0.02], reads: 'less the ship with each plank replaced' },
+          { id: 'cliff', profile: [1, 0.98, 0.96, 0.92, 0.04], reads: 'the ship until the last plank is replaced' },
         ],
       },
-      explain: 'Nearly flat. Continuity says what makes it the ship is unbroken service and gradual repair. So no single plank matters, and the last one matters no more than the first. The cliff is what you draw if you think there’s a hidden line somewhere.',
+      explain: 'The same ship after every replacement. On the continuity view, slow repair during use keeps the ship the same ship. So no single plank matters, and no last plank ends it.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Two Jobs For One Word',
+      title: 'Two Criteria for Sameness',
       points: [
-        'Persistence: surviving change over time',
-        'Unbroken use and original matter can point different ways',
-        'Composition: when parts add up to one thing',
-        'Some puzzles have no hidden fact waiting to be found',
+        'Persistence: how a thing survives change over time',
+        'Continuity of use and original material can disagree',
+        'Composition: when many parts make up one object',
+        'Some identity puzzles may have no further fact to find',
       ],
-      closing: 'The word “same” can mean two things without anyone noticing, and the wood is where they part.',
+      closing: 'The word “same” can express two different criteria. Usually they agree, and the Ship of Theseus is a case where they diverge.',
     },
     dur: 3.6,
   },

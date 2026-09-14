@@ -31,36 +31,36 @@ export interface Ethics29Beat extends BaseBeat {
 export const BEATS: Ethics29Beat[] = [
   {
     p: 422, x: 24, scale: 1, line: 0.4,
-    text: 'A soldier throws himself onto a grenade and saves his squad. Everybody calls it heroic.',
+    text: 'In 1958, James Urmson described a soldier who throws himself onto a grenade to save his squad. Everyone calls the act heroic.',
     dur: 5.0,
   },
   {
     p: 179, x: 24, scale: 1, line: 0.4,
-    text: 'Now ask the harder question. Would anybody have blamed him for staying where he was?',
+    text: 'A second question is harder. Would the soldier have been blameworthy if he had stayed where he was?',
     dur: 5.0,
   },
   {
     p: 448, x: 24, scale: 1, line: 0.4,
-    text: 'The gap between those two answers has a name. A supererogatory act is good and not required.',
+    text: 'Urmson argued that he wouldn’t be, so the act goes beyond duty. A supererogatory act is good and not required.',
     dur: 5.0,
   },
   {
     p: 269, x: 24, scale: 1, line: 0.4,
-    text: 'Praiseworthy if done, and not blameworthy if left undone. The honour depends on the gift being a gift.',
+    text: 'Such an act is praiseworthy if done, and not blameworthy if left undone. The special praise it earns depends on its not being owed.',
     dur: 5.0,
   },
   {
     p: 161, x: 24, scale: 1, line: 0.4, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what the grenade becomes if the most good is always owed.',
-      explain: 'Only his duty. If the most good is always owed, the grenade is bare duty and anybody who declines does wrong. The special admiration has nowhere left to attach.',
+      prompt: 'If morality always requires the most good you can do, what is the soldier’s act?',
+      explain: 'Only his duty. If the most good is always required, sacrificing himself is what he owes, and declining would be wrong. No category remains for praise beyond duty. He may still be admired, but not for going beyond what he owed.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 464, x: 80, scale: 1, line: 0.4,
-    text: 'Three people pass a charity drive. One gives a fair share, one gives a kidney, one walks past.',
+    text: 'Consider three responses to others’ need. One person gives a fair share, one donates a kidney to a stranger, and one walks past.',
     dur: 5.0,
   },
   {
@@ -77,24 +77,24 @@ export const BEATS: Ethics29Beat[] = [
   },
   {
     p: 458, x: 80, scale: 1, line: 0.4,
-    text: 'Lavish praise for the kidney, quiet expectation of the fair share, and perhaps no blame at all for walking past.',
+    text: 'Common sense praises the kidney donor highly and expects the fair share. Whether walking past deserves blame is less clear.',
     dur: 5.0,
   },
   {
     p: 177, x: 80, scale: 1,
     interact: {
-      prompt: 'Where does duty end and a gift begin?',
+      prompt: 'Where does duty end and supererogation begin?',
       drag: {
         lo: 'NOTHING OWED',
         hi: 'EVERYTHING OWED',
         start: 0.95,
         zones: [
-          { id: 'none', upto: 0.2, reads: 'nobody owes anybody anything at all' },
-          { id: 'fair', upto: 0.65, reads: 'a fair share is owed and the rest given', correct: true },
-          { id: 'all', upto: 1, reads: 'give until it hurts, or stand condemned' },
+          { id: 'none', upto: 0.2, reads: 'no one is required to give anything' },
+          { id: 'fair', upto: 0.65, reads: 'a fair share is owed, and more is optional', correct: true },
+          { id: 'all', upto: 1, reads: 'all the good you can do is owed' },
         ],
       },
-      explain: 'Somewhere in the middle. A fair share is a duty and the kidney is a gift. Only that arrangement leaves room to admire the gift. Push the line to the far end and every ordinary life becomes a moral failure.',
+      explain: 'A fair share is owed, and more is optional. On this view, a fair share is a duty and a kidney is supererogatory. If all the good you could do were owed, nearly every life would fall short.',
       xp: 5,
     },
     dur: 1.0,
@@ -102,14 +102,14 @@ export const BEATS: Ethics29Beat[] = [
   {
     p: 311, x: 80, scale: 1, line: 0.4,
     summary: {
-      title: 'Above and Beyond',
+      title: 'Acts Beyond Duty',
       points: [
         'A supererogatory act is good but not required',
         'Praiseworthy to do, and not blameworthy to omit',
-        'Heroes and saints act past what duty demands',
+        'Urmson: heroes and saints go beyond what duty demands',
         'Strict maximising theories leave no room for it',
       ],
-      closing: 'A morality with no room for the heroic gift may demand too much, or admire too little.',
+      closing: 'Without supererogation, heroism becomes mere duty, and most ordinary lives fall short of what morality requires.',
     },
     dur: 5.0,
   },

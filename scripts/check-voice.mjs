@@ -80,8 +80,9 @@ const DIR = 'components/lesson/cinematic';
  *
  * 43 → 4 on 11 Sep 2026, when every lesson was rewritten to be read aloud (group
  * AC): what is left is a philosopher's own reported first person and quoted speech.
+ * 4 → 1 on 13 Sep 2026, after the lecture rewrite (group V, V1).
  */
-const VOICE_BUDGET = 4;
+const VOICE_BUDGET = 1;
 
 /**
  * EVERY FIELD THE READER READS, AND NOT ONE MORE.
@@ -147,26 +148,105 @@ const FIRST_ANY = /\b(we|our|us|my|me)\b/i;
 const FIRST_I = /\bI\b/;
 const isFirstPerson = (s) => FIRST_ANY.test(s) || FIRST_I.test(s);
 
+// ── V3 · SAY THE LITERAL THING, AND V7 · NARRATION DOES NOT INSTRUCT THE EYE ──
+//
+// Added on 13 Sep 2026, when the owner retired the story voice for a clear lecture
+// (group V). Their own examples of what they did not want were phrases like "It eats
+// itself", "Brace yourself", "Mid game", "Rubbish" and "Watch the bar", and these two
+// checks hold the countable half of that.
+//
+// V3 LISTS ONLY WHAT IS COLLOQUIAL IN EVERY CONTEXT. The first list for the rewrite
+// also carried "in the room" and "turned up", and both are sometimes the literal
+// thing: Searle's Chinese Room has a man in the room. A zero that cannot tell a
+// case from an idiom would push a writer to damage a correct sentence, so those stay
+// with a person.
+//
+// It reads EVERY string of our own wording, not only narration: the owner's list
+// included a summary title and a readout.
+// ITS FIRST RUN FOUND THREE MORE LITERAL USES, and they are why the list is this
+// short: "a quarrel has no way to end", "Camp knows the thing is awful", and "a
+// spoiler" in the lesson about suspense. "No way", "the thing is", "spoiler" and
+// "nuts" were taken out rather than excused one by one.
+const COLLOQUIAL = [
+  /\bbrace yourself\b/i, /\bmid-?game\b/i, /\brubbish\b/i, /\beats? itself\b/i, /\beats? (?:them|your|our)selves\b/i,
+  /\bhand a copy\b/i, /\bwears? furniture\b/i, /\btakes the pig\b/i, /\bfeeds nothing\b/i, /\bhere[’']s the\b/i,
+  /\bkicker\b/i, /\bgonna\b/i, /\bwanna\b/i, /\bokay\b/i, /\bfolks\b/i,
+  /\bbig deal\b/i, /\bgame over\b/i, /\bfree pass\b/i, /\bpulls? the rug\b/i, /\bcrazy\b/i,
+  /\bweird\b/i, /\bbottom line\b/i, /\bat the end of the day\b/i,
+];
+/** A zero. Colloquial phrases in our own wording. */
+const COLLOQUIAL_BUDGET = 0;
+
+// V7 · a narration sentence that begins by telling the reader where to look. The
+// stage shows it; the sentence states the fact it illustrates instead.
+const EYE = /^(?:watch|look at|notice|see how|keep an eye|keep your eye)\b/i;
+/** A zero. Narration sentences that instruct the eye. */
+const EYE_BUDGET = 0;
+
+const S = `(['"])((?:\\\\.|(?!\\1)[^\\\\])*)\\1`;
+/** Every string of our own wording: a beat's text and cite, and every question and summary string. */
+function wordingOf(src) {
+  const out = [];
+  const grab = (re, kind) => { for (const m of src.matchAll(re)) out.push({ kind, s: m[2].replace(/\\'/g, "'") }); };
+  grab(new RegExp(`(?:^|\\n)\\s{4}text:\\s*${S}`, 'g'), 'text');
+  grab(new RegExp(`(?:^|\\n)\\s{4}cite:\\s*${S}`, 'g'), 'cite');
+  for (const k of ['explain', 'prompt', 'reads', 'closing', 'title', 'lo', 'hi', 'left', 'right', 'chip', 'label']) {
+    grab(new RegExp(`\\b${k}:\\s*${S}`, 'g'), k);
+  }
+  grab(new RegExp(`\\{\\s*text:\\s*${S}`, 'g'), 'card');
+  for (const p of src.matchAll(/\bpoints:\s*\[([\s\S]*?)\]/g)) {
+    for (const m of p[1].matchAll(new RegExp(S, 'g'))) out.push({ kind: 'point', s: m[2].replace(/\\'/g, "'") });
+  }
+  return out;
+}
+const spokenOf = (src) => [...src.matchAll(new RegExp(`(?:^|\\n)\\s{4}text:\\s*${S}`, 'g'))].map((m) => m[2].replace(/\\'/g, "'"));
+
 const hits = [];
+const slang = [];
+const eye = [];
 for (const f of fs.readdirSync(DIR).filter((x) => x.endsWith('Script.ts'))) {
   const src = fs.readFileSync(path.join(DIR, f), 'utf8');
   const id = f.replace('Script.ts', '');
   for (const [i, b] of beatsOf(src).entries()) {
     if (isFirstPerson(narratorVoice(b))) hits.push({ id, i, b: b.trim() });
   }
+  for (const w of wordingOf(src)) {
+    const said = narratorVoice(w.s);
+    for (const re of COLLOQUIAL) {
+      const m = said.match(re);
+      if (m) slang.push({ id, kind: w.kind, hit: m[0], s: w.s.trim() });
+    }
+  }
+  for (const t of spokenOf(src)) {
+    for (const sen of t.split(/(?<=[.!?][”"’']?)\s+/)) if (EYE.test(sen.trim())) eye.push({ id, s: sen.trim() });
+  }
 }
 
-console.log(`check:voice — V1, the narrator's own pronouns\n`);
-console.log(`${hits.length} beat(s) carry a first-person pronoun outside quotation (budget ${VOICE_BUDGET})`);
-
+let failed = false;
+console.log(`check:voice — group V, the narrator teaches\n`);
+console.log(`V1  ${hits.length} beat(s) carry a first-person pronoun outside quotation (budget ${VOICE_BUDGET})`);
 if (hits.length > VOICE_BUDGET) {
-  console.log('\nover budget — these are the candidates; a narrator\'s "we" must go, a philosopher\'s stays:');
-  for (const h of hits) console.log(`  ${h.id}#${h.i}  ${h.b.slice(0, 96)}`);
-  console.log(`\n✗ ${hits.length} against a budget of ${VOICE_BUDGET}`);
-  process.exit(1);
+  console.log('    over budget — these are the candidates; a narrator\'s "we" must go, a philosopher\'s stays:');
+  for (const h of hits) console.log(`      ${h.id}#${h.i}  ${h.b.slice(0, 96)}`);
+  failed = true;
+} else if (hits.length < VOICE_BUDGET) {
+  console.log(`    budget is stale: lower VOICE_BUDGET to ${hits.length} in scripts/check-voice.mjs.`);
+  failed = true;
 }
-if (hits.length < VOICE_BUDGET) {
-  console.log(`\nBudget is stale: lower VOICE_BUDGET to ${hits.length} in scripts/check-voice.mjs.`);
-  process.exit(1);
+
+console.log(`V3  ${slang.length} colloquial phrase(s) in our own wording (budget ${COLLOQUIAL_BUDGET})`);
+if (slang.length > COLLOQUIAL_BUDGET) {
+  for (const h of slang.slice(0, 30)) console.log(`      ${h.id} ${h.kind}  "${h.hit}"  ${h.s.slice(0, 80)}`);
+  if (slang.length > 30) console.log(`      … and ${slang.length - 30} more`);
+  failed = true;
 }
-console.log('\nok — no new seminar "we"');
+
+console.log(`V7  ${eye.length} narration sentence(s) tell the reader where to look (budget ${EYE_BUDGET})`);
+if (eye.length > EYE_BUDGET) {
+  for (const h of eye.slice(0, 30)) console.log(`      ${h.id}  ${h.s.slice(0, 90)}`);
+  if (eye.length > 30) console.log(`      … and ${eye.length - 30} more`);
+  failed = true;
+}
+
+if (failed) process.exit(1);
+console.log('\nok — no seminar "we", no colloquial phrase, and no narration instructing the eye');

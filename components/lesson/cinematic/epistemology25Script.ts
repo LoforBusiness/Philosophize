@@ -34,41 +34,41 @@ export interface Epistemology25Beat extends BaseBeat {
 export const BEATS: Epistemology25Beat[] = [
   {
     p: 2, x: 44,
-    text: 'You’ve got a test for what counts as knowledge. So how did you check the test?',
+    text: 'Suppose you adopt a criterion, a test for what counts as knowledge. How could you check that the criterion itself is correct?',
     dur: 4.4,
   },
   {
     p: 30, x: 44, rungs: 0.34,
-    text: 'Say the ruler is proof. Then the proof needs a ruler of its own.',
+    text: 'Checking the criterion requires a second criterion, used as a ruler for the first. That second ruler needs checking too.',
     dur: 3.8,
   },
   {
     p: 36, x: 44, rungs: 1,
-    text: 'And that one needs another. The line goes down as far as you care to look.',
+    text: 'Each check calls for a further check, so the series has no last member. The result is an infinite regress.',
     dur: 4.0,
   },
   {
     p: 160, x: 44, rungs: 1, nothing: 1,
-    text: 'Sextus Empiricus reached the bottom and found nothing standing there.',
+    text: 'Sextus Empiricus argued that no criterion can be established. The checks either run on for ever or return in a circle.',
     dur: 3.8,
   },
   {
     p: 161, x: 44, rungs: 1, nothing: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap where a particularist begins.',
-      explain: 'With the clear cases. A particularist trusts that they know a few plain things, then builds a rule that fits them. Starting from the rule instead is the other way out, and refusing to start is the sceptic\'s.',
+      prompt: 'Where does a particularist begin?',
+      explain: 'With the cases. A particularist starts from plain cases of knowledge and builds a criterion to fit them. Moore’s knowledge that he has hands is such a case. Starting from a criterion is methodism, and refusing to start is scepticism.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 159, x: 44, rungs: 1, nothing: 1, flow: 1,
-    text: 'The methodist picks the rule first, then lets it sort every belief below.',
+    text: 'A methodist starts with a criterion and uses it to sort beliefs. Roderick Chisholm’s example is John Locke’s empiricism.',
     dur: 4.2,
   },
   {
     p: 62, x: 100, rungs: 1, nothing: 1, flow: 2,
-    text: 'The particularist runs it the other way: cases first, then a rule built to fit them.',
+    text: 'A particularist reverses the order. Particular cases of knowledge come first, and a criterion is built to fit them.',
     dur: 4.6,
   },
   {
@@ -86,35 +86,35 @@ export const BEATS: Epistemology25Beat[] = [
   },
   {
     p: 383, x: 100, rungs: 1, nothing: 1,
-    text: 'Neither door is proved. Each one simply begins, and admits it.',
+    text: 'Neither starting point can be proved without assuming it. Chisholm conceded that every answer to the problem begs the question.',
     dur: 3.6,
   },
   {
     p: 21, x: 100, rungs: 1, nothing: 1,
     interact: {
-      prompt: 'Where would you begin?',
+      prompt: 'Where should an answer to the problem of the criterion begin?',
       poll: {
         options: [
-          { id: 'rule', reads: 'with the rule, and let it sort the cases' },
-          { id: 'cases', reads: 'with the cases, and build the rule to fit', correct: true },
-          { id: 'stop', reads: 'refuse to begin, and suspend judgement' },
+          { id: 'rule', reads: 'with a criterion, and let it sort the cases', holders: ['John Locke', 'David Hume'] },
+          { id: 'cases', reads: 'with the cases, and build a criterion to fit', holders: ['G.E. Moore', 'Roderick Chisholm'], correct: true },
+          { id: 'stop', reads: 'nowhere, and suspend judgement', holders: ['Sextus Empiricus'] },
         ],
       },
-      explain: 'With the cases. That’s where nearly everyone starts. The rule-first door sounds stricter, but it takes its own rule for granted without saying so. Refusing to start is honest, and it also ends every question.',
+      explain: 'With the cases, and build a criterion to fit. Particularism starts from knowledge that’s hard to doubt, such as knowing that this is a hand. Starting with a criterion assumes, without proof, that the criterion is correct.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'No Bottom Rung',
+      title: 'The Problem of the Criterion',
       points: [
-        'What counts as knowing and what is known chase each other',
+        'Sorting knowledge from belief seems to need a criterion first',
         'A criterion needs a proof, and a proof needs a criterion',
-        'Methodists trust a rule first, particularists trust cases',
-        'Neither door is proved before you walk through it',
+        'Methodists trust a criterion first, particularists trust cases',
+        'Neither starting point can be proved in advance',
       ],
-      closing: 'There may be no neutral ground floor here. To ask anything at all, you have to begin somewhere.',
+      closing: 'There may be no neutral starting point. Every answer to the problem of the criterion begins with an assumption.',
     },
     dur: 3.8,
   },

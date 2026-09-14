@@ -33,41 +33,41 @@ export interface Metaphysics25Beat extends BaseBeat {
 export const BEATS: Metaphysics25Beat[] = [
   {
     p: 2, x: 44,
-    text: 'You almost missed the train. Ask what that almost is made of.',
+    text: 'Suppose you almost missed your train this morning. What makes the claim that you could have missed it true?',
     dur: 3.8,
   },
   {
     p: 30, x: 44, trunk: 1,
-    text: 'Up to this morning your life runs along one road.',
+    text: 'Represent your life up to this morning as a single road.',
     dur: 3.6,
   },
   {
     p: 36, x: 44, trunk: 1, roads: 1,
-    text: 'Then the road forks. Philosophers call each way things could have gone a possible world.',
+    text: 'This morning the road forks, one branch for each way events could have gone. A complete way things could have been is called a possible world.',
     dur: 4.6,
   },
   {
     p: 160, x: 44, trunk: 1, roads: 1,
-    text: 'One is solid because you walked it. The rest are drawn thin.',
+    text: 'The road you took represents the actual world. The other roads represent worlds that are merely possible.',
     dur: 3.8,
   },
   {
     p: 161, x: 44, trunk: 1, roads: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what makes "you could have slept in" true.',
-      explain: 'A road exists where you did. The trunk is only what happened, and it can’t make a claim about what didn’t happen. That’s the job the fork was invented for.',
+      prompt: 'What makes it true that you could have slept in?',
+      explain: 'A road exists where you slept in. The trunk records only what happened, so it can’t make a claim about other possibilities true. Possible worlds were introduced to do that work.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 159, x: 44, trunk: 1, roads: 1,
-    text: 'Necessary means true on every road. Possible means true on at least one.',
+    text: 'A claim is necessary if it’s true in every possible world, and possible if it’s true in at least one.',
     dur: 4.6,
   },
   {
     p: 62, x: 100, trunk: 1, roads: 1,
-    text: 'Then David Lewis asked the awkward question. How solid are the thin roads?',
+    text: 'David Lewis asked what possible worlds are. Do the other roads exist as fully as the actual one?',
     dur: 4.4,
   },
   {
@@ -85,36 +85,36 @@ export const BEATS: Metaphysics25Beat[] = [
   },
   {
     p: 383, x: 100, trunk: 1, roads: 1,
-    text: 'Lewis meant it word for word. Real places, with a flesh and blood you on each of them.',
+    text: 'Lewis intended this as a literal claim. On his modal realism, other worlds are as concrete as the actual world and contain counterparts of you.',
     dur: 4.6,
   },
   {
     p: 21, x: 100, trunk: 1, roads: 1,
     interact: {
-      prompt: 'The road where you played music. What is it?',
+      prompt: 'What do most philosophers take a merely possible world to be?',
       sort: {
-        chip: 'the road you did not take',
+        chip: 'a merely possible world',
         bins: [
-          { id: 'place', label: 'a real place', reads: 'as concrete as this one, and cut off from it' },
-          { id: 'story', label: 'a story', reads: 'a description that holds together, and nothing more', correct: true },
-          { id: 'talk', label: 'loose talk', reads: 'a way of speaking that stands for nothing' },
+          { id: 'place', label: 'a concrete world', reads: 'as concrete as the actual world yet isolated' },
+          { id: 'story', label: 'an abstract description', reads: 'a consistent description of a whole world', correct: true },
+          { id: 'talk', label: 'a useful fiction', reads: 'a way of speaking with nothing behind it' },
         ],
       },
-      explain: 'A story, for most philosophers. Lewis paid for his answer with an enormous number of worlds. The usual objection is that a road you can never reach does far less work than an ordinary description.',
+      explain: 'An abstract description, for most philosophers. Lewis’s view needs countless real universes. Saul Kripke objected that a counterpart in another world is someone else, not you.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Roads Not Taken',
+      title: 'Possible Worlds',
       points: [
         'A possible world is a complete way things could have gone',
-        'Necessary holds on every road, possible on at least one',
-        'Lewis said the other roads are concrete places',
-        'Most say they are consistent descriptions instead',
+        'Necessary: true in every world. Possible: true in at least one',
+        'Lewis held that other possible worlds are concrete',
+        'Most philosophers treat them as abstract descriptions instead',
       ],
-      closing: 'One small word can hide a whole argument. Say “could” again and notice how much it’s carrying.',
+      closing: 'Ordinary claims about what could have happened rely on an account of possible worlds. Each account has costs.',
     },
     dur: 4.0,
   },

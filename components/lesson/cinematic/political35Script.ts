@@ -34,63 +34,63 @@ export interface Political35Beat extends BaseBeat {
 export const BEATS: Political35Beat[] = [
   {
     p: 462, x: 52, chairs: 1,
-    text: 'A room where a decision gets made. Three people are in it.',
+    text: 'Suppose three living people must choose a policy whose effects will last for centuries.',
     dur: 2.1,
   },
   {
     p: 462, x: 52, chairs: 1,
-    text: 'Nine of the chairs belong to people who are not born yet.',
+    text: 'Nine of the chairs belong to people who are not born yet. They’ll bear its effects without voting.',
     dur: 2.1,
   },
   {
     p: 461, x: 52, chairs: 1, live_w: 1, live: 1,
     interact: {
-      prompt: 'Give the empty chairs a weight. Slide until it matches what you actually believe.',
+      prompt: 'How much weight should the interests of future people carry in this decision?',
       drag: {
         lo: 'NO SAY AT ALL',
         hi: 'A FULL VOTE EACH',
         start: 0.1,
         zones: [
-          { id: 'none', upto: 0.22, reads: 'they can wait their turn' },
-          { id: 'some', upto: 0.7, reads: 'a voice, not a veto', correct: true },
-          { id: 'full', upto: 1, reads: 'and we are outvoted forever' },
+          { id: 'none', upto: 0.22, reads: 'none, since they don’t exist yet' },
+          { id: 'some', upto: 0.7, reads: 'real weight, yet no veto', correct: true },
+          { id: 'full', upto: 1, reads: 'full votes, outnumbering the living for ever' },
         ],
       },
-      explain: 'Slide to the far end and the living are permanently outvoted by everyone who comes after. No society could run on that. Slide to nothing and ten thousand years of waste is a free choice. The interesting part is that almost nobody stops at either end.',
+      explain: 'Real weight, yet no veto. Full votes for all future people would outvote the living for ever. No weight at all would permit any harm to them, however severe.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 168, x: 52, chairs: 1, weight: 0.5,
-    text: 'So far the choice is merely hard. Now comes the strange part.',
+    text: 'So far this is an ordinary problem of weighing interests. Derek Parfit named a deeper difficulty the non-identity problem.',
     dur: 3.0,
   },
   {
     p: 2, x: 52, chairs: 1, weight: 0.5,
-    text: 'Pick the reckless policy and the world runs another way. Other jobs, other journeys, other couples meeting.',
+    text: 'A different policy changes how people live: where they work, whom they meet, and when to have children.',
     dur: 4.1,
   },
   {
     p: 2, x: 52, chairs: 1, weight: 0.5,
-    text: 'Other children.',
+    text: 'Different children are therefore conceived. Which people exist in the future depends on the policy chosen.',
     dur: 1.8,
   },
   {
     p: 467, x: 52, chairs: 1, weight: 0.5, swap: 1,
-    text: 'Watch who’s in the room now. Not the same three.',
+    text: 'Under the reckless policy, a different set of future people is born.',
     dur: 2.2,
   },
   {
     p: 467, x: 52, chairs: 1, weight: 0.5, swap: 1,
-    text: 'Under the careful policy these people were never born at all.',
+    text: 'Had the careful policy been chosen instead, none of these particular people would ever have existed.',
     dur: 2.2,
   },
   {
     p: 160, x: 52, chairs: 1, weight: 0.5, swap: 1, live: 1,
     interact: {
-      prompt: 'The future is worse. Tap the person who ends up worse off.',
-      explain: 'There’s nobody to tap, and the absence is the lesson. Everyone in the worse world owes their existence to the reckless choice. So no one there can say they’d have been better off. The wrong is obvious and the victim is missing.',
+      prompt: 'If the reckless policy makes the future worse, who is made worse off by it?',
+      explain: 'No one. Everyone in the worse future exists only because of the reckless choice. Provided their lives are worth living, none of them is worse off for it. The policy seems wrong, yet it harms no particular person.',
       xp: 5,
     },
     dur: 1.0,
@@ -99,7 +99,7 @@ export const BEATS: Political35Beat[] = [
     p: 386, x: 126, chairs: 1, weight: 0.5, swap: 1,
     quote: {
       id: 'lq-political-political-35-1',
-      text: 'We are the trustees of the earth, not its owners.',
+      text: '…it becomes a partnership not only between those who are living, but between those who are living, those who are dead, and those who are to be born.',
       author: 'Edmund Burke',
       philosopherId: 'edmund-burke',
       work: 'Reflections on the Revolution in France',
@@ -110,20 +110,20 @@ export const BEATS: Political35Beat[] = [
   },
   {
     p: 383, x: 126, chairs: 1, weight: 0.8, swap: 1,
-    text: 'One reply drops the search for a victim. Some choices make the world go worse, and that’s a reason not to make them.',
+    text: 'Parfit replies that an outcome can be worse without being worse for anyone. That gives reason to avoid it.',
     cite: 'Parfit, Reasons and Persons, 1984',
     dur: 4.6,
   },
   {
     summary: {
-      title: 'Who Is in the Room',
+      title: 'The Non-Identity Problem',
       points: [
-        'Most of the affected are not born yet',
+        'Most people a policy affects are not yet born',
         'Change the policy and you change who is born',
         'So no future person is made worse off',
-        'Judging outcomes keeps the wrong without a victim',
+        'Parfit: an outcome can be worse without a victim',
       ],
-      closing: 'Every generation inherits a world it had no vote in. The only open question is what kind of ancestor that leaves you.',
+      closing: 'The non-identity problem challenges any account of wrongdoing that requires a victim.',
     },
     dur: 3.2,
   },

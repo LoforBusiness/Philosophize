@@ -28,25 +28,25 @@ export interface MetaBeat extends BaseBeat {
 export const BEATS: MetaBeat[] = [
   {
     hpose: 6,
-    text: 'Why is there something rather than nothing? Metaphysics’ most famous question.',
+    text: 'Why is there something rather than nothing? The question asks about everything that exists, taken as a whole.',
     dur: 2.9,
   },
   {
     hpose: 6,
-    text: 'Brace yourself.',
+    text: 'Gottfried Leibniz, in 1714, called it the first question anyone has a right to ask.',
     dur: 1.8,
   },
   {
     hpose: 2,
     rule: true,
-    text: 'Leibniz said nothing is ever just true for no reason. Point that rule at everything at once.',
-    cite: 'Leibniz, Principles of Nature and Grace §7',
+    text: 'Leibniz’s principle of sufficient reason says that nothing is true without a reason. Applied to the whole world, it asks why the world exists at all.',
+    cite: 'Principles of Nature and Grace',
     dur: 2.3,
   },
   {
     hpose: 2,
     rule: true,
-    text: 'Why this crowded universe rather than an empty one? He said nothing would have been simpler and easier.',
+    text: 'Leibniz argued that nothing is simpler and easier than something. So a universe that exists, rather than none, needs a reason.',
     dur: 2.5,
   },
   {
@@ -66,26 +66,26 @@ export const BEATS: MetaBeat[] = [
   {
     hpose: 1,
     erase: 0.86,
-    text: 'Try to reach nothing. Parmenides tried.',
-    cite: 'Parmenides, On Nature, early 5th c. BCE',
+    text: 'Parmenides, an early Greek philosopher, held that what is not cannot be thought or spoken of.',
+    cite: 'Parmenides, On Nature',
     dur: 1.8,
   },
   {
     hpose: 1,
     erase: 0.86,
-    text: 'Strip away objects, space, time and physics, and a dark void is still something. You can’t think about what is not without making it a thing.',
+    text: 'Suppose you remove every object, along with space and time. Even the dark void you then picture is still something, because thinking of nothing turns it into a thing.',
     dur: 4.2,
   },
   {
     hpose: 2,
     chain: true,
-    text: 'Science never even tries. It starts mid-game, explaining one state of the world by an earlier one.',
+    text: 'Science explains each state of the universe by an earlier state, together with the laws of nature.',
     dur: 2.6,
   },
   {
     hpose: 2,
     chain: true,
-    text: 'Science has to assume there are states and laws to begin with.',
+    text: 'So every scientific explanation presupposes that states and laws already exist. It can’t explain why they exist at all.',
     dur: 1.8,
   },
   {
@@ -95,10 +95,10 @@ export const BEATS: MetaBeat[] = [
     interact: {
       prompt: 'Why can’t science fully answer why anything exists at all?',
       cards: [
-        { text: 'It presumes things exist', correct: true },
-        { text: 'The Big Bang settled it', correct: false },
+        { text: 'Science presupposes that something exists', correct: true },
+        { text: 'The Big Bang already answers it', correct: false },
       ],
-      explain: 'Science explains each state by a prior state and the laws. It presupposes that there are laws and states at all. So it never reaches why there’s anything to begin with.',
+      explain: 'Science presupposes that something exists. It explains each state by an earlier state and the laws of nature. Every such explanation assumes that states and laws exist. The Big Bang theory describes one such state, so the theory can’t answer the question.',
       xp: 5,
     },
     dur: 1.0,
@@ -108,18 +108,18 @@ export const BEATS: MetaBeat[] = [
     chain: true,
     qregress: 'q2',
     interact: {
-      prompt: 'How far back does the Big Bang story actually explain?',
+      prompt: 'How far back does the Big Bang theory’s explanation reach?',
       drag: {
-        lo: 'LAST TUESDAY',
+        lo: 'THE RECENT PAST',
         hi: 'WHY ANYTHING AT ALL',
         start: 0,
         zones: [
           { id: 'stars', upto: 0.32, reads: 'how the galaxies and the stars formed' },
-          { id: 'early', upto: 0.72, reads: 'back to one hot dense beginning', correct: true },
-          { id: 'why', upto: 1, reads: 'why there is anything here to begin with' },
+          { id: 'early', upto: 0.72, reads: 'back to an early hot, dense state', correct: true },
+          { id: 'why', upto: 1, reads: 'why anything exists at all' },
         ],
       },
-      explain: 'It reaches the beginning and stops. The Big Bang describes how an already existing universe grew out of a hot dense state. That state had to be there first. So the story runs out one step short of the question.',
+      explain: 'Back to an early hot, dense state. The Big Bang theory describes how the universe expanded and cooled from that state. It doesn’t explain why that state existed. So the explanation stops one step short of the question.',
       xp: 5,
     },
     dur: 1.0,
@@ -128,12 +128,12 @@ export const BEATS: MetaBeat[] = [
     summary: {
       title: 'Why Existence Is a Puzzle',
       points: [
-        'Leibniz: nothing exists without a reason',
-        'So why something rather than nothing?',
+        'Leibniz: nothing is true without a sufficient reason',
+        'So why is there something rather than nothing?',
         'Parmenides: pure nothing can’t be thought',
-        'Science explains how, not why',
+        'Science explains states by earlier states, not existence itself',
       ],
-      closing: 'Even the ground beneath you now demands an explanation.',
+      closing: 'If the principle of sufficient reason is true, existence itself needs a reason, and science can’t supply it.',
     },
     dur: 2.8,
   },

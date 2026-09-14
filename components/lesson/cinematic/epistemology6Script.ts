@@ -20,29 +20,29 @@ export interface Epi6Beat extends BaseBeat {
 export const BEATS: Epi6Beat[] = [
   {
     p: 444, bal: 1, crack: 0, route: 0,
-    text: 'What if every belief can be doubted? The ancient skeptics took that idea further than Descartes ever did.',
+    text: 'Could every belief be doubted? The ancient Pyrrhonian sceptics pressed doubt further than Descartes, who used doubt only as a method.',
     dur: 3.4,
   },
   {
     p: 176, bal: 1, route: 1,
-    text: 'Skepticism asks whether you can know anything at all. For every reason to believe, the skeptic finds an equal reason to doubt.',
-    cite: 'The skeptic’s challenge',
+    text: 'Scepticism asks whether anything can be known. For each reason to believe a claim, the sceptic finds an equal reason against it.',
+    cite: 'The sceptic’s challenge',
     dur: 3.5,
   },
   {
     p: 176, bal: 1, route: 1,
-    text: 'If the reasons cancel out, how can any belief be secure?',
+    text: 'Equipollence is a balance of opposing reasons on both sides. Neither belief is then better supported than the other.',
     dur: 1.8,
   },
   {
     p: 158, bal: 1, route: 3,
-    text: 'Pyrrho met each claim with its opposite, found both equally strong, and refused to decide. He called the refusal epoche.',
-    cite: 'Pyrrho suspends judgment',
+    text: 'Pyrrhonian sceptics, named after Pyrrho of Elis, respond by suspending judgement. The Greek term for this suspension is epoche.',
+    cite: 'Suspending judgement',
     dur: 3.1,
   },
   {
     p: 158, bal: 1, route: 3,
-    text: 'What he got out of it wasn’t despair but calm — ataraxia.',
+    text: 'Sextus Empiricus holds that suspending judgement brings not despair but tranquillity, or ataraxia.',
     dur: 1.9,
   },
   {
@@ -61,40 +61,40 @@ export const BEATS: Epi6Beat[] = [
   {
     p: 22, bal: 1, route: 3,
     interact: {
-      prompt: 'Refusing to decide sounds miserable. Tap what Pyrrho says the refusing gets you.',
+      prompt: 'What do Pyrrhonian sceptics claim that suspending judgement brings?',
       cards: [
         { text: 'Peace of mind', correct: true },
-        { text: 'Certainty at last', correct: false },
+        { text: 'Certain knowledge', correct: false },
       ],
-      explain: 'Calm. He isn’t claiming to have proved anything, and he isn’t denying anything either. Putting the question down is the thing that quiets the mind.',
+      explain: 'Peace of mind. The sceptic neither affirms nor denies, so suspending judgement gives no certainty. Sextus says calm follows it as a shadow follows a body.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 12, bal: 0.3, crack: 1, route: 3,
-    text: 'But total doubt eats itself. If nothing can be known, how could you know even that?',
-    cite: 'Doubt that eats itself',
+    text: 'However, the claim that nothing can be known refutes itself. To know that claim would be to know something.',
+    cite: 'A self-refuting claim',
     dur: 2,
   },
   {
     p: 12, bal: 0.3, crack: 1, route: 3,
-    text: 'So most sceptics doubt softly. They go after your confidence, not after the chance of ever knowing anything.',
+    text: 'Sextus Empiricus avoids the objection by not asserting it. His sceptical phrases, he says, report only how things seem to him.',
     dur: 3,
   },
   {
     p: 165, crack: 1, route: 3,
     interact: {
-      prompt: 'What is wrong with saying nothing is certain?',
+      prompt: 'What is the problem with asserting that nothing can be known?',
       sort: {
-        chip: '"nothing is certain"',
+        chip: '“nothing can be known”',
         bins: [
-          { id: 'fine', label: 'nothing', reads: 'nothing, the claim is fine' },
-          { id: 'bold', label: 'too strong', reads: 'too strong to be true' },
-          { id: 'eats', label: 'it eats itself', reads: 'it asserts the very thing it denies', correct: true },
+          { id: 'fine', label: 'no problem', reads: 'no problem: the claim is coherent' },
+          { id: 'bold', label: 'too strong', reads: 'too sweeping to be true' },
+          { id: 'eats', label: 'self-refuting', reads: 'to assert it is to claim knowledge', correct: true },
         ],
       },
-      explain: 'It eats itself, and it’s the trap the whole school walks into. Knowing for certain that nobody can know anything is itself a certain piece of knowledge. Pyrrho avoids it by claiming nothing at all — which is why he suspends rather than argues.',
+      explain: 'Self-refuting. To know that nothing can be known would be to know something, so the claim can’t be known. Sextus avoids it: Pyrrhonian sceptics assert no doctrine and go on searching.',
       xp: 5,
     },
     dur: 1.0,
@@ -103,12 +103,12 @@ export const BEATS: Epi6Beat[] = [
     summary: {
       title: 'The Value of Doubt',
       points: [
-        'Skeptics oppose every claim with a rival',
-        'Pyrrho suspended judgment to find peace',
+        'Sceptics oppose every argument with an equal one',
+        'Pyrrhonists suspend judgement to reach tranquillity',
         'Total doubt is self-refuting',
-        'Healthy doubt sharpens belief, not destroys it',
+        'Doubt can test beliefs without denying all knowledge',
       ],
-      closing: 'The skeptic’s gift is not paralysis. It’s the habit of asking “But how do I really know?” every time.',
+      closing: 'Scepticism doesn’t have to end in paralysis. It can become a habit of asking what justifies each belief.',
     },
     dur: 2.8,
   },

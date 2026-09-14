@@ -24,29 +24,29 @@ export interface Pol4Beat extends BaseBeat {
 export const BEATS: Pol4Beat[] = [
   {
     p: 166, walls: 1, harm: 0, panel: 0,
-    text: 'Free because no one stops you, or free because you can? Two ideas of freedom — and two very different politics.',
+    text: 'Are you free when no one stops you, or only when you’re able to act? These are two ideas of freedom that support very different politics.',
     dur: 3.6,
   },
   {
     p: 7, walls: 0.25, harm: 0, panel: 1,
-    text: 'Berlin called this negative liberty: the area where others leave you alone. The walls pull back.',
-    cite: 'Negative liberty — freedom from',
+    text: 'Isaiah Berlin called the first idea negative liberty. It’s the area within which others don’t interfere with what you do.',
+    cite: 'Freedom from interference',
     dur: 2.4,
   },
   {
     p: 7, walls: 0.25, harm: 0, panel: 1,
-    text: 'Mill drew the line — power may be used against you only to prevent harm to others.',
+    text: 'John Stuart Mill’s harm principle marks the boundary of that area. Power may be used against you only to prevent harm to others.',
     dur: 2.6,
   },
   {
     p: 13, walls: 0.25, harm: 1, panel: 1, test: 1,
-    text: 'Eat badly, take wild risks, preach unpopular views? Mill says that’s your business.',
+    text: 'Mill holds that eating badly, taking risks and voicing unpopular opinions are your own decisions. Others may reason with you, but not compel you.',
     cite: 'Mill’s harm principle',
     dur: 2,
   },
   {
     p: 13, walls: 0.25, harm: 1, panel: 1, test: 1,
-    text: 'But poison a well, defraud a buyer, throw a punch? Now you harm others, and only then may power step in.',
+    text: 'Poisoning a well, defrauding a buyer or throwing a punch harms other people. Mill allows coercion only against conduct of this kind.',
     dur: 3.2,
   },
   {
@@ -64,25 +64,25 @@ export const BEATS: Pol4Beat[] = [
   },
   {
     p: 163, walls: 0, harm: 0, panel: 2,
-    text: 'Berlin named a rival ideal: positive liberty — being your own master. You might face no interference yet still be too poor, sick, or untaught to act.',
-    cite: 'Positive liberty — freedom to',
+    text: 'Berlin called the second idea positive liberty: being your own master. On this view, someone free of interference may still be too poor, ill or uneducated to act.',
+    cite: 'Freedom as self-mastery',
     dur: 3.8,
   },
   {
     p: 163, walls: 0, harm: 0, panel: 2,
-    text: 'Should the state empower people, not merely leave them alone?',
+    text: 'So positive liberty can back a bigger role for the state. It helps people act, not just leave them alone.',
     dur: 1.8,
   },
   {
     // Both cards sit neutral here — lighting one would hand the reader the answer.
     p: 380, walls: 0, harm: 0, panel: 0,
     interact: {
-      prompt: 'Tap the kind of freedom that is only about nobody standing in your way.',
+      prompt: 'Which liberty consists only in the absence of interference by others?',
       cards: [
         { text: 'Negative liberty', correct: true },
         { text: 'Positive liberty', correct: false },
       ],
-      explain: 'For Berlin, negative liberty is the space where no one blocks your way. Positive liberty asks instead whether you have the power to be your own master.',
+      explain: 'Negative liberty. For Berlin, it’s the area in which no one interferes with your choices. Positive liberty concerns something else: whether you’re your own master, able to direct your life.',
       xp: 5,
     },
     dur: 1.0,
@@ -90,31 +90,31 @@ export const BEATS: Pol4Beat[] = [
   {
     p: 165, walls: 0, harm: 0, panel: 2,
     interact: {
-      prompt: 'What does Berlin actually guard?',
+      prompt: 'How does Berlin weigh a core of negative liberty against positive liberty?',
       split: {
         left: 'A CORE OF NEGATIVE LIBERTY', right: 'POSITIVE LIBERTY',
         start: 0.04,
         zones: [
-          { id: 'pos', upto: 0.3, reads: 'the state frees your real self' },
-          { id: 'both', upto: 0.66, reads: 'both valued, and neither one protected' },
-          { id: 'neg', upto: 1, reads: 'a core of being left alone', correct: true },
+          { id: 'pos', upto: 0.3, reads: 'positive liberty first: the state frees your true self' },
+          { id: 'both', upto: 0.66, reads: 'both weighed equally, with no protected core' },
+          { id: 'neg', upto: 1, reads: 'a minimum core of negative liberty is protected', correct: true },
         ],
       },
-      explain: 'Nearly all of it. Berlin valued positive liberty, and spent his essay warning what happens when it’s handed to a state. Rulers get to coerce you in the name of your real self. So he fences off a core that nobody may enter for your own good.',
+      explain: 'A minimum core of negative liberty is protected. Berlin valued positive liberty but warned that it can be used to justify coercion. Rulers can coerce people in the name of their true selves. So Berlin insists on a minimum area of freedom that no authority may invade.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Two Ways to Think About Freedom',
+      title: 'Negative and Positive Liberty',
       points: [
         'Negative liberty: freedom from interference',
         'Mill: coerce only to prevent harm to others',
         'Positive liberty: being your own master',
-        'Berlin warned positive liberty can mask coercion',
+        'Berlin warned positive liberty can justify coercion',
       ],
-      closing: 'How you define freedom decides the kind of society you build.',
+      closing: 'Negative liberty limits what the state may do to you, while positive liberty can enlarge what it does for you.',
     },
     dur: 2.8,
   },

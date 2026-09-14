@@ -34,43 +34,43 @@ export interface Political38Beat extends BaseBeat {
 export const BEATS: Political38Beat[] = [
   {
     p: 164, x: 52, chamber: 1,
-    text: 'You elect somebody. Months later a vote comes up that nobody mentioned in the campaign.',
+    text: 'Suppose you elect a representative. Months later, a vote arises on an issue nobody raised during the campaign.',
     dur: 4.0,
   },
   {
     p: 384, x: 52, chamber: 1, cord: 1,
-    text: 'There’s a cord between the two of you, and the only question is how much slack it has.',
+    text: 'Theories of representation disagree about how closely a representative must follow the voters’ wishes.',
     dur: 4.0,
   },
   {
     p: 47, x: 52, chamber: 1, cord: 1, cards: 1,
-    text: 'Here are three things he might owe you.',
+    text: 'A representative might owe voters obedience to their instructions, independent judgement, or loyalty to a party.',
     dur: 2.6,
   },
   {
     p: 4, x: 52, chamber: 1, cord: 1, cards: 1, live: 1,
     interact: {
-      prompt: 'Tap the one a messenger could not supply.',
-      explain: 'His own judgement. Carrying what you instruct is what a messenger does, so it can’t be the difference. A party line is a third master, owed to neither you nor the argument in the room.',
+      prompt: 'Which of these could a mere messenger not provide?',
+      explain: 'His own judgement. A messenger can carry instructions. The party line serves the party, not the voters or the question.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 176, x: 52, chamber: 1, cord: 1, cards: 1,
-    text: 'In 1774 Edmund Burke faced the voters of Bristol on election day. He told them that instructions were not part of the bargain.',
+    text: 'In 1774, newly elected for Bristol, Edmund Burke told voters he would not be bound by their instructions.',
     dur: 5.0,
   },
   {
     p: 35, x: 98, chamber: 1, cord: 1, cards: 1,
-    text: 'The voters returned Burke once, then threw him out. That’s the other half of the argument.',
+    text: 'In 1780 Burke, having lost support in Bristol, withdrew from the election there. Voters can still dismiss a trustee.',
     dur: 4.0,
   },
   {
     p: 433, x: 98, chamber: 1, cord: 1, cards: 1,
     quote: {
       id: 'lq-political-political-38-1',
-      text: 'Your representative owes you, not his industry only, but his judgment; and he betrays you if he sacrifices it to your opinion.',
+      text: 'Your representative owes you, not his industry only, but his judgment; and he betrays, instead of serving you, if he sacrifices it to your opinion.',
       author: 'Edmund Burke',
       philosopherId: 'edmund-burke',
       work: 'Speech to the Electors of Bristol',
@@ -82,29 +82,29 @@ export const BEATS: Political38Beat[] = [
   {
     p: 177, x: 98, chamber: 1, cord: 1, cards: 1,
     interact: {
-      prompt: 'Which one would you send to the chamber?',
+      prompt: 'Which type of representative best serves the voters who elect them?',
       poll: {
         options: [
-          { id: 'delegate', reads: 'a delegate, carrying what you instruct', holders: ['Jean-Jacques Rousseau'] },
-          { id: 'trustee', reads: 'a trustee, owing you his judgement', holders: ['Edmund Burke'], correct: true },
-          { id: 'party', reads: 'a partisan, holding the line he was selected on' },
+          { id: 'delegate', reads: 'a delegate, bound by voters’ instructions', holders: ['Jean-Jacques Rousseau'] },
+          { id: 'trustee', reads: 'a trustee, using independent judgement', holders: ['Edmund Burke'], correct: true },
+          { id: 'party', reads: 'a party member, bound by its programme', holders: ['E. E. Schattschneider'] },
         ],
       },
-      explain: 'A trustee, on the argument, and the cost is real. Instructions can be checked against a record. Judgement can’t, because any vote at all can be called the judgement he was sent to use. Watch the cord. Taut, he’s accountable and useless in a debate.',
+      explain: 'A trustee, using independent judgement. Voters can’t foresee every question, and judgement is what a representative adds.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Slack in the Cord',
+      title: 'Delegates and Trustees',
       points: [
         'A delegate carries instructions, a trustee carries judgement',
-        'Elections do not say which you handed over',
+        'An election doesn’t say which role voters intended',
         'Judgement is what a messenger cannot supply',
-        'Instructions are what you can hold somebody to',
+        'Instructions are easier to hold a representative to',
       ],
-      closing: 'Every argument about a broken promise is this argument in different clothes. Decide which one you meant before you decide who betrayed you.',
+      closing: 'Disputes over broken campaign promises often turn on whether a representative was elected as a delegate or a trustee.',
     },
     dur: 3.6,
   },

@@ -66,40 +66,40 @@ export const BEATS: Meta2Beat[] = [
     // 167 = TALKING WITH THE HANDS, the narration loop (N2). The hook is somebody
     // talking to you, and this is what that looks like from the neck down.
     e: 167, x: 92, gone: 0.3,
-    text: 'There is a universe. There did not have to be one.',
+    text: 'A thing is contingent if it could have failed to exist. The universe appears to be contingent.',
     dur: 1.8,
   },
   {
     // 167 = TALKING WITH THE HANDS, the narration loop (N2). The hook is somebody
     // talking to you, and this is what that looks like from the neck down.
     e: 167, x: 92, gone: 0.3,
-    text: 'Why something rather than nothing? The question has outlasted everyone who ever picked it up.',
+    text: 'This raises the question why there is something rather than nothing. No answer to it is generally accepted.',
     dur: 2.1,
   },
   {
     // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
     e: 456, x: 150, gone: 0.3, pr: 1,
-    text: 'Leibniz had a rule. Nothing is without a reason.',
-    cite: 'Leibniz, sufficient reason',
+    text: 'Gottfried Leibniz’s principle of sufficient reason holds that nothing is without a reason.',
+    cite: 'The principle of sufficient reason',
     dur: 2.1,
   },
   {
     // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
     e: 456, x: 150, gone: 0.3, pr: 1,
-    text: 'Then he aimed the rule at existence itself. Why is there anything?',
+    text: 'The principle then applies to existence itself. There must be a reason why anything exists at all.',
     dur: 1.8,
   },
   {
     // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
     e: 456, x: 150, gone: 0.3, pr: 1,
-    text: 'Nothing would have been simpler. He was right about that much.',
+    text: 'Leibniz held that nothing is simpler and easier than something. So existence, not nothingness, is what requires a reason.',
     dur: 1.8,
   },
   {
     // 379 = THE IDEA, PLAYED (N2) — it arrives and the finger goes up, once, as he
     // reaches the fork. Held (179) it would just be a man standing with a finger up.
     e: 379, x: 214, gone: 0.35, pr: 1,
-    text: 'Parmenides got there first and went the other way. Forget reasons for a moment.',
+    text: 'Parmenides, more than two thousand years before Leibniz, asked whether there could be nothing at all.',
     cite: 'Parmenides, On Nature',
     dur: 1.8,
   },
@@ -107,7 +107,7 @@ export const BEATS: Meta2Beat[] = [
     // 379 = THE IDEA, PLAYED (N2) — it arrives and the finger goes up, once, as he
     // reaches the fork. Held (179) it would just be a man standing with a finger up.
     e: 379, x: 214, gone: 0.35, pr: 1,
-    text: 'Ask whether nothing was ever an option at all. Here’s the fork he left: one way says “it is”, the other says “it is not”.',
+    text: 'In his poem On Nature, a goddess sets out two ways of inquiry. One says “it is”, and the other says “it is not”.',
     dur: 3.1,
   },
   {
@@ -131,7 +131,7 @@ export const BEATS: Meta2Beat[] = [
     // fix — the sentence says he steps onto the second way and finds nothing, so
     // he walks out past the fork and recoils, once, on arrival.
     e: 318, x: 292, gone: 0.95, pr: 1,
-    text: 'So he tries it. He steps onto the second way — and there’s nothing there to step onto.',
+    text: 'The goddess calls the second way wholly unlearnable. There’s nothing on it to find or follow.',
     cite: 'The second way',
     dur: 2.3,
   },
@@ -140,7 +140,7 @@ export const BEATS: Meta2Beat[] = [
     // fix — the sentence says he steps onto the second way and finds nothing, so
     // he walks out past the fork and recoils, once, on arrival.
     e: 318, x: 292, gone: 0.95, pr: 1,
-    text: 'What is not cannot be walked on, pointed at, or thought about. It doesn’t have the decency to be an option.',
+    text: 'What is not cannot be walked on, pointed at, or thought about. It is not a genuine alternative to what is.',
     dur: 2.7,
   },
   {
@@ -149,8 +149,8 @@ export const BEATS: Meta2Beat[] = [
     // exactly the attitude to hold while they do it.
     e: 178, x: 236, gone: 0.95, pr: 1, pick: 1,
     interact: {
-      prompt: 'Two of these you can picture. Tap the one there is nothing to picture.',
-      explain: 'A unicorn doesn’t exist, and you pictured it anyway. So not existing was never the problem. “Nothing at all” leaves the thought nothing to be about, and that’s Parmenides\u2019 point.',
+      prompt: 'Of a horse, a unicorn, and nothing at all, which one can’t be pictured?',
+      explain: 'Nothing at all is the answer. A unicorn doesn’t exist, yet it can still be pictured, so non-existence wasn’t the obstacle. “Nothing at all” gives the mind no content to picture, which is Parmenides\u2019 point.',
       xp: 5,
     },
     dur: 1.0,
@@ -158,16 +158,16 @@ export const BEATS: Meta2Beat[] = [
   {
     e: 178, x: 236, gone: 0.95, pr: 1,
     interact: {
-      prompt: 'Why is there something rather than nothing?',
+      prompt: 'For Leibniz’s question to make sense, what must be true of nothingness itself?',
       sort: {
         chip: 'nothing at all',
         bins: [
           { id: 'never', label: 'never possible', reads: 'nothing was never possible' },
           { id: 'lost', label: 'possible, and lost', reads: 'nothing was possible, and something won anyway', correct: true },
-          { id: 'must', label: 'something had to be', reads: 'something had to exist' },
+          { id: 'must', label: 'always necessary', reads: 'something had to exist' },
         ],
       },
-      explain: 'Possible, and lost. Leibniz asks why something won, so nothing had to be a real option for it to beat. Parmenides sits at “never possible”. For him nothing was never on the table, so being never had a rival and the question never opens.',
+      explain: 'Possible, and lost is the answer. For Leibniz, nothing had to be a real possibility, one that something else beat. Parmenides instead says nothing was never possible. So existence had no rival, and his question doesn’t arise.',
       xp: 5,
     },
     dur: 1.0,

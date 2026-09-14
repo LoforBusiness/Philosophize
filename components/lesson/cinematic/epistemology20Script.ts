@@ -31,41 +31,41 @@ export interface Epi20Beat extends BaseBeat {
 export const BEATS: Epi20Beat[] = [
   {
     p: 172, x: 200, voices: 0.25, agree: 0.22,
-    text: 'You read something surprising. One source, and you hold it loosely.',
+    text: 'Suppose one source reports a surprising claim. With only one source, it’s reasonable to believe it tentatively.',
     dur: 3.6,
   },
   {
     p: 2, x: 200, voices: 1, agree: 0.9,
-    text: 'Then three more say it. A paper, a friend, a podcast.',
+    text: 'Then three more sources report the same claim: a paper, a friend and a podcast.',
     cite: 'Four confirmations',
     dur: 2.5,
   },
   {
     p: 2, x: 200, voices: 1, agree: 0.9,
-    text: 'The bar climbs, and it’s right to climb.',
+    text: 'Your confidence rises, and rightly so: four independent confirmations would be strong evidence.',
     dur: 2.1,
   },
   {
     p: 45, x: 132, voices: 1, agree: 0.9, wires: 1,
-    text: 'Now the wiring. Three of those four are repeating the same original post.',
+    text: 'But three of the four sources are repeating the same original post.',
     dur: 3.8,
   },
   {
     p: 13, x: 132, voices: 1, agree: 0.32, wires: 1,
-    text: 'Nobody retracted anything. All four still say the same thing.',
+    text: 'No source has retracted its claim, and all four still agree.',
     cite: 'One source, echoed',
     dur: 2.5,
   },
   {
     p: 13, x: 132, voices: 1, agree: 0.32, wires: 1,
-    text: 'The real count was never four.',
+    text: 'Yet there were never four independent sources, only two: one post and one reporter’s own legwork.',
     dur: 1.8,
   },
   {
     p: 165, x: 132, voices: 1, agree: 0.32, wires: 1, live: 1,
     interact: {
-      prompt: 'Tap the source that actually adds something.',
-      explain: 'The speaker whose wire runs somewhere else. The other three are just as sincere and just as sure, and between them they carry a single report. Agreement is evidence only when each person could have found out alone.',
+      prompt: 'Which source adds evidence of its own?',
+      explain: 'A reporter. The reporter’s wire runs to their own legwork, while the other three repeat one post. Agreement adds evidence only when each source could have found out independently.',
       xp: 5,
     },
     dur: 1.0,
@@ -85,22 +85,22 @@ export const BEATS: Epi20Beat[] = [
   },
   {
     p: 380, x: 268, voices: 1, agree: 0.32, wires: 1,
-    text: 'A feed is built to show you what people like you already share. It manufactures this picture by default.',
+    text: 'A social media feed favours posts shared by people like you. So the agreement in a feed often looks independent when it isn’t.',
     dur: 4.4,
   },
   {
     p: 383, x: 268, voices: 1, agree: 0.32, wires: 1,
     interact: {
-      prompt: 'Whose report is actually worth something?',
+      prompt: 'When does a report, or agreement among reports, count as evidence for a claim?',
       poll: {
         options: [
-          { id: 'real', reads: 'checked it themselves, and unknown', correct: true },
-          { id: 'reach', reads: 'a big name, just passing it on' },
-          { id: 'both', reads: 'a big name, and checked it themselves' },
-          { id: 'noise', reads: 'unknown, and just passing it on' },
+          { id: 'real', reads: 'only independent agreement counts', holders: ['Alvin Goldman'], correct: true },
+          { id: 'reach', reads: 'when reports have matched the facts before', holders: ['David Hume'] },
+          { id: 'both', reads: 'by default, absent a specific reason to doubt it', holders: ['Thomas Reid', 'C.A.J. Coady'] },
+          { id: 'noise', reads: 'when you have good reason to trust an expert', holders: ['John Hardwig'] },
         ],
       },
-      explain: 'Checked it themselves, and unknown. The point is that fame does nothing. A second report counts when it had its own way of checking and might have come out differently. A big name repeating a post adds reach, and reach is what feels like evidence.',
+      explain: 'Only independent agreement counts. A source that repeats another adds no evidence. Reid’s default trust doesn’t ask where a report came from.',
       xp: 5,
     },
     dur: 1.0,

@@ -28,35 +28,35 @@ export interface Metaphysics33Beat extends BaseBeat {
 export const BEATS: Metaphysics33Beat[] = [
   {
     p: 172, x: 62, fall: 0,
-    text: 'Nine blocks, stacked. Nothing has happened yet, and nothing about this picture tells you which way time is running.',
+    text: 'Consider a tower of nine blocks. A single still frame doesn’t show which way time runs.',
     dur: 3.6,
   },
   {
     p: 400, x: 62, fall: 1,
-    text: 'Now the tower falls. You’ve watched a tower of blocks fall a thousand times and it needs no explaining.',
+    text: 'Now the tower falls. Everyone has watched towers fall, and the event seems to need no explanation.',
     cite: 'The tower goes over',
     dur: 3.4,
   },
   {
     p: 19, x: 62, fall: 1, rev: 1,
-    text: 'So run the film backwards. A heap of blocks gathers itself and stands up.',
+    text: 'Now reverse the film. A scattered heap of blocks assembles itself into a standing tower.',
     cite: 'The film, reversed',
     dur: 2.5,
   },
   {
     p: 19, x: 62, fall: 1, rev: 1,
-    text: 'You knew the film was wrong before this sentence was over.',
+    text: 'Anyone can tell at once that the reversed film shows something that doesn’t happen.',
     dur: 1.9,
   },
   {
     p: 467, x: 62, fall: 1, rev: 1,
-    text: 'Here’s the strange part. Every single collision in that reversed film is legal.',
+    text: 'Yet every collision in the reversed film obeys the laws of physics. This is the puzzle of time’s arrow.',
     cite: 'Nothing forbids it',
     dur: 2.4,
   },
   {
     p: 467, x: 62, fall: 1, rev: 1,
-    text: 'Take any two blocks knocking together and the reverse obeys the same laws.',
+    text: 'The basic laws of motion are time-symmetric: any collision run in reverse is also permitted by them.',
     dur: 2.4,
   },
   {
@@ -74,7 +74,7 @@ export const BEATS: Metaphysics33Beat[] = [
   {
     p: 461, x: 62, fall: 0, live: 1,
     interact: {
-      prompt: 'Drag the blocks apart. Stop where a tower stops being one of very few ways to look.',
+      prompt: 'How many arrangements look like a tower that has only just come apart?',
       drag: {
         lo: 'STACKED',
         hi: 'SCATTERED',
@@ -85,48 +85,48 @@ export const BEATS: Metaphysics33Beat[] = [
         zones: [
           { id: 'few', upto: 0.3, reads: 'a handful of ways' },
           { id: 'many', upto: 0.62, reads: 'thousands of ways', correct: true },
-          { id: 'vast', upto: 1, reads: 'more ways than atoms' },
+          { id: 'vast', upto: 1, reads: 'more ways than there are atoms' },
         ],
       },
-      explain: 'Thousands of ways. The tower is one arrangement out of a few. Nudge it and the count runs into the thousands. A handful of blocks never gets near more ways than atoms. Nothing pushed the blocks toward the mess. There’s almost nothing else for them to be.',
+      explain: 'Thousands of ways. A standing tower can be arranged in very few ways, and a slightly fallen one in thousands. Nine blocks can never have more arrangements than there are atoms.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 167, x: 62, fall: 0.82,
-    text: 'That’s the whole answer. Order is rare and mess is common.',
-    cite: 'Rare and common',
+    text: 'This is Ludwig Boltzmann’s explanation of entropy increase. Ordered arrangements are rare, and disordered ones are common.',
+    cite: 'Boltzmann’s explanation',
     dur: 2.1,
   },
   {
     p: 167, x: 62, fall: 0.82,
-    text: 'Anything moving at random wanders into the mess and never wanders back.',
+    text: 'A system moving at random therefore drifts into disorder and almost never returns to order.',
     dur: 2.5,
   },
   {
     p: 45, x: 62, fall: 0.82,
     interact: {
-      prompt: 'The equations point neither way. So where does time’s direction come from?',
+      prompt: 'If the laws are time-symmetric, where does time’s direction come from?',
       cards: [
-        { text: 'From how it all started', correct: true },
-        { text: 'From the equations', correct: false },
+        { text: 'From the initial conditions', correct: true },
+        { text: 'From the laws of motion', correct: false },
       ],
-      explain: 'The card “From the equations” can’t be right. The equations run backwards just as well, as the reversed film showed. So the one-way feel has to come from the starting conditions, and the universe began in a very tidy state.',
+      explain: 'From the initial conditions. The laws of motion work equally well in reverse, as the reversed film showed. So the direction must come from the low-entropy state in which the universe began.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Arrow Is In The Counting',
+      title: 'The Statistical Arrow of Time',
       points: [
-        'Every collision runs backwards legally',
-        'Ordered states are vastly outnumbered',
-        'So things drift to mess and never back',
-        'The arrow came from a very ordered start',
+        'The laws of motion are time-symmetric',
+        'Ordered arrangements are far outnumbered by disordered ones',
+        'So random change leads almost always toward disorder',
+        'The arrow traces back to a low-entropy beginning',
       ],
-      closing: 'Time does not push you forward. You’re drifting into the far larger set of ways things can be.',
+      closing: 'Time’s direction isn’t written into the laws. It comes from counting arrangements and from how the universe began.',
     },
     dur: 3.0,
   },

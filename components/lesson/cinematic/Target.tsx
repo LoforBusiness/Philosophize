@@ -240,12 +240,24 @@ interface Registry {
 }
 const TargetCtx = createContext<Registry | null>(null);
 
+/**
+ * WHETHER THIS BEAT IS ANSWERED ON THE STAGE AT ALL (E41).
+ *
+ * The player supplies it from `stageAnswered`. On a beat whose question is asked
+ * BELOW the picture, a Target is scenery: it takes no press and draws no ring.
+ * It still registers and still reports its box, because the camera frames that box
+ * on every beat (H60c), and answering in one place must not move the camera.
+ */
+const StageLiveCtx = createContext(true);
+
 /** Wrap the scene so its Targets can be counted. Mounted by CinematicPlayer. */
 export function TargetCountProvider({
-  children, onCount, onBox, host,
+  children, onCount, onBox, host, live = true,
 }: {
   children: React.ReactNode;
   onCount: (n: number) => void;
+  /** Whether this beat is answered on the stage (E41). See StageLiveCtx. */
+  live?: boolean;
   /** The union of every target on this beat, or null while none has measured. */
   onBox?: (b: { x: number; y: number; w: number; h: number } | null) => void;
   host?: { current: unknown };
@@ -281,7 +293,11 @@ export function TargetCountProvider({
       host,
     };
   }, [onCount, onBox, host]);
-  return <TargetCtx.Provider value={reg}>{children}</TargetCtx.Provider>;
+  return (
+    <TargetCtx.Provider value={reg}>
+      <StageLiveCtx.Provider value={live}>{children}</StageLiveCtx.Provider>
+    </TargetCtx.Provider>
+  );
 }
 
 /**
@@ -324,6 +340,7 @@ export default function Target({
 } & Omit<PressableProps, 'onPress' | 'children'> & { children?: React.ReactNode }) {
   const answered = picked !== null;
   const reg = useContext(TargetCtx);
+  const live = useContext(StageLiveCtx);
   const key = useId();
 
   useEffect(() => {
@@ -483,8 +500,9 @@ export default function Target({
       accessibilityRole="button"
       {...rest}
       // After the spread: a scene's own `disabled` may add a reason to be
-      // untappable, but it may never make an answered target tappable again.
-      disabled={answered || !!rest.disabled}
+      // untappable, but it may never make an answered target tappable again, nor
+      // one on a beat whose question is asked below the picture (E41).
+      disabled={answered || !live || !!rest.disabled}
       onPress={() => onPick(id, correct)}
     >
       {/* The reaction transforms the ART, not the Pressable: `measureLayout` reads
@@ -518,7 +536,7 @@ export default function Target({
           still pulsing. An affordance that lies about being one is worse than
           no affordance, because it teaches the reader to distrust the real
           ones. */}
-      {!answered && !rest.disabled ? (
+      {!answered && live && !rest.disabled ? (
         <Animated.View
           pointerEvents="none"
           // Named so the lesson audit can find rings exactly. Detecting them by
@@ -538,7 +556,7 @@ export default function Target({
           ]}
         />
       ) : null}
-      {!answered && !rest.disabled ? (
+      {!answered && live && !rest.disabled ? (
         <>
           {/* THE HALO, drawn OUTSIDE the hard ring. Not named `target-ring`,
               because check-blank and the lesson audit count rings and two per
@@ -593,7 +611,8 @@ export function TargetRing({ answered, radius = 4 }: { answered: boolean; radius
     breath.value = withRepeat(withTiming(1, { duration: BREATH_MS, easing: Easing.inOut(Easing.quad) }), -1, true);
     return () => cancelAnimation(breath);
   }, [answered]);
-  const ring = useAnimatedStyle(() => ({ opacity: answered ? 0 : 0.35 + breath.value * 0.65 }));
+  const live = useContext(StageLiveCtx);
+  const ring = useAnimatedStyle(() => ({ opacity: answered || !live ? 0 : 0.35 + breath.value * 0.65 }));
   return (
     <Animated.View
       pointerEvents="none"

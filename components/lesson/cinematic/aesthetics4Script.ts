@@ -30,39 +30,39 @@ export interface Aes4Beat extends BaseBeat {
 export const BEATS: Aes4Beat[] = [
   {
     a: 2, v: 0, ask: 1, test: 0, verdict: 0, signed: 0, art: 0,
-    text: 'In 1917, a plain urinal was entered as art. No carving, no painting, just a choice.',
+    text: 'In 1917, a mass-produced urinal was submitted to an art exhibition. It wasn’t carved or painted, only chosen.',
     dur: 2.8,
   },
   {
     a: 2, v: 0, ask: 1, test: 0, verdict: 0, signed: 0, art: 0,
-    text: 'So what makes something art?',
+    text: 'The case raises a question of definition. What makes any object a work of art?',
     dur: 1.8,
   },
   {
     a: 167, v: 10, test: 2,
-    text: 'For ages there were two answers. Plato said art copies the world skilfully, and the Greek word for that is mimesis.',
-    cite: 'Two old answers',
+    text: 'Two older theories answer it. The first, from Plato and Aristotle, holds that art is skilled imitation, or mimesis.',
+    cite: 'Two older theories',
     dur: 2.6,
   },
   {
     a: 167, v: 10, test: 2,
-    text: 'Tolstoy said art puts a feeling into a form somebody else can pick up. Both assume a person made it.',
+    text: 'The second, from Tolstoy, holds that art expresses a feeling and conveys it to an audience. Both theories assume someone made the work.',
     dur: 2.4,
   },
   {
     a: 36, v: 15, test: 2, signed: 1,
-    text: 'Duchamp laid a urinal on its back, signed it R. Mutt 1917, and sent the thing in.',
+    text: 'Marcel Duchamp turned the urinal on its back, signed it with the name “R. Mutt 1917”, and titled the work Fountain.',
     cite: 'The Richard Mutt Case, 1917',
     dur: 2.2,
   },
   {
     a: 36, v: 15, test: 2, signed: 1,
-    text: 'The committee hid the piece. An unsigned defence replied that the maker didn’t matter.',
+    text: 'The exhibition’s board refused to display the work. An unsigned defence argued that whether Mutt made it with his own hands had no importance.',
     dur: 1.9,
   },
   {
     a: 36, v: 15, test: 2, signed: 1,
-    text: 'Duchamp chose the object, and choosing was the work.',
+    text: 'The defence held that choosing was the artistic act. Placed under a new title, the object lost its everyday use.',
     dur: 1.8,
   },
   {
@@ -79,24 +79,24 @@ export const BEATS: Aes4Beat[] = [
   },
   {
     a: 383, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
-    text: 'Fountain fits neither answer. It copies nothing and expresses nothing, and it still will not go away.',
+    text: 'Fountain copies nothing and expresses no feeling, so neither theory fits. For George Dickie, the institutions of the artworld make it art.',
     cite: 'The artworld confers',
     dur: 2.4,
   },
   {
     a: 400, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
-    text: 'Asking “but is that art?” is already philosophy. It makes you say what you secretly think art is.',
+    text: 'Asking whether something is art is philosophical. It forces you to state the definition you privately hold.',
     dur: 2.6,
   },
   {
     a: 380, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
     interact: {
-      prompt: 'So where does the art actually live — in the object, or in the room around it?',
+      prompt: 'If an identical urinal in a shop isn’t art, what makes Fountain art?',
       cards: [
         { text: 'The artworld confers the status', correct: true },
-        { text: 'Something in the object', correct: false },
+        { text: 'A property of the object', correct: false },
       ],
-      explain: 'George Dickie’s answer is the room. Galleries, critics and a tradition hand the object its status, and the object adds nothing. A chosen urinal becomes art, and an identical one in a shop stays plumbing.',
+      explain: 'The artworld confers the status. George Dickie’s institutional theory holds that someone acting for the artworld confers art status on an object. A property of the object can’t be the answer. An identical urinal in a shop has the same properties and isn’t art.',
       xp: 5,
     },
     dur: 1.0,
@@ -108,25 +108,25 @@ export const BEATS: Aes4Beat[] = [
       sort: {
         chip: 'a chosen object',
         bins: [
-          { id: 'label', label: 'saying so', reads: 'anything, if you say the word' },
-          { id: 'skill', label: 'real skill', reads: 'only what took real skill to make' },
-          { id: 'world', label: 'the art world', reads: 'the art world taking it up', correct: true },
+          { id: 'label', label: 'saying so', reads: 'whatever anyone declares to be art' },
+          { id: 'skill', label: 'skilled craft', reads: 'only what took skill to make' },
+          { id: 'world', label: 'the artworld', reads: 'recognition by the artworld', correct: true },
         ],
       },
-      explain: 'The art world. The “saying so” bin is the anything-goes reading, and it isn’t what Dickie or Danto said. It took theory, history and an artworld for the choice to register at all. That’s why the identical urinal in a plumbing shop stayed plumbing.',
+      explain: 'The artworld. For Arthur Danto, an object becomes art only against an atmosphere of theory and art history. A declaration alone isn’t enough on this view. Skill isn’t required either, since Fountain involved none.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Art Became a Question',
+      title: 'Fountain and the Definition of Art',
       points: [
-        'Old theories: mimesis, or expression',
+        'Older theories: art as imitation or expression',
         'Duchamp: choice and context, not craft',
-        'Danto and Dickie: the artworld confers art',
+        'Danto and Dickie: art status depends on the artworld',
       ],
-      closing: 'Duchamp’s urinal mattered most for the question it forced.',
+      closing: 'Fountain matters less as an object than for the question it raised about what art is.',
     },
     dur: 2.8,
   },

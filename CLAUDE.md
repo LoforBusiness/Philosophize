@@ -1727,6 +1727,51 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
   made**: they are pinned to what the stage draws, to maxims cut from their own
   wording, to the generated name index and to group Q's neighbour rules.
 
+  **THAT WAS RIGHT FOR THE VOICE IT DESCRIBED, AND ON 13 SEP 2026 THE OWNER CHANGED
+  THE VOICE.** They quoted the story voice back as the fault — *"Feeds nothing. Brace
+  yourself. Mid game. Rubbish. It eats itself. Never turned up. Watch the bar"* — and
+  chose a **clear lecture**: informative, precise wording that teaches. That is group V
+  of the rule book now (V1–V11), researched before a line changed:
+  - interesting-but-irrelevant detail measurably costs learning (Rey 2012; Sundararajan
+    & Adesope 2020);
+  - Mayer's coherence principle;
+  - idioms and slang confuse (Google's developer style guide);
+  - good philosophy writing names and defines its terms (Pryor; the Stanford
+    Encyclopedia's entry guidelines).
+
+  - **Every lesson was rewritten, narration and questions, all 246.** It went as a pilot, then
+    twelve reading-order batches. Two usage-limit stops were resumed by fresh agents
+    carrying a manifest (the last file each batch touched is the one to finish), never
+    by reloading a transcript. The guard was group AC's: only wording may move, a lint
+    per lesson, and maxims re-chosen from the new wording.
+  - **The rewriters found real errors in the old wording**, which is what reading every
+    sentence closely buys. Among them: the liar paradox credited to Epimenides
+    (Eubulides), the greatest-island reply to Anselm (Plantinga), the institutional
+    theory to Danto (Dickie), and Scanlon's promises called reliance-based
+    (assurance-based). Two anachronisms too: "Walzer replies" to a later book, and "Rawls answers"
+    a book published after his death.
+  - **Polls whose options nobody held were rebuilt on real positions** (R17). One of
+    them, valid3's grass-and-sky question, was a classification with no holders to name,
+    so it became a sort. Ten quotation blocks were corrected against their primary
+    texts: a Venice Charter line credited to Brandi, a Pius XI quote tagged with Zhu
+    Xi's id, a paraphrased Rawls and a silently shortened Burke.
+  - **The readability ratchets were retuned once for the register and the rest fixed**
+    (V11). They were calibrated on the story voice and began scoring the lecture itself:
+    243 pieces for clause density, and every "Kant argued that" counted as a vague
+    pointer. What was still over the retuned limits was rewritten by hand.
+  - **Changing the words means voicing them again.** 1,708 of the 1,718 narrated lines
+    changed, so they are rendered again through the character ledger (AC13–AC17).
+  - **A precise word can make a lesson grave, and it did in eight (N11).** The story voice
+    had kept words like *kill*, *drowning* and *harm* out of lessons that carried a gag,
+    and the lecture names them. Three lessons whose subject is grave (the trolley, the
+    drowning child, the seven identical harms) kept the words and lost the gag, each beat
+    taking an unused variant of the pose beside it. Five whose grave word was incidental
+    took the precise one instead: *an untaught boy from Meno's household*, *a four-year
+    sentence*. **`make:wardrobe` cannot grow a box for one changed pose**, because the same
+    run re-deals the costume rotation against the current grave set, and it re-dealt 68
+    lessons. The pose-reach arithmetic was applied to the three beats alone, and their
+    stamps were renewed on a proof that each script differed only in that pose code.
+
   **AND THEN THE LESSONS WERE GIVEN A VOICE, WHICH CHANGED WHAT A SENTENCE IS FOR.**
   Decided 11 Sep 2026: every narration beat will be read by Google's Chirp 3 HD
   voice (Algieba, British English), on by default and mutable, with each word
@@ -1765,9 +1810,14 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
   - **And it exposed a hole in the must-box stamp.** `muststamp` ignored narration,
     explanations and readouts, but its list stopped before a summary's `closing`
     and `points` and a control's `chip`. So rewriting closings made 103 box stamps
-    and 43 tour stamps stale for a change that cannot move a box. The list is
-    complete now. `scripts/restamp-deck-prose.mjs` re-stamped only lessons the old
-    rule proved valid, after a diagnostic found none stale for any other reason.
+    and 43 tour stamps stale for a change that cannot move a box. This line then
+    said the list was complete, and it was not. A poll's `holders`, a trend pick's
+    `axis` and a whole `cite` line are deck words too, and a holders list or a
+    caption is ADDED rather than reworded, so blanking values cannot hide it. The
+    lecture rewrite (13 Sep 2026) proved it, so `muststamp` now removes both whole.
+    `scripts/restamp-deck-prose.mjs` and then `scripts/restamp-deck-words.mjs`
+    re-stamped only lessons the old rule proved valid: 188 must-box stamps and 94
+    tour stamps the second time, none of them stale for any other reason.
   - **What it could not do is listen.** A synthetic voice misplaces stress and
     misreads a name in a perfectly even tone, so AC11's listening pass, and a
     pronunciation list, are owed on every voiced lesson.
@@ -1805,7 +1855,8 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     64 kbps mono `lesson.mp3` whose ID3 comment lists every line's WAV hash and
     offset. The manifest gives each line an `at`, and `lib/narration/real.ts` seeks
     there and pauses at the line's end, so a pause that lands late lands in the
-    silence. 246 files come to 69.0 MB, and a real Android export bundles 364 assets.
+    silence. 246 files come to 87.1 MB since the lecture rewrite (69.0 MB before, when the
+    lines were shorter), and a real Android export bundles 364 assets.
     Decoded, every line sits exactly on its start, and the 710 lines already heard kept
     their word times to the hundredth. ffmpeg is not a dependency; point `FFMPEG` at
     any build with libmp3lame.
@@ -2121,7 +2172,7 @@ skins, and **group R of the rule book is how to tell which one a claim wants**:
 | one quantity on a scale | `drag` | a knob on a rail (`DragScale`) |
 | what CATEGORY a named thing belongs to | `sort` | a chip and labelled bins (`SortBins`) |
 | which POSITION you would defend | `poll` | a ballot, then who held each (`PollBallot`) |
-| what happens to a thing AS another changes | `plot` | a curve you draw (`ShapePlot`) |
+| what happens to a thing AS another changes | `plot` | three or four drawn curves, one tap (`TrendPick`) |
 | how one thing DIVIDES between two | `split` | a seam in one bar (`SplitBar`) |
 
 > **THE LEVER AND THE PAD ARE GONE, AND THE READER WAS RIGHT ABOUT BOTH.** The
@@ -2202,6 +2253,38 @@ skins, and **group R of the rule book is how to tell which one a claim wants**:
 > design, since this component decides how big a scene's art is. Budget the sweep
 > before starting.
 
+> **AND THEN THEY WERE STILL "VERY SIMPLE BLACK AND WHITE", THE POLL GAVE ITS ANSWER
+> AWAY, THE PLOT TOOK TOO LONG, AND ONE BEAT COULD BE ANSWERED TWICE.** One reader
+> note (13 Sep 2026), five faults, and rules R16–R19 and E41 of the rule book:
+>
+> - **Colour in the edges, one hue a lesson (R18).** Every control is struck in the
+>   lesson's BRANCH colour (`questionTone.ts`, `QuestionParts.tsx`): raised
+>   `LipPlate` faces on a lip of that hue, a `Medallion` knob, accent rails. The
+>   verdict re-strikes the same plates green or rust, stamps the reader's own choice
+>   (`VerdictSeal`) and pays a right answer in gold on the answer card (`XpCoin`).
+>   The kicker counts QUESTION 1 OF 2 beside a gold stake. None of it makes a sound.
+> - **The poll's gap was the answer (R17).** Holder lines were mounted at opacity 0,
+>   and an invisible View still takes its height; only the correct row had holders
+>   in 7 of the 34 polls. They mount on answering now, on every row at once, and
+>   every option names who held it, in their era's colour.
+> - **The plot is a pick (R16).** Four columns set by hand and then a Set button was
+>   *"too complicated … takes too much time"*. `TrendPick` draws each authored shape
+>   as a tile and takes one tap. The block key is still `plot`, so every scene that
+>   reacts to one still does.
+> - **One beat, one place to answer (E41).** Ten scenes gated their targets on
+>   `!!cur.interact`, so a beat with a control below the figure was live on the
+>   stage too, and a tap there answered the question and then asked it again.
+>   `stageAnswered(beat)` gates the scene's picks and `Target`'s press, ring and pip.
+>   It deliberately does NOT gate a target's registration, because the camera frames
+>   target boxes on every beat.
+> - **And the answer did not fit the phone (R19).** Every harness measures at
+>   390×844, and the reader holds a phone that leaves about 780. `npm run sheet:deck`
+>   renders all 278 questions answered below the figure on one page, and the end of
+>   the explanation was cut off in 4 of them at 390×844, 28 at 384×780 and 45 at
+>   360×780. Once a control below the figure is answered, the prompt now gives its
+>   line to the answer (0, 6 and 12). A poll's explanation says why the right
+>   position is right instead of re-listing who held each row.
+
 The distinctions are load-bearing rather than decorative. Three answers that are
 ORDERED lose the order the moment they become cards. "How the aura goes as the
 copies multiply" is a curve, and a rail cannot hold one. Presentism, the growing
@@ -2217,10 +2300,10 @@ Three things make the whole family teach rather than merely slide:
   hunting for the flip. Every `reads` string is lesson copy under group J, not
   scoring furniture, and the WRONG ones matter most: they are where the failure
   modes get named.
-- **Nothing is graded on hitting a number.** A zone, a detent, a quadrant, or —
-  for `plot` — the nearest profile by RMS, so a reader who draws a cliff gets "a
-  cliff" whether it falls at 0.9 or 0.7. A tolerance dressed up as precision would
-  be a worse question, not a stricter one.
+- **Nothing is graded on hitting a number.** A zone, a detent or a bin, and a `plot`
+  is a tap on one of its drawn shapes (R16). It was the nearest profile by RMS to a
+  curve drawn by hand, which graded fairly and took too long. A tolerance dressed up
+  as precision would be a worse question, not a stricter one.
 - **The scene reads the same value.** The control lives on the player as `dragPos`
   (and `dragPos2` for the pad's second axis) and reaches the scene through
   `SceneApi`, so the reader is not moving a widget beside a picture, they are
@@ -2228,9 +2311,9 @@ Three things make the whole family teach rather than merely slide:
   while every life in it shrinks. One gesture, on the UI thread, with no React
   render in between.
 
-**182 graded beats are on the analogue family now** — 65 `drag`, 50 `sort`, 34
-`split`, 22 `poll` and 11 `plot` — against 36 left in the two-card deck, which is
-10% of all questions and is meant to stay a minority rather than reach zero
+**240 graded beats are on the analogue family now** — 78 `drag`, 65 `sort`, 45
+`split`, 34 `poll` and 18 `plot`, counted by `sheet:deck` — against 38 left in the
+two-card deck, which is 8% of all questions and is meant to stay a minority rather than reach zero
 (*"I still want a couple every now and then for the old way"*). It got there by
 conversion rather than by writing new lessons: **127 lessons had no analogue
 control at all and 2 do now**, and both of those ask both their questions on the
@@ -2563,6 +2646,10 @@ declared as a channel, so it cannot fall out of step with the control and it cos
 > the axis label already occupies, so it costs the deck no height. **A control's
 > commit gesture is derived from how many values it holds, never copied from the
 > control beside it** (S4).
+>
+> **The drawn plot has gone since (R16).** A plot is one tap on a drawn shape now
+> (`TrendPick`), so it holds one value and has no commit button. The rule stands for
+> the next control that holds more than one.
 
 > **THE READING ABOVE EVERY CONTROL WAS AN `<input>`, AND AN `<input>` CANNOT
 > WRAP.** It was an `ACounter` so Reanimated could write it from the UI thread —
@@ -2586,7 +2673,7 @@ declared as a channel, so it cannot fall out of step with the control and it cos
 > inside `styles.lower` with the deck, never as a sibling of the stage — that is
 > L6, and a control outside it does not merely move the picture, it **rescales**
 > it by about 12% on the frame a question mounts. And every control carries a
-> `nativeID` (`drag-strip`, `lever-arc`, `shape-plot`, `split-bar`, `field-pad`)
+> `nativeID` (`drag-strip`, `sort-bins`, `poll-ballot`, `split-bar`, `trend-pick`)
 > because a beat with no button on it is invisible to a harness that only knows
 > how to click: the first sweep of the twelve drag lessons measured 6 or 7 beats
 > of 9 and reported them as measured. All four harnesses drive them through one

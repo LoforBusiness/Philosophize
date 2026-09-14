@@ -33,36 +33,36 @@ export interface Political29Beat extends BaseBeat {
 export const BEATS: Political29Beat[] = [
   {
     p: 330, x: 24, cribs: 1, decide: 0.5,
-    text: 'The luckiest thing that ever happened to you may be where you were born.',
+    text: 'Your place of birth may be the most consequential piece of luck in your life.',
     dur: 4.6,
   },
   {
     p: 180, x: 24, cribs: 1, wall: 1, decide: 0.5,
-    text: 'Two babies are born the same day. One inside a wealthy democracy, one just across the line.',
+    text: 'Suppose two babies are born on the same day, one in a wealthy democracy and one just across its border.',
     dur: 5.0,
   },
   {
     p: 444, x: 24, cribs: 1, wall: 1, decide: 0.9,
-    text: 'Neither did anything to deserve a side. Carens calls citizenship the modern form of feudal privilege.',
+    text: 'Neither baby earned its side of the border. Joseph Carens calls citizenship the modern equivalent of feudal privilege.',
     dur: 5.0,
   },
   {
     p: 259, x: 24, cribs: 1, wall: 1, decide: 0.9,
-    text: 'An inherited status that shapes a life, handed out by birth. Liberal states reject that kind of rank at home.',
+    text: 'Like feudal rank, citizenship is an inherited status that shapes a life. Liberal states reject inherited rank among citizens.',
     dur: 5.0,
   },
   {
     p: 160, x: 24, cribs: 1, wall: 1, decide: 0.9, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap the point Carens is making with feudal privilege.',
-      explain: 'Birth decides too much. A liberal state already refuses inherited rank at home. Carens asks why a lottery at the border should be any different. The comparison is an argument, not a claim about literal nobles.',
+      prompt: 'What does comparing citizenship to feudal privilege show, on Carens’s view?',
+      explain: 'Birth decides too much. Liberal states already reject inherited rank within their borders. Carens asks why birth should settle so much at the border. He doesn’t claim that citizens are nobles or that feudalism is back.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 461, x: 80, cribs: 1, wall: 1, decide: 0.9,
-    text: 'Walzer answers back. A community is partly defined by the power to admit or refuse.',
+    text: 'Michael Walzer defends the opposite view. A community is partly defined by its power to admit or refuse newcomers.',
     dur: 4.6,
   },
   {
@@ -79,24 +79,24 @@ export const BEATS: Political29Beat[] = [
   },
   {
     p: 457, x: 80, cribs: 1, wall: 1, decide: 0.9,
-    text: 'Without control over membership, a self-governing people stops meaning anything at all.',
+    text: 'For Walzer, admission and exclusion are at the core of self-determination. Without them, no community could keep its character.',
     dur: 4.8,
   },
   {
     p: 171, x: 80, cribs: 1, wall: 1,
     interact: {
-      prompt: 'How much does the line decide about the two lives?',
+      prompt: 'How much does the side of the border decide about the two lives?',
       drag: {
         lo: 'NOTHING',
         hi: 'ALMOST EVERYTHING',
         start: 0.05,
         zones: [
-          { id: 'none', upto: 0.3, reads: 'the two will end up much the same' },
-          { id: 'some', upto: 0.65, reads: 'a nudge, and then their own choices' },
-          { id: 'most', upto: 1, reads: 'schooling, safety and money, settled at birth', correct: true },
+          { id: 'none', upto: 0.3, reads: 'the two lives will turn out much alike' },
+          { id: 'some', upto: 0.65, reads: 'a small effect, then their own choices decide' },
+          { id: 'most', upto: 1, reads: 'education, safety and income, largely settled at birth', correct: true },
         ],
       },
-      explain: 'Almost everything. Neither baby chose a side, and the line shapes both lives more than anything they go on to do. Carens builds the open-borders case on that, and Walzer still answers that a community decides who joins.',
+      explain: 'Education, safety and income, largely settled at birth. Neither baby chose a side, yet the border shapes both lives more than most later choices. Carens builds his case for open borders on this. Walzer still holds that a community may decide who joins.',
       xp: 5,
     },
     dur: 1.0,
@@ -104,14 +104,14 @@ export const BEATS: Political29Beat[] = [
   {
     p: 308, x: 80, cribs: 1, wall: 1, decide: 0.9,
     summary: {
-      title: 'The Door and the Lottery',
+      title: 'Borders and the Birth Lottery',
       points: [
-        'Carens: citizenship is inherited privilege by another name',
+        'Carens: citizenship is a form of inherited privilege',
         'Walzer: a community must decide who joins it',
         'The birth lottery shapes a life more than most choices',
         'Both sides argue in the language of justice',
       ],
-      closing: 'Nobody chose where to be born, and the choice nobody made decides more than almost anything else.',
+      closing: 'The debate turns on whether a community’s right to control membership outweighs the unfairness of the birth lottery.',
     },
     dur: 5.0,
   },

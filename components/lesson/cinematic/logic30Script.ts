@@ -32,36 +32,36 @@ export interface Logic30Beat extends BaseBeat {
 export const BEATS: Logic30Beat[] = [
   {
     p: 343, x: 24, built: 0.2,
-    text: 'You’ve spent a whole path taking arguments apart. Now build one on purpose.',
+    text: 'This unit has analysed arguments by taking them apart. The same tools can be used to build one.',
     dur: 4.8,
   },
   {
     p: 170, x: 24, built: 0.4,
-    text: 'Start from the conclusion you mean to defend. Then find the premises that would force it.',
+    text: 'Begin with the conclusion you mean to defend. Then find premises that, if true, would guarantee it.',
     dur: 5.0,
   },
   {
     p: 448, x: 24, built: 0.6,
-    text: 'Drag every hidden assumption into the open. An argument leaning on an unstated one is leaning on nothing.',
+    text: 'Next, make every hidden assumption explicit. A premise left unstated can’t be checked, and it may be false.',
     dur: 5.0,
   },
   {
     p: 263, x: 24, built: 0.8,
-    text: 'Check the form holds, and only then check whether each premise is true.',
+    text: 'Check that the argument is valid, then check whether each premise is true. A valid argument with true premises is called sound.',
     dur: 5.0,
   },
   {
     p: 164, x: 24, built: 0.8, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap the course that has to be laid first.',
-      explain: 'The conclusion. Everything above it is chosen for the job of forcing it. A builder who starts anywhere else is collecting premises without knowing what they’re for. Hidden assumptions and the stress test both come later.',
+      prompt: 'Which part of the argument should be settled first?',
+      explain: 'The conclusion. Premises are selected to guarantee the conclusion, so they can’t be selected before the conclusion is fixed. Hidden assumptions and the stress test come later, once the argument exists.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 466, x: 80, built: 1, swing: 0.5,
-    text: 'Now turn on your own work. Where is the weakest premise, and what would a critic aim at?',
+    text: 'Once the argument is built, test it yourself. Identify its weakest premise and the objection a critic would raise.',
     dur: 5.0,
   },
   {
@@ -79,18 +79,18 @@ export const BEATS: Logic30Beat[] = [
   },
   {
     p: 461, x: 80, built: 1, swing: 1,
-    text: 'Steelman the objection before anybody else makes it. Build the strongest version and answer that one.',
+    text: 'Construct the strongest version of each objection and answer that. This practice is called steelmanning.',
     dur: 5.0,
   },
   {
     p: 166, x: 80, built: 1, swing: 1,
     interact: {
-      prompt: 'What makes an argument hard to knock down?',
+      prompt: 'What makes an argument hard to refute?',
       cards: [
-        { text: 'You attacked it hardest yourself', correct: true },
-        { text: 'Nobody has attacked it yet', correct: false },
+        { text: 'You tested it hardest yourself', correct: true },
+        { text: 'No one has challenged it yet', correct: false },
       ],
-      explain: 'You attacked it hardest yourself. An untested argument is not strong, only unexamined. The first serious critic finds what you never looked for. Every weak point you found is one a stranger can’t use.',
+      explain: 'You tested it hardest yourself. An argument no one has challenged is untested, and so its strength is unknown. Each weakness you find and repair is one a critic can no longer exploit.',
       xp: 5,
     },
     dur: 1.0,
@@ -98,14 +98,14 @@ export const BEATS: Logic30Beat[] = [
   {
     p: 304, x: 80, built: 1, swing: 0.3,
     summary: {
-      title: 'Build It and Test It',
+      title: 'Building and Testing an Argument',
       points: [
-        'Build backward, from the conclusion to forcing premises',
-        'Drag every hidden assumption into the open',
-        'Confirm the form holds, then the premises',
-        'Attack your own weakest premise first',
+        'Work backwards from the conclusion to premises that guarantee it',
+        'Make every hidden assumption explicit',
+        'Check validity first, then the truth of each premise',
+        'Test your weakest premise against the strongest objection',
       ],
-      closing: 'You can build arguments now, and break them. That’s what thinking for yourself comes to.',
+      closing: 'A well-built argument states its assumptions, has a valid form, and has already answered its strongest objection.',
     },
     dur: 5.0,
   },

@@ -32,18 +32,18 @@ export interface Aesthetics36Beat extends BaseBeat {
 export const BEATS: Aesthetics36Beat[] = [
   {
     p: 164, x: 54, square: 1,
-    text: 'One square, one afternoon. Packed at one end of the day, empty at the other.',
+    text: 'Consider one square on one afternoon. A dense crowd fills one end, and a single man stands at the other.',
     dur: 2.4,
   },
   {
     p: 164, x: 54, square: 1,
-    text: 'Everything you can see is real.',
+    text: 'Everything in the square is real, and none of it will be altered.',
     dur: 1.8,
   },
   {
     p: 457, x: 54, square: 1, live_d: 1,
     interact: {
-      prompt: 'Slide the viewfinder. Read what your photograph would be captioned.',
+      prompt: 'Which crop of the square supports the least misleading caption?',
       drag: {
         lo: 'FRAME THE CROWD',
         hi: 'FRAME THE MAN',
@@ -54,29 +54,29 @@ export const BEATS: Aesthetics36Beat[] = [
           { id: 'alone', upto: 1, reads: 'NOBODY CAME' },
         ],
       },
-      explain: 'Three photographs of one square, and not one is faked. The middle scores because it’s the only frame that takes no side. It’s still a choice, made by you. The picture won’t mention that.',
+      explain: 'A modest turnout. None of the three photographs is faked, yet the two ends support opposite headlines. The middle frame favours neither end. Even so, it’s a choice, and the photograph doesn’t show that it was made.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 13, x: 54, square: 1, crop: 0.5, prints: 1,
-    text: 'Nothing was altered. No pixel was moved.',
+    text: 'Neither print has been manipulated, since no pixel was moved, added or removed.',
     dur: 1.8,
   },
   {
     p: 13, x: 54, square: 1, crop: 0.5, prints: 1,
-    text: 'Both prints are accurate and they disagree about what happened.',
+    text: 'Both prints are accurate, yet they imply opposite accounts of what happened.',
     dur: 2.6,
   },
   {
     p: 467, x: 54, square: 1, crop: 0.5, prints: 1,
-    text: 'Photographs get this power from feeling transparent. Light came off the thing and landed here.',
+    text: 'Photographs have this power because they’re made mechanically, by light from the scene itself.',
     dur: 2.6,
   },
   {
     p: 467, x: 54, square: 1, crop: 0.5, prints: 1,
-    text: 'So you say you are seeing the square, not a record of it.',
+    text: 'Kendall Walton argues that photographs are transparent: through them, you literally see the square itself.',
     dur: 2.2,
   },
   {
@@ -95,36 +95,36 @@ export const BEATS: Aesthetics36Beat[] = [
   {
     p: 35, x: 128, square: 1, crop: 0.5, prints: 1,
     interact: {
-      prompt: 'Does heavy editing make the photo a different kind of picture?',
+      prompt: 'If every photograph is processed, what makes an edited photograph a lie?',
       cards: [
-        { text: 'No line — only the promise', correct: true },
-        { text: 'Yes, any edit at all', correct: false },
+        { text: 'Breaking what viewers were promised', correct: true },
+        { text: 'Any edit to the pixels', correct: false },
       ],
-      explain: 'Every photograph is processed. Exposure, contrast, and the crop you just chose. What changes between a news picture and an advertisement is not the pixels. It’s what the viewer was promised about them, and breaking that is what counts as a lie.',
+      explain: 'Breaking what viewers were promised. Every photo is edited, at least in its light, contrast and crop. So edits alone can’t tell news from advertising. What differs is the promise made to the viewer.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 12, x: 128, square: 1, crop: 0.14, prints: 1,
-    text: 'A painting nobody suspects of neutrality does less damage here. You know a painter chose.',
+    text: 'A painting misleads less by framing, because no viewer assumes a painting is neutral. Everyone knows a painter made choices.',
     dur: 3.3,
   },
   {
     p: 12, x: 128, square: 1, crop: 0.14, prints: 1,
-    text: 'You forget that a photographer did.',
+    text: 'With a photograph, viewers easily forget that a photographer also made choices.',
     dur: 1.8,
   },
   {
     summary: {
-      title: 'Everything Here Is True',
+      title: 'How a True Photograph Misleads',
       points: [
         'A photograph feels like seeing the thing itself',
-        'That trust is what gives the frame its power',
+        'Trust in photographs gives framing its power',
         'A crop misleads with nothing fabricated',
-        'The line is the promise made, not the pixels',
+        'Deception depends on the promise made, not the pixels',
       ],
-      closing: 'Don’t ask whether the photograph is accurate. Ask what it was cropped away from, and who was holding the camera.',
+      closing: 'An accurate photograph can still mislead. The useful questions are what was cropped out, and who chose the frame.',
     },
     dur: 3.2,
   },

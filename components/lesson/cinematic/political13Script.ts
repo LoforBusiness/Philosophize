@@ -22,34 +22,34 @@ export interface Pol13Beat extends BaseBeat {
 export const BEATS: Pol13Beat[] = [
   {
     p: 462, x: 70,
-    text: 'Mill gives only one reason for using power over a person against their will. To stop them harming somebody else.',
+    text: 'John Stuart Mill accepts only one reason for coercing a person against their will. The reason is to prevent harm to others.',
     dur: 3.3,
   },
   {
     p: 462, x: 70,
-    text: 'Not for their own good, and not because you dislike the choice.',
+    text: 'Mill rejects coercion for a person’s own good, and coercion merely because others dislike the choice.',
     dur: 2,
   },
   {
     p: 41, x: 168, steps: 1,
-    text: 'A speaker says something most of the town finds repellent. Nobody is assaulted, nothing is stolen, no threat is made.',
+    text: 'Suppose a speaker says something most of the town finds repellent. No one is assaulted, robbed or threatened.',
     cite: 'The argument',
     dur: 3.5,
   },
   {
     p: 41, x: 168, steps: 1,
-    text: 'The town wants them stopped, and here’s the argument.',
+    text: 'The town argues that the speaker should be stopped.',
     dur: 1.8,
   },
   {
     p: 40, x: 168, steps: 3,
-    text: 'Three steps. Read them in order and the argument feels like a proof.',
-    cite: 'All three',
+    text: 'The argument has three steps, and read in order it appears valid.',
+    cite: 'Three steps',
     dur: 1.9,
   },
   {
     p: 40, x: 168, steps: 3,
-    text: 'Each one seems to follow from the one before. And the conclusion is what the town wanted.',
+    text: 'Each step seems to follow from the one before, and the conclusion is the one the town wanted.',
     dur: 2.9,
   },
   {
@@ -67,20 +67,20 @@ export const BEATS: Pol13Beat[] = [
   },
   {
     p: 13, x: 124, steps: 3,
-    text: 'Mill grants the first: they’re certainly offended. He grants the third, since it’s his own principle.',
-    cite: 'One of these is smuggled',
+    text: 'Mill accepts the first step, because the townspeople are offended. He also accepts the third, because it restates his own principle.',
+    cite: 'One step is unsupported',
     dur: 2.8,
   },
   {
     p: 13, x: 124, steps: 3,
-    text: 'So the whole weight of the town\'s case is resting on the middle one.',
+    text: 'So the town’s whole case depends on the middle step.',
     dur: 2.2,
   },
   {
     p: 383, x: 124, steps: 3, pick: 1,
     interact: {
-      prompt: 'Tap the step Mill would refuse to grant.',
-      explain: 'Step two swaps offence for harm. Harm sets back real interests or rights; being upset is not one. If the number of offended people counted, a majority could silence anything it disliked.',
+      prompt: 'Which step of the town’s argument would Mill reject?',
+      explain: 'So it harms them. That step treats offence as harm. On Mill’s view, harm sets back a person’s interests, and being upset doesn’t. If offence counted, a majority could silence any speech it disliked.',
       xp: 5,
     },
     dur: 1.0,
@@ -88,30 +88,30 @@ export const BEATS: Pol13Beat[] = [
   {
     p: 165, x: 124, steps: 3, tag: 1,
     interact: {
-      prompt: 'Which of these is harm rather than offence?',
+      prompt: 'Which principle implies that offence alone can never justify coercion?',
       poll: {
         options: [
-          { id: 'harm', reads: 'nobody agreed to it, and somebody is really harmed', holders: ['Mill'], correct: true },
-          { id: 'offence', reads: 'a great many object, and nobody is set back' },
-          { id: 'both', reads: 'many object, and somebody is set back: harm, loudly' },
-          { id: 'none', reads: 'nobody objects and nobody is hurt: nothing at all' },
+          { id: 'harm', reads: 'only harm to others justifies coercion', holders: ['John Stuart Mill'], correct: true },
+          { id: 'offence', reads: 'serious offence can justify coercion', holders: ['Joel Feinberg'] },
+          { id: 'both', reads: 'a society may enforce its shared morality', holders: ['Patrick Devlin'] },
+          { id: 'none', reads: 'coercion may protect people from themselves', holders: ['Sarah Conly'] },
         ],
       },
-      explain: 'Nobody agreed to it, and somebody is really harmed. Offence scales with how many people mind; harm does not move when the count does. That’s why Mill will not let a headcount stand in for an injury.',
+      explain: 'Only harm to others justifies coercion. On the harm principle, offence harms no one’s interests, so it gives no ground. An offence principle would count widespread disgust as a reason.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'What You Now Know',
+      title: 'Mill’s Harm Principle',
       points: [
         'Power over the unwilling is justified only to prevent harm',
         'Your own good is never a sufficient reason',
         'Offence and disapproval are not harm',
-        'The principle borders Berlin\'s protected area',
+        'The principle marks the edge of Berlin’s negative liberty',
       ],
-      closing: 'The dangerous step in an argument is rarely the conclusion. It’s the one nobody stopped to read.',
+      closing: 'An argument for restriction is only as strong as its weakest premise, here the claim that offence is harm.',
     },
     dur: 3.0,
   },

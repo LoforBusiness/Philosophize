@@ -24,33 +24,33 @@ export interface Ethics4Beat extends BaseBeat {
 export const BEATS: Ethics4Beat[] = [
   {
     a: 167, b: 8, floor: 0, rows: 1,
-    text: 'Cultures disagree about right and wrong. That much is just a fact.',
+    text: 'Cultures disagree about right and wrong. That disagreement is an observable fact.',
     dur: 1.8,
   },
   {
     a: 167, b: 8, floor: 0, rows: 1,
-    text: 'Saying there’s no right answer underneath the disagreement is a much bigger claim, and a separate one.',
+    text: 'The claim that no correct answer lies behind the disagreement is much stronger, and logically separate.',
     dur: 2.3,
   },
   {
     a: 2, b: 10, rows: 2,
-    text: 'First the harmless fact. Societies do hold different codes.',
+    text: 'The first claim is descriptive relativism: societies in fact hold different moral codes.',
     cite: 'Two kinds of relativism',
     dur: 1.8,
   },
   {
     a: 2, b: 10, rows: 2,
-    text: 'The bold claim, called moral relativism, goes further. Whether something is right depends on the group asking, and there’s no answer underneath.',
+    text: 'The second claim is moral relativism. It holds that rightness depends on a group’s code, with no higher standard.',
     dur: 2.9,
   },
   {
     a: 2, b: 10, rows: 2,
-    text: 'Sliding from the first to the second is the classic mistake.',
+    text: 'Inferring the second from the first is a common error. Disagreement doesn’t show there’s no answer.',
     dur: 1.8,
   },
   {
     a: 380, b: 35, rows: 3,
-    text: 'Ruth Benedict pressed the bold claim: what a society calls “good” only tracks what it has come to approve. For her, morality is a name for socially approved habits.',
+    text: 'The anthropologist Ruth Benedict defended relativism. For Benedict, a society calls good whatever it has come to approve.',
     cite: 'Ruth Benedict, 1934',
     dur: 4.6,
   },
@@ -68,46 +68,46 @@ export const BEATS: Ethics4Beat[] = [
   },
   {
     a: 13, b: 15, rows: 3,
-    text: 'The objectivist fires back: some truths hold whatever a culture says. Torturing a child for fun is wrong, full stop.',
+    text: 'Moral objectivists reply that some moral truths hold regardless of culture. Torturing a child for fun is wrong everywhere.',
     cite: 'Moral objectivism',
     dur: 3.4,
   },
   {
     a: 13, b: 15, rows: 3,
-    text: 'Cultures differing does not make every code equally true.',
+    text: 'Cultures differing does not make every code equally true. Disagreement about the Earth’s shape didn’t make every answer true.',
     dur: 1.8,
   },
   {
     a: 38, b: 38, floor: 1, rows: 3,
-    text: 'And look down. Donald Brown went through every society on record and found the same handful of things in all of them.',
+    text: 'Donald Brown looked at cultures all over the world. He found things that every one of them shared, which he called human universals.',
     cite: 'Donald Brown, Human Universals, 1991',
     dur: 2.8,
   },
   {
     a: 38, b: 38, floor: 1, rows: 3,
-    text: 'Returning a favour. Bans on murder and incest.',
+    text: 'Human universals include returning a favour, and forbidding murder and incest.',
     dur: 1.8,
   },
   {
     a: 38, b: 38, floor: 1, rows: 3,
-    text: 'A shared floor, under the feet of cultures sure they stood apart.',
+    text: 'These universals suggest a shared moral foundation beneath the differences between cultures.',
     dur: 1.8,
   },
   {
     a: 177, b: 0, floor: 1, rows: 3,
     interact: {
-      prompt: 'What does this kind of relativism claim?',
+      prompt: 'What does moral relativism claim about right and wrong?',
       drag: {
-        lo: 'CULTURES SIMPLY DIFFER',
+        lo: 'CULTURES DIFFER IN BELIEF',
         hi: 'NOTHING IS RIGHT OR WRONG',
         start: 0,
         zones: [
-          { id: 'differ', upto: 0.3, reads: 'cultures disagree, one may still be right' },
-          { id: 'relative', upto: 0.74, reads: 'true for a group, and no higher view', correct: true },
+          { id: 'differ', upto: 0.3, reads: 'cultures disagree, yet one may be correct' },
+          { id: 'relative', upto: 0.74, reads: 'right relative to a group, with no higher standard', correct: true },
           { id: 'none', upto: 1, reads: 'nothing is right or wrong, even inside a group' },
         ],
       },
-      explain: 'The middle, and both ends are easy to mistake for it. The near end is just an observation, and anybody can agree with it. The far end says nothing is ever right or wrong. This view does not: inside a group there are still right answers.',
+      explain: 'Moral relativism holds that right is relative to a group, with no higher standard. That cultures differ is only descriptive relativism, which an objectivist can accept. The claim that nothing is right or wrong is nihilism. Relativism still allows right answers within each group.',
       xp: 5,
     },
     dur: 1.0,
@@ -115,9 +115,9 @@ export const BEATS: Ethics4Beat[] = [
   {
     a: 378, b: 4, floor: 1, rows: 3,
     interact: {
-      prompt: 'If every culture sets its own rules, must each one tolerate the rest?',
+      prompt: 'Does it follow from moral relativism that every culture must tolerate the others?',
       explain:
-        'It sounds open-minded, and it backfires. If every value is only local, “tolerance suits us” can never grow into “everyone must be tolerant”. This view can’t give you a rule for everybody.',
+        'It does not. If values hold only inside a culture, “we value tolerance” can’t become “all must tolerate”. Bernard Williams called that step inconsistent. Relativism can’t give every group the same duty.',
       xp: 5,
     },
     dur: 1.0,
@@ -126,12 +126,12 @@ export const BEATS: Ethics4Beat[] = [
     summary: {
       title: 'One Morality or Many?',
       points: [
-        'Cultures differ is not yet "no moral truth"',
-        'Objectivism: some truths hold beyond culture',
-        'Brown found a shared moral floor',
+        'That cultures differ doesn’t show there’s no moral truth',
+        'Objectivism: some moral truths hold regardless of culture',
+        'Brown found moral universals in every documented society',
         'Tolerance does not follow from relativism',
       ],
-      closing: 'Understanding a culture is not giving up judgement. It’s judging with open eyes and a longer look.',
+      closing: 'Understanding another culture doesn’t require giving up moral judgement. It requires judging with full knowledge of that culture.',
     },
     dur: 2.8,
   },

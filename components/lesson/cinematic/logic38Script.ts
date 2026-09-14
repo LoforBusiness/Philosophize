@@ -36,36 +36,36 @@ export interface Logic38Beat extends BaseBeat {
 export const BEATS: Logic38Beat[] = [
   {
     p: 172, x: 60, mill: 1,
-    text: 'An argument is a shape. Three steps, stacked, and a word goes in at the top.',
+    text: 'An argument has a form that can be separated from its subject matter. The form shown has three steps, and a subject is supplied at the top.',
     dur: 3.8,
   },
   {
     p: 30, x: 60, mill: 1, runA: 1,
-    text: 'Anselm feeds in the word God, “that than which nothing greater can be conceived”. For him, existing is greater than not existing.',
+    text: 'Anselm of Canterbury defines God as that than which nothing greater can be conceived. He holds that to exist in reality is greater than to exist only in the mind.',
     dur: 4.4,
   },
   {
     p: 176, x: 60, mill: 1, runA: 1, twin: 1, runB: 1,
-    text: 'A monk named Gaunilo built the same mill and changed one word. He fed in the island than which no greater island can be conceived.',
+    text: 'Gaunilo, a monk of Marmoutiers, kept the same three steps and changed only the subject. He applied them to the greatest conceivable island.',
     dur: 4.4,
   },
   {
     p: 160, x: 60, mill: 1, runA: 1, twin: 1, runB: 1, verdicts: 1, live: 1,
     interact: {
-      prompt: 'Tap what the second run has shown.',
-      explain: 'The form is faulty. Nothing about the island is special, and being unremarkable is why Gaunilo chose one. Both mills hold the same three steps, so if one is sound the other is. Refusing the comparison is no reply until you name the step that fails.',
+      prompt: 'What does the island argument show about Anselm’s argument?',
+      explain: 'The form is faulty. Both arguments use the same three steps, so if one succeeds, so does the other. No such island exists. Rejecting the comparison is no reply unless someone names a step that fails for the island.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 35, x: 60, mill: 1, runA: 1, twin: 1, runB: 1, verdicts: 1,
-    text: 'Look at the two frames again. Not one glyph differs between them.',
+    text: 'The two arguments share every step and differ only in their subject. So they must both succeed or both fail.',
     dur: 3.2,
   },
   {
     p: 6, x: 100, mill: 1, runA: 1, twin: 1, runB: 1, verdicts: 1,
-    text: 'So whatever is wrong is wrong in both, and it was there before anybody mentioned an island.',
+    text: 'Any flaw in the island argument’s steps is also in Anselm’s. An argument whose form yields absurd conclusions is said to prove too much.',
     dur: 3.8,
   },
   {
@@ -83,31 +83,31 @@ export const BEATS: Logic38Beat[] = [
   {
     p: 177, x: 100, mill: 1, runA: 1, twin: 1, runB: 1,
     interact: {
-      prompt: 'Where does the fault sit?',
+      prompt: 'How much of the fault lies in the argument’s form rather than its concept?',
       split: {
-        left: 'IN THE SHAPE', right: 'IN THE WORD',
+        left: 'IN THE FORM', right: 'IN THE CONCEPT',
         start: 0.06,
         zones: [
-          { id: 'word', upto: 0.3, reads: 'in the word, and the two words were never compared' },
-          { id: 'both', upto: 0.62, reads: 'half and half, which leaves the charge unanswered' },
-          { id: 'shape', upto: 1, reads: 'nearly all in the shape, unless a step refuses the island', correct: true },
+          { id: 'word', upto: 0.3, reads: 'mostly in the concept, with no step identified' },
+          { id: 'both', upto: 0.62, reads: 'split evenly, leaving the objection unanswered' },
+          { id: 'shape', upto: 1, reads: 'mostly in the form, apart from one excluded step', correct: true },
         ],
       },
-      explain: 'Nearly all in the shape. The two runs differ only in what went into the hopper, so the burden falls on the steps. Anselm answered there, arguing that a greatest island is incoherent. Whether the reply works is still argued. Where to argue is not in doubt.',
+      explain: 'Mostly in the form, apart from one excluded step. The arguments differ only in concept, so the fault lies in the steps. Anselm replied that his reasoning applies only to God. Alvin Plantinga argued that a greatest island is incoherent. Whether either reply succeeds is disputed.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Running It Again',
+      title: 'Arguments That Prove Too Much',
       points: [
-        'A form works on anything you pour into it',
-        'Pour in a parallel case and read the tray',
-        'An absurd output convicts the form, not the topic',
-        'The only reply names a step that will not carry over',
+        'An argument’s form can be applied to any subject',
+        'Apply the form to a parallel case and check the conclusion',
+        'An absurd conclusion shows the form is faulty',
+        'A defender must name a step that fails in the parallel case',
       ],
-      closing: 'It’s the cheapest test in philosophy and the hardest to answer. Before you defend a conclusion, run your reasoning on something you don’t already believe.',
+      closing: 'Before defending a conclusion, apply the same reasoning to a case whose conclusion you already reject.',
     },
     dur: 3.2,
   },

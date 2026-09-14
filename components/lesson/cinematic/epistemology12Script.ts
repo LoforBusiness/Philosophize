@@ -36,29 +36,29 @@ export interface Epistemology12Beat extends BaseBeat {
 export const BEATS: Epistemology12Beat[] = [
   {
     p: 2, x: 56, pipes: 0,
-    text: 'You’ve never seen an atom, and you weren’t there for your own birth. You’d still bet money on both.',
+    text: 'You’ve never seen an atom, and you don’t remember being born. Yet you’re confident of both facts.',
     dur: 3.3,
   },
   {
     p: 2, x: 56, pipes: 0,
-    text: 'So how did they get in?',
+    text: 'By what routes do beliefs like these reach you?',
     dur: 1.8,
   },
   {
     p: 31, x: 56, pipes: 1,
-    text: 'Rain lands on your hand and you believe it’s raining before you’ve thought about it. That pipe is short: the world touches you, and the belief is already in.',
-    cite: 'Pipe one · perception',
+    text: 'The first source is perception, the most direct. Rain lands on your hand, and you believe it’s raining without inferring anything.',
+    cite: 'Source one · perception',
     dur: 5.0,
   },
   {
     p: 457, x: 124, pipes: 2,
-    text: 'You know what you ate this morning, but the toast is long gone. What you are reading is a copy your mind kept.',
-    cite: 'Pipe two · memory',
+    text: 'Memory is the second source. You still know what you ate this morning, although the toast is gone, because memory preserves what you perceived.',
+    cite: 'Source two · memory',
     dur: 3.8,
   },
   {
     p: 457, x: 124, pipes: 2,
-    text: 'That pipe is longer, and it bends.',
+    text: 'A remembered belief travels a longer route, because it must be stored and later recalled.',
     dur: 1.8,
   },
   {
@@ -76,28 +76,28 @@ export const BEATS: Epistemology12Beat[] = [
   },
   {
     p: 463, x: 124, pipes: 3,
-    text: 'The third pipe doesn’t begin near you at all. It runs in from strangers — teachers, books, mapmakers, people long dead.',
-    cite: 'Pipe three · testimony',
+    text: 'The third source, testimony, begins with other people. It reaches you from teachers, books, mapmakers and writers long dead.',
+    cite: 'Source three · testimony',
     dur: 3.8,
   },
   {
     p: 463, x: 124, pipes: 3,
-    text: 'Now watch what it does to the level.',
+    text: 'Most of what you know reaches you by testimony rather than by your own observation.',
     dur: 1.8,
   },
   {
     p: 453, x: 124, pipes: 3,
     interact: {
-      prompt: 'Rain felt, toast remembered, a wall you were told about. Which route is least direct?',
+      prompt: 'Your belief that a distant wall exists came from reports. What route did that belief take?',
       sort: {
-        chip: 'a wall you were told about',
+        chip: 'a wall known from reports',
         bins: [
-          { id: 'senses', label: 'one step', reads: 'the world, then you' },
-          { id: 'memory', label: 'two steps', reads: 'the world, then you, then you again' },
-          { id: 'told', label: 'through another mind', reads: 'the world, then somebody else, then you', correct: true },
+          { id: 'senses', label: 'one step', reads: 'from the world directly to you' },
+          { id: 'memory', label: 'two steps', reads: 'from the world to you, then recalled later' },
+          { id: 'told', label: 'through another mind', reads: 'from the world to another person, then to you', correct: true },
         ],
       },
-      explain: 'The trap: swapping DIRECT for RELIABLE. Senses misfire and memory fades, but both run straight from the world to you. Testimony detours through another mind that had to see it, keep it, and choose to pass it on.',
+      explain: 'Through another mind. Testimony reaches you only after someone else perceived the fact, remembered it and chose to report it. Direct isn’t the same as reliable: perception and memory can err, yet both run from the world to you.',
       xp: 5,
     },
     dur: 1.0,
@@ -105,8 +105,8 @@ export const BEATS: Epistemology12Beat[] = [
   {
     p: 386, x: 124, pipes: 3, token: 1, pick: 1,
     interact: {
-      prompt: 'A new belief enters the tank: the Great Wall exists. Tap the pipe that delivered it.',
-      explain: 'The trap: it feels seen — films, photographs, a line on a map. Every one of those is a report from somebody else. You’ve never stood on that wall, and most of the tank is stacked out of beliefs like it.',
+      prompt: 'Through which source did your belief that the Great Wall of China exists arrive?',
+      explain: 'Testimony. The belief can feel like something seen, because of films, photographs and maps. Yet each of these comes to you from someone else. Unless you’ve visited the wall, the belief rests on testimony, like most of what you know.',
       xp: 5,
     },
     dur: 1.0,
@@ -114,14 +114,14 @@ export const BEATS: Epistemology12Beat[] = [
   {
     p: 385, x: 124, pipes: 3,
     summary: {
-      title: 'The Three Pipelines',
+      title: 'Three Sources of Knowledge',
       points: [
-        'Perception, memory and testimony feed almost everything',
-        'Testimony is the longest route and carries the most',
-        'Every pipe can deliver something false',
+        'Perception, memory and testimony supply almost all knowledge',
+        'Testimony is the least direct source, yet supplies the most',
+        'Each source can deliver false beliefs',
         'Hume called testimony necessary to human life',
       ],
-      closing: 'You’re not an island of knowledge. You’re a node in a web of trust.',
+      closing: 'Because so much of it comes by testimony, your knowledge depends on trusting other people.',
     },
     dur: 3.2,
   },

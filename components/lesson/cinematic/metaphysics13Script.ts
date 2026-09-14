@@ -23,24 +23,24 @@ export interface Meta13Beat extends BaseBeat {
 export const BEATS: Meta13Beat[] = [
   {
     p: 379, x: 70,
-    text: 'A scanner reads every atom of you, builds a perfect copy on Mars, and vaporises the original here. Step in?',
+    text: 'Suppose a scanner records every cell of your body, destroys the original, and builds an exact replica on Mars. Would you step in?',
     dur: 4.4,
   },
   {
     p: 401, x: 168, track: 1,
-    text: 'Say yes, and say it works. What travels is a chain, not a body — memories, intentions, one half-finished thought about lunch.',
-    cite: 'What travels',
+    text: 'Suppose it works. The replica is psychologically continuous with you, linked to your past by your memories and intentions.',
+    cite: 'Psychological continuity',
     dur: 5.0,
   },
   {
     p: 13, x: 124, track: 1, fork: 1,
-    text: 'Now the machine malfunctions and forgets to vaporise you. You walk out on Earth.',
-    cite: 'The machine slips',
+    text: 'Now suppose the scanner fails to destroy the original. You walk out of the machine on Earth.',
+    cite: 'Parfit’s Branch-Line Case',
     dur: 2.4,
   },
   {
     p: 13, x: 124, track: 1, fork: 1,
-    text: 'Someone with your whole chain walks out on Mars. Neither is a copy of the other.',
+    text: 'The replica walks out on Mars with your memories and intentions. Both of you continue the mental life of the person who stepped in.',
     dur: 2.8,
   },
   {
@@ -58,29 +58,29 @@ export const BEATS: Meta13Beat[] = [
   },
   {
     p: 29, x: 168, track: 1, fork: 1, both: 1, stuck: 1,
-    text: 'Try to put the label on one of them. Nothing chooses, because the two branches are the same in every respect there is.',
-    cite: 'The label sticks',
+    text: 'Psychologically, the two have an equal claim to be you. The one on Earth also keeps your original body.',
+    cite: 'An equal claim',
     dur: 3.5,
   },
   {
     p: 29, x: 168, track: 1, fork: 1, both: 1, stuck: 1,
-    text: 'Identity has to pick one thing, and continuity has just gone two ways.',
+    text: 'Identity can’t branch, because one person can’t be identical to two different people. Psychological continuity, however, has branched.',
     dur: 2,
   },
   {
     p: 4, x: 124, track: 1, fork: 1, both: 1, stuck: 1,
     interact: {
-      prompt: 'How do you divide between the two of them?',
+      prompt: 'On a psychological account, how do the two people’s claims to be you compare?',
       split: {
-        left: 'THE ONE WHO WOKE UP', right: 'THE ONE ON EARTH',
+        left: 'THE REPLICA ON MARS', right: 'THE ONE ON EARTH',
         start: 0.04,
         zones: [
-          { id: 'earth', upto: 0.3, reads: 'the one on Earth is you' },
-          { id: 'both', upto: 0.7, reads: 'both are you, and the question is empty', correct: true },
-          { id: 'copy', upto: 1, reads: 'the new one is you' },
+          { id: 'earth', upto: 0.3, reads: 'all to the one on Earth' },
+          { id: 'both', upto: 0.7, reads: 'equal claims, so no fact settles which is you', correct: true },
+          { id: 'copy', upto: 1, reads: 'all to the replica on Mars' },
         ],
       },
-      explain: 'The middle, and being unable to settle it is the answer. Identity feels all or nothing, so one of them ought to be the real one. Both branches carry exactly what you carried. Parfit\'s move is to stop asking which is you and notice that what mattered survived twice.',
+      explain: 'Equal claims, so no fact settles which is you. Picking the one on Earth relies on the body, which this account sets aside. Your memories and aims survive twice while identity fails, so Parfit says identity isn’t what matters.',
       xp: 5,
     },
     dur: 1.0,
@@ -88,22 +88,22 @@ export const BEATS: Meta13Beat[] = [
   {
     p: 6, x: 124, track: 1, fork: 1, both: 1, stuck: 1, pick: 1,
     interact: {
-      prompt: 'Tap the thing the fork actually broke.',
-      explain: 'Not continuity. That survived twice over, which is the whole problem. Identity is what cannot branch. A thing can only be identical to one thing, and here there are two equally good candidates.',
+      prompt: 'When psychological continuity branches into two people, what can no longer hold?',
+      explain: 'Identity. If both people were you, they would be one person, and they’re two. The chain of continuity and the memories survive in both.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'What You Now Know',
+      title: 'When Continuity Branches',
       points: [
-        'Teleporter: a perfect copy may not be you',
-        'Fission: continuity can branch, identity cannot',
-        'Parfit — identity is not what matters, survival is',
-        'Hume and the Buddha gain force from this',
+        'A replica has your memories but may not be you',
+        'Psychological continuity can branch, but identity can’t',
+        'Parfit holds that continuity, not identity, is what matters',
+        'Parfit found his reductionist view anticipated by the Buddha',
       ],
-      closing: 'If the question "which one is really me?" has no answer, perhaps it was never the question.',
+      closing: 'Parfit argues that in cases of branching, “which one is me?” can be an empty question, with no answer.',
     },
     dur: 3.0,
   },

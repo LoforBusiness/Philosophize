@@ -35,41 +35,41 @@ export interface Ethics25Beat extends BaseBeat {
 export const BEATS: Ethics25Beat[] = [
   {
     p: 2, x: 40,
-    text: 'Somebody stopped you for your own good. Ask whether they had the right.',
+    text: 'Paternalism is interference with a person’s liberty for that person’s own good. When, if ever, is it justified?',
     dur: 4.0,
   },
   {
     p: 30, x: 40, bridge: 1,
-    text: 'John Stuart Mill drew the line in one sentence, and it’s narrower than it sounds.',
+    text: 'John Stuart Mill proposed one principle in On Liberty, in 1859. It’s known as the harm principle.',
     dur: 4.4,
   },
   {
     p: 36, x: 40, bridge: 1,
-    text: 'Power over a grown adult is warranted to stop harm to other people.',
+    text: 'On this principle, power over an adult is justified only to prevent harm to others.',
     dur: 4.0,
   },
   {
     p: 160, x: 40, bridge: 1,
-    text: 'Their own good is not enough. You may warn them and argue, but never compel.',
+    text: 'For Mill, a person’s own good is not a sufficient warrant for compulsion. It justifies persuasion, but never force.',
     dur: 4.4,
   },
   {
     p: 161, x: 40, bridge: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap the only reason Mill lets you compel an adult.',
-      explain: 'Harm to other people. Their own good is the reason Mill rules out by name. The bridge case works because the stranger hasn’t been told yet. You’re guessing at their will, not overriding it.',
+      prompt: 'On the harm principle, which reason can justify compelling an adult?',
+      explain: 'Harm to others. Their own good is the reason Mill rules out. In the bridge case, stopping someone not yet told doesn’t override their will, because nobody wants to fall.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 159, x: 40, bridge: 1, sign: 1,
-    text: 'So Mill tests his rule on a bridge with a plank missing, and a stranger walking towards it.',
+    text: 'Mill tests the principle on a bridge known to be unsafe. A stranger is walking towards the gap, and there’s no time to warn him.',
     dur: 4.8,
   },
   {
     p: 62, x: 96, bridge: 1, sign: 1,
-    text: 'Grab them. There’s no time to explain, and nobody wants to fall.',
+    text: 'Mill says you may seize him and turn him back. This is no real infringement of liberty, because he doesn’t want to fall.',
     dur: 3.8,
   },
   {
@@ -87,38 +87,38 @@ export const BEATS: Ethics25Beat[] = [
   },
   {
     p: 383, x: 96, bridge: 1, sign: 1,
-    text: 'Once they’ve read the sign, the bridge is theirs to cross. That’s the whole difference.',
+    text: 'Once the stranger is warned, Mill holds, he may decide for himself whether the risk is worth taking. A warning informs his will, whereas force would override it.',
     dur: 4.8,
   },
   {
     p: 21, x: 96, bridge: 1, sign: 1,
     interact: {
-      prompt: 'A product harms only the person using it. How far may the state go?',
+      prompt: 'If a product harms only its user, how far does Mill’s principle let the state go?',
       drag: {
         lo: 'WARN THEM',
         hi: 'BAN IT',
         start: 0.5,
         zones: [
-          { id: 'warn', upto: 0.34, reads: 'put up the sign, and let them walk', correct: true },
-          { id: 'nudge', upto: 0.68, reads: 'tax it, cover it in warnings, make it awkward' },
-          { id: 'ban', upto: 1, reads: 'close the bridge; nobody crosses' },
+          { id: 'warn', upto: 0.34, reads: 'require a warning, and let adults choose', correct: true },
+          { id: 'nudge', upto: 0.68, reads: 'tax it heavily to discourage its use' },
+          { id: 'ban', upto: 1, reads: 'forbid its sale to everyone' },
         ],
       },
-      explain: 'The warning end, on Mill’s own terms. A tax is a mild compulsion aimed at the person themselves, and that’s the thing he ruled out. He’d still allow it where a seller profits from a buyer who hasn’t been told.',
+      explain: 'Require a warning, and let adults choose. Mill allows labelling, because a warning informs a choice without overriding it. A tax meant to discourage use differs from a ban only in degree, he argues, so he rejects it too.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Whose Risk Is It',
+      title: 'Paternalism and the Harm Principle',
       points: [
-        'Autonomy is your right to run your own life',
-        'Paternalism overrides you for your own good',
+        'Autonomy is the right to govern your own life',
+        'Paternalism interferes with a person for their own good',
         'Mill allows compulsion only to stop harm to others',
-        'The bridge stop respects a will it cannot ask',
+        'Mill: seizing the unwarned stranger doesn’t violate liberty',
       ],
-      closing: 'The real question is rarely whether something is harmful. It’s whose life it is to risk.',
+      closing: 'For Mill, the question isn’t whether an act is harmful. It’s whom the act harms.',
     },
     dur: 4.0,
   },

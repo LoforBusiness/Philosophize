@@ -33,31 +33,31 @@ export interface Aes18Beat extends BaseBeat {
 export const BEATS: Aes18Beat[] = [
   {
     p: 172, x: 200, curve: 1,
-    text: 'A piece of music everyone calls sad. Here’s its shape: slow, low, and going down.',
+    text: 'Consider a piece of music that listeners call sad. Its melody is slow, low in pitch and falling.',
     dur: 4.2,
   },
   {
     p: 384, x: 200, curve: 1, body: 1,
-    text: 'And here’s a person who has had bad news. Same slope, drawn from the same numbers.',
+    text: 'A person who has had bad news shows the same contour. Their posture is slow, low and falling.',
     cite: 'Resemblance',
     dur: 4.2,
   },
   {
     p: 447, x: 132, curve: 1, body: 1, match: 1,
-    text: 'That’s the whole theory. You hear the music as sad because it moves the way sadness moves.',
+    text: 'This is the resemblance theory. Music sounds sad because its contour is like the way sad people move.',
     dur: 4.4,
   },
   {
     p: 395, x: 132, curve: 1, body: 1, match: 1, empty: 1,
-    text: 'Now the awkward panel. A shape is not a mood, and there’s nobody inside the notes to be having one.',
-    cite: 'So who is sad?',
+    text: 'The theory must admit a difficulty. A contour is not a mood, and no one in the notes feels sad.',
+    cite: 'Who is sad?',
     dur: 4.8,
   },
   {
     p: 467, x: 132, curve: 1, body: 1, match: 1, empty: 1, live: 1,
     interact: {
-      prompt: 'Tap the panel that holds what the music actually has.',
-      explain: 'The contour. A tune has a shape, a speed and a direction, and every one of those is in the notes. Nothing in the score is having an experience. The empty panel is empty because there’s no one in there for it to be about.',
+      prompt: 'Which panel shows a property the music itself has?',
+      explain: 'The music’s contour. A melody has a shape, a pace and a direction, and all of these are in the notes. No one in the score is having an experience, so the panel asking who is sad stays empty.',
       xp: 5,
     },
     dur: 1.0,
@@ -77,23 +77,23 @@ export const BEATS: Aes18Beat[] = [
   },
   {
     p: 21, x: 268, curve: 1, body: 1, empty: 1,
-    text: 'Which leaves a real puzzle. If nothing in there is sad, why do people pay to sit and be made miserable?',
+    text: 'A second puzzle concerns the listener. Why do people choose music that makes them feel sad?',
     dur: 4.6,
   },
   {
     p: 383, x: 268, curve: 1, body: 1, empty: 1,
     interact: {
-      prompt: 'Sad music moves you. Where is the sadness?',
+      prompt: 'When sad music moves you, where is the sadness located?',
       split: {
         left: 'IN THE LISTENER', right: 'IN THE NOTES',
         start: 0.5,
         zones: [
-          { id: 'notes', upto: 0.34, reads: 'the sadness sits in the sound' },
-          { id: 'both', upto: 0.66, reads: 'half in the sound, half in you' },
-          { id: 'you', upto: 1, reads: 'the notes carry a shape, you do the feeling', correct: true },
+          { id: 'notes', upto: 0.34, reads: 'the sadness is a feature of the sound' },
+          { id: 'both', upto: 0.66, reads: 'shared equally between the sound and you' },
+          { id: 'you', upto: 1, reads: 'the notes have a shape, the feeling is yours', correct: true },
         ],
       },
-      explain: 'In the listener. The notes carry a shape, you recognise it, and the feeling happens in you. That’s also why it’s bearable. Nothing has gone wrong in your life, so you get the shape of grief without the loss.',
+      explain: 'The notes have a shape, and the feeling is yours. The sad contour is in the music, but only a listener can feel sad. Since nothing has gone wrong in your life, you hear the shape of grief without any loss.',
       xp: 5,
     },
     dur: 1.0,
@@ -102,12 +102,12 @@ export const BEATS: Aes18Beat[] = [
     summary: {
       title: 'The Shape of a Feeling',
       points: [
-        'Music has contour, pace and direction, and these resemble how we behave',
+        'Music’s contour, pace and direction resemble human expressive behaviour',
         'Resemblance explains the recognition without giving the notes a mood',
         'The feeling occurs in the listener, not in the score',
-        'That is why sad music is something people choose',
+        'Sad music brings no real loss, so people choose it',
       ],
-      closing: 'The third panel is still empty, and the music still works.',
+      closing: 'Music can be expressive of sadness even though no one in it feels anything.',
     },
     dur: 3.4,
   },

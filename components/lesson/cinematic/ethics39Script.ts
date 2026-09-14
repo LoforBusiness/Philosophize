@@ -35,36 +35,36 @@ export interface Ethics39Beat extends BaseBeat {
 export const BEATS: Ethics39Beat[] = [
   {
     p: 25, x: 52, stair: 1,
-    text: 'It’s midnight and you know you should sleep. You press play anyway.',
+    text: 'Suppose it’s midnight and you judge that you should sleep. You start another episode anyway.',
     dur: 3.6,
   },
   {
     p: 30, x: 52, stair: 1, rungs: 1,
-    text: 'Between knowing better and doing better there are three steps. Judge which is better, intend to act, then act.',
+    text: 'Acting on your better judgement involves three steps: judging which option is better, intending to take it, and acting.',
     dur: 4.4,
   },
   {
     p: 160, x: 52, stair: 1, rungs: 1, live: 1,
     interact: {
-      prompt: 'Tap the step the weak-willed person never takes.',
-      explain: 'The last one. Fail the first and this is ignorance rather than weakness, because you never worked out which was better. Fail the second and you never meant to. Weakness of will needs the judgement intact and the act going the other way.',
+      prompt: 'Which of the three steps does a weak-willed person fail to complete?',
+      explain: 'Acting. A failure to judge would be ignorance, not weakness. A failure to intend would mean you never meant to act. Weakness of will is a judgement kept and an act that goes against it.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 176, x: 52, stair: 1, rungs: 1, climb: 0.75,
-    text: 'So the token gets to the top step and stops. Socrates said no token ever stops there.',
+    text: 'On this picture, the weak-willed person judges and intends, but stops before acting. Socrates denied that anyone ever stops there.',
     dur: 4.2,
   },
   {
     p: 383, x: 52, stair: 1, rungs: 1, climb: 0.75,
-    text: 'For him, to do a thing is to think it best right now. So the worse act was a mistake about the sums, not a failure of nerve.',
+    text: 'In Plato’s Protagoras, Socrates holds that choosing an act means judging it best at that moment. So a worse choice is an error of judgement, not a failure of will.',
     dur: 4.8,
   },
   {
     p: 6, x: 98, stair: 1, rungs: 1, climb: 0.75,
-    text: 'Aristotle wouldn’t have it. He said the knowledge is there but asleep, held the way a sleeping man holds what he knows.',
+    text: 'Aristotle disagreed. He holds that the weak-willed person has the knowledge but isn’t using it, like someone asleep or drunk.',
     dur: 4.4,
   },
   {
@@ -82,16 +82,16 @@ export const BEATS: Ethics39Beat[] = [
   {
     p: 177, x: 98, stair: 1, rungs: 1, climb: 0.75,
     interact: {
-      prompt: 'One more episode, at midnight. What is it?',
+      prompt: 'Which category does watching one more episode at midnight fall into?',
       sort: {
         chip: 'one more episode',
         bins: [
-          { id: 'mind', label: 'a change of mind', reads: 'you decided watching was better after all' },
+          { id: 'mind', label: 'a revised judgement', reads: 'you decided watching was better after all' },
           { id: 'weak', label: 'weakness of will', reads: 'you still think stopping is better', correct: true },
-          { id: 'hidden', label: 'a hidden preference', reads: 'you wanted this all along and would not say so' },
+          { id: 'hidden', label: 'a hidden preference', reads: 'you wanted to keep watching and never admitted it' },
         ],
       },
-      explain: 'Weakness of will, and the test is what you’d say if somebody asked. You’d say stopping is better, and mean it, with your thumb still on the remote. A change of mind answers differently, and a preference you hold is not hidden from you.',
+      explain: 'Weakness of will: you still think stopping is better. Asked, you’d say so and mean it, even as you keep watching. A revised judgement would favour watching instead. A hidden preference would mean you never judged stopping better.',
       xp: 5,
     },
     dur: 1.0,
@@ -100,12 +100,12 @@ export const BEATS: Ethics39Beat[] = [
     summary: {
       title: 'The Last Step',
       points: [
-        'Weakness keeps the judgement and drops the act',
+        'Weakness of will keeps the judgement but fails to act',
         'Socrates denied it was possible at all',
-        'Aristotle called the knowledge present but asleep',
-        'Test it by asking what you would say right now',
+        'Aristotle said the knowledge is present but not in use',
+        'The test is whether you still judge the other option better',
       ],
-      closing: 'The difference matters, because the repairs differ. Ignorance wants an argument. Weakness wants a habit, or a locked door.',
+      closing: 'The difference matters for how to improve. Ignorance calls for clearer thinking, while weakness calls for habits that help you act on what you judge.',
     },
     dur: 3.2,
   },

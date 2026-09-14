@@ -19,33 +19,33 @@ export interface Logic6Beat extends BaseBeat {
 export const BEATS: Logic6Beat[] = [
   {
     p: 443, link: 0, rain: 0,
-    text: 'Two tiny words run almost every argument. Master the words “if” and “then”, and you hold logic’s favourite tool.',
+    text: 'Many arguments depend on a sentence built with the words “if” and “then”. Logicians call such a sentence a conditional.',
     dur: 3.4,
   },
   {
     // The arrow and the promise table arrive together: the whole diagram assembles
     // on the beat that explains what a conditional actually claims.
     p: 167, link: 1, table: 1,
-    text: 'A conditional says “if P, then Q”. P is the antecedent — the condition.',
-    cite: 'Antecedent → consequent',
+    text: 'A conditional is a sentence of the form “if P, then Q”. The condition P, introduced by the word “if”, is called the antecedent.',
+    cite: 'Antecedent and consequent',
     dur: 2.2,
   },
   {
     // The arrow and the promise table arrive together: the whole diagram assembles
     // on the beat that explains what a conditional actually claims.
     p: 167, link: 1, table: 1,
-    text: 'Q is the consequent — what follows. The sentence promises nothing about P alone, only the link between them.',
+    text: 'The result Q, introduced by the word “then”, is called the consequent. The conditional claims a link between the two, not that either is true.',
     dur: 2.8,
   },
   {
     p: 13, link: 1, rain: 1, table: 1,
-    text: 'Take the sentence “if it rains, the streets get wet”. Nothing in it says rain is falling right now.',
-    cite: 'A promise, not a fact',
+    text: 'Consider the sentence “if it rains, the streets get wet”. The sentence asserts neither rain nor wet streets.',
+    cite: 'A link, not a fact',
     dur: 2.2,
   },
   {
     p: 13, link: 1, rain: 1, table: 1,
-    text: 'The sentence claims only a link: if rain comes, wet streets follow. A sunny day leaves the promise unbroken.',
+    text: 'Like a promise, the conditional is broken only if it rains and the streets stay dry. On a day without rain, the promise is kept.',
     dur: 2.8,
   },
   {
@@ -63,9 +63,9 @@ export const BEATS: Logic6Beat[] = [
   {
     p: 383, link: 1, table: 1, tapBoxes: 1,
     interact: {
-      prompt: 'One of these two boxes is the antecedent — the condition "if" introduces. Tap it.',
+      prompt: 'Which clause of this conditional is the antecedent?',
       explain:
-        'The antecedent is the condition "if" introduces: here, "it rains". The consequent is what "then" delivers: wet streets. Name them the right way round and every later rule of inference falls into place.',
+        '“It rains” is the antecedent, the condition introduced by “if”. “The streets get wet” is the consequent. Rules of inference such as modus ponens depend on telling the two apart.',
       xp: 5,
     },
     dur: 1.0,
@@ -75,29 +75,29 @@ export const BEATS: Logic6Beat[] = [
     interact: {
       prompt: 'What does accepting a conditional commit you to?',
       split: {
-        left: 'THE LINK ONLY', right: 'THE IF AS WELL',
+        left: 'THE LINK ONLY', right: 'THE ANTECEDENT TOO',
         start: 0.04,
         zones: [
-          { id: 'both', upto: 0.32, reads: 'accepting it means signing up for flying pigs' },
-          { id: 'half', upto: 0.66, reads: 'the link, and belief in the if' },
-          { id: 'link', upto: 1, reads: 'the link, and nothing whatever about the if', correct: true },
+          { id: 'both', upto: 0.32, reads: 'the truth of both antecedent and consequent' },
+          { id: 'half', upto: 0.66, reads: 'the link, and that the antecedent is likely' },
+          { id: 'link', upto: 1, reads: 'the link, and nothing about the antecedent', correct: true },
         ],
       },
-      explain: 'All of it goes to the link. You can accept “if pigs fly, the moon is cheese” while pigs stay on the ground. The sentence never claimed pigs fly, only that one would bring the other.',
+      explain: 'Accepting a conditional commits you to the link, and to nothing about the antecedent. You can accept “if it rains, the streets get wet” on a dry day, without believing rain is likely.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Conditional Unlocked',
+      title: 'The Structure of a Conditional',
       points: [
-        '"If P, then Q" links a condition to a result',
+        '“If P, then Q” links a condition to a result',
         'P is the antecedent, Q the consequent',
-        'It asserts the link, not that P is true',
-        'Conditionals power deduction’s strongest moves',
+        'A conditional asserts the link, not that P is true',
+        'Many valid forms of deduction rely on conditionals',
       ],
-      closing: 'Grasp the if-then and the next moves of logic snap into place.',
+      closing: 'Valid reasoning with conditionals depends on keeping the antecedent and the consequent distinct.',
     },
     dur: 2.8,
   },

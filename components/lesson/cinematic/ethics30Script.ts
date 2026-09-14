@@ -34,36 +34,36 @@ export interface Ethics30Beat extends BaseBeat {
 export const BEATS: Ethics30Beat[] = [
   {
     p: 344, x: 24, card: 1,
-    text: 'You’ve met the great theories. The question now is how to live with all three of them.',
+    text: 'Ethics has three major normative theories. The practical question is how to use all three when making a real decision.',
     dur: 5.0,
   },
   {
     p: 169, x: 24, card: 1, lenses: 0.34,
-    text: 'Consequentialism judges an act by what it brings about. Ask what the outcomes will be.',
+    text: 'Consequentialism judges an act by its outcomes. It asks which available act will bring about the best consequences.',
     dur: 5.0,
   },
   {
     p: 449, x: 24, card: 1, lenses: 0.67,
-    text: 'Deontology judges by duties and rights. Ask which rules are at stake and who’s owed what.',
+    text: 'Deontology judges an act by whether it respects duties and rights. The deontologist asks what moral rules apply and what each person is owed.',
     dur: 5.0,
   },
   {
     p: 262, x: 24, card: 1, lenses: 1,
-    text: 'Virtue ethics asks about character. What would a good person do, and who are you becoming?',
+    text: 'Virtue ethics focuses on character. It asks what a virtuous person would do, and which traits the act would build in you.',
     dur: 5.0,
   },
   {
     p: 163, x: 24, card: 1, lenses: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what to do with three rival theories.',
-      explain: 'Ask all three questions. Each lens shows something the others miss. A decision that survives all three is far better tested than one that pleases a single formula. Picking whichever suits the moment is motivated reasoning with a reading list.',
+      prompt: 'How should you use three rival moral theories in practice?',
+      explain: 'Ask all three. Each theory draws attention to features of a case that the others can overlook. A decision that survives all three questions is better tested than one that satisfies a single theory. Choosing whichever theory gives the answer you want is motivated reasoning.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 468, x: 80, card: 1, lenses: 1,
-    text: 'A colleague is secretly cheating customers. Weigh the harm of silence against the fallout of speaking.',
+    text: 'Suppose you learn that a colleague is secretly defrauding customers. You must decide whether to speak or stay silent.',
     dur: 5.0,
   },
   {
@@ -81,18 +81,18 @@ export const BEATS: Ethics30Beat[] = [
   },
   {
     p: 450, x: 80, card: 1, lenses: 1, clash: 1,
-    text: 'Often the three lenses agree. Sometimes they point three different ways, and no formula breaks the tie.',
+    text: 'Often the three theories give the same verdict. When they conflict, no formula decides between them.',
     dur: 5.0,
   },
   {
     p: 165, x: 80, card: 1, lenses: 1, clash: 1,
     interact: {
-      prompt: 'The three lenses disagree. What now?',
+      prompt: 'When the three theories conflict, how should you decide?',
       cards: [
-        { text: 'Weigh them and own the judgement', correct: true },
-        { text: 'Follow whichever rule is strictest', correct: false },
+        { text: 'Weigh them using practical judgement', correct: true },
+        { text: 'Always follow the strictest rule', correct: false },
       ],
-      explain: 'Weigh them, and own it. Aristotle called the skill practical wisdom. It can’t be reduced to a rule, because the rules are what have collided. Defaulting to the strictest one is a way of not deciding while looking as though you did.',
+      explain: 'Weigh them using practical judgement. Aristotle called this skill practical wisdom. No rule can replace it, because rules are what conflict here. Always taking the strictest rule is a way to avoid judging, not a way to judge.',
       xp: 5,
     },
     dur: 1.0,
@@ -100,14 +100,14 @@ export const BEATS: Ethics30Beat[] = [
   {
     p: 303, x: 80, card: 1, lenses: 1,
     summary: {
-      title: 'Three Lenses, One Life',
+      title: 'Using Three Moral Theories',
       points: [
-        'Treat the theories as questions, not rival tribes',
+        'Treat the theories as questions, not rival doctrines',
         'Ask about outcomes, about duties, about character',
-        'Living well is a habit built by practice',
-        'When the lenses clash, weigh them and own the call',
+        'Aristotle: virtue is a habit built by practice',
+        'When the theories conflict, practical wisdom must weigh them',
       ],
-      closing: 'You came asking what’s right. You leave with the tools to keep asking well.',
+      closing: 'No theory removes the need for judgement, but together they show what a judgement must consider.',
     },
     dur: 5.0,
   },

@@ -25,18 +25,18 @@ export interface M9Beat extends BaseBeat {
 export const BEATS: M9Beat[] = [
   {
     p: 379, x: 96, panels: 0,
-    text: 'Your brain weighs about three pounds and takes up space. Does the thought you’re having right now weigh anything at all?',
+    text: 'A human brain weighs about three pounds and occupies space. Does a thought, such as the one you’re having now, weigh anything?',
     dur: 3.6,
   },
   {
     p: 167, x: 96, panels: 1,
-    text: 'Descartes doubted everything he could, but he could not doubt he was thinking. So mind thinks and takes up no space, and body takes up space and does not think.',
+    text: 'Descartes argued that mind and body are distinct substances. Mind thinks and takes up no space, and body takes up space and doesn’t think.',
     cite: 'Cartesian dualism',
     dur: 4.6,
   },
   {
     p: 167, x: 96, panels: 1,
-    text: 'Two separate substances.',
+    text: 'This view is called substance dualism. On it, the mind could exist without the body.',
     dur: 1.8,
   },
   {
@@ -54,62 +54,62 @@ export const BEATS: M9Beat[] = [
   },
   {
     p: 13, x: 160, panels: 1, cross: 1, puzzle: true,
-    text: 'Then decide to lift your arm. Something with no size and no position has to shove a physical limb.',
+    text: 'Suppose you decide to lift your arm. Then something with no size or location must cause a physical limb to move.',
     cite: 'The interaction problem',
     dur: 2.5,
   },
   {
     p: 13, x: 160, panels: 1, cross: 1, puzzle: true,
-    text: 'Descartes pointed to the pineal gland. His critics answered that a mind with no size has nothing to push with.',
+    text: 'Descartes put the link in the pineal gland. Princess Elisabeth of Bohemia objected: moving a body takes contact, and a mind with no extension cannot touch it.',
     dur: 2.5,
   },
   {
     p: 33, x: 232, panels: 2,
-    text: 'So physicalists close the gap instead. Damage a brain and the memory, the mood, even the character change with it.',
+    text: 'Physicalists hold that the mind is physical, so there’s no gap to cross. Brain damage can alter memory, mood and even character.',
     cite: 'The physicalist reply',
     dur: 2.5,
   },
   {
     p: 33, x: 232, panels: 2,
-    text: 'That suggests the mind is not another substance. It is something the brain does, the way digestion is something the gut does.',
+    text: 'This evidence suggests that the mind isn’t a separate substance. It is something the brain does, the way digestion is something the gut does.',
     dur: 2.7,
   },
   {
     p: 380, x: 232, panels: 2,
     interact: {
-      prompt: 'What is the dualist actually claiming about the mind?',
+      prompt: 'What does substance dualism claim about the mind?',
       sort: {
         chip: 'the mind',
         bins: [
-          { id: 'same', label: 'it is the brain', reads: 'the mind is the brain: one kind of stuff' },
-          { id: 'does', label: 'what the brain does', reads: 'the mind is simply what the brain does' },
-          { id: 'two', label: 'a second kind of thing', reads: 'the mind is a second kind of thing entirely', correct: true },
+          { id: 'same', label: 'the brain itself', reads: 'the mind is identical to the brain' },
+          { id: 'does', label: 'brain activity', reads: 'the mind is an activity of the brain' },
+          { id: 'two', label: 'a distinct substance', reads: 'the mind is a substance distinct from matter', correct: true },
         ],
       },
-      explain: 'A second kind of thing. Two substances, not one. The trap is the “what the brain does” bin. It sounds like a modest version of the same idea, but it’s the view Descartes spent the Meditations arguing against.',
+      explain: 'A distinct substance. Substance dualism holds that mind and matter are two substances, not one. Brain activity may sound like mild dualism, but it’s a physicalist view that Descartes would reject.',
     },
     dur: 4.4,
   },
   {
     p: 440, x: 232, panels: 2, cards: true,
     interact: {
-      prompt: '"I think, therefore I am." Tap the label for what that sentence really establishes.',
+      prompt: 'What does Descartes’ “I think, therefore I am” establish on its own?',
       explain:
-        'A thinker, and no more. Something is doing this thinking, so something exists. The trap is the card that says “a separate substance”. The leap from there to “and it’s made of different stuff” is a further argument. It’s the one everybody has disputed since.',
+        'Something is thinking. The cogito shows that a thinker exists while it thinks. That the thinker is a separate substance needs a further argument, given in the Sixth Meditation. Nor does the cogito show that the body doesn’t exist.',
     },
     dur: 4.6,
   },
   {
     summary: {
-      title: 'The Mind-Body Knot',
+      title: 'The Mind-Body Problem',
       points: [
         'Descartes: mind and body, two substances',
-        'Mind thinks; body merely takes up space',
-        'The interaction problem dogs dualism',
+        'Mind thinks, and body takes up space',
+        'Dualism faces the interaction problem',
         'Physicalists: mind is what a brain does',
       ],
       closing:
-        'Whatever the mind turns out to be, the seam between thought and matter is still philosophy’s hardest to close.',
+        'How thought relates to matter remains one of the central unsolved problems in philosophy.',
     },
     dur: 4.0,
   },

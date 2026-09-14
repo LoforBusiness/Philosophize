@@ -34,39 +34,39 @@ export interface Epistemology11Beat extends BaseBeat {
 export const BEATS: Epistemology11Beat[] = [
   {
     p: 164, x: 80, real: 180, link: 1,
-    text: 'You glance up at the hallway clock. Three o’clock, and it really is three o’clock.',
+    text: 'Suppose you glance at the hallway clock and it reads three o’clock. The time is in fact three o’clock.',
     dur: 2.4,
   },
   {
     p: 164, x: 80, real: 180, link: 1,
-    text: 'You have never been more right, or for a worse reason.',
+    text: 'Your belief that it’s three o’clock is true. But do you know the time?',
     dur: 1.8,
   },
   {
     p: 465, x: 154, real: 195,
-    text: 'You step across for a second look. The other dial has moved on, but the hallway clock hasn’t.',
+    text: 'A little later, the real time has moved on. The hallway clock still reads three.',
     cite: 'The stopped clock',
     dur: 3.2,
   },
   {
     p: 465, x: 154, real: 195,
-    text: 'It stopped twelve hours ago, at three.',
+    text: 'The hallway clock stopped at three o’clock, twelve hours before you looked. Bertrand Russell gave this example in 1948.',
     dur: 1.8,
   },
   {
     p: 459, x: 154, real: 220,
-    text: 'Still, count what you had. You believed it.',
+    text: 'The traditional account defines knowledge as justified true belief. First, you believed that it was three o’clock.',
     cite: 'Justified true belief',
     dur: 1.8,
   },
   {
     p: 459, x: 154, real: 220,
-    text: 'It was true. And a clock on a wall is an ordinary reason to trust one.',
+    text: 'Second, the belief was true. Third, it was justified, since reading a clock is an ordinary way to learn the time.',
     dur: 2.7,
   },
   {
     p: 459, x: 154, real: 220,
-    text: 'Belief, truth, justification — all three.',
+    text: 'Your belief therefore meets all three conditions: belief, truth and justification.',
     dur: 1.8,
   },
   {
@@ -83,29 +83,29 @@ export const BEATS: Epistemology11Beat[] = [
   },
   {
     p: 5, x: 226, real: 300,
-    text: 'Walk on, and watch the pair. They agreed for one instant and never will again.',
+    text: 'The stopped clock matched the real time only at the moment you happened to look. So your belief was true by luck.',
     cite: 'Epistemic luck',
     dur: 2.6,
   },
   {
     p: 5, x: 226, real: 300,
-    text: 'Nothing ever joined your reason to the fact. The match was an accident.',
+    text: 'Nothing connected your reason to the fact that made the belief true. A match of this kind is called epistemic luck.',
     dur: 2.4,
   },
   {
     p: 457, x: 226, real: 350,
     interact: {
-      prompt: 'Which of the three conditions does the stopped clock actually break?',
+      prompt: 'Which condition of justified true belief does the stopped-clock case fail?',
       sort: {
-        chip: 'the stopped clock',
+        chip: 'the stopped-clock case',
         bins: [
-          { id: 'belief', label: 'belief', reads: 'belief: you did not really believe it' },
-          { id: 'truth', label: 'truth', reads: 'truth: the time on the wall was wrong' },
-          { id: 'reason', label: 'the reason', reads: 'justification: a broken clock is no reason' },
-          { id: 'none', label: 'none of them', reads: 'none of them, all three are met', correct: true },
+          { id: 'belief', label: 'belief', reads: 'belief: you didn’t believe it was three' },
+          { id: 'truth', label: 'truth', reads: 'truth: it wasn’t three o’clock when you looked' },
+          { id: 'reason', label: 'good reason', reads: 'justification: a stopped clock gives no reason' },
+          { id: 'none', label: 'none of them', reads: 'none of them: all three conditions are met', correct: true },
         ],
       },
-      explain: 'None of them, and that’s the whole of Gettier. A broken clock feels like a broken condition, and it isn’t. You believed it, it was true, and a clock on a wall is an ordinary reason to trust. All three met, and still not knowledge.',
+      explain: 'None of them: all three conditions are met. Nothing suggested that the clock had stopped, so reading it was justified. Yet the belief was true only by luck. As Edmund Gettier argued in 1963, justified true belief isn’t sufficient for knowledge.',
       xp: 5,
     },
     dur: 1.0,
@@ -113,8 +113,8 @@ export const BEATS: Epistemology11Beat[] = [
   {
     p: 177, x: 226, real: 410, pick: 1,
     interact: {
-      prompt: 'The hallway clock read three o’clock all day. Tap the one moment when that reading was actually true.',
-      explain: 'The trap: a stopped clock isn’t always wrong — it’s right for an instant, twice a day. At three it matched the world by accident. Your reason never touched the fact, so being right was luck rather than knowledge.',
+      prompt: 'At which marked moment was the hallway clock’s reading of three o’clock true?',
+      explain: 'When you looked, at three o’clock. A stopped clock is right twice a day, for an instant each time. Its reading matched the time by accident, so your true belief fell short of knowledge.',
       xp: 5,
     },
     dur: 1.0,
@@ -122,14 +122,14 @@ export const BEATS: Epistemology11Beat[] = [
   {
     p: 441, x: 226, real: 410,
     summary: {
-      title: 'What You Now Know',
+      title: 'Justified True Belief and Luck',
       points: [
         'Knowledge was defined as justified true belief',
-        'Gettier cases meet all three and still fail',
-        'Luck can stitch a true belief to a bad reason',
+        'Gettier cases meet all three conditions yet aren’t knowledge',
+        'In such cases, the belief is true only by luck',
         'Knowing needs a non-accidental link to the fact',
       ],
-      closing: 'Being right is not enough. You have to be right for the right reason.',
+      closing: 'A true belief with good reasons can still fall short of knowledge if its truth is a matter of luck.',
     },
     dur: 3.0,
   },

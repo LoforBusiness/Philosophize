@@ -32,36 +32,36 @@ export interface Aesthetics35Beat extends BaseBeat {
 export const BEATS: Aesthetics35Beat[] = [
   {
     p: 25, x: 56, track: 1,
-    text: 'A joke is a piece of track. The setup runs you along it, and you already know where you’re going.',
+    text: 'The setup of a joke leads you along one reading, like a train on a single track. You come to expect a particular ending.',
     dur: 3.8,
   },
   {
     p: 466, x: 56, track: 1, split: 1,
-    text: 'Here’s the setup line. “I told my doctor I broke my arm in two places.”',
+    text: 'The setup line reads, “I told my doctor I broke my arm in two places.”',
     dur: 2.6,
   },
   {
     p: 394, x: 56, track: 1, split: 1,
-    text: 'You’re in a surgery now, waiting for the diagnosis.',
+    text: 'On the natural reading, the two places are points on the arm, and you’re waiting for a diagnosis.',
     dur: 1.8,
   },
   {
     p: 380, x: 56, track: 1, split: 1, live: 1,
     interact: {
-      prompt: 'Three endings sit on three branches. Tap the one that lands.',
-      explain: '“He told me to stop going to those places.” The punchline fits, and it’s not the line you were on. That gap is the joke. The hospital ending fits and surprises nobody. The umbrella surprises and fits nothing, which is a mistake.',
+      prompt: 'Which of the three endings turns the setup into a joke?',
+      explain: 'The ending “stop going there” fits a second reading, on which the places are locations you visit. The switch between readings is the joke. The hospital ending fits but surprises no one. The umbrella surprises but fits nothing.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 467, x: 56, track: 1, split: 1, run: 1,
-    text: 'Both readings had to fit. That’s the part people miss.',
+    text: 'The incongruity theory says a joke is funny because it breaks what you expect. But both readings must still fit the same words.',
     dur: 2,
   },
   {
     p: 467, x: 56, track: 1, split: 1, run: 1,
-    text: 'A punchline that doesn’t fit the setup is not surprising. It’s wrong.',
+    text: 'A punchline that fits no reading of the setup is an error, not a surprise.',
     dur: 2.6,
   },
   {
@@ -79,51 +79,51 @@ export const BEATS: Aesthetics35Beat[] = [
   },
   {
     p: 12, x: 56, track: 1, split: 1, run: 1, spoil: 1,
-    text: 'Now watch it with the second line drawn in first. Same words, same swap, and nothing happens.',
+    text: 'Suppose the second reading is shown before the punchline arrives. The words and the switch are the same, but the joke is no longer funny.',
     dur: 3.1,
   },
   {
     p: 12, x: 56, track: 1, split: 1, run: 1, spoil: 1,
-    text: 'That is what explaining a joke does to it.',
+    text: 'Explaining a joke reveals the second reading in advance, and so removes the surprise.',
     dur: 1.8,
   },
   {
     p: 167, x: 128, track: 1, split: 1, spoil: 1,
-    text: 'That’s why the old theories only half work. Hobbes said we laugh at someone beneath us.',
+    text: 'Thomas Hobbes held that you laugh when you suddenly feel above someone. His superiority theory explains only some jokes.',
     dur: 3.3,
   },
   {
     p: 167, x: 128, track: 1, split: 1, spoil: 1,
-    text: 'Freud said we let out pressure.',
+    text: 'Sigmund Freud’s relief theory holds that a joke releases energy normally used to repress the feelings it expresses.',
     dur: 1.8,
   },
   {
     p: 379, x: 128, track: 1, split: 1, spoil: 1,
     interact: {
-      prompt: 'Which case breaks the idea that laughter needs a victim?',
+      prompt: 'Which case refutes the superiority theory’s claim that laughter needs a victim?',
       sort: {
         chip: 'laughter needs a victim',
         bins: [
-          { id: 'alone', label: 'laughing alone', reads: 'people laugh with nobody there to look down on' },
-          { id: 'kind', label: 'people who never mock', reads: 'some people never laugh at anyone at all' },
-          { id: 'pun', label: 'a pun', reads: 'a pun is funny and humiliates nobody', correct: true },
+          { id: 'alone', label: 'laughing alone', reads: 'laughter with no one present to look down on' },
+          { id: 'kind', label: 'mocking nobody', reads: 'people who laugh but never mock anyone' },
+          { id: 'pun', label: 'a pun', reads: 'a pun amuses without humiliating anyone', correct: true },
         ],
       },
-      explain: 'A pun. Laughing alone is no trouble for the theory: you can feel superior with nobody watching. The pun is the problem. It’s funny with nobody beneath anybody. A theory of humour has to cover the whole range, or it’s a theory of something narrower.',
+      explain: 'A pun. Laughing alone fits the superiority theory, since Hobbes allows pride in one’s own sudden act. People who never mock may still feel superior. A pun, however, amuses without placing anyone beneath anyone. Francis Hutcheson raised this objection against Hobbes.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Swap',
+      title: 'The Switch in a Joke',
       points: [
         'A joke builds one reading and delivers a second',
-        'Both readings have to genuinely fit',
-        'Explaining hands over the second in advance',
-        'Superiority and relief cover only some cases',
+        'Both readings must fit the setup',
+        'Explaining a joke reveals the second reading early',
+        'Superiority and relief theories explain only some humour',
       ],
-      closing: 'Comedy is the one art whose success is measured by a noise you can’t help. No wonder it resists being explained by people writing carefully.',
+      closing: 'The incongruity theory explains why a joke needs surprise. It also explains why an explained joke stops being funny.',
     },
     dur: 3.0,
   },

@@ -37,31 +37,31 @@ export const BEATS: Epistemology29Beat[] = [
   },
   {
     p: 170, x: 26, tiles: 1,
-    text: 'Two cooks know the recipe word for word. One panics when the sauce splits.',
+    text: 'Consider two cooks who both know a recipe word for word. When the sauce splits, one of them can’t save it.',
     dur: 4.8,
   },
   {
     p: 446, x: 26, tiles: 1, wired: 0.9,
-    text: 'The other rescues it in seconds. Same facts in both heads, and only one of them grasps the dish.',
+    text: 'The other cook saves it at once. Both know the same facts, but only the second understands why the recipe works.',
     dur: 5.0,
   },
   {
     p: 266, x: 26, tiles: 1, wired: 0.9, fresh: 1,
-    text: 'Understanding is knowing why. Seeing how the pieces hold each other up is what lets it travel.',
+    text: 'Understanding is knowing why. Grasping how facts explain one another lets understanding extend to new cases.',
     dur: 5.0,
   },
   {
     p: 164, x: 26, tiles: 1, wired: 0.9, fresh: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what a memorised test score cannot show.',
-      explain: 'Whether the pieces connect. A score measures what you can recall, and understanding shows up where recall runs out. More facts would be one more tile on a heap that was never short of tiles.',
+      prompt: 'What can a score earned by memorising fail to show?',
+      explain: 'Whether the pieces connect. A memorised score measures recall, and understanding shows itself where recall runs out, in new cases. Adding facts wouldn’t connect the ones already held.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 460, x: 80, tiles: 1, wired: 0.9, fresh: 1,
-    text: 'A student aces the physics test by memorising answers. A new problem defeats her completely.',
+    text: 'Suppose a student passes a physics test by memorising the answers. She can’t solve a problem she hasn’t seen.',
     dur: 5.0,
   },
   {
@@ -79,21 +79,21 @@ export const BEATS: Epistemology29Beat[] = [
   },
   {
     p: 456, x: 80, tiles: 1, wired: 0.2, fresh: 1,
-    text: 'Every fact she has is correct, and the facts sit there in a heap. Nothing carries them to a new case.',
+    text: 'Every fact she holds is true, but the facts are unconnected. Nothing in them lets her apply them to a new case.',
     dur: 5.0,
   },
   {
     p: 172, x: 80, tiles: 1, fresh: 1,
     interact: {
-      prompt: 'What is the student actually short of?',
+      prompt: 'What does understanding add to knowing the facts?',
       poll: {
         options: [
-          { id: 'more', reads: 'more facts, and a longer list of them' },
-          { id: 'links', reads: 'the links that hold the facts together', holders: ['Plato', 'Jonathan Kvanvig'], correct: true },
-          { id: 'nothing', reads: 'nothing at all, since the score was high' },
+          { id: 'more', reads: 'knowledge of a correct explanation, nothing more', holders: ['Kareem Khalifa'] },
+          { id: 'links', reads: 'a grasp of how the facts connect', holders: ['Plato', 'Jonathan Kvanvig'], correct: true },
+          { id: 'nothing', reads: 'nothing objective, only a feeling of insight', holders: ['Carl Hempel'] },
         ],
       },
-      explain: 'The links. Understanding is knowledge woven into a structure, which is why it reaches a case nobody rehearsed. A longer list would sit in the same heap, and a high score measured only the rehearsing.',
+      explain: 'A grasp of how the facts connect. That grasp lets understanding extend to cases nobody rehearsed. A mere feeling of insight couldn’t do that, so understanding adds something objective.',
       xp: 5,
     },
     dur: 1.0,
@@ -101,14 +101,14 @@ export const BEATS: Epistemology29Beat[] = [
   {
     p: 313, x: 80, tiles: 1, wired: 1, fresh: 1, solved: 1,
     summary: {
-      title: 'Knowing and Grasping',
+      title: 'Knowing and Understanding',
       points: [
         'Knowledge often arrives as isolated facts',
         'Understanding is grasping why they hold together',
         'A grasp transfers to cases you have never met',
-        'A stack of facts just sits there',
+        'Unconnected facts don’t extend to new cases',
       ],
-      closing: 'Ask yourself whether you could explain it to somebody, and you’ll find out which of the two you have.',
+      closing: 'Being able to explain a subject to someone else is a good test of understanding it.',
     },
     dur: 5.0,
   },

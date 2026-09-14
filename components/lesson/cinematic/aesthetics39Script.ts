@@ -34,36 +34,36 @@ export interface Aesthetics39Beat extends BaseBeat {
 export const BEATS: Aesthetics39Beat[] = [
   {
     p: 25, x: 52, routes: 1,
-    text: 'A chair and a sculpture can be the same wood, the same hands and the same skill.',
+    text: 'A chair and a sculpture can be made from the same wood, by the same hands, with the same skill. So materials and skill can’t separate art from craft.',
     dur: 3.8,
   },
   {
     p: 30, x: 52, routes: 1, steps: 1,
-    text: 'So look at the making instead. Each of these is a plan at the top and the hours it took underneath.',
+    text: 'The difference, then, must lie in the making. Each route runs from a plan at the top, through the hours of work beneath it.',
     dur: 4.4,
   },
   {
     p: 36, x: 52, routes: 1, steps: 1, works: 1,
-    text: 'And here’s what came out of each one.',
+    text: 'Each route ends in a finished work: a chair, a poem and a copy.',
     dur: 2.6,
   },
   {
     p: 160, x: 52, routes: 1, steps: 1, works: 1, live: 1,
     interact: {
-      prompt: 'Tap the maker who did not know what it would be.',
-      explain: 'The middle one, and the picture says so twice over: an empty plan, and a run that wanders. The other two spent every hour closing a gap drawn before they began. Closing a drawn gap is what craft is.',
+      prompt: 'Which maker didn’t know in advance what the finished work would be?',
+      explain: 'The poet. The poem’s plan is empty, and its route wanders. The other two makers worked towards a result fixed before they began. On this view, working to a fixed result is what makes something craft.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 159, x: 52, routes: 1, steps: 1, works: 1,
-    text: 'That’s Collingwood’s line between art and craft. It’s drawn in the making, never in the thing that comes out.',
+    text: 'R. G. Collingwood draws his line between art and craft in the process of making, not in the finished object.',
     dur: 4.6,
   },
   {
     p: 383, x: 98, routes: 1, steps: 1, works: 1,
-    text: 'Immanuel Kant had drawn it a century and a half earlier, and put the difference in one word: freedom.',
+    text: 'Immanuel Kant drew a related line in 1790. He placed the difference between art and handicraft in freedom.',
     dur: 4.2,
   },
   {
@@ -82,30 +82,30 @@ export const BEATS: Aesthetics39Beat[] = [
   {
     p: 21, x: 98, routes: 1, steps: 1, works: 1,
     interact: {
-      prompt: 'Where does a church belong?',
+      prompt: 'Where does a church belong on Collingwood’s distinction?',
       sort: {
         chip: 'a church',
         bins: [
-          { id: 'craft', label: 'craft', reads: 'a plan, and centuries of closing the gap' },
-          { id: 'art', label: 'art', reads: 'found in the building, with no plan to close' },
-          { id: 'both', label: 'both', reads: 'planned, and then found by the people who built it', correct: true },
+          { id: 'craft', label: 'craft', reads: 'a fixed plan, carried out over centuries' },
+          { id: 'art', label: 'art', reads: 'discovered in the building, with no plan' },
+          { id: 'both', label: 'both', reads: 'planned, then partly discovered by its builders', correct: true },
         ],
       },
-      explain: 'Both, and the fourth route says why. There was a drawing, and there were three hundred years of masons who never met the man who drew it. Most real making is like this. That’s not a failure of the distinction but a reason to ask about particular things.',
+      explain: 'Both craft and art. A medieval church followed a plan, yet masons over generations changed it as they built. Most real making combines the two. The distinction survives, but each case must be examined.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Two Routes',
+      title: 'Collingwood on Art and Craft',
       points: [
-        'Craft closes a gap between a plan and a thing',
-        'Art is said to have no gap to close',
+        'Craft carries out a plan fixed in advance',
+        'On Collingwood’s view, art has no plan to execute',
         'The difference is in the making, not the object',
-        'Commissioned masterpieces are the standing objection',
+        'Commissioned masterpieces are an objection to the theory',
       ],
-      closing: 'Most real making is a bit of both, and that’s not a failure of the distinction. It’s what makes asking about a particular thing worth doing.',
+      closing: 'Most real making combines craft and art. The distinction is useful because it asks how a particular thing was made.',
     },
     dur: 3.4,
   },

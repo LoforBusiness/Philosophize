@@ -33,36 +33,36 @@ export interface Logic29Beat extends BaseBeat {
 export const BEATS: Logic29Beat[] = [
   {
     p: 428, x: 24, beam: 1,
-    text: 'A china teapot orbits the sun, between Earth and Mars. Prove it doesn’t.',
+    text: 'Suppose someone claims that a china teapot orbits the sun between Earth and Mars, too small to be seen.',
     dur: 4.8,
   },
   {
     p: 178, x: 24, beam: 1,
-    text: 'You cannot. Bertrand Russell picked the example because nobody could, and that settles nothing.',
+    text: 'No one could disprove the claim, and Bertrand Russell chose the example for that reason. Yet being impossible to disprove gives no reason to believe a claim.',
     dur: 5.0,
   },
   {
     p: 447, x: 24, beam: 1, load: 1, side: 0.9,
-    text: 'The burden of proof is the job of backing a claim up. It falls on whoever asserts.',
+    text: 'The burden of proof is the obligation to support a claim with evidence. It falls on whoever asserts.',
     dur: 5.0,
   },
   {
     p: 268, x: 24, beam: 1, load: 1, side: 0.5,
-    text: 'Before anybody has argued, the beam is empty. Withholding belief is the resting state.',
+    text: 'Before any evidence is offered, the default is to withhold belief. Withholding belief is neither acceptance nor denial.',
     dur: 5.0,
   },
   {
     p: 165, x: 24, beam: 1, load: 1, side: 0.5, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what is wrong with you cannot disprove it.',
-      explain: 'It hands the work to the wrong side. Failing to refute a claim is not evidence for the claim. A guess doesn’t become a fact by being hard to check. The move is a burden shift, and naming it out loud is the whole defence.',
+      prompt: 'What is wrong with the reply “you can’t disprove it”?',
+      explain: 'It hands over the work. The reply shifts the burden of proof from the claimant to the doubter. Failing to refute a claim isn’t evidence for it, and treating it as evidence is the appeal to ignorance.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 461, x: 80, beam: 1, load: 1, side: 0.9,
-    text: 'Somebody keeps an invisible dragon in the garage. Every test you propose is explained away.',
+    text: 'Carl Sagan describes someone who says an invisible dragon lives in their garage. Each test for the dragon is explained away.',
     dur: 5.0,
   },
   {
@@ -80,24 +80,24 @@ export const BEATS: Logic29Beat[] = [
   },
   {
     p: 457, x: 80, beam: 1, load: 1, side: 0.9,
-    text: 'Sagan argues that a dragon no test can reach is the same picture as an empty garage.',
+    text: 'Sagan argues that a dragon no test can detect is no different from no dragon at all.',
     dur: 5.0,
   },
   {
     p: 175, x: 80, beam: 1, load: 1,
     interact: {
-      prompt: 'Where does the burden of proof sit?',
+      prompt: 'How should the burden of proof divide between claimant and doubter?',
       split: {
         left: 'THE CLAIMANT',
         right: 'THE DOUBTER',
         start: 0.1,
         zones: [
           { id: 'doubter', upto: 0.35, reads: 'the doubter has to disprove the dragon' },
-          { id: 'shared', upto: 0.7, reads: 'both sides owe exactly the same' },
+          { id: 'shared', upto: 0.7, reads: 'both sides bear an equal burden' },
           { id: 'claimant', upto: 1, reads: 'whoever makes the claim brings the evidence', correct: true },
         ],
       },
-      explain: 'Almost all of it on the claimant. An assertion is what creates the debt, and doubt takes on none of it. Splitting the burden evenly would make every unsupported claim halfway to true. That’s how the dragon gets into the garage.',
+      explain: 'Whoever makes the claim brings the evidence. The assertion creates the obligation, and doubt creates none. An equal division would treat every unsupported claim as half established.',
       xp: 5,
     },
     dur: 1.0,
@@ -105,14 +105,14 @@ export const BEATS: Logic29Beat[] = [
   {
     p: 307, x: 80, beam: 1, load: 1, side: 0.9,
     summary: {
-      title: 'Who Has to Prove It',
+      title: 'The Burden of Proof',
       points: [
         'The burden falls on whoever makes the claim',
         'The default is withholding belief, not assuming truth',
-        'You cannot disprove it shifts the burden unfairly',
-        'No evidence means unsupported, never proven',
+        '“You can’t disprove it” shifts the burden',
+        'Failure to disprove a claim isn’t evidence for it',
       ],
-      closing: 'Never let somebody make their guess your problem to refute. Ask them for the proof.',
+      closing: 'When a claim lacks evidence, ask the claimant for support rather than trying to refute it.',
     },
     dur: 5.0,
   },

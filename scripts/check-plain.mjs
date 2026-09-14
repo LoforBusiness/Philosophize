@@ -66,7 +66,8 @@ const POINTER_CEIL = 0.12;
  * reworded with every claim and every named term kept.
  */
 // 18 → 3 on 11 Sep 2026, when every lesson was rewritten to be read aloud (group AC).
-const HARD_BUDGET = 3;
+// 3 → 0 on 13 Sep 2026, after the lecture rewrite's readability pass (V11).
+const HARD_BUDGET = 0;
 /**
  * The shortest piece worth scoring. Below this both tests are noise — see the note
  * at the loop. Twenty words is about two ordinary sentences of this corpus, which
@@ -171,7 +172,12 @@ export function ease(text) {
   // A PROMPT IS EXEMPT, and deliberately. I71 requires a question to point at
   // something on the stage — "Tap the one it changed" is doing its job. Pointing
   // is only a fault when there is nothing to point AT.
-  const POINTERS = /^(it|its|it's|that|this|these|those|they|them|their|which)$/i;
+  // `that` AND `which` LEFT THE LIST ON 13 SEP 2026. Once every lesson was rewritten as
+  // a clear lecture (group V), nearly every one of them joins a clause rather than
+  // referring: "Kant argued that…", "the hypothesis that best explains it". They were
+  // scoring grammar as vagueness. The words that really stand in for an unnamed thing
+  // (it, this, they and the rest) still count.
+  const POINTERS = /^(it|its|it's|this|these|those|they|them|their)$/i;
   const bare = words.map((w) => w.replace(/[^A-Za-z']/g, ''));
   const pointers = bare.filter((w) => POINTERS.test(w)).length;
 

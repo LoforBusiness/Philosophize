@@ -32,7 +32,7 @@ export interface Ethics37Beat extends BaseBeat {
 export const BEATS: Ethics37Beat[] = [
   {
     p: 172, x: 54, posts: 1,
-    text: 'Two people stand apart on an ordinary Tuesday. Neither owes the other a thing.',
+    text: 'Consider two people on an ordinary Tuesday. At this point, neither owes the other anything.',
     dur: 3.4,
   },
   {
@@ -42,46 +42,46 @@ export const BEATS: Ethics37Beat[] = [
   },
   {
     p: 2, x: 54, posts: 1, cord: 1,
-    text: 'Watch the cord appear between the two.',
+    text: 'Those words create an obligation that binds the speaker to the other person.',
     dur: 1.8,
   },
   {
     p: 13, x: 54, posts: 1, cord: 1,
-    text: 'Nothing else changed. No money moved, no law was passed.',
+    text: 'David Hume found this puzzling. Nothing else changes: no money moves and no law is passed.',
     cite: 'Hume, 1740',
     dur: 1.9,
   },
   {
     p: 13, x: 54, posts: 1, cord: 1,
-    text: 'A sound was made and a duty exists that did not exist a second earlier.',
+    text: 'Yet a duty now exists where none existed a moment before. Hume concluded that only a human convention could explain the change.',
     dur: 2.9,
   },
   {
     p: 461, x: 54, posts: 1, cord: 1, lean: 1,
     interact: {
-      prompt: 'Where does the wrong actually land?',
+      prompt: 'How is the wrong of a broken promise divided between the person and the practice?',
       split: {
-        left: 'ON YOUR FRIEND', right: 'ON THE PRACTICE',
+        left: 'ON THE PERSON PROMISED', right: 'ON THE PRACTICE',
         start: 0.04,
         zones: [
           { id: 'practice', upto: 0.3, reads: 'on the practice of promising' },
-          { id: 'both', upto: 0.66, reads: 'half on her, half on the practice' },
-          { id: 'friend', upto: 1, reads: 'on her, she planned around your word', correct: true },
+          { id: 'both', upto: 0.66, reads: 'equally on the person and the practice' },
+          { id: 'friend', upto: 1, reads: 'on the person you gave your word to', correct: true },
         ],
       },
-      explain: 'Nearly all of it on your friend. The practice does matter, and it’s the other main answer. But that answer makes the person you let down an afterthought. Scanlon puts her first: she relied on you, and the reliance is what you broke.',
+      explain: 'On the person you gave your word to. Hume grounds the duty in the practice of promising. Scanlon argues that breaking a promise wrongs the person you assured.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 467, x: 54, posts: 1, cord: 1, lean: 1,
-    text: 'Look what’s leaning on the cord now. The other person cancelled a plan.',
+    text: 'Meanwhile, the other person has come to rely on the promise, and has cancelled a plan.',
     dur: 2.9,
   },
   {
     p: 467, x: 54, posts: 1, cord: 1, lean: 1,
-    text: 'Told a friend. Stopped hunting for another way.',
+    text: 'They’ve told a friend and stopped looking for any other arrangement.',
     dur: 1.8,
   },
   {
@@ -100,15 +100,15 @@ export const BEATS: Ethics37Beat[] = [
   {
     p: 12, x: 54, posts: 1, lean: 1, cut: 1, unseen: 1, live: 1,
     interact: {
-      prompt: 'You break it, and they never find out. Tap what was damaged anyway.',
-      explain: 'Their plans. They’re already down, and they went down at the moment you decided rather than at the moment anyone noticed. Secrecy protects you from the consequences and does nothing about the wrong.',
+      prompt: 'If you break the promise in secret, what has still been damaged?',
+      explain: 'Their plans. The plans failed when you broke the promise, not when anyone found out. Secrecy protects you from blame, but it doesn’t undo the wrong to the person you promised.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 400, x: 126, posts: 1, lean: 1, cut: 1,
-    text: 'Breaking a promise in secret is the test that separates the two accounts. If the wrong were only to the practice, a breach nobody hears of costs almost nothing.',
+    text: 'A secret breach separates the two accounts. If the wrong were only to the practice, a breach that no one discovers would leave the practice almost untouched.',
     dur: 4.8,
   },
   {
@@ -116,11 +116,11 @@ export const BEATS: Ethics37Beat[] = [
       title: 'Four Words and a Duty',
       points: [
         'A promise makes an obligation out of a sentence',
-        'Hume: only a convention explains that',
-        'Scanlon: the wrong is to whoever relied on you',
-        'Secrecy does not repair it',
+        'Hume holds that promising depends on human convention',
+        'Scanlon holds that the wrong is done to the promisee',
+        'A secret breach still wrongs the person promised',
       ],
-      closing: 'The strangest part is how ordinary a promise feels. You make one most weeks and never once stop to find that remarkable.',
+      closing: 'Promising is so common that its power to create an obligation from words alone is easy to overlook.',
     },
     dur: 3.2,
   },

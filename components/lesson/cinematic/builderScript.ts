@@ -85,14 +85,14 @@ export const BEATS: Beat[] = [
     act: 1,
     build: { p1: '' },
     gest: 7,                                        // lay the first brick
-    text: 'A master builder sets the first stone.',
+    text: 'In logic, an argument is a set of claims, some of which are offered as reasons for another.',
     dur: 2.6,
   },
   {
     act: 1,
     build: { p1: '', p2: '' },
     gest: 7,                                        // lay the second brick
-    text: 'Every argument hides the same skeleton. Learn to see it once, and you read minds forever.',
+    text: 'Every argument, however long, is built from the same basic parts. Once you can identify them, you can analyse any argument.',
     dur: 3.2,
   },
   {
@@ -100,7 +100,7 @@ export const BEATS: Beat[] = [
     build: { p1: '', p2: '', key: '' },
     gest: 5,                                        // sweep the keystone into place
     say: [{ who: 'master', text: 'There. It stands.' }],
-    text: 'Two stones below. One resting on top.',
+    text: 'Two stones form a base, and a third rests on top. The top stone stands only because the two below support it.',
     dur: 1.8,
   },
 
@@ -110,7 +110,7 @@ export const BEATS: Beat[] = [
     build: { p1: '', p2: '', key: '' },
     gest: 5,                                        // sweep the keystone into place
     say: [{ who: 'master', text: 'There. It stands.' }],
-    text: 'That shape is every argument you’ll ever meet.',
+    text: 'This shape is the basic form of an argument: claims below that support a claim above.',
     dur: 1.8,
   },
 
@@ -119,14 +119,14 @@ export const BEATS: Beat[] = [
     act: 2,
     build: { p1: '', p2: '', key: '', tags: true },
     gest: 3,                                        // count off the base
-    text: 'The two stones at the base are the premises — the reasons you lay down. Words like “because” and “since” point them out.',
+    text: 'The stones at the base are the premises, the reasons offered for a claim. The words “because” and “since” often introduce a premise.',
     dur: 4.2,
   },
   {
     act: 2,
     build: { p1: '', p2: '', key: '', tags: true },
     gest: 6,                                        // point up at the keystone
-    text: 'The stone on top is the conclusion. Aristotle called it the claim that must follow.',
+    text: 'The stone on top is the conclusion, the claim the premises support. In a deduction, Aristotle held, the conclusion follows of necessity.',
     cite: 'Aristotle, Prior Analytics',
     dur: 2.8,
   },
@@ -134,20 +134,20 @@ export const BEATS: Beat[] = [
     act: 2,
     build: { p1: '', p2: '', key: '', tags: true },
     gest: 6,                                        // point up at the keystone
-    text: 'The words “therefore”, “so” and “thus” all flag a conclusion.',
+    text: 'The words “therefore”, “so” and “thus” often introduce a conclusion.',
     dur: 1.8,
   },
   {
     act: 2,
     build: { p1: '', p2: '', key: '', tags: true },
     tap: {
-      prompt: 'One of these words flags a conclusion. Tap it.',
+      prompt: 'Which of these words usually introduces a conclusion?',
       options: [
-        { id: 'a', text: '"because"', correct: false },
-        { id: 'b', text: '"therefore"', correct: true },
+        { id: 'a', text: '“because”', correct: false },
+        { id: 'b', text: '“therefore”', correct: true },
       ],
       explain:
-        'The words “because” and “since” introduce a premise — the reason. “Therefore”, “so” and “thus” point to the conclusion the reasons support.',
+        '“Therefore” marks the conclusion, the claim the reasons support. “Because” marks a premise, one of the reasons given for it.',
     },
     dur: 0.8,
   },
@@ -157,14 +157,14 @@ export const BEATS: Beat[] = [
     act: 3,
     build: { p1: S_P1, p2: S_P2, key: S_K },
     gest: 2,                                        // present the finished structure
-    text: 'Here’s logic’s oldest structure, first written down around 350 BCE.',
+    text: 'This is the standard example of a syllogism, the form of argument Aristotle first analysed.',
     dur: 4.0,
   },
   {
     act: 3,
     build: { p1: S_P1, p2: S_P2, key: S_K },
     gest: 1,                                        // emphatic — "forced into place"
-    text: 'Grant the builder both premises, and no matter how you feel, the top stone is forced into place. That’s what the phrase “follows of necessity” means.',
+    text: 'If both premises are true, the conclusion can’t be false. That’s what Aristotle meant by a conclusion that follows of necessity.',
     cite: 'Aristotle, Prior Analytics',
     dur: 4.4,
   },
@@ -176,13 +176,13 @@ export const BEATS: Beat[] = [
     gest: 4,                                        // hand near the base, about to pull
     say: [{ who: 'master', text: 'Pull a premise. Does it still stand?' }],
     mc: {
-      prompt: 'True or false: a conclusion can stand on its own, with no premises behind it.',
+      prompt: 'Can a claim count as a conclusion if no premises support it?',
       options: [
-        { id: 'true', text: 'True', correct: false },
-        { id: 'false', text: 'False', correct: true },
+        { id: 'true', text: 'Yes', correct: false },
+        { id: 'false', text: 'No', correct: true },
       ],
       explain:
-        'A claim with nothing behind it is a bare assertion. Strip the premises and there’s no inference, and no reason to believe it.',
+        'No. A conclusion is, by definition, a claim that premises support. Without premises there’s no inference, only a bare assertion with no reason to believe it.',
       xp: 5,
     },
     dur: 1.0,
@@ -191,7 +191,7 @@ export const BEATS: Beat[] = [
     act: 4,
     build: { p1: S_P1, p2: S_P2, key: S_K },
     gest: 0,                                        // open hand — the plain point
-    text: 'Pull the reasons and nothing holds the claim up. Premises aren’t decoration but the load-bearing part.',
+    text: 'Remove the premises and nothing supports the conclusion. The premises are what give anyone a reason to accept it.',
     dur: 3.8,
   },
   {
@@ -200,15 +200,15 @@ export const BEATS: Beat[] = [
     gest: 6,                                        // gesture up at the empty slot
     say: [{ who: 'master', text: 'Which of these belongs on top?' }],
     mc: {
-      prompt: '"Therefore, taxes should rise. After all, the deficit is growing." Which sentence is the conclusion?',
+      prompt: '“Therefore, taxes should rise. After all, the deficit is growing.” Which sentence is the conclusion?',
       options: [
-        { id: 'a', text: '"Taxes should rise" — flagged by "therefore"', correct: true },
-        { id: 'b', text: '"The deficit is growing" — after "after all"', correct: false },
+        { id: 'a', text: '“Taxes should rise”, marked by “therefore”', correct: true },
+        { id: 'b', text: '“The deficit is growing”, after “after all”', correct: false },
         { id: 'c', text: 'Whichever sentence appears first', correct: false },
-        { id: 'd', text: 'Both — they each conclude something', correct: false },
+        { id: 'd', text: 'Both, since each concludes something', correct: false },
       ],
       explain:
-        'A conclusion can come first. The word “therefore” marks the claim being supported, and “after all” introduces the premise backing it up. Read the role, not the position.',
+        '“Taxes should rise”, marked by “therefore”. The word “therefore” marks the claim being supported, and “after all” introduces the premise. A conclusion can come first, so a conclusion is identified by its role, not by its position in the passage.',
       xp: 5,
     },
     dur: 1.0,
@@ -235,14 +235,14 @@ export const BEATS: Beat[] = [
   {
     act: 5,
     summary: {
-      title: 'The Skeleton Revealed',
+      title: 'The Parts of an Argument',
       points: [
         'Premises are the reasons offered for a conclusion',
-        '"Because" and "since" often flag a premise',
-        '"Therefore" and "thus" often flag a conclusion',
-        'Position can fool you; read the role',
+        '“Because” and “since” often introduce a premise',
+        '“Therefore” and “thus” often introduce a conclusion',
+        'Identify a conclusion by its role, not its position',
       ],
-      closing: 'Find the premises and the conclusion, and you can dissect any argument.',
+      closing: 'Identifying the premises and the conclusion is the first step in assessing any argument.',
     },
     dur: 2.8,
   },

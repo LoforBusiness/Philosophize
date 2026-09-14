@@ -34,36 +34,36 @@ export interface Aesthetics28Beat extends BaseBeat {
 export const BEATS: Aesthetics28Beat[] = [
   {
     p: 429, x: 26, rooms: 1, lit: 1,
-    text: 'You haven’t been to a museum in months. You’ve had aesthetic experiences all week.',
+    text: 'Suppose you haven’t visited a museum in months. You may still have had aesthetic experiences every day this week.',
     dur: 5.0,
   },
   {
     p: 177, x: 26, rooms: 1, lit: 1,
-    text: 'The smell of rain. A tidy desk, and the arc of a pass nobody expected.',
+    text: 'Examples include the smell of rain, a well-ordered desk and an unexpected pass in a football match.',
     dur: 4.6,
   },
   {
     p: 441, x: 26, rooms: 1, lit: 1, street: 1,
-    text: 'For centuries aesthetics meant paintings, symphonies and poems. Most of a life happens elsewhere.',
+    text: 'For centuries, aesthetics studied mainly the fine arts, such as painting, music and poetry. Most of a life happens elsewhere.',
     dur: 5.0,
   },
   {
     p: 264, x: 26, rooms: 1, lit: 1, street: 1,
-    text: 'Cooking, dressing, tidying, commuting. Yuriko Saito argues these hours deserve the same attention.',
+    text: 'Yuriko Saito argues that cooking, dressing, cleaning and commuting deserve aesthetic attention too. This field is called everyday aesthetics.',
     dur: 5.0,
   },
   {
     p: 160, x: 26, rooms: 1, lit: 1, street: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what everyday aesthetics claims.',
-      explain: 'Most beauty is outside art. Saito and others point at cooking, tidying and commuting, where nearly all of a life is spent. Nothing here runs art down, and taste is not the same as attention.',
+      prompt: 'Which of these claims is everyday aesthetics committed to?',
+      explain: 'Most beauty is outside art. Saito points to cooking, cleaning and commuting, which fill most of a life. The view doesn’t claim that art is overrated, and it concerns attention rather than taste.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 457, x: 82, rooms: 1, lit: 1, street: 1,
-    text: 'A footballer threads a pass nobody expected, and the stadium gasps. Grace, timing, form that fits its purpose.',
+    text: 'A footballer makes a pass nobody expected, and the stadium gasps. The pass has grace, good timing and a form suited to its purpose.',
     dur: 5.0,
   },
   {
@@ -80,22 +80,22 @@ export const BEATS: Aesthetics28Beat[] = [
   },
   {
     p: 453, x: 82, rooms: 1, lit: 1, street: 1,
-    text: 'A critic objects. If a tidy drawer and a Rembrandt are both aesthetic, the word has stopped working.',
+    text: 'The view faces an objection. If a tidy drawer and a Rembrandt are both aesthetic, the word marks nothing special.',
     dur: 5.0,
   },
   {
     p: 171, x: 82, rooms: 1,
     interact: {
-      prompt: 'Where does aesthetic experience actually happen?',
+      prompt: 'Which view of aesthetic experience fits a perfect cup of coffee?',
       sort: {
         chip: 'a perfect coffee',
         bins: [
-          { id: 'art', label: 'only in art', reads: 'the gallery keeps beauty to itself' },
-          { id: 'both', label: 'in the ordinary too', reads: 'form and balance, noticed off the wall', correct: true },
-          { id: 'same', label: 'all of it equal', reads: 'a sandwich now rivals a Rembrandt' },
+          { id: 'art', label: 'only in art', reads: 'aesthetic value belongs to art alone' },
+          { id: 'both', label: 'ordinary things too', reads: 'ordinary things can be appreciated for their form', correct: true },
+          { id: 'same', label: 'everything equal', reads: 'a sandwich has as much value as a Rembrandt' },
         ],
       },
-      explain: 'In the ordinary too. You look at a dish for its balance and the way it’s set out. That’s aesthetic looking, whatever the room. Saying a sandwich rivals a Rembrandt goes too far the other way.',
+      explain: 'Ordinary things too. A coffee noticed for its balance and look is an object of aesthetic attention. A sandwich doesn’t rival a Rembrandt, but beauty isn’t only in art.',
       xp: 5,
     },
     dur: 1.0,
@@ -103,14 +103,14 @@ export const BEATS: Aesthetics28Beat[] = [
   {
     p: 318, x: 82, rooms: 1, lit: 1, street: 1,
     summary: {
-      title: 'Beauty Off the Wall',
+      title: 'Everyday Aesthetics',
       points: [
         'Most aesthetic experience happens outside art',
-        'Food, sport and cities invite real appreciation',
-        'Enriching daily life does not cheapen a Rembrandt',
+        'Food, sport and cities invite genuine aesthetic appreciation',
+        'Valuing daily life need not lower the value of art',
         'Saito: daily beauty shapes the quality of a life',
       ],
-      closing: 'The next perfect cup of coffee is an aesthetic experience, if you let yourself notice it.',
+      closing: 'Aesthetic experience depends on attention to form, and ordinary things can receive that attention.',
     },
     dur: 5.0,
   },

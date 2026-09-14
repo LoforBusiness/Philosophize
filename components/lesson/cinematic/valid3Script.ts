@@ -26,34 +26,34 @@ export interface Valid3Beat extends BaseBeat {
 export const BEATS: Valid3Beat[] = [
   {
     p: 2, link: 0, stamp: 0, flaw: 0, form: 0,
-    text: 'A perfectly logical argument can still be dead wrong. Flawless structure isn’t enough without true premises.',
+    text: 'An argument can have a flawless logical form and still reach a false conclusion, if its premises are false.',
     dur: 3.6,
   },
   {
     p: 459, link: 1, form: 0,
-    text: 'Two tests, and never confuse them. An argument is valid when its shape won’t let true premises lead to a false conclusion.',
+    text: 'Logic distinguishes two tests. An argument is valid when its form makes it impossible for true premises to yield a false conclusion.',
     cite: 'Validity vs Soundness',
     dur: 3.2,
   },
   {
     p: 459, link: 1, form: 0,
-    text: 'An argument is sound when it’s valid and the premises are actually true.',
+    text: 'An argument is sound when it’s valid and all its premises are true.',
     dur: 1.8,
   },
   {
     p: 26, link: 1, stamp: 1, form: 1,
-    text: 'All toasters are gold. All gold things are time machines.',
+    text: 'Consider an argument whose premises are that all toasters are gold and all gold things are time machines.',
     cite: 'Valid but absurd',
     dur: 2,
   },
   {
     p: 26, link: 1, stamp: 1, form: 1,
-    text: 'So all toasters are time machines. The form is flawless, which makes the argument valid.',
+    text: 'Its conclusion is that all toasters are time machines. If the premises were true, the conclusion would have to be true, so the argument is valid.',
     dur: 2.6,
   },
   {
     p: 38, link: 1, stamp: 1, flaw: 1, form: 1,
-    text: 'Yet the conclusion is false because the premises are. Valid form, false premises: the argument is valid but not sound.',
+    text: 'Both premises are false, and so is the conclusion. Valid form, false premises: the argument is valid but not sound.',
     dur: 4.2,
   },
   {
@@ -73,45 +73,46 @@ export const BEATS: Valid3Beat[] = [
     p: 21, link: 1, stamp: 1, form: 1,
     // Answered ON the board: the form clears and four verdict cards take its place.
     interact: {
-      prompt: 'An argument is VALID and its premises are actually TRUE. What is it?',
+      prompt: 'What do you call a valid argument whose premises are all true?',
       explain:
-        'Valid form plus true premises makes an argument sound, and a sound argument’s conclusion must be true.',
+        'Sound. A valid argument with true premises is sound, so its conclusion must be true. “Valid only” fits an argument whose premises may be false, and “probable” describes inductive support.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 383, link: 1, stamp: 1, flaw: 1, form: 1,
-    text: 'Validity tests the form, and soundness tests form and facts. To resist a valid argument, you can’t attack the logic, so you must reject a premise.',
+    text: 'Validity concerns only the form, while soundness also concerns the truth of the premises. To reject the conclusion of a valid argument, you must reject a premise.',
     dur: 4.0,
   },
   {
     p: 4, link: 1, stamp: 0, flaw: 0, form: 0,
     interact: {
-      prompt: '"Grass is green, so the sky is blue." What is wrong with it?',
-      poll: {
-        options: [
-          { id: 'luck', reads: 'broken form, true conclusion', correct: true },
-          { id: 'valid', reads: 'good form, true conclusion' },
-          { id: 'premise', reads: 'good form, false conclusion' },
-          { id: 'bad', reads: 'broken form, false conclusion' },
+      prompt: 'How should the argument “Grass is green, so the sky is blue” be classified?',
+      sort: {
+        chip: 'the grass and sky argument',
+        bins: [
+          { id: 'luck', label: 'invalid', reads: 'broken form, true premise', correct: true },
+          { id: 'valid', label: 'sound', reads: 'good form, true premise' },
+          { id: 'premise', label: 'valid, unsound', reads: 'good form, false premise' },
+          { id: 'bad', label: 'both faults', reads: 'broken form, false premise' },
         ],
       },
-      explain: 'Broken form, true conclusion. Both halves of that sentence are true, but neither has anything to do with the other. So the conclusion is true and the link is missing. A true conclusion can’t decide validity, since an argument can arrive at one by accident.',
+      explain: 'Invalid. Both claims are true, but the colour of grass does nothing to make the sky blue. The form guarantees nothing, so the true conclusion is luck.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Valid vs Sound',
+      title: 'Validity and Soundness',
       points: [
-        'Valid: form blocks true premises, false conclusion',
-        'Sound: valid plus actually true premises',
+        'Valid: true premises can’t yield a false conclusion',
+        'Sound: valid, with all premises true',
         'A valid argument can reach a false conclusion',
-        '"Valid" means structure, never "true"',
+        '“Valid” describes form, not truth',
       ],
-      closing: 'Spot the difference, and bad arguments stop fooling you.',
+      closing: 'Asking the two questions separately shows where an argument fails.',
     },
     dur: 2.8,
   },

@@ -33,36 +33,36 @@ export interface Pol21Beat extends BaseBeat {
 export const BEATS: Pol21Beat[] = [
   {
     p: 172, x: 200, map: 1,
-    text: 'You never signed anything. No state has ever had your signature on a page.',
+    text: 'Consent theory holds that a state’s authority rests on the agreement of the people it governs. Yet you’ve never signed such an agreement.',
     dur: 3.8,
   },
   {
     p: 447, x: 200, map: 1, claimed: 1,
-    text: 'The usual answer is that you agreed by staying. Carry on living here and you’ve accepted the terms.',
+    text: 'One reply is tacit consent. John Locke argued that anyone who lives on a state’s territory thereby consents to obey its laws.',
     cite: 'Tacit consent',
     dur: 4.6,
   },
   {
     p: 2, x: 132, map: 1, claimed: 1, exit: 1,
-    text: 'So try leaving. Hop to the next square and somebody already governs it.',
+    text: 'The argument assumes you stay by choice, because you could leave. But every place you could move to is governed by another state.',
     dur: 3.3,
   },
   {
     p: 2, x: 132, map: 1, claimed: 1, exit: 1,
-    text: 'And the next.',
+    text: 'Leaving one state only places you under the authority of another.',
     dur: 1.8,
   },
   {
     p: 400, x: 132, map: 1, claimed: 1, exit: 1,
-    text: 'There’s only one square nobody has claimed, and you can’t live on it.',
+    text: 'Almost all habitable land is claimed by some state. The open sea is unclaimed, but no one can make a home there.',
     cite: 'The open sea',
     dur: 3.8,
   },
   {
     p: 165, x: 132, map: 1, claimed: 1, exit: 1, live: 1,
     interact: {
-      prompt: 'Tap the only ground no state claims.',
-      explain: 'The open sea, and the sea is no comfort. A choice counts as agreement only when refusing was a real option. Leaving takes money, papers, a new language and another state at the far end. So almost everybody stays, whatever they think.',
+      prompt: 'Which ground could you move to without coming under another state’s claim?',
+      explain: 'The open sea. Every other cell belongs to a state, and no one can make a home at sea. Staying counts as consent only if leaving is a real option. Yet emigrating takes money, documents and another state’s permission.',
       xp: 5,
     },
     dur: 1.0,
@@ -82,42 +82,42 @@ export const BEATS: Pol21Beat[] = [
   },
   {
     p: 176, x: 268, map: 1, claimed: 1, exit: 1,
-    text: 'Philosophical anarchism stops right there. The view does not call for a riot.',
+    text: 'Philosophical anarchism draws a limited conclusion from such arguments. It does not call for revolt against the state.',
     cite: 'The modest conclusion',
     dur: 2.6,
   },
   {
     p: 176, x: 268, map: 1, claimed: 1, exit: 1,
-    text: 'The view says the state never earned the authority it claims.',
+    text: 'The view holds only that no existing state has earned the authority it claims. There may still be moral reasons to obey many particular laws.',
     dur: 2.2,
   },
   {
     p: 383, x: 268, map: 1, claimed: 1, exit: 1,
     interact: {
-      prompt: 'What would real consent to the state have to involve?',
+      prompt: 'What would it take for staying in a state to count as consent?',
       sort: {
         chip: 'consent to the state',
         bins: [
-          { id: 'know', label: 'knowing the law', reads: 'knowing that the law exists' },
-          { id: 'stay', label: 'staying put', reads: 'staying put rather than leaving' },
-          { id: 'refuse', label: 'a refusal you could take', reads: 'having a refusal you could actually take', correct: true },
+          { id: 'know', label: 'knowing the law', reads: 'being informed of what the law requires' },
+          { id: 'stay', label: 'remaining resident', reads: 'continuing to live on the state’s territory' },
+          { id: 'refuse', label: 'a feasible refusal', reads: 'a way to refuse that is open in practice', correct: true },
         ],
       },
-      explain: 'A refusal you could take. Consent gets its force from the alternative being open in practice. That’s why a signature under threat binds nobody. The bin “knowing the law” describes being informed. Being informed of a demand is not the same as accepting it.',
+      explain: 'A feasible refusal. Consent binds only when you could refuse in practice. That’s why a signature made under threat binds no one. Remaining resident shows nothing if you can’t leave. Knowing the law means knowing a demand, not accepting it.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Agreement Nobody Made',
+      title: 'Tacit Consent and Its Limits',
       points: [
-        'Consent theory grounds the state in an agreement you never signed',
+        'Consent theory grounds authority in the agreement of the governed',
         'Tacit consent says staying counts as agreeing',
-        'Leaving is only consent-like if refusing is genuinely open',
+        'Staying counts as consent only if leaving is a real option',
         'Philosophical anarchism denies authority without demanding revolt',
       ],
-      closing: 'Every square is spoken for except the water, and nobody lives there.',
+      closing: 'Where nearly all habitable land is claimed and leaving is costly, staying can’t show consent to a state’s authority.',
     },
     dur: 3.4,
   },

@@ -23,24 +23,24 @@ export interface Pol12Beat extends BaseBeat {
 export const BEATS: Pol12Beat[] = [
   {
     p: 164, x: 70,
-    text: 'Rousseau wrote that a people can be forced to be free. The phrase sounds like nonsense.',
+    text: 'Rousseau wrote that a citizen who refuses to obey the general will must be forced to be free. The phrase seems contradictory.',
     dur: 2.5,
   },
   {
     p: 164, x: 70,
-    text: 'Isaiah Berlin spent an essay explaining why the phrase makes sense, and why that’s worse.',
+    text: 'In his 1958 lecture on liberty, Isaiah Berlin explains how the phrase can make sense, and why that’s dangerous.',
     dur: 2.5,
   },
   {
     p: 412, x: 168, door: 1, open: 0,
-    text: 'Freedom question one: how many doors are open to you, with nobody standing in them? That is negative liberty, and it is entirely about what other people are doing.',
+    text: 'One question asks how many doors are open to you, with no one blocking them. That is negative liberty, and it is entirely about what other people are doing.',
     cite: 'Negative liberty',
     dur: 5.0,
   },
   {
     p: 13, x: 124, door: 1, open: 1, neg: 1,
-    text: 'Open the door and the first lamp lights. Nothing is blocking you.',
-    cite: 'Nobody blocking',
+    text: 'With the door open and no one blocking it, you enjoy negative liberty.',
+    cite: 'No one blocking',
     dur: 2.2,
   },
   {
@@ -63,28 +63,28 @@ export const BEATS: Pol12Beat[] = [
   },
   {
     p: 29, x: 168, door: 1, open: 1, neg: 1, posi: 1,
-    text: 'Here’s Berlin’s worry. A regime announces that your real self wants the regime’s plan.',
-    cite: 'The second lamp',
+    text: 'Positive liberty is self-mastery. Berlin warns that a regime may claim your real self wants what the regime plans.',
+    cite: 'Positive liberty',
     dur: 2.4,
   },
   {
     p: 29, x: 168, door: 1, open: 1, neg: 1, posi: 1,
-    text: 'The regime lights the second lamp on your behalf, shuts the door, and calls the result freedom.',
+    text: 'The regime then removes your choices and calls the result freedom, because it serves your supposed real self.',
     dur: 2.8,
   },
   {
     p: 4, x: 124, door: 1, open: 1, neg: 1, posi: 1,
     interact: {
-      prompt: 'Nobody is stopping him, and he cannot stop. Which freedom is missing?',
+      prompt: 'An addict faces no interference but cannot stop. Which liberty does he lack?',
       sort: {
         chip: 'the addict',
         bins: [
-          { id: 'neg', label: 'negative liberty', reads: 'negative liberty: nobody standing in your way' },
-          { id: 'none', label: 'no freedom at all', reads: 'no freedom at all, just force' },
+          { id: 'neg', label: 'negative liberty', reads: 'negative liberty: no one interfering with you' },
+          { id: 'none', label: 'no freedom', reads: 'no freedom at all, only compulsion' },
           { id: 'pos', label: 'positive liberty', reads: 'positive liberty: being your own master', correct: true },
         ],
       },
-      explain: 'Positive liberty, and the comfortable answer is “no freedom at all”. Berlin’s point is sharper and nastier than that: the claim is coherent. Once somebody else gets to define your real self, they can shrink your choices in freedom’s name and mean it.',
+      explain: 'Positive liberty. No one blocks the addict, so his negative liberty is intact. He lacks self-mastery, because his craving, not his own judgement, rules what he does.',
       xp: 5,
     },
     dur: 1.0,
@@ -92,22 +92,22 @@ export const BEATS: Pol12Beat[] = [
   {
     p: 6, x: 124, door: 1, open: 1, neg: 1, posi: 1, pick: 1,
     interact: {
-      prompt: 'The door is wide open and you still cannot choose. Tap the lamp that is lying.',
-      explain: 'The second lamp. Negative liberty is honestly met: nobody stands in the doorway. But nobody else can switch on your self-mastery for you. That’s the whole force of Berlin’s warning.',
+      prompt: 'If the door is open but you can’t direct your own choices, which lamp gives a false reading?',
+      explain: 'Master of myself. No one blocks the doorway, so the claim of negative liberty is true. But self-mastery can’t be supplied by someone else, which is the force of Berlin’s warning.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'What You Now Know',
+      title: 'Berlin’s Two Concepts of Liberty',
       points: [
         'Negative liberty: the absence of obstacles from others',
         'Positive liberty: being your own master',
         'Berlin warned the two can openly conflict',
-        '"Forcing people to be free" can mask coercion',
+        '“Forced to be free” can justify coercion',
       ],
-      closing: 'An open door and a life you don’t steer are two different things. Only one of them is measured at the door.',
+      closing: 'Freedom from interference differs from self-mastery, and a regime can invoke self-mastery to remove freedom from interference.',
     },
     dur: 3.0,
   },

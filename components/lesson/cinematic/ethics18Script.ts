@@ -22,29 +22,29 @@ export interface Ethics18Beat extends BaseBeat {
 export const BEATS: Ethics18Beat[] = [
   {
     p: 25, x: 70,
-    text: 'A pig can be frightened, and can be hurt, and would rather not be. The question is whether any of that puts it inside ethics or leaves it outside.',
+    text: 'A pig can feel fear and pain, and it would rather avoid both. Does that give the pig moral standing, a claim to moral consideration?',
     dur: 4.6,
   },
   {
     p: 41, x: 168, line: 1, test: 1,
-    text: 'For most of history the line ran here. The reason given was reason itself.',
-    cite: 'Where the line ran',
+    text: 'Philosophers from Aristotle to Kant tied moral standing to the capacity to reason. Kant held that only rational beings are ends in themselves.',
+    cite: 'The rationality test',
     dur: 2.4,
   },
   {
     p: 41, x: 168, line: 1, test: 1,
-    text: 'Animals cannot argue, cannot promise, and cannot be held to anything. So they were furniture.',
+    text: 'Animals can’t argue, make promises or bear duties. So, on this view, they count only as things.',
     dur: 2.6,
   },
   {
     p: 13, x: 124, line: 1, test: 1,
-    text: 'But look at what else that test catches. Infants cannot reason.',
-    cite: 'The test misfires',
+    text: 'However, the rationality test also excludes some human beings. Infants can’t reason.',
+    cite: 'A counterexample',
     dur: 1.8,
   },
   {
     p: 13, x: 124, line: 1, test: 1,
-    text: 'Nor can someone deeply cognitively impaired. Nobody thinks they’re outside, so that’s not the real test.',
+    text: 'Nor can some people with severe mental disabilities. Yet they still count morally, so reason can’t be the test.',
     dur: 3.4,
   },
   {
@@ -62,15 +62,15 @@ export const BEATS: Ethics18Beat[] = [
   },
   {
     p: 383, x: 168, line: 1, test: 2, wide: 1,
-    text: 'Change the test to the one people actually use, and nobody has to argue about where the line goes. It moves by itself, and it takes the pig with it.',
-    cite: 'The line follows',
+    text: 'Replace reason with Bentham’s criterion: sentience, the capacity to suffer. The boundary of moral concern then includes the pig.',
+    cite: 'The capacity to suffer',
     dur: 4.6,
   },
   {
     p: 6, x: 124, line: 1, test: 2, wide: 1, pick: 1,
     interact: {
-      prompt: 'Excluding a being just for the group it belongs to has a name. Tap the right label.',
-      explain: 'Speciesism, named after racism and sexism. It gives less weight to the same suffering because of the body it happens in. Naming it is the point. An unnamed bias just feels like common sense.',
+      prompt: 'What is the name for discounting a being’s suffering because of its species?',
+      explain: 'Speciesism. Richard Ryder coined the term in 1970, by analogy with racism. It means giving less weight to equal suffering because of the species that suffers.',
       xp: 5,
     },
     dur: 1.0,
@@ -78,30 +78,30 @@ export const BEATS: Ethics18Beat[] = [
   {
     p: 165, x: 124, line: 1, test: 2, wide: 1,
     interact: {
-      prompt: 'What decides whether something counts morally?',
+      prompt: 'On Bentham’s view, what decides whether a being has moral standing?',
       sort: {
         chip: 'moral standing',
         bins: [
           { id: 'reason', label: 'can it reason', reads: 'whether it can reason' },
-          { id: 'speak', label: 'can it talk', reads: 'whether it can talk to you' },
+          { id: 'speak', label: 'can it talk', reads: 'whether it can use language' },
           { id: 'suffer', label: 'can it suffer', reads: 'whether it can suffer', correct: true },
         ],
       },
-      explain: 'Can it suffer, and Bentham got there first. “Can it reason” is the old test, and it doesn’t even follow. Reasoning has nothing to do with being hurt. Infants can’t reason either, and nobody proposes leaving them out.',
+      explain: 'Can it suffer. Bentham argues that suffering, not reason or speech, is what matters morally. Reason has no bearing on whether a being can be harmed, and infants lack it yet still count.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Circle Widens Again',
+      title: 'The Moral Standing of Animals',
       points: [
-        'Sentience, not species, grounds moral concern',
+        'For Bentham, sentience, not species, grounds moral concern',
         'Discounting a being for its species is speciesism',
         'Bentham asked only whether they can suffer',
-        'Regan grants animals rights, not mere interests',
+        'Tom Regan argues that animals have rights, not only interests',
       ],
-      closing: 'Arguing about where the line goes is the slow way. Ask what the line is for and it moves itself.',
+      closing: 'The debate turns less on where to draw the boundary than on which criterion should draw it.',
     },
     dur: 3.0,
   },

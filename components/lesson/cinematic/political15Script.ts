@@ -20,24 +20,24 @@ export interface Pol15Beat extends BaseBeat {
 export const BEATS: Pol15Beat[] = [
   {
     p: 25, x: 70,
-    text: 'Breaking a law can be the most law-respecting thing a person does. But the conditions are strict, and most lawbreaking fails them.',
+    text: 'Breaking a law can be the most law-respecting thing a person does. Martin Luther King Jr. argued so, but only under strict conditions.',
     dur: 4.6,
   },
   {
     p: 41, x: 168, stages: 2,
-    text: 'Name the injustice, and try the lawful routes first. Petitions, courts, elections.',
-    cite: 'The first two',
+    text: 'First, a clear and serious wrong must be found. Second, lawful routes must be tried, such as petitions, courts and elections.',
+    cite: 'The first two conditions',
     dur: 2.5,
   },
   {
     p: 41, x: 168, stages: 2,
-    text: 'Skipping this is where most claims to civil disobedience fall over.',
+    text: 'John Rawls treats civil disobedience as a last resort, justified only after lawful appeals have failed.',
     dur: 2.3,
   },
   {
     p: 40, x: 168, stages: 4,
-    text: 'Then break the law, in daylight, without violence. And then the one that does the real work: stay, and take the punishment the law hands you.',
-    cite: 'All four',
+    text: 'Third, the law is broken openly and without violence. Fourth, the lawbreaker stays and accepts the legal penalty.',
+    cite: 'The last two conditions',
     dur: 4.8,
   },
   {
@@ -55,23 +55,23 @@ export const BEATS: Pol15Beat[] = [
   },
   {
     p: 383, x: 124, stages: 4, night: 1,
-    text: 'Now a protest names the injustice, tries the courts and breaks the law, then goes home by a back route. Lay it against the stair and count.',
-    cite: 'A protest, measured',
+    text: 'Consider a protest that names the injustice, tries the courts and breaks the law openly, then leaves to avoid arrest. It meets three of the four conditions.',
+    cite: 'A protest tested',
     dur: 4.8,
   },
   {
     p: 165, x: 124, stages: 4, night: 1,
     interact: {
-      prompt: 'Smashing windows by night, then hiding. Is that civil disobedience?',
+      prompt: 'Does a protest that breaks the law openly but evades arrest still count as civil disobedience?',
       poll: {
         options: [
-          { id: 'crime', reads: 'hidden, and no penalty taken: a crime' },
-          { id: 'open', reads: 'open, and the penalty accepted', holders: ['Rawls', 'King'], correct: true },
-          { id: 'riot', reads: 'hidden, and running: still just a crime' },
-          { id: 'stunt', reads: 'open, yet dodging the cost' },
+          { id: 'crime', reads: 'yes, accepting punishment isn’t required', holders: ['Ronald Dworkin'] },
+          { id: 'open', reads: 'only if it accepts the legal penalty', holders: ['Rawls', 'Martin Luther King Jr.'], correct: true },
+          { id: 'riot', reads: 'yes, punishing justified disobedience is itself wrong', holders: ['Howard Zinn'] },
+          { id: 'stunt', reads: 'yes, when the penalty would be very severe', holders: ['William Scheuerman'] },
         ],
       },
-      explain: 'The trap is how the phrase is usually used. King and Rawls set a much narrower bar: public, nonviolent, penalty-accepting. Strip those and what’s left is ordinary crime with a motive.',
+      explain: 'A civil disobedient must accept the legal penalty. For Rawls and King, staying to be punished shows fidelity to law. It makes the breach an appeal, not an evasion.',
       xp: 5,
     },
     dur: 1.0,
@@ -79,22 +79,22 @@ export const BEATS: Pol15Beat[] = [
   {
     p: 6, x: 124, stages: 4, night: 1, pick: 1,
     interact: {
-      prompt: 'Tap the stage that protest skipped.',
-      explain: 'Accepting the penalty. That’s the tread carrying the weight. Staying to be punished turns a breach into an appeal to everyone else’s sense of justice, rather than an escape.',
+      prompt: 'Which condition did the protest fail to meet?',
+      explain: 'Accept the penalty. By staying to be punished, the protester shows fidelity to law. The breach then works as an appeal to the majority’s sense of justice, not as an escape from the law.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'What You Now Know',
+      title: 'The Conditions of Civil Disobedience',
       points: [
         'Public, nonviolent, conscientious lawbreaking',
         'Accepting the penalty distinguishes it from crime',
-        'Try legal channels first; breach as last resort',
-        'It appeals to the majority\'s sense of justice',
+        'Lawful channels come first, and breach is a last resort',
+        'It appeals to the majority’s sense of justice',
       ],
-      closing: 'The part everybody remembers is the breaking. The part that does the work is the staying.',
+      closing: 'Civil disobedience is often remembered for the breach, but accepting the penalty is what shows respect for law.',
     },
     dur: 3.0,
   },

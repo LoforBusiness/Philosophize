@@ -30,43 +30,43 @@ export interface Logic36Beat extends BaseBeat {
 export const BEATS: Logic36Beat[] = [
   {
     p: 379, x: 58, room: 1,
-    text: 'Somebody claims there’s an elephant in this room. Here’s the room, marked out in squares.',
+    text: 'Suppose someone claims there’s an elephant in a room. The room is divided into squares, so the extent of a search can be measured.',
     dur: 3.6,
   },
   {
     p: 461, x: 58, room: 1, live_d: 1, live: 1,
     interact: {
-      prompt: 'Search it. Every square comes back empty — stop when the emptiness means something.',
+      prompt: 'How much of the room must be searched before an empty result shows there’s no elephant?',
       drag: {
         lo: 'LOOKED NOWHERE',
         hi: 'LOOKED EVERYWHERE',
         start: 0,
         zones: [
-          { id: 'none', upto: 0.3, reads: 'you have learned nothing' },
-          { id: 'part', upto: 0.66, reads: 'probably not here' },
-          { id: 'all', upto: 1, reads: 'there is no elephant', correct: true },
+          { id: 'none', upto: 0.3, reads: 'the empty result shows almost nothing' },
+          { id: 'part', upto: 0.66, reads: 'the elephant is probably absent' },
+          { id: 'all', upto: 1, reads: 'the search shows there’s no elephant', correct: true },
         ],
       },
-      explain: 'Nothing was found at any point on that rail. What changed was how much of the room you’d covered. That’s the only thing that ever decides what an empty result is worth.',
+      explain: 'The search shows there’s no elephant. Every searched square was empty at every setting. Only the share of the room covered changed, and that share decides how much an empty result proves.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 168, x: 58, room: 1, done: 1,
-    text: 'So the rule. Finding nothing counts for as much as the chance your search would have found the thing, had it been there.',
+    text: 'An argument from absence concludes that something isn’t there because a search found nothing. Its strength depends on the search’s chance of finding the thing, had it been there.',
     dur: 4.4,
   },
   {
     p: 415, x: 58, room: 1, done: 0.15,
-    text: 'Look in two squares of a forest for one beetle and the empty result tells you almost nothing. The forest is large and the beetle is small.',
+    text: 'Suppose you search two squares of a forest for one beetle. The empty result is almost no evidence of absence, because the forest is large and the beetle small.',
     dur: 4.6,
   },
   {
     p: 385, x: 58, room: 1, done: 0.15,
     quote: {
       id: 'lq-logic-arguments-36-1',
-      text: 'Absence of evidence is evidence of absence, if the evidence should have been found.',
+      text: '…a proposition is true simply on the basis that it has not been proved false, or that it is false because it has not been proved true.',
       author: 'Irving Copi',
       work: 'Introduction to Logic',
       era: '1953',
@@ -77,32 +77,32 @@ export const BEATS: Logic36Beat[] = [
   {
     p: 160, x: 58, room: 1, done: 0.15, cases: 1, live: 1,
     interact: {
-      prompt: 'Two real searches, both found nothing. Tap the one whose silence is worth something.',
-      explain: 'The forty-person trial can’t see a one-in-a-thousand effect whether or not it’s there. Its silence sounds the same either way. Forty thousand people would have shown the effect, so their silence is a result.',
+      prompt: 'Both studies found nothing. Which study’s empty result is real evidence of absence?',
+      explain: 'The study of forty thousand people. An effect that occurs in one person in a thousand would appear about forty times there. So finding none is evidence of absence. Among forty people, the effect would usually not appear even if it were real.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 383, x: 104, room: 1, done: 1, cases: 1,
-    text: 'This is why the famous line is only half true. The saying “absence of evidence is not evidence of absence” describes a bad search and nothing else.',
+    text: 'The saying “absence of evidence is not evidence of absence” is therefore only partly true. It applies only to a search that would probably have missed the thing.',
     dur: 4.8,
   },
   {
     p: 45, x: 104, room: 1, done: 1,
-    text: 'Used on a careful search, it’s a way of ignoring a result. Say the words out loud and then ask how hard anybody looked.',
+    text: 'Applied to a thorough search, the saying dismisses a genuine result. So whenever someone uses it, ask how thorough the search was.',
     dur: 4.4,
   },
   {
     summary: {
-      title: 'How Hard Did You Look?',
+      title: 'Arguments from Absence',
       points: [
-        'Empty results weigh what the search was worth',
+        'An empty result is as strong as the search behind it',
         'A thorough search makes absence real evidence',
-        'A token search makes it worth nothing',
-        'The slogan is true of bad searches only',
+        'A cursory search shows almost nothing',
+        'The saying holds only for weak searches',
       ],
-      closing: 'The question is never whether the searcher found the thing. The question is whether the searcher would have found it, and you can usually work that out.',
+      closing: 'The question is whether the search would have found the thing, had it been there. That probability can usually be estimated.',
     },
     dur: 3.2,
   },

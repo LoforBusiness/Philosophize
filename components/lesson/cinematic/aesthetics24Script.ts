@@ -35,33 +35,33 @@ export interface Aes24Beat extends BaseBeat {
 export const BEATS: Aes24Beat[] = [
   {
     p: 172, x: 200, panel: 1,
-    text: 'One panel, in one room, where it has hung for five hundred years. People cross oceans to stand in front of it.',
+    text: 'Consider a painted panel that has hung in one room for five hundred years. Visitors travel across the world to stand before it.',
     dur: 4.8,
   },
   {
     p: 2, x: 200, panel: 1, copies: 1,
-    text: 'A print, a poster, a screen, a feed. The same picture everywhere at once, and none of them is here.',
+    text: 'A print, a poster, a screen and a feed reproduce the picture everywhere at once. Yet none of them occupies the original’s place.',
     cite: 'Mechanical reproduction',
     dur: 4.8,
   },
   {
     p: 45, x: 132, panel: 1, copies: 1, plates: 1,
-    text: 'What the copies leave behind has a name. Walter Benjamin called it the aura, and it is not about quality.',
+    text: 'Walter Benjamin called what the copies lack the aura. It concerns a work’s unique presence in time and space, not its quality.',
     cite: 'The aura',
     dur: 4.8,
   },
   {
     p: 165, x: 132, panel: 1, copies: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what a perfect scan does not copy.',
-      explain: 'The history of being here. A scan takes the brushstrokes and the colours down to the cracks. People reach for something visual and find nothing. What no scan can take is that this panel stood in this room through everything that happened.',
+      prompt: 'Which feature of the panel does even a perfect scan fail to reproduce?',
+      explain: 'The history of being here. A scan reproduces the brushstrokes and the colours in full detail, so neither visual answer is right. What no scan reproduces is the panel’s own history in its place.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 380, x: 132, panel: 1, copies: 1, plates: 1,
-    text: 'An altarpiece sat in one church and pilgrims travelled to it. A film has no original print to travel to.',
+    text: 'An altarpiece stood in one church, and pilgrims travelled to see it. A film has no original print that viewers must travel to.',
     dur: 4.6,
   },
   {
@@ -79,13 +79,13 @@ export const BEATS: Aes24Beat[] = [
   },
   {
     p: 13, x: 268, panel: 1, copies: 1, plates: 1,
-    text: 'Benjamin wasn’t only mourning. Cut loose from one room, a work reaches everybody, and it can argue rather than decorate.',
+    text: 'Benjamin also saw a gain in this loss. Freed from ritual, a work can reach everybody and take on a political function.',
     dur: 4.8,
   },
   {
     p: 383, x: 268, panel: 1, copies: 1, plates: 1,
     interact: {
-      prompt: 'Draw how the aura goes as the copies multiply.',
+      prompt: 'Which curve shows what happens to the aura as copies multiply?',
       plot: {
         axis: 'HOW MUCH AURA',
         cols: ['THE PANEL', 'A PRINT', 'A POSTER', 'A SCREEN', 'A FEED'],
@@ -96,21 +96,21 @@ export const BEATS: Aes24Beat[] = [
           { id: 'gone', profile: [1, 0.05, 0.04, 0.03, 0.02], reads: 'the first copy destroys it' },
         ],
       },
-      explain: 'It withers, and the first copy does not finish it. Benjamin chose the word withering, not killing, and he wasn’t mourning either. Cut loose from one room, art reaches everybody, and that’s counted as a gain.',
+      explain: 'The aura withers as copies multiply. Benjamin’s verb, “withers”, describes a slow decline, so one copy doesn’t destroy the aura. A flat curve would mean copies leave the aura intact.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Here, Once, And Nowhere Else',
+      title: 'Benjamin and the Aura',
       points: [
-        'The aura is a work being in one place and time',
-        'Copies can be faithful and still not carry it',
-        'Reproduction makes it wither rather than snap',
-        'What is lost in ritual is gained in reach',
+        'The aura is a work’s unique presence in time and space',
+        'A faithful copy still lacks the original’s aura',
+        'Reproduction makes the aura wither gradually',
+        'Art freed from ritual can reach the masses',
       ],
-      closing: 'Authenticity is not in the pixels. It’s in the object having stood somewhere.',
+      closing: 'A work’s authenticity lies in its history in time and space. No reproduction, however exact, can copy that history.',
     },
     dur: 3.6,
   },

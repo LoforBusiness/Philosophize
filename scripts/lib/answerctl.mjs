@@ -37,7 +37,7 @@
  * the lesson stuck on that beat forever. Analogue first, buttons after.
  */
 export const CONTROL_IDS = [
-  'drag-strip', 'split-bar', 'shape-plot', 'sort-bins', 'poll-ballot',
+  'drag-strip', 'split-bar', 'trend-pick', 'sort-bins', 'poll-ballot',
   // RETIRED, and listed anyway. `lever-arc` and `field-pad` no longer appear in
   // any lesson, but a harness that stops knowing how to drive them cannot audit
   // an older branch or a revert -- and the cost of keeping two ids in a list is
@@ -67,7 +67,8 @@ export const ANSWER_CONTROL = `(() => {
     // Press a row outright instead, and never the first: the ballot opens on a row
     // that is deliberately not the answer, and a harness that always took row 0
     // would answer correctly by luck in exactly the lessons where it opens there.
-    if (id === 'poll-ballot') {
+    // THE TREND PICK IS TAPPED TOO: its tiles are buttons, one per drawn shape.
+    if (id === 'poll-ballot' || id === 'trend-pick') {
       try {
         const rows = el.querySelectorAll('[role="button"]');
         if (!rows.length) continue;

@@ -24,41 +24,41 @@ export interface Ethics8Beat extends BaseBeat {
 export const BEATS: Ethics8Beat[] = [
   {
     p: 12, x: 80,
-    text: 'A friend goes quiet for two weeks. You could work out what you owe them, fairly and impartially.',
+    text: 'Suppose a friend has been withdrawn for two weeks. You could work out impartially what you owe them.',
     dur: 2.2,
   },
   {
     p: 12, x: 80,
-    text: 'Or you could just go and sit with them. For a long time, only the first one counted as ethics.',
+    text: 'Or you could go and sit with them. Care ethicists argue that moral theory long neglected the second response.',
     dur: 2.4,
   },
   {
     p: 47, x: 80, grid: 1,
-    text: 'Most big theories start the same way. Step back, be impartial, and find the rule or the total that covers everyone equally.',
+    text: 'Most major theories begin from impartiality. They seek a rule or a welfare total that applies to everyone equally.',
     cite: 'The usual method',
     dur: 3.3,
   },
   {
     p: 47, x: 80, grid: 1,
-    text: 'Tidy boxes, with nobody’s name in any of them.',
+    text: 'Their categories apply to anyone and name no particular person.',
     dur: 1.8,
   },
   {
     p: 159, x: 146, grid: 1, oth: 1,
-    text: 'Then you look up. Someone is on the floor by their bed, and no box fits them.',
-    cite: 'Someone actually there',
+    text: 'Now suppose a person is on the floor beside their bed. No general category fits their situation.',
+    cite: 'A particular person',
     dur: 2.8,
   },
   {
     p: 159, x: 146, grid: 1, oth: 1,
-    text: 'Not a case, not a number. The one you know.',
+    text: 'To you, this person isn’t a case or a number. This is someone with whom you have a relationship.',
     dur: 1.8,
   },
   {
     // 49 (down on one knee), not 43 (setting a load down while standing): the line
     // is "get down beside them", so the figure has to actually get down.
     p: 49, x: 182, grid: 1, oth: 1,
-    text: 'You cross the room and get down beside them. No theory has said a word yet.',
+    text: 'You cross the room and kneel beside them. You haven’t yet consulted any theory.',
     cite: 'Getting closer',
     dur: 2.7,
   },
@@ -66,7 +66,7 @@ export const BEATS: Ethics8Beat[] = [
     // 49 (down on one knee), not 43 (setting a load down while standing): the line
     // is "get down beside them", so the figure has to actually get down.
     p: 49, x: 182, grid: 1, oth: 1,
-    text: 'Something else is already telling you what to do.',
+    text: 'Something other than a principle is already guiding what you do.',
     dur: 1.8,
   },
   {
@@ -75,21 +75,21 @@ export const BEATS: Ethics8Beat[] = [
     // in the same breath as the sentence saying they were down.
     p: 49, x: 182, grid: 0.85, oth: 1, pick: 1,
     interact: {
-      prompt: 'You are down on the floor beside them. Tap the question this way of thinking asks FIRST.',
-      explain: 'It starts with the person, not the rulebook. Notice who needs you and what they actually need — and only then work out what to do. Attention comes before judgement.',
+      prompt: 'Beside the person in need, which question does this approach ask first?',
+      explain: '“Who needs me, and how?” Care ethics starts from the particular person, not from a general rule. It attends first to who needs you and what they need, then decides what to do.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 39, x: 182, grid: 0.5, oth: 1, thread: 1,
-    text: 'That move has a name. Carol Gilligan kept hearing people reason through bonds and care, and the textbooks had no word for it.',
+    text: 'Carol Gilligan studied people who reasoned through relationships and care. Kohlberg’s influential scale ranked such reasoning as less mature.',
     cite: 'Carol Gilligan · 1982',
     dur: 4,
   },
   {
     p: 39, x: 182, grid: 0.5, oth: 1, thread: 1,
-    text: 'Gilligan called the pattern a different voice.',
+    text: 'Gilligan called this a different moral voice, centred on responsibility and relationships.',
     dur: 1.8,
   },
   {
@@ -108,42 +108,42 @@ export const BEATS: Ethics8Beat[] = [
   {
     p: 380, x: 112, grid: 0.34, oth: 1, thread: 1,
     interact: {
-      prompt: 'What does caring actually amount to here?',
+      prompt: 'In care ethics, is caring a feeling or a practice with standards?',
       drag: {
         lo: 'A WARM FEELING',
-        hi: 'A METHOD WITH STANDARDS',
+        hi: 'A PRACTICE WITH STANDARDS',
         start: 0,
         zones: [
-          { id: 'mood', upto: 0.3, reads: 'a mood: pleasant, and nothing you could fail at' },
-          { id: 'some', upto: 0.6, reads: 'a feeling that sometimes leads somewhere useful' },
-          { id: 'method', upto: 1, reads: 'a method with demands you can plainly fail', correct: true },
+          { id: 'mood', upto: 0.3, reads: 'a pleasant mood that no one can fail at' },
+          { id: 'some', upto: 0.6, reads: 'a feeling that sometimes prompts helpful action' },
+          { id: 'method', upto: 1, reads: 'a practice with standards that can be failed', correct: true },
         ],
       },
-      explain: 'The far end. Care sounds like a mood, which is why it gets filed under nice instead of under reasoning. It makes demands: pay attention, accept the responsibility, answer the person in front of you. Every one of those can be failed, and often is.',
+      explain: 'A practice with standards that can be failed. Care is often dismissed as a mood rather than a form of moral reasoning. Yet care demands attention to the person, acceptance of responsibility, and a fitting response. Each of these can be done badly.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 38, x: 112, grid: 0.3, oth: 1, thread: 1,
-    text: 'Nel Noddings built care into a full ethics. For her, morality grows out of the bond between the one caring and the one cared for.',
+    text: 'Nel Noddings developed a full ethics of care. Its basis is the relation between the one caring and the cared-for.',
     cite: 'Nel Noddings · 1984',
     dur: 3.3,
   },
   {
     p: 38, x: 112, grid: 0.3, oth: 1, thread: 1,
-    text: 'You learned right and wrong on a kitchen floor, long before any rulebook.',
+    text: 'Noddings holds that ethical caring grows from natural caring, such as a parent’s care for a child.',
     dur: 1.8,
   },
   {
     p: 176, x: 172, grid: 0.28, oth: 1, thread: 1,
-    text: 'Critics feared care would trap people in endless self-sacrifice. Gilligan’s answer: care and justice are two lenses, not rivals.',
+    text: 'Claudia Card warned that care ethics could make a virtue of women’s oppression. Gilligan held that care and justice work together.',
     cite: 'Two voices, not rivals',
     dur: 2.9,
   },
   {
     p: 176, x: 172, grid: 0.28, oth: 1, thread: 1,
-    text: 'Rules stop you being cruel. Care notices the person the rules never mention.',
+    text: 'Justice requires treating everyone equally. Care notices the person the rules never mention.',
     dur: 2,
   },
   {
@@ -151,12 +151,12 @@ export const BEATS: Ethics8Beat[] = [
     summary: {
       title: 'Morality as Relationship',
       points: [
-        'Care ethics starts from bonds, not rules',
-        'Gilligan named a long-ignored moral voice',
-        'Noddings turned caring into a method',
-        'Justice and care work as partners',
+        'Care ethics starts from relationships, not rules',
+        'Gilligan identified a moral voice centred on care',
+        'Noddings grounded ethics in the caring relation',
+        'Justice and care complement each other',
       ],
-      closing: 'Long before you ever weighed a rule, someone sat down beside you.',
+      closing: 'Care ethics holds that moral life begins in relationships, before any rule is learned.',
     },
     dur: 3.0,
   },

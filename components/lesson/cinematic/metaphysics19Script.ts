@@ -35,28 +35,28 @@ export interface Met19Beat extends BaseBeat {
 export const BEATS: Met19Beat[] = [
   {
     p: 172, x: 200, props: 1, peg: 0.16,
-    text: 'An apple, written out as everything true of it. Red, round, sweet, eighty grams, on this table.',
+    text: 'Consider an apple and all of its properties. The apple is red, round and sweet, weighs eighty grams, and sits on this table.',
     dur: 4.4,
   },
   {
     p: 2, x: 200, props: 1, peg: 0.16, strip: 0.4,
-    text: 'Take the colour away. It’s still an apple.',
-    cite: 'Keep going',
+    text: 'Remove one property, its colour, and something is still there to have the rest.',
+    cite: 'Removing properties',
     dur: 2.4,
   },
   {
     p: 2, x: 200, props: 1, peg: 0.16, strip: 0.4,
-    text: 'Take the roundness, take the weight.',
+    text: 'Now remove the shape, the taste, the weight and the location as well.',
     dur: 1.8,
   },
   {
     p: 413, x: 132, props: 1, peg: 0.16, strip: 1,
-    text: 'That was the last card. Either something stands there or nothing does, and philosophers have never agreed which.',
+    text: 'Once every property is gone, either something remains or nothing does. Substance theory and bundle theory give opposite answers.',
     dur: 4.6,
   },
   {
     p: 383, x: 132, props: 1, peg: 0.4, strip: 1,
-    text: 'Locke thought there had to be something underneath holding the properties together. He also admitted he could say nothing at all about it.',
+    text: 'John Locke held that a substance underlies the properties and holds the properties together. Yet Locke admitted that such a substance is unknown.',
     cite: 'Substance',
     dur: 4.8,
   },
@@ -76,45 +76,45 @@ export const BEATS: Met19Beat[] = [
   {
     p: 165, x: 132, props: 1, peg: 0.4, strip: 1, live: 1,
     interact: {
-      prompt: 'Tap what is left after every card has come off.',
-      explain: 'The peg, if you’re Locke. It was never described, because nothing can be said about a thing with no properties. Hume looked at the same picture and said the stack was all there was. The pile is the cards you removed, not the apple.',
+      prompt: 'On Locke’s view, what remains when every property is removed?',
+      explain: 'The peg. For Locke, a substance remains, though he could describe it only as the support of the properties. Hume held that the idea of a substance is only a collection of qualities, so nothing remains. The pile holds only the removed properties.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 453, x: 268, props: 1, peg: 0.4, strip: 0, twin: 1,
-    text: 'Here’s the cost of saying there’s no peg. A second apple, matching the first in every property there is.',
-    cite: 'The twin',
+    text: 'The bundle theory faces a hard case. Suppose a second apple has every property on the first apple’s list.',
+    cite: 'Two identical apples',
     dur: 4.6,
   },
   {
     p: 442, x: 268, props: 1, peg: 0.4, twin: 1,
     interact: {
-      prompt: 'Two things exactly alike. What is the case?',
+      prompt: 'If two apples share every property, how many things are there?',
       sort: {
         chip: 'the two apples',
         bins: [
-          { id: 'one', label: 'one, counted twice', reads: 'one thing, counted twice' },
+          { id: 'one', label: 'one, counted twice', reads: 'one thing, since they share every property' },
           { id: 'two', label: 'two, identical', reads: 'two things, with nothing telling them apart', correct: true },
-          { id: 'never', label: 'impossible', reads: 'no such case could happen' },
+          { id: 'never', label: 'impossible', reads: 'two such things could never exist' },
         ],
       },
-      explain: 'Two, and that’s the bill bundle theory has to pay. If a thing is nothing but its properties, two with all the same properties are one thing. Saying they’re two means something beyond the properties is doing the counting. That’s the peg the theory threw away.',
+      explain: 'Two things, with nothing telling them apart. Max Black argued that two exactly similar spheres are possible. If a thing is only its properties, the twins would be one thing. So the bundle theory must deny that the case is possible.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Peg and the Pile',
+      title: 'Substance and Bundle Theories',
       points: [
         'Bundle theory says a thing is its properties and nothing else',
-        'Substance theory says something bare holds them together',
-        'That something cannot be described, because describing is a property',
+        'Substance theory posits a bearer that holds the properties together',
+        'Locke admitted that this bearer is unknown',
         'Two identical things are the hard case for the bundle view',
       ],
-      closing: 'Take away everything true of the apple and you’re looking at the whole dispute.',
+      closing: 'Leibniz’s identity of indiscernibles holds that no two distinct things share every property.',
     },
     dur: 3.4,
   },

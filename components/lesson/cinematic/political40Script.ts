@@ -34,36 +34,36 @@ export interface Political40Beat extends BaseBeat {
 export const BEATS: Political40Beat[] = [
   {
     p: 427, x: 32,
-    text: 'Two willing people agree a fair price for a vote. Nobody is poor, and nobody is fooled.',
+    text: 'Suppose two willing people agree a fair price for a vote. Neither is poor, and neither is deceived.',
     dur: 4.8,
   },
   {
     p: 174, x: 32, shelves: 0.34,
-    text: 'The usual complaint about markets is unfairness. That one doesn’t fit here.',
+    text: 'The usual objection to a market is that it favours the rich over the poor. That worry doesn’t apply to this sale.',
     dur: 4.2,
   },
   {
     p: 438, x: 32, shelves: 1,
-    text: 'So there’s a second complaint underneath the first, and it’s about the goods themselves.',
+    text: 'A second objection concerns the good itself rather than the fairness of the exchange.',
     dur: 4.6,
   },
   {
     p: 258, x: 32, shelves: 1,
-    text: 'Some things are changed by being priced. What the buyer gets is not what they wanted.',
+    text: 'Some things are changed by being priced. A purchased vote no longer expresses a citizen’s own judgement.',
     dur: 4.6,
   },
   {
     p: 260, x: 32, shelves: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what this argument adds to the old one.',
-      explain: 'That a sale can spoil the thing. Unfairness was the old objection, and you answer it by making people richer. That does nothing here, because a rich voter selling a vote is still selling a vote. Waste is an argument for markets, not against them.',
+      prompt: 'What does the second objection add to the charge that a sale is unfair?',
+      explain: 'It spoils it. A sale can change the good itself. Redistributing wealth would answer unfairness, but a rich voter who sells a vote still sells a vote. Inefficiency isn’t the objection, since markets are defended as efficient.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 450, x: 92, shelves: 1,
-    text: 'Firms will hold your place in a queue for a hearing. Everybody involved agrees.',
+    text: 'Michael Sandel describes firms that are paid to hold places in queues for congressional hearings. Everyone involved consents.',
     dur: 4.4,
   },
   {
@@ -80,22 +80,22 @@ export const BEATS: Political40Beat[] = [
   },
   {
     p: 381, x: 92, shelves: 1,
-    text: 'A queue was a place where turning up early was the only thing that counted.',
+    text: 'A queue distributes places by a single criterion: who arrived first, and who was willing to wait.',
     dur: 4.4,
   },
   {
     p: 264, x: 92, shelves: 1, token: 1,
     interact: {
-      prompt: 'Where does a bought place at the front belong?',
+      prompt: 'Where does a purchased place at the front of a queue belong among these goods?',
       sort: {
         chip: 'a place in the queue',
         bins: [
-          { id: 'free', label: 'sold freely', reads: 'a queue is just one way of rationing' },
-          { id: 'changed', label: 'changed by sale', reads: 'sold, and then no longer a queue', correct: true },
-          { id: 'blocked', label: 'not for sale', reads: 'never, whatever the circumstances' },
+          { id: 'free', label: 'sold freely', reads: 'queuing is only one way of rationing' },
+          { id: 'changed', label: 'changed by sale', reads: 'sale turns the queue into an auction', correct: true },
+          { id: 'blocked', label: 'not for sale', reads: 'never for sale, whatever the circumstances' },
         ],
       },
-      explain: 'The middle shelf. Calling a queue mere rationing throws away what made it a queue. Time was the only currency in it. And a flat ban is more than the argument needs. This is a case for naming what you lose, not for a rule.',
+      explain: 'Changed by sale. Selling places turns a queue into an auction, so patience stops deciding who goes first. A flat ban goes further than the argument requires. The argument shows what a sale destroys.',
       xp: 5,
     },
     dur: 1.0,
@@ -103,14 +103,14 @@ export const BEATS: Political40Beat[] = [
   {
     p: 320, x: 92, shelves: 1, token: 1,
     summary: {
-      title: 'Spheres',
+      title: 'Spheres and the Limits of Markets',
       points: [
         'Unfairness is not the only case against a market',
         'Pricing a good can change what the good is',
-        'Walzer kept each good inside its own sphere',
-        'Ask what survives the sale, not who profits',
+        'Walzer: each good has its own distributive sphere',
+        'Ask what a sale changes, not only who profits',
       ],
-      closing: 'No particular case is settled here. Walzer hands you a second question to ask, once the question about who could afford the good has been answered.',
+      closing: 'Walzer’s approach adds a second question to fairness: what selling a good does to the good itself.',
     },
     dur: 4.4,
   },

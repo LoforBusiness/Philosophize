@@ -33,36 +33,36 @@ export interface Ethics26Beat extends BaseBeat {
 export const BEATS: Ethics26Beat[] = [
   {
     p: 355, x: 28, rail: 0.4,
-    text: 'Kicking a rock is nothing, and kicking an animal is something. Where’s the line?',
+    text: 'Kicking a rock wrongs nothing, while kicking an animal seems to wrong the animal. Which beings can be wronged?',
     dur: 4.6,
   },
   {
     p: 170, x: 28, rail: 1,
-    text: 'Moral status means mattering in your own right, rather than mattering as a tool for somebody.',
+    text: 'A being has moral status if it matters morally for its own sake, not merely as a means for others.',
     dur: 4.8,
   },
   {
     p: 435, x: 28, rail: 1,
-    text: 'Three answers compete. Being able to suffer, being able to plan a life, and being human.',
+    text: 'Three main criteria are defended. They’re the capacity to suffer, the capacity to plan a life, and being human.',
     dur: 5.0,
   },
   {
     p: 258, x: 28, rail: 1, line: 1,
-    text: 'Here’s the last of them, drawn. Everything but the person falls outside.',
+    text: 'On the species criterion, only the person stands inside the line. The chimp, the fish, the plant and the rock all fall outside.',
     dur: 4.6,
   },
   {
     p: 163, x: 28, rail: 1, line: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what that last answer is accused of.',
-      explain: 'Speciesism. Being human is a biological label rather than a capacity. On its own, a label is not the kind of thing that can ground a duty. You may resist the charge — but then you have to name what humanity tracks that matters.',
+      prompt: 'If membership of the human species decides moral status, what objection does that view face?',
+      explain: 'Speciesism. Peter Singer holds that favouring your own species is like favouring your own race. Species is a matter of biology, not of what a being can feel. So a defender must say what about humans matters. Calling human priority a plain fact gives no reason.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 454, x: 88, rail: 1, line: 1,
-    text: 'Person and human come apart. A person plans, reflects and knows it has a future.',
+    text: 'Being a person and being human are different properties. A person is a being that plans, reflects and knows it has a future.',
     dur: 4.8,
   },
   {
@@ -80,22 +80,22 @@ export const BEATS: Ethics26Beat[] = [
   },
   {
     p: 439, x: 88, rail: 1, line: 1,
-    text: 'Each criterion moves the gate, and each one lets a different crowd through.',
+    text: 'Each criterion puts the line in a different place. Suffering lets in the fish, while planning lets in few beings besides the person.',
     dur: 4.6,
   },
   {
     p: 176, x: 88, rail: 1, line: 1,
     interact: {
-      prompt: 'What should the gate be set to?',
+      prompt: 'Which criterion should decide which beings have moral status?',
       sort: {
-        chip: 'the line that decides',
+        chip: 'the criterion for moral status',
         bins: [
-          { id: 'suffer', label: 'can suffer', reads: 'anything with something at stake is in', correct: true },
+          { id: 'suffer', label: 'can suffer', reads: 'every being with interests at stake counts', correct: true },
           { id: 'plan', label: 'can plan', reads: 'only beings who know they have a future' },
           { id: 'human', label: 'is human', reads: 'the human species, and nothing else' },
         ],
       },
-      explain: 'Suffering. It’s the one criterion that names a stake rather than a category. A duty needs a stake to be about. Planning is the serious rival and it has a cost: it puts some humans outside the gate. Species alone names no stake at all.',
+      explain: 'Can suffer. Bentham and Singer hold that any being that can suffer has interests that count. Planning, the main rival, leaves out some humans, such as newborns. Species alone names no interest that could be harmed.',
       xp: 5,
     },
     dur: 1.0,
@@ -103,14 +103,14 @@ export const BEATS: Ethics26Beat[] = [
   {
     p: 343, x: 88, rail: 1, line: 1,
     summary: {
-      title: 'Where the Circle Stops',
+      title: 'Who Has Moral Status?',
       points: [
         'Moral status is mattering for your own sake',
-        'Suffering, planning and species are the candidates',
+        'Suffering, planning and species are the main criteria',
         'Person and human are not the same category',
-        'Species on its own names a label, not a stake',
+        'Species alone is a classification, not a morally relevant capacity',
       ],
-      closing: 'Drawing this line is one of the oldest acts in ethics. It’s also one of the few where moving it has changed how whole populations are treated.',
+      closing: 'Where the line falls determines whose interests must be weighed at all.',
     },
     dur: 5.0,
   },

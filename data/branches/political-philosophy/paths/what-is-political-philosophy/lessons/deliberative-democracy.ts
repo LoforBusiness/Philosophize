@@ -30,10 +30,10 @@ const lesson: Lesson = {
     {
       type: 'quote',
       id: 'lq-political-political-26-1',
-      quote: 'No force except that of the better argument is exercised; and that, as a result, all motives except that of the cooperative search for truth are excluded.',
+      quote: '…excludes all force … except the force of the better argument, and … all motives except that of a cooperative search for the truth.',
       author: 'Jürgen Habermas',
-      era: '1971',
-      work: 'Knowledge and Human Interests',
+      era: '1981',
+      work: 'The Theory of Communicative Action, vol. 1',
     },
     {
       type: 'concept',

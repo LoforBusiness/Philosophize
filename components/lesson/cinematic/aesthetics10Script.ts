@@ -29,24 +29,24 @@ export interface Aes10Beat extends BaseBeat {
 export const BEATS: Aes10Beat[] = [
   {
     p: 164, x: 44, film: 1, panel: 1, shut: 0,
-    text: 'Two hours of the finest film-making you’ve ever sat through. Every frame placed by a master.',
+    text: 'Suppose a film is made with the greatest skill. Every frame is composed by a master.',
     dur: 2.6,
   },
   {
     p: 164, x: 44, film: 1, panel: 1, shut: 0,
-    text: 'And all of that skill is working to make cruelty look glorious.',
+    text: 'Yet all that skill is used to make cruelty look glorious.',
     dur: 1.8,
   },
   {
     p: 5, x: 44, film: 1, panel: 1, shut: 0, verdict: 1,
-    text: 'Nobody disputes the skill, so the craft verdict is easy to write. Underneath it sits a second question — what all that skill is asking you to feel.',
+    text: 'The verdict on its craft is uncontroversial. A second question concerns what the film asks you to feel.',
     cite: 'The craft',
     dur: 4.6,
   },
   {
     p: 13, x: 110, film: 1, panel: 1, shut: 1, verdict: 1,
-    text: 'Oscar Wilde draws the shutter across that second question. He says a book is well written or badly written, and there’s nothing else on the paper to judge.',
-    cite: 'Wilde slides it shut',
+    text: 'Autonomism holds that art should be judged on its craft alone. Oscar Wilde rules the second question out of aesthetic judgement.',
+    cite: 'Autonomism',
     dur: 4.8,
   },
   {
@@ -63,21 +63,21 @@ export const BEATS: Aes10Beat[] = [
   },
   {
     p: 389, x: 110, film: 1, panel: 1, shut: 0, verdict: 1,
-    text: 'The moralist shoves the shutter back. What a work invites you to feel isn’t a footnote: it is part of what the work already is.',
-    cite: 'The moralist opens it',
+    text: 'Moralism rejects the restriction. For the moralist, what a work invites you to feel is part of the work itself.',
+    cite: 'Moralism',
     dur: 4.6,
   },
   {
     p: 30, x: 110, film: 1, panel: 1, shut: 0, verdict: 2, link: 1,
-    text: 'A third camp draws a line between the two. Berys Gaut says that if a work asks you to feel what you shouldn’t, it’s flawed as art.',
+    text: 'A third position, ethicism, connects the two questions. Berys Gaut holds that a work inviting a response you shouldn’t have is, to that extent, flawed as art.',
     cite: 'Ethicism',
     dur: 4.8,
   },
   {
     p: 457, x: 110, film: 1, panel: 1, shut: 0, verdict: 2, link: 1, boards: 1,
     interact: {
-      prompt: 'A work that glamorises cruelty is worse AS art. Which board does that line belong on?',
-      explain: 'The trap: everyone agrees the film is superbly made, so calling it worse AS art sounds like a confusion. It isn’t. The moralist grants the skill, but says the feeling a work asks for is part of its worth as art. That’s the link Wilde denies.',
+      prompt: 'Which of these two views holds that glamorising cruelty makes a work worse as art?',
+      explain: 'The moralist, who counts feeling too. A moralist grants the film’s skill but treats the feeling it invites as part of its value as art. Wilde denies that link, because for him only the craft can be judged.',
       xp: 5,
     },
     dur: 1.0,
@@ -85,7 +85,7 @@ export const BEATS: Aes10Beat[] = [
   {
     p: 445, x: 110, film: 1, panel: 1, shut: 0, verdict: 2, link: 1,
     interact: {
-      prompt: 'Beauty and the city pull apart. Which one does Plato let go?',
+      prompt: 'When beauty conflicts with the good of the city, which does Plato put first?',
       drag: {
         lo: 'BEAUTY ABOVE ALL',
         hi: 'THE CITY ABOVE ALL',
@@ -93,10 +93,10 @@ export const BEATS: Aes10Beat[] = [
         zones: [
           { id: 'beauty', upto: 0.3, reads: 'beauty first, whatever it costs' },
           { id: 'even', upto: 0.62, reads: 'the two weighed against each other' },
-          { id: 'city', upto: 1, reads: 'the city first, and beautiful art frightened him most', correct: true },
+          { id: 'city', upto: 1, reads: 'the city first, and beautiful art is most dangerous', correct: true },
         ],
       },
-      explain: 'The far end, which reverses the usual picture. Plato policed art because he ranked the good of the city above beauty. He feared beautiful art more than clumsy art, because beauty is what makes a bad lesson persuasive.',
+      explain: 'The city first, and beautiful art is most dangerous. Plato ranked the good of the city above beauty, so the Republic proposes censoring poetry. He feared skilful art most, because its charm makes a harmful lesson persuasive.',
       xp: 5,
     },
     dur: 1.0,
@@ -105,12 +105,12 @@ export const BEATS: Aes10Beat[] = [
     summary: {
       title: 'Should Art Answer to Ethics?',
       points: [
-        'Moralism: judge art by what it does to us',
+        'Moralism: moral content affects artistic value',
         'Autonomism: judge the craft, nothing else',
         'Ethicism: a moral flaw can be an artistic flaw',
-        'The skill was never what was in dispute',
+        'The dispute concerns feeling, not skill',
       ],
-      closing: 'Beauty and goodness can pull apart, and the gap between them is the unsettling part.',
+      closing: 'Beauty and goodness can come apart, and the three positions disagree about what follows for art.',
     },
     dur: 3.2,
   },

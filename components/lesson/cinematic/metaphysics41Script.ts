@@ -33,36 +33,36 @@ export interface Metaphysics41Beat extends BaseBeat {
 export const BEATS: Metaphysics41Beat[] = [
   {
     p: 349, x: 28,
-    text: 'Move the whole universe three feet east. Everything in it, all at once.',
+    text: 'Suppose the whole universe were shifted three feet east. Everything in it would move together, by the same distance.',
     dur: 4.2,
   },
   {
     p: 159, x: 28, bodies: 1,
-    text: 'Newton thought space was a real container, there whether or not anything sat in it.',
+    text: 'Newton held that space is absolute. Space exists in its own right, whether or not anything occupies it.',
     dur: 4.8,
   },
   {
     p: 321, x: 28, bodies: 1, scale: 1,
-    text: 'Leibniz thought it was only the arrangement. No things, no space.',
+    text: 'Leibniz held that space is relational: nothing but the order among coexisting things. Without things, there would be no space.',
     dur: 4.0,
   },
   {
     p: 165, x: 28, bodies: 1, scale: 1, shift: 1,
-    text: 'So the two disagree about the shifted world, and about nothing you could measure.',
+    text: 'The two views therefore disagree about the shifted universe. On Newton’s view it’s a different world, yet no measurement could tell it apart from ours.',
     dur: 4.6,
   },
   {
     p: 167, x: 28, bodies: 1, scale: 1, shift: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap the step Leibniz leans on here.',
-      explain: 'The missing reason. Leibniz holds that nothing happens without one, and a choice between two identical worlds has none to give. So there was never a choice. Being undetectable is weaker on its own: plenty of real things go undetected.',
+      prompt: 'On what premise does Leibniz deny that a shifted universe would differ from ours?',
+      explain: 'No reason. The principle of sufficient reason holds that nothing is the case without a reason. God could have had no reason to create the world here rather than three feet east. “Nothing shows” needs a further premise: that an undetectable difference is no difference.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 324, x: 88, bodies: 1, scale: 1, shift: 1,
-    text: 'Look at the gaps. Every distance between every pair is unchanged.',
+    text: 'The shift leaves every distance between the bodies unchanged. For Leibniz, therefore, nothing about the world has changed.',
     dur: 4.4,
   },
   {
@@ -80,22 +80,22 @@ export const BEATS: Metaphysics41Beat[] = [
   },
   {
     p: 447, x: 88, bodies: 1, scale: 1, shift: 1,
-    text: 'Newton had one reply left: spin a bucket of water and the surface climbs the wall.',
+    text: 'Newton’s case for absolute space rested on rotation. Water in a spinning vessel rises up the sides, even when it’s still relative to the vessel.',
     dur: 4.8,
   },
   {
     p: 176, x: 88, bodies: 1, scale: 1, shift: 1,
     interact: {
-      prompt: 'What is the shifted universe, then?',
+      prompt: 'On Leibniz’s view, what has really changed if the universe shifts three feet east?',
       sort: {
-        chip: 'the world, moved east',
+        chip: 'the universe, shifted east',
         bins: [
-          { id: 'real', label: 'a real change', reads: 'something happened that nobody could detect' },
-          { id: 'same', label: 'the same world', reads: 'one world, described twice over', correct: true },
-          { id: 'empty', label: 'an empty question', reads: 'words with nothing behind them either way' },
+          { id: 'real', label: 'a real change', reads: 'a distinct world, differing only in position' },
+          { id: 'same', label: 'the same world', reads: 'one and the same world, described twice', correct: true },
+          { id: 'empty', label: 'an empty question', reads: 'a question with no fact to settle it' },
         ],
       },
-      explain: 'One world, twice. If space is the arrangement, then the arrangement came along and nothing stayed behind for it to have moved against. Calling the question empty gives up too early. The bucket shows there’s something real to argue about.',
+      explain: 'The same world. For Leibniz, space is only the relations among things, and shifting the universe leaves every relation intact, so nothing changes. A real change would need space to exist apart from things, which is Newton’s view.',
       xp: 5,
     },
     dur: 1.0,
@@ -103,14 +103,14 @@ export const BEATS: Metaphysics41Beat[] = [
   {
     p: 320, x: 88, bodies: 1, scale: 1, shift: 1,
     summary: {
-      title: 'The Order of Things',
+      title: 'Absolute and Relational Space',
       points: [
-        'Newton made space a container that could sit empty',
-        'Leibniz made it the order of the things there are',
-        'A shifted universe separates the two accounts',
-        'Rotation was the hard case Leibniz still had to meet',
+        'Newton held that space exists even if nothing occupies it',
+        'Leibniz held that space is only the order among things',
+        'Only on Newton’s view is a shifted universe a different world',
+        'Rotation remained the hardest case for a relational view',
       ],
-      closing: 'Physics ended up on the Leibniz side, and then made the whole thing stranger. But the question had to be asked well before anyone could measure an answer.',
+      closing: 'Modern physics changed the debate but didn’t end it. Philosophers of physics still argue over whether spacetime is a thing in its own right.',
     },
     dur: 4.6,
   },

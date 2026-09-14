@@ -30,61 +30,61 @@ export interface Ethics3Beat extends BaseBeat {
 export const BEATS: Ethics3Beat[] = [
   {
     d: 2, tx: 118, pull: 0, lens: 0,
-    text: 'One choice. Three philosophers.',
+    text: 'Consider one moral choice, judged by three philosophers.',
     dur: 1.8,
   },
   {
     d: 2, tx: 118, pull: 0, lens: 0,
-    text: 'Three verdicts. Same dilemma, same goal, yet they split.',
+    text: 'All three seek the right action, yet their verdicts differ.',
     dur: 2.4,
   },
   {
     d: 13, tx: 158, lens: 0,
-    text: 'A runaway trolley hurtles towards five people on the track. Your hand rests on a lever.',
-    cite: 'Philippa Foot, 1967',
+    text: 'Suppose a runaway trolley is heading towards five people on the track. You stand beside a lever.',
+    cite: 'Foot, 1967 · Thomson, 1976',
     dur: 2.5,
   },
   {
     d: 13, tx: 158, lens: 0,
-    text: 'Pull it, and the trolley swerves onto a side track, where one person stands instead.',
+    text: 'If you pull it, the trolley switches to a side track, where it will kill one person instead.',
     dur: 2.5,
   },
   {
-    d: 404, tx: 196, lens: 0,
-    text: 'Pull the lever, do nothing, or search for another way? Three great theories answer the same question — what makes an action good?',
+    d: 168, tx: 196, lens: 0,
+    text: 'Three major ethical theories address the case. Each asks the same question: what makes an action good?',
     dur: 4.2,
   },
   {
     d: 13, tx: 196, pull: 1, lens: 1,
-    text: 'John Stuart Mill would pull. For him, the right act promotes the most happiness, counting each person equally.',
+    text: 'John Stuart Mill’s utilitarianism says to pull the lever. For Mill, the right act produces the most happiness, counting each person equally.',
     cite: 'Consequentialism — the outcome',
     dur: 2.3,
   },
   {
     d: 13, tx: 196, pull: 1, lens: 1,
-    text: 'Five lives saved outweigh one lost. People who judge an act this way are called utilitarians.',
+    text: 'Five lives saved outweigh one lost. Judging acts by outcomes is consequentialism, and Mill’s version is utilitarianism.',
     dur: 2.3,
   },
   {
     d: 458, tx: 196, pull: 0, lens: 2,
-    text: 'Immanuel Kant would not. He won’t trade lives like sums, because the one person has a worth no arithmetic can outweigh.',
+    text: 'Immanuel Kant’s ethics rejects the trade. It holds that the one person has a worth no arithmetic can outweigh.',
     cite: 'Deontology — the duty',
     dur: 3.8,
   },
   {
     d: 458, tx: 196, pull: 0, lens: 2,
-    text: 'Duty binds whatever follows from it.',
+    text: 'This worth is what Kant calls dignity. In deontology, the ethics of duty, a duty binds whatever the consequences.',
     dur: 1.8,
   },
   {
     d: 22, tx: 196, lens: 3,
-    text: 'Aristotle asks a different question. Not what you should do, but who you become.',
+    text: 'Aristotle shifts the question from the act to the agent. Who does this choice make you?',
     cite: 'Virtue ethics — the character',
     dur: 2.9,
   },
   {
     d: 22, tx: 196, lens: 3,
-    text: 'What would a person of practical wisdom do here?',
+    text: 'In virtue ethics, the guide is what a practically wise person would do. Aristotle calls this wisdom phronesis.',
     dur: 1.8,
   },
   {
@@ -103,17 +103,17 @@ export const BEATS: Ethics3Beat[] = [
   {
     d: 380, tx: 196, lens: 0,
     interact: {
-      prompt: 'What does a consequentialist actually weigh?',
+      prompt: 'What does a consequentialist weigh in judging whether an act is right?',
       split: {
-        left: 'WHAT HAPPENS NEXT', right: 'THE RULE YOU FOLLOWED',
+        left: 'THE OUTCOME', right: 'THE RULE FOLLOWED',
         start: 0.04,
         zones: [
-          { id: 'rule', upto: 0.3, reads: 'the rule counts, not the outcome' },
-          { id: 'both', upto: 0.66, reads: 'the rule and the outcome, weighed against each other' },
-          { id: 'out', upto: 1, reads: 'the outcome alone, and nothing else whatever', correct: true },
+          { id: 'rule', upto: 0.3, reads: 'only the rule followed, not the outcome' },
+          { id: 'both', upto: 0.66, reads: 'both the rule and the outcome' },
+          { id: 'out', upto: 1, reads: 'the outcome alone', correct: true },
         ],
       },
-      explain: 'All the way over. Consequentialism, and its famous form utilitarianism, weighs an act by what the act brings about. Above all, it counts how much happiness comes of it. The other end of the bar is Kant, who doesn’t look at the ending at all.',
+      explain: 'The outcome alone. Consequentialism judges an act only by what it brings about, and utilitarianism measures that in happiness. A rule matters only through its effects. Kant’s view sits at the opposite end: an act is judged by the principle behind it.',
       xp: 5,
     },
     dur: 1.0,
@@ -122,9 +122,9 @@ export const BEATS: Ethics3Beat[] = [
     d: 165, tx: 196, lens: 0,
     // Answered ON the board: it clears and two big TRUE / FALSE plates take its place.
     interact: {
-      prompt: 'Utilitarians and Kant both say "the end justifies the means." True?',
+      prompt: 'Is it true that utilitarians and Kant both hold that the end justifies the means?',
       explain:
-        'A utilitarian may let good ends justify the means. Kant flatly forbids it: never treat a person merely as a means, whatever follows.',
+        'False. A utilitarian may let a good end justify the means. Kant forbids it: a person must never be treated merely as a means, whatever the consequences.',
       xp: 5,
     },
     dur: 1.0,
@@ -134,11 +134,11 @@ export const BEATS: Ethics3Beat[] = [
       title: 'Three Lenses on Moral Action',
       points: [
         'Consequentialism: judge by the outcome',
-        'Deontology: duty binds whatever follows',
-        'Virtue ethics: good acts, good character',
-        'These three pillars form normative ethics',
+        'Deontology: duty binds whatever the consequences',
+        'Virtue ethics: ask what a person of good character would do',
+        'Together they are the main theories of normative ethics',
       ],
-      closing: 'At your next hard choice, run all three and watch where outcome, duty and character clash.',
+      closing: 'In a hard case, applying all three shows where outcome, duty and character conflict.',
     },
     dur: 2.8,
   },

@@ -21,12 +21,12 @@ export interface Ethics2Beat extends BaseBeat {
 export const BEATS: Ethics2Beat[] = [
   {
     p: 12, x: 258, g: -1,
-    text: 'You find a wallet on the pavement. Now what?',
+    text: 'Suppose you find a wallet on the pavement. What should you do with it?',
     dur: 1.8,
   },
   {
     p: 12, x: 258, g: -1,
-    text: 'One small choice is about to get three different verdicts.',
+    text: 'Three ethical theories will each deliver a verdict on this one small choice.',
     dur: 1.8,
   },
   {
@@ -34,7 +34,7 @@ export const BEATS: Ethics2Beat[] = [
     // Nothing on this stage is labelled "Deontology", and the next three beats show
     // each lens by working the wallet through it. Naming all three first was a
     // vocabulary tax paid before any of them meant anything (J6).
-    text: 'Ethics hands you three lenses. One asks what happens next.',
+    text: 'Moral philosophy offers three main approaches, here called lenses. The first asks what consequences an act will have.',
     cite: 'Three lenses',
     dur: 1.9,
   },
@@ -43,7 +43,7 @@ export const BEATS: Ethics2Beat[] = [
     // Nothing on this stage is labelled "Deontology", and the next three beats show
     // each lens by working the wallet through it. Naming all three first was a
     // vocabulary tax paid before any of them meant anything (J6).
-    text: 'One asks what your duty is. One asks who the act turns you into.',
+    text: 'The second asks what your duty requires. The third asks what the act makes of your character.',
     dur: 2.1,
   },
   {
@@ -51,18 +51,18 @@ export const BEATS: Ethics2Beat[] = [
     // Nothing on this stage is labelled "Deontology", and the next three beats show
     // each lens by working the wallet through it. Naming all three first was a
     // vocabulary tax paid before any of them meant anything (J6).
-    text: 'Most people use all three without noticing.',
+    text: 'Ordinary moral thinking mixes the three. Most people use all three without noticing which one they’re using.',
     dur: 1.8,
   },
   {
     p: 160, x: 262, g: 21, gx: 108, named: 1, lens: 1,
-    text: 'Mill points the first lens at the wallet. Did handing it in make anyone’s life go better?',
+    text: 'John Stuart Mill’s utilitarianism judges acts by consequences. Returning the wallet is right if it produces the most happiness.',
     cite: 'J.S. Mill, Utilitarianism, 1863',
     dur: 2.7,
   },
   {
     p: 416, x: 262, g: 21, gx: 108, named: 1, lens: 1,
-    text: 'For him that’s the whole question, and everybody’s happiness counts the same.',
+    text: 'For Mill, consequences alone determine whether an act is right, and each person’s happiness counts equally.',
     dur: 2.1,
   },
   {
@@ -80,36 +80,36 @@ export const BEATS: Ethics2Beat[] = [
   },
   {
     p: 14, x: 262, g: 6, gx: 108, named: 1, lens: 2,
-    text: 'Kant ignores the happy ending. He says to act only on a rule you could want everyone to follow.',
+    text: 'Immanuel Kant sets consequences aside. He holds that you should act only on a rule you could will everyone to follow.',
     cite: 'Kant, Groundwork, 1785',
     dur: 2.3,
   },
   {
     p: 14, x: 262, g: 6, gx: 108, named: 1, lens: 2,
-    text: 'Try Kant’s test on the rule “keep any wallet you find”. It eats itself, because nobody would hand one in.',
+    text: 'Apply Kant’s test to the rule “keep any wallet you find”. Willed for everyone, it would let others keep your lost wallet, so you couldn’t consistently will it.',
     dur: 2.5,
   },
   {
     p: 13, x: 262, g: 22, gx: 108, named: 1, lens: 3,
-    text: 'Aristotle asks a third question. Not what to do, but who you’re becoming.',
+    text: 'Aristotle’s virtue ethics asks a third question. It asks not what to do, but what character you’re developing.',
     cite: 'Aristotle, Nicomachean Ethics',
     dur: 1.8,
   },
   {
     p: 13, x: 262, g: 22, gx: 108, named: 1, lens: 3,
-    text: 'Every honest act makes the next one easier. That’s what he means by a good life.',
+    text: 'Aristotle holds that virtue is acquired by practice. Each honest act makes the next easier, until honesty is part of your character.',
     dur: 3.3,
   },
   {
     p: 21, x: 262, g: -1, named: 1, lens: 3,
     interact: {
       // The table on stage calls this lens OUTCOMES, not "consequentialist".
-      prompt: 'Tap the question the OUTCOMES lens asks about that wallet.',
+      prompt: 'Which question does the outcomes lens ask about the wallet?',
       cards: [
-        { text: 'Which brings most happiness', correct: true },
-        { text: 'Could everyone follow it', correct: false },
+        { text: 'Which act brings most happiness', correct: true },
+        { text: 'Could everyone follow this rule', correct: false },
       ],
-      explain: '“Which brings most happiness.” That question weighs results and nothing else — whose life got better, whose got worse. The other card is Kant’s question, and it doesn’t care how the story ends.',
+      explain: 'Which act brings most happiness. The outcomes lens judges a choice by its results alone: whose life goes better and whose goes worse. “Could everyone follow this rule” is Kant’s question, which sets results aside.',
       xp: 5,
     },
     dur: 1.0,
@@ -117,16 +117,16 @@ export const BEATS: Ethics2Beat[] = [
   {
     p: 8, x: 262, g: -1, named: 1, lens: 3,
     interact: {
-      prompt: 'Does being common or being legal settle whether it is right?',
+      prompt: 'Does an act’s being common or legal establish that it’s right?',
       sort: {
         chip: 'common and legal',
         bins: [
-          { id: 'common', label: 'common settles it', reads: 'common, so it must be fine' },
-          { id: 'legal', label: 'legal settles it', reads: 'legal, so it must be fine' },
-          { id: 'neither', label: 'neither does', reads: 'neither one settles whether it is right', correct: true },
+          { id: 'common', label: 'common suffices', reads: 'it’s common, so it’s right' },
+          { id: 'legal', label: 'legal suffices', reads: 'it’s legal, so it’s right' },
+          { id: 'neither', label: 'neither suffices', reads: 'neither fact shows that it’s right', correct: true },
         ],
       },
-      explain: 'Neither does. Hume pointed at this gap in 1739. What people do never tells you, by itself, what they ought to do. The other two settings step over the gap and hope nobody notices.',
+      explain: 'Neither suffices. David Hume argued in 1740 that facts about what is can’t, alone, establish what ought to be. A common or legal act can still be wrong. The other two answers draw an ought from an is.',
       xp: 5,
     },
     dur: 1.0,
@@ -135,12 +135,12 @@ export const BEATS: Ethics2Beat[] = [
     summary: {
       title: 'One Choice, Three Lenses',
       points: [
-        'Outcomes: ask what result helps most (Mill)',
-        'Duty: ask if your maxim could be universal (Kant)',
-        'Character: ask who the act makes you (Aristotle)',
-        '"Natural" never proves "right" (the is–ought gap)',
+        'Outcomes: which act produces the most happiness (Mill)',
+        'Duty: whether your rule could be universal law (Kant)',
+        'Character: what the act makes of you (Aristotle)',
+        'No “ought” follows from an “is” alone (Hume)',
       ],
-      closing: 'The lenses rarely agree, and the disagreement is where real thinking starts.',
+      closing: 'Here all three lenses agree. In harder cases they diverge, and their reasons must be weighed against each other.',
     },
     dur: 2.8,
   },

@@ -36,59 +36,59 @@ export interface Metaphysics37Beat extends BaseBeat {
 export const BEATS: Metaphysics37Beat[] = [
   {
     p: 462, x: 56, shelf: 1,
-    text: 'One glass, one shelf, ninety years. The glass was never knocked, never dropped, and never broke.',
+    text: 'Consider a glass that stood on a shelf for ninety years. It was never knocked or dropped, and it never broke.',
     dur: 3.6,
   },
   {
     p: 419, x: 56, shelf: 1,
-    text: 'Ask whether it was fragile and everyone says yes without pausing. Now say what that yes was about.',
+    text: 'Was the glass fragile? Almost everyone would say yes, but it’s hard to say what that claim is about.',
     dur: 4.0,
   },
   {
     p: 4, x: 56, shelf: 1, labels: 1, live: 1,
     interact: {
-      prompt: 'Tap the label that says what being fragile is.',
-      explain: 'What it WOULD do. Not what it did, because it did nothing. Not what it is made of, because a thing can be fragile for many reasons. And not what anyone expects, because the glass was fragile before anyone looked at it.',
+      prompt: 'Which label states what being fragile consists in?',
+      explain: 'What it would do. Fragility isn’t what the glass did, since it did nothing. It isn’t the material, since fragility can rest on many materials. And it isn’t anyone’s expectation, since the glass was fragile unobserved.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 176, x: 56, shelf: 1, hammer: 1, swing: 1,
-    text: 'So try the obvious definition. Fragile means: if it is struck, it breaks.',
+    text: 'The simple conditional analysis defines fragility plainly: strike the object, and the object breaks.',
     dur: 3,
   },
   {
     p: 176, x: 56, shelf: 1, hammer: 1, swing: 1,
-    text: 'Watch the hammer come down.',
+    text: 'Now suppose a hammer comes down on the glass.',
     dur: 1.8,
   },
   {
     p: 2, x: 56, shelf: 1, hammer: 1, swing: 1, ward: 1,
-    text: 'And a sorcerer is watching, ready to toughen it the instant anyone swings. The glass does not break.',
-    cite: 'Martin\'s fink, 1994',
+    text: 'But a sorcerer stands ready to toughen the glass the moment a blow begins. So the glass doesn’t break.',
+    cite: 'A finkish disposition',
     dur: 3.2,
   },
   {
     p: 2, x: 56, shelf: 1, hammer: 1, swing: 1, ward: 1,
-    text: 'The glass is still as fragile as it ever was.',
+    text: 'Yet until the blow, the glass is as fragile as ever. So the simple conditional analysis fails.',
     dur: 1.8,
   },
   {
     p: 457, x: 56, shelf: 1, live_d: 1, live: 1,
     interact: {
-      prompt: 'The sorcerer is gone and nobody has touched it. How fragile is it right now?',
+      prompt: 'With the sorcerer gone and the glass untouched, how fragile is it now?',
       drag: {
         lo: 'NOT AT ALL',
         hi: 'COMPLETELY',
         start: 0,
         zones: [
-          { id: 'none', upto: 0.28, reads: 'nothing until it breaks' },
-          { id: 'some', upto: 0.62, reads: 'only a way of speaking' },
+          { id: 'none', upto: 0.28, reads: 'not fragile until it breaks' },
+          { id: 'some', upto: 0.62, reads: 'fragile only as a way of speaking' },
           { id: 'full', upto: 1, reads: 'as fragile as it ever was', correct: true },
         ],
       },
-      explain: 'Nothing about the glass changed when the sorcerer left, and nothing changed in ninety years on the shelf. Whatever fragility is, the glass has all of it right now, with no event to point at.',
+      explain: 'As fragile as it ever was. Nothing about the glass changed when the sorcerer left, or in ninety years on the shelf. So the glass has its fragility now, without any event to show it.',
       xp: 5,
     },
     dur: 1.0,
@@ -107,19 +107,19 @@ export const BEATS: Metaphysics37Beat[] = [
   },
   {
     p: 383, x: 128, shelf: 1,
-    text: 'That’s a strange thing for a fact to be. Something true of the glass is true because of an event that never happened and now never will.',
+    text: 'Dispositions are therefore unusual facts. The glass’s fragility is real now, yet it concerns a breaking that never occurs.',
     dur: 4.8,
   },
   {
     summary: {
-      title: 'The Property That Points Elsewhere',
+      title: 'Fragility and Dispositions',
       points: [
         'A disposition says what would happen, not what does',
-        'Simple conditionals fail — interference breaks them',
+        'Finks show that simple conditional analyses fail',
         'The glass is fragile whether struck or not',
         'So some truths are about events that never occur',
       ],
-      closing: 'Half of what you know about any object is what it would do. Almost none of it will ever be tested.',
+      closing: 'Much of what is known about any object concerns what it would do. Most of it is never tested.',
     },
     dur: 3.2,
   },

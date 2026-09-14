@@ -36,41 +36,41 @@ export interface Epistemology35Beat extends BaseBeat {
 export const BEATS: Epistemology35Beat[] = [
   {
     p: 172, x: 58, pens: 1,
-    text: 'A zoo, a pen, a striped animal. You know what that is, and you knew it before you finished looking.',
+    text: 'Suppose you see a striped animal in a zoo pen labelled “zebra”. You know at a glance that it’s a zebra.',
     dur: 3.6,
   },
   {
     p: 467, x: 58, pens: 1, plaques: 1, scan: 1, live: 1,
     interact: {
-      prompt: 'Slide the fence out to where an alternative stops being worth ruling out.',
+      prompt: 'How far-fetched must an alternative be before you needn’t rule it out?',
       drag: {
         lo: 'RULE OUT NOTHING',
         hi: 'RULE OUT EVERYTHING',
         start: 0.2,
         zones: [
-          { id: 'lax', upto: 0.3, reads: 'a mule in paint counts' },
-          { id: 'ok', upto: 0.72, reads: 'ordinary care is enough', correct: true },
-          { id: 'mad', upto: 1, reads: 'and a hologram, and a dream' },
+          { id: 'lax', upto: 0.3, reads: 'a painted mule needn’t be ruled out' },
+          { id: 'ok', upto: 0.72, reads: 'rule out only the likely alternatives', correct: true },
+          { id: 'mad', upto: 1, reads: 'rule out holograms and dreams too' },
         ],
       },
-      explain: 'Everyone slides to roughly the same place, and nobody can say why it stops there. Push the fence out far enough and you know nothing at all. Pull it in and a painted mule is suddenly your problem. The middle is where you live, and it has no marked edge.',
+      explain: 'Rule out only the likely alternatives. Requiring every alternative to be ruled out would leave no knowledge at all. Requiring none would make knowledge too easy. The hard part is saying where the line falls.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 13, x: 58, pens: 1, plaques: 1, chain: 1,
-    text: 'Here’s the rule that makes the puzzle awkward. Know a thing.',
+    text: 'Fred Dretske used this case to test a principle about knowledge.',
     dur: 1.8,
   },
   {
     p: 13, x: 58, pens: 1, plaques: 1, chain: 1,
-    text: 'Know what the thing rules out. You should know the second thing as well.',
+    text: 'If you know a claim and know that it rules out another, you know that the other is false.',
     dur: 2,
   },
   {
     p: 13, x: 58, pens: 1, plaques: 1, chain: 1,
-    text: 'Philosophers call the rule closure.',
+    text: 'The principle is called epistemic closure, because knowledge is closed under known entailment.',
     dur: 1.8,
   },
   {
@@ -88,25 +88,25 @@ export const BEATS: Epistemology35Beat[] = [
   {
     p: 160, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1, live: 1,
     interact: {
-      prompt: 'Tap the plate your evidence does not actually reach.',
-      explain: 'The last one. You looked at an animal and got the answer “zebra” for free. Nothing you did looked any harder at the paint. So the chain that should carry you through gives way at the end.',
+      prompt: 'Which claim does your evidence fail to reach?',
+      explain: 'Not a painted mule. Looking at the animal supports “it is a zebra”, but nothing in that look tests for paint. So the chain that closure promises breaks at its last link.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 167, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1,
-    text: 'Notice what didn’t happen. You never checked for paint.',
+    text: 'Yet you never checked whether the animal was a painted mule.',
     dur: 1.8,
   },
   {
     p: 167, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1,
-    text: 'You’d think it strange to be asked, and you’d still say you knew.',
+    text: 'The question would strike you as strange, and you’d still say you knew it was a zebra.',
     dur: 2.6,
   },
   {
     p: 386, x: 130, pens: 1, plaques: 1, chain: 1,
-    text: 'One way out says the mule was never a live option. If it’s far-fetched enough, your ordinary looking already counts as ruling it out.',
+    text: 'One way out treats the painted mule as an irrelevant alternative. On this view, ordinary looking counts as ruling it out.',
     dur: 4.6,
   },
   {
@@ -116,12 +116,12 @@ export const BEATS: Epistemology35Beat[] = [
     // every sibling pays 60. It stays as a tap because the point is worth making
     // and is not worth scoring: there is no trap in it, only a price.
     tap: {
-      prompt: 'That fix has a price. Tap what it costs.',
+      prompt: 'What does appealing to relevance leave unexplained?',
       options: [
-        { id: 'define', text: '"Far-fetched" has to be defined', correct: true },
-        { id: 'silly', text: 'Nothing — the mule is silly', correct: false },
+        { id: 'define', text: '“Far-fetched” has to be defined', correct: true },
+        { id: 'silly', text: 'Nothing, since the mule is absurd', correct: false },
       ],
-      explain: 'Calling it silly is the answer, not a reason for it. Once relevance does the work, someone has to say what makes an alternative relevant. And it moves when the stakes do, which is why a courtroom checks what a zoo never would.',
+      explain: '“Far-fetched” has to be defined. Calling the mule absurd restates the verdict without giving a reason. A theory of relevance must say what makes an alternative relevant, and relevance seems to shift with the stakes.',
     },
     dur: 1.0,
   },
@@ -129,12 +129,12 @@ export const BEATS: Epistemology35Beat[] = [
     summary: {
       title: 'What Your Evidence Reaches',
       points: [
-        'Closure: know it, know what it rules out, know that',
-        'Ordinary looking hands you "zebra" at once',
-        'The same looking says nothing about paint',
+        'Closure: knowledge extends to what a known claim rules out',
+        'Ordinary looking supports “it is a zebra” at once',
+        'The same looking doesn’t test for paint',
         'Either closure goes, or the mule was never relevant',
       ],
-      closing: 'You never checked for paint, and you were right not to. Saying exactly why you were right is most of a century of epistemology.',
+      closing: 'You never checked for paint, and you were right not to. Explaining why has occupied epistemology since Dretske’s 1970 paper.',
     },
     dur: 3.0,
   },

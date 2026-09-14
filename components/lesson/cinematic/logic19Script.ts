@@ -35,39 +35,39 @@ export interface Log19Beat extends BaseBeat {
 export const BEATS: Log19Beat[] = [
   {
     p: 379, x: 200, rule: 1, cards: 1,
-    text: 'A rule, and four cards. Each one has a letter on the face and a number on the back.',
+    text: 'Four cards each have a letter on the front and a number on the back. The rule says a vowel on the front means an even number on the back.',
     cite: 'The rule',
     dur: 4.2,
   },
   {
     p: 384, x: 200, rule: 1, cards: 1, reach: 1,
-    text: 'Which two would you turn to test it? Almost everybody reaches for the vowel and the even number.',
+    text: 'Which cards must be turned over to test the rule? In Peter Wason’s selection task, the most common answer is the vowel and the even number.',
     dur: 4.4,
   },
   {
     p: 447, x: 132, rule: 1, cards: 1, reach: 1,
-    text: 'Turn the four and the rule survives whatever is on its back. A consonant is allowed an even number.',
-    cite: 'The useless one',
+    text: 'Turning the four can’t refute the rule. A vowel on its front would satisfy the rule, and the rule says nothing about consonants.',
+    cite: 'An uninformative card',
     dur: 4.4,
   },
   {
     p: 165, x: 132, rule: 1, cards: 1, live: 1,
     interact: {
-      prompt: 'Tap the card that could still break the rule.',
-      explain: 'The seven. Turning the seven is the only move that can come back with bad news. A test that can’t fail is not a test. The four is safe whatever lies behind it, which is why people reach for the four.',
+      prompt: 'Besides the vowel, which card could reveal a vowel paired with an odd number?',
+      explain: 'The seven. A vowel on its front would refute the rule, so the seven must be turned, along with the vowel. The four and the consonant can’t refute the rule, whatever their hidden sides show.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 380, x: 132, rule: 1, cards: 1, turned: 1,
-    text: 'There it is. A vowel behind the seven and the rule is dead on the table.',
-    cite: 'The one that matters',
+    text: 'The seven has a vowel on its front. One counterexample is enough to show that the rule is false.',
+    cite: 'A counterexample',
     dur: 4.0,
   },
   {
     p: 383, x: 268, rule: 1, cards: 1, turned: 1,
-    text: 'You went looking for the card that would say yes. Only the card that can say no is really a test.',
+    text: 'Wason explained the common answer by confirmation bias, the tendency to seek cases that confirm a belief. Only a card that could refute the rule can test it.',
     dur: 4.6,
   },
   {
@@ -86,32 +86,32 @@ export const BEATS: Log19Beat[] = [
   {
     p: 442, x: 268, rule: 1, cards: 1, turned: 1,
     interact: {
-      prompt: 'Split your checking between the two kinds of case.',
+      prompt: 'To test a belief, how should your search be divided between confirming and refuting cases?',
       split: {
         left: 'COULD CONFIRM IT',
         right: 'COULD REFUTE IT',
         start: 0.82,
         zones: [
-          { id: 'refute', upto: 0.4, reads: 'you are hunting for trouble', correct: true },
-          { id: 'even', upto: 0.65, reads: 'an even-handed search' },
-          { id: 'confirm', upto: 1, reads: 'you are collecting yeses' },
+          { id: 'refute', upto: 0.4, reads: 'mostly cases that could refute it', correct: true },
+          { id: 'even', upto: 0.65, reads: 'confirming and refuting cases equally' },
+          { id: 'confirm', upto: 1, reads: 'mostly cases that could confirm it' },
         ],
       },
-      explain: 'Toward the cases that could go badly. A confirming case is cheap and there are always more of them. The only observation that changes anything is the one your belief forbids, so that’s where the effort belongs.',
+      explain: 'Mostly cases that could refute the belief. Confirming cases are easy to find, and no number of them proves a general claim. One refuting case can show the claim false, so a genuine test looks there.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Looking For The Yes',
+      title: 'Confirmation Bias and the Selection Task',
       points: [
-        'Confirmation bias is a bias in what you go and check',
-        'A test that cannot come back badly tests nothing',
-        'The informative card is the one your rule forbids',
+        'Confirmation bias is a bias in which evidence you seek',
+        'A test that could not refute a claim tests nothing',
+        'Only cards that could violate the rule are informative',
         'Ask what would have to be true for you to be wrong',
       ],
-      closing: 'Nobody turns the seven, and the seven is the only card with anything to say.',
+      closing: 'Few people choose the seven, yet only the seven and the vowel can show the rule is false.',
     },
     dur: 3.4,
   },

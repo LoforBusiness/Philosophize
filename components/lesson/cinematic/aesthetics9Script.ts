@@ -24,34 +24,34 @@ export interface A9Beat extends BaseBeat {
 export const BEATS: A9Beat[] = [
   {
     p: 462, x: 80, boxes: true, crown: true,
-    text: 'For most of the history of art, one word did the deciding. Beautiful things were art.',
+    text: 'For centuries, philosophers and critics treated beauty as the defining mark of art.',
     dur: 2.9,
   },
   {
     p: 462, x: 80, boxes: true, crown: true,
-    text: 'Everything else was something else.',
+    text: 'On this view, beauty is a necessary condition, so a work without beauty couldn’t count as art.',
     dur: 1.8,
   },
   {
     p: 459, x: 80, boxes: true, stands: true,
-    text: 'Then in 1964 Andy Warhol stacked plywood boxes painted to look exactly like Brillo cartons. Not a copy of a beautiful thing.',
+    text: 'In 1964, Andy Warhol exhibited plywood boxes painted to look like Brillo soap-pad cartons.',
     cite: 'Warhol, Brillo Box, 1964',
     dur: 3.6,
   },
   {
     p: 459, x: 80, boxes: true, stands: true,
-    text: 'A copy of a box.',
+    text: 'Warhol’s work copied an ordinary commercial package rather than anything beautiful.',
     dur: 1.8,
   },
   {
     p: 47, x: 144, boxes: true, stands: true,
-    text: 'Arthur Danto stood in front of the two boxes and asked the question that broke the old rule. The boxes are identical.',
+    text: 'Arthur Danto posed the problem of indiscernibles. Two objects can look identical, yet only one is a work of art.',
     cite: 'The indiscernible pair',
     dur: 2.5,
   },
   {
     p: 47, x: 144, boxes: true, stands: true,
-    text: 'One is in a supermarket and one is in a gallery. You can’t tell which is the art by looking.',
+    text: 'One box is in a supermarket and one is in a gallery. Perception alone can’t tell you which is the artwork.',
     dur: 2.7,
   },
   {
@@ -69,37 +69,37 @@ export const BEATS: A9Beat[] = [
   },
   {
     p: 5, x: 208, boxes: true, stands: true,
-    text: 'So the difference is not in the object. It’s in what the object does: the argument the work makes, the moment it lands in, the history it answers.',
-    cite: 'Beauty dethroned',
+    text: 'So the difference is not in the object. For Danto, the difference lies in the work’s meaning and in the art history behind it.',
+    cite: 'Meaning, not appearance',
     dur: 3.7,
   },
   {
     p: 5, x: 208, boxes: true, stands: true,
-    text: 'Beauty came off the throne and became one option among many.',
+    text: 'Beauty remains possible in art, but it no longer decides what counts as art.',
     dur: 1.8,
   },
   {
     p: 383, x: 208, boxes: true, stands: true,
     interact: {
-      prompt: 'So where does beauty stand now?',
+      prompt: 'After Warhol and Danto, what is the status of beauty in art?',
       sort: {
         chip: 'beauty',
         bins: [
           { id: 'must', label: 'required', reads: 'a work must be beautiful to count' },
           { id: 'may', label: 'optional', reads: 'a work may be beautiful, and need not be', correct: true },
-          { id: 'never', label: 'discarded', reads: 'beauty was thrown out altogether' },
+          { id: 'never', label: 'discarded', reads: 'beauty has no place in art' },
         ],
       },
-      explain: 'An option, not a condition. The trap is hearing “dethroned” as “banned”. A work can still be beautiful. It just no longer has to be, because what made it art was never the beauty.',
+      explain: 'Optional. For Danto, a work may be beautiful and need not be. Beauty wasn’t banished from art. It stopped being a condition, because what makes a work art is its meaning, not its appearance.',
     },
     dur: 4.6,
   },
   {
     p: 434, x: 208, boxes: true, stands: true, labels: true,
     interact: {
-      prompt: '“It isn’t beautiful, so it isn’t art.” Tap the label that belongs under the plinth.',
+      prompt: 'Warhol’s boxes aren’t beautiful. Which verdict belongs under the box in the gallery?',
       explain:
-        'The trap is the first label — the oldest assumption in the subject: art equals beauty. Warhol’s boxes are not beautiful and nobody says they are. The third smuggles beauty back in by insisting it must be there invisibly.',
+        'Not pretty, still art. The first verdict assumes that art requires beauty, the assumption Brillo Box challenges. The third keeps that assumption by positing a beauty no one can see in the work.',
     },
     dur: 4.8,
   },
@@ -112,7 +112,7 @@ export const BEATS: A9Beat[] = [
         'Two identical boxes, one of them art',
         'The difference is meaning, not appearance',
       ],
-      closing: 'Art is allowed to question and unsettle, not only to please the eye.',
+      closing: 'Art can question and unsettle, not only please the eye.',
     },
     dur: 4.0,
   },

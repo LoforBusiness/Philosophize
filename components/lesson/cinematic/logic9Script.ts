@@ -28,34 +28,34 @@ export interface L9Beat extends BaseBeat {
 export const BEATS: L9Beat[] = [
   {
     a: 384, d: 0, dx: 420, claim: true,
-    text: 'Someone puts a claim up where everyone can read it. The quickest way to look like you’ve beaten it is never to go near it.',
+    text: 'Suppose someone presents the claim that a budget adds up. A fallacy of distraction seems to rebut a claim while leaving the claim untouched.',
     dur: 3.8,
   },
   {
     a: 14, d: 13, dx: 264, claim: true, smear: true,
-    text: 'The first dodge aims at the arguer. It says “he failed maths at school, so ignore his budget”.',
+    text: 'The first is the ad hominem, which attacks the arguer instead of the argument. One such reply says “he failed maths, so ignore his budget”.',
     cite: 'Ad hominem',
     dur: 2,
   },
   {
     a: 14, d: 13, dx: 264, claim: true, smear: true,
-    text: 'But a claim doesn’t get its truth from the mouth it came out of. The insult has answered nothing on the board.',
+    text: 'However, a claim’s truth doesn’t depend on who asserts it. The insult says nothing about whether the figures add up.',
     dur: 3,
   },
   {
     a: 15, d: 29, dx: 264, claim: true, straw: 2,
-    text: 'The second dodge builds a flimsy copy first. Swap their real position for a weaker one nobody holds, knock that down, and take the bow.',
+    text: 'The second is the straw man. It replaces the real position with a weaker one nobody holds, and refutes that instead.',
     cite: 'The straw man',
     dur: 3.8,
   },
   {
     a: 403, d: 29, dx: 264, claim: true, straw: 2,
-    text: 'You beat a scarecrow you put up yourself.',
+    text: 'In effect, you defeat a position you built yourself, not your opponent’s.',
     dur: 1.8,
   },
   {
     a: 378, d: 8, dx: 264, claim: true, straw: 2, untouched: true,
-    text: 'Now look at what’s actually happened. Two replies, a lot of noise, and the claim is still standing where it was, unread and unanswered.',
+    text: 'Neither reply has engaged with the claim itself. The question of whether the budget adds up is still open.',
     dur: 4.2,
   },
   {
@@ -74,38 +74,38 @@ export const BEATS: L9Beat[] = [
   {
     a: 462, d: 1, dx: 264, replies: true,
     interact: {
-      prompt: 'Three replies to that budget plan. Tap the one that attacks the arguer instead of the argument.',
+      prompt: 'Which of these replies to the budget attacks the arguer instead of the argument?',
       explain:
-        'Ad hominem goes at the person: a school report can’t make a column of figures add up. The trap is the third reply — also a dodge, but a straw man. It distorts the position, then argues with the distortion.',
+        '“He failed maths at school” is the ad hominem. A school record can’t show whether a column of figures adds up. “So you want everyone to be poor?” is a straw man, which distorts the position.',
     },
     dur: 4.8,
   },
   {
     a: 165, d: 12, dx: 264,
     interact: {
-      prompt: 'A terrible argument that the sun will rise. Which is it?',
+      prompt: 'A fallacious argument concludes that the sun will rise. Which principle shows its conclusion may still be true?',
       poll: {
         options: [
-          { id: 'luck', reads: 'bad reasoning, true conclusion: this happens constantly', correct: true },
-          { id: 'best', reads: 'good reasoning, true conclusion: the best case there is' },
-          { id: 'odd', reads: 'good reasoning, false conclusion: a premise was false' },
-          { id: 'worst', reads: 'bad reasoning, false conclusion: nothing here at all' },
+          { id: 'luck', reads: 'refuting a proof isn’t refuting the claim', holders: ['Arthur Schopenhauer'], correct: true },
+          { id: 'best', reads: 'character is almost the strongest proof', holders: ['Aristotle'] },
+          { id: 'odd', reads: 'what seems true to you is true for you', holders: ['Protagoras'] },
+          { id: 'worst', reads: 'never believe on insufficient evidence', holders: ['W.K. Clifford'] },
         ],
       },
-      explain: 'Bad reasoning, true conclusion, and that answer is crowded. A fallacy tells you the reasoning doesn’t support the conclusion. It says nothing about whether the conclusion is true. Assuming it does has its own name: the fallacy fallacy.',
+      explain: 'Refuting a proof isn’t refuting the claim. A fallacy shows only that the reasoning fails, so the conclusion may still be true. Assuming otherwise is the fallacy fallacy.',
     },
     dur: 4.6,
   },
   {
     summary: {
-      title: 'Fallacies of Distraction Spotted',
+      title: 'Fallacies of Distraction',
       points: [
         'Ad hominem attacks the person, not the claim',
-        'Straw man beats a fake, weaker position',
+        'A straw man refutes a weaker position nobody holds',
         'Both leave the real argument untouched',
         'A fallacy does not make the conclusion false',
       ],
-      closing: 'Name the dodge out loud and it stops working.',
+      closing: 'Once a fallacy of distraction is named, the discussion can return to the claim itself.',
     },
     dur: 4.0,
   },

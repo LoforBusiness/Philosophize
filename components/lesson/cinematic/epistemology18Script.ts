@@ -34,53 +34,53 @@ export interface Epi18Beat extends BaseBeat {
 export const BEATS: Epi18Beat[] = [
   {
     p: 25, x: 200, rails: 1, ev: 0,
-    text: 'Two claims, and you believe one of them far more than the other. That’s the top rail and the bottom one.',
+    text: 'Consider two claims: the earth is round, and your keys are in the drawer. You believe the first far more firmly than the second.',
     dur: 4.4,
   },
   {
     p: 2, x: 200, rails: 1, grip: 1, ev: 0,
-    text: 'Look at what’s holding each marker. The round earth is tied to almost everything else you know.',
+    text: 'The claim that the earth is round is supported by almost everything else you know.',
     dur: 3.1,
   },
   {
     p: 2, x: 200, rails: 1, grip: 1, ev: 0,
-    text: 'The keys are tied to a memory of putting them down.',
+    text: 'The claim about your keys rests on a single memory of putting them there.',
     dur: 1.9,
   },
   {
     p: 447, x: 132, rails: 1, grip: 1, ev: 0.3,
-    text: 'Now the same piece of evidence arrives at both. Somebody you trust tells you it isn’t so.',
-    cite: 'One fact, two claims',
+    text: 'Now suppose the same evidence arrives against both. Someone you trust tells you that each claim is false.',
+    cite: 'One report, two claims',
     dur: 4.4,
   },
   {
     p: 383, x: 132, rails: 1, grip: 1, ev: 0.3,
-    text: 'The same report should not move both markers the same distance. The evidence alone can’t decide how far.',
+    text: 'The same report shouldn’t move both beliefs the same distance. How far a belief moves depends on more than the report.',
     dur: 3.8,
   },
   {
     p: 165, x: 132, rails: 1, grip: 1, ev: 0.3, live_d: 1,
     interact: {
-      prompt: 'Push the same evidence at both claims. How far does each one move?',
+      prompt: 'When a careful witness contradicts both beliefs, how far does each one move?',
       drag: {
         lo: 'A PASSING REMARK',
         hi: 'A CAREFUL WITNESS',
         start: 0.12,
         zones: [
-          { id: 'weak', upto: 0.3, reads: 'the loose one twitches' },
-          { id: 'mid', upto: 0.65, reads: 'one has moved, one has not' },
-          { id: 'strong', upto: 1, reads: 'the loose one has swung right over', correct: true },
+          { id: 'weak', upto: 0.3, reads: 'the keys belief shifts a little' },
+          { id: 'mid', upto: 0.65, reads: 'the keys belief moves, the round earth doesn’t' },
+          { id: 'strong', upto: 1, reads: 'the keys belief flips, the round earth holds', correct: true },
         ],
       },
-      explain: 'Same push, two different distances. What decides how far a fact moves you isn’t the fact. It’s how firmly you were already holding the claim. The round-earth marker barely shifts because almost everything else you know is holding it.',
+      explain: 'The keys belief flips, the round earth holds. The same report moves the two beliefs different distances, because one began far more probable than the other. Almost everything else you know supports the round earth.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 177, x: 132, rails: 1, grip: 1, ev: 1,
-    text: 'This is the rule Bayes wrote down. A new fact moves you in proportion to how loosely you were holding on.',
-    cite: 'Updating',
+    text: 'Bayesian reasoning, named after Thomas Bayes, makes this exact. The same evidence barely moves a belief you’re nearly sure of, but it can overturn a weak one.',
+    cite: 'Bayesian updating',
     dur: 4.6,
   },
   {
@@ -99,26 +99,26 @@ export const BEATS: Epi18Beat[] = [
   {
     p: 41, x: 268, rails: 1, grip: 1, ev: 1,
     interact: {
-      prompt: 'One study contradicts a very well established result. What now?',
+      prompt: 'If one study contradicts a well-established result, which should you doubt first?',
       cards: [
-        { text: 'Doubt the study first', correct: true },
-        { text: 'Drop the old result', correct: false },
+        { text: 'Doubt the new study first', correct: true },
+        { text: 'Abandon the established result', correct: false },
       ],
-      explain: 'Doubt the study first, and that isn’t stubbornness. A result held up by a thousand others is likelier to survive than one paper is to be right. If the study replicates, the balance changes, and then so should you.',
+      explain: 'Doubt the new study first. A result supported by many independent findings is more likely to be right than a single study. If the study is replicated, the balance of evidence changes, and so should your belief.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'How Far a Fact Moves You',
+      title: 'How Far Evidence Should Move You',
       points: [
         'How much to update depends on how firmly you already believed',
         'The same evidence moves a loose belief further than a settled one',
-        'Refusing to move at all is not caution, it is closing the rail',
-        'Strong claims need evidence in proportion to what holds them',
+        'Refusing to update at all isn’t caution but dogmatism',
+        'Overturning a well-supported claim requires correspondingly strong evidence',
       ],
-      closing: 'Ask what’s holding the marker before you decide the push was too weak.',
+      closing: 'Before judging a piece of evidence, ask how much already supports the belief it challenges.',
     },
     dur: 3.4,
   },

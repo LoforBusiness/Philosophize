@@ -102,7 +102,7 @@ const ANSWER_TARGET = `(() => {
 const WAITING = `(() => {
   const clip = document.getElementById('stage-clip');
   if (!clip) return false;
-  for (const id of ['drag-strip','split-bar','shape-plot','sort-bins','poll-ballot','field-pad','lever-arc']) {
+  for (const id of ['drag-strip','split-bar','trend-pick','shape-plot','sort-bins','poll-ballot','field-pad','lever-arc']) {
     if (document.getElementById(id)) return true;
   }
   return false;

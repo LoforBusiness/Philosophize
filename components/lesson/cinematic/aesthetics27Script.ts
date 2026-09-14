@@ -33,36 +33,36 @@ export interface Aesthetics27Beat extends BaseBeat {
 export const BEATS: Aesthetics27Beat[] = [
   {
     p: 423, x: 28, wall: 0.3,
-    text: 'First a melody, then a noise. Then four minutes of a pianist playing nothing.',
+    text: 'Over the twentieth century, some composers replaced melody with noise. One piece asked a pianist to play no notes at all.',
     dur: 4.8,
   },
   {
     p: 172, x: 28, wall: 0.6,
-    text: 'Avant-garde is a military word. It named the guard sent first into open country.',
+    text: 'Such artists are called the avant-garde. The term is military and originally meant the advance guard of an army.',
     dur: 5.0,
   },
   {
     p: 435, x: 28, wall: 1,
-    text: 'Cubism broke perspective. Atonal music dropped the key, and poetry dropped the sentence.',
+    text: 'Cubism gave up single-point perspective, and atonal music gave up the key. Dada sound poetry gave up words that meant anything.',
     dur: 5.0,
   },
   {
     p: 257, x: 28, wall: 1, meter: 1, shock: 0.85,
-    text: 'The gamble is that habit dulls a person. You stop seeing what you have seen a thousand times.',
+    text: 'These artists held that habit dulls perception. You stop noticing what you see every day.',
     dur: 5.0,
   },
   {
     p: 161, x: 28, wall: 1, meter: 1, shock: 0.85, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what the rule-breaking is for.',
-      explain: 'To wake you up. Shklovsky called it making the stone stony — breaking a form so the thing inside it is noticed again. Shock is the method rather than the aim. A market grew round the work afterwards, which is not why anybody made it.',
+      prompt: 'What is the avant-garde’s purpose in breaking artistic conventions?',
+      explain: 'To wake you up. Viktor Shklovsky called this defamiliarisation: making familiar things strange so that they’re perceived afresh. Shock is the method, not the aim. A market grew around such work later, but selling wasn’t the purpose.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 442, x: 88, wall: 1, meter: 1, shock: 0.85,
-    text: 'John Cage sat at a piano in 1952 and played nothing for four minutes and thirty-three seconds.',
+    text: 'At its premiere in 1952, John Cage’s piece had a pianist play no notes for four minutes and thirty-three seconds. The sounds in the hall became the music.',
     dur: 5.0,
   },
   {
@@ -79,25 +79,25 @@ export const BEATS: Aesthetics27Beat[] = [
   },
   {
     p: 445, x: 88, wall: 1, meter: 1, shock: 0.85,
-    text: 'Impressionism was mocked as unfinished smears. It now sells more postcards than anything.',
+    text: 'Critics in 1874 mocked Impressionist paintings as unfinished sketches. Today they’re among the most widely reproduced paintings.',
     dur: 5.0,
   },
   {
     p: 177, x: 88, wall: 1, meter: 1,
     interact: {
-      prompt: 'Draw what happens to the shock over time.',
+      prompt: 'Which curve shows what happens to the shock of a broken rule over time?',
       plot: {
         cols: ['1900', '1920', '1950', 'TODAY'],
         axis: 'SHOCK LEFT',
         start: [0.5, 0.5, 0.5, 0.5],
         shapes: [
-          { id: 'decay', profile: [0.9, 0.62, 0.36, 0.12], reads: 'the shock wears off and turns into taste', correct: true },
+          { id: 'decay', profile: [0.9, 0.62, 0.36, 0.12], reads: 'the shock fades and becomes convention', correct: true },
           { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5], reads: 'a broken rule stays startling for ever' },
-          { id: 'rise', profile: [0.12, 0.36, 0.62, 0.9], reads: 'each generation is harder to startle' },
-          { id: 'spike', profile: [0.1, 0.92, 0.14, 0.1], reads: 'one scandal, and then nothing at all' },
+          { id: 'rise', profile: [0.12, 0.36, 0.62, 0.9], reads: 'later audiences find it more shocking' },
+          { id: 'spike', profile: [0.1, 0.92, 0.14, 0.1], reads: 'a single scandal, then indifference' },
         ],
       },
-      explain: 'It decays. Every broken rule is absorbed and becomes the convention the next generation breaks. That’s why the movement has to keep moving. A flat line would mean Impressionism still upset people, and it sells postcards.',
+      explain: 'The shock fades and becomes convention. Once a broken rule is accepted, the next generation must break a new one. A flat line would mean Impressionism still shocked people. Yet its once-mocked paintings are now among the most widely reproduced.',
       xp: 5,
     },
     dur: 1.0,
@@ -110,9 +110,9 @@ export const BEATS: Aesthetics27Beat[] = [
         'The avant-garde breaks a convention on purpose',
         'The aim is to make a familiar thing visible again',
         'Cage asked where music stops and sound begins',
-        'Every broken rule becomes the next one to break',
+        'Each broken rule becomes a convention to break',
       ],
-      closing: 'Art breaks its own rules so that a half-asleep audience might wake up and look at something properly.',
+      closing: 'The avant-garde breaks conventions so that an audience dulled by habit perceives familiar things afresh.',
     },
     dur: 5.0,
   },

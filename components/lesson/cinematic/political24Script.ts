@@ -33,32 +33,32 @@ export interface Pol24Beat extends BaseBeat {
 export const BEATS: Pol24Beat[] = [
   {
     p: 462, x: 200, signs: 1, pub: 1,
-    text: 'A minority language. It’s printed on the court papers and taught in the schools, and at home it’s spoken.',
+    text: 'Consider a minority language used in the courts, taught in the schools and spoken at home.',
     dur: 4.8,
   },
   {
     p: 384, x: 200, signs: 1, pub: 1,
-    text: 'Recognition is not a courtesy added on top. You become who you are through how the people around you see you.',
+    text: 'Charles Taylor holds that identity is formed in dialogue with others. So due recognition is a vital human need, not a courtesy.',
     cite: 'Identity is dialogical',
     dur: 4.8,
   },
   {
     p: 447, x: 132, signs: 1, pub: 0,
-    text: 'Take the language out of the public places and leave the goodwill. Five generations later, this is what’s left.',
+    text: 'Suppose the language is removed from courts and schools but tolerated at home. Over five generations, the number of speakers falls.',
     dur: 4.6,
   },
   {
     p: 457, x: 132, signs: 1, pub: 0, live: 1,
     interact: {
-      prompt: 'Tap the place that cannot keep the language alive.',
-      explain: 'In private. It stayed lit the whole time and the bars fell anyway. Goodwill at home is the one form of recognition that costs nobody anything. So from outside, court and school look like a special favour, and from inside they look like survival.',
+      prompt: 'Which setting can’t, on its own, keep the language in use?',
+      explain: 'In private. People kept speaking it at home, yet the number of speakers still fell. Toleration at home costs the majority nothing. To outsiders, courts and schools can look like a privilege. To the minority, they’re how the language survives.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 380, x: 132, signs: 1, pub: 0,
-    text: 'Being mirrored back as lesser, or not at all, can trap people inside a picture of themselves they never made.',
+    text: 'Taylor argues that a demeaning picture reflected back by society does real damage. People may come to accept that picture of themselves.',
     cite: 'Misrecognition',
     dur: 4.8,
   },
@@ -77,36 +77,36 @@ export const BEATS: Pol24Beat[] = [
   },
   {
     p: 383, x: 268, signs: 1, pub: 0,
-    text: 'Two demands pull apart here. Treat everybody identically, or recognise what makes each way of life its own thing.',
+    text: 'Taylor sees two demands in conflict. One is to treat everyone alike, and the other is to recognise each group’s way of life.',
     dur: 4.6,
   },
   {
     p: 41, x: 268, signs: 1, pub: 0,
     interact: {
-      prompt: 'Which policy would have kept those bars full?',
+      prompt: 'Which policy would have kept the language in use across the generations?',
       sort: {
         chip: 'a minority culture',
         bins: [
-          { id: 'same', label: 'treat all alike', reads: 'treat everyone identically, ignore it' },
-          { id: 'tolerate', label: 'tolerate privately', reads: 'let them keep it to themselves' },
-          { id: 'public', label: 'a place in public', reads: 'give it a place in public life', correct: true },
+          { id: 'same', label: 'treat all alike', reads: 'treat everyone identically and ignore the difference' },
+          { id: 'tolerate', label: 'tolerate privately', reads: 'permit the language at home only' },
+          { id: 'public', label: 'public recognition', reads: 'give it a place in public life', correct: true },
         ],
       },
-      explain: 'A place in public. Equal dignity says to treat everyone the same, and that’s the policy that emptied the bars. Tolerance at home was already there and didn’t help. The tension is real. Treating people identically can erase them, and treating them differently can divide them.',
+      explain: 'Public recognition. Equal treatment let the speakers vanish, and private toleration didn’t save the language.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Seen, Or Not Seen',
+      title: 'The Politics of Recognition',
       points: [
         'Identity is built partly out of how others recognise you',
         'Misrecognition is a harm, not a discourtesy',
         'A way of life needs public standing to be handed on',
-        'Equal dignity and equal difference pull against each other',
+        'The politics of dignity and of difference conflict',
       ],
-      closing: 'Being ignored can cost a people more than being argued with.',
+      closing: 'For Taylor, nonrecognition is a real harm because identity depends on how others see you.',
     },
     dur: 3.6,
   },

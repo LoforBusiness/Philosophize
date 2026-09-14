@@ -34,43 +34,43 @@ export interface Eth21Beat extends BaseBeat {
 export const BEATS: Eth21Beat[] = [
   {
     p: 462, x: 200, act: 1, arms: 1,
-    text: 'A doctor gives enough morphine to stop the pain. Everyone knows it will also shorten the life.',
+    text: 'A doctor gives enough morphine to stop a patient’s pain. The doctor foresees that the dose will also shorten the patient’s life.',
     dur: 4.6,
   },
   {
     p: 384, x: 200, act: 1, arms: 1, aim: 1,
-    text: 'Two outcomes, both certain, both from one act. Only one of them was the point.',
-    cite: 'Aimed at, or come along with',
+    text: 'One act has two certain effects. The doctor intends only one of them.',
+    cite: 'Intended or foreseen',
     dur: 4.2,
   },
   {
     p: 379, x: 132, act: 1, arms: 1, aim: 1,
-    text: 'Aquinas saw that you judge the two arrows in different ways. So does everyone, not just in hospitals.',
+    text: 'Thomas Aquinas held that one act can have two effects, one intended and one not. The doctrine of double effect grew from this idea.',
     dur: 4.4,
   },
   {
     p: 380, x: 132, act: 1, arms: 1, aim: 1, live: 1,
     interact: {
-      prompt: 'Tap the outcome the doctor was aiming at.',
-      explain: 'Stopping the pain. The shorter life is foreseen with certainty and still not intended. That sounds like a dodge until you notice you already use the distinction. Nobody thinks a surgeon intends the scar.',
+      prompt: 'Which outcome does the doctor intend, rather than merely foresee?',
+      explain: 'Pain gone. The doctor aims at relief. The shortened life is foreseen with certainty, but it isn’t what the act is for.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 21, x: 132, act: 1, arms: 1, aim: 1, means: 1,
-    text: 'Now the case that tests it. Same two outcomes, except the death is how the relief is achieved.',
-    cite: 'On the path, not beside it',
+    text: 'Now consider a second case with the same two outcomes. Here, the death is the means by which the pain ends.',
+    cite: 'Harm as a means',
     dur: 4.6,
   },
   {
     p: 13, x: 268, act: 1, arms: 1, means: 1,
-    text: 'The doctrine says that one is different. You may accept a harm alongside your aim.',
+    text: 'The doctrine judges the second case differently. You may accept a harm alongside your aim.',
     dur: 3.4,
   },
   {
     p: 13, x: 268, act: 1, arms: 1, means: 1,
-    text: 'You may not walk through it.',
+    text: 'But you may not bring about a harm as the means to your aim.',
     dur: 1.8,
   },
   {
@@ -89,32 +89,32 @@ export const BEATS: Eth21Beat[] = [
   {
     p: 41, x: 268, act: 1, arms: 1, means: 1,
     interact: {
-      prompt: 'Split the morphine case between the two.',
+      prompt: 'How does the morphine case divide between what is intended and what is foreseen?',
       split: {
         left: 'INTENDED',
         right: 'MERELY FORESEEN',
         start: 0.5,
         zones: [
-          { id: 'foreseen', upto: 0.35, reads: 'the relief was incidental' },
-          { id: 'both', upto: 0.62, reads: 'you meant both equally' },
-          { id: 'intended', upto: 1, reads: 'you meant the relief, and knew the cost', correct: true },
+          { id: 'foreseen', upto: 0.35, reads: 'the relief was only a side effect' },
+          { id: 'both', upto: 0.62, reads: 'the doctor intended both effects equally' },
+          { id: 'intended', upto: 1, reads: 'the relief intended, the shortened life foreseen', correct: true },
         ],
       },
-      explain: 'Mostly intended. The relief is the whole point of the act, and the shortened life is a cost you accept without wanting. Splitting it evenly would say you were half aiming at the death. That’s the thing the doctor is not doing.',
+      explain: 'The relief intended, the shortened life foreseen. Relieving pain is the aim of the act. The shortened life is a cost the doctor accepts without aiming at it. An even split would mean the doctor half intended the death.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Aimed At, Or Accepted',
+      title: 'The Doctrine of Double Effect',
       points: [
         'One act can have an intended effect and a foreseen one',
-        'Double effect permits the harm beside the aim, not the harm as the means',
+        'Double effect permits harm as a side effect, not as a means',
         'Foreseeing something with certainty is not intending it',
-        'Critics say the line is too easy to redescribe your way across',
+        'Philippa Foot argued the line can be hard to draw',
       ],
-      closing: 'Nobody thinks a surgeon intends the scar. The argument is about where that stops.',
+      closing: 'A surgeon foresees a scar without intending it. The dispute is over how far that distinction extends.',
     },
     dur: 3.4,
   },

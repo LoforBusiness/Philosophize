@@ -6,52 +6,41 @@ import Animated, {
   withDelay, withSpring, withTiming, type SharedValue,
 } from 'react-native-reanimated';
 import { touch } from '@/lib/feedback';
+import { INK, PAPER, mix } from '@/components/shared/tone';
 import ControlRead from './ControlRead';
-import { PAPER, RULE, SOFT, INK } from './cinematicKit';
+import { Medallion, VerdictSeal, useQuestionAccent } from './QuestionParts';
+import { VERDICT } from './questionTone';
 import type { DragBlock } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AN ANSWER THAT IS A POSITION, NOT A PICK.
 //
-// Every graded question in the first 102 lessons is a CHOICE: tap one of N things
-// the scene drew, or take one of two cards. That is the right shape for "which of
-// these", and the wrong shape for the question a lot of philosophy actually asks,
-// which is "HOW MUCH". How much may a society tolerate. How much of your income is
-// morally required. How simple should an explanation be. How sure are you.
-//
-// Offer those as two cards and you have quietly answered them for the reader: the
-// interesting part of "how much" is that the answer is somewhere on a line and
-// reasonable people put it in different places. So this draws the line and hands
-// the reader the knob.
+// Every graded question in the first 102 lessons was a CHOICE, which is the right
+// shape for "which of these" and the wrong one for the question a lot of philosophy
+// asks: HOW MUCH. How much may a society tolerate, how sure are you, how far back
+// does an explanation reach. Offer those as two cards and the interesting part, that
+// the answer lies somewhere on a line, has been answered for the reader. So this
+// draws the line and hands the reader the knob.
 //
 // ── WHAT MAKES IT TEACH RATHER THAN JUST SLIDE ──────────────────────────────
 //
-// The readout. Dragging a bare knob teaches nothing; dragging a knob while a word
-// above it changes — "a hunch" → "a good bet" → "knowledge" — is the lesson. The
-// reader feels the categories give way to each other, and finds the boundary by
-// hunting for the flip rather than by being told where it is. That is the same
-// productive-struggle rule (§13) the tap targets serve, in an analogue register.
+// The readout. A word above the rail changes as the knob travels, "a hunch" → "a
+// good bet" → "knowledge", and the reader finds the boundary by hunting for the
+// flip. So a zone is not scoring furniture, it is the thing being taught, and
+// `reads` is lesson copy like any other.
 //
-// So a zone is not scoring furniture, it is the thing being taught, and `reads` is
-// a piece of lesson copy under group J like any other.
+// ── AND IT IS A STRUCK INSTRUMENT, IN THE LESSON'S COLOUR ───────────────────
 //
-// ── WHY THE WORD IS A TextInput ─────────────────────────────────────────────
+// It was a hairline with a ring on it, in ink and grey, and a reader called the
+// question controls "very simple black and white … not very gamified". The rail is
+// a GROOVE now, cut into the page, filled in the lesson's branch hue up to a knob
+// struck in the same hue (./QuestionParts, ./questionTone). The verdict re-strikes
+// the knob green or rust and lays a solid band where the right answer was.
 //
-// It changes at frame rate under the reader's thumb. A <Text> fed by React state
-// would re-render this component sixty times a second while a finger is down,
-// which is precisely what `scripts/check-poll.mjs` exists to stop. Reanimated can
-// write a NATIVE prop from the UI thread and `text` on a TextInput is one, so the
-// whole drag costs zero React renders. See components/shared/ACounter.
+// ── WHY IT SITS WHERE ChoiceCards SITS ──────────────────────────────────────
 //
-// ── AND WHY IT SITS WHERE ChoiceCards SITS ──────────────────────────────────
-//
-// Directly under the art, above the prompt, in deck coordinates. Not in the scene:
-// every lesson crops the 400×560 stage to its own band and pushes a camera around
-// inside it, so a rail placed there is a rail 12 lessons each get to clip
-// differently (H60). Not pinned over the stage either — the figure stands on the
-// ground line at the bottom of the band, and a rail there lands on top of him.
-// The same three paragraphs are argued out at length in ./ChoiceCards; this
-// follows that decision rather than re-litigating it.
+// Directly under the art, above the prompt, in deck coordinates (L6, H60). The
+// argument is set out in ./ChoiceCards and this follows it.
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -60,26 +49,23 @@ interface Props {
   picked: string | null;
   onPick: (id: string, correct: boolean) => void;
   /**
-   * The knob's position, 0..1 — OWNED BY THE PLAYER, not by this control.
-   *
-   * That is the whole reason this mechanic is worth having. The scene gets the same
-   * shared value as `dragPos`, so the reader is not moving a widget next to a
-   * picture, they are moving the picture: the painting cleans as the knob travels,
-   * the population fills in, the curve grows its wiggles. The knob and the art are
-   * one gesture on the UI thread with no React render between them.
+   * The knob's position, 0..1 — OWNED BY THE PLAYER, not by this control. The scene
+   * gets the same shared value as `dragPos`, so the reader moves the picture, not a
+   * widget beside it.
    */
   pos: SharedValue<number>;
 }
 
-/** How long the knob takes to settle into its zone after release. */
+/** How the knob settles into its zone after release. */
 const SETTLE = { damping: 15, stiffness: 180 } as const;
 /** How long the verdict takes to resolve once the knob has landed. */
 const REVEAL = 420;
 
-const KNOB = 30;
-const RAIL_H = 4;
+const KNOB = 34;
+const GROOVE = 12;
 
 export default function DragScale({ drag, picked, onPick, pos }: Props) {
+  const accent = useQuestionAccent();
   const answered = picked !== null;
 
   // Zone geometry as flat number arrays, because a worklet closure may capture
@@ -87,31 +73,23 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
   const uptos = drag.zones.map((z) => z.upto);
   const reads = drag.zones.map((z) => z.reads);
   const rightIdx = drag.zones.findIndex((z) => z.correct);
+  const pickedZone = drag.zones.find((z) => z.id === picked);
+  const verdict = !answered ? null : pickedZone?.correct ? 'right' : 'wrong';
+  const fillInk = verdict === 'right' ? VERDICT.right.ink : verdict === 'wrong' ? VERDICT.wrong.ink : accent.base;
 
-  const railW = useSharedValue(1);          // measured, so a fraction can become pixels
-  const held = useSharedValue(0);           // 0 released · 1 finger down
-  const done = useSharedValue(0);           // 0 open · 1 answered and revealed
-  const lastZone = useSharedValue(-1);      // for the tick as a boundary is crossed
+  const railW = useSharedValue(1);
+  const held = useSharedValue(0);
+  const done = useSharedValue(0);
+  const lastZone = useSharedValue(-1);
 
-  // DECLARED BEFORE EVERY WORKLET THAT CALLS IT. The babel plugin rewrites a
-  // 'worklet' function into a const and builds closures at module scope, so a
-  // worklet calling one declared further down hits its temporal dead zone and
-  // throws AT IMPORT — taking down the route tree, not just this control (§17
-  // rule 2). `npm run check:worklets` enforces it.
+  // DECLARED BEFORE EVERY WORKLET THAT CALLS IT (§17 rule 2).
   const zoneAt = useCallback((p: number) => {
     'worklet';
     for (let k = 0; k < uptos.length; k += 1) if (p <= uptos[k]) return k;
     return uptos.length - 1;
   }, [uptos]);
 
-
-  // WHICH READING IS SHOWING — A DERIVED VALUE, NOT REACT STATE.
-  //
-  // It WAS state, and on a rail that stuttered: a thumb crossing four zones in a
-  // few hundred milliseconds meant four hard cuts, four re-centrings of the box,
-  // and four re-renders of a component that builds its Gesture inline while a
-  // finger is down on it. ControlRead's header sets all three out. Derived here
-  // and read on the UI thread, the reading costs no render at all.
+  // WHICH READING IS SHOWING — a derived value, never React state (S7).
   const zone = useDerivedValue(() => zoneAt(pos.value));
 
   const commit = useCallback((k: number) => {
@@ -119,8 +97,7 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
     onPick(z.id, Boolean(z.correct));
   }, [drag.zones, onPick]);
 
-  // A SECOND DRAG BEAT MUST NOT OPEN ON THE FIRST ONE'S ANSWER. The player resets
-  // `dragPos` to the beat's own start, and the reading follows it for free now.
+  // A SECOND DRAG BEAT MUST NOT OPEN ON THE FIRST ONE'S ANSWER.
   useEffect(() => { lastZone.value = zoneAt(drag.start); }, [drag, zoneAt, lastZone]);
 
   useEffect(() => {
@@ -128,18 +105,8 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
     done.value = withDelay(140, withTiming(1, { duration: REVEAL, easing: Easing.out(Easing.cubic) }));
   }, [answered, done]);
 
-  // THE VALUE FOLLOWS WHERE THE FINGER IS, NOT HOW FAR IT HAS MOVED.
-  //
-  // This integrated `translationX / width`, which means the full range cost a
-  // full WIDTH of travel — and the reader reported the consequence exactly:
-  // "my finger gets to the end of the screen and I'll answer wrong because I
-  // can't move it enough". Starting anywhere but the far edge, the far end was
-  // literally unreachable inside the screen.
-  //
-  // Absolute placement removes the failure instead of retuning it: touch the far
-  // end and you ARE at the far end, a tap sets the value, and there is no gain to
-  // get wrong. `FieldPick` and `ShapePlot` were built this way and are the two
-  // nobody complained about.
+  // THE VALUE FOLLOWS WHERE THE FINGER IS, NOT HOW FAR IT HAS MOVED (S5): touch the
+  // far end and you ARE at the far end, and a tap sets the value.
   const setAt = useCallback((x: number) => {
     'worklet';
     const p = x / railW.value;
@@ -156,11 +123,7 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
       lastZone.value = zoneAt(pos.value);
       setAt(e.x);
     })
-    .onUpdate((e) => {
-      setAt(e.x);
-      // The tick as the verdict word flips lives in `setAt` — it is the whole
-      // feel of the control, and it has to fire on a tap as well as a drag.
-    })
+    .onUpdate((e) => { setAt(e.x); })
     .onEnd(() => {
       held.value = withTiming(0, { duration: 160 });
       const k = zoneAt(pos.value);
@@ -175,13 +138,10 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
       { scale: 1 + 0.14 * held.value },
     ],
   }));
-  const fillStyle = useAnimatedStyle(() => ({ width: pos.value * railW.value }));
-  // The rail lifts a little under the thumb, so the control reads as picked up.
-  const railStyle = useAnimatedStyle(() => ({ transform: [{ scaleY: 1 + 0.6 * held.value }] }));
+  const fillStyle = useAnimatedStyle(() => ({ width: Math.max(GROOVE, pos.value * railW.value) }));
 
-  // WHERE THE RIGHT ANSWER WAS. Marked only once answered, and marked even when the
-  // reader got it right — the band is the teaching, not the score. Same reasoning
-  // as ChoiceCards lifting the correct card nobody took.
+  // WHERE THE RIGHT ANSWER WAS. Marked once answered, whether or not the reader got
+  // it: the band is the teaching, not the score.
   const from = rightIdx <= 0 ? 0 : uptos[rightIdx - 1];
   const to = rightIdx < 0 ? 0 : uptos[rightIdx];
   const bandStyle = useAnimatedStyle(() => ({
@@ -192,93 +152,86 @@ export default function DragScale({ drag, picked, onPick, pos }: Props) {
 
   return (
     <View style={styles.wrap} pointerEvents="box-none">
-      <ControlRead texts={reads} idx={zone} />
+      <ControlRead texts={reads} idx={zone} color={accent.text} />
 
       <GestureDetector gesture={pan}>
-        {/* The touch target is the whole strip, not the 30px knob — a knob-sized
-            hit area on a phone is a knob you keep missing.
-
-            `nativeID` so the measurement harness can find it: a drag has no button
-            to click, so scripts/measure-must.mjs could not answer one and stopped
-            every drag lesson two beats short of its end. Same fix, same reason as
-            the `beat-progress` id — a harness that has to guess which element to
-            drive will eventually guess wrong and report a short sweep as a clean
-            one. See §21. */}
+        {/* The touch target is the whole strip, not the knob, and `nativeID` lets
+            a harness find it (§21). */}
         <View style={styles.strip} nativeID="drag-strip">
           <View
             style={styles.rail}
             onLayout={(e) => { railW.value = e.nativeEvent.layout.width; }}
           >
-            <Animated.View style={[styles.railLine, railStyle]} />
-            <Animated.View style={[styles.railFill, fillStyle]} />
+            {rightIdx >= 0 ? (
+              <Animated.View
+                style={[styles.band, { backgroundColor: VERDICT.right.face, borderColor: VERDICT.right.ink }, bandStyle]}
+                pointerEvents="none"
+              />
+            ) : null}
 
-            {/* The band the answer was in — thickness, never a second colour (§19). */}
-            {rightIdx >= 0 ? <Animated.View style={[styles.band, bandStyle]} pointerEvents="none" /> : null}
+            {/* THE GROOVE: cut into the page, darker along its top edge where the
+                light cannot reach into the cut. */}
+            <View style={[styles.groove, { backgroundColor: mix(PAPER, INK, 0.07), borderColor: mix(PAPER, INK, 0.14) }]}>
+              <View style={[styles.grooveShade, { backgroundColor: mix(PAPER, INK, 0.13) }]} />
+              <Animated.View style={[styles.fill, { backgroundColor: fillInk }, fillStyle]}>
+                <View style={[styles.fillSheen, { backgroundColor: mix(fillInk, PAPER, 0.4) }]} />
+              </Animated.View>
+            </View>
 
-            {/* Boundary ticks. Drawn for every zone edge except the far end, so the
-                reader can see there ARE regions before they start hunting. */}
+            {/* Boundary notches, so the reader can see there ARE regions before
+                they start hunting. */}
             {uptos.slice(0, -1).map((u, k) => (
-              <View key={k} style={[styles.tick, { left: `${u * 100}%` }]} pointerEvents="none" />
+              <View key={k} style={[styles.notch, { left: `${u * 100}%`, backgroundColor: accent.edge }]} pointerEvents="none" />
             ))}
 
             <Animated.View style={[styles.knob, knobStyle]} pointerEvents="none">
-              <View style={styles.knobCore} />
+              <Medallion held={held} size={KNOB} verdict={verdict} />
+              {verdict ? <VerdictSeal correct={verdict === 'right'} size={18} delay={220} style={styles.seal} /> : null}
             </Animated.View>
           </View>
         </View>
       </GestureDetector>
 
-      {/* HALF THE ROW EACH, AND TWO LINES. `space-between` with no width on either
-          label means a long pair simply pushes past both edges of the screen, which
-          is what a reader reported twice: "words are cut off the screen from the
-          left and the right". LET A COIN DECIDE WHO IS TREATED is 218dp of
-          lettering and the row is 308. */}
+      {/* HALF THE ROW EACH, AND TWO LINES, so a long pair cannot push past both
+          edges of the screen. */}
       <View style={styles.ends} pointerEvents="none">
-        <Text style={styles.end} numberOfLines={2}>{drag.lo}</Text>
-        <Text style={[styles.end, styles.endRight]} numberOfLines={2}>{drag.hi}</Text>
+        <Text style={[styles.end, { color: accent.text }]} numberOfLines={2}>{drag.lo}</Text>
+        <Text style={[styles.end, styles.endRight, { color: accent.text }]} numberOfLines={2}>{drag.hi}</Text>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // 4, NOT 8. The reading is two lines tall now instead of one, and the deck below
-  // is `overflow: hidden` — so what the box gains has to come from somewhere, and
-  // the margins are the only place it can come from that is not a word.
+  // 4, NOT 8. The deck below is `overflow: hidden`, so what the reading's second
+  // line gains has to come from the margins.
   wrap: { paddingHorizontal: 26, marginTop: 4 },
-  // Tall enough to catch a thumb that lands near the rail rather than on it.
-  strip: { height: 44, justifyContent: 'center' },
+  strip: { height: 46, justifyContent: 'center' },
   rail: { height: KNOB, justifyContent: 'center' },
-  railLine: {
-    position: 'absolute', left: 0, right: 0,
-    height: RAIL_H, borderRadius: RAIL_H / 2, backgroundColor: RULE,
-  },
-  railFill: {
-    position: 'absolute', left: 0,
-    height: RAIL_H, borderRadius: RAIL_H / 2, backgroundColor: INK,
-  },
   band: {
     position: 'absolute',
-    height: 14, borderRadius: 7,
-    borderWidth: 2, borderColor: INK, borderStyle: 'dashed',
+    height: GROOVE + 12, borderRadius: (GROOVE + 12) / 2,
+    borderWidth: 1.5,
   },
-  tick: { position: 'absolute', width: 2, height: 12, backgroundColor: SOFT },
-  knob: {
-    position: 'absolute', left: 0,
-    width: KNOB, height: KNOB, borderRadius: KNOB / 2,
-    borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
-    alignItems: 'center', justifyContent: 'center',
+  groove: {
+    position: 'absolute', left: 0, right: 0,
+    height: GROOVE, borderRadius: GROOVE / 2, borderWidth: 1,
+    overflow: 'hidden',
   },
-  knobCore: { width: 8, height: 8, borderRadius: 4, backgroundColor: INK },
+  grooveShade: { position: 'absolute', left: 0, right: 0, top: 0, height: 2.5 },
+  fill: { position: 'absolute', left: 0, top: 0, bottom: 0, borderRadius: GROOVE / 2 },
+  fillSheen: { position: 'absolute', left: 3, right: 3, top: 2, height: 2, borderRadius: 1, opacity: 0.8 },
+  notch: { position: 'absolute', width: 2, height: 20, borderRadius: 1, marginLeft: -1 },
+  knob: { position: 'absolute', left: 0, width: KNOB, height: KNOB },
+  seal: { top: -9, right: -9 },
   ends: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 },
   end: {
     flex: 1,
     paddingHorizontal: 3,
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    fontSize: 9.5,
     lineHeight: 12.5,
-    letterSpacing: 1.1,
-    color: SOFT,
+    letterSpacing: 1,
   },
   endRight: { textAlign: 'right' },
 });

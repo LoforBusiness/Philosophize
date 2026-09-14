@@ -20,23 +20,23 @@ export interface Aes2Beat extends BaseBeat {
 export const BEATS: Aes2Beat[] = [
   {
     a: 22, v: 4, chain: 1,
-    text: 'A dead painter is making you feel something right now. How does one mind’s feeling cross paint and centuries to reach yours?',
+    text: 'A painting can move you centuries after its painter has died. How can one person’s feeling reach another through paint?',
     dur: 3.6,
   },
   {
     a: 7, v: 0, wave: true, felt: true, chain: 3,
-    text: 'Forget beauty and forget skill. Tolstoy calls art an infection.',
+    text: 'The expression theory defines art by feeling, not by beauty or skill. Leo Tolstoy compared art to an infection that spreads a feeling to others.',
     cite: 'Expression theory',
     dur: 1.8,
   },
   {
     a: 7, v: 0, wave: true, felt: true, chain: 3,
-    text: 'The artist feels something, the work carries it, and you catch it off the work. Collingwood adds that artists often don’t know the feeling until the work is finished.',
+    text: 'The artist feels an emotion, the work carries the emotion, and the audience feels it too. For Collingwood, artists discover their feelings only by expressing them.',
     dur: 3.8,
   },
   {
     a: 387, v: 15, wave: true, felt: true, chain: 3,
-    text: 'A boy who met a wolf tells the story so well the room is frightened too. For Tolstoy that’s art, but only if the boy means every word.',
+    text: 'Tolstoy’s example is a boy who describes meeting a wolf and frightens his listeners. It’s art, provided the boy feels that fear again as he speaks.',
     cite: 'Tolstoy, What Is Art?, 1897',
     dur: 4.8,
   },
@@ -55,53 +55,53 @@ export const BEATS: Aes2Beat[] = [
   {
     a: 14, v: 8, chain: 3,
     interact: {
-      prompt: 'Tap what Tolstoy thinks art is actually doing.',
+      prompt: 'If Tolstoy is right, what must a work do to count as art?',
       cards: [
-        { text: 'To transmit the artist\'s feeling', correct: true },
-        { text: 'To make beautiful objects', correct: false },
+        { text: 'Transmit the artist’s feeling', correct: true },
+        { text: 'Give pleasure through beauty', correct: false },
       ],
-      explain: 'Tolstoy called art "infection": the maker passes on a feeling so the audience shares it. He rejected beauty, pleasure, and skill as the test.',
+      explain: 'Transmit the artist’s feeling. Tolstoy called this infection: the artist evokes a feeling they’ve lived through, and the audience comes to share it. He rejected beauty and pleasure as the definition of art, so a beautiful object that transmits no feeling doesn’t count.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     a: 20, v: 17, wave: true, felt: true, chain: 3,
-    text: 'If they’re right, a feeling can be packed into lines and sounds and words. It then outlives the person, the language and the century.',
+    text: 'If the expression theory is right, a work of art embodies a feeling in lines, sounds or words.',
     cite: 'Feeling made portable',
     dur: 3.4,
   },
   {
     a: 20, v: 17, wave: true, felt: true, chain: 3,
-    text: 'Almost nothing else anybody builds does that.',
+    text: 'The feeling can then outlive its maker, and reach audiences in other languages and centuries.',
     dur: 1.8,
   },
   {
     a: 0, v: 22, felt: true, chain: 3,
     interact: {
-      prompt: 'You cry at a film you know is invented. What is actually happening?',
+      prompt: 'You cry at a film you know is invented. What is the feeling behind your tears?',
       poll: {
         options: [
-          { id: 'puzzle', reads: 'made-up people, and real tears', correct: true },
-          { id: 'tidy', reads: 'made-up people, and pretend tears' },
-          { id: 'plain', reads: 'real people, and real tears' },
-          { id: 'odd', reads: 'real people, and pretend tears' },
+          { id: 'puzzle', reads: 'real pity for people you know don’t exist', holders: ['Colin Radford', 'Noël Carroll'], correct: true },
+          { id: 'tidy', reads: 'make-believe pity, not the real thing', holders: ['Kendall Walton'] },
+          { id: 'plain', reads: 'real sorrow that such evils could befall you', holders: ['Samuel Johnson'] },
+          { id: 'odd', reads: 'an involuntary stirring, not a true emotion', holders: ['Seneca'] },
         ],
       },
-      explain: 'Made-up people, and real tears, and nothing sits comfortably there. The tidy answer is “made-up people, and pretend tears”, and it’s untrue. The tears are real, and that’s the difficulty. Radford called it the paradox of fiction, and nobody has settled it since.',
+      explain: 'Real pity for people you know don’t exist. The tears and the pity are genuine, which is the puzzle Colin Radford posed in 1975, the paradox of fiction.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Art Connects Minds',
+      title: 'Expression and the Paradox of Fiction',
       points: [
-        'Tolstoy: art "infects" with the maker’s feeling',
+        'Tolstoy: art infects an audience with the artist’s feeling',
         'Collingwood: art clarifies a feeling',
-        'Paradox of fiction: real tears, unreal people',
+        'Paradox of fiction: real emotion for fictional people',
       ],
-      closing: 'Expression theory: art’s core is feeling, transmitted or clarified.',
+      closing: 'The expression theory places feeling at the centre of art, whether transmitted or clarified.',
     },
     dur: 2.8,
   },

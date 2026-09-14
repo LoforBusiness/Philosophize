@@ -28,29 +28,29 @@ export interface Logic5Beat extends BaseBeat {
 export const BEATS: Logic5Beat[] = [
   {
     p: 384, machine: 1,
-    text: 'A proof is a chain: premises that march, step by step, to a conclusion. One weak link, and it falls.',
+    text: 'A proof is a sequence of steps that leads from premises to a conclusion. If any single step fails, the proof fails.',
     dur: 3.4,
   },
   {
     p: 27, machine: 1, run: 1,
-    text: 'An argument moves from premises, the claims you grant, to a conclusion they force. Each move is an inference.',
-    cite: 'Premises → conclusion',
+    text: 'The premises are the claims granted at the start. Each step from claims already granted to a new claim is called an inference.',
+    cite: 'From premises to conclusion',
     dur: 3.2,
   },
   {
     p: 27, machine: 1, run: 1,
-    text: 'Feed the premises in, and the conclusion comes out the other end.',
+    text: 'An inference is valid when the premises, if true, guarantee that the conclusion is true.',
     dur: 1.8,
   },
   {
     p: 459, machine: 1, run: 1,
-    text: 'Euclid’s circles around point A and point B cross at C, each through the other’s centre. Line AB equals line AC and line BC, so line AC equals line BC.',
-    cite: 'Euclid, Elements I.1',
+    text: 'In Euclid’s first proposition, circles centred on point A and point B meet at point C. Line AC and line BC each equal line AB, so they equal each other.',
+    cite: 'Euclid, Elements, Proposition 1',
     dur: 4.1,
   },
   {
     p: 459, machine: 1, run: 1,
-    text: 'A triangle, proved link by link.',
+    text: 'The triangle on line AB therefore has three equal sides. Euclid builds this result from a short sequence of stated steps.',
     dur: 1.8,
   },
   {
@@ -69,38 +69,38 @@ export const BEATS: Logic5Beat[] = [
   {
     p: 165, chain: 1,
     interact: {
-      prompt: 'Euclid’s proof has one step missing. Tap the gap where a hidden flaw could sit.',
+      prompt: 'In this version of Euclid’s proof, which step has been left unstated?',
       explain:
-        'The gap sits between the two equalities and the conclusion. Euclid never leaves it out: things equal to the same thing are equal to each other. Every unwritten step is a place a faulty inference can hide, so skipping steps never makes a proof stronger.',
+        'The step between the two equalities and the conclusion. Euclid states it as a common notion: things equal to the same thing are equal to each other. An unstated step can hide a faulty inference, so omitting steps never strengthens a proof.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     climb: 1, ladder: 1, steps: 1,
-    text: 'Validity lives in the form, not the vibe. Spell out every inference to see where the chain might break, and climb from the simplest step up.',
-    cite: 'One rung at a time',
+    text: 'Stating every inference shows where a proof could fail. Descartes’s third rule is to begin with the simplest objects and rise, step by step, to the more complex.',
+    cite: 'Descartes, Discourse on the Method',
     dur: 4.4,
   },
   {
     p: 383, chute: 1,
     interact: {
-      prompt: 'A proof "feels obviously right" but skips three steps. Which chute do you send it down?',
-      explain: 'Feeling obvious isn’t a check. Unstated steps are where a hidden flaw can slip past you. So send the proof to be checked, not waved through.',
+      prompt: 'A proof seems correct at a glance but leaves three steps unstated. Should it be trusted or checked?',
+      explain: 'Check it. A proof’s seeming obvious is no evidence of its validity. Each unstated step could hide a faulty inference, so the missing steps must be supplied and examined.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Step-by-Step Thinking Mastered',
+      title: 'Reasoning Step by Step',
       points: [
-        'Arguments run premises to conclusion by inference',
+        'An argument moves from premises to conclusion by inference',
         'In a valid deduction, the conclusion must follow',
-        'Euclid proved theorems one explicit link at a time',
-        'Skipping steps hides where the chain breaks',
+        'Euclid proved theorems one explicit step at a time',
+        'An unstated step can hide a faulty inference',
       ],
-      closing: 'Face a huge problem? Divide it into parts and climb from the simplest step up.',
+      closing: 'Descartes’s method applies beyond geometry: divide a problem into parts and begin with the simplest.',
     },
     dur: 2.8,
   },

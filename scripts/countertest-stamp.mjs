@@ -9,7 +9,7 @@
 // could not change a single number. That is a real saving and a real risk: the
 // same edit that is now free is one keystroke from an edit that moves a prop.
 //
-// FIVE CASES, and one of them must stay SILENT. Four go red.
+// ELEVEN CASES: six must stay SILENT and five go red.
 //
 // It is worth having as a file rather than a scratch run because the first
 // version PASSED FOUR OF FIVE AND WAS WRONG TWICE:
@@ -26,6 +26,10 @@
 //
 // So this one restores from BYTES, and asserts each mutation actually changed the
 // file before believing what the stamp says about it.
+//
+// NEVER RUN IT WHILE ANYTHING ELSE IS EDITING logic18Script.ts OR logic18Scene.tsx.
+// It restores both from the bytes it read at the start, which would silently undo
+// an edit made in between.
 import fs from 'node:fs';
 import path from 'node:path';
 import { mustStamp } from './lib/muststamp.mjs';
@@ -85,7 +89,18 @@ run('a rewritten summary point', () => {
   fs.writeFileSync(SCRIPT, s.replace(/points: \[\s*'([^']{6,})'/, (m, b) => m.replace(b, 'A point rewritten from scratch')));
 }, 'same');
 
-// AND FOUR THAT MUST NOT BE.
+// AND A POLL'S HOLDERS AND A CITE LINE ARE DECK WORDS (13 Sep 2026). Both are ADDED
+// rather than reworded, so blanking values could not hide them, and the lecture
+// rewrite made every poll lesson stale for a change the probe cannot see.
+run('a holders list added to a beat', () => {
+  fs.writeFileSync(SCRIPT, s.replace(/\n {4}dur: /, "\n    holders: ['Somebody Else', 'A. N. Other'],\n    dur: "));
+}, 'same');
+
+run('a cite line added over a narration', () => {
+  fs.writeFileSync(SCRIPT, s.replace(/\n {4}text: '/, "\n    cite: 'A NEW CAPTION',\n    text: '"));
+}, 'same');
+
+// AND FIVE THAT MUST NOT BE.
 run('a changed channel value', () => {
   fs.writeFileSync(SCRIPT, s.replace(/\bx: 200\b/, 'x: 117'));
 }, 'changed');
@@ -102,9 +117,14 @@ run('an edited scene', () => {
   fs.writeFileSync(SCENE, `${scene0.toString('utf8')}\n// touched\n`);
 }, 'changed');
 
+// Removing a holders list whole must not take a neighbour with it.
+run('holders added beside a changed channel', () => {
+  fs.writeFileSync(SCRIPT, s.replace(/\n {4}dur: /, "\n    holders: ['Somebody Else'],\n    dur: ").replace(/\bx: 200\b/, 'x: 117'));
+}, 'changed');
+
 restore();
 if (bad) {
   console.log(`\n${bad} case(s) wrong — the must-stamp is not safe to rely on`);
   process.exit(1);
 }
-console.log('\nall clear — the stamp ignores prose and nothing else');
+console.log('\nall clear — the stamp ignores deck words and nothing else');

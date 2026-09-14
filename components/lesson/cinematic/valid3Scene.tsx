@@ -109,15 +109,16 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+// A sort as well as a poll. The grass-and-sky question became a sort on 13 Sep 2026: a
+// classification has nobody to name as its holder (R17), and the bins keep the order below.
+const REACT = BEATS.map((b) => (b.interact?.poll || b.interact?.sort ? 1 : 0));
 
-// WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
-// (never the shuffled row order — see SceneApi.pickPos). This question used to
-// be a pad, and its options are still that pad's corners written out as
-// sentences, so each row below is read straight off one option's own words.
-// VALID is stamped on the options that say GOOD FORM
+// WHAT THE MACHINE READS AT EACH BIN, in the order the SORT DECLARES them (never the
+// shuffled order on screen — see SceneApi.pickPos). This question was a pad and then
+// a poll, and each row below is read straight off one bin's own words.
+// VALID is stamped on the bins that say GOOD FORM
 const POLL_STAMP = [0, 1, 1, 0];
-// the ✗ shows on the options that say FALSE CONCLUSION
+// the premises are struck on the bins that say FALSE PREMISE
 const POLL_FLAW = [0, 0, 1, 1];
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('valid3'));
 
@@ -275,18 +276,23 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, pickPos,
 
           {CARDS.map((c, k) => {
             const chosen = picked === c.id;
+            // THE BALLOT ANSWERS ONLY ITS OWN QUESTION. It stays mounted on the grass-and-sky
+            // sort as well, and keyed on `picked` alone it struck SOUND correct the moment
+            // that sort was answered, for an argument whose form is broken.
+            const ownPick = CARDS.some((x) => x.id === picked) ? picked : null;
+            const own = ownPick !== null;
             return (
-              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
+              <Target id={c.id} correct={c.correct} picked={ownPick} onPick={onPick}
               key={c.id} style={[styles.balSlot, { top: BAL_TOP - 236 + k * BAL_STEP }]} disabled={answered}>
                 <View
                   style={[
                     styles.balCard,
-                    answered && c.correct && styles.balRight,
-                    answered && chosen && !c.correct && styles.balWrong,
+                    own && c.correct && styles.balRight,
+                    own && chosen && !c.correct && styles.balWrong,
                   ]}
                 >
-                  <Text style={[styles.balTitle, answered && c.correct && styles.balTitleOn]}>{c.title}</Text>
-                  <Text style={[styles.balSub, answered && c.correct && styles.balSubOn]}>{c.sub}</Text>
+                  <Text style={[styles.balTitle, own && c.correct && styles.balTitleOn]}>{c.title}</Text>
+                  <Text style={[styles.balSub, own && c.correct && styles.balSubOn]}>{c.sub}</Text>
                 </View>
               </Target>
             );

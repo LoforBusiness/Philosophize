@@ -29,29 +29,29 @@ export interface P9Beat extends BaseBeat {
 export const BEATS: P9Beat[] = [
   {
     vote: 0, one: 461,
-    text: 'Rule by the people. Four of them here, and one over there who wants something the four do not.',
+    text: 'Democracy is rule by the people. Consider five citizens: four want one thing, and the fifth wants something else.',
     dur: 3.6,
   },
   {
     vote: 1, tally: true, one: 22,
-    text: 'So they vote, and the count is honest, and the count is four to one. Plato distrusted this: steering a ship takes a trained pilot, not a show of hands.',
-    cite: 'Plato’s doubt',
+    text: 'They hold an honest vote, and the result is four to one. Plato distrusted such votes: a ship needs a trained navigator, not a show of hands.',
+    cite: 'Plato’s ship of state',
     dur: 3.8,
   },
   {
     vote: 1, tally: true, one: 22,
-    text: 'Let the crew vote and they follow whoever flatters them best.',
+    text: 'In Plato’s analogy, a crew that chooses its captain by vote follows whoever flatters it best.',
     dur: 1.8,
   },
   {
     vote: 0, tally: true, advance: true, one: 18,
-    text: 'Nothing has gone wrong with the procedure. Everyone got a vote, the larger number won, and now the larger number is walking toward the smaller one.',
+    text: 'The procedure worked. Everyone voted, the larger side won, and that side now forces its will on the smaller one.',
     cite: 'Tyranny of the majority',
     dur: 4.1,
   },
   {
     vote: 0, tally: true, advance: true, one: 18,
-    text: 'This is democracy working, not democracy failing.',
+    text: 'This is democracy working, not democracy failing. Alexis de Tocqueville called the danger the tyranny of the majority.',
     dur: 1.8,
   },
   {
@@ -69,43 +69,43 @@ export const BEATS: P9Beat[] = [
   },
   {
     vote: 0, tally: true, advance: true, rights: true, one: 378,
-    text: 'Mill and Tocqueville both named the danger, and both drew a line no vote can cross. That’s why a court can strike down a law the majority voted for.',
-    cite: 'Mill, Tocqueville',
+    text: 'Mill and Tocqueville both held that a majority’s power has limits no vote may cross. Constitutional rights enforced by courts express the same principle.',
+    cite: 'Limits on the majority',
     dur: 5.0,
   },
   {
     vote: 0, tally: true, advance: true, rights: true, one: 163,
     interact: {
-      prompt: 'Which danger is Mill actually warning about?',
+      prompt: 'Where does the oppression come from when a fair vote goes against a minority?',
       sort: {
-        chip: 'the danger Mill fears',
+        chip: 'oppression after a fair vote',
         bins: [
-          { id: 'one', label: 'one ruler', reads: 'one ruler pressing down on everybody' },
-          { id: 'outside', label: 'an outside power', reads: 'an outside power imposing its will' },
-          { id: 'many', label: 'the many', reads: 'the many closing in on the few', correct: true },
+          { id: 'one', label: 'one ruler', reads: 'a single ruler imposing his will on all' },
+          { id: 'outside', label: 'an outside power', reads: 'a foreign power imposing its will' },
+          { id: 'many', label: 'the many', reads: 'the majority pressing on the minority', correct: true },
         ],
       },
-      explain: 'The many, and that’s what makes it so hard to see. A tyrant is the picture the word brings up, and this tyrant is the electorate. No coup, no soldiers — just a majority pressing on a minority, and every vote counted properly.',
+      explain: 'The many. A fair vote can still oppress, since the larger side, not one tyrant, forces its will on the smaller. Mill warned that this social tyranny is harder to escape than many kinds of political oppression.',
     },
     dur: 4.6,
   },
   {
     vote: 0, tally: true, advance: true, rights: true, one: 173, cards: true,
     interact: {
-      prompt: 'The four voted fairly and they still cannot pass this line. Tap what is actually holding them.',
+      prompt: 'If a vote was fair, what can still stop the majority from acting on it?',
       explain:
-        'A right is a limit on what any vote may do. The trap is thinking a more careful count or a bigger majority could get past it. Mill argued for a sphere no majority may enter, however large.',
+        'A right the vote cannot touch. A right limits what any vote may decide, so neither a more careful count nor a bigger majority removes it. Mill defended a sphere of individual liberty that no majority may enter.',
     },
     dur: 4.8,
   },
   {
     summary: {
-      title: 'Democracy, Caged Wisely',
+      title: 'Democracy and Its Limits',
       points: [
-        'Plato: rule by vote can crown a flatterer',
+        'Plato: voting can put a flatterer in power',
         'Mill and Tocqueville: majorities can oppress',
         'Rights limit what a vote is allowed to do',
-        'Liberal democracy fuses the two',
+        'Liberal democracy combines majority rule with protected rights',
       ],
       closing: 'A vote decides who rules. Rights decide what no ruler, and no majority, may do.',
     },

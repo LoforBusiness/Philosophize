@@ -32,36 +32,36 @@ export interface Ethics27Beat extends BaseBeat {
 export const BEATS: Ethics27Beat[] = [
   {
     p: 427, x: 24, said: 1,
-    text: 'Somebody says that cruelty is wrong and everyone nods. Now ask what they just did.',
+    text: 'Suppose someone says that cruelty is wrong. Metaethics asks what such a sentence means, and whether it can be true or false.',
     dur: 4.8,
   },
   {
     p: 174, x: 24, said: 1, reading: 1,
-    text: 'A realist hears a plain fact, true whether or not anybody agrees.',
+    text: 'A moral realist takes it to state a fact, true whether or not anyone agrees.',
     dur: 4.2,
   },
   {
     p: 435, x: 24, said: 1, reading: 2,
-    text: 'A relativist hears a rule of one culture, with no standing outside it.',
+    text: 'A cultural relativist takes it to be true within one culture, with no authority outside it.',
     dur: 4.4,
   },
   {
     p: 258, x: 24, said: 1, reading: 3,
-    text: 'An expressivist hears a cry of disgust, wearing the grammar of a statement.',
+    text: 'An expressivist takes it to express a feeling of disapproval, although it has the grammar of a statement.',
     dur: 4.6,
   },
   {
     p: 260, x: 24, said: 1, reading: 2, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap the flaw critics find in relativism.',
-      explain: 'The slogan is universal. “No moral claim holds for everyone” is itself a rule for everyone. Critics call that shape self-undermining. It doesn’t hand the win to realism. Expressivism still stands.',
+      prompt: 'Which feature of relativism do critics say makes it inconsistent?',
+      explain: 'It is universal. Relativists often add that each culture must respect the others. Bernard Williams saw a rule for all in this demand, and the view says no such rule exists.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 451, x: 84, said: 1, reading: 3,
-    text: 'A. J. Ayer went furthest. For him, a moral sentence vents an attitude and is neither true nor false.',
+    text: 'Alfred Ayer defended an early form of this view, emotivism, in 1936. On his view, a moral sentence expresses an attitude and is neither true nor false.',
     dur: 5.0,
   },
   {
@@ -78,21 +78,21 @@ export const BEATS: Ethics27Beat[] = [
   },
   {
     p: 447, x: 84, said: 1, reading: 3,
-    text: 'Each reading costs something, and the bill falls due when two moralities collide.',
+    text: 'Each reading has a cost, which appears when two cultures disagree. Realism must explain what moral facts are, while the other two can’t call either culture mistaken.',
     dur: 4.8,
   },
   {
     p: 176, x: 84, said: 1, reading: 2,
     interact: {
-      prompt: 'Which reading lets a whole culture be wrong?',
+      prompt: 'Which reading allows that a whole culture could be morally mistaken?',
       poll: {
         options: [
-          { id: 'fact', reads: 'a fact, so a culture can simply miss it', holders: ['Plato', 'G. E. Moore'], correct: true },
-          { id: 'border', reads: 'a rule with no standing past the border', holders: ['cultural relativists'] },
-          { id: 'feeling', reads: 'an attitude, which cannot be mistaken', holders: ['A. J. Ayer'] },
+          { id: 'fact', reads: 'a fact, which a whole culture can miss', holders: ['G.E. Moore', 'Derek Parfit'], correct: true },
+          { id: 'border', reads: 'true only within the culture that holds it', holders: ['Ruth Benedict', 'W.G. Sumner'] },
+          { id: 'feeling', reads: 'an attitude, neither true nor false', holders: ['A.J. Ayer'] },
         ],
       },
-      explain: 'Only the fact. If a moral claim stops at a border, no outsider can call a practice wrong, only not theirs. Expressivism voices disgust at slavery but can’t say the slaveholders got anything wrong. That’s what dropping moral facts costs.',
+      explain: 'A fact, which a whole culture can miss. A culture can be mistaken only about something that holds whatever it believes. If moral truth held only within each culture, nothing would stand outside to correct it.',
       xp: 5,
     },
     dur: 1.0,
@@ -100,14 +100,14 @@ export const BEATS: Ethics27Beat[] = [
   {
     p: 322, x: 84, said: 1, reading: 1,
     summary: {
-      title: 'What the Words Are Doing',
+      title: 'Three Readings of a Moral Claim',
       points: [
-        'Metaethics asks what a moral sentence is',
-        'Realism makes it a fact that holds everywhere',
-        'Relativism makes it true inside one culture',
-        'Expressivism makes it an attitude, not a claim',
+        'Metaethics asks what a moral sentence says',
+        'Realism: it states a fact that holds everywhere',
+        'Relativism: it is true only within one culture',
+        'Expressivism: it expresses an attitude, not a fact',
       ],
-      closing: 'Before arguing about what’s right, it’s worth knowing what kind of thing right is meant to be.',
+      closing: 'Which reading is correct decides whether moral disagreement can have a right answer.',
     },
     dur: 4.8,
   },

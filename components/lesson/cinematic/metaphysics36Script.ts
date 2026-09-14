@@ -34,41 +34,41 @@ export interface Metaphysics36Beat extends BaseBeat {
 export const BEATS: Metaphysics36Beat[] = [
   {
     p: 379, x: 54, hotel: 1,
-    text: 'A hotel with endless rooms, and tonight every single one is taken. Then somebody walks in wanting a bed.',
+    text: 'Consider a hotel with infinitely many rooms, all occupied. A new guest arrives and asks for a room.',
     dur: 3.8,
   },
   {
     p: 461, x: 54, hotel: 1, live_d: 1, live: 1,
     interact: {
-      prompt: 'Slide to how many the clerk can still take in.',
+      prompt: 'How many new guests can the full hotel still accommodate?',
       drag: {
         lo: 'NOT ONE',
-        hi: 'ENDLESSLY MANY',
+        hi: 'INFINITELY MANY',
         start: 0,
         zones: [
-          { id: 'none', upto: 0.26, reads: 'full is full' },
-          { id: 'one', upto: 0.6, reads: 'one, if everybody moves' },
-          { id: 'all', upto: 1, reads: 'as many as turn up', correct: true },
+          { id: 'none', upto: 0.26, reads: 'none, since every room is taken' },
+          { id: 'one', upto: 0.6, reads: 'one, if every guest moves along' },
+          { id: 'all', upto: 1, reads: 'infinitely many new guests', correct: true },
         ],
       },
-      explain: 'Watch what happened as you slid. Every guest walked one door to the right and room 1 opened, with nobody left outside. Slide further and they double their room numbers instead, and every odd door opens at once. Full stopped meaning no room.',
+      explain: 'Infinitely many new guests. Each guest moves to the next room, which frees room one. If every guest doubles their room number instead, every odd-numbered room is freed. So a full infinite hotel can take in infinitely many more.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 13, x: 54, hotel: 1, shift: 1,
-    text: 'That’s the whole proof. Room one goes to room two, room two to room three, and on forever.',
+    text: 'The proof for one guest is simple. The guest in room one moves to room two, the guest in room two to room three, and so on.',
     dur: 3,
   },
   {
     p: 13, x: 54, hotel: 1, shift: 1,
-    text: 'Nobody is homeless and room one is empty.',
+    text: 'Every guest still has a room, and room one is now empty.',
     dur: 1.8,
   },
   {
     p: 380, x: 54, hotel: 1, shift: 1,
-    text: 'It works because there is no last room to fall off the end of. Try it with a hundred rooms and guest one hundred is out on the street.',
+    text: 'The move works only because there’s no last room. In a hotel of a hundred rooms, the guest in room one hundred would have nowhere to go.',
     dur: 4.8,
   },
   {
@@ -86,38 +86,38 @@ export const BEATS: Metaphysics36Beat[] = [
   {
     p: 384, x: 54, hotel: 1, dbl: 1, live: 1,
     interact: {
-      prompt: 'Now an endless coach arrives. Everyone doubles their room number. Tap a free door.',
-      explain: 'Any odd one. They all opened, in one instruction, and there are as many of them as there were rooms to begin with. A part of the hotel has been matched one to one with the whole. That’s what being infinite means.',
+      prompt: 'An infinite coach arrives, and each current guest moves to double their room number. Which rooms are free?',
+      explain: 'Any odd-numbered room. One instruction frees all of them, and there are as many odd rooms as there were rooms at the start. A part can be matched one to one with the whole, which marks an infinite set.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 405, x: 128, hotel: 1, dbl: 1,
-    text: 'Nothing here is an error. A part can be paired off one to one with the whole, and only an endless collection can do that.',
+    text: 'The mathematics is consistent. Only an endless collection can be paired one to one with a proper part of itself.',
     dur: 4.4,
   },
   {
     p: 463, x: 128, hotel: 1, dbl: 1,
-    text: 'That’s why William Lane Craig argues no real thing could work like this. The maths is fine.',
-    cite: 'Craig, on the impossibility of an actual infinite',
+    text: 'William Lane Craig argues that such a hotel shows an actual infinite can’t exist in reality.',
+    cite: 'Craig on actual infinites',
     dur: 3,
   },
   {
     p: 463, x: 128, hotel: 1, dbl: 1,
-    text: 'Whether anything buildable behaves this way is a different question.',
+    text: 'Whether any real collection behaves this way is a separate question from whether the mathematics is consistent.',
     dur: 1.8,
   },
   {
     summary: {
-      title: 'When Counting Stops Working',
+      title: 'Hilbert’s Hotel',
       points: [
-        'A full endless hotel still takes a guest',
-        'Doubling every number frees endlessly many',
-        'A part matches the whole, one to one',
-        'Consistent is not the same as buildable',
+        'A full infinite hotel can still take a new guest',
+        'Doubling every room number frees infinitely many rooms',
+        'An infinite set matches a part of itself one to one',
+        'Mathematical consistency doesn’t show physical possibility',
       ],
-      closing: 'The discomfort is real. It’s arithmetic built for finite things, complaining about a place with no last room.',
+      closing: 'The paradox feels troubling because a sense of size comes from finite sets. Infinite sets follow different rules.',
     },
     dur: 3.2,
   },

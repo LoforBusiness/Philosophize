@@ -47,14 +47,16 @@ const DIR = process.env.EAR_DIR || 'components/lesson/cinematic';
 // What is left was kept on purpose, lesson by lesson — a "not" that is the claim,
 // a maxim kept word for word, a dash that glosses — so each is a decision, and the
 // next one has to be too.
+// LOWERED ON 13 SEP 2026 to what the lecture rewrite (group V) left: 407 → 147
+// spelled-out forms, 38 → 0 dashes, 57 → 9 intensifiers. Unframed quotations stayed at 9.
 /** AC4 — spelled-out forms left where the "not" or the "is" is the point. May only go DOWN. */
-const EXPANDED_BUDGET = 407;
+const EXPANDED_BUDGET = 147;
 /** AC5 — quoted phrases with no spoken frame. May only go DOWN. */
 const UNFRAMED_BUDGET = 9;
 /** AC7 — dashes in narration, each one a real interruption. May only go DOWN. */
-const DASH_BUDGET = 38;
+const DASH_BUDGET = 0;
 /** AD6 — intensifiers that survived being asked what they change. May only go DOWN. */
-const ADVERB_BUDGET = 57;
+const ADVERB_BUDGET = 9;
 const BUDGETS = { EXPANDED_BUDGET, UNFRAMED_BUDGET, DASH_BUDGET, ADVERB_BUDGET };
 
 const args = process.argv.slice(2);

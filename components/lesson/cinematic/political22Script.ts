@@ -35,38 +35,38 @@ export interface Pol22Beat extends BaseBeat {
 export const BEATS: Pol22Beat[] = [
   {
     p: 164, x: 200, switchOn: 1, tiles: 1,
-    text: 'A servant with a kind employer. He has never once ordered her about.',
+    text: 'Consider a servant with a kind master. He never interferes with how she works, what she says or where she goes.',
     dur: 3.2,
   },
   {
     p: 164, x: 200, switchOn: 1, tiles: 1,
-    text: 'The servant\'s day is her own.',
+    text: 'Isaiah Berlin called the absence of interference negative liberty. By that standard, the servant is free.',
     dur: 1.8,
   },
   {
     p: 2, x: 200, switchOn: 1, tiles: 1, reach: 1,
-    text: 'The switch is on his wall, and only he can reach the switch. His reach does not go away while he leaves the lever alone.',
+    text: 'Yet he could interfere whenever he chose, and she couldn’t stop him. Philip Pettit calls such arbitrary power domination.',
     cite: 'Domination',
     dur: 4.8,
   },
   {
     p: 45, x: 132, switchOn: 1, tiles: 1, reach: 1, flip: 1,
-    text: 'If he ever felt like it, here’s what happens, and there’s nothing whatever she could do.',
+    text: 'If he chose, he could forbid her to work, speak or go out. She would have no means of stopping him.',
     dur: 4.6,
   },
   {
     p: 165, x: 132, switchOn: 1, tiles: 1, reach: 1, live: 1,
     interact: {
-      prompt: 'The lever is up. Tap what still makes her unfree.',
-      explain: 'His reach. Negative liberty only ever reads the lever, and the lever is up, so it reports her free. What she has to live with isn’t the flipping but the standing possibility. That’s why she flatters him and stays watchful.',
+      prompt: 'While he leaves her alone, what still makes her unfree?',
+      explain: 'His reach. The lever shows only interference, and while it’s up she counts as free. What makes her unfree is his standing power to interfere at will. So she must defer to him and anticipate his moods.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 380, x: 132, switchOn: 1, tiles: 1, reach: 1,
-    text: 'One question asks whether anyone is interfering now. The other asks whether anyone could, whenever they liked.',
-    cite: 'Two questions',
+    text: 'Negative liberty asks whether anyone is interfering with you now. Non-domination asks whether anyone could interfere at will.',
+    cite: 'Two tests of freedom',
     dur: 4.4,
   },
   {
@@ -83,36 +83,36 @@ export const BEATS: Pol22Beat[] = [
   },
   {
     p: 13, x: 268, switchOn: 1, tiles: 1, reach: 1,
-    text: 'So the cure is not better manners from the powerful. It is courts, rights and rules that take the switch off the wall.',
+    text: 'Kindness from the powerful can’t make her free, since it can be withdrawn. Pettit argues that freedom needs laws, rights and courts that check arbitrary power.',
     dur: 4.8,
   },
   {
     p: 383, x: 268, switchOn: 1, tiles: 1, reach: 1,
     interact: {
-      prompt: 'A servant with a kind master. Free, or not?',
+      prompt: 'Is the servant of a kind master free?',
       poll: {
         options: [
-          { id: 'bossed', reads: 'ordered about, by someone who may' },
-          { id: 'servant', reads: 'undisturbed, and still not free', holders: ['Pettit', 'Skinner'], correct: true },
-          { id: 'taxed', reads: 'taxed by a law you can challenge' },
-          { id: 'free', reads: 'free on both counts at once' },
+          { id: 'bossed', reads: 'free, if she wants only what she controls', holders: ['Epictetus'] },
+          { id: 'servant', reads: 'unfree, since he could interfere at will', holders: ['Philip Pettit', 'Quentin Skinner'], correct: true },
+          { id: 'taxed', reads: 'less free, by how likely interference is', holders: ['Ian Carter', 'Matthew Kramer'] },
+          { id: 'free', reads: 'free, since no one interferes with her', holders: ['Thomas Hobbes', 'Isaiah Berlin'] },
         ],
       },
-      explain: 'Undisturbed, and still not free. Non-interference on its own calls her free, and that’s the reading being argued with. The other odd case is a citizen taxed by a law they can challenge. That citizen is interfered with but not dominated.',
+      explain: 'Unfree, since he could interfere at will. Living at the mercy of another’s goodwill is itself unfreedom.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Switch On His Wall',
+      title: 'Freedom as Non-Domination',
       points: [
-        'Interference is being stopped; domination is being liable to it',
-        'A kind master leaves you unfree, because he could stop being kind',
-        'The two questions can give opposite answers',
-        'The cure is rules that remove the power, not restraint in using it',
+        'Negative liberty is the absence of interference',
+        'Domination is the power to interfere at will',
+        'A kind master’s servant is dominated, and so unfree',
+        'The remedy is laws and institutions that check arbitrary power',
       ],
-      closing: 'Freedom here means standing on your own feet, not merely being left undisturbed.',
+      closing: 'On the republican view, you’re free only when no one holds arbitrary power over you.',
     },
     dur: 3.8,
   },

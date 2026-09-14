@@ -71,21 +71,21 @@ export const BEATS: Beat[] = [
   {
     act: 1,
     vol: 3, reasons: 0,
-    text: 'Two people who don’t agree.',
+    text: 'Consider two people who disagree and who treat their disagreement as a fight.',
     dur: 2.2,
   },
   {
     act: 1,
     vol: 6, reasons: 0,
     say: [{ who: 'red', text: "YOU'RE WRONG!" }],
-    text: 'Watch closely. Not how loud the voices get, but what the words say.',
+    text: 'What could settle a disagreement is what each side claims and why. The volume of their voices settles nothing.',
     dur: 2.6,
   },
   {
     act: 1,
     vol: 8, reasons: 0,
     say: [{ who: 'blue', text: "NO — YOU'RE WRONG!" }],
-    text: 'Shouting back is not a counter-argument. A raised voice is the same noise aimed the other way.',
+    text: 'Shouting a denial back isn’t a counter-argument. It denies the claim without offering any reason against it.',
     dur: 2.6,
   },
   {
@@ -95,7 +95,7 @@ export const BEATS: Beat[] = [
       { who: 'red', text: 'IDIOT!' },
       { who: 'blue', text: 'MORON!' },
     ],
-    text: 'Three rounds in. Not one reason has been given by either of them.',
+    text: 'After three exchanges, the two have traded insults. Neither has given a reason.',
     dur: 2.8,
   },
 
@@ -104,41 +104,41 @@ export const BEATS: Beat[] = [
     act: 2,
     narr: 0,                                       // open hand, back toward the fight
     vol: 10, reasons: 0,
-    text: 'Most people picture a shouting match when they hear the word “argument”.',
+    text: 'In everyday speech, the word “argument” often means a shouting match.',
     dur: 3.4,
   },
   {
     act: 2,
     narr: 1,                                       // emphatic — "no way to end"
     vol: 10, reasons: 0,
-    text: 'That’s a quarrel. And a quarrel has no way to end, only a way to get louder.',
+    text: 'Such an exchange is a quarrel. Because a quarrel contains no reasons, nothing in it can settle the disagreement.',
     dur: 3.0,
   },
   {
     act: 2,
     board: 'anatomy',
     narr: 2,                                       // present the board
-    text: 'Philosophy means something else by the word. An argument is a machine with parts.',
+    text: 'In philosophy, the word “argument” has a technical meaning. An argument is a set of claims with a definite structure.',
     dur: 4.2,
   },
   {
     act: 2,
     board: 'anatomy',
     narr: 3,                                       // count off the parts
-    text: 'Reasons, called premises, offered in support of a conclusion. That’s the whole machine.',
+    text: 'Some of the claims, called premises, are offered as reasons. The claim these reasons support is the conclusion.',
     dur: 3.0,
   },
   {
     act: 2,
     vol: 10, reasons: 0,
     tap: {
-      prompt: 'One of these gives a reason. Tap it.',
+      prompt: 'Which of these statements offers a reason that could serve as a premise?',
       options: [
         { id: 'a', text: '"You clearly know nothing about this."', correct: false },
         { id: 'b', text: '"Rents rose 40% while wages stayed flat."', correct: true },
       ],
       explain:
-        'The first attacks a person. The second offers something you could check, argue with or prove false. That’s what makes it a premise.',
+        '“Rents rose 40% while wages stayed flat” offers a reason. A checkable fact about rents and wages bears on the dispute. A remark about the speaker’s ignorance attacks a person, not a claim.',
     },
     dur: 0.8,
   },
@@ -148,14 +148,14 @@ export const BEATS: Beat[] = [
     act: 3,
     board: 'syllogism',
     narr: 2,                                       // present the board
-    text: 'Aristotle was the first to write the machine down, around 350 BCE.',
+    text: 'In the fourth century BCE, Aristotle gave the first account of deductive argument.',
     dur: 4.4,
   },
   {
     act: 3,
     board: 'syllogism',
     narr: 3,                                       // count off premises → conclusion
-    text: 'Grant him the two premises and the conclusion follows whether you like it or not. No volume required.',
+    text: 'In a syllogism, two premises fix the conclusion, so accepting them means accepting it too.',
     cite: 'Aristotle, Prior Analytics',
     dur: 3.0,
   },
@@ -172,10 +172,10 @@ export const BEATS: Beat[] = [
         { id: 'a', text: 'Premises offered to support a conclusion', correct: true },
         { id: 'b', text: 'A heated clash between two people', correct: false },
         { id: 'c', text: 'An opinion stated with great confidence', correct: false },
-        { id: 'd', text: 'A long and confusing speech', correct: false },
+        { id: 'd', text: 'A claim repeated until accepted', correct: false },
       ],
       explain:
-        'An argument is premises from which a conclusion follows. Volume and confidence have nothing to do with it.',
+        'Premises offered to support a conclusion. That’s what an argument is in philosophy. Heat, confidence and repetition add no support to a claim.',
       xp: 5,
     },
     dur: 0.8,
@@ -184,14 +184,14 @@ export const BEATS: Beat[] = [
     act: 3,
     board: 'loudness',
     narr: 0,                                       // open hand — the plain point
-    text: 'Volume is not a reason. That’s worth saying plainly, because almost everyone behaves as though the opposite were true.',
+    text: 'The loudness of a claim has no bearing on whether it’s true. Only reasons and evidence bear on that.',
     dur: 4.6,
   },
   {
     act: 3,
     vol: 10, reasons: 0,
     mc: {
-      prompt: 'Your friend shouts "Pineapple belongs on pizza!" louder each time. Is that an argument?',
+      prompt: 'A friend repeats “Pineapple belongs on pizza!” more loudly each time. Is that an argument?',
       options: [
         { id: 'a', text: "No — it's a repeated claim with no reasons", correct: true },
         { id: 'b', text: 'Yes — they clearly disagree with someone', correct: false },
@@ -199,7 +199,7 @@ export const BEATS: Beat[] = [
         { id: 'd', text: 'Yes — saying it three times counts as proof', correct: false },
       ],
       explain:
-        "Heat and repetition aren't reasons. Without premises supporting it, even a loud claim is just an assertion.",
+        "No, it’s a repeated claim with no reasons. Repetition and volume give no support to a claim. Without premises, even a forceful claim remains a bare assertion.",
       xp: 5,
     },
     dur: 0.8,
@@ -208,30 +208,30 @@ export const BEATS: Beat[] = [
     act: 3,
     board: 'tworoads',
     narr: 5,                                       // sweep across the fork
-    text: 'Schopenhauer saw that people argue with two very different aims.',
+    text: 'Arthur Schopenhauer distinguished two aims a person can have in arguing.',
     dur: 4.4,
   },
   {
     act: 3,
     board: 'tworoads',
     narr: 2,                                       // present the board
-    text: 'One aim is to find out what’s true. The other is to win, and Schopenhauer catalogued thirty-eight tricks for winning when you’re in the wrong.',
-    cite: 'Schopenhauer, The Art of Being Right, 1831',
+    text: 'One aim is to establish the truth, and the other is to win. Schopenhauer listed thirty-eight stratagems for winning, whether or not you’re in the right.',
+    cite: 'The Art of Being Right',
     dur: 3.2,
   },
   {
     act: 3,
     narr: 4,                                       // hand to chin — questioning
     stack: 2,
-    text: 'Socrates went the other way. On trial for his life, he answered his accuser with nothing but questions.',
+    text: 'Socrates argued to test claims rather than to win. At his trial in 399 BCE, he cross-examined his accuser Meletus with questions.',
     dur: 4.0,
   },
   {
     act: 3,
     narr: 1,                                       // emphatic — the contradiction lands
     stack: 3,
-    text: 'Socrates kept asking Meletus who improves the young, until Meletus contradicted himself in front of the whole court. Socrates never raised his voice, and never needed to.',
-    cite: 'Plato, Apology, c. 399 BCE',
+    text: 'Meletus said that every Athenian improves the young except Socrates. Socrates showed the claim was absurd by asking whether the same holds for horses.',
+    cite: 'Plato, Apology',
     dur: 3.6,
   },
 
@@ -239,33 +239,33 @@ export const BEATS: Beat[] = [
   {
     act: 4,
     vol: 3, reasons: 0,
-    text: 'So give the two fighters the same disagreement again, with reasons.',
+    text: 'Now suppose the same two people take up the same disagreement again, this time with reasons.',
     dur: 3.6,
   },
   {
     act: 4,
     vol: 3, reasons: 1,
     say: [{ who: 'red', text: 'Rents rose 40%. Wages did not.' }],
-    text: 'A premise is a claim you can go and check.',
+    text: 'The first speaker now offers a premise: rents have risen while wages haven’t. It’s a factual claim, so it can be checked.',
     dur: 3.0,
   },
   {
     act: 4,
     vol: 3, reasons: 2,
     say: [{ who: 'blue', text: 'Then why did rents fall where we built more?' }],
-    text: 'And here’s a real counter. It engages the reason instead of the person.',
+    text: 'The second speaker replies that rents fell where more housing was built. That reply challenges the reasoning, not the person.',
     dur: 3.2,
   },
   {
     act: 4,
     vol: 3, reasons: 2,
-    text: 'Same two people, same disagreement. Nobody threw a punch, and for the first time it can go somewhere.',
+    text: 'The people and the disagreement are unchanged. Because each side now gives reasons, the exchange can make progress.',
     dur: 3.4,
   },
   {
     act: 4,
     vol: 2, reasons: 2,
-    text: 'Mill went further: you don’t fully understand your own position until you understand theirs.',
+    text: 'John Stuart Mill argued further that you understand your own view only once you understand the opposing one.',
     cite: 'J.S. Mill, On Liberty, 1859',
     dur: 3.4,
   },
@@ -286,14 +286,14 @@ export const BEATS: Beat[] = [
   {
     act: 5,
     summary: {
-      title: 'Argument Unlocked',
+      title: 'What an Argument Is',
       points: [
         'An argument is premises supporting a conclusion',
-        'Not a quarrel, and not a bare claim',
-        'It gives reasons, not just confidence',
+        'A quarrel or a bare claim isn’t an argument',
+        'Confidence and volume add no support to a claim',
         'Socrates argued to test beliefs, not to win',
       ],
-      closing: 'A clear set of reasons does more than a raised voice ever will.',
+      closing: 'A disagreement can make progress only when each side gives reasons the other can examine.',
     },
     dur: 2.8,
   },

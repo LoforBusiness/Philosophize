@@ -35,42 +35,42 @@ export interface Met18Beat extends BaseBeat {
 export const BEATS: Met18Beat[] = [
   {
     p: 25, x: 200, shelf: 1,
-    text: 'Four things on the table. Three of them sit somewhere you can point to.',
+    text: 'Consider four things, three of which have a location you can point to.',
     dur: 3.2,
   },
   {
     p: 443, x: 200, shelf: 1, aim: 1,
-    text: 'Point at the apple and you’ve pointed at something. Same for the chair, same for the star.',
+    text: 'The apple, the chair and the star each occupy a place in space and time. Each is a concrete object.',
     dur: 4.4,
   },
   {
     p: 159, x: 132, shelf: 1, aim: 1, hang: 1,
-    text: 'Now point at the number three. Not three apples.',
-    cite: 'The arrow hangs',
+    text: 'The number three has no such place. It isn’t a group of three apples.',
+    cite: 'No location',
     dur: 2.3,
   },
   {
     p: 159, x: 132, shelf: 1, aim: 1, hang: 1,
-    text: 'Not the mark chalked on a board. The number.',
+    text: 'Nor is it the numeral chalked on a board, which is only a sign for the number.',
     dur: 2.3,
   },
   {
     p: 383, x: 132, shelf: 1, aim: 1, hang: 1,
-    text: 'And yet three is a prime number, and three was prime before anybody counted anything.',
+    text: 'Yet claims about three are true. Three is a prime number, and it was prime before anyone counted.',
     dur: 4.2,
   },
   {
     p: 165, x: 132, shelf: 1, aim: 1, hang: 1, live: 1,
     interact: {
-      prompt: 'Tap the one nothing in the room can point at.',
-      explain: 'The number three. You can point at three apples, or at a numeral chalked on a board. Neither of those is the number. One is fruit and one is a mark. What they have in common has no place in the room.',
+      prompt: 'Which of these four things has no location in space?',
+      explain: 'The number three. The apple, the chair and the star each have a location. Three apples or a chalked numeral would too, but neither is the number itself.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 402, x: 132, shelf: 1, aim: 1, hang: 1, beyond: 1,
-    text: 'Plato takes the obvious way out. The number exists, and the number does not live here.',
+    text: 'Platonism, after Plato, gives the obvious answer. On this view, numbers exist as abstract objects outside space and time.',
     cite: 'Platonism',
     dur: 4.0,
   },
@@ -90,32 +90,32 @@ export const BEATS: Met18Beat[] = [
   {
     p: 41, x: 268, shelf: 1, aim: 1, hang: 1, beyond: 1,
     interact: {
-      prompt: 'How much contact can a number outside space make with you?',
+      prompt: 'How much causal contact can an object outside space and time have with you?',
       drag: {
         lo: 'NONE AT ALL',
         hi: 'AS MUCH AS A STONE',
         start: 1,
         zones: [
-          { id: 'none', upto: 0.3, reads: 'no contact at all', correct: true },
-          { id: 'faint', upto: 0.72, reads: 'something faint you cannot describe' },
+          { id: 'none', upto: 0.3, reads: 'an abstract object causes nothing in you', correct: true },
+          { id: 'faint', upto: 0.72, reads: 'contact through a special mathematical intuition' },
           { id: 'full', upto: 1, reads: 'as much as a stone does' },
         ],
       },
-      explain: 'None, and that’s the strongest objection Platonism faces. Knowing a thing normally means it reached you somehow — light, sound, pressure. An object with no place and no time can do none of that. The middle zone is the usual reply, and it names the problem.',
+      explain: 'An abstract object causes nothing in you. It emits no light and exerts no force. Paul Benacerraf argued that, on a causal theory of knowledge, this makes mathematical knowledge hard to explain.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Thing With No Address',
+      title: 'Mathematical Platonism and Its Problem',
       points: [
         'Numbers are not the marks, and not the things counted',
         'Platonism says they exist outside space and time',
-        'Nominalism says only the marks and the things exist',
-        'Neither side has an easy account of how we know them',
+        'Nominalism denies that abstract objects exist',
+        'Platonism must explain how causally inert objects are known',
       ],
-      closing: 'The arrow is still hanging there, and the arithmetic still works.',
+      closing: 'The nominalist Hartry Field holds that arithmetic is strictly false but still useful.',
     },
     dur: 3.4,
   },

@@ -21,23 +21,23 @@ export interface Meta24Beat extends BaseBeat {
 export const BEATS: Meta24Beat[] = [
   {
     p: 164, x: 70,
-    text: 'Here’s a heap of sand. Take one grain away.',
+    text: 'Consider a heap of sand, and remove a single grain.',
     dur: 1.8,
   },
   {
     p: 402, x: 70,
-    text: 'Still a heap, of course. One grain has never been the difference between a heap and no heap.',
+    text: 'What remains is still a heap, which seems obvious. A single grain seems too small to make a difference.',
     dur: 3,
   },
   {
     p: 41, x: 168, grains: 18, lamp: 1,
-    text: 'So the rule is safe: removing a single grain never changes the verdict. Every step you’re about to see applies a rule you just agreed to.',
-    cite: 'The rule',
+    text: 'The case supports a general premise: removing one grain from a heap always leaves a heap. Each later step applies only this premise.',
+    cite: 'The premise',
     dur: 4.8,
   },
   {
     p: 383, x: 168, grains: 9, lamp: 1,
-    text: 'Keep applying it. Half the grains are gone and the lamp hasn’t flickered, because at no point did one grain do anything.',
+    text: 'Apply the premise repeatedly. After half the grains are gone, the pile still counts as a heap, because no single removal changed the verdict.',
     cite: 'Halfway',
     dur: 4.2,
   },
@@ -56,30 +56,30 @@ export const BEATS: Meta24Beat[] = [
   },
   {
     p: 29, x: 168, grains: 1, lamp: 1,
-    text: 'One grain left, and the lamp still says it’s a heap. Every single step was fine and the destination is nonsense.',
+    text: 'Applied down to the last grain, the premise says a single grain is a heap. Every step seems valid and the premise seems true, yet the conclusion is false.',
     cite: 'One grain left',
     dur: 3,
   },
   {
     p: 29, x: 168, grains: 1, lamp: 1,
-    text: 'So something you agreed to is wrong, and the culprit isn’t obvious.',
+    text: 'This is the sorites paradox, named after the Greek word for heap. One of the assumptions must be given up, and philosophers disagree about which.',
     dur: 2.2,
   },
   {
     p: 165, x: 124, grains: 1, lamp: 1,
     interact: {
-      prompt: 'A friend says: "Just define a heap as 100 grains or more. Solved." Why does that dodge it?',
+      prompt: 'In ordinary use, which curve shows how far a pile counts as a heap?',
       plot: {
         axis: 'HOW MUCH A HEAP',
         cols: ['1 GRAIN', '10', '100', '1000', '10000'],
         start: [0.5, 0.5, 0.5, 0.5, 0.5],
         shapes: [
-          { id: 'slope', profile: [0.02, 0.2, 0.55, 0.85, 0.98], reads: 'it becomes a heap by degrees', correct: true },
-          { id: 'step', profile: [0, 0, 1, 1, 1], reads: 'one grain flips it, exactly at a hundred' },
-          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5, 0.5], reads: 'the word never settles at all' },
+          { id: 'slope', profile: [0.02, 0.2, 0.55, 0.85, 0.98], reads: 'more of a heap as grains are added', correct: true },
+          { id: 'step', profile: [0, 0, 1, 1, 1], reads: 'a heap from exactly one hundred grains' },
+          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5, 0.5], reads: 'no settled verdict at any size' },
         ],
       },
-      explain: 'The trap is false precision. It makes 99 grains a non-heap and 100 a heap, with no real difference between them. It swaps in a sharp definition without saying so, instead of explaining why the vague word resists a line.',
+      explain: 'More of a heap as grains are added: ordinary use draws no sharp boundary. Defining a heap as a hundred grains replaces the vague word with a precise one. That changes the subject rather than solving the paradox.',
       xp: 5,
     },
     dur: 1.0,
@@ -87,22 +87,22 @@ export const BEATS: Meta24Beat[] = [
   {
     p: 6, x: 124, grains: 1, lamp: 1, pick: 1,
     interact: {
-      prompt: 'Tap the grain whose removal ended the heap.',
-      explain: 'There’s no such grain, and that’s the paradox rather than a failure to find it. Every removal was harmless on its own. The trouble is that the harmless steps add up to a conclusion nobody accepts.',
+      prompt: 'Which grain’s removal turned the heap into a non-heap?',
+      explain: 'None that can be identified. Each removal is harmless on its own, yet together the removals reach a conclusion no one accepts. Epistemicists hold that a sharp boundary exists but can’t be known.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Living on the Blurry Edge',
+      title: 'The Sorites Paradox',
       points: [
-        'Tiny harmless steps reach a false conclusion',
-        'Heap, bald, tall: fuzzy boundaries everywhere',
-        'Epistemicism: a hidden sharp line we cannot know',
-        'Other views: truth-gaps, or degrees of truth',
+        'Individually harmless steps lead to a false conclusion',
+        'Vague words like heap, bald and tall lack sharp boundaries',
+        'Epistemicism: a sharp boundary exists but cannot be known',
+        'Rival views posit truth-value gaps or degrees of truth',
       ],
-      closing: 'Almost every useful word you own has a blurred edge like this one. The words work anyway, and that’s the strange part.',
+      closing: 'Most everyday words are vague in this way. Yet people still use them successfully, and any theory of vagueness must explain how.',
     },
     dur: 3.0,
   },

@@ -35,36 +35,36 @@ export interface Epistemology38Beat extends BaseBeat {
 export const BEATS: Epistemology38Beat[] = [
   {
     p: 172, x: 52, roundels: 1,
-    text: 'Three people were asked the time. All three answered, and two of them were right.',
+    text: 'Suppose three people are asked the time. All three answer, and two of them are right.',
     dur: 3.8,
   },
   {
     p: 384, x: 52, roundels: 1, shots: 1, wide: 1,
-    text: 'The solid mark is what each of them believed. The hollow ones are what the same method would have given a minute either side.',
+    text: 'Each solid mark shows a person’s belief. The hollow marks show what the same method would have given a minute earlier or later.',
     dur: 4.6,
   },
   {
     p: 47, x: 52, roundels: 1, shots: 1, wide: 1,
-    text: 'So one face holds a hit and another holds an aim. Nothing on the stage tells a hit from an aim.',
+    text: 'Two of the beliefs are true. A true belief on its own can’t show whether a reliable method produced it.',
     dur: 4.0,
   },
   {
     p: 165, x: 52, roundels: 1, shots: 1, wide: 1, live: 1,
     interact: {
-      prompt: 'Tap the true belief that is not knowledge.',
-      explain: 'The middle one. Its solid mark is on the bull, so the belief is true. But every near case it has is off the face. The third is wrong rather than lucky. A plain mistake was never the puzzle, and it needs no theory.',
+      prompt: 'Which true belief falls short of knowledge?',
+      explain: 'The middle one. Its solid mark is on the bull, so the belief is true. But the same method’s nearby results miss the face. The third belief is false, which needs no theory to explain.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 159, x: 52, roundels: 1, shots: 1, wide: 1, names: 1,
-    text: 'A belief is safe when it would still have been true in the cases nearest to this one.',
+    text: 'A belief is called safe when it would still have been true in the most similar nearby cases.',
     dur: 3.6,
   },
   {
     p: 35, x: 98, roundels: 1, shots: 1, wide: 1, names: 1,
-    text: 'The hall clock stopped at ten past four, and you look at it at ten past four. Careful method, true belief, and wrong at almost any other moment.',
+    text: 'Bertrand Russell’s example is a stopped clock, read at the one moment it shows the right time. The belief is true, but unsafe.',
     dur: 5.0,
   },
   {
@@ -83,17 +83,17 @@ export const BEATS: Epistemology38Beat[] = [
   {
     p: 176, x: 98, roundels: 1, shots: 1, names: 1,
     interact: {
-      prompt: 'Divide the credit for that hit.',
+      prompt: 'This belief is true but unsafe. How much credit belongs to skill, and how much to luck?',
       split: {
         left: 'THE SHOOTER', right: 'THE LUCK',
         start: 0.9,
         zones: [
           { id: 'luck', upto: 0.32, reads: 'almost all luck, and the hit is not knowing', correct: true },
           { id: 'half', upto: 0.62, reads: 'half and half, and it is still not knowledge' },
-          { id: 'skill', upto: 1, reads: 'the shooter earned it, so the misses were never near' },
+          { id: 'skill', upto: 1, reads: 'the shooter earned it, and nearby cases also land' },
         ],
       },
-      explain: 'Almost all luck. Watch the near shots close onto the bull as you hand the bar to the shooter. That’s a picture of a method that would have worked a minute earlier. The stopped clock has no such picture, which is why the true belief it produced buys nothing.',
+      explain: 'Almost all luck. The belief is true, but the same method would have missed a minute earlier or later. That’s the mark of the stopped clock, true only by chance. A true belief produced mostly by chance is not knowledge, however confident it feels.',
       xp: 5,
     },
     dur: 1.0,

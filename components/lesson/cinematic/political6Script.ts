@@ -14,18 +14,18 @@ export interface Pol6Beat extends BaseBeat {
 export const BEATS: Pol6Beat[] = [
   {
     p: 443, bars: 1,
-    text: 'Would you accept this society if you turned out to be the poorest in it? Rawls turned that question into a test for justice itself.',
+    text: 'Would you accept this society if you turned out to be its poorest member? John Rawls made that question part of his test for a just society.',
     dur: 3.6,
   },
   {
     p: 418, bars: 1,
-    text: 'Back behind the veil of ignorance, you choose the rules not knowing who you’ll be. Rawls says two principles fall out of that fair start, in strict order.',
+    text: 'Behind the veil of ignorance, you choose principles without knowing your place in society. Rawls argues that this fair choice yields two principles, ranked in strict order.',
     cite: 'The two principles',
     dur: 4.8,
   },
   {
     p: 438, bars: 1, prin: 1,
-    text: 'First: each person gets the same basic liberties, and these come first. Second: inequalities are allowed only if they help the least advantaged and attach to jobs open to all.',
+    text: 'The first principle gives each person the same basic liberties. The second allows inequalities only if they help the worst off and attach to jobs open to all.',
     cite: 'Liberty first, then difference',
     dur: 5.0,
   },
@@ -44,20 +44,20 @@ export const BEATS: Pol6Beat[] = [
   },
   {
     p: 13, bars: 1, prin: 1,
-    text: 'Is a surgeon earning far more than a clerk unjust? Not necessarily.',
+    text: 'Suppose a surgeon earns far more than a clerk. Rawls’s difference principle asks whether that gap helps the worst off.',
     cite: 'The difference principle',
     dur: 1.8,
   },
   {
     p: 13, bars: 1, prin: 1,
-    text: 'The gap is just when higher pay draws talent that lifts even the worst-off above the equality line. The test is the bottom, not the top.',
+    text: 'Higher pay is just if it draws talent that lifts the worst off above the equality line. Justice is judged by how the worst off fare, not the best off.',
     dur: 3.8,
   },
   {
     p: 383, bars: 1, prin: 1, pick: 1,
     interact: {
-      prompt: 'Rawls judges a society by its worst-off — the dark bar. Tap the one he would choose.',
-      explain: 'Under the unequal rules the worst-off finish ABOVE the equality line, so that gap earns its keep. Rawls allows a difference only when it lifts the least advantaged — the yardstick is the bottom, never the top.',
+      prompt: 'Which of the two societies would Rawls choose, judging each by its worst off?',
+      explain: 'The unequal society. There the worst off finish above the equality line, so the gap helps them. Rawls allows a gap only when it raises the worst off. The equal society may look fairer, but its worst off have less.',
       xp: 5,
     },
     dur: 1.0,
@@ -65,29 +65,29 @@ export const BEATS: Pol6Beat[] = [
   {
     p: 165, bars: 1, prin: 1,
     interact: {
-      prompt: 'How does Rawls order the two?',
+      prompt: 'How does Rawls rank the basic liberties against gains in wealth for the poorest?',
       split: {
-        left: 'LIBERTIES SETTLED FIRST', right: 'TRADED FOR THE POOREST',
+        left: 'LIBERTIES SETTLED FIRST', right: 'TRADED FOR WEALTH',
         start: 0.04,
         zones: [
-          { id: 'cash', upto: 0.3, reads: 'trade the liberties away whenever the poorest gain' },
-          { id: 'both', upto: 0.66, reads: 'weigh liberty against money case by case' },
-          { id: 'first', upto: 1, reads: 'liberties settled first, and only then the money', correct: true },
+          { id: 'cash', upto: 0.3, reads: 'give up liberties whenever the poorest gain wealth' },
+          { id: 'both', upto: 0.66, reads: 'weigh liberty against wealth case by case' },
+          { id: 'first', upto: 1, reads: 'secure liberties first, then distribute wealth', correct: true },
         ],
       },
-      explain: 'All the way over. Helping the poor sounds like grounds for a trade, and Rawls will not allow one. The basic liberties have strict priority. Only once they’re secured for everybody does the difference principle get to speak about wealth.',
+      explain: 'Liberties settled first. Rawls gives the basic liberties strict priority. They can’t be traded for wealth, even to help the poorest. Only once they’re secure for everyone does the difference principle apply to wealth.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Fairness Has a Structure',
+      title: 'Rawls’s Two Principles of Justice',
       points: [
-        'Equal basic liberties come first, always',
+        'Equal basic liberties have strict priority',
         'Inequalities must help the least advantaged',
-        'The test is the bottom, not the top',
-        'Justice judged from behind the veil',
+        'An inequality is judged by how the worst off fare',
+        'The principles are chosen behind a veil of ignorance',
       ],
       closing: 'A just society is one you’d accept before knowing your place in it.',
     },

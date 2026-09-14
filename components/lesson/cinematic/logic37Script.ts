@@ -33,41 +33,41 @@ export interface Logic37Beat extends BaseBeat {
 export const BEATS: Logic37Beat[] = [
   {
     p: 462, x: 56, boxes: 1,
-    text: 'A village with one barber and one rule. He shaves every man who doesn’t shave himself, and nobody else.',
+    text: 'Suppose a village has one barber, who follows one rule. He shaves all and only the men of the village who don’t shave themselves.',
     dur: 4.0,
   },
   {
     p: 2, x: 56, boxes: 1, sorted: 1,
-    text: 'It sorts the whole village without an argument. Shave yourself and he leaves you alone.',
+    text: 'For every other man, the rule gives a clear verdict. A man who shaves himself isn’t shaved by the barber.',
     dur: 3,
   },
   {
     p: 2, x: 56, boxes: 1, sorted: 1,
-    text: 'Don’t, and he shaves you.',
+    text: 'A man who doesn’t shave himself is shaved by the barber.',
     dur: 1.8,
   },
   {
     p: 4, x: 56, boxes: 1, sorted: 1, barber: 1, live: 1,
     interact: {
-      prompt: 'Now put the barber in a box.',
-      explain: 'Neither box takes him, and there’s no third. Put him left and he shaves himself, so his rule forbids it. Put him right and he doesn’t, so his rule requires it. The description is grammatical and there’s no such man.',
+      prompt: 'Which box does the barber belong in?',
+      explain: 'Neither box can hold the barber. If he shaves himself, his rule says he must not. If he doesn’t, his rule says he must. So the description is grammatical, but no such barber can exist.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 380, x: 56, boxes: 1, sorted: 1, barber: 1,
-    text: 'That’s the whole result, and the result bites harder than you would think. A sentence can be built perfectly and still describe nothing that could exist.',
+    text: 'The barber shaves himself if and only if he doesn’t, which is a contradiction. A description can be well formed and still describe nothing that could exist.',
     dur: 4.6,
   },
   {
     p: 13, x: 56, boxes: 1, sorted: 1, barber: 1, sets: 1,
-    text: 'Russell found the real one in 1901. Take the set of all sets that do not contain themselves.',
+    text: 'In 1901, Bertrand Russell found a contradiction of the same form in the theory of sets. Consider the set of all sets that do not contain themselves.',
     dur: 3.8,
   },
   {
     p: 13, x: 56, boxes: 1, sorted: 1, barber: 1, sets: 1,
-    text: 'Ask whether it contains itself.',
+    text: 'If the set contains itself, it violates its own condition for membership. If the set doesn’t contain itself, it meets the condition and must be included.',
     dur: 1.8,
   },
   {
@@ -86,35 +86,35 @@ export const BEATS: Logic37Beat[] = [
   {
     p: 35, x: 128, boxes: 1, barber: 1, sets: 1,
     interact: {
-      prompt: 'Why is the set paradox worse than the barber?',
+      prompt: 'Why was Russell’s paradox more damaging than the barber paradox?',
       sort: {
-        chip: 'Russell\'s set',
+        chip: 'Russell’s paradox',
         bins: [
-          { id: 'hard', label: 'harder to picture', reads: 'sets are simply harder to think about than barbers' },
-          { id: 'words', label: 'a trick of language', reads: 'just a trick of language' },
-          { id: 'axioms', label: 'the rules required it', reads: 'the rules said this set must exist', correct: true },
+          { id: 'hard', label: 'harder to picture', reads: 'sets are harder to think about than barbers' },
+          { id: 'words', label: 'merely verbal', reads: 'a confusion in language, not in logic' },
+          { id: 'axioms', label: 'axioms guaranteed it', reads: 'Frege’s axioms guaranteed that this set exists', correct: true },
         ],
       },
-      explain: 'The rules required it. With the barber you say there’s no such man and walk away. The axioms of the day said any condition you can state determines a set. So this one was a legal object, sitting inside the foundation of arithmetic.',
+      explain: 'Axioms guaranteed it. The barber case shows only that no such barber exists. But Frege’s axioms said that any condition you can state defines a set. So his axioms required a set that can’t exist, at the base of arithmetic.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 379, x: 128, boxes: 1, sets: 1,
-    text: 'Frege had a volume at the printer. He added an appendix saying the ground had gone, and published it anyway.',
+    text: 'In 1902, the second volume of Frege’s Basic Laws of Arithmetic was in press. Frege added an appendix acknowledging the contradiction, and the volume appeared in 1903.',
     dur: 4.4,
   },
   {
     summary: {
       title: 'When a Description Describes Nothing',
       points: [
-        'The rule leaves the barber no box',
+        'Applied to himself, the barber’s rule contradicts itself',
         'So no such barber can exist',
-        'Well formed is not the same as possible',
-        'The set version made that move legal, and cost a foundation',
+        'A well-formed description may describe something impossible',
+        'Russell’s paradox followed from the axioms of Frege’s system',
       ],
-      closing: 'Modern set theory is mostly machinery for stopping you writing that sentence. Every axiom is a door held shut against a barber.',
+      closing: 'Modern set theories limit which conditions define a set, so Russell’s set can’t exist.',
     },
     dur: 3.2,
   },

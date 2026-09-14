@@ -23,29 +23,29 @@ export const BEATS: Meta31Beat[] = [
   {
     g: 440, holes: 0, ticks: 0, chips: 0,
     dur: 3.8,
-    text: 'One slab of cheese. Solid all the way through, and there’s nothing here to argue about yet.',
+    text: 'Consider a solid slab of cheese. Everything in it is a material thing, cheese all the way through.',
   },
   {
     g: 159, holes: 1, ticks: 0, chips: 0,
     dur: 1.8,
-    text: 'Now three holes. Nothing was added to the cheese.',
+    text: 'Suppose three holes are made in it. Nothing was added to the cheese, and some was removed.',
     cite: 'Three more things',
   },
   {
     g: 159, holes: 1, ticks: 0, chips: 0,
     dur: 2.6,
-    text: 'Something was taken away. And yet there are three more things here than before.',
+    text: 'Yet a count now finds three more things than before, the three holes.',
   },
   {
     g: 456, holes: 1, ticks: 3, chips: 0,
     dur: 3,
-    text: 'You can count holes. You can measure one, call it deeper than the next, and be right.',
-    cite: 'One, two, three',
+    text: 'Holes can be counted and measured, and one hole can be deeper than another.',
+    cite: 'Counting holes',
   },
   {
     g: 456, holes: 1, ticks: 3, chips: 0,
     dur: 1.8,
-    text: 'Everything you do with objects, you do with holes.',
+    text: 'Talk about holes therefore seems to commit you to the existence of holes.',
   },
   {
     g: 129, holes: 1, ticks: 3, chips: 0,
@@ -63,7 +63,7 @@ export const BEATS: Meta31Beat[] = [
   {
     g: 457, holes: 1, ticks: 3, chips: 1,
     dur: 2.3,
-    text: 'So what did you count? There are only three things it could be.',
+    text: 'What, then, was counted? There are three candidates.',
     cite: 'Three candidates',
   },
   {
@@ -75,8 +75,8 @@ export const BEATS: Meta31Beat[] = [
     g: 466, holes: 1, ticks: 3, chips: 1, pick: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Tap whatever it is you counted when you counted three.',
-      explain: 'The rim. That’s Argle’s answer, from a famous 1970 dialogue. A hole just is its rim, a bit of cheese bent into a ring. Count the rings and you’ve counted the holes, and nothing new had to exist.',
+      prompt: 'If only material things exist, what was counted when three holes were counted?',
+      explain: 'The rim. In a 1970 dialogue by David and Stephanie Lewis, the character Argle says a hole is its lining. The lining is the cheese around the gap, so counting linings counts holes. Only cheese need exist.',
       xp: 5,
     },
   },
@@ -84,31 +84,31 @@ export const BEATS: Meta31Beat[] = [
     g: 173, holes: 1, ticks: 3, chips: 1,
     dur: 1.0,
     interact: {
-      prompt: 'How often can rewording make a hole go away?',
+      prompt: 'How often can a sentence about holes be reworded to mention only the cheese?',
       drag: {
         lo: 'ALWAYS',
         hi: 'NEVER',
         start: 0,
         zones: [
-          { id: 'easy', upto: 0.3, reads: 'rewording always works' },
-          { id: 'mostly', upto: 0.74, reads: 'rewording works until you count them', correct: true },
-          { id: 'never', upto: 1, reads: 'rewording never works' },
+          { id: 'easy', upto: 0.3, reads: 'every such sentence can be reworded' },
+          { id: 'mostly', upto: 0.74, reads: 'most can, except sentences that count holes', correct: true },
+          { id: 'never', upto: 1, reads: 'no such sentence can be reworded' },
         ],
       },
-      explain: 'Usually — and the failures are why this is still argued about. Rewording is a fair move, but it has to work every time. Try it on “there are as many holes as pegs” and it breaks. Counting is the one thing “holey” can’t do.',
+      explain: 'Most sentences about holes can be reworded, but not sentences that count holes. “The cheese has a hole” becomes “the cheese is perforated”. But “there are as many holes as crackers” resists rewording, which is why Argle turns to linings.',
       xp: 5,
     },
   },
   {
     summary: {
-      title: 'Counting Nothing',
+      title: 'The Metaphysics of Holes',
       points: [
-        'We count absences all the time and never notice',
+        'Ordinary speech counts and measures absences such as holes',
         'A hole can be counted, measured and compared',
-        'One tidy answer: a hole is its rim, which is real cheese',
-        'Rewording an absence away is harder than it sounds',
+        'Argle identifies a hole with its lining of cheese',
+        'Paraphrase fails for sentences that count holes',
       ],
-      closing: 'Metaphysics is mostly one move. Take an ordinary sentence seriously, then ask what would have to exist for the sentence to be true.',
+      closing: 'W.V.O. Quine held that a theory is committed to whatever must exist for its sentences to be true.',
     },
     dur: 3.0,
   },

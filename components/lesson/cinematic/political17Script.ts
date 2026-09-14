@@ -28,19 +28,19 @@ export const BEATS: Pol17Beat[] = [
   {
     g: 379, well: 1, turns: 4,
     dur: 4.6,
-    text: 'A village digs a well together and keeps a rota. Everyone hauls, everyone drinks, and nobody signed anything.',
+    text: 'Consider a village that digs a well together and keeps a rota for hauling water. Everyone takes a turn and everyone drinks, but no one signed an agreement.',
   },
   {
     g: 415, well: 1, turns: 4, blank: 1, taken: 1,
     dur: 4.8,
-    text: 'A newcomer drinks from it daily. His row on the rota is empty, and when his turn comes he points at that.',
-    cite: 'I never signed up',
+    text: 'A newcomer drinks from the well daily, but his row on the rota is empty. When his turn comes, he says he never agreed to haul.',
+    cite: 'No agreement made',
   },
   {
     g: 432, well: 1, turns: 4, blank: 1, taken: 1,
     dur: 4.8,
-    text: 'The newcomer is right about the signature. Almost nobody has ever agreed to the state they live under either, which is the awkward part.',
-    cite: 'And he is right',
+    text: 'The newcomer is right that he never consented. Almost no citizen has ever given express consent to the state either, which is a problem for consent theories.',
+    cite: 'The problem for consent',
   },
   {
     g: 456, well: 1, turns: 4, blank: 1, taken: 1,
@@ -58,15 +58,15 @@ export const BEATS: Pol17Beat[] = [
   {
     g: 433, well: 1, turns: 4, blank: 1, taken: 1,
     dur: 5.0,
-    text: 'So fair play stops asking about signatures. If you take what a shared effort produces, you owe your share of producing it.',
+    text: 'So fair play stops asking about signatures. Hart argued that people who benefit from a shared scheme owe a share of the burdens.',
     cite: 'Fair play',
   },
   {
     g: 165, well: 1, turns: 4, blank: 1, taken: 1, pick: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Tap what creates the newcomer\'s duty.',
-      explain: 'The water he drank. Fair play needs no signature and no vote. It needs him to have taken the benefit of something other people are carrying. That’s why the empty row is damning rather than an excuse: he’s on the rota already, by drinking.',
+      prompt: 'On the principle of fair play, what creates the newcomer’s duty to haul?',
+      explain: 'The water he drank. Fair play requires no signature and no vote, only that he accepted a benefit others work to provide. On this view, his empty row is a failure of duty, not an excuse.',
       xp: 5,
     },
   },
@@ -74,29 +74,29 @@ export const BEATS: Pol17Beat[] = [
     g: 442, well: 1, turns: 4, blank: 1, taken: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Nobody signed anything. Where could the obligation come from?',
+      prompt: 'If no one consented, what could ground an obligation to take a turn?',
       sort: {
-        chip: 'your obligation',
+        chip: 'the duty to haul',
         bins: [
-          { id: 'sign', label: 'a signature', reads: 'nowhere, nobody ever signed' },
-          { id: 'quiet', label: 'staying put', reads: 'from consenting quietly, by staying put' },
-          { id: 'benefit', label: 'taking the benefit', reads: 'from taking the benefit, signature or not', correct: true },
+          { id: 'sign', label: 'a signature', reads: 'no duty exists without a signature' },
+          { id: 'quiet', label: 'staying put', reads: 'tacit consent, given by staying put' },
+          { id: 'benefit', label: 'taking the benefit', reads: 'accepting the benefit of the scheme', correct: true },
         ],
       },
-      explain: 'Taking the benefit. Answering “a signature” assumes consent is the only place a duty could come from. Fair play drops that assumption. Hume had already shown consent couldn’t carry the weight, because nobody was ever offered a genuine choice to refuse.',
+      explain: 'Taking the benefit. Demanding a signature assumes consent is the only source of duty, and fair play rejects that assumption. Hume argued that staying put isn’t consent, since most people have no free choice to leave.',
       xp: 5,
     },
   },
   {
     summary: {
-      title: 'Why Obey',
+      title: 'The Principle of Fair Play',
       points: [
         'Consent theories need an agreement almost nobody made',
         'Fair play grounds the duty in benefits you accept',
-        'Taking the water puts you on the rota',
+        'Accepting the benefit creates a duty to contribute',
         'Free-riding is enjoying cooperation while refusing to cooperate',
       ],
-      closing: 'You never signed anything. You’ve been drinking from it your whole life.',
+      closing: 'On the fair-play view, accepting the benefits of a society can oblige you to share its burdens.',
     },
     dur: 3.0,
   },

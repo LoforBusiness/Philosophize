@@ -33,36 +33,36 @@ export interface Epistemology27Beat extends BaseBeat {
 export const BEATS: Epistemology27Beat[] = [
   {
     p: 423, x: 28, said: 1,
-    text: 'You can wrong somebody without telling a single lie. Refusing to believe a speaker is enough.',
+    text: 'You can wrong somebody without telling a single lie. Doubting a speaker because of prejudice can be enough.',
     dur: 4.6,
   },
   {
     p: 160, x: 28, said: 1, gauge: 1, credit: 1,
-    text: 'A patient describes her symptoms accurately. The report is true and well put.',
+    text: 'Suppose a patient gives a doctor an accurate account of her symptoms.',
     dur: 4.6,
   },
   {
     p: 436, x: 28, said: 1, gauge: 1, credit: 0.35,
-    text: 'The doctor hears anxiety, because the patient is young. Her word is worth less on arrival.',
+    text: 'The doctor treats the report as anxiety, because the patient is young. Her word receives less credit than it’s owed.',
     dur: 4.8,
   },
   {
     p: 264, x: 28, said: 1, gauge: 1, credit: 0.35,
-    text: 'Miranda Fricker gave the wrong a name: testimonial injustice. A bias marks down what a speaker says.',
+    text: 'Miranda Fricker calls this testimonial injustice. Prejudice makes a hearer give a speaker too little credibility.',
     dur: 5.0,
   },
   {
     p: 163, x: 28, said: 1, gauge: 1, credit: 0.35, plates: 1, live: 1,
     interact: {
-      prompt: 'A juror believes a witness less for his accent. Tap the wrong.',
-      explain: 'Testimonial. The witness can speak and be understood. Prejudice lowers how far the juror believes him. That deflation is the signature, and it’s the whole of the harm.',
+      prompt: 'A juror gives a witness less credit because of his accent. Which injustice is this?',
+      explain: 'Testimonial. The witness can say what he means and be understood. Prejudice about his accent makes the juror give his word less credit than it deserves.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 451, x: 88, said: 1, gauge: 1, credit: 0.35,
-    text: 'There’s a second kind, and it lands earlier. Sometimes a group has no words for what happened.',
+    text: 'Fricker names a second wrong, hermeneutical injustice. Here a group lacks the shared concepts to make sense of its experience.',
     dur: 5.0,
   },
   {
@@ -79,22 +79,22 @@ export const BEATS: Epistemology27Beat[] = [
   },
   {
     p: 448, x: 88, said: 1, gauge: 1, credit: 0.35,
-    text: 'Before anybody said the words “sexual harassment”, victims could feel the wrong and not name it.',
+    text: 'Victims of sexual harassment had no shared concept for the wrong until the term was coined in the 1970s.',
     dur: 5.0,
   },
   {
     p: 168, x: 88, said: 1, gauge: 1, credit: 0.35,
     interact: {
-      prompt: 'A harm nobody has a word for. Which kind is it?',
+      prompt: 'Which injustice leaves a harm with no shared concept to name it?',
       sort: {
-        chip: 'no word for it yet',
+        chip: 'a harm with no name',
         bins: [
-          { id: 'test', label: 'testimonial', reads: 'the words arrive and are marked down' },
-          { id: 'herm', label: 'hermeneutical', reads: 'there were never any words to send', correct: true },
-          { id: 'none', label: 'no injustice', reads: 'a gap in the language wrongs nobody' },
+          { id: 'test', label: 'testimonial', reads: 'a speaker’s word gets too little credit' },
+          { id: 'herm', label: 'missing concepts', reads: 'the concepts to express it are missing', correct: true },
+          { id: 'none', label: 'no injustice', reads: 'a gap in shared concepts wrongs nobody' },
         ],
       },
-      explain: 'Hermeneutical. Nothing has been deflated, because nothing got as far as being said. The plate is empty, not the gauge. Fricker set out to refuse the claim that a gap in the shared language is harmless. Somebody carries the cost, and it’s never the majority.',
+      explain: 'Missing concepts: Fricker calls it hermeneutical injustice. Nobody’s word was doubted. There were no words yet for what happened. The gap hurts groups kept out of shaping shared words.',
       xp: 5,
     },
     dur: 1.0,
@@ -105,9 +105,9 @@ export const BEATS: Epistemology27Beat[] = [
       title: 'Wronged as a Knower',
       points: [
         'You can wrong somebody in their capacity as a knower',
-        'Testimonial injustice deflates what a speaker is owed',
-        'Hermeneutical injustice removes the words to say it',
-        'Fricker put ethics inside the theory of knowledge',
+        'Testimonial injustice deflates a speaker’s credibility through prejudice',
+        'Hermeneutical injustice leaves an experience without shared concepts',
+        'Fricker brought ethics into the theory of knowledge',
       ],
       closing: 'Whom you believe, and how far, is not only a question about truth. It’s also a question about justice.',
     },

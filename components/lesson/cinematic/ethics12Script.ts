@@ -24,12 +24,12 @@ export interface Ethics12Beat extends BaseBeat {
 export const BEATS: Ethics12Beat[] = [
   {
     p: 462, x: 56, n: 1, word: 0,
-    text: 'Before you act, ask one question — what if everyone did this? Kant thought that single test could sort right from wrong, with no arithmetic at all.',
+    text: 'Kant proposed a single test for whether an action is permissible. Could you consistently will that everyone act on the same rule?',
     dur: 3.8,
   },
   {
     p: 418, x: 124, n: 1, word: 0,
-    text: 'You need money, so you say “I promise to repay”, knowing full well you can’t. That private reason for acting is what Kant calls your maxim.',
+    text: 'Suppose you need money and promise to repay a loan, knowing you can’t. Kant calls the principle behind such an act its maxim.',
     cite: 'The maxim',
     dur: 4.8,
   },
@@ -41,7 +41,7 @@ export const BEATS: Ethics12Beat[] = [
   },
   {
     p: 26, x: 124, n: 3, word: 0.55,
-    text: 'So hand the rule to the whole world and run it.',
+    text: 'So suppose everyone adopted the maxim of false promising at once.',
     dur: 1.8,
   },
   {
@@ -59,28 +59,28 @@ export const BEATS: Ethics12Beat[] = [
   },
   {
     p: 465, x: 124, n: 12, word: 1,
-    text: 'Now everyone breaks a promise the moment it suits them. Nobody believes one any more, so the word goes blank on every card.',
-    cite: 'What the law does',
+    text: 'If everyone promised falsely when in need, no one would believe a promise. Promises would become empty words.',
+    cite: 'The maxim universalised',
     dur: 4,
   },
   {
     p: 465, x: 124, n: 12, word: 1,
-    text: 'There’s no promising left to break.',
+    text: 'The maxim therefore contradicts itself. As a universal law, it would destroy the practice of promising it relies on.',
     dur: 1.8,
   },
   {
     p: 457, x: 124, n: 12, word: 1,
     interact: {
-      prompt: 'Which principle would let you break the promise?',
+      prompt: 'Which of these principles could permit breaking the promise?',
       sort: {
         chip: 'breaking a promise',
         bins: [
           { id: 'means', label: 'never a means', reads: 'never use another person merely as a means' },
-          { id: 'law', label: 'a universal rule', reads: 'act only on a rule everyone could follow' },
-          { id: 'happy', label: 'more people happy', reads: 'break it when more people end up happy', correct: true },
+          { id: 'law', label: 'a universal rule', reads: 'act only on a maxim you could universalise' },
+          { id: 'happy', label: 'more people happy', reads: 'break it if that makes more people happy', correct: true },
         ],
       },
-      explain: 'More people happy, and it sounds like plain decency, which is what hides it. That’s Mill counting, not Kant testing. Kant never adds the happiness up. He asks one thing: does the rule survive being handed to everybody at once?',
+      explain: 'More people happy. Only a rule that looks at outcomes could allow the broken promise. Kant’s two tests both forbid it. The maxim can’t be a universal law, and it treats the lender merely as a means.',
       xp: 5,
     },
     dur: 1.0,
@@ -88,8 +88,8 @@ export const BEATS: Ethics12Beat[] = [
   {
     p: 30, x: 124, n: 12, word: 1, pick: 1,
     interact: {
-      prompt: 'Three maxims go into the press. Tap the one that survives being made a law everyone follows.',
-      explain: 'The trap: each loser sounds like a small private exception. Universalised, they cancel themselves. If everyone lied when it suited them, nobody would believe anything, so there would be nothing left to gain. Only keeping promises still works when everyone does it.',
+      prompt: 'Which of these three maxims could be willed as a universal law?',
+      explain: 'Keep the promises you make. If everyone kept promises, promising would still work. But if everyone broke promises or lied when it suited them, no one would believe a promise or a statement. So those two maxims can’t be universal laws.',
       xp: 5,
     },
     dur: 1.0,
@@ -97,14 +97,14 @@ export const BEATS: Ethics12Beat[] = [
   {
     p: 47, x: 124, n: 12, word: 1, pick: 1,
     summary: {
-      title: 'One Rule For All Rules',
+      title: 'The Categorical Imperative',
       points: [
-        'Your maxim is your private reason for acting',
-        'Test it as a law everyone must follow',
-        'A maxim that self-destructs universalised is forbidden',
-        'Kant judges the rule, never the outcome',
+        'A maxim is the principle behind an action',
+        'Ask whether it could hold as a universal law',
+        'A maxim that contradicts itself when universalised is forbidden',
+        'The test examines the maxim, not the consequences',
       ],
-      closing: 'Kant gives the test a second form as well: never use a person merely as a means.',
+      closing: 'Kant also gives a second formulation: treat humanity never merely as a means, but always as an end.',
     },
     dur: 3.0,
   },

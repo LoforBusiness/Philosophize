@@ -33,36 +33,36 @@ export interface Aesthetics29Beat extends BaseBeat {
 export const BEATS: Aesthetics29Beat[] = [
   {
     p: 431, x: 24, trays: 1, book: 1,
-    text: 'It never happened. A war that was never fought, soldiers who never lived, and you learned something.',
+    text: 'Suppose you read a novel about a war that was never fought, with soldiers who never lived. You may still feel you learned something.',
     dur: 5.0,
   },
   {
     p: 173, x: 24, trays: 1, book: 1, gives: 0.45,
-    text: 'Fiction is false on its face. So the puzzle is how anything true gets out of it.',
+    text: 'A work of fiction describes events that didn’t happen. How, then, could it teach anything true?',
     dur: 4.8,
   },
   {
     p: 449, x: 24, trays: 1, book: 1, gives: 0.1,
-    text: 'Plato wanted the poets exiled. He argued that art copies a copy and stirs feeling over reason.',
+    text: 'Plato would banish poets from his ideal city. Poetry, he argued, imitates appearances and stirs feeling against reason.',
     dur: 5.0,
   },
   {
     p: 266, x: 24, trays: 1, book: 1, gives: 0.45,
-    text: 'A textbook tells you that grief exists. A novel puts you inside it for four hundred pages.',
+    text: 'A psychology textbook can tell you that grief exists. A novel can show what grief is like from the inside.',
     dur: 5.0,
   },
   {
     p: 163, x: 24, trays: 1, book: 1, gives: 0.45, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what a war novel can hand a reader.',
-      explain: 'A deeper grasp. The soldiers are invented, so no new fact changed hands. What changed is knowing courage and fear from inside, which a list of dates cannot deliver.',
+      prompt: 'What can a novel about an invented war give its reader?',
+      explain: 'A deeper grasp. The soldiers are invented, so the novel supplies no new historical facts. It can, however, convey what courage and fear are like from the inside, which a list of dates can’t.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 460, x: 80, trays: 1, book: 1, gives: 0.45,
-    text: 'A reader finishes a war novel and says she understands those soldiers now.',
+    text: 'Suppose a reader finishes a war novel and says she now understands what soldiers endure.',
     dur: 4.6,
   },
   {
@@ -80,24 +80,24 @@ export const BEATS: Aesthetics29Beat[] = [
   },
   {
     p: 456, x: 80, trays: 1, book: 1, gives: 0.45,
-    text: 'A sceptic answers that she learned nothing. The soldiers are invented, so the lesson was her own feeling.',
+    text: 'Jerome Stolnitz argued that fiction’s truths are trivial and unconfirmed. Its soldiers are invented, so nothing in the novel confirms what real soldiers feel.',
     dur: 5.0,
   },
   {
     p: 174, x: 80, trays: 1, book: 1,
     interact: {
-      prompt: 'How much does a novel hand over?',
+      prompt: 'How much knowledge can a novel about invented events provide?',
       drag: {
         lo: 'NOTHING',
         hi: 'PLAIN FACTS',
         start: 0.95,
         zones: [
-          { id: 'lie', upto: 0.25, reads: 'a pleasant lie, and nothing more' },
+          { id: 'lie', upto: 0.25, reads: 'a pleasing falsehood that teaches nothing' },
           { id: 'grasp', upto: 0.7, reads: 'a deeper grasp rather than new facts', correct: true },
-          { id: 'text', upto: 1, reads: 'a textbook with invented characters' },
+          { id: 'text', upto: 1, reads: 'factual knowledge, as a textbook gives' },
         ],
       },
-      explain: 'No new facts, but a deeper grasp. Plato called the poet a maker of images, twice removed from the truth. The reply is that a false story can still show a real thing, which is understanding rather than information.',
+      explain: 'A deeper grasp rather than new facts. An invented story gives no historical facts, yet it can show what people of a kind would do. Aristotle held that poetry expresses such universals.',
       xp: 5,
     },
     dur: 1.0,
@@ -105,14 +105,14 @@ export const BEATS: Aesthetics29Beat[] = [
   {
     p: 310, x: 80, trays: 1, book: 1, gives: 0.45,
     summary: {
-      title: 'Truth in Make-Believe',
+      title: 'Fiction and Knowledge',
       points: [
         'Fiction is literally false and still seems to teach',
         'Plato: art imitates, misleads and inflames feeling',
         'Aristotle: poetry shows the probable and the universal',
         'Fiction may give understanding rather than facts',
       ],
-      closing: 'The best fiction lies about everything except the things that matter.',
+      closing: 'Fiction’s events are invented, but its insight into human life may still be true.',
     },
     dur: 5.0,
   },

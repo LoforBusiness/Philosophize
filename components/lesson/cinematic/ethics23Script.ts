@@ -22,23 +22,23 @@ export interface Ethics23Beat extends BaseBeat {
 export const BEATS: Ethics23Beat[] = [
   {
     p: 462, x: 70,
-    text: 'You pass a shallow pond and a small child is drowning in it. Wading in ruins an expensive pair of shoes.',
+    text: 'Suppose you pass a shallow pond where a small child is drowning. Wading in to save the child would ruin an expensive pair of shoes.',
     dur: 3.5,
   },
   {
     p: 462, x: 70,
-    text: 'Nobody thinks this is a hard question.',
+    text: 'Peter Singer holds that you ought to wade in. The ruined shoes are insignificant beside the death of a child.',
     dur: 1.8,
   },
   {
     p: 442, x: 168, gauges: 1, near: 1,
-    text: 'So the first gauge goes straight to the top, and it doesn’t even feel like a moral decision. It feels like noticing.',
+    text: 'Your obligation to the child at your feet is therefore at its fullest. The verdict seems to need no argument at all.',
     cite: 'The child at your feet',
     dur: 4.2,
   },
   {
     p: 383, x: 124, gauges: 1, near: 1,
-    text: 'Now the second child, dying of something preventable, eight thousand miles off. The same money, the same certainty, the same small cost to you.',
+    text: 'Now suppose a second child, eight thousand miles away, is dying of a preventable disease. You could save this child with the same certainty, at the same small cost.',
     cite: 'The child far away',
     dur: 4.6,
   },
@@ -57,20 +57,20 @@ export const BEATS: Ethics23Beat[] = [
   },
   {
     p: 167, x: 168, gauges: 1, near: 1, far: 1,
-    text: 'Singer asks what could hold the second gauge down. Not the cost, which is the same.',
-    cite: 'Nothing holds it down',
+    text: 'Singer asks what could justify a weaker obligation to the distant child. It can’t be the cost, because the cost is the same.',
+    cite: 'No morally relevant difference',
     dur: 2.2,
   },
   {
     p: 167, x: 168, gauges: 1, near: 1, far: 1,
-    text: 'Not your power to help, which is the same. Only how far away it is, and distance is not a moral property.',
+    text: 'Nor can it be your ability to help, which is also equal. For Singer, the only difference left is distance, and distance is not a moral property.',
     dur: 3.2,
   },
   {
     p: 6, x: 124, gauges: 1, near: 1, far: 1, pick: 1,
     interact: {
-      prompt: 'Between the two children, tap the only thing that actually differs.',
-      explain: 'Distance, and nothing else — same cost, same certainty, same power to act. Singer\'s challenge is to name a reason distance should matter morally, and the honest answer is that nobody has one.',
+      prompt: 'What is the only difference between the near child and the far child?',
+      explain: 'Distance. The cost, the certainty and your power to act are the same in both cases. Singer challenges anyone to show why distance alone should make a moral difference.',
       xp: 5,
     },
     dur: 1.0,
@@ -78,32 +78,32 @@ export const BEATS: Ethics23Beat[] = [
   {
     p: 165, x: 124, gauges: 1, near: 1, far: 1,
     interact: {
-      prompt: 'Draw how much of the duty stays yours as the crowd grows.',
+      prompt: 'Which curve shows how much of the duty stays yours as more others are able to help?',
       plot: {
         axis: 'HOW MUCH IS YOURS',
         cols: ['YOU ALONE', '10 OTHERS', '1000', 'A MILLION'],
         start: [0.5, 0.5, 0.5, 0.5],
         shapes: [
-          { id: 'flat', profile: [0.95, 0.93, 0.92, 0.9], reads: 'it stays yours, whoever else is standing there', correct: true },
-          { id: 'fall', profile: [0.95, 0.5, 0.1, 0.02], reads: 'it thins out as the crowd grows' },
-          { id: 'share', profile: [0.95, 0.6, 0.35, 0.2], reads: 'it halves, and then halves again' },
+          { id: 'flat', profile: [0.95, 0.93, 0.92, 0.9], reads: 'it stays yours, however many could help', correct: true },
+          { id: 'fall', profile: [0.95, 0.5, 0.1, 0.02], reads: 'it falls to nearly nothing in a crowd' },
+          { id: 'share', profile: [0.95, 0.6, 0.35, 0.2], reads: 'it shrinks steadily but never vanishes' },
         ],
       },
-      explain: 'Flat. The sloping answer has a name — diffusion of responsibility — and the pond tests it. You wouldn’t stroll past a drowning child because a crowd was also watching. Others being able to act has never once cancelled your being able to.',
+      explain: 'The duty stays yours, however many could help. The falling curves express diffusion of responsibility, the tendency to feel less obliged when others could act. Singer replies that you aren’t less obliged to save the child when others stand by doing nothing.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Distance Is Not A Reason',
+      title: 'Distance and the Duty to Help',
       points: [
-        'The pond shows we must help at small cost',
+        'The pond: you ought to rescue when the cost is small',
         'Singer argues distance is morally irrelevant',
-        'Effective altruism asks: most good per pound',
-        'Critics worry the demand swallows your life',
+        'Effective altruism asks how to do the most good',
+        'Critics object that the principle is too demanding',
       ],
-      closing: 'The uncomfortable part is not how clever the argument is. The uncomfortable part is that nobody has found the flaw.',
+      closing: 'If Singer is right, giving to famine relief is a moral duty, not charity.',
     },
     dur: 3.0,
   },

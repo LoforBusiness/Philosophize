@@ -21,23 +21,23 @@ export const BEATS: Pol14Beat[] = [
   {
     g: 384, rows: 1,
     dur: 4.0,
-    text: 'Start from any distribution you’re willing to call just, dead equal if you like. Nozick doesn’t mind, and that’s the point of letting you choose.',
+    text: 'Robert Nozick asks you to start from any distribution you consider just, even an equal one. Letting you choose makes the argument apply to every pattern.',
   },
   {
     g: 2, rows: 2,
     dur: 3.6,
-    text: 'Now a basketball star offers to play, and asks a dollar from anyone who wants to watch. A million people happily pay.',
-    cite: 'A dollar each',
+    text: 'Suppose a basketball star agrees to play if twenty-five cents of each ticket goes to him. In a season, a million people pay to watch.',
+    cite: 'Twenty-five cents a ticket',
   },
   {
     g: 2, rows: 2,
     dur: 1.8,
-    text: 'Every single transfer is free.',
+    text: 'Every single transfer is free. Each spectator chooses to pay, and the star chooses to play.',
   },
   {
     g: 447, rows: 3,
     dur: 4.4,
-    text: 'And the pattern is gone. He’s vastly rich, everyone else is a dollar poorer, and nobody was wronged at any step of it.',
+    text: 'The original pattern is now gone. The star has a quarter of a million dollars more, yet no one was wronged at any step.',
     cite: 'The pattern is gone',
   },
   {
@@ -56,15 +56,15 @@ export const BEATS: Pol14Beat[] = [
   {
     g: 383, rows: 3,
     dur: 4.8,
-    text: 'So if you want the top row back, you have to reach into this picture and stop something. Nozick\'s question is only which row you were planning to reach into.',
-    cite: 'Reach in and stop something',
+    text: 'To restore the original pattern, something in this sequence must be stopped. Nozick asks which stage you’d stop.',
+    cite: 'Something must be stopped',
   },
   {
     g: 461, rows: 3, pick: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Tap what holding the pattern in place would mean interrupting.',
-      explain: 'The trades. Nothing else is available to stop. You can’t object to a start you chose, and the result is only where the trades led. Holding any pattern means preventing the middle row, over and over.',
+      prompt: 'To keep the original pattern in place, which stage would have to be interrupted?',
+      explain: 'The trades. The start was a distribution you accepted as just, and the result only follows from the trades. So keeping any pattern means repeatedly preventing or reversing free exchanges.',
       xp: 5,
     },
   },
@@ -72,16 +72,16 @@ export const BEATS: Pol14Beat[] = [
     g: 165, rows: 3,
     dur: 1.0,
     interact: {
-      prompt: 'What is Nozick arguing with the basketball star?',
+      prompt: 'Which conclusion does the basketball case support?',
       sort: {
-        chip: 'Nozick\'s point',
+        chip: 'the basketball case',
         bins: [
-          { id: 'pay', label: 'they are overpaid', reads: 'that sportsmen are paid far too much' },
-          { id: 'equal', label: 'only equal is fair', reads: 'that only equal shares are fair' },
-          { id: 'pattern', label: 'patterns stop exchange', reads: 'that holding any pattern means stopping free exchanges', correct: true },
+          { id: 'pay', label: 'stars are overpaid', reads: 'star athletes are paid far too much' },
+          { id: 'equal', label: 'equality is required', reads: 'only equal shares are fair' },
+          { id: 'pattern', label: 'patterns stop exchange', reads: 'keeping any pattern requires stopping free exchanges', correct: true },
         ],
       },
-      explain: 'Patterns stop exchange. The argument bites on ANY pattern, equal or not, and says nothing whatever about what a sportsman deserves. Rawls replies that the target was never one distribution. It’s the basic structure, the rules the exchanges run inside.',
+      explain: 'Patterns stop exchange. The case applies to any pattern, equal or not, and makes no claim about what athletes deserve. Rawls replies that justice concerns the basic structure, the rules within which exchanges take place.',
       xp: 5,
     },
   },
@@ -89,12 +89,12 @@ export const BEATS: Pol14Beat[] = [
     summary: {
       title: 'Pattern Against History',
       points: [
-        'Rawls judges the pattern; Nozick judges the history',
+        'Rawls judges the pattern, Nozick the history',
         'Free transfers from a just start break any pattern',
-        'Holding a pattern means interfering, and then again',
-        'Rawls answers at the level of the rules, not the snapshot',
+        'Keeping a pattern requires repeated interference',
+        'Rawls answers at the level of rules, not single distributions',
       ],
-      closing: 'Don’t just ask whether a distribution is fair. Ask what you’d have to keep doing to keep it that way.',
+      closing: 'Judging a distribution involves asking what would be required to maintain it, as well as whether it’s fair.',
     },
     dur: 3.0,
   },

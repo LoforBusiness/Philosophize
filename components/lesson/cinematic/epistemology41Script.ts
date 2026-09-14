@@ -34,36 +34,36 @@ export interface Epistemology41Beat extends BaseBeat {
 export const BEATS: Epistemology41Beat[] = [
   {
     p: 423, x: 28, oar: 1, lifted: 1,
-    text: 'Hold a straight oar up. Nothing to report.',
+    text: 'Consider a straight oar held up in the air. Here appearance and reality agree: it looks straight and is straight.',
     dur: 3.4,
   },
   {
     p: 160, x: 28, water: 1, oar: 1,
-    text: 'Put half the oar in water and the shaft kinks at the surface.',
+    text: 'Now put half of the oar in water. Because light refracts at the surface, the oar looks bent there.',
     dur: 3.8,
   },
   {
     p: 434, x: 28, water: 1, oar: 1,
-    text: 'The argument is three steps. What you see is bent, and the oar is not.',
+    text: 'The argument from illusion takes three steps. The oar looks bent, but the oar itself is straight.',
     dur: 4.4,
   },
   {
     p: 258, x: 28, water: 1, oar: 1,
-    text: 'So what you see is not the oar. Something else is standing in front of it.',
+    text: 'Next, the argument infers that a bent thing is seen. The bent thing can’t be the straight oar, so you see something other than the oar.',
     dur: 4.6,
   },
   {
     p: 167, x: 28, water: 1, oar: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap the claim a direct realist refuses.',
-      explain: 'The bottom plate. Nobody disputes the look, and nobody disputes the oar. The argument would be pointless if either were in doubt. What gets refused is the slide from “something looks bent” to “a bent something is here”.',
+      prompt: 'Which step does a direct realist, who holds that you see the oar itself, reject?',
+      explain: 'A bent thing is seen. A direct realist accepts that the oar looks bent and that it’s straight. What gets rejected is the inference from “something looks bent” to “a bent thing is seen”. Without that step, nothing but the oar is seen.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 449, x: 88, water: 1, oar: 1,
-    text: 'Bertrand Russell accepted the conclusion and named the thing you see a sense-datum.',
+    text: 'Bertrand Russell accepted the conclusion. He held that you directly see a sense-datum, a patch of colour and shape, and only infer the oar.',
     dur: 4.8,
   },
   {
@@ -81,21 +81,21 @@ export const BEATS: Epistemology41Beat[] = [
   },
   {
     p: 445, x: 88, water: 1, oar: 1,
-    text: 'J. L. Austin answered that looking bent is one of the ways a straight oar looks.',
+    text: 'J. L. Austin rejected the inference. Looking bent in water, he argued, is one of the ways a straight oar looks.',
     dur: 4.6,
   },
   {
     p: 168, x: 88, water: 1, oar: 1,
     interact: {
-      prompt: 'What are you aware of at the waterline?',
+      prompt: 'When the half-submerged oar looks bent, what are you directly aware of?',
       poll: {
         options: [
           { id: 'oar', reads: 'the oar, which merely looks bent from here', holders: ['J. L. Austin'], correct: true },
-          { id: 'datum', reads: 'a bent sense-datum standing in for it', holders: ['Bertrand Russell', 'A. J. Ayer'] },
-          { id: 'mind', reads: 'a state of your own mind, and nothing outside', holders: ['George Berkeley'] },
+          { id: 'datum', reads: 'a bent sense-datum, not the oar itself', holders: ['Bertrand Russell', 'A.J. Ayer'] },
+          { id: 'mind', reads: 'a bent idea, with no matter behind it', holders: ['George Berkeley'] },
         ],
       },
-      explain: 'The oar. Things look different from different places. A kink at the waterline is one of the ways a straight oar looks. The sense-datum buys a tidy story at a high price. Once you only ever meet the stand-in, the oar itself becomes a guess.',
+      explain: 'The oar, which merely looks bent from here. On Austin’s view, a straight oar in water looks bent, and nothing extra is seen. Sense-data explain the look, but then the oar becomes only an inference that could be mistaken.',
       xp: 5,
     },
     dur: 1.0,
@@ -107,10 +107,10 @@ export const BEATS: Epistemology41Beat[] = [
       points: [
         'The oar looks bent and is not bent',
         'The argument concludes you see something else',
-        'Its weak step is the slide from looks to is',
-        'Sense-data explain the look and lose the world',
+        'Its weak step infers a bent thing from a bent look',
+        'Sense-data explain the look but make the oar an inference',
       ],
-      closing: 'Whichever way you go, notice how much theory hid inside what sounded like a plain description of a boat.',
+      closing: 'The argument from illusion shows that a plain description of what you see can carry a theory of perception.',
     },
     dur: 4.6,
   },

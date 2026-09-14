@@ -35,36 +35,36 @@ export interface Epistemology40Beat extends BaseBeat {
 export const BEATS: Epistemology40Beat[] = [
   {
     p: 423, x: 44,
-    text: 'You test an idea and the test comes back wrong. Something in there is false.',
+    text: 'Suppose a scientific theory makes a prediction, and the prediction fails. Something in the reasoning must be false.',
     dur: 4.2,
   },
   {
     p: 264, x: 44, dock: 0.5,
-    text: 'But an idea never reaches the evidence on its own.',
+    text: 'In practice, an idea never reaches the evidence on its own.',
     dur: 3.4,
   },
   {
     p: 168, x: 44, dock: 1,
-    text: 'It brings the lens, the sums, and a hundred unspoken assumptions about the setup.',
+    text: 'The test also relies on the lens, the calculations, and many unstated assumptions about the setup.',
     dur: 4.6,
   },
   {
     p: 436, x: 44, dock: 1, rope: 1, verdict: 1,
-    text: 'So the failed prediction convicts all of them at once. Pierre Duhem saw it first.',
+    text: 'So a failed prediction refutes the whole group of assumptions at once. Pierre Duhem made this point in 1906.',
     dur: 4.4,
   },
   {
     p: 163, x: 44, dock: 1, rope: 1, verdict: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what the failed test has refuted.',
-      explain: 'All of it. The bar came down across the whole dock, and that’s what the logic gives you. The theory only reached the evidence with help. Blaming the law alone is the tidy story, and saying nothing was refuted goes too far the other way.',
+      prompt: 'What does the failed prediction refute?',
+      explain: 'All of it. Logic shows only that at least one assumption in the group is false. Blaming the law alone assumes the rest are true, and saying nothing was refuted ignores the failed prediction.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 451, x: 108, dock: 1, rope: 1,
-    text: 'Uranus once moved wrongly. Le Verrier kept Newton and blamed a planet nobody had seen.',
+    text: 'In the 1840s, Uranus strayed from its predicted orbit. Urbain Le Verrier kept Newton’s law and posited an unseen planet.',
     dur: 4.8,
   },
   {
@@ -82,13 +82,13 @@ export const BEATS: Epistemology40Beat[] = [
   },
   {
     p: 382, x: 108, dock: 1, rope: 1,
-    text: 'Neptune turned up where he pointed. Then Mercury wobbled, and the same move found nothing.',
+    text: 'Neptune was found where his calculation predicted. But when the same reasoning was applied to Mercury, it found nothing.',
     dur: 4.8,
   },
   {
     p: 265, x: 108, dock: 1, rope: 1, verdict: 1,
     interact: {
-      prompt: 'Mercury kept wobbling. Which part was at fault?',
+      prompt: 'Which part of the theory does Mercury’s continued wobble actually implicate?',
       sort: {
         chip: 'Mercury\'s wobble',
         bins: [
@@ -97,7 +97,7 @@ export const BEATS: Epistemology40Beat[] = [
           { id: 'lens', label: 'the lens', reads: 'the telescopes are out of true' },
         ],
       },
-      explain: 'The law. Einstein got Mercury right by replacing Newton, not by adding a planet. The trap is that the hidden-planet move had just worked brilliantly. Same reasoning, same confidence, opposite answer. Nothing in the evidence says which case you’re in.',
+      explain: 'The law. Einstein explained Mercury’s orbit by revising gravity itself, not by adding a new planet. The Neptune case had used that same reasoning, and it worked. Nothing in the evidence could show in advance which explanation was right.',
       xp: 5,
     },
     dur: 1.0,

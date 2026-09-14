@@ -34,36 +34,36 @@ export interface Metaphysics29Beat extends BaseBeat {
 export const BEATS: Metaphysics29Beat[] = [
   {
     p: 420, x: 24, land: 1, rock: 1,
-    text: 'Nobody is in the forest. The tree falls, and the old question arrives with it.',
+    text: 'Consider a tree falling where no one perceives it. Does the tree still exist when no mind perceives it?',
     dur: 4.8,
   },
   {
     p: 174, x: 24, land: 1, rock: 1,
-    text: 'Realism says the world has its nature without any mind. Mountains would stand there unwatched.',
+    text: 'Realism holds that the world exists and has its nature independently of minds. Unobserved mountains would still exist.',
     dur: 5.0,
   },
   {
     p: 445, x: 24, land: 1, rock: 1,
-    text: 'Anti-realism says what counts as real leans on minds. In the boldest form, to exist is to be perceived.',
+    text: 'Anti-realism holds that what’s real depends on minds. For the idealist, to exist is to be perceived.',
     dur: 5.0,
   },
   {
     p: 267, x: 24, land: 1, rock: 1,
-    text: 'Berkeley set a trap. Try to picture an unseen tree, and the tree you picture is being seen.',
+    text: 'George Berkeley argued that an unperceived tree can’t even be conceived. Anyone imagining one is perceiving it in thought.',
     dur: 5.0,
   },
   {
     p: 162, x: 24, land: 1, rock: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap why kicking a rock does not refute Berkeley.',
-      explain: 'A kick is a perception. The hardness and the pain are sensations, and Berkeley never denied the rock or the jolt. What he denied was unperceived matter standing behind them, which no vivid feeling can produce.',
+      prompt: 'Why doesn’t kicking a stone refute Berkeley?',
+      explain: 'A kick is a perception. The hardness and the pain are sensations, and Berkeley never denied that stones exist as perceived. He denied only matter existing unperceived, and no sensation can prove that such matter exists.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 459, x: 80, land: 1, rock: 1,
-    text: 'Doctor Johnson kicked a stone and said he had refuted Berkeley that way.',
+    text: 'James Boswell records that in 1763 Samuel Johnson kicked a large stone and declared, “I refute it thus.”',
     dur: 4.6,
   },
   {
@@ -81,22 +81,22 @@ export const BEATS: Metaphysics29Beat[] = [
   },
   {
     p: 455, x: 80, land: 1, rock: 1, lid: 1,
-    text: 'Now suppose every conscious being blinks out at once. No mind is left anywhere.',
+    text: 'Now suppose every conscious being ceased to exist at once, leaving no mind anywhere.',
     dur: 5.0,
   },
   {
     p: 176, x: 80, land: 1, lid: 1,
     interact: {
-      prompt: 'Every mind blinks out. Whose view says the mountain is gone?',
+      prompt: 'If every mind ceased to exist, which view says the mountain would be gone?',
       sort: {
-        chip: 'the unwatched mountain',
+        chip: 'the unperceived mountain',
         bins: [
-          { id: 'realist', label: 'the realist', reads: 'the rock never needed a witness' },
+          { id: 'realist', label: 'the realist', reads: 'the mountain exists without any perceiver' },
           { id: 'berkeley', label: 'Berkeley', reads: 'to be is to be perceived', correct: true },
-          { id: 'kant', label: 'the Kantian', reads: 'something remains without an ordered world' },
+          { id: 'kant', label: 'the Kantian', reads: 'a thing in itself, without space or time' },
         ],
       },
-      explain: 'Berkeley. To be is to be perceived, so an unsensed mountain is a contradiction. His rescue is that God perceives everything always. A realist keeps the rock, and a Kantian keeps a thing in itself without the ordered world.',
+      explain: 'Berkeley. If to be is to be perceived, an unperceived mountain can’t exist. Berkeley himself held that God perceives everything continuously, so nothing disappears. A Kantian keeps a thing in itself, but not the mountain in space and time.',
       xp: 5,
     },
     dur: 1.0,
@@ -104,14 +104,14 @@ export const BEATS: Metaphysics29Beat[] = [
   {
     p: 314, x: 80, land: 1, rock: 1,
     summary: {
-      title: 'Whose World Is It',
+      title: 'Realism and Idealism',
       points: [
-        'Realism: the world stands without any mind',
-        'Anti-realism ties what is real to a knower',
+        'Realism: the world exists independently of minds',
+        'Anti-realism: what is real depends on minds',
         'Berkeley: to be is to be perceived',
-        'Kant: a knower meets appearances, not things in themselves',
+        'Kant: knowledge reaches appearances, not things in themselves',
       ],
-      closing: 'The forest puzzle was never about sound. It was about whether reality needs a witness.',
+      closing: 'The falling tree puzzle concerns existence, not sound. It asks whether reality depends on being perceived.',
     },
     dur: 5.0,
   },

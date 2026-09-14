@@ -33,36 +33,36 @@ export interface Logic27Beat extends BaseBeat {
 export const BEATS: Logic27Beat[] = [
   {
     p: 356, x: 28, card: 1,
-    text: 'Read the card, then try to decide whether it’s telling the truth.',
+    text: 'Consider the sentence “this sentence is false”. Is the sentence true, or is it false?',
     dur: 4.2,
   },
   {
     p: 169, x: 28, card: 1, lamps: 1,
-    text: 'Suppose the card speaks true. Then what it says holds, and the card is false.',
+    text: 'Suppose the sentence is true. Then what it says is the case, so it’s false.',
     dur: 4.0,
   },
   {
     p: 429, x: 28, card: 1, lamps: 1,
-    text: 'Suppose the card speaks false. Then what it says is wrong, and the card is true.',
+    text: 'Suppose instead that the sentence is false. Then what it says isn’t the case, so the sentence is true.',
     dur: 4.0,
   },
   {
     p: 259, x: 28, card: 1, loop: 1, lamps: 1,
-    text: 'The culprit is the pointing. An ordinary sentence describes the world, but this one describes itself.',
+    text: 'The source of the trouble is self-reference. An ordinary sentence describes the world, but this one describes itself.',
     dur: 5.0,
   },
   {
     p: 261, x: 28, card: 1, loop: 1, lamps: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Suppose the card is true. Tap what follows.',
-      explain: 'The card comes out FALSE. A true card says what it says, and what the card says is that the card is false. Every branch of the argument flips the same way, so nothing ever comes to rest.',
+      prompt: 'If a sentence that calls itself false is true, what follows?',
+      explain: 'It is false. A true sentence describes the world accurately, and this sentence describes itself as false. Supposing the sentence false leads back to truth, so neither truth value is stable.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 421, x: 88, card: 1, loop: 1, lamps: 1,
-    text: 'Epimenides said it first, and he was a Cretan calling all Cretans liars.',
+    text: 'This is the liar paradox, often credited to Eubulides of Miletus. Epimenides, a Cretan, said that his own people always lie, though the claim can be false without contradiction.',
     dur: 4.6,
   },
   {
@@ -79,21 +79,21 @@ export const BEATS: Logic27Beat[] = [
   },
   {
     p: 348, x: 88, card: 1, loop: 1, lamps: 1,
-    text: 'Russell hit the same wall in set theory, and Kurt Gödel turned the trick into a theorem.',
+    text: 'Bertrand Russell found a similar paradox in set theory. Kurt Gödel used self-reference to prove his incompleteness theorems.',
     dur: 5.0,
   },
   {
     p: 266, x: 88, card: 1, loop: 1, lamps: 1,
     interact: {
-      prompt: 'What should logic do with a sentence like this?',
+      prompt: 'Which response to the liar paradox also blocks its strengthened versions?',
       poll: {
         options: [
           { id: 'gap', reads: 'give it no truth value at all', holders: ['Saul Kripke'] },
-          { id: 'ban', reads: 'stop a language naming its own truth', holders: ['Alfred Tarski'], correct: true },
-          { id: 'both', reads: 'let it be true and false together', holders: ['Graham Priest'] },
+          { id: 'ban', reads: 'express truth only in a richer language', holders: ['Alfred Tarski'], correct: true },
+          { id: 'both', reads: 'accept that it’s both true and false', holders: ['Graham Priest'] },
         ],
       },
-      explain: 'Cut the pointing. Tarski split the language in two, so truth for one level is only ever spoken at the next. The loop has nowhere to close. Leaving the card valueless works until somebody writes a card saying it is not true.',
+      explain: 'Express truth only in a richer language. A language’s truth predicate belongs to a metalanguage, so no sentence can call itself untrue. A gap fails against “this sentence is not true”, which would then be true.',
       xp: 5,
     },
     dur: 1.0,
@@ -103,12 +103,12 @@ export const BEATS: Logic27Beat[] = [
     summary: {
       title: 'No Stable Value',
       points: [
-        'Each branch of the argument flips into the other',
+        'Each supposition about its truth leads to the other',
         'The cause is self-reference joined to a denial',
-        'Epimenides voiced it more than two thousand years ago',
+        'Eubulides discussed it in the fourth century BC',
         'The repairs reshaped logic and mathematics',
       ],
-      closing: 'A sentence biting its own tail rebuilt set theory and produced the incompleteness theorems. Hardly a party trick.',
+      closing: 'Paradoxes of self-reference reshaped set theory and underlie Gödel’s incompleteness theorems.',
     },
     dur: 4.8,
   },

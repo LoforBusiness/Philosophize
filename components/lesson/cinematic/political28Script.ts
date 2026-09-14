@@ -33,34 +33,34 @@ export interface Political28Beat extends BaseBeat {
 export const BEATS: Political28Beat[] = [
   {
     p: 421, x: 24, cell: 1,
-    text: 'The state takes years of a life. Everyone else is forbidden to do anything like it.',
+    text: 'A prison sentence takes years from a person’s life. If anyone else did this, it would be a crime.',
     dur: 4.8,
   },
   {
     p: 179, x: 24, cell: 1,
-    text: 'Punishment does on purpose what the law forbids everyone else. So the state needs a reason nobody else can use.',
+    text: 'Punishment does on purpose what the law forbids everyone else. So the state needs a justification that no private person could give.',
     dur: 5.0,
   },
   {
     p: 443, x: 24, cell: 1, past: 1,
-    text: 'One answer looks back. He did it, so the sentence is what he’s earned.',
+    text: 'Retributivism looks back to the crime. The offender deserves punishment because of what he did.',
     dur: 4.6,
   },
   {
     p: 265, x: 24, cell: 1, past: 1, future: 1,
-    text: 'The other looks forward. Punishment is there to deter, to protect, and to send somebody back changed.',
+    text: 'Consequentialism looks forward. Punishment is justified if it deters crime, protects the public or reforms the offender.',
     dur: 4.8,
   },
   {
     p: 458, x: 24, cell: 1, past: 1, future: 1,
-    text: 'A town is rioting. Framing one innocent man would calm the mob and save many lives.',
+    text: 'Suppose a town is rioting over a crime. Framing one innocent man would end the riot and save many lives.',
     dur: 5.0,
   },
   {
     p: 159, x: 24, cell: 1, past: 1, future: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap why the scapegoat case bites a forward-looking theory.',
-      explain: 'Good outcomes can justify it. If only results matter, framing one man to stop a riot comes out justified, and most people find that monstrous. Looking back at what somebody did blocks the move outright.',
+      prompt: 'Why does the scapegoat case trouble a forward-looking theory of punishment?',
+      explain: 'Good outcomes can justify it. If only results count, framing one innocent man to end a riot could be right. Desert rules that out, since the innocent deserve no punishment.',
       xp: 5,
     },
     dur: 1.0,
@@ -80,21 +80,21 @@ export const BEATS: Political28Beat[] = [
   },
   {
     p: 454, x: 78, cell: 1, past: 1, future: 1, watch: 1,
-    text: 'Foucault refused the whole frame. He asked not whether prison is justified, but what a prison does.',
+    text: 'Michel Foucault set aside the question of whether prison is justified. In Discipline and Punish, he studied how prisons observe and discipline the people they hold.',
     dur: 5.0,
   },
   {
     p: 158, x: 78, cell: 1,
     interact: {
-      prompt: 'A reformed offender is harmless now. Which view still sentences him?',
+      prompt: 'Which view requires punishing an offender even when no future good would come of it?',
       poll: {
         options: [
-          { id: 'desert', reads: 'the sentence is owed for the past act', holders: ['Immanuel Kant'], correct: true },
-          { id: 'good', reads: 'no future good, so no warrant to harm', holders: ['consequentialists'] },
-          { id: 'power', reads: 'the cell is a machine for making citizens', holders: ['Michel Foucault'] },
+          { id: 'desert', reads: 'punishment is owed for the past crime', holders: ['Immanuel Kant'], correct: true },
+          { id: 'good', reads: 'punishment is justified only by its future benefits', holders: ['Jeremy Bentham'] },
+          { id: 'power', reads: 'ask what prisons do, not whether they’re justified', holders: ['Michel Foucault'] },
         ],
       },
-      explain: 'The past act settles it. For Kant, what the offender deserves is the whole ground, so a sentence is owed whether or not anybody benefits. A consequentialist would release the man, and Foucault would ask what the prison is doing.',
+      explain: 'Punishment is owed for the past crime. For Kant, desert alone grounds punishment, whether or not anyone benefits. A theory based on future good would let the offender go.',
       xp: 5,
     },
     dur: 1.0,
@@ -102,14 +102,14 @@ export const BEATS: Political28Beat[] = [
   {
     p: 317, x: 78, cell: 1, past: 1,
     summary: {
-      title: 'The Cage and Its Reasons',
+      title: 'Justifying Punishment',
       points: [
         'Retribution looks back at what the offender deserves',
         'Consequentialism looks forward to deterrence and protection',
         'The scapegoat case presses hard on forward-looking views',
         'Foucault asks what a prison does, not whether it is just',
       ],
-      closing: 'When a sentence is called deserved, ask whether the past act or the future good is doing the work.',
+      closing: 'A theory of punishment must say whether its justification lies in the past crime or in future benefits.',
     },
     dur: 5.0,
   },

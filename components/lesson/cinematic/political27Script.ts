@@ -34,36 +34,36 @@ export interface Political27Beat extends BaseBeat {
 export const BEATS: Political27Beat[] = [
   {
     p: 428, x: 26, road: 1,
-    text: 'Pacifists say war is never right. Realists say the rules stop at the border.',
+    text: 'Pacifists hold that war is always wrong. Realists hold that moral rules don’t apply between states at war.',
     dur: 4.8,
   },
   {
     p: 173, x: 26, road: 1,
-    text: 'Just war theory sits between them and hangs two gates across one road.',
+    text: 'Just war theory takes a middle position. It judges a war by two separate sets of tests.',
     dur: 4.4,
   },
   {
     p: 436, x: 26, road: 1, entry: 1,
-    text: 'The first gate asks whether going to war is justified. A just cause, a last resort, and no better option.',
+    text: 'The first, jus ad bellum, asks whether going to war is justified. It requires a just cause, and war must be a last resort.',
     dur: 5.0,
   },
   {
     p: 259, x: 26, road: 1, entry: 1, conduct: 1,
-    text: 'The second gate asks how the fighting is done. Spare civilians, and use no more force than the job needs.',
+    text: 'The second, jus in bello, governs how war is fought. Combatants must not target civilians, and force must be proportionate to its military aim.',
     dur: 5.0,
   },
   {
     p: 162, x: 26, road: 1, entry: 1, conduct: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what the two gates hand down.',
-      explain: 'Two separate verdicts. A war can be right to start and wrong in the fighting. That’s why the theory keeps the tests apart. One verdict would let a just cause excuse anything done under it. And the gates are not points to add up.',
+      prompt: 'What does just war theory deliver when it judges a war?',
+      explain: 'Two separate verdicts. A war can be just in its cause and unjust in its conduct. A single verdict would let a just cause excuse any means. Nor are the tests scored, because passing one can’t make up for failing the other.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 452, x: 82, road: 1, entry: 1, conduct: 1,
-    text: 'A country is invaded and fights back, then firebombs an enemy city to end the war sooner.',
+    text: 'Suppose an invaded country fights back, and then firebombs an enemy city to end the war sooner.',
     dur: 5.0,
   },
   {
@@ -80,22 +80,22 @@ export const BEATS: Political27Beat[] = [
   },
   {
     p: 448, x: 82, road: 1, entry: 1, conduct: 1,
-    text: 'Augustine argued a war could be just. Aquinas set out the tests: right authority, right cause, right intention.',
+    text: 'Augustine argued that a war could be just. Aquinas later named three conditions: rightful authority, a just cause and right intention.',
     dur: 5.0,
   },
   {
     p: 175, x: 82, road: 1,
     interact: {
-      prompt: 'Where does bombing the city leave the two gates?',
+      prompt: 'How does just war theory judge the firebombing of the enemy city?',
       sort: {
-        chip: 'bombing the city',
+        chip: 'firebombing the city',
         bins: [
-          { id: 'both', label: 'passes both', reads: 'a just cause carries the means as well' },
-          { id: 'first', label: 'passes the first', reads: 'right to fight, wrong in the fighting', correct: true },
-          { id: 'none', label: 'fails both', reads: 'no standing to take up arms at all' },
+          { id: 'both', label: 'passes both tests', reads: 'a just cause justifies the means as well' },
+          { id: 'first', label: 'passes the first', reads: 'a just war fought by unjust means', correct: true },
+          { id: 'none', label: 'fails both', reads: 'no just cause to fight at all' },
         ],
       },
-      explain: 'The first gate, and not the second. Self-defence is a just cause, so going to war clears the first test. Killing civilians on purpose fails the second, however few die in total.',
+      explain: 'Passes the first. Self-defence against invasion is a just cause, so the decision to fight passes jus ad bellum. Deliberately killing civilians fails jus in bello, even if it shortens the war.',
       xp: 5,
     },
     dur: 1.0,
@@ -103,14 +103,14 @@ export const BEATS: Political27Beat[] = [
   {
     p: 324, x: 82, road: 1, entry: 1,
     summary: {
-      title: 'Rules Even in War',
+      title: 'Just War Theory',
       points: [
-        'A middle path between pacifism and anything goes',
-        'The first gate asks whether to fight at all',
-        'The second gate asks how the fighting is done',
-        'A just cause never licences killing civilians',
+        'A middle position between pacifism and realism',
+        'Jus ad bellum asks whether going to war is just',
+        'Jus in bello asks whether the war is fought justly',
+        'A just cause never licenses killing civilians',
       ],
-      closing: 'When a war is called justified, ask two questions rather than one: just to start, and justly fought.',
+      closing: 'Judging a war requires two questions: whether it was just to begin, and whether it was justly fought.',
     },
     dur: 5.0,
   },

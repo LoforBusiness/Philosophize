@@ -159,12 +159,15 @@ if (!orderSrc) {
 } else {
   // eslint-disable-next-line no-new-func
   const orderFor = new Function('seed', 'n', orderSrc[1]);
-  const slotted = { poll: [], sort: [] };
+  // A PLOT HAS SLOTS NOW TOO. Drawn freehand its shapes had no positions to guess
+  // at; offered as tiles (R16) they do, and the correct shape was authored FIRST in
+  // 15 of 18 plot questions.
+  const slotted = { poll: [], sort: [], plot: [] };
   for (const [id, comp] of comps) {
     const found = beatsOf(comp);
     if (!found) continue;
     for (const ch of found.chunks) {
-      for (const kind of ['poll', 'sort']) {
+      for (const kind of ['poll', 'sort', 'plot']) {
         if (!new RegExp(`\\n\\s{6}${kind}:`).test(ch)) continue;
         const its = [...ch.matchAll(/\{[^{}]*?reads:[^{}]*?\}/g)].map((x) => x[0]);
         const authored = its.findIndex((x) => /correct:\s*true/.test(x));
@@ -173,7 +176,8 @@ if (!orderSrc) {
         // which for a poll is its first position and for a sort is its chip.
         const firstRe = /reads:\s*'((?:[^'\\]|\\.)*)'/;
         const chipRe = /chip:\s*'((?:[^'\\]|\\.)*)'/;
-        const first = kind === 'poll'
+        // A plot is seeded like a poll, on its first shape's words (TrendPick).
+        const first = kind === 'poll' || kind === 'plot'
           ? (its[0].match(firstRe) || [, ''])[1]
           : (ch.match(chipRe) || [, ''])[1];
         const shown = orderFor(seedFor(id, [{ text: first }]), its.length);
@@ -181,7 +185,7 @@ if (!orderSrc) {
       }
     }
   }
-  for (const kind of ['poll', 'sort']) {
+  for (const kind of ['poll', 'sort', 'plot']) {
     const xs = slotted[kind];
     if (!xs.length) continue;
     const mean = xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -194,6 +198,42 @@ if (!orderSrc) {
       bad(`${kind}: the answer sits ${(mean * 100).toFixed(0)}% of the way along, on average`,
         `${xs.length} questions · a reader can guess by position`);
     }
+  }
+}
+
+// ── R17 · A POLL SHOWS NOTHING OF ITS ANSWER BEFORE THE PICK ─────────────────
+//
+// The ballot mounted each option's holder line from the start at opacity 0, and an
+// invisible View still takes its height. In 7 of 34 polls only the correct option
+// had holders, so the empty space under a row was the answer, and a reader found it.
+// Two things are held here. The ballot creates its holder lines only once the answer
+// is in. And every option names who holds it, because the reveal is who held each
+// position, and an option with nothing to reveal is a tell by absence.
+{
+  /** A zero. Poll options that name nobody who holds them. */
+  const UNHELD_BUDGET = 0;
+  const ballot = fs.readFileSync(path.join(DIR, 'PollBallot.tsx'), 'utf8');
+  if (/answered\s*&&\s*holders\.length/.test(ballot)) ok('the ballot creates its holder lines only once the answer is in (R17)');
+  else bad('the ballot no longer gates its holder lines on the answer (R17)', 'an invisible line still takes its height, and the gap is the answer');
+
+  const unheld = [];
+  let options = 0;
+  for (const [id, comp] of comps) {
+    const found = beatsOf(comp);
+    if (!found) continue;
+    found.chunks.forEach((ch, k) => {
+      if (!/\n\s{6}poll:/.test(ch)) return;
+      for (const o of ch.matchAll(/\{\s*id:\s*'([^']+)'[^{}]*?reads:[^{}]*?\}/g)) {
+        options += 1;
+        if (!/holders:\s*\[\s*['"]/.test(o[0])) unheld.push(`${id} beat ${k} "${o[1]}"`);
+      }
+    });
+  }
+  if (unheld.length <= UNHELD_BUDGET) ok('every poll option names who holds it (R17)', `${options} options`);
+  else {
+    bad(`${unheld.length} of ${options} poll options name nobody who holds them (R17)`, `budget ${UNHELD_BUDGET}`);
+    for (const u of unheld.slice(0, 8)) console.log(`        ${u}`);
+    if (unheld.length > 8) console.log(`        … and ${unheld.length - 8} more`);
   }
 }
 

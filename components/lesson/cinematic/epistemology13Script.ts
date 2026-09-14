@@ -23,23 +23,23 @@ export interface Epi13Beat extends BaseBeat {
 export const BEATS: Epi13Beat[] = [
   {
     p: 462, x: 70,
-    text: 'A fair lottery, a million tickets, one winner. You hold ticket forty thousand and one.',
+    text: 'Suppose a fair lottery has a million tickets and a single winner. You hold ticket forty thousand and one.',
     dur: 2.1,
   },
   {
     p: 462, x: 70,
-    text: 'Will it win? You’d say no, flatly, and you’d be right.',
+    text: 'At odds of a million to one, believing that your ticket will lose seems rational.',
     dur: 2.3,
   },
   {
     p: 437, x: 168, grid: 1,
-    text: 'Here are twenty of them, to keep the drawing manageable. Nothing about the argument changes with the count.',
+    text: 'Twenty tickets stand in for the million. The argument is the same for any number of tickets.',
     cite: 'The draw',
     dur: 4.0,
   },
   {
     p: 394, x: 168, grid: 1, off: 1,
-    text: 'Strike the first one out, at a million to one. It’s still not certainty, but it beats most things you happily claim to know, like who your neighbours are.',
+    text: 'At a million to one, you believe the first ticket will lose. The belief is still not certain, yet it’s better supported than much ordinary knowledge.',
     cite: 'One verdict',
     dur: 4.8,
   },
@@ -58,30 +58,30 @@ export const BEATS: Epi13Beat[] = [
   },
   {
     p: 29, x: 168, grid: 1, off: 2, winner: 1,
-    text: 'The same reasoning covers every ticket, so strike them all. Read the grid now.',
+    text: 'The same reasoning applies to every ticket, so each belief that a ticket will lose is justified.',
     cite: 'All of them',
     dur: 2.4,
   },
   {
     p: 29, x: 168, grid: 1, off: 2, winner: 1,
-    text: 'You’ve just said this draw has no winner, and you know there’s one.',
+    text: 'Together, the verdicts imply that no ticket wins, yet you know one ticket will. Henry Kyburg set out this lottery paradox in 1961.',
     dur: 2.6,
   },
   {
     p: 165, x: 124, grid: 1, off: 2, winner: 1,
     interact: {
-      prompt: 'Draw how reasonable "this ticket loses" gets as more tickets are added.',
+      prompt: 'Which curve shows how reasonable the belief that a ticket loses becomes as tickets are added?',
       plot: {
         axis: 'HOW REASONABLE',
         cols: ['2 TICKETS', '10', '100', '1000', 'A MILLION'],
         start: [0.5, 0.5, 0.5, 0.5, 0.5],
         shapes: [
           { id: 'rise', profile: [0.1, 0.4, 0.72, 0.9, 0.98], reads: 'the more tickets, the safer each verdict', correct: true },
-          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5, 0.5], reads: 'the count makes no difference at all' },
+          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5, 0.5], reads: 'the number of tickets makes no difference' },
           { id: 'fall', profile: [0.95, 0.7, 0.4, 0.2, 0.05], reads: 'the more tickets, the weaker each verdict' },
         ],
       },
-      explain: 'It climbs, and that’s the sting. Every verdict gets more reasonable as tickets are added. The whole set gets more certainly false, because one ticket wins. Believing each is not believing all. And nothing says which belief is wrong.',
+      explain: 'The more tickets, the safer each verdict. Yet all the verdicts together are false, because one ticket must win. Henry Kyburg concluded that justified beliefs don’t always combine into a justified conjunction.',
       xp: 5,
     },
     dur: 1.0,
@@ -89,22 +89,22 @@ export const BEATS: Epi13Beat[] = [
   {
     p: 383, x: 124, grid: 1, off: 2, winner: 1, pick: 1,
     interact: {
-      prompt: 'You are sure of every verdict up there. Tap the ticket that wins.',
-      explain: 'You can’t name one, and you can’t deny there’s one. The whole paradox is the gap between what you can say about each ticket and about all of them.',
+      prompt: 'You’re justified in believing each ticket loses. Which ticket, then, will win?',
+      explain: 'No idea. You can’t name the winner, yet you know that one ticket wins. The paradox lies between what you believe of each ticket and what you believe of all.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Reasonable Steps, Absurd Total',
+      title: 'The Lottery Paradox',
       points: [
-        'Each ticket verdict is individually justified',
-        'Together they deny the draw has a winner',
-        'Knowledge may not survive being added up',
-        'Demanding certainty would erase most of it',
+        'Each belief that a ticket loses is justified',
+        'Together, those beliefs deny that the draw has a winner',
+        'Justified beliefs may not combine into a justified conjunction',
+        'Demanding certainty instead would rule out most knowledge',
       ],
-      closing: 'Almost everything you know is a very good bet. The rows on stage are the bill that comes with betting.',
+      closing: 'If justified belief needs only high probability, the lottery paradox follows. If it needs certainty, little is left.',
     },
     dur: 3.0,
   },

@@ -30,76 +30,76 @@ export interface Metaphysics8Beat extends BaseBeat {
 export const BEATS: Metaphysics8Beat[] = [
   {
     p: 164, x: 300, chain: 1, front: 13,
-    text: 'Think of the last thing you chose. Now picture it already on its way a thousand years before you were born.',
+    text: 'Consider the last choice you made. Could events long before your birth have already made it inevitable?',
     dur: 3,
   },
   {
     p: 164, x: 300, chain: 1, front: 13,
-    text: 'Every event gets pushed over by the one before it.',
+    text: 'Determinism holds that every event is fixed by earlier events and the laws of nature.',
     dur: 1.8,
   },
   {
     p: 159, x: 232, chain: 1, front: 9, tags: 1, mark: 1,
-    text: 'The first domino went over long before you existed — your genes, your parents, the street you grew up on. That push has been travelling ever since.',
-    cite: 'The first push',
+    text: 'The causes of your choice began before you existed: your genes, your parents, your upbringing. Each state of the world produced the next.',
+    cite: 'A chain of causes',
     dur: 4.3,
   },
   {
     p: 159, x: 232, chain: 1, front: 9, tags: 1, mark: 1,
-    text: 'Here it comes.',
+    text: 'That chain of causes leads, step by step, to the choice you made.',
     dur: 1.8,
   },
   {
     p: 173, x: 232, chain: 1, front: 5, tags: 1, mark: 1,
-    text: 'Hard determinists take the conclusion on the chin. Given everything that came before, they say, you could not have done otherwise.',
+    text: 'Hard determinism says nobody is ever free. Everything you do was fixed by what came before, so you could not have done otherwise.',
     cite: 'Hard determinism',
     dur: 3.6,
   },
   {
     p: 173, x: 232, chain: 1, front: 5, tags: 1, mark: 1,
-    text: 'Not once. Not in your entire life.',
+    text: 'On this view, no choice you’ve ever made could have gone differently.',
     dur: 1.8,
   },
   {
     p: 15, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'And there’s the domino with your name on it. It goes over right on schedule.',
-    cite: 'Your domino',
+    text: 'Your own choice is one more event in the chain, fixed by the events before it.',
+    cite: 'Your choice',
     dur: 2.8,
   },
   {
     p: 15, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'The choice you’re proudest of was a sentence physics started centuries ago.',
+    text: 'Even your proudest choices were settled by causes that began long before your birth.',
     dur: 2.2,
   },
   {
     p: 33, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'One camp refuses. For them a real choice snaps the chain and starts a brand-new line that no earlier cause set going.',
-    cite: 'The refusal',
+    text: 'A second position denies that choices are determined. A free choice, it holds, begins a new chain that no earlier cause fixed.',
+    cite: 'Breaking the chain',
     dur: 4,
   },
   {
     p: 33, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'That’s libertarian free will.',
+    text: 'This is libertarian free will, which is distinct from political libertarianism.',
     dur: 1.8,
   },
   {
     // 8 (shrug), not 4 (think): the line opens "A third camp shrugs".
     p: 378, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'A third camp shrugs at the whole fight. They think both sides picked the wrong test.',
+    text: 'A third position rejects an assumption both sides share: that freedom requires uncaused choices.',
     cite: 'A third way',
     dur: 2.6,
   },
   {
     // 8 (shrug), not 4 (think): the line opens "A third camp shrugs".
     p: 416, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
-    text: 'Freedom was never about escaping causes. So what else could a free choice be?',
+    text: 'On this view, being caused is compatible with being free. What, then, makes a choice free?',
     dur: 2.2,
   },
   {
     p: 380, x: 200, chain: 1, front: 3, tags: 0, mark: 0, pick: 1,
     interact: {
-      prompt: 'This camp agrees every domino falls, yours included. Tap what they say makes a choice FREE.',
-      explain: 'Free means the push came from your own wants, with nobody else’s hand on your arm. The chain itself is left untouched.',
+      prompt: 'On this third view, which condition makes a caused choice free?',
+      explain: 'You acted from your own wants. On this view, a choice is free when it comes from the agent’s own desires, without external force. A broken chain is ruled out, because this view accepts that every choice is caused.',
       xp: 5,
     },
     dur: 1.0,
@@ -107,29 +107,29 @@ export const BEATS: Metaphysics8Beat[] = [
   {
     p: 165, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
     interact: {
-      prompt: 'Where does the third camp actually stand?',
+      prompt: 'Which view of causation and freedom does the third position take?',
       poll: {
         options: [
-          { id: 'gap', reads: 'the chain breaks, and freedom lives in the gap', holders: ['Kane'] },
-          { id: 'hard', reads: 'every link holds, so nobody is free', holders: ['d\'Holbach'] },
-          { id: 'compat', reads: 'every link holds, and people are free anyway', holders: ['Hume', 'Frankfurt'], correct: true },
-          { id: 'lost', reads: 'the chain breaks and nobody is free either' },
+          { id: 'gap', reads: 'the chain breaks, and freedom requires the break', holders: ['Robert Kane'] },
+          { id: 'hard', reads: 'every link holds, so nobody is free', holders: ['Baron d’Holbach'] },
+          { id: 'compat', reads: 'every link holds, and people are still free', holders: ['David Hume', 'Harry Frankfurt'], correct: true },
+          { id: 'lost', reads: 'even if the chain breaks, nobody is free', holders: ['Derk Pereboom', 'Galen Strawson'] },
         ],
       },
-      explain: 'Every link holds, and people are free anyway. These are two questions, not one. “Compatible with free will” sounds like something was rescued from the causes. Nothing was. Every domino still falls. The camp only changed the test from “was it uncaused?” to “was it forced?”',
+      explain: 'Every link holds, and people are still free. The third position accepts that every choice is caused, but denies that being caused makes a choice unfree.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 29, x: 140, chain: 1, front: 2, tags: 1, mark: 1,
-    text: 'That camp has a name: compatibilism. David Hume, and later Harry Frankfurt, keep every cause and change the test.',
+    text: 'This position is called compatibilism. David Hume and, later, Harry Frankfurt held that free will is compatible with determinism.',
     cite: 'Compatibilism · Hume, Frankfurt',
     dur: 2.7,
   },
   {
     p: 29, x: 140, chain: 1, front: 2, tags: 1, mark: 1,
-    text: 'You act freely when the push comes from your own wants, not from a hand on your arm.',
+    text: 'For Hume, you act freely when your action comes from your own will, not from external constraint.',
     dur: 2.7,
   },
   {
@@ -147,14 +147,14 @@ export const BEATS: Metaphysics8Beat[] = [
   },
   {
     summary: {
-      title: 'Wound Up, and Still Yours',
+      title: 'Determinism and Free Will',
       points: [
-        'Every choice sits inside a chain of causes',
+        'Determinism: every event is fixed by earlier causes',
         'Hard determinism: you could not have done otherwise',
-        'Libertarians say a real choice snaps the chain',
+        'Libertarians: a free choice breaks the causal chain',
         'Compatibilism: free means unforced, not uncaused',
       ],
-      closing: 'The dominoes may all be falling. The only question left is whose hand is on yours.',
+      closing: 'For the compatibilist, the real question is not whether your choice was caused. It is whether your choice was forced.',
     },
     dur: 3.0,
   },

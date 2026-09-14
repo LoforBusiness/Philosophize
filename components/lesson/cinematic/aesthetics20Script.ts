@@ -32,7 +32,7 @@ export interface Aes20Beat extends BaseBeat {
 export const BEATS: Aes20Beat[] = [
   {
     p: 379, x: 200, uses: 1,
-    text: 'Four reasons people give for why art is worth the money. Watch each one get answered by something cheaper.',
+    text: 'Consider four common reasons for valuing art. For each, ask whether something cheaper does the same job.',
     dur: 3.8,
   },
   {
@@ -42,31 +42,31 @@ export const BEATS: Aes20Beat[] = [
     // sentence names one substitution, the textbook, and the picture should show
     // exactly that (A1).
     p: 398, x: 200, uses: 1, swaps: 0.34, struck: 0.34,
-    text: 'Art teaches you things. So does a textbook, faster and with fewer mistakes.',
+    text: 'First, art can teach. A textbook also teaches, often more quickly and with fewer mistakes.',
     cite: 'Instruction',
     dur: 4.2,
   },
   {
     p: 2, x: 132, uses: 1, swaps: 1, struck: 1,
-    text: 'Art records how the world looked. A camera does the same.',
+    text: 'Second, art records how the world looked. A camera records appearances at least as faithfully.',
     dur: 2.5,
   },
   {
     p: 2, x: 132, uses: 1, swaps: 1, struck: 1,
-    text: 'Art decorates a room, and wallpaper is cheaper.',
+    text: 'Third, wallpaper decorates a room more cheaply than art does.',
     dur: 1.9,
   },
   {
     p: 383, x: 132, uses: 1, swaps: 1, struck: 1,
-    text: 'Three struck out, and nothing came for the fourth.',
-    cite: 'The one left',
+    text: 'Each of the first three reasons has a cheaper substitute. No substitute has been found for the fourth.',
+    cite: 'The remaining reason',
     dur: 3.2,
   },
   {
     p: 461, x: 132, uses: 1, swaps: 1, struck: 1, live: 1,
     interact: {
-      prompt: 'Tap the row nothing arrived to replace.',
-      explain: 'Showing you a world through somebody else’s eyes. Facts can be handed over, images can be copied, walls can be covered. What has no substitute is another person’s way of seeing. It isn’t information that could be sent by a cheaper route.',
+      prompt: 'Which reason for valuing art has no cheaper substitute?',
+      explain: 'Showing you the world through someone’s eyes. A textbook can teach facts, a camera can record how things look, and wallpaper can cover walls. No cheaper thing can pass on another person’s way of seeing.',
       xp: 5,
     },
     dur: 1.0,
@@ -86,36 +86,36 @@ export const BEATS: Aes20Beat[] = [
   },
   {
     p: 380, x: 268, uses: 1, swaps: 1, struck: 1,
-    text: 'One warning about the method. Something can be replaceable and still be worth having.',
+    text: 'This method of elimination has a limit. Something can be replaceable and still be worth having.',
     dur: 3.8,
   },
   {
     p: 442, x: 268, uses: 1, swaps: 1, struck: 1,
     interact: {
-      prompt: 'You cross out three of the four. What has that done?',
+      prompt: 'What does eliminating three of the four reasons establish?',
       sort: {
-        chip: 'crossing three out',
+        chip: 'eliminating three reasons',
         bins: [
-          { id: 'proved', label: 'proves the last', reads: 'the last one is proved' },
-          { id: 'nothing', label: 'changes nothing', reads: 'nothing at all' },
-          { id: 'narrow', label: 'narrows the field', reads: 'the field is narrower, and nothing is proved', correct: true },
+          { id: 'proved', label: 'proves the last', reads: 'the remaining reason is proved' },
+          { id: 'nothing', label: 'changes nothing', reads: 'nothing about the remaining reason' },
+          { id: 'narrow', label: 'narrows the field', reads: 'the field narrows, and nothing is proved', correct: true },
         ],
       },
-      explain: 'Narrows the field. Crossing answers out shows which reasons can’t be the whole story, and it never makes the survivor true. Art may well teach and decorate and record. The question was what art does that nothing cheaper already does.',
+      explain: 'Elimination narrows the field. Removing three reasons shows they can’t fully explain art’s value, but it doesn’t prove the fourth. Art may still teach, record and decorate. The question was what art does that nothing cheaper does.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'What Nothing Else Does',
+      title: 'What Art Alone Provides',
       points: [
         'Most reasons given for art name a job something cheaper also does',
         'Instruction, record and decoration all have substitutes',
         'A particular way of seeing does not',
-        'Elimination narrows the answer; it does not prove one',
+        'Elimination narrows the answer but proves none',
       ],
-      closing: 'Three rows crossed out, and the fourth is still waiting for its replacement.',
+      closing: 'The fourth reason survives elimination, though surviving isn’t the same as being proved.',
     },
     dur: 3.4,
   },

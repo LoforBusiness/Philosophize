@@ -24,29 +24,29 @@ export interface Ethics9Beat extends BaseBeat {
 export const BEATS: Ethics9Beat[] = [
   {
     p: 164, x: 70,
-    text: 'Most hard choices have a right answer buried in them somewhere. Some do not.',
+    text: 'Most hard choices have a right answer, even when it’s difficult to find. A genuine moral dilemma is different.',
     dur: 2.2,
   },
   {
     p: 164, x: 70,
-    text: 'Some leave a mark on you whichever way you go.',
+    text: 'In a genuine dilemma, you ought to do each of two things. You can’t do both.',
     dur: 1.8,
   },
   {
     p: 41, x: 168, notes: 1,
-    text: 'In 1940 a student came to Sartre. His brother had been killed by the Germans and he wanted to fight.',
+    text: 'During the German occupation, a student asked Sartre for advice. His elder brother had been killed in 1940, and he wanted to join the Free French.',
     cite: 'Two claims',
     dur: 3.1,
   },
   {
     p: 41, x: 168, notes: 1,
-    text: 'The student’s mother lived for him alone, and his leaving would break her.',
+    text: 'The student’s mother, however, lived only for him, and his departure would plunge her into despair.',
     dur: 1.9,
   },
   {
     p: 383, x: 124, notes: 1,
-    text: 'Neither claim outranks the other. This is a dilemma, not a hard sum, because there is no scale both of them fit on.',
-    cite: 'Not a hard sum',
+    text: 'Neither claim overrides the other, so this is a genuine dilemma. No common scale can weigh one claim against the other.',
+    cite: 'No common scale',
     dur: 4.4,
   },
   {
@@ -64,20 +64,20 @@ export const BEATS: Ethics9Beat[] = [
   },
   {
     p: 167, x: 168, notes: 1, taken: 2,
-    text: 'The student goes. Say he was right to, as most people think he was.',
-    cite: 'He chooses',
+    text: 'Suppose the student joins the Free French. Suppose, too, that his choice is justified.',
+    cite: 'A justified choice',
     dur: 2.1,
   },
   {
     p: 167, x: 168, notes: 1, taken: 2,
-    text: 'Now look at the board: the other claim has not moved. Nothing about his choice removed it.',
+    text: 'The claim to stay with his mother remains. Acting on the other claim did not cancel it.',
     dur: 2.7,
   },
   {
     p: 6, x: 124, notes: 1, taken: 2, pick: 1,
     interact: {
-      prompt: 'He chose, and chose well. Tap the note that is still owed an account.',
-      explain: 'A correct choice does not settle the account. The duty he couldn’t meet was never cancelled, only outweighed — and it still has a claim on him.',
+      prompt: 'If his choice was justified, which claim is still owed something?',
+      explain: 'Stay with her. Joining the Free French didn’t cancel his duty to his mother, because that duty was never overridden. It still has a claim on him.',
       xp: 5,
     },
     dur: 1.0,
@@ -85,30 +85,30 @@ export const BEATS: Ethics9Beat[] = [
   {
     p: 457, x: 124, notes: 1, taken: 2, owed: 1,
     interact: {
-      prompt: 'He chose the better option. Was anything still lost?',
+      prompt: 'Does a justified choice in a genuine dilemma leave anything morally lost?',
       sort: {
-        chip: 'the tragic choice',
+        chip: 'what was lost',
         bins: [
-          { id: 'nothing', label: 'nothing', reads: 'nothing, he chose rightly' },
-          { id: 'third', label: 'a third way', reads: 'a third way out that he never looked for' },
-          { id: 'duty', label: 'a real duty', reads: 'a real duty went unmet', correct: true },
+          { id: 'nothing', label: 'nothing', reads: 'nothing, since the choice was justified' },
+          { id: 'third', label: 'a third way', reads: 'a third option he failed to see' },
+          { id: 'duty', label: 'a real duty', reads: 'a real duty that went unmet', correct: true },
         ],
       },
-      explain: 'A real duty. If choosing rightly cancelled the loss, regret would be irrational — and yet you distrust anyone who walks away untroubled. Something real was owed and was not paid. Williams called what is left over moral residue.',
+      explain: 'A real duty. If a justified choice cancelled the loss, regret would be irrational. Bernard Williams argued that the unmet duty leaves a remainder, so regret is the appropriate response.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Both Roads Cost Something',
+      title: 'Dilemmas and Moral Residue',
       points: [
-        'A dilemma offers no cost-free road',
-        'Choosing well does not erase the loss',
-        'What survives the choice is moral residue',
-        'Regret can be the accurate response',
+        'In a genuine dilemma, every option fails a real duty',
+        'A justified choice doesn’t cancel the unmet duty',
+        'The unmet duty that survives is called moral residue',
+        'Regret can be the appropriate response',
       ],
-      closing: 'When a choice still hurts after you got it right, the ache is not weakness. The ache is accuracy.',
+      closing: 'On this view, regret after a justified choice isn’t irrational. It registers a real moral loss.',
     },
     dur: 3.0,
   },

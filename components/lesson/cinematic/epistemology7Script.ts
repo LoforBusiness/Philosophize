@@ -15,34 +15,34 @@ export interface Epi7Beat extends BaseBeat {
 export const BEATS: Epi7Beat[] = [
   {
     p: 6, days: 1, twist: 0,
-    text: 'The sun rose today. Will it rise tomorrow?',
+    text: 'The sun has risen every morning in recorded history. What justifies the belief that it will rise tomorrow?',
     dur: 1.8,
   },
   {
     p: 6, days: 1, twist: 0,
-    text: 'You feel sure. But Hume asks what gives you the right to be.',
+    text: 'You feel confident that it will. David Hume asked what, if anything, justifies that confidence.',
     dur: 2.3,
   },
   {
     p: 167, days: 3,
-    text: 'Induction goes from the cases you’ve seen to the ones you haven’t. Every swan so far was white, so all swans are white.',
+    text: 'Induction is inference from observed cases to unobserved ones. For example, every swan seen so far was white, so all swans are white.',
     cite: 'Induction',
     dur: 4,
   },
   {
     p: 167, days: 3,
-    text: 'Science runs on that leap constantly.',
+    text: 'Everyday expectations and much of science depend on inferences of this kind.',
     dur: 1.8,
   },
   {
     p: 160, days: 4, circle: 1,
-    text: 'Why expect the future to match the past? Only because it always has.',
-    cite: 'Hume’s problem',
+    text: 'Induction assumes that the future will be like the past. The only evidence for this is past experience.',
+    cite: 'The problem of induction',
     dur: 1.9,
   },
   {
     p: 396, days: 4, circle: 1,
-    text: 'But that uses the past to vouch for the past. The circle closes, and logic never gets a grip on it.',
+    text: 'But arguing from past experience assumes the very principle in question. Hume concludes that any such justification is circular.',
     dur: 3.1,
   },
   {
@@ -60,24 +60,24 @@ export const BEATS: Epi7Beat[] = [
   },
   {
     p: 13, days: 4, twist: 1,
-    text: 'A chicken is fed every morning and grows sure the farmer is its friend. Each feeding confirms the rule — until the day the farmer wrings its neck.',
-    cite: 'Russell’s chicken',
+    text: 'Bertrand Russell gives an example. A chicken fed every day comes to expect food, until one day the farmer wrings its neck instead.',
+    cite: 'Russell’s chicken, 1912',
     dur: 3.8,
   },
   {
     p: 13, days: 4, twist: 1,
-    text: 'More of the same is no guarantee of the same.',
+    text: 'No number of past confirmations can guarantee the next case. The chicken’s evidence was strong, and its conclusion was false.',
     dur: 1.8,
   },
   {
     p: 165, days: 4, twist: 1,
     interact: {
-      prompt: 'So what exactly is the problem Hume has found here?',
+      prompt: 'What does Hume’s problem show about inductive inference?',
       cards: [
-        { text: 'No proof the future matches', correct: true },
-        { text: 'Nature has been proven uniform', correct: false },
+        { text: 'It rests on an unproved assumption', correct: true },
+        { text: 'Experience proves its reliability', correct: false },
       ],
-      explain: 'Induction assumes nature keeps behaving the same way. But the only reason to assume so is that nature has done so before, which is a circle.',
+      explain: 'Induction assumes nature stays the same. That assumption has never been proved. Proving it would require induction. And using induction to prove induction is circular.',
       xp: 5,
     },
     dur: 1.0,
@@ -85,32 +85,32 @@ export const BEATS: Epi7Beat[] = [
   {
     p: 8, days: 4, twist: 1,
     interact: {
-      prompt: 'What does Hume say you should do about induction?',
+      prompt: 'Once induction is shown to lack a rational proof, what attitude to it does Hume take?',
       drag: {
         lo: 'STOP USING IT',
         hi: 'CALL IT PROVED',
         start: 0,
         zones: [
-          { id: 'stop', upto: 0.28, reads: 'stop using it, it proves nothing' },
-          { id: 'habit', upto: 0.74, reads: 'keep using it, habit gives no choice', correct: true },
-          { id: 'proved', upto: 1, reads: 'keep it, and call it proved' },
+          { id: 'stop', upto: 0.28, reads: 'abandon it, since reason can’t justify it' },
+          { id: 'habit', upto: 0.74, reads: 'rely on induction, since custom compels belief', correct: true },
+          { id: 'proved', upto: 1, reads: 'rely on induction, and call it rationally proved' },
         ],
       },
-      explain: 'The middle, and it’s the odd part of Hume. He shows there’s no logical proof. Then he says you’ll go on anyway, because custom is stronger than argument. Neither end is his: he doesn’t drop it and he doesn’t rescue it.',
+      explain: 'Rely on induction, since custom compels belief. Hume finds no rational proof of induction. But he holds that expectations come from custom, not reasoning, so sceptical arguments can’t stop them.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Crack Beneath Science',
+      title: 'The Problem of Induction',
       points: [
-        'Induction leaps from past cases to future ones',
-        'No logic guarantees the future fits the past',
-        'Hume: habit, not proof, drives expectation',
+        'Induction infers unobserved cases from observed ones',
+        'No logical proof shows the future will resemble the past',
+        'Hume: custom, not reason, produces expectation',
         'Russell’s chicken shows confirmation can mislead',
       ],
-      closing: 'Science still works astonishingly well. Hume just reminds you its foundation is trust, not proof.',
+      closing: 'Science still relies on induction. Hume’s point is that its reliability can’t be proved without arguing in a circle.',
     },
     dur: 2.8,
   },

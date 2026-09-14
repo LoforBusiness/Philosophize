@@ -22,12 +22,12 @@ export interface Aes16Beat extends BaseBeat {
 export const BEATS: Aes16Beat[] = [
   {
     p: 25, x: 70,
-    text: 'You’ve stood in front of this painting three times and liked it more each time. Today you read the label on the wall.',
+    text: 'Suppose you’ve admired a painting on three visits, liking it more each time. Today you read the label beside it.',
     dur: 4.0,
   },
   {
     p: 41, x: 168, canvas: 1,
-    text: 'There’s the painting. Finished in 1911, and not one mark has moved since.',
+    text: 'The painting was finished in 1911, and no mark on it has changed since.',
     cite: 'The work',
     dur: 2.8,
   },
@@ -38,15 +38,15 @@ export const BEATS: Aes16Beat[] = [
   },
   {
     p: 425, x: 124, canvas: 1, facts: 1,
-    text: 'The first line on the card says the painter took the commission from a man he despised. He said so in a letter.',
-    cite: 'One fact',
+    text: 'The label’s first line reports that the painter accepted the commission from a patron he despised. His own letter says so.',
+    cite: 'A biographical fact',
     dur: 4.2,
   },
   {
     p: 129, x: 124, canvas: 1, facts: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-16-1',
-      text: 'The design or intention of the author is neither available nor desirable as a standard for judging the success of a work of art.',
+      text: 'The design or intention of the author is neither available nor desirable as a standard for judging the success of a work of literary art.',
       author: 'Wimsatt and Beardsley',
       work: 'The Intentional Fallacy',
       era: '1946',
@@ -56,25 +56,25 @@ export const BEATS: Aes16Beat[] = [
   },
   {
     p: 383, x: 168, canvas: 1, facts: 3,
-    text: 'The gallery keeps adding, and now the card is longer than the painting is wide. You notice you’ve been reading it instead of looking.',
-    cite: 'The rail fills',
+    text: 'The gallery adds more facts, until the label is longer than the painting is wide. Your attention shifts from the work to the biography.',
+    cite: 'The biography grows',
     dur: 4.8,
   },
   {
     p: 165, x: 124, canvas: 1, facts: 3,
     interact: {
-      prompt: 'What did learning it actually change?',
+      prompt: 'What does learning the painter’s biography change?',
       drag: {
         lo: 'THE PAINTING IS RUINED',
         hi: 'IT CHANGES NOTHING AT ALL',
         start: 0,
         zones: [
-          { id: 'ruin', upto: 0.3, reads: 'the painting is spoiled now' },
-          { id: 'you', upto: 0.74, reads: 'the painting is the same, you are not', correct: true },
-          { id: 'none', upto: 1, reads: 'nothing changed at all' },
+          { id: 'ruin', upto: 0.3, reads: 'the painting is spoiled as art' },
+          { id: 'you', upto: 0.74, reads: 'the painting stays, your response changes', correct: true },
+          { id: 'none', upto: 1, reads: 'nothing, neither the painting nor your response' },
         ],
       },
-      explain: 'The middle, and both ends feel principled, which is what makes them tempting. The paint hasn’t moved. Nothing in the picture is different from yesterday. What changed is you, standing in front of it, knowing something you didn’t know before.',
+      explain: 'The painting is unchanged, but your response changes. No mark has moved since yesterday. What differs is the viewer, who now knows something about the painter. Calling the work ruined treats facts about the painter as facts about the painting.',
       xp: 5,
     },
     dur: 1.0,
@@ -82,22 +82,22 @@ export const BEATS: Aes16Beat[] = [
   {
     p: 6, x: 124, canvas: 1, facts: 3, pick: 1,
     interact: {
-      prompt: 'Three things about this wall. Tap what actually changed on the canvas.',
-      explain: 'Nothing. Every mark is where it was in 1911. The rail underneath grew, the room grew quieter, and you changed. But the work has been finished the whole time.',
+      prompt: 'After the biography was added, what changed on the canvas itself?',
+      explain: 'Nothing. Every mark and every hue is as it was in 1911. The label grew and the viewer’s knowledge grew, but the painting itself didn’t change.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Canvas Does Not Hear You',
+      title: 'The Artist’s Life and the Work',
       points: [
-        'What you learn cannot edit the marks',
-        'It can still change what looking is like',
-        'Intention is not the court of appeal',
-        'Both "ruined" and "irrelevant" are dodges',
+        'Learning about the artist can’t alter the marks',
+        'It can still change the experience of looking',
+        'Intention isn’t the standard for judging the work',
+        'Neither “ruined” nor “irrelevant” describes the change',
       ],
-      closing: 'The work stopped changing the day it was finished. You did not.',
+      closing: 'The painting was complete in 1911, but a viewer’s response can change with each new fact.',
     },
     dur: 3.0,
   },

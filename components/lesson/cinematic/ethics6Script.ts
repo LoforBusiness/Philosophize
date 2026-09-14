@@ -26,40 +26,40 @@ export interface Ethics6Beat extends BaseBeat {
 export const BEATS: Ethics6Beat[] = [
   {
     d: 2, str: 0, tx: 70, card: 0,
-    text: 'Five lives saved. So why does this one feel wrong?',
+    text: 'Some acts that save five lives at the cost of one still strike most people as wrong.',
     dur: 1.8,
   },
   {
     d: 2, str: 0, tx: 70, card: 0,
-    text: 'Same numbers, different hands — your gut splits where the math does not.',
+    text: 'The numbers can stay fixed while moral intuitions reverse. What changes is how the harm is brought about.',
     dur: 2,
   },
   {
     d: 383, str: 0, tx: 110, card: 1,
-    text: 'Earlier you met the lever: divert the trolley, one dies instead of five. Philosophers then twisted it, each version keeping the five-for-one math but changing how the one dies.',
+    text: 'Pulling a lever diverts the trolley to kill one instead of five. Later variants change only how the one dies.',
     cite: 'One dilemma, many versions',
     dur: 5.0,
   },
   {
     d: 13, str: 15, tx: 150, shove: 1, card: 2,
-    text: 'Thomson’s 1985 twist: you stand on a bridge beside a large stranger. Shove him onto the track and his body stops the trolley, saving five.',
-    cite: 'The footbridge twist',
+    text: 'In Judith Jarvis Thomson’s 1976 footbridge case, you stand on a bridge beside a large stranger. Pushing him onto the track would stop the trolley.',
+    cite: 'The footbridge case',
     dur: 3.8,
   },
   {
     d: 13, str: 15, tx: 150, shove: 1, card: 2,
-    text: 'Most who would pull the lever refuse to push.',
+    text: 'In surveys, most people who would pull the lever judge pushing impermissible.',
     dur: 1.8,
   },
   {
     d: 22, str: 18, tx: 180, card: 2, stamp: 1,
-    text: 'The arithmetic is identical — five lives for one, which is all a utilitarian counts. Yet the switch and the shove split people.',
-    cite: 'Doing vs using',
+    text: 'Both cases trade one life for five, which is all a utilitarian counts. Yet people judge them differently.',
+    cite: 'Side effect or means',
     dur: 3.2,
   },
   {
     d: 22, str: 18, tx: 180, card: 2, stamp: 1,
-    text: 'For Foot, diverting redirects a threat. Shoving makes a person your instrument.',
+    text: 'The doctrine of double effect offers an explanation. Diverting kills as a side effect, whereas shoving uses a person as a means.',
     dur: 1.8,
   },
   {
@@ -78,17 +78,17 @@ export const BEATS: Ethics6Beat[] = [
   {
     d: 165, str: 0, tx: 180, card: 2, stamp: 1,
     interact: {
-      prompt: 'What actually changed between the two cases?',
+      prompt: 'What differs morally between the lever case and the footbridge case?',
       split: {
-        left: 'HE IS USED AS A TOOL', right: 'THE NUMBER WHO DIE',
+        left: 'USED AS A MEANS', right: 'THE NUMBER WHO DIE',
         start: 0.04,
         zones: [
-          { id: 'count', upto: 0.3, reads: 'the numbers changed, and that is what moved you' },
-          { id: 'both', upto: 0.66, reads: 'half the numbers, half the using' },
-          { id: 'tool', upto: 1, reads: 'same numbers, you used him as a tool', correct: true },
+          { id: 'count', upto: 0.3, reads: 'a different number of people die' },
+          { id: 'both', upto: 0.66, reads: 'partly the numbers, partly the using' },
+          { id: 'tool', upto: 1, reads: 'same numbers, yet one is used as a means', correct: true },
         ],
       },
-      explain: 'All of it on the using, because the numbers never moved: one life for five, in both. What changes is that the man on the bridge is used as a tool. The doctrine of double effect flags that, and Thomson built the footbridge case to isolate it.',
+      explain: 'Same numbers, but one is used as a means. One life is traded for five in both cases. What differs is that the man on the bridge is used to stop the trolley. The doctrine of double effect treats that difference as morally significant.',
       xp: 5,
     },
     dur: 1.0,
@@ -96,26 +96,26 @@ export const BEATS: Ethics6Beat[] = [
   {
     d: 177, str: 0, tx: 180, card: 2, stamp: 1,
     interact: {
-      prompt: 'A strict utilitarian must judge the lever and footbridge cases exactly alike. True?',
+      prompt: 'Is it true that a strict utilitarian must judge the lever and footbridge cases alike?',
       cards: [
         { text: 'True', correct: true },
         { text: 'False', correct: false },
       ],
-      explain: 'True, and it feels wrong. Pure utilitarianism counts only outcomes. Five saved for one lost is identical in both, so the cases get the same verdict.',
+      explain: 'True. Strict utilitarianism counts only outcomes, and both cases save five lives at the cost of one. So it gives the same verdict in both, even though most people’s intuitions differ.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Trolley Family',
+      title: 'Variants of the Trolley Problem',
       points: [
-        'Switch and shove share the same math',
-        'Our gut still treats them differently',
-        'Means versus side effect drives the split',
-        'Foot: not harming outweighs helping',
+        'The switch and the shove trade one life for five',
+        'Most people nonetheless judge the two cases differently',
+        'Double effect separates harm as a means from a side effect',
+        'Foot: the duty not to harm outweighs the duty to help',
       ],
-      closing: 'The puzzle isn’t what to do. It’s why your intuitions refuse to line up.',
+      closing: 'The central puzzle is to explain why intuitions differ when the outcomes are identical.',
     },
     dur: 2.8,
   },

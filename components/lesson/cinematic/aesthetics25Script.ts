@@ -34,41 +34,41 @@ export interface Aesthetics25Beat extends BaseBeat {
 export const BEATS: Aesthetics25Beat[] = [
   {
     p: 2, x: 40,
-    text: 'Name the thing you find most beautiful. A sociologist will guess where you grew up.',
+    text: 'Taste in art feels personal. Yet the sociologist Pierre Bourdieu found that it closely tracks social class and upbringing.',
     dur: 4.2,
   },
   {
     p: 30, x: 40, frames: 1,
-    text: 'Two visitors stand at the same canvas.',
+    text: 'Consider two visitors in front of the same canvas.',
     dur: 2.8,
   },
   {
     p: 36, x: 40, frames: 1,
-    text: 'One reads it at once. The other doesn’t know where to start.',
+    text: 'One recognises its style and subject at once. The other can’t tell what to look for.',
     dur: 3.6,
   },
   {
     p: 160, x: 40, frames: 1, shelves: 1,
-    text: 'Pierre Bourdieu asked what each of them walked in carrying.',
+    text: 'Bourdieu locates the difference in what each visitor brings to the canvas.',
     dur: 3.4,
   },
   {
     p: 161, x: 40, frames: 1, shelves: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what is not the same for both visitors.',
-      explain: 'What they brought. The canvas is one canvas, and the second visitor looked at it for just as long. The picture shows both. Only the stack under each one differs.',
+      prompt: 'Which of these differs between the two visitors?',
+      explain: 'What they brought. Both visitors face the same canvas, and both look at it for the same length of time. Only the stacks beneath them differ.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 159, x: 40, frames: 1, shelves: 1,
-    text: 'Bourdieu called it cultural capital. Books at home, gallery trips, the talk at the table.',
+    text: 'Bourdieu called such a background cultural capital. It includes books at home, gallery visits and conversation over meals.',
     dur: 4.4,
   },
   {
     p: 62, x: 96, frames: 1, shelves: 1,
-    text: 'Cultural capital arrives so early it feels like your own eye.',
+    text: 'Cultural capital is acquired in childhood, so it feels like natural taste rather than training.',
     dur: 3.4,
   },
   {
@@ -86,22 +86,22 @@ export const BEATS: Aesthetics25Beat[] = [
   },
   {
     p: 383, x: 96, frames: 1, shelves: 1,
-    text: 'Kant praised a pure pleasure in form. Bourdieu answered that only some people can afford one.',
+    text: 'Kant said a judgement of beauty is disinterested. Bourdieu replied that such detachment requires freedom from economic need.',
     dur: 4.6,
   },
   {
     p: 21, x: 96, feeds: 1,
     interact: {
-      prompt: 'You love difficult films. Where does that love belong?',
+      prompt: 'Suppose you love difficult films. What does Bourdieu’s account make of that preference?',
       sort: {
         chip: 'loving difficult films',
         bins: [
-          { id: 'heart', label: 'sincere', reads: 'felt straight from the eye, and owing nothing to anyone' },
-          { id: 'shelf', label: 'positioning', reads: 'a signal, sent to mark you out as cultured' },
-          { id: 'both', label: 'both', reads: 'really felt, and shaped long before you felt it', correct: true },
+          { id: 'heart', label: 'sincere', reads: 'a sincere response that owes nothing to upbringing' },
+          { id: 'shelf', label: 'social signal', reads: 'a display meant to mark you as cultured' },
+          { id: 'both', label: 'both', reads: 'sincerely felt, yet shaped by your upbringing', correct: true },
         ],
       },
-      explain: 'Both, and Bourdieu needs it to be both. The love is sincere because the training finished years ago. Calling it a pose would make it easy to deny, and that’s not the claim.',
+      explain: 'Sincerely felt, yet shaped by your upbringing. For Bourdieu, the love is sincere, because its training ended long ago. Calling it a pose misreads him. Taste, on his account, is socially formed and still felt.',
       xp: 5,
     },
     dur: 1.0,
@@ -111,11 +111,11 @@ export const BEATS: Aesthetics25Beat[] = [
       title: 'Where Taste Comes From',
       points: [
         'Preferences track class as well as temperament',
-        'Cultural capital is handed over by upbringing',
-        'A trained eye feels like an untrained one',
-        'The disinterested gaze costs money to afford',
+        'Cultural capital is passed on through upbringing',
+        'Trained taste feels natural to its owner',
+        'Disinterested contemplation presupposes freedom from economic need',
       ],
-      closing: 'The next time something strikes you as beautiful, ask yourself who taught you to see it that way.',
+      closing: 'For Bourdieu, a judgement of taste also reveals the social position of the person making it.',
     },
     dur: 3.6,
   },

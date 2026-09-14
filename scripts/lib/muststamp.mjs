@@ -130,8 +130,21 @@ function layoutOf(file) {
  * old rule proved the measurement valid. Only QUOTED values go: `chip` and `left`
  * are also numeric CHANNELS in two scenes, and a number here is never stripped.
  */
+/*
+ * AND A POLL'S HOLDERS, A TREND PICK'S AXIS AND A CITE LINE ARE DECK WORDS TOO.
+ *
+ * R17 gave every poll option a `holders` list, R16's trend pick labels its row with
+ * `axis`, and a beat's `cite` is the caption printed over its narration. All three
+ * are drawn inside `styles.lower`, so none can move a stage box. But a holders list
+ * or a cite is ADDED or REMOVED rather than reworded, and blanking a value cannot
+ * hide a key that was not there before. So the 13 Sep 2026 lecture rewrite, which put
+ * holders on every poll and moved a few captions, made stamps stale for a change the
+ * probe cannot see. Both are therefore removed WHOLE, key and all.
+ * `scripts/restamp-deck-words.mjs` migrated the stores, only where the old rule
+ * proved the measurement valid.
+ */
 const PROSE_KEYS = ['text', 'cite', 'explain', 'prompt', 'reads', 'author', 'work', 'era', 'label',
-  'closing', 'title', 'chip', 'lo', 'hi', 'left', 'right'];
+  'closing', 'title', 'chip', 'lo', 'hi', 'left', 'right', 'axis'];
 
 function proselessScript(file) {
   const src = fs.readFileSync(file, 'utf8');
@@ -140,6 +153,10 @@ function proselessScript(file) {
     'g',
   );
   return src
+    // A holders list is bare names in brackets; take the key and its comma with it.
+    .replace(/,?\s*\bholders\s*:\s*\[[^\]]*\]/g, '')
+    // A cite sits on its own line in every script that has one.
+    .replace(/\n[ \t]*cite\s*:\s*(['"])(?:\\.|(?!\1)[^\\\n])*\1,?[ \t]*(?=\n)/g, '')
     .replace(re, (_m, key, sep, q) => `${key}${sep}${q}${q}`)
     // A summary's points are an array of bare strings, so no key names each one.
     .replace(/(points\s*:\s*\[)([\s\S]*?)(\])/g, (_m, open, body, close) => (

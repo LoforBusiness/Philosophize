@@ -35,53 +35,53 @@ export interface Log18Beat extends BaseBeat {
 export const BEATS: Log18Beat[] = [
   {
     p: 172, x: 200, crowd: 0.12, needle: 0.5,
-    text: 'One person says the water here is safe. You’ve no idea whether it is.',
+    text: 'Suppose one person tells you the town’s water is safe to drink, and you know nothing else about it.',
     dur: 3.8,
   },
   {
     p: 405, x: 200, crowd: 1, needle: 0.5,
-    text: 'Now the whole town says the same thing. Every voice, loudly, and a few are upset with you for asking.',
+    text: 'Now suppose the whole town says the same thing, and some residents are angry with you for doubting it.',
     dur: 4.6,
   },
   {
     p: 465, x: 128, crowd: 1, gap: 1, needle: 0.5,
-    text: 'Here’s the machinery. The handle is what they turn.',
-    cite: 'Look at the middle',
+    text: 'In this machine, the handle stands for the number of believers and the strength of their feeling. The needle shows whether the claim is true.',
+    cite: 'Popularity and feeling',
     dur: 2.4,
   },
   {
     p: 465, x: 128, crowd: 1, gap: 1, needle: 0.5,
-    text: 'The needle is whether the water is safe.',
+    text: 'Treating popularity as evidence is the bandwagon fallacy. Treating strong feeling as evidence is the appeal to emotion.',
     dur: 2,
   },
   {
     p: 383, x: 128, crowd: 1, gap: 1, needle: 0.5,
-    text: 'There’s a hole in the shaft. Nothing that happens on the left reaches the right.',
+    text: 'The shaft between them is broken. Popularity and feeling have no bearing on whether a claim is true.',
     dur: 3.8,
   },
   {
     p: 165, x: 128, crowd: 1, gap: 1, needle: 0.5, live_d: 1,
     interact: {
-      prompt: 'Turn it up. Take it all the way to everybody, and watch the needle.',
+      prompt: 'If everyone asserts that the water is safe, where does the needle point?',
       drag: {
         lo: 'ONE PERSON SAYS SO',
         hi: 'EVERYBODY SAYS SO',
         start: 0.08,
         zones: [
-          { id: 'few', upto: 0.35, reads: 'the needle has not moved' },
-          { id: 'many', upto: 0.72, reads: 'the needle still has not moved' },
-          { id: 'all', upto: 1, reads: 'exactly where it started', correct: true },
+          { id: 'few', upto: 0.35, reads: 'few people agree, and the needle hasn’t moved' },
+          { id: 'many', upto: 0.72, reads: 'most agree, and the needle still hasn’t moved' },
+          { id: 'all', upto: 1, reads: 'everyone agrees, and the needle is where it began', correct: true },
         ],
       },
-      explain: 'Nothing happened, because nothing is connected. How many people hold a view, and how loudly, are facts about the people. The needle measures whether the claim is true, and no amount of turning that handle reaches it.',
+      explain: 'Everyone agrees, and the needle is where it began. How many people hold a view, and how strongly, are facts about them, not about the water. Only evidence, such as a test, can move the needle.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 467, x: 128, crowd: 1, gap: 1, meshed: 1, needle: 0.78,
-    text: 'Here’s the other kind of link. Somebody tested the water, and this shaft has no hole in it.',
-    cite: 'What does reach it',
+    text: 'Evidence, unlike popularity, is connected to the truth of a claim. A test of the water bears on whether it’s safe.',
+    cite: 'Evidence',
     dur: 4.2,
   },
   {
@@ -100,26 +100,26 @@ export const BEATS: Log18Beat[] = [
   {
     p: 442, x: 268, crowd: 1, gap: 1, meshed: 1, needle: 0.78,
     interact: {
-      prompt: 'So is it always wrong to be moved by a story?',
+      prompt: 'Is it always a fallacy to be persuaded by a moving story?',
       cards: [
-        { text: 'No, if the story is evidence', correct: true },
-        { text: 'Yes, feelings are never relevant', correct: false },
+        { text: 'No, the story may be evidence', correct: true },
+        { text: 'Yes, stories are never evidence', correct: false },
       ],
-      explain: 'No. A story can be real evidence. One case can show that a thing is possible, or what a policy does to a person. The fallacy is using the feeling instead of the reason, not feeling anything at all.',
+      explain: 'A moving story may be evidence. One case can show that something is possible, or what a policy does to a person. The fallacy is letting the feeling replace the reasons, not being moved at all.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Handle and the Needle',
+      title: 'Popularity, Feeling and Truth',
       points: [
-        'Bandwagon treats how many believe it as evidence',
-        'Appeal to emotion treats how it feels as evidence',
-        'Both are facts about the audience, not about the claim',
-        'A story counts when it is evidence, not when it is moving',
+        'The bandwagon fallacy treats popularity as evidence of truth',
+        'The appeal to emotion treats feeling as evidence of truth',
+        'Both are facts about believers, not about the claim',
+        'A story supports a claim only when it is evidence',
       ],
-      closing: 'Ask what’s on the other end of the handle before you pull it.',
+      closing: 'Before accepting a claim, ask whether the reason offered bears on its truth.',
     },
     dur: 3.2,
   },

@@ -21,30 +21,30 @@ export interface Epistemology33Beat extends BaseBeat {
 export const BEATS: Epistemology33Beat[] = [
   {
     p: 172, x: 56, ev: 0, bar: 0.2,
-    text: 'A friend asks whether the bank opens on Saturday. You were there last Saturday and there was a queue out of the door.',
+    text: 'Consider a case adapted from Keith DeRose. Asked whether the bank opens on Saturday, you recall being there last Saturday.',
     dur: 3.8,
   },
   {
     p: 435, x: 56, ev: 1, bar: 0.2,
-    text: 'That’s your evidence, and it’s ordinary. You say you know, nobody blinks, and the two of you carry on.',
-    cite: 'One memory, and it is enough',
+    text: 'In ordinary conversation, that memory is enough. You say you know the bank will be open, and nobody objects.',
+    cite: 'Low stakes',
     dur: 4.0,
   },
   {
     p: 415, x: 56, ev: 1, bar: 0.85,
-    text: 'Now the same afternoon with one thing added. A cheque has to clear by Monday or you lose the house.',
-    cite: 'The stakes go up',
+    text: 'Now add high stakes. A cheque must be deposited by Monday, or you’ll lose your house.',
+    cite: 'High stakes',
     dur: 4.0,
   },
   {
     p: 457, x: 56, ev: 1, bar: 0.85,
-    text: 'Look at the column as you get out of the car to check. Not one brick has moved.',
+    text: 'Your evidence hasn’t changed. The column of evidence is the same height as before.',
     cite: 'The evidence did not move',
     dur: 3.5,
   },
   {
     p: 457, x: 56, ev: 1, bar: 0.85,
-    text: 'You’ve got the same evidence you had a minute ago.',
+    text: 'Yet it now seems wrong to say that you know the bank will be open.',
     dur: 1.8,
   },
   {
@@ -62,25 +62,25 @@ export const BEATS: Epistemology33Beat[] = [
   {
     p: 467, x: 56, ev: 1, live: 1,
     interact: {
-      prompt: 'The column never changes as you drag. Stop where what you have stops being enough.',
+      prompt: 'At what level of stakes does your evidence stop being enough to know?',
       drag: {
-        lo: 'NOTHING RIDES ON IT',
+        lo: 'NOTHING AT STAKE',
         hi: 'THE HOUSE',
         start: 0,
         zones: [
           { id: 'know', upto: 0.36, reads: 'you know it' },
-          { id: 'hedge', upto: 0.68, reads: 'you had better check' },
+          { id: 'hedge', upto: 0.68, reads: 'you should check first' },
           { id: 'no', upto: 1, reads: 'you do not know it', correct: true },
         ],
       },
-      explain: 'Watch what didn’t move: the evidence. The bar did. That’s contextualism. The word “know” takes its standard from what’s riding on the answer. One belief can pass in the morning and fail in the afternoon.',
+      explain: 'You do not know it, once the house is at stake. The evidence stayed the same, but the standard rose. Contextualism holds that the word “know” takes its standard from what depends on the answer.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 383, x: 56, ev: 1, bar: 0.85,
-    text: 'So there is no single height that counts as knowing. There’s a height for this conversation, and it goes up when the answer starts to cost something.',
+    text: 'So there is no single height that counts as knowing. On this view, the standard rises as the cost of error rises.',
     cite: 'No single height',
     dur: 4.6,
   },
@@ -89,24 +89,24 @@ export const BEATS: Epistemology33Beat[] = [
     interact: {
       prompt: 'Does raising the stakes make your belief less likely to be true?',
       cards: [
-        { text: 'No, just harder to claim', correct: true },
+        { text: 'No, only harder to call knowledge', correct: true },
         { text: 'Yes, the evidence weakens', correct: false },
       ],
-      explain: 'The tempting slide is from “I should not say I know” to “I am probably wrong”. They’re different. The bank will do whatever it was always going to do. What changed is how much you should stake on it without looking.',
+      explain: 'Only harder to call knowledge. Raising the stakes doesn’t change your evidence, or the chance that the bank opens. It changes how much evidence you need before claiming to know.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Enough For What?',
+      title: 'Stakes and Knowledge',
       points: [
         'The same evidence can pass one test and fail another',
         'Stakes move the standard, not the evidence',
-        '"I should check" is not "I am probably wrong"',
-        '"Know" carries its context with it',
+        '“I should check” is not “I am probably wrong”',
+        'On contextualism, “know” depends on context',
       ],
-      closing: 'Next time you hesitate to say you know, ask what changed. Usually it’s not what you have, but what it would cost to be wrong.',
+      closing: 'When you hesitate to claim knowledge, your evidence has often stayed the same. What has changed is the cost of being wrong.',
     },
     dur: 3.0,
   },

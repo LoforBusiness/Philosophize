@@ -35,36 +35,36 @@ export interface Metaphysics40Beat extends BaseBeat {
 export const BEATS: Metaphysics40Beat[] = [
   {
     p: 420, x: 40,
-    text: 'Tomorrow either rains or does not rain. Nothing could sound safer.',
+    text: 'Tomorrow it will either rain or not rain. That either-or statement, called a disjunction, seems beyond doubt.',
     dur: 4.2,
   },
   {
     p: 158, x: 40, ledger: 0.5,
-    text: 'Logic has a rule: every statement is either true or false.',
+    text: 'Classical logic accepts the principle of bivalence. It holds that every statement is either true or false.',
     dur: 3.4,
   },
   {
     p: 448, x: 40, ledger: 1, written: 0.67,
-    text: 'Point that rule at tomorrow and one of the two is true already, today.',
+    text: 'Applied to tomorrow, bivalence implies that one of the two predictions is already true today.',
     dur: 4.0,
   },
   {
     p: 168, x: 40, ledger: 1, written: 0.67,
-    text: 'Aristotle imagined two admirals arguing the night before a sea battle. One of them was right while they spoke.',
+    text: 'In Aristotle’s example, a sea battle is predicted for tomorrow. If the prediction is true today, the battle seems bound to happen.',
     dur: 4.6,
   },
   {
     p: 161, x: 40, ledger: 1, written: 0.67, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what the rule puts on tomorrow\'s line.',
-      explain: 'One of the two, already. That’s the rule applied to a day nobody has lived. “Both at once” isn’t something any logic offers. “Nothing yet” is a real escape, and it’s the one Aristotle takes. It costs him the rule.',
+      prompt: 'What does bivalence assign to a statement about tomorrow, before the day has come?',
+      explain: 'One of the two. Bivalence makes every statement true or false, even one about a day to come. “Nothing yet” denies bivalence, and that’s Aristotle’s reply on the traditional reading.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 446, x: 104, ledger: 1, written: 0.67,
-    text: 'So Aristotle refused the rule here. Tomorrow\'s line is neither true nor false yet.',
+    text: 'On the traditional reading, Aristotle denies bivalence for future contingents, claims about what may or may not happen. Such a claim is neither true nor false yet.',
     dur: 4.4,
   },
   {
@@ -82,21 +82,21 @@ export const BEATS: Metaphysics40Beat[] = [
   },
   {
     p: 393, x: 104, ledger: 1, written: 1,
-    text: 'There’s a cheaper door. Let the line be written, and deny that writing it forces anything.',
+    text: 'A second reply, defended by William of Ockham, keeps bivalence. It accepts that a prediction can be true now, but denies that truth makes the event necessary.',
     dur: 4.6,
   },
   {
     p: 267, x: 104, ledger: 1, written: 0.67,
     interact: {
-      prompt: 'What holds for tomorrow, right now?',
+      prompt: 'What is the status, today, of a prediction about tomorrow’s sea battle?',
       poll: {
         options: [
-          { id: 'shut', reads: 'settled already, and nothing can change it', holders: ['Chrysippus'] },
-          { id: 'blank', reads: 'neither true nor false yet', holders: ['Aristotle'] },
-          { id: 'open', reads: 'settled, and yet nothing is forced', holders: ['Boethius', 'William of Ockham'], correct: true },
+          { id: 'shut', reads: 'already true or false, and so necessary', holders: ['Diodorus Cronus'] },
+          { id: 'blank', reads: 'neither true nor false yet', holders: ['Aristotle', 'Epicurus'] },
+          { id: 'open', reads: 'already true or false, yet not necessary', holders: ['William of Ockham'], correct: true },
         ],
       },
-      explain: 'Settled, and yet nothing is forced. It’s true that you’ll finish this sentence, and you’re finishing it freely. Truth is a record, not a rope. Aristotle chose “neither true nor false yet”, at the cost of a law of logic. Chrysippus takes the rope for granted.',
+      explain: 'Already true or false, yet not necessary. A prediction is true because of what will happen, so its truth can’t force the event. “Neither true nor false yet” also avoids necessity, but only by giving up bivalence.',
       xp: 5,
     },
     dur: 1.0,
@@ -104,14 +104,14 @@ export const BEATS: Metaphysics40Beat[] = [
   {
     p: 437, x: 104, ledger: 1, written: 1,
     summary: {
-      title: 'The Blank Line',
+      title: 'Bivalence and the Future',
       points: [
-        'Every statement is true or false, says the rule',
-        'Aimed at tomorrow, it seems to settle tomorrow',
-        'Aristotle left that one line neither, for now',
-        'The cheaper escape denies that true means forced',
+        'Bivalence holds that every statement is either true or false',
+        'Applied to tomorrow, it seems to make the future necessary',
+        'On the traditional reading, Aristotle denies bivalence for future contingents',
+        'Ockham’s reply denies that truth now implies necessity',
       ],
-      closing: 'Every answer here costs something — a law of logic, or an open tomorrow. Working out which you’d rather pay is the exercise.',
+      closing: 'Denying bivalence gives up a law of logic. Keeping bivalence means accepting a fixed future, or showing that truth doesn’t fix it.',
     },
     dur: 4.0,
   },

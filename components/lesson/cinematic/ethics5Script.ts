@@ -39,14 +39,14 @@ export const BEATS: Ethics5Beat[] = [
     // The empty three-lane chart opens the lesson: it names the very three places
     // this line names, and the thinkers drop into it as the narration reaches them.
     x: 177, soc: 1, chart: 1,
-    text: 'In Greece, in India, in China, humans began to argue about how to live. Out loud, for the first time.',
+    text: 'In Greece, India and China, thinkers began to argue systematically about how people should live.',
     dur: 3.2,
   },
   {
     x: 217, soc: 2, chart: 1,
     // The chart overhead already draws the window and its dates. Saying them again
     // in the narration is the reader reading a number they can see (J6).
-    text: 'Karl Jaspers gave that window a name: the Axial Age. Three places, no contact between them, all starting to ask the same kind of question.',
+    text: 'Karl Jaspers named this period the Axial Age. He argued that these regions, without contact, began asking similar questions.',
     cite: 'The Axial Age',
     dur: 4.4,
   },
@@ -54,29 +54,29 @@ export const BEATS: Ethics5Beat[] = [
     x: 217, soc: 2, chart: 1,
     // The chart overhead already draws the window and its dates. Saying them again
     // in the narration is the reader reading a number they can see (J6).
-    text: 'Nobody has ever agreed on why.',
+    text: 'Scholars dispute why this happened, and some doubt that there was a single Axial Age at all.',
     dur: 1.8,
   },
   {
     x: 217, soc: 13, chart: 2,
-    text: 'Socrates never wrote a word down. What survives of him was written later, by a student.',
+    text: 'Socrates wrote nothing. His views are known mainly through the dialogues of his student Plato.',
     cite: 'Greece — Socrates',
     dur: 1.9,
   },
   {
     x: 217, soc: 13, chart: 2,
-    text: 'In Athens, he walked up to people and asked them what virtue was. The city put him on trial and killed him for it.',
+    text: 'Socrates questioned Athenians about what virtue is. In 399 BCE, Athens executed him for impiety and corrupting the young.',
     dur: 3.5,
   },
   {
     x: 265, soc: 5, chart: 3,
-    text: 'The same thing is stirring elsewhere. India’s word is dharma: doing what your place in life actually asks of you.',
+    text: 'In India, a central concept was dharma. It includes the duties that belong to your place in life.',
     cite: 'India — China',
     dur: 2.8,
   },
   {
     x: 265, soc: 5, chart: 3,
-    text: 'China’s word is ren, something like humaneness. Confucius says it grows only between people.',
+    text: 'In China, Confucius taught ren, usually translated as humaneness. He held that ren is cultivated in relationships with others.',
     dur: 2.4,
   },
   {
@@ -95,8 +95,8 @@ export const BEATS: Ethics5Beat[] = [
   {
     x: 265, soc: 4, fork: 1,
     interact: {
-      prompt: 'Ren has to grow somewhere. Take the path Confucius would send you down.',
-      explain: 'Ren is shaped in real relationships: family, friends, ruler and citizen. Confucius has no use for a virtue you could practise alone in a room.',
+      prompt: 'Where does Confucius hold that ren is cultivated?',
+      explain: 'Among others. For Confucius, ren is cultivated in relationships, such as those between ruler and subject or father and son. It can’t be developed in solitude, since it consists in how you treat others.',
       xp: 5,
     },
     dur: 1.0,
@@ -104,8 +104,8 @@ export const BEATS: Ethics5Beat[] = [
   {
     x: 265, soc: 4, balance: 1,
     interact: {
-      prompt: 'The "Axial Age" — tip the scale. Is it a proven fact, or an interpretive thesis?',
-      explain: 'The claim sounds like a fact with a date on it, but it’s a reading of history. Jaspers noticed three places changing at once and argued that the timing meant something. Historians have argued back ever since.',
+      prompt: 'Is the Axial Age a proven historical fact, or an interpretive thesis?',
+      explain: 'A thesis. The Axial Age sounds like a dated fact, but the idea is a reading of history. Jaspers saw similar changes in several places and argued that the timing mattered. Historians have disputed the reading ever since.',
       xp: 5,
     },
     dur: 1.0,
@@ -119,7 +119,7 @@ export const BEATS: Ethics5Beat[] = [
         'Dharma tied right action to duty and role',
         'Confucius rooted ethics in humane relationships',
       ],
-      closing: 'Not one of these thinkers wrote a word for you. Their pupils carried the questions forward anyway.',
+      closing: 'The teachings of Socrates and Confucius survive through their students, who recorded the questions they raised.',
     },
     dur: 2.8,
   },

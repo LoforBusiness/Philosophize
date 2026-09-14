@@ -33,26 +33,26 @@ export interface Aesthetics37Beat extends BaseBeat {
 export const BEATS: Aesthetics37Beat[] = [
   {
     p: 379, x: 54, staves: 1, score: 1,
-    text: 'Two performances tonight. The top one was written first, and every note existed before anybody walked on.',
+    text: 'Consider two performances. The upper piece was written in advance, so every note existed before anyone came on stage.',
     dur: 3.8,
   },
   {
     p: 384, x: 54, staves: 1, score: 1, played: 1,
-    text: 'The bottom row is a solo. Watch the line arrive with nothing above it and nothing to compare it against.',
+    text: 'The lower row is an improvised solo. Each note is decided as it’s played, with no score to compare it against.',
     dur: 4.2,
   },
   {
     p: 165, x: 54, staves: 1, score: 1, played: 1, live: 1,
     interact: {
-      prompt: 'Tap the row with nothing standing behind it.',
-      explain: 'The lower one. The written piece has something the performance is a performance OF, so a wrong note is a mistake. There’s nothing for the solo to be wrong about, because the playing and the making are the same act.',
+      prompt: 'Which performance has no prior work that it’s a performance of?',
+      explain: 'The row made up tonight. A composed piece exists before its performance, so a wrong note counts as a mistake. An improvised solo has no prior work to get wrong, because playing it and making it are the same act.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 380, x: 54, staves: 1, score: 1, played: 1,
-    text: 'That’s why you can burn every copy of a symphony and it survives. Do that to an improvisation and there’s nothing left to recover.',
+    text: 'A symphony isn’t its score, so you can burn every copy of a symphony and it survives. An unrecorded solo ends when the playing stops.',
     dur: 4.8,
   },
   {
@@ -69,48 +69,48 @@ export const BEATS: Aesthetics37Beat[] = [
   },
   {
     p: 309, x: 54, staves: 1, score: 1, played: 1,
-    text: 'Then recording arrived, and players started learning famous solos note for note. Something meant to happen once now had a correct version.',
+    text: 'Recording changed this. Players began learning famous solos note for note, so an event meant to happen once acquired a correct version.',
     dur: 4.8,
   },
   {
     p: 457, x: 54, staves: 1, score: 1, played: 1, live_d: 1, live: 1,
     interact: {
-      prompt: 'Transcribe it. Slide the solo up onto the stave.',
+      prompt: 'Once a solo is transcribed and learned note for note, what has it become?',
       drag: {
         lo: 'MADE UP TONIGHT',
         hi: 'WRITTEN DOWN',
         start: 0,
         zones: [
-          { id: 'live', upto: 0.3, reads: 'nothing to get wrong' },
-          { id: 'mid', upto: 0.66, reads: 'a tune people know' },
-          { id: 'text', upto: 1, reads: 'a piece to get right', correct: true },
+          { id: 'live', upto: 0.3, reads: 'an event with nothing to get wrong' },
+          { id: 'mid', upto: 0.66, reads: 'a familiar tune, loosely remembered' },
+          { id: 'text', upto: 1, reads: 'a composition that can be played wrongly', correct: true },
         ],
       },
-      explain: 'The notes survived the trip and the making-it-up did not. What sits on the stave now is a composition with an odd history. It began as something being decided, and it’s now something being followed.',
+      explain: 'A composition that can be played wrongly. The notes survived transcription, but the improvising didn’t. What sits on the stave is now a composition with an unusual history. It began as a series of decisions and is now a text to follow.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 167, x: 126, staves: 1, score: 1, lift: 1,
-    text: 'So the same sounds become a different kind of thing depending on what stood behind them. Not how the sounds strike the ear.',
+    text: 'The same sounds can be two different kinds of thing, depending on whether a composition preceded them.',
     dur: 4.1,
   },
   {
     p: 167, x: 126, staves: 1, score: 1, lift: 1,
-    text: 'What the sounds are.',
+    text: 'The difference lies not in how the music sounds, but in what the music is.',
     dur: 1.8,
   },
   {
     summary: {
-      title: 'Made While You Watch',
+      title: 'The Ontology of Improvisation',
       points: [
-        'A score stands behind its performances',
-        'An improvisation has nothing standing behind it',
-        'So the performance is the work, not a copy',
+        'A composed work exists before its performances',
+        'An improvisation has no work prior to its performance',
+        'The improvised performance is itself the work',
         'Transcribing it turns it into a composition',
       ],
-      closing: 'It’s the one art where being there for the making is not a privilege. It’s the only way the thing exists at all.',
+      closing: 'An unrecorded improvisation exists only while it’s being made. To hear the work, you must be present at its making.',
     },
     dur: 3.2,
   },

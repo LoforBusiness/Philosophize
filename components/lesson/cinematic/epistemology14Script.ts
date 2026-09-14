@@ -21,18 +21,18 @@ export const BEATS: Epis14Beat[] = [
   {
     g: 384, vat: 0, leap: 0,
     dur: 4.0,
-    text: 'Here’s your situation, drawn honestly. There’s the world, and there’s what reaches you of the world, with a leap in between.',
+    text: 'Indirect realism holds that you perceive the world only through your experience of it. A leap separates what you see from the world.',
   },
   {
     g: 443, vat: 0, leap: 0,
     dur: 4.4,
-    text: 'Everything you’ve ever checked, you checked by looking. So every check happened here, on this side of the glass, and never against the world itself.',
+    text: 'Every check you make on a belief relies on your own experience. So every check happens on this side of the screen, never against the world itself.',
     cite: 'What you can check',
   },
   {
     g: 383, vat: 0, leap: 1,
     dur: 4.4,
-    text: 'So the world is not something you observe. It’s something you infer, across this gap, from what shows up on the screen.',
+    text: 'On this view, the world is not something you observe but something you infer. You reason to it across the leap, from what appears on the screen.',
     cite: 'The leap',
   },
   {
@@ -51,20 +51,20 @@ export const BEATS: Epis14Beat[] = [
   {
     g: 159, vat: 1, leap: 1,
     dur: 3,
-    text: 'Now swap the world for a tank and a very good computer. Watch the screen while it happens.',
-    cite: 'Swap the world',
+    text: 'Now suppose your brain were kept in a vat, and a computer supplied all your experiences. This is the brain-in-a-vat scenario.',
+    cite: 'The brain in a vat',
   },
   {
     g: 159, vat: 1, leap: 1,
     dur: 1.8,
-    text: 'Nothing on the screen moved, and nothing on it ever would.',
+    text: 'What appears on the screen doesn’t change. Every experience in the vat would match an experience in the world.',
   },
   {
     g: 461, vat: 1, leap: 1, pick: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Tap the only part of this you can actually inspect.',
-      explain: 'The screen. Everything you’ve ever verified, you verified by looking — which means you verified it here. The world is reached across the gap, and the gap is the part you can’t get behind from inside.',
+      prompt: 'Which part of this arrangement can you inspect directly?',
+      explain: 'What you see. Every check you make relies on your own experience, so it takes place on this side of the screen. The world lies beyond the leap, which experience alone can’t cross.',
       xp: 5,
     },
   },
@@ -72,16 +72,16 @@ export const BEATS: Epis14Beat[] = [
     g: 165, vat: 1, leap: 1,
     dur: 1.0,
     interact: {
-      prompt: 'What has to be true for the vat scenario to work at all?',
+      prompt: 'Which claim about experience does the brain-in-a-vat scenario depend on?',
       poll: {
         options: [
-          { id: 'vat', reads: 'two worlds, one experience: nothing can tell them apart', correct: true },
-          { id: 'easy', reads: 'two worlds that feel different: easy to tell apart' },
-          { id: 'same', reads: 'one world, one experience: nothing to decide' },
-          { id: 'odd', reads: 'one world felt two ways: a different puzzle entirely' },
+          { id: 'vat', reads: 'a vat could produce all the same experiences', holders: ['Hilary Putnam'], correct: true },
+          { id: 'easy', reads: 'dreams and waking life feel different', holders: ['J. L. Austin'] },
+          { id: 'same', reads: 'you perceive physical things themselves, not ideas', holders: ['Thomas Reid'] },
+          { id: 'odd', reads: 'physical things are only collections of ideas', holders: ['George Berkeley'] },
         ],
       },
-      explain: 'Two worlds, one experience, and it’s built that way on purpose. Every piece of evidence you could ever collect is explained equally well by both worlds, so evidence can’t separate them. Common sense is no help: a simulation would fake the pinch too.',
+      explain: 'A vat could produce all the same experiences. The scenario depends on this, because all your evidence would then fit a vat as well as a world.',
       xp: 5,
     },
   },
@@ -89,12 +89,12 @@ export const BEATS: Epis14Beat[] = [
     summary: {
       title: 'The World Beyond the Screen',
       points: [
-        'You only ever directly access your own experience',
-        'The vat fakes every piece of evidence equally well',
-        'Russell: the external world is an inference, not a sighting',
-        'Putnam argued the scenario may even be self-refuting',
+        'Indirect realism: you directly access only your experience',
+        'A vat could produce every experience you have',
+        'Russell: the external world can’t be strictly proved',
+        'Putnam argued that the vat hypothesis refutes itself',
       ],
-      closing: 'You probably can’t prove the world is real. Notice that you can’t prove it’s fake either, and you have to live somewhere.',
+      closing: 'Experience alone can’t prove that the world is real. It can’t prove that the world is unreal either.',
     },
     dur: 3.0,
   },

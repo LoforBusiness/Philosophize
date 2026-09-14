@@ -35,36 +35,36 @@ export interface Logic40Beat extends BaseBeat {
 export const BEATS: Logic40Beat[] = [
   {
     p: 356, x: 36,
-    text: 'Every emerald anybody has ever checked came out green.',
+    text: 'Consider a simple case of induction: every emerald checked so far has been green.',
     dur: 3.6,
   },
   {
     p: 169, x: 36, tray: 1, checked: 0.67,
-    text: 'A great many stones, and every one of them says the same thing.',
+    text: 'Each observation supports the claim that every emerald is green.',
     dur: 3.6,
   },
   {
     p: 429, x: 36, tray: 1, checked: 0.67, rules: 0.5,
-    text: 'Now a new word. A stone is grue if it looks green when checked before tonight.',
+    text: 'Nelson Goodman defined a new predicate, grue. A stone is grue if it’s checked before tonight and is green, or not checked before tonight and is blue.',
     dur: 4.6,
   },
   {
     p: 259, x: 36, tray: 1, checked: 0.67, rules: 1, links: 1,
-    text: 'Nobody has checked one after tonight. So every stone on record is grue as well.',
+    text: 'Every stone checked so far was checked before tonight and was green. So every stone on record is grue as well.',
     dur: 4.6,
   },
   {
     p: 261, x: 36, tray: 1, checked: 0.67, rules: 1, links: 1, live: 1,
     interact: {
-      prompt: 'Tap the stone the two rules disagree about.',
-      explain: 'The one nobody has checked. Grue was built to match green on every case already in the tray. No checked stone can tell them apart. The disagreement stays invisible until you reach for the next one.',
+      prompt: 'Which stone do the two rules disagree about?',
+      explain: 'The stone no one has checked. Grue was defined to agree with green on every stone checked before tonight. So no checked stone can separate the two rules. They disagree only about stones not yet examined.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 421, x: 96, tray: 1, checked: 0.67, rules: 1, links: 1,
-    text: 'Pull a fresh stone out tomorrow and green calls it green. Grue calls it blue.',
+    text: 'The two rules conflict about a stone first checked tomorrow. The green rule predicts green, and the grue rule predicts blue.',
     dur: 4.4,
   },
   {
@@ -81,24 +81,24 @@ export const BEATS: Logic40Beat[] = [
   },
   {
     p: 348, x: 96, tray: 1, checked: 0.67, rules: 1, links: 1,
-    text: 'Green looks simpler. But simple depends on which words you started with.',
+    text: 'Green seems the simpler predicate. However, simplicity depends on which predicates a language takes as basic.',
     dur: 4.2,
   },
   {
     p: 266, x: 96, tray: 1, checked: 0.67, rules: 1, links: 1,
     interact: {
-      prompt: 'Divide the tray between the two rules.',
+      prompt: 'How should the support of the checked stones be divided between the two rules?',
       split: {
         left: 'GREEN',
         right: 'GRUE',
         start: 0.94,
         zones: [
-          { id: 'grue', upto: 0.34, reads: 'the stones back grue, and green is odd' },
-          { id: 'even', upto: 0.66, reads: 'the stones back both, exactly alike', correct: true },
-          { id: 'green', upto: 1, reads: 'the stones back green, and grue is a trick' },
+          { id: 'grue', upto: 0.34, reads: 'the evidence favours grue, since green is artificial' },
+          { id: 'even', upto: 0.66, reads: 'the evidence supports both rules equally', correct: true },
+          { id: 'green', upto: 1, reads: 'the evidence favours green, since grue is artificial' },
         ],
       },
-      explain: 'Down the middle. Every stone in the tray fits both rules, so the evidence has nothing to say. Somebody whose language began with grue would find green the fiddly word, the one that mentions a time. Goodman answered that green is only the older habit.',
+      explain: 'The evidence supports both rules equally. Every checked stone is both green and grue. To a speaker who began with grue, green would be the predicate that mentions a time. Goodman held that green is preferred because it has a longer history of use in predictions.',
       xp: 5,
     },
     dur: 1.0,
@@ -106,14 +106,14 @@ export const BEATS: Logic40Beat[] = [
   {
     p: 322, x: 96, tray: 1, checked: 0.67, rules: 1, links: 1,
     summary: {
-      title: 'The Next Stone',
+      title: 'Goodman’s New Riddle of Induction',
       points: [
         'Grue matches green on every case ever checked',
-        'The rules split only on cases still to come',
+        'The two rules differ only about unexamined cases',
         'Evidence alone cannot choose between them',
-        'Habit chooses green, and habit is not a proof',
+        'Goodman prefers green because it is better entrenched',
       ],
-      closing: 'Induction was hard enough when the worry was whether the future resembles the past. Goodman asks a sharper question: resembles the past in what respect?',
+      closing: 'Hume asked why the past should guide beliefs about the future. Goodman asks which features of the past should guide them.',
     },
     dur: 4.2,
   },

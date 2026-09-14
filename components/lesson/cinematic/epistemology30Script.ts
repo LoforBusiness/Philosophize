@@ -31,36 +31,36 @@ export interface Epistemology30Beat extends BaseBeat {
 export const BEATS: Epistemology30Beat[] = [
   {
     p: 342, x: 24, disc: 1, edge: 0.1,
-    text: 'Thirty lessons in, the question changed on you.',
+    text: 'Most of epistemology asks what knowledge is and how beliefs are justified.',
     dur: 4.2,
   },
   {
     p: 171, x: 24, disc: 1, edge: 0.35,
-    text: 'You stopped asking what knowledge is. You started asking how to know well.',
+    text: 'Virtue epistemology asks a further question: what makes someone a good knower?',
     dur: 4.8,
   },
   {
     p: 447, x: 24, disc: 1, edge: 0.6,
-    text: 'A wise knower is not the one holding the most facts. Good intellectual character is the skill.',
+    text: 'A wise knower isn’t the one holding the most facts. Wisdom depends on good intellectual character.',
     dur: 5.0,
   },
   {
     p: 265, x: 24, disc: 1, edge: 0.6,
-    text: 'Humble about being wrong, curious enough to keep looking, fair enough to credit other people.',
+    text: 'Intellectual virtues include humility about your own errors, curiosity, intellectual courage, and fairness to the views of others.',
     dur: 5.0,
   },
   {
     p: 159, x: 24, disc: 1, edge: 0.6, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what Socratic wisdom actually is.',
-      explain: 'Knowing what you don’t know. Socrates claimed no store of answers and no immunity from error. He claimed only an accurate view of where his own knowledge stopped. That’s a working posture rather than modesty or despair.',
+      prompt: 'What does Socratic wisdom consist in?',
+      explain: 'Knowing where you stop. Socrates claimed no store of answers and no immunity from error. He claimed only an accurate view of where his own knowledge ended.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 465, x: 80, disc: 1, edge: 0.75,
-    text: 'The oracle called Socrates the wisest man in Athens, and he spent years trying to prove it wrong.',
+    text: 'The oracle at Delphi said that no one was wiser than Socrates. Socrates tried to refute it by questioning people reputed to be wise.',
     dur: 5.0,
   },
   {
@@ -78,25 +78,25 @@ export const BEATS: Epistemology30Beat[] = [
   },
   {
     p: 460, x: 80, disc: 1, edge: 0.75,
-    text: 'Hold a belief firmly enough to act on it, and loosely enough to give it up.',
+    text: 'A wise knower holds a belief firmly enough to act on it, and loosely enough to revise it.',
     dur: 4.8,
   },
   {
     p: 168, x: 80, disc: 1,
     interact: {
-      prompt: 'Draw what happens to the questions you can see.',
+      prompt: 'Which curve shows how many questions come into view as you learn?',
       plot: {
         cols: ['LESSON 1', 'LESSON 10', 'LESSON 20', 'LESSON 30'],
         axis: 'QUESTIONS IN VIEW',
         start: [0.5, 0.5, 0.5, 0.5],
         shapes: [
-          { id: 'open', profile: [0.14, 0.4, 0.66, 0.94], reads: 'the edge keeps opening as you learn', correct: true },
-          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5], reads: 'the same view from start to finish' },
-          { id: 'close', profile: [0.94, 0.66, 0.4, 0.14], reads: 'the puzzles get used up one by one' },
-          { id: 'spike', profile: [0.14, 0.92, 0.2, 0.16], reads: 'one confusing week and then clarity' },
+          { id: 'open', profile: [0.14, 0.4, 0.66, 0.94], reads: 'questions multiply as you learn', correct: true },
+          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5], reads: 'the same number of questions throughout' },
+          { id: 'close', profile: [0.94, 0.66, 0.4, 0.14], reads: 'questions are answered and run out' },
+          { id: 'spike', profile: [0.14, 0.92, 0.2, 0.16], reads: 'a surge of questions, then few' },
         ],
       },
-      explain: 'It keeps opening. Every answer brings a question you couldn’t have asked before. So the edge of what you know you don’t know grows faster than the middle. A shrinking line would mean philosophy runs out.',
+      explain: 'Questions multiply as you learn. Each answer makes new questions possible, so the visible edge of your ignorance grows. A falling curve would mean that inquiry runs out of questions.',
       xp: 5,
     },
     dur: 1.0,
@@ -104,14 +104,14 @@ export const BEATS: Epistemology30Beat[] = [
   {
     p: 331, x: 80, disc: 1, edge: 0.94,
     summary: {
-      title: 'A Better Way to Think',
+      title: 'Becoming a Wise Knower',
       points: [
-        'Good knowing is a skill and a character',
-        'Wisdom is humility, curiosity, courage and fairness',
+        'Knowing well depends on intellectual character',
+        'Intellectual virtues include humility, curiosity, courage and fairness',
         'Socratic wisdom is knowing where your knowledge stops',
-        'Hold beliefs firmly enough to act, loosely enough to learn',
+        'Beliefs should be firm enough to act on, and open to revision',
       ],
-      closing: 'You set out to define knowledge. You leave with something rarer, which is a better way to think.',
+      closing: 'Epistemology asks what knowledge is. Virtue epistemology also asks what makes a good knower.',
     },
     dur: 5.0,
   },

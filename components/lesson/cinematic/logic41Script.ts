@@ -35,36 +35,36 @@ export interface Logic41Beat extends BaseBeat {
 export const BEATS: Logic41Beat[] = [
   {
     p: 420, x: 28,
-    text: 'Linda is thirty-one, outspoken, and studied philosophy at university.',
+    text: 'Consider Linda, who’s thirty-one, single and outspoken. As a student, she studied philosophy and cared about social justice.',
     dur: 4.0,
   },
   {
     p: 161, x: 28, outer: 1,
-    text: 'Is she more likely to be a bank teller, or a bank teller who’s also an activist?',
+    text: 'Is it more probable that Linda is a bank teller, or a bank teller who’s also an activist?',
     dur: 4.8,
   },
   {
     p: 386, x: 28, outer: 1, inner: 1, fill: 0.34,
-    text: 'Most people pick the second. The extra detail fits Linda.',
+    text: 'Most people choose the second, because the added detail matches Linda’s description.',
     dur: 4.4,
   },
   {
     p: 263, x: 28, outer: 1, inner: 1, fill: 0.34,
-    text: 'But every activist teller is a teller. The second group sits inside the first.',
+    text: 'However, every activist bank teller is a bank teller. So the second group is a subset of the first.',
     dur: 4.6,
   },
   {
     p: 260, x: 28, outer: 1, inner: 1, fill: 0.34, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what makes the longer description feel likelier.',
-      explain: 'Resemblance. You were asked about probability and answered about fit, because fit is the easier question. Precision is real and beside the point — a narrower claim is less likely, not more. And the number of claims is the mechanism, not the reason.',
+      prompt: 'Why does the longer description seem more probable?',
+      explain: 'The description fits her. Most people judge by how well Linda matches each option, a shortcut called the representativeness heuristic. A more precise claim is less likely, not more. And two claims together are less likely than one, so that can’t be the reason.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 434, x: 88, outer: 1, inner: 1, fill: 0.34,
-    text: 'Amos Tversky and Daniel Kahneman found this in nine of ten people, including statisticians.',
+    text: 'Amos Tversky and Daniel Kahneman named this error the conjunction fallacy in 1983. Most people they tested made the error, even students trained in statistics.',
     dur: 5.0,
   },
   {
@@ -81,24 +81,24 @@ export const BEATS: Logic41Beat[] = [
   },
   {
     p: 446, x: 88, outer: 1, inner: 1, fill: 0.34,
-    text: 'Adding a detail narrows a claim. Narrower means fewer people fit it.',
+    text: 'Adding a detail narrows a claim, so the claim fits the same cases or fewer. Detail can make a story more convincing while never making it more probable.',
     dur: 4.2,
   },
   {
     p: 257, x: 88, outer: 1, inner: 1,
     interact: {
-      prompt: 'How large can the activist tellers be?',
+      prompt: 'Compared with all bank tellers, how large is the group of activist tellers likely to be?',
       drag: {
         lo: 'A FEW',
         hi: 'ALL OF THEM',
         start: 0.95,
         zones: [
-          { id: 'slice', upto: 0.45, reads: 'a slice of the tellers, and never more', correct: true },
-          { id: 'most', upto: 0.8, reads: 'most tellers, which no description shows' },
-          { id: 'all', upto: 1, reads: 'all of them — every teller an activist' },
+          { id: 'slice', upto: 0.45, reads: 'a small part of the tellers', correct: true },
+          { id: 'most', upto: 0.8, reads: 'most tellers, which nothing in the evidence suggests' },
+          { id: 'all', upto: 1, reads: 'all tellers, only if every teller is an activist' },
         ],
       },
-      explain: 'A slice. The inner box can touch the wall at most, when every teller is an activist, and it can’t break out. Nothing you learn about Linda moves that wall, because the description was never about how many tellers there are.',
+      explain: 'A small part of the tellers. The group could equal all tellers only if every teller were an activist, which is unlikely. Linda’s description can’t make the group bigger. It says nothing about how many tellers are activists.',
       xp: 5,
     },
     dur: 1.0,
@@ -106,14 +106,14 @@ export const BEATS: Logic41Beat[] = [
   {
     p: 320, x: 88, outer: 1, inner: 1, fill: 0.34,
     summary: {
-      title: 'Inside the Box',
+      title: 'The Conjunction Fallacy',
       points: [
-        'A conjunction is a subset of each of its parts',
-        'So it can never be the likelier of the two',
-        'Detail buys resemblance and costs probability',
-        'A vivid story is the strongest form of the trap',
+        'Every case of a conjunction is a case of each part',
+        'So a conjunction is never more probable than either part',
+        'Judging by resemblance makes the conjunction seem likelier',
+        'Added detail can raise resemblance but never probability',
       ],
-      closing: 'A forecast with names, dates and a motive convinces where a bare one doesn’t. Every detail added is one more way for the forecast to be wrong.',
+      closing: 'A forecast with names, dates and a motive is more convincing than a bare one. Yet each added detail is another way for the forecast to be wrong.',
     },
     dur: 4.6,
   },

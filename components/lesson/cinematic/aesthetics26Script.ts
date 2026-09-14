@@ -33,36 +33,36 @@ export interface Aesthetics26Beat extends BaseBeat {
 export const BEATS: Aesthetics26Beat[] = [
   {
     p: 423, x: 28, bird: 1,
-    text: 'A plastic flamingo on a lawn. Nobody’s calling it great sculpture.',
+    text: 'Consider a plastic flamingo on a lawn. By any ordinary standard it’s bad art, yet many people love it.',
     dur: 4.2,
   },
   {
     p: 172, x: 28, bird: 1,
-    text: 'Kitsch hands you the feeling already chewed. A kitten with enormous wet eyes.',
+    text: 'Kitsch is art that supplies ready-made emotion. A painted kitten with enormous wet eyes is a standard example.',
     dur: 4.6,
   },
   {
     p: 435, x: 28, bird: 1,
-    text: 'Milan Kundera called it the second tear. The first is for children on the grass, the second for how nice it feels to be moved.',
+    text: 'Milan Kundera wrote that kitsch brings two tears. The first is for children running on grass, the second for the pleasure of being moved.',
     dur: 5.0,
   },
   {
     p: 257, x: 28, bird: 1, eye: 1,
-    text: 'Camp is the other thing entirely. Kitsch is sincere, and camp is a wink.',
+    text: 'Camp is a different attitude. The lover of kitsch is sincere, while camp loves bad taste knowingly.',
     dur: 4.4,
   },
   {
     p: 164, x: 28, bird: 1, eye: 1, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what a grin at a tacky bird is.',
-      explain: 'Knowing love. Sincerely mistaking this for a masterpiece would be the bad taste your flatmate means. Pretending it secretly is one gives up the joke. Camp sees that the thing is awful and enjoys that, on purpose.',
+      prompt: 'What is the attitude of someone who grins at a tacky flamingo?',
+      explain: 'Knowing love. Sincerely admiring the flamingo would be bad taste. Calling it a masterpiece would deny the very awfulness camp enjoys. Camp sees that the thing is awful and loves it for that reason.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 442, x: 88, bird: 1, eye: 1,
-    text: 'Susan Sontag mapped camp: drag, B-movies, a chandelier hung in a diner.',
+    text: 'Susan Sontag defined camp in 1964 as a love of the unnatural. Her examples include Tiffany lamps and Swan Lake.',
     dur: 4.6,
   },
   {
@@ -79,24 +79,24 @@ export const BEATS: Aesthetics26Beat[] = [
   },
   {
     p: 445, x: 88, bird: 1, eye: 1,
-    text: 'The same flamingo can be either. One neighbour finds it lovely, and another finds it gloriously absurd.',
+    text: 'The same flamingo can be either kitsch or camp. One neighbour admires it sincerely, and another enjoys it as absurd.',
     dur: 5.0,
   },
   {
     p: 177, x: 88, bird: 1, eye: 1,
     interact: {
-      prompt: 'What decides which of the two it is?',
+      prompt: 'What decides whether the flamingo is kitsch or camp?',
       drag: {
         lo: 'THE OBJECT',
         hi: 'THE BEHOLDER',
         start: 0.04,
         zones: [
-          { id: 'object', upto: 0.3, reads: 'the object — some things simply are tacky' },
-          { id: 'both', upto: 0.62, reads: 'half the bird, half the person looking' },
-          { id: 'eye', upto: 1, reads: 'the beholder — the bird never changed', correct: true },
+          { id: 'object', upto: 0.3, reads: 'the object: its features settle the matter' },
+          { id: 'both', upto: 0.62, reads: 'partly the object, partly the beholder' },
+          { id: 'eye', upto: 1, reads: 'the beholder’s attitude, since the object is unchanged', correct: true },
         ],
       },
-      explain: 'The beholder, and the picture says so: nothing about the bird moved while you slid. Tackiness is real enough, and tackiness is what BOTH attitudes respond to. So tackiness cannot be the mark that tells the two apart.',
+      explain: 'The beholder’s attitude, since the object is unchanged. Tackiness is a real feature, but both attitudes respond to it. So tackiness can’t be what distinguishes kitsch from camp, and the difference lies in how the beholder takes it.',
       xp: 5,
     },
     dur: 1.0,
@@ -104,14 +104,14 @@ export const BEATS: Aesthetics26Beat[] = [
   {
     p: 322, x: 88, bird: 1, eye: 1, wink: 1,
     summary: {
-      title: 'The Joy of Bad Taste',
+      title: 'Kitsch and Camp',
       points: [
-        'Kitsch is easy, sentimental and completely sincere',
-        'Kundera called it being moved by your own feeling',
+        'Kitsch offers easy, sincere sentiment',
+        'Kundera: kitsch is enjoying your own emotion',
         'Camp knows the thing is awful and enjoys that',
-        'The object hardly changes; the attitude does',
+        'The object stays the same, but the attitude differs',
       ],
-      closing: 'Bad taste taken up with open eyes turns into a taste of its own. It’s one of the few that has to be held on purpose.',
+      closing: 'Enjoyed knowingly, bad taste becomes a distinct taste in its own right. Sontag called this sensibility camp.',
     },
     dur: 4.8,
   },

@@ -25,35 +25,35 @@ export interface Metaphysics11Beat extends BaseBeat {
 export const BEATS: Metaphysics11Beat[] = [
   {
     p: 458, c: 42, cx: 440, tok: 0,
-    text: 'Nearly every scrap of matter this man was born with has been replaced. The name under him has not moved once.',
+    text: 'Over a lifetime, much of the matter in a human body is replaced. Yet the person is still counted as the same person.',
     dur: 2.8,
   },
   {
     p: 458, c: 42, cx: 440, tok: 0,
-    text: 'What’s it holding on to?',
+    text: 'What, then, makes someone the same person over time?',
     dur: 1.8,
   },
   {
     p: 412, c: 42, cx: 290, tok: 0,
-    text: 'Locke asks you to picture two of them. A prince, and a cobbler who walks in off the street having never once seen a palace.',
-    cite: 'The two men',
+    text: 'John Locke describes a case involving two people, a prince and a cobbler.',
+    cite: 'Locke’s prince and cobbler',
     dur: 4.4,
   },
   {
     p: 384, c: 44, tok: 0,
-    text: 'The plate above the prince holds all he can remember doing. Every room, every promise, the whole thread running back to his childhood.',
-    cite: 'What hangs above him',
+    text: 'The prince’s consciousness reaches back over his past life. He remembers his actions, back to his childhood.',
+    cite: 'The prince’s memories',
     dur: 4.2,
   },
   {
     p: 173, c: 15, tok: 1,
-    text: 'Overnight the whole thread leaves the prince and settles above the cobbler. Neither man has taken a step.',
+    text: 'Suppose the prince’s consciousness, with all its memories, enters the cobbler’s body overnight. Neither body has moved.',
     cite: 'One night',
     dur: 3.4,
   },
   {
     p: 173, c: 15, tok: 1,
-    text: 'Only the memories have moved.',
+    text: 'The case pulls apart two things that usually stay together: having the same body, and having the same memory.',
     dur: 1.8,
   },
   {
@@ -72,17 +72,17 @@ export const BEATS: Metaphysics11Beat[] = [
   {
     p: 378, c: 31, tok: 1,
     interact: {
-      prompt: 'Where does Locke hang the person?',
+      prompt: 'What does Locke hold that personal identity consists in?',
       split: {
         left: 'MEMORY REACHING BACK', right: 'THE SAME BODY',
         start: 0.04,
         zones: [
-          { id: 'body', upto: 0.32, reads: 'the body carries you' },
-          { id: 'both', upto: 0.64, reads: 'both together, and neither one on its own' },
-          { id: 'mind', upto: 1, reads: 'your memories, wherever they wake up', correct: true },
+          { id: 'body', upto: 0.32, reads: 'the same living body' },
+          { id: 'both', upto: 0.64, reads: 'body and memory together, neither one alone' },
+          { id: 'mind', upto: 1, reads: 'consciousness of the past, in whatever body', correct: true },
         ],
       },
-      explain: 'Almost all of it goes to memory. The bodily answer feels safest, and a court wants it. But a body swaps nearly all its matter over a lifetime. It’s the Ship of Theseus wearing your face. Locke hangs the person on the thread instead.',
+      explain: 'Consciousness of the past, in whatever body. For Locke, a person extends as far back as consciousness of past actions reaches. The same body secures only the same man, a living organism, which Locke distinguishes from the same person.',
       xp: 5,
     },
     dur: 1.0,
@@ -90,34 +90,34 @@ export const BEATS: Metaphysics11Beat[] = [
   {
     p: 170, c: 28, tok: 1, pick: 1,
     interact: {
-      prompt: 'The memories now sit over the man on the right. Tap the stand of whoever is the prince.',
-      explain: 'The trap is that his stand still says COBBLER, and it’s his own body. That’s what a court would go by. Locke says follow the memories. The man on the right remembers being the prince, so the prince is who he is.',
+      prompt: 'On Locke’s view, which of the two men is now the prince?',
+      explain: 'The man on the stand labelled cobbler. He has the prince’s memories, so Locke counts him the same person as the prince. His body is still the cobbler’s, but for Locke a body secures only the same man.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 33, c: 35, tok: 1, swap: 1,
-    text: 'Now watch the ground. Nobody moves, and yet the two names cross the floor and trade stands.',
-    cite: 'The names follow',
+    text: 'Locke concludes that the man with the prince’s memories is now the prince. The name follows the memories, not the body.',
+    cite: 'Locke’s verdict',
     dur: 3,
   },
   {
     p: 33, c: 35, tok: 1, swap: 1,
-    text: 'The name goes where the memories went.',
+    text: 'Locke distinguishes the same man, one continuing living body, from the same person, one continuing consciousness.',
     dur: 1.8,
   },
   {
     p: 17, c: 33, tok: 1, swap: 1,
     summary: {
-      title: 'You Are the Thread',
+      title: 'Consciousness, Not Body, Makes the Person',
       points: [
-        'You change completely and stay one person',
-        'Same body fails — its matter is all replaced',
-        'Locke: consciousness reaching back carries identity',
-        'The name follows the memories, not the flesh',
+        'A body’s matter changes over a lifetime, yet the person persists',
+        'Locke separates the same man from the same person',
+        'A person extends as far back as consciousness of past actions',
+        'With the prince’s memories, the cobbler’s body is the prince',
       ],
-      closing: 'You are not your atoms. You are the thread of awareness that remembers being you.',
+      closing: 'Joseph Butler objected that memory presupposes personal identity, so it can’t be what constitutes it.',
     },
     dur: 3.0,
   },

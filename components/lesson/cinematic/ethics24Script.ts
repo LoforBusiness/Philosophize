@@ -32,36 +32,36 @@ export interface Eth24Beat extends BaseBeat {
 export const BEATS: Eth24Beat[] = [
   {
     p: 172, x: 200, slab: 1,
-    text: 'A sentence, and the four things people say it’s for. In an ordinary case all four agree, so nobody has to choose.',
+    text: 'What justifies a four-year sentence? In an ordinary case, four standard answers all support it.',
     dur: 4.8,
   },
   {
     p: 2, x: 200, slab: 1, names: 1,
-    text: 'Stop him doing it again. Stop others copying him.',
-    cite: 'The four',
+    text: 'Incapacitation protects the public by stopping the offender from offending again. General deterrence discourages others from copying the crime.',
+    cite: 'Four justifications',
     dur: 2.2,
   },
   {
     p: 2, x: 200, slab: 1, names: 1,
-    text: 'Make him better. Give him what he has coming.',
+    text: 'Rehabilitation aims to make him a better person. Retribution says he should be punished for what he did.',
     dur: 2.2,
   },
   {
     p: 45, x: 132, slab: 1, names: 1, gone: 1,
-    text: 'Now a man of ninety, forty years after the crime, ill and harmless. He won’t reoffend, and nobody is watching.',
+    text: 'Consider a man of ninety, ill and harmless, forty years after his crime. He won’t reoffend, needs no reform, and no one will learn of his punishment.',
     cite: 'The test case',
     dur: 4.8,
   },
   {
     p: 383, x: 132, slab: 1, names: 1, gone: 1,
-    text: 'Three of the four pillars have nothing left to hold. The sentence hasn’t stopped feeling right.',
+    text: 'Three of the four justifications no longer apply to him. If his sentence still seems right, some other justification must support it.',
     dur: 4.2,
   },
   {
     p: 467, x: 132, slab: 1, names: 1, gone: 1, live: 1,
     interact: {
-      prompt: 'Tap the pillar still holding the slab up.',
-      explain: 'Desert. Nobody needs reforming, nobody is deterred and there’s no one to protect. If the sentence still seems right, the reason is backward-looking. That’s retribution, and most people find they hold it whether or not they’d say so.',
+      prompt: 'Which justification still supports punishing him?',
+      explain: 'Desert. Punishing him reforms no one, deters no one and protects no one. Any reason that remains looks back to the crime, not forward to effects. That view is retribution.',
       xp: 5,
     },
     dur: 1.0,
@@ -81,37 +81,37 @@ export const BEATS: Eth24Beat[] = [
   },
   {
     p: 399, x: 268, slab: 1, names: 1, gone: 1,
-    text: 'The other side runs the same trick backwards, and that reply is why nobody holds deterrence on its own.',
+    text: 'Critics of deterrence turn the test around. Suppose the truth stays hidden, and framing an innocent man would stop others from crime.',
     cite: 'The other direction',
     dur: 4.6,
   },
   {
     p: 442, x: 268, slab: 1, names: 1, gone: 1,
     interact: {
-      prompt: 'Which theory would allow punishing someone innocent?',
+      prompt: 'Which theory, taken alone, would permit punishing an innocent person?',
       sort: {
-        chip: 'punishing an innocent',
+        chip: 'punishing an innocent person',
         bins: [
-          { id: 'deter', label: 'deterrence', reads: 'deterrence alone would allow it', correct: true },
-          { id: 'desert', label: 'desert', reads: 'desert would allow it' },
-          { id: 'neither', label: 'neither', reads: 'neither could allow it' },
+          { id: 'deter', label: 'deterrence', reads: 'deterrence alone would permit it', correct: true },
+          { id: 'desert', label: 'desert', reads: 'desert would permit it' },
+          { id: 'neither', label: 'neither', reads: 'neither theory could permit it' },
         ],
       },
-      explain: 'Deterrence on its own. It looks only at the effect on everybody else. If nobody knows, an innocent man has that effect as well as a guilty one. Desert forbids it outright, because he has nothing coming. That’s why almost nobody holds either theory alone.',
+      explain: 'Deterrence. A deterrence theory looks only at the effect on others. If no one knows the truth, punishing an innocent man deters crime as well as punishing a guilty one. Desert forbids it, because the innocent have done nothing to deserve it.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'What The Sentence Rests On',
+      title: 'Four Justifications of Punishment',
       points: [
         'Punishment is defended by deterrence, reform, protection and desert',
-        'Ordinary cases hide which one you are actually using',
+        'In ordinary cases, all four support the same sentence',
         'A harmless old offender removes every forward-looking reason',
         'Deterrence alone would permit punishing someone innocent',
       ],
-      closing: 'Three pillars gone and the sentence still stood. That’s worth knowing about yourself.',
+      closing: 'If the old man’s sentence still seems right to you, your judgement rests on desert.',
     },
     dur: 3.4,
   },

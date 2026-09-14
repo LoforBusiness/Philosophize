@@ -33,40 +33,40 @@ export interface Met20Beat extends BaseBeat {
 export const BEATS: Met20Beat[] = [
   {
     p: 172, x: 200, outer: 1,
-    text: 'One world, and the world is real. Nothing here denies the world exists.',
+    text: 'Begin with a single world, which is real. The simulation argument doesn’t deny that this world exists.',
     dur: 4.0,
   },
   {
     p: 2, x: 200, outer: 1, nest: 0.3, tally: 1,
-    text: 'Now suppose a civilisation like ours learns to run a world on a computer.',
+    text: 'Nick Bostrom asks you to suppose that a civilisation like ours learns to run a world on a computer.',
     dur: 3.9,
   },
   {
     p: 2, x: 200, outer: 1, nest: 0.3, tally: 1,
-    text: 'Not one world. Thousands, for research.',
+    text: 'Such an advanced civilisation might run many thousands of simulations of its own past history.',
     dur: 1.8,
   },
   {
     p: 379, x: 132, outer: 1, nest: 1, tally: 1,
-    text: 'Count the minds. Almost all the minds now sit inside a machine, and every mind believes otherwise.',
+    text: 'Simulated minds would then vastly outnumber unsimulated ones. Yet each simulated mind would take its world to be real.',
     cite: 'Bostrom, 2003',
     dur: 4.8,
   },
   {
     p: 13, x: 132, outer: 1, nest: 1, tally: 1, token: 1,
-    text: 'Here’s your token. Nobody aimed the token.',
+    text: 'Suppose nothing you know tells you whether your own mind is simulated.',
     dur: 1.9,
   },
   {
     p: 13, x: 132, outer: 1, nest: 1, tally: 1, token: 1,
-    text: 'It landed where most of the minds are.',
+    text: 'By Bostrom’s principle of indifference, your mind is then most likely a simulated one.',
     dur: 1.9,
   },
   {
     p: 165, x: 132, outer: 1, nest: 1, tally: 1, token: 1, live: 1,
     interact: {
-      prompt: 'Tap the frame your token is most likely inside.',
-      explain: 'The inner grid, if the count is right, and that’s the whole argument. It is not a claim that the world feels fake. It’s a claim about proportions. Pick a mind at random from that picture and you’ll almost certainly pick a simulated one.',
+      prompt: 'Given that count, which frame is your own mind most likely inside?',
+      explain: 'The inner grid, if the count is right. The argument concerns proportions, not whether the world feels fake. A mind chosen at random from that population is almost certainly a simulated one.',
       xp: 5,
     },
     dur: 1.0,
@@ -85,29 +85,29 @@ export const BEATS: Met20Beat[] = [
   },
   {
     p: 176, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
-    text: 'Two of those three say the grid never gets built. Extinction, or nobody bothering.',
+    text: 'Two of the three possibilities imply that few such simulations are ever run. Civilisations may die out first, or may choose not to run them.',
     dur: 3.5,
   },
   {
     p: 176, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
-    text: 'Watch the grid shrink.',
+    text: 'In either case, the number of simulated minds falls.',
     dur: 1.8,
   },
   {
     p: 383, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
     interact: {
-      prompt: 'What count stops this argument?',
+      prompt: 'For which count of simulations is your mind probably not simulated?',
       drag: {
         lo: 'NONE ARE EVER BUILT',
         hi: 'BILLIONS OF THEM RUN',
         start: 1,
         zones: [
-          { id: 'none', upto: 0.3, reads: 'none at all, so nothing follows', correct: true },
-          { id: 'few', upto: 0.72, reads: 'a handful, still far fewer than the real one' },
-          { id: 'many', upto: 1, reads: 'billions, and you are almost certainly inside one' },
+          { id: 'none', upto: 0.3, reads: 'too few to outnumber the real minds', correct: true },
+          { id: 'few', upto: 0.72, reads: 'enough to outnumber the real minds' },
+          { id: 'many', upto: 1, reads: 'billions, so you are almost certainly simulated' },
         ],
       },
-      explain: 'Attack the count. If nobody ever runs those worlds, or nobody lasts long enough to, the proportion never appears. Then the conclusion doesn’t follow. How real it all feels is no help at all. A simulated morning would feel just like this one.',
+      explain: 'Too few to outnumber the real minds. The argument depends on the proportion. If simulated minds are a minority, a randomly chosen mind is probably real. How real the world feels is no evidence, since a simulated world would feel the same.',
       xp: 5,
     },
     dur: 1.0,
@@ -116,12 +116,12 @@ export const BEATS: Met20Beat[] = [
     summary: {
       title: 'A Question About Proportions',
       points: [
-        'The argument counts minds, it does not inspect the world',
+        'The argument counts minds rather than inspecting the world',
         'If simulated minds vastly outnumber real ones, most minds are simulated',
-        'Bostrom offers three possibilities and only one is the headline',
-        'It is resisted by denying the count, not by feeling certain',
+        'Bostrom argues that at least one of three possibilities holds',
+        'The argument is resisted by denying the count, not by intuition',
       ],
-      closing: 'Nothing here says the world is fake. It says a census would be embarrassing.',
+      closing: 'Bostrom’s argument doesn’t say which of the three possibilities is true.',
     },
     dur: 3.4,
   },

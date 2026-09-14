@@ -32,41 +32,41 @@ export interface Political25Beat extends BaseBeat {
 export const BEATS: Political25Beat[] = [
   {
     p: 2, x: 44,
-    text: 'Who does the dishes turns out to be a question about justice.',
+    text: 'The feminist slogan “the personal is political” dates from about 1970. It says that who does the housework is a matter of justice.',
     dur: 3.8,
   },
   {
     p: 30, x: 44, rooms: 1,
-    text: 'Political philosophy used to draw a line at the front door.',
+    text: 'Liberal political philosophy long drew a boundary between public life and the private home.',
     dur: 3.6,
   },
   {
     p: 36, x: 44, rooms: 1, reach: 0.46,
-    text: 'Law, work and the vote were public, and open to argument.',
+    text: 'Law, work and voting belonged to the public sphere, where questions of justice applied.',
     dur: 4.0,
   },
   {
     p: 160, x: 44, rooms: 1, reach: 0.46,
-    text: 'What happened at home was private, and treated as nature rather than power.',
+    text: 'Home life belonged to the private sphere. Its roles were treated as natural rather than as a matter of power.',
     dur: 4.6,
   },
   {
     p: 161, x: 44, rooms: 1, reach: 0.46, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap where the old picture stopped looking.',
-      explain: 'At the front door. The statute and the factory were both public, and both were argued over for centuries. The house was the room the argument was told to stay out of.',
+      prompt: 'Where did traditional political philosophy stop applying questions of justice?',
+      explain: 'At the front door. Law and work were public, so their justice was debated for centuries. The household was treated as private and left outside the theory of justice.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 159, x: 44, rooms: 1, reach: 0.46,
-    text: 'Feminist thinkers turned the line around. What’s private is held there by public rules.',
+    text: 'Feminist philosophers reply that public rules shape private life. Marriage law, work rules and benefits all structure the family.',
     dur: 5.0,
   },
   {
     p: 62, x: 100, rooms: 1, reach: 0.46,
-    text: 'A mother quits work when parental leave favours her and childcare costs more than she earns.',
+    text: 'Suppose parental leave favours mothers and childcare costs more than a mother earns. Her decision to leave work looks private, but public policy shaped it.',
     dur: 5.0,
   },
   {
@@ -84,38 +84,38 @@ export const BEATS: Political25Beat[] = [
   },
   {
     p: 383, x: 100, rooms: 1, reach: 0.46,
-    text: 'Susan Okin put the point to Rawls. Behind the veil you can’t know your gender either.',
+    text: 'Susan Moller Okin turned John Rawls’s veil of ignorance on the family. If you didn’t know your sex, you’d want the household to be just.',
     dur: 5.0,
   },
   {
     p: 21, x: 100, rooms: 1,
     interact: {
-      prompt: 'How far should the reach of justice run?',
+      prompt: 'How far into social life should principles of justice apply?',
       drag: {
-        lo: 'THE STATUTE BOOK',
-        hi: 'THE KITCHEN TABLE',
+        lo: 'LAW ALONE',
+        hi: 'THE HOUSEHOLD TOO',
         start: 0.2,
         zones: [
-          { id: 'law', upto: 0.32, reads: 'equal rights on paper, and the door left shut' },
-          { id: 'work', upto: 0.64, reads: 'into the workplace, and no further' },
-          { id: 'home', upto: 1, reads: 'through the door, to who does what at home', correct: true },
+          { id: 'law', upto: 0.32, reads: 'equal legal rights, with the family left alone' },
+          { id: 'work', upto: 0.64, reads: 'law and the workplace, yet not the home' },
+          { id: 'home', upto: 1, reads: 'into the family, including who does the care', correct: true },
         ],
       },
-      explain: 'All the way through. Equal rights on paper leave the care, the money and the deciding where they were. And those three decide who can use a right outside the front door.',
+      explain: 'Into the family, including who does the care. Equal legal rights leave care, money and decision-making in the home unchanged. Yet those determine who can use rights outside it.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Past The Front Door',
+      title: 'Justice and the Family',
       points: [
-        'The old line put law in public and family in private',
+        'Traditional theory put law in public and family in private',
         'Private arrangements are held in place by public rules',
         'Okin turned the veil of ignorance on the household',
         'Equal rights leave unequal care untouched',
       ],
-      closing: 'The next time something is called just private, ask whose interest that label is protecting.',
+      closing: 'Calling an arrangement private can shield it from scrutiny, so feminists ask whose interests the label protects.',
     },
     dur: 4.2,
   },

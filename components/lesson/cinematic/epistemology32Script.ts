@@ -20,29 +20,29 @@ export const BEATS: Epis32Beat[] = [
   {
     g: 5, maps: 0,
     dur: 4.0,
-    text: 'Four maps of the same stretch of coast. One coastline, drawn four times at four scales.',
+    text: 'Consider four maps of the same stretch of coast, each drawn at a different scale.',
   },
   {
     g: 459, maps: 1,
     dur: 2.8,
-    text: 'The first is the whole country in one stroke. Nothing on it is false.',
+    text: 'The first map shows the whole coast as a single line. Nothing on it is false.',
     cite: 'One line',
   },
   {
     g: 459, maps: 1,
     dur: 1.8,
-    text: 'There’s almost nothing on it.',
+    text: 'But it contains almost no information about the coast.',
   },
   {
     g: 168, maps: 3,
     dur: 2.3,
-    text: 'The second gives you the shape and its bays. The third gives you every rock.',
-    cite: 'More and more',
+    text: 'The second map shows the coast’s shape and its bays. The third shows every rock.',
+    cite: 'More detail',
   },
   {
     g: 168, maps: 3,
     dur: 2.6,
-    text: 'It’s also the sort of map you’d still be reading when the tide came in.',
+    text: 'But the third map holds so much detail that it’s too slow to use at sea.',
   },
   {
     g: 129, maps: 3,
@@ -59,20 +59,20 @@ export const BEATS: Epis32Beat[] = [
   {
     g: 159, maps: 4,
     dur: 2.9,
-    text: 'And here’s the perfect one. One to one, nothing omitted, no error anywhere in it.',
+    text: 'The fourth map is drawn at a scale of one to one, with nothing omitted and no errors.',
     cite: 'The perfect map',
   },
   {
     g: 159, maps: 4,
     dur: 1.8,
-    text: 'At that scale the frame holds a single rock.',
+    text: 'At that scale, a frame of the same size shows a single rock.',
   },
   {
     g: 2, maps: 4, pick: 1,
     dur: 1.0,
     interact: {
-      prompt: 'You are sailing this coast tonight. Tap the map you would take.',
-      explain: 'The second. You can’t sail by the first, and you can’t read the third in the dark. The fourth omits nothing at all. So it can only show you the rock you’re standing on.',
+      prompt: 'Suppose you’re sailing this coast tonight. Which map would serve you best?',
+      explain: 'The second map, of the coast and its bays. The first is too sparse to navigate by, and the third too detailed to read quickly. The fourth omits nothing, so its frame shows only one rock.',
       xp: 5,
     },
   },
@@ -83,7 +83,7 @@ export const BEATS: Epis32Beat[] = [
       prompt: 'How much detail does a good model keep?',
       drag: {
         lo: 'ALMOST NONE',
-        hi: 'EVERY LAST THING',
+        hi: 'ALL OF IT',
         start: 1,
         zones: [
           { id: 'bare', upto: 0.24, reads: 'almost nothing, so it explains almost nothing' },
@@ -91,20 +91,20 @@ export const BEATS: Epis32Beat[] = [
           { id: 'all', upto: 1, reads: 'everything, so it becomes the thing itself' },
         ],
       },
-      explain: 'The middle, and the far end is what the fourth map showed. Add detail without limit and you get the coastline back at coastline size, which is no use to anybody. Leaving things out is the job, not the shortfall.',
+      explain: 'The few things the question needs, and no more. Adding detail without limit reproduces the coastline at its own size, as the fourth map showed. A model is useful because it leaves things out.',
       xp: 5,
     },
   },
   {
     summary: {
-      title: 'Built for a Task',
+      title: 'Models and Their Purposes',
       points: [
         'Every model leaves things out on purpose',
         'More detail is not the same as more accuracy',
-        'A map is judged by the job, not by resemblance',
+        'A map is judged by its purpose, not by resemblance',
         'Ask what a model omits before you trust it',
       ],
-      closing: 'The question is never whether your picture of the world is complete. It’s whether it leaves out the right things.',
+      closing: 'No model of the world is complete. A good model leaves out what its purpose doesn’t need.',
     },
     dur: 3.0,
   },

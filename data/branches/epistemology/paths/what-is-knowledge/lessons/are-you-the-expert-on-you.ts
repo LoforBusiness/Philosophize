@@ -30,8 +30,8 @@ const lesson: Lesson = {
     {
       type: 'quote',
       id: 'lq-epistemology-knowledge-36',
-      quote: 'People may have little ability to report accurately on their own cognitive processes.',
-      author: 'Richard Nisbett',
+      quote: 'Evidence is reviewed which suggests that there may be little or no direct introspective access to higher order cognitive processes.',
+      author: 'Richard E. Nisbett and Timothy D. Wilson',
       era: '1977',
     },
     {

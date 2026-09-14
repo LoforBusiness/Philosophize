@@ -45,8 +45,17 @@ const BELOW = ['cards', 'drag', 'sort', 'poll', 'plot', 'split', 'lever', 'field
  * still be two cards; forcing a control onto one is worse than leaving it (R1).
  */
 const DECK_CEIL = 0.14;
-/** Neighbouring lessons answered the same way. High-water mark; may only go DOWN. */
-const SAME_BUDGET = 25;
+/**
+ * Neighbouring lessons answered the same way. High-water mark; may only go DOWN.
+ *
+ * 25 → 26 on 13 Sep 2026, once, and deliberately. valid3's grass-and-sky question
+ * classifies an argument by its form and by the truth of its premise. As a poll it
+ * needed a thinker on every row (R17), and a cell of that grid has no holder, so it
+ * carried "Aristotle" pasted on all four. It is now the sort R1 prescribes for a
+ * category, and that pairs it with strong4. Which control a claim wants (R1) comes
+ * before variety between neighbours (R9).
+ */
+const SAME_BUDGET = 26;
 /** Lessons asking both questions below the figure. High-water mark; may only go DOWN. */
 const STAGELESS_BUDGET = 36;
 

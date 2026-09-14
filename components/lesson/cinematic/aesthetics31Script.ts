@@ -24,18 +24,18 @@ export const BEATS: Aes31Beat[] = [
   {
     g: 383, strings: 4, playing: 1, clapA: 0, clapB: 0,
     dur: 4.0,
-    text: 'Nine notes on four strings. A good phrase, played well, and the room is pleased with it.',
+    text: 'Suppose a musician plays a phrase of nine notes on four strings. The audience is pleased by a good phrase, well played.',
   },
   {
     g: 400, strings: 4, playing: 1, clapA: 1, clapB: 0,
     dur: 3.8,
-    text: 'The applause is polite. Nobody stands up.',
-    cite: 'The first time',
+    text: 'The audience applauds politely, but no one stands.',
+    cite: 'The first performance',
   },
   {
     g: 442, strings: 1, playing: 1, clapA: 1, clapB: 0,
     dur: 4.6,
-    text: 'Now three of the strings are gone. Same nine notes, same tempo, same phrasing — every sound leaving the instrument is the sound that left it before.',
+    text: 'Now suppose three strings are removed, and the same nine notes are played on one. The tempo, phrasing and sound are identical to the first performance.',
     cite: 'One string',
   },
   {
@@ -53,20 +53,20 @@ export const BEATS: Aes31Beat[] = [
   {
     g: 40, strings: 1, playing: 1, clapA: 1, clapB: 1,
     dur: 2.8,
-    text: 'And the room is on its feet. Not one sound reaching anybody’s ears had changed.',
-    cite: 'The second time',
+    text: 'This time the audience gives a standing ovation. Yet the sound reaching their ears is unchanged.',
+    cite: 'The second performance',
   },
   {
     g: 40, strings: 1, playing: 1, clapA: 1, clapB: 1,
     dur: 1.8,
-    text: 'The meter is the only thing on stage that moved.',
+    text: 'Only the audience’s response has changed, so the extra applause must be for something other than the sound.',
   },
   {
     g: 443, strings: 1, playing: 0, clapA: 1, clapB: 1, pick: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Tap what the extra applause is actually for.',
-      explain: 'The player. Nobody applauds a hard piece played badly, so difficulty is not the good itself. It is evidence of an achievement, and an achievement belongs to a person rather than to a sound.',
+      prompt: 'What does the second, louder ovation reward?',
+      explain: 'The player. No one applauds a hard piece played badly, so difficulty isn’t valued for itself. It’s evidence of an achievement, and an achievement belongs to a person rather than to a sound.',
       xp: 5,
     },
   },
@@ -74,29 +74,29 @@ export const BEATS: Aes31Beat[] = [
     g: 165, strings: 1, playing: 0, clapA: 1, clapB: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Where does sheer difficulty, on its own, land?',
+      prompt: 'What does difficulty, on its own, add to a performance?',
       poll: {
         options: [
-          { id: 'stunt', reads: 'hard, and it says nothing', correct: true },
-          { id: 'great', reads: 'hard, and it says something' },
-          { id: 'gift', reads: 'easy, and it says something' },
-          { id: 'dull', reads: 'easy, and it says nothing' },
+          { id: 'stunt', reads: 'a sign of achievement, not beauty itself', holders: ['Denis Dutton'], correct: true },
+          { id: 'great', reads: 'nothing, as only what is perceived counts', holders: ['Monroe Beardsley'] },
+          { id: 'gift', reads: 'grandeur: great labour makes a work sublime', holders: ['Edmund Burke'] },
+          { id: 'dull', reads: 'a fault if shown: art should hide effort', holders: ['Baldassare Castiglione'] },
         ],
       },
-      explain: 'Hard, and it says nothing: a real place, and difficulty with nothing to show for it. Strict formalism says the making never mattered, and the second ovation embarrasses it. The same nine notes brought the room to its feet once three strings were gone. Difficulty and meaning are separate.',
+      explain: 'A sign of achievement, not beauty itself. The notes were unchanged, so the second ovation rewarded the player. Yet a hard piece played badly earns nothing.',
       xp: 5,
     },
   },
   {
     summary: {
-      title: 'Two Things at Once',
+      title: 'Difficulty and Achievement',
       points: [
         'A performance is admired as sound and as achievement',
         'Difficulty is evidence of skill, not a beauty of its own',
         'The second ovation shows how much the making matters',
-        'Two values can point in different directions',
+        'Aesthetic value and achievement can come apart',
       ],
-      closing: 'When you applaud, notice what you’re applauding. Half the time it isn’t the thing you heard.',
+      closing: 'Applause can reward the performer’s achievement as well as the sound, and the two are distinct.',
     },
     dur: 3.0,
   },

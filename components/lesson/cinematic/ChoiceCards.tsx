@@ -6,7 +6,7 @@ import Animated, {
 import { INK, PAPER, RIGHT, RIGHT_BG, WRONG, WRONG_BG } from './cinematicKit';
 import type { ChoiceCard } from './cinematicKit';
 import { LIP } from '@/constants/design';
-import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
+import { useQuestionAccent } from './QuestionParts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO CHOICES, STANDING ON THE PICTURE.
@@ -189,6 +189,7 @@ function Card({ card, id, picked, onPick }: {
 }) {
   const answered = picked !== null;
   const mine = picked === id;
+  const accent = useQuestionAccent();
   // Three outcomes, and the third is the one that matters most: the card nobody
   // picked, which was RIGHT. A wrong answer should show the answer, not just
   // take a point away — so that card lifts and holds rather than fading out with
@@ -263,17 +264,9 @@ function Card({ card, id, picked, onPick }: {
     };
   });
 
-  // THE PAYMENT, SHOWN WHERE IT WAS EARNED. The number was only ever on the
-  // reward screen after the lesson; this is it leaving the card that won it.
-  const xp = useSharedValue(0);
-  useEffect(() => {
-    if (!(chosen && card.correct)) { xp.value = 0; return; }
-    xp.value = withDelay(240, withTiming(1, { duration: 900, easing: Easing.out(Easing.cubic) }));
-  }, [chosen, card.correct, xp]);
-  const xpStyle = useAnimatedStyle(() => ({
-    opacity: xp.value === 0 ? 0 : Math.min(1, xp.value * 4) * (1 - Math.max(0, (xp.value - 0.6) / 0.4)),
-    transform: [{ translateY: -26 * xp.value }],
-  }));
+  // THE PAYMENT used to rise off this card. It lives on the verdict card under the
+  // question now (Reveal's XpCoin), which every control shares, so a right answer
+  // pays out once and in the same place whatever it was answered with.
 
   const seal = useSharedValue(0);
   useEffect(() => {
@@ -293,6 +286,7 @@ function Card({ card, id, picked, onPick }: {
     <Animated.View
       style={[
         styles.card,
+        { borderColor: accent.rim },
         answered && card.correct && styles.cardTrue,
         missed && styles.cardMiss,
         style,
@@ -322,11 +316,6 @@ function Card({ card, id, picked, onPick }: {
           <Text style={[styles.sealMark, styles.sealMarkOn]}>✕</Text>
         </Animated.View>
       ) : null}
-      {chosen && card.correct ? (
-        <Animated.View style={[styles.xpFly, xpStyle]} pointerEvents="none">
-          <Text style={styles.xpFlyText}>{`+${XP_PER_CORRECT_ANSWER} XP`}</Text>
-        </Animated.View>
-      ) : null}
     </Animated.View>
   );
 
@@ -353,7 +342,7 @@ function Card({ card, id, picked, onPick }: {
           Yoga never re-measures and the prompt below cannot shift on a press —
           see components/ui/Button for the version of this that got it wrong. */}
       <View style={{ paddingBottom: answered ? 0 : LIP.button }}>
-        {!answered ? <View pointerEvents="none" style={styles.cardLip} /> : null}
+        {!answered ? <View pointerEvents="none" style={[styles.cardLip, { backgroundColor: accent.shade }]} /> : null}
         {body}
       </View>
     </Pressable>
@@ -415,8 +404,4 @@ const styles = StyleSheet.create({
   sealMiss: { borderColor: WRONG, backgroundColor: WRONG },
   sealMark: { fontFamily: 'Inter_700Bold', fontSize: 14, color: INK, marginTop: -1 },
   sealMarkOn: { color: PAPER },
-  // Rises off the card that won it and fades. Absolutely positioned and
-  // pointer-inert, so it never touches the row's layout or its hit area.
-  xpFly: { position: 'absolute', top: -6, alignSelf: 'center' },
-  xpFlyText: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.4, color: RIGHT },
 });

@@ -32,29 +32,29 @@ export interface Metaphysics30Beat extends BaseBeat {
 export const BEATS: Metaphysics30Beat[] = [
   {
     p: 341, x: 24, cave: 1, charted: 0.15,
-    text: 'The same questions for two and a half thousand years. Any of them answered yet?',
+    text: 'Metaphysicians have debated the same questions for two and a half thousand years. Has any of them been answered?',
     dur: 5.0,
   },
   {
     p: 172, x: 24, cave: 1, charted: 0.15,
-    text: 'Science settles a question and moves on. Metaphysics is still arguing over claims raised in antiquity.',
+    text: 'The critic’s charge is that science settles questions and moves on, while metaphysics still debates claims raised in antiquity.',
     dur: 5.0,
   },
   {
     p: 446, x: 24, cave: 1, charted: 0.55,
-    text: 'The defence says progress here does not mean closed cases. It means sharper questions and fewer live options.',
+    text: 'Defenders reply that progress here isn’t a matter of settled questions. It means sharper questions and fewer defensible answers.',
     dur: 5.0,
   },
   {
     p: 264, x: 24, cave: 1, charted: 0.55,
-    text: 'Picture a cave mapped in the dark. Each expedition charts new passages and marks the dead ends.',
+    text: 'Consider an analogy: a cave explored in darkness. Each expedition charts new passages and records the dead ends.',
     dur: 5.0,
   },
   {
     p: 166, x: 24, cave: 1, charted: 0.55, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what is wrong with the charge against metaphysics.',
-      explain: 'It undermines itself. “Only what science can test is meaningful” is not a claim science can test. So the verdict against metaphysics leans on metaphysics without saying so. Nothing here says science is shaky or that the answers are in.',
+      prompt: 'What is wrong with dismissing metaphysics because its claims can’t be tested?',
+      explain: 'It undermines itself. The verification principle says a claim means something only if it can be tested or is true by definition. The principle itself is neither. So by its own test, it means nothing.',
       xp: 5,
     },
     dur: 1.0,
@@ -79,25 +79,25 @@ export const BEATS: Metaphysics30Beat[] = [
   },
   {
     p: 459, x: 80, cave: 1, charted: 0.75,
-    text: 'Physics leans on time, cause, law and possibility. Working out what those are is not a physics experiment.',
+    text: 'Physics takes time, cause, law and possibility for granted. Working out what these really are is not a job for experiments.',
     dur: 5.0,
   },
   {
     p: 167, x: 80, cave: 1,
     interact: {
-      prompt: 'Draw how much of the cave has been charted over the centuries.',
+      prompt: 'On this analogy, which curve shows how much of the cave has been charted?',
       plot: {
         cols: ['ANTIQUITY', '1600', '1900', 'TODAY'],
         axis: 'HOW MUCH MAPPED',
         start: [0.5, 0.5, 0.5, 0.5],
         shapes: [
           { id: 'climb', profile: [0.16, 0.42, 0.68, 0.92], reads: 'a better map every century', correct: true },
-          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5], reads: 'the same ground walked again and again' },
-          { id: 'fall', profile: [0.9, 0.62, 0.36, 0.12], reads: 'the ancients knew it and later ages forgot' },
-          { id: 'spike', profile: [0.12, 0.9, 0.16, 0.14], reads: 'one good century, and then nothing' },
+          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5], reads: 'the same amount charted in every age' },
+          { id: 'fall', profile: [0.9, 0.62, 0.36, 0.12], reads: 'charted early, then steadily forgotten' },
+          { id: 'spike', profile: [0.12, 0.9, 0.16, 0.14], reads: 'a peak around 1600, then a collapse' },
         ],
       },
-      explain: 'A better map every century. Nobody has reached the far wall, and the passages charted since Parmenides are real all the same. A flat line would mean the questions are stated no more clearly now than they were then.',
+      explain: 'A better map every century. No one has reached the far wall, yet the passages charted since Parmenides are real progress. A flat curve would mean the questions are no clearer now than in antiquity.',
       xp: 5,
     },
     dur: 1.0,
@@ -105,14 +105,14 @@ export const BEATS: Metaphysics30Beat[] = [
   {
     p: 306, x: 80, cave: 1, charted: 0.92,
     summary: {
-      title: 'The Verdict on Verdicts',
+      title: 'Progress in Metaphysics',
       points: [
-        'The charge: no method, no settled answers, no facts',
-        'The defence: progress is clarifying, not closing',
-        'Only science counts is not itself a scientific claim',
+        'The charge: metaphysics settles no questions',
+        'The defence: progress means clearer questions, not settled ones',
+        'The verification principle fails its own test',
         'Metaphysics examines what other fields assume',
       ],
-      closing: 'You set out asking why anything exists. The real prize was learning to ask the question well.',
+      closing: 'Metaphysics may never close its questions. It can still show which answers are defensible and why.',
     },
     dur: 5.0,
   },

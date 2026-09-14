@@ -34,7 +34,7 @@ export interface Ethics28Beat extends BaseBeat {
 export const BEATS: Ethics28Beat[] = [
   {
     p: 427, x: 24, rail: 1,
-    text: 'Your principle says yes. Your gut says no, and says it loudly.',
+    text: 'A principle you accept can approve an act that your gut rejects. That gut reaction is an intuition, a judgement about a particular case.',
     dur: 4.4,
   },
   {
@@ -44,26 +44,26 @@ export const BEATS: Ethics28Beat[] = [
   },
   {
     p: 440, x: 24, rail: 1, blocks: 1, give: 0.06,
-    text: 'Sometimes the two collide. One of them has to move, and the argument is about which.',
+    text: 'When the two conflict, consistency requires revising at least one of them. The question is which.',
     dur: 4.8,
   },
   {
     p: 263, x: 24, rail: 1, blocks: 1, give: 0.94,
-    text: 'Rawls proposed going back and forth. You revise the rule, then the judgement, then the rule again.',
+    text: 'John Rawls’s answer is reflective equilibrium. You adjust the principle and the judgement in turn until they fit.',
     dur: 5.0,
   },
   {
     p: 169, x: 24, rail: 1, blocks: 1, give: 0.5, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap which of the two always gets its way.',
-      explain: 'Neither always wins. A vivid feeling can be bias in disguise, and a tidy principle can be too tidy for the world. Equilibrium comes from moving both until they fit.',
+      prompt: 'In reflective equilibrium, which of the two always takes priority?',
+      explain: 'Neither of them. A strong intuition may be a bias, and a neat principle may miss details that matter. So either one may be revised until the two fit.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 456, x: 78, rail: 1, blocks: 1, give: 0.5,
-    text: 'Many obvious feelings turned out to be prejudice. Many elegant rules turned out to be too clean.',
+    text: 'Many intuitions once thought obvious proved to be prejudice. Many elegant principles proved too simple for real cases.',
     dur: 5.0,
   },
   {
@@ -81,24 +81,24 @@ export const BEATS: Ethics28Beat[] = [
   },
   {
     p: 452, x: 78, rail: 1, blocks: 1, give: 0.5,
-    text: 'The aim is a web that holds together. Nothing in it is the unshakeable floor.',
+    text: 'The goal is coherence between principles and judgements. No belief in the system is a fixed foundation beyond revision.',
     dur: 4.8,
   },
   {
     p: 173, x: 78, rail: 1, blocks: 1,
     interact: {
-      prompt: 'Which side should give ground to reach equilibrium?',
+      prompt: 'To reach reflective equilibrium, which side should be revised?',
       split: {
         left: 'THE PRINCIPLE',
         right: 'YOUR GUT',
         start: 0.06,
         zones: [
-          { id: 'rule', upto: 0.3, reads: 'the feeling yields and the rule never bends' },
-          { id: 'both', upto: 0.7, reads: 'both move, and they meet in between', correct: true },
-          { id: 'gut', upto: 1, reads: 'the rule bends to whatever you feel' },
+          { id: 'rule', upto: 0.3, reads: 'only the intuition is revised, never the principle' },
+          { id: 'both', upto: 0.7, reads: 'both are revised until they cohere', correct: true },
+          { id: 'gut', upto: 1, reads: 'only the principle is revised, never the intuition' },
         ],
       },
-      explain: 'Both move. Rawls called the method going back and forth. Test the principle against considered judgements, and the judgements against the principle. Letting one side never bend is a foundation rather than an equilibrium.',
+      explain: 'Both are revised until they cohere. Rawls checks the rule against your judgements about cases, and those judgements against the rule. If one side could never change, it would be a fixed base, not an equilibrium.',
       xp: 5,
     },
     dur: 1.0,
@@ -106,14 +106,14 @@ export const BEATS: Ethics28Beat[] = [
   {
     p: 319, x: 78, rail: 1, blocks: 1, give: 0.5,
     summary: {
-      title: 'Rule Against Conscience',
+      title: 'Reflective Equilibrium',
       points: [
         'Principles and particular judgements sometimes collide',
         'Reflective equilibrium revises both until they cohere',
-        'Neither side automatically wins the argument',
-        'The goal is a stable web, not one unshakeable axiom',
+        'Neither principles nor intuitions automatically take priority',
+        'The goal is coherence, not a single unrevisable axiom',
       ],
-      closing: 'Good ethical thinking is less a one-way proof than a patient negotiation between your rules and your conscience.',
+      closing: 'On this method, a moral view is justified by coherence, not by deduction from one first principle.',
     },
     dur: 5.0,
   },

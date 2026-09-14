@@ -27,24 +27,24 @@ export interface Aes12Beat extends BaseBeat {
 export const BEATS: Aes12Beat[] = [
   {
     p: 383, r: 0, rx: 456, ticks: 0, box: 0,
-    text: 'A poem hangs where anyone can read it. The poet stands across the square and says every reader has got the poem wrong.',
+    text: 'Suppose a poem is posted in a public square for anyone to read. The poet claims that every reader has misread the poem.',
     dur: 4.2,
   },
   {
     p: 163, r: 1, rx: 224, ticks: 1, box: 0,
-    text: 'A reader comes away from the board certain: this is grief. The lamp, the waiting, the going out.',
+    text: 'A reader concludes the poem expresses grief. The image of a lamp left burning for someone, now gone out, supports the reading.',
     cite: 'The first reading',
     dur: 3.2,
   },
   {
     p: 163, r: 1, rx: 224, ticks: 1, box: 0,
-    text: 'Nothing on the page hints at a joke.',
+    text: 'Nothing in the text of the poem suggests irony or a joke.',
     dur: 1.8,
   },
   {
     p: 170, r: 21, rx: 224, ticks: 3, box: 1,
-    text: 'Every reader who stops adds another mark, and every mark says the same word. Sealed inside the poet’s head is whatever he meant.',
-    cite: 'Two places meaning could live',
+    text: 'Every reader who studies the poem reaches the same reading. What the poet meant, however, is private and can’t be checked.',
+    cite: 'Two sources of meaning',
     dur: 4.8,
   },
   {
@@ -61,29 +61,29 @@ export const BEATS: Aes12Beat[] = [
   },
   {
     p: 26, r: 45, rx: 224, ticks: 5, box: 1,
-    text: 'Now the poet insists the last line was a joke. Two more readers stop, read, and add the same mark.',
-    cite: 'The claim',
+    text: 'The poet now insists that the last line was meant as a joke. Yet two more readers examine the poem and reach the same reading.',
+    cite: 'The author’s claim',
     dur: 3.5,
   },
   {
     p: 26, r: 45, rx: 224, ticks: 5, box: 1,
-    text: 'The box still will not open.',
+    text: 'Wimsatt and Beardsley called appeals like this the intentional fallacy. It treats the author’s intention as the standard of a poem’s meaning.',
     dur: 1.8,
   },
   {
     p: 384, r: 4, rx: 224, ticks: 5, box: 1,
     interact: {
-      prompt: 'Where does the meaning live?',
+      prompt: 'How far is a poem’s meaning fixed by the poem, and how far by the poet?',
       split: {
         left: 'IN THE POEM', right: 'IN THE POET',
         start: 0.04,
         zones: [
-          { id: 'poet', upto: 0.3, reads: 'in the poet, he decides' },
-          { id: 'both', upto: 0.66, reads: 'half the poem, half the poet' },
+          { id: 'poet', upto: 0.3, reads: 'in the poet, whose intention decides' },
+          { id: 'both', upto: 0.66, reads: 'shared between the poem and the poet' },
           { id: 'poem', upto: 1, reads: 'in the poem, which every reader can examine', correct: true },
         ],
       },
-      explain: 'Nearly all of it in the poem. Letting what the poet meant decide what the poem means is the intentional fallacy. What the poet intended is private and can’t be checked, so it settles nothing in public. The poem is the one thing everybody can point at.',
+      explain: 'In the poem, which every reader can examine. Wimsatt and Beardsley argue that what a poet meant is private, so it can’t be a public test. Letting it decide meaning is the intentional fallacy. An equal share still gives half the say to something no one can check.',
       xp: 5,
     },
     dur: 1.0,
@@ -91,8 +91,8 @@ export const BEATS: Aes12Beat[] = [
   {
     p: 169, r: 5, rx: 224, ticks: 5, box: 1, pick: 1,
     interact: {
-      prompt: 'The poet says the line was a joke. Tap what actually settles the poem’s meaning.',
-      explain: 'The trap: the box feels like the source, so it feels authoritative. But nobody can open it, and an intention nobody can inspect settles nothing. The poem on the board is the one thing every reader can check.',
+      prompt: 'If the poet says the last line was a joke, what settles the poem’s meaning?',
+      explain: 'The pinned poem. The poet’s intention seems authoritative because it’s the poem’s source. Yet no reader can inspect it, so it can’t settle a dispute. The text on the board is public, and any reading can be checked against it.',
       xp: 5,
     },
     dur: 1.0,
@@ -100,14 +100,14 @@ export const BEATS: Aes12Beat[] = [
   {
     p: 139, r: 33, rx: 224, ticks: 5, box: 1,
     summary: {
-      title: 'Meaning Lives in the Work',
+      title: 'The Intentional Fallacy',
       points: [
         'Intention is private and cannot be inspected',
-        'The intentional fallacy lets it decide meaning',
-        'Meaning is read off the public text',
-        'The maker gets a reading, not a verdict',
+        'The intentional fallacy lets intention decide meaning',
+        'Meaning is found in the public text',
+        'An author’s own reading has no special authority',
       ],
-      closing: 'The author opens a door, then the work walks through without them.',
+      closing: 'For Wimsatt and Beardsley, a poem belongs to the public once written, beyond its author’s control.',
     },
     dur: 3.2,
   },

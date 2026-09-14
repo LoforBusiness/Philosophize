@@ -26,35 +26,35 @@ export interface Ethics11Beat extends BaseBeat {
 export const BEATS: Ethics11Beat[] = [
   {
     p: 31, x: 60,
-    text: 'Suppose happiness came in coins. Every pleasure you’ve ever had, poured onto one table and counted out like loose change.',
+    text: 'Suppose every pleasure could be measured in one unit, like coins. Then all your pleasures could be added into a single total.',
     dur: 4.0,
   },
   {
     p: 168, x: 60, tok: 1,
-    text: 'Jeremy Bentham built that table. A bar game, a helping of dessert, a symphony.',
-    cite: 'The counting table',
+    text: 'Jeremy Bentham, the founder of modern utilitarianism, treated pleasure this way. Consider three pleasures: a bar game, a dessert and a symphony.',
+    cite: 'Pleasure as quantity',
     dur: 2.5,
   },
   {
     p: 168, x: 60, tok: 1,
-    text: 'The three pleasures are drawn the same size. To him they’re the same stuff.',
+    text: 'For Bentham, pleasures differ only in quantity, so no pleasure is better in itself than another.',
     dur: 2.5,
   },
   {
     p: 380, x: 60, tok: 1, led: 1,
-    text: 'Bentham’s felicific calculus scored each for intensity, duration, certainty and reach, then added them up. He said push-pin is as good as poetry if the totals come out the same.',
+    text: 'Bentham’s felicific calculus scores pleasures by how intense, lasting and certain they are. If the pleasure is equal, he held, push-pin is as good as poetry.',
     cite: 'The felicific calculus',
     dur: 5.4,
   },
   {
     p: 6, x: 126, tok: 1, led: 1, shelf: 1,
-    text: 'Then his own student refused the arithmetic. Watch a second shelf go up above the table.',
-    cite: 'Mill puts up a shelf',
+    text: 'John Stuart Mill was raised on Bentham’s ideas, yet he rejected this purely quantitative view of pleasure.',
+    cite: 'Mill’s objection',
     dur: 2.8,
   },
   {
     p: 6, x: 126, tok: 1, led: 1, shelf: 1,
-    text: 'John Stuart Mill would not leave a bar game and a symphony on one level.',
+    text: 'Mill argued that pleasures differ in quality as well as quantity. Some are higher in kind than others.',
     dur: 2.6,
   },
   {
@@ -73,17 +73,17 @@ export const BEATS: Ethics11Beat[] = [
   {
     p: 457, x: 126, tok: 1, led: 1, shelf: 1,
     interact: {
-      prompt: 'Cheap thrills sum to more raw pleasure than one symphony. For Mill, have they beaten it?',
+      prompt: 'If lower pleasures add up to more pleasure than a symphony, does Mill say they outweigh it?',
       split: {
-        left: 'WHAT KIND', right: 'HOW MUCH',
+        left: 'QUALITY', right: 'QUANTITY',
         start: 0.5,
         zones: [
-          { id: 'amount', upto: 0.34, reads: 'add the pleasure up and the bigger pile wins' },
-          { id: 'both', upto: 0.66, reads: 'the amount matters, and so does the kind' },
-          { id: 'kind', upto: 1, reads: 'some kinds outrank any amount of the others', correct: true },
+          { id: 'amount', upto: 0.34, reads: 'only the total quantity of pleasure counts' },
+          { id: 'both', upto: 0.66, reads: 'quality counts, yet enough quantity can win' },
+          { id: 'kind', upto: 1, reads: 'higher quality outweighs any quantity of lower', correct: true },
         ],
       },
-      explain: 'The trap: reading Mill as Bentham with better manners. He broke the ledger. Higher pleasures differ in KIND, and judges who have tasted both prefer them. So a taller pile of lower ones can’t outvote them.',
+      explain: 'Higher quality outweighs any quantity of lower. Mill says competent judges wouldn’t give up a higher pleasure for any quantity of a lower one. He counts quantity too, but beside a difference in quality it’s “of small account”.',
       xp: 5,
     },
     dur: 1.0,
@@ -91,29 +91,29 @@ export const BEATS: Ethics11Beat[] = [
   {
     p: 169, x: 126, tok: 1, led: 1, shelf: 1, up: 1, pick: 1,
     interact: {
-      prompt: 'Three pleasures, one table. Tap the one Mill lifts onto the higher shelf.',
-      explain: 'The trap: intensity is not rank. The dessert and the bar game are real pleasures, and push-pin was Bentham’s own example. But neither had to be learned. Mill’s higher pleasure is the one you trained yourself to hear, and nobody who can hear it trades it back.',
+      prompt: 'Which of the three pleasures does Mill count as a higher pleasure?',
+      explain: 'The symphony. For Mill, higher pleasures come from the mind, the feelings and the imagination, and need training to enjoy. The bar game and the dessert are real but lower pleasures, however intense.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 163, x: 126, tok: 1, led: 2, shelf: 1, up: 1,
-    text: 'Two levels now, and the column below can no longer settle it. Mill’s test is not the size of the total but the verdict of people who have tasted both.',
+    text: 'Once pleasures differ in kind, quantity alone can’t decide which pleasure is better. Mill’s test is the preference of competent judges who have experienced both.',
     cite: 'Competent judges',
     dur: 5.0,
   },
   {
     p: 163, x: 126, tok: 1, led: 2, shelf: 1, up: 1,
     summary: {
-      title: 'Counting, and Ranking',
+      title: 'Quantity and Quality of Pleasure',
       points: [
         'Utilitarianism judges an act by the happiness it produces',
         'Bentham counted pleasure by quantity alone',
-        'Mill ranked some pleasures higher in kind, not amount',
-        'Competent judges, not the raw total, decide',
+        'Mill ranked some pleasures higher in quality',
+        'Competent judges, not the total quantity, decide the ranking',
       ],
-      closing: 'Next time someone says just add up the happiness, ask Mill which kind.',
+      closing: 'Mill remains a utilitarian, but he denies that pleasures differ only in amount.',
     },
     dur: 3.0,
   },

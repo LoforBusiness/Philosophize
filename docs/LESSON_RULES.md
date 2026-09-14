@@ -1271,8 +1271,10 @@ reinvented per lesson — reuse the rig, the transitions, the layout, the deck. 
 must be new every time is the **content and the in-lesson metaphor/beats/interaction**,
 *"so it's new for the users."* Copy the closest exemplar scene and vary the story.
 
-**F39. Tell philosophy like a story.** Entertaining first, informative second,
-interactive throughout, and premium enough that someone would pay to keep going.
+**F39. Teach philosophy as a clear lecture, and let the ideas be the interest.**
+Informative and precise first, interactive throughout, and premium enough that
+someone would pay to keep going. This rule asked for a story until 13 Sep 2026, when
+the owner retired that voice (group V).
 
 **F40. Give it an arc.** Hook (provocation) → build → productive struggle → a "what
 you now know" payoff on the summary. One idea per beat; concrete example **before**
@@ -1353,7 +1355,7 @@ simplicity". Groups J, AC and AD are all about the sentence, and none of them li
 a shallower claim.
 
 F46–F51 are judgement, like J5 and group M: a checker cannot tell whether an opening
-starts something (V6 records three metrics deleted for trying).
+starts something (V10 records three metrics deleted for trying).
 
 **F45. Never cross-reference a lesson by number.** "As we saw in Lesson 4" breaks
 silently the moment anything is reordered and `tsc` will never tell you. Write
@@ -2590,6 +2592,15 @@ it out again. A green checker and an absent one are indistinguishable from the o
 
 ## Group M — the narrator is a character, and the character is passive-aggressive
 
+> **RETIRED FROM THE TEACHING VOICE ON 13 SEP 2026.** The owner asked for lessons in a
+> clear lecture register (group V), and a narrator who is dry, put-upon and faintly
+> sarcastic is the opposite of one. Narration, questions, explanations and summaries
+> carry no barbs now. **The character did not disappear; it moved.** The stickman's
+> own thought bubbles and his line back on an answer (group AB) keep his voice, and
+> they are not spoken. M1 survives there unchanged: a barb lands on the subject, never
+> on the reader. M6 still holds for any pose chosen against a line. The rest of this
+> group is kept as the record of what the voice was.
+
 Group J says *how* to write a sentence. This one says **who is saying it**.
 
 The words sit under a figure who is plainly the one speaking them, and until now he
@@ -3352,7 +3363,7 @@ the wrong one is the mistake this group exists to stop.
 | one quantity on a scale | `drag` | `DragScale` — a knob on a rail |
 | what CATEGORY a named thing belongs to | `sort` | `SortBins` — a chip, and labelled bins |
 | which POSITION you would defend | `poll` | `PollBallot` — a ballot, then who held each |
-| what happens to a thing AS another changes | `plot` | `ShapePlot` — a curve you draw |
+| what happens to a thing AS another changes | `plot` | `TrendPick` — drawn curves, chosen in one tap (R16) |
 | how one thing DIVIDES between two | `split` | `SplitBar` — a seam in one bar |
 | anything else, including most of them | `cards` | two `ChoiceCards` |
 
@@ -3368,8 +3379,9 @@ Read the middle column as a set of tests, not a menu:
   `lever`, and the control changed under it — the test did not.)
 - **`plot`, not `drag`,** when the reader believes something about a SHAPE. "How
   much aura is left" is a number; "how the aura goes as the copies multiply" is a
-  curve, and a rail cannot hold one. Four cards describing four curves makes the
-  reader choose between four sentences instead of committing to a shape.
+  curve, and a rail cannot hold one. Four cards describing four curves make the
+  reader choose between four sentences; four drawn curves let them choose the shape
+  itself (R16).
 - **`split`, not `drag`,** when giving one side more has to visibly take it off the
   other. A rail with a label at each end says "more this way" and says nothing
   about what you gave up.
@@ -3388,9 +3400,10 @@ more moving parts.
 
 ### R2 · The readout is lesson copy, not scoring furniture
 
-Every one of the five carries a live word above it that changes as the reader
-moves: `reads` on a `ScaleZone`, `LeverStop`, `PlotShape`, `SplitZone` or
-`FieldQuad`. That string is under **group J** like any other sentence the reader
+Every control that moves carries a live word above it that changes as the reader
+moves: `reads` on a `ScaleZone`, a `SortBin` or a `SplitZone` (and on the retired
+`LeverStop` and `FieldQuad`). A `PlotShape`'s `reads` is the caption on its tile, and
+a poll option's is the position itself. That string is under **group J** like any other sentence the reader
 sees — short, plain, one thought.
 
 It is what makes the control teach rather than merely slide. The reader hunts for
@@ -3407,8 +3420,8 @@ None of the five compares a float to a target.
 
 - `drag`, `split` — the value falls in a **zone** or on a **detent**.
 - `sort` — the chip is over a **bin**.
-- `plot` — the drawn curve is scored to the **nearest profile** by RMS, so a reader
-  who draws a cliff gets "a cliff" whether it falls at 0.9 or at 0.7.
+- `plot` — the reader taps one **drawn shape**. It used to be a curve drawn by hand
+  and scored to the nearest profile by RMS; that control is retired (R16).
 - `poll` — the reader has pressed one **row**.
 
 A tolerance dressed up as precision is a worse question, not a stricter one. The
@@ -3453,8 +3466,9 @@ time the failure looked identical: a sweep that measures less and says nothing.
   `pointermove`s rather than one jump — `onUpdate` integrates `translationX`, and a
   single leap does not clear the pan recogniser activation check.
 
-So: every control carries a `nativeID` (`drag-strip`, `lever-arc`, `shape-plot`,
-`split-bar`, `field-pad`), and **all four harnesses share one snippet**,
+So: every control carries a `nativeID` (`drag-strip`, `split-bar`, `sort-bins`,
+`poll-ballot`, `trend-pick`, and the retired `lever-arc`, `field-pad` and
+`shape-plot`), and **all four harnesses share one snippet**,
 `scripts/lib/answerctl.mjs`, which knows how to work each of them. Adding a control
 means adding its id there, in the same commit as the control.
 
@@ -3468,8 +3482,9 @@ in it shrinks. One gesture, on the UI thread, with no React render in between.
 
 The condition is the beat: the scene reads the control's value **only on its own
 graded beat** and the script's own track everywhere else. WHICH value depends on
-the control — `dragPos` for `drag`, `split` and `plot`, whose position IS the
-answer, and `pickPos` for `sort` and `poll`, whose rows are shuffled (X3). One value, two sources, and the picture
+the control — `dragPos` for `drag` and `split`, whose position IS the answer, and
+for `plot`, where it is the chosen shape's mean height; `pickPos` for `sort`, `poll`
+and `plot`, whose options are shuffled (X3). One value, two sources, and the picture
 never disagrees with whichever is in charge. Derive that flag from the beat rather
 than declaring a channel for it —
 
@@ -4120,6 +4135,13 @@ to get wrong and impossible to see in the source:
 - [ ] **It teaches like a person** (F46–F51): it opens on a situation, the idea comes
       before the term, the other side gets its strongest version in its own beat,
       and a thinker arrives with the question they chased.
+- [ ] **It reads as a clear lecture** (group V): every beat teaches something; no
+      idiom, slang or joke; the term is named and defined; the reasoning says
+      *because* and *therefore*; narration never tells the eye where to look.
+      `npm run check:voice`.
+- [ ] **Every poll option names who held it** (R17), with an attribution you could
+      source, and nothing of the reveal exists before the pick. A plot prompt never
+      says "Draw" (R16). `npm run check:answers`.
 - [ ] **Every label lands at 8pt or more** (D34) — `declared × fit`, where a tall
       band shrinks everything. `npm run check:legible`.
 - [ ] **Every `reads` string is lesson copy** (R2) and every wrong region is a
@@ -4960,6 +4982,112 @@ the middle one does most of the work:
 — by design, since this component decides how big a scene's art is. Budget the
 sweep before starting.
 
+### R16 · A curve is chosen from drawn graphs, not drawn by hand
+
+> *"the question where you move those lines up or down, and there is usually four or
+> five different ones you move up and down, and then push set. This is something I'd
+> not want anymore. It's too complicated to do. It takes too much time."*
+
+`ShapePlot` asked for a curve column by column and a SET button, in eighteen lessons.
+The claims those questions make are still curves (R1), so the curves are drawn FOR
+the reader now, one per tile, and one tap chooses (`TrendPick`). The block is still
+`plot`, with the same `shapes` and `profile`s, so every scene that reacted to a plot
+beat still does: `dragPos` is the chosen shape's mean height, as it was the drawn
+curve's, and `pickPos` is the chosen shape in the author's order.
+
+- **The tiles are shuffled** (R11). The correct shape was authored FIRST in 15 of 18
+  plot questions. Drawn freehand that cost nothing; offered as tiles it would be "tap
+  the top left".
+- **A shape's `reads` is its tile's caption**, at most 42 characters, and the `axis`
+  names the row above the tiles, at most 24. Four shapes sit two by two with two-line
+  captions; three sit in one row with four-line captions in a smaller face.
+  `check:controls` measures both slots against the real font.
+- **A plot prompt never says "Draw"** (R12).
+- **The curve draws itself in**, behind a strip of the chart's own ground sliding
+  away, tile after tile. Nothing animates a path (§17 rule 7): the curve is Views.
+
+### R17 · A poll shows nothing of its answer before the pick, and every option names who holds it
+
+> *"I can usually tell which one to answer right because there is a gap. And when you
+> tap on it, the thinker arrives already below it. I need for these questions to not
+> have a gap … and if you push it, then a gap appears, and then the thinker says that
+> was what they would have said, and also the wrong answers show up too."*
+
+The gap was layout, not styling. `PollBallot` mounted each option's holder line from
+the start at opacity 0, and an invisible View still takes its height. Only the
+correct option carried holders in 7 of the 34 polls, and 5 more narrowed the choice,
+so the empty space under a row was the answer. `check:controls` measured the names'
+width and never the room they reserved, and group O gated the words, not their box.
+
+- **Nothing of the reveal is mounted before the pick.** O3 says mount a reveal rather
+  than hide it; here the fault was mounting it early. The holder line is created on
+  answering, on every row at once, and the rows below slide down (`LinearTransition`).
+- **Every option carries `holders`**, the correct one included, because the reveal is
+  who held each position. A holder is somebody who held or defended that position in
+  their own work, as the Stanford or Internet Encyclopedia of Philosophy describes it,
+  or a named school. An attribution is never invented: an option nobody holds is
+  rewritten into one somebody does (R4).
+- **A holder's name is drawn in their era's colour** (W1's licence), looked up by name
+  in the roster. A school, or a name the roster does not carry, is ink.
+- **The explanation says why, not who.** Once answered, every row already shows its
+  holders, so an explanation that lists who held which row repeats what is on screen
+  and spends the lines that should give the reason. It says why the right position is
+  right, and names at most one tempting wrong row and why it fails. It runs to at most
+  30 words on a four-option poll and 40 on a three-option poll. Those limits are the
+  room a 780-tall phone leaves under four held rows (R19), not a style preference.
+
+`npm run check:answers` fails on a poll option with no holders and on a ballot that
+renders its holders before the answer is in.
+
+### R18 · A question wears the lesson's branch colour, and the verdict wears green and rust
+
+> *"the UI of most questions don't look very good below the stickman. It's very simple
+> black and white … it's very boring, not very gamified … lighten them up or gamify
+> them more, polish them up, make them look cooler to do."*
+
+R14 made the controls struck objects, but they were struck in ink, grey and paper on
+a screen where the pins, the badges, the streak and Insights all carry colour. So
+every control now takes the lesson's BRANCH hue (`questionTone.ts`, `QuestionParts.tsx`).
+That is the one licence `constants/design.ts` gives a branch colour: to say "this is
+that branch". One hue per lesson, carried in lips, rims, rails and fills, never flooded.
+
+- **A pressable thing is a raised face on a lip of the branch colour** (`LipPlate`). It
+  drops onto the lip under a finger and stays down when chosen.
+- **The verdict re-strikes the same plates** green or rust, stamps the reader's own
+  choice (`VerdictSeal`), and pays a right answer in gold on the verdict card
+  (`XpCoin`) — once, whatever control answered it. There is no sound: the app plays two.
+- **The question is numbered.** "QUESTION 1 OF 2" sits on a branch-coloured kicker
+  beside a gold stake.
+- **Type in the branch colour uses the accent's `text` tone**, the hue taken toward
+  ink, so a small label clears 4.5:1 on paper.
+
+`npm run sheet:controls` draws every control open, right and wrong, in any branch's
+colour (`BRANCH=logic`), and reports each state's height, because every point a
+control grows comes out of the explanation under it.
+
+### R19 · An answered question fits its deck on the phone it is held on
+
+A control below the figure shares one fixed box with the prompt and the explanation
+(L6), and the deck in that box is `overflow: hidden`. A control that grows, or an
+explanation that gains a sentence, therefore costs the END of the explanation, cut off
+with no mark. Every harness in this repo measures at 390×844, which is not the phone
+the reader holds. A 2340-tall screen at its default density is about 830 tall, and the
+status and gesture bars take 50 of that. R17's holder line under every poll row made
+the gap matter. Rendered for all 278 questions answered below the figure, 4 clipped at
+390×844, 28 at 384×780 and 45 at 360×780.
+
+- **Once a control below the figure is answered, the prompt gives its line to the
+  answer** (`InteractPanel`). The control still shows the options with the verdict
+  struck on them, so the prompt was the one thing left that the reader no longer
+  needed. That change alone took 45 to 12 at 360×780. A stage question keeps its
+  prompt: its deck has room, and nothing on the stage says in words what was asked.
+- **So an explanation reads without its question.** It never opens with "It", "That",
+  "This", "Right", "Yes." or "No." leaning on the prompt. It names the subject.
+- **The gate is 360×780**, the narrowest common Android width at the height the
+  reader's own phone leaves. `npm run sheet:deck` renders every answered question in
+  the corpus on one page, one width at a time, works out each phone height from the
+  player's flex weights, and exits non-zero on any question cut off at the gate.
+
 ---
 
 ## H60d · A stored measurement is a MOMENT, not a place
@@ -5087,6 +5215,10 @@ Two things follow, and both are load-bearing:
 
 ### S4 · Lifting a finger is only an answer when the control has one value
 
+> **The drawn plot this rule was written about is retired (R16).** A plot is one tap
+> on a drawn shape now. The general form at the end of this rule still holds for any
+> control that holds several values.
+
 Four of the five analogue controls hold a single number, so release-is-commit is
 right for them: when the finger comes up there is nothing left to say.
 
@@ -5196,9 +5328,9 @@ Measured on a real 1.5-second sweep, sampling every animation frame:
 counter-tested by setting the crossfade to 0 and watching the step go back to
 1.000. It needs Metro and a browser, so the rule it protects is ratcheted offline
 instead: **`check:controls` fails if any control holds React state, or hands
-`ControlRead` anything but a shared value.** One allowance is listed by name —
-`ShapePlot`'s `drawn`, which flips once per question and gates the commit button
-rather than the reading.
+`ControlRead` anything but a shared value.** The one allowance it listed by name,
+`ShapePlot`'s `drawn`, went with the drawn plot (R16), so no control holds React
+state now.
 
 **The general form: coarse controls hide continuous defects.** A thing that
 changes three times per gesture and a thing that changes thirty times are not the
@@ -5572,6 +5704,36 @@ always free, and a component cannot know which one this scene left empty.
 
 ---
 
+## E41 · One beat, one place to answer
+
+> *"sometimes I've noticed on questions you're supposed to answer below the stickman,
+> but you can also answer above it, which is not right. So if I answer above the
+> stickman sometimes, it'll ask that again on the next tap."*
+
+Exactly right, and it was ten scenes. Each switched its answer Targets on for any
+graded beat (`const showPick = !!cur.interact`), so on a beat asking a `split`, a
+`sort`, a `drag` or a `poll` the stage's own options were live too. A tap there went
+through the player's one `choose()`, was graded against the STAGE question's answer,
+locked the control below as answered and showed that control's explanation. The
+stage question then arrived on its own beat and asked again. The ten were ethics3,
+ethics4, epistemology4, epistemology5, aesthetics5, political2, political5,
+metaphysics3, valid3 and strong4.
+
+**The fix is in the player, not in the ten scenes**, so an eleventh cannot repeat it.
+`stageAnswered(beat)` in `cinematicKit` is true only when a graded beat declares none
+of the controls drawn below the picture. The player gates every scene pick on it, and
+`TargetCountProvider` hands it to every `Target`, which then takes no press and draws
+no ring, halo or pip. **A Target on a beat answered below still registers and still
+reports its box**: the camera frames target boxes on every beat (H60c), and fixing
+where a question is answered must not move the camera. The inScene hint reads the
+same function, so the hint and the picks cannot disagree.
+
+`npm run check:shape` holds all of it, including that `stageAnswered` names every key
+the `InteractBlock` type declares, so a new control added without its key fails.
+`node scripts/countertest-shape.mjs` puts seven defects back.
+
+---
+
 ## J15 · A word the lesson is not teaching must be one the reader already has
 
 The reader drew the distinction themselves, and it is the whole rule:
@@ -5612,6 +5774,19 @@ correctable is the method working, not a confession"* — and one clause that wa
 simply not English: `political9` had *"steering a ship takes a pilot, not a show
 of hands, and govern by popularity and flattery beats wisdom."* **Look for the
 sentence that cannot be read aloud, not the long word.**
+
+### And then the owner asked for intellectual words (13 Sep 2026)
+
+The clear-lecture voice (group V) needs the vocabulary of the subject — *justified,
+imputable, necessary, sufficient, presuppose, criterion, counterexample* — and this
+list was forbidding some of it: *tenable, cogent, culpability, salient, intelligible,
+irrefutable*. It now draws the line the research draws. Coxhead's Academic Word List
+(570 word families, about a tenth of the words in academic text and under 2% of
+fiction) is what an educated reader expects to meet, and a precise word is welcome
+wherever the sentence makes its meaning clear. What stays banned is **inflated
+diction**, where a plainer word means exactly the same thing: *utilise, commence,
+endeavour, ascertain, heretofore, notwithstanding, aforementioned, myriad*.
+`check:plainwords` keeps only those, each with its plain word.
 
 ---
 
@@ -6668,170 +6843,238 @@ with `file` rather than assuming.
 
 ---
 
-## Group V — the narrator is not in the room
+## Group V — the narrator teaches
 
-A reader named a model: *American History Tellers*, the Wondery show. They were
-specific about what they wanted from it — *"I like the script that they use and
-how they tell the story… I like how simple it is to understand when hearing the
-words"* — and about the hard case: **the topics are difficult and the telling
-should not be.**
+**Decided on 13 Sep 2026, and it reverses the voice this group used to prescribe.**
+The lessons had been written as a story, after the podcast *American History
+Tellers*: colloquial, elliptical and personal. The owner read them back and named
+what that produced, quoting shipped beats:
 
-Its writer, Lindsay Graham, states the method plainly enough to build rules from:
+> *"Feeds nothing. Brace yourself. Mid game. Nobody says how loud. Sitting under the
+> line. Rubbish. Nobody in the room objects. Never turned up. Hand a copy to
+> everybody. Watch the bar. It eats itself. They wear furniture. Not the real test.
+> Takes the pig with it where the line goes."*
+>
+> *"It's too personal. It's too simple, it's too strange. I want more intellectual,
+> informative wording in lessons … that describe what is going on in the lesson and
+> is teaching the user."*
 
-> *"There's a temptation to get the facts across and that's the worst instinct,
-> because no facts live or breathe."*
-> *"We think in a very, almost television way. We have characters, they do things,
-> there are consequences."*
-> *"Something has to happen every two minutes."*
-> *"The voice in my shows is removed. There's no first-person personal pronouns."*
+Shown two registers side by side, rewritten from the same beats, they chose the
+**clear lecture** over the academic textbook. It is precise and informative, like a
+very good university lecture or an Oxford *Very Short Introduction*: technical terms
+are named and defined, and nothing is chatty. Every lesson was rewritten to it,
+narration and questions both, and every line whose words changed was voiced again
+(AC14).
 
-`npm run check:voice` holds V1. Everything else in this group is a rule for a
-person, because the two attempts to make them countable both failed in the way
-group Z describes — see the end.
+**The evidence agrees with them, four ways, and it was read before a word changed.**
+
+- **Interesting but irrelevant detail measurably lowers learning.** The seductive
+  details effect holds across 39 experiments (Rey 2012) with a meta-analytic g of
+  −0.33 (Sundararajan & Adesope 2020). Mayer's coherence principle held in 23 of 23
+  tests (median d 0.86): people learn more when extraneous words are left out. A beat
+  that exists for mood is extraneous by definition.
+- **Idioms, colloquialisms, slang and humour confuse, and they do not translate.**
+  Google's developer documentation style guide says so in as many words ("Writing
+  for a global audience"), and a reader of these lessons may be reading in a second
+  language.
+- **Good philosophy writing is precise.** It names a technical term and defines it,
+  gives an example, makes the inference explicit with *because* and *therefore*, and
+  states the other side fairly (Jim Pryor, *Guidelines on Writing a Philosophy
+  Paper*). The Stanford Encyclopedia of Philosophy asks its authors for "clarity of
+  substance and style" and no editorialising in the voice of the entry.
+- **But the reader is still spoken to.** Mayer's personalization principle
+  (meta-analyses at d ≈ 0.5 to 1.1) finds that people learn more when prose addresses
+  them. So "you" stays inside a case and inside a question. What went is the slang
+  and the chat, not the reader.
+
+`npm run check:voice` holds V1, V3 and V7. Group AC still holds the ear, through
+`npm run check:ear`. The rest of this group is judgement.
 
 ## V1 · No seminar "we"
 
-**A beat may not put the narrator and the reader in the same pronoun.** "We
-forget that a photographer did", "Tragedy hurts, and we go anyway", "Most of us
-quietly use all three" — that is a lecturer agreeing with a room about what they
-both think, and it is the register a story does not have. Hand the sentence to
-the reader instead: *you* forget, *you* go anyway. The picture is untouched, so
-A1 costs nothing.
+**A beat may not put the narrator and the reader in the same pronoun.** "We forget
+that a photographer did" and "Most of us use all three" make the narrator a
+participant in the view rather than the person presenting it, and they blur who
+holds a claim (V8). State it about the reader inside a case, or about the people who
+hold it.
 
 **THREE KINDS ARE NOT THIS, and the check leaves them alone**:
 
-- **a philosopher's own claim, reported.** "Hobbes said we laugh at someone
-  beneath us" is Hobbes's first person; rewriting it misquotes him.
-- **speech in quotation marks.** `you say "I promise to repay"` — the pronoun is
-  the example.
+- **a philosopher's own claim, reported.** "Hobbes said we laugh at someone beneath
+  us" is Hobbes's first person; rewriting it misquotes him.
+- **speech in quotation marks.** `you say "I promise to repay"` — the pronoun is the
+  example.
 - **a "us" that names a real group** the lesson is about.
 
-The check covers **`text`, `explain`, `prompt` and `reads`** — every field a
-reader actually reads. It scanned `text` alone at first, which left the worst
-place untouched: **`explain` is the sentence shown in the second AFTER
-answering**, when attention is highest, and it was saying things like *"we would
-not accept 'too demanding' from somebody refusing to wade into the pond"*.
+The check covers **`text`, `explain`, `prompt` and `reads`**, every field a reader
+reads, and `explain` matters most: it is the sentence shown in the second after
+answering, when attention is highest. `cite` is excluded, because "Descartes,
+Meditations I, 1641" ends in a Roman numeral any first-person rule reads as "I". A
+philosopher's quotation is excluded by INDENT: those are the source's own words.
 
-`cite` is excluded and must stay excluded — "Descartes, Meditations I, 1641"
-ends in a Roman NUMERAL, which any first-person rule reads as "I". A
-philosopher's quotation is excluded by INDENT rather than by a word list: those
-75 are the source's own words.
+> **The checker was once blind to the commonest form of the defect**, and its own
+> counter-test is what found that. `\b(we|our|us|I|my|me)\b` had no `i` flag, so a
+> sentence-initial "We", which is most of them, matched nothing. `we|our|us|my|me`
+> folds case; `I` must not, or every stray tokenised "i" fires.
 
-38 narrator first-persons were rewritten in all. What remains is quoted speech
-and readouts deliberately written in the reader's own voice, so the check is a
-high-water mark rather than a zero.
+## V2 · Every beat teaches something
 
-> **The checker was blind to the commonest form of the defect, and its own
-> counter-test is what found that.** `\b(we|our|us|I|my|me)\b` has no `i` flag, so
-> a **sentence-initial "We"** — which is most of them, since a beat is usually one
-> or two sentences — matched nothing. Splicing "We see the needle…" into a lesson
-> left the count sitting at exactly the budget, which reads as a clean corpus.
-> `we|our|us|my|me` folds case; `I` must not, or every stray tokenised "i" fires.
+A beat states a definition, a claim, a step of reasoning, a case, an objection or a
+consequence. **No beat exists for mood or suspense.** "Brace yourself." carried
+nothing, and it became "Leibniz called it the first question a reasoning mind is
+entitled to ask." A beat of two or three words is almost always the symptom.
 
-## V2 · A beat contains an event, not an exhibit
+This replaces the story rule that stood here, *a beat contains an event, not an
+exhibit*. An event is still welcome when it is the case under discussion. It is no
+longer a requirement, and a beat that only sets a mood is no longer a beat.
 
-Graham's "no facts live or breathe" is the rule these lessons are most at risk
-from, because a philosophy lesson's material really is a set of claims. The test
-is whether the beat has something HAPPEN in it. `epistemology31` opens *"You are
-already down the road when it hits you: did you lock the door?"* — a moment, a
-person, a jolt. It could have opened "Memory cannot certify itself" and said the
-same thing.
+## V3 · Say the literal thing
 
-## V3 · The turn is the rhythm, and it is one sentence
+No idiom, slang, colloquialism, joke or figurative shorthand in the teaching voice.
+Say what it means:
 
-AHT's most repeated move is a short reversal immediately after the setup: *"But
-today is anything but regular."* It costs a sentence and it tells the reader the
-situation just changed, which is the difference between a list and a story.
+| story voice | clear lecture |
+|---|---|
+| it eats itself | it defeats itself · it undermines the condition it depends on |
+| it starts mid-game | it begins with a universe that already exists |
+| they’re rubbish | they are false · they are unsupported |
+| a reason that never turned up | a reason that is never given |
+| nobody in the room objects | on its own, the proposal is uncontroversial |
+| hand a copy to everybody | suppose everyone adopted the rule at once |
+| not the real test | not the criterion that decides the question |
 
-**THIS IS A TECHNIQUE, NOT A TARGET, AND THE EXEMPLAR IS WHY.** 7.6% of beats
-carry one — and `political7`, the lesson the reader holds up as the standard,
-carries **none at all**. A rule its own best example fails is not a rule, so
-there is no budget here and no check. What the number is good for is the
-opposite of a quota: if a beat already reads well without a turn, leave it.
-Reach for one when a beat has set something up and the next thing that happens
-contradicts it.
+`check:voice` holds a zero on phrases that are colloquial in every context
+(`COLLOQUIAL`, budget `COLLOQUIAL_BUDGET`), across every string of our own wording:
+narration, cites, prompts, explanations, readouts, labels, cards and summaries.
+**It lists only those.** "In the room" is sometimes the literal thing, because
+Searle's Chinese Room has a man in it, and a zero that cannot tell a case from an
+idiom would push a writer to damage a correct sentence.
 
-## V4 · Strip to the emotional core, not to the summary
+## V4 · Name the concept, and define it the first time it appears
 
-> *"All we need to know is Pope Pius IX is really angry."*
+Use the proper term and gloss it in the same sentence or the next: "This is the
+principle of sufficient reason. It holds that nothing is the case without a reason."
+F47's order still holds — where the lesson opens on a case, the case comes first and
+the term second — but the term then arrives, and is used. A beginner who leaves
+knowing *universalisability* and what it means has learned more than one who leaves
+knowing *hand a copy to everybody*.
 
-The instinct when compressing is to keep the load-bearing facts and drop the
-colour. Graham does the reverse: he keeps the one thing a person would feel and
-drops everything else. In a lesson that means the stake — what goes wrong for
-somebody if this idea is false — survives the cut before the taxonomy does.
+## V5 · Make the reasoning explicit
 
-## V5 · THE COLD OPEN DOES NOT TRANSFER, AND THAT IS THE FINDING
+Say why one thing follows from another: *because*, *so*, *therefore*, *however*,
+*for example*, *in that case*. A lesson is an argument, and the connectives carry it.
+An inference left for the reader to reconstruct is the curse of knowledge (Pinker):
+obvious to the writer, invisible to a beginner.
 
-The signature device of the show is the second-person dramatised opening: a date,
-a place, a broken radio, a double martini, four hundred words before the narrator
-speaks. **Do not write that here**, and the reason is structural rather than a
-matter of taste.
+## V6 · A thought experiment is stated as a case, and "you" lives inside it
 
-**AHT builds a scene in words because audio has no picture. These lessons have a
-picture.** A beat that sets the scene in prose is narrating what the reader is
-already looking at — A1 read backwards — and it spends a beat's ~11 words (J12)
-on the one job the stage does for free. The cinematic format already *is* the
-cold open; the prose is the narrator over the top of it.
+"Suppose a murderer comes to your door and asks where your friend is hiding." "Consider
+a ship whose planks are replaced one by one." The reader is placed inside the case and
+addressed inside the question (the personalization evidence above). "You" does not
+belong in chat: no "You’ve probably noticed", no "Here’s the thing".
 
-So what transfers from AHT is the **voice** (V1), the **event** (V2), the
-**turn** (V3) and the **cut** (V4). The scene-painting is already the scene's.
+## V7 · Narration does not instruct the eye, and does not paint the picture
 
-**And the same test applies to the voice that now reads the lessons.** Google's own
-scripting tips for Chirp 3 HD recommend disfluencies — "ums" — for authenticity.
-That exists for audio that has no screen. These words are on one, so a hesitation is
-a detail about nothing (AC10); the tips that DO transfer — write conversationally,
-contract, keep sentences short — are group AC.
+No "Watch the bar", "Look at the gaps", "Notice how…". The picture already shows it,
+so the sentence states the fact the picture illustrates, in the terms of the idea:
+"Watch the bar. A lie only works on somebody expecting the truth" became "A lie
+deceives only a listener who expects the truth. If everyone lied, that expectation
+would disappear." A1 still binds every word to what the stage draws.
 
-## V6 · The corpus was measured before it was rewritten, and it was mostly right
+The finding that stood here as V5 still holds, because it is the same fault from the
+other side: the podcast built its scenes in words because audio has no picture, and
+these lessons have one. A beat that describes what the reader is already looking at
+spends a beat on the one job the stage does for free.
 
-Two metrics were built to find un-AHT-like prose and **both were deleted for
-disagreeing with lessons whose answer was already known** (Z-group's rule):
+`check:voice` holds a zero on narration sentences that begin by telling the reader
+where to look (`EYE`, budget `EYE_BUDGET`).
 
-- **a keyword "concreteness" score** called *"Two canvases. One is a Vermeer."*
-  and *"A bull, drawn properly. Eleven strokes, and nobody has to be told what it
-  is."* abstract. It was scoring its own word list — it had no entry for canvas,
-  Vermeer, urinal, swan or morphine.
-- **a linking-verb "exhibit" score** ranked `epistemology31` and `metaphysics24`
-  among the worst in the corpus. Its action-verb test required an `-s`/`-ed`
-  ending, so every imperative — *"Take one grain away"*, *"Keep applying it"* —
-  was invisible, and an imperative is the most active sentence there is.
+## V8 · Attribute precisely and neutrally
 
-**A THIRD WAS BUILT AND DELETED IN THE SAME WAY**, and three for three is the
-finding rather than bad luck. An EXHIBIT score meant to catch an opening that
-announces an inventory instead of starting something flagged 72, including:
+Say who holds what: "Hume argues…", "Kant holds…" (AD3, AD5). The narrator does not
+editorialise: no "the obvious reply", "the famous trap", "the caricature". Where the
+lesson's point is that a reading is a misreading, say whose reading and why it fails.
 
-    political3     "A gun makes you obey. What makes you owe obedience?"
-    ethics6        "Five lives saved. So why does this one feel wrong?"
-    epistemology7  "The sun rose today. Will it rise tomorrow?"
-    ethics35       "Two men, one afternoon, one drowning child. The first
-                    reaches in and holds him under."
+## V9 · The precise word, not the inflated one
 
-Those are among the best openings in the corpus. It tested for an "event verb"
-against a keyword list, so `glance`, `reaches`, `holds`, `rose` and `makes` read
-as no event at all. **WHETHER A BEAT STARTS SOMETHING IS NOT COUNTABLE.** A
-person reads the opening; a checker can only measure whether a sentence is hard
-to get through.
+*Justified, imputable, necessary, sufficient, presuppose, criterion, counterexample*
+are the vocabulary of the subject and are welcome, provided the sentence makes the
+meaning clear. What stays banned is inflated diction, where a plainer word means
+exactly the same: *utilise, commence, endeavour, ascertain, heretofore*. J15 holds the
+list.
 
-**AND A RATIO NEEDS A DENOMINATOR, WHICH J12 TOOK AWAY.** The beat-splitting pass
-cut 466 packed beats into pieces, so a great many beats are now three or four
-words — and Flesch is built for passages. *"Two completely different reasons."*
-scores **−9**; *"Belief, truth, justification — all three."* scores 33; *"Look at
-it. Beautiful, obviously."* scores 52. All three are exactly right as written.
-One pointer in a five-word beat is 20% and means nothing. `prose-worklist` gates
-its ratio faults at twelve words for that reason, and the clause rule too — three
-commas in a five-word LIST is one clean thought, not two bolted together.
+## V10 · What the story voice got right, and what was measured
 
-What survived measurement: the corpus reads at **83.2 mean Flesch reading ease
-and 10.2 words a sentence**. Working the whole corpus down a calibrated worklist
-came to **73 pieces across 54 lessons** — the rest were already clean by every
-readability rule the suite holds. **The prose was already close to the model.**
+**Kept, because the evidence behind it did not change:** one or two sentences a beat
+(J12), the whole of group AC for the ear, a concrete case before the abstract term
+(F46, F47), and the other side at its strongest in its own beat (F48).
 
-> **A WHOLESALE REWRITE WAS THE WRONG MOVE AND WAS NOT MADE.** 1,364 beats are
-> pinned to what the stage draws, to the maxims in `data/lessonFocus.ts` that are
-> cut from their own wording, to the generated name index, and to the neighbour
-> rules in group Q. The affordable, checkable change is the one that leaves all
-> four alone.
+**Retired:** the event-not-exhibit rule, the one-sentence "turn" as a rhythm device,
+stripping a beat "to the emotional core", and group M's dry narrator.
 
+**Three metrics were built for the story voice and deleted**, each for disagreeing
+with lessons whose answer was already known (group Z's rule): a keyword
+"concreteness" score that called *"Two canvases. One is a Vermeer."* abstract because
+its own word list had no canvas in it, and two "exhibit" scores whose action-verb
+tests could not see an imperative and ranked some of the best openings in the corpus
+among the worst. **Whether a beat teaches is not countable either.** A person reads
+it; a checker holds the mechanical half (V1, V3, V7) and the reading measures (J10,
+J11, J15).
+
+> **THIS GROUP ONCE SAID "A WHOLESALE REWRITE WAS THE WRONG MOVE AND WAS NOT MADE."**
+> That was true while the voice was right and only the mechanics needed work. It
+> stopped being true when the owner changed the voice. The rewrite was then made the
+> way group AC's was made safe: a guard that failed any script where anything moved
+> except the wording a rewrite may change, a lint per lesson, maxims re-chosen from the
+> new wording (W5), and only the changed lines voiced again.
+
+## V11 · The readability ratchets were retuned for the lecture, once, and the rest was fixed
+
+The ratchets in group J were calibrated on the story voice. The lecture rewrite (13 Sep
+2026) states a claim and qualifies it in one sentence, defines the term it teaches, and
+attributes each view to its thinker. So five measures began scoring the register the
+owner chose rather than prose that is hard to follow:
+- 243 pieces for clause density;
+- 22 for plainness;
+- 23 dense beats;
+- 17 roll-calls;
+- 11 recall prompts.
+
+The owner chose to retune the measures that score the register, and to fix everything
+still over them.
+
+- **Three clause marks a sentence in prose, not two and a half,** and a little more
+  abstraction: 0.16 of the words, 0.14 in a prompt (`check:clear`). J1 still holds every
+  sentence to twenty words. A readout did not move: it is read in motion, and a "but"
+  there is still what a thumb cannot hold.
+- **"That" and "which" are not pointers.** In lecture prose they join clauses ("Kant
+  argued that…"). "It", "this" and "they" still count (`check:plain`, `check:clear`).
+- **A name is not abstraction (J4).** A capitalised word inside a sentence no longer
+  counts as a long word.
+- **A roll-call counts people (J6).** A lower-case particle keeps "Han van Meegeren" one
+  name, and weekdays, months and peoples are not names. The budget carries six beats the
+  count still cannot tell from people: book titles (*Meno*, *Theaetetus*, *Discipline and
+  Punish*), a brand and a ballet, a planet, a myth, and Plato's capitalised Forms.
+- **Applying a thinker is not recall (J8).** "On Locke's view, which of the two men is now
+  the prince?" asks the reader to apply a criterion to the case on the stage. Only a
+  question about the thinker's own term or claim still counts.
+- **A label drawn in capitals is measured in capitals.** `check:controls` measured sort
+  bin labels in lower case, which the component draws in upper case, and passed four
+  labels the render cut.
+
+Everything still over a limit was then rewritten, one piece at a time:
+
+| Check | Before | After |
+|---|---|---|
+| `check:clear` | 243 | 1 |
+| `check:plain` | 22 | 0 |
+| J4 | 23 | 0 |
+| J8 | 11 | 0 |
+
+Every budget now sits on its residue. One ratchet moved UP: `check:rotation`, 25 → 26. valid3's grass-and-sky
+question classifies an argument, so no thinker holds any cell of its grid. It left the
+poll it could not honestly be (R17) for the sort R1 prescribes, and that pairs it with its
+neighbour.
 ---
 
 ## Group W — two things in the paragraph are not ordinary words
@@ -8488,10 +8731,10 @@ target and a thought placement, and every one of those is indexed by it.
 
 The voice cannot raise an eyebrow. Irony, a sarcastic "Sure.", a rhetorical
 question that only lands with a sneer — all flatten, and a flat reading of a line
-written for a knowing tone is worse than either. Group M's dry narrator survives
-only where the dryness is in what is SAID: an understatement that is literally
-true, a juxtaposition, a fact left standing. Read it in a monotone; if it stops
-being funny, it was a tone.
+written for a knowing tone is worse than either. Group M's dry narrator is retired from
+the teaching voice (group V), so narration carries no irony at all; the dryness lives
+in the stickman's own bubbles (group AB), which are not spoken. Read a beat in a
+monotone: if it changes meaning, it was written for a tone.
 
 Not countable.
 
@@ -8528,7 +8771,7 @@ Four suggestions sound right and were checked against the evidence first:
   ones grammar puts there.
 - **"An ellipsis is a soft pause."** Google documents it as hesitation (AC7).
 - **"Short, spaced sentences for atmosphere."** Pace is the voice's speaking rate,
-  not sentence length — and setting the scene in words is what V5 already rules
+  not sentence length — and setting the scene in words is what V7 already rules
   out, because these lessons have a picture.
 - **"Vary sentence length — human writing is bursty."** Burstiness is a detector's
   term for how predictable text is, not sentence length, and GPTZero stopped
@@ -8624,7 +8867,8 @@ A clip a line had already put 710 narration clips into an update of 809 assets w
 lessons voiced, and the whole library is 1,718 lines, so it could never have shipped.
 `FFMPEG=<path> node scripts/encode-narration.mjs` lays a lesson's spoken lines end to end
 in beat order, `GAP_S` (0.4 seconds) of silence apart, and encodes them once as a 64 kbps
-mono `lesson.mp3`: 246 files in 69.0 MB, and a real Android export bundles 364 assets in
+mono `lesson.mp3`: 246 files in 87.1 MB (69.0 before the lecture rewrite lengthened the
+lines), and a real Android export bundles 364 assets in
 all. The file's ID3 comment lists every line's beat, its WAV's SHA-256 and where it
 starts. `make-narration` writes each line's `at` from the same layout, and the player
 seeks there and pauses at `at + dur`, so the gap is what a late pause lands in. Decoded,

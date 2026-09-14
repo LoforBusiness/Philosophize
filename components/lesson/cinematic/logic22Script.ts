@@ -23,19 +23,19 @@ export interface Logic22Beat extends BaseBeat {
 export const BEATS: Logic22Beat[] = [
   {
     p: 379, x: 70,
-    text: 'For two thousand years the claim “all swans are white” held up. Then someone sailed to Australia and saw a black one, and that was the end of it.',
+    text: 'For centuries, Europeans accepted the claim “all swans are white”. In 1697, Dutch sailors saw black swans in Western Australia, and the claim was refuted.',
     dur: 4.4,
   },
   {
     p: 399, x: 168, claim: 1, field: 1,
-    text: 'Aristotle boiled talk about groups down to four shapes: all, none, some, and some-not. Here’s the first one, with the group it’s about underneath.',
+    text: 'Aristotle sorted claims about groups into four forms: all, none, some, and some-not. The universal claim “all cats are black” covers every cat in the group underneath.',
     cite: 'A universal claim',
     dur: 4.8,
   },
   {
     p: 383, x: 124, claim: 1, field: 1,
-    text: 'A universal claim is a promise about every single member. The promise is worth a lot and breaks easily, because one exception breaks all of it.',
-    cite: 'What "all" costs',
+    text: 'A universal claim asserts something of every member of a group. Such a claim says a great deal, but one exception makes it false.',
+    cite: 'What “all” commits you to',
     dur: 4.6,
   },
   {
@@ -53,15 +53,15 @@ export const BEATS: Logic22Beat[] = [
   },
   {
     p: 35, x: 168, claim: 1, field: 1, odd: 1, dead: 1,
-    text: 'One cat is not black, and that alone finishes the claim. The other seventeen don’t help it in the slightest.',
+    text: 'One cat isn’t black, so the claim “all cats are black” is false. The seventeen black cats can’t restore it.',
     cite: 'One is enough',
     dur: 4.4,
   },
   {
     p: 6, x: 124, claim: 1, field: 1, odd: 1, dead: 1,
     interact: {
-      prompt: 'Tap the pair where exactly one must be true.',
-      explain: 'All black and some not black are contradictories: exactly one of them is true, always. “Some are” and “some are not” are happy together. A class where some passed and some failed makes both true.',
+      prompt: 'In which pair must exactly one of the two claims be true?',
+      explain: 'All black and some not black. These two are contradictories: in every case one is true and the other false. Some black and some not black are both true of a mixed group. All black and none black can both be false, but never both true.',
       xp: 5,
     },
     pick: 1,
@@ -70,16 +70,16 @@ export const BEATS: Logic22Beat[] = [
   {
     p: 4, x: 124, claim: 1, field: 1, odd: 1, dead: 1,
     interact: {
-      prompt: 'What does it take to refute "all cats are black"?',
+      prompt: 'What is needed to refute “all cats are black”?',
       sort: {
-        chip: '"all cats are black"',
+        chip: '“all cats are black”',
         bins: [
-          { id: 'one', label: 'one exception', reads: 'one cat that is not black', correct: true },
-          { id: 'many', label: 'a good many', reads: 'a good many cats that are not' },
-          { id: 'all', label: 'prove the negative', reads: 'prove that no cat is black' },
+          { id: 'one', label: 'one exception', reads: 'one cat that isn’t black', correct: true },
+          { id: 'many', label: 'many exceptions', reads: 'a large number of cats that aren’t black' },
+          { id: 'all', label: 'the opposite claim', reads: 'proof that no cat is black' },
         ],
       },
-      explain: 'The trap is the bin “prove the negative”, reaching for the sweeping opposite, “no cats are black”. That’s a much stronger and separate claim. The contradictory of “all are” is only “some are not”. One cat does it.',
+      explain: 'One exception. The contradictory of “all cats are black” is “some cat isn’t black”, and one cat makes that true. Proof that no cat is black would also refute it, but that’s a far stronger claim than refutation needs.',
       xp: 5,
     },
     dur: 1.0,
@@ -91,9 +91,9 @@ export const BEATS: Logic22Beat[] = [
         'Four forms: all, none, some, some-not',
         'Contradictories: exactly one of the pair is true',
         'One counterexample refutes any universal claim',
-        '"Some" and "some not" can both hold at once',
+        '“Some” and “some not” can both be true at once',
       ],
-      closing: 'The strongest claims are the easiest to kill. That’s the trade you make by saying “all”.',
+      closing: 'The more a claim asserts, the more ways it can be refuted. A universal claim can be falsified by a single counterexample.',
     },
     dur: 3.0,
   },

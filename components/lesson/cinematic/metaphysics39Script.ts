@@ -34,36 +34,36 @@ export interface Metaphysics39Beat extends BaseBeat {
 export const BEATS: Metaphysics39Beat[] = [
   {
     p: 25, x: 52, plant: 1, wilt: 1,
-    text: 'The plant died because nobody watered it. That sentence is true, and nobody is a great many people.',
+    text: 'Suppose a plant dies because no one waters it. The cause appears to be an absence, an omission.',
     dur: 4.4,
   },
   {
     p: 384, x: 52, plant: 1, wilt: 1, folk: 1,
-    text: 'Here are four of them. Not one of them lifted a watering can all week.',
+    text: 'Consider four people who could have watered it. None of them did so all week.',
     dur: 3.6,
   },
   {
     p: 36, x: 52, plant: 1, wilt: 1, folk: 1, arrows: 1,
-    text: 'Ask what would have happened if each had watered it, and every answer is the same. The plant lives.',
+    text: 'For each person, ask what would have happened had they watered it. In every case, the plant would have lived.',
     dur: 4.2,
   },
   {
     p: 159, x: 52, plant: 1, wilt: 1, folk: 1, arrows: 1, live: 1,
     interact: {
-      prompt: 'Tap the absence anyone would actually blame.',
-      explain: 'The gardener, and no fact about the plant says so. A neighbour may have stood nearer and a stranger may have seen it was dry. What separates the gardener from the other three is a job, which isn’t a feature of the soil.',
+      prompt: 'Whose failure to water the plant would people ordinarily blame?',
+      explain: 'The gardener. No fact about the plant singles the gardener out. A neighbour may have stood nearer, and a stranger may have seen the dry soil. What separates the gardener is a job, not a physical feature.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 176, x: 52, plant: 1, wilt: 1, folk: 1, arrows: 1,
-    text: 'The test that finds the gardener finds the king too, and a stranger three streets away.',
+    text: 'The counterfactual test counts the gardener as a cause, but it counts the king and the stranger too.',
     dur: 3.8,
   },
   {
     p: 6, x: 98, plant: 1, wilt: 1, folk: 1, arrows: 1,
-    text: 'The test is old. David Hume wrote the line, and philosophers still reach for the same one.',
+    text: 'The test comes from David Hume. One thing causes another if, without the first, the second wouldn’t have happened.',
     dur: 4.2,
   },
   {
@@ -82,17 +82,17 @@ export const BEATS: Metaphysics39Beat[] = [
   {
     p: 21, x: 98, plant: 1, wilt: 1, folk: 1, arrows: 1,
     interact: {
-      prompt: 'What picks the gardener out of the four?',
+      prompt: 'What distinguishes the gardener from the other three candidates?',
       split: {
         left: 'THE PHYSICS', right: 'WHAT WAS EXPECTED',
         start: 0.92,
         zones: [
           { id: 'norms', upto: 0.3, reads: 'the expectation picks it out, and physics cannot', correct: true },
-          { id: 'both', upto: 0.62, reads: 'half a fact, half a judgement about who should have' },
-          { id: 'physics', upto: 1, reads: 'the physics alone, so the king is a cause as well' },
+          { id: 'both', upto: 0.62, reads: 'half a fact, half a judgement about duty' },
+          { id: 'physics', upto: 1, reads: 'the physics alone, so the king counts too' },
         ],
       },
-      explain: 'Almost all of it is the expectation. Hand the bar to the physics and watch all four runs come back. That’s what the world alone can tell you. The plant still died of thirst. Naming one absence is a further step, and it goes through a duty.',
+      explain: 'What was expected is the answer. Physics alone cannot single out the gardener. It would count the king and the stranger too. The plant still dies of thirst either way. Naming one absence as the cause is a further step, guided by duty.',
       xp: 5,
     },
     dur: 1.0,

@@ -24,29 +24,29 @@ export interface Aes19Beat extends BaseBeat {
 export const BEATS: Aes19Beat[] = [
   {
     p: 379, x: 70,
-    text: 'Aesthetics has spent most of its life indoors, looking at things in frames. Take the frame outside and point it at whatever happens to be there.',
+    text: 'Aesthetics has long studied art. In 1966, Ronald Hepburn argued that it had neglected the beauty of nature.',
     dur: 4.6,
   },
   {
     p: 41, x: 168, row: 1, frame: 1,
-    text: 'A drainpipe. Nobody hung it or signed it, and still the pipe has a shape, a rhythm and a set of stains.',
+    text: 'Consider a drainpipe. No one made it as art, yet it has a shape, a rhythm and a pattern of stains.',
     cite: 'A drainpipe',
     dur: 3,
   },
   {
     p: 41, x: 168, row: 1, frame: 1,
-    text: 'Put a frame round the pipe and you’ll look at it properly for the first time.',
+    text: 'Framing an object directs aesthetic attention to qualities that everyday use passes over.',
     dur: 2.2,
   },
   {
     p: 13, x: 124, row: 1, frame: 3, verdict: 1,
-    text: 'Now a marsh. Flat, buggy, no view.',
+    text: 'Now consider a marsh. It’s flat, full of insects, and offers no scenic view.',
     cite: 'A marsh',
     dur: 1.8,
   },
   {
     p: 13, x: 124, row: 1, frame: 3, verdict: 1,
-    text: 'A passerby glances and files it under ugly, and the glance is the whole of their appreciation.',
+    text: 'Seen only as scenery, the marsh looks ugly. Allen Carlson calls this way of looking the landscape model, and rejects it.',
     dur: 3.3,
   },
   {
@@ -63,30 +63,30 @@ export const BEATS: Aes19Beat[] = [
   },
   {
     p: 36, x: 168, row: 1, frame: 3, verdict: 2, know: 1,
-    text: 'So bring the natural history. Nursery, filter, flood defence, one of the densest habitats there is.',
-    cite: 'Knowing it',
+    text: 'Carlson brings in natural history instead. A marsh is a nursery, a water filter and a flood defence.',
+    cite: 'Natural history',
     dur: 2.8,
   },
   {
     p: 36, x: 168, row: 1, frame: 3, verdict: 2, know: 1,
-    text: 'The frame has not moved and the marsh has not moved. The verdict has.',
+    text: 'Neither the frame nor the marsh has changed, yet the verdict on the marsh has.',
     dur: 2.4,
   },
   {
     p: 4, x: 124, row: 1, frame: 3, verdict: 2, know: 1,
     interact: {
-      prompt: 'What does Carlson say a marsh needs from you?',
+      prompt: 'What must a viewer bring to appreciate a marsh appropriately?',
       drag: {
         lo: 'A PRETTY GLANCE',
         hi: 'KNOWING WHAT IT IS',
         start: 0,
         zones: [
-          { id: 'glance', upto: 0.3, reads: 'just a pretty glance' },
-          { id: 'some', upto: 0.62, reads: 'a glance, helped along by a name or two' },
-          { id: 'know', upto: 1, reads: 'knowing what you are looking at', correct: true },
+          { id: 'glance', upto: 0.3, reads: 'a pleasing glance and nothing more' },
+          { id: 'some', upto: 0.62, reads: 'a glance, aided by a few names' },
+          { id: 'know', upto: 1, reads: 'knowing what you’re looking at', correct: true },
         ],
       },
-      explain: 'The far end. The scenery picture treats not knowing as not needing to know. A marsh breaks it: a wasteland, until somebody tells you what’s going on in it. Natural history does for a marsh what art history does for a painting.',
+      explain: 'Knowing what you’re looking at. Carlson rejects the landscape model, which lets a glance be enough. A marsh looks like a wasteland until you learn what it does. Natural history does for nature what art history does for art.',
       xp: 5,
     },
     dur: 1.0,
@@ -94,22 +94,22 @@ export const BEATS: Aes19Beat[] = [
   {
     p: 6, x: 124, row: 1, frame: 3, verdict: 2, know: 1, pick: 1,
     interact: {
-      prompt: 'The frame never moved. Tap what actually changed the verdict.',
-      explain: 'Knowing what it is. The frame only decides where you point. It can’t tell you what’s in front of you. On Carlson’s view, that’s the part appreciation was waiting on.',
+      prompt: 'If the frame never moved, what changed the verdict on the marsh?',
+      explain: 'Knowing. A frame only directs attention to an object. It can’t supply knowledge of what the object is, and on Carlson’s view that knowledge shapes appropriate appreciation.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'What You Now Know',
+      title: 'The Aesthetics of Nature',
       points: [
         'Aesthetics reaches past art into nature and daily life',
-        'Carlson: knowing nature shapes appreciating it',
-        'The pretty-glance view treats nature as scenery',
-        'A frame points; it does not inform',
+        'Carlson: scientific knowledge shapes appropriate appreciation of nature',
+        'The landscape model judges nature like a painting',
+        'A frame directs attention but supplies no knowledge',
       ],
-      closing: 'You’ve walked past the same marsh a hundred times. Nothing about it was hiding.',
+      closing: 'On Carlson’s view, an unremarkable place can reward appreciation once its natural history is understood.',
     },
     dur: 3.0,
   },

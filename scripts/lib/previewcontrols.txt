@@ -1,0 +1,245 @@
+// TEMPORARY — DELETE BEFORE COMMITTING. Any file in app/ is a real route (§21).
+// Written and removed by scripts/sheet-controls.mjs; check-routes blocks a build
+// if one is left behind.
+import { useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useSharedValue } from 'react-native-reanimated';
+import ChoiceCards, { orderFor, seedFor, swapFor } from '@/components/lesson/cinematic/ChoiceCards';
+import DragScale from '@/components/lesson/cinematic/DragScale';
+import SortBins from '@/components/lesson/cinematic/SortBins';
+import PollBallot from '@/components/lesson/cinematic/PollBallot';
+import SplitBar from '@/components/lesson/cinematic/SplitBar';
+import TrendPick from '@/components/lesson/cinematic/TrendPick';
+import { QuestionAccentProvider } from '@/components/lesson/cinematic/QuestionParts';
+import { InteractPanel } from '@/components/lesson/cinematic/cinematicKit';
+import type {
+  ChoiceCard, DragBlock, PlotBlock, PollBlock, SortBlock, SplitBlock,
+} from '@/components/lesson/cinematic/cinematicKit';
+import { useUIStore } from '@/stores/uiStore';
+import { useUserDataStore } from '@/stores/userDataStore';
+
+const q = (k: string) =>
+  typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(k);
+
+const LESSON = 'preview-controls';
+
+// REAL BLOCKS, copied from shipped scripts, so the sheet shows the words the
+// controls actually carry rather than tidy placeholders.
+const CARDS: { prompt: string; explain: string; cards: [ChoiceCard, ChoiceCard] } = {
+  prompt: 'Why can’t science fully answer why anything exists at all?',
+  explain: 'Science explains each state by a prior state and the laws. It presupposes that there are laws and states at all.',
+  cards: [
+    { text: 'It presumes things exist', correct: true },
+    { text: 'The Big Bang settled it', correct: false },
+  ],
+};
+const DRAG: { prompt: string; explain: string; drag: DragBlock } = {
+  prompt: 'How far back does the Big Bang story actually explain?',
+  explain: 'It reaches the beginning and stops. The Big Bang describes how an already existing universe grew out of a hot dense state.',
+  drag: {
+    lo: 'LAST TUESDAY', hi: 'WHY ANYTHING AT ALL', start: 0,
+    zones: [
+      { id: 'stars', upto: 0.32, reads: 'how the galaxies and the stars formed' },
+      { id: 'early', upto: 0.72, reads: 'back to one hot dense beginning', correct: true },
+      { id: 'why', upto: 1, reads: 'why there is anything here to begin with' },
+    ],
+  } as DragBlock,
+};
+const SORT: { prompt: string; explain: string; sort: SortBlock } = {
+  prompt: 'What is actually wrong with a slippery-slope argument?',
+  explain: 'An unargued step. An alarming ending is fine if every step to it is argued.',
+  sort: {
+    chip: 'the slippery slope',
+    bins: [
+      { id: 'ending', label: 'too far-fetched', reads: 'the ending is too far-fetched to take seriously' },
+      { id: 'length', label: 'too many steps', reads: 'the chain simply has too many steps in it' },
+      { id: 'joins', label: 'an unargued step', reads: 'a step is asserted with no reason given', correct: true },
+    ],
+  } as SortBlock,
+};
+const POLL: { prompt: string; explain: string; poll: PollBlock } = {
+  prompt: 'When you see the oar bent in the water, what are you seeing?',
+  explain: 'The oar itself, which merely looks bent from here. Austin rejects the sense-datum in between.',
+  poll: {
+    options: [
+      { id: 'oar', reads: 'the oar, which merely looks bent from here', holders: ['J. L. Austin'], correct: true },
+      { id: 'datum', reads: 'a bent sense-datum standing in for it', holders: ['Bertrand Russell', 'A. J. Ayer'] },
+      { id: 'mind', reads: 'a state of your own mind, and nothing outside', holders: ['George Berkeley'] },
+    ],
+  } as PollBlock,
+};
+const POLL_TELL: { prompt: string; explain: string; poll: PollBlock } = {
+  prompt: 'What is the feeling of the storm at sea?',
+  explain: 'The sublime: overwhelming, and shot through with terror held at a safe distance.',
+  poll: {
+    options: [
+      { id: 'sublime', reads: 'overwhelming, and shot through with terror', holders: ['Edmund Burke', 'Immanuel Kant'], correct: true },
+      { id: 'beauty', reads: 'soothing, with nothing to fear: the beautiful' },
+      { id: 'grand', reads: 'overwhelming and not frightening: merely grand', holders: ['Joseph Addison'] },
+      { id: 'uneasy', reads: 'soothing and frightening at once: an odd corner' },
+    ],
+  } as PollBlock,
+};
+const SPLIT: { prompt: string; explain: string; split: SplitBlock } = {
+  prompt: 'Where does Kant put the death?',
+  explain: 'All the way to the murderer. You answer for the lie, and he answers for the killing.',
+  split: {
+    left: 'ON THE MURDERER', right: 'ON YOU, FOR ANSWERING', start: 0.04,
+    zones: [
+      { id: 'you', upto: 0.3, reads: 'on you, for handing him the address' },
+      { id: 'both', upto: 0.66, reads: 'shared between the two of you' },
+      { id: 'him', upto: 1, reads: 'on him, you answer for your own act', correct: true },
+    ],
+  } as SplitBlock,
+};
+const PLOT: { prompt: string; explain: string; plot: PlotBlock } = {
+  prompt: 'Which curve shows what happens to the shock over time?',
+  explain: 'It decays. The broken rule becomes a new rule, and the shock turns into taste.',
+  plot: {
+    cols: ['1900', '1920', '1950', 'TODAY'],
+    axis: 'SHOCK LEFT',
+    start: [0.5, 0.5, 0.5, 0.5],
+    shapes: [
+      { id: 'decay', profile: [0.9, 0.62, 0.36, 0.12], reads: 'the shock wears off and turns into taste', correct: true },
+      { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5], reads: 'a broken rule stays startling for ever' },
+      { id: 'rise', profile: [0.12, 0.36, 0.62, 0.9], reads: 'each generation is harder to startle' },
+      { id: 'spike', profile: [0.1, 0.92, 0.14, 0.1], reads: 'one scandal, and then nothing at all' },
+    ],
+  } as PlotBlock,
+};
+const PLOT3: { prompt: string; explain: string; plot: PlotBlock } = {
+  prompt: 'Which curve shows the aura as the copies multiply?',
+  explain: 'It withers. Each copy takes something from the original’s presence in one place.',
+  plot: {
+    cols: ['ONE', 'TEN', 'A MILLION'],
+    axis: 'AURA',
+    start: [0.5, 0.5, 0.5],
+    shapes: [
+      { id: 'withers', profile: [0.92, 0.5, 0.12], reads: 'the aura withers as copies spread', correct: true },
+      { id: 'holds', profile: [0.8, 0.8, 0.8], reads: 'the aura holds, however many copies', },
+      { id: 'gone', profile: [0.9, 0.05, 0.05], reads: 'one copy and it is gone at once' },
+    ],
+  } as PlotBlock,
+};
+
+type Kind = 'cards' | 'drag' | 'sort' | 'poll' | 'polltell' | 'split' | 'trend' | 'trend3';
+type State = 'open' | 'right' | 'wrong';
+const KINDS: Kind[] = ['cards', 'drag', 'sort', 'poll', 'polltell', 'split', 'trend', 'trend3'];
+const STATES: State[] = ['open', 'right', 'wrong'];
+
+/** The middle of a zone list's correct (or first wrong) zone. */
+function zoneMid(zones: { upto: number; correct?: boolean }[], want: boolean) {
+  const k = zones.findIndex((z) => Boolean(z.correct) === want);
+  const from = k <= 0 ? 0 : zones[k - 1].upto;
+  return { k, mid: (from + zones[k].upto) / 2 };
+}
+
+function Case({ kind, state }: { kind: Kind; state: State }) {
+  const answered = state !== 'open';
+  const right = state === 'right';
+  const noop = () => {};
+
+  let prompt = '';
+  let explain = '';
+  let init = 0.5;
+  let semInit = 0.5;
+  let picked: string | null = null;
+  let body: 'cards' | 'drag' | 'sort' | 'poll' | 'split' | 'trend' = 'cards';
+
+  if (kind === 'cards') {
+    prompt = CARDS.prompt; explain = CARDS.explain; body = 'cards';
+    const seed = seedFor(LESSON, CARDS.cards);
+    const shown = swapFor(seed) ? [CARDS.cards[1], CARDS.cards[0]] : CARDS.cards;
+    const rightId = shown[0].correct ? 'c0' : 'c1';
+    picked = !answered ? null : right ? rightId : rightId === 'c0' ? 'c1' : 'c0';
+  } else if (kind === 'drag') {
+    prompt = DRAG.prompt; explain = DRAG.explain; body = 'drag';
+    const z = zoneMid(DRAG.drag.zones, right || !answered);
+    init = answered ? z.mid : DRAG.drag.start;
+    picked = answered ? DRAG.drag.zones[z.k].id : null;
+  } else if (kind === 'split') {
+    prompt = SPLIT.prompt; explain = SPLIT.explain; body = 'split';
+    const z = zoneMid(SPLIT.split.zones, right || !answered);
+    init = answered ? Math.min(0.94, Math.max(0.06, z.mid)) : SPLIT.split.start;
+    picked = answered ? SPLIT.split.zones[z.k].id : null;
+  } else if (kind === 'sort') {
+    prompt = SORT.prompt; explain = SORT.explain; body = 'sort';
+    const bins = SORT.sort.bins;
+    const a = bins.findIndex((b) => Boolean(b.correct) === (right || !answered));
+    const order = orderFor(seedFor(LESSON, [{ text: SORT.sort.chip }]), bins.length);
+    const d = order.indexOf(a);
+    init = answered ? (d + 0.5) / bins.length : 0.5;
+    semInit = answered ? a / (bins.length - 1) : 0.5;
+    picked = answered ? bins[a].id : null;
+  } else if (kind === 'poll' || kind === 'polltell') {
+    const P = kind === 'poll' ? POLL : POLL_TELL;
+    prompt = P.prompt; explain = P.explain; body = 'poll';
+    const o = P.poll.options.find((x) => Boolean(x.correct) === right) ?? P.poll.options[0];
+    picked = answered ? o.id : null;
+  } else {
+    const T = kind === 'trend' ? PLOT : PLOT3;
+    prompt = T.prompt; explain = T.explain; body = 'trend';
+    const s = T.plot.shapes.find((x) => Boolean(x.correct) === right) ?? T.plot.shapes[0];
+    picked = answered ? s.id : null;
+  }
+
+  // A split STARTS at its opening value and is then moved, as a reader moves it. Its
+  // two percentages are written by Reanimated only when the value differs from what
+  // was drawn at render, so rendering at the answer would leave them at defaultValue.
+  // SplitBar also puts its value back to split.start when it mounts, and a child's
+  // effect runs before its parent's, so the answered position is applied here.
+  const pos = useSharedValue(kind === 'split' ? SPLIT.split.start : init);
+  const sem = useSharedValue(semInit);
+  useEffect(() => { pos.value = init; sem.value = semInit; }, [pos, sem, init, semInit]);
+  const P = kind === 'polltell' ? POLL_TELL : POLL;
+  const T = kind === 'trend3' ? PLOT3 : PLOT;
+
+  return (
+    <View nativeID={`case-${kind}-${state}`} style={{ width: 390, paddingTop: 8, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: '#D8D4CA' }}>
+      <Text style={{ fontSize: 10, color: '#9A968C', paddingHorizontal: 24, marginBottom: 6, letterSpacing: 1 }}>
+        {`${kind.toUpperCase()} · ${state.toUpperCase()}`}
+      </Text>
+      <View nativeID={`ctl-${kind}-${state}`}>
+        {body === 'cards' ? <ChoiceCards cards={CARDS.cards} picked={picked} onPick={noop} seed={seedFor(LESSON, CARDS.cards)} /> : null}
+        {body === 'drag' ? <DragScale drag={DRAG.drag} picked={picked} onPick={noop} pos={pos} /> : null}
+        {body === 'split' ? <SplitBar split={SPLIT.split} picked={picked} onPick={noop} pos={pos} /> : null}
+        {body === 'sort' ? <SortBins sort={SORT.sort} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(LESSON, [{ text: SORT.sort.chip }])} /> : null}
+        {body === 'poll' ? <PollBallot poll={P.poll} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(LESSON, [{ text: P.poll.options[0].reads }])} /> : null}
+        {body === 'trend' ? <TrendPick plot={T.plot} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(LESSON, [{ text: T.plot.shapes[0].reads }])} /> : null}
+      </View>
+      <View nativeID={`panel-${kind}-${state}`} style={{ paddingHorizontal: 24 }}>
+        <InteractPanel prompt={prompt} explain={explain} answered={answered} correct={right} inScene={false} index={1} total={2} />
+      </View>
+    </View>
+  );
+}
+
+export default function PreviewControls() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    useUserDataStore.setState({ _hasHydrated: true } as never);
+    // The root layout holds every route behind the launch animation; a preview
+    // that does not release it photographs an empty page (sheet-pass learned it).
+    useUIStore.setState({ launchDone: true } as never);
+    setReady(true);
+  }, []);
+  if (!ready) return <View style={{ flex: 1 }} nativeID="controls-boot" />;
+
+  const only = (q('only') ?? '').split(',').filter(Boolean) as Kind[];
+  const kinds = only.length ? KINDS.filter((k) => only.includes(k)) : KINDS;
+  const states = (q('states') ?? '').split(',').filter(Boolean) as State[];
+  const list = states.length ? STATES.filter((s) => states.includes(s)) : STATES;
+  // ?branch=logic strikes the sheet in that branch's colour.
+  const lessonId = `${q('branch') ?? 'ethics'}-preview-0`;
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QuestionAccentProvider lessonId={lessonId}>
+        <View nativeID="controls-root" style={{ flex: 1, backgroundColor: '#FAFAF7', alignItems: 'flex-start' }}>
+          {kinds.map((k) => list.map((s) => <Case key={`${k}-${s}`} kind={k} state={s} />))}
+        </View>
+      </QuestionAccentProvider>
+    </GestureHandlerRootView>
+  );
+}

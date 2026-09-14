@@ -39,34 +39,34 @@ export interface Pol3Beat extends BaseBeat {
 export const BEATS: Pol3Beat[] = [
   {
     sub: 2, r: 28, scroll: 0, pair: 1, force: 1, flow: 0, seal: 0,
-    text: 'A gun makes you obey. What makes you owe obedience?',
+    text: 'A gunman can make you obey. What, if anything, makes you owe obedience to a government?',
     dur: 1.8,
   },
   {
     sub: 2, r: 28, scroll: 0, pair: 1, force: 1, flow: 0, seal: 0,
-    text: 'Power compels. Legitimacy is the other thing, and the gap between them is the whole subject.',
+    text: 'Power is the capacity to compel obedience. Legitimacy is the right to rule, which creates a duty to obey.',
     dur: 2.3,
   },
   {
     sub: 30, r: 31, scroll: 1, pair: 0, flow: 1, seal: 0,
-    text: 'Imagine no state at all — people free and unruled. Hobbes argued that with no common judge, this “state of nature” slides into war.',
+    text: 'Social contract theory begins with a state of nature, a condition with no government. Hobbes argued that without a common power, it becomes a state of war.',
     cite: 'The social contract',
     dur: 3.5,
   },
   {
     sub: 30, r: 31, scroll: 1, pair: 0, flow: 1, seal: 0,
-    text: 'So people covenant to set up a ruler who keeps the peace.',
+    text: 'Hobbes held that people escape the war by covenant, agreeing to set up a sovereign who keeps the peace.',
     dur: 1.8,
   },
   {
     sub: 462, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
-    text: 'Locke said people set up a government to guard their rights, and it holds power only in trust. Break the trust and the government forfeits its right to rule.',
+    text: 'John Locke argued that people consent to government to protect their natural rights. Government holds power in trust, and loses the right to rule by breaking the trust.',
     cite: 'Locke, 1689',
     dur: 3.9,
   },
   {
     sub: 462, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
-    text: 'The American founders leaned on Locke in 1776.',
+    text: 'The American Declaration of Independence, in 1776, drew on Locke’s ideas of consent and natural rights.',
     dur: 1.8,
   },
   {
@@ -84,24 +84,24 @@ export const BEATS: Pol3Beat[] = [
   },
   {
     sub: 38, r: 38, scroll: 1, pair: 2, flow: 1, seal: 1,
-    text: 'Rousseau pushed further. Legitimacy flows from what he called the “general will” — what serves everyone, not the sum of private wants.',
-    cite: 'Rousseau — the general will',
+    text: 'Jean-Jacques Rousseau based legitimacy on the general will, which aims at what serves everyone. The will of all is a sum of private wants.',
+    cite: 'The Social Contract, 1762',
     dur: 3.5,
   },
   {
     sub: 38, r: 38, scroll: 1, pair: 2, flow: 1, seal: 1,
-    text: 'Real freedom is living under rules you give yourself.',
+    text: 'Citizens who obey the general will obey laws they made themselves. For Rousseau, real freedom is living under rules you give yourself.',
     dur: 1.8,
   },
   {
     sub: 380, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1,
     interact: {
-      prompt: 'On Locke’s account, tap what makes a government forfeit its right to rule.',
+      prompt: 'On Locke’s account, what makes a government forfeit its right to rule?',
       cards: [
-        { text: 'It tramples natural rights', correct: true },
-        { text: 'It loses an election', correct: false },
+        { text: 'Breaching natural rights', correct: true },
+        { text: 'Losing an election', correct: false },
       ],
-      explain: 'For Locke, power is held in trust to guard people’s lives, liberties, and estates. Turn against that trust and rulers forfeit the right to rule.',
+      explain: 'Breaching natural rights costs a government its right to rule, on Locke’s view. Government holds power in trust, to protect life, liberty and property. Breaking that trust costs legitimacy, but losing an election breaks no trust.',
       xp: 5,
     },
     dur: 1.0,
@@ -109,18 +109,18 @@ export const BEATS: Pol3Beat[] = [
   {
     sub: 165, r: 0, scroll: 1, pair: 2, flow: 1, seal: 1,
     interact: {
-      prompt: 'How close does a majority vote get to the general will?',
+      prompt: 'For Rousseau, how reliably does a majority vote express the general will?',
       drag: {
-        lo: 'THEY ARE THE SAME THING',
-        hi: 'A VOTE NEVER REACHES IT',
+        lo: 'ALWAYS EXPRESSES IT',
+        hi: 'NEVER EXPRESSES IT',
         start: 0,
         zones: [
-          { id: 'same', upto: 0.3, reads: 'a majority simply is the general will' },
-          { id: 'often', upto: 0.74, reads: 'often close, and a majority can still be wrong', correct: true },
-          { id: 'never', upto: 1, reads: 'a vote cannot reach it at all' },
+          { id: 'same', upto: 0.3, reads: 'a majority vote simply is the general will' },
+          { id: 'often', upto: 0.74, reads: 'often, yet a majority can still be mistaken', correct: true },
+          { id: 'never', upto: 1, reads: 'a vote can never express it' },
         ],
       },
-      explain: 'The middle. Rousseau splits the will of all from the general will. The first is the sum of private wants, and the second is what serves the whole. A show of hands measures the first and can miss the second.',
+      explain: 'Often, yet a majority can still be mistaken. Rousseau distinguishes the general will, which aims at the common good, from the will of all. The will of all is a sum of private interests. When factions form, a majority can express the will of all instead.',
       xp: 5,
     },
     dur: 1.0,
@@ -129,12 +129,12 @@ export const BEATS: Pol3Beat[] = [
     summary: {
       title: 'The Right to Rule',
       points: [
-        'Hobbes: no common judge means war',
+        'Hobbes: without a common power, life is war',
         'Locke: legitimacy rests on consent and trust',
         'Rousseau: law must serve the general will',
-        'Democracy fuses rights and popular sovereignty',
+        'Democracy combines rights with popular sovereignty',
       ],
-      closing: 'Every election says the same quiet thing. Rulers answer to the ruled.',
+      closing: 'Social contract theories ground the right to rule in the consent or the will of the ruled.',
     },
     dur: 2.8,
   },

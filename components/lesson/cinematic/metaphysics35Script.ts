@@ -36,38 +36,38 @@ export interface Metaphysics35Beat extends BaseBeat {
 export const BEATS: Metaphysics35Beat[] = [
   {
     p: 172, x: 322, line: 1,
-    text: 'Here’s your life drawn as a line. You’re standing at the near end.',
+    text: 'Represent your life as a line through time. You stand at the present end.',
     dur: 3.2,
   },
   {
     p: 13, x: 322, line: 1, arc: 1,
-    text: 'Now walk back to 1925. Nothing in the idea of a visit is broken yet.',
+    text: 'Now suppose you travel back to 1925. So far, the idea of visiting the past involves no contradiction.',
     dur: 2.6,
   },
   {
     p: 13, x: 322, line: 1, arc: 1,
-    text: 'You’re a tourist with an unusual travel agent.',
+    text: 'Being present in 1925 need not change any event that happened there.',
     dur: 1.8,
   },
   {
     p: 457, x: 120, line: 1, arc: 1, knot: 1,
-    text: 'So you arrive, and you stop your grandparents meeting. Then you’re never born.',
+    text: 'Suppose that in 1925 you shoot your grandfather before he meets your grandmother. Then you’re never born.',
     dur: 2.5,
   },
   {
     p: 457, x: 120, line: 1, arc: 1, knot: 1,
-    text: 'Then nobody arrives. Then they meet, and you’re born, and you arrive.',
+    text: 'But then no one travels back to fire the shot, so you’re born after all. This is the grandfather paradox.',
     dur: 2.3,
   },
   {
     p: 394, x: 120, line: 1, arc: 1, knot: 1, live: 1,
     tap: {
-      prompt: 'Two marks hold the story up. Tap the one your trip needs in order to happen at all.',
+      prompt: 'Which of the two marks must happen for your trip to happen at all?',
       options: [
         { id: 'shot', text: '1925', correct: false },
         { id: 'born', text: '1975', correct: true },
       ],
-      explain: 'Your birth. The trip depends on it, and the trip is what undoes it. That’s the loop, drawn on the line rather than argued about.',
+      explain: 'Your birth in 1975. The trip depends on your birth, yet the trip is what prevents it. So the story contradicts itself.',
     },
     dur: 1.0,
   },
@@ -87,51 +87,51 @@ export const BEATS: Metaphysics35Beat[] = [
   {
     p: 383, x: 120, line: 1, knot: 1, snap: 1, live: 1,
     interact: {
-      prompt: 'Tap the link the story actually breaks.',
-      explain: 'The break is at your birth, and only because the trip is meant to make the past come out differently. A visit that was always part of what happened breaks nothing. Changing the past is the contradiction — going there is not.',
+      prompt: 'Which link in the story contains the contradiction?',
+      explain: 'Your birth. The contradiction arises only because the trip is meant to make the past come out differently. A visit that was always part of history contradicts nothing. Changing the past is contradictory, but visiting it isn’t.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 47, x: 120, line: 1, branch: 1,
-    text: 'One answer keeps the line whole. You were always at 1925, and whatever you did there is already how it went.',
+    text: 'One response keeps history consistent. If you were always in 1925, whatever you did there is part of what happened.',
     dur: 3.6,
   },
   {
     p: 47, x: 120, line: 1, branch: 1,
-    text: 'The gun jams. It always jammed.',
+    text: 'Your attempt fails for an ordinary reason, such as a jammed gun. In the only consistent history, it never succeeded.',
     dur: 1.8,
   },
   {
     p: 35, x: 210, line: 1, branch: 1,
     interact: {
-      prompt: 'What is actually stopping you?',
+      prompt: 'On this view, what prevents you from changing the past?',
       drag: {
-        lo: 'NOTHING IS STOPPING YOU',
-        hi: 'SOMETHING PUSHES BACK',
+        lo: 'NO FORCE AT ALL',
+        hi: 'A FORCE THAT INTERVENES',
         start: 1,
         zones: [
-          { id: 'never', upto: 0.32, reads: 'nothing pushes, it never happened', correct: true },
-          { id: 'luck', upto: 0.72, reads: 'a run of bad luck, oddly reliable' },
-          { id: 'guard', upto: 1, reads: 'time itself steps in and stops you' },
+          { id: 'never', upto: 0.32, reads: 'no force, since it never happened', correct: true },
+          { id: 'luck', upto: 0.72, reads: 'a reliable run of bad luck' },
+          { id: 'guard', upto: 1, reads: 'a law of time that intervenes' },
         ],
       },
-      explain: 'Nothing has to push. The past already went one way, so every attempt to make it go otherwise fails. Each failure has its own dull local cause: a jam, a slip, the wrong street. Reliable failure looks like a guardian and needs none.',
+      explain: 'No force, since it never happened. The past already went one way, so every attempt to change it fails. Each failure has an ordinary local cause, and no special force is needed.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The One Thing You Cannot Do',
+      title: 'Time Travel and the Fixed Past',
       points: [
         'Changing the past is a contradiction, not a difficulty',
         'Visiting it contradicts nothing',
         'A fixed past means you were always there',
         'A branch is a second history, not a changed one',
       ],
-      closing: 'Go back as often as you like. You can’t make it different, because there’s nothing for “different” to be measured against.',
+      closing: 'A time traveller may visit the past. What no one can do is make it different from how it was.',
     },
     dur: 3.0,
   },

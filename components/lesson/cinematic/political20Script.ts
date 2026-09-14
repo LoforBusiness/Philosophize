@@ -33,36 +33,36 @@ export interface Pol20Beat extends BaseBeat {
 export const BEATS: Pol20Beat[] = [
   {
     p: 25, x: 200, stacks: 1,
-    text: 'Two neighbours. Everything either of them believes about how to live is in one of those stacks.',
+    text: 'Consider two neighbours, each with a complete view of how to live. John Rawls calls such a view a comprehensive doctrine.',
     dur: 4.2,
   },
   {
     p: 177, x: 200, stacks: 1,
-    text: 'They overlap almost nowhere, and neither is going to talk the other round. This is not a failure.',
+    text: 'The two doctrines share almost nothing, and neither neighbour can persuade the other. Yet neither need have reasoned badly.',
     cite: 'Reasonable pluralism',
     dur: 3.2,
   },
   {
     p: 416, x: 200, stacks: 1,
-    text: 'Rawls thought it was the normal result of free thinking.',
+    text: 'Rawls held that free societies will always contain such disagreement, because reasonable people weigh hard questions differently.',
     dur: 1.8,
   },
   {
     p: 443, x: 132, stacks: 1, shelf: 1, cands: 1,
-    text: 'They still have to share a street, and a law about the street will land on both of them.',
+    text: 'However, the neighbours share a street, and any law governing it will be enforced on both of them.',
     dur: 4.2,
   },
   {
     p: 383, x: 132, stacks: 1, shelf: 1, cands: 1,
-    text: 'So the shelf. A reason for the law has to be one the other person could weigh without first joining you.',
+    text: 'The idea of public reason holds that such a law must be justifiable to everyone it binds. So its reasons can’t presuppose either neighbour’s doctrine.',
     cite: 'Public reason',
     dur: 4.6,
   },
   {
     p: 165, x: 132, stacks: 1, shelf: 1, cands: 1, live: 1,
     interact: {
-      prompt: 'Tap the reason that can go on the shelf.',
-      explain: 'Safety. The other two might both be true, and one of them is somebody’s deepest conviction. But neither can be checked by a person who doesn’t already share it. The shelf is not for the best reasons. It’s for the ones everybody can get at.',
+      prompt: 'Which of the three reasons meets the standard of public reason?',
+      explain: 'The appeal to safety. Anyone can judge whether a rule makes a street safer, whatever doctrine they hold. The other two may be sincere, and one may be true, but each presupposes a doctrine the other neighbour rejects.',
       xp: 5,
     },
     dur: 1.0,
@@ -82,36 +82,36 @@ export const BEATS: Pol20Beat[] = [
   },
   {
     p: 453, x: 268, stacks: 1, shelf: 1, cands: 1, landed: 1,
-    text: 'Look at the size of the shelf. Almost everything either side cares about stayed in its own stack.',
+    text: 'The reasons both can weigh are few. Almost everything each neighbour values stays within their own doctrine, and neither is asked to abandon it.',
     dur: 4.2,
   },
   {
     p: 41, x: 268, stacks: 1, shelf: 1, cands: 1, landed: 1,
     interact: {
-      prompt: 'What does tolerating a view actually require of you?',
+      prompt: 'What does tolerating a view require of you?',
       sort: {
         chip: 'a view you detest',
         bins: [
-          { id: 'power', label: 'no law against it', reads: 'do not reach for the law against it', correct: true },
-          { id: 'quiet', label: 'say nothing', reads: 'say nothing against it' },
-          { id: 'agree', label: 'admit it might be right', reads: 'allow that the view might be right' },
+          { id: 'power', label: 'legal restraint', reads: 'refrain from using the law against it', correct: true },
+          { id: 'quiet', label: 'silence', reads: 'keep your objections to yourself' },
+          { id: 'agree', label: 'an open mind', reads: 'allow that the view might be right' },
         ],
       },
-      explain: 'Not reaching for the law. Toleration is a restraint on force, not a change of mind. It’s only ever tested on views you think are wrong. “Admit it might be right” describes open-mindedness, which is a different virtue and costs nothing here.',
+      explain: 'Legal restraint. Toleration means refraining from using the law against a view you judge wrong. It still leaves you free to criticise that view. Allowing that the view might be right shows an open mind, a different virtue.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Narrow Shelf',
+      title: 'Public Reason and Toleration',
       points: [
-        'Deep disagreement is what free thinking produces, not a fault',
+        'Reasonable pluralism is the normal result of free reasoning',
         'Coercive law needs reasons the coerced can weigh',
-        'A sincere reason can still be unavailable to your neighbour',
-        'Toleration restrains power; it does not require agreement',
+        'A sincere reason may still presuppose a doctrine others reject',
+        'Toleration restrains the use of force and requires no agreement',
       ],
-      closing: 'Both stacks are still standing. That’s the point, and it’s why the shelf is so small.',
+      closing: 'Public reason leaves both doctrines intact, which is why the reasons it allows are so few.',
     },
     dur: 3.4,
   },

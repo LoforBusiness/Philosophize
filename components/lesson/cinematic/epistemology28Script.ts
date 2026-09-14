@@ -34,36 +34,36 @@ export interface Epistemology28Beat extends BaseBeat {
 export const BEATS: Epistemology28Beat[] = [
   {
     p: 425, x: 26, track: 1, lean: 0.5,
-    text: 'Your mind is not always a scientist. Sometimes it is a lawyer with the verdict already chosen.',
+    text: 'Reasoning can work like a scientist testing a theory, or like a lawyer defending a verdict already chosen.',
     dur: 5.0,
   },
   {
     p: 172, x: 26, track: 1, bars: 1, lean: 0.5,
-    text: 'A study says your favourite habit is harmful. You check the sample size, the method, the funding.',
+    text: 'Suppose a study finds your favourite habit harmful. You examine the sample size, the method and the funding.',
     dur: 5.0,
   },
   {
     p: 438, x: 26, track: 1, bars: 1, lean: 0.16,
-    text: 'A second study says the habit is fine. You nod and share it without a single question.',
+    text: 'A second study of equal quality finds the habit harmless. You accept the result and share it without checking further.',
     dur: 5.0,
   },
   {
     p: 261, x: 26, track: 1, bars: 1, lean: 0.16,
-    text: 'Same quality of evidence, two different standards. What decided was not the data but the wanting.',
+    text: 'The evidence is of equal quality, but the standards differ. Your preference, not the data, set the standard.',
     dur: 5.0,
   },
   {
     p: 166, x: 26, track: 1, bars: 1, lean: 0.16, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what a fair test does to the two bars.',
-      explain: 'It levels the two bars. An easy bar for welcome news and a hard bar for unwelcome news is the disease. Raising both would only make you doubt everything.',
+      prompt: 'What does a fair test do to the two bars?',
+      explain: 'It levels the two bars. Motivated reasoning holds welcome evidence to a lower standard than unwelcome evidence. A fair test applies the same standard to both.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 454, x: 82, track: 1, bars: 1, lean: 0.16,
-    text: 'Motivated reasoning almost never announces itself. You don’t feel biased, you feel right.',
+    text: 'Motivated reasoning feels like being right from the inside, which is why it is hard to detect.',
     dur: 4.8,
   },
   {
@@ -80,24 +80,24 @@ export const BEATS: Epistemology28Beat[] = [
   },
   {
     p: 450, x: 82, track: 1, bars: 1, lean: 0.16,
-    text: 'The verdict came first, and the reasons were recruited afterwards. The search was rigged before it began.',
+    text: 'In motivated reasoning the conclusion comes first, and reasons are gathered afterwards to support it.',
     dur: 5.0,
   },
   {
     p: 174, x: 82, track: 1, bars: 1,
     interact: {
-      prompt: 'Where should the scrutiny sit between the two studies?',
+      prompt: 'How should scrutiny be divided between welcome and unwelcome studies?',
       split: {
         left: 'NEWS YOU LIKE',
         right: 'NEWS YOU DO NOT',
         start: 0.12,
         zones: [
-          { id: 'lawyer', upto: 0.35, reads: 'welcome news waltzes straight through' },
-          { id: 'even', upto: 0.65, reads: 'one bar, and both studies must clear', correct: true },
-          { id: 'contrarian', upto: 1, reads: 'only bad news gets waved through' },
+          { id: 'lawyer', upto: 0.35, reads: 'welcome news passes with little scrutiny' },
+          { id: 'even', upto: 0.65, reads: 'one standard, applied equally to both studies', correct: true },
+          { id: 'contrarian', upto: 1, reads: 'unwelcome news passes with little scrutiny' },
         ],
       },
-      explain: 'Right down the middle. Motivated reasoning is asymmetric scrutiny, so the cure is one standard applied both ways. Leaning the other way is the same fault reversed, punishing yourself with whatever you least want to hear.',
+      explain: 'One standard, applied equally to both studies. Motivated reasoning tests news you dislike harder than news you like. The fix is one test for both. Testing only the news you like is the same fault reversed.',
       xp: 5,
     },
     dur: 1.0,
@@ -107,12 +107,12 @@ export const BEATS: Epistemology28Beat[] = [
     summary: {
       title: 'The Lawyer In Your Head',
       points: [
-        'Motivated reasoning chases the conclusion you already wanted',
-        'It grills unwelcome evidence and waves welcome evidence through',
-        'From the inside it feels exactly like honest thinking',
-        'Ask must I believe this, not can I believe this',
+        'Motivated reasoning serves a conclusion chosen in advance',
+        'It scrutinises unwelcome evidence more than welcome evidence',
+        'From the inside it feels like honest reasoning',
+        'Ask “Must I believe this?” rather than “Can I believe this?”',
       ],
-      closing: 'The hardest bias to catch is the one wearing your own reasoning as a disguise.',
+      closing: 'Motivated reasoning is hard to catch, because it uses the same steps as honest reasoning.',
     },
     dur: 5.0,
   },

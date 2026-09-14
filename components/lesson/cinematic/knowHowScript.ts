@@ -25,34 +25,34 @@ export interface KnowHowBeat extends BaseBeat {
 export const BEATS: KnowHowBeat[] = [
   {
     p: 164, x: 70,
-    text: 'You have read every word ever written about swimming. The physics, the technique, the breathing.',
+    text: 'Suppose you’ve read every word ever written about swimming, its physics, technique and breathing.',
     dur: 3,
   },
   {
     p: 164, x: 70,
-    text: 'Now get in the water.',
+    text: 'Does all that reading, on its own, make you able to swim?',
     dur: 1.8,
   },
   {
     p: 41, x: 168, steps: 1,
-    text: 'Start with one instruction, and make it a good one. Precise, true, and easy to check.',
-    cite: 'One step',
+    text: 'Consider the instruction “keep the head low”. It’s precise, true and easy to check.',
+    cite: 'One instruction',
     dur: 2.9,
   },
   {
     p: 41, x: 168, steps: 1,
-    text: 'Below it, the thing the instruction is for.',
+    text: 'Every instruction serves an end beyond itself. Here the end is the doing, the act of swimming.',
     dur: 1.8,
   },
   {
     p: 435, x: 168, steps: 3,
-    text: 'Add the rest. Every line is accurate and you’ve memorised all of them.',
+    text: 'The full method adds more instructions, and you’ve memorised every one. Gilbert Ryle calls knowledge of such facts knowing that.',
     cite: 'The whole method',
     dur: 2.7,
   },
   {
     p: 399, x: 168, steps: 3,
-    text: 'Look at the box underneath: nothing has arrived in it.',
+    text: 'Even so, the box underneath stays empty. The ability to swim, which Ryle calls knowing how, hasn’t arrived.',
     dur: 1.9,
   },
   {
@@ -70,24 +70,24 @@ export const BEATS: KnowHowBeat[] = [
   },
   {
     p: 383, x: 168, steps: 3, done: 1,
-    text: 'Then the reading stops and the hands move, and the box fills. Ryle’s point: not one line of that column is what filled it.',
+    text: 'The box fills only through practice. Ryle holds that knowing how is distinct from knowing that.',
     cite: 'The doing',
     dur: 4.6,
   },
   {
     p: 4, x: 124, steps: 3, done: 1,
     interact: {
-      prompt: 'What did memorising actually give you?',
+      prompt: 'What does memorising every instruction give you: the facts, the skill, or some of each?',
       split: {
         left: 'THE FACTS', right: 'THE SKILL',
         start: 0.04,
         zones: [
-          { id: 'skill', upto: 0.32, reads: 'the doing itself, now in the hands' },
-          { id: 'both', upto: 0.66, reads: 'half the facts, half the doing' },
-          { id: 'facts', upto: 1, reads: 'the facts, and none of the doing', correct: true },
+          { id: 'skill', upto: 0.32, reads: 'the skill of swimming itself' },
+          { id: 'both', upto: 0.66, reads: 'some of the facts and some of the skill' },
+          { id: 'facts', upto: 1, reads: 'the facts, yet none of the skill', correct: true },
         ],
       },
-      explain: 'Nearly all facts. The rival is a serious view. Intellectualists argue a skill just is knowing enough facts about how, so the middle isn’t silly. Ryle answers with the expert who can’t state most of what they do, and does it perfectly anyway.',
+      explain: 'The facts, but none of the skill. For Ryle, memorised rules add to knowing that and leave knowing how untouched. His example is the wit, who makes good jokes but can’t state rules for making them. Intellectualists reply that knowing how is itself a form of knowing that.',
       xp: 5,
     },
     dur: 1.0,
@@ -95,22 +95,22 @@ export const BEATS: KnowHowBeat[] = [
   {
     p: 6, x: 124, steps: 3, done: 1, pick: 1,
     interact: {
-      prompt: 'The column is complete and correct. Tap what it still cannot hand you.',
-      explain: 'Instructions can carry rules and reasons. What they can’t hand over is the skill. That’s why coaching happens in a pool, not a library.',
+      prompt: 'What can a complete and correct set of instructions still not give you?',
+      explain: 'The doing. Instructions can state rules and give reasons, but they can’t transfer the ability itself. That ability comes through practice, which is why swimmers are coached in the water.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Two Achievements, Not One',
+      title: 'Two Kinds of Knowing',
       points: [
-        'Knowing that is stated; knowing how is shown',
-        'Experts cannot state most of their own skill',
-        'Instructions carry rules, never the capacity',
-        'Intellectualists disagree — the debate is live',
+        'Knowing that is knowledge of facts that can be stated',
+        'Knowing how is an ability shown in performance',
+        'Skilled people often can’t state the rules they follow',
+        'Intellectualists hold that knowing how is a form of knowing that',
       ],
-      closing: 'The recipe is not the cooking, and reading it faster will never close the gap.',
+      closing: 'For Ryle, a skill is learned mainly by practice, and knowing more facts about it doesn’t amount to having it.',
     },
     dur: 3.0,
   },

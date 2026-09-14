@@ -33,28 +33,28 @@ export interface Epi19Beat extends BaseBeat {
 export const BEATS: Epi19Beat[] = [
   {
     p: 172, x: 200, doors: 1,
-    text: 'Five people, and every one of them knows something you don’t.',
+    text: 'Each of five experts knows a subject that you don’t: engines, the heart, nutrition, tax law and the climate.',
     dur: 3.8,
   },
   {
     p: 466, x: 200, doors: 1, chip: 1,
-    text: 'A question turns up, cut to fit only one of these doors. Standing at the wrong door will open nothing.',
+    text: 'Expertise is a relation between a person and a subject. The question “is this diet safe?” fits only one of these doors.',
     cite: 'Expertise is a relation',
     dur: 4.8,
   },
   {
     p: 379, x: 132, doors: 1, chip: 1, stray: 1,
-    text: 'Here’s the everyday failure. A famous heart doctor is asked about diet on television, and answers.',
+    text: 'Consider a common failure. A famous heart doctor is asked about diet on television, and gives an answer.',
     dur: 4.2,
   },
   {
     p: 13, x: 132, doors: 1, chip: 1, stray: 1,
-    text: 'Nobody lied. The credentials are real.',
+    text: 'The doctor’s credentials are genuine, and nobody has lied.',
     dur: 1.8,
   },
   {
     p: 13, x: 132, doors: 1, chip: 1, stray: 1,
-    text: 'They’re for a different door.',
+    text: 'But the credentials concern the heart, not nutrition. That doesn’t make the answer authoritative on its own.',
     dur: 1.9,
   },
   {
@@ -73,45 +73,45 @@ export const BEATS: Epi19Beat[] = [
   {
     p: 165, x: 132, doors: 1, chip: 1, live: 1,
     interact: {
-      prompt: 'Tap the door this question actually belongs at.',
-      explain: 'Nutrition. A cardiologist knows more medicine than you and has read almost none of the diet trials. Standing is earned subject by subject. The label on the door is what you’re checking, not the person’s eminence.',
+      prompt: 'At which door does the question “is this diet safe?” belong?',
+      explain: 'Nutrition. A heart doctor may know more medicine than most people. Yet whether a diet is safe is a question for nutrition science. What counts is expertise in the subject the question is about.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 412, x: 268, doors: 1, split: 1,
-    text: 'Then the hard case. Two people behind the right door, both qualified, saying opposite things.',
-    cite: 'When they disagree',
+    text: 'A harder case arises when two people behind the right door, both qualified, give opposite answers.',
+    cite: 'When experts disagree',
     dur: 4.2,
   },
   {
     p: 383, x: 268, doors: 1, split: 1,
     interact: {
-      prompt: 'Two experts disagree. What should you actually do?',
+      prompt: 'When two qualified experts disagree, what should a non-expert do?',
       sort: {
-        chip: 'two experts disagree',
+        chip: 'qualified experts disagree',
         bins: [
-          { id: 'guess', label: 'pick either', reads: 'nobody knows, pick either' },
-          { id: 'loud', label: 'the confident one', reads: 'follow whichever one sounds the most certain' },
-          { id: 'weight', label: 'weigh the sides', reads: 'count who is on each side, and why', correct: true },
+          { id: 'guess', label: 'choose either', reads: 'no one knows, so choose either' },
+          { id: 'loud', label: 'the confident one', reads: 'trust whichever expert sounds most certain' },
+          { id: 'weight', label: 'weigh the sides', reads: 'weigh how many experts hold each view, and why', correct: true },
         ],
       },
-      explain: 'Weigh the sides. Disagreement at the edge of a field is normal and doesn’t touch its settled middle. “Pick either” is how a real debate gets used to sell a false one. Somebody holds up one dissenter and calls the whole subject unsettled.',
+      explain: 'Weigh the sides. Alvin Goldman counts agreement among other experts as evidence, along with each side’s arguments and track record. Sounding certain isn’t evidence, and one dissenter doesn’t make a settled question open.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Right Door',
+      title: 'Trusting the Right Expert',
       points: [
-        'Expertise holds between a person and a subject, not on its own',
-        'Real credentials do not transfer to the next field along',
-        'Trusting testimony is rational, and it is still a check',
-        'Disagreement at the edge is not ignorance at the centre',
+        'Expertise is a relation between a person and a subject',
+        'Credentials in one field don’t transfer to another',
+        'Trusting testimony is rational until contrary evidence appears',
+        'Disagreement at a field’s frontier leaves its settled core intact',
       ],
-      closing: 'The question was never whether the expert is clever. The question is what the expert is clever about.',
+      closing: 'The question isn’t whether an expert is clever, but which subject the expert’s knowledge covers.',
     },
     dur: 3.4,
   },

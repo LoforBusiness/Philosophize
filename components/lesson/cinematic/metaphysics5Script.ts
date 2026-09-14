@@ -16,18 +16,18 @@ export interface Meta5Beat extends BaseBeat {
 export const BEATS: Meta5Beat[] = [
   {
     p: 462, stars: 0.7, q: 0,
-    text: 'There is something rather than nothing. Leibniz asked why, and Heidegger called it the first question of all.',
+    text: 'Leibniz asked why there is something rather than nothing. Martin Heidegger later called it the first of all questions.',
     dur: 3.6,
   },
   {
     p: 24, stars: 1, q: 1,
-    text: 'Heidegger called the question fundamental to all of metaphysics. It isn’t about why one thing or another exists.',
+    text: 'Heidegger calls this the fundamental question of metaphysics. The question concerns beings as a whole, not why any one thing exists.',
     cite: 'The fundamental question',
     dur: 3.3,
   },
   {
     p: 24, stars: 1, q: 1,
-    text: 'It asks why there’s anything at all to ask about.',
+    text: 'It asks why there are any beings at all, the questioner included.',
     dur: 1.9,
   },
   {
@@ -35,7 +35,7 @@ export const BEATS: Meta5Beat[] = [
     // The rule is drawn on stage in plain words — EVERY FACT NEEDS A REASON. Naming
     // it "the Principle of Sufficient Reason" over the top of that adds a term and
     // no meaning, and undoes the choice the scene already made (J7).
-    text: 'Leibniz pressed it hardest. He said nothing is just true for no reason.',
+    text: 'Leibniz grounded the question in his principle of sufficient reason. It holds that every fact needs a reason.',
     cite: 'Leibniz, 1714',
     dur: 2.2,
   },
@@ -44,7 +44,7 @@ export const BEATS: Meta5Beat[] = [
     // The rule is drawn on stage in plain words — EVERY FACT NEEDS A REASON. Naming
     // it "the Principle of Sufficient Reason" over the top of that adds a term and
     // no meaning, and undoes the choice the scene already made (J7).
-    text: 'Every fact has a reason somewhere. So what’s the reason for there being anything?',
+    text: 'If every fact needs a reason, the existence of anything at all needs one too. What could that reason be?',
     dur: 2.6,
   },
   {
@@ -62,30 +62,30 @@ export const BEATS: Meta5Beat[] = [
   },
   {
     p: 20, stars: 1, q: 0.4, psr: 1, dasein: 1,
-    text: 'And here comes the strange part. You are a thing that wonders what it is.',
-    cite: 'Dasein — being-there',
+    text: 'The questioner is also part of the question. You’re a being for whom your own being is an issue.',
+    cite: 'Heidegger, Being and Time',
     dur: 2.3,
   },
   {
     p: 20, stars: 1, q: 0.4, psr: 1, dasein: 1,
-    text: 'Heidegger’s name for that is Dasein, and through you the universe turns round and asks about itself.',
+    text: 'Heidegger calls such a being Dasein, German for “being-there”. It’s the being that can inquire into being itself.',
     dur: 2.7,
   },
   {
     p: 165, stars: 1, q: 0.4, psr: 1, dasein: 1,
     interact: {
-      prompt: 'What kind of question is "why is there anything at all"?',
+      prompt: 'Which attitude does the question “why is there anything at all?” express?',
       sort: {
-        chip: 'Leibniz\'s question',
+        chip: 'Leibniz’s question',
         bins: [
-          { id: 'doubt', label: 'doubt', reads: 'doubt: can I trust anything I see?' },
-          { id: 'wonder', label: 'wonder', reads: 'wonder: why is any of this here at all?', correct: true },
-          { id: 'measure', label: 'measurement', reads: 'how much is here?' },
+          { id: 'doubt', label: 'doubt', reads: 'doubt: whether your beliefs can be trusted' },
+          { id: 'wonder', label: 'wonder', reads: 'wonder: that anything exists at all', correct: true },
+          { id: 'measure', label: 'measurement', reads: 'measurement: how much exists, and where' },
         ],
       },
       // Was "the leap is Kierkegaard's, the absurd is Camus's" — a leftover list of
       // two options that no longer exist, naming two thinkers for nothing.
-      explain: 'Wonder. Amazement that there’s anything, rather than suspicion about what you’re looking at. The “doubt” bin is Descartes’ question, and it asks something else. It doesn’t ask whether the world is here, but whether your eyes are telling the truth about it.',
+      explain: 'Wonder. The question expresses amazement that anything exists at all. Doubt, as in Descartes, asks whether your beliefs can be trusted, which is a question about knowledge. Measurement asks how much exists, not why anything does.',
       xp: 5,
     },
     dur: 1.0,
@@ -93,26 +93,26 @@ export const BEATS: Meta5Beat[] = [
   {
     p: 160, stars: 1, q: 0.4, psr: 1, dasein: 1,
     interact: {
-      prompt: 'Heidegger picked that word deliberately. Tap what it says about you.',
+      prompt: 'What does the term Dasein say about your way of being?',
       cards: [
-        { text: 'Being-there', correct: true },
-        { text: 'Decision', correct: false },
+        { text: 'Already there, in a world', correct: true },
+        { text: 'A mind apart from the world', correct: false },
       ],
-      explain: 'Da means there and Sein means being. Being-there. The word is plain on purpose. You are not a soul visiting a world. You’re something already in the middle of one.',
+      explain: 'Already there, in a world. Da means “there” and Sein means “being”. Heidegger calls this being-in-the-world, and rejects the picture of a mind standing apart from its world.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Existence Is Worth Wondering About',
+      title: 'The Question of Being',
       points: [
-        'Leibniz: why something rather than nothing?',
-        'Heidegger: the fundamental question',
-        'Dasein: a being whose being is in question',
-        'Wonder is where metaphysics catches fire',
+        'Leibniz: every fact, even existence, needs a reason',
+        'Heidegger: the fundamental question of metaphysics',
+        'Dasein: a being for whom being is an issue',
+        'The question begins in wonder, not doubt',
       ],
-      closing: 'You belong to a universe that can ask why there is anything. So go ahead and ask.',
+      closing: 'As Dasein, you’re a being that can ask why anything exists at all.',
     },
     dur: 2.8,
   },

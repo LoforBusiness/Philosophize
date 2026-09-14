@@ -34,53 +34,53 @@ export interface Political37Beat extends BaseBeat {
 export const BEATS: Political37Beat[] = [
   {
     p: 25, x: 54, pair: 1,
-    text: 'Two citizens on election day. Two ballots, drawn the same size, because they are the same size.',
+    text: 'Consider two citizens on election day. Each casts one ballot, and the two ballots count equally.',
     dur: 3.8,
   },
   {
     p: 2, x: 54, pair: 1, horns: 1, labels: 1,
-    text: 'Now look above the ballots. One of them can be heard across the country.',
+    text: 'Their political voices aren’t equal. One citizen can afford to be heard across the whole country.',
     dur: 2.8,
   },
   {
     p: 2, x: 54, pair: 1, horns: 1, labels: 1,
-    text: 'The other can be heard across a room.',
+    text: 'The other, without money for advertising, reaches only the people nearby.',
     dur: 1.8,
   },
   {
     p: 457, x: 54, pair: 1, horns: 1, labels: 1, live_d: 1, live: 1,
     interact: {
-      prompt: 'Cap what may be spent. Slide, and watch both voices change.',
+      prompt: 'How far should the law cap what can be spent on political campaigns?',
       drag: {
         lo: 'NO LIMIT',
         hi: 'STRICT EQUALITY',
         start: 0,
         zones: [
-          { id: 'none', upto: 0.28, reads: 'money decides who is heard' },
-          { id: 'some', upto: 0.68, reads: 'a floor, and a ceiling', correct: true },
-          { id: 'hard', upto: 1, reads: 'nobody may amplify anything' },
+          { id: 'none', upto: 0.28, reads: 'wealth decides who is heard' },
+          { id: 'some', upto: 0.68, reads: 'a ceiling that still allows real campaigning', correct: true },
+          { id: 'hard', upto: 1, reads: 'no one may spend to amplify a message' },
         ],
       },
-      explain: 'Notice how the smaller horn never grew. A cap does not give the quieter citizen more voice. A cap takes reach away from the louder one. That may still be the right move, and it’s worth being clear about the move you just made.',
+      explain: 'A ceiling that still allows real campaigning. With no limit, wealth decides who’s heard. Strict equality would stop anyone amplifying a message. Even a moderate cap works by reducing the louder voice, not by raising the quieter one.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 168, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
-    text: 'Rawls put it as a distinction. Having a liberty is one thing.',
+    text: 'John Rawls distinguishes a liberty from its worth, which is a person’s ability to use it.',
     dur: 2.1,
   },
   {
     p: 414, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
-    text: 'Being able to use the right is another. Only one of the two is equal here.',
+    text: 'Both citizens have equal political liberties but unequal power to use them. Rawls argues these liberties need fair value.',
     dur: 2.7,
   },
   {
     p: 433, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
     quote: {
       id: 'lq-political-political-37-1',
-      text: 'The liberties protected by the principle of participation lose much of their value whenever those with greater means control the course of public debate.',
+      text: '…those who have greater private means are permitted to use their advantages to control the course of public debate.',
       author: 'John Rawls',
       philosopherId: 'john-rawls',
       work: 'A Theory of Justice',
@@ -92,37 +92,37 @@ export const BEATS: Political37Beat[] = [
   {
     p: 467, x: 54, pair: 1, horns: 1, cap: 1, labels: 1, live: 1,
     interact: {
-      prompt: 'Tap what the cap you set is actually restricting.',
-      explain: 'Speech. Spending to spread a message is a way of saying it. So a cap is a limit on political speech, which a free society guards most fiercely. That’s why this argument doesn’t resolve. It’s liberty against liberty, not liberty against equality.',
+      prompt: 'What does a cap on campaign spending restrict?',
+      explain: 'Speech. Spending to spread a message is a means of expressing it, so a cap limits political speech. The dispute sets one liberty against another, not liberty against equality.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 459, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
-    text: 'So the argument never settles. One side defends the right to be heard.',
+    text: 'The dispute persists because both sides appeal to liberty. One side defends the freedom to spend on speech.',
     dur: 2.3,
   },
   {
     p: 459, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
-    text: 'So does the other. The two sides disagree about whose right it is.',
+    text: 'The other defends the fair value of every citizen’s political voice. They disagree about which liberty comes first.',
     dur: 2.3,
   },
   {
     p: 379, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
-    text: 'Every democracy draws the line somewhere, usually without announcing it. Where the line lands tells you what a country thinks a vote is for.',
+    text: 'Democracies differ in how they regulate campaign money. Each rule reflects a view of what political equality requires.',
     dur: 4.8,
   },
   {
     summary: {
-      title: 'The Worth of a Right',
+      title: 'The Fair Value of Political Liberty',
       points: [
         'Having a liberty differs from being able to use it',
         'Rawls: political liberties need fair value',
-        'A spending cap limits a kind of speech',
-        'So it is liberty against liberty',
+        'A spending cap restricts political speech',
+        'The dispute sets liberty against liberty',
       ],
-      closing: 'The ballots are the same size. Almost nothing else about the two of them is, and the ballot is the part that gets photographed.',
+      closing: 'Equal votes can coexist with unequal political influence. Campaign finance law is where democracies confront that gap.',
     },
     dur: 3.2,
   },

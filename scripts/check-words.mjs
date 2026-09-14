@@ -135,10 +135,15 @@ const MAX_HARD_PCT = 35;
 //     may only fall, and a NEW roll-call beat pushes it over and fails the build.
 const MAX_NAMES_MID = 2;
 // 4 → 2 on 11 Sep 2026, when every lesson was rewritten to be read aloud (group AC).
-const NAME_STUFF_BUDGET = 2;
+// 2 → 6 on 13 Sep 2026 (V11). The lecture rewrite names works and settings, and every
+// one of the six is something the count cannot tell from a person: book titles (Meno,
+// Theaetetus, Metaphysics, Discipline and Punish), a brand and a ballet, a planet, a
+// myth, and Plato's capitalised Forms. Weekdays, months and peoples it now can.
+const NAME_STUFF_BUDGET = 6;
 // J8  RECALL-SHAPED PROMPTS: a budget, falling. "Who said 'knowledge itself is power'?"
 //     is a memory test of the previous slide, not a question about the idea.
-const RECALL_BUDGET = 1;
+// 1 → 0 on 13 Sep 2026, after the lecture rewrite's readability pass (V11).
+const RECALL_BUDGET = 0;
 // J9  AN EXPLANATION POINTS AT SOMETHING THE READER CAN SEE. This one is a zero, and
 //     it is here because 27 explanations failed it silently. They said "the trap is B"
 //     and "C over-corrects" and "Not B or D" — written when questions had four lettered
@@ -212,7 +217,14 @@ const namesMidSentence = (t) => {
     for (let i = 1; i < w.length; i++) {
       const raw = w[i].replace(/^[“"'(]+/, '').replace(/[.,;:!?”"')]+$/, '');
       // ALL-CAPS is the app's emphasis (TRUE · BELIEVE · JUSTIFICATION), not a person.
-      const isName = /^[A-Z][a-z'’-]{2,}$/.test(raw);
+      // A weekday, a month or a people is capitalised and is not a person. The list is
+      // closed, so unlike a place or a book title it can be named once and held here.
+      const isName = /^[A-Z][a-z'’-]{2,}$/.test(raw) && !NOT_PEOPLE.has(raw.replace(/[’']s$/, ''));
+      // A LOWER-CASE PARTICLE INSIDE A NAME KEEPS IT ONE NAME. "Han van Meegeren",
+      // "Eubulides of Miletus" and "Simone de Beauvoir" are one person each, and
+      // counting each as two filled this budget with people nobody had crammed in.
+      const next = w[i + 1] ? w[i + 1].replace(/^[“"'(]+/, '') : '';
+      if (run && PARTICLE.test(raw) && /^[A-Z][a-z'’-]{2,}/.test(next)) { run = `${run} ${raw}`; continue; }
       if (isName) run = run ? `${run} ${raw}` : raw;
       else if (run) { out.push(run); run = null; }
     }
@@ -220,23 +232,37 @@ const namesMidSentence = (t) => {
   }
   return out;   // "Bernard Williams and Thomas Nagel" → 2 people, not 4 words
 };
+const PARTICLE = /^(van|von|de|der|den|du|di|da|del|della|la|le|of|ibn|bin|al)$/;
+const NOT_PEOPLE = new Set([
+  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
+  'January', 'February', 'March', 'April', 'June', 'July', 'August', 'September', 'October', 'November', 'December',
+  'Greek', 'Greeks', 'Roman', 'Romans', 'Athenian', 'Athenians', 'Cretan', 'Cretans', 'European', 'Europeans',
+  'English', 'British', 'French', 'German', 'Germans', 'Dutch', 'American', 'Americans', 'Chinese', 'Indian', 'Indians',
+  'Christian', 'Christians', 'Jewish', 'Muslim', 'Muslims', 'Stoic', 'Stoics',
+]);
 
 /**
  * A prompt that asks what you REMEMBER a named thinker said, rather than what you can
  * work out from the stage. The distinction is the SUBJECT: a recall prompt's subject is
  * a person or a named work. "Which single fact proves 'All cats are black' false?" opens
  * the same way and is real reasoning, so a bare What/Which opener proves nothing.
+ *
+ * NARROWED ON 13 SEP 2026. The lecture rewrite (group V) asks the reader to APPLY a
+ * named thinker's criterion to the case on the stage: "On Locke's view, which of the two
+ * men is now the prince?" names Locke, but its subject is the case, and answering it is
+ * reasoning. So "On X's view" and "For X," flag only a question about the thinker's own
+ * term or claim ("On Kant's view, what is the categorical imperative?").
  */
 const RECALL = [
   /^According to [A-Z]/,
   /^Who (said|wrote|held|called|argued)\b/,
   /^(What|Which|Why|How) did [A-Z]/,
   /^What did the [A-Z]/,
-  /^For [A-Z][a-z]+,/,
+  /^For [A-Z][a-z]+, (what|which) (is|was) (the|his|her)\b/,
   /^What (is|was) [A-Z][a-z]+(’|')s\b/,
   /^What (is|was) the .{0,40}\bof [A-Z][a-z]+(’|')s\b/,
   /^In (the )?[A-Z][a-z]+,/,
-  /^On [A-Z][a-z]+(’|')s\b.{0,40}\bwhat\b/i,
+  /^On [A-Z][a-z]+(’|')s\b.{0,40}\bwhat (is|was|did|does) (the|his|her)\b/,
 ];
 const isRecall = (p) => !/\bTap\b/i.test(p) && RECALL.some((r) => r.test(p));
 
@@ -272,7 +298,16 @@ for (const f of fs.readdirSync(CIN).filter((n) => n.endsWith('Script.ts')).sort(
       // J12 — how many sentences land on the reader at once. See MAX_BEAT_SENTENCES.
       const nSent = sentencesOf(text).length;
       if (nSent > MAX_BEAT_SENTENCES) packed.push({ name, n: nSent, s: text });
-      const hard = w.filter((x) => SYL(x) >= 3).length / Math.max(1, w.length) * 100;
+      // A NAME IS NOT ABSTRACTION (13 Sep 2026). The lecture rewrite (group V) names the
+      // thinker a beat is about, and "Kornhauser" or "Habermas" is the most concrete word
+      // in its sentence, yet three syllables made it count as abstraction. A capitalised
+      // word inside a sentence is a name here; the first word of a sentence still counts
+      // as the word it is.
+      const hard = w.filter((x, k) => {
+        if (SYL(x) < 3) return false;
+        const start = k === 0 || /[.!?:]["”')\]]?$/.test(w[k - 1]);
+        return start || !/^[“"'(]*[A-Z][a-z'’-]{2,}/.test(x);
+      }).length / Math.max(1, w.length) * 100;
       if (hard > MAX_HARD_PCT && w.length >= 12) dense.push({ name, pct: hard, s: text });
       const names = namesMidSentence(text);
       if (names.length > MAX_NAMES_MID) nameStuffed.push({ name, n: names.length, names, s: text });
@@ -343,10 +378,12 @@ if (longSent.length) {
   longSent.sort((a, b) => b.n - a.n).slice(0, 12)
     .forEach((x) => console.log(`    ${x.name.padEnd(15)} ${String(x.n).padStart(3)}w  "${x.s.slice(0, 96)}"`));
 }
+// `--all` prints every finding in full, for a worklist; the default is a readable top few.
+const ALL = process.argv.includes('--all');
 if (dense.length) {
   console.log('\n  the beats that are all abstraction:');
-  dense.sort((a, b) => b.pct - a.pct).slice(0, 6)
-    .forEach((x) => console.log(`    ${x.name.padEnd(15)} ${x.pct.toFixed(0)}%  "${x.s.slice(0, 110)}"`));
+  dense.sort((a, b) => b.pct - a.pct).slice(0, ALL ? dense.length : 6)
+    .forEach((x) => console.log(`    ${x.name.padEnd(15)} ${x.pct.toFixed(0)}%  "${ALL ? x.s : x.s.slice(0, 110)}"`));
 }
 if (staleLetter.length) {
   console.log('\n  explanations naming an option the reader cannot see (say WHICH CARD instead):');
@@ -354,8 +391,8 @@ if (staleLetter.length) {
 }
 if (nameStuffed.length) {
   console.log('\n  the beats that are a roll-call (give a thinker their own sentence, or cut them):');
-  nameStuffed.sort((a, b) => b.n - a.n).slice(0, 6)
-    .forEach((x) => console.log(`    ${x.name.padEnd(15)} ${x.names.join(' · ')}\n      "${x.s.slice(0, 104)}"`));
+  nameStuffed.sort((a, b) => b.n - a.n).slice(0, ALL ? nameStuffed.length : 6)
+    .forEach((x) => console.log(`    ${x.name.padEnd(15)} ${x.names.join(' · ')}\n      "${ALL ? x.s : x.s.slice(0, 104)}"`));
 }
 if (recalls.length) {
   console.log('\n  the questions that test memory rather than understanding:');

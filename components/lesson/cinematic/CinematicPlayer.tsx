@@ -30,7 +30,8 @@ import { footfallTrack } from './footfalls';
 import ChoiceCards, { seedFor } from './ChoiceCards';
 import DragScale from './DragScale';
 import LeverPick from './LeverPick';
-import ShapePlot from './ShapePlot';
+import TrendPick from './TrendPick';
+import { QuestionAccentProvider } from './QuestionParts';
 import SplitBar from './SplitBar';
 import FieldPick from './FieldPick';
 import PollBallot from './PollBallot';
@@ -42,7 +43,7 @@ import { swishTrack } from './gestures';
 import { lessonHasSound } from './lessonSound';
 import { TargetCountProvider } from './Target';
 import {
-  Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, styles,
+  Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, stageAnswered, styles,
   XpPill, TapNudge,
   COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, GROUND, INK,
   type BaseBeat, REACT, Thought, useCarry, carry,} from './cinematicKit';
@@ -570,6 +571,13 @@ export default function CinematicPlayer({
   const onBox = useCallback((b: Box | null) => { targetBox.value = b; }, [targetBox]);
   const camHost = useRef(null);
   const needsBox = useMemo(() => beats.map((b) => !!b.interact), [beats]);
+  // WHICH GRADED QUESTION EACH BEAT IS, from 1, and how many the lesson asks. The
+  // kicker prints "QUESTION 1 OF 2". Above the early return, like every hook here.
+  const [qIndex, qTotal] = useMemo(() => {
+    let c = 0;
+    const at = beats.map((b) => (b.interact ? (c += 1) : 0));
+    return [at, c] as const;
+  }, [beats]);
   /**
    * Beats where the camera PARKS at its own framing instead of holding the last one.
    *
@@ -1043,6 +1051,9 @@ export default function CinematicPlayer({
   }, [done]);
 
   const locked = gates(beat) && picked === null;
+  // E41 — whether this beat is answered on the stage. A beat whose question is
+  // asked below the picture takes no pick from the scene and shows no ring on it.
+  const stageLive = stageAnswered(beat);
   const last = i === beats.length - 1;
 
   const advance = useCallback(() => {
@@ -1231,13 +1242,13 @@ export default function CinematicPlayer({
                       nativeID="stage-cam"
                       style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
                     >
-                      <TargetCountProvider onCount={setTargetCount} onBox={onBox} host={camHost}>
-                        <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubbles.map((B) => <Thought key={B.key} text={B.text} kind={B.kind} x={B.at[0]} anchorY={B.at[1]} discs={B.at[2]} headX={B.at[3]} show={B.show} figX={B.refX === undefined ? undefined : figX} refX={B.refX ?? 0} settle={B.refX === undefined ? undefined : figTr} probeId={`${B.key[0] === 'v' ? 'thought-vis' : 'thought-lead'}${B.show ? '' : '-out'}`} />)}</WardrobeProvider>
+                      <TargetCountProvider onCount={setTargetCount} onBox={onBox} host={camHost} live={stageLive}>
+                        <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => { if (stageLive) choose(id, ok, true); }} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubbles.map((B) => <Thought key={B.key} text={B.text} kind={B.kind} x={B.at[0]} anchorY={B.at[1]} discs={B.at[2]} headX={B.at[3]} show={B.show} figX={B.refX === undefined ? undefined : figX} refX={B.refX ?? 0} settle={B.refX === undefined ? undefined : figTr} probeId={`${B.key[0] === 'v' ? 'thought-vis' : 'thought-lead'}${B.show ? '' : '-out'}`} />)}</WardrobeProvider>
                       </TargetCountProvider>
                     </Animated.View>
                   ) : (
-                    <TargetCountProvider onCount={setTargetCount}>
-                      <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => choose(id, ok, true)} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubbles.map((B) => <Thought key={B.key} text={B.text} kind={B.kind} x={B.at[0]} anchorY={B.at[1]} discs={B.at[2]} headX={B.at[3]} show={B.show} figX={B.refX === undefined ? undefined : figX} refX={B.refX ?? 0} settle={B.refX === undefined ? undefined : figTr} probeId={`${B.key[0] === 'v' ? 'thought-vis' : 'thought-lead'}${B.show ? '' : '-out'}`} />)}</WardrobeProvider>
+                    <TargetCountProvider onCount={setTargetCount} live={stageLive}>
+                      <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => { if (stageLive) choose(id, ok, true); }} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubbles.map((B) => <Thought key={B.key} text={B.text} kind={B.kind} x={B.at[0]} anchorY={B.at[1]} discs={B.at[2]} headX={B.at[3]} show={B.show} figX={B.refX === undefined ? undefined : figX} refX={B.refX ?? 0} settle={B.refX === undefined ? undefined : figTr} probeId={`${B.key[0] === 'v' ? 'thought-vis' : 'thought-lead'}${B.show ? '' : '-out'}`} />)}</WardrobeProvider>
                     </TargetCountProvider>
                   )}
                 </View>
@@ -1274,6 +1285,7 @@ export default function CinematicPlayer({
             (§21). `check:readable` scans this box as well as the stage, because
             the words the reader could not read turned out to be in BOTH. */}
         <View style={styles.lower} nativeID="lower-deck">
+          <QuestionAccentProvider lessonId={lesson.id}>
           {/* THE TWO CHOICES — directly under the art, above the prompt.
               Not in scene coordinates (every lesson crops its band differently and
               a camera push would cut them in half, H60) and not pinned over the
@@ -1317,12 +1329,17 @@ export default function CinematicPlayer({
             />
           ) : null}
 
+          {/* A CURVE, CHOSEN IN ONE TAP. It was drawn column by column and set
+              with a button, which a reader found too slow; see ./TrendPick. The
+              block is still `plot`, so every scene reacting to one still does. */}
           {beat.interact?.plot && !gone ? (
-            <ShapePlot
+            <TrendPick
               plot={beat.interact.plot}
               picked={picked}
               onPick={(id, ok) => choose(id, ok, true)}
               pos={dragPos}
+              sem={pickPos}
+              seed={seedFor(lesson.id, [{ text: beat.interact.plot.shapes[0]?.reads ?? '' }])}
             />
           ) : null}
 
@@ -1466,19 +1483,20 @@ export default function CinematicPlayer({
                     // pointing the reader back at the scene sends them to targets
                     // that are mounted and disabled. Same failure this flag was
                     // added for, one control family later.
-                    inScene={
-                      !beat.interact.cards && !beat.interact.drag && !beat.interact.lever
-                      && !beat.interact.plot && !beat.interact.split && !beat.interact.field
-                      && !beat.interact.poll && !beat.interact.sort
-                    }
+                    // The same test the stage's picks are gated on (E41), so the
+                    // hint and the picks cannot drift apart.
+                    inScene={stageLive}
                     answered={picked !== null}
                     correct={pickedOk}
+                    index={qIndex[i] || undefined}
+                    total={qTotal || undefined}
                   />
                 ) : null}
               </>
             )}
             />
           </View>
+          </QuestionAccentProvider>
         </View>
 
         <View style={styles.tapLayer}>

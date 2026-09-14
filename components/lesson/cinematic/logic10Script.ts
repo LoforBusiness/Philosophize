@@ -27,24 +27,24 @@ export interface Logic10Beat extends BaseBeat {
 export const BEATS: Logic10Beat[] = [
   {
     p: 172, x: 34, arg: 1,
-    text: 'A friend says “he is rich, so he must be happy”, and you nod along. Two sentences went past you, and a third one never did.',
+    text: 'Suppose a friend says “he’s rich, so he must be happy”. The argument states a premise and a conclusion, but it relies on a third claim.',
     dur: 3.8,
   },
   {
     p: 416, x: 96, arg: 1, slot: 1,
-    text: 'Nothing actually joins them. Being rich and being happy are different things, and the sentence tying one to the other was never said.',
-    cite: 'The gap',
+    text: 'Being rich and being happy are different conditions. So the argument needs a premise linking them, and that premise is never stated.',
+    cite: 'The unstated link',
     dur: 4.6,
   },
   {
     p: 38, x: 96, arg: 1, slot: 1, hid: 1,
-    text: 'Logic has a name for an argument like this. An enthymeme: one that runs on a premise nobody says out loud.',
+    text: 'An argument that depends on an unstated premise is called an enthymeme.',
     cite: 'Enthymeme',
     dur: 3.6,
   },
   {
     p: 38, x: 96, arg: 1, slot: 1, hid: 1,
-    text: 'There it is, sitting under the line.',
+    text: 'To assess such an argument, its unstated premise has to be made explicit.',
     dur: 1.8,
   },
   {
@@ -62,28 +62,28 @@ export const BEATS: Logic10Beat[] = [
   },
   {
     p: 30, x: 158, arg: 1, slot: 1, hid: 2,
-    text: 'So say the claim out loud. All rich people are happy.',
-    cite: 'Into the light',
+    text: 'Stated explicitly, the missing premise reads: all rich people are happy.',
+    cite: 'The premise stated',
     dur: 1.8,
   },
   {
     p: 30, x: 158, arg: 1, slot: 1, hid: 2,
-    text: 'Up it comes through the line, and once you can read the words you can see they’re rubbish.',
+    text: 'Once stated, the premise can be assessed, and it’s false: many rich people are unhappy.',
     dur: 3,
   },
   {
     p: 380, x: 158, arg: 1, slot: 1, hid: 2,
     interact: {
-      prompt: 'When does a missing premise actually break an argument?',
+      prompt: 'When does an unstated premise make an argument fail?',
       sort: {
-        chip: 'a hidden premise',
+        chip: 'an unstated premise',
         bins: [
-          { id: 'always', label: 'always', reads: 'always, whatever is left unsaid' },
-          { id: 'false', label: 'only when false', reads: 'only when the unsaid premise is false', correct: true },
-          { id: 'never', label: 'never', reads: 'never, everybody leaves things out' },
+          { id: 'always', label: 'always', reads: 'always, since every premise should be stated' },
+          { id: 'false', label: 'only when false', reads: 'only when the unstated premise is false', correct: true },
+          { id: 'never', label: 'never', reads: 'never, since everyday arguments omit premises' },
         ],
       },
-      explain: 'Only when false. The word “hidden” sounds like “dishonest”, but a hidden premise usually isn’t. Almost every real argument leaves something out, and nobody says “all men are mortal” out loud. It only fails when the thing left unsaid wouldn’t survive being said.',
+      explain: 'An unstated premise makes an argument fail only when the premise is false. Most everyday arguments omit a premise too obvious to state, such as “all men are mortal”. Omission alone is no fault.',
       xp: 5,
     },
     dur: 1.0,
@@ -91,8 +91,8 @@ export const BEATS: Logic10Beat[] = [
   {
     p: 165, x: 158, arg: 2, slot: 1, pick: 1,
     interact: {
-      prompt: '“You should sleep more — you look exhausted.” Tap the premise this argument needs but never says.',
-      explain: 'The trap: the other two are true, and true is not the same as load-bearing. This argument only walks if looking tired is evidence of needing sleep. Deny that one bridge and it collapses. The general facts about sleep were never holding it up.',
+      prompt: '“You should sleep more, since you look exhausted.” Which unstated premise does this argument need?',
+      explain: 'Looking tired means you need sleep. The argument depends on that premise, because without it looking exhausted gives no reason to sleep more. The other two premises may be true, but the argument doesn’t rest on them.',
       xp: 5,
     },
     dur: 1.0,
@@ -100,14 +100,14 @@ export const BEATS: Logic10Beat[] = [
   {
     p: 455, x: 158, arg: 2, slot: 1,
     summary: {
-      title: 'The Premise Nobody Said',
+      title: 'The Unstated Premise',
       points: [
         'An enthymeme leaves one premise unstated',
-        'Say the missing sentence out loud before judging it',
-        'The hidden premise is where a weak argument hides',
-        'Unstated is not the same as false — check it',
+        'State the missing premise explicitly before assessing it',
+        'A weak argument often rests on a false unstated premise',
+        'An unstated premise is not thereby false',
       ],
-      closing: 'You can now hear the sentence nobody said. That’s usually where the argument breaks.',
+      closing: 'Making an unstated premise explicit is often the quickest way to find where an argument fails.',
     },
     dur: 3.0,
   },

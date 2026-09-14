@@ -33,36 +33,36 @@ export interface Epistemology39Beat extends BaseBeat {
 export const BEATS: Epistemology39Beat[] = [
   {
     p: 25, x: 52, grid: 1,
-    text: 'Three judges hear one case. A verdict of liable needs two findings: a contract existed, and it was broken.',
+    text: 'Three judges hear one case. To find the defendant liable, they must agree a contract existed and was broken.',
     dur: 4.2,
   },
   {
     p: 2, x: 52, grid: 1, votes: 1,
-    text: 'Each of them votes on both, and each verdict follows from the two votes above it. Nobody is careless.',
+    text: 'Each judge votes on both findings, and each judge’s verdict follows consistently from those two votes.',
     dur: 4.2,
   },
   {
     p: 36, x: 52, grid: 1, votes: 1, tally: 1,
-    text: 'Now count each column.',
+    text: 'The court’s majority is found by counting each column separately.',
     dur: 2.4,
   },
   {
     p: 4, x: 52, grid: 1, votes: 1, tally: 1, live: 1,
     interact: {
-      prompt: 'Tap the majority cell that contradicts the other two.',
-      explain: 'The verdict. Two of three found a contract, and two of three found it broken. Together those mean liable, yet two of three voted not liable. Every row above holds together. Only the row made by counting does not.',
+      prompt: 'Which majority finding is inconsistent with the other two?',
+      explain: 'The verdict. A majority found a contract, and a majority found it broken. Those two votes together mean the defendant is liable. Yet a majority voted not liable. Each judge is consistent, but the group is not.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 176, x: 52, grid: 1, votes: 1, tally: 1,
-    text: 'The puzzle has a name: the doctrinal paradox. Each row can hold together while the row you get by counting does not.',
+    text: 'Lewis Kornhauser and Lawrence Sager named this puzzle the doctrinal paradox. Judges can each be consistent, while the court as a whole is not.',
     dur: 5.0,
   },
   {
     p: 168, x: 98, grid: 1, votes: 1, tally: 1,
-    text: 'So a court has to choose what it counts. It can count the verdict alone, or count the reasons and let the verdict follow.',
+    text: 'A court must therefore choose a procedure. It can take a majority on the verdict, or on each premise and let the verdict follow.',
     dur: 4.4,
   },
   {
@@ -81,31 +81,31 @@ export const BEATS: Epistemology39Beat[] = [
   {
     p: 21, x: 98, grid: 1, votes: 1, tally: 1,
     interact: {
-      prompt: 'How far should the reasons bind the verdict?',
+      prompt: 'Should a court count votes on the verdict itself, or on the reasons behind it?',
       drag: {
         lo: 'count the verdict', hi: 'follow the reasons',
         start: 0.06,
         zones: [
-          { id: 'count', upto: 0.25, reads: 'count the verdict, and the court contradicts itself' },
-          { id: 'mix', upto: 0.55, reads: 'take whichever answer suits, case by case' },
+          { id: 'count', upto: 0.25, reads: 'vote on the verdict, leaving the court inconsistent' },
+          { id: 'mix', upto: 0.55, reads: 'choose a procedure case by case, as convenient' },
           { id: 'reasons', upto: 1, reads: 'settle the reasons, and let the verdict follow', correct: true },
         ],
       },
-      explain: 'Settle the reasons first. Watch the bottom cell turn over as you move. That’s the repair working, and also the bill. The court now rules liable when two of its three judges voted the other way. It has to say why that’s legitimate.',
+      explain: 'Settle the reasons, and let the verdict follow. This keeps the court consistent, but at a cost. The court then rules liable although two of its three judges voted not liable, and it must justify that.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Bottom Row',
+      title: 'The Doctrinal Paradox',
       points: [
-        'A group verdict is built column by column',
-        'Every member can be consistent and the total not',
-        'Reasons and verdicts give different answers',
-        'Which you count is a decision, not a detail',
+        'A court’s majority is counted issue by issue',
+        'Consistent judges can form an inconsistent majority',
+        'Voting on premises and on the verdict can disagree',
+        'Choosing what to count is a substantive decision',
       ],
-      closing: 'Any committee you sit on is running one of the two procedures. Knowing which is worth the trouble, because the choice decides what a group can mean.',
+      closing: 'Every group that votes on reasons and conclusions must use one of these procedures. The choice shapes what the group can be said to believe.',
     },
     dur: 3.4,
   },

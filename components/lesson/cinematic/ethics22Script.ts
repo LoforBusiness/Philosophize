@@ -33,37 +33,37 @@ export interface Eth22Beat extends BaseBeat {
 export const BEATS: Eth22Beat[] = [
   {
     p: 25, x: 200, wants: 1,
-    text: 'Five things people say they want out of a life, in no particular order. In a moment somebody offers you all five at once.',
+    text: 'A theory of well-being says what makes a life go well for the person living it. Candidates include pleasure, achievement, being loved, knowing the truth and doing things yourself.',
     dur: 4.4,
   },
   {
     p: 443, x: 200, wants: 1, machine: 1,
-    text: 'Now the offer. A tank, a lifetime of experience indistinguishable from the real thing, and no way back.',
+    text: 'Robert Nozick, in 1974, imagined an experience machine. It gives you any experience you want, and while plugged in you believe it’s real.',
     cite: 'The experience machine',
     dur: 4.6,
   },
   {
     p: 379, x: 132, wants: 1, machine: 1,
-    text: 'Almost everybody says no, and most can’t say why. The reason is in the picture.',
+    text: 'Nozick asks whether you’d plug in for life. He expects most people to refuse, and asks what their refusal shows.',
     dur: 4.0,
   },
   {
     p: 457, x: 132, wants: 1, machine: 1, live: 1,
     interact: {
-      prompt: 'Tap the one thing the machine can actually deliver.',
-      explain: 'The feeling. Everything else on that row is something you wanted to be true, not something you wanted to feel. The tank changes what you experience without touching any of it. You’d believe you had them.',
+      prompt: 'Which of the five goods can the experience machine provide?',
+      explain: 'Pleasure. The other four goods depend on how the world is, not on how your life feels. You must in fact achieve, be loved, know the truth and act. The machine alters nothing but your experience, so you’d only believe you possessed them.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 467, x: 132, wants: 1, machine: 1, cable: 1,
-    text: 'One cable, into one column. The other four are not switched off.',
+    text: 'The machine is connected to one good only. It supplies pleasure, which is a matter of how your life feels from the inside.',
     dur: 3.1,
   },
   {
     p: 467, x: 132, wants: 1, machine: 1, cable: 1,
-    text: 'They were never plugged in.',
+    text: 'The other four goods require facts about the world. The machine can supply only the experience of them.',
     dur: 1.8,
   },
   {
@@ -81,39 +81,39 @@ export const BEATS: Eth22Beat[] = [
   },
   {
     p: 407, x: 268, wants: 1, machine: 1, cable: 1,
-    text: 'That refusal is evidence about you. If pleasure were all that mattered, the tank would be an easy yes.',
+    text: 'Hedonism holds that pleasure is the only thing good in itself. If it were true, plugging in would be an easy choice, so refusing is evidence against hedonism.',
     cite: 'Against hedonism',
     dur: 4.6,
   },
   {
     p: 41, x: 268, wants: 1, machine: 1, cable: 1,
     interact: {
-      prompt: 'Draw what the machine gives you across the five.',
+      prompt: 'Which profile shows what the experience machine gives you across the five goods?',
       plot: {
         axis: 'HOW MUCH',
         cols: ['PLEASURE', 'ACHIEVING', 'BEING LOVED', 'THE TRUTH', 'DOING IT'],
         start: [0.5, 0.5, 0.5, 0.5, 0.5],
         shapes: [
-          { id: 'all', profile: [0.92, 0.9, 0.9, 0.9, 0.9], reads: 'everything you asked for' },
-          { id: 'feel', profile: [0.94, 0.08, 0.08, 0.06, 0.05], reads: 'all the feeling, none of the doing', correct: true },
-          { id: 'none', profile: [0.1, 0.1, 0.08, 0.08, 0.06], reads: 'nothing at all' },
+          { id: 'all', profile: [0.92, 0.9, 0.9, 0.9, 0.9], reads: 'all five, as good as the real thing' },
+          { id: 'feel', profile: [0.94, 0.08, 0.08, 0.06, 0.05], reads: 'pleasure, and none of the other four', correct: true },
+          { id: 'none', profile: [0.1, 0.1, 0.08, 0.08, 0.06], reads: 'none of the five' },
         ],
       },
-      explain: 'High on the left and flat on the floor after it. The tank is very good at one column and can’t reach the others. Drawing it high all the way across is the hedonist answer, which is the position Nozick is arguing against.',
+      explain: 'Pleasure, and none of the other four. The machine supplies pleasure but can’t make you achieve, be loved, know or act. The profile high across all five treats the feeling of each good as worth as much as the good. That’s the hedonist view Nozick rejects.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Feeling And The Thing',
+      title: 'What the Experience Machine Shows',
       points: [
         'The machine offers experiences, not the things experienced',
         'Most people refuse, which is evidence against pure hedonism',
-        'We want to do things, be a certain way, and be in contact with reality',
-        'A defender can say the refusal is just fear of the unfamiliar',
+        'Nozick: people also value acting, character and contact with reality',
+        'A hedonist may blame the refusal on status quo bias',
       ],
-      closing: 'One cable, one column. Ask yourself which of the other four you were prepared to lose.',
+      closing: 'If you’d refuse to plug in, you seem to value more than how your life feels.',
     },
     dur: 3.4,
   },

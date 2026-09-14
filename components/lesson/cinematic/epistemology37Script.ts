@@ -34,41 +34,41 @@ export interface Epistemology37Beat extends BaseBeat {
 export const BEATS: Epistemology37Beat[] = [
   {
     p: 462, x: 54, hull: 1,
-    text: 'An old ship, due to carry emigrants. Her owner has five separate reasons to doubt she’s sound.',
+    text: 'Clifford described a shipowner sending an old emigrant ship to sea. The owner had five reasons to doubt she was seaworthy.',
     dur: 3.8,
   },
   {
     p: 4, x: 54, hull: 1, live_d: 1,
     interact: {
-      prompt: 'Set the bar. How much would he need before he may believe her seaworthy?',
+      prompt: 'How much evidence would the owner need before he may believe her seaworthy?',
       drag: {
-        lo: 'A FEELING WILL DO',
+        lo: 'A FEELING OF CONFIDENCE',
         hi: 'SURVEY EVERY PLANK',
         start: 0.1,
         zones: [
           { id: 'lax', upto: 0.3, reads: 'whatever settles his mind' },
-          { id: 'fair', upto: 0.72, reads: 'a survey he did not pay for', correct: true },
-          { id: 'mad', upto: 1, reads: 'and nobody ever sails', correct: false },
+          { id: 'fair', upto: 0.72, reads: 'an independent survey of the hull', correct: true },
+          { id: 'mad', upto: 1, reads: 'so much that no ship ever sails', correct: false },
         ],
       },
-      explain: 'Wherever you set it, notice you set it above a feeling. He did not. He worked on himself until the doubts were quiet, then sent her out sincerely convinced. That’s the part Clifford won’t forgive.',
+      explain: 'An independent survey of the hull. The owner only wanted a feeling of certainty, and silenced his doubts instead of checking them. Clifford condemns this: a sincere belief that was never earned.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 13, x: 54, hull: 1, quiet: 1,
-    text: 'Watch what he did. He did not inspect her.',
+    text: 'The owner never had the ship inspected.',
     dur: 1.9,
   },
   {
     p: 13, x: 54, hull: 1, quiet: 1,
-    text: 'The owner put the doubts down, one at a time, until they stopped bothering him.',
+    text: 'Instead he suppressed his doubts, one at a time, until they no longer troubled him.',
     dur: 2.7,
   },
   {
     p: 380, x: 54, hull: 1, quiet: 1, sailed: 1, verdict: 1,
-    text: 'Then he took his fee, waved her off, and grieved sincerely when she went down. He never lied to anybody, including himself.',
+    text: 'The owner watched her leave with a light heart and collected the insurance when she sank. He sincerely believed she was safe.',
     dur: 4.6,
   },
   {
@@ -85,30 +85,30 @@ export const BEATS: Epistemology37Beat[] = [
   },
   {
     p: 2, x: 54, hull: 1, quiet: 1, sailed: 1, verdict: 1, safe: 1,
-    text: 'Now run it again and let her arrive. Same hull, same cracks, same owner.',
+    text: 'Clifford then altered the case: suppose the ship arrived safely, with the same hull and the same owner.',
     dur: 2.8,
   },
   {
     p: 2, x: 54, hull: 1, quiet: 1, sailed: 1, verdict: 1, safe: 1,
-    text: 'Look at the verdict card. It has not moved.',
+    text: 'Clifford’s verdict is unchanged, because the owner had no right to believe on that evidence.',
     dur: 1.8,
   },
   {
     p: 35, x: 126, hull: 1, quiet: 1, verdict: 1, safe: 1,
     interact: {
-      prompt: 'James thought the rule too strong. What is his best case against it?',
+      prompt: 'What is William James’s strongest objection to Clifford’s rule?',
       cards: [
         { text: 'Some beliefs come before proof', correct: true },
-        { text: 'Belief is not under our control', correct: false },
+        { text: 'Belief isn’t under voluntary control', correct: false },
       ],
-      explain: 'Control is arguable and would excuse the shipowner too. The real problem is trust: commit to a person, a project or a friendship and the evidence only arrives afterwards. Wait for enough of it and you guarantee you never get any.',
+      explain: 'Some beliefs come before proof. James argued that in cases like friendship, believing first can help bring about the evidence. Waiting for proof would then keep the evidence from ever arriving.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 419, x: 126, hull: 1, quiet: 1, verdict: 1, safe: 1,
-    text: 'Both are right about different cases. What survives is the shipowner: when other people carry the risk, the checking is not optional.',
+    text: 'Both are right about different cases. Clifford’s verdict still holds where other people bear the risk of a false belief.',
     dur: 4.8,
   },
   {
@@ -120,7 +120,7 @@ export const BEATS: Epistemology37Beat[] = [
         'A lucky outcome does not clear you',
         'Some beliefs must be held before they can be tested',
       ],
-      closing: 'He’s easy to condemn from here. He did what anyone does when checking is expensive and the answer is one they can’t afford.',
+      closing: 'The shipowner is easy to condemn. Clifford’s point is that his fault, stifling doubt when checking is costly, is a common one.',
     },
     dur: 3.2,
   },

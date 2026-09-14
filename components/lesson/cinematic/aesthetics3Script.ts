@@ -33,62 +33,62 @@ export const BEATS: Aes3Beat[] = [
     // Both halves alive at once: a story arc beginning to climb while the modes
     // play — "song or story", drawn rather than asserted.
     p: 130, arc: 0.3, modes: 1,
-    text: 'No culture has ever lived without song or story. Not one, anywhere.',
+    text: 'Every human culture on record has made music and told stories. No society studied by anthropologists lacks either.',
     dur: 2.2,
   },
   {
     // Both halves alive at once: a story arc beginning to climb while the modes
     // play — "song or story", drawn rather than asserted.
     p: 130, arc: 0.3, modes: 1,
-    text: 'That’s strange enough to want an explanation.',
+    text: 'A practice found in every culture calls for an explanation. Why would people seek out stories that make them suffer?',
     dur: 1.8,
   },
   {
     p: 22, arc: 0.5, mask: 1,
-    text: 'Tragedy hurts, and you go anyway. Aristotle says it raises pity and fear in you, then works them back out of you.',
+    text: 'Aristotle held that a tragedy arouses pity and fear in its audience, and then releases them.',
     cite: 'Catharsis',
     dur: 3.1,
   },
   {
     p: 22, arc: 0.5, mask: 1,
-    text: 'Aristotle named the effect katharsis. He never quite says what katharsis is.',
+    text: 'The effect is called katharsis, a term Aristotle never explained. Readers still disagree about what it means.',
     dur: 1.8,
   },
   {
     p: 15, arc: 1, mask: 1,
-    text: 'Athens watches Oedipus work out that he killed his own father. Nobody looks away.',
-    cite: 'Aristotle at the theatre',
+    text: 'In Sophocles’ Oedipus the King, Oedipus discovers that he has killed his own father. Aristotle calls this a recognition, a change from ignorance to knowledge.',
+    cite: 'Recognition',
     dur: 2.1,
   },
   {
     p: 15, arc: 1, mask: 1,
-    text: 'Aristotle thinks you can bear to look at painful things drawn well because looking at them teaches you something.',
+    text: 'Aristotle also writes that people enjoy accurate images of painful things, because learning from them is a pleasure.',
     dur: 2.9,
   },
   {
     p: 165, arc: 1, mask: 1,
     interact: {
-      prompt: 'You leave a tragedy wrung out and somehow lighter. Tap Aristotle’s word for that.',
+      prompt: 'You leave a tragedy drained and yet relieved. Which of Aristotle’s concepts explains the relief?',
       cards: [
         { text: 'Catharsis', correct: true },
         { text: 'Mimesis', correct: false },
       ],
       // Was a list of FOUR Greek terms, three of them glossing options that stopped
       // existing when the A/B/C/D cards went. Only one is on screen now.
-      explain: 'Catharsis. It’s the one word Aristotle never pins down, and people have argued ever since. Mimesis, the other card, means imitation. That’s a different idea.',
+      explain: 'Catharsis. For Aristotle, a tragedy first stirs pity and fear, and then lets them go. That’s the relief you feel at the end. Mimesis means copying, and every tragedy copies an action, so copying can’t explain the relief.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 33, modes: 1, will: 1,
-    text: 'A minor key floods you with sadness and never argues for it. Schopenhauer thought music reaches something underneath all the arguing — the restless wanting that drives you.',
-    cite: 'Music slips past reason',
+    text: 'Music can make you sad without giving you any reason to be sad. Arthur Schopenhauer held that music expresses the will, the blind striving behind everything in nature.',
+    cite: 'Music before reason',
     dur: 4,
   },
   {
     p: 33, modes: 1, will: 1,
-    text: 'For Plato, that same thing made music dangerous.',
+    text: 'Plato, over two thousand years earlier, argued that music shapes character before reason develops. So he thought music dangerous.',
     dur: 1.8,
   },
   {
@@ -107,31 +107,31 @@ export const BEATS: Aes3Beat[] = [
   {
     p: 168, modes: 1, cut: 1, will: 1,
     interact: {
-      prompt: 'Plato feared what music does to people. How far did that take him?',
+      prompt: 'If music shapes character before reason develops, how should Plato’s ideal city treat music?',
       drag: {
-        lo: 'LEFT IT ALONE',
-        hi: 'BANNED EVERY NOTE',
+        lo: 'NO REGULATION',
+        hi: 'ALL MUSIC BANNED',
         start: 1,
         zones: [
-          { id: 'free', upto: 0.28, reads: 'left it alone entirely' },
-          { id: 'modes', upto: 0.74, reads: 'kept the steadfast modes and removed the soft ones', correct: true },
-          { id: 'ban', upto: 1, reads: 'banned every note of it from the city' },
+          { id: 'free', upto: 0.28, reads: 'leave music entirely unregulated' },
+          { id: 'modes', upto: 0.74, reads: 'keep the steadfast modes and remove the soft ones', correct: true },
+          { id: 'ban', upto: 1, reads: 'banish all music from the city' },
         ],
       },
-      explain: 'The middle. Plato regulated music rather than banning it, and his reason is the interesting part. He thought music shapes a character before you get the chance to argue with it. You can’t reason your way out of a tune you grew up inside.',
+      explain: 'Keep the steadfast modes and remove the soft ones. In the Republic, Plato regulates music rather than banning it. Rhythm and harmony shape a child’s character before the child can reason. So the city keeps modes that imitate courage and self-control, and bans modes that soften character.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'We Love Songs and Stories',
+      title: 'Tragedy, Music and the Emotions',
       points: [
-        'Aristotle: tragedy works a katharsis',
+        'Aristotle: tragedy arouses and releases pity and fear',
         'Schopenhauer: music copies the will',
-        'Plato regulated the modes, did not ban them',
+        'Plato regulated the modes rather than banning music',
       ],
-      closing: 'The next song that moves you echoes a question twenty-four centuries old.',
+      closing: 'Philosophers have debated why art moves its audience for twenty-four centuries.',
     },
     dur: 2.8,
   },

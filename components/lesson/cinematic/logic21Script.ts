@@ -35,43 +35,43 @@ export interface Log21Beat extends BaseBeat {
 export const BEATS: Log21Beat[] = [
   {
     p: 25, x: 200, chips: 1,
-    text: 'Four things that have something to do with a fire starting. Only one of them is the fire.',
+    text: 'Consider four conditions that might bear on whether a fire starts. Each relates to the fire in a different way.',
     dur: 4.2,
   },
   {
     p: 443, x: 200, chips: 1, bench: 1, under: 0,
-    text: 'Two tests, and they ask different questions. Take a thing away, and see if the fire still starts.',
-    cite: 'The bench',
+    text: 'Necessity and sufficiency are separate questions. A condition is necessary when removing it stops the fire from starting.',
+    cite: 'Two separate tests',
     dur: 3,
   },
   {
     p: 400, x: 200, chips: 1, bench: 1, under: 0,
-    text: 'Then try that thing alone, and see if it starts the fire.',
+    text: 'A condition is sufficient when it starts the fire alone.',
     dur: 1.8,
   },
   {
     p: 447, x: 132, chips: 1, bench: 1, under: 1,
-    text: 'A match in petrol lights it every time, and a spark would have done just as well. Enough, but not required.',
+    text: 'A match in petrol starts a fire every time, so it’s sufficient. It isn’t necessary, because a spark could start the same fire.',
     dur: 4.8,
   },
   {
     p: 457, x: 132, chips: 1, bench: 1, under: 0, live: 1,
     interact: {
-      prompt: 'Tap the one you must have, which is still not enough.',
-      explain: 'Oxygen. Take oxygen away and nothing burns, so oxygen is required. Fill a room with oxygen and nothing happens, so oxygen is not enough on its own. Those two facts are independent, and that’s why the words are worth keeping apart.',
+      prompt: 'Which condition is necessary for the fire but not sufficient?',
+      explain: 'Oxygen. Without it nothing burns, so it’s necessary. But air full of oxygen doesn’t catch fire by itself, so it isn’t sufficient. A match in petrol is the reverse.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 380, x: 132, chips: 1, bench: 1, under: 2,
-    text: 'It being Tuesday fails both tests. Fuel and heat and oxygen together pass both.',
-    cite: 'The other two corners',
+    text: 'It being Tuesday is neither necessary nor sufficient. Fuel, heat and oxygen together are both necessary and sufficient.',
+    cite: 'Neither, and both',
     dur: 4.0,
   },
   {
     p: 168, x: 268, chips: 1, bench: 1, under: 3,
-    text: 'So there are four boxes, not two. Most arguments that go wrong here have put something in the wrong one.',
+    text: 'So there are four kinds of condition. A common mistake is to take a sufficient one for a necessary one, or the reverse.',
     dur: 4.6,
   },
   {
@@ -90,16 +90,16 @@ export const BEATS: Log21Beat[] = [
   {
     p: 41, x: 268, chips: 1, bench: 1, under: 1,
     interact: {
-      prompt: 'For the fire, is a lit match needed, enough, both, or neither?',
+      prompt: 'Which claim about causes does a match in petrol confirm?',
       poll: {
         options: [
-          { id: 'neither', reads: 'beside the point' },
-          { id: 'nec', reads: 'needed, and not enough' },
-          { id: 'suf', reads: 'enough, and not the only way', correct: true },
-          { id: 'both', reads: 'the whole story' },
+          { id: 'neither', reads: 'a cause need only make its effect more likely', holders: ['Patrick Suppes'] },
+          { id: 'nec', reads: 'without its cause, an effect wouldn’t occur', holders: ['David Hume'] },
+          { id: 'suf', reads: 'a cause can suffice without being necessary', correct: true, holders: ['John Stuart Mill'] },
+          { id: 'both', reads: 'a cause is both necessary and sufficient', holders: ['Baruch Spinoza'] },
         ],
       },
-      explain: 'Enough on its own, so it’s sufficient. It’s not required, because a spark or a hot surface would have started the same fire. Being sufficient says nothing at all about being necessary, and that’s the confusion this question takes apart.',
+      explain: 'A cause can suffice without being necessary. A match in petrol always starts a fire. Yet a spark would too, so the fire doesn’t depend on the match.',
       xp: 5,
     },
     dur: 1.0,
@@ -108,12 +108,12 @@ export const BEATS: Log21Beat[] = [
     summary: {
       title: 'Two Questions, Not One',
       points: [
-        'Necessary means it cannot happen without this',
-        'Sufficient means this on its own makes it happen',
+        'A necessary condition is one the effect can’t occur without',
+        'A sufficient condition produces the effect on its own',
         'A condition can be either, both, or neither',
-        'Most confusions here have put something in the wrong box',
+        'A common error is to mistake one kind for the other',
       ],
-      closing: 'Take the thing away, then try the thing alone. Two tests, and the answers can disagree.',
+      closing: 'To classify a condition, ask whether the effect can occur without it, and whether it produces the effect alone.',
     },
     dur: 3.4,
   },

@@ -34,33 +34,33 @@ export interface Eth17Beat extends BaseBeat {
 export const BEATS: Eth17Beat[] = [
   {
     p: 462, x: 200, maxim: 1, trust: 1,
-    text: 'A man at your door asks where your friend is hiding. He means to kill him.',
+    text: 'Suppose a murderer comes to your door and asks where your friend is hiding. May you lie to him?',
     dur: 3.4,
   },
   {
     p: 462, x: 200, maxim: 1, trust: 1,
-    text: 'Kant says do not lie.',
+    text: 'Kant answers that you may not. The duty of truthfulness holds even towards a murderer.',
     dur: 1.8,
   },
   {
     p: 463, x: 200, maxim: 1, trust: 1,
-    text: 'Kant’s answer looks monstrous, and he knew it. His reason is not that lying is ugly.',
+    text: 'The verdict seems monstrous. Kant defends it with an argument about consistency, not with revulsion at lying.',
     dur: 2.7,
   },
   {
     p: 463, x: 200, maxim: 1, trust: 1,
-    text: 'Kant’s reason is that lying cannot be made a rule for all.',
+    text: 'Kant calls the rule behind an action its maxim. You may act only on a maxim you could will to be a universal law.',
     dur: 2.1,
   },
   {
     p: 466, x: 132, maxim: 1, copies: 1, trust: 1,
-    text: 'So run his test. Write down what you are about to do, and hand a copy to everybody.',
-    cite: 'Universalise it',
+    text: 'Kant’s test asks what would follow if everyone adopted your maxim at once. Here, it tests a maxim of lying whenever it suits you.',
+    cite: 'The universalisability test',
     dur: 4.2,
   },
   {
     p: 383, x: 132, maxim: 1, copies: 1, trust: 0.06,
-    text: 'Watch the bar. A lie only works on somebody expecting the truth, and now nobody is.',
+    text: 'A lie deceives only a listener who expects the truth. If everyone lied, no one would expect the truth, and no lie could deceive.',
     dur: 4.0,
   },
   {
@@ -79,46 +79,46 @@ export const BEATS: Eth17Beat[] = [
   {
     p: 165, x: 132, maxim: 1, copies: 1, trust: 0.06, live: 1,
     interact: {
-      prompt: 'Tap the thing the maxim needed, and used up.',
-      explain: 'Being believed. A lie only works while most people tell the truth, so it lives off a stock it doesn’t refill. Hand the maxim to everybody and the stock is gone. The rule destroys the thing that made it worth breaking.',
+      prompt: 'Which condition does a universal lying maxim depend on and destroy?',
+      explain: 'Being believed. A lie deceives only where people expect the truth. Adopted by everyone, the maxim removes that expectation. So it can’t be willed as a universal law. The card and its copies are the maxim itself, not what it relies on.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 453, x: 268, maxim: 1, copies: 1, trust: 0.06,
-    text: 'Constant pushed back at once. Tell the truth and your friend dies, so the blood is on your hands.',
-    cite: 'The obvious reply',
+    text: 'Benjamin Constant objected that a murderer has no right to the truth. No one, he argued, has a right to a truth that harms others.',
+    cite: 'Constant’s objection',
     dur: 4.6,
   },
   {
     p: 442, x: 268, maxim: 1, copies: 1, trust: 0.06,
     interact: {
-      prompt: 'Where does Kant put the death?',
+      prompt: 'If you answer truthfully and the murderer kills, where does Kant place the responsibility?',
       split: {
         left: 'ON THE MURDERER', right: 'ON YOU, FOR ANSWERING',
         start: 0.04,
         zones: [
-          { id: 'you', upto: 0.3, reads: 'on you, for handing him the address' },
-          { id: 'both', upto: 0.66, reads: 'shared between the two of you' },
-          { id: 'him', upto: 1, reads: 'on him, you answer for your own act', correct: true },
+          { id: 'you', upto: 0.3, reads: 'on you, for revealing where your friend is' },
+          { id: 'both', upto: 0.66, reads: 'shared between you and the murderer' },
+          { id: 'him', upto: 1, reads: 'on the murderer, who alone does the killing', correct: true },
         ],
       },
-      explain: 'All the way to the murderer. Kant does not deny the death is terrible, which is the caricature and why people call him heartless. He denies that it lands on your account. You answer for the lie; he answers for the killing.',
+      explain: 'On the murderer, who alone does the killing. Kant doesn’t deny that the death is terrible. He denies that it’s imputable to a truthful speaker. In his view, only a lie would make you answerable for what follows.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Rule That Eats Itself',
+      title: 'Why the Lying Maxim Fails',
       points: [
         'Universalising a maxim asks what happens if everyone adopts it',
-        'Lying needs a stock of truth-telling it does not replace',
-        'So the maxim cannot be willed as a law for everybody',
-        'Kant holds you answerable for your act, not the murderer\'s',
+        'A lie depends on a general expectation of truth',
+        'So a lying maxim can’t be willed as a universal law',
+        'Kant holds you answerable for your act, not the murderer’s',
       ],
-      closing: 'Most people accept the test and refuse the verdict. Working out why is the rest of ethics.',
+      closing: 'Accepting Kant’s test doesn’t commit you to his verdict. Whether the test forbids this lie remains disputed among Kantians.',
     },
     dur: 3.4,
   },

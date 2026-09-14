@@ -24,23 +24,23 @@ export interface Logic11Beat extends BaseBeat {
 export const BEATS: Logic11Beat[] = [
   {
     p: 379, x: 48, steps: 1,
-    text: 'A proof has to rest on something outside itself. Watch this proof stop doing so, without a single step going wrong.',
+    text: 'A proof must rest on support from outside itself. This proof loses that support, although no single step is invalid.',
     dur: 3.8,
   },
   {
     p: 176, x: 48, steps: 2,
-    text: 'Two claims go up. The book is God’s word, and whatever God says is true.',
+    text: 'The proof begins with two premises: this book is God’s word, and whatever God says is true.',
     cite: 'The two premises',
     dur: 2.6,
   },
   {
     p: 176, x: 48, steps: 2,
-    text: 'Innocent so far. Nothing has been smuggled in yet.',
+    text: 'So far, each premise is asserted on its own, and neither is used to support the other.',
     dur: 1.8,
   },
   {
     p: 402, x: 116, steps: 4, base: 1,
-    text: 'Step three answers the obvious objection, and step four draws the conclusion. The whole structure now stands on that line: evidence from outside the argument.',
+    text: 'Step three answers an obvious objection with “God exists, because the book says so”. Step four concludes that the book is true, and the proof appears to rest on evidence.',
     cite: 'The proof, complete',
     dur: 5.2,
   },
@@ -59,30 +59,30 @@ export const BEATS: Logic11Beat[] = [
   },
   {
     p: 163, x: 116, steps: 4, base: 1, spine: 1,
-    text: 'Now test the chain. Every link holds, step after step, nothing missing and nothing limping.',
-    cite: 'Every link holds',
+    text: 'Tested step by step, the proof is valid because each step follows from the one before it.',
+    cite: 'Each step is valid',
     dur: 2.9,
   },
   {
     p: 163, x: 116, steps: 4, base: 1, spine: 1,
-    text: 'A chain that sound is what makes the trap dangerous.',
+    text: 'That validity is what makes the flaw hard to detect.',
     dur: 2.1,
   },
   {
     p: 380, x: 116, steps: 4, base: 1, spine: 1,
     interact: {
-      prompt: 'How much support does a circle actually give?',
+      prompt: 'How much support does a circular argument give its conclusion?',
       drag: {
         lo: 'NONE AT ALL',
         hi: 'IT PROVES THE CONCLUSION',
         start: 1,
         zones: [
-          { id: 'none', upto: 0.3, reads: 'none, it assumed the answer', correct: true },
+          { id: 'none', upto: 0.3, reads: 'none, since it assumes its conclusion', correct: true },
           { id: 'some', upto: 0.7, reads: 'a little, by making the claim explicit' },
           { id: 'proof', upto: 1, reads: 'it proves the conclusion outright' },
         ],
       },
-      explain: 'None, and the knob starts on the trap. Validity feels like proof and is not. All it promises is that true premises couldn’t give a false conclusion. A circle clears that bar by putting the conclusion in the premises. It never fails and never tells you anything.',
+      explain: 'A circular argument gives its conclusion no support at all. Validity promises only that true premises can’t yield a false conclusion. A circle meets this standard by including the conclusion among the premises, and so establishes nothing.',
       xp: 5,
     },
     dur: 1.0,
@@ -90,8 +90,8 @@ export const BEATS: Logic11Beat[] = [
   {
     p: 447, x: 116, steps: 4, base: 1, spine: 1, pick: 1, arc: 1,
     interact: {
-      prompt: 'Tap the step that assumes the very thing the argument is meant to prove.',
-      explain: 'The trap: step three looks like extra support, so the proof seems to be doing more work. It’s doing less. Step one leans on God. Step three leans on the book. The loop closes, and no evidence from outside ever gets in.',
+      prompt: 'Which step assumes what the argument is meant to prove?',
+      explain: 'Step three quietly assumes what it is meant to prove: “God exists, because the book says so.” Step one relies on God the same way.',
       xp: 5,
     },
     dur: 1.0,
@@ -99,14 +99,14 @@ export const BEATS: Logic11Beat[] = [
   {
     p: 130, x: 116,
     summary: {
-      title: 'The Argument That Eats Its Tail',
+      title: 'Begging the Question',
       points: [
         'Begging the question assumes its conclusion as a premise',
-        'It can be flawlessly valid and still prove nothing',
-        'Two claims propping each other up is still a circle',
+        'A circular argument can be valid and still prove nothing',
+        'Two claims that support only each other form a circle',
         'Ask what each premise rests on outside the argument',
       ],
-      closing: 'You now see the loop — a proof that only ever hands you back what it was given.',
+      closing: 'A circular proof concludes with the very claim assumed at the start.',
     },
     dur: 3.0,
   },

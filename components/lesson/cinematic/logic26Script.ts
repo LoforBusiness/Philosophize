@@ -21,34 +21,34 @@ export interface Logic26Beat extends BaseBeat {
 export const BEATS: Logic26Beat[] = [
   {
     p: 164, x: 70,
-    text: 'Here’s a strange way to prove something is true. Begin by assuming it is false.',
+    text: 'Proof by contradiction, or reductio ad absurdum, proves a claim indirectly. Begin by assuming it is false.',
     dur: 2.8,
   },
   {
     p: 164, x: 70,
-    text: 'Then be as reasonable as you possibly can.',
+    text: 'Then reason validly, one careful step at a time, from that assumption until a contradiction appears.',
     dur: 1.8,
   },
   {
     p: 41, x: 168, links: 1,
-    text: 'Suppose there’s a largest number. Call it N.',
+    text: 'Suppose there’s a largest whole number. Call it N.',
     cite: 'The assumption',
     dur: 1.8,
   },
   {
     p: 41, x: 168, links: 1,
-    text: 'Nothing wrong with supposing it. That’s the whole move, and you’re allowed to suppose anything at all.',
+    text: 'Supposing a claim doesn’t assert it. Any claim may be assumed for the sake of argument.',
     dur: 3.3,
   },
   {
     p: 40, x: 168, links: 3,
-    text: 'Now just follow it. N plus one is a number, and it’s bigger than N.',
-    cite: 'Follow it honestly',
+    text: 'N plus one is also a whole number, and it’s larger than N.',
+    cite: 'The next step',
     dur: 2.3,
   },
   {
     p: 409, x: 168, links: 3,
-    text: 'So N is not the largest after all. That’s flatly at odds with what you assumed.',
+    text: 'So N is not the largest after all, which contradicts the original assumption.',
     dur: 2.7,
   },
   {
@@ -65,28 +65,28 @@ export const BEATS: Logic26Beat[] = [
   },
   {
     p: 459, x: 168, links: 4, snap: 1,
-    text: 'Something in that chain has to give. Every step after the first was valid, so the break lands where it started.',
-    cite: 'Where it breaks',
+    text: 'Valid steps can’t lead from true premises to a contradiction. Every later step was valid and used only true facts, so the assumption must be false.',
+    cite: 'Where the fault lies',
     dur: 3.5,
   },
   {
     p: 459, x: 168, links: 4, snap: 1,
-    text: 'The assumption was false. There’s no largest number.',
+    text: 'So the assumption is false, and there’s no largest whole number.',
     dur: 1.8,
   },
   {
     p: 165, x: 124, links: 4, snap: 1,
     interact: {
-      prompt: 'The reasoning held and the end is absurd. What has been shown?',
+      prompt: 'Valid steps from one starting assumption reach a clear contradiction. What exactly has been shown?',
       sort: {
-        chip: 'a false conclusion',
+        chip: 'a contradiction',
         bins: [
-          { id: 'nothing', label: 'nothing', reads: 'nothing, the argument collapsed' },
-          { id: 'step', label: 'a step was wrong', reads: 'one of the steps along the way was wrong' },
-          { id: 'assume', label: 'the start was false', reads: 'what you started from was false', correct: true },
+          { id: 'nothing', label: 'nothing', reads: 'nothing, since the argument failed' },
+          { id: 'step', label: 'a faulty step', reads: 'one of the intermediate steps was invalid' },
+          { id: 'assume', label: 'a false assumption', reads: 'the assumption you started from is false', correct: true },
         ],
       },
-      explain: 'The start was false, and the contradiction is the goal rather than the wreckage. If every step from your assumption was valid, the assumption is the only thing left to blame. The bin “nothing” is the instinct this whole method is built to overturn.',
+      explain: 'A false assumption. In a proof by contradiction, reaching a contradiction is the aim of the method. If every step was valid, only the assumption can be false. So the argument has established something rather than nothing.',
       xp: 5,
     },
     dur: 1.0,
@@ -94,8 +94,8 @@ export const BEATS: Logic26Beat[] = [
   {
     p: 383, x: 124, links: 4, snap: 1, pick: 1,
     interact: {
-      prompt: 'The chain ends in an absurdity. Tap what it breaks.',
-      explain: 'Not the rules of logic and not a middle step. Every one of those was a valid move you’d make again. The only thing that was ever optional is the thing you assumed at the top.',
+      prompt: 'When valid steps end in a contradiction, which part must be rejected?',
+      explain: 'The assumption. The middle steps were valid, and the rules of logic are what make a step valid. The assumption is the only premise that was never established, so it’s the one rejected.',
       xp: 5,
     },
     dur: 1.0,
@@ -106,10 +106,10 @@ export const BEATS: Logic26Beat[] = [
       points: [
         'Assume the opposite of what you want to prove',
         'Reason validly until it yields a contradiction',
-        'The contradiction kills the assumption, not the logic',
+        'The contradiction refutes the assumption, not the logic',
         'Therefore the original claim must be true',
       ],
-      closing: 'The only move you were free to refuse was the first one. So the first move is the one that breaks.',
+      closing: 'Every later step was valid, so all the blame lands on that first assumption.',
     },
     dur: 3.0,
   },

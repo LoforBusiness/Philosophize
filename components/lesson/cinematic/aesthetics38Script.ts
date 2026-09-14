@@ -33,36 +33,36 @@ export interface Aesthetics38Beat extends BaseBeat {
 export const BEATS: Aesthetics38Beat[] = [
   {
     p: 172, x: 52, chart: 1,
-    text: 'You’ve seen this one. You know he gets out of the building.',
+    text: 'Suppose you watch a thriller for the second time. You already know that the hero escapes the building.',
     dur: 3.4,
   },
   {
     p: 2, x: 52, chart: 1, bars: 1,
-    text: 'Two bars a scene. What you know runs flat and full from the opening frame, and what you feel climbs anyway.',
+    text: 'In every scene, what you know is complete from the first frame. Yet what you feel still rises.',
     dur: 4.6,
   },
   {
     p: 47, x: 52, chart: 1, bars: 1, claims: 1,
-    text: 'Three claims, and they cannot all stand.',
+    text: 'The paradox of suspense sets out three claims that can’t all be true. You know the ending, you’re still tense, and suspense requires doubt.',
     dur: 2.6,
   },
   {
     p: 165, x: 52, chart: 1, bars: 1, claims: 1, live: 1,
     interact: {
-      prompt: 'Tap the claim that has to go.',
-      explain: 'The theory goes, because the other two are things you can check tonight. You know the ending, and you can feel your own shoulders. When a list holds two observations and one assumption, the assumption is what gives.',
+      prompt: 'Which claim should be given up to resolve the paradox of suspense?',
+      explain: 'Suspense needs doubt. The other two claims are things any viewer can check: you know the ending, and you feel tense. So the theory is the one to drop. Robert Yanal disagrees. He holds that repeat viewers feel only anticipation.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 380, x: 52, chart: 1, bars: 1, claims: 1,
-    text: 'Greek crowds knew the myths by heart. Nobody in the seats sat wondering how it would end.',
+    text: 'The puzzle is old. Greek tragedies usually retold traditional myths, whose outcomes were fixed before the play began.',
     dur: 4.4,
   },
   {
     p: 35, x: 98, chart: 1, bars: 1, claims: 1,
-    text: 'Coleridge had a phrase for what an audience does instead, and it is not forgetting.',
+    text: 'Samuel Taylor Coleridge described engagement with fiction as a willing act, not a lapse of memory.',
     dur: 3.6,
   },
   {
@@ -80,15 +80,15 @@ export const BEATS: Aesthetics38Beat[] = [
   {
     p: 176, x: 98, chart: 1, bars: 1, claims: 1,
     interact: {
-      prompt: 'What is the suspense running on?',
+      prompt: 'When you already know the ending, what produces your suspense?',
       poll: {
         options: [
-          { id: 'setaside', reads: 'you set what you know aside while it runs', holders: ['Samuel Taylor Coleridge'] },
-          { id: 'stake', reads: 'something at stake, watched as it arrives', holders: ['Aristotle'], correct: true },
-          { id: 'forget', reads: 'you genuinely forget the ending each time' },
+          { id: 'setaside', reads: 'imagining that it might end otherwise', holders: ['Noël Carroll'] },
+          { id: 'stake', reads: 'a frustrated wish to affect the outcome', holders: ['Aaron Smuts'], correct: true },
+          { id: 'forget', reads: 'failing to use what you know of the ending', holders: ['Richard Gerrig'] },
         ],
       },
-      explain: 'Something at stake, held in front of you moment by moment. Forgetting fails a simple test: recite the ending during the scene and the feeling is still there. Setting knowledge aside is closer, and it still owes an account of what’s left to be tense about.',
+      explain: 'A frustrated wish to affect the outcome. On this view, suspense needs no doubt, so a known ending doesn’t end it. Imagining another ending still makes suspense need doubt, if only imagined doubt.',
       xp: 5,
     },
     dur: 1.0,
@@ -98,11 +98,11 @@ export const BEATS: Aesthetics38Beat[] = [
       title: 'Knowing and Feeling',
       points: [
         'Suspense survives knowing exactly what happens',
-        'Two of the three claims can simply be checked',
-        'So the theory of suspense is what gives way',
-        'Stakes and attention do the work doubt was credited with',
+        'Two of the three claims are observations',
+        'So the claim that suspense needs doubt gives way',
+        'Caring about an outcome can produce suspense without doubt',
       ],
-      closing: 'That’s why a story you love holds up on a fifth reading, and a spoiler costs less than people fear. What you lose is surprise, and surprise was never the same thing.',
+      closing: 'If suspense doesn’t need doubt, a favourite story can stay gripping on rereading. A spoiler removes surprise, but surprise and suspense are different things.',
     },
     dur: 3.6,
   },

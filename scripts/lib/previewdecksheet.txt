@@ -1,0 +1,140 @@
+// TEMPORARY — DELETE BEFORE COMMITTING. Any file in app/ is a real route (§21).
+// Written and removed by scripts/sheet-deck.mjs, which fills the two markers below
+// with every lesson script in the app; check-routes blocks a build if one is left.
+import { useEffect, useMemo, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useSharedValue } from 'react-native-reanimated';
+import ChoiceCards, { orderFor, seedFor, swapFor } from '@/components/lesson/cinematic/ChoiceCards';
+import DragScale from '@/components/lesson/cinematic/DragScale';
+import SortBins from '@/components/lesson/cinematic/SortBins';
+import PollBallot from '@/components/lesson/cinematic/PollBallot';
+import SplitBar from '@/components/lesson/cinematic/SplitBar';
+import TrendPick from '@/components/lesson/cinematic/TrendPick';
+import { QuestionAccentProvider } from '@/components/lesson/cinematic/QuestionParts';
+import { InteractPanel, styles as kit } from '@/components/lesson/cinematic/cinematicKit';
+import { useUIStore } from '@/stores/uiStore';
+import { useUserDataStore } from '@/stores/userDataStore';
+/*IMPORTS*/
+
+const MODS: [string, Record<string, unknown>][] = [/*MODS*/];
+
+const q = (k: string) =>
+  typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(k);
+
+type Kind = 'cards' | 'drag' | 'sort' | 'poll' | 'split' | 'plot';
+const KINDS: Kind[] = ['cards', 'drag', 'sort', 'poll', 'split', 'plot'];
+type Case = { key: string; file: string; kind: Kind; it: any };
+
+// EVERY BEAT ANSWERED BELOW THE FIGURE, read out of the scripts themselves rather
+// than parsed from their text: an exported array whose elements carry `interact`
+// with one of the deck's controls on it.
+function collect(): Case[] {
+  const out: Case[] = [];
+  for (const [file, mod] of MODS) {
+    const seen = new Set<unknown>();
+    for (const v of Object.values(mod)) {
+      if (!Array.isArray(v) || seen.has(v)) continue;
+      seen.add(v);
+      v.forEach((b: any, i: number) => {
+        const it = b && typeof b === 'object' ? b.interact : null;
+        const kind = it ? KINDS.find((k) => it[k]) : undefined;
+        if (kind) out.push({ key: `${file} b${i}`, file, kind, it });
+      });
+    }
+  }
+  return out;
+}
+
+const DECK_PAD = (StyleSheet.flatten(kit.deck).paddingHorizontal as number | undefined) ?? 24;
+
+function zoneMid(zones: { upto: number; correct?: boolean }[]) {
+  const k = Math.max(0, zones.findIndex((z) => z.correct));
+  const from = k === 0 ? 0 : zones[k - 1].upto;
+  return { k, mid: (from + zones[k].upto) / 2 };
+}
+
+function DeckCase({ c, n }: { c: Case; n: number }) {
+  const it = c.it;
+  const seed = c.key;
+  let init = 0.5;
+  let semInit = 0.5;
+  let picked: string | null = null;
+  if (c.kind === 'cards') {
+    const shown = swapFor(seedFor(seed, it.cards)) ? [it.cards[1], it.cards[0]] : it.cards;
+    picked = shown[0].correct ? 'c0' : 'c1';
+  } else if (c.kind === 'drag' || c.kind === 'split') {
+    const zones = it[c.kind].zones;
+    const z = zoneMid(zones);
+    init = Math.min(0.94, Math.max(0.06, z.mid));
+    picked = zones[z.k].id;
+  } else if (c.kind === 'sort') {
+    const bins = it.sort.bins;
+    const a = Math.max(0, bins.findIndex((b: any) => b.correct));
+    const order = orderFor(seedFor(seed, [{ text: it.sort.chip }]), bins.length);
+    init = (order.indexOf(a) + 0.5) / bins.length;
+    semInit = bins.length > 1 ? a / (bins.length - 1) : 0;
+    picked = bins[a].id;
+  } else if (c.kind === 'poll') {
+    picked = (it.poll.options.find((o: any) => o.correct) ?? it.poll.options[0]).id;
+  } else {
+    picked = (it.plot.shapes.find((s: any) => s.correct) ?? it.plot.shapes[0]).id;
+  }
+  const pos = useSharedValue(init);
+  const sem = useSharedValue(semInit);
+  const noop = () => {};
+  // The branch only colours the controls; it does not move a single row.
+  const lessonId = `${c.file.replace(/[0-9]+$/, '')}-sheet-0`;
+  return (
+    <View nativeID={`case-${n}`} style={{ alignSelf: 'stretch', paddingTop: 8, paddingBottom: 12, borderTopWidth: 1, borderTopColor: '#D8D4CA' }}>
+      <Text nativeID={`key-${n}`} style={{ fontSize: 10, color: '#9A968C', paddingHorizontal: DECK_PAD, marginBottom: 4 }}>
+        {`${c.key} ${c.kind}`}
+      </Text>
+      <QuestionAccentProvider lessonId={lessonId}>
+        <View nativeID={`ctl-${n}`}>
+          {c.kind === 'cards' ? <ChoiceCards cards={it.cards} picked={picked} onPick={noop} seed={seedFor(seed, it.cards)} /> : null}
+          {c.kind === 'drag' ? <DragScale drag={it.drag} picked={picked} onPick={noop} pos={pos} /> : null}
+          {c.kind === 'split' ? <SplitBar split={it.split} picked={picked} onPick={noop} pos={pos} /> : null}
+          {c.kind === 'sort' ? <SortBins sort={it.sort} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(seed, [{ text: it.sort.chip }])} /> : null}
+          {c.kind === 'poll' ? <PollBallot poll={it.poll} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(seed, [{ text: it.poll.options[0].reads }])} /> : null}
+          {c.kind === 'plot' ? <TrendPick plot={it.plot} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(seed, [{ text: it.plot.shapes[0]?.reads ?? '' }])} /> : null}
+        </View>
+        <View nativeID={`panel-${n}`} style={{ paddingHorizontal: DECK_PAD }}>
+          <InteractPanel prompt={it.prompt} explain={it.explain} answered correct inScene={false} index={1} total={2} />
+        </View>
+        {/* The words this case was drawn from, so an offline model of the same
+            layout can be calibrated against this exact render and not against a
+            script that has moved on since. */}
+        <Text nativeID={`data-${n}`} style={{ position: 'absolute', left: 0, top: 0, width: 1, height: 1, opacity: 0, overflow: 'hidden', fontSize: 1 }}>
+          {JSON.stringify({ prompt: it.prompt, explain: it.explain, block: it[c.kind] })}
+        </Text>
+      </QuestionAccentProvider>
+    </View>
+  );
+}
+
+export default function PreviewDeckSheet() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    useUserDataStore.setState({ _hasHydrated: true } as never);
+    // The root layout holds every route behind the launch animation (sheet-pass).
+    useUIStore.setState({ launchDone: true } as never);
+    setReady(true);
+  }, []);
+  const all = useMemo(() => {
+    const only = (q('only') ?? '').split(',').filter(Boolean);
+    const list = collect();
+    return only.length ? list.filter((c) => only.includes(c.kind)) : list;
+  }, []);
+  if (!ready) return <View style={{ flex: 1 }} nativeID="deck-boot" />;
+  const from = +(q('from') ?? 0);
+  const to = Math.min(all.length, +(q('to') ?? all.length));
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <View nativeID="deck-root" style={{ backgroundColor: '#FAFAF7', alignSelf: 'stretch' }}>
+        <Text nativeID="deck-total" style={{ fontSize: 10, padding: 8 }}>{String(all.length)}</Text>
+        {all.slice(from, to).map((c, k) => <DeckCase key={c.key} c={c} n={from + k} />)}
+      </View>
+    </GestureHandlerRootView>
+  );
+}

@@ -45,16 +45,19 @@ const PHONE = 360;
  */
 const SLOTS = {
   // `ends` is a space-between row and neither label has a width, so each gets half.
-  'drag.end': { file: 'DragScale.tsx', font: 'Inter_600SemiBold', size: 10, track: 1.1, lines: 2, room: () => (PHONE - 26 * 2) / 2 - 6 },
+  'drag.end': { file: 'DragScale.tsx', font: 'Inter_700Bold', size: 9.5, track: 1, lines: 2, room: () => (PHONE - 26 * 2) / 2 - 6 },
   // maxWidth 130, numberOfLines 2 — the one that was already bounded.
   'split.side': { file: 'SplitBar.tsx', font: 'Inter_700Bold', size: 9, track: 0.9, lines: 2, room: () => 130 },
   // labelRow: one flex cell per stop, paddingHorizontal 2, inside wrap's 26.
   'lever.label': { file: 'LeverPick.tsx', font: 'Inter_500Medium', size: 8.5, track: 0, lines: 4, room: (n) => (PHONE - 26 * 2) / n - 10 },
-  // width 26, paddingRight 5.
-  'plot.axis': { file: 'ShapePlot.tsx', font: 'Inter_700Bold', size: 8, track: 0.6, lines: 3, room: () => 64 },
-  // labels row: paddingLeft 70 (the axis gutter) inside wrap's 24, one flex cell
-  // per column.
-  'plot.col': { file: 'ShapePlot.tsx', font: 'Inter_500Medium', size: 8.5, track: 0, lines: 2, room: (n) => (PHONE - 24 * 2 - 70) / n - 2 },
+  // THE TREND PICK. The axis name shares its row with the column range and is the
+  // one that shrinks, so it has the row less about seventy points of range.
+  'trend.axis': { file: 'TrendPick.tsx', font: 'Inter_700Bold', size: 9, track: 1.1, lines: 1, room: () => PHONE - 24 * 2 - 78 },
+  // A tile's caption. Four shapes go two by two with two lines each; three sit in
+  // one row with three lines each. Each tile's face has 5 of padding and 1.5 of
+  // border a side, and the tiles are 6 apart.
+  'trend.caption4': { file: 'TrendPick.tsx', font: 'Inter_500Medium', size: 10.5, track: 0, lines: 2, room: () => (PHONE - 24 * 2 - 6) / 2 - 13 },
+  'trend.caption3': { file: 'TrendPick.tsx', font: 'Inter_500Medium', size: 10, track: 0, lines: 4, room: () => (PHONE - 24 * 2 - 12) / 3 - 13 },
   // absolute, width 52.
   'field.y': { file: 'FieldPick.tsx', font: 'Inter_700Bold', size: 8, track: 0.6, lines: 3, room: () => 64 },
   // row: paddingHorizontal 16 and a 10 gap between two cards, then each card's own
@@ -80,7 +83,6 @@ const SLOTS = {
   'drag.read':  { file: 'DragScale.tsx', font: 'PlayfairDisplay_700Bold', size: 15, track: 0, lines: 2, room: () => PHONE - 26 * 2 },
   'lever.read': { file: 'LeverPick.tsx', font: 'PlayfairDisplay_700Bold', size: 15, track: 0, lines: 2, room: () => PHONE - 26 * 2 },
   'split.read': { file: 'SplitBar.tsx',  font: 'PlayfairDisplay_700Bold', size: 15, track: 0, lines: 2, room: () => PHONE - 26 * 2 },
-  'plot.read':  { file: 'ShapePlot.tsx', font: 'PlayfairDisplay_700Bold', size: 15, track: 0, lines: 2, room: () => PHONE - 24 * 2 },
   'field.read': { file: 'FieldPick.tsx', font: 'PlayfairDisplay_700Bold', size: 15, track: 0, lines: 2, room: () => PHONE - 22 * 2 },
 
   // ── THE TWO THAT REPLACED THE LEVER AND THE PAD ────────────────────────────
@@ -94,18 +96,20 @@ const SLOTS = {
   //
   // SortBins: bins is a flex row of `n` cells with a 6px gap, inside the deck's
   // own horizontal padding, and each bin has paddingHorizontal 5.
-  'sort.label': { file: 'SortBins.tsx', font: 'Inter_500Medium', size: 10, track: 0.8, lines: 2, room: (n) => (PHONE - 26 * 2 - 6 * (n - 1)) / n - 10 },
+  // SortBins sets `textTransform: 'uppercase'` on the label, so it is measured in capitals.
+  'sort.label': { file: 'SortBins.tsx', font: 'Inter_700Bold', size: 9.5, track: 0.8, lines: 2, upper: true, room: (n) => (PHONE - 20 * 2 - 7 * (n - 1)) / n - 13 },
   // The chip is 140 wide with paddingHorizontal 5, over two lines. It started at
   // 80 on one line and this check immediately found 39 of 50 authored chips too
   // long for it -- "a wall you were told about" is 138dp. The chip names the thing
   // being classified and those names are lesson copy; the box was what was wrong.
-  'sort.chip':  { file: 'SortBins.tsx', font: 'Inter_600SemiBold', size: 10, track: 0, lines: 2, room: () => 140 - 10 },
-  'sort.read':  { file: 'SortBins.tsx', font: 'PlayfairDisplay_700Bold', size: 15, track: 0, lines: 2, room: () => PHONE - 26 * 2 },
-  // PollBallot rows: paddingHorizontal 9 each side, a 6px gap and the answered
-  // tick (~10) on the right, inside the deck's padding.
-  'poll.reads': { file: 'PollBallot.tsx', font: 'Inter_400Regular', size: 12.5, track: 0, lines: 2, room: () => PHONE - 26 * 2 - 18 - 16 },
-  // The holder names sit after a 46px bar and a 6px gap, at paddingLeft 9.
-  'poll.names': { file: 'PollBallot.tsx', font: 'Inter_400Regular', size: 10.5, track: 0.2, lines: 1, room: () => PHONE - 26 * 2 - 9 - 46 - 6 },
+  'sort.chip':  { file: 'SortBins.tsx', font: 'Inter_700Bold', size: 10.5, track: 0, lines: 2, room: () => 150 - 16 - 3 },
+  'sort.read':  { file: 'SortBins.tsx', font: 'PlayfairDisplay_700Bold', size: 15, track: 0, lines: 2, room: () => PHONE - 20 * 2 },
+  // PollBallot rows: the ballot's 20 a side, the face's 10 a side and its 1.5
+  // border, then the 8px gem and a 9px gap before the words.
+  'poll.reads': { file: 'PollBallot.tsx', font: 'Inter_500Medium', size: 12.5, track: 0, lines: 2, room: () => PHONE - 20 * 2 - 20 - 3 - 17 },
+  // The holder names follow HELD BY (about 42 wide) and a 7px gap, indented 17
+  // under the gem. They are revealed on answering and must fit one line.
+  'poll.names': { file: 'PollBallot.tsx', font: 'Inter_700Bold', size: 11, track: 0, lines: 1, room: () => PHONE - 20 * 2 - 20 - 3 - 17 - 42 - 7 },
 };
 
 const FONT_FILE = {
@@ -156,14 +160,12 @@ for (const f of scripts) {
     for (const v of stops) add('lever.label', v, id, stops.length);
     for (const v of stops) add('lever.read', v, id);
   }
+  // THE TREND PICK draws a plot's shapes as tiles, and each shape's `reads` is its
+  // tile's caption; the axis names the row above them.
   for (const b of blocks('plot')) {
-    add('plot.axis', str(b, 'axis'), id);
-    for (const r of readsIn(b)) add('plot.read', r, id);
-    const cols = /cols: \[([^\]]*)\]/.exec(b);
-    if (cols) {
-      const list = [...cols[1].matchAll(/'((?:[^'\\]|\\.)*)'/g)];
-      for (const v of list) add('plot.col', unesc(v[1]), id, list.length);
-    }
+    add('trend.axis', str(b, 'axis'), id);
+    const caps = readsIn(b);
+    for (const r of caps) add(caps.length >= 4 ? 'trend.caption4' : 'trend.caption3', r, id);
   }
   // The deck's two cards.
   for (const b of blocks('cards', '[', ']')) {
@@ -187,7 +189,7 @@ for (const f of scripts) {
     // which is what the reader sees, and what has to fit.
     for (const h of b.matchAll(/holders: \[([^\]]*)\]/g)) {
       const names = [...h[1].matchAll(/'((?:[^'\\]|\\.)*)'/g)].map((v) => unesc(v[1]));
-      if (names.length) add('poll.names', names.join(' · '), id);
+      if (names.length) add('poll.names', names.join('  ·  '), id);
     }
   }
 }
@@ -216,12 +218,14 @@ for (const f of scripts) {
  * and gates the plot's commit BUTTON; it is not the reading, and it cannot fire
  * while a value is changing under a thumb, which is the thing that stuttered.
  */
-const STATE_OK = { 'ShapePlot.tsx': ['drawn'] };
+// ShapePlot's `drawn` went with the drawn plot (the trend pick is one tap), so no
+// control holds React state now.
+const STATE_OK = {};
 
 const readSrc = fs.readFileSync(path.join(DIR, 'ControlRead.tsx'), 'utf8');
 const noReact = [];
 if (/\buseState\b/.test(readSrc)) noReact.push('ControlRead.tsx holds React state');
-for (const f of ['DragScale.tsx', 'LeverPick.tsx', 'ShapePlot.tsx', 'SplitBar.tsx', 'FieldPick.tsx']) {
+for (const f of ['DragScale.tsx', 'LeverPick.tsx', 'SplitBar.tsx', 'FieldPick.tsx', 'SortBins.tsx']) {
   const src = fs.readFileSync(path.join(DIR, f), 'utf8');
   const use = /<ControlRead([^>]*)\/>/.exec(src);
   if (!use) { noReact.push(`${f} does not render ControlRead`); continue; }
@@ -279,7 +283,7 @@ for (const [slot, texts] of want) {
 }
 
 const measured = await evaluate(`(() => {
-  const jobs = ${JSON.stringify(jobs.map((j) => ({ text: j.text, font: j.font, size: j.size, track: j.track, room: j.room })))};
+  const jobs = ${JSON.stringify(jobs.map((j) => ({ text: j.text, font: j.font, size: j.size, track: j.track, room: j.room, upper: !!j.upper })))};
   const el = document.createElement('div');
   el.style.position = 'absolute';
   el.style.visibility = 'hidden';
@@ -290,6 +294,9 @@ const measured = await evaluate(`(() => {
     el.style.fontFamily = j.font;
     el.style.fontSize = j.size + 'px';
     el.style.letterSpacing = j.track + 'px';
+    // A label the component draws in capitals is measured in capitals: lower case
+    // is narrower, and measuring it passed a sort bin label the render had cut.
+    el.style.textTransform = j.upper ? 'uppercase' : 'none';
     const oneLine = widthOf(j.text);
     // How many lines it takes in the room it has.
     el.style.width = j.room + 'px';

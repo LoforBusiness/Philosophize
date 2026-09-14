@@ -23,41 +23,41 @@ export interface Epi5Beat extends BaseBeat {
 export const BEATS: Epi5Beat[] = [
   {
     p: 164, star: 0.4, power: 0, rungs: 2,
-    text: 'Aristotle opens his largest book with the line “All men by nature desire to know”. It’s a claim about you.',
+    text: 'Aristotle opens his Metaphysics with a claim about human nature. He writes that “all men by nature desire to know”.',
     dur: 2.6,
   },
   {
     p: 164, star: 0.4, power: 0, rungs: 2,
-    text: 'Nobody taught you to want to know things.',
+    text: 'On this view, nobody needs to be taught to want knowledge. The desire comes with being human.',
     dur: 1.8,
   },
   {
     p: 24, star: 0.8, rungs: 5,
-    text: 'The best kind of knowing, he says, isn’t the useful kind. It’s the kind you want for no reason beyond wanting it.',
-    cite: 'Aristotle, Metaphysics I',
+    text: 'Aristotle ranks the kinds of knowledge. The highest, wisdom, isn’t valued for its usefulness but is sought for its own sake.',
+    cite: 'Aristotle, Metaphysics, Book One',
     dur: 3.2,
   },
   {
     p: 24, star: 0.8, rungs: 5,
-    text: 'Aristotle calls knowing for its own sake the only free knowledge. It’s in service of nothing.',
+    text: 'Aristotle calls wisdom the only free science. Just as a free person exists for their own sake, so does wisdom.',
     dur: 1.8,
   },
   {
     p: 19, star: 1, rungs: 5,
-    text: 'Aristotle’s evidence is small and hard to argue with. You like looking at things.',
+    text: 'Aristotle offers evidence from ordinary life: people delight in their senses, and above all in sight.',
     cite: 'The joy of sight',
     dur: 1.8,
   },
   {
     p: 19, star: 1, rungs: 5,
-    text: 'Not to get anything out of it. You just do, and that plain pleasure is where the whole ladder starts.',
+    text: 'People enjoy seeing even when it serves no purpose. Sensation is the lowest rung of Aristotle’s ladder of knowledge.',
     dur: 3,
   },
   {
     p: 467, star: 1, rungs: 5,
     // The cite plate carries `thaumazein`; the narration says what it means. A term
     // the reader can SEE spelled out does not also need spelling out in the prose (J7).
-    text: 'Both Plato and Aristotle say philosophy begins in wonder. Not the pleasant kind.',
+    text: 'Plato and Aristotle both hold that philosophy begins in wonder. Plato says so in the Theaetetus, Aristotle in the Metaphysics.',
     cite: 'Thaumazein — wonder',
     dur: 2.2,
   },
@@ -65,18 +65,18 @@ export const BEATS: Epi5Beat[] = [
     p: 467, star: 1, rungs: 5,
     // The cite plate carries `thaumazein`; the narration says what it means. A term
     // the reader can SEE spelled out does not also need spelling out in the prose (J7).
-    text: 'Their word is closer to being knocked off balance by something you can’t account for.',
+    text: 'Aristotle links wonder to perplexity. Someone puzzled by what they can’t explain becomes aware of their own ignorance.',
     dur: 2.6,
   },
   {
     p: 37, star: 1, power: 1, rungs: 5,
-    text: 'Centuries later Francis Bacon points the whole ladder somewhere else. Knowledge is for getting things done, and for making nature do what you want.',
+    text: 'Nearly two thousand years later, Francis Bacon gave knowledge a new purpose. For Bacon, knowledge is worth having for the power it gives over nature.',
     cite: 'Knowledge as power',
     dur: 3.4,
   },
   {
     p: 37, star: 1, power: 1, rungs: 5,
-    text: 'Aristotle wanted to understand nature. Bacon wanted to use it.',
+    text: 'Aristotle prized understanding nature for its own sake. Bacon prized knowledge that could be used to control nature.',
     dur: 1.8,
   },
   {
@@ -95,17 +95,17 @@ export const BEATS: Epi5Beat[] = [
   {
     p: 172, star: 1, rungs: 5,
     interact: {
-      prompt: 'Where does Aristotle put the wanting to know?',
+      prompt: 'On Aristotle’s view, how far is the desire to know innate rather than taught?',
       split: {
         left: 'BORN WITH IT', right: 'TAUGHT IT',
         start: 0.04,
         zones: [
-          { id: 'taught', upto: 0.32, reads: 'trained into you by school and habit' },
-          { id: 'both', upto: 0.66, reads: 'a spark you are born with, then fanned' },
-          { id: 'born', upto: 1, reads: 'there from the start, in the nature', correct: true },
+          { id: 'taught', upto: 0.32, reads: 'instilled by education and habit' },
+          { id: 'both', upto: 0.66, reads: 'partly innate, partly instilled by teaching' },
+          { id: 'born', upto: 1, reads: 'part of human nature from birth', correct: true },
         ],
       },
-      explain: 'Nearly all of it is in the nature. Aristotle opens with the line “all men by nature desire to know”. The middle is the tempting compromise. Nobody has to be trained to want to know what’s behind a closed door.',
+      explain: 'Part of human nature from birth. Aristotle opens the Metaphysics with “all men by nature desire to know”. Teaching develops knowledge, but on his view the desire to know isn’t taught.',
       xp: 5,
     },
     dur: 1.0,
@@ -115,9 +115,9 @@ export const BEATS: Epi5Beat[] = [
     interact: {
       // Was "Who said ... ? Tap the name" — a memory test of the quote card two beats
       // back. Asking which of them HELD the position is the same tap and a real question (J8).
-      prompt: 'One of these four wanted knowledge in order to make nature obey. Tap them.',
+      prompt: 'Which of these thinkers valued knowledge as a means of controlling nature?',
       explain:
-        'Bacon. He’s the one who turned knowing into a tool. Aristotle is the trap. He wanted the opposite — knowledge worth having even if it never did a thing for you.',
+        'Francis Bacon. He valued knowledge for the power it gives over nature. Aristotle held the opposite view: the highest knowledge is sought for its own sake, whatever its use.',
       xp: 5,
     },
     dur: 1.0,
@@ -126,12 +126,12 @@ export const BEATS: Epi5Beat[] = [
     summary: {
       title: 'The Human Drive to Know',
       points: [
-        'Aristotle: the desire to know is in our nature',
-        'Wisdom, sought for itself, is the "free" science',
-        'Wonder (thaumazein) is where philosophy begins',
-        'Bacon redirects knowledge toward power',
+        'Aristotle: the desire to know is part of human nature',
+        'Wisdom, sought for its own sake, is the free science',
+        'Philosophy begins in wonder, or thaumazein',
+        'Bacon valued knowledge for its power over nature',
       ],
-      closing: 'Every "why?" you ask proves Aristotle right: curiosity isn’t just what you do — it’s who you are.',
+      closing: 'The question remains whether knowledge is valuable in itself, as Aristotle held, or for its uses, as Bacon held.',
     },
     dur: 2.8,
   },

@@ -34,36 +34,36 @@ export interface Ethics41Beat extends BaseBeat {
 export const BEATS: Ethics41Beat[] = [
   {
     p: 427, x: 28,
-    text: 'Nobody made you sign the form. Nobody gave you a reason to, either.',
+    text: 'Suppose you join a scheme because joining is the default. No one forced you, and no one gave you a reason.',
     dur: 4.2,
   },
   {
     p: 159, x: 28, doors: 1,
-    text: 'There are three ways to move somebody, and only two of them have names.',
+    text: 'There are three broad ways to influence a choice. Two are familiar: persuasion and force.',
     dur: 4.4,
   },
   {
     p: 448, x: 28, doors: 1, floorOn: 1,
-    text: 'Give somebody reasons, and let the reasons be weighed. Or take the option away.',
+    text: 'Persuasion offers reasons for the chooser to weigh. Force removes an option altogether.',
     dur: 4.4,
   },
   {
     p: 165, x: 28, doors: 1, floorOn: 1, tilt: 0.45,
-    text: 'Or leave both doors open, and arrange the answer somebody gets by doing nothing.',
+    text: 'The third leaves every option open but sets the default, the outcome you get by doing nothing. Richard Thaler and Cass Sunstein call this a nudge.',
     dur: 4.6,
   },
   {
     p: 163, x: 28, doors: 1, floorOn: 1, tilt: 0.45, plates: 1, live: 1,
     interact: {
-      prompt: 'Tap what a nudge actually works on.',
-      explain: 'Your habits. Defaults, framing and plain inertia settle the matter before any reasoning starts. Nudges are cheap to build, and work even on people who know all about nudges. Working on reasons would be an argument; removing a door would be a rule.',
+      prompt: 'Which does a nudge work on: your reasons, your habits or your money?',
+      explain: 'Your habits. A default works through inertia, before you think it over. Giving reasons would be persuasion. Changing what things cost would alter your incentives, which a nudge leaves unchanged.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 451, x: 88, doors: 1, floorOn: 1, tilt: 0.45,
-    text: 'Countries with opt-out organ donation get far more donors than countries with opt-in.',
+    text: 'Where organ donation is the default, far more people consent to be donors than where they must opt in.',
     dur: 4.8,
   },
   {
@@ -81,24 +81,24 @@ export const BEATS: Ethics41Beat[] = [
   },
   {
     p: 389, x: 88, doors: 1, floorOn: 1, tilt: 0.45,
-    text: 'The form takes the same ten seconds either way. Only the resting answer changed.',
+    text: 'Declining takes the same few seconds in either system. Only the default has changed, yet the outcomes differ widely.',
     dur: 4.6,
   },
   {
     p: 168, x: 88, doors: 1, floorOn: 1,
     interact: {
-      prompt: 'Where does influence stop treating you as a chooser?',
+      prompt: 'Where along this range does influence stop treating you as a rational chooser?',
       drag: {
         lo: 'GIVING REASONS',
         hi: 'LEAVING NO CHOICE',
         start: 0.03,
         zones: [
-          { id: 'reasons', upto: 0.3, reads: 'persuasion — you can say no, and know why' },
-          { id: 'nudge', upto: 0.68, reads: 'a nudge — it works whether you notice or not', correct: true },
-          { id: 'force', upto: 1, reads: 'force — the other door is simply shut' },
+          { id: 'reasons', upto: 0.3, reads: 'persuasion, which you can assess and refuse' },
+          { id: 'nudge', upto: 0.68, reads: 'a nudge, which works whether or not you notice', correct: true },
+          { id: 'force', upto: 1, reads: 'force, which closes the other option' },
         ],
       },
-      explain: 'At the nudge. Force is the obvious wrong and the duller one. It overrules your judgement and leaves it intact, and you know what happened. A nudge goes around your judgement and leaves you sure you decided. That’s far harder to consent to.',
+      explain: 'A nudge, which works whether or not you notice. Force overrides your judgement, but you know what happened. A nudge bypasses your judgement and leaves you believing you decided, so it’s harder to consent to.',
       xp: 5,
     },
     dur: 1.0,
@@ -106,14 +106,14 @@ export const BEATS: Ethics41Beat[] = [
   {
     p: 322, x: 88, doors: 1, floorOn: 1, tilt: 0.45,
     summary: {
-      title: 'The Tilted Floor',
+      title: 'Persuasion, Nudge and Force',
       points: [
         'Persuasion works through your reasons',
         'Force works by taking an option away',
-        'A nudge works around both, on your habits',
-        'Its trace is that you still feel you chose',
+        'A nudge sets a default and relies on habit',
+        'A nudged chooser still believes the choice was their own',
       ],
-      closing: 'The test is not whether you could have done otherwise. The test is whether you were given anything to think with.',
+      closing: 'The question is not only whether you could have chosen otherwise, but whether you were given reasons to choose with.',
     },
     dur: 4.4,
   },

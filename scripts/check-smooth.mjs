@@ -373,7 +373,7 @@ const iDeck = player.indexOf('styles.deck');
 // having if it names all of them, which is L7 in its plainest form: the lessons
 // gained four new ways to be answered, so this gained four names in the same
 // commit.
-const CONTROLS = ['<ChoiceCards', '<DragScale', '<LeverPick', '<ShapePlot', '<SplitBar', '<FieldPick'];
+const CONTROLS = ['<ChoiceCards', '<DragScale', '<LeverPick', '<TrendPick', '<SplitBar', '<FieldPick', '<PollBallot', '<SortBins'];
 const strays = CONTROLS.filter((c) => {
   const at = player.indexOf(c);
   return at < 0 || at < iLower;
@@ -404,13 +404,19 @@ ok('the answer controls sit inside the deck\'s box, not the stage\'s (L6)',
 {
   // Read by slicing rather than by regex: the expression spans lines and holds
   // braces of its own, which no small pattern gets right.
-  const at = player.indexOf('inScene={');
-  const expr = at < 0 ? '' : player.slice(at, at + 420);
-  const missing = ['cards', 'drag', 'lever', 'plot', 'split', 'field']
-    .filter((k) => !expr.includes(`interact.${k}`));
-  ok('the prompt hint names every non-scene control (I)', at >= 0 && missing.length === 0,
-    at < 0 ? 'could not find the inScene expression'
-      : missing.length ? `not excluded: ${missing.join(', ')}` : 'all six accounted for');
+  // The hint and the stage's picks share ONE test, `stageAnswered` (E41), so this
+  // reads that function and holds it to every control key the block type declares.
+  const block = /export interface InteractBlock \{([\s\S]*?)\n\}/.exec(kit);
+  const keys = block ? [...block[1].matchAll(/^ {2}(\w+)\?:/gm)].map((m) => m[1]) : [];
+  const at = kit.indexOf('export function stageAnswered');
+  const expr = at < 0 ? '' : kit.slice(at, kit.indexOf('\n}', at));
+  const missing = keys.filter((k) => !expr.includes(`q.${k}`));
+  const wired = player.includes('inScene={stageLive}') && player.includes('const stageLive = stageAnswered(beat)');
+  ok('the prompt hint names every non-scene control (I)', at >= 0 && wired && keys.length > 0 && missing.length === 0,
+    at < 0 ? 'could not find stageAnswered in cinematicKit'
+      : !wired ? 'the hint no longer reads stageAnswered'
+        : !keys.length ? 'could not read the InteractBlock keys'
+          : missing.length ? `not excluded: ${missing.join(', ')}` : `all ${keys.length} accounted for`);
 }
 
 ok('the stage keeps a fixed share of the body (L6)',

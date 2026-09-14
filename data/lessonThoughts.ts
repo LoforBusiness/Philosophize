@@ -91,7 +91,7 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
   },
   'ethics-ethics-2': {
     at: [null, null, null, null, [262, 386, 2, 262], null, null, null, null, [262, 386, 2, 262], null, null, null, null, null],
-    say: [null, 'Three verdicts. One wallet.', null, 'Not three religions.', 'I use all three.', null, 'Everyone counts the same.', null, 'Would I want that rule?', 'It eats itself.', null, 'Who am I becoming, then.', null, null, null],
+    say: [null, 'Three verdicts. One wallet.', null, 'Not three religions.', 'I use all three.', null, 'Everyone counts the same.', null, 'Would I want that rule?', 'It defeats itself.', null, 'Who am I becoming, then.', null, null, null],
   },
   'metaphysics-being-2': {
     at: [null, null, null, [150, 378, 3, 150], null, null, [214, 376, 3, 214], null, null, null, null, [236, 378, 3, 236], null],
@@ -366,7 +366,7 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
   },
   'logic-arguments-10': {
     at: [null, null, null, null, null, null, [158, 386, 2, 158], [158, 386, 2, 158], [158, 387, 2, 158], null],
-    say: [null, 'Nothing joins them.', null, 'There it is.', null, 'All of them? Really?', 'Said aloud, it’s rubbish.', null, null, null],
+    say: [null, 'Nothing joins them.', null, 'There it is.', null, 'All of them? Really?', 'Said aloud, it’s nonsense.', null, null, null],
   },
   'aesthetics-aesthetics-9': {
     at: [null, null, null, [80, 386, 3, 80], null, null, null, [208, 386, 3, 208], null, [208, 386, 3, 208], [208, 386, 3, 208], null],
@@ -688,7 +688,7 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
   },
   'ethics-ethics-17': {
     at: [null, null, null, [200, 389, 2, 200], null, null, null, null, null, [268, 387, 2, 268], null],
-    say: [null, 'Even then?', 'He knew how it looks.', 'Not a rule for all.', 'Hand a copy to everybody.', 'Then nobody expects truth.', null, null, 'Surely the friend matters.', null, null],
+    say: [null, 'Even then?', 'He knew how it looks.', 'Not a rule for all.', 'Make it everyone’s rule.', 'Then nobody expects truth.', null, null, 'Surely the friend matters.', null, null],
     vis: [8, 325, 387, 2, 349],
   },
   'epistemology-knowledge-18': {

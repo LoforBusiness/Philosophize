@@ -43,33 +43,33 @@ export interface Epi23Beat extends BaseBeat {
 export const BEATS: Epi23Beat[] = [
   {
     p: 462, x: 200, sieve: 1, mouth: 0.35, mesh: 0.3,
-    text: 'Claims arrive all day. What you end up believing is whatever is left in the tray.',
+    text: 'Virtue epistemology studies the traits of a good thinker. Model a mind as a sieve: the claims that reach its tray are what you believe.',
     dur: 4.0,
   },
   {
     p: 384, x: 200, sieve: 1, mouth: 0.9, mesh: 0.3, fall: 1,
-    text: 'Open the mouth and more gets a hearing. Nothing about that decides how much you keep.',
-    cite: 'Two settings, not one',
+    text: 'Open-mindedness widens the mouth, so more claims get a hearing. Nothing about that decides how much you keep.',
+    cite: 'Two separate settings',
     dur: 4.4,
   },
   {
     p: 447, x: 132, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1,
-    text: 'Tighten the mesh and most of it goes through the sides. The mouth has not moved.',
+    text: 'Intellectual rigour tightens the mesh, so fewer claims survive scrutiny. The mouth stays as wide as before.',
     dur: 4.0,
   },
   {
     p: 457, x: 132, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1, live: 1,
     interact: {
-      prompt: 'Tap the part that decides how much gets thrown out.',
-      explain: 'The mesh. The mouth decides what gets a hearing, and the mesh decides what survives it. People run the two together, because the word “open-minded” gets used for both. That’s how somebody ends up proud of believing everything they were told.',
+      prompt: 'Which part decides how many of the claims given a hearing are rejected?',
+      explain: 'The mesh. The mouth decides which claims get a hearing, and the mesh decides which of them are kept. The word “open-minded” is used for both, so a credulous person can mistake believing everything for an open mind.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 380, x: 132, sieve: 1, mouth: 0.14, mesh: 0.9, fall: 1,
-    text: 'Close the mouth and the mesh has nothing to do. That’s a person who’s never wrong and never learns anything.',
-    cite: 'The other failure',
+    text: 'With the mouth closed, the mesh has no claims to test. Such a thinker admits no new errors, and no new truths either.',
+    cite: 'Closed-mindedness',
     dur: 4.8,
   },
   {
@@ -87,36 +87,36 @@ export const BEATS: Epi23Beat[] = [
   },
   {
     p: 383, x: 268, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1,
-    text: 'So the virtue is a pair of settings held at once, and neither one on its own is worth having.',
+    text: 'So intellectual virtue needs both settings at once. Openness without rigour is credulity, and rigour without openness is dogmatism.',
     dur: 4.2,
   },
   {
     p: 41, x: 268, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1,
     interact: {
-      prompt: 'Which of these is the good thinker?',
+      prompt: 'Which policy toward claims and arguments makes a good thinker?',
       poll: {
         options: [
-          { id: 'shut', reads: 'incurious, and easily sold' },
-          { id: 'crank', reads: 'the crank: all in, all kept' },
-          { id: 'dogma', reads: 'the dogmatist: nothing gets a hearing' },
-          { id: 'good', reads: 'hears everything, keeps almost none of it', correct: true },
+          { id: 'shut', reads: 'keep inherited beliefs, distrust new ones', holders: ['Edmund Burke'] },
+          { id: 'crank', reads: 'risk believing error, rather than miss a truth', holders: ['William James'] },
+          { id: 'dogma', reads: 'set aside arguments you know are misleading', holders: ['Jeremy Fantl'] },
+          { id: 'good', reads: 'hear every side, and keep what survives criticism', holders: ['John Stuart Mill', 'Karl Popper'], correct: true },
         ],
       },
-      explain: 'Hears everything, keeps almost none of it. The two near misses are the interesting ones. The crank has heard every theory and believes them all. The dogmatist has strict standards that never get used on anything new.',
+      explain: 'Hear every side, and keep what survives criticism. This policy joins openness to rigour. Risking error for truth loosens the mesh, so false claims survive with the true.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Mouth And The Mesh',
+      title: 'Openness and Rigour',
       points: [
-        'Openness and rigour are two settings, not one',
-        'Open with no rigour believes whatever arrives',
-        'Rigour with no openness never tests anything new',
-        'The virtue is holding both at once, and it is uncomfortable',
+        'Open-mindedness and rigour are separate intellectual virtues',
+        'Openness without rigour becomes credulity',
+        'Rigour without openness becomes dogmatism',
+        'A good thinker exercises both at once',
       ],
-      closing: 'Hear everything, then keep almost none of what you hear. Doing both is harder than doing either.',
+      closing: 'A good thinker gives every claim a hearing and keeps only what survives scrutiny. Holding both settings is harder than holding either.',
     },
     dur: 3.4,
   },

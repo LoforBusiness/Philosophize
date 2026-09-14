@@ -26,29 +26,29 @@ export interface E10Beat extends BaseBeat {
 export const BEATS: E10Beat[] = [
   {
     p: 462, x: 92, gauge: 0, needle: 0.62,
-    text: 'You’re not certain the sun will rise tomorrow. You’d still bet everything you own on it.',
+    text: 'You aren’t absolutely certain that the sun will rise tomorrow. Even so, you’d bet heavily that it will.',
     dur: 2.7,
   },
   {
     p: 462, x: 92, gauge: 0, needle: 0.62,
-    text: 'So do you know, or don’t you?',
+    text: 'Can you know that the sun will rise without being certain of it?',
     dur: 1.8,
   },
   {
     p: 383, x: 92, gauge: 1, band: 1, needle: 0.62,
-    text: 'One old answer draws the line at absolute certainty, where you couldn’t possibly be wrong. Held strictly, that leaves almost nothing: not the sunrise, not your own name.',
+    text: 'One old answer, called infallibilism, says you know something only if you couldn’t be wrong. Held strictly, that rules out almost everything, even the sunrise and your own name.',
     cite: 'The demand for certainty',
     dur: 5.0,
   },
   {
     p: 33, x: 92, gauge: 1, band: 2, needle: 0.62,
-    text: 'Fallibilism moves the line. You can know something and still admit you might be wrong.',
+    text: 'Fallibilism, a term introduced by Charles Sanders Peirce, rejects that standard. You can know something even though you might be wrong.',
     cite: 'Fallibilism',
     dur: 3.1,
   },
   {
     p: 33, x: 92, gauge: 1, band: 2, needle: 0.62,
-    text: 'Knowing and doubting are allowed in the room together.',
+    text: 'On this view, knowledge is compatible with the possibility of error.',
     dur: 1.8,
   },
   {
@@ -66,39 +66,39 @@ export const BEATS: E10Beat[] = [
   },
   {
     p: 5, x: 160, gauge: 1, band: 2, needle: 0.78, revise: true,
-    text: 'Watch what science does with doubt. Science never claims certainty, and it plainly knows a great deal.',
-    cite: 'Why it is a strength',
+    text: 'Science shows that knowledge and fallibility can coexist. Its theories stay open to revision, yet science has produced a great deal of knowledge.',
+    cite: 'Revision as a strength',
     dur: 2.5,
   },
   {
     p: 5, x: 160, gauge: 1, band: 2, needle: 0.78, revise: true,
-    text: 'Evidence arrives and the needle moves. Changing its mind is how the method works, not a sign of failure.',
+    text: 'As new evidence arrives, confidence in a theory rises or falls. Such revision is part of scientific method, not a sign of its failure.',
     dur: 2.7,
   },
   {
     p: 380, x: 228, gauge: 1, band: 2, needle: 0.78, flags: true,
     interact: {
-      prompt: 'Fallibilism draws the line somewhere on this gauge. Tap where knowledge begins.',
+      prompt: 'On the fallibilist view, where on the gauge does knowledge begin?',
       explain:
-        'Well short of certainty, well past a guess. The trap is the right-hand flag. “Know it only when you cannot be wrong” sounds like the rigorous answer, but it’s the demand fallibilism rejects. Hold to it and you know nothing at all.',
+        'Good evidence, still open. Knowledge begins well past a guess and well short of certainty. The flag marked “only when you cannot be wrong” is the infallibilist standard, which fallibilism rejects. Held strictly, that standard would leave almost nothing known.',
     },
     dur: 4.6,
   },
   {
     p: 177, x: 228, gauge: 1, band: 2, needle: 0.78,
     interact: {
-      prompt: 'How firmly does a fallibilist actually hold it?',
+      prompt: 'How firmly can a fallibilist hold a belief they admit might be wrong?',
       drag: {
         lo: 'BARELY AT ALL',
         hi: 'BEYOND ANY QUESTION',
         start: 0,
         zones: [
-          { id: 'hedge', upto: 0.28, reads: 'barely, more a hedge than a belief' },
-          { id: 'firm', upto: 0.74, reads: 'fully, and still open to being shown wrong', correct: true },
-          { id: 'closed', upto: 1, reads: 'so firmly nothing could shake it' },
+          { id: 'hedge', upto: 0.28, reads: 'barely: a hedge rather than a belief' },
+          { id: 'firm', upto: 0.74, reads: 'fully, yet open to being shown wrong', correct: true },
+          { id: 'closed', upto: 1, reads: 'so firmly that no evidence could shake it' },
         ],
       },
-      explain: 'The middle, and the near end is the misreading. Saying “I might be wrong” sounds like hedging and isn’t. It’s a standing invitation to evidence. You can commit fully, act on it, and leave the door open at the same time.',
+      explain: 'Fully, while remaining open to being shown wrong. Admitting that you might be wrong isn’t hedging. A fallibilist can believe firmly and act on the belief. What a fallibilist rejects is a belief that no evidence could change.',
     },
     dur: 4.4,
   },
@@ -108,11 +108,11 @@ export const BEATS: E10Beat[] = [
       points: [
         'Fallibilism: knowledge without absolute certainty',
         'Beliefs stay open to revision by evidence',
-        'Science thrives on being correctable',
-        'Socratic humility, grown wise and usable',
+        'Science advances by correcting its theories',
+        'Firm belief and openness to error can coexist',
       ],
       closing:
-        'Know boldly, doubt honestly, and never stop asking how you know.',
+        'A fallibilist claims knowledge and remains ready to revise it when new evidence arrives.',
     },
     dur: 4.0,
   },

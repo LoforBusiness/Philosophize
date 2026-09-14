@@ -201,5 +201,44 @@ else {
   if (!ALL && dimmed.length > shownDim.length) console.log(`          …and ${dimmed.length - shownDim.length} more (SHAPE_ALL=1)`);
 }
 
+// E41 — ONE BEAT, ONE PLACE TO ANSWER.
+//
+// Ten scenes switched their Targets on for any graded beat, so a question asked
+// BELOW the picture could also be answered by tapping the stage. The tap was graded
+// against the stage question, the control below locked as though answered, and the
+// stage question asked again on the next tap. The fix lives in the player rather
+// than in ten scenes, so this holds the player: every scene pick is gated on
+// `stageAnswered`, every provider hands that to the Targets, Target honours it in
+// its press and its ring, and `stageAnswered` names every control the block
+// type declares. A control added without its key here fails.
+{
+  const kitSrc = strip(fs.readFileSync(path.join(CIN, 'cinematicKit.tsx'), 'utf8'));
+  const playerSrc = strip(fs.readFileSync(path.join(CIN, 'CinematicPlayer.tsx'), 'utf8'));
+  const targetSrc = strip(fs.readFileSync(path.join(CIN, 'Target.tsx'), 'utf8'));
+  const faults = [];
+  const block = /export interface InteractBlock \{([\s\S]*?)\n\}/.exec(kitSrc);
+  const keys = block ? [...block[1].matchAll(/^ {2}(\w+)\?:/gm)].map((m) => m[1]) : [];
+  const fnAt = kitSrc.indexOf('export function stageAnswered');
+  const fn = fnAt < 0 ? '' : kitSrc.slice(fnAt, kitSrc.indexOf('\n}', fnAt));
+  if (!keys.length) faults.push('could not read the InteractBlock keys');
+  if (fnAt < 0) faults.push('stageAnswered is gone from cinematicKit');
+  const unnamed = keys.filter((k) => !fn.includes(`q.${k}`));
+  if (unnamed.length) faults.push(`stageAnswered does not exclude: ${unnamed.join(', ')}`);
+  if (!playerSrc.includes('const stageLive = stageAnswered(beat)')) faults.push('the player no longer derives stageLive from stageAnswered');
+  const mounts = [...playerSrc.matchAll(/<Scene\b/g)].map((m) => playerSrc.slice(m.index, playerSrc.indexOf('/>', m.index)));
+  if (!mounts.length) faults.push('could not find the <Scene> mounts');
+  const ungated = mounts.filter((s) => !s.includes('if (stageLive) choose('));
+  if (ungated.length) faults.push(`${ungated.length} <Scene> mount(s) pass picks through ungated`);
+  const providers = [...playerSrc.matchAll(/<TargetCountProvider\b[^>]*>/g)].map((m) => m[0]);
+  const unlit = providers.filter((p) => !p.includes('live={stageLive}'));
+  if (!providers.length) faults.push('could not find a TargetCountProvider');
+  if (unlit.length) faults.push(`${unlit.length} TargetCountProvider(s) without live={stageLive}`);
+  if (!targetSrc.includes('disabled={answered || !live ||')) faults.push('Target takes a press on a beat answered below');
+  if ((targetSrc.match(/!answered && live && !rest\.disabled/g) || []).length !== 2) faults.push('Target draws its ring or pip on a beat answered below');
+  if (!/answered \|\| !live \? 0/.test(targetSrc)) faults.push('TargetRing breathes on a beat answered below');
+  if (!faults.length) ok('a beat takes its answer in one place only (E41)', `${mounts.length} scene mounts gated, ${keys.length} controls excluded`);
+  else for (const f of faults) no('a beat takes its answer in one place only (E41)', f);
+}
+
 console.log(bad ? `\n${bad} failing.\n` : '\nall clear.\n');
 process.exit(bad ? 1 : 0);

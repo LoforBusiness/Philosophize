@@ -33,40 +33,40 @@ export interface Ethics35Beat extends BaseBeat {
 export const BEATS: Ethics35Beat[] = [
   {
     p: 462, x: 54, pair: 1,
-    text: 'Two men, one afternoon, one drowning child. The first reaches in and holds him under.',
+    text: 'Consider James Rachels’ case of two men and a child in the water. The first man holds the child under until he drowns.',
     dur: 2.4,
   },
   {
     p: 462, x: 54, pair: 1,
-    text: 'The second sees the boy slip under and puts his hands in his pockets.',
+    text: 'The second man sees the child slip under the water and does nothing to save him.',
     dur: 2.2,
   },
   {
     p: 168, x: 54, pair: 1, live: 1,
     tap: {
-      prompt: 'Tap the one you would call a killer.',
+      prompt: 'Which of the two men would you call a killer?',
       options: [
         { id: 'pusher', text: 'The one who reached in', correct: true },
         { id: 'watcher', text: 'The one who watched', correct: false },
       ],
-      explain: 'Almost everyone taps the first, quickly, and without needing to think. Hold on to how fast that was. The rest of the lesson asks whether that verdict survives being slowed down.',
+      explain: 'Most people choose the man who reached in, and without hesitation. The rest of the lesson tests whether that verdict survives once the two cases are matched.',
     },
     dur: 1.0,
   },
   {
     p: 160, x: 54, pair: 1, tags: 2,
-    text: 'Now match them. Same motive: both want the inheritance.',
+    text: 'Now match the two cases. Both men have the same motive, since each stands to inherit if the child dies.',
     dur: 2.4,
   },
   {
     p: 160, x: 54, pair: 1, tags: 2,
-    text: 'Same result: the boy dies either way.',
+    text: 'The outcome is the same as well, since the child dies in both cases.',
     dur: 1.8,
   },
   {
     p: 380, x: 54, pair: 1, tags: 4, beam: 1, tip: 1, live: 1,
     interact: {
-      prompt: 'Every difference is gone but one. Tip the beam to where you actually stand.',
+      prompt: 'With motive, outcome, relation and certainty matched, how much worse is the killing?',
       drag: {
         lo: 'THE SAME',
         hi: 'FAR WORSE',
@@ -74,10 +74,10 @@ export const BEATS: Ethics35Beat[] = [
         zones: [
           { id: 'same', upto: 0.28, reads: 'no difference at all' },
           { id: 'some', upto: 0.66, reads: 'a little worse', correct: true },
-          { id: 'far', upto: 1, reads: 'a killer and a bystander' },
+          { id: 'far', upto: 1, reads: 'as different as a killer and a bystander' },
         ],
       },
-      explain: 'A little worse is where the gap settles. Thirty seconds ago the two men looked like a killer and a bystander. The gap shrank as each difference was matched away. That’s Rachels’ point, felt rather than argued.',
+      explain: 'A little worse. Matched, the cases no longer look like a killer and a bystander, and most of the gap disappears. Rachels argues that the remainder is not a moral difference at all.',
       xp: 5,
     },
     dur: 1.0,
@@ -96,14 +96,14 @@ export const BEATS: Ethics35Beat[] = [
   },
   {
     p: 383, x: 132, pair: 1, tags: 4, beam: 1,
-    text: 'The defenders have a good reply, and it’s not stubbornness. Real cases are never matched like this.',
+    text: 'Defenders of the distinction reply that real cases are rarely matched like this. Killing and letting die usually differ in other ways too.',
     dur: 4.0,
   },
   {
     p: 4, x: 132, pair: 1, tags: 4, beam: 1, live: 1,
     interact: {
-      prompt: 'Tap the tag that is almost never really equal outside a thought experiment.',
-      explain: 'Certainty. A person who acts knows what will happen. A person who stands back usually doesn’t, and often couldn’t have stopped it anyway. The everyday rule is tuned to that ordinary case. That’s why it can be right without surviving a case built to strip it bare.',
+      prompt: 'Which matched feature is rarely equal outside a thought experiment?',
+      explain: 'Certainty. Someone who kills knows the outcome. Someone who stands back is usually unsure what will happen, or whether they could prevent it. The everyday rule reflects that contrast, so it can guide ordinary cases well even though matched cases undermine it.',
       xp: 5,
     },
     dur: 1.0,
@@ -112,12 +112,12 @@ export const BEATS: Ethics35Beat[] = [
     summary: {
       title: 'Same Result, Two Verdicts',
       points: [
-        'Doing usually strikes us as worse than allowing',
+        'Killing usually seems worse than letting die',
         'A matched pair removes every other difference',
-        'Matched, the gap shrinks and may vanish',
-        'It may be a rule for ordinary cases, not a truth',
+        'In matched cases, the apparent gap shrinks or disappears',
+        'The distinction may hold for ordinary cases without being fundamental',
       ],
-      closing: 'The distinction holds up everywhere except the one place anyone tested it. People who agree on every fact still land in different places, and you just felt why.',
+      closing: 'Rachels holds that the bare difference carries no moral weight. His critics reply that real cases are rarely bare, so the everyday rule is still a good guide.',
     },
     dur: 3.2,
   },

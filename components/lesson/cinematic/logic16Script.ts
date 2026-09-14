@@ -35,48 +35,48 @@ export interface Log16Beat extends BaseBeat {
 export const BEATS: Log16Beat[] = [
   {
     p: 25, x: 60, dawns: 1,
-    text: 'Every morning the cockerel crows. A few minutes later the sun comes up.',
+    text: 'Suppose that every morning a cockerel crows, and a few minutes later the sun rises.',
     dur: 4.0,
   },
   {
     p: 312, x: 60, dawns: 5,
-    text: 'Five mornings running. Five crows, five sunrises, and not once has the sun beaten him to it.',
+    text: 'Over five mornings the order never varies: first the crow, then the sunrise.',
     dur: 4.4,
   },
   {
     p: 159, x: 132, dawns: 5, arrow: 1,
-    text: 'So the crow makes the sun rise. Nobody believes that.',
-    cite: 'And therefore',
+    text: 'The inference would be that the crowing makes the sun rise. Here, no one accepts that conclusion.',
+    cite: 'The inference',
     dur: 2.6,
   },
   {
     p: 159, x: 132, dawns: 5, arrow: 1,
-    text: 'Everybody makes the same move about something else.',
+    text: 'Yet the same form of inference is common where the conclusion seems plausible.',
     dur: 2,
   },
   {
     p: 13, x: 132, dawns: 5, arrow: 1,
-    text: 'Order in time is free. Every cause comes before its effect.',
+    text: 'The fallacy is called post hoc ergo propter hoc. In Latin that means “after this, therefore because of this”.',
     cite: 'Post hoc ergo propter hoc',
     dur: 3.1,
   },
   {
     p: 13, x: 132, dawns: 5, arrow: 1,
-    text: 'So does every coincidence.',
+    text: 'Every cause comes before its effect, but so does every coincidence.',
     dur: 1.8,
   },
   {
     p: 165, x: 132, dawns: 5, arrow: 1, cands: 1, live: 1,
     interact: {
-      prompt: 'Tap the card that would actually test it.',
-      explain: 'The card with no crow on it. If the sun still comes up, the crow was never doing the work. Another crowing morning just repeats what you have. And nobody can arrange a morning without a sunrise, so it tests nothing.',
+      prompt: 'Which observation would test whether the crowing causes the sunrise?',
+      explain: 'No crow: a morning when the bird stays quiet. If the sun still rises, the crowing isn’t needed for the sunrise. Another crowing morning only repeats the evidence already gathered, and a morning without sunrise can’t be arranged.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 380, x: 132, dawns: 6, arrow: 1, silent: 1,
-    text: 'The cockerel is ill and says nothing. The sun comes up at the usual minute.',
+    text: 'On the sixth morning the cockerel is ill and silent. The sun rises at the usual time.',
     cite: 'The sixth morning',
     dur: 4.4,
   },
@@ -96,16 +96,16 @@ export const BEATS: Log16Beat[] = [
   {
     p: 41, x: 250, dawns: 6, silent: 1,
     interact: {
-      prompt: 'What have five mornings actually established?',
+      prompt: 'Five crows came before five sunrises. Which principle shows this doesn’t make the crow a cause?',
       poll: {
         options: [
-          { id: 'pattern', reads: 'five times, and still only a pattern', correct: true },
-          { id: 'once', reads: 'once, which is not even a pattern yet' },
-          { id: 'cause5', reads: 'five times, so one of them causes the other' },
-          { id: 'cause1', reads: 'once, and already calling it a cause' },
+          { id: 'pattern', reads: 'night precedes day but doesn’t cause it', holders: ['Thomas Reid'], correct: true },
+          { id: 'once', reads: 'we never observe a necessary connection', holders: ['David Hume'] },
+          { id: 'cause5', reads: 'every event follows another by a rule', holders: ['Immanuel Kant'] },
+          { id: 'cause1', reads: 'the course of nature is uniform', holders: ['John Stuart Mill'] },
         ],
       },
-      explain: 'Five times, and still only a pattern. Repetition is real progress: one morning is an anecdote, five is a pattern. But a cause is a different claim altogether, and no amount of repetition carries you across. Here the dawn light wakes the bird, so the arrow points the other way.',
+      explain: 'Night precedes day but doesn’t cause it. Regular succession, however long, doesn’t show that one event produces another.',
       xp: 5,
     },
     dur: 1.0,
@@ -114,12 +114,12 @@ export const BEATS: Log16Beat[] = [
     summary: {
       title: 'After Is Not Because',
       points: [
-        'Post hoc reads order in time as cause',
+        'Post hoc reasoning mistakes order in time for causation',
         'Every cause precedes its effect, and so does every coincidence',
         'The test is a case where the supposed cause is absent',
         'One shared cause can produce both without either causing the other',
       ],
-      closing: 'Nothing crowed on the sixth morning, and the sun came up anyway.',
+      closing: 'The sixth morning settles the question: the cockerel was silent, and the sun still rose.',
     },
     dur: 3.2,
   },

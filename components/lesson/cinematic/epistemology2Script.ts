@@ -19,29 +19,29 @@ export interface Epi2Beat extends BaseBeat {
 export const BEATS: Epi2Beat[] = [
   {
     d: 12, m: 5, doubt: 0.1,
-    text: 'What if everything you’re sure of is a lie? Descartes doubted it all on purpose, then rebuilt knowledge from the rubble.',
+    text: 'Can you be wrong about something you feel certain of? René Descartes set out to doubt his beliefs, to find a firm foundation for knowledge.',
     dur: 3.8,
   },
   {
     d: 457, m: 7, doubt: 0.2,
-    text: 'First he separates two things you run together. Feeling certain is something happening in you.',
-    cite: 'Certainty vs truth',
+    text: 'The question rests on a distinction between certainty and truth. Feeling certain is something happening in you.',
+    cite: 'Certainty versus truth',
     dur: 1.9,
   },
   {
     d: 457, m: 7, doubt: 0.2,
-    text: 'Truth is how the world is. Those two can come apart, so he goes hunting for beliefs that survive every possible doubt.',
+    text: 'Truth is a matter of how the world is. Since certainty can accompany a false belief, Descartes seeks beliefs that withstand every possible doubt.',
     dur: 2.9,
   },
   {
     d: 15, m: 13, doubt: 0.62,
-    text: 'So he imagines a demon of utmost power rigging his whole reality. Every sight, every memory, even that two plus three make five — all could be a planted lie.',
-    cite: 'Descartes, Meditations I, 1641',
+    text: 'Descartes supposes an evil demon who uses all its power to deceive him. His senses, his memories and even simple sums could then be false.',
+    cite: 'Descartes, First Meditation, 1641',
     dur: 4.4,
   },
   {
     d: 15, m: 13, doubt: 0.62,
-    text: 'Doubt at maximum.',
+    text: 'Descartes resolves to treat every belief that could possibly be false as if it were false.',
     dur: 1.8,
   },
   {
@@ -59,29 +59,29 @@ export const BEATS: Epi2Beat[] = [
   },
   {
     d: 13, m: 6, doubt: 0.85, glow: true,
-    text: 'The demon is a tool, not a real fear. Of each idea Descartes asks: could the demon fake this?',
+    text: 'Descartes does not believe the demon exists. The supposition is a test: of each belief, he asks whether a deceiver could mislead him about it.',
     cite: 'Methodological doubt',
     dur: 2.7,
   },
   {
     d: 13, m: 6, doubt: 0.85, glow: true,
-    text: 'Most beliefs crack. One refuses.',
+    text: 'Nearly every belief fails this test. One survives, the belief “I exist”, because a deceiver needs someone to deceive.',
     dur: 1.8,
   },
   {
     d: 13, m: 6, doubt: 0.85, glow: true,
-    text: 'Used this way, doubt rebuilds rather than ruins.',
+    text: 'Used as a method, doubt is constructive. It removes uncertain beliefs to reach a foundation on which knowledge can be rebuilt.',
     dur: 1.8,
   },
   {
     d: 9, m: 3, doubt: 0.85, glow: true,
     interact: {
-      prompt: 'Descartes never believed in the demon. Tap what he was using it for.',
+      prompt: 'Why would Descartes suppose a demon he didn’t believe existed?',
       cards: [
-        { text: 'Find what survives fiercest doubt', correct: true },
-        { text: 'Prove the world unreal', correct: false },
+        { text: 'To find beliefs beyond all doubt', correct: true },
+        { text: 'To prove the world unreal', correct: false },
       ],
-      explain: 'The demon is a deliberate stress test. Cranking deception to the extreme reveals what still holds: the thinking self.',
+      explain: 'To find beliefs beyond all doubt. The demon makes doubt as extreme as possible, so a belief that survives the demon is certain. Descartes never concludes that the world is unreal. In the Sixth Meditation he argues that the material world exists.',
       xp: 5,
     },
     dur: 1.0,
@@ -89,16 +89,16 @@ export const BEATS: Epi2Beat[] = [
   {
     d: 16, m: 15, doubt: 1.0, glow: true,
     interact: {
-      prompt: 'With the demon deceiving you about everything, what is still safe?',
+      prompt: 'If a demon deceived you about everything, what would remain certain?',
       sort: {
         chip: 'the demon',
         bins: [
-          { id: 'all', label: 'nothing at all', reads: 'nothing at all is safe' },
-          { id: 'sums', label: 'arithmetic', reads: 'arithmetic is safe' },
-          { id: 'doubter', label: 'the doubter', reads: 'the one being fooled is safe', correct: true },
+          { id: 'all', label: 'nothing at all', reads: 'nothing at all would remain certain' },
+          { id: 'sums', label: 'arithmetic', reads: 'simple arithmetic would remain certain' },
+          { id: 'doubter', label: 'the doubter', reads: 'the existence of the one deceived', correct: true },
         ],
       },
-      explain: 'The doubter. You can’t be fooled unless you exist. So the harder the demon works, the more certain the doubter becomes. Arithmetic isn’t safe — Descartes lets the demon have the sums. Only the doubter survives.',
+      explain: 'The doubter. To be deceived, you must exist, so being deceived proves that you exist. Arithmetic isn’t certain, because a powerful deceiver could make a false sum seem true.',
       xp: 5,
     },
     dur: 1.0,
@@ -108,11 +108,11 @@ export const BEATS: Epi2Beat[] = [
       title: 'What Survives the Demon',
       points: [
         'Feeling certain is not the same as being true',
-        'The evil demon stress-tests beliefs with doubt',
-        'Doubt can be a method, not despair',
-        '"I am, I exist" outlasts every doubt',
+        'The evil demon tests which beliefs can be doubted',
+        'Doubt can be a method for finding certainty',
+        '“I am, I exist” survives every possible doubt',
       ],
-      closing: 'Bold doubt is not weakness. Doubt is the first honest step towards knowledge that holds.',
+      closing: 'For Descartes, systematic doubt is the first step towards knowledge with a secure foundation.',
     },
     dur: 2.8,
   },

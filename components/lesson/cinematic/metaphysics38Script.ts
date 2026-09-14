@@ -34,36 +34,36 @@ export interface Metaphysics38Beat extends BaseBeat {
 export const BEATS: Metaphysics38Beat[] = [
   {
     p: 164, x: 52, days: 1,
-    text: 'Three days on a bench, and one piece of clay for all of them.',
+    text: 'Consider one piece of clay on a potter’s bench over three days.',
     dur: 3.6,
   },
   {
     p: 30, x: 52, days: 1, objects: 1,
-    text: 'Monday the clay is a lump, and Tuesday the same clay is a vase. Wednesday the potter squashes the vase back into a lump.',
+    text: 'On Monday the clay is a lump, and on Tuesday it’s shaped into a vase. On Wednesday the potter squashes it back into a lump.',
     dur: 4.4,
   },
   {
     p: 47, x: 52, days: 1, objects: 1, lines: 1,
-    text: 'So the clay was here for three days, and the vase for one.',
+    text: 'So the clay existed for three days, but the vase existed for only one.',
     dur: 3.0,
   },
   {
     p: 160, x: 52, days: 1, objects: 1, lines: 1, live: 1,
     interact: {
-      prompt: 'Tap the day the clay and the vase share every measurement.',
-      explain: 'Tuesday. Same size, same shape, same weight, same place, down to the last gram. If two things ever counted as one, Tuesday is the day. And Tuesday is what makes the trouble rather than what settles it.',
+      prompt: 'On which day do the clay and the vase share every physical property?',
+      explain: 'Tuesday. On that day the clay and the vase have the same size, shape, weight and location. That coincidence creates the puzzle, because they still differ in how long they exist.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     p: 165, x: 52, days: 1, objects: 1, lines: 1,
-    text: 'And still the bars are different lengths, which is a fact about dates rather than about clay.',
+    text: 'Yet they still differ in how long they last. Things that differ in any way can’t be one and the same.',
     dur: 4.0,
   },
   {
     p: 383, x: 98, days: 1, objects: 1, lines: 1,
-    text: 'Saul Kripke gave the tool. If two names pick out one thing, they could not have picked out two.',
+    text: 'Saul Kripke argued that identity is necessary. If two names refer to one thing, they couldn’t have referred to two.',
     dur: 4.2,
   },
   {
@@ -82,16 +82,16 @@ export const BEATS: Metaphysics38Beat[] = [
   {
     p: 177, x: 98, days: 1, objects: 1, lines: 1,
     interact: {
-      prompt: 'So what is the vase?',
+      prompt: 'Given that clay and vase differ in how long they last, what is the vase?',
       sort: {
         chip: 'the vase',
         bins: [
-          { id: 'same', label: 'the clay itself', reads: 'one thing under two names, and the bars must match' },
+          { id: 'same', label: 'the clay itself', reads: 'one thing under two names, so both bars match' },
           { id: 'other', label: 'a second thing', reads: 'made of the clay, and not the clay', correct: true },
-          { id: 'none', label: 'no thing at all', reads: 'only a shape, so nothing was made on Tuesday' },
+          { id: 'none', label: 'not a thing', reads: 'only a shape, so nothing was made on Tuesday' },
         ],
       },
-      explain: 'A second thing, made of the clay. It isn’t free. Two objects then sit in one place at one time, and philosophers who take this route say so. The rivals cost more. Watch the bars as you move the chip and you can see each bill being paid.',
+      explain: 'A second thing is the answer: the vase is made of the clay without being the clay. Two objects then occupy one place at once, the cost of this view. Calling the vase the clay breaks Kripke’s test, and calling it no thing denies that a vase was ever made.',
       xp: 5,
     },
     dur: 1.0,

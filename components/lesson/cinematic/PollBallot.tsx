@@ -1,74 +1,53 @@
 import { useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, {
-  Easing, useAnimatedStyle, useSharedValue, withDelay, withTiming, type SharedValue,
+  Easing, FadeIn, LinearTransition, useSharedValue, withTiming, type SharedValue,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import { touch } from '@/lib/feedback';
-import { METAL, PAPER_LIT, PAPER_SHADE, SHADOW, mix } from '@/components/shared/tone';
+import { ERA, type EraKey } from '@/constants/design';
+import { ALL_PHILOSOPHERS, eraGroupOf } from '@/data/philosophers';
+import { INK, PAPER, mix } from '@/components/shared/tone';
 import { orderFor } from './ChoiceCards';
-import { INK, PAPER, RULE, SOFT } from './cinematicKit';
+import { LipPlate, VerdictSeal, useQuestionAccent, type PlateState } from './QuestionParts';
+import { VERDICT } from './questionTone';
+import { SOFT } from './cinematicKit';
 import type { PollBlock } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AN ANSWER THAT IS A POSITION, AND THE COMPANY IT PUTS YOU IN.
 //
-// This replaces the two-axis pad, which a reader named as the hardest thing in
-// the app: "the box with the four squares, and you drag the circle to one of the
-// four boxes — that one's always really difficult, it takes a long time to
-// understand what is actually being said."
+// This replaced the two-axis pad, which a reader named as the hardest thing in the
+// app. Its four corners were named positions the reader had to rebuild from two
+// axis labels before they could read the question, so the positions are simply
+// listed, in plain words, shuffled so no row is always the answer (orderFor).
 //
-// They were right, and the diagnosis is not that the pad was badly drawn. Its
-// four corners ARE named positions — presentism, the growing block, the
-// shrinking tree, eternalism — but the reader had to reconstruct them from two
-// axis labels before they could even read the question. A puzzle was sitting in
-// front of the question, and solving it earned nothing.
+// ── THE REVEAL IS WHO HELD EACH POSITION, AND IT USED TO GIVE THE ANSWER AWAY ─
 //
-// So the positions are simply listed. One dimension, named, in the order the
-// lesson argued them. The question above says what is being asked in words a
-// reader could answer out loud.
+// Answering shows, under every row, the thinkers who actually held that position:
+// you do not merely pick the right box, you find out you agreed with Austin and
+// disagreed with Russell. The reader asked for exactly that.
 //
-// ── WHAT MAKES IT MORE THAN A MULTIPLE CHOICE ───────────────────────────────
+// And the first version leaked it. The names were MOUNTED from the start and only
+// faded in, so a row with holders reserved their line as empty space before the
+// question was answered. Only the correct row had holders in 7 of the 34 polls,
+// so the gap under it was the answer. A reader found it from the outside: "I can
+// usually tell which one to answer right because there is a gap."
 //
-// The reveal. Answering does not just mark you right or wrong: each position
-// grows the names of the people who actually held it. You do not merely pick the
-// correct box, you find out you agreed with Hume and disagreed with Kant — which
-// is the reader's own idea for this control, and it is the difference between a
-// quiz and a place to stand.
+// So nothing about the reveal exists until the answer is in. The holder line is
+// mounted on answering, every row opens its own line at once, and the rows below
+// slide down to make room (LinearTransition) rather than jumping. Before that
+// moment every row is the same shape, whatever its data holds.
 //
-// ── AND THERE ARE NO PERCENTAGES, BY CONSTRUCTION ───────────────────────────
+// ── EVERY ROW IS A RAISED PLATE ON THE LESSON'S COLOUR ─────────────────────
 //
-// The obvious version of a poll shows what share of people said each thing, and
-// there is no honest source for that inside this app. `PollOption` therefore has
-// no field to type one into: the bar is drawn from how many NAMED holders a
-// position lists, so it is always a count of real people. A position with no
-// holders draws no bar at all rather than an empty one, because an empty bar
-// still reads as "nobody, measured" when the truth is "not recorded here".
-//
-// ── AND EVERY ROW IS A STRUCK PLATE ─────────────────────────────────────────
-//
-// The first version was four bordered rectangles, and the reader said what this
-// app has now heard about every flat surface it has shipped: "pretty boring and
-// not very cool. Not very gamified."
-//
-// The identity has an answer already, used on the rank pins, the badges, the
-// certificates and the profile's tiles: things are STRUCK, lit from the top
-// left, with a shaded corner and a shadow. An unpicked position is a raised
-// plate you could press. The one you choose is PRESSED IN -- the same gradient
-// run backwards, dark where the light cannot reach into the cut, which is the
-// only thing that says pushed rather than raised.
-//
-// The reveal is then worth watching rather than merely correct: the holder bars
-// grow from nothing, staggered down the ballot, and the row that was right takes
-// a gold rail down its cut edge. Gold because that is what XP and first place
-// are already struck in here; nothing new is invented.
+// See ./QuestionParts. The one you choose drops onto its lip; the verdict then
+// strikes the right position green and a wrong choice rust. A holder's name is
+// drawn in their ERA's colour, the one hue this app licenses for "who was this".
 //
 // ── THE SCENE MOVES WITH IT ─────────────────────────────────────────────────
 //
-// `pos` is the player's shared value, eased between rows rather than snapped, so
-// a scene reading `dragPos` re-aims smoothly as the reader moves down the ballot
-// (R7c). Snapping it would be a track jumping a whole step in one frame, which
-// is the teleport group L exists to forbid.
+// `pos` is the row as drawn and `sem` the option as authored, both eased; a scene
+// reads `sem` (SceneApi.pickPos), because the rows are shuffled.
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -77,222 +56,144 @@ interface Props {
   onPick: (id: string, correct: boolean) => void;
   /** 0..1 down the ballot AS DRAWN — the control's own position. */
   pos: SharedValue<number>;
-  /**
-   * 0..1 across the options AS AUTHORED — what a scene reads (SceneApi.pickPos).
-   *
-   * These are two different numbers because the rows are shuffled, and only this
-   * one means anything outside the control: row 2 of the ballot is a different
-   * claim in every lesson, while option 2 of the block is the claim the author
-   * put second. A scene animating off `pos` would be animating off the shuffle.
-   */
+  /** 0..1 across the options AS AUTHORED — what a scene reads (SceneApi.pickPos). */
   sem?: SharedValue<number>;
   /** The question's own words, so the row order is stable but not authored. */
   seed: string;
 }
 
-const ROW_H = 34;
-// A WIDE ROW BARELY SHADES, AND §19 HAD ALREADY MEASURED THAT.
+// ── A HOLDER'S ERA, BY NAME ──────────────────────────────────────────────────
 //
-// The first pass ran StruckTile's full PAPER_LIT -> PAPER -> PAPER_SHADE across
-// a 350dp row on a 0.15->0.85 diagonal, and the render came back with a tan
-// stain down the right-hand half. §19 records the identical failure on the
-// profile's panels, in the same words: "a tile's shading does not survive being
-// scaled up ... a big flat surface lit from one side barely shades at all -- its
-// depth is in its EDGES."
-//
-// So: a third of the fall-off, running mostly DOWN rather than across (a wide
-// surface is lit from above, not from the left), and the rest of the depth comes
-// from a lit top rim, a hairline and the shadow the row sits on.
-const FACE_FOOT = mix(PAPER, PAPER_SHADE, 0.30);
-const FACE_FROM = { x: 0.2, y: 0 } as const;
-const FACE_TO = { x: 0.55, y: 1 } as const;
-const REVEAL = 420;
+// Holders are written as names, the way a reader says them, so the roster is
+// indexed by name once: the full name with its dots and spaces folded away, and a
+// surname wherever exactly one thinker carries it. A school ("the Stoics") or a
+// name the roster does not carry is drawn in ink.
+let HUE_BY_NAME: Map<string, string> | null = null;
+const fold = (s: string) => s.toLowerCase().replace(/[.\s]+/g, '');
+function eraHueOf(name: string): string | null {
+  if (!HUE_BY_NAME) {
+    const byName = new Map<string, string>();
+    const bySurname = new Map<string, string[]>();
+    for (const p of ALL_PHILOSOPHERS) {
+      const hue = ERA[eraGroupOf(p) as EraKey];
+      if (!hue) continue;
+      byName.set(fold(p.name), hue);
+      const last = fold(p.name.split(' ').pop() ?? '');
+      bySurname.set(last, [...(bySurname.get(last) ?? []), hue]);
+    }
+    for (const [last, hues] of bySurname) if (hues.length === 1 && !byName.has(last)) byName.set(last, hues[0]);
+    HUE_BY_NAME = byName;
+  }
+  return HUE_BY_NAME.get(fold(name)) ?? HUE_BY_NAME.get(fold(name.split(' ').pop() ?? '')) ?? null;
+}
 
 export default function PollBallot({ poll, picked, onPick, pos, sem, seed }: Props) {
   const answered = picked !== null;
   const n = poll.options.length;
-  // THE ORDER IS DECIDED HERE AND NOWHERE ELSE, exactly as ChoiceCards decides
-  // its two. Measured before this existed, the pad these questions came from put
-  // its answer in the first quadrant 68% of the time — which in a ballot is the
-  // top row, and a reader who noticed could tap their way through the app.
-  const options = orderFor(seed, n).map((k) => poll.options[k]);
-  const done = useSharedValue(0);
-  // NOTHING IS SELECTED UNTIL THE READER SELECTS IT. An authored opening row is
-  // one more value that can land on the answer -- the exact fault this control
-  // was built to remove -- and pre-committing the reader to a position they did
-  // not choose is the wrong way to ask them where they stand.
-  const sel = useSharedValue(-1);
-
-  // WHERE EACH DRAWN ROW SITS IN THE AUTHOR'S OWN ORDER. Plain numbers, so the
-  // worklet that writes `sem` can close over it.
-  const semOf = orderFor(seed, n).map((k) => (n > 1 ? k / (n - 1) : 0));
+  const order = orderFor(seed, n);
+  const options = order.map((k) => poll.options[k]);
 
   useEffect(() => {
-    sel.value = -1;
     pos.value = 0.5;
     // Mid-scale, matching `pos`: nothing is chosen yet, so the scene must not be
     // shown either end of the question before the reader has said anything.
     if (sem) sem.value = 0.5;
-  }, [poll, pos, sem, sel]);
-
-  useEffect(() => {
-    if (!answered) { done.value = 0; return; }
-    done.value = withDelay(120, withTiming(1, { duration: REVEAL, easing: Easing.out(Easing.cubic) }));
-  }, [answered, done]);
+  }, [poll, pos, sem]);
 
   const choose = useCallback((k: number) => {
+    if (answered) return;
     const o = options[k];
-    sel.value = k;
-    // EASED, NOT SNAPPED. See the header: a scene track driven off `dragPos`
-    // would otherwise cover a whole step between two frames.
+    // EASED, NOT SNAPPED: a scene track driven off this would otherwise cover a
+    // whole step between two frames (group L).
     pos.value = withTiming(n > 1 ? k / (n - 1) : 0, { duration: 220, easing: Easing.out(Easing.cubic) });
-    // The same move in the question's own space, for the scene (SceneApi.pickPos).
-    if (sem) sem.value = withTiming(semOf[k], { duration: 220, easing: Easing.out(Easing.cubic) });
+    if (sem) sem.value = withTiming(n > 1 ? order[k] / (n - 1) : 0, { duration: 220, easing: Easing.out(Easing.cubic) });
     touch();
     onPick(o.id, Boolean(o.correct));
-  }, [options, n, onPick, pos, sem, semOf, sel]);
-
-  // The widest holder list decides the bar scale, so two positions with one name
-  // each do not both draw a full bar and imply a tie that was never measured.
-  const widest = Math.max(1, ...options.map((o) => (o.holders ? o.holders.length : 0)));
+  }, [answered, options, order, n, onPick, pos, sem]);
 
   return (
     <View style={styles.wrap} nativeID="poll-ballot">
       {options.map((o, k) => (
-        <Row
-          key={o.id}
-          option={o}
-          index={k}
-          selected={sel}
-          done={done}
-          widest={widest}
-          answered={answered}
-          onPress={() => { if (!answered) choose(k); }}
-        />
+        <Row key={o.id} option={o} index={k} answered={answered} picked={picked} onPress={() => choose(k)} />
       ))}
     </View>
   );
 }
 
-function Row({ option, index, selected, done, widest, answered, onPress }: {
+function Row({ option, index, answered, picked, onPress }: {
   option: PollBlock['options'][number];
   index: number;
-  selected: SharedValue<number>;
-  done: SharedValue<number>;
-  widest: number;
   answered: boolean;
+  picked: string | null;
   onPress: () => void;
 }) {
-  const chosen = useAnimatedStyle(() => {
-    const on = selected.value === index ? 1 : 0;
-    return {
-      borderColor: on ? INK : RULE,
-      borderWidth: on ? 1.6 : 1,
-      // A pressed plate sinks and stops casting. Both, or it reads as a colour
-      // change rather than a movement.
-      transform: [{ translateY: on * 1.5 }],
-      shadowOpacity: (1 - on) * SHADOW.opacity,
-    };
-  });
-  // THE FACE FLIPS when the row is taken: raised runs light -> dark down-right,
-  // pressed runs dark -> light, and that inversion is the only thing that says
-  // pushed IN rather than merely marked.
-  const pressedFace = useAnimatedStyle(() => ({ opacity: selected.value === index ? 1 : 0 }));
+  const accent = useQuestionAccent();
+  const mine = picked === option.id;
+  const state: PlateState = !answered ? 'idle' : option.correct ? 'right' : mine ? 'wrong' : 'rest';
+  const gem = state === 'right' ? VERDICT.right.ink
+    : state === 'wrong' ? VERDICT.wrong.ink
+      : state === 'rest' ? mix(PAPER, INK, 0.3)
+        : accent.base;
 
-  // The holder bar and names arrive after the answer, one row after another --
-  // a stagger down the ballot, so the reveal reads as a result coming in rather
-  // than four things appearing at once.
-  const revealStyle = useAnimatedStyle(() => {
-    const t = Math.max(0, Math.min(1, (done.value - index * 0.12) / 0.6));
-    return { opacity: t };
-  });
-  const barStyle = useAnimatedStyle(() => {
-    const t = Math.max(0, Math.min(1, (done.value - index * 0.12) / 0.6));
-    return { width: `${t * 100 * ((option.holders?.length ?? 0) / widest)}%` };
-  });
-  const railStyle = useAnimatedStyle(() => ({ opacity: option.correct ? done.value : 0 }));
-  const held = option.holders && option.holders.length > 0;
+  const down = useSharedValue(0);
+  useEffect(() => {
+    down.value = withTiming(answered && mine ? 1 : 0, { duration: 90 });
+  }, [answered, mine, down]);
+
+  const holders = option.holders ?? [];
 
   return (
-    <Pressable
-      onPress={onPress}
-      disabled={answered}
-      accessibilityRole="button"
-      style={styles.press}
-    >
-      <Animated.View style={[styles.row, chosen]}>
-        <LinearGradient
-          colors={[PAPER_LIT, PAPER, FACE_FOOT]}
-          locations={[0, 0.5, 1]}
-          start={FACE_FROM}
-          end={FACE_TO}
-          style={StyleSheet.absoluteFill}
-          pointerEvents="none"
-        />
-        {/* The lit top edge, which is where a wide surface's depth actually is. */}
-        <View style={styles.lip} pointerEvents="none" />
-        <Animated.View style={[StyleSheet.absoluteFill, pressedFace]} pointerEvents="none">
-          <LinearGradient
-            colors={[FACE_FOOT, PAPER, PAPER_LIT]}
-            locations={[0, 0.5, 1]}
-            start={FACE_FROM}
-            end={FACE_TO}
-            style={StyleSheet.absoluteFill}
-          />
-        </Animated.View>
-        {/* The gold rail down the cut edge — the same metal a first-place disc
-            and the XP line are struck in, so it is a material the app already
-            owns rather than a new colour (§19). */}
-        <Animated.View style={[styles.rail, railStyle]} pointerEvents="none" />
-        <Text style={styles.reads} numberOfLines={2}>{option.reads}</Text>
-        {/* The tick is drawn only once the answer is in, so the ballot itself
-            never gives away which row is right (group O). */}
-        {answered && option.correct ? <Text style={styles.tick}>✓</Text> : null}
-      </Animated.View>
-      {held ? (
-        <Animated.View style={[styles.holders, revealStyle]}>
-          <View style={styles.barTrack}>
-            <Animated.View style={[styles.barFill, barStyle]} />
+    <Animated.View layout={LinearTransition.duration(280)} style={styles.slot}>
+      <Pressable
+        onPress={onPress}
+        disabled={answered}
+        accessibilityRole="button"
+        accessibilityLabel={option.reads}
+        onPressIn={() => { if (!answered) down.value = 1; }}
+        onPressOut={() => { if (!answered) down.value = 0; }}
+      >
+        {/* Answered rows tighten by a few points each, because every row gains its
+            holder line at once and the explanation below still has to fit the deck. */}
+        <LipPlate state={state} down={down} radius={10} faceStyle={[styles.face, answered && styles.faceAnswered]}>
+          <View style={styles.line}>
+            <View style={[styles.gem, { backgroundColor: gem }]} />
+            <Text style={styles.reads} numberOfLines={2}>{option.reads}</Text>
           </View>
-          <Text style={styles.names} numberOfLines={1}>{option.holders!.join(' · ')}</Text>
-        </Animated.View>
-      ) : null}
-    </Pressable>
+          {/* MOUNTED ON ANSWERING AND NOT BEFORE. See the header: a line that
+              exists at opacity 0 still takes its height, and that height was the
+              answer. */}
+          {answered && holders.length ? (
+            <Animated.View entering={FadeIn.duration(260).delay(160 + index * 90)} style={styles.held}>
+              <Text style={styles.heldBy}>HELD BY</Text>
+              <Text style={styles.names} numberOfLines={1}>
+                {holders.map((h, i) => (
+                  <Text key={`${i}:${h}`}>
+                    {i ? <Text style={styles.dot}>{'  ·  '}</Text> : null}
+                    <Text style={{ color: eraHueOf(h) ?? INK }}>{h}</Text>
+                  </Text>
+                ))}
+              </Text>
+            </Animated.View>
+          ) : null}
+        </LipPlate>
+      </Pressable>
+      {answered && mine ? <VerdictSeal correct={Boolean(option.correct)} size={22} style={styles.seal} /> : null}
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { alignSelf: 'stretch', paddingHorizontal: 2 },
-  press: { marginBottom: 4 },
-  row: {
-    minHeight: ROW_H,
-    borderRadius: 4,
-    overflow: 'hidden',
-    shadowColor: INK,
-    shadowOffset: { width: SHADOW.dx, height: SHADOW.dy },
-    shadowRadius: 2.5,
-    elevation: 1,
-    paddingHorizontal: 9,
-    paddingVertical: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 6,
-  },
-  // flexShrink so a long position wraps inside the row rather than pushing the
-  // tick off the end (S8).
-  reads: { flexShrink: 1, color: INK, fontSize: 12.5, lineHeight: 15.5 },
-  tick: { color: INK, fontSize: 13, fontWeight: '700' },
-  lip: {
-    position: 'absolute', left: 0, right: 0, top: 0, height: 1,
-    backgroundColor: PAPER_LIT,
-  },
-  rail: {
-    position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
-    backgroundColor: METAL.GOLD.base,
-  },
-  holders: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingLeft: 9, paddingTop: 2 },
-  barTrack: { width: 46, height: 3, backgroundColor: RULE, borderRadius: 2, overflow: 'hidden' },
-  barFill: { height: 3, backgroundColor: INK, borderRadius: 2 },
-  names: { flexShrink: 1, color: SOFT, fontSize: 10.5, letterSpacing: 0.2 },
+  wrap: { alignSelf: 'stretch', paddingHorizontal: 20, marginTop: 2 },
+  slot: { marginBottom: 5 },
+  face: { paddingHorizontal: 10, paddingVertical: 7 },
+  faceAnswered: { paddingVertical: 5 },
+  line: { flexDirection: 'row', alignItems: 'center', gap: 9 },
+  gem: { width: 8, height: 8, borderRadius: 4 },
+  // flexShrink so a long position wraps inside the row (S8).
+  reads: { flexShrink: 1, fontFamily: 'Inter_500Medium', fontSize: 12.5, lineHeight: 16, color: INK },
+  held: { flexDirection: 'row', alignItems: 'baseline', gap: 7, marginTop: 2, paddingLeft: 17 },
+  heldBy: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.1, color: SOFT },
+  names: { flexShrink: 1, fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14 },
+  dot: { color: SOFT },
+  seal: { top: -7, right: -5 },
 });

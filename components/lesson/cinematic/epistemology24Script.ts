@@ -35,30 +35,30 @@ export interface Epi24Beat extends BaseBeat {
 export const BEATS: Epi24Beat[] = [
   {
     p: 25, x: 200, ladder: 1,
-    text: 'A sceptical argument, set out properly. Three premises and a conclusion, and the step from one to the next is fine.',
+    text: 'Consider a sceptical argument about dreaming, set out step by step. Each step follows validly from the ones before it.',
     dur: 4.8,
   },
   {
     p: 2, x: 200, ladder: 1, sure: 1,
-    text: 'Beside each claim, a bar for how sure you are. Not how clever it sounds.',
-    cite: 'Measured, not argued',
+    text: 'Beside each claim, a bar shows how certain you are that it’s true. The bar measures credibility, not how persuasive the claim sounds.',
+    cite: 'Credibility, not persuasiveness',
     dur: 3.7,
   },
   {
     p: 2, x: 200, ladder: 1, sure: 1,
-    text: 'How sure.',
+    text: 'The bars rate the premise that you can’t rule out a dream highest. They rate the sceptic’s conclusion lowest.',
     dur: 1.8,
   },
   {
     p: 418, x: 132, ladder: 1, sure: 1, hand: 1,
-    text: 'Moore holds up his hand and says he knows this. That claim has a longer bar than anything on the ladder.',
+    text: 'Moore held up his hand and said he knew this was a hand. That claim is more credible than any claim on the ladder.',
     dur: 4.6,
   },
   {
     p: 457, x: 132, ladder: 1, sure: 1, hand: 1, live: 1,
     interact: {
-      prompt: 'Tap the rung or the hand you are surest of.',
-      explain: 'The hand, and almost nobody hesitates. That’s the point Moore is making. He’s not saying the sceptic argued badly. He’s pointing out which end of the argument you were more confident about before it started.',
+      prompt: 'Which of these claims are you most certain is true?',
+      explain: 'Here is one hand. Moore’s point is that this claim is more certain than any premise of the sceptical argument. He doesn’t accuse the sceptic of reasoning badly. He compares how certain the premises are with how certain the conclusion’s denial is.',
       xp: 5,
     },
     dur: 1.0,
@@ -78,42 +78,42 @@ export const BEATS: Epi24Beat[] = [
   },
   {
     p: 380, x: 268, ladder: 1, sure: 1, hand: 1, give: 1,
-    text: 'An argument runs both ways. Doubt the conclusion harder than the premises, and it’s the premises that have to move.',
+    text: 'A valid argument can also be run in reverse. You should reject a premise when you’re surer the conclusion is false than the premises are true.',
     cite: 'The Moorean shift',
     dur: 4.8,
   },
   {
     p: 168, x: 268, ladder: 1, sure: 1, hand: 1, give: 1,
-    text: 'The sceptic can answer that. He says the bar beside the hand is confidence, not knowledge, and that difference is what’s in dispute.',
+    text: 'The sceptic can reply that the bar measures confidence, not knowledge. Whether Moore knows he has a hand is the very point in dispute.',
     dur: 4.8,
   },
   {
     p: 41, x: 268, ladder: 1, sure: 1, hand: 1, give: 1,
     interact: {
-      prompt: 'Valid reasoning, and the conclusion is false. What follows?',
+      prompt: 'If an argument is valid and its conclusion is false, what follows?',
       sort: {
         chip: 'a false conclusion',
         bins: [
-          { id: 'premise', label: 'a premise goes', reads: 'at least one premise has to go', correct: true },
-          { id: 'valid', label: 'the logic failed', reads: 'the reasoning must be invalid' },
-          { id: 'accept', label: 'accept it', reads: 'you have to accept the conclusion' },
+          { id: 'premise', label: 'a false premise', reads: 'at least one premise must be false', correct: true },
+          { id: 'valid', label: 'invalid reasoning', reads: 'the reasoning must be invalid' },
+          { id: 'accept', label: 'accept it anyway', reads: 'the conclusion must still be accepted' },
         ],
       },
-      explain: 'A premise has to go. Validity means true premises can’t give you a false conclusion. So a valid argument with a false conclusion proves that something going in wasn’t true. Which premise is a separate fight, and it’s the one Moore leaves open.',
+      explain: 'A false premise. A valid argument can’t lead from true premises to a false conclusion. So if the conclusion is false, at least one premise is false. Validity alone doesn’t show which premise that is.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'Which End You Trust',
+      title: 'Moore’s Reply to Scepticism',
       points: [
         'Moore grants the sceptical argument is valid',
         'He is surer of his hand than of any premise in it',
         'A valid argument with a false conclusion refutes a premise',
         'The sceptic replies that confidence is not knowledge',
       ],
-      closing: 'Every argument can be run backwards. Which way you run it depends on what you were surest of.',
+      closing: 'Any valid argument can be run in reverse. Which direction is rational depends on which claims are more certain.',
     },
     dur: 3.6,
   },

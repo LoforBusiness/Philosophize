@@ -35,48 +35,48 @@ export interface Eth20Beat extends BaseBeat {
 export const BEATS: Eth20Beat[] = [
   {
     p: 379, x: 200, blocks: 1, rate: 0,
-    text: 'Seven harms, all the same size. The only difference is when each one happens.',
+    text: 'Consider seven identical harms. They differ only in when they occur, from now to five hundred years ahead.',
     dur: 4.0,
   },
   {
     p: 447, x: 200, blocks: 1, rate: 0.72,
-    text: 'Every government discounts the far harms first. A cost two hundred years out is written down until almost nothing is left.',
+    text: 'Governments apply a discount rate, which makes a future cost count for less the later it falls. At typical rates, a harm two centuries away counts for almost nothing.',
     cite: 'Discounting',
     dur: 4.8,
   },
   {
     p: 383, x: 132, blocks: 1, rate: 0.72,
-    text: 'Some of that is fair. A distant benefit is less certain, and the people there may be richer than you.',
+    text: 'Some discounting has good reasons. A distant benefit is less certain, and future people may be richer than you.',
     dur: 4.4,
   },
   {
     p: 384, x: 132, blocks: 1, rate: 0.72,
-    text: 'But strip those reasons out and something is left. A rate applied to the date itself.',
+    text: 'Set those reasons aside, and one further discount may remain. Pure time preference counts a harm for less only because it comes later.',
     cite: 'Pure time preference',
     dur: 4.0,
   },
   {
     p: 165, x: 132, blocks: 1, rate: 0.72, live_d: 1,
     interact: {
-      prompt: 'Set the rate. How much less does a harm count for being late?',
+      prompt: 'How much less should a harm count only because it happens later?',
       drag: {
         lo: 'A LIFE IS A LIFE',
         hi: 'NOBODY LATER COUNTS',
         start: 0.72,
         zones: [
-          { id: 'none', upto: 0.22, reads: 'nothing shrinks', correct: true },
-          { id: 'some', upto: 0.6, reads: 'the far ones are fading' },
-          { id: 'hard', upto: 1, reads: 'the end of the row is gone' },
+          { id: 'none', upto: 0.22, reads: 'no less: a later harm counts the same', correct: true },
+          { id: 'some', upto: 0.6, reads: 'distant harms count for somewhat less' },
+          { id: 'hard', upto: 1, reads: 'distant harms count for almost nothing' },
         ],
       },
-      explain: 'Nothing about the blocks changed. Only the drawing did. A pure discount says a harm matters less because of when it happens. Nobody has managed to say why that would be so. Distance in time is not a moral difference.',
+      explain: 'No less: a later harm counts the same. Pure time preference makes a harm matter less only because of when it happens. Frank Ramsey called that practice “ethically indefensible”.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
-    p: 394, x: 132, blocks: 1, rate: 0, truth: 1,
-    text: 'Here’s what was under it the whole time. Seven people, none of whom chose which century to be born in.',
+    p: 165, x: 132, blocks: 1, rate: 0, truth: 1,
+    text: 'Without any discount, the seven harms are equal again. Each falls on a person who didn’t choose which century to be born in.',
     dur: 4.6,
   },
   {
@@ -95,26 +95,26 @@ export const BEATS: Eth20Beat[] = [
   {
     p: 442, x: 268, blocks: 1, rate: 0, truth: 1,
     interact: {
-      prompt: 'So should a government discount future costs at all?',
+      prompt: 'Should a government discount future costs at all?',
       cards: [
         { text: 'Yes, for risk and growth', correct: true },
         { text: 'No, never discount anything', correct: false },
       ],
-      explain: 'Yes, but not for time itself. A future benefit is less certain, and people later may be richer, so a pound buys less good. Those are real reasons with numbers behind them. What can’t be defended is discounting a harm for being late.',
+      explain: 'Discounting for risk and growth is justified, but not for time itself. A future benefit is less certain, and later people may be richer, so a pound does less good. Nothing similar justifies discounting a harm merely for coming later.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
     summary: {
-      title: 'The Far End of the Row',
+      title: 'Discounting the Future',
       points: [
-        'Discounting shrinks a future cost before anyone weighs it',
+        'Discounting reduces the weight of future costs',
         'Risk and rising wealth are real grounds for some of it',
-        'Pure time preference is a rate on the date alone',
-        'Nobody has defended treating a later person as worth less',
+        'Pure time preference discounts for lateness alone',
+        'Ramsey called pure time preference ethically indefensible',
       ],
-      closing: 'The people two centuries out cannot vote and cannot argue. They’ll be as real as you are.',
+      closing: 'People two centuries from now can’t vote or argue their case. Yet, as Parfit notes, the costs they bear will be no less real.',
     },
     dur: 3.4,
   },
