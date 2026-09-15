@@ -39,7 +39,7 @@ import { addTombstone } from '@/lib/supabase/tombstone';
 import { track } from '@/lib/posthog';
 import { awardedRank } from '@/data/ranks';
 import { useUserDataStore, type AppSettings } from '@/stores/userDataStore';
-import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { useSubscriptionStore, usePassState } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { purchases } from '@/lib/purchases';
 import { ads } from '@/lib/ads';
@@ -49,6 +49,7 @@ import { cue, soundSupported } from '@/lib/feedback';
 import { BILLING_PERIOD_LABEL } from '@/constants/subscription';
 import PassChart from '@/components/paywall/PassChart';
 import PassDoor from '@/components/paywall/PassDoor';
+import TrialStatus from '@/components/paywall/TrialStatus';
 import { effectiveStreak } from '@/lib/utils/streak';
 import { restDaysHeld } from '@/constants/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
@@ -972,11 +973,15 @@ function VersionLine() {
 // ---------------------------------------------------------------------------
 
 function SubscriptionSection() {
-  const isPro = useSubscriptionStore((s) => s.isPro);
-  // PAYING, not merely Pro. `isPro` is also true inside the free trial, and a
-  // reader on the trial has nothing to cancel and something to keep.
-  const paying = useSubscriptionStore((s) => s.entitled || s.isReviewer);
-  const onTrial = isPro && !paying;
+  // WHICH OF THE FIVE STATES, decided once in `passState`. `isPro` is true on the
+  // free trial as well as on a paid Pass, and the two need opposite things here:
+  // a reader on the trial is told it converts and shown how to stop it, and a
+  // paying reader gets the plain cancel button.
+  const state = usePassState();
+  const paying = state.kind === 'paid' || state.kind === 'reviewer';
+  const onTrial = state.kind === 'trial' || state.kind === 'deviceTrial';
+  const trialCancelled = state.kind === 'trial' && !state.willRenew;
+  const openManage = useSubscriptionStore((s) => s.openManage);
   const [confirmCancel, setConfirmCancel] = useState(false);
   useEffect(() => {
     track('paywall_viewed', { source: 'settings' });
@@ -1008,23 +1013,12 @@ function SubscriptionSection() {
   };
 
   // Google Play / the App Store owns cancellation — an app can't cancel a store
-  // subscription itself. Send the user to the store's manage-subscription page
-  // (RevenueCat's managementURL when available, else the generic account page).
+  // subscription itself. The store opens THIS subscription's page there (see
+  // `openManage`), and re-reads it when the reader comes back.
   const storeName = Platform.OS === 'ios' ? 'the App Store' : 'Google Play';
-  const openManageSubscription = async () => {
+  const openManageSubscription = () => {
     setConfirmCancel(false);
-    track('subscription_manage_opened', { source: 'settings' });
-    let url: string | null = null;
-    try {
-      url = await purchases.getManagementURL();
-    } catch {}
-    if (!url) {
-      url =
-        Platform.OS === 'ios'
-          ? 'https://apps.apple.com/account/subscriptions'
-          : 'https://play.google.com/store/account/subscriptions';
-    }
-    Linking.openURL(url).catch(() => {});
+    void openManage('settings');
   };
 
   return (
@@ -1034,9 +1028,11 @@ function SubscriptionSection() {
         sub={
           paying
             ? 'You have Scholar’s Pass.'
-            : onTrial
-              ? 'You are on the free trial of Scholar’s Pass.'
-              : 'You are on the Free plan.'
+            : trialCancelled
+              ? 'Your free trial of Scholar’s Pass is cancelled.'
+              : onTrial
+                ? 'You are on the free trial of Scholar’s Pass.'
+                : 'You are on the Free plan.'
         }
       />
       <View style={styles.hr} />
@@ -1058,6 +1054,12 @@ function SubscriptionSection() {
           size="lg"
           style={{ marginTop: SPACE[3] }}
         />
+      ) : onTrial ? (
+        // THE TRIAL, with its end, what it becomes and its Cancel button. The
+        // reader asked for cancelling to be easy to find, so it is the whole action.
+        <View style={{ marginTop: SPACE[3] }}>
+          <TrialStatus source="settings" compact />
+        </View>
       ) : (
         <View style={{ marginTop: SPACE[3] }}>
           <PassDoor source="settings" compact />
@@ -1072,13 +1074,19 @@ function SubscriptionSection() {
         </View>
       )}
 
-      <Text style={styles.footNote}>
-        {paying
-          ? `Your Scholar’s Pass renews every ${period}. Cancelling is done through ${storeName}; it stays active until the end of the current billing period.`
-          : onTrial
-            ? 'The free trial ends by itself. Nothing is charged unless you subscribe.'
-            : `The Scholar’s Pass renews every ${period} until cancelled, through ${storeName}.`}
-      </Text>
+      {/* No footnote under a CANCELLED trial: the panel above has already said
+          nothing is coming, and any line about renewing would contradict it. */}
+      {trialCancelled ? null : (
+        <Text style={styles.footNote}>
+          {paying
+            ? `Your Scholar’s Pass renews every ${period}. Cancelling is done through ${storeName}; it stays active until the end of the current billing period.`
+            : state.kind === 'deviceTrial'
+              ? 'This free trial ends by itself. Nothing is charged unless you subscribe.'
+              : onTrial
+                ? `${storeName} also emails a reminder before a free trial ends.`
+                : `The Scholar’s Pass renews every ${period} until cancelled, through ${storeName}.`}
+        </Text>
+      )}
 
       <ConfirmModal
         visible={confirmCancel}

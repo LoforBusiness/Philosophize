@@ -184,17 +184,17 @@ export const EVENTS = {
     where: 'components/shared/RatePrompt.tsx',
   },
   trial_offered: {
-    note: 'The three-day trial was put in front of a free reader: after a lesson and before the ad (`post_lesson`), or as the door on the Pass tab or in Settings (`pass_tab`, `settings`). Paired with `trial_started` by `source` it is the only conversion rate this offer has -- there is no separate decline event, because offered-minus-started IS the decline.',
+    note: 'Google Play\'s free trial was put in front of a free reader it is on offer to: after a lesson and before the ad (`post_lesson`), or as the door on the Pass tab or in Settings (`pass_tab`, `settings`). Paired with `trial_started` by `source` it is the only conversion rate this offer has -- there is no separate decline event, because offered-minus-started IS the decline.',
     props: ['source', 'lessons_left'],
     where: 'components/paywall/TrialOffer.tsx, components/paywall/PassDoor.tsx',
   },
   trial_started: {
-    note: 'They took it. Granted by the app, not by the store -- nobody was charged and nothing will convert, so this is NOT a revenue event and must never be given a `$revenue` property.',
+    note: 'Google Play\'s free trial started: the payment sheet completed and the entitlement came back as a TRIAL. Nobody has been charged yet, and it converts only if they do not cancel, so this is NOT a revenue event and must never be given a `$revenue` property. `days` is the offer\'s length as the store stated it.',
     props: ['days', 'source'],
     where: 'stores/subscriptionStore.ts',
   },
   trial_ended: {
-    note: 'The three days ran out. Sent by the clock in subscriptionStore, so it arrives on whichever foreground notices -- it dates the expiry, not the moment of sending.',
+    note: 'The RETIRED on-device trial ran out, for a reader who took it before the trial became Google Play\'s. Sent by the clock in subscriptionStore, so it arrives on whichever foreground notices -- it dates the expiry, not the moment of sending. Google\'s trial ending is RevenueCat\'s to report, not this event\'s.',
     props: ['days'],
     where: 'stores/subscriptionStore.ts',
   },
@@ -209,9 +209,9 @@ export const EVENTS = {
     where: 'stores/subscriptionStore.ts',
   },
   subscription_manage_opened: {
-    note: 'Sent to the store to manage or cancel. The app cannot see what happens next — only a RevenueCat webhook can.',
+    note: 'Sent to the store to manage or cancel: a paid Pass from Settings, or the free trial from its panel (`source` names the screen). The app cannot see what happens next — only a RevenueCat webhook can.',
     props: ['source'],
-    where: 'app/(app)/settings.tsx',
+    where: 'stores/subscriptionStore.ts',
   },
 
   // ── ads ───────────────────────────────────────────────────────────────────
@@ -228,9 +228,9 @@ export const EVENTS = {
 
   // ── settings and profile ──────────────────────────────────────────────────
   notify_prompt: {
-    note: 'The reminder permission ask was answered.',
-    props: ['answer'],
-    where: 'components/lesson/NotifyPrompt.tsx',
+    note: 'A reminder permission ask was answered: after a lesson (`source` absent), or when a free trial started so its reminder can reach them (`source` names the screen).',
+    props: ['answer', 'source'],
+    where: 'components/lesson/NotifyPrompt.tsx, components/paywall/TrialReminderAsk.tsx',
   },
   sign_out: {
     note: 'Signed out, which wipes local progress.',

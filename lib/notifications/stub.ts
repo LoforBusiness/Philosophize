@@ -8,4 +8,6 @@ export const stubNotifications: NotificationsProvider = {
   hasPermission: async () => false,
   requestPermission: async () => false,
   sync: async () => {},
+  onOpen: () => () => {},
+  takeLaunchOpen: async () => null,
 };

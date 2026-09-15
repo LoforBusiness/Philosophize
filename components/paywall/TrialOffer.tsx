@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Modal, View, Text, StyleSheet, ScrollView, useWindowDimensions,
 } from 'react-native';
@@ -8,9 +8,13 @@ import { MetalPlate } from '@/components/profile/Struck';
 import PassChart, { PlanTiles, usePassArrival } from '@/components/paywall/PassChart';
 import { INK, MID, METAL } from '@/components/shared/tone';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { libraryStanding } from '@/lib/utils/passValue';
 import { trialLengthPhrase } from '@/lib/utils/trial';
-import { FREE_DAILY_LESSON_LIMIT, TRIAL_DAYS, lessonsWord } from '@/constants/subscription';
+import {
+  conversionTerms, REMINDER_PROMISE, startNotice, startTrialLabel,
+} from '@/lib/utils/trialTerms';
+import { BILLING_PERIOD_LABEL, FALLBACK_PRICE } from '@/constants/subscription';
 import { C, SPACE } from '@/constants/design';
 import { track } from '@/lib/posthog';
 
@@ -35,52 +39,54 @@ import { track } from '@/lib/posthog';
 // the first thing the Pass buys, demonstrated one second after it is promised
 // rather than described in a row of a table.
 //
+// == IT IS GOOGLE PLAY'S TRIAL, AND IT SAYS SO ===============================
+//
+// Accepting opens Google's payment sheet, and when the trial ends it becomes a
+// Scholar's Pass automatically unless the reader cancels. So under the button,
+// in this order: the promise that they will be reminded a day before it ends,
+// large; then, small, how long it lasts, the price it becomes, and how to cancel.
+// Every sentence is `lib/utils/trialTerms.ts`, the same words as every other door.
+//
 // == IT IS OFFERED ONLY WHILE IT CAN BE HONOURED =============================
 //
-// `canStartTrial()` is false for anyone paying and for anyone who has already
-// taken it. The reader asked for it after EVERY lesson, and it is -- for as long
-// as there is a trial left to give. A screen that came back every day saying
-// "three days free" to somebody who had already spent them would be a lie the
-// app told repeatedly, which is the one thing section 14 is written to stop.
-//
-// == IT WEARS THE PASS TAB'S CHART NOW, AND ITS ARRIVAL ======================
-//
-//   "when a free user finished the lesson, they still get that old look. I want
-//    it changed to the new look ... I want that [animation] to show up when the
-//    user finishes the lesson and sees the offer."
-//
-// The engraved certificate is gone from here as it went from the tab. The chart
-// and the tiles are `PassChart`, the same object the tab and Settings draw, and
-// the arrival is the tab's too: the glint, then the Pass column stamping in. It
-// waits for the modal to finish sliding up, because cells stamped during the
-// slide are stamped where nobody is looking yet.
+// `canStartTrial()` is true only while Google Play is offering THIS reader a
+// trial, and Google stops once they have had one. So "after every lesson" means
+// every lesson there is still a trial to give, and never a screen promising three
+// free days to somebody the button would charge.
 //
 // == EVERY FIGURE ON IT IS DERIVED ===========================================
 //
 // The chart comes from `PASS_LINES`, the tiles from the tree, the lessons left
-// from `libraryStanding()`, and the length of the trial from `TRIAL_DAYS`.
-// Nothing on this screen is typed as a number.
+// from `libraryStanding()`, the trial's length from the store's own offer, and
+// the price from the store. Nothing on this screen is typed as a number.
 // -----------------------------------------------------------------------------
 
 /** How long the modal's slide takes before the chart starts to arrive. */
 const ARRIVE_AFTER_MS = 320;
 
 interface Props {
-  /** Accept — grants the trial and hands over to the conferral. */
-  onAccept: () => void;
+  /**
+   * Accept: opens Google Play's sheet. Resolves with how it went, so this screen
+   * can say what failed while the reader is still looking at it. On success the
+   * host closes it and the store raises the conferral.
+   */
+  onAccept: () => Promise<string>;
   /** Decline — the lesson flow carries on, ad and all. */
   onDecline: () => void;
 }
 
 export default function TrialOffer({ onAccept, onDecline }: Props) {
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
+  const trial = useSubscriptionStore((s) => s.monthly?.trial ?? null);
+  const price = useSubscriptionStore((s) => s.monthly?.priceString ?? FALLBACK_PRICE);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const { width: winW } = useWindowDimensions();
   const PAD = SPACE[4];
   const cardW = winW - PAD * 2;
 
   const lib = useMemo(() => libraryStanding(lessonsByBranch), [lessonsByBranch]);
-  const days = trialLengthPhrase();
   const { play, replay } = usePassArrival();
 
   useEffect(() => {
@@ -94,6 +100,14 @@ export default function TrialOffer({ onAccept, onDecline }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // THE OFFER CANNOT OUTLIVE THE TRIAL IT OFFERS. If the store stops offering one
+  // while this is up, the reader is handed on exactly as if they had declined,
+  // rather than left on a screen whose button would refuse them.
+  useEffect(() => {
+    if (!trial) onDecline();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trial]);
+
   // THE HEADLINE IS A COUNT, AND IT HAS A FALLBACK FOR THE ONE READER IT CANNOT
   // BE. Somebody who has finished the library has no "other N" -- the sentence
   // would read "The other 0 are waiting", which is both wrong and slightly
@@ -101,6 +115,18 @@ export default function TrialOffer({ onAccept, onDecline }: Props) {
   const headline = lib.left > 0
     ? `The other ${lib.left.toLocaleString()} are waiting.`
     : 'The whole library is waiting.';
+
+  if (!trial) return null;
+  const days = trialLengthPhrase(trial);
+
+  const accept = async () => {
+    if (busy) return;
+    setNotice(null);
+    setBusy(true);
+    const outcome = await onAccept();
+    setBusy(false);
+    setNotice(startNotice(outcome));
+  };
 
   return (
     <Modal visible animationType="slide" transparent={false} onRequestClose={onDecline}>
@@ -113,10 +139,7 @@ export default function TrialOffer({ onAccept, onDecline }: Props) {
             <MetalPlate metal={METAL.GOLD} label={`${days.toUpperCase()} FREE`} />
             <Text style={st.kicker}>THAT WAS TODAY’S LESSON</Text>
             <Text style={st.head}>{headline}</Text>
-            <Text style={st.sub}>
-              Open the Scholar’s Pass for {days} — no card, no charge, and nothing
-              to cancel. It closes again on its own.
-            </Text>
+            <Text style={st.sub}>{`Open every lesson free for ${days}.`}</Text>
           </View>
 
           {/* The five things the trial opens, on the same chart as the Pass tab,
@@ -134,17 +157,20 @@ export default function TrialOffer({ onAccept, onDecline }: Props) {
           </View>
         </ScrollView>
 
-        {/* THE FOOTER DOES NOT SCROLL. A decision this screen exists to invite
-            must not be something you have to go looking for at the bottom of the
-            page. */}
+        {/* THE FOOTER DOES NOT SCROLL. A decision this screen exists to invite,
+            and the terms that come with it, must not be something you have to go
+            looking for at the bottom of the page. */}
         <View style={[st.foot, { paddingHorizontal: PAD }]}>
-          <Button label={`Start your ${TRIAL_DAYS}-day free trial`} onPress={onAccept} size="lg" />
+          <Button
+            label={busy ? 'One moment…' : startTrialLabel(trial)}
+            onPress={() => void accept()}
+            disabled={busy}
+            size="lg"
+          />
+          <Text style={st.promise}>{REMINDER_PROMISE}</Text>
+          <Text style={st.fine}>{conversionTerms(trial, price, BILLING_PERIOD_LABEL)}</Text>
+          {notice ? <Text style={st.notice}>{notice}</Text> : null}
           <Button label="Not today" onPress={onDecline} variant="ghost" />
-          <Text style={st.fine}>
-            When it closes you go back to {FREE_DAILY_LESSON_LIMIT}{' '}
-            {lessonsWord(FREE_DAILY_LESSON_LIMIT)} a day. Everything you have
-            earned stays yours.
-          </Text>
         </View>
       </SafeAreaView>
     </Modal>
@@ -187,8 +213,14 @@ const st = StyleSheet.create({
     backgroundColor: C.paper,
     gap: SPACE[2],
   },
+  promise: {
+    fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 20, color: INK, textAlign: 'center',
+  },
   fine: {
-    fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: MID,
-    textAlign: 'center', paddingHorizontal: SPACE[2],
+    fontFamily: 'Inter_400Regular', fontSize: 11.5, lineHeight: 16, color: MID,
+    textAlign: 'center', paddingHorizontal: SPACE[1],
+  },
+  notice: {
+    fontFamily: 'Inter_500Medium', fontSize: 13, lineHeight: 19, color: INK, textAlign: 'center',
   },
 });

@@ -5,8 +5,8 @@ import Purchases, {
   type PurchasesPackage,
   type CustomerInfo,
 } from 'react-native-purchases';
-import type { PurchasesProvider, SubPackage } from './types';
-import { PurchasesCancelledError } from './types';
+import type { PurchasesProvider, SubPackage, SubStatus, TrialPeriod } from './types';
+import { NO_SUB, PurchasesCancelledError } from './types';
 import { ENTITLEMENT_ID, OFFERING_ID } from '@/constants/subscription';
 
 // Real RevenueCat-backed provider. Only ever loaded in a native build that has
@@ -26,6 +26,26 @@ function periodOf(pkg: PurchasesPackage): SubPackage['period'] {
   return 'unknown';
 }
 
+const UNIT: Record<string, TrialPeriod['unit']> = {
+  DAY: 'day', WEEK: 'week', MONTH: 'month', YEAR: 'year',
+};
+
+/**
+ * The free trial a purchase of this package would start, read off the option it buys.
+ *
+ * GOOGLE ONLY. Google Play lists only the offers a reader is eligible for, so the
+ * default option's free phase is a trial they will actually be given. The App
+ * Store lists an introductory offer whether or not this reader may have it (that
+ * takes a separate eligibility call), so iOS reports no trial rather than one it
+ * might not honour. The app ships on Google Play.
+ */
+function trialOf(pkg: PurchasesPackage): TrialPeriod | null {
+  if (Platform.OS !== 'android') return null;
+  const p = pkg.product.defaultOption?.freePhase?.billingPeriod;
+  const unit = p ? UNIT[p.unit] : undefined;
+  return p && unit && p.value > 0 ? { value: p.value, unit } : null;
+}
+
 function normalize(pkg: PurchasesPackage): SubPackage {
   return {
     identifier: pkg.identifier,
@@ -34,7 +54,21 @@ function normalize(pkg: PurchasesPackage): SubPackage {
     price: pkg.product.price,
     currency: pkg.product.currencyCode,
     period: periodOf(pkg),
+    trial: trialOf(pkg),
     raw: pkg,
+  };
+}
+
+/** The entitlement, as the facts the app shows about it. */
+function statusOf(info: CustomerInfo): SubStatus {
+  const e = info.entitlements.active[ENTITLEMENT_ID];
+  if (!e) return NO_SUB;
+  return {
+    active: true,
+    onTrial: e.periodType === 'TRIAL',
+    expiresAt: e.expirationDateMillis ?? null,
+    willRenew: e.willRenew,
+    productId: e.productIdentifier ?? null,
   };
 }
 
@@ -52,9 +86,13 @@ export const realProvider: PurchasesProvider = {
     configured = true;
   },
 
-  async isPro() {
-    const info = await Purchases.getCustomerInfo();
-    return info.entitlements.active[ENTITLEMENT_ID] != null;
+  async getStatus(fresh) {
+    if (fresh) {
+      try {
+        await Purchases.invalidateCustomerInfoCache();
+      } catch {}
+    }
+    return statusOf(await Purchases.getCustomerInfo());
   },
 
   async getMonthlyPackage() {
@@ -68,7 +106,7 @@ export const realProvider: PurchasesProvider = {
   async purchase(pkg) {
     try {
       const { customerInfo } = await Purchases.purchasePackage(pkg.raw as PurchasesPackage);
-      return customerInfo.entitlements.active[ENTITLEMENT_ID] != null;
+      return statusOf(customerInfo);
     } catch (e) {
       if (e && typeof e === 'object' && (e as { userCancelled?: boolean }).userCancelled) {
         throw new PurchasesCancelledError();
@@ -78,8 +116,7 @@ export const realProvider: PurchasesProvider = {
   },
 
   async restore() {
-    const info = await Purchases.restorePurchases();
-    return info.entitlements.active[ENTITLEMENT_ID] != null;
+    return statusOf(await Purchases.restorePurchases());
   },
 
   async getManagementURL() {
@@ -89,6 +126,10 @@ export const realProvider: PurchasesProvider = {
     } catch {
       return null;
     }
+  },
+
+  async setAttributes(attributes) {
+    await Purchases.setAttributes(attributes);
   },
 
   async logIn(appUserId) {
@@ -103,8 +144,7 @@ export const realProvider: PurchasesProvider = {
   },
 
   addCustomerInfoListener(cb) {
-    const listener = (info: CustomerInfo) =>
-      cb(info.entitlements.active[ENTITLEMENT_ID] != null);
+    const listener = (info: CustomerInfo) => cb(statusOf(info));
     Purchases.addCustomerInfoUpdateListener(listener);
     return () => Purchases.removeCustomerInfoUpdateListener(listener);
   },

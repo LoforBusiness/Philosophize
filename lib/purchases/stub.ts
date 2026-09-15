@@ -1,5 +1,5 @@
 import type { PurchasesProvider } from './types';
-import { PurchasesUnavailableError } from './types';
+import { NO_SUB, PurchasesUnavailableError } from './types';
 
 // No-op provider for environments without the native RevenueCat module: the web
 // preview and Expo Go. Everything resolves to "not subscribed", and attempting
@@ -9,8 +9,8 @@ import { PurchasesUnavailableError } from './types';
 export const stubProvider: PurchasesProvider = {
   available: false,
   async configure() {},
-  async isPro() {
-    return false;
+  async getStatus() {
+    return NO_SUB;
   },
   async getMonthlyPackage() {
     return null;
@@ -24,6 +24,7 @@ export const stubProvider: PurchasesProvider = {
   async getManagementURL() {
     return null;
   },
+  async setAttributes() {},
   async logIn() {},
   async logOut() {},
   addCustomerInfoListener() {

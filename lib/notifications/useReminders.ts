@@ -2,8 +2,10 @@ import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { effectiveStreak } from '@/lib/utils/streak';
 import { restDaysHeld } from '@/constants/streak';
+import { BILLING_PERIOD_LABEL, FALLBACK_PRICE } from '@/constants/subscription';
 import { notifications } from '.';
 
 function todayKey(d = new Date()): string {
@@ -12,13 +14,14 @@ function todayKey(d = new Date()): string {
 }
 
 /**
- * Keeps the scheduled reminders in step with the settings and with the streak.
+ * Keeps the scheduled reminders in step with the settings, the streak and the
+ * free trial.
  *
  * Mounted once, in the root layout. It re-syncs whenever a preference changes,
- * whenever a lesson is finished (`lastLessonDate` / `streak` move), and on every
- * return to the foreground — that last one is what makes the streak warning
- * honest, since it is the moment we learn the day has rolled over and tonight's
- * warning needs re-deciding.
+ * whenever a lesson is finished (`lastLessonDate` / `streak` move), whenever the
+ * trial starts, is cancelled or ends, and on every return to the foreground —
+ * that last one is what makes the streak warning honest, since it is the moment
+ * we learn the day has rolled over and tonight's warning needs re-deciding.
  */
 export function useReminders() {
   const hasHydrated = useUserDataStore((s) => s._hasHydrated);
@@ -34,11 +37,17 @@ export function useReminders() {
   // until the next foreground, because the settings it would have changed were
   // already true (see uiStore.remindersNonce).
   const remindersNonce = useUIStore((s) => s.remindersNonce);
+  // THE TRIAL, reduced to what its reminder needs. Primitives rather than the
+  // `sub` object, so the effect below re-runs when the trial changes and not on
+  // every store write that happens to rebuild the object.
+  const trialEndsAt = useSubscriptionStore((s) => (s.sub.active && s.sub.onTrial ? s.sub.expiresAt : null));
+  const trialRenews = useSubscriptionStore((s) => s.sub.willRenew);
+  const price = useSubscriptionStore((s) => s.monthly?.priceString ?? FALLBACK_PRICE);
 
   // Read through a ref inside the AppState listener so the listener is attached
   // once rather than torn down and re-attached on every settings change.
-  const latest = useRef({ dailyReminder, reminderTime, streakAlerts, quoteOfDay, streakRaw, lastLessonDate, restDaysEarned, restDaysUsed });
-  latest.current = { dailyReminder, reminderTime, streakAlerts, quoteOfDay, streakRaw, lastLessonDate, restDaysEarned, restDaysUsed };
+  const latest = useRef({ dailyReminder, reminderTime, streakAlerts, quoteOfDay, streakRaw, lastLessonDate, restDaysEarned, restDaysUsed, trialEndsAt, trialRenews, price });
+  latest.current = { dailyReminder, reminderTime, streakAlerts, quoteOfDay, streakRaw, lastLessonDate, restDaysEarned, restDaysUsed, trialEndsAt, trialRenews, price };
 
   const run = () => {
     if (!hasHydrated || !notifications.isSupported()) return;
@@ -57,11 +66,21 @@ export function useReminders() {
         // teaches people to ignore notifications.
         streak: effectiveStreak(s.streakRaw, s.lastLessonDate, restDaysHeld(s.restDaysEarned, s.restDaysUsed)),
         doneToday: s.lastLessonDate === todayKey(),
-      }
+      },
+      {
+        endsAt: s.trialEndsAt,
+        willRenew: s.trialRenews,
+        price: s.price,
+        period: BILLING_PERIOD_LABEL,
+      },
     );
   };
 
-  useEffect(run, [hasHydrated, dailyReminder, reminderTime, streakAlerts, quoteOfDay, streakRaw, lastLessonDate]);
+  // `remindersNonce` IS IN THIS LIST, and for a long time it was not. It was read
+  // above and never listed here, so a bump re-rendered this hook and ran nothing:
+  // a reader who said yes to reminders got none until they next left the app and
+  // came back. For the trial's reminder that gap is the whole first day.
+  useEffect(run, [hasHydrated, dailyReminder, reminderTime, streakAlerts, quoteOfDay, streakRaw, lastLessonDate, remindersNonce, trialEndsAt, trialRenews, price]);
 
   useEffect(() => {
     if (!notifications.isSupported()) return;

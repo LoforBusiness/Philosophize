@@ -202,6 +202,9 @@ const FAMILY = [
   'components/paywall/PassParts.tsx',
   'components/paywall/TrialOffer.tsx',
   'components/paywall/PassConferred.tsx',
+  'components/paywall/TrialStatus.tsx',
+  'components/paywall/TrialReminderAsk.tsx',
+  'lib/utils/trialTerms.ts',
   'components/paywall/DailyLimit.tsx',
   'components/paywall/LessonLocked.tsx',
   'components/shared/PaywallContent.tsx',
@@ -521,8 +524,11 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
   // AND IT PICKS ON WHAT THE READER PAYS, NOT ON `isPro`. `isPro` is also true
   // inside the free trial, and a reader on the trial has nothing to cancel: the
   // cancel button shown to them would open a store page with no subscription on it.
-  ok(/paying \? \(/.test(sec) && /s\.entitled \|\| s\.isReviewer/.test(sec),
-    'the cancel button is for a paying reader only, never for one on the trial');
+  ok(/paying \? \(/.test(sec) && /state\.kind === 'paid' \|\| state\.kind === 'reviewer'/.test(sec),
+    'the cancel subscription button is for a paying reader only',
+    'isPro is true on the free trial as well, so it cannot decide this');
+  ok(/<TrialStatus\b[^>]*source="settings"/.test(sec),
+    'and a reader on the trial gets the trial panel, with its own Cancel free trial button');
 
   // ── AND THE TAB'S CHART SHOWS EVERY DIFFERENCE, SAID SHORT ────────────────
   //
@@ -747,31 +753,34 @@ head('8 · THE CERTIFICATE\'S NAME FITS THE CERTIFICATE');
 
 
 // =============================================================================
-head('9 · THE TRIAL SAYS ONLY WHAT THE STORE WILL HONOUR');
+head('9 · THE TRIAL IS GOOGLE PLAY\'S, AND NOBODY IS SURPRISED BY THE CHARGE');
 //
-// The three-day trial is granted BY THE APP -- there is no store product behind
-// it and no receipt to reconcile against -- so every claim it makes is a claim
-// with nothing but this file underneath it. That makes it the most exposed
-// surface in the whole family, not the least.
+//   "I want it to explicitly say that the user will be notified a day before the
+//    trial expires. And in smaller letters, it will say it will automatically
+//    convert to a scholar's pass."
 //
-// Five things are held here, and each one is a way the offer could quietly stop
-// being true while every screen still rendered and every type still checked.
+// For its first life the trial was granted BY THE APP, and this section held that
+// it could never charge anybody. Then the reader found the monthly subscription's
+// free-trial offer in Play Console. The Subscribe button had been starting
+// Google's trial all along, and that one converts into a charge. There is one
+// trial now, Google's, so what this section holds is the opposite promise: that
+// the charge is said before the trial starts, a reminder is set for the day
+// before it, and cancelling is one button away while it runs.
+//
+// Each block below is a way that promise could quietly stop being kept while
+// every screen still rendered and every type still checked.
 {
   const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  const TERMS = await import('@/lib/utils/trialTerms');
 
   // -- 9a. `isPro` IS DERIVED, ALWAYS ---------------------------------------
   //
-  // The trial reaches the roughly forty places that read `isPro` by making that
-  // field derived rather than by adding a second flag beside it. The whole
-  // safety of that rests on ONE writer: a stray `set({ isPro })` anywhere else
-  // in the store would set the entitlement and the trial at odds, and the
-  // reader on the losing side of the disagreement is somebody who paid.
+  // A stray `set({ isPro })` anywhere but derive() would set the entitlement and
+  // the trial at odds, and the reader on the losing side of the disagreement is
+  // somebody who paid.
   const store = strip(read('stores/subscriptionStore.ts'));
-  // `isPro` AS A KEY, not as a word inside the braces. The first version of
-  // this matched `set({ entitled: isPro || ... })` -- where `isPro` is a local
-  // holding what the store just answered -- and reported three writes where
-  // there is one. A pattern looser than its intent does not fail loudly; it
-  // fails by finding real code and calling it a defect.
+  // `isPro` AS A KEY, not as a word inside the braces: a looser pattern once
+  // matched a local holding the store's answer and reported three writes.
   const writes = [...store.matchAll(/set\(\s*\{[^{}]*\bisPro\s*:/g)];
   ok(writes.length === 1, 'isPro is written in exactly one place',
     `${writes.length} write(s)`);
@@ -779,17 +788,17 @@ head('9 · THE TRIAL SAYS ONLY WHAT THE STORE WILL HONOUR');
   ok(dv >= 0 && /set\(\{ isPro/.test(store.slice(dv, dv + 400)),
     'and that place is derive()', 'entitlement and trial cannot disagree');
   ok(/trialActive\(s\.trialEndsAt/.test(store),
-    'and it consults the clock rather than a stored boolean',
-    'a trial that expired while the app was shut must not survive the restart');
+    'and a retired on-device trial still ends by the clock',
+    'one that expired while the app was shut must not survive the restart');
 
-  // -- 9b. THE OFFER COMES BEFORE THE AD, AND ONLY WHEN IT CAN BE HONOURED ---
+  // -- 9b. OFFERED BEFORE THE AD, AND ONLY WHILE GOOGLE WILL GIVE IT --------
   //
-  // Both halves are the reader's own brief. Before the ad, because the second
-  // after an interstitial is the worst frame of mind the app can produce to ask
-  // somebody about a subscription. And gated, because "every lesson" has to
-  // mean "every lesson there is still a trial to give" -- an offer of three free
-  // days shown nightly to somebody who spent theirs in March is a lie the app
-  // would tell forever.
+  // Before the ad, because the second after an interstitial is the worst frame of
+  // mind to ask somebody about a subscription. And only while the STORE is
+  // offering this reader a trial. A button promising free days over a sheet that
+  // charges at once is the lie section 14 exists to prevent, and Google lists
+  // only the offers a reader is still eligible for, so its answer is the only one
+  // that can be trusted.
   const rw = strip(read('components/lesson/LessonReward.tsx'));
   const a = rw.indexOf('const handleContinue');
   const b = rw.indexOf('const finishFree');
@@ -799,17 +808,32 @@ head('9 · THE TRIAL SAYS ONLY WHAT THE STORE WILL HONOUR');
   ok(!/showInterstitial/.test(cont),
     'and no ad can run before it', 'the interstitial lives past the offer, not in front of it');
   ok(/isPro\b[\s\S]{0,120}?return;/.test(cont),
-    'and a paying reader is returned before either');
+    'and a reader who holds the Pass is returned before either');
+  // The IMPLEMENTATION, not the interface line above it that shares its name. And
+  // `trialUsed` anywhere but the migration that deletes it: the old device flag
+  // must not decide an offer the store now owns.
+  const canImpl = store.slice(store.indexOf('canStartTrial: () => {'), store.indexOf('startTrial: async'));
+  ok(/monthly\?\.trial != null/.test(canImpl) && !/trialUsed/.test(store.slice(0, store.indexOf('migrate:'))),
+    'the trial is offered only while the store is offering one',
+    'the store’s answer, not a flag on this phone');
+  const real = strip(read('lib/purchases/real.ts'));
+  ok(/defaultOption\?\.freePhase/.test(real),
+    'and the offer is read off the option a purchase actually buys',
+    'purchasePackage buys defaultOption; a trial read from anywhere else could promise days the sheet will not give');
+  // Ended at the NEXT `syncTrial:` after it. The first one in the file is the
+  // interface's, which comes before, and slicing to it returned an empty string.
+  const startAt = store.indexOf('startTrial: async');
+  const startImpl = store.slice(startAt, store.indexOf('syncTrial: () =>', startAt));
+  ok(/if \(!get\(\)\.canStartTrial\(\)\) return 'error'/.test(startImpl),
+    'a trial button refuses rather than charging once the offer has gone',
+    'a button that said free must never open a sheet that charges today');
 
   // -- 9c. THE OFFER'S SCHEDULE IS THE PASS'S OWN ---------------------------
   //
-  // Section 14's founding fault, arriving on a new screen: the paywall carried
-  // three hand-typed benefits for months and two of the five real ones were
-  // missing. A trial screen listing what the trial gives is exactly where that
-  // happens again, and the answer is the same -- it may not have a list.
+  // Section 14's founding fault was three hand-typed benefits with two of the
+  // five real ones missing. A trial screen listing what the trial gives is where
+  // that happens again, so it may not have a list of its own.
   const off = read('components/paywall/TrialOffer.tsx');
-  // The offer draws the shared chart, whose rows section 7 re-derives from
-  // PASS_LINES, with the arrival the tab plays, and the included tiles under it.
   ok(/<PassChart\b[^>]*\bplay=/.test(off),
     'the offer renders the shared chart, with the arrival the tab plays');
   ok(/<PlanTiles\b/.test(off),
@@ -818,21 +842,27 @@ head('9 · THE TRIAL SAYS ONLY WHAT THE STORE WILL HONOUR');
   ok(/PASS_LINES\.map/.test(conf) && /grade="granted"/.test(conf),
     'and the conferral shows the same five rows, not a summary of them');
 
-  // -- 9d. NO FIGURE IS TYPED ON EITHER SCREEN ------------------------------
+  // -- 9d. NO FIGURE IS TYPED ON ANY TRIAL SCREEN ---------------------------
   //
-  // The same balanced-brace strip the Pass tab gets, and for the same reason:
-  // the length of the trial appears in a headline, a button, a metal plate and
-  // two paragraphs, and TRIAL_DAYS is the only place it may come from. A "3"
-  // typed into any one of those survives a retune in silence.
-  for (const [rel, src] of [['TrialOffer', off], ['PassConferred', conf]]) {
+  // The trial's length, its price and its end date all appear on these screens,
+  // and every one of them has to come from the store. The balanced-brace strip
+  // the Pass tab gets: every interpolation in JSX lives inside `{...}`, so what is
+  // left of a render is tag names and literal text, and a digit left in that is
+  // copy somebody typed.
+  const statusSrc = read('components/paywall/TrialStatus.tsx');
+  const askSrc = read('components/paywall/TrialReminderAsk.tsx');
+  for (const [rel, src, last] of [
+    ['TrialOffer', off, true], ['PassConferred', conf, true],
+    ['TrialStatus', statusSrc, false], ['TrialReminderAsk', askSrc, false],
+  ]) {
     const t = strip(src);
-    // THE LAST `return (` BEFORE THE STYLESHEET, not the first in the file.
-    // PassConferred's effect ends with `return () => clearTimeout(t);` -- which
-    // contains the substring `return (` -- so the first-match version sliced from
-    // the cleanup function and reported three shared-value names as typed
-    // figures. The JSX return is always the last one before the styles.
+    // THE LAST `return (` BEFORE THE STYLESHEET for a one-render screen:
+    // PassConferred's effect ends with `return () => clearTimeout(t);`, which
+    // contains `return (`. From the FIRST one for the two components with a
+    // render per state, whose earlier returns are real JSX.
     const styleAt = t.indexOf('const st = StyleSheet.create');
-    const render = t.slice(t.lastIndexOf('return (', styleAt), styleAt);
+    const from = last ? t.lastIndexOf('return (', styleAt) : t.indexOf('return (');
+    const render = t.slice(from, styleAt);
     let literal = '', depth = 0;
     for (const ch of render) {
       if (ch === '{') depth++;
@@ -840,7 +870,7 @@ head('9 · THE TRIAL SAYS ONLY WHAT THE STORE WILL HONOUR');
       else if (depth === 0) literal += ch;
     }
     const typed = [...literal.matchAll(/[^\s<>/]*\d[^\s<>/]*/g)].map((m) => m[0]);
-    ok(typed.length === 0, `no figure is typed into ${rel}`,
+    ok(from > 0 && typed.length === 0, `no figure is typed into ${rel}`,
       typed.slice(0, 3).map((x) => JSON.stringify(x)).join(' ') || 'every number derived');
   }
 
@@ -848,28 +878,23 @@ head('9 · THE TRIAL SAYS ONLY WHAT THE STORE WILL HONOUR');
   //
   // Four screens can make somebody a Scholar and three of them close themselves
   // the instant `isPro` flips, so a conferral raised by the caller would be
-  // unmounted mid-animation by its own success. It is raised in the store; if a
-  // screen ever starts raising its own, this is the line that says so.
+  // unmounted mid-animation by its own success.
   ok(/showConferral\('purchase'\)/.test(store) && /showConferral\('trial'\)/.test(store),
     'both doors raise the conferral from the store');
   for (const rel of ['components/shared/PaywallContent.tsx', 'app/(app)/pass.tsx',
                      'app/(app)/settings.tsx', 'components/paywall/DailyLimit.tsx',
-                     'components/paywall/PassDoor.tsx']) {
+                     'components/paywall/PassDoor.tsx', 'components/paywall/TrialStatus.tsx']) {
     ok(!/showConferral/.test(read(rel)), `${rel} does not raise its own ceremony`);
   }
-  // A RESTORE IS NOT A CONFERRAL. It is the same Pass they already had, on a new
-  // phone, and a ceremony there congratulates somebody on something that
-  // happened months ago -- the fault section 19 records for the streak
-  // celebration and for Insights announcing an arrival on a reaction.
+  // A RESTORE IS NOT A CONFERRAL: it is the Pass they already had, on a new phone.
   const rest = store.slice(store.indexOf('restore: async'));
   ok(!/showConferral/.test(rest), 'and a restore raises none');
 
-  // -- 9f. THE COUNTDOWN'S ARITHMETIC ---------------------------------------
+  // -- 9f. THE TRIAL'S ARITHMETIC -------------------------------------------
   //
-  // Pure, so it is checked rather than eyeballed. The rounding is the part worth
-  // pinning: a trial started at nine on Monday has 71 hours left an hour later,
-  // and a reader promised three days who is told two an hour after taking it has
-  // been short-changed by a rounding rule. It goes UP.
+  // Pure, so it is checked rather than eyeballed. The countdown rounds UP: a trial
+  // started at nine on Monday has 71 hours left an hour later, and a reader
+  // promised three days who is told two has been short-changed by a rounding rule.
   const H = 3_600_000;
   ok(TR.trialLabel(71 * H) === `${SUB.TRIAL_DAYS} days left`,
     'an hour in, the trial still reads its full length', TR.trialLabel(71 * H));
@@ -881,47 +906,130 @@ head('9 · THE TRIAL SAYS ONLY WHAT THE STORE WILL HONOUR');
   ok(TR.trialActive(1000, 999) === true && TR.trialActive(1000, 1000) === false,
     'the trial is over AT its end, not after it');
   ok(TR.trialActive(null, 1) === false, 'and a trial never taken is never active');
-  ok(TR.trialEndFrom(0) === SUB.TRIAL_MS,
-    'the length applied is the length declared', `${SUB.TRIAL_MS}ms`);
+  const offer = { value: SUB.TRIAL_DAYS, unit: 'day' };
+  ok(TR.trialLengthPhrase(offer) === `${SUB.TRIAL_DAYS} days` && TR.trialAdjective(offer) === `${SUB.TRIAL_DAYS}-day`,
+    'the offer’s length reads as the store states it',
+    `${TR.trialLengthPhrase(offer)} · ${TR.trialAdjective(offer)}`);
+  ok(TR.trialLengthPhrase({ value: 1, unit: 'week' }) === '1 week',
+    'and a single unit reads singular');
+  ok(TR.reminderAt(10 * 24 * H) === 9 * 24 * H,
+    'the reminder is due exactly a day before the end');
+  ok(TR.playSubscriptionUrl('philosophize_scholars_pass_monthly:monthly')
+      === `https://play.google.com/store/account/subscriptions?sku=philosophize_scholars_pass_monthly&package=${SUB.ANDROID_PACKAGE}`,
+    'the cancel link opens on THIS subscription in Google Play',
+    'the base plan RevenueCat appends is stripped from the sku');
+  const at = (sub, extra = {}) => TR.passState({
+    entitled: sub.active, isReviewer: false, sub, trialEndsAt: null, offer: null, ...extra,
+  }, 1000).kind;
+  const S = (o) => ({ active: false, onTrial: false, expiresAt: null, willRenew: false, productId: null, ...o });
+  ok(at(S({ active: true, onTrial: true, willRenew: true })) === 'trial'
+     && at(S({ active: true, willRenew: true })) === 'paid'
+     && at(S({}), { trialEndsAt: 2000 }) === 'deviceTrial'
+     && at(S({}), { trialEndsAt: 500 }) === 'free',
+    'a trial, a paid Pass, the retired trial and a free reader are four different states',
+    'isPro is true in three of them and cannot tell them apart');
 
-  // -- 9g. THE TRIAL CANNOT CHARGE ANYBODY ----------------------------------
+  // -- 9g. EVERY DOOR SAYS THE PROMISE LARGE AND THE CONVERSION SMALL -------
   //
-  //   "if a user activates the free trial, at the end of the free trial, it
-  //    doesn't automatically charge a user. I just want you to check that."
-  //
-  // It does not, and this is what keeps it true. The trial is a date in this
-  // device's store: starting it writes the date, and ending it is the clock
-  // re-deriving `isPro`. Neither may reach the billing SDK, and the one function
-  // that does, `purchaseMonthly`, may be called only from the paywall's own
-  // button, which the reader has to press.
-  const implOf = (name) => {
-    const at = store.lastIndexOf(`${name}: (`);
-    return at < 0 ? '' : store.slice(at, store.indexOf('\n      },', at));
-  };
-  for (const name of ['startTrial', 'syncTrial']) {
-    const body = implOf(name);
-    ok(body.length > 0 && !/purchase/i.test(body),
-      `${name} never reaches billing`, body ? 'no purchase call inside it' : 'NOT FOUND');
+  // Google Play's policy asks the same thing from the other side: before the
+  // trial starts, say how long it lasts, what it costs after, when it converts
+  // and how to cancel. Three doors with three wordings would be three chances for
+  // one of them to leave out the charge, so all three say the shared sentences.
+  const t3 = { value: SUB.TRIAL_DAYS, unit: 'day' };
+  const terms = TERMS.conversionTerms(t3, '$X', 'month');
+  ok(/a day before/.test(TERMS.REMINDER_PROMISE),
+    'the promise says the reminder comes a day before the end', TERMS.REMINDER_PROMISE);
+  ok(/automatically becomes a Scholar’s Pass/.test(terms) && terms.includes('$X a month'),
+    'the terms say it automatically becomes a Scholar’s Pass, at the price');
+  ok(terms.includes(TR.trialLengthPhrase(t3)), 'and how long the trial lasts');
+  ok(/Cancel any time before then/.test(terms) && /won’t be charged/.test(terms) && terms.includes(TERMS.STORE),
+    'and how to cancel without being charged', terms);
+  for (const [rel, where] of [
+    ['components/paywall/PassDoor.tsx', 'the Pass tab and Settings'],
+    ['components/paywall/TrialOffer.tsx', 'the offer after a lesson'],
+    ['components/shared/PaywallContent.tsx', 'the paywall'],
+  ]) {
+    const src = strip(read(rel));
+    ok(/\{REMINDER_PROMISE\}/.test(src) && /conversionTerms\(/.test(src) && /startTrialLabel\(/.test(src),
+      `${where}: the trial starts under the shared promise and terms`);
+    ok(src.indexOf('{REMINDER_PROMISE}') < src.lastIndexOf('conversionTerms('),
+      `${where}: the promise comes before the terms`, 'the order the reader asked for');
+    ok(!/no card|no charge|nothing to cancel|closes again on its own/i.test(src),
+      `${where}: nothing still claims the trial cannot charge`);
   }
-  ok((store.match(/purchases\.purchase\(/g) || []).length === 1,
-    'the store opens the billing sheet in exactly one place', 'inside purchaseMonthly');
-  const callers = [];
-  const scan = (dir) => {
-    for (const e of fs.readdirSync(path.join(REPO, dir), { withFileTypes: true })) {
-      const rel = `${dir}/${e.name}`;
-      if (e.isDirectory()) scan(rel);
-      else if (/\.(tsx?|mjs)$/.test(e.name) && /purchaseMonthly\(\)/.test(strip(read(rel)))) callers.push(rel);
-    }
-  };
-  for (const dir of ['app', 'components', 'lib', 'stores']) scan(dir);
-  ok(callers.length === 1 && callers[0] === 'components/shared/PaywallContent.tsx',
-    'and purchaseMonthly() is called from the paywall button and nowhere else',
-    callers.join(' · ') || 'no caller at all');
-  // And the two new doors offer the trial only while the store says it can be
-  // honoured, and start it through the store, which raises the ceremony itself.
-  const door9 = strip(read('components/paywall/PassDoor.tsx'));
-  ok(/canStartTrial\(\)/.test(door9) && /startTrial\(source\)/.test(door9),
-    'the Pass tab and Settings offer the trial through canStartTrial() and the store');
+
+  // -- 9h. WHILE IT RUNS, IT SAYS WHAT IT BECOMES, AND CANCEL IS ONE BUTTON -
+  //
+  //   "I want this to be easy to do so that the user won't be able to complain
+  //    about not being able to cancel the free trial before it ends"
+  //
+  // An app cannot cancel a Google Play subscription itself. Easy means a button
+  // nobody can miss, at the top of the tab the reminder opens, and a link that
+  // lands on THIS subscription rather than on a list.
+  const status = strip(statusSrc);
+  ok(/autoConvertLine\(/.test(status) && /label="Cancel free trial"/.test(status),
+    'the running trial says what it becomes and carries a Cancel free trial button');
+  ok(/openManage\(source\)/.test(status),
+    'and the button opens Google Play through the store');
+  ok(/cancelledLine\(/.test(status) && /willRenew/.test(status),
+    'and once cancelled it says no charge is coming');
+  const tabSrc = strip(read('app/(app)/pass.tsx'));
+  ok(/<TrialStatus\b[^>]*source="pass_tab"/.test(tabSrc)
+     && tabSrc.indexOf('<TrialStatus') < tabSrc.indexOf('<PassChart'),
+    'the Pass tab puts the trial above the chart', 'the reminder lands on this tab');
+  const manage = store.slice(store.indexOf('openManage: async'), store.indexOf('init: async'));
+  ok(/playSubscriptionUrl\(/.test(manage),
+    'the store opens this subscription’s own page in Google Play');
+  ok(/refresh\(true\)/.test(store),
+    'and re-reads it fresh on the way back', 'a cancelled trial must not still say it converts');
+  const lay = strip(read('app/(app)/_layout.tsx'));
+  ok(/pendingOpen !== 'trial'/.test(lay) && /router\.navigate\('\/\(app\)\/pass'\)/.test(lay),
+    'a tap on the reminder opens the Pass tab');
+
+  // -- 9i. THE REMINDER: A DAY BEFORE, ONLY WHILE IT WILL CONVERT, AND ASKED FOR
+  const notif = strip(read('lib/notifications/real.ts'));
+  const block = notif.slice(notif.indexOf('trial.endsAt != null'), notif.indexOf('export const realNotifications'));
+  ok(/trial\.willRenew/.test(block) && /reminderAt\(trial\.endsAt\)/.test(block),
+    'the notification is laid down a day before the end, and only while the trial will convert');
+  ok(/reminderNotification\(/.test(block) && /open: 'trial'/.test(block) && /TRIAL_CHANNEL/.test(block),
+    'in the shared words, on its own channel, and a tap on it opens the trial');
+  const rn = TERMS.reminderNotification('$X', 'month');
+  ok(/automatically becomes a Scholar’s Pass/.test(rn.body) && /cancel/i.test(rn.body),
+    'and it says the trial converts and can be cancelled', rn.body);
+  const useRem = strip(read('lib/notifications/useReminders.ts'));
+  ok(/remindersNonce, trialEndsAt, trialRenews/.test(useRem),
+    'the scheduler re-runs when permission is granted and when the trial changes',
+    'the nonce was read and never listed, so a yes scheduled nothing until the next foreground');
+  ok(/<TrialReminderAsk\b/.test(conf) && /requestPermission\(\)/.test(strip(askSrc)),
+    'the conferral asks for the reminder the moment a trial starts');
+  ok(/TRIAL_EMAIL_REMINDERS && email/.test(strip(askSrc)),
+    'and mentions an email only once the email is really being sent',
+    `TRIAL_EMAIL_REMINDERS is ${SUB.TRIAL_EMAIL_REMINDERS}`);
+
+  // -- 9j. A TRIAL START IS NOT REVENUE -------------------------------------
+  //
+  // Nobody has been charged. A `$revenue` on a trial would count every trial as a
+  // sale whether or not it ever converts, which is most of the number being wrong.
+  const buy = store.slice(store.indexOf('purchaseMonthly: async'), store.indexOf('restore: async'));
+  const trialAt = buy.indexOf("track('trial_started'");
+  const saleAt = buy.indexOf("track('subscribe_succeeded'");
+  ok(trialAt > 0 && saleAt > trialAt && buy.indexOf('if (st.onTrial)') < trialAt
+     && !/\$revenue/.test(buy.slice(trialAt, saleAt)),
+    'a trial start is tracked as a trial, never as revenue');
+
+  // -- 9k. THE REMINDER EMAIL KEEPS THE SAME DAY ----------------------------
+  //
+  // It is sent by a server that cannot import the app's constants, so the figure
+  // is stated twice, and this is what stops the two drifting apart.
+  const shared = 'supabase/functions/_shared/trialReminder.ts';
+  if (fs.existsSync(path.join(REPO, shared))) {
+    const E = await import('@/supabase/functions/_shared/trialReminder');
+    ok(E.REMINDER_BEFORE_MS === SUB.TRIAL_REMINDER_BEFORE_MS,
+      'the reminder email is due in the same window as the notification',
+      `${E.REMINDER_BEFORE_MS} against ${SUB.TRIAL_REMINDER_BEFORE_MS}`);
+  } else {
+    ok(false, 'the reminder email’s server module exists', shared);
+  }
 }
 
 

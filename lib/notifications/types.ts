@@ -15,6 +15,22 @@ export interface StreakContext {
   doneToday: boolean;
 }
 
+/**
+ * What the free trial's reminder needs in order to be true. `endsAt` null (no
+ * trial running) or `willRenew` false (cancelled, so nothing is coming to warn
+ * about) lays nothing down.
+ */
+export interface TrialReminder {
+  endsAt: number | null;
+  willRenew: boolean;
+  /** The localized monthly price the trial becomes. */
+  price: string;
+  period: string;
+}
+
+/** What a tap on one of this app's notifications asks to open. */
+export type NotificationOpen = 'trial';
+
 export interface NotificationsProvider {
   /**
    * Whether this BINARY can schedule anything. False on web, in Expo Go, and —
@@ -31,7 +47,12 @@ export interface NotificationsProvider {
   /**
    * Cancel everything and re-schedule from scratch. Idempotent and cheap, and
    * the only way anything gets scheduled — switching all three reminders off
-   * simply means this rebuilds an empty set.
+   * simply means this rebuilds an empty set, with the trial's reminder in it if
+   * a trial is running.
    */
-  sync(prefs: ReminderPrefs, ctx: StreakContext): Promise<void>;
+  sync(prefs: ReminderPrefs, ctx: StreakContext, trial: TrialReminder): Promise<void>;
+  /** Taps on this app's notifications while it is running. Returns an unsubscribe. */
+  onOpen(cb: (open: NotificationOpen) => void): () => void;
+  /** The tap that launched the app from cold, handed over once, then forgotten. */
+  takeLaunchOpen(): Promise<NotificationOpen | null>;
 }

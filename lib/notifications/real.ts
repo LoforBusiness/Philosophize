@@ -1,7 +1,11 @@
 import { Platform } from 'react-native';
 import * as N from 'expo-notifications';
 import { getQuoteForDay, dayNumber } from '@/lib/dailyQuote';
-import type { NotificationsProvider, ReminderPrefs, StreakContext } from './types';
+import { reminderAt } from '@/lib/utils/trial';
+import { reminderNotification } from '@/lib/utils/trialTerms';
+import type {
+  NotificationOpen, NotificationsProvider, ReminderPrefs, StreakContext, TrialReminder,
+} from './types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LOCAL REMINDERS.
@@ -14,6 +18,11 @@ import type { NotificationsProvider, ReminderPrefs, StreakContext } from './type
 // ─────────────────────────────────────────────────────────────────────────────
 
 const CHANNEL = 'reminders';
+// THE TRIAL'S REMINDER HAS A CHANNEL OF ITS OWN. Android lets a reader mute a
+// channel, and somebody who silences the daily nudges has not asked to silence the
+// one notification standing between them and a charge. It is also the only one
+// set to HIGH, so it is shown rather than filed.
+const TRIAL_CHANNEL = 'trial';
 
 // The hour the streak warning lands. Late enough to mean "the day is nearly
 // gone", early enough that a lesson still fits before midnight.
@@ -35,6 +44,12 @@ async function ensureChannel() {
     sound: 'default',
     // The app is black ink on paper; a coloured LED pulse would be the one
     // saturated thing anywhere near it.
+    lightColor: '#1A1A1A',
+  });
+  await N.setNotificationChannelAsync(TRIAL_CHANNEL, {
+    name: 'Free trial',
+    importance: N.AndroidImportance.HIGH,
+    sound: 'default',
     lightColor: '#1A1A1A',
   });
   channelReady = true;
@@ -67,12 +82,19 @@ function trimQuote(text: string, max = 150): string {
   return `${cut.slice(0, space > 40 ? space : max).trimEnd()}…`;
 }
 
-async function schedule(identifier: string, title: string, body: string, trigger: any) {
+async function schedule(
+  identifier: string, title: string, body: string, trigger: any, data?: Record<string, string>,
+) {
   await N.scheduleNotificationAsync({
     identifier,
-    content: { title, body, sound: 'default' },
+    content: { title, body, sound: 'default', ...(data ? { data } : {}) },
     trigger,
   });
+}
+
+/** What a tapped notification asks to open, if it is one of ours. */
+function openOf(r: N.NotificationResponse): NotificationOpen | null {
+  return r.notification.request.content.data?.open === 'trial' ? 'trial' : null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -143,7 +165,7 @@ const STREAK_NAGS = [
     blind: 'Getting late. I am noting it, that is all.' },
 ];
 
-async function doSync(prefs: ReminderPrefs, ctx: StreakContext) {
+async function doSync(prefs: ReminderPrefs, ctx: StreakContext, trial: TrialReminder) {
   await ensureChannel();
   // Cancel-then-rebuild rather than diffing. The set is small, this runs on
   // foreground and on each settings change, and a scheduler that is rebuilt from
@@ -232,6 +254,32 @@ async function doSync(prefs: ReminderPrefs, ctx: StreakContext) {
       );
     }
   }
+
+  // ── THE FREE TRIAL'S REMINDER ──────────────────────────────────────────────
+  //
+  //   "the user will be notified a day before the trial expires … that
+  //    notification will also tell them that a day before the trial ends, you
+  //    can cancel. So the user won't get charged."
+  //
+  // It follows none of the three switches above. It is not a nudge; it is the
+  // warning that a charge is coming, and the reader was asked for it when the
+  // trial began. It is laid down only while the trial will actually convert, since
+  // once it is cancelled there is nothing to warn about, and only while "a day
+  // before" is still ahead. A trial with less than a day left says so on its own
+  // screen instead.
+  if (trial.endsAt != null && trial.willRenew) {
+    const when = reminderAt(trial.endsAt);
+    if (when > Date.now() + 60_000) {
+      const n = reminderNotification(trial.price, trial.period);
+      await schedule(
+        'trial-ends',
+        n.title,
+        n.body,
+        { type: N.SchedulableTriggerInputTypes.DATE, date: new Date(when), channelId: TRIAL_CHANNEL },
+        { open: 'trial' },
+      );
+    }
+  }
 }
 
 export const realNotifications: NotificationsProvider = {
@@ -262,7 +310,7 @@ export const realNotifications: NotificationsProvider = {
     }
   },
 
-  sync: async (prefs, ctx) => {
+  sync: async (prefs, ctx, trial) => {
     try {
       // Never schedule against a permission we do not hold — on Android 13+ the
       // calls quietly succeed and nothing is ever delivered, which would put us
@@ -272,7 +320,30 @@ export const realNotifications: NotificationsProvider = {
         await N.cancelAllScheduledNotificationsAsync();
         return;
       }
-      await doSync(prefs, ctx);
+      await doSync(prefs, ctx, trial);
     } catch {}
+  },
+
+  onOpen: (cb) => {
+    const sub = N.addNotificationResponseReceivedListener((r) => {
+      const open = openOf(r);
+      if (!open) return;
+      // Handled here, so the cold-start read below must not hand it over again
+      // on the next launch.
+      void N.clearLastNotificationResponseAsync().catch(() => {});
+      cb(open);
+    });
+    return () => sub.remove();
+  },
+
+  takeLaunchOpen: async () => {
+    try {
+      const r = await N.getLastNotificationResponseAsync();
+      if (!r) return null;
+      await N.clearLastNotificationResponseAsync().catch(() => {});
+      return openOf(r);
+    } catch {
+      return null;
+    }
   },
 };

@@ -46,6 +46,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { posthog, setAnalyticsConsent, setPersonProperties, track } from '@/lib/posthog';
 import { useCloudSync } from '@/lib/supabase/useCloudSync';
 import { useReminders } from '@/lib/notifications/useReminders';
+import { useNotificationOpens } from '@/lib/notifications/useNotificationOpens';
 import { consumeReloadedFlag, useFirstRunUpdate } from '@/lib/updates/firstRun';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { ads } from '@/lib/ads';
@@ -322,6 +323,10 @@ export default function RootLayout() {
   // Keep the scheduled reminders in step with the settings and the streak. No-op
   // on web, in Expo Go, and in any binary without the notifications module.
   useReminders();
+
+  // A tap on the free trial's reminder, parked for the tab shell to open. See the
+  // hook for why it does not navigate by itself.
+  useNotificationOpens();
 
   // Configure Google sign-in once at launch (no-op stub on web/Expo Go, and a
   // no-op until the Google Web client id env var is set). Idempotent.

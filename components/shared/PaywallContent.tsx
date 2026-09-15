@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  View, Text, Pressable, ScrollView, StyleSheet, Linking, useWindowDimensions,
+  View, Text, Pressable, ScrollView, StyleSheet, Linking, Platform, useWindowDimensions,
 } from 'react-native';
 import { MotiView } from 'moti';
 import SketchIcon from '@/components/shared/SketchIcon';
@@ -10,12 +10,17 @@ import { MasteryRow, MetalPlate } from '@/components/profile/Struck';
 import { METAL, ramp } from '@/components/shared/tone';
 import { BRANCH_SHORT, BRANCH_ICON } from '@/components/shared/branchMarks';
 import { Standing, LibraryLine, TheWall, PassTable, Rule } from '@/components/paywall/PassParts';
-import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import TrialStatus from '@/components/paywall/TrialStatus';
+import { useSubscriptionStore, usePassState } from '@/stores/subscriptionStore';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { awardedRank, rankOrder, rankDegree } from '@/data/ranks';
 import { ALL_BRANCHES } from '@/data';
 import { C, SPACE, BRANCH, type BranchKey } from '@/constants/design';
-import { FALLBACK_PRICE } from '@/constants/subscription';
+import { FALLBACK_PRICE, BILLING_PERIOD_LABEL } from '@/constants/subscription';
+import { trialLengthPhrase } from '@/lib/utils/trial';
+import {
+  conversionTerms, REMINDER_PROMISE, startNotice, startTrialLabel, trialLegal,
+} from '@/lib/utils/trialTerms';
 import { restDaysHeld } from '@/constants/streak';
 import { effectiveStreak } from '@/lib/utils/streak';
 import { libraryStanding, daysAtFreePace, allowanceLabel } from '@/lib/utils/passValue';
@@ -71,8 +76,10 @@ export default function PaywallContent({
   const available = useSubscriptionStore((s) => s.available);
   const monthly = useSubscriptionStore((s) => s.monthly);
   const purchaseMonthly = useSubscriptionStore((s) => s.purchaseMonthly);
+  const startTrial = useSubscriptionStore((s) => s.startTrial);
   const restore = useSubscriptionStore((s) => s.restore);
   const refresh = useSubscriptionStore((s) => s.refresh);
+  const state = usePassState();
 
   const displayName = useUserDataStore((s) => s.displayName);
   const rankIndex = useUserDataStore((s) => s.rankIndex);
@@ -133,16 +140,26 @@ export default function PaywallContent({
   }, []);
 
   const price = monthly?.priceString ?? FALLBACK_PRICE;
+  const period = BILLING_PERIOD_LABEL;
+  const storeName = Platform.OS === 'ios' ? 'the App Store' : 'Google Play';
+  // THE TRIAL GOOGLE PLAY WILL GIVE THIS READER, if any. With one on offer the
+  // button starts it and says so; without one it charges today and says that. The
+  // screen never guesses which: `trial` is read off the exact option the purchase
+  // buys.
+  const trial = monthly?.trial ?? null;
 
   const onSubscribe = async () => {
     if (busy) return;
     setNotice(null);
     setBusy(true);
     track('subscribe_clicked', { plan: 'scholars_pass', billing: 'monthly', source });
-    const outcome = await purchaseMonthly();
+    const outcome = trial
+      ? await startTrial(source ?? 'paywall')
+      : await purchaseMonthly(source);
     setBusy(false);
     if (outcome === 'success') return; // the success state renders from isPro
     if (outcome === 'cancelled') return; // user backed out — say nothing
+    if (trial) { setNotice(startNotice(outcome)); return; }
     if (outcome === 'unavailable')
       setNotice("Purchases run in the installed Ashmere app — this preview can't complete a real purchase.");
     else setNotice('Something went wrong starting your subscription. Please try again.');
@@ -187,17 +204,28 @@ export default function PaywallContent({
               width={cardW}
             />
           </MotiView>
-          <View style={styles.proPlate}>
-            <MetalPlate metal={METAL.GOLD} label="ACTIVE" />
-          </View>
-          <Text style={styles.thanksTitle}>You’re a Scholar</Text>
-          <Text style={styles.thanksBody}>
-            Every lesson, every day, with nothing in the way of them. Thank you for
-            keeping this project going.
-          </Text>
-          <Text style={styles.manageNote}>
-            Manage or cancel anytime from your App Store / Google Play subscription settings.
-          </Text>
+          {state.kind === 'trial' || state.kind === 'deviceTrial' ? (
+            // ON THE TRIAL, the thank-you is not the news. When it ends, what it
+            // becomes and how to cancel it are, so this reader sees the trial's
+            // own panel where a subscriber sees ACTIVE.
+            <View style={styles.trialBox}>
+              <TrialStatus source="paywall" />
+            </View>
+          ) : (
+            <>
+              <View style={styles.proPlate}>
+                <MetalPlate metal={METAL.GOLD} label="ACTIVE" />
+              </View>
+              <Text style={styles.thanksTitle}>You’re a Scholar</Text>
+              <Text style={styles.thanksBody}>
+                Every lesson, every day, with nothing in the way of them. Thank you for
+                keeping this project going.
+              </Text>
+              <Text style={styles.manageNote}>
+                {`Manage or cancel any time from Settings, or in your ${storeName} subscriptions.`}
+              </Text>
+            </>
+          )}
           <Button label="Done" onPress={onClose} size="lg" style={styles.proCta} />
         </ScrollView>
       </View>
@@ -277,11 +305,22 @@ export default function PaywallContent({
           />
         </View>
 
-        <View style={styles.priceRow}>
-          <Text style={styles.price}>{price}</Text>
-          <Text style={styles.per}> / month</Text>
-        </View>
-        <Text style={styles.billNote}>Billed monthly · cancel anytime</Text>
+        {trial ? (
+          <>
+            <View style={styles.priceRow}>
+              <Text style={styles.price}>{`${trialLengthPhrase(trial)} free`}</Text>
+            </View>
+            <Text style={styles.billNote}>{`Then ${price} a ${period}, unless you cancel`}</Text>
+          </>
+        ) : (
+          <>
+            <View style={styles.priceRow}>
+              <Text style={styles.price}>{price}</Text>
+              <Text style={styles.per}> / month</Text>
+            </View>
+            <Text style={styles.billNote}>Billed monthly · cancel anytime</Text>
+          </>
+        )}
 
         {!available && (
           <View style={styles.previewBanner}>
@@ -293,12 +332,20 @@ export default function PaywallContent({
         )}
 
         <Button
-          label={busy ? 'One moment…' : `Start — ${price} / mo`}
+          label={busy ? 'One moment…' : trial ? startTrialLabel(trial) : `Start — ${price} / mo`}
           onPress={onSubscribe}
           disabled={busy || !ready}
           size="lg"
           style={styles.cta}
         />
+        {/* THE PROMISE LARGE, THEN THE TERMS SMALL, straight under the button that
+            starts the trial, in the words every other door uses. */}
+        {trial ? (
+          <>
+            <Text style={styles.promise}>{REMINDER_PROMISE}</Text>
+            <Text style={styles.terms}>{conversionTerms(trial, price, period)}</Text>
+          </>
+        ) : null}
 
         <Pressable onPress={onRestore} disabled={busy} style={styles.restoreBtn} hitSlop={8}>
           <Text style={styles.restoreText}>Restore purchase</Text>
@@ -311,9 +358,9 @@ export default function PaywallContent({
         )}
 
         <Text style={styles.legal}>
-          Payment is charged to your store account at confirmation. The subscription renews monthly
-          unless cancelled at least 24 hours before the period ends. Manage or cancel in your store
-          account settings.
+          {trial
+            ? trialLegal(price, period)
+            : `Payment is charged to your ${storeName} account when you confirm. The Scholar’s Pass renews every ${period} until you cancel. Cancel any time in ${storeName} or from Settings in the app; it stays active until the end of the ${period} you have paid for.`}
         </Text>
         <View style={styles.linksRow}>
           {terms ? (
@@ -406,6 +453,17 @@ const styles = StyleSheet.create({
   previewText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 12.5, color: C.inkSoft, lineHeight: 18 },
 
   cta: { marginTop: SPACE[3] },
+  // 14, not 14.5: at 14.5 the sentence broke with "ends." alone on a second line
+  // across the full-width column.
+  promise: {
+    fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 20, color: C.ink,
+    textAlign: 'center', marginTop: SPACE[2],
+  },
+  terms: {
+    fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: C.inkSoft,
+    textAlign: 'center', marginTop: SPACE[1],
+  },
+  trialBox: { alignSelf: 'stretch', marginTop: SPACE[3] },
 
   restoreBtn: { alignItems: 'center', paddingVertical: SPACE[2] },
   restoreText: {

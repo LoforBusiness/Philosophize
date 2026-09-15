@@ -7,8 +7,9 @@ import ScreenTransition from '@/components/shared/ScreenTransition';
 import { MetalPlate } from '@/components/profile/Struck';
 import PassChart, { PlanTiles, usePassArrival, INK_GOLD } from '@/components/paywall/PassChart';
 import PassDoor from '@/components/paywall/PassDoor';
+import TrialStatus from '@/components/paywall/TrialStatus';
 import { METAL, INK, MID, PAPER, mix } from '@/components/shared/tone';
-import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { useSubscriptionStore, usePassState } from '@/stores/subscriptionStore';
 import { C, SPACE } from '@/constants/design';
 import { BILLING_PERIOD_LABEL } from '@/constants/subscription';
 import { TERMS_URL, PRIVACY_URL } from '@/constants/legal';
@@ -44,9 +45,13 @@ const GOLD = METAL.GOLD;
 
 export default function PassTab() {
   const isPro = useSubscriptionStore((s) => s.isPro);
-  // PAYING, not merely Pro. `isPro` is also true inside the free trial, and the
-  // ACTIVE plate and "manage or cancel" say something a trial reader cannot do.
-  const paying = useSubscriptionStore((s) => s.entitled || s.isReviewer);
+  // WHICH OF THE FIVE STATES, decided once in `passState`. `isPro` is true on the
+  // free trial as well as on a paid Pass, and the two need opposite things on
+  // this tab: the trial's end, what it becomes and its Cancel button at the top,
+  // or the ACTIVE plate under the chart.
+  const state = usePassState();
+  const paying = state.kind === 'paid' || state.kind === 'reviewer';
+  const onTrial = state.kind === 'trial' || state.kind === 'deviceTrial';
   const period = BILLING_PERIOD_LABEL;
 
   // Local consts: TypeScript will not carry a narrowing of an IMPORTED binding
@@ -104,6 +109,15 @@ export default function PassTab() {
             <Text style={st.h1Gold}>{'Scholar’s Pass'}</Text>
           </Text>
 
+          {/* THE TRIAL, FIRST, while one is running. The reminder notification
+              lands on this tab, and "tap to cancel" has to mean the Cancel button
+              is the first thing under the headline, not somewhere down the page. */}
+          {onTrial ? (
+            <View style={st.trial}>
+              <TrialStatus source="pass_tab" />
+            </View>
+          ) : null}
+
           <View style={st.chart}>
             <PassChart play={play} />
           </View>
@@ -146,6 +160,7 @@ const st = StyleSheet.create({
     textAlign: 'center', includeFontPadding: false, paddingHorizontal: SPACE[1],
   },
   h1Gold: { color: INK_GOLD },
+  trial: { marginTop: SPACE[4] },
 
   chart: { marginTop: SPACE[5] },
   door: { marginTop: SPACE[4] },

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Easing, InteractionManager } from 'react-native';
-import { Tabs, useSegments } from 'expo-router';
+import { Tabs, router, useSegments } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TabIcon, { type TabIconName } from '@/components/shared/TabIcon';
 import { touch } from '@/lib/feedback';
@@ -166,6 +166,17 @@ export default function AppLayout() {
     };
   }, [launchDone, warm]);
   const built = (name: (typeof WARM)[number]) => WARM.indexOf(name) < warm;
+
+  // A TAP ON THE FREE TRIAL'S REMINDER lands on the Pass tab, where the trial's
+  // end and its Cancel button sit at the top. It waits for `launchDone`, which
+  // comes after the auth redirect, so the root layout's `router.replace` to Home
+  // cannot land on top of it.
+  const pendingOpen = useUIStore((s) => s.pendingOpen);
+  useEffect(() => {
+    if (!launchDone || pendingOpen !== 'trial') return;
+    useUIStore.getState().setPendingOpen(null);
+    router.navigate('/(app)/pass');
+  }, [launchDone, pendingOpen]);
 
   return (
     <Tabs

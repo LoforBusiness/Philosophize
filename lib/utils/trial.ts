@@ -1,4 +1,5 @@
-import { TRIAL_DAYS, TRIAL_MS } from '@/constants/subscription';
+import { TRIAL_REMINDER_BEFORE_MS, ANDROID_PACKAGE } from '@/constants/subscription';
+import type { SubStatus, TrialPeriod } from '@/lib/purchases/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE TRIAL'S ARITHMETIC, AND NOTHING ELSE.
@@ -50,18 +51,107 @@ export function trialLabel(msLeft: number): string {
   return `${days} ${days === 1 ? 'day' : 'days'} left`;
 }
 
-/** 'THREE DAYS' — the trial's length, spelled, for inscriptional type. */
-export function trialSpelled(): string {
-  const WORDS = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN'];
-  return WORDS[TRIAL_DAYS] ?? String(TRIAL_DAYS);
+/** `3 days`, `1 week`: the offer's length, for running text. */
+export function trialLengthPhrase(t: TrialPeriod): string {
+  return `${t.value} ${t.value === 1 ? t.unit : `${t.unit}s`}`;
 }
 
-/** When a trial started now would end. The one place the length is applied. */
-export function trialEndFrom(now: number): number {
-  return now + TRIAL_MS;
+/** `3-day`, `1-week`: the same length as the adjective in "a 3-day free trial". */
+export function trialAdjective(t: TrialPeriod): string {
+  return `${t.value}-${t.unit}`;
 }
 
-/** `3 days` / `1 day`, for running text. */
-export function trialLengthPhrase(): string {
-  return `${TRIAL_DAYS} ${TRIAL_DAYS === 1 ? 'day' : 'days'}`;
+/** The offer's length in days, for analytics. A month counts as thirty. */
+export function trialDays(t: TrialPeriod): number {
+  const per = { day: 1, week: 7, month: 30, year: 365 }[t.unit];
+  return t.value * per;
+}
+
+/** When the reminder is due: a day before the trial ends. */
+export function reminderAt(endsAt: number): number {
+  return endsAt - TRIAL_REMINDER_BEFORE_MS;
+}
+
+/**
+ * The page in Google Play that manages THIS subscription, where it is cancelled.
+ *
+ * Google's documented deep link. With `sku` and `package` it opens on the
+ * subscription itself instead of on a list the reader has to search, which is
+ * the difference between an easy cancel and one somebody can complain about.
+ * RevenueCat names a Google product `subscription:basePlan`, and Play wants only
+ * the first half.
+ */
+export function playSubscriptionUrl(productId: string | null): string {
+  const base = 'https://play.google.com/store/account/subscriptions';
+  if (!productId) return base;
+  const sku = productId.split(':')[0];
+  return `${base}?sku=${encodeURIComponent(sku)}&package=${ANDROID_PACKAGE}`;
+}
+
+/**
+ * `Thursday, September 18 at 9:41 AM`, in the reader's own locale and time zone.
+ *
+ * The day AND the time, because "ends Thursday" leaves a reader guessing whether
+ * cancelling on Thursday afternoon is still in time.
+ */
+export function whenLabel(ms: number): string {
+  const d = new Date(ms);
+  const day = d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  // The time is held together with no-break spaces: in Settings' narrow card
+  // "9:43 PM" broke with "PM" alone on its own line.
+  const time = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+    .replace(/\s/g, ' ');
+  return `${day} at ${time}`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WHICH OF FIVE STATES THE READER IS IN.
+//
+// Every screen in the Pass family used to work this out for itself from
+// `isPro`, `entitled` and a date, and they did not all agree. `isPro` is true in
+// four of the five, so it cannot tell a trial from a paid Pass. Those two need
+// opposite things on screen: a reader on the trial has to be told it will charge
+// and shown how to stop it, and a paying reader has to be left alone. So it is
+// decided once, here, in the order that matters:
+//
+//   trial        Google Play's free trial. Converts unless `willRenew` is false.
+//   paid         An active subscription that is not a trial.
+//   reviewer     The allow-list; nothing to cancel, nothing to buy.
+//   deviceTrial  The RETIRED on-device trial, still running for a reader who
+//                took it before it was retired. Ends by itself; nothing converts.
+//   free         Everybody else. `offer` is the trial Google would give, if any.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface PassInput {
+  /** The store's answer (plus the reviewer allow-list), as the store holds it. */
+  entitled: boolean;
+  isReviewer: boolean;
+  sub: SubStatus;
+  /** The retired on-device trial's end, or null. */
+  trialEndsAt: number | null;
+  /** The trial the Subscribe button would start for this reader, or null. */
+  offer: TrialPeriod | null;
+}
+
+export type PassState =
+  | { kind: 'trial'; endsAt: number | null; willRenew: boolean }
+  | { kind: 'paid'; willRenew: boolean; expiresAt: number | null }
+  | { kind: 'reviewer' }
+  | { kind: 'deviceTrial'; endsAt: number }
+  | { kind: 'free'; offer: TrialPeriod | null };
+
+export function passState(s: PassInput, now: number): PassState {
+  if (s.sub.active && s.sub.onTrial) {
+    return { kind: 'trial', endsAt: s.sub.expiresAt, willRenew: s.sub.willRenew };
+  }
+  if (s.sub.active) return { kind: 'paid', willRenew: s.sub.willRenew, expiresAt: s.sub.expiresAt };
+  if (s.isReviewer) return { kind: 'reviewer' };
+  // Entitled with no status behind it: a subscriber persisted before `sub`
+  // existed, on the first frame before the store answers. Paid, until told
+  // otherwise, which is what they were before this update too.
+  if (s.entitled) return { kind: 'paid', willRenew: true, expiresAt: null };
+  if (s.trialEndsAt != null && trialActive(s.trialEndsAt, now)) {
+    return { kind: 'deviceTrial', endsAt: s.trialEndsAt };
+  }
+  return { kind: 'free', offer: s.offer };
 }

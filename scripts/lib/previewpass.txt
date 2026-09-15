@@ -9,15 +9,30 @@ import SettingsScreen from '@/app/(app)/settings';
 import DailyLimit from '@/components/paywall/DailyLimit';
 import LessonLocked from '@/components/paywall/LessonLocked';
 import TrialOffer from '@/components/paywall/TrialOffer';
+import PassConferred from '@/components/paywall/PassConferred';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { notifications } from '@/lib/notifications';
 import { ALL_BRANCHES } from '@/data';
 
 const q = (k: string) =>
   typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(k);
 
 const HOUR = 3_600_000;
+
+// THE STORE'S MONTHLY PACKAGE, seeded the way `normalize` in lib/purchases/real.ts
+// builds it. The web stub has no RevenueCat, so without this no screen could show
+// the free trial at all: the trial is read off the package, never assumed.
+const PKG = {
+  identifier: '$rc_monthly',
+  productId: 'philosophize_scholars_pass_monthly:monthly',
+  priceString: '$6.99',
+  price: 6.99,
+  currency: 'USD',
+  period: 'month',
+  trial: { value: 3, unit: 'day' },
+};
 
 export default function PreviewPass() {
   const [ready, setReady] = useState(false);
@@ -63,6 +78,19 @@ export default function PreviewPass() {
       philosopherViews: {},
     } as never);
 
+    // NOTIFICATIONS, AS A PHONE WOULD ANSWER. The web build has no scheduler, so
+    // the trial's reminder ask renders nothing there, and it is the one piece of
+    // this flow a reader on a phone always meets. `notify=ask` is a phone that has
+    // not been asked; `notify=granted` one that allowed it.
+    const notify = q('notify');
+    if (notify === 'ask' || notify === 'granted') {
+      Object.assign(notifications, {
+        isSupported: () => true,
+        hasPermission: async () => notify === 'granted',
+        requestPermission: async () => false,
+      });
+    }
+
     // The root layout holds every route behind the launch animation, so a
     // preview that does not release it photographs an empty page with no error
     // anywhere — which is exactly what the first run of this harness did.
@@ -75,20 +103,30 @@ export default function PreviewPass() {
     //
     // THE FIELDS ARE SEEDED THE WAY THE STORE WOULD HOLD THEM. `isPro` is derived
     // from `entitled` and the trial, so seeding it alone would preview a state the
-    // app can never be in. `trial=on` is a trial 36 hours from its end, `used` a
-    // trial that ended yesterday, and neither is a free reader with one to take.
+    // app can never be in.
+    //
+    //   trial=on         Google Play's trial, 60 hours from its end, will convert
+    //   trial=cancelled  the same trial, cancelled: it will not convert
+    //   trial=used       Google no longer offers this reader a trial
+    //   trial=device     the retired on-device trial, 36 hours from its end
     const pro = q('pro') === '1';
     const trial = q('trial');
     const now = Date.now();
+    const google = trial === 'on' || trial === 'cancelled';
+    const NONE = { active: false, onTrial: false, expiresAt: null, willRenew: false, productId: null };
     useSubscriptionStore.setState({
       ready: true,
       available: false,
-      entitled: pro,
+      entitled: pro || google,
       isReviewer: false,
-      trialUsed: trial === 'on' || trial === 'used',
-      trialEndsAt: trial === 'on' ? now + 36 * HOUR : trial === 'used' ? now - 24 * HOUR : null,
-      isPro: pro || trial === 'on',
-      monthly: null,
+      sub: google
+        ? { active: true, onTrial: true, expiresAt: now + 60 * HOUR, willRenew: trial === 'on', productId: PKG.productId }
+        : pro
+          ? { active: true, onTrial: false, expiresAt: now + 20 * 24 * HOUR, willRenew: true, productId: PKG.productId }
+          : NONE,
+      trialEndsAt: trial === 'device' ? now + 36 * HOUR : null,
+      isPro: pro || google || trial === 'device',
+      monthly: trial === 'used' ? { ...PKG, trial: null } : PKG,
       refresh: async () => {},
     } as never);
 
@@ -119,7 +157,10 @@ export default function PreviewPass() {
   } else if (s === 'trial') {
     // THE POST-LESSON OFFER. A Modal, which react-native-web portals outside this
     // root; sheet-pass reads the whole body for that reason.
-    body = <TrialOffer onAccept={() => {}} onDecline={() => {}} />;
+    body = <TrialOffer onAccept={async () => 'unavailable'} onDecline={() => {}} />;
+  } else if (s === 'conferral') {
+    // THE CEREMONY, as a trial that has just started. Also a Modal.
+    body = <PassConferred kind="trial" onDone={() => {}} />;
   } else if (s === 'limit') {
     body = <DailyLimit lesson={unit0.lessons[2]} branch={branch} onExit={() => {}} />;
   } else if (s === 'locked') {

@@ -12,10 +12,14 @@ import RankSeal from '@/components/shared/RankSeal';
 import { MetalPlate } from '@/components/profile/Struck';
 import Certificate, { ScheduleHead, ScheduleRow } from '@/components/paywall/Certificate';
 import { INK, MID, PANEL_BASE, METAL, mix } from '@/components/shared/tone';
+import TrialReminderAsk from '@/components/paywall/TrialReminderAsk';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { awardedRank, rankOrder, rankDegree } from '@/data/ranks';
 import { PASS_LINES, longPass } from '@/lib/utils/passValue';
-import { trialLengthPhrase } from '@/lib/utils/trial';
+import { trialLengthPhrase, whenLabel } from '@/lib/utils/trial';
+import { startedTerms } from '@/lib/utils/trialTerms';
+import { BILLING_PERIOD_LABEL, FALLBACK_PRICE } from '@/constants/subscription';
 import { C, SPACE } from '@/constants/design';
 import { cue } from '@/lib/feedback';
 
@@ -125,6 +129,12 @@ export default function PassConferred({ kind, onDone }: Props) {
   const displayName = useUserDataStore((s) => s.displayName);
   const rankIndex = useUserDataStore((s) => s.rankIndex);
   const totalXP = useUserDataStore((s) => s.totalXP);
+  // THE TRIAL AS GOOGLE PLAY STARTED IT: when it ends, the price it becomes, and
+  // how long the offer was. Read from the store, never from a constant, so the
+  // terms under the certificate are the terms the reader just agreed to.
+  const trialEndsAt = useSubscriptionStore((s) => (s.sub.onTrial ? s.sub.expiresAt : null));
+  const offer = useSubscriptionStore((s) => s.monthly?.trial ?? null);
+  const price = useSubscriptionStore((s) => s.monthly?.priceString ?? FALLBACK_PRICE);
 
   const { width: winW } = useWindowDimensions();
   const PAD = SPACE[4];
@@ -246,12 +256,19 @@ export default function PassConferred({ kind, onDone }: Props) {
 
   // The head plate and the terms are the ONLY difference between the two doors.
   const trial = kind === 'trial';
+  // A TRIAL'S TERMS SAY WHAT HAPPENS AT THE END, in the words every other door
+  // uses: free until the date, then a Scholar's Pass automatically, unless it is
+  // cancelled. The ceremony is not the place to go quiet about the charge.
   const terms = useMemo(
     () =>
       trial
-        ? `${trialLengthPhrase()} from right now, with everything above unlocked. There is nothing to cancel and no card on file — when it runs out the Pass simply closes again.`
+        ? startedTerms(
+          trialEndsAt != null ? whenLabel(trialEndsAt) : 'the trial ends',
+          price,
+          BILLING_PERIOD_LABEL,
+        )
         : 'Yours for as long as you keep it. Manage or cancel any time from Settings, and nothing you have earned ever goes away.',
-    [trial],
+    [trial, trialEndsAt, price],
   );
 
   const rows = useMemo(
@@ -316,7 +333,9 @@ export default function PassConferred({ kind, onDone }: Props) {
                   flag={
                     <MetalPlate
                       metal={METAL.GOLD}
-                      label={trial ? trialLengthPhrase().toUpperCase() : 'ACTIVE'}
+                      label={trial
+                        ? (offer ? `${trialLengthPhrase(offer).toUpperCase()} FREE` : 'FREE TRIAL')
+                        : 'ACTIVE'}
                     />
                   }
                 >
@@ -359,6 +378,13 @@ export default function PassConferred({ kind, onDone }: Props) {
             <Text style={st.kicker}>CONFERRED</Text>
             <Text style={st.head}>The library is open.</Text>
             <Text style={st.terms}>{terms}</Text>
+            {/* THE ASK FOR THE REMINDER, at the moment the trial exists to be
+                reminded about. It says the date it would arrive. */}
+            {trial ? (
+              <View style={st.ask}>
+                <TrialReminderAsk endsAt={trialEndsAt} source="conferral" />
+              </View>
+            ) : null}
           </Animated.View>
 
           <Animated.View style={[{ width: cardW }, ctaStyle]}>
@@ -414,4 +440,5 @@ const st = StyleSheet.create({
     fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 19, color: MID,
     marginTop: SPACE[2], textAlign: 'center',
   },
+  ask: { alignSelf: 'stretch', marginTop: SPACE[3] },
 });

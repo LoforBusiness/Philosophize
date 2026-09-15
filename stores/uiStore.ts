@@ -76,6 +76,17 @@ interface UIStore {
    */
   remindersNonce: number;
   bumpReminders: () => void;
+  /**
+   * A tap on a notification this app laid down, waiting for the tab shell to act
+   * on it. The only one today is the free trial's reminder, which opens the Pass
+   * tab, where the trial's end and its Cancel button sit at the top.
+   *
+   * Parked here rather than navigated to directly because the tap can launch the
+   * app from cold, before there is a router to push into or a signed-in shell to
+   * push into it -- the same reason the widget parks `pendingPhilosopherId`.
+   */
+  pendingOpen: 'trial' | null;
+  setPendingOpen: (open: 'trial' | null) => void;
   // ── THE CONFERRAL ─────────────────────────────────────────────────────────
   //
   // The Scholar's Pass being handed over, shown globally over everything for the
@@ -160,6 +171,8 @@ export const useUIStore = create<UIStore>((set) => ({
   closePaywall: () => set({ paywallOpen: false }),
   remindersNonce: 0,
   bumpReminders: () => set((s) => ({ remindersNonce: s.remindersNonce + 1 })),
+  pendingOpen: null,
+  setPendingOpen: (open) => set({ pendingOpen: open }),
   conferral: null,
   conferralSeq: 0,
   showConferral: (kind) => set((s) => ({ conferral: kind, conferralSeq: s.conferralSeq + 1 })),

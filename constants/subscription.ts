@@ -63,41 +63,40 @@ export const FALLBACK_PRICE = '$6.99';
 export const BILLING_PERIOD_LABEL = 'month';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE FREE TRIAL.
+// THE FREE TRIAL IS GOOGLE PLAY'S.
 //
-// Three days of the whole Pass, granted by the app, with no card and no charge.
-// It is deliberately NOT a store introductory offer, and the difference is worth
-// stating because the two look identical on screen and are nothing alike:
+// For its first life the trial was granted BY THE APP: three days written onto
+// this phone, no card, nothing to cancel, closing by itself. That was true as
+// far as it went, and it sat beside a second trial no screen mentioned. The
+// monthly subscription carries a free-trial offer in Play Console, so the
+// Subscribe button was starting GOOGLE'S trial, which converts into a charge.
+// Two trials, and the one that charges was the one saying nothing about it.
 //
-//   · A STORE TRIAL is configured in Play Console and RevenueCat. Tapping it
-//     opens the billing sheet, the reader confirms with a real payment method,
-//     the entitlement goes active with `periodType: TRIAL`, and on day four it
-//     CONVERTS — they are charged unless they cancelled. It monetizes better and
-//     it cannot be reset by reinstalling.
-//   · THIS one is granted locally. Nobody is asked for a card, nothing converts,
-//     and on day four the Pass simply closes again.
+// There is one trial now, and it is the store's. That was the reader's choice
+// (2026-09-15), and this is what it means:
 //
-// The local one is what ships because it is the one that can be true today: a
-// store trial needs dashboard configuration this repo cannot do, and a button
-// that says "3 days free" while opening a sheet that charges immediately is the
-// exact class of lie §14 exists to prevent.
+//   · STARTING IT opens Google's payment sheet. Google shows its own terms, the
+//     reader confirms with a payment method, and nothing is charged today.
+//   · WHEN IT ENDS it automatically becomes a Scholar's Pass at the monthly
+//     price, unless the reader cancelled first. Google Play does that and
+//     charges it. The app cannot, and cannot stop it either.
+//   · ITS LENGTH IS WHATEVER THE OFFER SAYS. It is read off the exact option a
+//     purchase buys (`SubPackage.trial`), and Google lists only the offers a
+//     reader is still eligible for, so no screen can promise free days the button
+//     would not give. `TRIAL_DAYS` below is what Play Console is set to, for the
+//     web preview and the checks. No screen reads it.
 //
-// SWAPPING TO THE STORE VERSION LATER IS ONE FUNCTION. `startTrial()` in
-// stores/subscriptionStore.ts is the seam: point it at `purchaseMonthly()` once
-// the intro offer exists, keep `TRIAL_DAYS` in step with what the store is
-// configured for, and every screen, every string and the whole conferral
-// animation carry over untouched.
+// Google Play's policy asks every app with a trial to say, before it starts, how
+// long it lasts, what it costs afterwards, when it converts and how to cancel,
+// and to give an easy way to cancel inside the app. Those sentences live once, in
+// `lib/utils/trialTerms.ts`, and `check:pass` §9 holds every door to them.
 //
-// KNOWN LIMIT, stated rather than discovered: the flag lives in this device's
-// subscription store, which is persisted but NOT part of the cloud snapshot. A
-// reader who deletes and reinstalls the app gets another three days. That is a
-// lot of friction for the price of a month, and the alternative — putting an
-// entitlement fact into `userDataStore` — would give the app two sources of
-// truth about who has paid, which is a worse problem than a rare free week.
+// A READER WHO TOOK THE OLD ON-DEVICE TRIAL keeps it until it ends. See
+// `trialEndsAt` in stores/subscriptionStore.ts.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * How long the trial runs. Every string that names it interpolates this.
+ * What Play Console's free-trial offer is set to. Screens read the offer itself.
  *
  * ANNOTATED `number` rather than left to infer, which is not a style choice:
  * inferred it is the literal type `3`, and TypeScript then calls every
@@ -107,5 +106,24 @@ export const BILLING_PERIOD_LABEL = 'month';
  */
 export const TRIAL_DAYS: number = 3;
 
-/** The same figure in milliseconds, which is what the clock is compared against. */
-export const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
+/**
+ * "A day before it ends." The reminder notification is laid down this long
+ * before the trial's end, and the reminder email goes out in the same window.
+ * The email is sent by a server that cannot import this file, so
+ * `supabase/functions/_shared/trialReminder.ts` states the figure again, and
+ * `check:pass` fails if the two ever disagree.
+ */
+export const TRIAL_REMINDER_BEFORE_MS = 24 * 60 * 60 * 1000;
+
+/** The Play package, for the link that opens THIS subscription in Google Play. */
+export const ANDROID_PACKAGE = 'com.philosophize.app';
+
+/**
+ * Whether the reminder EMAIL is actually being sent.
+ *
+ * False until the two functions in supabase/functions are deployed and
+ * RevenueCat's webhook points at them. Until then no screen may mention an
+ * email, because a promised email that never arrives is exactly the complaint
+ * this whole flow exists to prevent.
+ */
+export const TRIAL_EMAIL_REMINDERS: boolean = false;

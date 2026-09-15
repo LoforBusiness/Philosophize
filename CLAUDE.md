@@ -151,7 +151,8 @@ Philosophize/
 │   ├── paywall/                 # THE PASS FAMILY — PassChart (the Free-against-
 │   │                            #   Pass chart + tiles, on the tab, the trial
 │   │                            #   offer and Settings), PassDoor (trial or buy),
-│   │                            #   TrialOffer, PassConferred, PassParts,
+│   │                            #   TrialStatus (a running trial + Cancel),
+│   │                            #   TrialReminderAsk, TrialOffer, PassConferred, PassParts,
 │   │                            #   DailyLimit, LessonLocked, Certificate,
 │   │                            #   PassHerald (§14)
 │   ├── gamification/            # StreakBook, StreakWeek, RankUpScreen
@@ -935,7 +936,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **fifty-seven** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **fifty-eight** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -945,7 +946,7 @@ followed:
 `check-plainwords` · `check-voice` · `check-ear` · `check-narration` · `check-streak` · `check-quips` ·
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
-`check-poll` · `check-access` · `check-pass` · `check-rest` · `check-stats` · `check-launch` ·
+`check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-stats` · `check-launch` ·
 `check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-thoughts` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
@@ -2031,15 +2032,43 @@ the button and the price is a quiet link under it; during the trial it shows the
 days left and offers to keep the Pass; after it, the price and the button.
 `startTrial(source)` records where the trial was taken.
 
-- **`isPro` is true inside the trial, so "has paid" is `entitled || isReviewer`.**
-  The tab's ACTIVE plate and Settings' cancel button both read `isPro`, and would
-  have told a reader on the trial to cancel a subscription they do not have.
-- **The trial cannot charge anybody**, and `check:pass` §9g holds it:
-  `startTrial` and `syncTrial` never reach billing, the store opens the billing
-  sheet in exactly one place, and `purchaseMonthly()` is called only from the
-  paywall's own button. A free-trial offer configured on the monthly product in
-  Play Console would be a different thing, a store trial that converts to a
-  charge, and nothing in this repo can see whether one exists.
+- **The trial is Google Play's, and it converts.** For its first life it was
+  granted by the app, with no card and nothing to cancel. Then the reader found
+  the monthly subscription's free-trial offer in Play Console (2026-09-15): the
+  Subscribe button had been starting GOOGLE'S trial all along, and that one turns
+  into a charge. So there is one trial now, Google's, and `startTrial` is the
+  payment sheet. Its length is read off the exact option a purchase buys
+  (`SubPackage.trial`, from `defaultOption.freePhase`). Google lists only the
+  offers a reader is still eligible for, so no door can promise days the sheet
+  will not give. A reader who took the on-device trial before keeps it until it
+  ends (`deviceTrial`).
+- **Every door says the promise large and the conversion small**, in the reader's
+  own order and in `lib/utils/trialTerms.ts`'s words. First "We'll remind you a day
+  before your free trial ends", then how long it lasts, that it automatically
+  becomes a Scholar's Pass at the price, and how to cancel without being charged.
+  That is also what Google Play's subscription policy requires before a trial
+  starts, and `check:pass` §9g holds all three doors to the shared sentences.
+- **Cancelling is one button, and the reminder lands on it.** `TrialStatus` sits at
+  the top of the Pass tab, in Settings and on the paywall. It shows the end date,
+  says the trial becomes a Scholar's Pass automatically, and carries Cancel free
+  trial. That button opens Google Play on THIS subscription (`playSubscriptionUrl`),
+  and the store re-reads the trial fresh on the way back, so a cancelled trial says
+  "you won't be charged" by itself.
+  - A local notification is laid down a day before the end, on its own HIGH
+    channel, only while the trial will convert; tapping it opens the Pass tab.
+  - The conferral asks for notification permission the moment a trial starts
+    (`TrialReminderAsk`).
+- **The reminder email is a server's** (`supabase/functions/revenuecat-webhook` and
+  `trial-reminder-emails`). No screen mentions it until `TRIAL_EMAIL_REMINDERS` is
+  true, because a promised email that never arrives is the complaint this exists
+  to prevent. Google Play also emails every trial user before a trial ends, on its
+  own schedule.
+- **A trial start is not revenue.** `trial_started` carries no `$revenue`, and
+  `subscribe_succeeded` fires only for a purchase that is not a trial.
+- **`isPro` is true inside the trial, so screens ask `passState` instead.** It sorts
+  a reader into one of five states: trial, paid, reviewer, deviceTrial or free.
+  `isPro` cannot tell a trial from a paid Pass, and the two need opposite things on
+  screen.
 
 **The certificate is still the object** the conferral issues (`PassConferred`),
 and these three decisions in it stand:

@@ -156,31 +156,71 @@ const SCREENS = [
     want: ['Every lesson, every day', 'with the Scholar’s', 'Benefits', 'Free', 'Pass',
            'Lessons a day', 'Unlimited', 'Replay lessons', 'In order',
            'EVERY PLAN INCLUDES', 'badges', 'DAYS FREE', 'Start your',
-           'No card and no charge', 'Or subscribe now for'],
-    notWant: ['Get the Scholar’s Pass'] },
+           'We’ll remind you a day before your free trial ends.',
+           'it automatically becomes a Scholar’s Pass', 'Cancel any time before then'],
+    // The on-device trial's old words, which Google's trial would make untrue.
+    notWant: ['Get the Scholar’s Pass', 'No card and no charge', 'Or subscribe now for'] },
   { key: 'pass-tab-new', q: 's=tab&seed=new',
-    want: ['Benefits', 'EVERY PLAN INCLUDES', 'Start your'] },
-  // The trial running: the door keeps the Pass, and nothing offers to cancel it.
+    want: ['Benefits', 'EVERY PLAN INCLUDES', 'Start your', 'We’ll remind you'] },
+  // GOOGLE'S TRIAL RUNNING: the end, what it becomes and Cancel, above the chart.
   { key: 'pass-tab-trial', q: 's=tab&trial=on',
-    want: ['You hold the', 'DAYS LEFT', 'nothing is charged', 'Keep the Scholar’s Pass'],
-    notWant: ['ACTIVE', 'Start your'] },
-  // The trial spent: no second offer of free days, the plain door instead.
+    want: ['You hold the', 'DAYS LEFT', 'Your free trial ends',
+           'If you do nothing, it automatically becomes a Scholar’s Pass',
+           'Cancel free trial', 'Cancelling happens in Google Play'],
+    notWant: ['ACTIVE', 'Start your', 'nothing is charged'] },
+  // ON A PHONE THAT ALLOWED NOTIFICATIONS the panel says when the reminder comes.
+  { key: 'pass-tab-trial-granted', q: 's=tab&trial=on&notify=granted',
+    want: ['Reminder set for', 'Cancel free trial'], notWant: ['Turn on reminders'] },
+  // The Cancel button's one step before Google Play opens.
+  { key: 'pass-tab-cancel', q: 's=tab&trial=on', click: 'Cancel free trial',
+    want: ['Cancel your free trial', 'Tap Cancel subscription there', 'Go to Google Play', 'Keep my trial'] },
+  // CANCELLED: no charge is coming, and the panel says so without being asked.
+  { key: 'pass-tab-cancelled', q: 's=tab&trial=cancelled',
+    want: ['FREE TRIAL CANCELLED', 'You won’t be charged', 'stays open until', 'Keep it'],
+    notWant: ['Cancel free trial', 'ACTIVE', 'If you do nothing'] },
+  // Google no longer offers this reader a trial: no free days, the plain door.
   { key: 'pass-tab-used', q: 's=tab&trial=used',
     want: ['Every lesson, every day', 'Get the Scholar’s Pass', 'Cancel any time'],
-    notWant: ['Start your', 'DAYS FREE'] },
+    notWant: ['Start your', 'DAYS FREE', 'We’ll remind you'] },
+  // THE RETIRED ON-DEVICE TRIAL, still running for somebody who took it before.
+  { key: 'pass-tab-device', q: 's=tab&trial=device',
+    want: ['DAYS LEFT', 'It ends by itself, and nothing is charged.', 'Keep the Scholar’s Pass'],
+    notWant: ['Cancel free trial', 'ACTIVE'] },
   { key: 'pass-tab-pro', q: 's=tab&pro=1',
-    want: ['You hold the', 'ACTIVE', 'Benefits'], notWant: ['Get the Scholar’s Pass', 'Start your'] },
+    want: ['You hold the', 'ACTIVE', 'Benefits'],
+    notWant: ['Get the Scholar’s Pass', 'Start your', 'Cancel free trial'] },
   // THE OFFER AFTER A LESSON, on the tab's chart and with its arrival.
   { key: 'trial-offer', q: 's=trial',
     want: ['THAT WAS TODAY’S LESSON', 'DAYS FREE', 'Benefits', 'Replay lessons',
-           'EVERY PLAN INCLUDES', 'Start your', 'Not today'] },
+           'EVERY PLAN INCLUDES', 'Start your', 'Not today',
+           'We’ll remind you a day before your free trial ends.',
+           'it automatically becomes a Scholar’s Pass'],
+    notWant: ['no card, no charge'] },
+  // THE CEREMONY, for a trial that has just started: its terms say the charge.
+  { key: 'conferral-trial', q: 's=conferral&trial=on',
+    want: ['CONFERRED', 'Free until', 'it automatically becomes a Scholar’s Pass', 'Begin'],
+    notWant: ['no card on file', 'nothing to cancel'] },
+  // AND THE ASK, on a phone that has not been asked yet: the moment a trial starts.
+  { key: 'conferral-trial-ask', q: 's=conferral&trial=on&notify=ask',
+    want: ['Get a reminder the day before it ends', 'It would arrive on', 'Turn on reminders', 'Not now', 'Begin'] },
   { key: 'paywall', q: 's=paywall',
     want: ['ADMIT THE BEARER', 'FREE AGAINST THE PASS', 'WHERE YOU ARE',
-           'AT 1 LESSON A DAY', 'no wait at all', 'Start —'] },
+           'AT 1 LESSON A DAY', 'no wait at all', 'days free', 'Start your',
+           'We’ll remind you a day before your free trial ends.',
+           'Starting the free trial costs nothing today'],
+    notWant: ['Start —'] },
+  // No trial on offer: the paywall charges today, and says so.
+  { key: 'paywall-used', q: 's=paywall&trial=used',
+    want: ['Start —', 'Payment is charged'], notWant: ['days free', 'We’ll remind you'] },
   // A reader on day one: every bar empty, and the wait is the whole library.
   { key: 'paywall-new', q: 's=paywall&seed=new',
-    want: ['FREE AGAINST THE PASS', '0 of 222 lessons opened', '222 more days'] },
-  { key: 'paywall-pro', q: 's=paywall&pro=1', want: ['You’re a Scholar', 'ACTIVE'] },
+    want: ['FREE AGAINST THE PASS', '0 of 246 lessons opened', '246 more days'] },
+  { key: 'paywall-pro', q: 's=paywall&pro=1', want: ['You’re a Scholar', 'ACTIVE'],
+    notWant: ['Cancel free trial'] },
+  // On the trial, the paywall shows the trial's own panel where a subscriber sees ACTIVE.
+  { key: 'paywall-trial', q: 's=paywall&trial=on',
+    want: ['Your free trial ends', 'Cancel free trial', 'automatically becomes a Scholar’s Pass'],
+    notWant: ['You’re a Scholar', 'ACTIVE'] },
   { key: 'limit', q: 's=limit',
     want: ['WAITING FOR YOU', 'Opens in', 'TODAY BANKED', 'DAY PASS', 'USED ·'] },
   { key: 'locked-replay', q: 's=locked&k=replay',
@@ -204,20 +244,25 @@ const SCREENS = [
   // by pressing it rather than by a prop.
   { key: 'settings-sub', q: 's=settings', click: 'Subscription',
     want: ['You are on the Free plan', 'Benefits', 'Replay lessons', 'Streak rest days',
-           'DAYS FREE', 'Start the free trial', 'No card and no charge', 'See everything it includes'],
+           'DAYS FREE', 'Start the free trial', 'We’ll remind you a day before your free trial ends.',
+           'it automatically becomes a Scholar’s Pass', 'See everything it includes'],
     // "All 50 badges" was the old card's own claim against a case of seventy.
     // The PRICE is not tested here and must not be: `$6.99` is FALLBACK_PRICE,
     // which is correct on web and before RevenueCat answers. Whether a price is
     // TYPED is a question about the source, and check-pass §7 asks it there.
-    notWant: ['All 50 badges', 'THE DAY PASS'] },
-  // The trial running: Settings keeps the Pass and does not offer to cancel it.
+    notWant: ['All 50 badges', 'THE DAY PASS', 'No card and no charge'] },
+  // GOOGLE'S TRIAL RUNNING: Settings says it converts and carries the trial's own
+  // Cancel button, not the paid Pass's.
   { key: 'settings-sub-trial', q: 's=settings&trial=on', click: 'Subscription',
-    want: ['on the free trial of Scholar’s Pass', 'DAYS LEFT', 'Keep the Pass',
-           'Nothing is charged unless you subscribe'],
+    want: ['on the free trial of Scholar’s Pass', 'DAYS LEFT', 'Cancel free trial',
+           'automatically becomes a Scholar’s Pass', 'Cancelling happens in Google Play'],
     notWant: ['Cancel subscription', 'Start the free trial'] },
+  { key: 'settings-sub-cancelled', q: 's=settings&trial=cancelled', click: 'Subscription',
+    want: ['Your free trial of Scholar’s Pass is cancelled.', 'You won’t be charged'],
+    notWant: ['Cancel free trial', 'Cancel subscription'] },
   { key: 'settings-sub-pro', q: 's=settings&pro=1', click: 'Subscription',
     want: ['You have Scholar’s Pass', 'Benefits', 'Cancel subscription'],
-    notWant: ['Start the free trial', 'Get the Pass'] },
+    notWant: ['Start the free trial', 'Get the Pass', 'Cancel free trial'] },
 ];
 
 const { release } = claimRoute({ route: ROUTE, src: SRC, owner: 'sheet-pass', keep: !!process.env.PASS_KEEP });

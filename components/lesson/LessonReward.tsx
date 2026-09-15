@@ -412,15 +412,23 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     if (atLimit && !justDeclined) openPaywall();
   };
 
-  // Accepting hands over to the conferral, which `startTrial` raises globally --
-  // so this screen can close immediately and the ceremony plays over the branch
-  // the reader is being returned to, rather than over a modal that has to wait
-  // for it. No ad and no paywall: they are a Scholar as of this line.
-  const acceptTrial = () => {
-    setOffer(false);
-    startTrial();
-    onDone();
-    goToBranch();
+  // Accepting opens Google Play's payment sheet over the offer. Only once it has
+  // actually started does this screen close: the conferral, which the store
+  // raises globally, then plays over the branch the reader is returned to. No ad
+  // and no paywall: they are a Scholar as of that line.
+  //
+  // A sheet the reader closes, or one that fails, leaves them ON the offer, which
+  // says what went wrong and still has "Not today". Closing the screen first, as
+  // the on-device trial could, would drop somebody who backed out of Google's
+  // sheet onto the branch with no Pass and no ad, having skipped both.
+  const acceptTrial = async () => {
+    const outcome = await startTrial('post_lesson');
+    if (outcome === 'success') {
+      setOffer(false);
+      onDone();
+      goToBranch();
+    }
+    return outcome;
   };
 
   const declineTrial = () => {
