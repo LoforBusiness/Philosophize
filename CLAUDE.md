@@ -123,9 +123,10 @@ Philosophize/
 │       │                        #   Display · Privacy · Feedback · Subscription ·
 │       │                        #   Danger Zone. Notifications only when §22 says
 │       │                        #   the binary can schedule one
-│       ├── pass.tsx             # THE PASS TAB — two certificates and a herald
-│       │                        #   (§14). The only permanent address the offer
-│       │                        #   has; the rest of the family are interruptions
+│       ├── pass.tsx             # THE PASS TAB — a Free-against-Pass chart, the
+│       │                        #   way Brilliant draws it (§14). The only permanent
+│       │                        #   address the offer has; the rest of the family
+│       │                        #   are interruptions
 │       └── paywall.tsx          # Hidden route — hosts PaywallContent full-screen
 ├── components/
 │   ├── lesson/                  # LessonRunner, CardShell, LessonReward, LessonLoader
@@ -1977,13 +1978,46 @@ offer also has a permanent address between Insights and Profile, which is the
 shape Duolingo and Brilliant both use and the reason is not imitation: a reader
 can walk in, read the terms at their own pace, and walk out again.
 
-**Two certificates, and the second one is the argument.** The SCHOLAR'S PASS is
-engraved in gold and carries everything — the five things the Pass adds, struck
-and recessed and railed, then the six things every reader already has, flat.
-Below it, in paper instead of gold, the DAY PASS says what the free tier really
-gives: the same six included rows, then the identical five rows showing the other
-column. They are the same object in two materials, so the comparison needs no
-explaining.
+**It is a chart now, and for its first life it was two certificates.** The tab
+printed a herald, an engraved Scholar's Pass with eleven ruled rows, the wall in
+days, then an engraved Day Pass with the same eleven rows again. Every line was
+true and none of it was quick to read: *"it's a little bit too confusing because
+a lot of information ... look at Brilliant's page ... it shows two different
+sections."* Brilliant's own paywall (captured 2025) is one chart: a Benefits
+column, a quiet Free column, a Premium column raised in a bright frame, five
+short rows of ticks and crosses, and one chunky button. NN/g's rule for
+comparisons on a phone says the same from the other end: two options, only the
+rows that differ, and what both share merged rather than repeated.
+
+- **The Pass column is struck GOLD, not a rainbow**, on a hard lip the way a
+  button sits, with a white card inside it. Its cells stamp in row by row on
+  every visit, and a glint crosses the gold first. The trigger is FOCUS, because
+  the tab is built at startup and a mount animation would spend itself behind the
+  launch screen; its callback depends on nothing, because `available` flips when
+  RevenueCat answers and a callback listing it would replay the arrival under a
+  reader who had not moved (§19's Insights fault).
+- **A limit is said in words where it is not zero**: "1", "In order", "2 held". A
+  cross appears only where the free tier has none of the thing, because a cross
+  beside "Start any unit" would say a free reader cannot start a unit at all.
+- **`lib/utils/passCompare.ts` re-says `PASS_LINES` as cells**, and
+  `includedTiles()` turns the six shared things into figures on tiles, printed
+  once. That short form is a second place a claim could drift, so `check:pass` §7
+  re-derives every cell from the constant its gate reads, not from the long form.
+  It also measures the cross: GHOST alone is about 2:1 on paper, under the 3:1 a
+  meaningful mark needs, so the disc is darkened toward ink and reads 3.67:1 on
+  the Free panel.
+- **The narrow phone set the columns.** At 320dp the first draft's columns left
+  "Replay finished lessons" three lines of one word each; the columns are 64 and
+  90 and the label is "Replay lessons". A wrapped row also STRETCHES its children
+  by default, and StruckTile's face does not stretch with its shadow, so the tiles
+  sit `flex-start` with one-word nouns.
+- **The herald is not on the tab any more.** `PassHerald` and `passQuips` still
+  pass `check:quips` and nothing draws them. His lines talk about "the
+  certificate", which this screen no longer shows, so moving him somewhere else
+  means reading the pool first.
+
+**The certificate is still the object** Settings, the trial offer and the
+conferral issue, and these three decisions in it stand:
 
 - **The highlight is a MATERIAL, not a colour.** The obvious way to mark the Pass
   rows is a tint behind them, and §19 records that exact move — large saturated
@@ -2000,12 +2034,8 @@ explaining.
   certificate" signal available and it costs no colour at all. It stops above the
   motto — drawn full-bleed it ran behind the one line set in a light italic,
   which is the type least able to hold its own against texture.
-- **The herald stands ON the certificate's top edge**, not beside it. The literal
-  layout was drawn and does not survive a narrow phone: at 320dp a 96pt figure
-  leaves 184pt for a certificate carrying eleven ruled rows, which stops being a
-  certificate and becomes a receipt.
 
-**AND EVERY FIGURE ON BOTH CERTIFICATES IS COUNTED, INCLUDING THE ONES THAT ARE
+**AND EVERY FIGURE ON THE PASS SCREENS IS COUNTED, INCLUDING THE ONES THAT ARE
 NOT GATES.** `PASS_LINES` already held the five differences; `includedLines()`
 now counts the library, the thinkers, the saveable quotes, the ranks and the
 badges out of the tree, and `check:pass` re-derives every one of them by counting
@@ -5412,6 +5442,11 @@ browser at it; the first transform can take longer than a navigation timeout.
   and re-measure before believing it.
 - A stale Metro server will serve a bundle that never boots. Restart with
   `--clear` before concluding the app is broken.
+- **`CI=1 npx expo start` does not watch files.** Expo turns watch mode off in
+  CI, so an edit never reaches the page and a new `app/preview*.tsx` answers
+  "This screen doesn't exist". Both look like the app ignoring your change. Start
+  a verification Metro without `CI`, with stdin from `/dev/null` so it does not
+  wait for keys.
 - **Generated art can be looked at WITHOUT a device or a browser.**
   `scripts/lib/rasterpath.mjs` turns SVG path data into pixels in plain Node —
   flatten, scanline-fill by non-zero winding, anti-alias — and

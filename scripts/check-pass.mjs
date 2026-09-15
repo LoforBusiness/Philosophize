@@ -449,12 +449,6 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
   ok(typedNumber.length === 0, 'no figure is typed into the Pass tab',
     typedNumber.slice(0, 3).map((t) => JSON.stringify(t)).join(' ') || 'every number derived');
 
-  // ── AND THE TWO CERTIFICATES SHOW THE SAME SCHEDULE ───────────────────────
-  //
-  // The free certificate is not a second list of features — it is the identical
-  // five rows with the other column's values, which is what makes the pair
-  // comparable at a glance instead of two unrelated brochures. If one of them
-  // ever renders a subset, they stop being a comparison.
   // -- AND SETTINGS IS THE SIXTH MEMBER OF THE FAMILY --------------------------
   //
   // It was not, and that is why this block exists. Settings > Subscription spent
@@ -514,12 +508,52 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
     `${certs} of 2 — the pro branch and the free branch`);
   ok(/isPro \? \(/.test(sec), 'and picks between them on the tier the reader holds');
 
-  const scholarRows = /PASS_LINES\.map\([\s\S]*?grade="granted"/.test(tab);
-  const freeRows = /PASS_LINES\.map\([\s\S]*?grade="limit"/.test(tab);
-  const included = (tab.match(/included\.map\(/g) || []).length;
-  ok(scholarRows, 'the Scholar certificate renders every row of PASS_LINES as granted');
-  ok(freeRows, 'and the free certificate renders every one of them as a limit');
-  ok(included === 2, 'both certificates print the whole included schedule', `${included} of 2`);
+  // ── AND THE TAB'S CHART SHOWS EVERY DIFFERENCE, SAID SHORT ────────────────
+  //
+  // The tab stopped being two certificates: a reader found eleven ruled rows,
+  // printed twice, "too confusing", and it is a Free-against-Pass chart now, the
+  // way Brilliant shows it. A column is about sixty points wide, so `passCompare`
+  // re-says each row as a tick, a cross or a few characters. That short form is
+  // a second place a claim could drift, so every cell is re-derived here from the
+  // constant its gate reads, not from the long form it was made from.
+  const CMP = await import('@/lib/utils/passCompare');
+  const cmp = CMP.compareRows();
+  ok(/compareRows\(\)/.test(tab) && /rows\.map\(/.test(tab),
+    'the tab draws its chart from compareRows() rather than a typed list');
+  ok(cmp.length === V.PASS_LINES.length && cmp.every((r, i) => r.id === V.PASS_LINES[i].id),
+    'the chart has one row per PASS_LINES entry, in the same order', cmp.map((r) => r.id).join(' · '));
+  const cell = (id, side) => cmp.find((r) => r.id === id)?.[side];
+  const said = (c) => (c?.kind === 'value' ? c.text : c?.kind);
+  ok(said(cell('lessons', 'free')) === String(SUB.FREE_DAILY_LESSON_LIMIT),
+    'the Free column\'s lessons a day is the allowance the gate reads', `"${said(cell('lessons', 'free'))}"`);
+  ok(cell('ads', 'free')?.kind === 'no' && LINE('ads').free !== null,
+    'the Free column does not have "No ads", because a free reader sees them');
+  ok((cell('replay', 'free')?.kind === 'no') === (LINE('replay').free === null),
+    'replay is crossed out on Free exactly when the free tier cannot replay at all');
+  ok(cell('units', 'free')?.kind === 'value',
+    'starting a unit is NOT crossed out on Free: a free reader can start them in order');
+  ok(String(said(cell('rest', 'free'))).includes(String(STREAK.REST_CAP_FREE))
+      && String(said(cell('rest', 'pass'))).includes(String(STREAK.REST_CAP_PRO)),
+    'the rest days held are the two caps the streak reads',
+    `"${said(cell('rest', 'free'))}" · "${said(cell('rest', 'pass'))}"`);
+  ok(cmp.every((r) => r.pass.kind !== 'no'), 'nothing in the Pass column is crossed out');
+  ok(cmp.every((r) => said(r.free) !== said(r.pass)),
+    'and every row differs between the columns, or it is not a difference');
+
+  // THE SHARED HALF, ONCE. NN/g's rule for a comparison on a phone is to merge
+  // what both options share rather than repeat it, and the certificates printed
+  // the same six rows twice.
+  const tiles = CMP.includedTiles();
+  ok(/includedTiles\(\)/.test(tab) && (tab.match(/tiles\.map\(/g) || []).length === 1,
+    'the tab prints what every plan includes once, from includedTiles()');
+  ok(tiles.length === IDS.length && IDS.every((id) => tiles.some((t) => t.id === id)),
+    'one tile per included id', tiles.map((t) => t.id).join(' · '));
+  const fig = (id) => tiles.find((t) => t.id === id)?.figure;
+  ok(fig('library') === String(lessons), 'the lessons tile counts the real lessons', `${fig('library')} of ${lessons}`);
+  ok(fig('thinkers') === String(PH.ALL_PHILOSOPHERS.length), 'the thinkers tile counts ALL_PHILOSOPHERS', `${fig('thinkers')}`);
+  ok(fig('quotes') === String(quotes), 'the quotes tile counts every quote card', `${fig('quotes')}`);
+  ok(fig('ranks') === String(RK.RANKS.length), 'the ranks tile counts the real ladder', `${fig('ranks')}`);
+  ok(fig('badges') === String(BG.BADGES.length), 'the badges tile counts the real roll', `${fig('badges')}`);
 
   // ── NO COLOUR IS DECLARED IN THE NEW FILES ────────────────────────────────
   //
@@ -550,6 +584,27 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
   // asserting here too rather than assuming.
   const onPlate = ratio(T.METAL.GOLD.on, T.METAL.GOLD.base);
   ok(onPlate >= 3, 'the ACTIVE plate\'s label reads on its own metal', `${onPlate.toFixed(2)}:1`);
+
+  // ── THE CROSS ON THE TAB'S CHART, READ OUT OF THE TAB ─────────────────────
+  //
+  // A grey disc is what Brilliant draws for "not included", and GHOST alone
+  // measures about 2:1 on paper, under the 3:1 a mark that carries meaning needs
+  // (WCAG 1.4.11). The tab darkens it toward ink; both the disc against the Free
+  // panel it sits on and the white cross on the disc have to clear the floor.
+  // Both mixes are READ from the component rather than restated, which is the
+  // rule section 8 below learned the hard way.
+  const tabSrc = read('app/(app)/pass.tsx');
+  const noMix = /const NO_DISC = mix\(GHOST, INK, ([\d.]+)\)/.exec(tabSrc);
+  const panelMix = /const FREE_PANEL = mix\(PAPER, GHOST, ([\d.]+)\)/.exec(tabSrc);
+  ok(!!noMix && !!panelMix, 'the chart\'s cross and Free panel are readable from the tab',
+    noMix && panelMix ? `disc ${noMix[1]} · panel ${panelMix[1]}` : 'NOT FOUND — this checker has stopped tracking them');
+  if (noMix && panelMix) {
+    const disc = T.mix(T.GHOST, T.INK, +noMix[1]);
+    const panel = T.mix(T.PAPER, T.GHOST, +panelMix[1]);
+    ok(ratio(disc, panel) >= 3, 'the cross\'s disc reads against the Free panel', `${ratio(disc, panel).toFixed(2)}:1`);
+    ok(ratio(T.PAPER_LIT, disc) >= 3, 'and the cross reads on its disc', `${ratio(T.PAPER_LIT, disc).toFixed(2)}:1`);
+    ok(ratio(T.MID, panel) >= 4.5, 'and a limit said in words reads on the Free panel', `${ratio(T.MID, panel).toFixed(2)}:1`);
+  }
 }
 
 // ═════════════════════════════════════════════════════════════════════════════

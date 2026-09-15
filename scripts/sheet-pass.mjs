@@ -143,18 +143,19 @@ const SCREENS = [
   // can be imported, typechecked and still render nothing.
   // ── THE PASS TAB ─────────────────────────────────────────────────────────
   //
-  // Two certificates, a stickman and a frame drawn from a measured height. That
-  // last one is why this screen has to be LOADED rather than reasoned about: the
-  // frame is an SVG sized from onLayout, so a mistake in it does not fail a type
-  // check or a contact sheet — it renders at the wrong size, or not at all.
+  // A Free-against-Pass chart whose columns are panels laid UNDER rows of
+  // measured height. That is why this screen has to be LOADED rather than
+  // reasoned about: a label that wraps on a narrow phone makes its row taller,
+  // and only a real layout says whether the gold column still runs the whole way
+  // down and every cell still sits inside it.
   { key: 'pass-tab', q: 's=tab',
-    want: ['THE SCHOLAR’S PASS', 'WHAT THE PASS ADDS', 'AND EVERYTHING BELOW, AS ALWAYS',
-           'ISSUED TO', 'THE DAY PASS', 'WHAT YOU HOLD TODAY', 'WHERE IT STOPS',
-           'The whole library', 'Replay what you finished'] },
+    want: ['Every lesson, every day', 'with the Scholar’s', 'Benefits', 'Free', 'Pass',
+           'Lessons a day', 'Unlimited', 'Replay lessons', 'In order',
+           'EVERY PLAN INCLUDES', 'badges', 'Get the Scholar’s Pass'] },
   { key: 'pass-tab-new', q: 's=tab&seed=new',
-    want: ['THE SCHOLAR’S PASS', 'THE DAY PASS'] },
+    want: ['Benefits', 'EVERY PLAN INCLUDES', 'Get the Scholar’s Pass'] },
   { key: 'pass-tab-pro', q: 's=tab&pro=1',
-    want: ['THE SCHOLAR’S PASS', 'Yours already'] },
+    want: ['You hold the', 'ACTIVE', 'Benefits'], notWant: ['Get the Scholar’s Pass'] },
   { key: 'paywall', q: 's=paywall',
     want: ['ADMIT THE BEARER', 'FREE AGAINST THE PASS', 'WHERE YOU ARE',
            'AT 1 LESSON A DAY', 'no wait at all', 'Start —'] },

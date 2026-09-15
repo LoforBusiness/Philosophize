@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Easing, InteractionManager, type ColorValue } from 'react-native';
+import { Easing, InteractionManager } from 'react-native';
 import { Tabs, useSegments } from 'expo-router';
-import { MotiView } from 'moti';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
+import TabIcon, { type TabIconName } from '@/components/shared/TabIcon';
+import { touch } from '@/lib/feedback';
 import { useUIStore } from '@/stores/uiStore';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -94,15 +94,18 @@ const SETTLE_MS = 1200;
 // InteractionManager, so a tap or an animation goes first.
 const STEP_MS = 420;
 
-function tab(name: SketchIconName) {
-  return ({ color, focused }: { color: ColorValue; focused: boolean }) => (
-    <MotiView
-      animate={{ scale: focused ? 1.16 : 1, translateY: focused ? -2 : 0 }}
-      transition={{ type: 'spring', damping: 13, stiffness: 220, mass: 0.6 }}
-    >
-      <SketchIcon name={name} color={color as string} size={26} />
-    </MotiView>
-  );
+/**
+ * A tab's icon, and whether its tab is the one the reader is on.
+ *
+ * THE BAR NEVER TELLS AN ICON THAT ITS TAB WAS CHOSEN. TabBarIcon draws every
+ * icon twice, one copy as focused and one as not, and switches between them by
+ * opacity, so each copy's `focused` is fixed for life. The old MotiView here
+ * "animated" on it and so never moved at all: the focused copy was simply always
+ * drawn 16% larger. `open` comes from the route instead, which does change, and
+ * it is what the icon's tile and bounce follow (see TabIcon).
+ */
+function tab(name: TabIconName, open: boolean) {
+  return ({ focused }: { focused: boolean }) => <TabIcon name={name} lit={focused} open={open} />;
 }
 
 export default function AppLayout() {
@@ -136,6 +139,10 @@ export default function AppLayout() {
   // slug that happens to contain the word.
   const segments = useSegments() as string[];
   const inLesson = segments.includes('lesson');
+  // The tab the reader is on, by route name. The index route has no segment of
+  // its own. On a hidden route (settings, the paywall, the streak) no tab is open,
+  // which is also what the bar itself shows.
+  const current = segments[0] === '(app)' ? (segments[1] ?? 'index') : null;
 
   // How many of WARM have been built — see the note at the top of the file.
   const [warm, setWarm] = useState(0);
@@ -162,6 +169,10 @@ export default function AppLayout() {
 
   return (
     <Tabs
+      // A light tap under the thumb when a tab is pressed. `touch()` rather than
+      // a cue: moving between tabs is navigation, which makes no sound (see
+      // lib/feedback.ts), but the press should still be felt to have landed.
+      screenListeners={{ tabPress: () => touch() }}
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
@@ -217,33 +228,34 @@ export default function AppLayout() {
               paddingTop: 10,
               paddingBottom: 12 + insets.bottom,
             },
-        tabBarActiveTintColor: '#1A1A1A',
-        tabBarInactiveTintColor: '#B8B8B2',
+        // No tint colours. TabIcon draws both states itself: the unchosen grey
+        // this used to set, #B8B8B2, measured 1.9:1 on the bar, under the 3:1 a
+        // mark that carries meaning needs.
       }}
     >
       <Tabs.Screen
         name="index"
-        options={{ title: 'Home', tabBarIcon: tab('home'), lazy: !built('index') }}
+        options={{ title: 'Home', tabBarIcon: tab('home', current === 'index'), lazy: !built('index') }}
       />
       <Tabs.Screen
         name="branches"
-        options={{ title: 'Branches', tabBarIcon: tab('cloud'), lazy: !built('branches') }}
+        options={{ title: 'Branches', tabBarIcon: tab('learn', current === 'branches'), lazy: !built('branches') }}
       />
       <Tabs.Screen
         name="philosophers"
-        options={{ title: 'Thinkers', tabBarIcon: tab('hat'), lazy: !built('philosophers') }}
+        options={{ title: 'Thinkers', tabBarIcon: tab('thinkers', current === 'philosophers'), lazy: !built('philosophers') }}
       />
       <Tabs.Screen
         name="stats"
-        options={{ title: 'Stats', tabBarIcon: tab('frame'), lazy: !built('stats') }}
+        options={{ title: 'Stats', tabBarIcon: tab('insights', current === 'stats'), lazy: !built('stats') }}
       />
       {/* ── THE SIXTH TAB, AND THE NOTE BELOW USED TO ARGUE AGAINST ONE ─────
           The streak was considered for a sixth slot and rejected because "at
           390pt that is ~62pt a tab and the labels clip". That reasoning was
           sound and it does not apply here: `tabBarShowLabel` is false, so there
-          are no labels to clip — the bar carries 26pt icons that grow to about
-          30 when focused. Six of those on the narrowest phone this app supports
-          is 60pt a tab, which is twice the icon.
+          are no labels to clip — the bar carries 28pt icons, and the open one
+          sits on a 46pt tile. Six on the narrowest phone this app supports is
+          53pt a tab, which still leaves the tile room.
 
           What DID have to be re-checked is the thing the old note was really
           about: whether a sixth destination earns the room. It does, and for a
@@ -252,11 +264,11 @@ export default function AppLayout() {
           shop they can walk out of. */}
       <Tabs.Screen
         name="pass"
-        options={{ title: 'Pass', tabBarIcon: tab('pass'), lazy: !built('pass') }}
+        options={{ title: 'Pass', tabBarIcon: tab('pass', current === 'pass'), lazy: !built('pass') }}
       />
       <Tabs.Screen
         name="profile"
-        options={{ title: 'Profile', tabBarIcon: tab('person'), lazy: !built('profile') }}
+        options={{ title: 'Profile', tabBarIcon: tab('profile', current === 'profile'), lazy: !built('profile') }}
       />
       {/* Reachable via router.push from the profile, hidden from the tab bar */}
       <Tabs.Screen name="settings" options={{ href: null }} />
