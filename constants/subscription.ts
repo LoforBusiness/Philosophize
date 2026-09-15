@@ -61,3 +61,51 @@ export const lessonsWord = (n: number) => (n === 1 ? 'lesson' : 'lessons');
 // from the offering when available.
 export const FALLBACK_PRICE = '$6.99';
 export const BILLING_PERIOD_LABEL = 'month';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE FREE TRIAL.
+//
+// Three days of the whole Pass, granted by the app, with no card and no charge.
+// It is deliberately NOT a store introductory offer, and the difference is worth
+// stating because the two look identical on screen and are nothing alike:
+//
+//   · A STORE TRIAL is configured in Play Console and RevenueCat. Tapping it
+//     opens the billing sheet, the reader confirms with a real payment method,
+//     the entitlement goes active with `periodType: TRIAL`, and on day four it
+//     CONVERTS — they are charged unless they cancelled. It monetizes better and
+//     it cannot be reset by reinstalling.
+//   · THIS one is granted locally. Nobody is asked for a card, nothing converts,
+//     and on day four the Pass simply closes again.
+//
+// The local one is what ships because it is the one that can be true today: a
+// store trial needs dashboard configuration this repo cannot do, and a button
+// that says "3 days free" while opening a sheet that charges immediately is the
+// exact class of lie §14 exists to prevent.
+//
+// SWAPPING TO THE STORE VERSION LATER IS ONE FUNCTION. `startTrial()` in
+// stores/subscriptionStore.ts is the seam: point it at `purchaseMonthly()` once
+// the intro offer exists, keep `TRIAL_DAYS` in step with what the store is
+// configured for, and every screen, every string and the whole conferral
+// animation carry over untouched.
+//
+// KNOWN LIMIT, stated rather than discovered: the flag lives in this device's
+// subscription store, which is persisted but NOT part of the cloud snapshot. A
+// reader who deletes and reinstalls the app gets another three days. That is a
+// lot of friction for the price of a month, and the alternative — putting an
+// entitlement fact into `userDataStore` — would give the app two sources of
+// truth about who has paid, which is a worse problem than a rare free week.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * How long the trial runs. Every string that names it interpolates this.
+ *
+ * ANNOTATED `number` rather than left to infer, which is not a style choice:
+ * inferred it is the literal type `3`, and TypeScript then calls every
+ * `TRIAL_DAYS === 1` singular/plural test an error because the two "have no
+ * overlap". A constant meant to be retuned must not narrow to the value it
+ * happens to hold today.
+ */
+export const TRIAL_DAYS: number = 3;
+
+/** The same figure in milliseconds, which is what the clock is compared against. */
+export const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;

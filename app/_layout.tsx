@@ -58,6 +58,7 @@ import PhilosopherSheet from '@/components/shared/PhilosopherSheet';
 import RanksBadgesSheet from '@/components/shared/RanksBadgesSheet';
 import SavedQuotesSheet from '@/components/shared/SavedQuotesSheet';
 import PaywallSheet from '@/components/shared/PaywallSheet';
+import PassConferred from '@/components/paywall/PassConferred';
 import LaunchScreen from '@/components/launch/LaunchScreen';
 import { SPLASH_BG } from '@/components/launch/launchArt';
 import UpdateGate from '@/components/shared/UpdateGate';
@@ -78,6 +79,28 @@ function LessonRewardHost() {
   const dismiss = useUIStore((s) => s.dismissReward);
   if (!reward) return null;
   return <LessonReward key={seq} {...reward} onDone={dismiss} />;
+}
+
+/**
+ * THE PASS BEING CONFERRED, hosted globally for the same reason the reward is.
+ *
+ * Four screens can make somebody a Scholar -- the Pass tab, the post-lesson
+ * sheet, the daily-limit gate and Settings -- and three of them close themselves
+ * the instant `isPro` flips. A ceremony owned by whichever one raised it would
+ * therefore be unmounted, mid-animation, by its own success. Here it outlives
+ * all of them.
+ *
+ * `key` on the sequence so it plays from the first frame every time: a reader
+ * who trials, lapses and later buys must see the whole thing again, and a
+ * component left mounted with its shared values at 1 would show them a finished
+ * animation.
+ */
+function PassConferredHost() {
+  const kind = useUIStore((s) => s.conferral);
+  const seq = useUIStore((s) => s.conferralSeq);
+  const dismiss = useUIStore((s) => s.dismissConferral);
+  if (!kind) return null;
+  return <PassConferred key={seq} kind={kind} onDone={dismiss} />;
 }
 
 /**
@@ -426,8 +449,14 @@ export default function RootLayout() {
       <RanksBadgesSheet />
       <PaywallSheet />
       <LessonRewardHost />
-      {/* Animated cold-start loading screen: ink scene + drawing stroke + quote.
-          Sits over everything until the boot is ready and the count hits 100%. */}
+      {/* After the reward so it covers one taken from the post-lesson offer, and
+          before UpdateGate so it can never cover the update wall -- a reader who
+          must update is a reader who cannot use what they were just given. */}
+      <PassConferredHost />
+      {/* Animated cold-start loading screen: a white page on which one pen line
+          scribbles itself into a ball of ink, crosses the page, becomes a light
+          bulb and lights. Sits over everything until the boot is ready and the
+          count hits 100%. */}
       {!launchGone && (
         <LaunchScreen
           ready={authChecked && hasHydrated && accentFonts && updateSettled}

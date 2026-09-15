@@ -16,6 +16,7 @@ import { landOnBranch } from './lessonNav';
 import { useUserDataStore, previewDailyActivity, previewNewBadges, daysBetween, type DayInfo } from '@/stores/userDataStore';
 import { restDaysHeld } from '@/constants/streak';
 import NotifyPrompt from './NotifyPrompt';
+import TrialOffer from '@/components/paywall/TrialOffer';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { ads } from '@/lib/ads';
@@ -206,6 +207,12 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   const joinedAt = useUserDataStore((s) => s.joinedAt);
 
   const isPro = useSubscriptionStore((s) => s.isPro);
+  // READ AS FUNCTIONS, NOT AS DERIVED BOOLEANS. `canStartTrial` reads three
+  // fields; subscribing to it as a value would re-render this screen on every
+  // entitlement write during a purchase, and the answer is only ever needed at
+  // the instant the button is pressed.
+  const canStartTrial = useSubscriptionStore((s) => s.canStartTrial);
+  const startTrial = useSubscriptionStore((s) => s.startTrial);
   const openPaywall = useUIStore((s) => s.openPaywall);
   const markLessonFinished = useUIStore((s) => s.markLessonFinished);
 
@@ -227,6 +234,14 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   // the ceremony — that effect already gates on `phase !== 'reward'`.
   const [phase, setPhase] = useState<'pending' | 'rankup' | 'streak' | 'reward'>('pending');
   const [rankUp, setRankUp] = useState<{ from: RankDef; to: RankDef; next: RankDef | null; totalXP: number } | null>(null);
+  // THE TRIAL OFFER, WHICH REPLACES THIS SCREEN RATHER THAN SITTING OVER IT.
+  //
+  // Both are Modals, and one Modal at a time is worth more than the alternative:
+  // nesting them works but leaves two full-screen presentations stacked, and on
+  // the way back out of a declined offer the reward would re-present itself
+  // behind the dismissal. The reward has finished saying what it had to say by
+  // the time this can be true -- `commit()` has already run -- so it steps aside.
+  const [offer, setOffer] = useState(false);
   // Badges finishing WOULD earn. Like the streak and the rank above, worked out
   // without writing any of it — see previewNewBadges.
   const [badges, setBadges] = useState<BadgeDef[]>([]);
@@ -355,6 +370,37 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
       goToBranch();
       return;
     }
+    // THE OFFER GOES BEFORE THE AD, AND ACCEPTING MEANS THE AD NEVER PLAYS.
+    //
+    // Not a trick -- the first row of the certificate they were just shown says
+    // "Advertisements: none, ever", and this is that row being honoured one
+    // second after it was promised rather than a fortnight later. It also means
+    // the reader's own decision is what removes the interruption, which is the
+    // difference between a subscription and a toll.
+    //
+    // Only while there is a trial left to give: `canStartTrial()` is false for
+    // anyone paying and for anyone who has already spent one, so a reader who
+    // declined it in March does not meet it again every night for a year.
+    if (canStartTrial()) {
+      setAdvancing(false); // the offer's own buttons take it from here
+      setOffer(true);
+      return;
+    }
+    await finishFree();
+  };
+
+  // What happens to a free reader who is not being offered anything, and to one
+  // who has just said no: the ad, then the branch, then the Pass if they are out
+  // of lessons. Extracted so the two paths cannot drift -- a declined offer must
+  // leave the reader exactly where declining nothing would have.
+  //
+  // `justDeclined` is not a detail. A reader at their daily limit who has this
+  // second refused the offer would otherwise meet the Pass again eight seconds
+  // later, on the branch screen, as a sheet -- asked twice about the same thing
+  // inside ten seconds, the second time immediately after saying no. That is the
+  // ambush the Pass tab exists to be the opposite of. They keep the tab, they
+  // keep tomorrow's limit notice; they do not get chased down the corridor.
+  const finishFree = async (justDeclined = false) => {
     try {
       await ads.showInterstitial();
     } catch {}
@@ -363,7 +409,24 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     // that gets skipped. A free reader who has just spent their last lesson of the
     // day still sees their progress advance, and the Pass slides up over it.
     goToBranch();
-    if (atLimit) openPaywall();
+    if (atLimit && !justDeclined) openPaywall();
+  };
+
+  // Accepting hands over to the conferral, which `startTrial` raises globally --
+  // so this screen can close immediately and the ceremony plays over the branch
+  // the reader is being returned to, rather than over a modal that has to wait
+  // for it. No ad and no paywall: they are a Scholar as of this line.
+  const acceptTrial = () => {
+    setOffer(false);
+    startTrial();
+    onDone();
+    goToBranch();
+  };
+
+  const declineTrial = () => {
+    setOffer(false);
+    setAdvancing(true);
+    void finishFree(true);
   };
 
   // What finishing WOULD do, worked out without writing any of it. Both halves
@@ -470,6 +533,11 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   // render where the return fires, throws, and takes down the whole tree --
   // INCLUDING the reward modal that has just been mounted. Every cinematic
   // lesson ended on a blank screen with no way forward. Add hooks above.
+
+  // The offer replaces this screen while it is up. See the note on `offer`.
+  if (offer) {
+    return <TrialOffer onAccept={acceptTrial} onDecline={declineTrial} />;
+  }
 
   // One frame of bare paper while the completion effect decides which screen this
   // is. Painting the reward first would flash XP behind a rank-up.

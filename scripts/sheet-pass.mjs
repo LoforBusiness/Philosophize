@@ -53,6 +53,10 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const PROBE = `(() => {
   const root = document.getElementById('pass-root');
   if (!root) return JSON.stringify({ mounted: false });
+  // THE WHOLE BODY, NOT THE ROOT. The trial offer is a Modal, which
+  // react-native-web portals outside the preview root; measuring only the root
+  // photographs it and then reports none of its words.
+  const scope = document.body;
 
   const vw = document.documentElement.clientWidth;
   const seen = new Set();
@@ -60,7 +64,7 @@ const PROBE = `(() => {
   const clipped = [];
   const truncated = [];
 
-  for (const el of root.querySelectorAll('*')) {
+  for (const el of scope.querySelectorAll('*')) {
     const s = getComputedStyle(el);
     if (s.display === 'none' || s.visibility === 'hidden') continue;
     const r = el.getBoundingClientRect();
@@ -118,7 +122,7 @@ const PROBE = `(() => {
   }
 
   // Words actually on the page, for "did the part I expect exist".
-  const text = root.innerText.replace(/\\s+/g, ' ').trim();
+  const text = scope.innerText.replace(/\\s+/g, ' ').trim();
 
   return JSON.stringify({
     mounted: true,
@@ -128,7 +132,7 @@ const PROBE = `(() => {
     // flex:1 makes the root exactly viewport-tall, so the CONTENT height is the
     // scroll extent of whatever inside it actually scrolls. Without this the
     // screenshot below silently photographs one screenful and looks complete.
-    content: Math.max(...[...root.querySelectorAll('*')]
+    content: Math.max(...[...scope.querySelectorAll('*')]
       .map((e) => (e.scrollHeight > e.clientHeight + 1 ? e.scrollHeight : 0)), 0),
     marks: [...seen],
     overflow, clipped, truncated,
@@ -151,11 +155,25 @@ const SCREENS = [
   { key: 'pass-tab', q: 's=tab',
     want: ['Every lesson, every day', 'with the Scholar’s', 'Benefits', 'Free', 'Pass',
            'Lessons a day', 'Unlimited', 'Replay lessons', 'In order',
-           'EVERY PLAN INCLUDES', 'badges', 'Get the Scholar’s Pass'] },
+           'EVERY PLAN INCLUDES', 'badges', 'DAYS FREE', 'Start your',
+           'No card and no charge', 'Or subscribe now for'],
+    notWant: ['Get the Scholar’s Pass'] },
   { key: 'pass-tab-new', q: 's=tab&seed=new',
-    want: ['Benefits', 'EVERY PLAN INCLUDES', 'Get the Scholar’s Pass'] },
+    want: ['Benefits', 'EVERY PLAN INCLUDES', 'Start your'] },
+  // The trial running: the door keeps the Pass, and nothing offers to cancel it.
+  { key: 'pass-tab-trial', q: 's=tab&trial=on',
+    want: ['You hold the', 'DAYS LEFT', 'nothing is charged', 'Keep the Scholar’s Pass'],
+    notWant: ['ACTIVE', 'Start your'] },
+  // The trial spent: no second offer of free days, the plain door instead.
+  { key: 'pass-tab-used', q: 's=tab&trial=used',
+    want: ['Every lesson, every day', 'Get the Scholar’s Pass', 'Cancel any time'],
+    notWant: ['Start your', 'DAYS FREE'] },
   { key: 'pass-tab-pro', q: 's=tab&pro=1',
-    want: ['You hold the', 'ACTIVE', 'Benefits'], notWant: ['Get the Scholar’s Pass'] },
+    want: ['You hold the', 'ACTIVE', 'Benefits'], notWant: ['Get the Scholar’s Pass', 'Start your'] },
+  // THE OFFER AFTER A LESSON, on the tab's chart and with its arrival.
+  { key: 'trial-offer', q: 's=trial',
+    want: ['THAT WAS TODAY’S LESSON', 'DAYS FREE', 'Benefits', 'Replay lessons',
+           'EVERY PLAN INCLUDES', 'Start your', 'Not today'] },
   { key: 'paywall', q: 's=paywall',
     want: ['ADMIT THE BEARER', 'FREE AGAINST THE PASS', 'WHERE YOU ARE',
            'AT 1 LESSON A DAY', 'no wait at all', 'Start —'] },
@@ -185,18 +203,21 @@ const SCREENS = [
   // `click` names a section on the settings rail, because the section is reached
   // by pressing it rather than by a prop.
   { key: 'settings-sub', q: 's=settings', click: 'Subscription',
-    want: ['THE DAY PASS', 'WHERE IT STOPS', 'Replay what you finished',
-           'Rest days for your streak', 'Take the Scholar\u2019s Pass',
-           'See everything it includes'],
+    want: ['You are on the Free plan', 'Benefits', 'Replay lessons', 'Streak rest days',
+           'DAYS FREE', 'Start the free trial', 'No card and no charge', 'See everything it includes'],
     // "All 50 badges" was the old card's own claim against a case of seventy.
     // The PRICE is not tested here and must not be: `$6.99` is FALLBACK_PRICE,
     // which is correct on web and before RevenueCat answers. Whether a price is
     // TYPED is a question about the source, and check-pass §7 asks it there.
-    notWant: ['All 50 badges'] },
+    notWant: ['All 50 badges', 'THE DAY PASS'] },
+  // The trial running: Settings keeps the Pass and does not offer to cancel it.
+  { key: 'settings-sub-trial', q: 's=settings&trial=on', click: 'Subscription',
+    want: ['on the free trial of Scholar’s Pass', 'DAYS LEFT', 'Keep the Pass',
+           'Nothing is charged unless you subscribe'],
+    notWant: ['Cancel subscription', 'Start the free trial'] },
   { key: 'settings-sub-pro', q: 's=settings&pro=1', click: 'Subscription',
-    want: ['THE SCHOLAR\u2019S PASS', 'WHAT IT GRANTS YOU', 'ACTIVE',
-           'Cancel subscription', 'Any lesson, any time'],
-    notWant: ['Take the Scholar\u2019s Pass'] },
+    want: ['You have Scholar’s Pass', 'Benefits', 'Cancel subscription'],
+    notWant: ['Start the free trial', 'Get the Pass'] },
 ];
 
 const { release } = claimRoute({ route: ROUTE, src: SRC, owner: 'sheet-pass', keep: !!process.env.PASS_KEEP });

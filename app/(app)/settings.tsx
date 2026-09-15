@@ -46,13 +46,9 @@ import { ads } from '@/lib/ads';
 import { notifications } from '@/lib/notifications';
 import { sound } from '@/lib/sound';
 import { cue, soundSupported } from '@/lib/feedback';
-import { FALLBACK_PRICE, BILLING_PERIOD_LABEL } from '@/constants/subscription';
-import Certificate, { ScheduleHead, ScheduleRow } from '@/components/paywall/Certificate';
-import RankSeal from '@/components/shared/RankSeal';
-import { MetalPlate } from '@/components/profile/Struck';
-import { METAL, MID, INK, mix } from '@/components/shared/tone';
-import { rankOrder, rankDegree } from '@/data/ranks';
-import { PASS_LINES, longFree, longPass } from '@/lib/utils/passValue';
+import { BILLING_PERIOD_LABEL } from '@/constants/subscription';
+import PassChart from '@/components/paywall/PassChart';
+import PassDoor from '@/components/paywall/PassDoor';
 import { effectiveStreak } from '@/lib/utils/streak';
 import { restDaysHeld } from '@/constants/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
@@ -960,49 +956,39 @@ function VersionLine() {
 // the price twice, in dollars, on a screen that ships to every currency Play
 // sells in.
 //
-// So it is the same object as the Pass tab now, issued small: `Certificate` with
-// `compact`, the same `PASS_LINES`, the same struck rows, the same rank seal. A
-// claim cannot be true on one screen and stale on the other, because there is
-// only one claim.
+// So it is the same object as the Pass tab now, issued compact: `PassChart` with
+// `size="compact"`, the same rows from `PASS_LINES`, and `PassDoor` for the
+// action, the same door the tab uses. A claim cannot be true on one screen and
+// stale on the other, because there is only one claim.
 //
-// ONE CERTIFICATE, THE ONE YOU HOLD. The tab is a shop and shows both — the
-// offer, then the comparison. Settings is not a shop: a reader who opens
-// Settings › Subscription came to do one thing, and a second certificate is
-// 300pt of engraving between them and the button that does it. A Scholar sees
-// the SCHOLAR'S PASS with its ACTIVE plate and what it grants them; everybody
-// else sees THE DAY PASS and where it stops. Either way it is what they hold,
-// which is what a settings screen is for.
+// NO ARRIVAL ANIMATION HERE, on the reader's own instruction. The tab and the
+// post-lesson offer stamp their cells in; Settings is somewhere a reader goes to
+// do one thing, and a screen that performs every time it opens is in the way.
 //
-// AND THE SCHEDULE IS THE SHORT ONE. The tab prints the five differences AND the
-// six things both tiers include; here only the five. The six are not in question
-// on this screen, and they are most of what makes the tab's certificate long.
+// COMPACT, BECAUSE THIS CARD IS NARROW. It sits beside a labelled rail: about
+// 225pt at 390dp and about 160pt at 320dp, against the tab's 342. The chart takes
+// the measured width and picks smaller columns from it. The six things both tiers
+// include stay on the tab, one tap away.
 // ---------------------------------------------------------------------------
 
 function SubscriptionSection() {
   const isPro = useSubscriptionStore((s) => s.isPro);
-  const monthly = useSubscriptionStore((s) => s.monthly);
-  const displayName = useUserDataStore((s) => s.displayName);
-  const rankIndex = useUserDataStore((s) => s.rankIndex);
-  const totalXP = useUserDataStore((s) => s.totalXP);
+  // PAYING, not merely Pro. `isPro` is also true inside the free trial, and a
+  // reader on the trial has nothing to cancel and something to keep.
+  const paying = useSubscriptionStore((s) => s.entitled || s.isReviewer);
+  const onTrial = isPro && !paying;
   const [confirmCancel, setConfirmCancel] = useState(false);
   useEffect(() => {
     track('paywall_viewed', { source: 'settings' });
   }, []);
 
-  // The localized string from the store, and the fallback on web, in Expo Go and
-  // before RevenueCat answers — the same pair the Pass tab uses. `SubPackage`
-  // also carries a numeric `price`; that one is for analytics, which cannot add
-  // labels up, and must never reach a screen.
-  const price = monthly?.priceString ?? FALLBACK_PRICE;
   const period = BILLING_PERIOD_LABEL;
-
-  const rank = awardedRank(rankIndex, totalXP);
 
   // ── THE WIDTH IS MEASURED, NOT COMPUTED ────────────────────────────
   //
-  // The certificate draws its frame at a real pixel width — it has to be TOLD
-  // one rather than stretched, because a cut-corner rule scaled with
-  // preserveAspectRatio="none" skews its notches into parallelograms.
+  // The chart picks its column widths from the width it is given, and the
+  // certificate before it drew its frame at one, so both have needed a real
+  // number rather than a guess.
   //
   // The first version worked that width out from the window, and it was wrong on
   // the first render: this screen is a LABELLED RAIL beside a card, so the card
@@ -1045,95 +1031,26 @@ function SubscriptionSection() {
     <Card>
       <Header
         title="Subscription"
-        sub={isPro ? 'You have Scholar’s Pass.' : 'You are on the Free plan.'}
+        sub={
+          paying
+            ? 'You have Scholar’s Pass.'
+            : onTrial
+              ? 'You are on the free trial of Scholar’s Pass.'
+              : 'You are on the Free plan.'
+        }
       />
       <View style={styles.hr} />
 
       {/* nativeID so a harness can measure the object rather than guess at it —
           the same reason every answer control in a lesson carries one (§21). */}
       <View nativeID="sub-cert" style={styles.certWrap} onLayout={onCertBox}>
-        {certW <= 0 ? null : isPro ? (
-          <Certificate
-            compact
-            variant="scholar"
-            width={certW}
-            title="THE SCHOLAR’S PASS"
-            // A TERSER INSCRIPTION ON A SMALLER OBJECT, which is what a pocket
-            // copy of anything does. The tab's line — "This pass admits you to
-            // the whole library." — wraps to two at this width, and the motto is
-            // the certificate's voice rather than one of its claims, so
-            // shortening it costs nothing that check-pass is holding.
-            //
-            // IT STILL HAS TO BE A WHOLE SENTENCE. The line here used to read
-            // "The whole library, without limit" — no verb, no full stop — and a
-            // reader met it as a sentence that stopped halfway. check-pass §10
-            // now holds both copies to a finished sentence and to a clean break.
-            motto="It opens the whole library."
-            holder={displayName || 'Philosopher'}
-            seal={
-              <RankSeal
-                glyph={rank.current.glyph}
-                state="current"
-                size={34}
-                order={rankOrder(rank.index)}
-                degree={rankDegree(rank.index)}
-              />
-            }
-            flag={<MetalPlate metal={METAL.GOLD} label="ACTIVE" />}
-          >
-            <ScheduleHead compact label="WHAT IT GRANTS YOU" tint={mix(METAL.GOLD.base, INK, 0.34)} />
-            {PASS_LINES.map((l, i) => (
-              <ScheduleRow
-                compact
-                key={l.id}
-                grade="granted"
-                label={l.label}
-                detail={longPass(l)}
-                last={i === PASS_LINES.length - 1}
-              />
-            ))}
-          </Certificate>
-        ) : (
-          <Certificate
-            compact
-            variant="free"
-            width={certW}
-            title="THE DAY PASS"
-            motto="It is free for as long as you like."
-            holder={displayName || 'Philosopher'}
-            seal={
-              <RankSeal
-                glyph={rank.current.glyph}
-                state="current"
-                size={30}
-                order={null}
-                degree={0}
-              />
-            }
-          >
-            {/* THE SAME FIVE ROWS AS THE TAB, showing the free column. Not a
-                list of things being withheld — the schedule of what this
-                certificate actually admits you to, which is the honest reading
-                and the one that makes the button underneath make sense. */}
-            <ScheduleHead compact label="WHERE IT STOPS" />
-            {PASS_LINES.map((l, i) => (
-              <ScheduleRow
-                compact
-                key={l.id}
-                grade="limit"
-                label={l.label}
-                detail={longFree(l)}
-                last={i === PASS_LINES.length - 1}
-              />
-            ))}
-          </Certificate>
-        )}
+        {certW <= 0 ? null : <PassChart size="compact" width={certW} />}
       </View>
 
-      {/* THE ACTION, DIRECTLY UNDER THE OBJECT. Not sticky and not buried: the
-          certificate above it is the compact one precisely so that this is on
-          screen at the same time as the thing it acts on. */}
-      {isPro ? (
+      {/* THE ACTION, DIRECTLY UNDER THE CHART. A paying reader can cancel. Everybody
+          else gets the same door as the Pass tab, which offers the free trial first
+          while there is one to give, keeps the Pass during it, and sells it after. */}
+      {paying ? (
         <Button
           label="Cancel subscription"
           onPress={() => setConfirmCancel(true)}
@@ -1142,37 +1059,25 @@ function SubscriptionSection() {
           style={{ marginTop: SPACE[3] }}
         />
       ) : (
-        <>
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>{price}</Text>
-            <Text style={styles.per}>/ {period}</Text>
-          </View>
-          <Button
-            label="Take the Scholar’s Pass"
-            icon="star"
-            size="lg"
-            onPress={() => {
-              track('subscribe_clicked', { plan: 'monthly', billing: 'monthly', source: 'settings' });
-              router.push('/(app)/paywall');
-            }}
-            style={{ marginTop: SPACE[2] }}
-          />
-          {/* The full comparison — both certificates, the wall, everything both
-              tiers include — lives one tap away rather than on this screen,
-              which is the whole reason this one is short. */}
+        <View style={{ marginTop: SPACE[3] }}>
+          <PassDoor source="settings" compact />
+          {/* What both tiers include lives one tap away on the tab rather than on
+              this screen, which is the whole reason this one is short. */}
           <Button
             label="See everything it includes"
             variant="ghost"
             onPress={() => router.push('/(app)/pass')}
             style={{ marginTop: SPACE[1] }}
           />
-        </>
+        </View>
       )}
 
       <Text style={styles.footNote}>
-        {isPro
+        {paying
           ? `Your Scholar’s Pass renews every ${period}. Cancelling is done through ${storeName}; it stays active until the end of the current billing period.`
-          : `The Scholar’s Pass renews every ${period} until cancelled, through ${storeName}.`}
+          : onTrial
+            ? 'The free trial ends by itself. Nothing is charged unless you subscribe.'
+            : `The Scholar’s Pass renews every ${period} until cancelled, through ${storeName}.`}
       </Text>
 
       <ConfirmModal
@@ -1577,25 +1482,11 @@ const styles = StyleSheet.create({
 
   // Subscription. THIRTEEN STYLES WENT WITH THE TWO PRICING CARDS — planRow,
   // planCol, currentTag, proKicker, planName, planPrice, perMo, planNote,
-  // planFoot and the "& more" divider. What replaces them is a certificate that
-  // brings its own everything, so all this screen owns is the box it sits in and
-  // the price above the button.
+  // planFoot and the "& more" divider. The chart and the door that replaced them
+  // bring their own everything, so all this screen owns is the box they sit in.
   // `stretch`, not `center`: the box has to take the card's full content width
-  // for onLayout to report it, and the certificate is then drawn at exactly that.
+  // for onLayout to report it, and the chart picks its columns from exactly that.
   certWrap: { alignSelf: 'stretch', marginTop: SPACE[3] },
-  // The Pass tab's `priceRow`, deliberately: two screens that print the same
-  // price should agree about what a price looks like. The unit takes the scale's
-  // own `label` size rather than the tab's 12.5 — this file is held to the type
-  // scale (check:ui) and the tab is not, and half a point is not worth an exemption.
-  priceRow: {
-    flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center',
-    gap: 4, marginTop: SPACE[2],
-  },
-  price: {
-    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: C.ink,
-    includeFontPadding: false,
-  },
-  per: { fontFamily: 'Inter_400Regular', fontSize: 13, color: MID },
 
   // An inline note that a control is currently unable to do its job (permission
   // refused, backup switched off). Ink on a tinted panel, not red — it is a state

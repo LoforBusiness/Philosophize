@@ -148,11 +148,12 @@ Philosophize/
 │   ├── launch/                  # LaunchScreen + launchArt + launchScenes +
 │   │                            #   LaunchFigure + launchMotion (§19)
 │   ├── home/                    # QuickStartCard, StickmanStroll
-│   ├── paywall/                 # THE PASS FAMILY — PassParts (the reader's
-│   │                            #   standing, the wall in days, the five-row
-│   │                            #   comparison), DailyLimit, LessonLocked,
-│   │                            #   Certificate (the engraved object + its
-│   │                            #   schedule rows), PassHerald (§14)
+│   ├── paywall/                 # THE PASS FAMILY — PassChart (the Free-against-
+│   │                            #   Pass chart + tiles, on the tab, the trial
+│   │                            #   offer and Settings), PassDoor (trial or buy),
+│   │                            #   TrialOffer, PassConferred, PassParts,
+│   │                            #   DailyLimit, LessonLocked, Certificate,
+│   │                            #   PassHerald (§14)
 │   ├── gamification/            # StreakBook, StreakWeek, RankUpScreen
 │   ├── widget/                  # Android home-screen widget surface
 │   └── shared/                  # SketchIcon, Glyph, PhilosopherSheet, RanksBadgesSheet,
@@ -2016,8 +2017,32 @@ rows that differ, and what both share merged rather than repeated.
   certificate", which this screen no longer shows, so moving him somewhere else
   means reading the pool first.
 
-**The certificate is still the object** Settings, the trial offer and the
-conferral issue, and these three decisions in it stand:
+**And it is one chart in three places, with the trial as the door.** The same
+reader asked for the post-lesson offer and Settings › Subscription to wear the
+tab's look, for the tab's arrival on the post-lesson offer but not in Settings,
+and for the three-day trial to be what a free reader is offered first in all
+three. `components/paywall/PassChart.tsx` is the chart and the tiles: the tab
+replays its arrival on focus, `TrialOffer` plays it once the modal has slid up,
+and Settings draws it `size="compact"` and still, picking smaller columns from
+the card's measured width, because that card sits beside a rail and is about
+225pt wide at 390dp and 160pt at 320dp. `components/paywall/PassDoor.tsx` is the
+action under it on the tab and in Settings: while `canStartTrial()`, the trial is
+the button and the price is a quiet link under it; during the trial it shows the
+days left and offers to keep the Pass; after it, the price and the button.
+`startTrial(source)` records where the trial was taken.
+
+- **`isPro` is true inside the trial, so "has paid" is `entitled || isReviewer`.**
+  The tab's ACTIVE plate and Settings' cancel button both read `isPro`, and would
+  have told a reader on the trial to cancel a subscription they do not have.
+- **The trial cannot charge anybody**, and `check:pass` §9g holds it:
+  `startTrial` and `syncTrial` never reach billing, the store opens the billing
+  sheet in exactly one place, and `purchaseMonthly()` is called only from the
+  paywall's own button. A free-trial offer configured on the monthly product in
+  Play Console would be a different thing, a store trial that converts to a
+  charge, and nothing in this repo can see whether one exists.
+
+**The certificate is still the object** the conferral issues (`PassConferred`),
+and these three decisions in it stand:
 
 - **The highlight is a MATERIAL, not a colour.** The obvious way to mark the Pass
   rows is a tint behind them, and §19 records that exact move — large saturated

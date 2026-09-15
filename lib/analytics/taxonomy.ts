@@ -184,9 +184,9 @@ export const EVENTS = {
     where: 'components/shared/RatePrompt.tsx',
   },
   trial_offered: {
-    note: 'The three-day trial was put in front of a free reader, after a lesson and before the ad. Paired with `trial_started` it is the only conversion rate this offer has -- there is no separate decline event, because offered-minus-started IS the decline.',
+    note: 'The three-day trial was put in front of a free reader: after a lesson and before the ad (`post_lesson`), or as the door on the Pass tab or in Settings (`pass_tab`, `settings`). Paired with `trial_started` by `source` it is the only conversion rate this offer has -- there is no separate decline event, because offered-minus-started IS the decline.',
     props: ['source', 'lessons_left'],
-    where: 'components/paywall/TrialOffer.tsx',
+    where: 'components/paywall/TrialOffer.tsx, components/paywall/PassDoor.tsx',
   },
   trial_started: {
     note: 'They took it. Granted by the app, not by the store -- nobody was charged and nothing will convert, so this is NOT a revenue event and must never be given a `$revenue` property.',
@@ -201,7 +201,7 @@ export const EVENTS = {
   subscribe_clicked: {
     note: 'The purchase sheet was opened.',
     props: ['plan', 'billing', 'source'],
-    where: 'components/shared/PaywallContent.tsx, app/(app)/pass.tsx',
+    where: 'components/shared/PaywallContent.tsx, components/paywall/PassDoor.tsx',
   },
   subscribe_succeeded: {
     note: 'The entitlement went live. `$revenue` is the property PostHog revenue views read.',
