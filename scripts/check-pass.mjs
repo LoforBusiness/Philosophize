@@ -282,15 +282,15 @@ for (const rel of FAMILY.filter((f) => f.endsWith('.tsx'))) {
 // THE WALL'S TICKS ARE THE ARGUMENT, so they are held to the 3:1 non-text mark
 // floor rather than left to whatever recedes prettily. `C.dim` measures 2.11:1
 // on paper and its own comment rules it out for anything that must be seen; so
-// does gold's `base`, at 2.51:1, which is why the struck tick is drawn from the
-// shaded half of the metal instead.
+// did gold's `base`, at 2.51:1, which is why the struck tick is drawn from the
+// shaded half of the metal, the palette's purple since 2026-09-15.
 ok(ratio(D.C.inkSoft, PAPER) >= 3, 'the free run of day-ticks is visible on paper',
   `${ratio(D.C.inkSoft, PAPER).toFixed(2)}:1`);
-ok(ratio(T.METAL.GOLD.shade, PAPER) >= 3, 'and so is the single struck one beside it',
-  `${ratio(T.METAL.GOLD.shade, PAPER).toFixed(2)}:1`);
+ok(ratio(T.ROYAL.shade, PAPER) >= 3, 'and so is the single struck one beside it',
+  `${ratio(T.ROYAL.shade, PAPER).toFixed(2)}:1`);
 {
   const parts = read('components/paywall/PassParts.tsx');
-  ok(/METAL\.GOLD\.base, METAL\.GOLD\.shade, METAL\.GOLD\.rim/.test(parts),
+  ok(/ROYAL\.base, ROYAL\.shade, ROYAL\.rim/.test(parts),
     'and it is struck from that half, not the lit one');
 }
 
@@ -595,23 +595,18 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
       hexes.slice(0, 3).join(' ') || 'every value from tone/METAL/mix');
   }
 
-  // ── GOLD ON PAPER, MEASURED ───────────────────────────────────────────────
+  // ── THE PURPLE ON PAPER, MEASURED ───────────────────────────────────────────────
   //
-  // PassParts records that `METAL.GOLD.base` is 2.51:1 on paper — fine inside a
-  // rim on a medal, invisible as a hairline standing alone on a page. The
-  // certificate's frame and its section headings are exactly that: rules and
-  // small caps on bare paper. `INK_GOLD` is the derived tone they use instead,
-  // and this asserts it actually clears the floor rather than merely looking
-  // darker.
-  const INK_GOLD = T.mix(T.METAL.GOLD.base, T.INK, 0.34);
-  const onPaper = ratio(INK_GOLD, D.C.paper);
-  ok(onPaper >= 4.5, 'the certificate\'s gold clears 4.5:1 on paper',
-    `${onPaper.toFixed(2)}:1 (raw gold base is ${ratio(T.METAL.GOLD.base, D.C.paper).toFixed(2)}:1)`);
+  // The certificate's frame and its section headings are rules and small caps
+  // on bare paper. Gold's base read 2.51:1 there and had to be dragged toward
+  // ink; the palette's purple is used as it is, and this asserts it clears.
+  const onPaper = ratio(T.PURPLE, D.C.paper);
+  ok(onPaper >= 4.5, 'the certificate\'s purple clears 4.5:1 on paper', `${onPaper.toFixed(2)}:1`);
 
-  // The label inside a gold plate takes the metal's own `on`, which check-ui
+  // The label inside a purple plate takes the metal's own `on`, which check-ui
   // owns — but the plate on this certificate is the ACTIVE flag, so it is worth
   // asserting here too rather than assuming.
-  const onPlate = ratio(T.METAL.GOLD.on, T.METAL.GOLD.base);
+  const onPlate = ratio(T.ROYAL.on, T.ROYAL.base);
   ok(onPlate >= 3, 'the ACTIVE plate\'s label reads on its own metal', `${onPlate.toFixed(2)}:1`);
 
   // ── THE CROSS ON THE TAB'S CHART, READ OUT OF THE TAB ─────────────────────

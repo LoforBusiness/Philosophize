@@ -5054,10 +5054,11 @@ that branch". One hue per lesson, carried in lips, rims, rails and fills, never 
 - **A pressable thing is a raised face on a lip of the branch colour** (`LipPlate`). It
   drops onto the lip under a finger and stays down when chosen.
 - **The verdict re-strikes the same plates** green or rust, stamps the reader's own
-  choice (`VerdictSeal`), and pays a right answer in gold on the verdict card
-  (`XpCoin`) — once, whatever control answered it. There is no sound: the app plays two.
+  choice (`VerdictSeal`), and pays a right answer in the palette's purple on the
+  verdict card (`XpCoin`) — once, whatever control answered it. There is no sound: the
+  app plays two.
 - **The question is numbered.** "QUESTION 1 OF 2" sits on a branch-coloured kicker
-  beside a gold stake.
+  beside a beige stake struck in purple.
 - **Type in the branch colour uses the accent's `text` tone**, the hue taken toward
   ink, so a small label clears 4.5:1 on paper.
 

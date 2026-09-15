@@ -12,7 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Circle, Line as SvgLine, Defs, LinearGradient as SvgGrad, Stop } from 'react-native-svg';
 import ACounter, { counterStyle } from '@/components/shared/ACounter';
-import { PANEL_BASE, PANEL_LIP, PANEL_RULE, METAL, glow, mix } from '@/components/shared/tone';
+import { PANEL_BASE, PANEL_LIP, PANEL_RULE, glow, mix, LAVENDER } from '@/components/shared/tone';
 import { C } from '@/constants/design';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -38,10 +38,10 @@ import { C } from '@/constants/design';
 //
 // ── ONE ACCENT, NOT SIX, FOR EVERYTHING THAT IS NOT A BRANCH ────────────────
 //
-// The line chart is gold and nothing else. It is the app's own METAL.GOLD, the
-// same material a first-place league disc and a top-tier badge are struck in,
-// and XP is exactly the thing gold already means here. A second data colour on
-// this panel would start a palette; one accent plus six labels is a system.
+// The line chart is lavender and nothing else: the palette's purple (tone.ts),
+// lifted for a dark ground, because #4B0082 itself reads 1.49:1 on this panel.
+// It was gold until 2026-09-15. A second data colour on this panel would start a
+// palette; one accent plus six labels is a system.
 //
 // ── NOT ONE SVG PROPERTY IS ANIMATED ────────────────────────────────────────
 //
@@ -238,7 +238,7 @@ export interface SparkProps {
  * THIRTY DAYS OF XP, WITH THE TREND UNDER IT.
  *
  * Two lines, because one is a fact and the other is the shape of a habit: the
- * gold run is what was actually earned each day, and the cream line is its
+ * lavender run is what was actually earned each day, and the cream line is its
  * seven-day mean, which is the only way a reader can tell a good fortnight from
  * a good Tuesday. The high day is marked, because on a thirty-point series the
  * peak is the one point anybody looks for.
@@ -246,7 +246,7 @@ export interface SparkProps {
 export function SparkLine({
   series, spanLabel, labels, width, height = 108, playToken, animate, entrance,
 }: SparkProps) {
-  const gold = METAL.GOLD;
+  const xpTone = LAVENDER;
   const n = series.length;
   const padT = 12;
   const padB = 18;
@@ -408,8 +408,8 @@ export function SparkLine({
       <Svg width={width} height={height}>
         <Defs>
           <SvgGrad id="xpArea" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0%" stopColor={gold.base} stopOpacity={0.34} />
-            <Stop offset="100%" stopColor={gold.base} stopOpacity={0} />
+            <Stop offset="0%" stopColor={xpTone} stopOpacity={0.34} />
+            <Stop offset="100%" stopColor={xpTone} stopOpacity={0} />
           </SvgGrad>
         </Defs>
 
@@ -423,12 +423,12 @@ export function SparkLine({
         {geom.meanPath ? (
           <Path d={geom.meanPath} stroke={C.paperSoft} strokeWidth={1} fill="none" opacity={0.45} strokeDasharray="3 4" />
         ) : null}
-        {geom.line ? <Path d={geom.line} stroke={gold.lit} strokeWidth={2} fill="none" strokeLinejoin="round" /> : null}
+        {geom.line ? <Path d={geom.line} stroke={xpTone} strokeWidth={2} fill="none" strokeLinejoin="round" /> : null}
 
         {max > 1 ? (
           <>
-            <Circle cx={geom.px} cy={geom.py} r={4.5} fill={PANEL_BASE} stroke={gold.lit} strokeWidth={2} />
-            <Circle cx={geom.px} cy={geom.py} r={1.6} fill={gold.lit} />
+            <Circle cx={geom.px} cy={geom.py} r={4.5} fill={PANEL_BASE} stroke={xpTone} strokeWidth={2} />
+            <Circle cx={geom.px} cy={geom.py} r={1.6} fill={xpTone} />
           </>
         ) : null}
       </Svg>
@@ -626,16 +626,16 @@ const s = StyleSheet.create({
   },
   readVal: {
     width: 84, fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 0.8,
-    color: METAL.GOLD.lit,
+    color: LAVENDER,
   },
   /** The hairline down the day the finger is on. */
   scrubRule: {
     position: 'absolute', left: 0, width: 1, backgroundColor: C.paperSoft,
   },
-  /** The point itself, ringed in gold like the peak marker it may land on. */
+  /** The point itself, ringed in lavender like the peak marker it may land on. */
   scrubDot: {
     position: 'absolute', left: 0, top: 0, width: DOT, height: DOT,
-    borderRadius: DOT / 2, borderWidth: 2, borderColor: METAL.GOLD.lit,
+    borderRadius: DOT / 2, borderWidth: 2, borderColor: LAVENDER,
     backgroundColor: PANEL_BASE,
   },
   scrubPad: { position: 'absolute', left: 0, top: 0 },

@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
 import RankSeal from '@/components/shared/RankSeal';
 import { StruckBar, StruckTile, MetalPlate } from '@/components/profile/Struck';
-import { INK, PAPER_LIT, PAPER_SHADE, FAINT, METAL, SHADOW, ramp } from '@/components/shared/tone';
+import { INK, PAPER_LIT, PAPER_SHADE, FAINT, SHADOW, ramp, ROYAL } from '@/components/shared/tone';
 import { C, SPACE, BRANCH, type BranchKey } from '@/constants/design';
 import { rankProgress, rankOrder, rankDegree } from '@/data/ranks';
 import {
@@ -225,7 +225,7 @@ export function TheWall({
       </View>
       <View style={s.tickBox}>
         <View style={s.tickRun}>
-          {/* One mark, struck in gold, for the one sitting it would take. Same
+          {/* One mark, struck in purple, for the one sitting it would take. Same
               size as a free tick so the two runs are comparable at a glance —
               a bigger mark here would be arguing with a different unit. */}
           {/* STRUCK FROM THE SHADED HALF OF THE METAL, not the lit half. Gold's
@@ -235,7 +235,7 @@ export function TheWall({
               body of the mark at 5.66:1 and keeps it plainly a metal rather than
               a second grey tick. */}
           <LinearGradient
-            colors={[METAL.GOLD.base, METAL.GOLD.shade, METAL.GOLD.rim]}
+            colors={[ROYAL.base, ROYAL.shade, ROYAL.rim]}
             start={LIGHT_START}
             end={LIGHT_END}
             style={s.tickLit}
@@ -254,7 +254,7 @@ export function TheWall({
  * already learned to read it on the Profile.
  */
 export function LibraryLine({
-  lessonsByBranch, tint = METAL.GOLD.base,
+  lessonsByBranch, tint = ROYAL.base,
 }: {
   lessonsByBranch: Record<string, number>;
   tint?: string;
@@ -318,7 +318,7 @@ export function PassTable({ width }: { width: number }) {
         <View style={{ flex: 1 }} />
         <Text style={[s.headFree, { width: FREE }]}>FREE</Text>
         <View style={{ width: COL, alignItems: 'center' }}>
-          <MetalPlate metal={METAL.GOLD} label="THE PASS" />
+          <MetalPlate metal={ROYAL} label="THE PASS" />
         </View>
       </View>
 

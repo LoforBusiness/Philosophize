@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import Button from '@/components/ui/Button';
 import { MetalPlate } from '@/components/profile/Struck';
-import { METAL, INK, MID } from '@/components/shared/tone';
+import { INK, MID, ROYAL } from '@/components/shared/tone';
 import { C, SPACE } from '@/constants/design';
 import { FALLBACK_PRICE, BILLING_PERIOD_LABEL } from '@/constants/subscription';
 import { trialLengthPhrase } from '@/lib/utils/trial';
@@ -95,7 +95,7 @@ export default function PassDoor({ source, compact = false }: {
     return (
       <View style={st.door}>
         <MetalPlate
-          metal={METAL.GOLD}
+          metal={ROYAL}
           label={`${trialLengthPhrase(trial).toUpperCase()} FREE`}
           style={st.plate}
         />

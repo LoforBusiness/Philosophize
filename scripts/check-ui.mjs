@@ -836,7 +836,7 @@ for (const [name, hue] of ERA_FACES) {
     `${r2(D.C.paperSoft, GROUND).toFixed(1)}:1`);
   ok(r2(D.C.dim, GROUND) >= 3, 'panel: the caption grey clears the mark floor',
     `${r2(D.C.dim, GROUND).toFixed(1)}:1`);
-  ok(r2(T.METAL.GOLD.lit, GROUND) >= 3, 'panel: the XP line reads', `${r2(T.METAL.GOLD.lit, GROUND).toFixed(1)}:1`);
+  ok(r2(T.LAVENDER, GROUND) >= 3, 'panel: the XP line reads', `${r2(T.LAVENDER, GROUND).toFixed(1)}:1`);
   ok(r2(T.PANEL_RULE, GROUND) >= 1.15, 'panel: a hairline is actually visible',
     `${r2(T.PANEL_RULE, GROUND).toFixed(2)}:1`);
   // TWO DIFFERENT THINGS, and the first draft measured the wrong one. The

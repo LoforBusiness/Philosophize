@@ -5,7 +5,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
-import { METAL, INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, mix } from '@/components/shared/tone';
+import { INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, mix, ROYAL, PURPLE, BEIGE, BEIGE_SHADE, BEIGE_LIT } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE SIX TAB ICONS, AS THINGS YOU CAN HOLD.
@@ -34,8 +34,10 @@ import { METAL, INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, mix } from '@/compone
 // And what it deliberately does NOT copy: Duolingo gives each tab its own hue.
 // The six branch colours already mean "this branch" on Insights, and §19 records
 // six saturated colours at once as the thing that made a screen look cheap. So
-// the fill is the app's one reward metal, GOLD, lit from the top left like every
-// struck thing here, with an ink rim and ink details.
+// the fill is the app's accent, royal purple (tone.ts), lit from the top left like
+// every struck thing here, with an ink rim, beige details inside the body and a
+// beige recess behind it. It was gold until the owner called the gold "pretty
+// AI" (2026-09-15).
 //
 // ── THE BAR DRAWS EVERY ICON TWICE ──────────────────────────────────────────
 //
@@ -54,7 +56,6 @@ import { METAL, INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, mix } from '@/compone
 
 export type TabIconName = 'home' | 'learn' | 'thinkers' | 'insights' | 'pass' | 'profile';
 
-const GOLD = METAL.GOLD;
 
 /**
  * The unchosen glyph: ink, faded only as far as a meaningful mark can afford.
@@ -68,13 +69,20 @@ const TILE_W = 46;
 const TILE_H = 36;
 
 interface Art {
-  /** The shape that fills with gold when chosen and is outlined when not. */
+  /** The shape that fills with purple when chosen and is outlined when not. */
   body: string[];
   /** Round parts of the body, as [cx, cy, r]. */
   bodyDots?: [number, number, number][];
   /** Solid details: ink when chosen, the idle grey when not. */
   solid?: string[];
   solidDots?: [number, number, number][];
+  /**
+   * Details INSIDE the body: beige when chosen, the idle grey when not. Ink on the
+   * purple is 1.34:1, so a detail drawn in ink on the chosen body disappears.
+   */
+  inset?: string[];
+  insetDots?: [number, number, number][];
+  insetLines?: string[];
   /** Lines drawn the same way in both states. */
   lines?: string[];
   /** A paper-white part with an ink edge when chosen; an outline when not. */
@@ -89,7 +97,9 @@ const ART: Record<TabIconName, Art> = {
   // A house with its roof overhanging the walls, and a dark door.
   home: {
     body: ['M7 14.6 L16 6.8 L25 14.6 L25 25.2 C25 26.3 24.1 27.2 23 27.2 L9 27.2 C7.9 27.2 7 26.3 7 25.2 Z'],
-    solid: ['M13.2 27.2 L13.2 21.4 C13.2 20.3 14.1 19.4 15.2 19.4 L16.8 19.4 C17.9 19.4 18.8 20.3 18.8 21.4 L18.8 27.2 Z'],
+    // The door stops at the wall's inner edge, so a beige door does not notch
+    // the ink outline under it.
+    inset: ['M13.2 26.1 L13.2 21.4 C13.2 20.3 14.1 19.4 15.2 19.4 L16.8 19.4 C17.9 19.4 18.8 20.3 18.8 21.4 L18.8 26.1 Z'],
     lines: ['M3.8 16.4 L16 5.4 L28.2 16.4'],
   },
   // The thought cloud with a question in it: curiosity, which is what the Learn
@@ -99,15 +109,15 @@ const ART: Record<TabIconName, Art> = {
     // Clear of the cloud by a stroke's width: closer than that and the two
     // outlines met and the bubbles read as a smudge at tab size.
     bodyDots: [[7.6, 28.2, 1.6], [4.6, 30, 0.9]],
-    lines: ['M13.9 14.9 C13.9 12.8 18.3 12.7 18.3 15 C18.3 16.7 16.2 16.9 16.2 18.8'],
-    solidDots: [[16.2, 21, 1.2]],
+    insetLines: ['M13.9 14.9 C13.9 12.8 18.3 12.7 18.3 15 C18.3 16.7 16.2 16.9 16.2 18.8'],
+    insetDots: [[16.2, 21, 1.2]],
   },
-  // The philosopher's hat: a gold crown, a dark brim, a white feather.
+  // The philosopher's hat: a purple crown, a dark brim, a beige feather.
   thinkers: {
     body: ['M8.6 20.4 C8.6 12.8 11.6 8.6 16 8.6 C20.4 8.6 23.4 12.8 23.4 20.4 Z'],
     paper: ['M21.6 14.2 C22.6 10 24.6 6.2 27.8 3.6 C29 8.4 26.2 12.6 22.4 15.4 Z'],
     solid: ['M3.4 21.4 C3.4 18.7 28.6 18.7 28.6 21.4 C28.6 24.2 3.4 24.2 3.4 21.4 Z'],
-    lines: ['M9.2 17.4 C12.4 19 19.6 19 22.8 17.4'],
+    insetLines: ['M9.2 17.4 C12.4 19 19.6 19 22.8 17.4'],
   },
   // Three rising bars on a ground line; chosen, a spark lands beside the tallest.
   insights: {
@@ -122,7 +132,7 @@ const ART: Record<TabIconName, Art> = {
   // An admission ticket, notched at both sides, with a star struck on it.
   pass: {
     body: ['M6.2 8 L25.8 8 C26.9 8 27.8 8.9 27.8 10 L27.8 13.1 C26.4 13.4 25.4 14.6 25.4 16 C25.4 17.4 26.4 18.6 27.8 18.9 L27.8 22 C27.8 23.1 26.9 24 25.8 24 L6.2 24 C5.1 24 4.2 23.1 4.2 22 L4.2 18.9 C5.6 18.6 6.6 17.4 6.6 16 C6.6 14.6 5.6 13.4 4.2 13.1 L4.2 10 C4.2 8.9 5.1 8 6.2 8 Z'],
-    solid: ['M16 10.9 L17.35 14.2 L20.9 14.45 L18.2 16.75 L19.05 20.2 L16 18.35 L12.95 20.2 L13.8 16.75 L11.1 14.45 L14.65 14.2 Z'],
+    inset: ['M16 10.9 L17.35 14.2 L20.9 14.45 L18.2 16.75 L19.05 20.2 L16 18.35 L12.95 20.2 L13.8 16.75 L11.1 14.45 L14.65 14.2 Z'],
   },
   // A bust: head and shoulders.
   profile: {
@@ -133,36 +143,43 @@ const ART: Record<TabIconName, Art> = {
 
 function Glyph({ name, lit }: { name: TabIconName; lit: boolean }) {
   const a = ART[name];
-  const id = `tabgold-${name}`;
+  const id = `tabroyal-${name}`;
   const edge = lit ? INK : TAB_IDLE;
   const line = {
     stroke: edge, strokeWidth: STROKE, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
   };
   const body = { ...line, fill: lit ? `url(#${id})` : 'none' };
   const solid = { fill: edge, stroke: edge, strokeWidth: lit ? 0.6 : 0.4, strokeLinejoin: 'round' as const };
+  // A detail inside the chosen body is beige; unchosen, it is the outline's grey.
+  const mark = lit ? BEIGE : edge;
 
   return (
     <Svg width={SIZE} height={SIZE} viewBox="0 0 32 32">
       {lit ? (
         <Defs>
           <SvgGradient id={id} x1="15%" y1="0%" x2="85%" y2="100%">
-            <Stop offset="0%" stopColor={GOLD.lit} />
-            <Stop offset="55%" stopColor={GOLD.base} />
-            <Stop offset="100%" stopColor={GOLD.shade} />
+            <Stop offset="0%" stopColor={ROYAL.lit} />
+            <Stop offset="55%" stopColor={ROYAL.base} />
+            <Stop offset="100%" stopColor={ROYAL.shade} />
           </SvgGradient>
         </Defs>
       ) : null}
       {a.body.map((d) => <Path key={d} d={d} {...body} />)}
       {(a.bodyDots ?? []).map(([cx, cy, r]) => <Circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={r} {...body} />)}
       {(a.paper ?? []).map((d) => (
-        <Path key={d} d={d} {...line} fill={lit ? PAPER_LIT : 'none'} />
+        <Path key={d} d={d} {...line} fill={lit ? BEIGE : 'none'} />
       ))}
       {(a.solid ?? []).map((d) => <Path key={d} d={d} {...solid} />)}
       {(a.solidDots ?? []).map(([cx, cy, r]) => <Circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={r} fill={edge} />)}
+      {(a.inset ?? []).map((d) => (
+        <Path key={d} d={d} fill={mark} stroke={mark} strokeWidth={lit ? 0.6 : 0.4} strokeLinejoin="round" />
+      ))}
+      {(a.insetDots ?? []).map(([cx, cy, r]) => <Circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={r} fill={mark} />)}
       {(a.lines ?? []).map((d) => <Path key={d} d={d} {...line} fill="none" />)}
+      {(a.insetLines ?? []).map((d) => <Path key={d} d={d} {...line} stroke={mark} fill="none" />)}
       {lit
         ? (a.flourish ?? []).map((d) => (
-          <Path key={d} d={d} fill={INK} stroke={INK} strokeWidth={0.6} strokeLinejoin="round" />
+          <Path key={d} d={d} fill={PURPLE} stroke={PURPLE} strokeWidth={0.6} strokeLinejoin="round" />
         ))
         : null}
     </Svg>
@@ -172,7 +189,7 @@ function Glyph({ name, lit }: { name: TabIconName; lit: boolean }) {
 /**
  * One copy of one tab's icon.
  *
- * `lit` picks the drawing: the bar's focused copy is gold, the other an outline.
+ * `lit` picks the drawing: the bar's focused copy is purple, the other an outline.
  * `open` is whether the reader is on this tab, and only the lit copy acts on it:
  * the tile fades in and the icon bounces when the tab is CHOSEN, never on mount,
  * because every tab is built at startup and a mount animation would spend itself
@@ -220,7 +237,7 @@ function TabIcon({ name, lit, open }: { name: TabIconName; lit: boolean; open: b
               dark hairline sits along the top, where light cannot reach into a
               cut. StruckNiche's rule, at tab size. */}
           <LinearGradient
-            colors={[mix(PAPER, PAPER_SHADE, 0.55), PAPER, PAPER_LIT]}
+            colors={[BEIGE_SHADE, BEIGE, BEIGE_LIT]}
             locations={[0, 0.5, 1]}
             start={{ x: 0.15, y: 0 }}
             end={{ x: 0.85, y: 1 }}
@@ -251,13 +268,13 @@ const st = StyleSheet.create({
     height: TILE_H,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: FAINT,
+    borderColor: BEIGE_SHADE,
     overflow: 'hidden',
   },
   // Inset from both corners. Run edge to edge, the tile's own radius clipped it
   // into a grey band across the top rather than a line inside the cut.
   tileCut: {
     position: 'absolute', left: 9, right: 9, top: 0, height: 1,
-    backgroundColor: mix(PAPER_SHADE, INK, 0.18),
+    backgroundColor: mix(BEIGE_SHADE, INK, 0.2),
   },
 });

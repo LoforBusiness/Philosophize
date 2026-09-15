@@ -8,7 +8,7 @@ import Animated, {
 import Stickman from '@/components/lesson/cinematic/Stickman';
 import { pose, type Bundle } from '@/components/lesson/cinematic/rig';
 import { emoteAnyLive } from '@/components/lesson/cinematic/moves';
-import { GILT, SLATE } from '@/constants/streak';
+import { STREAK_PURPLE, SLATE } from '@/constants/streak';
 import type { MoodState } from '@/lib/utils/streakMood';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -175,7 +175,7 @@ export default function StreakMascot({ mood, alive, delay = 0, hold }: Props) {
           style={[
             styles.floor,
             {
-              backgroundColor: alive ? GILT : SLATE,
+              backgroundColor: alive ? STREAK_PURPLE : SLATE,
               opacity: alive ? 0.25 + 0.55 * mood.glow : 0.4,
               // It also SHORTENS, so the change survives a reader who cannot see
               // the colour shift at all.

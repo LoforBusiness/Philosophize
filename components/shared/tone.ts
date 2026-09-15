@@ -206,6 +206,55 @@ export function mix(a: string, b: string, t: number): string {
   return toHex(r1 + (r2 - r1) * t, g1 + (g2 - g1) * t, b1 + (b2 - b1) * t);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// THE PALETTE: ROYAL PURPLE AND WARM BEIGE.
+//
+// The owner chose these on 2026-09-15, as two swatches, and asked for them in
+// place of the gold everywhere gold had been the app's accent: the tab icons,
+// the Pass, the streak, the profile's plates and Insights' two paper boxes.
+// "The gold looks pretty AI." The black-and-white identity stays, and these two
+// carry what gold used to.
+//
+// HOW THEY PAIR. Purple marks what was earned or chosen; beige is the surface it
+// sits on, or the lettering on it. Beige on purple reads 10.52:1, purple on paper
+// 12.38:1, and ink on beige 14.13:1.
+//
+// TWO GROUNDS THEY CANNOT TAKE. Purple on ink is 1.34:1 and on the Insights
+// panel 1.49:1, so a dark ground takes LAVENDER, the same hue lifted toward paper.
+// Beige as a fill on paper is 1.18:1, so a beige surface is carried by its cut
+// edges, never by the fill alone.
+//
+// The rank ladder keeps its eight metals, AURUM included, by the owner's choice:
+// a pin is an earned object in a ladder, not the app's accent.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Royal purple, #4B0082. L* 20, C* 74, hue 314. */
+export const PURPLE = '#4B0082';
+/** Warm beige, #F5E6CA. L* 92, C* 15, hue 88. */
+export const BEIGE = '#F5E6CA';
+/** Beige a step down: the floor of a beige recess, and a hairline on beige. */
+export const BEIGE_SHADE = mix(BEIGE, INK, 0.1);
+/** Beige a step up: the lit edge of a beige surface. */
+export const BEIGE_LIT = mix(BEIGE, PAPER_LIT, 0.5);
+/** The purple for a dark ground, same hue: 7.12:1 on ink, 7.90:1 on the panel. */
+export const LAVENDER = mix(PURPLE, PAPER, 0.62);
+
+/**
+ * The purple as a struck material, in the shape `METAL` uses, so a plate, a coin
+ * and a column are cut from it exactly as they were cut from gold. `on` is beige.
+ *
+ * The lit corner stops at 0.22 toward paper, where beige still reads 6.22:1 on
+ * it. At 0.34, the fraction `ramp()` uses, the corner turns orchid and a label
+ * running across it falls under 4.5:1.
+ */
+export const ROYAL: Metal = {
+  lit: mix(PURPLE, PAPER, 0.22),
+  base: PURPLE,
+  shade: mix(PURPLE, INK, 0.36),
+  rim: mix(PURPLE, INK, 0.58),
+  on: BEIGE,
+};
+
 export interface Ramp { lit: string; base: string; shade: string; rim: string; track: string; }
 
 /**

@@ -12,7 +12,7 @@ import ScreenTransition from '@/components/shared/ScreenTransition';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { C, TYPE, SPACE, BRANCH, type TypeKey, type BranchKey } from '@/constants/design';
-import { GHOST, METAL, ramp } from '@/components/shared/tone';
+import { GHOST, ramp, ROYAL, PURPLE, LAVENDER } from '@/components/shared/tone';
 import { StruckBar, StruckTile, MetalPlate, MasteryRow, ShelfCount } from '@/components/profile/Struck';
 import RankSeal from '@/components/shared/RankSeal';
 import { BRANCH_SHORT, BRANCH_ICON } from '@/components/shared/branchMarks';
@@ -515,8 +515,8 @@ export default function ProfileScreen() {
             <Text style={styles.insightLabel}>THINKERS YOU KEEP RETURNING TO</Text>
             {topPhilosopher ? (
               <View style={{ marginTop: SPACE[2] }}>
-                {/* Gold on the leader only — a placing rather than a longer bar. */}
-                <ShareBars rows={thinkerRows} c={CHART_INK} accent={METAL.GOLD.base} />
+                {/* Purple on the leader only — a placing rather than a longer bar. */}
+                <ShareBars rows={thinkerRows} c={CHART_INK} accent={ROYAL.base} />
               </View>
             ) : (
               <>
@@ -568,12 +568,12 @@ export default function ProfileScreen() {
                 other box, so the biggest facts arrived with the least weight.
                 A lit corner, a shaded one and a shadow is the badge treatment
                 applied to a rectangle — which is the point, since a profile is a
-                case of struck things. The top edge carries the metal of whatever
-                the tile is about. */}
+                case of struck things. The top edge and the icon carry the
+                palette: purple for XP, lavender for lessons. */}
             <View style={styles.glanceCol}>
-              <StruckTile accent={METAL.BRONZE.base} style={styles.glanceTile}>
+              <StruckTile accent={LAVENDER} style={styles.glanceTile}>
                 <View style={styles.glanceTop}>
-                  <SketchIcon name="book" size={15} color={C.ink} />
+                  <SketchIcon name="book" size={15} color={PURPLE} />
                   <Text style={styles.glanceLabel}>LESSONS DONE</Text>
                 </View>
                 <Text style={styles.glanceValue}>{lessonsDone}</Text>
@@ -588,9 +588,9 @@ export default function ProfileScreen() {
               </StruckTile>
             </View>
             <View style={styles.glanceCol}>
-              <StruckTile accent={METAL.GOLD.base} style={styles.glanceTile}>
+              <StruckTile accent={ROYAL.base} style={styles.glanceTile}>
                 <View style={styles.glanceTop}>
-                  <SketchIcon name="star" size={15} color={C.ink} />
+                  <SketchIcon name="star" size={15} color={PURPLE} />
                   <Text style={styles.glanceLabel}>TOTAL XP</Text>
                 </View>
                 <Text style={styles.glanceValue}>{totalXP.toLocaleString()}</Text>
@@ -721,7 +721,7 @@ export default function ProfileScreen() {
                 </View>
               ) : (
                 <View style={styles.rankPin}>
-                  <MetalPlate metal={METAL.GOLD} label="TOP" />
+                  <MetalPlate metal={ROYAL} label="TOP" />
                 </View>
               )}
             </View>
@@ -781,7 +781,7 @@ export default function ProfileScreen() {
               and at a tenth strength on the empty part of the track — so a row is
               identifiable before its name is read. The percentage moved aside for
               the count it was hiding, and a branch that is finished says so on a
-              gold plate rather than by having a bar that is full to within a few
+              purple plate rather than by having a bar that is full to within a few
               pixels of one that is not. */}
           {branchesComplete > 0 ? (
             <Text style={styles.masteryLead}>

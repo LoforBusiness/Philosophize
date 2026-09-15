@@ -7,7 +7,7 @@ import SketchIcon from '@/components/shared/SketchIcon';
 import PassCard from '@/components/shared/PassCard';
 import Button from '@/components/ui/Button';
 import { MasteryRow, MetalPlate } from '@/components/profile/Struck';
-import { METAL, ramp } from '@/components/shared/tone';
+import { ramp, ROYAL } from '@/components/shared/tone';
 import { BRANCH_SHORT, BRANCH_ICON } from '@/components/shared/branchMarks';
 import { Standing, LibraryLine, TheWall, PassTable, Rule } from '@/components/paywall/PassParts';
 import TrialStatus from '@/components/paywall/TrialStatus';
@@ -214,7 +214,7 @@ export default function PaywallContent({
           ) : (
             <>
               <View style={styles.proPlate}>
-                <MetalPlate metal={METAL.GOLD} label="ACTIVE" />
+                <MetalPlate metal={ROYAL} label="ACTIVE" />
               </View>
               <Text style={styles.thanksTitle}>You’re a Scholar</Text>
               <Text style={styles.thanksBody}>

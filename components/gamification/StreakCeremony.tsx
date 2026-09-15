@@ -6,7 +6,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ramp, rampFace, mix, PAPER_LIT } from '@/components/shared/tone';
-import { GILT, GILT_DEEP, GILT_SOFT, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
+import { STREAK_PURPLE, STREAK_DEEP, STREAK_BEIGE, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
 import { buildWeek } from '@/lib/utils/streakCalendar';
 import { LIP } from '@/constants/design';
 import { cue } from '@/lib/feedback';
@@ -86,9 +86,9 @@ const FAINT = '#E4E1D8';
 //                            today, which is struck in miniature as it gets
 //                            there. The sequence ends on the day just won.
 //
-// ── GOLD LEAF, NOT CONFETTI ─────────────────────────────────────────────────
+// ── LEAF, NOT CONFETTI ─────────────────────────────────────────────────
 //
-// The burst is cut from GILT's own ramp plus paper — RankUpScreen's rule ("cut
+// The burst is cut from the purple's own ramp plus beige — RankUpScreen's rule ("cut
 // from the order, not from ink: a celebration that does not know what it is
 // celebrating"), one metal along. Flakes leave from the seal's RIM rather than
 // its centre, which is the other thing that screen learned the hard way:
@@ -103,9 +103,9 @@ const FAINT = '#E4E1D8';
 // frame and stay on the UI thread where they belong.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const METAL = ramp(GILT);
+const METAL = ramp(STREAK_PURPLE);
 const FACE = rampFace(METAL);
-const RAIL = mix(GILT, PAPER, 0.62);
+const RAIL = mix(STREAK_PURPLE, PAPER, 0.62);
 const GROOVE: [string, string, string] = [
   mix(RAIL, INK, 0.16), RAIL, mix(RAIL, PAPER_LIT, 0.5),
 ];
@@ -309,7 +309,7 @@ export default function StreakCeremony({
   // A landmark day gets more of everything the ordinary day gets — the object
   // itself changes, which is Duolingo's own stated milestone rule.
   const flakes = useMemo(() => makeFlakes(hitMilestone ? 44 : 26), [hitMilestone]);
-  const tones = useMemo(() => [METAL.lit, GILT, METAL.shade, PAPER], []);
+  const tones = useMemo(() => [METAL.lit, STREAK_PURPLE, METAL.shade, STREAK_BEIGE], []);
 
   const sealIn = useSharedValue(0);
   const sealScale = useSharedValue(1.6);
@@ -543,11 +543,9 @@ export default function StreakCeremony({
               </Animated.View>
 
               {/* THE IMPRESSION — a ruled ring and a crooked legend inside it.
-                  The words are INK with a PAPER-coloured shadow down-right,
-                  which is the app's own emboss read backwards: light below a
-                  dark mark is what a shape pressed INTO a surface does. Type on
-                  a 135° gradient has no single contrast, and the shadow is what
-                  carries the legend across the shaded half. */}
+                  The words are BEIGE with an ink shadow down-right: beige
+                  reads 10.52:1 on the purple at the face's centre, and the
+                  shadow keeps the letters crisp across the lit corner. */}
               <Animated.View pointerEvents="none" style={[styles.stamp, stampStyle]}>
                 <View style={styles.stampRing} />
                 {STAMP.map((word) => (
@@ -702,30 +700,30 @@ const styles = StyleSheet.create({
   },
   stampRing: {
     position: 'absolute', width: STAMP_RING, height: STAMP_RING, borderRadius: STAMP_RING / 2,
-    borderWidth: 2, borderColor: METAL.rim, opacity: 0.55,
+    borderWidth: 2, borderColor: STREAK_BEIGE, opacity: 0.55,
   },
   stampWord: {
     fontFamily: 'SpecialElite_400Regular',
     fontSize: STAMP_SIZE,
     lineHeight: STAMP_SIZE * 1.06,
     letterSpacing: 0.6,
-    color: INK,
+    color: STREAK_BEIGE,
     // includeFontPadding is what put the league numeral low in its disc. A
     // typewriter face carries deep, asymmetric padding, so two stacked lines
     // inside a ring are centred on the box rather than on the glyphs without it.
     includeFontPadding: false,
     textAlign: 'center',
-    textShadowColor: 'rgba(255, 252, 245, 0.5)',
+    textShadowColor: 'rgba(26, 26, 26, 0.4)',
     textShadowOffset: { width: 1, height: 1.6 },
     textShadowRadius: 1.2,
   },
   collar: {
     position: 'absolute', width: SEAL + 20, height: SEAL + 20, borderRadius: (SEAL + 20) / 2,
-    borderWidth: 3, borderColor: GILT_DEEP,
+    borderWidth: 3, borderColor: STREAK_DEEP,
   },
   pressRing: {
     position: 'absolute', width: SEAL, height: SEAL, borderRadius: SEAL / 2,
-    borderWidth: 3, borderColor: GILT,
+    borderWidth: 3, borderColor: STREAK_PURPLE,
   },
   leafOrigin: {
     position: 'absolute', left: BOX / 2, top: BOX / 2,
@@ -735,7 +733,7 @@ const styles = StyleSheet.create({
   count: {
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 84,
-    color: GILT,
+    color: STREAK_PURPLE,
     marginTop: 18,
     includeFontPadding: false,
   },
@@ -761,14 +759,14 @@ const styles = StyleSheet.create({
   disc: { width: DISC, height: DISC, borderRadius: DISC / 2 },
   dayPressRing: {
     position: 'absolute', width: DISC, height: DISC, borderRadius: DISC / 2,
-    borderWidth: 1.5, borderColor: GILT,
+    borderWidth: 1.5, borderColor: STREAK_PURPLE,
   },
-  rested: { backgroundColor: GILT_SOFT, borderWidth: 1, borderColor: GILT },
+  rested: { backgroundColor: STREAK_BEIGE, borderWidth: 1, borderColor: STREAK_PURPLE },
   missed: { borderWidth: 1.5, borderColor: FAINT },
   future: { borderWidth: 1.5, borderColor: FAINT, opacity: 0.55 },
 
   milestone: {
-    fontFamily: 'Inter_700Bold', fontSize: 12, color: GILT,
+    fontFamily: 'Inter_700Bold', fontSize: 12, color: STREAK_PURPLE,
     letterSpacing: 2.6, marginTop: 26, textAlign: 'center',
   },
   tail: {
@@ -776,7 +774,7 @@ const styles = StyleSheet.create({
     color: INK_SOFT, marginTop: 26, textAlign: 'center',
   },
 
-  btn: { borderRadius: 14, paddingVertical: 18, alignItems: 'center', backgroundColor: GILT },
-  btnLip: { position: 'absolute', left: 0, right: 0, top: LIP.button, bottom: 0, borderRadius: 14, backgroundColor: GILT_DEEP },
-  btnText: { fontFamily: 'Inter_700Bold', fontSize: 18, color: PAPER },
+  btn: { borderRadius: 14, paddingVertical: 18, alignItems: 'center', backgroundColor: STREAK_PURPLE },
+  btnLip: { position: 'absolute', left: 0, right: 0, top: LIP.button, bottom: 0, borderRadius: 14, backgroundColor: STREAK_DEEP },
+  btnText: { fontFamily: 'Inter_700Bold', fontSize: 18, color: STREAK_BEIGE },
 });

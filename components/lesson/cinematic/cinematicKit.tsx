@@ -12,7 +12,7 @@ import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import { C, RADIUS, LIP } from '@/constants/design';
 import { ease01, pose, seg, type Bundle, type Stance } from './rig';
 import { gazeAt } from './moves';
-import { METAL } from '@/components/shared/tone';
+import { PURPLE, BEIGE } from '@/components/shared/tone';
 import { VerdictSeal, XpCoin, useQuestionAccent } from './QuestionParts';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1441,7 +1441,7 @@ export function Reveal({ correct, graded, explain }: {
   correct: boolean; graded?: boolean; explain: string;
 }) {
   // It says WHICH of the two things happened before anything else, with a stamp,
-  // and a right answer pays out in gold where it was earned.
+  // and a right answer pays out in purple where it was earned.
   return (
     <Animated.View
       style={[styles.explain, correct ? styles.explainRight : styles.explainWrong]}
@@ -1856,12 +1856,13 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 2,
   },
   kickerText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.4, color: PAPER },
-  // THE STAKE, in gold, because XP is already struck in gold everywhere else.
+  // THE STAKE, a beige pill struck in purple: the palette's pair, and the same
+  // purple the XP coin pays out in.
   stake: {
     borderRadius: RADIUS.pill, paddingHorizontal: 8, paddingVertical: 2,
-    backgroundColor: METAL.GOLD.lit, borderWidth: 1.5, borderColor: METAL.GOLD.base,
+    backgroundColor: BEIGE, borderWidth: 1.5, borderColor: PURPLE,
   },
-  stakeText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.8, color: INK },
+  stakeText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.8, color: PURPLE },
 
   prompt: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 16, color: INK, marginBottom: 8, lineHeight: 21 },
   interactHint: { fontFamily: 'Inter_500Medium', fontSize: 12, letterSpacing: 0.5, color: SOFT, fontStyle: 'italic' },

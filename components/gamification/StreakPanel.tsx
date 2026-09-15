@@ -5,7 +5,7 @@ import { ramp, rampFace } from '@/components/shared/tone';
 import StreakBook from './StreakBook';
 import { weekDays } from '@/lib/utils/week';
 import {
-  GILT, GILT_LIT, SLATE, SLATE_LIT, nextTier, tierFor,
+  STREAK_PURPLE, STREAK_ON_INK, SLATE, SLATE_LIT, nextTier, tierFor,
 } from '@/constants/streak';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ import {
 // Nothing here is invented. Everything this panel now shows already existed in
 // the codebase and had never reached the two screens a reader actually looks at:
 //
-//   THE GILT      constants/streak.ts carries a measured orange whose entire
+//   THE PURPLE    constants/streak.ts carries the palette's purple, whose entire
 //                  stated job is to say ALIVE or ABOUT TO DIE at a glance — and
 //                  Home's panel and Profile's both drew the streak in flat ink.
 //                  The one licensed colour in the app existed for this object
@@ -49,8 +49,8 @@ import {
 // Home's panel is ink; Profile's is paper. Two copies of one object is how
 // "POLITICS" ends up on one screen and "Political Philosophy" on the other, so
 // this takes `onInk` and swaps the six values, exactly as StreakWeek already
-// does for `tint`/`ground`. The ember has its OWN pair for the dark ground —
-// see GILT_LIT: a colour measured on paper reads 3.50:1 on ink, under the floor
+// does for `tint`/`ground`. The purple has its OWN pair for the dark ground —
+// see STREAK_ON_INK: the purple measured on paper reads 1.34:1 on ink, under the floor
 // for the number it is colouring.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -111,13 +111,13 @@ export default function StreakPanel({
   daySize = 28,
 }: StreakPanelProps) {
   const alive = streak > 0;
-  const mark = onInk ? (alive ? GILT_LIT : SLATE_LIT) : alive ? GILT : SLATE;
+  const mark = onInk ? (alive ? STREAK_ON_INK : SLATE_LIT) : alive ? STREAK_PURPLE : SLATE;
   // A DONE DAY IS STRUCK, NOT FILLED. It was a flat disc of `mark` with a check
   // cut out of it — the same flat-dot fault the reward screen was pulled up on
   // ("just a blue dot"), on the two screens a reader sees most. `ramp()` is the
   // one light every pin, badge and certificate in the app is cut to, and it
   // takes whichever `mark` this printing resolved to, so the panel still
-  // inverts correctly and a lapsed run is struck in slate rather than in gilt.
+  // inverts correctly and a lapsed run is struck in slate rather than in purple.
   const metal = ramp(mark);
   const face = rampFace(metal);
   const text = onInk ? CREAM : INK;

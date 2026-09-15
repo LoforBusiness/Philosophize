@@ -25,6 +25,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { statsFingerprint, grownKeys } from '@/lib/utils/statsMilestone';
 import { discoverIn, discoverFact, type Candidate } from '@/lib/utils/statsDiscovery';
 import { dailyXP, dayLabels, activeDays as countActive } from '@/lib/utils/xpSeries';
+import { PURPLE } from '@/components/shared/tone';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -481,11 +482,11 @@ export default function StatsScreen() {
           <RankedBars
             title="Thinkers by Era"
             subtitle="whose century you actually read"
-            // INK, NOT AN ERA HUE. The five colours in this box are labels for
-            // the five rows; a sixth one in the head would be a label for
-            // nothing, and picking the leading era's would make the box change
-            // colour as the reader reads.
-            accent={Ink}
+            // THE PALETTE'S PURPLE, NOT AN ERA HUE. The five colours in this box
+            // are labels for the five rows; a sixth era colour in the head would
+            // be a label for nothing, and picking the leading era's would make
+            // the box change colour as the reader reads.
+            accent={PURPLE}
             rows={eraRows}
             playToken={playToken}
             animate={animate}

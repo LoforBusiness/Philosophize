@@ -2,8 +2,7 @@ import { View, Text, StyleSheet, type StyleProp, type ViewStyle } from 'react-na
 import { LinearGradient } from 'expo-linear-gradient';
 import { C, SPACE } from '@/constants/design';
 import {
-  INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, GHOST, SHADOW,
-  METAL, ramp, mix, type Metal, type Ramp,
+  INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, GHOST, SHADOW, METAL, ramp, mix, type Metal, type Ramp, ROYAL, PURPLE, BEIGE, BEIGE_SHADE, BEIGE_LIT,
 } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -266,21 +265,24 @@ export function StruckPanel({
         style={s.panel}
       >
         <View pointerEvents="none" style={[s.panelRim, { backgroundColor: PAPER_LIT }]} />
+        {/* THE HEAD IS CUT IN BEIGE, the palette's surface, and its title is
+            struck in the palette's purple. Beige is 1.18:1 on paper, so the band
+            is carried by its cut edges rather than by the fill. */}
         <LinearGradient
-          colors={[mix(PAPER, PAPER_SHADE, 0.36), mix(PAPER, PAPER_SHADE, 0.1), PAPER]}
+          colors={[BEIGE_SHADE, BEIGE, BEIGE_LIT]}
           locations={[0, 0.55, 1]}
           start={LIGHT_START}
           end={LIGHT_END}
           style={s.panelBand}
         >
-          <View pointerEvents="none" style={[s.bandTop, { backgroundColor: mix(PAPER_SHADE, INK, 0.28) }]} />
+          <View pointerEvents="none" style={[s.bandTop, { backgroundColor: mix(BEIGE_SHADE, INK, 0.28) }]} />
           <View style={s.bandBody}>
             {accent ? <View style={[s.bandRule, { backgroundColor: accent }]} /> : null}
             <Text style={[s.panelTitle, EMBOSS]}>{title}</Text>
             <Text style={s.panelSub}>{subtitle}</Text>
           </View>
           {right}
-          <View pointerEvents="none" style={[s.bandFoot, { backgroundColor: PAPER_LIT }]} />
+          <View pointerEvents="none" style={[s.bandFoot, { backgroundColor: BEIGE_LIT }]} />
         </LinearGradient>
 
         <View style={s.panelBody}>{children}</View>
@@ -334,7 +336,7 @@ export function MetalPlate({
  * · the branch's HUE identifies the row before the name is read;
  * · the COUNT ("12 / 34") is what a percentage was hiding — 68% of an unknown
  *   number is not a thing anyone can act on, and "22 of 34 done" is;
- * · a GOLD PLATE at 100%, because a bar that is merely full looks the same as a
+ * · a PURPLE PLATE at 100%, because a bar that is merely full looks the same as a
  *   bar that is nearly full at a glance, and finishing a branch is the largest
  *   single thing a reader does in this app.
  */
@@ -357,7 +359,7 @@ export function MasteryRow({
         <View style={s.mTop}>
           <Text style={[s.mName, { color: r.shade }]} numberOfLines={1}>{name}</Text>
           {complete ? (
-            <MetalPlate metal={METAL.GOLD} label="COMPLETE" style={s.mPlate} />
+            <MetalPlate metal={ROYAL} label="COMPLETE" style={s.mPlate} />
           ) : (
             <Text style={s.mCount}>
               <Text style={[s.mDone, { color: r.base }]}>{done}</Text>
@@ -381,7 +383,7 @@ export function MasteryRow({
  * page.
  */
 export function ShelfCount({ earned, total }: { earned: number; total: number }) {
-  const r = ramp(METAL.GOLD.base);
+  const r = ramp(ROYAL.base);
   return (
     <View style={s.shelf}>
       <View style={s.shelfTop}>
@@ -451,10 +453,12 @@ const s = StyleSheet.create({
   bandFoot: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 1 },
   bandBody: { flex: 1 },
   bandRule: { width: 26, height: 2, borderRadius: 1, marginBottom: 7 },
-  panelTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: INK },
+  panelTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: PURPLE },
   panelSub: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
-    fontSize: 12, color: C.inkSoft, marginTop: 2,
+    // Darker than inkSoft, which is 4.53:1 on beige and 3.66:1 at the band's
+    // shaded corner; this is 4.76:1 there.
+    fontSize: 12, color: mix(INK, BEIGE, 0.3), marginTop: 2,
   },
   panelBody: { paddingHorizontal: SPACE[3], paddingTop: SPACE[3] + 2, paddingBottom: SPACE[3] },
 

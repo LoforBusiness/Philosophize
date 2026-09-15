@@ -11,7 +11,7 @@ import Button from '@/components/ui/Button';
 import RankSeal from '@/components/shared/RankSeal';
 import { MetalPlate } from '@/components/profile/Struck';
 import Certificate, { ScheduleHead, ScheduleRow } from '@/components/paywall/Certificate';
-import { INK, MID, PANEL_BASE, METAL, mix } from '@/components/shared/tone';
+import { INK, MID, PANEL_BASE, mix, ROYAL, PURPLE, BEIGE } from '@/components/shared/tone';
 import TrialReminderAsk from '@/components/paywall/TrialReminderAsk';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
@@ -72,10 +72,9 @@ import { cue } from '@/lib/feedback';
 // == NO NEW COLOUR ===========================================================
 //
 // Same rule as Certificate and PassParts, and check-pass holds it: every value
-// comes from `tone`, `METAL` or `C`. The gold that sweeps across is
-// `METAL.GOLD.lit` -- the lit corner of the metal the certificate is already
-// struck in -- so the light passing over it is literally the highlight it
-// already wears, moving.
+// comes from `tone`, `METAL` or `C`. The light that sweeps across is the
+// palette's BEIGE -- the surface the certificate's Pass rows are cut into -- so
+// the light passing over it is a colour it already wears, moving.
 // -----------------------------------------------------------------------------
 
 /**
@@ -92,9 +91,9 @@ const clear = (hex: string) => {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, 0)`;
 };
 
-/** The gold at a stated alpha, for the band and the rings. Same rule as above. */
-const gold = (a: number) => {
-  const n = parseInt(METAL.GOLD.lit.slice(1), 16);
+/** The beige at a stated alpha, for the band. Same rule as above. */
+const light = (a: number) => {
+  const n = parseInt(BEIGE.slice(1), 16);
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
 };
 
@@ -332,7 +331,7 @@ export default function PassConferred({ kind, onDone }: Props) {
                   }
                   flag={
                     <MetalPlate
-                      metal={METAL.GOLD}
+                      metal={ROYAL}
                       label={trial
                         ? (offer ? `${trialLengthPhrase(offer).toUpperCase()} FREE` : 'FREE TRIAL')
                         : 'ACTIVE'}
@@ -342,7 +341,7 @@ export default function PassConferred({ kind, onDone }: Props) {
                   <ScheduleHead
                     compact
                     label="THIS ADMITS YOU TO"
-                    tint={mix(METAL.GOLD.base, INK, 0.34)}
+                    tint={PURPLE}
                   />
                   {rows}
                 </Certificate>
@@ -355,7 +354,7 @@ export default function PassConferred({ kind, onDone }: Props) {
                   <LinearGradient
                     colors={[
                       clear(PANEL_BASE), clear(PANEL_BASE),
-                      gold(0.9), METAL.GOLD.lit,
+                      light(0.9), BEIGE,
                       PANEL_BASE, PANEL_BASE,
                     ]}
                     locations={[0, 0.40, 0.452, 0.468, 0.492, 1]}
@@ -367,7 +366,7 @@ export default function PassConferred({ kind, onDone }: Props) {
 
                 <Animated.View
                   pointerEvents="none"
-                  style={[StyleSheet.absoluteFill, { backgroundColor: METAL.GOLD.lit }, flashStyle]}
+                  style={[StyleSheet.absoluteFill, { backgroundColor: BEIGE }, flashStyle]}
                 />
               </View>
             </Animated.View>
@@ -420,7 +419,7 @@ const st = StyleSheet.create({
     position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
     borderRadius: 4,
     borderWidth: 1.5,
-    borderColor: METAL.GOLD.base,
+    borderColor: PURPLE,
   },
   // Three card-heights tall and pulled a height above the top, so the skew can
   // never expose a corner. `top`/`bottom` are stated as percentages of the clip
@@ -430,7 +429,7 @@ const st = StyleSheet.create({
   words: { alignItems: 'center' },
   kicker: {
     fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 2.4,
-    color: mix(METAL.GOLD.base, INK, 0.34),
+    color: PURPLE,
   },
   head: {
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: INK,

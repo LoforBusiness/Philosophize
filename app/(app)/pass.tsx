@@ -5,10 +5,10 @@ import { useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { MetalPlate } from '@/components/profile/Struck';
-import PassChart, { PlanTiles, usePassArrival, INK_GOLD } from '@/components/paywall/PassChart';
+import PassChart, { PlanTiles, usePassArrival } from '@/components/paywall/PassChart';
 import PassDoor from '@/components/paywall/PassDoor';
 import TrialStatus from '@/components/paywall/TrialStatus';
-import { METAL, INK, MID, PAPER, mix } from '@/components/shared/tone';
+import { INK, MID, PAPER, mix, ROYAL, PURPLE, BEIGE } from '@/components/shared/tone';
 import { useSubscriptionStore, usePassState } from '@/stores/subscriptionStore';
 import { C, SPACE } from '@/constants/design';
 import { BILLING_PERIOD_LABEL } from '@/constants/subscription';
@@ -41,7 +41,6 @@ import { track } from '@/lib/posthog';
 // enforce it and reads this file for any digit typed into its text.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const GOLD = METAL.GOLD;
 
 export default function PassTab() {
   const isPro = useSubscriptionStore((s) => s.isPro);
@@ -94,8 +93,8 @@ export default function PassTab() {
             across the chart. */}
         <LinearGradient
           pointerEvents="none"
-          colors={[mix(GOLD.lit, PAPER, 0.5), PAPER, PAPER]}
-          locations={[0, 0.7, 1]}
+          colors={[mix(BEIGE, PAPER, 0.15), PAPER, PAPER]}
+          locations={[0, 0.5, 1]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.55, y: 1 }}
           style={st.glow}
@@ -106,7 +105,7 @@ export default function PassTab() {
               product's name split with one word stranded under the other. */}
           <Text style={st.h1}>
             {isPro ? 'You hold the ' : 'Every lesson, every day, with the '}
-            <Text style={st.h1Gold}>{'Scholar’s Pass'}</Text>
+            <Text style={st.h1Accent}>{'Scholar’s Pass'}</Text>
           </Text>
 
           {/* THE TRIAL, FIRST, while one is running. The reminder notification
@@ -125,7 +124,7 @@ export default function PassTab() {
           <View style={st.door}>
             {paying ? (
               <View style={st.held}>
-                <MetalPlate metal={GOLD} label="ACTIVE" />
+                <MetalPlate metal={ROYAL} label="ACTIVE" />
                 <Text style={st.heldNote}>
                   Every lesson is open to you. Manage or cancel the Pass any time from Settings.
                 </Text>
@@ -159,7 +158,7 @@ const st = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 30, lineHeight: 37, color: INK,
     textAlign: 'center', includeFontPadding: false, paddingHorizontal: SPACE[1],
   },
-  h1Gold: { color: INK_GOLD },
+  h1Accent: { color: PURPLE },
   trial: { marginTop: SPACE[4] },
 
   chart: { marginTop: SPACE[5] },

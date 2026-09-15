@@ -150,7 +150,7 @@ const SCREENS = [
   // A Free-against-Pass chart whose columns are panels laid UNDER rows of
   // measured height. That is why this screen has to be LOADED rather than
   // reasoned about: a label that wraps on a narrow phone makes its row taller,
-  // and only a real layout says whether the gold column still runs the whole way
+  // and only a real layout says whether the purple column still runs the whole way
   // down and every cell still sits inside it.
   { key: 'pass-tab', q: 's=tab',
     want: ['Every lesson, every day', 'with the Scholar’s', 'Benefits', 'Free', 'Pass',

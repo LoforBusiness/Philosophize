@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, PixelRatio, type LayoutChangeEvent } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, G } from 'react-native-svg';
-import { INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, MID, METAL, mix } from '@/components/shared/tone';
+import { INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, MID, mix, ROYAL, PURPLE, BEIGE, BEIGE_SHADE, BEIGE_LIT, LAVENDER } from '@/components/shared/tone';
 import { EMBOSS } from '@/components/profile/Struck';
 import { SPACE } from '@/constants/design';
 
@@ -30,17 +30,16 @@ import { SPACE } from '@/constants/design';
 //
 // Same rule as PassParts: every value comes from `tone`, `METAL` or `mix` of the
 // two, and check-pass fails the build on a stray hex. The Scholar's certificate
-// is struck in GOLD and the free one in PAPER, and that is the entire difference
+// is struck in PURPLE and the free one in PAPER, and that is the entire difference
 // in palette — one metal against none. Two objects that differ by material read
 // as two grades of the same thing; two objects that differ by hue read as two
 // unrelated products.
 //
 // ── THREE MEASURED RULES ────────────────────────────────────────────────────
 //
-// · GOLD'S `base` IS 2.51:1 ON PAPER. PassParts records it: fine inside a rim,
-//   useless for a hairline standing alone on the page. So every gold rule here
-//   runs base → shade → rim as a gradient, or uses `INK_GOLD` — gold mixed a
-//   third of the way into ink — for anything that must simply be SEEN.
+// · THE PURPLE READS 12.38:1 ON PAPER. Gold's base read 2.51:1 and had to be
+//   dragged toward ink before a hairline in it could be seen; the palette's
+//   purple needs no such step, so every rule here is PURPLE as it is.
 // · A BIG FACE BARELY SHADES. StruckPanel measured the full PAPER_LIT →
 //   PAPER_SHADE run across 350px and got a tan stain in one corner. The face
 //   here runs a third of that and takes its depth from its EDGES instead: a lit
@@ -53,15 +52,6 @@ import { SPACE } from '@/constants/design';
 const LIGHT_START = { x: 0.15, y: 0 } as const;
 const LIGHT_END = { x: 0.85, y: 1 } as const;
 
-/**
- * Gold, dragged a third of the way toward ink.
- *
- * The one derived tone this file needs and the reason is measured: `METAL.GOLD`
- * is a metal, tuned to be read against its own rim on a medal, and its `base`
- * measures 2.51:1 on paper. A 1px rule painted in it is invisible. This clears
- * the 3:1 a mark needs while still plainly being the gold rather than a grey.
- */
-const INK_GOLD = mix(METAL.GOLD.base, INK, 0.34);
 
 export type CertVariant = 'scholar' | 'free';
 
@@ -71,14 +61,14 @@ function dressing(variant: CertVariant) {
   return {
     gold,
     /** The frame's two rules. */
-    outer: gold ? INK_GOLD : INK,
-    inner: gold ? mix(METAL.GOLD.base, INK, 0.18) : FAINT,
+    outer: gold ? PURPLE : INK,
+    inner: gold ? LAVENDER : FAINT,
     /** The guilloché ground under the head. */
-    ground: gold ? mix(METAL.GOLD.base, INK, 0.1) : mix(PAPER_SHADE, INK, 0.06),
+    ground: gold ? mix(PURPLE, PAPER, 0.5) : mix(PAPER_SHADE, INK, 0.06),
     /** Display type. */
     title: gold ? INK : INK,
     /** The hairline under the title. */
-    rule: gold ? INK_GOLD : mix(PAPER_SHADE, INK, 0.2),
+    rule: gold ? PURPLE : mix(PAPER_SHADE, INK, 0.2),
   };
 }
 
@@ -613,12 +603,12 @@ export function ScheduleHead({ label, tint, compact = false }: { label: string; 
  * that — a tint behind them — is the thing §19 records as making the whole
  * Insights tab read cheap: large saturated fills on paper. So a `granted` row is
  * not a coloured row. It is a row that has been STRUCK: cut into the page as a
- * recess, with a gold rail down its edge and a gold-rimmed tick. It differs from
+ * recess, with a purple rail down its edge and a purple tick. It differs from
  * its neighbours by depth and by material, which is how every other reward in
  * this app already differs from the thing below it.
  *
  * · `granted` — the Pass gives you this and the free tier does not. Recessed,
- *   railed and ticked in gold. These are the rows the reader is buying.
+ *   railed and ticked in purple, cut into beige. These are the rows the reader is buying.
  * · `included` — true on both tiers. Flat, an ink tick, a hairline under it.
  * · `limit` — what the free tier actually allows. Flat, and the mark is a RULE
  *   rather than a tick, because a tick meaning "you have this, but only a bit of
@@ -648,13 +638,13 @@ export function ScheduleRow({
       <View style={[r.markBox, compact && r.markBoxSm]}>
         {granted ? (
           <LinearGradient
-            colors={[METAL.GOLD.lit, METAL.GOLD.base, METAL.GOLD.shade]}
+            colors={[ROYAL.lit, ROYAL.base, ROYAL.shade]}
             start={LIGHT_START}
             end={LIGHT_END}
-            style={[r.mark, compact && r.markSm, { borderColor: METAL.GOLD.rim }]}
+            style={[r.mark, compact && r.markSm, { borderColor: ROYAL.rim }]}
           >
-            <View style={[r.tickShort, { backgroundColor: METAL.GOLD.on }]} />
-            <View style={[r.tickLong, { backgroundColor: METAL.GOLD.on }]} />
+            <View style={[r.tickShort, { backgroundColor: ROYAL.on }]} />
+            <View style={[r.tickLong, { backgroundColor: ROYAL.on }]} />
           </LinearGradient>
         ) : grade === 'included' ? (
           <View style={[r.mark, compact && r.markSm, { borderColor: mix(PAPER_SHADE, INK, 0.45) }]}>
@@ -702,22 +692,22 @@ export function ScheduleRow({
         // reach into the cut. Reverse those two and the row stops being cut in
         // and starts floating off the certificate.
         <LinearGradient
-          colors={[mix(PAPER, PAPER_SHADE, 0.5), PAPER, PAPER_LIT]}
+          colors={[BEIGE_SHADE, BEIGE, BEIGE_LIT]}
           locations={[0, 0.45, 1]}
           start={LIGHT_START}
           end={LIGHT_END}
           style={[r.niche, compact && r.nicheSm]}
         >
-          <View pointerEvents="none" style={[r.nicheTop, { backgroundColor: mix(PAPER_SHADE, INK, 0.26) }]} />
+          <View pointerEvents="none" style={[r.nicheTop, { backgroundColor: mix(BEIGE_SHADE, INK, 0.26) }]} />
           <LinearGradient
-            colors={[METAL.GOLD.lit, METAL.GOLD.base, METAL.GOLD.shade]}
+            colors={[ROYAL.lit, ROYAL.base, ROYAL.shade]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={r.rail}
             pointerEvents="none"
           />
           {body}
-          <View pointerEvents="none" style={[r.nicheFoot, { backgroundColor: PAPER_LIT }]} />
+          <View pointerEvents="none" style={[r.nicheFoot, { backgroundColor: BEIGE_LIT }]} />
         </LinearGradient>
       ) : (
         body

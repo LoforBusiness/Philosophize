@@ -5,7 +5,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { INK, METAL, PAPER, PAPER_LIT, SHADOW, mix } from '@/components/shared/tone';
+import { INK, PAPER, PAPER_LIT, SHADOW, mix, ROYAL, BEIGE } from '@/components/shared/tone';
 import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import { DEFAULT_ACCENT, accentForLesson, VERDICT, type QAccent } from './questionTone';
 
@@ -29,8 +29,8 @@ import { DEFAULT_ACCENT, accentForLesson, VERDICT, type QAccent } from './questi
 // ── AN ANSWER IS AN EVENT ───────────────────────────────────────────────────
 //
 // `VerdictSeal` stamps the reader's own choice with a tick or a cross, and `XpCoin`
-// pays out in gold with a small burst when the answer is right. Gold because XP and
-// first place are already struck in gold here, so nothing new is invented. Both are
+// pays out in the palette's purple with a small burst when the answer is right, the
+// same purple the Pass, the streak and first place are struck in. Both are
 // mounted only when earned: a transparent View still contributes its text, and a
 // screen reader would announce "✓" on every option (ChoiceCards learned it).
 //
@@ -147,7 +147,7 @@ function Ray({ k, t }: { k: number; t: SharedValue<number> }) {
 }
 
 /**
- * THE PAYOUT. A gold coin reading the XP a correct answer earns, which pops and
+ * THE PAYOUT. A purple coin reading the XP a correct answer earns, which pops and
  * throws eight short rays. Mount it only on a right answer.
  */
 export function XpCoin({ delay = 240, style }: { delay?: number; style?: StyleProp<ViewStyle> }) {
@@ -167,7 +167,7 @@ export function XpCoin({ delay = 240, style }: { delay?: number; style?: StylePr
       </View>
       <Animated.View style={[styles.coin, coin]}>
         <LinearGradient
-          colors={[METAL.GOLD.lit, METAL.GOLD.base, METAL.GOLD.shade]}
+          colors={[ROYAL.lit, ROYAL.base, ROYAL.shade]}
           locations={[0, 0.55, 1]}
           start={{ x: 0.15, y: 0 }}
           end={{ x: 0.85, y: 1 }}
@@ -234,17 +234,17 @@ const styles = StyleSheet.create({
   rays: { position: 'absolute', width: 0, height: 0, alignItems: 'center', justifyContent: 'center' },
   ray: {
     position: 'absolute', width: 2.5, height: 7, borderRadius: 1.5,
-    backgroundColor: METAL.GOLD.base,
+    backgroundColor: ROYAL.base,
   },
   coin: {
     borderRadius: 999,
     borderWidth: 1.5,
-    borderColor: METAL.GOLD.rim,
+    borderColor: ROYAL.rim,
     paddingHorizontal: 8,
     paddingVertical: 2,
     overflow: 'hidden',
   },
-  coinText: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.5, color: INK },
+  coinText: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.5, color: BEIGE },
   disc: {
     flex: 1,
     borderWidth: 2,

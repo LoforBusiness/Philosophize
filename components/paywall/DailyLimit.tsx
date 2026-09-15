@@ -7,7 +7,7 @@ import PassCard from '@/components/shared/PassCard';
 import Button from '@/components/ui/Button';
 import StreakWeek from '@/components/gamification/StreakWeek';
 import { MetalPlate } from '@/components/profile/Struck';
-import { METAL } from '@/components/shared/tone';
+import { ROYAL } from '@/components/shared/tone';
 import { BRANCH_SHORT } from '@/components/shared/branchMarks';
 import { NextUp, Rule, useRenewal } from '@/components/paywall/PassParts';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -46,7 +46,7 @@ import type { Branch, Lesson } from '@/data/types';
 // different one would be answering a question nobody asked — the reader would
 // have to work out whether their choice had been overridden or simply lost.
 //
-// NO GILT ON THIS SCREEN, and that is deliberate rather than an oversight.
+// NO STREAK PURPLE ON THIS SCREEN, and that is deliberate rather than an oversight.
 // `constants/streak.ts` licenses the one colour in three places, and a gate is
 // not among them; `StreakWeek` is drawn here in its ink default, which is the
 // same row the reward screen and Profile already show.
@@ -135,7 +135,7 @@ export default function DailyLimit({
             </>
           ) : null}
           <View style={styles.bankedPlate}>
-            <MetalPlate metal={METAL.GOLD} label="TODAY BANKED" />
+            <MetalPlate metal={ROYAL} label="TODAY BANKED" />
           </View>
         </MotiView>
 

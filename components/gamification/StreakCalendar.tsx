@@ -8,7 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
-import { GILT, GILT_DEEP, GILT_SOFT, SLATE, STREAK_MILESTONES } from '@/constants/streak';
+import { STREAK_PURPLE, STREAK_DEEP, STREAK_BEIGE, SLATE, STREAK_MILESTONES } from '@/constants/streak';
 import { ramp, rampFace, mix, PAPER_LIT, PAPER_SHADE } from '@/components/shared/tone';
 import {
   buildMonth,
@@ -110,13 +110,13 @@ const PULSE_MS = 1800;
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** The struck material every lit day is cut from. One light, top-left, always. */
-const METAL = ramp(GILT);
+const METAL = ramp(STREAK_PURPLE);
 const FACE = rampFace(METAL);
 /**
- * THE RAIL, AND WHY IT IS NOT `GILT_SOFT`.
+ * THE RAIL, AND WHY IT IS NOT A WASH.
  *
  * The obvious tone for a band behind the tokens is the material's own wash, and
- * the first build used it: `GILT_SOFT` measures 1.24:1 on paper, which is the
+ * the first build used it: the gilt's wash measured 1.24:1 on paper, which is the
  * FLOOR for a faint fill (design.ts records `HUE_SOFT` failing at 1.04 and the
  * six mastery bars having no visible remainder at all). Rendered, the rail was
  * technically present and could not be seen — the run measured correctly across
@@ -124,14 +124,14 @@ const FACE = rampFace(METAL);
  *
  * That is the wrong floor for this object. A progress track may be faint because
  * it is the part that has NOT happened; this rail is the streak itself, the one
- * thing in the grid the reader is here to look at. 1.69:1 is a band on paper.
+ * thing in the grid the reader is here to look at. 2.34:1 is a band on paper.
  *
  * The groove still runs the face BACKWARDS (StruckNiche's rule: a groove is
  * bright where a dome is dark), and it stops at a lit tint of its own rather
  * than at PAPER_LIT — running a three-stop gradient out to white put half the
  * rail's length at 1.0:1 and was most of why it disappeared.
  */
-const RAIL = mix(GILT, PAPER, 0.62);        // 1.69:1 on paper
+const RAIL = mix(STREAK_PURPLE, PAPER, 0.62); // 2.34:1 on paper
 const GROOVE: [string, string, string] = [
   mix(RAIL, INK, 0.16), RAIL, mix(RAIL, PAPER_LIT, 0.5),
 ];
@@ -470,7 +470,7 @@ export default function StreakCalendar({
           rest days at all. */}
       <View style={styles.key}>
         <Legend fill={METAL.base} label="STUDIED" />
-        <Legend fill={GILT_SOFT} rim={GILT} label="RESTED" />
+        <Legend fill={STREAK_BEIGE} rim={STREAK_PURPLE} label="RESTED" />
         <Legend fill={PAPER} rim={FAINT} label="MISSED" />
       </View>
     </View>
@@ -526,7 +526,7 @@ function TodayRing({ size, pulse }: { size: number; pulse: SharedValue<number> }
           height: size,
           borderRadius: size / 2,
           borderWidth: 2,
-          borderColor: GILT,
+          borderColor: STREAK_PURPLE,
         },
         ringStyle,
       ]}
@@ -629,7 +629,7 @@ function CellFace({ cell, size, milestone, pulse }: {
             height: size + 7,
             borderRadius: (size + 7) / 2,
             borderWidth: 1.5,
-            borderColor: GILT_DEEP,
+            borderColor: STREAK_DEEP,
           }}
         />
       ) : null}
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
   },
   fill: { height: 6, borderRadius: 3 },
   tally: { includeFontPadding: false },
-  tallyBig: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: GILT },
+  tallyBig: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: STREAK_PURPLE },
   tallyOf: { fontFamily: 'Inter_500Medium', fontSize: 12, color: INK_SOFT },
 
   labels: { flexDirection: 'row', marginTop: 16, marginBottom: 5 },
@@ -732,16 +732,16 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: 'transparent',
   },
-  rest: { backgroundColor: GILT_SOFT, borderColor: GILT },
+  rest: { backgroundColor: STREAK_BEIGE, borderColor: STREAK_PURPLE },
   // Quiet on purpose: a hollow ring, not an accusation.
   missed: { borderColor: FAINT },
   today: { borderWidth: 2, borderColor: INK, backgroundColor: PAPER },
 
   num: { fontFamily: 'Inter_500Medium', color: INK_SOFT },
-  // Paper on GILT measures 4.55:1, and the number sits on the face's MIDDLE
+  // Beige on the purple measures 10.52:1, and the number sits on the face's MIDDLE
   // stop rather than on its lit corner — which is the trap §19 records for the
   // quote plate's byline, and check:streak measures it rather than assuming.
-  numLit: { color: PAPER, fontFamily: 'Inter_700Bold' },
+  numLit: { color: STREAK_BEIGE, fontFamily: 'Inter_700Bold' },
   numRest: { color: INK, fontFamily: 'Inter_500Medium' },
   numFuture: { color: FAINT },
   numToday: { color: INK, fontFamily: 'Inter_700Bold' },

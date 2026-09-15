@@ -589,6 +589,25 @@ costs milliseconds rather than a Metro and a browser. What it holds:
 > `check:streak` holds all five as floors, counter-tested by putting each colour
 > back and watching it go red.
 >
+> **AND THEN THE OWNER REPLACED THE GILT, ALONG WITH EVERY OTHER GOLD (2026-09-15).**
+> *"The gold looks pretty AI"*, and in its place two swatches to be used together:
+> ROYAL PURPLE `#4B0082` and WARM BEIGE `#F5E6CA`. They are `PURPLE` and `BEIGE`
+> in `components/shared/tone.ts`, beside `LAVENDER` for a dark ground (the purple
+> itself is 1.34:1 on ink) and `ROYAL`, the purple as a struck material in the
+> shape `METAL` uses. Purple marks what was earned or chosen; beige is what it
+> sits on, or the lettering on it, at 10.52:1.
+>
+> The streak takes `STREAK_PURPLE`, `STREAK_DEEP`, `STREAK_BEIGE` and
+> `STREAK_ON_INK` from `constants/streak.ts`, and `check:streak` re-derives each
+> one from tone.ts. A cool streak goes against the research above, which is the
+> owner's call; the floors that research set still hold, at ΔE 82 from slate, 105
+> from the ember and 18 from the AMETHYST rank order it can meet on Profile.
+>
+> The tab icons, the Pass chart and certificate, the Profile plates, Insights'
+> two paper boxes and a lesson's XP coin moved with it. The rank ladder keeps its
+> eight metals, AURUM included: a pin is an earned object in a ladder, and the
+> owner chose to keep it.
+>
 > **AND THE READER'S SECOND SENTENCE WAS ABOUT THE ANIMATION:** *"the animation
 > for the day streak is just a blue dot and it isnt a clean cool animation."*
 > Two faults, not one.
@@ -1991,9 +2010,10 @@ short rows of ticks and crosses, and one chunky button. NN/g's rule for
 comparisons on a phone says the same from the other end: two options, only the
 rows that differ, and what both share merged rather than repeated.
 
-- **The Pass column is struck GOLD, not a rainbow**, on a hard lip the way a
-  button sits, with a white card inside it. Its cells stamp in row by row on
-  every visit, and a glint crosses the gold first. The trigger is FOCUS, because
+- **The Pass column is struck in the palette's purple, not a rainbow**, on a
+  hard lip the way a button sits, with a beige card inside it (gold until
+  2026-09-15, §7). Its cells stamp in row by row on every visit, and a glint
+  crosses the purple first. The trigger is FOCUS, because
   the tab is built at startup and a mount animation would spend itself behind the
   launch screen; its callback depends on nothing, because `available` flips when
   RevenueCat answers and a callback listing it would replay the arrival under a
@@ -2076,8 +2096,8 @@ and these three decisions in it stand:
 - **The highlight is a MATERIAL, not a colour.** The obvious way to mark the Pass
   rows is a tint behind them, and §19 records that exact move — large saturated
   fills on paper — as what made Insights read cheap. A `granted` row is instead
-  CUT INTO the page: a recess running StruckNiche's gradient backwards, a 3pt
-  gold rail down the cut edge, a gold-rimmed tick. It differs from its neighbours
+  CUT INTO the page: a beige recess running StruckNiche's gradient backwards, a
+  3pt purple rail down the cut edge, a purple tick. It differs from its neighbours
   by depth and by metal, which is how every other reward in this app already
   differs from the thing below it.
 - **A limit is not a tick.** The free certificate's rows carry an open square with
@@ -2345,8 +2365,8 @@ skins, and **group R of the rule book is how to tell which one a claim wants**:
 >   lesson's BRANCH colour (`questionTone.ts`, `QuestionParts.tsx`): raised
 >   `LipPlate` faces on a lip of that hue, a `Medallion` knob, accent rails. The
 >   verdict re-strikes the same plates green or rust, stamps the reader's own choice
->   (`VerdictSeal`) and pays a right answer in gold on the answer card (`XpCoin`).
->   The kicker counts QUESTION 1 OF 2 beside a gold stake. None of it makes a sound.
+>   (`VerdictSeal`) and pays a right answer in purple on the answer card (`XpCoin`).
+>   The kicker counts QUESTION 1 OF 2 beside a beige stake struck in purple. None of it makes a sound.
 > - **The poll's gap was the answer (R17).** Holder lines were mounted at opacity 0,
 >   and an invisible View still takes its height; only the correct row had holders
 >   in 7 of the 34 polls. They mount on answering now, on every row at once, and
@@ -4748,9 +4768,9 @@ be a dashboard belonging to some other product.
 - **The dial has a sixty-tick bezel**, and it is not decoration: a bezel implies
   the ring is measured against something, which is the difference between an
   instrument and a pie. It is also the cheapest depth available.
-- **One accent for everything that is not a branch.** The XP line is `METAL.GOLD`
-  and nothing else — the same material a first-place league disc is struck in,
-  and XP is what gold already means here. A second data colour would start a
+- **One accent for everything that is not a branch.** The XP line is `LAVENDER`
+  and nothing else — the palette's purple lifted for this dark ground, the same
+  purple first place is struck in on the paper below. A second data colour would start a
   palette; one accent plus six labels is a system.
 - **Type on the panel is never a branch colour.** Measured on `PANEL_BASE` the
   six run 3.8:1 to 9.1:1 — past the 3:1 a mark needs, and three of them under the

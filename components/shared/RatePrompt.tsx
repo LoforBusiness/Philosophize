@@ -14,7 +14,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { mayAsk } from '@/lib/utils/rateCadence';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
 import { C, SPACE, RADIUS } from '@/constants/design';
-import { METAL } from '@/components/shared/tone';
+import { ROYAL } from '@/components/shared/tone';
 import { track } from '@/lib/posthog';
 import { touch } from '@/lib/feedback';
 
@@ -162,7 +162,7 @@ export default function RatePrompt({
                     <SketchIcon
                       name={n <= stars ? 'star-filled' : 'star'}
                       size={34}
-                      color={n <= stars ? METAL.GOLD.base : C.dim}
+                      color={n <= stars ? ROYAL.base : C.dim}
                     />
                   </Pressable>
                 ))}

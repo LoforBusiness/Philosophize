@@ -15,7 +15,7 @@ import {
 } from '@/components/stats/reveal';
 import { StruckBar, StruckTile, StruckPanel, EMBOSS } from '@/components/profile/Struck';
 import {
-  INK, PAPER_LIT, MID, PANEL_BASE, ramp, mix, glow, METAL,
+  INK, PAPER_LIT, MID, PANEL_BASE, ramp, mix, glow, ROYAL,
 } from '@/components/shared/tone';
 import { C } from '@/constants/design';
 import { milestoneFor, type StatElement, type Milestone } from '@/lib/utils/statsMilestone';
@@ -623,7 +623,7 @@ export function ThinkerLeague({
     <StruckPanel
       title="Who You Read Most"
       subtitle="lessons about them, and quotes of theirs you kept"
-      accent={METAL.GOLD.base}
+      accent={ROYAL.base}
       style={[s.section, style]}
     >
       {rows.map((r, i) => (
@@ -689,7 +689,7 @@ function LeagueLine({
             the styles: at 14pt inside a 30px disc a numeral is a label and had
             to be decorated to stop being boring; at 25pt in its own gutter it is
             the ornament, and needs nothing round it. */}
-        <Text style={[s.placeNum, EMBOSS, { color: place === 0 ? METAL.GOLD.shade : C.inkSoft }]}>
+        <Text style={[s.placeNum, EMBOSS, { color: place === 0 ? ROYAL.base : C.inkSoft }]}>
           {place + 1}
         </Text>
         <Text style={[s.leagueName, EMBOSS, selected && { color: r.shade }]} numberOfLines={1}>
@@ -830,8 +830,8 @@ const s = StyleSheet.create({
   // CAN. Measured on paper the three metals run gold 5.66:1, bronze 8.36:1 and
   // silver 3.86:1 — silver is under the 4.5 a word needs, which is §19's "a tone
   // fitted for METAL is invisible on PAPER" for the fourth time. A podium where
-  // one of the three places is unreadable is not a podium, so the leader is gold
-  // and the rest are ink.
+  // one of the three places is unreadable is not a podium, so the leader takes the
+  // palette's purple, 12.38:1, and the rest are ink.
   leagueRow: { paddingVertical: 8 },
   leagueRuled: { borderBottomWidth: 1, borderBottomColor: C.hairline },
   leagueTop: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },
