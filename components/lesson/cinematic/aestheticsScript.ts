@@ -34,12 +34,33 @@ export interface AestheticsBeat extends BaseBeat {
   glow?: boolean;
   /** The apple of appetite is present (the figure reaches to grab it). */
   apple?: boolean;
-  /** A crowd the judgement of taste reaches out to. */
+  /** A crowd the judgement of taste reaches out to (it arrives on "the agreement of everyone"). */
   crowd?: boolean;
   /** Hume's true critics, converging on a standard of taste. */
   critics?: boolean;
   /** This beat's answer drives the scene. */
   weigh?: 'q1' | 'q2';
+  //
+  // THE LATCHES BELOW are set on the ONE beat where their thing arrives, and the
+  // scene holds it from there to the end — every tap of the opening adds one
+  // element to the picture and none of them has to be taken back.
+  //
+  /** The verdict card's heading turns from YOUR VERDICT to A JUDGEMENT OF TASTE. */
+  taste?: boolean;
+  /** The verdict card lists the two questions that follow. */
+  questions?: boolean;
+  /** Kant's chart gains its SUNSET row: it asks for NOTHING. */
+  unwanted?: boolean;
+  /** Kant's chart writes its foot line: beauty wants nothing (free of desire). */
+  desireless?: boolean;
+  /** Hume's scattered verdicts slide together into one band. */
+  agree?: boolean;
+  /** Under Hume's chart, CRITIC and VERDICT point at each other: the circle. */
+  circular?: boolean;
+  /** The panel turns to WHO MUST AGREE, with “I LIKE IT” and its single pip. */
+  assent?: boolean;
+  /** “IT IS BEAUTIFUL” is written under it, resting on one feeling: one pip. */
+  claim?: boolean;
 }
 
 export const BEATS: AestheticsBeat[] = [
@@ -52,12 +73,14 @@ export const BEATS: AestheticsBeat[] = [
   {
     hpose: 2,
     glow: true,
+    taste: true,
     text: 'Such a verdict is called a judgement of taste. Philosophers have asked what grounds these judgements for three hundred years.',
     dur: 2.8,
   },
   {
     hpose: 2,
     glow: true,
+    questions: true,
     text: 'Two questions follow. What makes this pleasure distinctive, and for whom does the judgement speak?',
     dur: 1.8,
   },
@@ -72,6 +95,7 @@ export const BEATS: AestheticsBeat[] = [
     hpose: 7,
     glow: true,
     apple: true,
+    unwanted: true,
     text: 'The sunset satisfies no appetite. You want nothing from it.',
     dur: 1.8,
   },
@@ -79,6 +103,7 @@ export const BEATS: AestheticsBeat[] = [
     hpose: 7,
     glow: true,
     apple: true,
+    desireless: true,
     text: 'Kant calls such pleasure disinterested, meaning free of desire. It doesn’t depend on wanting to use or possess the object.',
     dur: 1.8,
   },
@@ -96,6 +121,7 @@ export const BEATS: AestheticsBeat[] = [
     hpose: 10,
     glow: true,
     critics: true,
+    agree: true,
     text: 'Hume placed the standard of taste in the joint verdict of true critics. Practice, comparison and freedom from prejudice make their verdicts converge.',
     dur: 1.9,
   },
@@ -104,6 +130,7 @@ export const BEATS: AestheticsBeat[] = [
     hpose: 10,
     glow: true,
     critics: true,
+    circular: true,
     text: 'The proposal risks circularity. A true critic is recognised by sound verdicts, yet sound verdicts are defined as those of true critics.',
     dur: 1.8,
   },
@@ -153,15 +180,15 @@ export const BEATS: AestheticsBeat[] = [
   },
   {
     hpose: 1,
-    crowd: true,
     critics: true,
+    assent: true,
     text: 'The second question concerns whom a judgement of taste speaks for. You rarely stop at saying “I like it”.',
     dur: 1.8,
   },
   {
     hpose: 1,
-    crowd: true,
     critics: true,
+    claim: true,
     text: 'You say “it is beautiful”, as though stating a fact about the object. Yet the judgement rests only on your feeling of pleasure.',
     dur: 2.4,
   },

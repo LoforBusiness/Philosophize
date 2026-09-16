@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIVE COURSES LAID FROM THE BOTTOM UP, AND A HAMMER OVER THEM.
@@ -190,7 +191,7 @@ const styles = StyleSheet.create({
   foot: { position: 'absolute', left: FOOT_X, top: FOOT_Y, width: FOOT_W, height: 8, backgroundColor: RULE },
   course: {
     position: 'absolute', left: CRS_X, width: CRS_W, height: CRS_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
   },
   courseText: {
     position: 'absolute', left: CRS_X, width: CRS_W, textAlign: 'center',
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
   handle: { position: 'absolute', left: 0, top: 0, width: HAND_W, height: HAND_H, backgroundColor: INK },
   head: {
     position: 'absolute', left: HAND_W / 2 - HEAD_W / 2, top: -HEAD_H, width: HEAD_W, height: HEAD_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
   },
 
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },

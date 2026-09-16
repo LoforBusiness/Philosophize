@@ -15,7 +15,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ONE FRAME, FIVE DEPTHS, AND THE READER DESCENDS IT.
 //
@@ -168,7 +169,7 @@ const styles = StyleSheet.create({
 
   frame: {
     position: 'absolute', left: FRAME_L, top: FRAME_T, width: FRAME_W, height: FRAME_H,
-    backgroundColor: STONE,
+    backgroundColor: STONE, boxShadow: LIP,
     borderWidth: 2, borderColor: INK },
   plinth: {
     position: 'absolute', left: FRAME_L + 30, top: FRAME_T + FRAME_H, width: FRAME_W - 60, height: 6,

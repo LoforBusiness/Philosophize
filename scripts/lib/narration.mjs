@@ -417,10 +417,109 @@ export function lessonLines(lessonId, dir = ASSETS) {
   return { beats, lines, missing };
 }
 
+// ── THE RELEASE: CHIRP STOPS INSIDE THE LAST SOUND, AND THE VOICE HAS TO LET GO ──
+//
+// A reader: *"at the end of the words under the stickman that are read out by the
+// narrator … it will stop abruptly or not sound right at the very end of a sentence."*
+//
+// Measured over all 1,718 masters, Chirp 3 HD trims every take tight to the voice: the
+// median silence after the last sound is ZERO, and 1,574 takes end within 50ms of it.
+// 522 of them, in 215 lessons, end with their final 20ms still within 30 dB of the
+// line's peak — the file stops inside the last word's own decay, and 32 of those are
+// above −20 dB, which is a word cut off mid-sound (ethics-ethics-17 beat 0 is still at
+// −8 dB on its last frame). Nothing here trims: install-narration stores Chirp's
+// LINEAR16 as delivered. Laid straight against GAP_S of digital zero, every one of those
+// is a step from speech to nothing in one sample, which an ear hears as a chop.
+//
+// So the encoder lays a RELEASE into the first RELEASE_S of each gap: the take's own
+// last pitch period, continued and decayed. A voiced ending is periodic, so the sample
+// after a take's last one is close to the one a period before it, and the seam has no
+// step; an unvoiced one repeats a short grain instead, under a decay too fast to hear
+// as a repeat. The release lives in the GAP, so no line's `at`, no `dur`, no word time
+// and no WAV master moves — the masters and their hashes stay exactly what Chirp gave.
+//
+// And the player had the matching fault, which alone clipped EVERY line: it paused
+// when the reported position reached `end − 0.05`, with no silence there to spend. It
+// pauses after the release now (lib/narration/real.ts), and check:narration holds the
+// two constants against each other.
+/** How long the synthesised release after each take runs. */
+export const RELEASE_S = 0.08;
+export const RELEASE_SAMPLES = Math.round(WAV_RATE * RELEASE_S);
+/**
+ * What the encoder does to a lesson beyond laying WAVs end to end. It is part of the
+ * tag, so a lesson encoded before the release existed is STALE MP3 rather than current.
+ */
+export const ENCODING = 'release-1';
+
+/**
+ * The release a take's end needs: RELEASE_SAMPLES that begin where `pcm` stops and fall
+ * to zero. Pure, so the counter-test and the encoder produce the same samples.
+ */
+export function releaseOf(pcm, rate = WAV_RATE) {
+  const L = Math.round(rate * RELEASE_S);
+  const out = new Int16Array(L);
+  const n = pcm ? pcm.length : 0;
+  if (n < rate * 0.02) return out;
+  // The last pitch period, by normalised autocorrelation over the final 40ms, in the
+  // range a speaking voice uses (70–400 Hz).
+  const W = Math.min(n, Math.round(rate * 0.04));
+  const lo = Math.round(rate / 400);
+  const hi = Math.min(Math.round(rate / 70), W - 1);
+  let best = 0;
+  let P = 0;
+  for (let p = lo; p <= hi; p += 1) {
+    let num = 0, a = 0, b = 0;
+    for (let i = n - W + p; i < n; i += 1) {
+      const x = pcm[i], y = pcm[i - p];
+      num += x * y; a += x * x; b += y * y;
+    }
+    const r = num / Math.sqrt(a * b + 1e-9);
+    if (r > best) { best = r; P = p; }
+  }
+  // Unvoiced, or no clear period: a 12ms grain, which the decay ends inside two repeats.
+  if (best < 0.5 || P === 0) P = Math.round(rate * 0.012);
+
+  // THE SEAM. An integer period drifts out of phase at the end of a word, where pitch
+  // and formants are both moving — measured, 452 takes had a bigger jump into the
+  // release than into plain silence. So the period is allowed to move a few samples
+  // either way, to whichever continues the take's last value AND its last slope best.
+  const x1 = pcm[n - 1];
+  const x2 = pcm[n - 2];
+  const want = 2 * x1 - x2;               // where the take was heading next
+  const slope = x1 - x2;
+  const J = Math.max(2, Math.round(P / 8));
+  let Pb = P;
+  let cost = Infinity;
+  for (let q = Math.max(2, P - J); q <= Math.min(n - 2, P + J); q += 1) {
+    const a = pcm[n - q];
+    const c = Math.abs(a - want) + Math.abs((pcm[n - q + 1] - a) - slope);
+    if (c < cost) { cost = c; Pb = q; }
+  }
+  // Whatever step is left is taken out over ~3ms, which is below where an ear hears a
+  // transient and far shorter than the release itself.
+  const d = want - pcm[n - Pb];
+  const fix = rate * 0.003;
+
+  const tau = rate * 0.018;               // a vowel's own release, about 18ms
+  const land = Math.round(rate * 0.01);   // and the last 10ms straight down to zero
+  for (let k = 0; k < L; k += 1) {
+    let g = Math.exp(-k / tau);
+    if (L - k < land) g *= (L - k) / land;
+    const v = pcm[n - Pb + (k % Pb)] + d * Math.exp(-k / fix);
+    out[k] = Math.max(-32768, Math.min(32767, Math.round(v * g)));
+  }
+  return out;
+}
+
 /** A line's entry in its lesson MP3's tag: its beat, its WAV's SHA-256 and where it starts. */
 export const entryOf = (beat, sha, at) => `beat-${String(beat).padStart(2, '0')}=${sha}@${at.toFixed(3)}`;
-/** The ID3 comment a lesson's MP3 carries. Every entry ends in ';', so none is a prefix of another. */
-export const lessonTagOf = (entries) => `narration-lesson:${entries.map((e) => `${e};`).join('')}`;
+/** The marker every current lesson MP3's tag opens with. */
+export const encodingMark = `narration-lesson:${ENCODING};`;
+/**
+ * The ID3 comment a lesson's MP3 carries: the encoding first, then every line. Every
+ * entry ends in ';', so none is a prefix of another.
+ */
+export const lessonTagOf = (entries) => `${encodingMark}${entries.map((e) => `${e};`).join('')}`;
 
 // ── IS THE TAKE CLEAN ────────────────────────────────────────────────────────
 //
@@ -601,6 +700,8 @@ export function lineFaults({ text, wav, record, clip, beat, at }) {
   }
   if (!clip || !clip.includes(`${entryOf(beat, sha, at)};`)) {
     faults.push({ kind: 'STALE MP3', say: `its lesson's ${LESSON_CLIP} is missing, or does not hold this WAV at ${at.toFixed(3)}s: run scripts/encode-narration.mjs` });
+  } else if (!clip.includes(encodingMark)) {
+    faults.push({ kind: 'STALE MP3', say: `its lesson's ${LESSON_CLIP} was encoded without the release after each take (${ENCODING}), so the line stops dead where Chirp trimmed it: run scripts/encode-narration.mjs` });
   }
   let m = null;
   if (w.pcm && w.pcm.length && w.rate) {

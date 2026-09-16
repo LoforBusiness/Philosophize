@@ -15,6 +15,8 @@ export interface Aes2Beat extends BaseBeat {
   /** A feeling-pulse crosses from artist to viewer this beat. */ wave?: boolean;
   /** The viewer's chest glows (they feel it too), 0/1. */ felt?: boolean;
   /** How many links of the infection chain are filled in, 1→3. */ chain?: number;
+  /** Each panel of the chain names its feeling: FEAR, Tolstoy's wolf story (0/1). */ fear?: number;
+  /** The artist's own panel empties: the feeling outlives its maker (0/1). */ outlived?: number;
 }
 
 export const BEATS: Aes2Beat[] = [
@@ -24,24 +26,24 @@ export const BEATS: Aes2Beat[] = [
     dur: 3.6,
   },
   {
-    a: 7, v: 0, wave: true, felt: true, chain: 3,
+    a: 7, v: 0, wave: true, felt: true, chain: 1,
     text: 'The expression theory defines art by feeling, not by beauty or skill. Leo Tolstoy compared art to an infection that spreads a feeling to others.',
     cite: 'Expression theory',
     dur: 1.8,
   },
   {
-    a: 7, v: 0, wave: true, felt: true, chain: 3,
+    a: 260, v: 158, wave: true, felt: true, chain: 3,
     text: 'The artist feels an emotion, the work carries the emotion, and the audience feels it too. For Collingwood, artists discover their feelings only by expressing them.',
     dur: 3.8,
   },
   {
-    a: 387, v: 15, wave: true, felt: true, chain: 3,
+    a: 387, v: 15, wave: true, felt: true, chain: 3, fear: 1,
     text: 'Tolstoy’s example is a boy who describes meeting a wolf and frightens his listeners. It’s art, provided the boy feels that fear again as he speaks.',
     cite: 'Tolstoy, What Is Art?, 1897',
     dur: 4.8,
   },
   {
-    a: 1, v: 22, felt: true, chain: 3,
+    a: 1, v: 22, felt: true, chain: 3, fear: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-2-1',
       text: 'Art is a human activity consisting in this, that one man hands on to others feelings he has lived through.',
@@ -53,7 +55,7 @@ export const BEATS: Aes2Beat[] = [
     dur: 3.2,
   },
   {
-    a: 14, v: 8, chain: 3,
+    a: 14, v: 8, chain: 3, fear: 1,
     interact: {
       prompt: 'If Tolstoy is right, what must a work do to count as art?',
       cards: [
@@ -66,18 +68,18 @@ export const BEATS: Aes2Beat[] = [
     dur: 1.0,
   },
   {
-    a: 20, v: 17, wave: true, felt: true, chain: 3,
+    a: 278, v: 17, wave: true, felt: true, chain: 3,
     text: 'If the expression theory is right, a work of art embodies a feeling in lines, sounds or words.',
     cite: 'Feeling made portable',
     dur: 3.4,
   },
   {
-    a: 20, v: 17, wave: true, felt: true, chain: 3,
+    a: 278, v: 17, wave: true, felt: true, chain: 3, outlived: 1,
     text: 'The feeling can then outlive its maker, and reach audiences in other languages and centuries.',
     dur: 1.8,
   },
   {
-    a: 0, v: 22, felt: true, chain: 3,
+    a: 0, v: 22, felt: true, chain: 3, outlived: 1,
     interact: {
       prompt: 'You cry at a film you know is invented. What is the feeling behind your tears?',
       poll: {

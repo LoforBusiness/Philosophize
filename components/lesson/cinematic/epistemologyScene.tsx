@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE GATE OF KNOWING, held by three locks: TRUE · BELIEF · REASONS.
@@ -33,6 +34,19 @@ const { RULE, STONE } = stageTone('epistemology');
 // of a pencil line. Now the leaf inks in from its hinge as `know` rises (INK = on,
 // the same language the bolts and the tally already speak), so the beat where all
 // three locks turn actually lands.
+//
+// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
+// Five taps held one frame, and all three locks turned on the sentence that names
+// only the first. The gate is worked as it is described now: EPISTEMOLOGY is
+// lettered over the arch when the field is named (`field`, y 240…252, clear of the
+// halo's top at 254 and left of the verdict panel at 220); TRUE turns alone on "the
+// first is truth", BELIEF and then REASONS on the next sentence; the door waits for
+// "the three together are sufficient" (`opens`); "without the third condition" rings
+// the REASONS bolt in a dashed line (`third`); "justification is meant to connect
+// a belief to the truth" runs a rod through the three studs, from REASONS up to TRUE
+// (`tie`, shown while REASONS is turned); and "being persuaded is no good reason"
+// writes PERSUADED under the REASONS bolt and strikes it out (`persuaded`, gone
+// again when the first question is asked).
 //
 // CAMERA: none. The old scene shifted everything with a fixed camera transform,
 // which made the band impossible to measure; design space is now final space, so
@@ -85,6 +99,21 @@ const RESTAMP = VKEY.map((k, n) => (n === 0 || k !== VKEY[n - 1] ? 1 : 0));
 const Q1 = BEATS.map((b) => (b.qkey === 'q1' ? 1 : 0));
 const Q2 = BEATS.map((b) => (b.qkey === 'q2' ? 1 : 0));
 const KEYED = BEATS.map((b) => ((b.hpose ?? 0) === 5 ? 1 : 0));
+const FIELD = BEATS.map((b) => (b.field ? 1 : 0));
+const OPENS = BEATS.map((b) => (b.opens ? 1 : 0));
+const TIE = BEATS.map((b) => (b.tie ? 1 : 0));
+const PERSUADED = BEATS.map((b) => (b.persuaded ? 1 : 0));
+const THIRD = BEATS.map((b) => (b.third ? 1 : 0));
+
+// The rod through the three studs: each stud is 18 square, 12 in from its bolt's
+// top-left inside the gate, so their centres are x 31 and y BOLT_Y + 21.
+const ROD_X = BOLT_X + 21;
+const ROD_T = BOLT_Y[0] + 21;
+const ROD_B = BOLT_Y[2] + 21;
+// PERSUADED, under the ring round the REASONS bolt (which ends at 207) and above the
+// slab's inner floor (229.5), set on the bolt labels' left edge.
+const PERS_T = 212;
+const PERS_L = BOLT_X + 38;
 
 function reachKey(t: number): Stance {
   'worklet';
@@ -117,15 +146,17 @@ const X = BEATS.map((b) => b.x ?? SEEKER_X);
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology'));
 
-export default function EpistemologyScene({ clock, bt, bi, qv, i, picked, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function EpistemologyScene({ clock, bt, bi, qv, i, picked, pickedOk, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldSeekerS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(9);
   const cur = BEATS[i];
   // Only the RIGHT answer turns the third bolt. A door that swings open on a wrong
   // pick would tell the reader "you know" at the exact moment they showed they
   // don't — the whole point of the lesson.
-  const rightPick = picked !== null && !!cur.mc?.options.find((o) => o.id === picked)?.correct;
+  // It read `cur.mc`, and the question is `interact.cards` now, so a right answer
+  // never turned the bolt at all. The player knows which answer was right.
+  const rightPick = picked !== null && !!pickedOk;
   const turns = Q1[i] === 1 && rightPick ? 1 : 0;
 
   const SCENE = useDerivedValue(() => {
@@ -144,7 +175,9 @@ export default function EpistemologyScene({ clock, bt, bi, qv, i, picked, dragPo
     // they were drawn.
     const l1 = carry(cv, 1, n, LOCKS[p][0], LOCKS[n][0], tr);
     const l2 = carry(cv, 2, n, LOCKS[p][1], LOCKS[n][1], tr);
-    let l3 = carry(cv, 3, n, LOCKS[p][2], LOCKS[n][2], tr);
+    // The third lock runs half a second behind the other two, so a sentence that
+    // names the second and third conditions turns them one after the other.
+    let l3 = carry(cv, 3, n, LOCKS[p][2], LOCKS[n][2], ease01((bt.value - 0.45) / TR));
     if (turns === 1) l3 = lerp(l3, 1, ease01(q));
 
     // Stepped so a half-lit bolt never renders as a muddy grey plate.
@@ -152,7 +185,9 @@ export default function EpistemologyScene({ clock, bt, bi, qv, i, picked, dragPo
     const k2 = clamp01((l2 - 0.55) / 0.35);
     const k3 = clamp01((l3 - 0.55) / 0.35);
 
-    const know = k1 * k2 * k3;               // all three → the gate opens
+    // All three turned AND the narration calling them sufficient → the gate opens.
+    const opens = carry(cv, 5, n, OPENS[p], OPENS[n], ease01((bt.value - 0.3) / 0.9));
+    const know = k1 * k2 * k3 * opens;
 
     // The stamped WORD swaps; it must never cross-dissolve. Two 17px words each
     // holding 50% opacity on top of each other read as a smudge for a quarter of
@@ -175,6 +210,13 @@ export default function EpistemologyScene({ clock, bt, bi, qv, i, picked, dragPo
       // one takes reasons, so dragging along the rail brings the hand to it: the
       // reader turns the lock they are being asked about.
       keyed: carry(cv, 0, n, KEYED[p], reacting ? dragPos.value : KEYED[n], tr),
+      field: carry(cv, 4, n, FIELD[p], FIELD[n], ease01((bt.value - 0.2) / 0.6)),
+      // The rod is only a link while there is a REASONS lock turned for it to link.
+      tie: carry(cv, 6, n, TIE[p], TIE[n], ease01((bt.value - 0.3) / 0.8)) * k3,
+      pers: carry(cv, 7, n, PERSUADED[p], PERSUADED[n], ease01((bt.value - 0.3) / 0.5)),
+      third: carry(cv, 8, n, THIRD[p], THIRD[n], ease01((bt.value - 0.25) / 0.5)),
+      // The strike is drawn once, on the beat the word is written, and then holds (C20c).
+      persX: PERSUADED[n] > 0 && !(n > 0 && PERSUADED[p] > 0) ? ease01((bt.value - 1.0) / 0.45) : 1,
     };
   });
 
@@ -239,8 +281,34 @@ function Gate({ S }: { S: SharedValue<any> }) {
     opacity: clamp01(S.value.know * 4),
     transform: [{ scaleX: S.value.know }],
   }));
+  const field = useAnimatedStyle(() => ({
+    opacity: S.value.field,
+    transform: [{ translateY: (1 - S.value.field) * 5 }],
+  }));
+  // The rod grows UP out of the REASONS stud to TRUE: justification connecting the
+  // belief to the truth. Its rivets land as it passes each stud.
+  const rod = useAnimatedStyle(() => ({ opacity: clamp01(S.value.tie * 3), transform: [{ scaleY: S.value.tie }] }));
+  const rivet = [
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: clamp01((S.value.tie - 0.95) * 20) })),
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: clamp01((S.value.tie - 0.45) * 20) })),
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: clamp01(S.value.tie * 20) })),
+  ];
+  const pers = useAnimatedStyle(() => ({
+    opacity: S.value.pers,
+    transform: [{ translateX: (1 - S.value.pers) * -8 }],
+  }));
+  const persX = useAnimatedStyle(() => ({ transform: [{ scaleX: S.value.persX }] }));
+  // "Without the third condition": a dashed ring settles round the REASONS bolt.
+  const third = useAnimatedStyle(() => ({
+    opacity: S.value.third,
+    transform: [{ scale: 1.08 - 0.08 * S.value.third }],
+  }));
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      <Animated.Text style={[styles.fieldSign, field]} numberOfLines={1}>EPISTEMOLOGY</Animated.Text>
       <Animated.View style={[styles.halo, halo]} />
       <Animated.View style={[styles.gateWrap, body]}>
         <View style={styles.gateSlab} />
@@ -252,6 +320,15 @@ function Gate({ S }: { S: SharedValue<any> }) {
         <Bolt S={S} idx={0} />
         <Bolt S={S} idx={1} />
         <Bolt S={S} idx={2} />
+        <Animated.View style={[styles.thirdRing, third]} />
+        <Animated.View style={[styles.rod, rod]} />
+        {BOLT_Y.map((y, k) => (
+          <Animated.View key={y} style={[styles.rivet, { top: y + 21 - 3 }, rivet[k]]} />
+        ))}
+        <Animated.View style={[styles.pers, pers]}>
+          <Text style={styles.persText} numberOfLines={1}>PERSUADED</Text>
+          <Animated.View nativeID="crossout-persuaded" style={[styles.persStrike, persX]} />
+        </Animated.View>
       </Animated.View>
     </View>
   );
@@ -316,7 +393,7 @@ const styles = StyleSheet.create({
   gateSlab: {
     position: 'absolute', left: 0, top: 0, width: GATE_W, height: GATE_H,
     borderTopLeftRadius: ARCH, borderTopRightRadius: ARCH,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   gateLabel: {
     position: 'absolute', top: 30, left: 0, right: 0, textAlign: 'center',
@@ -324,7 +401,7 @@ const styles = StyleSheet.create({
   },
   gateDoor: {
     position: 'absolute', left: DOOR_X, top: DOOR_T, width: DOOR_W, height: DOOR_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, overflow: 'hidden',
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   gateKnob: {
     position: 'absolute', left: 5, top: 78, width: 8, height: 8, borderRadius: 4,
@@ -334,7 +411,7 @@ const styles = StyleSheet.create({
 
   bolt: {
     position: 'absolute', left: BOLT_X, width: BOLT_W, height: BOLT_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, overflow: 'hidden',
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   boltFill: { backgroundColor: INK },
   stud: {
@@ -350,9 +427,37 @@ const styles = StyleSheet.create({
   },
   boltTextOn: { color: PAPER },
 
+  // The field's name over the arch: 100 units of type centred on the gate.
+  fieldSign: {
+    position: 'absolute', left: GATE_L, top: 240, width: GATE_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 2, color: INK,
+    includeFontPadding: false,
+  },
+  // Paper with an ink edge, so it reads on a lit (ink) bolt and on the stone between.
+  rod: {
+    position: 'absolute', left: ROD_X - 2, top: ROD_T, width: 4, height: ROD_B - ROD_T,
+    backgroundColor: PAPER, borderWidth: 1, borderColor: INK, transformOrigin: '50% 100%',
+  },
+  rivet: { position: 'absolute', left: ROD_X - 3, width: 6, height: 6, borderRadius: 3, backgroundColor: INK },
+  // 2 outside the REASONS bolt at the sides (x 8…136, clear of the door leaf at 138)
+  // and 3 above it, running down past its lip to 207.
+  thirdRing: {
+    position: 'absolute', left: BOLT_X - 2, top: BOLT_Y[2] - 3, width: BOLT_W + 4, height: BOLT_H + 8,
+    borderWidth: 2, borderColor: INK, borderStyle: 'dashed', borderRadius: 7,
+  },
+  pers: { position: 'absolute', left: PERS_L, top: PERS_T, height: 13, justifyContent: 'center' },
+  persText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 1.2, color: INK,
+    includeFontPadding: false,
+  },
+  persStrike: {
+    position: 'absolute', left: -2, right: -2, top: 5.5, height: 2, borderRadius: 1,
+    backgroundColor: INK, transformOrigin: '0% 50%',
+  },
+
   vp: {
     position: 'absolute', left: VP_L, top: VP_T, width: VP_W, height: VP_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
   },
   vpCap: {
     position: 'absolute', top: 8, left: 0, right: 0, textAlign: 'center',
@@ -373,7 +478,7 @@ const styles = StyleSheet.create({
   },
   pip: {
     width: 16, height: 16, borderRadius: 3, borderWidth: 2, borderColor: INK,
-    backgroundColor: STONE, marginLeft: 7,
+    backgroundColor: STONE, boxShadow: LIP, marginLeft: 7,
   },
   pipFill: { backgroundColor: INK, borderRadius: 1 },
 
@@ -386,8 +491,8 @@ const styles = StyleSheet.create({
   keyTooth: { position: 'absolute', top: 1.5, width: 3, height: 7, backgroundColor: INK },
 });
 
-// Every pixel this scene can draw lives between the verdict panel's top edge (246)
-// and the seeker's ankle joints (~507): the gate halo starts at 254, the gate at
+// Every pixel this scene can draw lives between the EPISTEMOLOGY sign's top (240)
+// and the seeker's ankle joints (~507): the verdict panel starts at 246, the gate halo at 254, the gate at
 // 268, the door leaf at 328..497, the ground rule at 500, and the key rides the seeker's
 // wrist no higher than ~389. A 280-unit band is also the tightest crop that still
 // pays: the stage region is ~923×647 device px, so 647/280 ≈ 923/400 — anything

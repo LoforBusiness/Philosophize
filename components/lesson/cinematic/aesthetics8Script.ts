@@ -40,13 +40,13 @@ export const BEATS: Aes8Beat[] = [
     dur: 1.8,
   },
   {
-    p: 24, x: 68, mode: 0, lens: 1,
+    p: 275, x: 68, mode: 0, lens: 1,
     text: 'Each view can be pictured as a pair of glasses, and a pair for each hangs on the wall. Consider the first pair.',
     cite: 'The first pair',
     dur: 2.4,
   },
   {
-    p: 24, x: 68, mode: 0, lens: 1,
+    p: 275, x: 68, mode: 0, lens: 1,
     text: 'The glasses change nothing in the painting. They change which of its features you attend to.',
     dur: 1.8,
   },
@@ -62,13 +62,13 @@ export const BEATS: Aes8Beat[] = [
     dur: 1.8,
   },
   {
-    p: 31, x: 68, mode: 0, lens: 2,
+    p: 273, x: 68, mode: 0, lens: 2,
     text: 'A second pair of glasses hangs on the same wall, for the second viewer.',
     cite: 'The second pair',
     dur: 1.8,
   },
   {
-    p: 31, x: 68, mode: 0, lens: 2,
+    p: 273, x: 68, mode: 0, lens: 2,
     text: 'This pair picks out different features, so the same canvas presents a different painting.',
     dur: 2.2,
   },
@@ -116,13 +116,13 @@ export const BEATS: Aes8Beat[] = [
     dur: 3.6,
   },
   {
-    p: 37, x: 68, mode: 2, lens: 2,
+    p: 272, x: 68, mode: 2, lens: 2,
     text: 'The second way of looking is the expression theory. Tolstoy held that art transmits a feeling from one person to others.',
     cite: 'Expression theory · Tolstoy',
     dur: 2.9,
   },
   {
-    p: 37, x: 68, mode: 2, lens: 2,
+    p: 272, x: 68, mode: 2, lens: 2,
     text: 'Collingwood developed a different version. A painter, he held, often discovers the feeling only in the act of painting.',
     dur: 2.1,
   },

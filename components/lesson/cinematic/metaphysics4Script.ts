@@ -28,13 +28,13 @@ export const BEATS: Meta4Beat[] = [
     dur: 3.4,
   },
   {
-    p: 24, tokens: 1,
+    p: 275, tokens: 1,
     text: 'Suppose you try to think of nothing. It becomes the object of your thought, and a thought must be about something.',
     cite: 'A self-defeating paradox',
     dur: 3.8,
   },
   {
-    p: 24, tokens: 1,
+    p: 275, tokens: 1,
     text: 'Each attempt to refer to nothing turns it into something, such as the object of a thought.',
     dur: 1.8,
   },

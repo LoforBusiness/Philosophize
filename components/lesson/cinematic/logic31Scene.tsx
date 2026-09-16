@@ -17,7 +17,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A SEATED lesson, and the composition is turned ninety degrees from the walking
 // ones: the run of flips is a full-width band across the top, the odds needle is a
@@ -85,6 +86,11 @@ function attitude(code: number, t: number): Stance {
 const P = BEATS.map((b) => b.p ?? 0);
 const FLIPS = BEATS.map((b) => b.flips ?? 0);
 const SCALEV = BEATS.map((b) => b.scale ?? 0);
+const NEXT = BEATS.map((b) => b.next ?? 0);
+const STRESS = BEATS.map((b) => b.stress ?? 0);
+const APART = BEATS.map((b) => b.apart ?? 0);
+/** The eighth flip's place, one pitch past the seventh. */
+const NEXT_X = COIN_L + COIN_N * (COIN + COIN_GAP);
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -95,9 +101,13 @@ const SCALEV = BEATS.map((b) => b.scale ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic31'));
 
+// R7c — LEFT STILL ON PURPOSE: the plot's answer is the SHAPE of a curve across four sample
+// sizes, and this stage draws one run of flips and a needle fixed at one half by design. One
+// track cannot draw a curve, and moving the needle would say the coin's odds change as flips
+// pile up, which is the gambler's-fallacy picture the lesson refutes.
 export default function Logic31Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
   const scaleFade = (cur.scale ?? 0) !== (prev?.scale ?? 0);
@@ -115,11 +125,30 @@ export default function Logic31Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       flips: carry(cv, 0, n, FLIPS[p], FLIPS[n], grow),
       scale: carry(cv, 1, n, SCALEV[p], SCALEV[n], tr, scaleFade ? grow : 1),
+      next: carry(cv, 2, n, NEXT[p], NEXT[n], grow),
+      stress: carry(cv, 3, n, STRESS[p], STRESS[n], tr),
+      apart: carry(cv, 4, n, APART[p], APART[n], ease01(bt.value / 0.9)),
+      t,
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const scaleStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.scale }));
+  // The eighth flip, not yet thrown: a dashed place with a question in it.
+  const nextStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.next,
+    transform: [{ translateY: (1 - SCENE.value.next) * -12 }],
+  }));
+  // A ring round the needle that does not move, breathing while the beat says so.
+  const ringStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.stress * (0.55 + 0.45 * Math.sin(SCENE.value.t * 3.2)),
+    transform: [{ scale: 0.92 + 0.08 * Math.sin(SCENE.value.t * 3.2) }],
+  }));
+  // Each flip ruled off from the next, drawn down from the top.
+  const apartStyle = useAnimatedStyle(() => ({
+    opacity: Math.min(1, SCENE.value.apart * 2),
+    transform: [{ scaleY: SCENE.value.apart }],
+  }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -132,10 +161,22 @@ export default function Logic31Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
         <Coin key={k} index={k} SCENE={SCENE} />
       ))}
 
+      <Animated.View style={[styles.nextCoin, { left: NEXT_X }, nextStyle]} pointerEvents="none">
+        <Text style={styles.coinText} numberOfLines={1}>?</Text>
+      </Animated.View>
+      {Array.from({ length: COIN_N }, (_, k) => (
+        <Animated.View
+          key={`apart${k}`}
+          style={[styles.divider, { left: COIN_L + (k + 1) * (COIN + COIN_GAP) - COIN_GAP / 2 - 0.75 }, apartStyle]}
+          pointerEvents="none"
+        />
+      ))}
+
       {/* ── the odds scale, which is the thing that does not move ───────────── */}
       <Animated.View style={[styles.scaleWrap, scaleStyle]} pointerEvents="none">
         <View style={styles.track} />
         <View style={[styles.needle, { left: SC_L + NEEDLE_AT * SC_W - 3 }]} />
+        <Animated.View style={[styles.needleRing, { left: SC_L + NEEDLE_AT * SC_W - 13 }, ringStyle]} />
         <Text style={styles.scaleLab} numberOfLines={1}>CHANCE OF HEADS, NEXT FLIP</Text>
       </Animated.View>
 
@@ -200,7 +241,7 @@ const styles = StyleSheet.create({
 
   coin: {
     position: 'absolute', top: COIN_T, width: COIN, height: COIN, borderRadius: COIN / 2,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   coinText: {
@@ -208,10 +249,27 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
+  // The eighth place: the coin's size, dashed, unthrown. x 346…374, clear of the edge.
+  nextCoin: {
+    position: 'absolute', top: COIN_T, width: COIN, height: COIN, borderRadius: COIN / 2,
+    borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  // Between two coins, in the 12-unit gap, the height of a coin and a little more.
+  divider: {
+    position: 'absolute', top: COIN_T - 4, width: 1.5, height: COIN + 8,
+    backgroundColor: SOFT, transformOrigin: '50% 0%',
+  },
+  // Round the needle (x 292…298, y 296…320), inside the gap between the scale's label
+  // above (ends y 291) and the tick targets below (start y 322).
+  needleRing: {
+    position: 'absolute', top: SC_T - 6, width: 26, height: 28, borderRadius: 13,
+    borderWidth: 1.5, borderColor: INK,
+  },
   scaleWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   track: {
     position: 'absolute', left: SC_L, top: SC_T, width: SC_W, height: SC_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   needle: {
     position: 'absolute', top: SC_T - 4, width: 6, height: SC_H + 8,
@@ -225,7 +283,7 @@ const styles = StyleSheet.create({
 
   tick: { position: 'absolute', top: TICK_T, width: TICK_W },
   tickInner: {
-    height: TICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: TICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   tickText: {

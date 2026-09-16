@@ -20,7 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // TWO CANVASES THE READER CANNOT TELL APART, and a provenance line that draws
 // BACKWARDS in time underneath them — six links under one, a single link under the
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
   // top carries the answer state instead (H61).
   tab: {
     position: 'absolute', left: 82, top: 52, width: 120, height: 22,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   tabText: {

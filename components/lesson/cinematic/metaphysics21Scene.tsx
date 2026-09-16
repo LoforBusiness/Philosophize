@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE LINE, AND WHICH HALVES OF IT ARE FURNISHED.
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
 
   box: {
     position: 'absolute', top: BOX_Y, width: BOX_W, height: BOX_H,
-    borderWidth: 1.2, borderColor: SOFT, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 1.2, borderColor: SOFT, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
   fill: {
     position: 'absolute', top: BOX_Y + 4, width: BOX_W - 8, height: BOX_H - 8,
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
   // flush with its top — and the whole thing can then be lifted as one object.
   nowIn: {
     position: 'absolute', left: 2, top: 0, width: NOW_W, height: NOW_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   nowTextIn: {
     position: 'absolute', left: 2, top: 23, width: NOW_W, textAlign: 'center',

@@ -65,7 +65,7 @@ export const BEATS: Ethics8Beat[] = [
   {
     // 49 (down on one knee), not 43 (setting a load down while standing): the line
     // is "get down beside them", so the figure has to actually get down.
-    p: 49, x: 182, grid: 1, oth: 1,
+    p: 280, x: 182, grid: 1, oth: 1,
     text: 'Something other than a principle is already guiding what you do.',
     dur: 1.8,
   },

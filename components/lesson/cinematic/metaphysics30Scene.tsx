@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A CAVERN, THE PASSAGES CHARTED SO FAR, AND A WALL NOBODY HAS REACHED.
@@ -182,7 +183,7 @@ const styles = StyleSheet.create({
 
   cave: {
     position: 'absolute', left: CAVE_X, top: CAVE_Y, width: CAVE_W, height: CAVE_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
   },
   // A DASHED EDGE IS A BOUNDARY, not a thing. Nobody has reached this one.
   wall: {

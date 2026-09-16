@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A STACK THAT BECOMES A WALL (H64). Five blocks stand in a pile; five courses go
 // up; the pile is empty when the wall is finished, and the wall is exactly as tall
@@ -224,11 +225,11 @@ const styles = StyleSheet.create({
 
   block: {
     position: 'absolute', left: STACK_L, width: STACK_W, height: BLOCK_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
   course: {
     position: 'absolute', left: WALL_L, width: WALL_W, height: COURSE_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   // The vertical joint, so a course reads as masonry rather than a bar.
   mortar: { position: 'absolute', left: WALL_W / 2 - 1, top: 0, bottom: 0, width: 2, backgroundColor: RULE },
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
 
   board: { position: 'absolute', left: BOARD_L, width: BOARD_W, height: BOARD_H },
   boardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   boardText: {

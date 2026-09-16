@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A rule straight across the stage labelled SAID. Above it, the two sentences that
 // were actually spoken; below it, in dashed outline, the one that was not. The
@@ -284,7 +285,7 @@ const styles = StyleSheet.create({
 
   card: {
     position: 'absolute', left: CARD_L, width: CARD_W, height: SAID_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   cardA: { top: SAID_A_T },
@@ -312,10 +313,10 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   hidCard: {
     position: 'absolute', left: CARD_L, top: HID_T, width: CARD_W, height: SLOT_H,
-    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   frame: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
-  frameDash: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 0, backgroundColor: STONE },
+  frameDash: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 0, backgroundColor: STONE, boxShadow: LIP },
   frameSolid: { borderWidth: 2, borderColor: INK, borderRadius: 4 },
   hidText: {
     fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 0.4,
@@ -325,7 +326,7 @@ const styles = StyleSheet.create({
   pickSlot: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
     height: PICK_H, borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 0,
-    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   pickRight: { backgroundColor: INK, borderColor: INK, borderStyle: 'solid' },
   pickWrong: { borderColor: RULE },

@@ -6,7 +6,7 @@ import CinematicPlayer from './CinematicPlayer';
 import { dirsFrom, clamp01, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology19Script';
-import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, pickAt,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIVE DOORS WITH SUBJECTS ON THEM, AND A KEY CUT FOR ONE.
@@ -30,8 +31,10 @@ const { RULE, STONE } = stageTone('epistemology');
 // · the QUESTION CHIP is 132×28 at x 134…266, y 234…262 — IS THIS DIET SAFE. It
 //   is the only rounded object on the stage, which is what makes it read as a
 //   thing that travels rather than another panel.
-// · the STRAY is the chip translated to sit over the HEART door (x 100) and
-//   tilted 6°, with a 2-thick bar across that door's face. Nothing about the
+// · the STRAY is the chip translated to hang over the HEART door (x 100), 6 down and
+//   tilted 6°, with a 2-thick bar across that door's face. It hangs ABOVE the door:
+//   at 42 down it lay across the ENGINES, HEART and NUTRITION captions, being twice
+//   a door's width. Tilted, its ends reach y 233…275, clear of the captions at 282. Nothing about the
 //   door dims: the credentials stay drawn, because the lesson is that they are
 //   real and still do not apply.
 // · the SPLIT is two small opposed marks inside the NUTRITION door on the last
@@ -76,9 +79,25 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology19'));
 
-export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
+// R7c — the doors follow the sort on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
+
+// ARE THE EXPERTS STILL STANDING? Read in the sort's OWN bin order (never the
+// shuffled row order — see SceneApi.pickPos): choose either · the confident one ·
+// weigh the sides. The doors are "five experts who each know a subject that you
+// don't". "No one knows, so choose either" says nobody behind them knows, so the
+// doors go — the giving-up-on-expertise the header names. Trusting the most certain
+// voice and weighing the sides both still take the experts as experts, so the doors
+// stay. The two marks inside NUTRITION stay drawn under every row: the
+// disagreement is a fact whichever answer the reader gives.
+const DOORS_AT = [0, 1, 1];
+
+export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
+  const reacting = REACT[i] === 1;
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -96,7 +115,7 @@ export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick, 
 
     return {
       fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
-      doors: carry(cv, 1, n, DOORS[p], DOORS[n], tr),
+      doors: carry(cv, 1, n, DOORS[p], reacting ? DOORS[n] * pickAt(DOORS_AT, pickPos.value) : DOORS[n], tr),
       chip: carry(cv, 2, n, CHIP[p], CHIP[n], tr),
       stray: carry(cv, 3, n, STRAY[p], STRAY[n], tr),
       split: carry(cv, 4, n, SPLIT[p], SPLIT[n], tr),
@@ -118,7 +137,7 @@ export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick, 
       opacity: SCENE.value.chip,
       transform: [
         { translateX: (DOOR_X[1] + DOOR_W / 2 - (CHIP_X + CHIP_W / 2)) * s },
-        { translateY: 42 * s },
+        { translateY: 6 * s },
         { rotate: `${s * 6}deg` },
       ],
     };
@@ -196,7 +215,7 @@ const styles = StyleSheet.create({
   // are what let the whole thing be lifted as one object.
   doorFace: {
     position: 'absolute', left: 0, top: 0, width: DOOR_W, height: DOOR_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   doorCap: {
     position: 'absolute', left: 0, top: 8, width: DOOR_W, textAlign: 'center',
@@ -207,7 +226,7 @@ const styles = StyleSheet.create({
 
   chip: {
     position: 'absolute', left: CHIP_X, top: CHIP_Y, width: CHIP_W, height: CHIP_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 14, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 14, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   chipText: {

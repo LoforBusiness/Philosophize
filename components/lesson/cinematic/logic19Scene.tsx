@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOUR CARDS, A RULE ABOVE THEM, AND ONE BACK SHOWING.
@@ -57,6 +58,11 @@ const FACES = ['E', 'K', '4', '7'];
 const CARD_ID = ['vowel', 'cons', 'even', 'odd'];
 /** Which two a reader reaches for first. */
 const REACHED = [1, 0, 1, 0];
+/**
+ * The one card that can only CONFIRM: whatever is on its other side, the four
+ * cannot break the rule. The vowel is ringed too, but it could still refute.
+ */
+const FOUR = FACES.indexOf('4');
 
 const FIG_X = 200;
 
@@ -71,16 +77,21 @@ const CARDS = BEATS.map((b) => b.cards ?? 0);
 const REACH = BEATS.map((b) => b.reach ?? 0);
 const TURNED = BEATS.map((b) => b.turned ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+// R7c — the stage follows the split on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic19'));
 
-export default function Logic19Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic19Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+  const reacting = REACT[i] === 1;
   // The beat the seven turns on. Its back is the REVEAL, so it is not mounted
   // before then — an opacity-0 <Text> is invisible and still readable, which is
   // exactly what check:spoiler exists to catch (group O).
   const TURN_BEAT = 4;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -102,6 +113,12 @@ export default function Logic19Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
       cards: carry(cv, 2, n, CARDS[p], CARDS[n], tr),
       reach: carry(cv, 3, n, REACH[p], REACH[n], tr),
       turned: carry(cv, 4, n, TURNED[p], TURNED[n], tr),
+      // R7c — the FOUR's ring is the same script track everywhere but the split,
+      // where it follows the seam: `dragPos` is the share of the search given to
+      // cases that COULD CONFIRM, and the four is the card that can only confirm.
+      // The vowel's ring stays on the script (it could refute), and the seven stays
+      // turned, because a search plan does not un-find a counterexample.
+      reachFour: carry(cv, 5, n, REACH[p], reacting ? dragPos.value : REACH[n], tr),
       t,
     };
   });
@@ -162,7 +179,7 @@ export default function Logic19Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
 function Card({
   S, index, showBack,
 }: {
-  S: { value: { cards: number; reach: number; turned: number } };
+  S: { value: { cards: number; reach: number; reachFour: number; turned: number } };
   index: number;
   showBack: boolean;
 }) {
@@ -174,7 +191,9 @@ function Card({
   }));
   const frontStyle = useAnimatedStyle(() => ({ opacity: last ? 1 - S.value.turned : 1 }));
   const backStyle = useAnimatedStyle(() => ({ opacity: last ? S.value.turned : 0 }));
-  const ringStyle = useAnimatedStyle(() => ({ opacity: REACHED[index] ? S.value.reach : 0 }));
+  const ringStyle = useAnimatedStyle(() => ({
+    opacity: REACHED[index] ? (index === FOUR ? S.value.reachFour : S.value.reach) : 0,
+  }));
   return (
     <View pointerEvents="none">
       <Animated.View style={[styles.ring, { left: left - 5 }, ringStyle]} />
@@ -196,7 +215,7 @@ const styles = StyleSheet.create({
 
   plate: {
     position: 'absolute', left: PLATE_X, top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   plateText: {
     position: 'absolute', left: PLATE_X, top: PLATE_Y + 11, width: PLATE_W, textAlign: 'center',
@@ -205,7 +224,7 @@ const styles = StyleSheet.create({
 
   card: {
     position: 'absolute', top: CARD_Y, width: CARD_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   face: {

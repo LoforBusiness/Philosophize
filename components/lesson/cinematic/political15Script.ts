@@ -24,13 +24,13 @@ export const BEATS: Pol15Beat[] = [
     dur: 4.6,
   },
   {
-    p: 41, x: 168, stages: 2,
+    p: 270, x: 168, stages: 2,
     text: 'First, a clear and serious wrong must be found. Second, lawful routes must be tried, such as petitions, courts and elections.',
     cite: 'The first two conditions',
     dur: 2.5,
   },
   {
-    p: 41, x: 168, stages: 2,
+    p: 270, x: 168, stages: 2,
     text: 'John Rawls treats civil disobedience as a last resort, justified only after lawful appeals have failed.',
     dur: 2.3,
   },

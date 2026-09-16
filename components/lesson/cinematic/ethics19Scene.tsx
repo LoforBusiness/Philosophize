@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A FORM WITH FOUR LINES ON IT, AND THE WRONG NAME IN THREE OF THE SLOTS.
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
   sig: {
     position: 'absolute', left: COL_SIG, width: 58, height: 16,
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: SOFT, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 1, borderColor: SOFT, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
   sigText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.7, color: INK, includeFontPadding: false,

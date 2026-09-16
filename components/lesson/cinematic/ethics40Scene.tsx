@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A SEALED PROMISE ABOVE AN EMPTY SEAT, AND ONE TIE LOOKING FOR SOMETHING.
@@ -231,11 +232,11 @@ const styles = StyleSheet.create({
 
   back: {
     position: 'absolute', left: SEAT_X, top: BACK_Y, width: 10, height: BACK_H,
-    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   pan: {
     position: 'absolute', left: SEAT_X, top: PAN_Y, width: SEAT_W, height: 10,
-    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   leg: { position: 'absolute', top: LEG_Y, width: 6, height: LEG_H, backgroundColor: INK },
 

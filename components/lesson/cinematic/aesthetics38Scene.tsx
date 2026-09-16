@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIVE SCENES, TWO BARS EACH, AND THE THREE CLAIMS THAT CANNOT ALL STAND.
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
   // off its own rule, which is the one line in this picture that may not move.
   barKnow: {
     position: 'absolute', top: BASE_Y - BAR_MAX, width: BAR_W, height: BAR_MAX,
-    backgroundColor: STONE, borderWidth: 1.5, borderColor: INK, transformOrigin: '50% 100%',
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: INK, transformOrigin: '50% 100%',
   },
   barFeel: {
     position: 'absolute', top: BASE_Y - BAR_MAX, width: BAR_W, height: BAR_MAX,
@@ -227,7 +228,7 @@ const styles = StyleSheet.create({
 
   swatch: {
     position: 'absolute', top: LEG_Y, width: 10, height: 10,
-    backgroundColor: STONE, borderWidth: 1.5, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: INK,
   },
   swatchFeel: { position: 'absolute', top: LEG_Y, width: 10, height: 10, backgroundColor: INK },
   legend: {

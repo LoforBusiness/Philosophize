@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE PANEL, AND FOUR FAITHFUL COPIES OF IT GETTING SMALLER.
@@ -76,6 +77,10 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics24'));
 
+// R7c — LEFT STILL ON PURPOSE: the plot asks what happens to the AURA as copies multiply, and
+// the aura is named on a plate, never drawn. Drawing it as a glow that fades down the copies
+// is the "copies look worse" picture this scene's header rules out (A1): every copy here is
+// as faithful as the panel.
 export default function Aesthetics24Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
@@ -197,12 +202,12 @@ const styles = StyleSheet.create({
     position: 'absolute', left: PAN_X + 16, width: PAN_W - 32, height: 1.2, backgroundColor: SOFT,
   },
   copyFrame: {
-    position: 'absolute', borderWidth: 1.8, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    position: 'absolute', borderWidth: 1.8, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
 
   plate: {
     position: 'absolute', top: PL_Y, width: PL_W, height: PL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   plateText: {
     position: 'absolute', top: PL_Y + 10, width: PL_W, textAlign: 'center', lineHeight: 11,

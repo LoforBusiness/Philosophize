@@ -17,7 +17,8 @@ import { Shapes, Outlined, ell, bar, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A LAWN FLAMINGO THAT NEVER MOVES, AND AN EYE BESIDE IT THAT DOES.
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
 
   plinth: {
     position: 'absolute', left: PLINTH_X, top: PLINTH_Y, width: PLINTH_W, height: PLINTH_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
 
   // THE ONE THING THE READER MOVES. Clipped, so a closing lid stays in its lens.
@@ -218,7 +219,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: EYE_W / 2 - 10, top: EYE_H / 2 - 10, width: 16, height: 16, borderRadius: 8,
     backgroundColor: INK,
   },
-  lid: { position: 'absolute', left: 0, top: 0, width: EYE_W, backgroundColor: STONE },
+  lid: { position: 'absolute', left: 0, top: 0, width: EYE_W, backgroundColor: STONE, boxShadow: LIP },
   eyeText: {
     position: 'absolute', left: 130, top: 342, width: 80, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,

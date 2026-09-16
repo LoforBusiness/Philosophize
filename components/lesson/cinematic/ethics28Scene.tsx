@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO BLOCKS SLIDING TOWARD EACH OTHER ON ONE RAIL.
@@ -194,11 +195,11 @@ const styles = StyleSheet.create({
 
   rail: {
     position: 'absolute', left: RAIL_X, top: RAIL_Y, width: RAIL_W, height: RAIL_H,
-    backgroundColor: STONE, borderWidth: 1.5, borderColor: RULE,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: RULE,
   },
   block: {
     position: 'absolute', top: BLOCK_Y, width: BLOCK_W, height: BLOCK_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
   },
   blockText: {
     position: 'absolute', left: 0, top: 15, width: BLOCK_W, textAlign: 'center', lineHeight: 10,

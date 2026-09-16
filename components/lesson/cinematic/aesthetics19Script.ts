@@ -28,13 +28,13 @@ export const BEATS: Aes19Beat[] = [
     dur: 4.6,
   },
   {
-    p: 41, x: 168, row: 1, frame: 1,
+    p: 270, x: 168, row: 1, frame: 1,
     text: 'Consider a drainpipe. No one made it as art, yet it has a shape, a rhythm and a pattern of stains.',
     cite: 'A drainpipe',
     dur: 3,
   },
   {
-    p: 41, x: 168, row: 1, frame: 1,
+    p: 270, x: 168, row: 1, frame: 1,
     text: 'Framing an object directs aesthetic attention to qualities that everyday use passes over.',
     dur: 2.2,
   },
@@ -62,13 +62,13 @@ export const BEATS: Aes19Beat[] = [
     dur: 4.0,
   },
   {
-    p: 36, x: 168, row: 1, frame: 3, verdict: 2, know: 1,
+    p: 269, x: 168, row: 1, frame: 3, verdict: 2, know: 1,
     text: 'Carlson brings in natural history instead. A marsh is a nursery, a water filter and a flood defence.',
     cite: 'Natural history',
     dur: 2.8,
   },
   {
-    p: 36, x: 168, row: 1, frame: 3, verdict: 2, know: 1,
+    p: 269, x: 168, row: 1, frame: 3, verdict: 2, know: 1,
     text: 'Neither the frame nor the marsh has changed, yet the verdict on the marsh has.',
     dur: 2.4,
   },

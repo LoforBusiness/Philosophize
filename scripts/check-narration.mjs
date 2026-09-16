@@ -21,6 +21,11 @@
 //   4. EACH TAKE IS CLEAN: no clipped run, no pile of clipped samples, no burst, a
 //      pace that fits its words, and no stall. The limits, and the lines they were
 //      calibrated on, are in scripts/lib/narration.mjs.
+//   5. A LINE ENDS, AND DOES NOT STOP. Chirp trims every take to the voice, so each
+//      lesson MP3 must carry the synthesised release after every line (its tag opens
+//      with the encoding), and the player must pause after that release and before the
+//      next line — never as the line nears its end, which clipped every line in the app
+//      until 16 Sep 2026 and was heard as sentences that "stop abruptly".
 //
 // It exists because a reader heard a burst and then a garbled voice in
 // metaphysics-being-4 on 12 Sep 2026, and nothing had ever measured the audio.
@@ -33,6 +38,7 @@ import path from 'node:path';
 import {
   ROOT, ASSETS, MANIFEST, LESSONS, LESSON_CLIP, keyOf, requireOf, spoken, lessonLines, lineFaults, parseManifest,
   readRenders, weightOf, MAX_CLIP_RUN, MAX_CLIPS_IN_50MS, BURST_DBFS, PACE_MIN, PACE_MAX, MAX_PAUSE_S, MAX_EDGE_SILENCE_S,
+  RELEASE_S, GAP_S,
 } from './lib/narration.mjs';
 
 const manifestFile = process.env.NARRATION_MANIFEST ? path.resolve(ROOT, process.env.NARRATION_MANIFEST) : MANIFEST;
@@ -154,7 +160,34 @@ for (const dir of dirs) {
   }
 }
 
+// 5. A LINE IS PAUSED AFTER ITS RELEASE AND BEFORE THE NEXT LINE. The player's numbers
+// live in lib/narration/real.ts, which imports expo-audio and cannot be loaded here, so
+// they are read out of its text. A pause before `end` clips the last word of every line
+// — Chirp leaves no silence there to spend — and one past GAP_S plays the next line's
+// first word. NARRATION_PLAYER points the counter-test at a damaged copy.
+const playerFile = process.env.NARRATION_PLAYER
+  ? path.resolve(ROOT, process.env.NARRATION_PLAYER)
+  : path.join(ROOT, 'lib', 'narration', 'real.ts');
+let timing = '';
+{
+  const src = fs.readFileSync(playerFile, 'utf8');
+  const who = path.relative(ROOT, playerFile).replace(/\\/g, '/');
+  const num = (name) => { const m = src.match(new RegExp(String.raw`const ${name} = ([\d.]+);`)); return m ? Number(m[1]) : NaN; };
+  const pad = num('END_PAD_S');
+  const slack = num('END_SLACK_MS') / 1000;
+  const lat = num('LATENCY_MS') / 1000;
+  const late = pad + slack + lat;
+  if (![pad, slack, lat].every(Number.isFinite)) note(who, 'PLAYER', 'END_PAD_S, END_SLACK_MS or LATENCY_MS could not be read out of the player');
+  else {
+    if (/else if \(heard\)\s*finish\(\)/.test(src)) note(who, 'PLAYER', 'the status listener pauses as soon as the line nears its end, which clips its last sound');
+    if (pad < RELEASE_S + 0.03) note(who, 'PLAYER', `END_PAD_S ${pad}s does not clear the ${RELEASE_S}s release after every take`);
+    if (late > GAP_S - 0.05) note(who, 'PLAYER', `the fallback pause lands ${late.toFixed(2)}s past a line, into the next one at ${GAP_S}s`);
+    timing = `release ${RELEASE_S}s · pause +${pad}s · fallback +${late.toFixed(2)}s · next line +${GAP_S}s`;
+  }
+}
+
 const GROUPS = [
+  ['a line is paused after its release and before the next line', ['PLAYER'], timing],
   ['every lesson speaks', ['UNVOICED'], `every lesson the app opens has its voice${routed.length ? ` (${routed.length})` : ''}`],
   ['the manifest is the script', ['MANIFEST', 'MISSING', 'NOT SPOKEN', 'LENGTH', 'WORDS', 'OFFSET'],
     'every spoken beat has its line, where its lesson\'s audio has it'],
@@ -166,6 +199,7 @@ const GROUPS = [
   ['nothing is left behind', ['ORPHAN'], 'no record or file that no line plays'],
 ];
 if (lines === 0) bad('measured no lines at all', 'a check that reads nothing must not look clean');
+
 for (const [title, kinds, fine] of GROUPS) {
   const hits = findings.filter((f) => kinds.includes(f.kind));
   if (!hits.length) { ok(title, fine); continue; }

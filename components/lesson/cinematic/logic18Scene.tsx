@@ -15,7 +15,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A MACHINE WITH A HOLE IN THE MIDDLE OF IT.
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
 
   evBox: {
     position: 'absolute', left: EV_X, top: EV_Y, width: EV_W, height: EV_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   evText: {
     position: 'absolute', left: EV_X, top: EV_Y + 5, width: EV_W, textAlign: 'center', lineHeight: 10.8,
@@ -240,7 +241,7 @@ const styles = StyleSheet.create({
   crank: {
     position: 'absolute', left: CRANK_CX - CRANK_R, top: CRANK_CY - CRANK_R,
     width: CRANK_R * 2, height: CRANK_R * 2, borderRadius: CRANK_R,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   handleWrap: {
     position: 'absolute', left: CRANK_CX - CRANK_R, top: CRANK_CY - CRANK_R,

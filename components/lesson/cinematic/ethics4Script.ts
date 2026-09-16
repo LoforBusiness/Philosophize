@@ -39,12 +39,12 @@ export const BEATS: Ethics4Beat[] = [
     dur: 1.8,
   },
   {
-    a: 2, b: 10, rows: 2,
+    a: 266, b: 161, rows: 2,
     text: 'The second claim is moral relativism. It holds that rightness depends on a group’s code, with no higher standard.',
     dur: 2.9,
   },
   {
-    a: 2, b: 10, rows: 2,
+    a: 266, b: 161, rows: 2,
     text: 'Inferring the second from the first is a common error. Disagreement doesn’t show there’s no answer.',
     dur: 1.8,
   },
@@ -73,7 +73,7 @@ export const BEATS: Ethics4Beat[] = [
     dur: 3.4,
   },
   {
-    a: 13, b: 15, rows: 3,
+    a: 266, b: 258, rows: 3,
     text: 'Cultures differing does not make every code equally true. Disagreement about the Earth’s shape didn’t make every answer true.',
     dur: 1.8,
   },
@@ -84,12 +84,12 @@ export const BEATS: Ethics4Beat[] = [
     dur: 2.8,
   },
   {
-    a: 38, b: 38, floor: 1, rows: 3,
+    a: 266, b: 266, floor: 1, rows: 3,
     text: 'Human universals include returning a favour, and forbidding murder and incest.',
     dur: 1.8,
   },
   {
-    a: 38, b: 38, floor: 1, rows: 3,
+    a: 266, b: 266, floor: 1, rows: 3,
     text: 'These universals suggest a shared moral foundation beneath the differences between cultures.',
     dur: 1.8,
   },

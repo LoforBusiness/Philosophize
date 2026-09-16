@@ -348,7 +348,8 @@ const MOTIONS = [
     name: `act ${i + 1}`, kind: 'oneShot', at: (u) => M.actStance(i + 1, T, u),
     ...(i + 1 === 92 ? { lands: () => M.postureHold(1, T) } : {}),
   })),
-  ...Array.from({ length: 12 }, (_, i) => ({
+  // 169–182, the working shelf, the same way and in the same commit that adds it.
+  ...Array.from({ length: 26 }, (_, i) => ({
     name: `hold ${i + 157}`, kind: 'oneShot', at: (u) => M.actStance(i + 157, T + u * 12, 1),
   })),
   // THE HOLDS ARE SAMPLED ON THE CLOCK, NOT ON u. 59–78 ignore `u` entirely, so

@@ -17,7 +17,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO LAMPS ON A BENCH, AND EVERY CONDITION PUT THROUGH BOTH.
@@ -75,6 +76,11 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic21'));
 
+// R7c — LEFT STILL ON PURPOSE: the poll's four answers are claims about what a cause IS, and
+// the two lamps state facts about the chip under test: the match, sufficient and not
+// necessary. Lighting them to a claim's pattern would print a false reading of the match on
+// the bench, and a poll moves `pickPos` only on the pick, so a wrong pick would leave that
+// false reading standing beside its own explanation.
 export default function Logic21Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
@@ -199,7 +205,7 @@ const styles = StyleSheet.create({
 
   chip: {
     position: 'absolute', top: CHIP_Y, width: CHIP_W, height: CHIP_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 13, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 13, backgroundColor: STONE, boxShadow: LIP,
   },
   chipText: {
     position: 'absolute', top: CHIP_Y + 5, width: CHIP_W, textAlign: 'center', lineHeight: 9,
@@ -213,7 +219,7 @@ const styles = StyleSheet.create({
 
   bench: {
     position: 'absolute', left: BENCH_X, top: BENCH_Y, width: BENCH_W, height: BENCH_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   split: {
     position: 'absolute', left: BENCH_X + BENCH_W / 2, top: BENCH_Y, width: 1, height: BENCH_H,

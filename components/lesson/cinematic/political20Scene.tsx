@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO FULL STACKS, THREE CANDIDATES, AND A SHELF WITH ROOM FOR ONE.
@@ -82,6 +83,10 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political20'));
 
+// R7c — LEFT STILL ON PURPOSE: the bins (legal restraint · silence · an open mind) are what
+// toleration asks of you, and nothing on this stage shows any of them. The two stacks are
+// drawn at full strength by rule, so the only picture a bin could drive, dimming a view, is
+// the one the lesson says nobody has to give up.
 export default function Political20Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -200,7 +205,7 @@ const styles = StyleSheet.create({
   },
   block: {
     position: 'absolute', width: STACK_W, height: BLOCK_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
     justifyContent: 'center', paddingHorizontal: 6,
   },
   blockText: {
@@ -210,7 +215,7 @@ const styles = StyleSheet.create({
   shelfTop: { position: 'absolute', left: MID_X, top: SHELF_Y, width: MID_W, height: 2.5, backgroundColor: INK },
   shelfBox: {
     position: 'absolute', left: MID_X, top: SHELF_Y, width: MID_W, height: SHELF_H,
-    backgroundColor: STONE,
+    backgroundColor: STONE, boxShadow: LIP,
     borderWidth: 1, borderColor: RULE, borderRadius: 2,
   },
   shelfCap: {
@@ -221,7 +226,7 @@ const styles = StyleSheet.create({
   candHit: { position: 'absolute', left: MID_X, width: MID_W, height: CAND_H },
   cand: {
     width: MID_W, height: CAND_H, borderWidth: 2, borderColor: INK, borderRadius: 3,
-    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   candRight: { backgroundColor: INK },
   candWrong: { borderColor: SOFT },

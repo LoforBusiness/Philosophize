@@ -15,7 +15,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // TWO BARS, AND ONLY ONE OF THEM OBEYS THE READER.
 //
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
   claim: { position: 'absolute', left: CLAIM_L, bottom: STAGE_H - GROUND, width: BAR_W, backgroundColor: INK },
   hold: {
     position: 'absolute', left: HOLD_L, bottom: STAGE_H - GROUND, width: BAR_W,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   // The space between the two tops — a dashed bracket, never a second colour (§19).
   gap: {

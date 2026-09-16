@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO TRAYS OVER ONE BOOK, AND WHAT ENDS UP IN EACH.
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
 
   tray: {
     position: 'absolute', left: TRAY_X, width: TRAY_W, height: TRAY_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
   },
   fill: { position: 'absolute', left: TRAY_X + 2, height: TRAY_H - 4, backgroundColor: INK },
   trayText: {
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
   stem: { position: 'absolute', left: BOOK_X + BOOK_W / 2 - 1.5, top: TRAY_Y[1] + TRAY_H, width: 3, height: BOOK_Y - TRAY_Y[1] - TRAY_H, backgroundColor: INK },
   book: {
     position: 'absolute', left: BOOK_X, top: BOOK_Y, width: BOOK_W, height: BOOK_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
   },
   spine: { position: 'absolute', left: BOOK_X, top: BOOK_Y, width: 5, height: BOOK_H, backgroundColor: INK },
   page: { position: 'absolute', left: BOOK_X + 16, width: BOOK_W - 28, height: 2, backgroundColor: RULE },

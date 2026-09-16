@@ -32,13 +32,13 @@ export const BEATS: Epi5Beat[] = [
     dur: 1.8,
   },
   {
-    p: 24, star: 0.8, rungs: 5,
+    p: 275, star: 0.8, rungs: 5,
     text: 'Aristotle ranks the kinds of knowledge. The highest, wisdom, isn’t valued for its usefulness but is sought for its own sake.',
     cite: 'Aristotle, Metaphysics, Book One',
     dur: 3.2,
   },
   {
-    p: 24, star: 0.8, rungs: 5,
+    p: 275, star: 0.8, rungs: 5,
     text: 'Aristotle calls wisdom the only free science. Just as a free person exists for their own sake, so does wisdom.',
     dur: 1.8,
   },
@@ -69,13 +69,13 @@ export const BEATS: Epi5Beat[] = [
     dur: 2.6,
   },
   {
-    p: 37, star: 1, power: 1, rungs: 5,
+    p: 272, star: 1, power: 1, rungs: 5,
     text: 'Nearly two thousand years later, Francis Bacon gave knowledge a new purpose. For Bacon, knowledge is worth having for the power it gives over nature.',
     cite: 'Knowledge as power',
     dur: 3.4,
   },
   {
-    p: 37, star: 1, power: 1, rungs: 5,
+    p: 272, star: 1, power: 1, rungs: 5,
     text: 'Aristotle prized understanding nature for its own sake. Bacon prized knowledge that could be used to control nature.',
     dur: 1.8,
   },

@@ -5,7 +5,7 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A wall shelf holding three particular red things — a rose, a ruby, a flag — and
 // one card reading REDNESS that has to live somewhere. The card is the only thing
@@ -126,19 +127,39 @@ const CARD_TOP = (() => {
   }
   return out;
 })();
+const CARD_ON = CARDV.map((v) => (v > 0 ? 1 : 0));
+const TAGS = BEATS.map((b) => ((b.tags ?? 0) > 0 ? 1 : 0));
 
-export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
+// R7c — the card follows the drag on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+
+// THE DRAG IS THE CARD'S ADDRESS. Its three zones are the three homes this lesson
+// has already staged, so the knob sends the card to the one its zone names:
+//   'word'   (0 … 0.28)     "nothing shared, only a name"             — on the strings, as beat 8 hung it
+//   'things' (0.28 … 0.72)  "real yet only in red things"             — split into the three RED tags, as beat 5 pinned them
+//   'realm'  (0.72 … 1)     "in its own realm, apart from red things" — up in Plato's frame, as beat 4 raised it
+// The card is only ever SEEN at rest on the strings or in the frame: it changes
+// height only while it is wholly the tags (HOME_MID ± HOME_CORE), so it never sweeps
+// across the shelf. The drag opens from beat 9, where the card is on the strings,
+// which is 0 on this scale — hence the carry's constant source.
+const HOME_MID = 0.5;       // the middle zone's centre
+const HOME_EDGE = 0.22;     // its half-width: the zone runs 0.28 … 0.72
+const HOME_CORE = 0.14;     // the part of it where the tags are wholly on
+const HOME_ON_STRINGS = 0;
+
+export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const reacting = REACT[i] === 1;
 
   // A prop only fades on the beat that CHANGES it; otherwise it holds, so nothing
   // re-reveals itself behind the reader every time they tap forward (H58, C20c).
   const frameOn = (cur.frame ?? 0) > 0;
   const frameFade = frameOn !== ((prev?.frame ?? 0) > 0);
-  const tagsOn = (cur.tags ?? 0) > 0;
-  const tagsFade = tagsOn !== ((prev?.tags ?? 0) > 0);
   const strOn = (cur.str ?? 0) > 0;
   const strFade = strOn !== ((prev?.str ?? 0) > 0);
   const slotsOn = (cur.slots ?? 0) > 0 && !!cur.interact;
@@ -163,21 +184,43 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, g
     const on = CARDV[n] > 0;
     const was = CARDV[p] > 0;
 
+    // Where the reader has the card, on the drag's own 0…1, eased in from the strings.
+    const home = carry(cv, 2, n, HOME_ON_STRINGS, reacting ? dragPos.value : HOME_ON_STRINGS, tr);
+    const inThings = clamp01((HOME_EDGE - Math.abs(home - HOME_MID)) / (HOME_EDGE - HOME_CORE));
+    const homeY = lerp(CARD_Y[3], CARD_Y[2], clamp01((home - (HOME_MID - HOME_CORE)) / (2 * HOME_CORE)));
+
     return {
       fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       frame: (frameOn ? 1 : 0) * (frameFade ? grow : 1),
-      tags: (tagsOn ? 1 : 0) * (tagsFade ? grow : 1),
+      // The tags and the card's visibility fade from what was DRAWN toward this
+      // beat's state — the same curve as before whenever the last beat finished,
+      // and no snap when the reader leaves the drag with the tags or the card up.
+      tags: carry(cv, 4, n, TAGS[p], reacting ? inThings : TAGS[n], reacting ? 1 : grow),
       str: (strOn ? 1 : 0) * (strFade ? grow : 1),
+      t,
       slots: (slotsOn ? 1 : 0) * (slotsFade ? grow : 1),
-      cardV: on ? (was ? 1 : grow) : (was ? 1 - grow : 0),
+      cardV: carry(cv, 3, n, CARD_ON[p], reacting ? 1 - inThings : CARD_ON[n], reacting ? 1 : grow),
       // Always through the carry, so it REMEMBERS where the card was drawn. A card
       // that arrived used to be put at its home without the carry hearing of it, so
       // the next beat slid it in again from wherever it had last been seen (C20c).
-      cardT: carry(cv, 1, n, CARD_TOP[p], CARD_TOP[n], was ? tr : 1),
+      // A beat with no card HOLDS it where it was (mix 0), so a fade-out happens in
+      // place — including the one after the drag, wherever the reader left it.
+      cardT: carry(cv, 1, n, CARD_TOP[p], reacting ? homeY : CARD_TOP[n], reacting ? 1 : on ? (was ? tr : 1) : 0),
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  // A FLAG FLIES. Hinged at the pole, its fly end ripples on two rates so it never
+  // repeats a frame; a red flag standing rigid read as a sign, not a flag.
+  const flagFly = useAnimatedStyle(() => {
+    const t = SCENE.value.t;
+    return {
+      transform: [
+        { scaleX: 1 + Math.sin(t * 2.4) * 0.06 },
+        { rotate: `${Math.sin(t * 1.7 + 0.6) * 2.5}deg` },
+      ],
+    };
+  });
   const frameStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.frame }));
   const tagStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.tags,
@@ -221,7 +264,7 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, g
       <View style={styles.ruby} pointerEvents="none" />
       {/* the flag: a pole and a filled panel */}
       <View style={styles.pole} pointerEvents="none" />
-      <View style={styles.flag} pointerEvents="none" />
+      <Animated.View style={[styles.flag, flagFly]} pointerEvents="none" />
 
       {/* ── Aristotle: the card split into three tags, pinned onto the things ─ */}
       {OBJ_X.map((cx, k) => (
@@ -285,7 +328,7 @@ const styles = StyleSheet.create({
 
   plank: {
     position: 'absolute', left: SLOT_L, top: PLANK_T, width: SLOT_W, height: PLANK_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   bracket: { position: 'absolute', top: PLANK_T + PLANK_H, width: 12, height: 14, backgroundColor: SOFT, borderRadius: 2 },
   bracketL: { left: SLOT_L + 8 },
@@ -323,12 +366,12 @@ const styles = StyleSheet.create({
   },
 
   pole: { position: 'absolute', left: OBJ_X[2] - 1.25, top: OBJ_T, width: 2.5, height: 40, backgroundColor: INK },
-  flag: { position: 'absolute', left: OBJ_X[2] + 1.25, top: OBJ_T + 2, width: 28, height: 20, backgroundColor: INK, borderRadius: 1 },
+  flag: { position: 'absolute', left: OBJ_X[2] + 1.25, top: OBJ_T + 2, width: 28, height: 20, backgroundColor: INK, borderRadius: 1, transformOrigin: '0% 50%' },
 
   tagWrap: { position: 'absolute', top: TAG_T, width: TAG_W, alignItems: 'center' },
   tag: {
     width: TAG_W, height: TAG_H, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
-    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   tagText: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.6, color: INK, includeFontPadding: false },
   /** The pin that fixes the tag to the thing under it — 6 units down to the object. */
@@ -347,7 +390,7 @@ const styles = StyleSheet.create({
 
   slotWrap: { position: 'absolute', left: SLOT_L, width: SLOT_W },
   slot: {
-    height: SLOT_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: SLOT_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   slotRight: { backgroundColor: INK, borderColor: INK },

@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // One gauge across the top of the stage: a guess at the left end, absolute certainty
 // at the right. A shaded BAND says where knowledge is allowed to live — a sliver at
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
   flagSlot: { position: 'absolute', top: SC_Y + 12, width: FLAG_W, alignItems: 'center' },
   stem: { width: 2, height: FLAG_T - (SC_Y + 12), backgroundColor: SOFT },
   flag: {
-    width: FLAG_W, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    width: FLAG_W, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     paddingVertical: 5, paddingHorizontal: 4, alignItems: 'center',
   },
   flagRight: { backgroundColor: INK, borderColor: INK },

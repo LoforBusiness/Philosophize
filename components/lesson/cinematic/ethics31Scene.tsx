@@ -19,7 +19,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A CLIMB, which no other lesson in the app stages: the figure works on the spot
 // and the rungs scroll DOWN past it (C22d — raising a figure up a static ladder
@@ -128,10 +129,12 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick, pickPo
     // Climbing only while the rung count is actually changing; otherwise hold a
     // human pose rather than a frozen half-step (C20).
     const moving = dr > 0 ? 1 - Math.abs(tr * 2 - 1) : 0;
-    const s = keepHeld(heldS, mixStance(carryFrom(heldS, n,
-      emoteHold(HOLD[P[n]] ?? 0, t)),
-      climb(travelled * PHASE_PER_RUNG),
-      moving));
+    // The held pose is only where the beat STARTS: it blends into the live hold over
+    // the transition. Mixed straight against the climb by `moving`, it stood in for
+    // the whole beat, so on every beat without a climb the figure held the frame the
+    // tap caught him in and never breathed again.
+    const rest = mixStance(carryFrom(heldS, n, emoteHold(HOLD[P[p]] ?? 0, t)), emoteHold(HOLD[P[n]] ?? 0, t), tr);
+    const s = keepHeld(heldS, mixStance(rest, climb(travelled * PHASE_PER_RUNG), moving));
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // The rungs slide by exactly the distance the legs walked, then wrap — every
@@ -230,7 +233,7 @@ const styles = StyleSheet.create({
 
   shelf: { position: 'absolute', left: SHELF_L, top: SHELF_T, width: SHELF_W },
   shelfInner: {
-    height: SHELF_H, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    height: SHELF_H, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   shelfText: {
@@ -251,7 +254,7 @@ const styles = StyleSheet.create({
 
   topRung: { position: 'absolute', left: 216, top: TOPRUNG_T, width: 176 },
   topRungInner: {
-    height: TOPRUNG_H, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    height: TOPRUNG_H, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   topRungText: {
@@ -261,7 +264,7 @@ const styles = StyleSheet.create({
 
   lamp: { position: 'absolute', left: LAMP_L, top: LAMP_T, width: LAMP_W },
   lampBox: {
-    height: LAMP_H, borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: LAMP_H, borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   lampWord: {

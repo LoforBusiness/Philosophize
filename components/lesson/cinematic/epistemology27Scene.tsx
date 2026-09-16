@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHAT SHE SAID, THE PASSAGE, AND THE GAUGE AT THE FAR END OF IT.
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
 
   gauge: {
     position: 'absolute', left: GAUGE_X, top: GAUGE_Y, width: GAUGE_W, height: GAUGE_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   fill: { position: 'absolute', left: GAUGE_X + 2, top: GAUGE_Y + 2, height: GAUGE_H - 4, backgroundColor: INK },
   // WHAT IT WAS OWED, drawn at every setting so the shortfall can be seen at all.

@@ -33,6 +33,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import {
   ASSETS as DIR, LESSONS, LESSON_CLIP, WAV_RATE, GAP_SAMPLES, lessonLines, parseWav, headerFaults, entryOf, lessonTagOf,
+  releaseOf, RELEASE_SAMPLES,
   sha256hex,
 } from './lib/narration.mjs';
 
@@ -70,6 +71,8 @@ function removeOneLineClips(lessonId) {
   return n;
 }
 
+// The release sits inside the gap, so it may never be as long as the gap itself.
+if (RELEASE_SAMPLES >= GAP_SAMPLES) throw new Error('RELEASE_S must be shorter than GAP_S');
 fs.mkdirSync(TMP, { recursive: true });
 let encoded = 0, skipped = 0, failed = 0, removed = 0, lines = 0, mp3Bytes = 0;
 for (const lessonId of Object.keys(LESSONS)) {
@@ -91,9 +94,16 @@ for (const lessonId of Object.keys(LESSONS)) {
     removed += removeOneLineClips(lessonId);
     continue;
   }
+  // Every line is followed by its RELEASE and then silence, the last line included — it
+  // used to end the file on its final sample, so the one line with nowhere to decay
+  // into was the one the player also had no gap to pause in.
   const last = ls[ls.length - 1];
-  const pcm = new Int16Array(last.start + last.samples);
-  for (const l of ls) pcm.set(parseWav(l.wav).pcm, l.start);
+  const pcm = new Int16Array(last.start + last.samples + GAP_SAMPLES);
+  for (const l of ls) {
+    const take = parseWav(l.wav).pcm;
+    pcm.set(take, l.start);
+    pcm.set(releaseOf(take), l.start + take.length);
+  }
   const tmp = path.join(TMP, `${lessonId}.wav`);
   fs.writeFileSync(tmp, wavOf(pcm));
   const r = spawnSync(FFMPEG, [

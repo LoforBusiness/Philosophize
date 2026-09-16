@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // NINE TILES THAT NEVER MOVE, AND THE WIRES BETWEEN THEM.
@@ -200,7 +201,7 @@ const styles = StyleSheet.create({
 
   board: {
     position: 'absolute', left: BOARD_X, top: BOARD_Y, width: BOARD_W, height: BOARD_H,
-    backgroundColor: STONE, borderWidth: 1.5, borderColor: RULE,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: RULE,
   },
   tile: {
     position: 'absolute', width: TILE, height: TILE,
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: FRESH_X, top: FRESH_Y, width: FRESH_W, height: FRESH_H,
     backgroundColor: PAPER, borderWidth: 2, borderColor: INK,
   },
-  freshFill: { position: 'absolute', left: FRESH_X + 2, top: FRESH_Y + 2, width: FRESH_W - 4, height: FRESH_H - 4, backgroundColor: STONE },
+  freshFill: { position: 'absolute', left: FRESH_X + 2, top: FRESH_Y + 2, width: FRESH_W - 4, height: FRESH_H - 4, backgroundColor: STONE, boxShadow: LIP },
   freshText: {
     position: 'absolute', left: FRESH_X, top: FRESH_Y + 9, width: FRESH_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false,

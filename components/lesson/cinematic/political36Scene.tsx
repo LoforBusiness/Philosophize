@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWENTY-FOUR LIT WINDOWS, AND A LAMP WITH NOBODY BEHIND IT.
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
 
   winFrame: {
     position: 'absolute', left: 0, top: 0, width: WIN_W, height: WIN_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
   winLit: { position: 'absolute', left: 3, top: 3, width: WIN_W - 6, height: WIN_H - 6, backgroundColor: INK, borderRadius: 1 },
 
@@ -239,7 +240,7 @@ const styles = StyleSheet.create({
 
   guardBox: {
     position: 'absolute', left: 188, top: 238, width: 44, height: 30,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   guardLabel: {
     position: 'absolute', left: 188, top: 270, width: 44, textAlign: 'center',

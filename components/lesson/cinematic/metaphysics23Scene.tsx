@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIVE PLANKS, LEAVING ONE HULL AND ARRIVING IN THE OTHER.
@@ -82,6 +83,10 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics23'));
 
+// R7c — LEFT STILL ON PURPOSE: the plot rates the repaired ship as planks are replaced, and
+// the planks already moved (`swap`) are the plot's x axis, not its answer. The rating cannot
+// be drawn on a hull: the puzzle dies the moment one hull looks more like a ship than the
+// other, which is this scene's first rule.
 export default function Metaphysics23Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
@@ -200,7 +205,7 @@ const styles = StyleSheet.create({
   hull: {
     position: 'absolute', top: HULL_Y, width: HULL_W, height: HULL_H,
     borderWidth: 2.5, borderColor: INK, borderBottomLeftRadius: 12, borderBottomRightRadius: 12,
-    backgroundColor: STONE,
+    backgroundColor: STONE, boxShadow: LIP,
   },
   plank: {
     position: 'absolute', width: PLANK_W, height: PLANK_H, backgroundColor: INK, borderRadius: 1.5,
@@ -208,7 +213,7 @@ const styles = StyleSheet.create({
   mast: { position: 'absolute', top: MAST_TOP, width: 3, height: HULL_Y - MAST_TOP, backgroundColor: INK },
   sail: {
     position: 'absolute', top: SAIL_Y, width: SAIL_W, height: SAIL_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   label: {
     position: 'absolute', top: LABEL_Y, width: HULL_W, textAlign: 'center',

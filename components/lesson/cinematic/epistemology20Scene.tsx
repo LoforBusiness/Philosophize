@@ -17,7 +17,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOUR REPORTS, TWO ORIGINS, AND A BAR THAT WAS COUNTING WRONG.
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
 
   box: {
     position: 'absolute', top: BOX_Y, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   boxCap: {
     position: 'absolute', top: BOX_Y + 7, width: BOX_W, textAlign: 'center',
@@ -240,7 +241,7 @@ const styles = StyleSheet.create({
   },
   barBox: {
     position: 'absolute', left: BAR_X, top: BAR_Y, width: BAR_W, height: BAR_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     justifyContent: 'center', paddingHorizontal: 2,
   },
   barFill: { height: BAR_H - 8, backgroundColor: INK, borderRadius: 1 },

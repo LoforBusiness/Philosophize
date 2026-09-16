@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO POSTS, A CORD BETWEEN THEM, AND FOUR THINGS LEANING ON IT.
@@ -129,6 +130,13 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
     transform: [{ scaleX: SCENE.value.cord * (1 - SCENE.value.fall) }],
   }));
   const curtainStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.unseenOn }));
+  // Hung from its top edge, the cloth breathes a little; the label under it stays put.
+  const clothStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: Math.sin(SCENE.value.t * 0.8) * 1.2 },
+      { scaleX: 1 + Math.sin(SCENE.value.t * 1.05 + 0.7) * 0.05 },
+    ],
+  }));
 
   // THE PLANS ARE THE ANSWER, so all four rise together (E39). A pure translate:
   // each is placed individually, so scaling them about their own centres would
@@ -183,7 +191,7 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, curtainStyle]} pointerEvents="none">
-        <View style={styles.curtain} />
+        <Animated.View style={[styles.curtain, clothStyle]} />
         <Text style={styles.curtainLabel}>NOBODY{'\n'}LOOKING</Text>
       </Animated.View>
 
@@ -233,7 +241,8 @@ const styles = StyleSheet.create({
 
   curtain: {
     position: 'absolute', left: 358, top: 272, width: 34, height: 120,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    transformOrigin: '50% 0%',
   },
   curtainLabel: {
     position: 'absolute', left: 348, top: 396, width: 54, textAlign: 'center', lineHeight: 10.8,

@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A GRID OF FOUR BOXES, ONE OF WHICH IS SUPPOSED TO BE EMPTY (H64). The cells are
 // the Q1 targets, so the answer is a position rather than a piece of vocabulary.
@@ -184,11 +185,11 @@ const styles = StyleSheet.create({
   rowHead: {
     position: 'absolute', left: ROWH_L, width: ROWH_W,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10.8, letterSpacing: 1.1, color: SOFT,
-    textAlign: 'left', includeFontPadding: false, backgroundColor: STONE },
+    textAlign: 'left', includeFontPadding: false, backgroundColor: STONE, boxShadow: LIP },
 
   cell: { position: 'absolute', width: CELL_W, height: CELL_H },
   cellInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   note: {

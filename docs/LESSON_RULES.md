@@ -2590,6 +2590,23 @@ it out again. A green checker and an absent one are indistinguishable from the o
 
 ---
 
+### L9 · One held value per figure, and it is where the beat STARTS
+
+`carryFrom(held, n, fallback)` returns the pose captured at the beat change and holds
+it for the whole beat. It is a STARTING POINT: it only means anything blended into the
+live stance by the transition, `mixStance(carryFrom(held, n, …), live, tr)`. Two
+shapes broke that, and both froze a figure from the second tap on:
+
+- **`politicalScene`'s four brawlers shared ONE `useHeld()`** and blended it by
+  `auth`, so from the second tap all four stood in the last citizen's pose.
+- **`ethics31Scene` blended it by the climb**, so on every beat without a climb the
+  figure held the frame the tap caught him in and never breathed again.
+
+Neither moves a joint between two frames, so L1 is blind to both — a frozen figure is
+the smoothest figure there is. `npm run check:smooth` holds L9 statically: each held
+value is kept and carried once, and the weight of a `mixStance` that starts from one
+is the transition. `node scripts/countertest-depth.mjs` puts both shapes back.
+
 ## Group M — the narrator is a character, and the character is passive-aggressive
 
 > **RETIRED FROM THE TEACHING VOICE ON 13 SEP 2026.** The owner asked for lessons in a
@@ -3593,6 +3610,26 @@ the JS side rather than a track the scene carries. aesthetics-8's canvas mode is
 the case — the mapping is perfect (three stops, three renderings) and the plumbing
 is a rebuild, not a wiring.
 
+### R7d · A sort reacts while it is dragged, and its table may not single out the answer
+
+`pickPos` rests at 0.5 — the MIDDLE option's slot — until the reader acts, and a
+`sort` moves it while the chip is dragged, before anything is committed. Two things
+follow, and eleven wirings on 16 Sep 2026 were held to both:
+
+- **The middle entry of a table is on screen before anybody has chosen**, so it may
+  not be the only honest picture of the answer. Several wirings keep it at 0.
+- **A table that moves the stage for the correct option alone gives the answer away
+  mid-drag** — the reader watches the picture change over one bin and not the others
+  (the spirit of O5 and R17). When only the right option has an honest picture, the
+  lesson is left unwired, and the reason is recorded in its scene. A `poll` is safer:
+  it only moves `pickPos` when a row is tapped, so its reaction arrives with the pick.
+
+Sixteen lessons are unwired on purpose after that pass, each for one of R7c's
+three shapes or for this rule, and each scene says which in a comment beginning
+`// R7c — LEFT STILL ON PURPOSE:`. `node scripts/check-react.mjs --list` names them.
+A still lesson with no such comment is a gap nobody has looked at yet, and
+`check:react` fails it by name.
+
 ### R7b · The seam's position is the LEFT side's share, and six blocks read it backwards
 
 `SplitBar` prints `pos * 100` under `left` and `100 - pos * 100` under `right`. So
@@ -4327,11 +4364,13 @@ had no section for.
 **Run the shape check first — it costs a second and needs no browser.**
 
 ```
-npm run check          # tsc + fifty-six validators, this file's checker included
+npm run check          # tsc + fifty-nine validators, this file's checker included
 npm run check:cinematic
 npm run check:tour     # group K, offline, against each lesson's own band
 npm run check:ear      # groups AC and AD — the narration is heard, and must not read as generated
-npm run check:narration  # group AC's clips — each is its beat's words, rendered clean (AC13–AC16)
+npm run check:narration  # group AC's clips — each is its beat's words, rendered clean (AC13–AC18)
+npm run check:marks    # group AE — every pen mark is on a named label, off every word and border
+npm run check:idle     # N16–N18 — the living holds read, and the dead taps only go down
 npm run check:rules    # THIS FILE, against the code it describes (U8)
 ```
 
@@ -6273,6 +6312,33 @@ the answer state, which fills that very box INK.
 
 ---
 
+## T7 · A toned plate stands on a shaded lip
+
+The depth ramp has three rungs and the corpus used two: 237 scenes used STONE, 244 used
+RULE and four used SHADE. A plate with no shaded side is a coloured shape; the answer
+controls UNDER the words were already struck on a lip of their own hue
+(`QuestionParts.LipPlate`). So every STONE mass on the stage now stands on the same
+lip — a hard SHADE edge three units below it: `boxShadow: LIP`, where `LIP` is a
+`0px 3px 0px` shadow in the scene's own SHADE, declared beside its tone destructure.
+
+**It is a `boxShadow`, and that is what makes it affordable.** A lip drawn as a View
+is new art in every must-box table and a full browser re-measure. A hard shadow is drawn
+behind the element, changes no layout and no bounding box, and needs no JSX: RN 0.85 has
+only the New Architecture, where `boxShadow` renders on Android and iOS, and
+react-native-web passes it through as CSS. `node scripts/restamp-lip.mjs` re-stamped
+231 scenes on a two-part proof (the codemod reproduces the file from HEAD, and the stored
+stamp matched HEAD). This is NOT the `shadow*` sweep §12 defers — nothing that already
+rendered was restyled.
+
+**What gets no lip:** a style anchored to the band's bottom, anything named as ground, a
+full-width fill, a sliver under six units. `scripts/lip-stage.mjs` is the rule and
+`npm run check:shade` runs it: over a finished scene the codemod must find nothing left
+to do. Counter-tested by `node scripts/countertest-depth.mjs`.
+
+**And check the bundle, not the source.** The first render showed no lips at all: Metro's
+watcher had missed some of 231 simultaneous edits and served a mix of old and new scene
+modules. Restarted with `--clear`, all 455 were there (§21's stale-bundle trap).
+
 ## S10 · A collapsed label is invisible TWICE — on the stage, and to the checker
 
 `ethics13` puts five named plates on a rail: COWARD · TIMID · COURAGE · RASH ·
@@ -7333,6 +7399,21 @@ asserts both come back carrying their `tr`.
 
 **When a generated value stops changing what you see, check that it is being
 read before you tune it further.**
+
+## K18 · The generator asks the camera before it offers a follow
+
+`make:tours` writes all lessons or none, and for weeks it wrote none: its follow rule
+built two end boxes of one size and called that "one scale", while `camera.ts` frames
+each end through `fit` and then `containShot`, which can widen one end at a band's
+edge and not the other. `metaphysics-being-22` beat 7 asked for 1.16→1.31 and K9
+rejected it — and because the lesson that sat nearest the line changed every time the
+boxes moved, it looked like a data problem rather than two implementations of one rule.
+
+`lessonTours(beats, band, ground, followOk)` now takes the camera's own verdict:
+make-tours passes a predicate that runs `checkTour` on the candidate follow, and a
+follow the camera would reject is not offered — the beat falls through to its static
+framing. The table regenerates again, and the thirty lessons that finished the
+takeover have stations.
 
 ## W8 · The snapshot draws itself in, and the close is that reversed
 
@@ -8608,6 +8689,54 @@ Run `node scripts/regrow-pose.mjs --write`, which grows them arithmetically the 
 `make:thoughts`, in that order and once, because a wider lead narrows the clear
 floor and a head that sways further closes the gap under a bubble.
 
+### N17 · A pose at a prop has a WORKING twin, and the hand stays on the prop
+
+N16 left every prop-work and floor pose frozen, because a living hold from the first
+two shelves takes the hand off the board. The fix is a third shelf, **the working
+shelf, acts 169–182**: each is its source pose ALIVE — the working hand stays within a
+few units of where the source put it, and what moves is the work itself (strokes, taps,
+a load shifting, a crouch breathing) carried by the weight going from foot to foot.
+
+| source | twin | | source | twin |
+|---|---|---|---|---|
+| 40 write on a board | hold(169) | | 6 point up, settled | hold(175) |
+| 36 sign on a surface | hold(170) | | 24 reached up high | hold(176) |
+| 41 tap high on the board | hold(171) | | 26 stamp | hold(177) |
+| 42 carry a load | hold(172) | | 43 set it down | hold(178) |
+| 37 the catch | hold(173) | | 20 hold up | hold(179) |
+| 31 receive, cupped | hold(174) | | 18 cower | hold(180) |
+| 49 kneel beside | hold(181) | | 27 grip the lever | hold(182) |
+
+All fourteen are in `CLOCK_ACTS`, so `check:moves` sweeps them on the clock, and in
+`STILL_TWIN` and `LIVING_RUN`, so `check:idle` holds each to the READS tier and
+`check:life` holds a split run to them. Three failed the head-clearance rule before
+they passed (a writing hand drawn back toward the face meets the head), and the kneel
+put its knee through the floor until its breath was made to lift only.
+
+**The HELD band is 100–299, not 100–199.** `holdsARun` stopped at 199, so the second
+living shelf — held as 256–267 — counted as frozen everywhere it was used. It is fixed.
+
+**`liven-still` now livens BOTH figures of a two-figure scene** on a still beat instead
+of skipping the lesson: which is the lead is a judgement, and giving each figure its own
+twin never has to make it (`posetrack.poseTracks`). And `liven-lessons --runs` applies
+`LIVING_RUN` alone: without the flag the script WRITES, jokes included — its dry run is
+`--dry`, which was learned by running it once without either.
+
+### N18 · A tap that moves nothing on screen is counted
+
+The number the reader felt is not the vocabulary, it is the taps: *"three tabs in one
+lesson where there is no animation above the words."* `npm run check:idle` now counts
+DEAD taps corpus-wide — no scene channel changed, every posed figure holds the same code
+and none of them is a living hold, and the player draws no pen mark (AE) and no thought
+(AB) on the beat; a question, a quotation and the summary are events in themselves. It
+was 289 on 15 Sep 2026 and 135 a day later, and it is a ratchet (`DEAD_TAPS_BUDGET`).
+
+**The openers get no allowance.** The first three lessons of every branch are the ones a
+new reader judges the app by, and on 16 Sep 2026 each FROZEN tap in them was given its own
+scene event — a label writing in, a card turning, a column lighting, a prop arriving —
+chosen from the words of that beat. `political-political-1`'s first seven taps used to
+hold one frame; they now stage the state of nature as it is described.
+
 ### AA9 · A costume piece hangs off something the eye can see
 
 > *"the box behind the stickman follow[s] in a bad way, you can remove that box by
@@ -8973,6 +9102,28 @@ the character ledger, installed with `install-narration`, encoded, and timed wit
 
 ---
 
+### AC18 · A line ends on its own tail, and the player waits for it
+
+A reader: *"sometimes at the end of the words … it will stop abruptly or not sound right
+at the very end of a sentence."* Two causes, and both were in the pipeline, not the takes.
+
+- **The player paused the line early.** `lib/narration/real.ts` called `finish()` the
+  first status update at or past `at + dur` — and a status update lands up to a quarter
+  of a second apart, so a line could be cut on its last syllable. It now pauses only
+  once playback is `END_PAD_S` (0.2s) past the line's end, with a fallback timer that
+  allows the same pad.
+- **A take ended on a cut.** Chirp returns speech that stops at a sample, often mid-cycle,
+  and a hard stop into 0.4s of digital silence is a click that reads as a clipped word.
+  `encode-narration.mjs` now lays a synthesised RELEASE after every take
+  (`releaseOf` in `scripts/lib/narration.mjs`): the take's last pitch period, a 3ms
+  residual correction so the seam is continuous, an 18ms decay and 10ms to zero —
+  `RELEASE_S` = 0.08, inside the 0.4s gap, so no line's timing moves.
+
+`npm run check:narration` holds both: every `lesson.mp3` carries the `release-1`
+encoding mark or it is **STALE MP3**, and the player's constants are read and fail
+**PLAYER** if the early pause returns, if the pad is shorter than the release, or if the
+fallback runs past the gap. `node scripts/countertest-narration.mjs` stages all three.
+
 ## Group AD — it must not read as generated
 
 The lessons were drafted with a model's help, and a reader can tell when a sentence
@@ -9050,3 +9201,76 @@ running, and the stock phrases, are zeros.
 
 Vary what beats DO — a claim, an example, a question, a turn — not their word
 counts. AC12 records why sentence-length variety is not a target.
+
+---
+
+## Group AE — the pen marks what the voice is naming
+
+On a tap where the scene's art does not change, the PLAYER draws one hand-drawn mark
+(`StageMark.tsx`) round the stage label the narration names — a ring, an underline, a
+pair of brackets, a box or an arrow — at the moment the voice reaches the word. It is
+the teacher's pen at a board, and it is Mayer's signalling principle rather than
+decoration. The table is `data/lessonMarks.ts`, written by `npm run make:marks` and
+re-derived by `npm run check:marks`, both reading one set of rules in
+`scripts/lib/marks.mjs`.
+
+### AE1 · Only on a still tap, and never on another event
+
+A mark goes only on a FROZEN tap — no scene channel changed — and never on a question,
+a quotation, the summary, a beat with a thought bubble, or a beat whose camera travels.
+A beat already moving has its event, and a mark on top of it is clutter.
+
+### AE2 · Only on a label the voice names, and never on a common word alone
+
+The label's content words must be said in the beat. A one-word label needs a strong
+word; a two-word label needs both or one long one; a longer label needs two. The WEAK
+list exists because the matcher's first pairings were wrong one time in six — "fits the
+web" ringed while the voice defined a different theory, YOURS ringed for "your friend".
+**A mark on the wrong thing is worse than no mark.**
+
+### AE3 · Never on the coming answer (group O)
+
+On the beat before a question, a label that names any of that question's options or
+explanation words — less what its prompt already says — is refused.
+
+### AE4 · The PEN, not the box, stays off every word and every border
+
+The rule is tested on the drawn path, seeded exactly as StageMark seeds it, a unit apart,
+within `PEN_REACH` (half the stroke plus the halo): off its own word, off every other
+word, and off every painted edge the page draws — a plate's border, a tick box, a rule,
+the round top of a door. The must-box probe records leaves only, so the plates were
+invisible offline, and the first render showed an underline laid along a plate's border
+and a ring through a tick box. `node scripts/audit-marks.mjs` walks each candidate beat
+in a browser and records every painted box near the label with its border width and its
+corner radii, stamped with the lesson's must-box stamp; a re-measured lesson's marks go
+red until it is audited again. **A label printed on a plate is marked round the plate**
+(`plateOf`) — there is no room between a word and the edge of its own tile.
+
+A ring is a SQUIRCLE (degree four), not an ellipse: an ellipse inside a box round a word
+passes inside the word's corners.
+
+### AE5 · Inside the shot the camera holds
+
+A beat with no tour of its own holds the previous shot, so the mark is tested against
+that window (`cameraWindow`, the same model make:thoughts uses — AB15).
+
+### AE6 · A paper halo under the pen, and the spark only ever small
+
+The pen is EMBER_INK, 2.3 units, drawn over a 2.2-unit PAPER halo so it reads on an INK
+plate as well as on paper and the hued STONE; `check:marks` measures the contrast and
+requires the halo. One mark at a time, never the same style twice running in a lesson,
+drawn with a dash reveal and round caps, and turned off by the harness switch that turns
+off the bubbles (`tourFlag.thoughtsOff`), because a mark recorded as art would teach the
+next placement to avoid it.
+
+### AE7 · The label is on screen when the pen draws
+
+The must-box probe records a word at any opacity, so a label still waiting to fade in is
+in the table as if it were drawn — and `metaphysics-being-10` shipped an underline and an
+arrow ringing empty paper on two beats where REDNESS was at opacity 0. `audit-marks`
+reads the label's own opacity, ancestors included, at the spot the table records it, and
+a label that is not there reads 0. `make:marks` refuses a mark below 0.5 and
+`check:marks` fails one.
+
+`node scripts/countertest-marks.mjs` stages every rule above going red, and the shipped
+table silent.

@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BRIDGE WITH A PLANK MISSING, AND THE THREE THINGS ANYONE CAN DO ABOUT IT.
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
 
   deck: {
     position: 'absolute', top: DECK_Y, height: DECK_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   pier: { position: 'absolute', top: PIER_Y, width: PIER_W, height: PIER_H, backgroundColor: INK },
   gapCap: {

@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE CANVAS DRAWN TWICE, AND WHAT EACH VIEWER BROUGHT TO IT.
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
   // object is identical, so the drawing must not be able to differ by accident.
   frame: {
     position: 'absolute', top: FRAME_Y, width: FRAME_W, height: FRAME_H,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   markBar: { position: 'absolute', width: 58, height: 5, borderRadius: 2, backgroundColor: INK },
   markDisc: {
@@ -282,7 +283,7 @@ const styles = StyleSheet.create({
 
   viewer: {
     position: 'absolute', left: VIEW_X - VIEW_W / 2, top: VIEW_Y, width: VIEW_W, height: VIEW_H,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   viewerText: {
     position: 'absolute', left: VIEW_X - VIEW_W / 2, top: VIEW_Y + 18, width: VIEW_W, textAlign: 'center',

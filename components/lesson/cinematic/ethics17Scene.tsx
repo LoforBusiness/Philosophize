@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A CARD, EIGHT COPIES OF IT, AND A BAR THAT PAYS FOR THEM.
@@ -220,7 +221,7 @@ const styles = StyleSheet.create({
   maximHit: { position: 'absolute', left: MAXIM_X, top: MAXIM_Y, width: MAXIM_W, height: MAXIM_H },
   maxim: {
     width: MAXIM_W, height: MAXIM_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   maximText: {
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1, color: INK, includeFontPadding: false,
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
 
   copy: {
     position: 'absolute', width: COPY_W, height: COPY_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
   copyHit: { position: 'absolute', top: COPY_Y, width: COPY_W, height: COPY_H },
   copyHitBox: { width: COPY_W, height: COPY_H, borderRadius: 2 },

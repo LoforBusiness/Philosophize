@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BALANCE THAT STARTS LEVEL, AND A RACK OF REASONS HANGING OVER IT.
@@ -218,7 +219,7 @@ const styles = StyleSheet.create({
 
   column: {
     position: 'absolute', left: COL_X, top: COL_Y, width: COL_W, bottom: STAGE_H - GROUND,
-    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
 
   // The rotating group is exactly the beam's own box, so the pivot is its centre.
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
   },
   beam: {
     position: 'absolute', left: 0, top: 0, width: BEAM_W, height: BEAM_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
 
   /** One end of the beam: the cord, the pan, its name, its life and its weight. */
@@ -259,7 +260,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: W_Y, width: W_W, height: W_H },
   weight: {
     position: 'absolute', left: 0, top: 0, width: W_W, height: W_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   weightRight: { backgroundColor: INK },
   weightWrong: { borderColor: SOFT, borderStyle: 'dashed' },

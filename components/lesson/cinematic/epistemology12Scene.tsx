@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // THREE PIPES FEEDING ONE TANK labelled WHAT YOU KNOW. The pipes are laid one per
 // beat and each fills its own band of the tank; the third — testimony, the one that
@@ -369,7 +370,7 @@ const styles = StyleSheet.create({
   // ── the belief that lands on Q2 ─────────────────────────────────────────────
   token: {
     position: 'absolute', left: 259, top: 276, width: 112, height: 36,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   tokenText: {
@@ -380,7 +381,7 @@ const styles = StyleSheet.create({
   // ── the plates ──────────────────────────────────────────────────────────────
   plateBox: { position: 'absolute', width: PLATE_W },
   plate: {
-    height: PLATE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: PLATE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   plateRight: { backgroundColor: INK, borderColor: INK },

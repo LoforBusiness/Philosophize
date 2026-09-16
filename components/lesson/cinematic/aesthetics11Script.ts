@@ -32,13 +32,13 @@ export const BEATS: Aes11Beat[] = [
     dur: 1.8,
   },
   {
-    p: 41, x: 168, frames: 1,
+    p: 270, x: 168, frames: 1,
     text: 'The two pictures aren’t merely similar but identical.',
     cite: 'Both canvases',
     dur: 1.8,
   },
   {
-    p: 41, x: 168, frames: 1,
+    p: 270, x: 168, frames: 1,
     text: 'Every mark is in the same place, at the same size, in the same colour.',
     dur: 3.2,
   },

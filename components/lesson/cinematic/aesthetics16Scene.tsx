@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // One canvas on a wall, stage right, with a rail of biographical cards filling in
 // underneath it.
@@ -88,6 +89,9 @@ const DIR = dirsFrom(X, 1);
 const CANV = BEATS.map((b) => b.canvas ?? 0);
 const NFACTS = BEATS.map((b) => b.facts ?? 0);
 
+// R7c — LEFT STILL ON PURPOSE: the answer is that learning the biography leaves the PAINTING
+// exactly as it was and changes only your response. A canvas that changed with the knob
+// would draw a wrong answer as a fact, so the picture holds still.
 export default function Aesthetics16Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -204,7 +208,7 @@ const styles = StyleSheet.create({
 
   canvas: {
     position: 'absolute', left: CANVAS_L, top: CANVAS_T, width: CANVAS_W, height: CANVAS_H,
-    borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', gap: 10,
   },
   bar: { height: 8, backgroundColor: INK, borderRadius: 1 },
@@ -221,7 +225,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   // 9/0 rather than 9.5/0.3: these chips are ~52 units of inner width on ONE line,

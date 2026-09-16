@@ -20,7 +20,8 @@ import Target, { AnswerLift } from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A small gallery. Two framed works hang side by side on a picture rail — a
 // three-second scribble on the left, a thirty-year composition on the right — each
@@ -373,7 +374,7 @@ const styles = StyleSheet.create({
   // the four marks of a trained eye
   mkChip: {
     position: 'absolute', top: MK_T, width: MK_W, height: MK_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2,
   },
   mkText: {
@@ -430,7 +431,7 @@ const styles = StyleSheet.create({
   // ── the caption plate under each frame ──────────────────────────────────────
   plate: {
     position: 'absolute', left: 0, top: CAP_T, width: FR_W, height: CAP_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },

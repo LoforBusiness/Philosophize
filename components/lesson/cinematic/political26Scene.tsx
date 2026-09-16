@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A DECISION WITH A STAMP ON IT, FED FROM A BALLOT BOX AND FROM A TABLE.
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
 
   source: {
     position: 'absolute', top: SRC_Y, width: SRC_W, height: SRC_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   round: { borderTopLeftRadius: 22, borderTopRightRadius: 22 },
   slot: { position: 'absolute', left: SRC_X[0] + (SRC_W - 28) / 2, top: SRC_Y + 8, width: 28, height: 4, backgroundColor: INK },

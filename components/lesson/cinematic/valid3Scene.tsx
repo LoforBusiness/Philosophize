@@ -3,7 +3,7 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
+import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
@@ -18,7 +18,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // The argument pinned up as a FORM the inspector reads, stage right.
 //
@@ -36,6 +37,14 @@ const { RULE, STONE } = stageTone('logic');
 //
 // On the graded beat the form clears and four VERDICT CARDS take the board — the
 // question is answered by tapping one of them, not by reading a list.
+//
+// THE CHECKLIST IS WRITTEN UP AS IT IS TAUGHT, so no tap of the opening leaves the
+// board as it was: FORM VALID? arrives with validity's definition, PREMISES TRUE?
+// with soundness's, and a bracket to their right names the pair SOUND (`tests`).
+// The toaster premises fill in before the conclusion does (`form` 1 → 2), the VALID
+// stamp comes down on "so the argument is valid", and when the premises are struck
+// false the word SOUND is struck with them — the checklist then reads ✓ ✗, and
+// "valid but not sound" is on the board rather than only in the deck.
 //
 // No camera transform: everything is authored straight into stage space, so the
 // band below is exact. The inspector's widest reach ends at x ≈ 118, the board
@@ -61,6 +70,10 @@ const C_H = 44;
 const CK1_Y = 436;
 const CK2_Y = 468;
 const CK_BOX = 28;
+// The bracket that joins the two tests: from the first label's top to the second's foot.
+const BRACE_X = 304;
+const BRACE_T = CK1_Y + 5;         // 441
+const BRACE_H = 50;                // 441..491
 
 // ── the "what VALID forbids" block, stage left ───────────────────────────────
 // Validity's definition, drawn: the ONE pairing a valid form can never produce —
@@ -101,6 +114,7 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const LINK = BEATS.map((b) => b.link ?? 0);
 const STAMP = BEATS.map((b) => b.stamp ?? 0);
 const FLAW = BEATS.map((b) => b.flaw ?? 0);
+const TESTS = BEATS.map((b) => b.tests ?? 0);
 const TR = 0.85;
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
@@ -130,7 +144,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('valid3'));
 export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldInsp = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(4);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
   const showPick = !!cur.interact;
@@ -140,9 +154,15 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, pickPos,
   const spent = useAnswerSpent(picked);
 
   // The words only re-animate on the beat that CHANGES them, so the form does not
-  // flicker every time the reader taps forward.
-  const swapped = (cur.form ?? 0) !== (prev?.form ?? 0);
-  const lines = FORMS[cur.form ?? 0];
+  // flicker every time the reader taps forward. The premises fill in on the beat
+  // that names them (form 1) and the conclusion on the beat after (form 2), so the
+  // two halves swap — and re-animate — separately.
+  const premOf = (b?: typeof cur) => ((b?.form ?? 0) >= 1 ? 1 : 0);
+  const conclOf = (b?: typeof cur) => ((b?.form ?? 0) >= 2 ? 1 : 0);
+  const swappedP = premOf(cur) !== premOf(prev);
+  const swappedC = conclOf(cur) !== conclOf(prev);
+  const premLines = FORMS[premOf(cur)];
+  const conclLine = FORMS[conclOf(cur)][2];
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -162,7 +182,10 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, pickPos,
       // appears: good form with a false ending has to have a bad premise somewhere.
       // Two axes, and the reader finds the corner where truth and validity come apart.
       flaw: carry(cv, 2, n, FLAW[p], reacting ? pickAt(POLL_FLAW, pickPos.value) : FLAW[n], tr),
-      words: swapped ? grow : 1,
+      wordsP: swappedP ? grow : 1,
+      wordsC: swappedC ? grow : 1,
+      // The checklist is written up test by test; the SOUND bracket closes it.
+      tests: carry(cv, 3, n, TESTS[p], TESTS[n], tr),
       // The form and the ballot cross-fade: the form dissolves as the cards land,
       // and fades back in on the beat after, so neither ever pops.
       board: showPick ? 1 - grow : leaving ? grow : 1,
@@ -173,9 +196,35 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, pickPos,
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const boardStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.board }));
   const linkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.link * SCENE.value.board }));
-  const wordStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.words,
-    transform: [{ translateX: (1 - SCENE.value.words) * -8 }],
+  const wordPStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.wordsP,
+    transform: [{ translateX: (1 - SCENE.value.wordsP) * -8 }],
+  }));
+  const wordCStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.wordsC,
+    transform: [{ translateX: (1 - SCENE.value.wordsC) * -8 }],
+  }));
+  const test1Style = useAnimatedStyle(() => {
+    const a = clamp01(SCENE.value.tests);
+    return { opacity: a, transform: [{ translateX: (1 - a) * -8 }] };
+  });
+  const test2Style = useAnimatedStyle(() => {
+    const a = clamp01(SCENE.value.tests - 1);
+    return { opacity: a, transform: [{ translateX: (1 - a) * -8 }] };
+  });
+  // The bracket draws DOWN from the first test to the second, then names them.
+  const braceStyle = useAnimatedStyle(() => ({
+    transform: [{ scaleY: Math.max(0.001, clamp01((SCENE.value.tests - 2) * 1.6)) }],
+  }));
+  const soundStyle = useAnimatedStyle(() => {
+    const a = clamp01((SCENE.value.tests - 2.5) * 2);
+    return { opacity: a, transform: [{ translateX: (1 - a) * -6 }] };
+  });
+  // False premises break soundness: the name the bracket gives the pair is struck
+  // with them, on the same track, and lifts with them on the summary.
+  const soundStrikeStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.flaw,
+    transform: [{ rotate: '-10deg' }, { scaleX: Math.max(0.001, SCENE.value.flaw) }],
   }));
   const stampStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.stamp * SCENE.value.board,
@@ -214,16 +263,16 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, pickPos,
         <Text style={styles.frameLab}>THE ARGUMENT</Text>
 
         <View style={[styles.row, { top: P1_Y }]}>
-          <Animated.Text style={[styles.rowT, wordStyle]}>{lines[0]}</Animated.Text>
+          <Animated.Text style={[styles.rowT, wordPStyle]}>{premLines[0]}</Animated.Text>
         </View>
         <View style={[styles.row, { top: P2_Y }]}>
-          <Animated.Text style={[styles.rowT, wordStyle]}>{lines[1]}</Animated.Text>
+          <Animated.Text style={[styles.rowT, wordPStyle]}>{premLines[1]}</Animated.Text>
         </View>
 
         <Animated.View style={[styles.divider, linkStyle]} />
         <Animated.Text style={[styles.therefore, linkStyle]}>∴</Animated.Text>
         <Animated.View style={[styles.row, styles.concl, { top: C_Y, height: C_H }, linkStyle]}>
-          <Animated.Text style={[styles.rowT, styles.conclT, wordStyle]}>{lines[2]}</Animated.Text>
+          <Animated.Text style={[styles.rowT, styles.conclT, wordCStyle]}>{conclLine}</Animated.Text>
         </Animated.View>
 
         {/* The false-premise strikes and their tag. `nativeID` is not decoration:
@@ -256,17 +305,33 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, pickPos,
 
       {/* ── the two tests, as a checklist ───────────────────────────────────── */}
       <Animated.View style={[styles.check, boardStyle]} pointerEvents="none">
-        <View style={[styles.ckBox, { top: CK1_Y }]}>
-          <Animated.Text style={[styles.ckMark, okQStyle]}>?</Animated.Text>
-          <Animated.Text style={[styles.ckMark, styles.ckOn, okStyle]}>✓</Animated.Text>
-        </View>
-        <Text style={[styles.ckLab, { top: CK1_Y + 5 }]}>FORM VALID?</Text>
+        <Animated.View style={[StyleSheet.absoluteFill, test1Style]}>
+          <View style={[styles.ckBox, { top: CK1_Y }]}>
+            <Animated.Text style={[styles.ckMark, okQStyle]}>?</Animated.Text>
+            <Animated.Text style={[styles.ckMark, styles.ckOn, okStyle]}>✓</Animated.Text>
+          </View>
+          <Text style={[styles.ckLab, { top: CK1_Y + 5 }]}>FORM VALID?</Text>
+        </Animated.View>
 
-        <View style={[styles.ckBox, { top: CK2_Y }]}>
-          <Animated.Text style={[styles.ckMark, badQStyle]}>?</Animated.Text>
-          <Animated.Text style={[styles.ckMark, styles.ckOn, badStyle]}>✗</Animated.Text>
-        </View>
-        <Text style={[styles.ckLab, { top: CK2_Y + 5 }]}>PREMISES TRUE?</Text>
+        <Animated.View style={[StyleSheet.absoluteFill, test2Style]}>
+          <View style={[styles.ckBox, { top: CK2_Y }]}>
+            <Animated.Text style={[styles.ckMark, badQStyle]}>?</Animated.Text>
+            <Animated.Text style={[styles.ckMark, styles.ckOn, badStyle]}>✗</Animated.Text>
+          </View>
+          <Text style={[styles.ckLab, { top: CK2_Y + 5 }]}>PREMISES TRUE?</Text>
+        </Animated.View>
+
+        {/* both tests, bracketed: that pair is what SOUND means */}
+        <Animated.View style={[styles.brace, braceStyle]}>
+          <View style={styles.braceBar} />
+          <View style={[styles.braceTick, { top: 0 }]} />
+          <View style={[styles.braceTick, { bottom: 0 }]} />
+          <View style={styles.braceSpur} />
+        </Animated.View>
+        <Animated.View style={[styles.sound, soundStyle]}>
+          <Text style={styles.soundT} numberOfLines={1}>SOUND</Text>
+          <Animated.View nativeID="strike-sound" style={[styles.soundStrike, soundStrikeStyle]} />
+        </Animated.View>
       </Animated.View>
 
       <Stickman D={DF} k={K} />
@@ -328,7 +393,7 @@ const styles = StyleSheet.create({
 
   row: {
     position: 'absolute', left: BX, width: BW, height: ROW_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     justifyContent: 'center', paddingHorizontal: 10,
   },
   concl: { borderWidth: 2.5 },
@@ -349,7 +414,7 @@ const styles = StyleSheet.create({
   },
   vdBox: {
     marginTop: 1, height: VD_BOX_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   vdLine: {
     fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 15, color: INK,
@@ -401,7 +466,7 @@ const styles = StyleSheet.create({
   check: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   ckBox: {
     position: 'absolute', left: FR_L, width: CK_BOX, height: CK_BOX,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   ckMark: {
@@ -411,6 +476,27 @@ const styles = StyleSheet.create({
   ckLab: {
     position: 'absolute', left: FR_L + CK_BOX + 12,
     fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 18, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  },
+
+  // ── the SOUND bracket ─────────────────────────────────────────────────────
+  // PREMISES TRUE? ends near x 295, so the bracket stands at 304, spanning the two
+  // label rows (441..491), and the name sits right of its spur at 316..380 — below
+  // the tilted VALID stamp (which ends at 397) and clear of the floor at 500.
+  brace: {
+    position: 'absolute', left: BRACE_X - 6, top: BRACE_T, width: 14, height: BRACE_H,
+    transformOrigin: '50% 0%',
+  },
+  braceBar: { position: 'absolute', left: 6, top: 0, width: 2, height: BRACE_H, backgroundColor: INK },
+  braceTick: { position: 'absolute', left: 0, width: 8, height: 2, backgroundColor: INK },
+  braceSpur: { position: 'absolute', left: 6, top: BRACE_H / 2 - 1, width: 8, height: 2, backgroundColor: INK },
+  sound: { position: 'absolute', left: BRACE_X + 12, top: BRACE_T + BRACE_H / 2 - 9, width: 66, height: 18 },
+  soundT: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 18, letterSpacing: 1.2, color: INK, includeFontPadding: false,
+  },
+  // A pen stroke across the word (D33 — declared by its nativeID).
+  soundStrike: {
+    position: 'absolute', left: -3, top: 12, width: 60, height: 2.5,
+    backgroundColor: INK, transformOrigin: '0% 50%',
   },
 
   // ── ballot ────────────────────────────────────────────────────────────────
@@ -432,7 +518,7 @@ const styles = StyleSheet.create({
   balSlot: { position: 'absolute', left: 0, width: BAL_W, height: BAL_H },
   balCard: {
     width: BAL_W, height: BAL_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, justifyContent: 'center', paddingHorizontal: 12,
+    backgroundColor: STONE, boxShadow: LIP, justifyContent: 'center', paddingHorizontal: 12,
   },
   balRight: { backgroundColor: INK, borderColor: INK },
   balWrong: { borderColor: SOFT },

@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A SHAFT CROSSING A WATERLINE, AND THE ANGLE IT PICKS UP ON THE WAY DOWN.
@@ -161,6 +162,8 @@ export default function Epistemology41Scene({ clock, bt, bi, i, picked, onPick, 
 
       <Animated.View style={[StyleSheet.absoluteFill, waterStyle]} pointerEvents="none">
         <View style={styles.water} />
+        <WaterMark S={SCENE} y={WATER_Y + 22} k={0} />
+        <WaterMark S={SCENE} y={WATER_Y + 44} k={1} />
         <View style={styles.surface} />
       </Animated.View>
 
@@ -204,6 +207,17 @@ export default function Epistemology41Scene({ clock, bt, bi, i, picked, onPick, 
   );
 }
 
+// ── the water moves, because water does ──────────────────────────────────────
+// Two short ripple marks inside the tank, in its LEFT half: the oar only ever leans
+// right of the kink at x 201, so the marks (x 146…190) never cross the shaft whose
+// bend is the whole lesson. Off the scene clock, so a tap never restarts them.
+function WaterMark({ S, y, k }: { S: SharedValue<any>; y: number; k: number }) {
+  const st = useAnimatedStyle(() => ({
+    transform: [{ translateX: Math.sin(S.value.t * (0.6 + k * 0.2) + k * 2.3) * 5 }],
+  }));
+  return <Animated.View style={[styles.waterMark, { top: y, left: WATER_X + 14 + k * 8 }, st]} pointerEvents="none" />;
+}
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
@@ -218,8 +232,9 @@ const styles = StyleSheet.create({
 
   water: {
     position: 'absolute', left: WATER_X, top: WATER_Y, width: WATER_W, height: WATER_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
+  waterMark: { position: 'absolute', width: 24, height: 1.5, borderRadius: 1, backgroundColor: SHADE },
   // THE SURFACE RUNS PAST THE BODY OF THE WATER, because a waterline is a line
   // and a tank is a box, and the argument is entirely about the line.
   surface: { position: 'absolute', left: SURFACE_X, top: WATER_Y - 2, width: SURFACE_W, height: 2.5, backgroundColor: INK },

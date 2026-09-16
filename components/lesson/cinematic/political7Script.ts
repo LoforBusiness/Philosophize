@@ -47,13 +47,13 @@ export const BEATS: Political7Beat[] = [
     dur: 2,
   },
   {
-    p: 41, x: 330, stone: 1, charter: 1,
+    p: 270, x: 330, stone: 1, charter: 1,
     text: 'Another tradition locates rights in agreement. A right exists only where people have written down a rule, signed it and agreed to enforce it.',
     cite: 'The second answer',
     dur: 2.8,
   },
   {
-    p: 41, x: 330, stone: 1, charter: 1,
+    p: 270, x: 330, stone: 1, charter: 1,
     text: 'On this view, a right that no law secures is only a wish that there were such a right.',
     dur: 1.8,
   },
@@ -91,18 +91,18 @@ export const BEATS: Political7Beat[] = [
     dur: 1.0,
   },
   {
-    p: 24, x: 330, stone: 1, charter: 1, tear: 1,
+    p: 275, x: 330, stone: 1, charter: 1, tear: 1,
     text: 'A law can destroy a right that exists on paper. It can’t remove a right that exists by nature.',
     cite: 'Natural rights',
     dur: 2.7,
   },
   {
-    p: 24, x: 330, stone: 1, charter: 1, tear: 1,
+    p: 275, x: 330, stone: 1, charter: 1, tear: 1,
     text: 'These are natural rights: rights you have just for being human. A government can violate one.',
     dur: 2.2,
   },
   {
-    p: 24, x: 330, stone: 1, charter: 1, tear: 1,
+    p: 275, x: 330, stone: 1, charter: 1, tear: 1,
     text: 'What a government never granted, it cannot take away.',
     dur: 1.8,
   },

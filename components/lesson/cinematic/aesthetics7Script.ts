@@ -40,7 +40,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 1.8,
   },
   {
-    p: 47, x: 250, q: 9, art: 1, capt: 1,
+    p: 267, x: 250, q: 163, art: 1, capt: 1,
     text: 'Nearly all visitors prefer the masterwork, and only a few the scribble. Yet popularity doesn’t make a verdict correct.',
     dur: 2.9,
   },
@@ -51,7 +51,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 3.6,
   },
   {
-    p: 7, x: 160, q: 10, art: 1, capt: 1,
+    p: 260, x: 160, q: 161, art: 1, capt: 1,
     text: 'Beauty, for Hume, is a sentiment, a feeling that arises in the mind of the viewer.',
     dur: 1.8,
   },
@@ -75,7 +75,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 3.5,
   },
   {
-    p: 12, x: 90, q: 7, art: 1, capt: 1,
+    p: 165, x: 90, q: 260, art: 1, capt: 1,
     text: 'Hume rejected the tie. Ranking the minor poet Ogilby equal to Milton, he wrote, is like calling a molehill as high as a mountain.',
     dur: 1.8,
   },
@@ -100,13 +100,13 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 1.8,
   },
   {
-    p: 24, x: 250, q: 25, art: 1, capt: 3, marks: 1,
+    p: 275, x: 250, q: 25, art: 1, capt: 3, marks: 1,
     text: 'The standard isn’t snobbery. A trained wine taster detects flavours a novice can’t, because practice reshapes perception itself.',
     cite: 'Practice changes what you see',
     dur: 2.4,
   },
   {
-    p: 24, x: 250, q: 25, art: 1, capt: 3, marks: 1,
+    p: 275, x: 250, q: 25, art: 1, capt: 3, marks: 1,
     text: 'If you return after studying many works, you’ll perceive more in this canvas than you do today.',
     dur: 2.6,
   },

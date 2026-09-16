@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A PANEL'S VOTES, RULED INTO A TABLE, AND THE ROW THAT COUNTING MADE.
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
   },
   head: {
     position: 'absolute', left: T_X, top: HEAD_Y, width: T_W, height: HEAD_H,
-    borderTopLeftRadius: 3, borderTopRightRadius: 3, backgroundColor: STONE,
+    borderTopLeftRadius: 3, borderTopRightRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   headText: {
     position: 'absolute', top: HEAD_Y + 9, width: COL_W, textAlign: 'center',
@@ -248,7 +249,7 @@ const styles = StyleSheet.create({
   midRule: { position: 'absolute', left: T_X, top: RULE_Y, width: T_W, height: 2, backgroundColor: INK },
   maj: {
     position: 'absolute', left: T_X, top: MAJ_Y, width: T_W, height: MAJ_H,
-    borderBottomLeftRadius: 3, borderBottomRightRadius: 3, backgroundColor: STONE,
+    borderBottomLeftRadius: 3, borderBottomRightRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   reasonRail: {
     position: 'absolute', left: COL_X[0], top: MAJ_Y + MAJ_H - 4, width: COL_W * 2, height: 3,

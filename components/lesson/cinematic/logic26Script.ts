@@ -30,13 +30,13 @@ export const BEATS: Logic26Beat[] = [
     dur: 1.8,
   },
   {
-    p: 41, x: 168, links: 1,
+    p: 270, x: 168, links: 1,
     text: 'Suppose there’s a largest whole number. Call it N.',
     cite: 'The assumption',
     dur: 1.8,
   },
   {
-    p: 41, x: 168, links: 1,
+    p: 270, x: 168, links: 1,
     text: 'Supposing a claim doesn’t assert it. Any claim may be assumed for the sake of argument.',
     dur: 3.3,
   },

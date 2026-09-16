@@ -15,7 +15,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SEVEN HARMS ON A HORIZON, AND A DIAL THAT ONLY CHANGES THE DRAWING.
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
 
   block: {
     position: 'absolute', width: BLOCK_W,
-    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
   trueBox: {
     position: 'absolute', top: HORIZON - BLOCK_FULL, width: BLOCK_W, height: BLOCK_FULL,

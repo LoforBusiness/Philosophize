@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // TWO PANELS DRAWN IDENTICALLY EXCEPT FOR ONE ARROW (H64). Everything inside them
 // is the same object at the same coordinates; only the second-order arrow differs,
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
 
   panel: { position: 'absolute', top: PANEL_T, width: PANEL_W, height: PANEL_H },
   panelInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   head: {
     position: 'absolute', left: 0, right: 0, top: 8,
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
     // 56 WIDE, NOT 44: TAKES IT is 43.4dp and the content box was 40, so the label
     // on the control the reader is watching lost its last letters.
     position: 'absolute', left: PANEL_W / 2 - 28, top: 158, width: 56, height: 30,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   doseOn: { backgroundColor: INK, borderColor: PAPER },

@@ -1,6 +1,6 @@
 import {
   View, Text, Pressable, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A pond stage right with a child in it, and the same child again far off to the
 // left — smaller, standing higher up the picture at the end of a dotted line, which
@@ -106,6 +107,11 @@ const CHILD_REACH_Y = 470;
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics10'));
 const DIR = dirsFrom(X, 1);
 
+// R7c — LEFT STILL ON PURPOSE: the drag asks how much moral THEORY Singer's argument needs
+// (ONE MODEST PREMISE … ALL OF SINGER'S ETHICS), and nothing on this stage is an amount of
+// theory. The only moving quantity is how far he reaches for the child, and driving it off
+// the knob would say that the more theory you accept the more you help, a claim the lesson
+// does not make.
 export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(2);
@@ -188,13 +194,7 @@ export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: Scen
       </Animated.View>
 
       {/* ── the pond: three rules, nothing filled ───────────────────────────── */}
-      {RIPPLES.map((y, k) => (
-        <View
-          key={y}
-          style={[styles.ripple, { top: y, left: POND_L + k * 9, width: POND_R - POND_L - k * 18 }]}
-          pointerEvents="none"
-        />
-      ))}
+      {RIPPLES.map((y, k) => <Ripple key={y} S={SCENE} y={y} k={k} />)}
 
       {/* ── Q1: which difference carries no moral weight? ───────────────────── */}
       {cardsOn &&
@@ -228,6 +228,29 @@ export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: Scen
   );
 }
 
+// ── the pond moves, because water does ───────────────────────────────────────
+// Three rules that used to lie dead still under a man standing in them. Each now
+// drifts on its own slow phase and breathes a little in length, off the scene clock
+// so a tap never restarts it (L1). Small on purpose: the pond is where he stands,
+// not what the lesson is about.
+function Ripple({ S, y, k }: { S: SharedValue<any>; y: number; k: number }) {
+  const st = useAnimatedStyle(() => {
+    const t = S.value.t;
+    return {
+      transform: [
+        { translateX: Math.sin(t * (0.7 + k * 0.17) + k * 1.9) * 3.2 },
+        { scaleX: 1 + Math.sin(t * (0.9 + k * 0.11) + k) * 0.05 },
+      ],
+    };
+  });
+  return (
+    <Animated.View
+      style={[styles.ripple, { top: y, left: POND_L + k * 9, width: POND_R - POND_L - k * 18 }, st]}
+      pointerEvents="none"
+    />
+  );
+}
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   // The ground rule stops short of the pond on the right — the bank is where the
@@ -249,7 +272,7 @@ const styles = StyleSheet.create({
 
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W },
   card: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },

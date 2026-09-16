@@ -9,6 +9,7 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle, type Stance } from
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics3Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
+  stageAnswered,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
@@ -18,7 +19,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // The trolley problem, staged as a schematic.
 //
@@ -44,7 +46,13 @@ const LEVER_X = 112;
 
 // ── the line ─────────────────────────────────────────────────────────────────
 const JUNCTION = 256;
-const BR_LEN = 88;                 // branch, 40° up-right → ends at (323, 443)
+// THE ONE STANDS APART FROM THE FIVE. The branch used to climb at 40° for 88 units,
+// which put the one at x 303 — behind the first of the five, so the six read as one
+// crowd and ONE was printed across two of their heads. At 55° for 50 units the branch
+// ends at (285, 459), short of the five, and the one stands on it at x 276: his feet
+// and tied hands 13 units clear of the first head (x 292), his own head at 262–290.
+const BR_ANGLE = 55;
+const BR_LEN = 50;                 // branch, 55° up-right → ends at (285, 459)
 // THE PEOPLE ON THE TRACK ARE PEOPLE, AND HAVE TO READ AS PEOPLE.
 //
 // They were 40 units tall beside a 150-unit decider — barely a quarter his height,
@@ -68,8 +76,8 @@ const BR_LEN = 88;                 // branch, 40° up-right → ends at (323, 44
 // its own seed, because the rig's own note is that figures sharing a motion read
 // as one figure duplicated rather than as a crowd.
 const PEG_K = 0.70;                // 103 × 0.70 ≈ 72, the height the row was already using
-const FIVE = [298, 320, 342, 364, 386];
-const ONE = { x: 303.5, y: 460 };  // stands ON the branch line
+const FIVE = [306, 326, 346, 366, 386];
+const ONE = { x: 276, y: GROUND - (276 - JUNCTION) * Math.tan((BR_ANGLE * Math.PI) / 180) };  // ON the branch, y ≈ 471
 const SLEEPERS = [24, 50, 76, 102, 128, 154, 180, 206, 232, 258, 284, 310, 336, 362, 388];
 
 // ── the verdict board ────────────────────────────────────────────────────────
@@ -98,10 +106,42 @@ const PLATES = [
 ];
 
 const D_CODE = BEATS.map((b) => b.d ?? 0);
-const TX = BEATS.map((b) => b.tx ?? 118);
+const TX = BEATS.map((b) => b.tx ?? 132);
 const PULL = BEATS.map((b) => b.pull ?? 0);
 const LENS = BEATS.map((b) => b.lens ?? 0);
 const TR = 0.85;
+
+// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
+// Five taps used to hold a frame. Each now adds exactly what its sentence says,
+// and nothing here moves for effect — this is the trolley lesson, so the events are
+// words and lines, kept sober:
+//   · "yet their verdicts differ" — the three ruling chips, empty until now, are
+//     written in: PULL · NEVER · WHO AM I?;
+//   · "if you pull it, the trolley switches to a side track" — the branch is marked
+//     as a route, dash by dash from the points, before anyone has pulled;
+//   · "five lives saved outweigh one lost" — Mill's column gains its gloss,
+//     5 LIVES > 1 LIFE; "what Kant calls dignity" — DIGNITY under Kant's; "Aristotle
+//     calls this wisdom phronesis" — PHRONESIS under Aristotle's.
+// The glosses belong to the board and leave with it when a question clears it.
+function latch(vals: number[]): number[] {
+  const first = vals.findIndex((v) => v > 0);
+  return vals.map((_, k) => (first >= 0 && k >= first ? 1 : 0));
+}
+/** The highest value set so far: a count that only ever grows. */
+function runningMax(vals: number[]): number[] {
+  let m = 0;
+  return vals.map((v) => { m = Math.max(m, v); return m; });
+}
+const SAID = latch(BEATS.map((b) => b.said ?? 0));
+const ROUTE = latch(BEATS.map((b) => b.route ?? 0));
+const GLOSS = runningMax(BEATS.map((b) => b.gloss ?? 0));
+const GLOSSES = ['5 LIVES > 1 LIFE', 'DIGNITY', 'PHRONESIS'];
+// The board clears on EVERY graded beat — neither answer may be read off it — but
+// the TRUE / FALSE plates belong only to the one answered on the stage. On the
+// split below the figure the stage shows the line and its lever, nothing else.
+const BOARD_ON = BEATS.map((b) => (b.interact ? 0 : 1));
+const DASHES = [2, 9, 16, 23, 30, 37, 44];
+const DASH_N = 7;
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -120,11 +160,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics3'));
 export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldD = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(7);
   const cur = BEATS[i];
-  const prev = i > 0 ? BEATS[i - 1] : undefined;
-  const showPick = !!cur.interact;
-  const leaving = !!prev?.interact && !cur.interact;
+  // Only the question answered ON the stage mounts the plates (E41: one beat, one
+  // place to answer — the split is answered below the figure).
+  const showPick = stageAnswered(cur);
   const answered = picked !== null;
 
   const SCENE = useDerivedValue(() => {
@@ -146,8 +186,11 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick, dragPos
       pull: carry(cv, 2, n, PULL[p], reacting ? dragPos.value : PULL[n], tr),
       wheel: (t * 200) % 360,
       // The verdict board and the plates cross-fade, so neither ever pops.
-      board: showPick ? 1 - grow : leaving ? grow : 1,
+      board: carry(cv, 3, n, BOARD_ON[p], BOARD_ON[n], grow),
       ballot: showPick ? grow : 0,
+      said: carry(cv, 4, n, SAID[p], SAID[n], tr),
+      route: carry(cv, 5, n, ROUTE[p], ROUTE[n], tr),
+      gloss: carry(cv, 6, n, GLOSS[p], GLOSS[n], tr),
       l1: clamp01(lens) - clamp01(lens - 1),
       l2: clamp01(lens - 1) - clamp01(lens - 2),
       l3: clamp01(lens - 2),
@@ -175,6 +218,9 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick, dragPos
       {SLEEPERS.map((x) => <View key={x} style={[styles.sleeper, { left: x }]} pointerEvents="none" />)}
       <View style={styles.rail} pointerEvents="none" />
       <View style={styles.branch} pointerEvents="none" />
+      <View style={styles.routeWrap} pointerEvents="none">
+        {DASHES.map((d, j) => <RouteDash key={d} S={SCENE} j={j} at={d} />)}
+      </View>
       <Animated.View style={[styles.branch, styles.branchOn, branchOnStyle]} pointerEvents="none" />
 
       {/* the points lever the decider stands at */}
@@ -214,11 +260,12 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick, dragPos
                 in paper — a grey wash read as "greyed out" rather than "this one" */}
             <View style={styles.rule}>
               <Animated.View style={[styles.ruleOn, lensStyles[k]]} />
-              <Text style={styles.ruleT}>{v.rule}</Text>
+              <Ruling S={SCENE} k={k} word={v.rule} />
               <Animated.Text style={[styles.ruleT, styles.ruleTOn, lensStyles[k]]}>{v.rule}</Animated.Text>
             </View>
           </View>
         ))}
+        {GLOSSES.map((g, k) => <Gloss key={g} S={SCENE} k={k} text={g} />)}
       </Animated.View>
 
       {/* ── the TRUE / FALSE plates: the question is answered here ──────────── */}
@@ -246,6 +293,43 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick, dragPos
       ) : null}
     </Animated.View>
   );
+}
+
+/** One dash of the side track's route, drawn in order from the points outward. */
+function RouteDash({ S, j, at }: { S: SharedValue<any>; j: number; at: number }) {
+  const st = useAnimatedStyle(() => ({ opacity: clamp01(S.value.route * DASH_N - j) }));
+  return <Animated.View style={[styles.dash, { left: at }, st]} />;
+}
+
+/**
+ * A ruling chip's word. Until the verdicts are said the chip holds a question mark;
+ * the three words are then written in left to right, handing over through a gap so
+ * the "?" and the word never sit on each other at half strength.
+ */
+function Ruling({ S, k, word }: { S: SharedValue<any>; k: number; word: string }) {
+  const wordStyle = useAnimatedStyle(() => {
+    const u = clamp01((S.value.said - k * 0.25) / 0.5);
+    return { opacity: clamp01(u * 2 - 1) };
+  });
+  const askStyle = useAnimatedStyle(() => {
+    const u = clamp01((S.value.said - k * 0.25) / 0.5);
+    return { opacity: 1 - clamp01(u * 2) };
+  });
+  return (
+    <>
+      <Animated.Text style={[styles.ruleT, wordStyle]}>{word}</Animated.Text>
+      <Animated.Text style={[styles.ruleT, styles.ruleAsk, askStyle]}>?</Animated.Text>
+    </>
+  );
+}
+
+/** One column's one-line gloss, hung under its card on the beat that states it. */
+function Gloss({ S, k, text }: { S: SharedValue<any>; k: number; text: string }) {
+  const st = useAnimatedStyle(() => {
+    const u = clamp01(S.value.gloss - k);
+    return { opacity: u, transform: [{ translateY: (1 - u) * -4 }] };
+  });
+  return <Animated.Text style={[styles.gloss, { left: CARD_X[k] }, st]}>{text}</Animated.Text>;
 }
 
 /** One waiting figure — head, body, two legs — planted with its feet at (x, y). */
@@ -286,9 +370,17 @@ const styles = StyleSheet.create({
   sleeper: { position: 'absolute', top: GROUND + 3, width: 3.5, height: 7, backgroundColor: SOFT, borderRadius: 1 },
   branch: {
     position: 'absolute', left: JUNCTION, top: GROUND, width: BR_LEN, height: 2.5, backgroundColor: RULE,
-    transformOrigin: '0% 50%', transform: [{ rotate: '-40deg' }],
+    transformOrigin: '0% 50%', transform: [{ rotate: `-${BR_ANGLE}deg` }],
   },
   branchOn: { backgroundColor: INK },
+  // The route: a box on the branch's own pivot (JUNCTION, GROUND + 1.25) and angle,
+  // carrying seven dashes that lie exactly on the grey branch line, so the thrown
+  // lever's solid ink later covers them rather than doubling them.
+  routeWrap: {
+    position: 'absolute', left: JUNCTION, top: GROUND - 3.75, width: BR_LEN, height: 10,
+    transformOrigin: '0% 50%', transform: [{ rotate: `-${BR_ANGLE}deg` }],
+  },
+  dash: { position: 'absolute', top: 3.75, width: 4.5, height: 2.5, borderRadius: 1, backgroundColor: INK },
 
   leverBase: {
     position: 'absolute', left: LEVER_X - 11, top: GROUND - 9, width: 22, height: 9,
@@ -303,16 +395,17 @@ const styles = StyleSheet.create({
   // Both labels moved UP clear of the taller figures: the five now reach y 428 and
   // the one on the branch reaches 388, so the old positions sat on top of them.
   fiveLab: {
-    position: 'absolute', left: 316, top: 392, width: 72, textAlign: 'center',
+    position: 'absolute', left: 310, top: 392, width: 72, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
   },
   oneLab: {
-    // y 430, NOT 348. The two TRUE / FALSE plates fill y 252…368 across the whole
-    // width when the question opens, so at 348 this label was printed UNDER the
-    // second plate on both of the beats it matters — measured at 5.1:1 against a
-    // ground it no longer reached (D31). At 430 it sits 30 above its own bound on
-    // the branch and 23 clear of FIVE, and the plates end 50 above it.
-    position: 'absolute', left: 276, top: 430, width: 56, textAlign: 'center',
+    // Below 368, NOT at 348: the two TRUE / FALSE plates fill y 252…368 across the
+    // whole width when the question opens, so at 348 this label was printed UNDER
+    // the second plate on both of the beats it matters (D31). And BESIDE his head,
+    // not over the five: at x 276, y 430 it lay across two of their heads. His head
+    // is x 262–290 at y 399–427; the label ends 6 short of it, 32 below the plates
+    // and 11 above the parked trolley's roof (x 176–260 from y 426).
+    position: 'absolute', left: 200, top: 400, width: 56, textAlign: 'right',
     fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
   },
 
@@ -331,7 +424,7 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   car: {
     position: 'absolute', left: 0, top: 16, width: 84, height: 47,
-    borderWidth: 3, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
+    borderWidth: 3, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
   },
   window: {
     position: 'absolute', top: 25, width: 20, height: 17,
@@ -339,7 +432,7 @@ const styles = StyleSheet.create({
   },
   wheel: {
     position: 'absolute', bottom: -5, width: 25, height: 25, borderRadius: 13,
-    borderWidth: 3.5, borderColor: INK, backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 3.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   spoke: { width: 3.5, height: 15, backgroundColor: INK },
 
@@ -347,7 +440,7 @@ const styles = StyleSheet.create({
   board: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   card: {
     position: 'absolute', top: CARD_TOP, width: CARD_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
     paddingHorizontal: 7, paddingTop: 8, overflow: 'hidden',
   },
   cardOn: { position: 'absolute', left: 0, top: 0, right: 0, height: 4, backgroundColor: INK },
@@ -368,7 +461,7 @@ const styles = StyleSheet.create({
   lens: { fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 15, letterSpacing: 0.2, color: INK, includeFontPadding: false },
   rule: {
     marginTop: 6, height: 24, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
-    alignItems: 'center', justifyContent: 'center', backgroundColor: STONE, overflow: 'hidden',
+    alignItems: 'center', justifyContent: 'center', backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   ruleOn: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: INK },
   ruleT: {
@@ -378,6 +471,16 @@ const styles = StyleSheet.create({
   // The chip is 24 tall with a 1.5 border inside it, so a 15-tall line centres at
   // (24 − 3 − 15) / 2 = 3 — the reversed copy must land exactly on the base word.
   ruleTOn: { position: 'absolute', left: 0, right: 0, top: 3, color: PAPER },
+  // The question mark that holds a chip before its verdict is said, on the word's line.
+  ruleAsk: { position: 'absolute', left: 0, right: 0, top: 3 },
+  // Under each card (the card and its lip end at 315), centred on it; the widest,
+  // 5 LIVES > 1 LIFE, measures 85 at 9.5px in the card's 118. The decider's hands
+  // never rise above y 406 and the five's label starts at 392, so 318…330 is clear.
+  gloss: {
+    position: 'absolute', top: CARD_TOP + CARD_H + 6, width: CARD_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
 
   // ── plates ────────────────────────────────────────────────────────────────
   ballot: { position: 'absolute', left: BAL_L, top: CARD_TOP, width: BAL_W, height: 148 },
@@ -395,7 +498,7 @@ const styles = StyleSheet.create({
     // moment the fill changed. The car is the mass in this picture; a card the
     // reader is being asked to read is not.
     width: BAL_W, height: BAL_H, borderWidth: 2.5, borderColor: INK, borderRadius: 5,
-    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   plateRight: { backgroundColor: INK, borderColor: INK },
   plateWrong: { borderColor: SOFT },
@@ -405,8 +508,8 @@ const styles = StyleSheet.create({
 
 // BAND. Topmost ink is the verdict board at 232 (its columns now end at 312); the lowest is the sleeper row under
 // the rail, 500 + 3 (rail) + 7 (sleeper) = 510. Everything else sits inside that: the
-// TRUE/FALSE plates finish at 368, the branch line climbs to 444, the ONE peg reaches
-// 388 and its label 348, the five reach 428 and their label 392, the lever knob to
+// TRUE/FALSE plates finish at 368, the branch line climbs to 459, the ONE peg reaches
+// 399 and its label 400, the five reach 428 and their label 392, the lever knob to
 // ~446, the trolley's wheels to 504, the figure's crown to
 // 350. So [224, 518] holds every extreme with 8 units of margin at each end, and the
 // scene renders about 90% larger than the letterboxed full-height fit.

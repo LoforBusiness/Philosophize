@@ -20,7 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // Two men on two low stands, each stand carrying a name, and a plate reading
 // MEMORIES hanging over one head on a short leader line. The plate travels from
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
   slot: { position: 'absolute', top: PLINTH_T, width: PLINTH_W, height: PLINTH_H },
   slotFill: { width: '100%', height: '100%' },
   face: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   faceRight: { backgroundColor: INK, borderColor: INK },
   faceWrong: { borderColor: SOFT },

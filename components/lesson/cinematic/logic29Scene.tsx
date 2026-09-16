@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BEAM ON A PIVOT, AND ONE WEIGHT THAT HAS TO GO SOMEWHERE.
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
   // so the origin is stated in px at the pivot itself.
   beam: {
     position: 'absolute', left: PIV_MID - BEAM_W / 2, top: BEAM_Y, width: BEAM_W, height: BEAM_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
     transformOrigin: `${BEAM_W / 2}px ${BEAM_H / 2}px`,
   },
   pivot: {

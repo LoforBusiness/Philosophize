@@ -31,13 +31,13 @@ export const BEATS: Meta15Beat[] = [
     dur: 1.8,
   },
   {
-    p: 41, x: 168, balls: 1,
+    p: 270, x: 168, balls: 1,
     text: 'You observe the first ball moving, and then its contact with the second ball.',
     cite: 'What is observed',
     dur: 1.8,
   },
   {
-    p: 41, x: 168, balls: 1,
+    p: 270, x: 168, balls: 1,
     text: 'Then the second ball moves. You see contact and one event after another, but you never see the necessary connection.',
     dur: 3.2,
   },

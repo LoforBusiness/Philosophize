@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO CLAIMS ON TWO PLINTHS, AND ONLY ONE OF THEM IS FURNITURE.
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
 
   plinth: {
     position: 'absolute', top: PLINTH_Y, width: COL_W, height: PLINTH_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   who: {
     position: 'absolute', top: PLINTH_Y + 17, width: COL_W, textAlign: 'center',
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: CARD_Y, width: COL_W, height: CARD_H },
   card: {
     width: COL_W, height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK },
   cardWrong: { borderColor: SOFT, opacity: 0.45 },

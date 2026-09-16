@@ -17,6 +17,7 @@ import { followMoves, kindOf, seedOf } from './camera';
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
 const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A WELL AND A ROTA, AND ONE ROW WITH NOBODY ON IT (H64). The rota is where the
 // argument lives: the well is what everybody agrees about.
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
 
   board: { position: 'absolute', top: BOARD_T, width: BOARD_W, height: BOARD_H },
   boardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   boardText: {
@@ -239,7 +240,7 @@ const styles = StyleSheet.create({
   },
   drum: {
     position: 'absolute', left: WELL_L, top: WELL_T, width: WELL_W, height: 470 - WELL_T,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
   },
   rim: {
     position: 'absolute', left: WELL_L - 6, top: WELL_T - 4, width: WELL_W + 12, height: 10,

@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A four-stage stair, stage right. The stages are the tap targets.
 //
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
   head: {
     position: 'absolute', left: ST_L, top: HEAD_T, width: ST_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT,
-    includeFontPadding: false, backgroundColor: STONE },
+    includeFontPadding: false, backgroundColor: STONE, boxShadow: LIP },
 
   night: {
     position: 'absolute', left: ST_L - 8, top: STG_T, width: 4,

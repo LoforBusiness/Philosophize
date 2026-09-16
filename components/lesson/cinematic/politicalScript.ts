@@ -17,42 +17,64 @@ export interface PoliticalBeat extends BaseBeat {
   auth?: number;
   /** This beat's correct answer raises the sovereign (q1) or holds him firm (q2). */
   weigh?: 'q1' | 'q2';
+  /** How far the state of nature has set in: 0 four neighbours, 1 the war of all. */
+  nature?: number;
+  /** How much of the argument is on the board: 1 the flow, 2 the ledger, 3 the headline, 4 the covenant's arrow. */
+  reveal?: number;
+  /** The unsigned contract is shown (beats after the covenant). */
+  paper?: number;
+  /** The subjects bow to the sovereign they authorised. */
+  bow?: number;
 }
 
 export const BEATS: PoliticalBeat[] = [
   {
+    nature: 0,
+    reveal: 0,
     auth: 0,
     text: 'Every state claims authority over you, although you never agreed to its rules. Why, then, should you obey?',
     dur: 2.5,
   },
   {
+    nature: 0,
+    reveal: 1,
     auth: 0,
     text: 'This is the problem of political authority. What could give a state the right to rule?',
     dur: 1.8,
   },
   {
+    nature: 0.35,
+    reveal: 1,
     auth: 0,
     text: 'Thomas Hobbes asks you to imagine life without any law, court or ruler. This condition is called the state of nature.',
     cite: 'Thomas Hobbes, Leviathan, 1651',
     dur: 2.1,
   },
   {
+    nature: 0.7,
+    reveal: 2,
     auth: 0,
     text: 'With no common power to settle disputes, people compete and distrust one another. Hobbes says such a life is “solitary, poor, nasty, brutish, and short”.',
     dur: 2.7,
   },
   {
+    nature: 1,
+    reveal: 3,
     auth: 0,
     text: 'Even the weakest can kill the strongest, so fear gives everyone a reason to strike first. Hobbes calls the result a war “of every man against every man”.',
     dur: 3.3,
   },
   {
+    nature: 0.55,
+    reveal: 4,
     auth: 0,
     text: 'Hobbes argues that the only escape is a covenant. In it, everyone authorises one sovereign to keep the peace.',
     dur: 1.8,
   },
   {
     auth: 0,
+    nature: 0.55,
+    reveal: 4,
     quote: {
       id: 'lq-political-political-1-1',
       text: 'Covenants, without the sword, are but words, and of no strength to secure a man at all.',
@@ -67,6 +89,8 @@ export const BEATS: PoliticalBeat[] = [
   {
     auth: 1,
     weigh: 'q1',
+    nature: 0.55,
+    reveal: 4,
     interact: {
       prompt: 'Why, on Hobbes’s account, do people authorise a sovereign at all?',
       cards: [
@@ -79,11 +103,16 @@ export const BEATS: PoliticalBeat[] = [
     dur: 1.0,
   },
   {
+    paper: 1,
+    reveal: 4,
     auth: 1,
     text: 'No one ever signed such a contract, and no one needs to. The contract is a test of legitimacy, not a document.',
     dur: 1.9,
   },
   {
+    paper: 1,
+    bow: 1,
+    reveal: 4,
     auth: 1,
     text: 'For Hobbes, subjects have no right to rebel against the sovereign they authorised. John Locke disagreed: a people may resist rulers who violate their rights.',
     dur: 2.9,
@@ -91,6 +120,9 @@ export const BEATS: PoliticalBeat[] = [
   {
     auth: 1,
     weigh: 'q2',
+    paper: 1,
+    bow: 1,
+    reveal: 4,
     interact: {
       prompt: 'On Hobbes’s view, when may subjects rebel against their sovereign?',
       drag: {
@@ -109,6 +141,7 @@ export const BEATS: PoliticalBeat[] = [
     dur: 1.0,
   },
   {
+    reveal: 4,
     summary: {
       title: 'Hobbes and the Social Contract',
       points: [

@@ -50,24 +50,24 @@ export const BEATS: Political8Beat[] = [
     dur: 2.6,
   },
   {
-    p: 42, x: 100, carry: 1, pile: 1, marks: 1,
+    p: 271, x: 100, carry: 1, pile: 1, marks: 1,
     text: 'There are three spare crates by the gate, one for each person.',
     cite: 'Three spare crates',
     dur: 2.2,
   },
   {
-    p: 42, x: 100, carry: 1, pile: 1, marks: 1,
+    p: 271, x: 100, carry: 1, pile: 1, marks: 1,
     text: 'One crate each looks like the fairest possible division.',
     dur: 2,
   },
   {
-    p: 43, x: 170, pile: 1, mode: 1, marks: 1,
+    p: 277, x: 170, pile: 1, mode: 1, marks: 1,
     text: 'Each person receives an identical crate. The shares are equal, and no one is favoured or left out.',
     cite: 'Equal shares',
     dur: 2.5,
   },
   {
-    p: 43, x: 170, pile: 1, mode: 1, marks: 1,
+    p: 277, x: 170, pile: 1, mode: 1, marks: 1,
     text: 'Yet the shortest person still can’t see over the fence.',
     dur: 2.1,
   },

@@ -17,7 +17,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A WEEK OF MORNINGS, AND THE ONE WITH A HOLE IN IT.
@@ -272,7 +273,7 @@ const styles = StyleSheet.create({
 
   panel: {
     position: 'absolute', top: PANEL_Y, width: PANEL_W, height: PANEL_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   horizon: { position: 'absolute', top: HORIZON, width: PANEL_W - 12, height: 1, backgroundColor: RULE },
   sun: {
@@ -288,7 +289,7 @@ const styles = StyleSheet.create({
   cand: { position: 'absolute', top: CAND_Y, width: CAND_W, height: PANEL_H },
   candBox: {
     width: CAND_W, height: PANEL_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   candRight: { backgroundColor: INK },
   candWrong: { borderColor: SOFT, opacity: 0.45 },

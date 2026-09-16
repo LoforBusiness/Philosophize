@@ -4,13 +4,13 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  clamp01, ease01, lerp, mixStance, pose, type Bundle,
+  clamp01, ease01, mixStance, pose, type Bundle,
 } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology31Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, lookPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, lookPose, useCarry, carry, pickAt,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
@@ -20,7 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A CABINET WHOSE DRAWERS SLIDE OUT, and a door nobody walks to. The answer targets
 // are containers rather than cards — three drawers and the door — so choosing an
@@ -74,14 +75,30 @@ const G = BEATS.map((b) => b.g ?? 0);
 // camera that never rests.
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology31'));
+/** How many drawers are pulled out on each beat (see the script). */
+const OPEN = BEATS.map((b) => b.open ?? 0);
 
-export default function Epistemology31Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
+// R7c — the cabinet follows the sort on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
+
+// HOW MANY DRAWERS EACH ANSWER PULLS OUT, in the sort's OWN bin order (never the
+// shuffled row order — see SceneApi.pickPos). Every drawer is a memory used as
+// evidence, and each one past the first is a check on the one before (beats 2–8):
+//   prove it first  0 — "against something outside memory": no memory is used until
+//                       it is proved, so the cabinet stays shut
+//   trust it        1 — the memory itself, I LOCKED IT, taken as it comes, with no
+//                       reason to doubt and so no drawer behind it
+//   suspect it      3 — "every memory suspect until it is confirmed": each check is
+//                       another memory, so every drawer comes out
+const OPEN_AT = [0, 1, 3];
+
+export default function Epistemology31Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
+  const cv = useCarry(1);
   const cur = BEATS[i];
-  const prev = i > 0 ? BEATS[i - 1] : undefined;
-
-  const shownOpen = cur.open ?? 0;
-  const prevOpen = prev?.open ?? 0;
+  const reacting = REACT[i] === 1;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -94,7 +111,9 @@ export default function Epistemology31Scene({ clock, bt, bi, i, picked, onPick, 
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
-      open: lerp(prevOpen, shownOpen, slide),
+      // Through the carry, so a drawer slides from where it was DRAWN — which after
+      // the sort is wherever the reader left the cabinet.
+      open: carry(cv, 0, n, OPEN[p], reacting ? pickAt(OPEN_AT, pickPos.value) : OPEN[n], slide),
     };
   });
 
@@ -200,12 +219,12 @@ const styles = StyleSheet.create({
 
   cabinet: {
     position: 'absolute', left: CAB_L, top: CAB_T, width: CAB_W, height: CAB_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
 
   drawer: { position: 'absolute', left: DRW_L, width: DRW_W, height: DRW_H },
   drawerInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     justifyContent: 'center', paddingLeft: 10, paddingRight: 26,
   },
   drawerText: {
@@ -220,7 +239,7 @@ const styles = StyleSheet.create({
 
   door: { position: 'absolute', left: DOOR_L, top: DOOR_T, width: DOOR_W, height: DOOR_H },
   doorInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', paddingTop: 8,
   },
   doorText: {

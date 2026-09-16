@@ -45,13 +45,13 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 1.8,
   },
   {
-    p: 40, x: 148, land: 1, map: 1,
+    p: 268, x: 148, land: 1, map: 1,
     text: 'Now suppose you sketch the landscape: two hills, one tree. The sketch stands for a belief, a claim about the land.',
     cite: 'The belief',
     dur: 3.2,
   },
   {
-    p: 40, x: 148, land: 1, map: 1,
+    p: 268, x: 148, land: 1, map: 1,
     text: 'The question is what makes such a claim true.',
     dur: 1.8,
   },

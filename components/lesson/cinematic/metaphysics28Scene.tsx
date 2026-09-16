@@ -18,6 +18,7 @@ import { Shapes, ell, bar, tri, type Part } from './Silhouette';
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
 const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A DARK FIELD, FOUR THINGS STANDING IN IT, AND A LAMP IN EVERY ONE.
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
 
   field: {
     position: 'absolute', left: FIELD_X, top: FIELD_Y, width: FIELD_W, height: FIELD_H,
-    backgroundColor: STONE, borderWidth: 1.5, borderColor: RULE,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: RULE,
   },
   cap: {
     position: 'absolute', left: FIELD_X, top: CAP_T, width: FIELD_W, textAlign: 'center',

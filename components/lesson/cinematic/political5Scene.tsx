@@ -18,7 +18,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // THREE PIECES OF INK INFORMATION DESIGN, one per idea in the lesson:
 //
@@ -331,7 +332,7 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   tier: {
     position: 'absolute', height: TIER_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   tierTitle: {
@@ -370,7 +371,7 @@ const styles = StyleSheet.create({
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W, height: CARD_H },
   card: {
     width: CARD_W, height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, justifyContent: 'center', paddingHorizontal: 10,
+    backgroundColor: STONE, boxShadow: LIP, justifyContent: 'center', paddingHorizontal: 10,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },
   cardWrong: { borderColor: SOFT, opacity: 0.45 },

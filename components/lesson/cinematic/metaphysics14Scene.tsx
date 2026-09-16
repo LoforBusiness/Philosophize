@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // FOUR CLAIMS AND FIVE WORLDS, WITH A MARK WHEREVER A CLAIM SURVIVES (H64). A
 // necessary truth is a full row and you can count the gaps in the others.
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
 
   claim: { position: 'absolute', left: CLAIM_L, width: CLAIM_W, height: CLAIM_H },
   claimInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   claimText: {
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
 
   mark: { position: 'absolute', width: MARK, height: MARK, borderRadius: MARK / 2 },
   markOn: { backgroundColor: INK },
-  markOff: { borderWidth: 1.5, borderColor: RULE, backgroundColor: STONE },
+  markOff: { borderWidth: 1.5, borderColor: RULE, backgroundColor: STONE, boxShadow: LIP },
 
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },

@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A four-link chain of reasoning, stage right; the figure downstage left.
 //
@@ -65,6 +66,10 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic26'));
 const DIR = dirsFrom(X, 1);
 const NLINKS = BEATS.map((b) => b.links ?? 0);
 
+// R7c — LEFT STILL ON PURPOSE: where the chain breaks IS the lesson's claim (the assumption,
+// never a middle step; see the break's own note below). A sort's chip rests on the middle
+// bin, A FAULTY STEP, so any table would move the break onto a valid step before the reader
+// had touched anything, and NOTHING has no picture at all.
 export default function Logic26Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(2);
@@ -183,7 +188,7 @@ const styles = StyleSheet.create({
 
   link: {
     position: 'absolute', left: CH_L, width: CH_W, height: LINK_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   linkLast: { backgroundColor: INK, borderColor: INK },
@@ -205,7 +210,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', left: CH_L, width: CH_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {

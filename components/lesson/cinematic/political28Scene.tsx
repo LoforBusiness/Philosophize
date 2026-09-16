@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE CELL, TWO BOARDS OVER IT, AND AN EYE THAT ARRIVES LAST.
@@ -205,14 +206,14 @@ const styles = StyleSheet.create({
 
   cell: {
     position: 'absolute', left: CELL_X, top: CELL_Y, width: CELL_W, height: CELL_H,
-    backgroundColor: STONE, borderWidth: 2.5, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2.5, borderColor: INK,
   },
   inmate: { position: 'absolute', left: 142, top: CELL_Y + 40, width: 26, height: 54, backgroundColor: RULE },
   bar: { position: 'absolute', top: CELL_Y, width: 6, height: CELL_H, backgroundColor: INK },
 
   board: {
     position: 'absolute', top: BOARD_Y, width: BOARD_W, height: BOARD_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
   },
   // A REASON IS LEANED ON OR IT IS NOT. The fill rides the raw driver, so the
   // board is struck or plain rather than a smear (D35).

@@ -17,6 +17,7 @@ import { followMoves, kindOf, seedOf } from './camera';
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
 const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A HOPPER, A MOUTH THAT OPENS, A MESH THAT TIGHTENS, AND A TRAY.
@@ -398,7 +399,7 @@ const styles = StyleSheet.create({
 
   chute: {
     position: 'absolute', left: CH_X, top: CH_Y, width: CH_W, height: CH_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   /** The shadow the lip throws inside the chute — one View, and it becomes a box. */
   chuteLip: {
@@ -412,7 +413,7 @@ const styles = StyleSheet.create({
 
   throat: {
     position: 'absolute', left: SV_X, top: MOUTH_Y, width: SV_W, height: SIEVE_BOT - MOUTH_Y,
-    backgroundColor: STONE,
+    backgroundColor: STONE, boxShadow: LIP,
   },
   wallL: { position: 'absolute', left: SV_X, top: MOUTH_Y, width: WALL, height: SIEVE_BOT - MOUTH_Y, backgroundColor: INK },
   wallR: { position: 'absolute', left: SV_X + SV_W - WALL, top: MOUTH_Y, width: WALL, height: SIEVE_BOT - MOUTH_Y, backgroundColor: INK },
@@ -433,7 +434,7 @@ const styles = StyleSheet.create({
 
   tray: {
     position: 'absolute', left: TRAY_X, top: TRAY_Y, width: TRAY_W, height: TRAY_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   /** What survived, standing in the tray — anchored to its floor so it grows UP. */
   pile: {

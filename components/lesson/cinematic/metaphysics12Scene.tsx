@@ -20,7 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A STREAM THAT NEVER STOPS, and a box drawn for its owner that stays empty all
 // lesson. Hume's result is nowhere asserted — it is just the fact that nothing ever
@@ -182,12 +183,12 @@ const styles = StyleSheet.create({
 
   stream: { position: 'absolute', left: STR_L, top: STR_T, width: STR_W, height: STR_H },
   streamInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     overflow: 'hidden',
   },
   tile: {
     position: 'absolute', left: 0, top: 6, width: TILE_W, height: 34,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   tileOnInk: { borderColor: PAPER, backgroundColor: INK },
   dot: { position: 'absolute', width: 4, height: 4, borderRadius: 2, backgroundColor: INK },
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
   own: { position: 'absolute', ...OWN },
   // Empty by design: the label at the top and clear paper below it is the argument.
   ownInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', paddingTop: 7,
   },
   ownText: {
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
 
   none: { position: 'absolute', ...NONE },
   noneInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
 

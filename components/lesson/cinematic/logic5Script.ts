@@ -38,7 +38,7 @@ export const BEATS: Logic5Beat[] = [
     dur: 3.2,
   },
   {
-    p: 27, machine: 1, run: 1,
+    p: 281, machine: 1, run: 1,
     text: 'An inference is valid when the premises, if true, guarantee that the conclusion is true.',
     dur: 1.8,
   },

@@ -50,7 +50,7 @@ export const BEATS: P9Beat[] = [
     dur: 4.1,
   },
   {
-    vote: 0, tally: true, advance: true, one: 18,
+    vote: 0, tally: true, advance: true, one: 279,
     text: 'This is democracy working, not democracy failing. Alexis de Tocqueville called the danger the tyranny of the majority.',
     dur: 1.8,
   },

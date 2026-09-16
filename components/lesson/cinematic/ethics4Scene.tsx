@@ -18,7 +18,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A TWO-LAYER DIAGRAM with the argument happening inside it.
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   tablet: {
     position: 'absolute', top: TAB_T, width: TAB_W, height: TAB_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   tabHead: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 10, paddingTop: 6 },
   tabName: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: INK,
@@ -293,7 +294,7 @@ const styles = StyleSheet.create({
   },
   vHit: { position: 'absolute', width: TAB_W },
   vBox: {
-    height: 48, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    height: 48, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   vRight: { backgroundColor: INK, borderColor: INK },

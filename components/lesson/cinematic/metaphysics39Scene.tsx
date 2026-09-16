@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A WILTING PLANT, FOUR NAMED PLATES, AND FOUR IDENTICAL DASHED RUNS.
@@ -217,13 +218,13 @@ const styles = StyleSheet.create({
     position: 'absolute', width: LEAF_W, height: LEAF_H,
     borderTopLeftRadius: LEAF_H, borderTopRightRadius: LEAF_H,
     borderBottomLeftRadius: LEAF_H, borderBottomRightRadius: LEAF_H,
-    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   pot: {
     position: 'absolute', left: POT_X, top: POT_Y, width: POT_W, height: POT_H,
     borderWidth: 2, borderColor: INK,
     borderTopLeftRadius: 3, borderTopRightRadius: 3, borderBottomLeftRadius: 12, borderBottomRightRadius: 12,
-    backgroundColor: STONE,
+    backgroundColor: STONE, boxShadow: LIP,
   },
 
   // DASHED, NOT SOLID. Nothing travelled along these; each one is a question

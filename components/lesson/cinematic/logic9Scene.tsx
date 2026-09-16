@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic9Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
@@ -20,7 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A claim on a board, an arguer standing by it, and a dodger who walks on and never
 // once goes near it.
@@ -100,6 +101,20 @@ const DIM = BEATS.map((b) => (b.untouched ? 1 : 0));
 const DOWN = STRAW.map((s, k) => (s === 2 || (k > 0 && STRAW[k - 1] === 2) ? 1 : 0));
 const FALLS = STRAW.map((s, k) => s === 2 && (k === 0 || STRAW[k - 1] !== 2));
 
+// R7c — the stage follows the poll on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// WHAT THE STAGE SHOWS AT EACH OPTION, in the order the BALLOT DECLARES them
+// (never the shuffled row order — see SceneApi.pickPos). The claim board is the
+// lesson's one unanswered claim, so it stands again only for the option that says
+// a failed proof leaves the claim standing; the other three name no claim, and the
+// board stays down as this beat already has it.
+// the board STANDS for luck (refuting a proof isn't refuting the claim), and is
+// down for best (character as proof), odd (truth for you) and worst (Clifford)
+const POLL_CLAIM = [1, 0, 0, 0];
+
 // The arguer never moves, so he never walks; his x is a constant and the rule about
 // routing motion through travelStance simply does not apply to him (C18).
 const ARG_X = 96;
@@ -112,7 +127,8 @@ const ARG_X = 96;
 const X = BEATS.map((b) => b.x ?? ARG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic9'));
 
-export default function Logic9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Logic9Scene({ clock, bt, bi, i, picked, onPick, pickPos }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldAMix = useHeld();
   const heldDMix = useHeld();
   // One slot per scalar blended across a beat change (L5): the dodger's x, then the
@@ -171,7 +187,8 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     return {
       arg: pose(aMix, ARG_X, GROUND, K_FIG, 1, 1),
       dod: reactPose(dMix, dx, GROUND, K_FIG, DDIR[n], walkIn),
-      claim: carry(cv, 1, n, from(CLAIM), CLAIM[n], pace(CLAIM)),
+      // R7c — on the poll the board answers the option being chosen (POLL_CLAIM).
+      claim: carry(cv, 1, n, from(CLAIM), reacting ? pickAt(POLL_CLAIM, pickPos.value) : CLAIM[n], pace(CLAIM)),
       smear: carry(cv, 2, n, from(SMEAR), SMEAR[n], pace(SMEAR)),
       straw: carry(cv, 3, n, from(STRAW_ON), STRAW_ON[n], pace(STRAW_ON)),
       // The copy is knocked over on the beat it is built, a beat's breath after it
@@ -282,8 +299,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.6, color: SOFT,
     marginBottom: 3, includeFontPadding: false,
   },
+  // 13, not 14: at 14 THE BUDGET ADDS UP measured 162.6 inside the board's 163 units
+  // of content, so its first and last letters sat against the border.
   boardText: {
-    fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 0.4, color: INK,
+    fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
   post: { position: 'absolute', top: BOARD_T + BOARD_H - 2, width: 2.5, height: 22, backgroundColor: SOFT },
@@ -315,7 +334,7 @@ const styles = StyleSheet.create({
 
   replySlot: { position: 'absolute', left: REPLY_L, width: REPLY_W },
   reply: {
-    height: REPLY_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: REPLY_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   replyRight: { backgroundColor: INK, borderColor: INK },

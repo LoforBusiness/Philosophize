@@ -34,13 +34,13 @@ export const BEATS: KnowHowBeat[] = [
     dur: 1.8,
   },
   {
-    p: 41, x: 168, steps: 1,
+    p: 270, x: 168, steps: 1,
     text: 'Consider the instruction “keep the head low”. It’s precise, true and easy to check.',
     cite: 'One instruction',
     dur: 2.9,
   },
   {
-    p: 41, x: 168, steps: 1,
+    p: 270, x: 168, steps: 1,
     text: 'Every instruction serves an end beyond itself. Here the end is the doing, the act of swimming.',
     dur: 1.8,
   },

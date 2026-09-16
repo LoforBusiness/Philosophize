@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // AN UNEQUAL STACK OF HOLDINGS, READ TWICE. Stage right, three columns of very
 // different heights standing on a HISTORY TAPE whose four marks read ACQUIRED ·
@@ -129,6 +130,9 @@ const X = BEATS.map((b) => b.x ?? FIG_B);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political10'));
 const DIR = dirsFrom(X, 1);
 
+// R7c — LEFT STILL ON PURPOSE: the drag asks how much common land one person may take under
+// Locke's proviso, and nothing on this stage is a share of common land. The columns are the
+// holdings Nozick and Rawls read, and by design they never change; only the reading does.
 export default function Political10Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(1);
@@ -314,7 +318,7 @@ const styles = StyleSheet.create({
 
   tape: {
     position: 'absolute', left: TAPE_L, top: TAPE_T, width: TAPE_W, height: TAPE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     flexDirection: 'row',
   },
   marks: {
@@ -343,7 +347,7 @@ const styles = StyleSheet.create({
 
   plateSlot: { position: 'absolute', left: PL_L, width: PL_W },
   plate: {
-    height: PL_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: PL_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },

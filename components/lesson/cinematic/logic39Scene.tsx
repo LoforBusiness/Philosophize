@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE PLANKS ACROSS TWO POSTS, AND THE MIDDLE ONE IS SAWN BY ITS OWN DEMAND.
@@ -225,12 +226,12 @@ const styles = StyleSheet.create({
 
   post: {
     position: 'absolute', top: POST_Y, width: POST_W, height: POST_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
 
   plank: {
     position: 'absolute', left: 0, top: 0, width: PL_W, height: PL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   plankWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   cut: { position: 'absolute', left: 0, top: 0, width: PL_W, height: PL_H },
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
 
   half: {
     position: 'absolute', top: 0, width: HALF_W, height: PL_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   halfMarked: { borderWidth: 3 },
   halfText: {

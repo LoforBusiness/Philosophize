@@ -259,6 +259,7 @@ export const BEATS: Beat[] = [
   {
     act: 4,
     vol: 3, reasons: 2,
+    say: [{ who: 'red', text: 'Fair. Let\'s compare the cities.' }],
     text: 'The people and the disagreement are unchanged. Because each side now gives reasons, the exchange can make progress.',
     dur: 3.4,
   },

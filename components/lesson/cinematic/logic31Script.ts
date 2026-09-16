@@ -16,6 +16,9 @@ export interface Logic31Beat extends BaseBeat {
   /** How many flips are on the table, 0…7. */ flips?: number;
   /** 1 = the odds scale is showing. */ scale?: number;
   /** 1 = the five ticks are live targets (Q1). */ pick?: number;
+  /** 1 = the EIGHTH flip is on the table, still to be thrown ("?"). */ next?: number;
+  /** 1 = the unmoved needle is ringed, as the narration says the chance is still one half. */ stress?: number;
+  /** 1 = the flips are ruled apart from each other: each one is independent. */ apart?: number;
 }
 
 export const BEATS: Logic31Beat[] = [
@@ -42,12 +45,12 @@ export const BEATS: Logic31Beat[] = [
     cite: 'Seven in a row',
   },
   {
-    p: 2, flips: 7, scale: 1,
+    p: 2, flips: 7, scale: 1, next: 1, stress: 1,
     dur: 1.8,
     text: 'Yet the chance of heads on the eighth flip is still one half.',
   },
   {
-    p: 3, flips: 7, scale: 1,
+    p: 3, flips: 7, scale: 1, next: 1,
     dur: 3.8,
     quote: {
       id: 'lq-logic-arguments-31-1',
@@ -59,18 +62,18 @@ export const BEATS: Logic31Beat[] = [
     },
   },
   {
-    p: 1, flips: 7, scale: 1,
+    p: 1, flips: 7, scale: 1, next: 1,
     dur: 3.4,
     text: 'In 1913, a roulette wheel at Monte Carlo landed on black twenty-six times in a row. Gamblers lost heavily by betting that red was overdue.',
     cite: 'Monte Carlo, 1913',
   },
   {
-    p: 1, flips: 7, scale: 1,
+    p: 1, flips: 7, scale: 1, next: 1, apart: 1,
     dur: 1.8,
     text: 'Each spin was independent. The outcome of one spin doesn’t change the chance of any other.',
   },
   {
-    p: 2, flips: 7, scale: 1, pick: 1,
+    p: 2, flips: 7, scale: 1, pick: 1, next: 1, apart: 1,
     dur: 1.0,
     interact: {
       prompt: 'After seven heads in a row, what is the chance that the next flip lands heads?',
@@ -79,7 +82,7 @@ export const BEATS: Logic31Beat[] = [
     },
   },
   {
-    p: 3, flips: 7, scale: 1,
+    p: 3, flips: 7, scale: 1, next: 1, apart: 1,
     dur: 1.0,
     interact: {
       prompt: 'As flips accumulate, which curve shows how far the proportion of heads sits from one half?',

@@ -34,6 +34,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { softOnToneByBox } from './lib/tonefit.mjs';
 import { softOnToneByNest } from './lib/tonenest.mjs';
+import { lipScene } from './lip-stage.mjs';
 
 const DIR = 'components/lesson/cinematic';
 
@@ -211,9 +212,26 @@ console.log(deadMass.length
   ? '  a declared fill is not a drawn fill. Render it or delete it.'
   : '  ok    every style that declares a tonal fill is actually rendered');
 
+// ── EVERY TONED PLATE STANDS ON ITS LIP (T7) ────────────────────────────────
+//
+// The depth ramp's third rung is a hard SHADE shadow under each STONE mass, added by
+// scripts/lip-stage.mjs. The codemod is the rule: run over a scene, it must find
+// nothing left to do. A plate added later without its lip is a flat shape beside a
+// row of objects, and this is where that shows up.
+const unlipped = [];
+// SHADE_EXTRA=<file> adds one staged scene to this rule alone (scripts/countertest-depth.mjs).
+for (const file of process.env.SHADE_EXTRA ? [...files, process.env.SHADE_EXTRA] : files) {
+  const r = lipScene(fs.readFileSync(path.resolve(DIR, file), 'utf8'));
+  if (r.lipped > 0) unlipped.push(`${file}: ${r.lipped} STONE plate(s) without a lip`);
+}
+for (const m of unlipped.slice(0, 14)) console.log(`  FAIL  ${m}`);
+console.log(unlipped.length
+  ? '  node scripts/lip-stage.mjs --write gives them one; a boxShadow moves no layout (T7).'
+  : '  ok    every toned plate stands on its shaded lip (T7)');
+
 const over = flat.length > FLAT_BUDGET;
 console.log(`  ${over ? 'FAIL' : 'ok  '}  the flat count is a high-water mark  ${flat.length} of ${FLAT_BUDGET}`);
 if (over) console.log('\n  a scene got flatter, or a new one arrived with one tone. Give it masses (see cinematicKit).');
 else if (flat.length < FLAT_BUDGET) console.log(`\n  lower FLAT_BUDGET to ${flat.length} in scripts/check-shade.mjs — a budget that still says the old number is a debt.`);
 console.log('');
-process.exit(over || softOnTone.length || deadMass.length ? 1 : 0);
+process.exit(over || softOnTone.length || deadMass.length || unlipped.length ? 1 : 0);

@@ -39,3 +39,20 @@ export function poseTrack(dir, stem) {
   const uniq = [...new Map(used.map((u) => [`${u.field}:${u.dflt}`, u])).values()];
   return uniq.length === 1 ? uniq[0] : null;
 }
+
+/**
+ * EVERY pose track a scene reads, `[{ name, field, dflt }]` — for the scenes that pose
+ * two figures, where `poseTrack` returns null because which one is the lead is a
+ * judgement. A pass that treats both figures alike (liven-still's pairs) never has to
+ * make it.
+ */
+export function poseTracks(dir, stem) {
+  const p = path.join(dir, `${stem}Scene.tsx`);
+  if (!fs.existsSync(p)) return [];
+  const src = fs.readFileSync(p, 'utf8');
+  const tracks = new Map();
+  for (const m of src.matchAll(TRACK)) tracks.set(m[1], { name: m[1], field: m[2], dflt: Number(m[3]) });
+  const used = [...new Set([...src.matchAll(POSERS)].map((m) => m[1]))]
+    .map((n) => tracks.get(n)).filter(Boolean);
+  return [...new Map(used.map((u) => [u.field, u])).values()];
+}

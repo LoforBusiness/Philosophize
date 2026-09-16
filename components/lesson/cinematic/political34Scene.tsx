@@ -15,7 +15,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // FIVE NESTED RINGS, AND TWO MARKS THAT HAVE TO BE BROUGHT TOGETHER.
 //
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
   ring: { position: 'absolute', borderColor: INK, marginTop: -240 },
   reach: {
     position: 'absolute', borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
-    marginTop: -300, backgroundColor: STONE },
+    marginTop: -300, backgroundColor: STONE, boxShadow: LIP },
 
   // 60 WIDE, NOT 46: EVERYONE is 53dp with its tracking and was losing its tail on
   // every beat — and it is the outermost ring, the whole point of the question.

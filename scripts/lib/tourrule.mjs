@@ -407,9 +407,17 @@ export function freshOf(raw) {
  *     dealing push/pull/hold to every lesson alike.
  *
  * @param beats  per beat: { items, wide, single, dur }
+ * @param followOk  (near, far) => boolean — whether the SHIPPING camera can hold one
+ *   scale from `near` to `far`. The two ends here are the same size by construction,
+ *   and that is not the same thing: camera.ts frames each end through `fit` and then
+ *   `containShot`, and at the edge of a band the second can widen one end and not the
+ *   other. metaphysics-being-22 beat 7 asked for 1.16→1.31 that way, and because
+ *   make-tours writes all lessons or none, one refused follow froze the whole table.
+ *   A follow the camera would reject is not offered; the beat falls through to the
+ *   static framing below, which is what a still frame of a short walk is anyway.
  * @returns per beat: an array of stations, or null to hold
  */
-export function lessonTours(beats, band, ground) {
+export function lessonTours(beats, band, ground, followOk = () => true) {
   const WHOLE = [0, band[0], STAGE_W, band[1] - band[0]];
   const out = [];
   // `null` means the camera is showing the whole stage, which is where it starts and
@@ -459,7 +467,7 @@ export function lessonTours(beats, band, ground) {
         // The clamp can still shave an end that runs off the band, which would put
         // the scales back out of step, so a follow is only offered when it did not.
         const same = Math.abs(near[2] - far[2]) < 0.51 && Math.abs(near[3] - far[3]) < 0.51;
-        if (same && centrable(near, band) && centrable(far, band)) followed = { near, far };
+        if (same && centrable(near, band) && centrable(far, band) && followOk(near, far)) followed = { near, far };
       }
     }
     if (followed) {

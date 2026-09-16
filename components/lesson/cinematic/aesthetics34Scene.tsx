@@ -15,7 +15,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A BULL MADE OF ELEVEN STROKES, LOSING THEM ONE AT A TIME.
 //
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
   // strokes is the one mass this picture can carry without inventing scenery.
   plate: {
     position: 'absolute', left: 152, top: 344, width: 200, height: 132,
-    backgroundColor: STONE, borderWidth: 1.5, borderColor: SOFT, borderRadius: 2,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: SOFT, borderRadius: 2,
   },
 
   kicker: {

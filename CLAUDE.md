@@ -1001,7 +1001,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **fifty-eight** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **fifty-nine** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1012,7 +1012,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-thoughts` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-thoughts` · `check-marks` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
 > replays the figure, and a prop's animation was invisible to every check unless it
@@ -1146,7 +1146,7 @@ they belong to, so the rule book has them and this file did not:
   `poll` · `split` · `plot` (§17, group R). **The analogue family is the
   majority**: 240 graded beats against 210 on the stage and 38 left in the deck,
   and every lesson but two has one (the two ask both their questions on the stage
-  instead). **207 of those 240 move the picture as the reader moves the control**
+  instead). **224 of the 240 lessons with one move the picture as the reader moves the control**
   (R7c, §17), and **224 scenes now turn the figure toward what the beat is
   about** — `lookPose` off a per-beat table `npm run make:gaze` derives from what
   each beat draws (the 20 that pose two figures are exempt). Animated
@@ -1154,7 +1154,7 @@ they belong to, so the rule book has them and this file did not:
   he reacts**: 78 of 246 lessons put a costume on him from a wardrobe of eleven
   (`npm run sheet:wardrobe`), neighbours never match, grave lessons are held to
   the sober set, and he nods or draws back on every answer in the scenes that
-  route through `lookPose`. **27 lessons also have a second figure walk in** on the
+  route through `lookPose`. **31 lessons also have a second figure walk in** on the
   beat before a two-sided question, dressed differently and turned to face him
   (group AA) — the count moves whenever the must-boxes are re-measured, because
   whether there is ROOM for him is derived from them.
@@ -1243,15 +1243,19 @@ they belong to, so the rule book has them and this file did not:
   still carries its `cards` array, which is the fallback the runner uses if a
   `CINEMATIC` entry is ever removed, and that is what makes a scene safe to roll
   back (§17). The runner itself is now unreachable; see the note at the top of §5.
-- **Roughly nine scenes in ten are a PHOTOGRAPH between taps.** Measured in
-  pixels by `npm run check:alive`, not by grep: two screenshots from one page
-  load, differenced, with the figure's own box excluded. `political7` — the
-  lesson the reader holds up as the standard — is one of them. Two are fixed
-  (`epistemology11`'s clock now has a second hand, `epistemology37`'s hull rocks)
-  and the rest is per-lesson authoring, because a blanket drift pass would break
-  A1 in every scene about a thing that is deliberately still. Group Z7–Z8 has the
-  method and the two worked examples.
-- **33 analogue lessons still leave the stage still** (R7c), and 20 scenes that
+- **Most scenes are still a PHOTOGRAPH between taps, and that is now mostly
+  honest.** Measured in pixels by `npm run check:alive` (two screenshots from one
+  page load, differenced, figure excluded). The subjects that move by nature were
+  given motion on 16 Sep 2026 — `ethics10`'s pond, `epistemology41`'s water,
+  `metaphysics10`'s flag, `political33`'s banner, `aesthetics15`'s rose and
+  `ethics37`'s curtain, after `epistemology11`'s clock and `epistemology37`'s hull —
+  and a painted sun, a gauge or a verdict banner stays still on purpose (Z8). What
+  the reader felt was the TAP, and that is counted now: `check:idle` holds the taps
+  on which nothing on screen moves at all (N18).
+- **16 analogue lessons still leave the stage still** (R7c), each for a
+  reason recorded in its scene (`check:react` fails one that does not say why) — a ladder with no quantity, a track that must not come
+  back, a reaction that would give the answer away mid-drag (R7d), or
+  `aesthetics16`, whose answer is that the painting did not change. And 20 scenes that
   pose two figures never turn a head (`check:life` §10 exempts them, because which
   of the two is the narrator is a judgement). Both are named budgets, not silence.
 - **The figure cannot REACH anything, by composition.** Of the 60 scenes with a
@@ -1946,6 +1950,18 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     any clause under 0.4 or over 2.5 times the line's own pace now falls back to an
     even spread over the speech. Across 402 lines that changed exactly two, both
     newly narrated, and none of the lines already heard.
+  - **A line cut off on its last word was the player and the encoder, not the takes
+    (AC18).** A reader: *"at the end of a sentence … it will stop abruptly or not sound
+    right."* `lib/narration/real.ts` paused the line on the first status update past
+    its end, and status updates land up to a quarter of a second apart, so a line could
+    lose its final syllable; it now waits `END_PAD_S` (0.2s) past the end. And every
+    Chirp take stops on a sample, often mid-cycle, which into 0.4s of digital silence is
+    a click that reads as a clipped word: `encode-narration.mjs` lays a synthesised
+    RELEASE after each take — its own last pitch period, a 3ms seam correction, an 18ms
+    decay — inside the gap, so no line's timing moves. All 246 `lesson.mp3`s were
+    re-encoded (87.8 MB); `check:narration` fails **STALE MP3** on a file without the
+    `release-1` mark and **PLAYER** if the early pause comes back. No take was
+    re-rendered, so it cost no character budget.
   - **A take can break, and nothing had measured one until a reader heard it.**
     *"There is, like, a loud sound, and then the voice becomes extremely
     distorted"*, not quite halfway through `metaphysics-being-4`. The player was
@@ -2487,7 +2503,7 @@ prints what is left, with each claim, in reading order.
 
 **THE SCENE FOLLOWING THE CONTROL IS NO LONGER OPTIONAL (R7c).** It used to be:
 30 scenes of 186 moved and the other 150 held still while the reader dragged a
-knob under them. **149 of 182 do now**, because the reader said what the
+knob under them. **224 of the 240 lessons with a control do now**, because the reader said what the
 difference was — *"I want something to change within the animation above the
 stickman, like it reacts during the user moving something"* — and it is the
 difference between moving a widget and moving the picture. The wiring is a
@@ -2508,8 +2524,11 @@ moves toward *done in the open*; `metaphysics11`'s MEMORIES plate rides across t
 whoever woke up with the recollections as the seam gives memory more of the person.
 **"It looks hard" is a description of the reader's attention, not of the scene.**
 
-The 33 left are three shapes, and naming which one a lesson is comes before calling
-it a gap. **A ladder that is not a scale** — a lever whose stops are *one ruler
+The 16 left are four shapes, and naming which one a lesson is comes
+before calling it a gap — each scene says which, in a comment that begins
+`// R7c — LEFT STILL ON PURPOSE:`. **A reaction that would give the answer away**
+(R7d): a `sort` moves `pickPos` while the chip is being dragged, so a table that
+changes the picture over the right bin alone is the answer, shown mid-drag. **A ladder that is not a scale** — a lever whose stops are *one ruler
 pressing down* · *an outside power* · *the many closing in* has no quantity behind
 it, so any monotone track lies at two of the three settings, and A1 outranks R7c.
 **A track that is deliberately monotone** — `metaphysics2`'s `gone` carries a
@@ -3101,7 +3120,13 @@ worst frame 10.9 → 8.6 units.
 > shot list is repaired and one-per-beat, but what a reader sees in that lesson is
 > the tour, and the arc is decoration until the scene draws something smaller.
 
-> **AND `make:tours` NOW REFUSES TO WRITE AT ALL, WHICH IS A GENERATOR AND A
+> **FIXED 16 SEP 2026 (K18): the generator now asks the camera.** `lessonTours` takes a
+> `followOk` predicate and make-tours passes one that runs `checkTour` on the candidate
+> follow; a follow the camera would reject is not offered and the beat takes its static
+> framing. The table regenerates again, and the thirty takeover lessons have stations.
+> The diagnosis below was right, and it is kept for the next rule with two readers.
+>
+> **AND `make:tours` REFUSED TO WRITE AT ALL, WHICH WAS A GENERATOR AND A
 > VALIDATOR DISAGREEING ABOUT ONE NUMBER.** Finishing the takeover re-measured
 > thirty lessons and re-ran `make:wardrobe`, which reshuffled costumes (inserting
 > thirty lessons changes every neighbour relationship) and corrected over a thousand
@@ -3656,7 +3681,7 @@ from the lead's neighbours, which is all it can know. It cannot know the BAND.
 top hat pokes seven units above that lesson's band, and nothing in the component
 could have seen it.
 
-**AND A SECOND FIGURE WALKS IN, IN 27 LESSONS (AA8).** He arrives on the beat
+**AND A SECOND FIGURE WALKS IN, IN 31 LESSONS (AA8).** He arrives on the beat
 before a `poll` or a `split` and is standing there when the question is asked —
 the person who holds the OTHER position, which is what keeps A1 true and makes him
 an argument rather than a cameo. **Which lessons is taken from STRUCTURE, never
@@ -3710,8 +3735,8 @@ the head mostly in X and judging it on `y` alone under-reads it by half.
 
 That is group **AB** of the rule book, and the point of it is that **he is
 learning too** — not presenting the material, but the other student. 1,113
-authored thoughts, 279 of them shown, plus a line back on an answer wherever one
-can sit near his head without touching it or a word (316 of them).
+authored thoughts, 272 of them shown, plus a line back on an answer wherever one
+can sit near his head without touching it or a word (314 of them).
 
 **THE THIRTY LESSONS THAT FINISHED THE TAKEOVER CARRY NO THOUGHT LINES**, which is
 part of why 94 lessons show none. `say` is AUTHORED and the
@@ -4161,6 +4186,74 @@ this. Those beats need the SCENE to change, not the figure.
 > `make:thoughts` after that, because a head that now sways further closes the gap
 > under a bubble: 26 of them dropped under the 10-unit floor.
 
+### The pen marks what the voice is naming (group AE)
+
+On a tap where the scene's art holds, the PLAYER draws one hand-drawn mark — a ring,
+an underline, brackets, a box or an arrow — round the stage label the narration names,
+as the voice reaches the word (`StageMark.tsx`, `data/lessonMarks.ts`). It is the
+teacher's pen at a board: Mayer's signalling, which is what transfers from Imprint's
+"every card earns one event" without seven illustrators. **69 marks in
+60 lessons.** `make:marks` writes the table and `check:marks` re-derives it
+from one set of rules in `scripts/lib/marks.mjs`; `countertest-marks` stages each.
+
+- **Only a still tap, only a label the voice names, never the coming answer.** The
+  matcher paired one label in six wrongly on its first run ("fits the web" ringed while
+  the voice defined a different theory), which is why common words never carry a match
+  alone. A mark on the wrong thing is worse than none.
+- **The PEN is tested, not its box.** The must-box probe records leaves, so the plates
+  words sit on were invisible offline, and the first render laid an underline along a
+  plate's border and a ring through a tick box. `scripts/audit-marks.mjs` records every
+  painted box near each candidate in a browser — border width and corner radii
+  included, stamped with the must-box stamp — and the drawn path, seeded as StageMark
+  seeds it, must stay off every word and every edge. A label on a plate is marked round
+  the plate. That audit cost 161 → 110 marks, and the 51 were all faults nothing
+  offline could see. The same day's re-measure of 56 lessons took it to 91, and the
+  visibility reading below to 69: the
+  openers draw more now, and the regenerated tours hold a pushed shot on more still
+  beats. `MARKS_WHY=1 node scripts/make-marks.mjs` prints every refusal by style.
+- **A Python heredoc wrote a backspace byte into `/\bcamera=\{/`**, so every scene
+  read as camera-less and 43 marks were placed outside the shot. Found with `od -c`.
+  Write regexes with the editor, never through a shell (§ "Bash eats backslashes").
+- The pen is EMBER_INK on a PAPER halo, one at a time, and the bubble switch in
+  `tourFlag.ts` turns marks off for the measuring harness too.
+- **And the label has to be ON SCREEN (AE7).** The must-box probe records a word at any
+  opacity, so the first table underlined empty paper in `metaphysics-being-10`, on two
+  beats where REDNESS had not faded in yet. The audit now reads the label's real
+  opacity where the table says it is, and a mark under 0.5 is refused and fails the check.
+
+### The working shelf, and the prop poses that could not breathe (N17)
+
+N16 left every pose that works at a prop frozen, because a living hold takes the hand
+off the board. Acts **169–182** are the answer: each is its source pose alive — the
+working hand stays where the source put it, and what moves is the work (strokes, taps,
+a load shifting, a crouch breathing) and the weight. They are in `STILL_TWIN` and
+`LIVING_RUN`; `liven-lessons --runs` and `liven-still` applied them (and `liven-still`
+now livens BOTH figures of a two-figure scene instead of skipping it). Two finds on the
+way: **`holdsARun` stopped at 199**, so the second living shelf (held 256–267) counted as
+frozen everywhere, and acts 29–55 loop on the clock too; and **`liven-lessons` with no
+flag WRITES** — its dry run is `--dry` — which placed sixty jokes nobody asked for
+until the 90 scripts were restored from HEAD.
+
+### Four brawlers froze after the first tap (L9)
+
+`politicalScene`'s citizens shared ONE `useHeld()` and blended `carryFrom` by `auth`:
+`carryFrom` returns the pose captured at the beat change for the WHOLE beat, so from the
+second tap all four stood in the last one's pose. `ethics31Scene` weighted it by the
+climb and froze the same way on every beat without one. L1 cannot see a frozen figure —
+it is the smoothest figure there is — so `check:smooth` now holds L9 statically.
+
+### Every tap of the openers changes the picture (N18)
+
+The first three lessons of each branch are the ones a new reader judges the app by. On
+16 Sep 2026 every FROZEN tap in them got its own scene event, chosen from that beat's
+words: `political-political-1` stages the state of nature arriving (neighbours → squaring
+up → the brawl, with the ledger, fear and headline appearing as named) and an unsigned
+CONTRACT after the covenant; `ethics-ethics-1` writes "about your own conduct", drops
+FOR/AGAINST weights into the balance, turns ORIGIN? to DISPUTED, lights the YOU column
+and grows a seedling into FLOURISHING. The ledger's ANIMAL column became the drag's own
+reading (R7c). Across the corpus `check:idle` counts the taps on which nothing moves at
+all — **0**, from 289 two days earlier, and `DEAD_TAPS_BUDGET` holds it there.
+
 ### The stage is coloured now, at exactly the grey's luminance
 
 > *"I want the visuals above the words to look really good, like Imprint's app."*
@@ -4207,11 +4300,18 @@ candy; mid plus saturated is rich.
 > and call a file clean: normalise to LF after any restore here, and check with
 > `file`.
 >
-> **237 scenes use STONE, 244 use RULE and FOUR use SHADE.** The tonal pass gave
-> the corpus a light mass and stopped, so the depth ramp has three rungs and the
-> corpus uses two — a mass with no shaded side is a shape, not an object. That is
-> the next thing to spend on, and it is why the hued SHADE is exported in the same
-> breath as the rest.
+> **AND THE THIRD RUNG IS A LIP (T7).** 237 scenes used STONE, 244 used RULE and four
+> used SHADE — a mass with no shaded side is a shape, not an object. Every STONE plate
+> now stands on a hard SHADE edge three units below it, the way the answer plates under
+> the words stand on theirs: 455 plates in 231 scenes, by `scripts/lip-stage.mjs`.
+> **It is a `boxShadow`, not a View**, and that is the whole of why it was affordable:
+> RN 0.85 has only the New Architecture, where `boxShadow` renders on Android and iOS,
+> react-native-web passes it through as CSS, and a shadow moves no layout and no box —
+> so `scripts/restamp-lip.mjs` re-stamped every scene on a two-part proof instead of a
+> re-measure. This is not the `shadow*` sweep §12 defers; nothing already drawn was
+> restyled. `check:shade` runs the codemod as its rule. **And the first render showed
+> no lips at all** — Metro's watcher had missed some of 231 simultaneous edits and was
+> serving a mix of old and new scene modules; `--clear` fixed it (§21).
 
 ### The branch road — the same rig, outside a lesson
 

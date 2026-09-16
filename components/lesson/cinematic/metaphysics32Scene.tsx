@@ -20,7 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // THE APP'S FIRST ORBIT, and the answer targets are three NUMBERS — the reader answers
 // by counting what is in front of them (E33). Nothing in the frame ever breaks the
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
   orb: {
     position: 'absolute',
     left: UNI_CX - SPH_R, top: UNI_CY - SPH_R, width: SPH_R * 2, height: SPH_R * 2,
-    borderRadius: SPH_R, borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    borderRadius: SPH_R, borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   tag: {
@@ -226,7 +227,7 @@ const styles = StyleSheet.create({
 
   plate: { position: 'absolute', top: PLATE_T, width: PLATE_W, height: PLATE_H },
   plateInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   plateText: {

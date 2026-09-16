@@ -11,6 +11,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic22Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
+  pickAt,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -21,7 +22,8 @@ import { Shapes, ell, bar, tri, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A claim card over a field of eighteen cats, stage right; the figure downstage left.
 //
@@ -98,12 +100,26 @@ const DIR = dirsFrom(X, 1);
 const CLAIM = BEATS.map((b) => b.claim ?? 0);
 const FIELD = BEATS.map((b) => b.field ?? 0);
 
+// R7c — THE CHIP HOLLOWS AS MANY CATS AS ITS BIN SAYS IT TAKES. The sort asks what is
+// needed to refute ALL CATS ARE BLACK, and each bin has its own true picture, read in
+// the author's order:
+//   one exception      → 1   "one cat that isn't black" — the hollow cat already drawn
+//   many exceptions    → 7   "a large number of cats that aren't black"
+//   the opposite claim → 18  "proof that no cat is black" — every cat hollow
+// The claim is struck under all three, because each of them would refute it. The chip
+// rests on the middle bin, whose picture is a wrong answer's, never the answer's alone.
+const HOLLOW_AT = [1, 7, 18];
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
+/** After the first, the order the cats go hollow in: scattered, so MANY reads as spread. */
+const HOLLOW_ORDER = [3, 13, 1, 16, 10, 5, 15, 0, 11, 6, 17, 2, 12, 7, 14, 4, 9];
+
 function dotLeft(k: number) { return BD_L + (k % COLS) * (DOT + DOT_GX); }
 function dotTop(k: number) { return FIELD_T + Math.floor(k / COLS) * (DOT + DOT_GY); }
 
-export default function Logic22Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic22Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(4);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -132,6 +148,8 @@ export default function Logic22Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
       field: carry(cv, 2, n, FIELD[p], FIELD[n], tr, fieldFade ? grow : 1),
       odd: oddOn ? (oddFade ? grow : 1) : 0,
       dead: deadOn ? (deadFade ? grow : 1) : 0,
+      // How many MORE cats are hollow than the one: the chip's bin, on its own beat only.
+      more: carry(cv, 3, n, 0, reacting ? pickAt(HOLLOW_AT, pickPos.value) - 1 : 0, tr),
     };
   });
 
@@ -164,6 +182,7 @@ export default function Logic22Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
         <Animated.View style={[styles.cat, { left: dotLeft(ODD), top: dotTop(ODD) }, oddStyle]}>
           <Shapes parts={CAT_BODY} grow={-1} color={PAPER} />
         </Animated.View>
+        {HOLLOW_ORDER.map((k, r) => <Hollow key={k} S={SCENE} cell={k} rank={r + 1} />)}
       </Animated.View>
 
       {showPick &&
@@ -196,6 +215,16 @@ export default function Logic22Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
   );
 }
 
+/** A cat drawn hollow over its own cell once the sort's bin asks for more than one (R7c). */
+function Hollow({ S, cell, rank }: { S: { value: { more: number } }; cell: number; rank: number }) {
+  const st = useAnimatedStyle(() => ({ opacity: Math.max(0, Math.min(1, S.value.more - (rank - 1))) }));
+  return (
+    <Animated.View style={[styles.cat, { left: dotLeft(cell), top: dotTop(cell) }, st]}>
+      <Shapes parts={CAT_BODY} grow={-1} color={PAPER} />
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 24, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
@@ -206,7 +235,7 @@ const styles = StyleSheet.create({
 
   claim: {
     position: 'absolute', left: BD_L, top: CLAIM_T, width: BD_W, height: CLAIM_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   claimText: {
@@ -223,7 +252,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', left: BD_L, width: BD_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {

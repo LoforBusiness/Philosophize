@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO PIERS A FIXED DISTANCE APART, AND A PLANK RUNNING OUT FROM THE FIRST.
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
 
   pier: {
     position: 'absolute', top: PIER_Y, width: PIER_W, height: PIER_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
   },
   sill: { position: 'absolute', top: PIER_Y + PIER_H, width: PIER_W + 12, height: 4, backgroundColor: INK },
   pierText: {
@@ -186,11 +187,11 @@ const styles = StyleSheet.create({
   // the pier it starts from, and a bar that vanishes entirely reads as a fault.
   stub: {
     position: 'absolute', left: GAP_X - 20, top: PLANK_Y, width: 20, height: PLANK_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
   },
   plank: {
     position: 'absolute', left: GAP_X, top: PLANK_Y, height: PLANK_H,
-    backgroundColor: STONE, borderTopWidth: 2, borderBottomWidth: 2, borderRightWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderTopWidth: 2, borderBottomWidth: 2, borderRightWidth: 2, borderColor: INK,
   },
 
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },

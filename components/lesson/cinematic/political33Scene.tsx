@@ -68,6 +68,7 @@ export default function Political33Scene({ clock, bt, bi, i, dragPos, gazeX, gaz
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       open: live ? dragPos.value : carry(cv, 0, n, OPEN[p], OPEN[n], swing),
       threat: carry(cv, 1, n, THREAT[p], THREAT[n], tr),
+      t,
     };
   });
 
@@ -79,6 +80,10 @@ export default function Political33Scene({ clock, bt, bi, i, dragPos, gazeX, gaz
     const w = LEAF_W * (1 - 0.88 * SCENE.value.open);
     return { width: w, left: GATE_R - w };
   });
+  // A banner carried by a movement is never still: it sways on the top of its pole.
+  const bannerSway = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${Math.sin(SCENE.value.t * 1.3) * 3}deg` }],
+  }));
   const threatStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.threat * SCENE.value.open,
   }));
@@ -93,7 +98,7 @@ export default function Political33Scene({ clock, bt, bi, i, dragPos, gazeX, gaz
 
       {/* Behind the doors, so a shut door hides it. */}
       <Animated.View style={[styles.threat, threatStyle]} pointerEvents="none">
-        <View style={styles.banner} />
+        <Animated.View style={[styles.banner, bannerSway]} />
         <View style={styles.pole} />
       </Animated.View>
 
@@ -140,7 +145,7 @@ const styles = StyleSheet.create({
   // A MID TONE, never ink. §17: nothing near-black may stand at the walking figure's
   // own height, or the man in front of it stops being readable as a man.
   threat: { position: 'absolute', left: 230, top: WALL_T + 26, width: 32, alignItems: 'center' },
-  banner: { width: 30, height: 34, backgroundColor: SOFT, borderRadius: 2 },
+  banner: { width: 30, height: 34, backgroundColor: SOFT, borderRadius: 2, transformOrigin: '50% 100%' },
   pole: { width: 3, height: 60, backgroundColor: SOFT },
 });
 

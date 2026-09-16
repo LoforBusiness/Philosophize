@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HOW SURE YOU ARE, DRAWN AS LENGTH.
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
 
   conc: {
     position: 'absolute', left: L_X, top: CONC_Y, width: L_W, height: CONC_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   concText: {
     position: 'absolute', left: L_X + 6, top: CONC_Y + 5, width: L_W - 12,
@@ -238,7 +239,7 @@ const styles = StyleSheet.create({
 
   hand: {
     position: 'absolute', left: HAND_X, top: HAND_Y, width: HAND_W, height: HAND_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   handText: {
     position: 'absolute', left: HAND_X, top: HAND_Y + 20, width: HAND_W, textAlign: 'center',

@@ -18,7 +18,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // Three charts and a figure caught between them.
 //
@@ -127,6 +128,25 @@ const ARC = (() => {
 })();
 const CUTB = BEATS.map((b) => b.cut ?? 0);
 
+// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
+// Four taps used to hold a frame. Each now writes its own words onto a chart:
+//   · "Why would people seek out stories that make them suffer?" — the graph asks
+//     WHY SUFFER? in its empty upper left, and keeps asking while Aristotle answers;
+//   · "katharsis, a term Aristotle never explained" — the fall's label arrives as
+//     KATHARSIS ?, and trades the question mark for its arrow once the fall is drawn;
+//   · "people enjoy accurate images of painful things" — a frame closes round the
+//     mask, and its caption becomes IMAGE OF PAIN;
+//   · "music shapes character before reason develops" — the meter's caption,
+//     MUSIC ARRIVES BEFORE REASON, writes in on the beat that says it.
+// And the meter no longer prints REGULATED — NOT BANNED over the question that asks
+// exactly that (group O): it waits for the answer.
+const WHY = BEATS.map((b) => b.why ?? 0);
+const NAMED = BEATS.map((b) => b.named ?? 0);
+const FRAMED = BEATS.map((b) => b.framed ?? 0);
+const EARLY = BEATS.map((b) => b.early ?? 0);
+/** The graded drag about Plato's regulation — its caption is the scene's own verdict. */
+const CUT_Q = BEATS.findIndex((b) => !!b.interact?.drag);
+
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
 // pushes close on a quote, and PULLS BACK to the whole band on a question or a
@@ -141,11 +161,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics3'));
 
-export default function Aesthetics3Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Aesthetics3Scene({ clock, bt, bi, i, qv, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(6);
-  const cur = BEATS[i];
+  const cv = useCarry(10);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -166,6 +185,13 @@ export default function Aesthetics3Scene({ clock, bt, bi, i, dragPos, gazeX, gaz
       maskOn: ease01(clamp01((carry(cv, 3, n, MASK_ON[p], MASK_ON[n], tr) - 0.55) / 0.45)),
       meterOn: ease01(clamp01((carry(cv, 4, n, METER_ON[p], METER_ON[n], tr) - 0.55) / 0.45)),
       willOn: ease01(clamp01((carry(cv, 5, n, WILL_ON[p], WILL_ON[n], tr) - 0.55) / 0.45)),
+      why: carry(cv, 6, n, WHY[p], WHY[n], tr),
+      named: carry(cv, 7, n, NAMED[p], NAMED[n], tr),
+      framed: carry(cv, 8, n, FRAMED[p], FRAMED[n], tr),
+      early: carry(cv, 9, n, EARLY[p], EARLY[n], tr),
+      // REGULATED — NOT BANNED is the answer to the drag, so it arrives only once
+      // the drag is answered, and stays for the summary that follows.
+      reg: n === CUT_Q ? ease01(clamp01(qv.value)) : n > CUT_Q && CUT_Q >= 0 ? 1 : 0,
       t,
     };
   });
@@ -176,14 +202,44 @@ export default function Aesthetics3Scene({ clock, bt, bi, i, dragPos, gazeX, gaz
   const peakStyle = useAnimatedStyle(() => ({
     opacity: ease01(clamp01((SCENE.value.arc - 0.72) / 0.2)) * SCENE.value.arcOn,
   }));
-  const tailStyle = useAnimatedStyle(() => ({
-    opacity: ease01(clamp01((SCENE.value.arc - 0.85) / 0.13)) * SCENE.value.arcOn,
+  // KATHARSIS is named before its fall is drawn; the word stays, and its "?" hands
+  // over to the arrow once the curve has actually come down.
+  const kathWord = useAnimatedStyle(() => {
+    const tail = ease01(clamp01((SCENE.value.arc - 0.85) / 0.13));
+    return { opacity: Math.max(tail, SCENE.value.named) * SCENE.value.arcOn };
+  });
+  const kathAsk = useAnimatedStyle(() => {
+    const tail = ease01(clamp01((SCENE.value.arc - 0.85) / 0.13));
+    return { opacity: SCENE.value.named * (1 - clamp01(tail * 2)) * SCENE.value.arcOn };
+  });
+  const tailStyle = useAnimatedStyle(() => {
+    const tail = ease01(clamp01((SCENE.value.arc - 0.85) / 0.13));
+    return { opacity: clamp01(tail * 2 - 1) * SCENE.value.arcOn };
+  });
+  const whyStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.why * SCENE.value.arcOn,
+    transform: [{ translateY: (1 - SCENE.value.why) * -5 }],
   }));
   const maskStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.maskOn,
     transform: [{ translateY: (1 - SCENE.value.maskOn) * 10 }],
   }));
+  // The frame settles onto the mask from slightly larger, the way a frame is lowered
+  // over a picture; the caption hands over through a gap, never a blend.
+  const frameStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.framed,
+    transform: [{ scale: 1.06 - 0.06 * SCENE.value.framed }],
+  }));
+  const capMask = useAnimatedStyle(() => ({ opacity: 1 - clamp01(SCENE.value.framed * 2) }));
+  const capImage = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.framed * 2 - 1) }));
   const meterStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.meterOn }));
+  const earlyStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.meterOn * SCENE.value.early * (1 - clamp01(SCENE.value.reg * 2)),
+    transform: [{ translateX: (1 - SCENE.value.early) * -8 }],
+  }));
+  const regStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.meterOn * clamp01(SCENE.value.reg * 2 - 1),
+  }));
   const willStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.willOn }));
 
   return (
@@ -199,7 +255,10 @@ export default function Aesthetics3Scene({ clock, bt, bi, i, dragPos, gazeX, gaz
       <Animated.View style={[styles.peakGuide, peakStyle]} pointerEvents="none" />
       <Animated.View style={[styles.peakRing, peakStyle]} pointerEvents="none" />
       <Animated.Text style={[styles.peakLabel, peakStyle]}>RECOGNITION</Animated.Text>
-      <Animated.Text style={[styles.footR, tailStyle]}>KATHARSIS ↓</Animated.Text>
+      <Animated.Text style={[styles.footR, kathWord]}>KATHARSIS</Animated.Text>
+      <Animated.Text style={[styles.footMark, kathAsk]}>?</Animated.Text>
+      <Animated.Text style={[styles.footMark, tailStyle]}>↓</Animated.Text>
+      <Animated.Text style={[styles.whyTag, whyStyle]}>WHY SUFFER?</Animated.Text>
 
       {/* ── SCHOPENHAUER'S LADDER (the arc's slot, on the music beats) ───────── */}
       <Animated.View style={[styles.willWrap, willStyle]} pointerEvents="none">
@@ -224,13 +283,16 @@ export default function Aesthetics3Scene({ clock, bt, bi, i, dragPos, gazeX, gaz
       <Animated.Text style={[styles.meterTitle, meterStyle]}>THE MODES</Animated.Text>
       {MODES.map((m, k) => <Bar key={m} S={SCENE} k={k} label={m} />)}
       <Animated.View style={[styles.meterBase, meterStyle]} pointerEvents="none" />
-      <Animated.Text style={[styles.meterFoot, meterStyle]}>
-        {(cur.cut ?? 0) > 0 ? 'REGULATED — NOT BANNED' : 'MUSIC ARRIVES BEFORE REASON'}
-      </Animated.Text>
+      <Animated.Text style={[styles.meterFoot, earlyStyle]}>MUSIC ARRIVES BEFORE REASON</Animated.Text>
+      <Animated.Text style={[styles.meterFoot, regStyle]}>REGULATED — NOT BANNED</Animated.Text>
 
       {/* ── the tragic mask, in the meter's slot on the Aristotle beats ──────── */}
       <Animated.View style={[styles.maskWrap, maskStyle]} pointerEvents="none">
-        <Text style={styles.maskCap}>THE TRAGIC MASK</Text>
+        <Animated.Text style={[styles.maskCap, capMask]}>THE TRAGIC MASK</Animated.Text>
+        <Animated.Text style={[styles.maskCap, capImage]}>IMAGE OF PAIN</Animated.Text>
+        <Animated.View style={[styles.maskFrame, frameStyle]}>
+          <View style={styles.maskFrameInner} />
+        </Animated.View>
         <View style={styles.mask}>
           <View style={[styles.maskBrow, { left: 12, transform: [{ rotate: '15deg' }] }]} />
           <View style={[styles.maskBrow, { right: 12, transform: [{ rotate: '-15deg' }] }]} />
@@ -319,9 +381,25 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.2, color: SOFT,
     includeFontPadding: false,
   },
+  // KATHARSIS (72.5 wide) ends at 358, and its mark — "?" while the word is only a
+  // name, "↓" once the fall is drawn — sits in its own 12-wide box after it, where
+  // the old single string "KATHARSIS ↓" put its arrow.
   footR: {
-    position: 'absolute', left: 234, top: 342, width: 138, textAlign: 'right',
+    position: 'absolute', left: 234, top: 342, width: 124, textAlign: 'right',
     fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.2, color: INK,
+    includeFontPadding: false,
+  },
+  footMark: {
+    position: 'absolute', left: 360, top: 342, width: 12,
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, color: INK,
+    includeFontPadding: false,
+  },
+  // The graph's question, in its empty upper left: under the axis label (229…242),
+  // right of the y axis (52) and far above the curve, which is below y 290 until
+  // x 200. WHY SUFFER? measures 77 at 9.5px.
+  whyTag: {
+    position: 'absolute', left: 62, top: 254, width: 96,
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 0.8, color: INK,
     includeFontPadding: false,
   },
 
@@ -347,7 +425,7 @@ const styles = StyleSheet.create({
   },
   fromBox: {
     position: 'absolute', left: FROM_L, width: FROM_W, height: RUNG_H,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   fromBoxOn: { borderWidth: 2.5, borderColor: INK, backgroundColor: INK },
@@ -364,7 +442,7 @@ const styles = StyleSheet.create({
   },
   toBox: {
     position: 'absolute', left: TO_L, width: TO_W, height: RUNG_H,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   toBoxOn: { borderWidth: 2.5, borderColor: INK },
@@ -423,9 +501,20 @@ const styles = StyleSheet.create({
   },
   mask: {
     position: 'absolute', left: 18, top: 18, width: 84, height: 100,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
     borderTopLeftRadius: 42, borderTopRightRadius: 42,
     borderBottomLeftRadius: 38, borderBottomRightRadius: 38,
+  },
+  // A picture frame lowered round the mask: 8 units clear of it on each side and 4
+  // above, under the caption (which ends at 12.5) and 6 above the wrap's floor.
+  // Stage x 126…226, y 380…492 — the figure starts at x 296.
+  maskFrame: {
+    position: 'absolute', left: 10, top: 14, width: 100, height: 112,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 3,
+  },
+  maskFrameInner: {
+    position: 'absolute', left: 2, top: 2, right: 2, bottom: 2,
+    borderWidth: 1, borderColor: RULE, borderRadius: 2,
   },
   maskBrow: { position: 'absolute', top: 26, width: 22, height: 3, backgroundColor: INK, borderRadius: 2 },
   maskEye: { position: 'absolute', top: 36, width: 14, height: 14, borderRadius: 7, backgroundColor: INK },
@@ -444,7 +533,7 @@ const styles = StyleSheet.create({
 //          JOINTS: circles of radius STR.limb·K_FIG/2 = 7.43 centred exactly on
 //          GROUND, so ink reaches y = 507.4. The meter's caption bottoms out at
 //          500 (489 + an 11-unit line, moved down 4 to clear the mode labels — D33)
-//          and the mask at 484.
+//          and the mask at 484 (its picture frame, on beats 5–6, at 492).
 // The figure stands on GROUND = 500 with its crown near 361, and nothing is drawn
 // right of x 386. [218, 512] therefore holds every extreme on every beat with 8
 // units of margin at the top and 4.6 at the foot, and renders the scene ~2.20×

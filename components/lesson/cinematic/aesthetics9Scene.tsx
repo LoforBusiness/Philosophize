@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // Two boxes, drawn identically down to the last rule, because the lesson dies the
 // moment the reader can tell them apart by looking. One sits on a shop shelf, one
@@ -208,7 +209,7 @@ const styles = StyleSheet.create({
 
   box: {
     position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5,
   },
   boxBrand: {
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   plinth: {
     position: 'absolute', top: BOX_T + BOX_H, width: BOX_W - 20, height: STAND_B - (BOX_T + BOX_H),
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   // ABOVE the box, not under the stand — under the stand is where the figure's head
   // goes, and a caption there would be the D31 collision wearing a name badge.

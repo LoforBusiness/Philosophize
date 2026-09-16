@@ -20,7 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // Four on the left, one on the right, and a line between them.
 //
@@ -90,6 +91,9 @@ const ONE = BEATS.map((b) => b.one ?? 0);
 const X = BEATS.map((b) => b.x ?? ONE_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political9'));
 
+// R7c — LEFT STILL ON PURPOSE: a ladder that is not a scale. The bins (one ruler · an outside
+// power · the many) are three sources of oppression with no quantity behind them, so any
+// monotone track lies at two of the three, and AN OUTSIDE POWER has no picture on this stage.
 export default function Political9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
@@ -226,7 +230,7 @@ const styles = StyleSheet.create({
 
   tally: {
     position: 'absolute', left: TALLY_L, top: TALLY_T, width: TALLY_W,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', paddingVertical: 7,
   },
   tallyTag: {
@@ -250,7 +254,7 @@ const styles = StyleSheet.create({
 
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W },
   card: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },

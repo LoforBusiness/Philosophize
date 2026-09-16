@@ -20,7 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // FOUR MAPS OF ONE COAST, and the answer targets are the four panels — you answer by
 // picking a SCALE (E33). The four profiles come out of a single `coast()` function
@@ -234,7 +235,7 @@ const styles = StyleSheet.create({
 
   panel: { position: 'absolute', width: PAN_W, height: PAN_H },
   panelInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   art: { position: 'absolute', left: PAD, top: PAD, width: ART_W, height: ART_H },
   bar: { position: 'absolute', bottom: 0, backgroundColor: INK, transformOrigin: '50% 100%' },

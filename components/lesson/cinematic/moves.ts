@@ -3694,6 +3694,218 @@ export function actStance(code: number, t: number, u: number): Stance {
     };
   }
 
+  // ── 169–182 · THE WORKING SHELF ────────────────────────────────────────────
+  // Living holds for a figure whose hands are ON something. `STILL_TWIN` left every
+  // prop-work pose out, and rightly: a living hold from the first two shelves takes
+  // the hand off the board, and A1 outranks a figure that moves. So the reader kept
+  // meeting a man frozen at a board while the words advanced — 53 still beats in
+  // single-figure lessons, every one of them a pose in this list.
+  //
+  // Each of these is its source pose, alive: the WORKING HAND stays within a few
+  // units of where the source put it (the board, the load, the stamp), and the
+  // movement a reader sees is the work itself — strokes, taps, a load shifting —
+  // carried by the weight going from foot to foot. Two rates per act, so no two
+  // frames of a loop coincide (160's rule).
+  //
+  // They read `t` and ignore `u`, like 59–78 and 157–168, and they are in
+  // `CLOCK_ACTS`, so check:moves sweeps them on the clock and check:idle holds them
+  // to the READS tier a still beat needs.
+  if (code === 169) {                            // WRITING, LINE AFTER LINE — twin of rig 40
+    const along = Math.sin(t * 0.9);             // the hand travels along the line and back
+    const pen = Math.sin(t * 6.1);               // the letters
+    const lean = Math.sin(t * 0.9 + 0.4);
+    return {
+      ...s,
+      tilt: s.tilt - 0.05 + lean * 0.035,
+      neck: -0.10 + lean * 0.05,
+      bob: s.bob - Math.abs(along) * 1.2,
+      footL: { x: -5 - along * 2.2, y: 0 }, footR: { x: 5 - along * 2.2, y: 0 },
+      fistL: { x: -13 - along * 1.2, y: 6 + along * 1.4 },
+      // Along the line to the RIGHT of where rig 40 writes, never back past it: the
+      // board is in front of him, and a hand drawn in toward the face meets the head.
+      fistR: { x: 31.5 + (along + 1) * 1.9, y: -40 + pen * 1.8 + Math.sin(t * 0.43) * 1.2 },
+    };
+  }
+  if (code === 170) {                            // SIGNING IT, LOW — twin of rig 36
+    const along = Math.sin(t * 1.05);
+    const pen = Math.sin(t * 7.3);
+    return {
+      ...s,
+      tilt: s.tilt - 0.06 + along * 0.03,
+      neck: 0.10 + Math.sin(t * 0.61) * 0.05,
+      bob: s.bob - Math.abs(along) * 1.3,
+      footL: { x: -5 - along * 2.4, y: 0 }, footR: { x: 5 - along * 2.4, y: 0 },
+      fistL: { x: -13 - along * 1.0, y: 6 + along * 1.6 },
+      fistR: { x: 26 + along * 3.4, y: -2 + pen * 1.6 },
+    };
+  }
+  if (code === 171) {                            // TAPPING THE POINT — twin of rig 41
+    // One tap, a breath, another: the cube sharpens the sine into a strike with a
+    // long rest, which is the difference between tapping a point and rubbing it.
+    const tap = Math.max(0, Math.sin(t * 2.3)) ** 3;
+    const weight = Math.sin(t * 0.7);
+    return {
+      ...s,
+      tilt: s.tilt - 0.05 + weight * 0.04 + tap * 0.02,
+      neck: -0.18 + tap * 0.06 + weight * 0.03,
+      bob: s.bob - Math.abs(weight) * 1.4,
+      footL: { x: -5 - weight * 2.6, y: 0 }, footR: { x: 5 - weight * 2.6, y: 0 },
+      fistL: { x: -13 - weight * 1.4, y: 6 + weight * 1.8 },
+      fistR: { x: 32 + tap * 5, y: -44 + weight * 1.0 },
+    };
+  }
+  if (code === 172) {                            // CARRYING THE LOAD — twin of rig 42
+    const shift = Math.sin(t * 1.1);
+    const heft = Math.max(0, Math.sin(t * 0.47) - 0.7) * 6;   // now and then, a hitch
+    return {
+      ...s,
+      tilt: s.tilt + 0.04 + shift * 0.04,
+      bob: s.bob - 2 - Math.abs(shift) * 2.0 + heft * 0.6,
+      neck: s.neck + 0.06 + shift * 0.05,
+      footL: { x: -5 - shift * 3.0, y: 0 }, footR: { x: 5 - shift * 3.0, y: 0 },
+      fistL: { x: 18 + shift * 1.2, y: 2 + Math.abs(shift) * 2.0 - heft },
+      fistR: { x: 26 + shift * 1.2, y: 2 + Math.abs(shift) * 2.0 - heft },
+    };
+  }
+  if (code === 173) {                            // HOLDING IT CLOSE — twin of rig 37
+    // The free hand sits at 13, not 10: rig 37 put both forearms inside the trunk
+    // (rule 1b), and the thing he caught is held at the working fist either way.
+    const rock = Math.sin(t * 0.8);
+    return {
+      ...s,
+      tilt: s.tilt - 0.04 + rock * 0.05,
+      neck: s.neck + 0.12 + Math.sin(t * 0.53) * 0.06,
+      bob: s.bob - Math.abs(rock) * 1.6,
+      footL: { x: -5 - rock * 2.6, y: 0 }, footR: { x: 5 - rock * 2.6, y: 0 },
+      fistL: { x: -7 - rock * 1.2, y: 5 + rock * 2.2 },
+      fistR: { x: 13 + rock * 1.0, y: -14 + rock * 1.8 },
+    };
+  }
+  if (code === 174) {                            // CUPPED HANDS, KEEPING IT — twin of rig 31
+    const lift = Math.sin(t * 0.72);
+    const look = Math.sin(t * 0.37);
+    return {
+      ...s,
+      tilt: s.tilt - 0.03 + lift * 0.04,
+      neck: 0.04 + 0.08 + look * 0.06,
+      bob: s.bob - Math.abs(lift) * 1.5,
+      footL: { x: -5 - lift * 2.4, y: 0 }, footR: { x: 5 - lift * 2.4, y: 0 },
+      fistL: { x: 14 + lift * 0.9, y: -2 - lift * 2.4 },
+      fistR: { x: 24 + lift * 0.9, y: -6 - lift * 2.4 },
+    };
+  }
+  if (code === 175) {                            // A FINGER STILL RAISED — twin of rig 6
+    // The point has been made and the hand stays up with it, beating the stress of
+    // each clause, as a speaker's does.
+    const beat = Math.max(0, Math.sin(t * 2.0)) ** 2;
+    const weight = Math.sin(t * 0.66);
+    return {
+      ...s,
+      tilt: s.tilt + weight * 0.05,
+      neck: -0.08 + weight * 0.05 - beat * 0.04,
+      bob: s.bob - Math.abs(weight) * 1.5,
+      footL: { x: -5 - weight * 2.6, y: 0 }, footR: { x: 5 - weight * 2.6, y: 0 },
+      fistL: { x: -13 - weight * 1.4, y: 4 + weight * 2.0 },
+      fistR: { x: 22.5 + weight * 1.0, y: -28 - beat * 3.4 },
+    };
+  }
+  if (code === 176) {                            // LOOKING UP AT WHAT HE REACHED — twin of rig 24
+    const drift = Math.sin(t * 0.5);
+    const shift = Math.sin(t * 0.83);
+    return {
+      ...s,
+      tilt: s.tilt - 0.02 + shift * 0.05,
+      neck: -0.06 - 0.10 + drift * 0.08,
+      bob: s.bob - Math.abs(shift) * 1.5,
+      footL: { x: -5 - shift * 2.5, y: 0 }, footR: { x: 5 - shift * 2.5, y: 0 },
+      fistL: { x: -16 - shift * 1.2, y: -4 + shift * 2.0 },
+      fistR: { x: 16 - shift * 1.2, y: -6 + drift * 2.2 },
+    };
+  }
+  if (code === 177) {                            // STAMP IN HAND, READY — twin of rig 26
+    const heft = Math.sin(t * 1.3);
+    const weight = Math.sin(t * 0.61);
+    return {
+      ...s,
+      tilt: s.tilt - 0.03 + weight * 0.05,
+      neck: -0.04 + weight * 0.05,
+      bob: s.bob - Math.abs(weight) * 1.5,
+      footL: { x: -5 - weight * 2.5, y: 0 }, footR: { x: 5 - weight * 2.5, y: 0 },
+      fistL: { x: -13 - weight * 1.2, y: 6 + weight * 1.8 },
+      fistR: { x: 24 + heft * 1.2, y: -12 + heft * 2.6 },
+    };
+  }
+  if (code === 178) {                            // CROUCHED BY IT — twin of rig 43
+    const breathe = Math.sin(t * 0.9);
+    const check = Math.sin(t * 0.41);
+    return {
+      ...s,
+      tilt: s.tilt - 0.14 + breathe * 0.03,
+      neck: 0.14 + check * 0.08,
+      bob: s.bob - 9 + breathe * 1.4,
+      footL: { x: -6 - check * 1.8, y: 0 }, footR: { x: 6 - check * 1.8, y: 0 },
+      fistL: { x: 16 + check * 1.6, y: 10 + breathe * 1.2 },
+      fistR: { x: 24 + check * 1.6, y: 12 + breathe * 1.2 - Math.max(0, Math.sin(t * 1.7)) * 2.2 },
+    };
+  }
+  if (code === 179) {                            // STILL HOLDING IT UP — twin of rig 20
+    const lift = Math.sin(t * 0.75);
+    return {
+      ...s,
+      tilt: s.tilt - 0.02 + lift * 0.04,
+      neck: s.neck - 0.06 + Math.sin(t * 0.47) * 0.07,
+      bob: s.bob - Math.abs(lift) * 1.5,
+      footL: { x: -5 - lift * 2.5, y: 0 }, footR: { x: 5 - lift * 2.5, y: 0 },
+      fistL: { x: -13 - lift * 1.2, y: 6 + lift * 1.8 },
+      fistR: { x: 20 + lift * 1.0, y: -18 - lift * 2.6 },
+    };
+  }  if (code === 180) {                            // COWERING, STILL SHAKING — twin of rig 18
+    // The tremble rig 18 plays once and lets die, kept going at half strength, with
+    // the breath coming fast; the crouch never rises.
+    const shake = Math.sin(t * 19) * 0.9 + Math.sin(t * 13.3) * 0.5;
+    const breath = Math.sin(t * 2.4);
+    const glance = Math.sin(t * 0.55);
+    return {
+      ...s,
+      tilt: 0.12 + breath * 0.03 + glance * 0.04,
+      neck: 0.10 + glance * 0.10,
+      bob: -14 + breath * 2.0,
+      footL: { x: -11 - glance * 2.6, y: 0 }, footR: { x: 11 - glance * 2.6, y: 0 },
+      fistL: { x: -12 + shake * 0.8 - glance * 1.2, y: -16 + breath * 2.4 },
+      fistR: { x: 12 + shake * 0.8 - glance * 1.2, y: -16 + breath * 2.4 },
+    };
+  }
+  if (code === 181) {                            // KNEELING BESIDE THEM, STILL THERE — twin of rig 49
+    const breath = Math.sin(t * 0.9);
+    const reach = Math.sin(t * 0.48);
+    return {
+      ...s,
+      tilt: -0.02 + reach * 0.07,
+      neck: 0.12 + Math.sin(t * 0.37) * 0.09,
+      // The breath only LIFTS the kneel: rig 49 already has the knee on the floor.
+      bob: -18 + (breath + 1) * 1.1,
+      footL: { x: 15, y: 0 }, footR: { x: -11, y: 0 },
+      fistL: { x: 20 + reach * 3.4, y: 4 + breath * 2.2 },
+      fistR: { x: 27 + reach * 3.4, y: 0 + breath * 2.2 },
+    };
+  }
+  if (code === 182) {                            // GRIPPING THE LEVER — twin of rig 27
+    // Both hands stay on the grip; the body leans into it and eases off, as someone
+    // does who has pulled a lever and is holding it there.
+    const lean = Math.sin(t * 0.8);
+    const strain = Math.max(0, Math.sin(t * 1.9)) ** 2;
+    return {
+      ...s,
+      tilt: s.tilt - 0.10 + lean * 0.05,
+      neck: 0.06 + lean * 0.06,
+      bob: s.bob - Math.abs(lean) * 1.8 - strain * 1.2,
+      footL: { x: -5 - lean * 3.0, y: 0 }, footR: { x: 5 - lean * 3.0, y: 0 },
+      fistL: { x: 18 + lean * 1.5, y: 4 + strain * 2.2 },
+      fistR: { x: 26 + lean * 1.5, y: 8 + strain * 2.2 },
+    };
+  }
+
+
   return s;
 }
 
@@ -3720,7 +3932,7 @@ export function actStance(code: number, t: number, u: number): Stance {
 //   100+    one-shot actions from this file, HELD at full extension
 //           (100 → act 1 … 219 → act 120; the loose-arm and dance set is
 //           128–139, and the living holds — the ones a beat can actually show —
-//           are 158–177)
+//           are 158–177, 256–267 and the working shelf 268–281)
 //   200+    prop actions from interact.ts are NOT here — a prop action needs an
 //           object, so it belongs to the scene that drew one.
 //   300+    the same actions PLAYED ONCE as the beat opens, then settled

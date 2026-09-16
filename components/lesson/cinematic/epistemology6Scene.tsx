@@ -17,7 +17,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // Skepticism drawn as METHOD, not mood.
 //
@@ -266,7 +267,7 @@ const styles = StyleSheet.create({
     position: 'absolute', top: PAN_T, width: PAN_W, height: PAN_H,
     borderWidth: 2.5, borderColor: INK, borderTopWidth: 0,
     borderBottomLeftRadius: 8, borderBottomRightRadius: 8,
-    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   panT: {
     fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 0.4, color: INK, includeFontPadding: false,
@@ -277,7 +278,7 @@ const styles = StyleSheet.create({
   // ── the boast that breaks itself ────────────────────────────────────────────
   claim: {
     position: 'absolute', left: 240, top: 402, width: 152, height: 60,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   claimT: {

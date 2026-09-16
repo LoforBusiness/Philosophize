@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A SCREEN upper right showing a masterfully-made film, and directly under it a
 // second panel reading WHAT IT ASKS YOU TO FEEL. A shutter runs on a track across
@@ -272,7 +273,7 @@ const styles = StyleSheet.create({
 
   verdict: {
     position: 'absolute', left: VRD_L, top: VRD_T, width: VRD_W, height: VRD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   verdictText: {
@@ -314,7 +315,7 @@ const styles = StyleSheet.create({
   slat: { position: 'absolute', left: 26, right: 10, height: 2, backgroundColor: PAPER, opacity: 0.5 },
   rail: {
     position: 'absolute', left: RAIL_L, top: 8, width: RAIL_W, height: PAN_H - 16,
-    borderRadius: 3, backgroundColor: STONE,
+    borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
 
   board: { position: 'absolute', left: BRD_L, width: BRD_W },

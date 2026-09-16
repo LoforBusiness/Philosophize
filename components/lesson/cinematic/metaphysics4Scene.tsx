@@ -18,7 +18,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A LEDGER of failed attempts to name nothing, and the void that keeps refuting
 // them. Parmenides' trap drawn as information rather than mood.
@@ -282,7 +283,7 @@ const styles = StyleSheet.create({
   },
   cellB: {
     position: 'absolute', left: CELL_B_L, top: 0, width: CELL_B_W, height: ROW_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   cellBText: {
@@ -295,7 +296,7 @@ const styles = StyleSheet.create({
 
   frozenBox: {
     position: 'absolute', left: LED_L, top: 400, width: LED_W, height: 40,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   frozenText: { fontFamily: 'Inter_700Bold', fontSize: 14.5, letterSpacing: 1, color: INK, includeFontPadding: false },

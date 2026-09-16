@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A STACK COMING OFF A POST, AND WHAT IS UNDER THE LAST CARD.
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
 
   card: {
     position: 'absolute', left: CARD_X, width: CARD_W, height: CARD_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
     justifyContent: 'center', paddingLeft: 8,
   },
   cardText: {
@@ -247,7 +248,7 @@ const styles = StyleSheet.create({
   twinPeg: { position: 'absolute', left: TWIN_X + 24, top: PEG_Y, width: 6, height: PEG_H, backgroundColor: INK, borderRadius: 2 },
   twinCard: {
     position: 'absolute', left: TWIN_X, width: PILE_W, height: CARD_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
     justifyContent: 'center', paddingLeft: 6,
   },
   twinText: {

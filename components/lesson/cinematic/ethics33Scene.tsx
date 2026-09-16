@@ -15,7 +15,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // TWELVE COINS THAT MOVE ACROSS UNDER THE READER'S THUMB.
 //
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
 
   coin: {
     position: 'absolute', width: COIN_W, height: COIN_H, borderRadius: 3,
-    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
 });
 

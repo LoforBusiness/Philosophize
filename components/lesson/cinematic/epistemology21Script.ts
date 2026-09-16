@@ -32,13 +32,13 @@ export const BEATS: Epi21Beat[] = [
     dur: 1.8,
   },
   {
-    p: 41, x: 168, dial: 1,
+    p: 270, x: 168, dial: 1,
     text: 'The needle shows how strongly you believe that it’s raining. At present it rests against doubt.',
     cite: 'Degree of belief',
     dur: 3.9,
   },
   {
-    p: 41, x: 168, dial: 1,
+    p: 270, x: 168, dial: 1,
     text: 'Two kinds of input might move the needle: acts of will and evidence.',
     dur: 1.8,
   },

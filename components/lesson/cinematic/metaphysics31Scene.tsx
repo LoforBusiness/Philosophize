@@ -21,6 +21,7 @@ import { followMoves, kindOf, seedOf } from './camera';
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
 const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // THREE NESTED ANSWERS. The slab, the ring drawn round the big hole, and the empty
 // middle of that ring are three targets drawn INSIDE ONE ANOTHER, so the reader picks
@@ -292,7 +293,7 @@ const styles = StyleSheet.create({
   // outline occupies no space on the page, and a filled mass does.
   face: {
     position: 'absolute', left: CH_L, top: FACE_T, width: CH_W, height: FACE_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
   },
   // The lit face, skewed back. RULE rather than PAPER so it is plainly the same
   // material catching light rather than a different object.
@@ -312,7 +313,7 @@ const styles = StyleSheet.create({
   // The far wall, low and right, catching the light that falls from top left.
   cavityLit: {
     position: 'absolute', left: '22%', top: '30%', right: '-6%', bottom: '-6%',
-    backgroundColor: STONE,
+    backgroundColor: STONE, boxShadow: LIP,
   },
 
   bigWrap: { position: 'absolute', left: BIG_CX - BIG_R, top: BIG_CY - BIG_R, width: BIG_R * 2, height: BIG_R * 2 },
@@ -360,7 +361,7 @@ const styles = StyleSheet.create({
   leadGapIn: { position: 'absolute', left: BIG_CX + GAP_R, top: 447, width: 306 - (BIG_CX + GAP_R), height: 2, backgroundColor: INK },
   tab: { position: 'absolute', height: TAB_H },
   tabInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   tabText: {

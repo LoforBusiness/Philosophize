@@ -11,7 +11,7 @@ import {
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
-import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useCarry, carry, lookPose,
+import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useCarry, carry, lookPose, pickAt,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,7 +20,8 @@ import type { SceneApi } from './CinematicPlayer';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE ROAD THAT FORKS, AND THE WAY THAT ISN'T THERE.
@@ -46,13 +47,17 @@ const { RULE, STONE } = stageTone('metaphysics');
 // reading the styles.
 //
 // · the riddle headline box   y 236…264, x  40…360
-// · Leibniz's principle strip y 270…290, x  40…360 (slides in on beat 1)
+// · Leibniz's principle strip y 270…290, x  40…360 (slides in on beat 2)
+// · its two consequences      y 294…314 and 318…338, x 40…360 — beats 3–9 only
 // · the three posted claims   y 302…340, x  20…380 — Q1 only, three Targets
 //   (CLAIM_L is derived: (400 - (112*3 + 12*2)) / 2 = 20, so the row is centred)
 // · BOTH sign plates          y 356…382 — above the crown, by 13 units
 // · both posts                y 382…500, at x 292 (IT IS) and x 360 (IT IS NOT)
 // · the traveller             crown y 395, feet 500, on every beat and phase
-// · he WALKS x 92 → 150 → 214 → 292 → 236; widest body span x 69…312
+// · he WALKS x 92 → 150 → 214 → 350 → 236; widest body span x 69…370. The
+//   recoil beats were at 292, which is BEFORE the fork (306) and directly under
+//   the IT IS plate — his hat, 9 above the crown, rose into it. At 350 he is out on
+//   the dashes the sentence puts him on, under the plate that has dissolved.
 // · the road, ticks and fork  y 493…507
 //
 // THE TWO CLEARANCES: claims stop at 340 and the plates start at 356, so 16 units
@@ -63,6 +68,23 @@ const { RULE, STONE } = stageTone('metaphysics');
 // walking past a signpost passes in front of it, and `Stickman` is drawn last so he
 // does. What may never happen is a WORD behind him, which is what the plates being
 // above 382 buys.
+//
+// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
+// Five taps used to hold one frame, and the fork carried its two signs and the
+// riddle its headline before a word about either was said. Each now arrives as it
+// is named: the headline on "the question why there is something rather than
+// nothing" (`ask`); under Leibniz's principle, its application SO EXISTENCE
+// ITSELF NEEDS A REASON (`applied`, y 294…314) and then his premise NOTHING IS
+// SIMPLER THAN SOMETHING (`simpler`, y 318…338); the two signs are planted, IT IS
+// and then IT IS NOT, on "a goddess sets out two ways" (`ways`); and on "not a
+// genuine alternative to what is" IT IS is struck solid (`only`). The two argument
+// lines leave, fast, on Q1, because the posted claims take that row.
+//
+// R7c — on the sort, the reader's chip decides whether IT IS stands as the ONLY
+// way: lit for "never possible" and for "always necessary" (either way nothing was
+// ever a rival), plain for "possible, and lost" (there was one, and it lost). The
+// dissolved second way is NOT driven: `gone` may never come back (the script's
+// header), so the table moves only the sign.
 //
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -78,6 +100,21 @@ const DIR = dirsFrom(X, 1);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics2'));
 const GONE = BEATS.map((b) => b.gone ?? 0);
 const PR = BEATS.map((b) => b.pr ?? 0);
+const ASK = BEATS.map((b) => b.ask ?? 0);
+const APPLIED = BEATS.map((b) => b.applied ?? 0);
+const SIMPLER = BEATS.map((b) => b.simpler ?? 0);
+const WAYS = BEATS.map((b) => b.ways ?? 0);
+const ONLY = BEATS.map((b) => b.only ?? 0);
+
+// R7c — the stage follows the sort on its own graded beat, and only there (R7).
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
+/**
+ * Is IT IS the only way, at each bin, in the block's authored order:
+ *   never possible     → 1  nothing was never a way, so IT IS stands alone
+ *   possible, and lost → 0  nothing was a real rival, and lost to it
+ *   always necessary   → 1  something had to exist: there was no other way
+ */
+const ONLY_AT = [1, 0, 1];
 
 const SIGN_IS_X = 292;
 // 360 and not 364, with a plate 62 wide and not 68. The plate is its own element now
@@ -110,8 +147,9 @@ const CLAIM_W = 112;
 const CLAIM_GAP = 12;
 const CLAIM_L = (STAGE_W - (CLAIM_W * 3 + CLAIM_GAP * 2)) / 2;
 
-export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
-  const cv = useCarry(3);
+export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
+  const reacting = REACT[i] === 1;
+  const cv = useCarry(8);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -125,10 +163,24 @@ export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick, ga
       ? strideStance(X[p], X[n], emoteLive(E[n], t, bt.value), tr, WALK)
       : mixStance(emoteHold(E[p], t), emoteLive(E[n], t, bt.value), tr);
 
+    // A line that is leaving goes in a quarter of a second, not over the walk: the
+    // row it sits in is where Q1's claims are posted, on the same frame.
+    const writeIn = ease01((bt.value - 0.3) / 0.6);
+
     return {
       trav: lookPose(travS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       gone: carry(cv, 1, n, GONE[p], GONE[n], tr),
       pr: carry(cv, 2, n, PR[p], PR[n], tr),
+      ask: carry(cv, 3, n, ASK[p], ASK[n], ease01((bt.value - 0.15) / 0.5)),
+      applied: APPLIED[n] > 0
+        ? carry(cv, 4, n, APPLIED[p], APPLIED[n], writeIn)
+        : APPLIED[p] > 0 ? clamp01(1 - bt.value / 0.25) : 0,
+      simpler: SIMPLER[n] > 0
+        ? carry(cv, 5, n, SIMPLER[p], SIMPLER[n], writeIn)
+        : SIMPLER[p] > 0 ? clamp01(1 - bt.value / 0.25) : 0,
+      // Planted over a second: IT IS in its first half, IT IS NOT in its second.
+      ways: carry(cv, 6, n, WAYS[p], WAYS[n], ease01((bt.value - 0.3) / 1.0)),
+      only: carry(cv, 7, n, ONLY[p], reacting ? pickAt(ONLY_AT, pickPos.value) : ONLY[n], tr),
       t,
     };
   });
@@ -141,10 +193,18 @@ export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick, ga
     const flick = 0.75 + 0.25 * Math.sin(SCENE.value.t * 5.0);
     return { opacity: (1 - SCENE.value.gone) * flick };
   });
+  // The second way's POST is planted in the second half of `ways`, growing up out of
+  // the road from its foot.
+  const notPost = useAnimatedStyle(() => ({ transform: [{ scaleY: clamp01(SCENE.value.ways * 2 - 1) }] }));
   // The sign's PLATE flickers with the road: the same numbers, one style per view.
   const notPlate = useAnimatedStyle(() => {
     const flick = 0.75 + 0.25 * Math.sin(SCENE.value.t * 5.0);
     return { opacity: (1 - SCENE.value.gone) * flick };
+  });
+  // The whole second sign drops onto its post as that post finishes growing.
+  const notBoard = useAnimatedStyle(() => {
+    const w = clamp01(SCENE.value.ways * 2 - 1);
+    return { opacity: w, transform: [{ translateY: (1 - w) * -8 }] };
   });
   // AND ITS NAME IS THERE OR IT IS NOT (D35, S13). It rode the flicker too, so on the
   // eight beats the second way still stands IT IS NOT swam between 0.33 and 0.65, a
@@ -152,9 +212,31 @@ export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick, ga
   // carry the failing; the name stays readable while the way still stands (`gone`
   // 0.35) and is absent once it has gone (0.95).
   const notWord = useAnimatedStyle(() => ({ opacity: clamp01((0.6 - SCENE.value.gone) / 0.2) }));
+  // The first way is planted first: its post, then its board.
+  const isPost = useAnimatedStyle(() => ({ transform: [{ scaleY: clamp01(SCENE.value.ways * 2) }] }));
+  const isBoard = useAnimatedStyle(() => {
+    const w = clamp01(SCENE.value.ways * 2);
+    return { opacity: w, transform: [{ translateY: (1 - w) * -8 }] };
+  });
+  // IT IS, struck solid: the ink face and the reversed name ride `only`, the inked
+  // name its complement, so the word is never half-contrast on either ground.
+  const isLit = useAnimatedStyle(() => ({ opacity: SCENE.value.only }));
+  const isInk = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.only }));
+  const riddle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.ask,
+    transform: [{ scale: 1.08 - 0.08 * SCENE.value.ask }],
+  }));
   const principle = useAnimatedStyle(() => ({
     opacity: SCENE.value.pr,
     transform: [{ translateX: (1 - SCENE.value.pr) * -14 }],
+  }));
+  const applied = useAnimatedStyle(() => ({
+    opacity: SCENE.value.applied,
+    transform: [{ translateX: (1 - SCENE.value.applied) * -14 }],
+  }));
+  const simpler = useAnimatedStyle(() => ({
+    opacity: SCENE.value.simpler,
+    transform: [{ translateX: (1 - SCENE.value.simpler) * -14 }],
   }));
 
   const answered = picked !== null;
@@ -172,11 +254,17 @@ export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick, ga
   return (
     <Animated.View style={styles.scene}>
       {/* ── the riddle, and Leibniz's answer to it ────────────────────────── */}
-      <View style={styles.qBox} pointerEvents="none">
+      <Animated.View style={[styles.qBox, riddle]} pointerEvents="none">
         <Text style={styles.qText}>WHY SOMETHING RATHER THAN NOTHING?</Text>
-      </View>
+      </Animated.View>
       <Animated.View style={[styles.prStrip, principle]} pointerEvents="none">
         <Text style={styles.prText}>NOTHING IS WITHOUT A REASON  ·  LEIBNIZ</Text>
+      </Animated.View>
+      <Animated.View style={[styles.prStrip, { top: 294 }, applied]} pointerEvents="none">
+        <Text style={styles.argText} numberOfLines={1}>SO EXISTENCE ITSELF NEEDS A REASON</Text>
+      </Animated.View>
+      <Animated.View style={[styles.prStrip, { top: 318 }, simpler]} pointerEvents="none">
+        <Text style={styles.argText} numberOfLines={1}>NOTHING IS SIMPLER THAN SOMETHING</Text>
       </Animated.View>
 
       {/* ── Q1, answered on the stage (H65): tap the one there is nothing to
@@ -215,20 +303,26 @@ export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick, ga
       {TICKS.map((x) => <View key={x} style={[styles.roadTick, { left: x }]} pointerEvents="none" />)}
       <View style={styles.forkMark} pointerEvents="none" />
 
-      <View style={styles.postIs} pointerEvents="none" />
-      <View style={styles.signIs} pointerEvents="none"><Text style={styles.signIsText}>IT IS</Text></View>
+      <Animated.View style={[styles.postIs, isPost]} pointerEvents="none" />
+      <Animated.View style={[styles.signIs, isBoard]} pointerEvents="none">
+        <Animated.View style={[styles.signIsLit, isLit]} />
+        <Animated.Text style={[styles.signIsText, isInk]}>IT IS</Animated.Text>
+        <Animated.View style={[styles.signIsLitWrap, isLit]}>
+          <Text style={[styles.signIsText, styles.signIsTextLit]}>IT IS</Text>
+        </Animated.View>
+      </Animated.View>
 
       {/* everything past the fork — the road as well as the post — is only ever
           dashes, and thins to nothing as the second way dissolves */}
       <Animated.View style={[StyleSheet.absoluteFill, notSign]} pointerEvents="none">
         {DASHES.map((x) => <View key={x} style={[styles.roadDash, { left: x }]} />)}
         {GHOST_TICKS.map((x) => <View key={x} style={[styles.ghostTick, { left: x }]} />)}
-        <View style={styles.postNot} />
+        <Animated.View style={[styles.postNot, notPost]} />
       </Animated.View>
-      <View style={styles.signNot} pointerEvents="none">
+      <Animated.View style={[styles.signNot, notBoard]} pointerEvents="none">
         <Animated.View style={[styles.signNotPlate, notPlate]} />
         <Animated.Text style={[styles.signNotText, notWord]}>IT IS NOT</Animated.Text>
-      </View>
+      </Animated.View>
 
       <Stickman D={DT} k={K_FIG} />
     </Animated.View>
@@ -247,7 +341,7 @@ const styles = StyleSheet.create({
 
   qBox: {
     position: 'absolute', left: 40, top: 236, width: 320, height: 28,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   qText: {
@@ -262,6 +356,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 0.8, color: SOFT,
     includeFontPadding: false,
   },
+  // The two lines the principle leads to, on the same rule and in ink: 227 units of
+  // type in the strip's 308. They stand above the claims row, which they leave for.
+  argText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
 
   // H61: a scene-owned answer target looks exactly like the deck's option —
   // 2px INK border, radius 4; the right one fills INK with PAPER text and the
@@ -269,7 +369,7 @@ const styles = StyleSheet.create({
   // answer UI, however different the thing being tapped is.
   claim: { position: 'absolute', top: CLAIM_T, width: CLAIM_W },
   claimInner: {
-    height: CLAIM_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: CLAIM_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   claimRight: { backgroundColor: INK, borderColor: INK },
@@ -280,18 +380,29 @@ const styles = StyleSheet.create({
   },
   claimTextOn: { color: PAPER },
 
-  postIs: { position: 'absolute', left: SIGN_IS_X - 1.5, top: 382, width: 3, height: GROUND - 382, backgroundColor: INK },
+  postIs: {
+    position: 'absolute', left: SIGN_IS_X - 1.5, top: 382, width: 3, height: GROUND - 382, backgroundColor: INK,
+    transformOrigin: '50% 100%',
+  },
   signIs: {
     position: 'absolute', left: SIGN_IS_X - 30, top: 356, width: 60, height: 26,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   signIsText: {
     fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 17, letterSpacing: 1, color: INK,
     includeFontPadding: false,
   },
+  signIsLit: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: 1.5, backgroundColor: INK },
+  signIsLitWrap: {
+    position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center',
+  },
+  signIsTextLit: { color: PAPER },
 
-  postNot: { position: 'absolute', left: SIGN_NOT_X - 1, top: 382, width: 2, height: GROUND - 382, backgroundColor: SOFT },
+  postNot: {
+    position: 'absolute', left: SIGN_NOT_X - 1, top: 382, width: 2, height: GROUND - 382, backgroundColor: SOFT,
+    transformOrigin: '50% 100%',
+  },
   // ONE BOX, the plate its child (S12), so the plate can flicker while the name does not.
   signNot: {
     position: 'absolute', left: SIGN_NOT_X - 31, top: 356, width: 62, height: 26,

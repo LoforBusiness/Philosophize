@@ -52,7 +52,15 @@ const ANALOGUE = ['drag', 'lever', 'plot', 'split', 'field', 'sort', 'poll'];
  * could see, not 15 of the lessons that have a control. 33 is the first honest
  * count, and it happens to equal the budget that was already here.
  */
-const DEAD_BUDGET = 33;
+const DEAD_BUDGET = 16;
+
+/**
+ * A still stage must SAY it is still on purpose. The note that begins with this is
+ * what separates a lesson somebody looked at and judged from one nobody has opened;
+ * the budget alone cannot tell them apart, and the rule book claimed every still
+ * lesson carried a reason for a day when fifteen of the sixteen did not (R7d).
+ */
+const STILL_NOTE = 'R7c — LEFT STILL ON PURPOSE:';
 
 const route = fs.readFileSync('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx', 'utf8');
 const wired = [...route.matchAll(/^\s*'([a-z0-9-]+)':\s*(\w+),/gm)].map((m) => ({ id: m[1], comp: m[2] }));
@@ -115,7 +123,8 @@ for (const { id, comp } of wired) {
   // almost always one of these handed the control's value on its own beat, rather
   // than new art — which is what makes wiring one a small job.
   const tracks = [...new Set([...scene.matchAll(/carry\(cv,\s*\d+,\s*n,\s*([A-Z_][A-Z0-9_]*)\[p\]/g)].map((m) => m[1]))];
-  rows.push({ id, comp, file: path.basename(cf), controls, reads, tracks });
+  const noted = fs.readFileSync(cf, 'utf8').includes(STILL_NOTE);
+  rows.push({ id, comp, file: path.basename(cf), controls, reads, tracks, noted });
 }
 
 const dead = rows.filter((r) => !r.reads);
@@ -153,13 +162,18 @@ if (dead.length) {
 }
 if (ok && dead.length < DEAD_BUDGET) console.log(`        ${dead.length} now — lower DEAD_BUDGET to ${dead.length} to lock it in`);
 
+const unexplained = dead.filter((r) => !r.noted);
+for (const r of unexplained) console.log(`  FAIL  ${r.id.padEnd(30)} leaves the stage still and ${r.file} does not say why (${STILL_NOTE})`);
+if (!unexplained.length) console.log('  ok    every still stage says why, in its own scene (R7d)');
+
 for (const d of deadFlag.slice(0, 12)) console.log(`  FAIL  ${d}`);
 if (deadFlag.length > 12) console.log(`  FAIL  … and ${deadFlag.length - 12} more`);
 console.log(deadFlag.length
   ? '  a flag that cannot fire is the SHAPE of a wired scene, which is why nobody looked at it again.'
   : '  ok    every reaction flag names a control its own lesson actually ships');
 
-console.log(ok && !deadFlag.length
+const pass = ok && !deadFlag.length && !unexplained.length;
+console.log(pass
   ? '\nthe reader moves the picture, not a widget beside it.\n'
   : '\na control with a dead stage is a slider with a lesson printed next to it.\n');
-process.exit(ok && !deadFlag.length ? 0 : 1);
+process.exit(pass ? 0 : 1);

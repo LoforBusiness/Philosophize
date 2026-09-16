@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO IDENTICAL CRIBS, A LINE BETWEEN THEM, AND TWO COLUMNS OF LIFE CHANCES.
@@ -196,10 +197,10 @@ const styles = StyleSheet.create({
   },
   crib: {
     position: 'absolute', top: CRIB_Y, width: CRIB_W, height: CRIB_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
   },
   blanket: { position: 'absolute', top: CRIB_Y + 18, width: CRIB_W - 12, height: 10, backgroundColor: PAPER },
-  col: { position: 'absolute', width: COL_W, backgroundColor: STONE, borderWidth: 1.5, borderColor: INK },
+  col: { position: 'absolute', width: COL_W, backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: INK },
   name: {
     position: 'absolute', top: NAME_T, width: NAME_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: SOFT, includeFontPadding: false,

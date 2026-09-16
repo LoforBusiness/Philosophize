@@ -30,13 +30,13 @@ export const BEATS: Meta6Beat[] = [
     dur: 3.6,
   },
   {
-    p: 36, swap: 1, orig: 0.06,
+    p: 269, swap: 1, orig: 0.06,
     text: 'Plutarch reports that the Athenians preserved the ship of Theseus, replacing decayed timbers with new ones.',
     cite: 'The Ship of Theseus',
     dur: 3.9,
   },
   {
-    p: 36, swap: 1, orig: 0.06,
+    p: 269, swap: 1, orig: 0.06,
     text: 'Plutarch adds that philosophers disputed whether it remained the same ship.',
     dur: 1.8,
   },

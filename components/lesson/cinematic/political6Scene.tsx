@@ -19,7 +19,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // Rawls's two principles, drawn as INFORMATION rather than illustration.
 //
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
   // ── the ranked principles ───────────────────────────────────────────────────
   chip: {
     position: 'absolute', top: PRIN_T, height: PRIN_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   chipA: { left: CH_L, width: 130 },
@@ -251,7 +252,7 @@ const styles = StyleSheet.create({
   faded: { opacity: 0.45 },
   frame: {
     position: 'absolute', left: 0, top: 0, width: PAN_W, height: PAN_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   frameOn: { borderWidth: 3.5 },
   frameOff: { borderColor: SOFT },

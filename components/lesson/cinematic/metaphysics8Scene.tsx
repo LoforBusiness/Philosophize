@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A thirteen-domino run standing on a long rail, sweeping right to left: the far
 // end is everything that happened before you were born, and domino 3 is labelled
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
   // ── a domino: a thin tall card pivoting on its own bottom edge ──────────────
   dom: {
     position: 'absolute', top: DOM_T, width: DOM_W, height: DOM_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
     transformOrigin: '50% 100%',
   },
   domMark: { backgroundColor: INK },
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },

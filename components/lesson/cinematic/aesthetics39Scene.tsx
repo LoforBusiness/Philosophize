@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOUR COLUMNS, EACH A PLAN AND THE ROUTE TAKEN FROM IT.
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
 
   plan: {
     position: 'absolute', left: (COL_W - PLAN_W) / 2, top: PLAN_Y - NAME_Y, width: PLAN_W, height: PLAN_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   // NO PLAN, AND THE BOX SAYS SO. A dashed empty outline is a boundary with
   // nothing inside it, which is exactly the claim being made about this maker.
@@ -247,7 +248,7 @@ const styles = StyleSheet.create({
   },
   planAbs: {
     position: 'absolute', top: PLAN_Y, width: PLAN_W, height: PLAN_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   // THE CORRECT PLAN STAYS DASHED AND EMPTY. Filling it in on a right answer
   // would delete the reason it was the right answer.
@@ -259,7 +260,7 @@ const styles = StyleSheet.create({
   rail: { position: 'absolute', left: 138, top: RAIL_Y, width: 248, height: 1.5, backgroundColor: RULE },
   work: {
     position: 'absolute', top: WORK_Y, width: WORK_W, height: WORK_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
 });
 

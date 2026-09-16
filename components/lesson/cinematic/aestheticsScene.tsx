@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHY THINGS FEEL BEAUTIFUL — Kant's two strange facts, drawn as a chart.
@@ -67,9 +68,13 @@ const P_W = 184;
 const P_H = 104;
 const TRACK_W = 108;
 
-const FIG_X = 262;
+// 280, not 262, and the apple at 456, not 440: from the appetite on he leans toward
+// the apple, and at 262 his head, hip and reaching hand were all drawn over it. The
+// apple cannot go left — Hume's chart is at x 27..207 down to y 452 — so he stands
+// back from it, reaching toward it with the hand stopping short.
+const FIG_X = 280;
 const APPLE_CX = 228;
-const APPLE_CY = 440;
+const APPLE_CY = 456;
 const APPLE_R = 15;
 
 // Hume's standard of taste, in the quarter under the framed sunset that nothing
@@ -113,11 +118,36 @@ function held(flags: number[]): number[] {
 const APPLE = held(BEATS.map((b) => (b.apple ? 1 : 0)));
 const CROWD = BEATS.map((b) => (b.crowd ? 1 : 0));
 const CRIT = BEATS.map((b) => (b.critics ? 1 : 0));
-// Only the beat that RAISES the chart runs the convergence; on any later beat it
-// holds converged, so the verdicts never scatter and re-gather on a forward tap.
-const CRITIN = CRIT.map((v, k) => (v === 1 && (k === 0 || CRIT[k - 1] === 0) ? 1 : 0));
-// Same discipline for the assent row: the eight pips only count themselves in on
-// the beat the crowd first appears.
+/** 1 from the first beat whose flag is set, to the end: a thing that arrives and stays. */
+function latch(flags: boolean[]): number[] {
+  const first = flags.indexOf(true);
+  return flags.map((_, k) => (first >= 0 && k >= first ? 1 : 0));
+}
+// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
+// Eight taps of this lesson used to hold one frame, because the panel's first chart,
+// its second chart, Hume's convergence and the crowd were all drawn before the
+// sentence that names them. Each now arrives on its own words:
+//   · the panel opens as the reader's VERDICT — “BEAUTIFUL”, stamped at once —
+//     is named A JUDGEMENT OF TASTE, and lists the two questions that follow;
+//   · Kant's chart builds a row at a time: the apple's bar fills on "you take an
+//     apple", the sunset's NOTHING row on "you want nothing from it", the foot on
+//     "free of desire";
+//   · Hume's verdicts scatter on "masters above hacks" and CONVERGE on "make their
+//     verdicts converge"; CRITIC and VERDICT point at each other on "circularity";
+//   · WHO MUST AGREE opens on “I like it” with one pip, “it is beautiful” arrives
+//     resting on one feeling (still one pip), and the other seven — with the crowd —
+//     only on "demands the agreement of everyone".
+const TASTE = latch(BEATS.map((b) => !!b.taste));
+const QUESTIONS = latch(BEATS.map((b) => !!b.questions));
+/** Kant's chart takes the panel from the beat the apple first arrives. */
+const KANT = latch(BEATS.map((b) => !!b.apple));
+const UNWANTED = latch(BEATS.map((b) => !!b.unwanted));
+const DESIRELESS = latch(BEATS.map((b) => !!b.desireless));
+const AGREE = latch(BEATS.map((b) => !!b.agree));
+const CIRCULAR = latch(BEATS.map((b) => !!b.circular));
+const ASSENT = latch(BEATS.map((b) => !!b.assent));
+const CLAIM = latch(BEATS.map((b) => !!b.claim));
+// The eight pips only count themselves in on the beat the crowd first appears.
 const CROWDIN = CROWD.map((v, k) => (v === 1 && (k === 0 || CROWD[k - 1] === 0) ? 1 : 0));
 const Q1 = BEATS.map((b) => (b.weigh === 'q1' ? 1 : 0));
 
@@ -167,7 +197,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics'));
 export default function AestheticsScene({ clock, bt, bi, qv, dragPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFigS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(12);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -188,13 +218,23 @@ export default function AestheticsScene({ clock, bt, bi, qv, dragPos, i, gazeX, 
       // leaving one person liking something. That is the whole of Kant's oddity.
       crowdOn: carry(cv, 2, n, CROWD[p], reacting ? dragPos.value : CROWD[n], tr),
       criticsOn: carry(cv, 3, n, CRIT[p], CRIT[n], tr),
-      // The verdicts slide together once the card has settled, and STAY together
-      // while it fades out — a chart that un-converges on its way off stage would
-      // undo the very point it just made.
-      converge: CRITIN[n] === 1 ? ease01((bt.value - 0.45) / 1.15) : 1,
+      // The verdicts slide together on the beat that says they converge, and STAY
+      // together from then on — including while the card fades out, since a chart
+      // that un-converges on its way off stage would undo its own point.
+      converge: AGREE[n] === 1 ? (AGREE[p] === 1 ? 1 : ease01((bt.value - 0.45) / 1.15)) : 0,
       // Seconds since the crowd rose (or a large number if it was already up), so
-      // the eight assent pips can count themselves in one at a time.
+      // the seven other assent pips can count themselves in one at a time.
       pipT: CROWDIN[n] === 1 ? bt.value : 9,
+      // “BEAUTIFUL” is judged AT ONCE — it stamps down just after the lesson opens.
+      stamp: n === 0 ? ease01((bt.value - 0.35) / 0.3) : 1,
+      taste: carry(cv, 4, n, TASTE[p], TASTE[n], tr),
+      asks: carry(cv, 5, n, QUESTIONS[p], QUESTIONS[n], tr),
+      kant: carry(cv, 6, n, KANT[p], KANT[n], tr),
+      unwanted: carry(cv, 7, n, UNWANTED[p], UNWANTED[n], tr),
+      desireless: carry(cv, 8, n, DESIRELESS[p], DESIRELESS[n], tr),
+      circular: carry(cv, 9, n, CIRCULAR[p], CIRCULAR[n], tr),
+      assent: carry(cv, 10, n, ASSENT[p], ASSENT[n], tr),
+      claim: carry(cv, 11, n, CLAIM[p], CLAIM[n], tr),
     };
   });
 
@@ -209,6 +249,7 @@ export default function AestheticsScene({ clock, bt, bi, qv, dragPos, i, gazeX, 
       <SunsetFrame />
       <Panel S={SCENE} />
       <Critics S={SCENE} />
+      <Circularity S={SCENE} />
       <Crowd S={SCENE} />
       <View style={styles.ground} pointerEvents="none" />
 
@@ -310,60 +351,132 @@ function Critics({ S }: { S: SharedValue<any> }) {
   );
 }
 
-// ── the panel: two charts, swapped by the lesson's second half ───────────────
-
-function Bar({ top, label, fill, note }: { top: number; label: string; fill: number; note?: string }) {
+// "A true critic is recognised by sound verdicts, yet sound verdicts are defined
+// as those of true critics." Two words under Hume's chart, each pointing at the
+// other; the two arrows drift against each other, so the loop never settles.
+function Circularity({ S }: { S: SharedValue<any> }) {
+  const wrap = useAnimatedStyle(() => {
+    const u = S.value.circular * S.value.criticsOn;
+    return { opacity: u, transform: [{ translateY: (1 - S.value.circular) * -6 }] };
+  });
+  const over = useAnimatedStyle(() => ({ transform: [{ translateX: Math.sin(S.value.t * 2.1) * 1.5 }] }));
+  const under = useAnimatedStyle(() => ({ transform: [{ translateX: -Math.sin(S.value.t * 2.1) * 1.5 }] }));
   return (
-    <View style={{ position: 'absolute', left: 12, top, flexDirection: 'row', alignItems: 'center' }}>
-      <Text style={styles.barLabel}>{label}</Text>
-      <View style={styles.track}>
-        {fill > 0 ? <View style={[styles.trackFill, { width: TRACK_W * fill }]} /> : null}
-        {note ? <Text style={styles.trackNote}>{note}</Text> : null}
+    <Animated.View style={[styles.loop, wrap]} pointerEvents="none">
+      <Text style={styles.loopWord}>CRITIC</Text>
+      <View style={styles.loopArrows}>
+        <Animated.Text style={[styles.loopArrow, over]}>→</Animated.Text>
+        <Animated.Text style={[styles.loopArrow, under]}>←</Animated.Text>
       </View>
-    </View>
+      <Text style={styles.loopWord}>VERDICT</Text>
+    </Animated.View>
   );
 }
 
-// One pip = one person the claim reaches for. The eight-pip row counts itself in
-// left to right on the beat the crowd arrives, so "it is beautiful" is SEEN
-// gathering assent rather than just being labelled with a number.
-function Pip({ S, k, stagger }: { S: SharedValue<any>; k: number; stagger: boolean }) {
+// ── the panel: two charts, swapped by the lesson's second half ───────────────
+
+// A row of Kant's chart: a label and a track. The APPLE row arrives with the chart
+// and its bar fills as it does (appetite asks for the apple); the SUNSET row writes
+// in on its own beat with an empty track marked NOTHING.
+function Bar({ S, top, which }: { S: SharedValue<any>; top: number; which: 'apple' | 'sunset' }) {
+  const apple = which === 'apple';
+  const rowStyle = useAnimatedStyle(() => {
+    const u = apple ? 1 : S.value.unwanted;
+    return { opacity: u, transform: [{ translateX: (1 - u) * -8 }] };
+  });
+  const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: 0.02 + 0.98 * S.value.kant }] }));
+  return (
+    <Animated.View style={[styles.barRow, { top }, rowStyle]}>
+      <Text style={styles.barLabel}>{apple ? 'APPLE' : 'SUNSET'}</Text>
+      <View style={styles.track}>
+        {apple ? <Animated.View style={[styles.trackFill, fillStyle]} /> : null}
+        {apple ? null : <Text style={styles.trackNote}>NOTHING</Text>}
+      </View>
+    </Animated.View>
+  );
+}
+
+// One pip = one person the claim reaches for. In the eight-pip row the FIRST is
+// the speaker's own feeling, there as soon as the claim is written; the other seven
+// count themselves in, left to right, only when the claim demands everyone's
+// agreement — and on the question they follow the seam, as the crowd does.
+function Pip({ S, k, row }: { S: SharedValue<any>; k: number; row: 'like' | 'claim' }) {
   const st = useAnimatedStyle(() => {
-    if (!stagger) return { opacity: 1, transform: [{ scale: 1 }] };
-    const u = ease01((S.value.pipT - 0.55 - k * 0.085) / 0.24);
+    if (row === 'like') return { opacity: 1, transform: [{ scale: 1 }] };
+    if (k === 0) return { opacity: S.value.claim, transform: [{ scale: 0.5 + 0.5 * S.value.claim }] };
+    const u = ease01((S.value.pipT - 0.55 - k * 0.085) / 0.24) * S.value.crowdOn;
     return { opacity: u, transform: [{ scale: 0.5 + 0.5 * u }] };
   });
   return <Animated.View style={[styles.pip, st]} />;
 }
 
-function Pips({ S, top, n, stagger }: { S: SharedValue<any>; top: number; n: number; stagger?: boolean }) {
+function Pips({ S, top, n, row }: { S: SharedValue<any>; top: number; n: number; row: 'like' | 'claim' }) {
   const out: number[] = [];
   for (let k = 0; k < n; k++) out.push(k);
   return (
     <View style={{ position: 'absolute', left: 12, top, flexDirection: 'row' }}>
-      {out.map((k) => <Pip key={k} S={S} k={k} stagger={!!stagger} />)}
+      {out.map((k) => <Pip key={k} S={S} k={k} row={row} />)}
     </View>
   );
 }
 
+function Question({ S, top, n, text }: { S: SharedValue<any>; top: number; n: number; text: string }) {
+  const st = useAnimatedStyle(() => {
+    const u = clamp01(S.value.asks * 2 - n);
+    return { opacity: u, transform: [{ translateX: (1 - u) * -8 }] };
+  });
+  return (
+    <Animated.View style={[styles.qRow, { top }, st]}>
+      <View style={styles.qBadge}><Text style={styles.qBadgeText}>{n + 1}</Text></View>
+      <Text style={styles.qText}>{text}</Text>
+    </Animated.View>
+  );
+}
+
+// THREE CARDS IN ONE PANEL, in the order the lesson needs them: the reader's own
+// VERDICT, then Kant's WHAT IT ASKS OF YOU, then WHO MUST AGREE. Each hands over by
+// cross-fading in place, and each writes its rows in as the narration reaches them.
 function Panel({ S }: { S: SharedValue<any> }) {
-  const first = useAnimatedStyle(() => ({ opacity: 1 - S.value.crowdOn }));
-  const second = useAnimatedStyle(() => ({ opacity: S.value.crowdOn }));
+  const intro = useAnimatedStyle(() => ({ opacity: 1 - S.value.kant }));
+  const first = useAnimatedStyle(() => ({ opacity: S.value.kant * (1 - S.value.assent) }));
+  const second = useAnimatedStyle(() => ({ opacity: S.value.assent }));
+  // The heading hands over through a gap rather than a blend, so the two never
+  // sit on top of each other at half strength.
+  const capVerdict = useAnimatedStyle(() => ({ opacity: 1 - clamp01(S.value.taste * 2) }));
+  const capTaste = useAnimatedStyle(() => ({ opacity: clamp01(S.value.taste * 2 - 1) }));
+  const stamp = useAnimatedStyle(() => ({
+    opacity: S.value.stamp,
+    transform: [{ scale: 1.35 - 0.35 * S.value.stamp }, { rotate: `${(1 - S.value.stamp) * -7}deg` }],
+  }));
+  const foot = useAnimatedStyle(() => ({
+    opacity: S.value.desireless, transform: [{ translateY: (1 - S.value.desireless) * 5 }],
+  }));
+  const claimLabel = useAnimatedStyle(() => ({
+    opacity: S.value.claim, transform: [{ translateX: (1 - S.value.claim) * -8 }],
+  }));
   return (
     <View style={styles.panel} pointerEvents="none">
+      <Animated.View style={[StyleSheet.absoluteFill, intro]}>
+        <Animated.Text style={[styles.panelCap, capVerdict]}>YOUR VERDICT</Animated.Text>
+        <Animated.Text style={[styles.panelCap, capTaste]}>A JUDGEMENT OF TASTE</Animated.Text>
+        <Animated.Text style={[styles.verdict, stamp]}>“BEAUTIFUL”</Animated.Text>
+        <Question S={S} top={54} n={0} text="WHAT PLEASURE?" />
+        <Question S={S} top={76} n={1} text="SPEAKS FOR WHOM?" />
+      </Animated.View>
+
       <Animated.View style={[StyleSheet.absoluteFill, first]}>
         <Text style={styles.panelCap}>WHAT IT ASKS OF YOU</Text>
-        <Bar top={26} label="APPLE" fill={1} />
-        <Bar top={54} label="SUNSET" fill={0} note="NOTHING" />
-        <Text style={styles.panelFoot}>BEAUTY WANTS NOTHING</Text>
+        <Bar S={S} top={26} which="apple" />
+        <Bar S={S} top={54} which="sunset" />
+        <Animated.Text style={[styles.panelFoot, foot]}>BEAUTY WANTS NOTHING</Animated.Text>
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, second]}>
         <Text style={styles.panelCap}>WHO MUST AGREE?</Text>
         <Text style={[styles.rowLabel, { top: 26 }]}>“I LIKE IT”</Text>
-        <Pips S={S} top={42} n={1} />
-        <Text style={[styles.rowLabel, { top: 62 }]}>“IT IS BEAUTIFUL”</Text>
-        <Pips S={S} top={78} n={8} stagger />
+        <Pips S={S} top={42} n={1} row="like" />
+        <Animated.Text style={[styles.rowLabel, { top: 62 }, claimLabel]}>“IT IS BEAUTIFUL”</Animated.Text>
+        <Pips S={S} top={78} n={8} row="claim" />
       </Animated.View>
     </View>
   );
@@ -380,7 +493,7 @@ const styles = StyleSheet.create({
   },
   frame: {
     position: 'absolute', left: FRAME_L, top: FRAME_T, width: FRAME_W, height: FRAME_H,
-    borderWidth: 3, borderColor: INK, backgroundColor: STONE, overflow: 'hidden',
+    borderWidth: 3, borderColor: INK, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   frameLabel: {
     position: 'absolute', left: FRAME_L, top: FRAME_T + FRAME_H + 5, width: FRAME_W, textAlign: 'center',
@@ -411,14 +524,14 @@ const styles = StyleSheet.create({
   // centred under the apple (the figure's shins occupy x 248..276 all the way to
   // the ground) nor beside it (that band belongs to Hume's chart, y 386..452).
   appleLabel: {
-    position: 'absolute', left: 128, top: 468, width: 78, textAlign: 'right',
+    position: 'absolute', left: 128, top: 480, width: 78, textAlign: 'right',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.8, color: SOFT, includeFontPadding: false,
   },
-  appleLead: { position: 'absolute', left: 210, top: 473, width: 16, height: 1.5, backgroundColor: SOFT },
+  appleLead: { position: 'absolute', left: 210, top: 485, width: 16, height: 1.5, backgroundColor: SOFT },
 
   critCard: {
     position: 'absolute', left: CR_L, top: CR_T, width: CR_W, height: CR_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
   },
   critCap: {
     position: 'absolute', left: 12, top: 7,
@@ -444,7 +557,7 @@ const styles = StyleSheet.create({
 
   panel: {
     position: 'absolute', left: P_L, top: P_T, width: P_W, height: P_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
   },
   panelCap: {
     position: 'absolute', left: 12, top: 8,
@@ -459,9 +572,13 @@ const styles = StyleSheet.create({
   },
   track: {
     width: TRACK_W, height: 16, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
-    backgroundColor: STONE, overflow: 'hidden', justifyContent: 'center',
+    backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden', justifyContent: 'center',
   },
-  trackFill: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: INK },
+  barRow: { position: 'absolute', left: 12, flexDirection: 'row', alignItems: 'center' },
+  trackFill: {
+    position: 'absolute', left: 0, top: 0, bottom: 0, width: TRACK_W,
+    backgroundColor: INK, transformOrigin: '0% 50%',
+  },
   trackNote: {
     textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2,
     color: INK, includeFontPadding: false,
@@ -471,12 +588,44 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.3, color: INK, includeFontPadding: false,
   },
   pip: { width: 14, height: 14, borderRadius: 3, borderWidth: 1.5, borderColor: INK, backgroundColor: INK, marginRight: 5 },
+
+  // ── the verdict card (the panel's first face) ──────────────────────────────
+  // “BEAUTIFUL” measures 123 at 16px (166 at the stamp's opening 1.35×, still
+  // inside the face); the two questions 98 and 112 from x 33, so the widest line
+  // ends at 145 in a 180-wide face. Rows end at 91 of 100.
+  verdict: {
+    position: 'absolute', left: 12, top: 24,
+    fontFamily: 'Inter_700Bold', fontSize: 16, lineHeight: 20, letterSpacing: 1.5, color: INK,
+    includeFontPadding: false, transformOrigin: '0% 50%',
+  },
+  qRow: { position: 'absolute', left: 12, height: 15, flexDirection: 'row', alignItems: 'center' },
+  qBadge: {
+    width: 15, height: 15, borderRadius: 3, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center', marginRight: 6,
+  },
+  qBadgeText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, color: PAPER, includeFontPadding: false },
+  qText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 0.4, color: INK, includeFontPadding: false,
+  },
+
+  // ── Hume's circle, under his chart ─────────────────────────────────────────
+  // x 28…128, y 458…476: under the card (its lip ends at 455), left of the apple's
+  // APPETITE callout (its ink starts at x 143) and far from the figure (x ≥ 230).
+  loop: { position: 'absolute', left: 28, top: 458, height: 18, flexDirection: 'row', alignItems: 'center' },
+  loopWord: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  },
+  loopArrows: { width: 14, height: 18, marginHorizontal: 4, alignItems: 'center', justifyContent: 'center' },
+  loopArrow: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 9, color: INK, includeFontPadding: false, textAlign: 'center',
+  },
 });
 
 // Extremes: the chart panel's top edge (244) and the frame at 246 down to the
 // figure's ankle joints (~507). The glow rings reach y 255..375 at full scale,
-// the ripple rings y 400..504, Hume's chart y 386..452, the crowd y 440..500 and
-// the apple's callout y 468..480 — all inside the slice, with the figure's crown
+// the ripple rings y 400..504, Hume's chart y 386..452 with its circle under it at
+// y 458..476, the crowd y 440..500 and the apple's callout y 468..480 — all inside
+// the slice, with the figure's crown
 // at ~361 sitting in the gap between the panel's floor (348) and Hume's card.
 //
 // 280 units is also the tightest band that still pays: the stage region is about

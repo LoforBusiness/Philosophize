@@ -18,7 +18,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // The footbridge — and, written up beside it, the SPLIT drawn as a chart: two bars
 // for the same trade, landing at opposite heights over one shared footing that
@@ -287,7 +288,7 @@ const styles = StyleSheet.create({
   window: { position: 'absolute', top: 22, width: 14, height: 16, backgroundColor: INK, borderRadius: 2 },
   wheel: {
     position: 'absolute', top: 54, width: 24, height: 24, borderRadius: 12,
-    borderWidth: 3, borderColor: INK, backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 3, borderColor: INK, backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   spoke: { width: 3, height: 16, backgroundColor: INK },
   streak: { position: 'absolute', height: 1.5, backgroundColor: SOFT, borderRadius: 1 },
@@ -316,7 +317,7 @@ const styles = StyleSheet.create({
   // wider box would be brushed by a hand on the last question beat.
   stamp: {
     position: 'absolute', left: 12, top: 292, width: 92, height: 60,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   stampT: {
@@ -345,7 +346,7 @@ const styles = StyleSheet.create({
   },
   chFoot: {
     position: 'absolute', left: CH_L, top: 370, width: CH_W, height: 22,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   chFootT: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.6, color: INK, includeFontPadding: false },

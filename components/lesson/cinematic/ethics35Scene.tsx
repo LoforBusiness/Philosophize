@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO PANELS, FOUR TAGS, AND A BEAM THE READER TIPS.
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
 
   panel: {
     position: 'absolute', top: PANEL_Y, width: PANEL_W, height: PANEL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   torso: { position: 'absolute', left: PANEL_W / 2 - 3, top: 22, width: 6, height: 52, backgroundColor: INK, borderRadius: 3 },
   arm: { position: 'absolute', top: 34, width: 40, height: 5, backgroundColor: INK, borderRadius: 3, transformOrigin: '0% 50%' },
@@ -231,7 +232,7 @@ const styles = StyleSheet.create({
   tag: { position: 'absolute', left: TAG_X, width: 190, height: 18 },
   tagBox: {
     position: 'absolute', left: 0, top: 0, width: 190, height: 18,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   tagText: {
     position: 'absolute', left: 0, top: 5, width: 190, textAlign: 'center',

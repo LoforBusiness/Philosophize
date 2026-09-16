@@ -19,7 +19,8 @@ import { Shapes, bar, tri, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 /**
  * THE DEMON'S HORNS AND TAIL, riding his head (anchor 24 above its centre) and his
@@ -65,6 +66,17 @@ const TAIL: Part[] = [
 // floor, the ruin lives in x 138…248 at y ≥ 452, while the lowest hand either
 // figure ever throws is ~450 — so no hand can ever cross it. The old static camera
 // transform is gone — the band does the zooming now.
+//
+// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
+// The audit is run in the order the narration runs it. "Descartes seeks beliefs
+// that withstand every possible doubt" puts a question mark at the end of every
+// row (`test`); "could then be false" stamps three of them FAKED as the demon's
+// reach passes them; "treat … as if it were false" only then strikes them through
+// (`treat`); "one survives, the belief I exist" is when that row is stamped
+// SURVIVES (`kept` — the halo and the I AM plinth still light on the quote); and
+// "a foundation on which knowledge can be rebuilt" lays two new stones on the
+// plinth that never fell (`rebuilt`, x 180…210, y 430…452, inside the corridor
+// neither figure's hands can reach: the demon's end at x 136, the doubter's at 232).
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DOUBT_X = 272;
@@ -75,6 +87,10 @@ const M_CODE = BEATS.map((b) => (b.m ?? -1));
 const M_ON = BEATS.map((b) => ((b.m ?? -1) >= 0 ? 1 : 0));
 const DOUBT = BEATS.map((b) => b.doubt ?? 0);
 const GLOW = BEATS.map((b) => (b.glow ? 1 : 0));
+const TEST = BEATS.map((b) => b.test ?? 0);
+const TREAT = BEATS.map((b) => b.treat ?? 0);
+const KEPT = BEATS.map((b) => b.kept ?? 0);
+const REBUILT = BEATS.map((b) => b.rebuilt ?? 0);
 
 const LIST_L = 44;
 const LIST_W = 312;
@@ -118,10 +134,10 @@ const X = BEATS.map((b) => b.x ?? 184);
 const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology2'));
 
-export default function Epistemology2Scene({ clock, bt, bi, pickPos, i }: SceneApi) {
+export default function Epistemology2Scene({ clock, bt, bi, qv, pickPos, i }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldDemonS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(7);
   const heldDoubterS = useHeld();
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -151,7 +167,14 @@ export default function Epistemology2Scene({ clock, bt, bi, pickPos, i }: SceneA
       // rows go one by one; the point of the lesson is which one will not go, and the
       // reader gets to try to take it.
       doubt: carry(cv, 1, n, DOUBT[p], reacting ? pickPos.value : DOUBT[n], tr),
-      glow: carry(cv, 2, n, GLOW[p], GLOW[n], tr),
+      // O5 — on the sort ("what would remain certain?") the SURVIVES stamp and the
+      // halo are the answer, printed under the option that is right. They wait for
+      // the pick: `qv` is the player's 0→1 once this beat has been answered.
+      glow: carry(cv, 2, n, GLOW[p], reacting ? GLOW[n] * qv.value : GLOW[n], tr),
+      test: carry(cv, 3, n, TEST[p], TEST[n], ease01((bt.value - 0.3) / 0.6)),
+      treat: carry(cv, 4, n, TREAT[p], TREAT[n], ease01((bt.value - 0.2) / 0.9)),
+      kept: carry(cv, 5, n, KEPT[p], reacting ? KEPT[n] * qv.value : KEPT[n], ease01((bt.value - 0.3) / 0.5)),
+      rebuilt: carry(cv, 6, n, REBUILT[p], REBUILT[n], ease01((bt.value - 0.4) / 1.1)),
       t,
     };
   });
@@ -177,11 +200,22 @@ export default function Epistemology2Scene({ clock, bt, bi, pickPos, i }: SceneA
       transform: [{ translateX: h[0].translateX }, { translateY: h[1].translateY }, { scale: 0.92 + 0.1 * pulse }],
     };
   });
-  const survive = useAnimatedStyle(() => ({ opacity: SCENE.value.glow }));
+  const survive = useAnimatedStyle(() => ({ opacity: SCENE.value.kept }));
+  // I EXIST's question mark stands until the row's verdict replaces it.
+  const existAsk = useAnimatedStyle(() => ({ opacity: SCENE.value.test * (1 - SCENE.value.kept) }));
   // The rubble inks in as the meter climbs — the wreckage of the faked beliefs.
   const fallen = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.doubt - 0.15) / 0.35) }));
   // The one plinth left standing is inscribed only when the surviving self lights.
   const inscribed = useAnimatedStyle(() => ({ opacity: SCENE.value.glow }));
+  // Two stones set back on it, the wide one first and then the narrow one on top.
+  const stoneA = useAnimatedStyle(() => {
+    const u = clamp01(SCENE.value.rebuilt * 2);
+    return { opacity: clamp01(u * 3), transform: [{ translateY: (1 - u) * -16 }] };
+  });
+  const stoneB = useAnimatedStyle(() => {
+    const u = clamp01(SCENE.value.rebuilt * 2 - 1);
+    return { opacity: clamp01(u * 3), transform: [{ translateY: (1 - u) * -16 }] };
+  });
 
   return (
     <Animated.View style={styles.scene} pointerEvents="none">
@@ -200,6 +234,9 @@ export default function Epistemology2Scene({ clock, bt, bi, pickPos, i }: SceneA
 
       <View style={[styles.row, { top: ROW_T[3] }]}>
         <Text style={styles.belief}>I EXIST</Text>
+        <Animated.View style={[styles.qMark, { left: LIST_W - 100, top: 3.5 }, existAsk]}>
+          <Text style={styles.qMarkText}>?</Text>
+        </Animated.View>
         <Animated.View style={[styles.surviveRow, survive]}>
           <Text style={styles.beliefOn}>I EXIST</Text>
           <View style={styles.chipOut}><Text style={styles.chipOutText}>SURVIVES</Text></View>
@@ -226,6 +263,8 @@ export default function Epistemology2Scene({ clock, bt, bi, pickPos, i }: SceneA
       <Animated.View style={[styles.plinthOn, inscribed]}>
         <Text style={styles.plinthText}>I AM</Text>
       </Animated.View>
+      <Animated.View style={[styles.stone, { left: 180, top: 440, width: 30, height: 12 }, stoneA]} />
+      <Animated.View style={[styles.stone, { left: 187, top: 430, width: 16, height: 10 }, stoneB]} />
 
       <Animated.View style={[styles.anchor, halo]}>
         <View style={styles.haloOuter} />
@@ -250,18 +289,28 @@ export default function Epistemology2Scene({ clock, bt, bi, pickPos, i }: SceneA
 function AuditRow({
   S, k, b,
 }: { S: SharedValue<any>; k: number; b: { text: string; th: number; strike: number } }) {
-  // 0 while the belief still stands, 1 once the demon has faked it away.
-  const dim = useAnimatedStyle(() => ({ opacity: 1 - 0.45 * ease01(clamp01((S.value.doubt - b.th) / 0.12)) }));
-  const cut = useAnimatedStyle(() => ({ transform: [{ scaleX: ease01(clamp01((S.value.doubt - b.th) / 0.12)) }] }));
+  // 0 while the belief still stands, 1 once the demon has faked it away. The chip
+  // follows the demon's reach alone; the strike and the dimming wait for Descartes
+  // to resolve to TREAT the faked belief as false.
+  const dim = useAnimatedStyle(() => ({
+    opacity: 1 - 0.45 * ease01(clamp01((S.value.doubt - b.th) / 0.12)) * S.value.treat,
+  }));
+  const cut = useAnimatedStyle(() => ({
+    transform: [{ scaleX: ease01(clamp01((S.value.doubt - b.th) / 0.12)) * S.value.treat }],
+  }));
   // The second stroke carries its own rotate: an animated `transform` REPLACES a
   // static one when styles flatten, so the tilt has to live inside this worklet.
   const cutB = useAnimatedStyle(() => ({
-    transform: [{ rotate: '-1.6deg' }, { scaleX: ease01(clamp01((S.value.doubt - b.th) / 0.12)) }],
+    transform: [{ rotate: '-1.6deg' }, { scaleX: ease01(clamp01((S.value.doubt - b.th) / 0.12)) * S.value.treat }],
   }));
   const chip = useAnimatedStyle(() => {
     const e = ease01(clamp01((S.value.doubt - b.th) / 0.12));
     return { opacity: e, transform: [{ scale: 1.3 - 0.3 * e }] };
   });
+  // The question the row is being asked, until the chip answers it in the same place.
+  const ask = useAnimatedStyle(() => ({
+    opacity: S.value.test * (1 - ease01(clamp01((S.value.doubt - b.th) / 0.12))),
+  }));
 
   return (
     <>
@@ -272,6 +321,9 @@ function AuditRow({
         <Animated.View style={[styles.cutFaint, { top: 16, width: b.strike - 6 }, cutB]} />
       </Animated.View>
       {/* the stamp sits OUTSIDE the dimmed row, so it stays crisp on a faded belief */}
+      <Animated.View style={[styles.qMark, { left: LIST_L + LIST_W - 100, top: ROW_T[k] + 5 }, ask]}>
+        <Text style={styles.qMarkText}>?</Text>
+      </Animated.View>
       <Animated.View style={[styles.chip, { top: ROW_T[k] + 5 }, chip]}>
         <Text style={styles.chipText}>FAKED</Text>
       </Animated.View>
@@ -296,7 +348,7 @@ const styles = StyleSheet.create({
   },
   meter: {
     position: 'absolute', left: LIST_L, top: METER_T, width: LIST_W, height: METER_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, overflow: 'hidden',
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   meterFill: {
     position: 'absolute', left: 0, top: 0, bottom: 0, width: LIST_W,
@@ -306,7 +358,7 @@ const styles = StyleSheet.create({
 
   row: {
     position: 'absolute', left: LIST_L, width: LIST_W, height: ROW_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   belief: {
     position: 'absolute', left: 14, top: 4,
@@ -322,6 +374,13 @@ const styles = StyleSheet.create({
   chipText: {
     fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 1.2, color: PAPER,
     includeFontPadding: false,
+  },
+
+  // The same 84 × 20 cell the FAKED / SURVIVES stamps take, so a verdict lands
+  // exactly where the question stood. Ink, on the row's stone face.
+  qMark: { position: 'absolute', width: 84, height: 20, alignItems: 'center', justifyContent: 'center' },
+  qMarkText: {
+    fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 18, color: INK, includeFontPadding: false,
   },
 
   surviveRow: {
@@ -359,6 +418,11 @@ const styles = StyleSheet.create({
   plinthText: {
     fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 0.8, color: PAPER,
     includeFontPadding: false,
+  },
+  // A new course of masonry on the cap (452), in the stage's own stone.
+  stone: {
+    position: 'absolute', borderWidth: 1.5, borderColor: INK, borderRadius: 1.5,
+    backgroundColor: STONE, boxShadow: LIP,
   },
 
   haloOuter: { position: 'absolute', left: -34, top: -34, width: 68, height: 68, borderRadius: 34, borderWidth: 2, borderColor: INK },

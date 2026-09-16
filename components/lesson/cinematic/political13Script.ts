@@ -31,24 +31,24 @@ export const BEATS: Pol13Beat[] = [
     dur: 2,
   },
   {
-    p: 41, x: 168, steps: 1,
+    p: 270, x: 168, steps: 1,
     text: 'Suppose a speaker says something most of the town finds repellent. No one is assaulted, robbed or threatened.',
     cite: 'The argument',
     dur: 3.5,
   },
   {
-    p: 41, x: 168, steps: 1,
+    p: 270, x: 168, steps: 1,
     text: 'The town argues that the speaker should be stopped.',
     dur: 1.8,
   },
   {
-    p: 40, x: 168, steps: 3,
+    p: 268, x: 168, steps: 3,
     text: 'The argument has three steps, and read in order it appears valid.',
     cite: 'Three steps',
     dur: 1.9,
   },
   {
-    p: 40, x: 168, steps: 3,
+    p: 268, x: 168, steps: 3,
     text: 'Each step seems to follow from the one before, and the conclusion is the one the town wanted.',
     dur: 2.9,
   },

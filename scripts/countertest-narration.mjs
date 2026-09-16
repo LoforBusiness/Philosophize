@@ -17,7 +17,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { ROOT, ASSETS, MANIFEST, LESSON_CLIP, parseWav, sha256hex, readRenders, writeRenders } from './lib/narration.mjs';
+import { ROOT, ASSETS, MANIFEST, LESSON_CLIP, parseWav, sha256hex, readRenders, writeRenders, encodingMark } from './lib/narration.mjs';
 
 const LESSON = 'metaphysics-being-4';
 const tmp = path.join(os.tmpdir(), 'philosophize-narration-ct');
@@ -235,6 +235,42 @@ expect('a lesson MP3 whose tag puts a line a millisecond away', 'STALE MP3', { n
 fresh();
 fs.rmSync(clipFile);
 expect('a lesson with no MP3 at all', 'STALE MP3');
+
+// ── THE RELEASE AND THE PAUSE (a line that stopped dead at its very end) ─────
+fresh();
+editClip((m) => {
+  const s = m.toString('latin1');
+  if (!s.includes(encodingMark)) throw new Error(`${LESSON_CLIP} carries no ${encodingMark}`);
+  return Buffer.from(s.replace(encodingMark, 'narration-lesson:'), 'latin1');
+});
+expect('a lesson MP3 encoded before the release existed', 'STALE MP3');
+
+const realPlayer = fs.readFileSync(path.join(ROOT, 'lib', 'narration', 'real.ts'), 'utf8');
+const stagedPlayer = path.join(tmp, 'real.ts');
+function player(edit) {
+  const out = edit(realPlayer);
+  if (out === realPlayer) throw new Error('a player stage changed nothing');
+  fs.writeFileSync(stagedPlayer, out);
+  return { NARRATION_PLAYER: stagedPlayer };
+}
+
+fresh();
+expect('the player that paused 50ms before every line ended, as shipped', 'PLAYER', {
+  env: player((s) => s.replace('else if (heard && t >= end + END_PAD_S) finish();', 'else if (heard) finish();')),
+});
+
+fresh();
+expect('a pause that lands inside the release', 'PLAYER', {
+  env: player((s) => s.replace('const END_PAD_S = 0.2;', 'const END_PAD_S = 0.05;')),
+});
+
+fresh();
+expect('a fallback that lands on the next line', 'PLAYER', {
+  env: player((s) => s.replace('const END_SLACK_MS = 40;', 'const END_SLACK_MS = 200;')),
+});
+
+fresh();
+expect('the player as it is', null, { env: { NARRATION_PLAYER: path.join(ROOT, 'lib', 'narration', 'real.ts') } });
 
 fresh();
 damage(0, (pcm) => { pcm[1000] += 1; return pcm; }, { record: false });

@@ -20,7 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // TWO figures with the question between them, and the words of the question are
 // the answer targets.
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
 
   word: { position: 'absolute', height: WORD_H },
   wordInner: {
-    height: WORD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: WORD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   wordText: {
@@ -230,7 +231,7 @@ const styles = StyleSheet.create({
 
   tried: {
     position: 'absolute', left: (STAGE_W - TRY_W) / 2, top: TRY_T, width: TRY_W, height: TRY_H,
-    borderLeftWidth: 3, borderLeftColor: INK, backgroundColor: STONE,
+    borderLeftWidth: 3, borderLeftColor: INK, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   triedText: {

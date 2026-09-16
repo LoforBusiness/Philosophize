@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO BALLOTS THE SAME SIZE, AND TWO VOICES THAT ARE NOT.
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
 
   ballot: {
     position: 'absolute', top: BALLOT_Y, width: BALLOT_W, height: BALLOT_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   tick: { position: 'absolute', top: BALLOT_Y + 16, width: 3, height: 16, backgroundColor: INK, transform: [{ rotate: '-40deg' }] },
   tickTail: { position: 'absolute', top: BALLOT_Y + 22, width: 3, height: 9, backgroundColor: INK, transform: [{ rotate: '40deg' }] },
@@ -224,7 +225,7 @@ const styles = StyleSheet.create({
   label: { position: 'absolute', top: LABEL_Y, width: 96, height: 22 },
   labelBox: {
     position: 'absolute', left: 0, top: 0, width: 96, height: 22,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   labelWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   labelText: {
@@ -235,7 +236,7 @@ const styles = StyleSheet.create({
   speech: { position: 'absolute', left: 206, top: 262, width: 88, height: 22 },
   speechBox: {
     position: 'absolute', left: 0, top: 0, width: 88, height: 22,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   speechText: {
     position: 'absolute', left: 0, top: 6, width: 88, textAlign: 'center',

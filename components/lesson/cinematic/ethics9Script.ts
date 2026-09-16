@@ -33,13 +33,13 @@ export const BEATS: Ethics9Beat[] = [
     dur: 1.8,
   },
   {
-    p: 41, x: 168, notes: 1,
+    p: 270, x: 168, notes: 1,
     text: 'During the German occupation, a student asked Sartre for advice. His elder brother had been killed in 1940, and he wanted to join the Free French.',
     cite: 'Two claims',
     dur: 3.1,
   },
   {
-    p: 41, x: 168, notes: 1,
+    p: 270, x: 168, notes: 1,
     text: 'The student’s mother, however, lived only for him, and his departure would plunge her into despair.',
     dur: 1.9,
   },

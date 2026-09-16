@@ -17,7 +17,8 @@ import { Shapes, Outlined, ell, bar, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO PENS DRAWN THE SAME, AND A CHAIN THAT WILL NOT REACH.
@@ -264,7 +265,7 @@ const styles = StyleSheet.create({
   plate: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plateBox: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   plateLit: {
     position: 'absolute', left: 3, top: 3, width: PLATE_W - 6, height: PLATE_H - 6,
@@ -283,7 +284,7 @@ const styles = StyleSheet.create({
 
   pen: {
     position: 'absolute', top: PEN_Y, width: PEN_W, height: PEN_H,
-    borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
 
   plaque: {

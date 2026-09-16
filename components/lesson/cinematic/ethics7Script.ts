@@ -45,13 +45,13 @@ export const BEATS: Ethics7Beat[] = [
     dur: 3.3,
   },
   {
-    p: 6, x: 300, laneA: 1, laneB: 1, kid: 1, carB: 60,
+    p: 274, x: 300, laneA: 1, laneB: 1, kid: 1, carB: 60,
     text: 'The second driver makes the same choice, on a similar road, for the same two seconds.',
     cite: 'Road B',
     dur: 2,
   },
   {
-    p: 6, x: 300, laneA: 1, laneB: 1, kid: 1, carB: 60,
+    p: 274, x: 300, laneA: 1, laneB: 1, kid: 1, carB: 60,
     text: 'The only difference lies outside the driver’s control: a child is already stepping into the road.',
     dur: 2.4,
   },

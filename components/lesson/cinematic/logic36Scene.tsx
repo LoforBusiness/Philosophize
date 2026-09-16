@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWENTY-FOUR SQUARES, AND HOW MANY OF THEM YOU ACTUALLY LOOKED IN.
@@ -184,7 +185,7 @@ const styles = StyleSheet.create({
 
   cell: {
     position: 'absolute', left: 0, top: 0, width: CELL_W, height: CELL_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
   // A stroke corner to corner: the square was looked in, and is still empty.
   mark: {
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
   case: { position: 'absolute', top: CASE_Y, width: CASE_W, height: CASE_H },
   caseBox: {
     position: 'absolute', left: 0, top: 0, width: CASE_W, height: CASE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   caseWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   caseTop: {

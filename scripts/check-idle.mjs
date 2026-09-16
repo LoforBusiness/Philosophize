@@ -183,6 +183,58 @@ if (process.argv.includes('--table')) {
   }
 }
 
+// ── AND THE TAPS THEMSELVES: ON HOW MANY DOES NOTHING ON SCREEN MOVE? ─────────
+//
+// Everything above is about the vocabulary. This is the number the reader felt:
+// "three tabs in one lesson where there is no animation above the words". A tap is
+// DEAD when no scene channel changed, every posed figure holds the same code and
+// none of them is a living hold, and the player draws nothing of its own on it — no
+// pen mark (data/lessonMarks.ts) and no thought (data/lessonThoughts.ts). A
+// question, a quotation and the summary are events in themselves and never count.
+// It was 289 on 2026-09-15 and 135 a day later; a ratchet, so it only goes down.
+const { LESSONS, beatsOf } = await import('./lib/narration.mjs');
+const { poseTrack, poseTracks } = await import('./lib/posetrack.mjs');
+const { thoughtBeats, PROSE } = await import('./lib/marks.mjs');
+const { loadTs } = await import('./lib/loadts.mjs');
+const { holdsARun } = await import('./lib/liveliness.mjs');
+const fsm = (await import('node:fs')).default;
+const CIN = 'components/lesson/cinematic';
+const { MARKS } = await loadTs('data/lessonMarks.ts');
+const thoughts = thoughtBeats(fsm.readFileSync('data/lessonThoughts.ts', 'utf8'));
+const dead = [];
+for (const [id, file] of Object.entries(LESSONS)) {
+  const stem = file.replace(/Script\.ts$/, '');
+  if (!fsm.existsSync(`${CIN}/${stem}Scene.tsx`)) continue;       // the two with their own player
+  const one = poseTrack(CIN, stem);
+  const tracks = one ? [one] : poseTracks(CIN, stem);
+  const fields = tracks.map((tk) => tk.field);
+  const beats = beatsOf(file);
+  for (let k = 1; k < beats.length; k += 1) {
+    const a = beats[k - 1], b = beats[k];
+    if (b.interact || b.mc || b.tap || b.quote || b.summary) continue;
+    if (MARKS[id]?.[k] || thoughts[id]?.has(k)) continue;
+    const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+    const moved = [...keys].some((key) => !PROSE.has(key) && JSON.stringify(a[key] ?? null) !== JSON.stringify(b[key] ?? null));
+    if (moved) continue;
+    if (tracks.some((tk) => holdsARun(Number(b[tk.field] ?? tk.dflt)))) continue;
+    if (!tracks.length && fields.length === 0) { /* no readable pose: judged by its scene channels alone */ }
+    dead.push(`${id} beat ${k}`);
+  }
+}
+// 0 since 16 Sep 2026: from 289 two days earlier, through the working shelf, the
+// openers' scene events and the pen marks. A tap that leaves everything still is a
+// build failure now, not a number to watch.
+const DEAD_TAPS_BUDGET = 0;
+if (dead.length > DEAD_TAPS_BUDGET) {
+  bad += 1;
+  console.log(`\n  ✗   ${dead.length} taps leave the whole picture still, up from ${DEAD_TAPS_BUDGET}`);
+  for (const d of dead.slice(0, 12)) console.log(`        ${d}`);
+} else {
+  console.log(`\n  ok  ${dead.length} tap(s) leave the whole picture still  budget ${DEAD_TAPS_BUDGET}`);
+  if (process.argv.includes('--dead')) for (const d of dead) console.log(`        ${d}`);
+  if (dead.length < DEAD_TAPS_BUDGET) console.log(`      lower DEAD_TAPS_BUDGET to ${dead.length} in scripts/check-idle.mjs`);
+}
+
 const quiet = rows.filter((r) => r.span < 4).length;
 console.log(`\n  travel over a cycle: median ${rows.map((r) => r.span).sort((a, b) => a - b)[rows.length >> 1]} units · ${quiet} under 4`);
 console.log(bad ? '\nfailed.' : '\nall clear.');

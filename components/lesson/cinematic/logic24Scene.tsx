@@ -17,7 +17,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE IDENTICAL ENGINES, ONE TOKEN EACH, AND THREE DIFFERENT THINGS OUT.
@@ -189,7 +190,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: ENG_Y, width: ENG_W, height: ENG_H },
   engine: {
     position: 'absolute', left: 0, top: 0, width: ENG_W, height: ENG_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   engineText: {
     position: 'absolute', left: 0, top: ENG_H / 2 - 5, width: ENG_W, textAlign: 'center',

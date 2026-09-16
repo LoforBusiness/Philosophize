@@ -40,6 +40,10 @@ export function toursOff(): boolean {
 // then protect the bubble, the camera frames it, and make:thoughts places the next
 // bubble clear of where the last one was: a table that feeds on its own output.
 // Five of twelve lessons re-measured on 2026-09-11 came back that way.
+//
+// It turns off the PEN MARKS too (StageMark.tsx), for the identical reason: a mark is a
+// player-drawn stroke inside the stage, and recorded as art it would teach make:marks to
+// place the next mark clear of where the last one was.
 let quiet = false;
 
 export function setThoughtsOff(v: boolean) {

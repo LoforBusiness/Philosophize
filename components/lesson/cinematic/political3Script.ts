@@ -23,6 +23,14 @@ import type { BaseBeat } from './cinematicKit';
 // on the hook), `flow` (the consent circuit that replaces it), `scroll` (0 = in
 // the subject's hands, 1 = in the ruler's) and `seal`.
 //
+// And, so that every tap of this opener puts on the stage what its sentence names:
+// `nat` (the state of nature — no government, a state of war — in the corridor
+// between the contract's two halves), `crown` (the sovereign's crown, which lifts
+// off in the state of nature and comes back with the covenant), `rights` (the
+// return half of the circuit, which is Locke's, not Hobbes's), `decl` (the 1776
+// Declaration pinned above them) and `will` (the GENERAL WILL panel struck in ink
+// when the citizens are said to obey it).
+//
 // Graded questions are the two from data/.../what-makes-government-legitimate.ts.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -34,43 +42,57 @@ export interface Pol3Beat extends BaseBeat {
   /** Bare power: one heavy arrow down, nothing owed back (0/1). Shares the corridor with `flow`. */ force?: number;
   /** The consent / protection circuit between them (0/1). */ flow?: number;
   /** The HELD IN TRUST stamp struck across the circuit (0/1). */ seal?: number;
+  /** The state of nature in the corridor: two arrows meeting head on (0/1). */ nat?: number;
+  /** The crown over the ruler (0 = lifted off: no government). Defaults to 1. */ crown?: number;
+  /** The return half of the circuit — RIGHTS PROTECTED (0/1). */ rights?: number;
+  /** The Declaration of Independence pinned above the pair (0/1). */ decl?: number;
+  /** The GENERAL WILL panel struck in ink (0/1). */ will?: number;
 }
 
 export const BEATS: Pol3Beat[] = [
   {
-    sub: 2, r: 28, scroll: 0, pair: 1, force: 1, flow: 0, seal: 0,
+    // The gunman and the one he makes obey: the force diagram alone.
+    sub: 2, r: 28, scroll: 0, pair: 0, force: 1, flow: 0, seal: 0,
     text: 'A gunman can make you obey. What, if anything, makes you owe obedience to a government?',
     dur: 1.8,
   },
   {
-    sub: 2, r: 28, scroll: 0, pair: 1, force: 1, flow: 0, seal: 0,
+    // "Power is … Legitimacy is …" — the two are set side by side.
+    sub: 266, r: 163, scroll: 0, pair: 1, force: 1, flow: 0, seal: 0,
     text: 'Power is the capacity to compel obedience. Legitimacy is the right to rule, which creates a duty to obey.',
     dur: 2.3,
   },
   {
-    sub: 30, r: 31, scroll: 1, pair: 0, flow: 1, seal: 0,
+    // "a condition with no government … a state of war" — the crown lifts off and
+    // the corridor holds two arrows meeting head on.
+    sub: 30, r: 31, scroll: 0, pair: 0, flow: 0, seal: 0, nat: 1, crown: 0,
     text: 'Social contract theory begins with a state of nature, a condition with no government. Hobbes argued that without a common power, it becomes a state of war.',
     cite: 'The social contract',
     dur: 3.5,
   },
   {
-    sub: 30, r: 31, scroll: 1, pair: 0, flow: 1, seal: 0,
+    // "escape the war by covenant … set up a sovereign" — the consent scroll
+    // travels up to the ruler and the crown comes back down onto him.
+    sub: 266, r: 273, scroll: 1, pair: 0, flow: 1, seal: 0,
     text: 'Hobbes held that people escape the war by covenant, agreeing to set up a sovereign who keeps the peace.',
     dur: 1.8,
   },
   {
-    sub: 462, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
+    // "to protect their natural rights … holds power in trust" — the return half
+    // of the circuit, and the stamp.
+    sub: 462, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1, rights: 1,
     text: 'John Locke argued that people consent to government to protect their natural rights. Government holds power in trust, and loses the right to rule by breaking the trust.',
     cite: 'Locke, 1689',
     dur: 3.9,
   },
   {
-    sub: 462, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1,
+    // "The American Declaration of Independence, in 1776" — pinned up above them.
+    sub: 462, r: 35, scroll: 1, pair: 0, flow: 1, seal: 1, rights: 1, decl: 1,
     text: 'The American Declaration of Independence, in 1776, drew on Locke’s ideas of consent and natural rights.',
     dur: 1.8,
   },
   {
-    sub: 460, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1,
+    sub: 460, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1, rights: 1, decl: 1,
     quote: {
       id: 'lq-political-political-3-1',
       text: 'Men being by nature all free, equal and independent, no one can be subjected to the political power of another without his own consent.',
@@ -83,18 +105,19 @@ export const BEATS: Pol3Beat[] = [
     dur: 3.6,
   },
   {
-    sub: 38, r: 38, scroll: 1, pair: 2, flow: 1, seal: 1,
+    sub: 38, r: 38, scroll: 1, pair: 2, flow: 1, seal: 1, rights: 1,
     text: 'Jean-Jacques Rousseau based legitimacy on the general will, which aims at what serves everyone. The will of all is a sum of private wants.',
     cite: 'The Social Contract, 1762',
     dur: 3.5,
   },
   {
-    sub: 38, r: 38, scroll: 1, pair: 2, flow: 1, seal: 1,
+    // "Citizens who obey the general will" — that panel is struck in ink.
+    sub: 266, r: 266, scroll: 1, pair: 2, flow: 1, seal: 1, rights: 1, will: 1,
     text: 'Citizens who obey the general will obey laws they made themselves. For Rousseau, real freedom is living under rules you give yourself.',
     dur: 1.8,
   },
   {
-    sub: 380, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1,
+    sub: 380, r: 0, scroll: 1, pair: 0, flow: 1, seal: 1, rights: 1,
     interact: {
       prompt: 'On Locke’s account, what makes a government forfeit its right to rule?',
       cards: [
@@ -107,7 +130,7 @@ export const BEATS: Pol3Beat[] = [
     dur: 1.0,
   },
   {
-    sub: 165, r: 0, scroll: 1, pair: 2, flow: 1, seal: 1,
+    sub: 165, r: 0, scroll: 1, pair: 2, flow: 1, seal: 1, rights: 1,
     interact: {
       prompt: 'For Rousseau, how reliably does a majority vote express the general will?',
       drag: {

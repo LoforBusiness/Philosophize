@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO PANELS OVER ONE AXIS. THE TOP LINE IS FLAT AND THE BOTTOM ONE IS NOT.
@@ -78,6 +79,10 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political19'));
 
+// R7c — LEFT STILL ON PURPOSE: the plot's axis is how much you have ALREADY GIVEN, and this
+// stage's one axis is DISTANCE. No track here means "how much the principle still asks as
+// you give", and redrawing the pull line off the plot would put the question's curve on the
+// other variable's axis.
 export default function Political19Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -229,7 +234,7 @@ const styles = StyleSheet.create({
   },
   panel: {
     position: 'absolute', left: PAN_X, width: PAN_W, height: PAN_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   seg: {
     position: 'absolute', height: 2.5, backgroundColor: INK, borderRadius: 1.5,

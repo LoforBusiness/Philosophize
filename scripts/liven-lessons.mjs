@@ -36,6 +36,10 @@ import {
 } from './lib/liveliness.mjs';
 
 const DRY = process.argv.includes('--dry');
+// --runs: pass 0 alone. For a change to LIVING_RUN, which should reach the split runs
+// and nothing else — the joke pass places gags wherever the current prose fits one,
+// and that is its own decision, not a side effect of a new living twin.
+const RUNS_ONLY = process.argv.includes('--runs');
 
 /**
  * A deterministic 0..1 from a string. Murmur's finaliser on the tail, for the
@@ -174,7 +178,7 @@ for (const [branch, list] of byBranch) {
 
     // ── pass 1 · no pose struck twice ────────────────────────────────────────
     const seen = new Map();
-    for (const beat of lesson.beats) {
+    for (const beat of RUNS_ONLY ? [] : lesson.beats) {
       const c = effective[beat.i];
       if (c === null) continue;
       const hit = (seen.get(c) || 0);
@@ -191,7 +195,7 @@ for (const [branch, list] of byBranch) {
     }
 
     // ── pass 2 · one thing actually performed ────────────────────────────────
-    if (!hasPlayed) {
+    if (!hasPlayed && !RUNS_ONLY) {
       // The last beat that is safe to move: late enough to be a payoff, never
       // the summary, never a question, never a continuation.
       // NEVER INSIDE A RUN, head included. A played action restarts on `bt`, so
@@ -219,7 +223,7 @@ for (const [branch, list] of byBranch) {
 
     // ── pass 3 · collect the joke candidates; the branch settles them ───────
     const cands = [];
-    if (!isGrave) {
+    if (!isGrave && !RUNS_ONLY) {
       const free = (b) => b.declared !== null
         && b.i > 0 && b.i < n - 1 && !b.graded && !b.quote && !grave(b.text);
       // Outside a run first; the LAST PIECE of a run as a fallback. Some lessons

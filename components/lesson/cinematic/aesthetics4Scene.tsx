@@ -17,7 +17,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A gallery that is also a scorecard.
 //
@@ -247,7 +248,7 @@ const styles = StyleSheet.create({
   askWrap: { position: 'absolute', left: ASK_L, top: CARD_T - TACK_H, width: ASK_W, height: CARD_H + TACK_H },
   askCard: {
     position: 'absolute', left: 0, top: TACK_H, width: ASK_W, height: CARD_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   askText: {
@@ -265,7 +266,7 @@ const styles = StyleSheet.create({
   },
   card: {
     position: 'absolute', left: 0, top: TACK_H, width: CARD_W, height: CARD_H,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
   },
   cardName: {
     position: 'absolute', left: 0, top: 7, width: CARD_W - 4, textAlign: 'center',
@@ -302,7 +303,7 @@ const styles = StyleSheet.create({
   // rounded blob.
   readymade: {
     position: 'absolute', left: PED_X - 48, top: 316, width: 96, height: 72,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
     borderTopLeftRadius: 48, borderTopRightRadius: 48,
     borderBottomLeftRadius: 11, borderBottomRightRadius: 11,
   },
@@ -334,7 +335,7 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   plinth: {
     position: 'absolute', left: PED_X - 44, top: 401, width: 88, height: GROUND - 401,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   placard: {
     position: 'absolute', left: PED_X - 38, top: 428, width: 76, height: 44,

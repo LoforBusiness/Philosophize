@@ -18,7 +18,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // The Ship of Theseus drawn as INFORMATION, not just mood.
 //
@@ -361,7 +362,7 @@ const styles = StyleSheet.create({
   // ship one's prow / ship two's stern post below (both start at 406).
   ask: {
     position: 'absolute', left: 243, top: 364, width: 40, height: 40, borderRadius: 20,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   askT: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, lineHeight: 29, color: INK, includeFontPadding: false },
 
@@ -371,7 +372,7 @@ const styles = StyleSheet.create({
   // right-aligned 300-YEARS-ON tick (whose glyphs start ≈ 300).
   youTag: {
     position: 'absolute', left: 124, top: 331, width: 116, height: 18,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   youT: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.8, color: INK, includeFontPadding: false },

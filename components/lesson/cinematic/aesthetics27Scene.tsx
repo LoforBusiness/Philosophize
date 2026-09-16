@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOUR WORKS ON A WALL, AND A GAUGE OVER THEM.
@@ -203,13 +204,13 @@ const styles = StyleSheet.create({
   gaugeWrap: { position: 'absolute', left: GAU_X, top: GAU_Y, width: GAU_W, height: GAU_H },
   gauge: {
     position: 'absolute', left: 0, top: 0, width: GAU_W, height: GAU_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   gaugeFill: { position: 'absolute', left: 0, top: 0, height: GAU_H, backgroundColor: INK },
 
   wall: {
     position: 'absolute', left: WALL_X, top: WALL_Y, width: WALL_W, height: WALL_H,
-    backgroundColor: STONE, borderWidth: 1.5, borderColor: RULE,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: RULE,
   },
   frame: {
     position: 'absolute', top: FR_Y, width: FR_S, height: FR_S,

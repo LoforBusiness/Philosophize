@@ -42,24 +42,24 @@ export const BEATS: Metaphysics7Beat[] = [
     dur: 1.9,
   },
   {
-    p: 6, x: 70, line: 1, spot: 1,
+    p: 274, x: 70, line: 1, spot: 1,
     text: 'Suppose only the present exists. Then yesterday has no place on the line, and its frame is empty.',
     cite: 'Yesterday',
     dur: 2.4,
   },
   {
-    p: 6, x: 70, line: 1, spot: 1,
+    p: 274, x: 70, line: 1, spot: 1,
     text: 'On this view, the past isn’t stored somewhere else. It no longer exists at all.',
     dur: 2,
   },
   {
-    p: 41, x: 330, line: 1, spot: 1,
+    p: 270, x: 330, line: 1, spot: 1,
     text: 'The future is in the same position. Tomorrow doesn’t exist yet.',
     cite: 'Tomorrow',
     dur: 1.9,
   },
   {
-    p: 41, x: 330, line: 1, spot: 1,
+    p: 270, x: 330, line: 1, spot: 1,
     text: 'So its frame is empty too, because that moment hasn’t yet occurred.',
     dur: 2.3,
   },

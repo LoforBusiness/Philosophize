@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // THE SANDWICH SYLLOGISM, SET OUT LIKE A SUM (H64). Two premises, a rule, an
 // answer — and when the reader has found the shared word, each premise grows a
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
 
   card: {
     position: 'absolute', left: LINE_L, width: LINE_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     paddingHorizontal: 10, paddingTop: 7,
   },
   cardText: {
@@ -232,7 +233,7 @@ const styles = StyleSheet.create({
   },
   conc: {
     position: 'absolute', left: LINE_L, top: CONC_T, width: LINE_W, height: CONC_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10,
   },
   concText: {
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
 
   chip: { position: 'absolute', top: CHIP_T, width: CHIP_W, height: CHIP_H },
   chipInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5,
   },
   chipText: {

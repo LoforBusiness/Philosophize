@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A column of instructions stage right, with the outcome box beneath it.
 //
@@ -81,7 +82,21 @@ const DIR = dirsFrom(X, 1);
 const NSTEPS = BEATS.map((b) => b.steps ?? 0);
 const DONE = BEATS.map((b) => b.done ?? 0);
 
-export default function KnowHowScene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
+// R7c — the stage follows the split on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+//
+// The split divides what memorising gives you between THE FACTS (left) and THE
+// SKILL (right), and `dragPos` is the LEFT side's share (R7b). The stage already
+// draws both halves of that: the column of instructions is the facts, and the
+// outcome box — EMPTY or DONE, with the column receding as it fills — is the
+// skill. So the skill's share is `1 − dragPos`, read straight into `done`: toward
+// "the skill of swimming itself" the box fills and the column dims, toward "the
+// facts, yet none of the skill" the box empties and the column comes back up.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+
+export default function KnowHowScene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
@@ -103,7 +118,7 @@ export default function KnowHowScene({ clock, bt, bi, i, picked, onPick, gazeX, 
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
-    const done = carry(cv, 0, n, DONE[p], DONE[n], doneFade ? grow : tr);
+    const done = carry(cv, 0, n, DONE[p], reacting ? 1 - dragPos.value : DONE[n], doneFade ? grow : tr);
     return {
       fig: lookPose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       fill: carry(cv, 2, n, NSTEPS[p], NSTEPS[n], grow),
@@ -206,7 +221,7 @@ const styles = StyleSheet.create({
   column: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   step: {
     position: 'absolute', left: WALL_L, width: WALL_W, height: STEP_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, gap: 8,
   },
   stepNum: {
@@ -220,7 +235,7 @@ const styles = StyleSheet.create({
 
   box: {
     position: 'absolute', left: BOX_L, top: BOX_T, width: BOX_W, height: BOX_H,
-    borderWidth: 3, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 3, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   boxEmpty: {
@@ -243,7 +258,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   // 9/0 rather than 9.5/0.3: these chips are ~52 units of inner width on ONE line,

@@ -282,6 +282,38 @@ ok('a step in the requested shot does not stutter the stage (L4)',
 // This section is what stops a bare one coming back.
 const bare = [];
 const bags = [];
+const held = [];
+
+// ── ONE HELD VALUE PER FIGURE, AND IT IS WHERE THE BEAT STARTS (L9) ──────────
+// `carryFrom(held, n, …)` returns the pose captured at the beat change and holds it
+// for the WHOLE beat — it is a starting point, and it only means anything blended
+// into the live stance by the transition. Two shapes broke that and both froze a
+// figure from the second tap on: politicalScene's four brawlers shared ONE held
+// value and were weighted by `auth`, so all four stood in the last one's pose;
+// ethics31Scene weighted it by the climb, so a figure not climbing never breathed
+// again. Neither moves a joint between two frames, so L1 is blind to both.
+function heldRule(name, src) {
+  for (const h of [...src.matchAll(/const (\w+) = useHeld\(\)/g)].map((m) => m[1])) {
+    const keeps = src.split(`keepHeld(${h},`).length - 1;
+    const froms = src.split(`carryFrom(${h},`).length - 1;
+    if (keeps > 1 || froms > 1) held.push(`${name} — ${h} is kept ${keeps}× and carried ${froms}×: one held value per figure`);
+  }
+  for (const m of src.matchAll(/mixStance\(\s*carryFrom\(/g)) {
+    // Split the call's arguments by bracket depth; the third is the blend weight.
+    const args = [];
+    let depth = 0, from = m.index + 'mixStance('.length;
+    for (let k = from; k < src.length; k += 1) {
+      const ch = src[k];
+      if ('([{'.includes(ch)) depth += 1;
+      else if (')]}'.includes(ch)) {
+        if (depth === 0) { args.push(src.slice(from, k)); break; }
+        depth -= 1;
+      } else if (ch === ',' && depth === 0) { args.push(src.slice(from, k)); from = k + 1; }
+    }
+    const w = (args[2] ?? '').trim();
+    if (w && !/^(tr|trS|trB|trW|trA|trP|trQ|blend|tw)$/.test(w)) held.push(`${name} — a held pose blended by \`${w}\`, not by the transition`);
+  }
+}
 for (const name of names) {
   // COMMENTS ARE NOT CODE, and this section reads for shapes that get WRITTEN
   // ABOUT: the note explaining why a track had to be carried by hand quotes the
@@ -325,6 +357,8 @@ for (const name of names) {
   if (shaped > 0) bare.push(`${name} (${shaped} track lerp(s) off a beat array)`);
   void carried;
 
+  heldRule(name, src);
+
   // THE SLOTS MUST ACCOUNT FOR THEMSELVES. An undersized `useCarry(N)` does not
   // throw — it aliases two tracks onto one slot, so a prop starts each beat from
   // some other prop's last value. That is a worse picture than the defect being
@@ -345,6 +379,12 @@ console.log('\nEVERY TRACK, NOT JUST THE FIGURE\n');
 ok('no scene blends a track straight off T[p] (L5)', bare.length === 0,
   bare.length ? `${bare.length} scene(s): ${bare.slice(0, 6).join(', ')}${bare.length > 6 ? '…' : ''}`
     : `${names.length} scenes carry every track they interpolate`);
+// SMOOTH_EXTRA=<file> runs L9 over one staged scene as well (scripts/countertest-depth.mjs).
+if (process.env.SMOOTH_EXTRA) {
+  heldRule('staged', readFileSync(process.env.SMOOTH_EXTRA, 'utf8').replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, ''));
+}
+ok('every figure has its own held pose, blended in by the transition (L9)', held.length === 0,
+  held.length ? held.slice(0, 5).join(' · ') : 'no shared or misweighted held values');
 ok('every carry slot is declared and distinct (L5)', bags.length === 0,
   bags.length ? bags.slice(0, 5).join(' · ') : 'no aliased or undeclared slots');
 

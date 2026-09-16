@@ -103,7 +103,7 @@ export const BEATS: Metaphysics11Beat[] = [
     dur: 3,
   },
   {
-    p: 33, c: 35, tok: 1, swap: 1,
+    p: 260, c: 167, tok: 1, swap: 1,
     text: 'Locke distinguishes the same man, one continuing living body, from the same person, one continuing consciousness.',
     dur: 1.8,
   },

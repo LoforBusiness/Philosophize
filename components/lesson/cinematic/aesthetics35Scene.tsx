@@ -17,7 +17,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A JOKE DRAWN AS TRACK, AND THE POINTS SWITCHING UNDER IT.
@@ -72,6 +73,10 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics35'));
 
+// R7c — LEFT STILL ON PURPOSE: the sort asks which case refutes the superiority theory
+// (laughing alone · mocking nobody · a pun), and this stage draws a different joke's
+// incongruity as track and points. None of the three cases is on it and nothing on it is a
+// victim, so there is nothing the chip could move honestly.
 export default function Aesthetics35Scene({ clock, bt, bi, qv, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -216,7 +221,7 @@ const styles = StyleSheet.create({
   plate: { position: 'absolute', left: PLATE_X, width: PLATE_W, height: 26 },
   plateBox: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: 26,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   plateLit: {
     position: 'absolute', left: 3, top: 3, width: PLATE_W - 6, height: 20,

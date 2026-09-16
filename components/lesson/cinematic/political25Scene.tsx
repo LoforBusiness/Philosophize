@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO ROOMS OF EQUAL SIZE, A DOOR BETWEEN THEM, AND A REACH THAT STOPS.
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
 
   room: {
     position: 'absolute', top: ROOM_Y, width: ROOM_W, height: ROOM_H,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   roomCap: {
     position: 'absolute', top: ROOM_Y + 26, width: ROOM_W, textAlign: 'center',

@@ -38,7 +38,7 @@ export const BEATS: L9Beat[] = [
     dur: 2,
   },
   {
-    a: 14, d: 13, dx: 264, claim: true, smear: true,
+    a: 266, d: 266, dx: 264, claim: true, smear: true,
     text: 'However, a claim’s truth doesn’t depend on who asserts it. The insult says nothing about whether the figures add up.',
     dur: 3,
   },

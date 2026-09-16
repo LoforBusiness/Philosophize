@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A SLAB ON FOUR LEGS, AND THREE OF THEM TAKEN AWAY.
@@ -247,7 +248,7 @@ const styles = StyleSheet.create({
 
   slab: {
     position: 'absolute', left: SLAB_X, top: SLAB_Y, width: SLAB_W, height: SLAB_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   slabText: {
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
   },
   rubble: {
     position: 'absolute',
-    borderWidth: 2, borderColor: INK, borderRadius: 1.5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 1.5, backgroundColor: STONE, boxShadow: LIP,
   },
   pilCap: {
     // DERIVED, like the pillars it labels. This was a hardcoded 344 while PIL_TOP

@@ -20,7 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A poem pinned up on a public board stage right, the poet who wrote it planted
 // stage left, and a small SEALED BOX riding above his head. Marks accumulate under
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
 
   board: {
     position: 'absolute', left: BOARD_L, top: BOARD_T, width: BOARD_W, height: BOARD_B - BOARD_T,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   post: { position: 'absolute', top: BOARD_B - 2, width: 2.5, height: 18, backgroundColor: SOFT },
   postL: { left: BOARD_L + 26 },
@@ -336,7 +337,7 @@ const styles = StyleSheet.create({
   tether: { position: 'absolute', left: 0, top: 0, width: 6, height: 6, borderRadius: 3, backgroundColor: INK },
   box: {
     position: 'absolute', left: 0, top: 0, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center',
   },
   lid: { width: BOX_W - 4, height: 3.5, backgroundColor: INK },
@@ -355,7 +356,7 @@ const styles = StyleSheet.create({
 
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W },
   card: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },

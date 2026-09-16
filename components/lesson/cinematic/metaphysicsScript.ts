@@ -13,7 +13,7 @@ import type { BaseBeat } from './cinematicKit';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface MetaBeat extends BaseBeat {
-  /** Figure pose: 0 stand · 1 emphatic (wipe) · 2 present · 6 gaze up. */
+  /** Figure pose: 0 stand · 1 emphatic (wipe) · 2 present · 6 gaze up · 100+ the movement catalogue. */
   hpose?: number;
   /** How much of the sky is erased, 0 (full) → 1 (void). */
   erase?: number;
@@ -23,6 +23,17 @@ export interface MetaBeat extends BaseBeat {
   chain?: boolean;
   /** This beat's answer pushes the regress further. */
   qregress?: 'q1' | 'q2';
+  /** The question plate's caption: Leibniz, in 1714, called it the first question. */
+  first?: boolean;
+  /** The sky is tagged NEEDS A REASON: a universe that exists needs one. */
+  needs?: boolean;
+  /** Parmenides' card: the word NOTHING, written out and then struck through. */
+  parm?: boolean;
+  /**
+   * How far the unanswered "?" boxes behind the chain have receded, 0 → 1. Above 0
+   * the head of the chain is lit: why the states and laws exist at all is left open.
+   */
+  open?: number;
 }
 
 export const BEATS: MetaBeat[] = [
@@ -33,12 +44,14 @@ export const BEATS: MetaBeat[] = [
   },
   {
     hpose: 6,
+    first: true,
     text: 'Gottfried Leibniz, in 1714, called it the first question anyone has a right to ask.',
     dur: 1.8,
   },
   {
     hpose: 2,
     rule: true,
+    first: true,
     text: 'Leibniz’s principle of sufficient reason says that nothing is true without a reason. Applied to the whole world, it asks why the world exists at all.',
     cite: 'Principles of Nature and Grace',
     dur: 2.3,
@@ -46,12 +59,16 @@ export const BEATS: MetaBeat[] = [
   {
     hpose: 2,
     rule: true,
+    first: true,
+    needs: true,
     text: 'Leibniz argued that nothing is simpler and easier than something. So a universe that exists, rather than none, needs a reason.',
     dur: 2.5,
   },
   {
     hpose: 0,
     rule: true,
+    first: true,
+    needs: true,
     quote: {
       id: 'lq-metaphysics-being-1-1',
       text: 'Why is there something rather than nothing? For nothing is simpler and easier than something.',
@@ -64,8 +81,13 @@ export const BEATS: MetaBeat[] = [
     dur: 3.0,
   },
   {
-    hpose: 1,
-    erase: 0.86,
+    // 257 = THINKING IT OVER, a living hold (moves hold 158). The sky is not wiped
+    // on this beat any more: the sentence says only that what is not cannot be
+    // thought, which is the Parmenides card, and the wipe is the next sentence's.
+    hpose: 257,
+    parm: true,
+    first: true,
+    needs: true,
     text: 'Parmenides, an early Greek philosopher, held that what is not cannot be thought or spoken of.',
     cite: 'Parmenides, On Nature',
     dur: 1.8,
@@ -73,24 +95,35 @@ export const BEATS: MetaBeat[] = [
   {
     hpose: 1,
     erase: 0.86,
+    parm: true,
+    first: true,
+    needs: true,
     text: 'Suppose you remove every object, along with space and time. Even the dark void you then picture is still something, because thinking of nothing turns it into a thing.',
     dur: 4.2,
   },
   {
     hpose: 2,
     chain: true,
+    first: true,
+    needs: true,
     text: 'Science explains each state of the universe by an earlier state, together with the laws of nature.',
     dur: 2.6,
   },
   {
     hpose: 2,
     chain: true,
+    open: 0.4,
+    first: true,
+    needs: true,
     text: 'So every scientific explanation presupposes that states and laws already exist. It can’t explain why they exist at all.',
     dur: 1.8,
   },
   {
     hpose: 2,
     chain: true,
+    open: 0.4,
+    first: true,
+    needs: true,
     qregress: 'q1',
     interact: {
       prompt: 'Why can’t science fully answer why anything exists at all?',
@@ -106,6 +139,9 @@ export const BEATS: MetaBeat[] = [
   {
     hpose: 4,
     chain: true,
+    open: 0.7,
+    first: true,
+    needs: true,
     qregress: 'q2',
     interact: {
       prompt: 'How far back does the Big Bang theory’s explanation reach?',
@@ -125,6 +161,8 @@ export const BEATS: MetaBeat[] = [
     dur: 1.0,
   },
   {
+    first: true,
+    needs: true,
     summary: {
       title: 'Why Existence Is a Puzzle',
       points: [

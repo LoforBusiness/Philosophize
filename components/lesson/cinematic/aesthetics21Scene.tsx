@@ -19,7 +19,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE COLUMNS OF STOCK, EMPTIED, AND ONE VERDICT THAT DIFFERS.
@@ -87,6 +88,10 @@ const ASK_BEAT = LIVE.findIndex((v) => v === 1);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics21'));
 
+// R7c — LEFT STILL ON PURPOSE: the seam asks how far a photograph is like a novel and how far
+// like a painting, and the stage's answer to "is the work gone?" is the verdict plate under
+// the photograph, which waits for the pick (O5). Driving it off the seam would print one
+// wrong answer's verdict at each end, and a blur of both in the middle.
 export default function Aesthetics21Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
@@ -263,16 +268,16 @@ const styles = StyleSheet.create({
   },
   ash: {
     position: 'absolute',
-    borderWidth: 1.5, borderColor: INK, borderRadius: 1.5, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 1.5, backgroundColor: STONE, boxShadow: LIP,
   },
   slab: {
     position: 'absolute', width: COL_W,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
 
   plate: {
     position: 'absolute', top: PLATE_Y, width: COL_W, height: 22,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   plateGone: { borderColor: INK, borderWidth: 2, backgroundColor: INK },
   plateText: {

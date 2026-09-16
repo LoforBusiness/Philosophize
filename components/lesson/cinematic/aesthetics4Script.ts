@@ -34,7 +34,7 @@ export const BEATS: Aes4Beat[] = [
     dur: 2.8,
   },
   {
-    a: 2, v: 0, ask: 1, test: 0, verdict: 0, signed: 0, art: 0,
+    a: 266, v: 158, ask: 1, test: 0, verdict: 0, signed: 0, art: 0,
     text: 'The case raises a question of definition. What makes any object a work of art?',
     dur: 1.8,
   },
@@ -50,18 +50,18 @@ export const BEATS: Aes4Beat[] = [
     dur: 2.4,
   },
   {
-    a: 36, v: 15, test: 2, signed: 1,
+    a: 269, v: 15, test: 2, signed: 1,
     text: 'Marcel Duchamp turned the urinal on its back, signed it with the name “R. Mutt 1917”, and titled the work Fountain.',
     cite: 'The Richard Mutt Case, 1917',
     dur: 2.2,
   },
   {
-    a: 36, v: 15, test: 2, signed: 1,
+    a: 269, v: 15, test: 2, signed: 1,
     text: 'The exhibition’s board refused to display the work. An unsigned defence argued that whether Mutt made it with his own hands had no importance.',
     dur: 1.9,
   },
   {
-    a: 36, v: 15, test: 2, signed: 1,
+    a: 269, v: 15, test: 2, signed: 1,
     text: 'The defence held that choosing was the artistic act. Placed under a new title, the object lost its everyday use.',
     dur: 1.8,
   },

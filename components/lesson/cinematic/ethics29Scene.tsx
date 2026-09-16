@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE ACTS STANDING STILL, AND ONE LINE THAT SAYS WHICH WERE OWED.
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
 
   rail: {
     position: 'absolute', left: RAIL_X, top: RAIL_Y, width: RAIL_W, height: RAIL_H,
-    backgroundColor: STONE, borderWidth: 1.5, borderColor: RULE,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: RULE,
   },
   // EVERYTHING LEFT OF THE LINE IS OWED. Filling the rail rather than labelling
   // the marks means nothing on the stage has to be re-read as the line moves.
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
 
   mark: {
     position: 'absolute', top: MARK_TOP, width: MARK_W, height: RAIL_Y - MARK_TOP,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
     borderTopLeftRadius: 16, borderTopRightRadius: 16,
   },
   name: {

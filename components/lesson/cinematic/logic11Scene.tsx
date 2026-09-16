@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A four-step proof standing as a stack of cards on a base line, stage right, with
 // the narrator downstage left. The stack builds top-down, the base line slides in
@@ -280,7 +281,7 @@ const styles = StyleSheet.create({
 
   step: { position: 'absolute', left: STACK_L, width: STACK_W },
   stepInner: {
-    height: BOX_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: BOX_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     flexDirection: 'row', alignItems: 'center', paddingLeft: 6, paddingRight: 24,
   },
   stepNum: {

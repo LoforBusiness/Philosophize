@@ -37,13 +37,13 @@ export const BEATS: Political10Beat[] = [
     dur: 2,
   },
   {
-    p: 37, x: 44,
+    p: 272, x: 44,
     text: 'John Locke begins before anything is owned. In his account, the earth is first given to humankind in common.',
     cite: 'Locke · labour',
     dur: 1.8,
   },
   {
-    p: 37, x: 44,
+    p: 272, x: 44,
     text: 'You own your labour, so land you mix your labour with becomes yours. Locke adds a proviso: enough, and as good, must be left for others.',
     dur: 3.6,
   },

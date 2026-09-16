@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A HOTEL FRONT, SIXTEEN DOORS, AND GUESTS THAT WALK RIGHT.
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
     // arrives AT reception, which is a better reading of the beat as well. Nothing
     // else occupies y 402…432 right of the doors, which stop at y 368.
     position: 'absolute', left: 176, top: 402, width: 78, height: 30,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   deskLabel: {
     position: 'absolute', left: 176, top: 412, width: 78, textAlign: 'center',

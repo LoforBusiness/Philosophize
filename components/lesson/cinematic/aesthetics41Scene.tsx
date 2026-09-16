@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A CANVAS INSIDE A FRAME INSIDE A WALL, AND ONE RING THAT WILL NOT SETTLE.
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
 
   wall: {
     position: 'absolute', left: WALL_X, top: WALL_Y, width: WALL_W, height: WALL_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   // A BAND WITH A WIDTH, not a hairline — the whole lesson is about a thing that
   // occupies territory of its own.

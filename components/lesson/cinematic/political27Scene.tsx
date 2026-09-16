@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO GATES ON ONE ROAD, AND WHICHEVER OF THEM IS STANDING OPEN.
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
 
   road: {
     position: 'absolute', left: ROAD_X, top: ROAD_Y, width: ROAD_W, height: ROAD_H,
-    backgroundColor: STONE, borderWidth: 1.5, borderColor: RULE,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: RULE,
   },
   post: { position: 'absolute', top: POST_Y, width: POST_W, height: POST_H, backgroundColor: INK },
   lintel: {
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
 
   board: {
     position: 'absolute', top: BOARD_Y, width: BOARD_W, height: BOARD_H,
-    backgroundColor: STONE, borderWidth: 1.5, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: INK,
   },
   boardText: {
     position: 'absolute', top: BOARD_Y + 7, width: BOARD_W, textAlign: 'center',

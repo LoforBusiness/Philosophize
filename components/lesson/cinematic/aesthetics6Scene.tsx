@@ -18,7 +18,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A tiny figure at the foot of a vast range — and, written up beside it, the TABLE
 // Burke actually drew: two columns that are two different responses, not two doses
@@ -328,7 +329,7 @@ const styles = StyleSheet.create({
 
   tagWrap: { position: 'absolute', left: 132, top: 400, width: 80, alignItems: 'center' },
   tagBox: {
-    width: 80, height: 22, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    width: 80, height: 22, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   tagT: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: INK, includeFontPadding: false },
@@ -361,7 +362,7 @@ const styles = StyleSheet.create({
   // reads at a glance. Card x 236–384, y 294–372, clear of the table (ends x 186).
   mindCard: {
     position: 'absolute', left: 236, top: 294, width: 148, height: 78,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
   },
   // 143, not 148: an absolutely-positioned child sits inside the border box, so a
   // child given the card's OUTER width overhangs it by the two 2.5-unit borders —

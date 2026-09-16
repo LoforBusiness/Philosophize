@@ -51,13 +51,13 @@ export const BEATS: Strong4Beat[] = [
     dur: 3.5,
   },
   {
-    p: 6, fill: 1, lock: 1, dice: 0, verdict: 2, lens: 1,
+    p: 274, fill: 1, lock: 1, dice: 0, verdict: 2, lens: 1,
     text: 'Consider the argument “all men are mortal, Socrates is a man, so Socrates is mortal”. If both premises are true, the conclusion can’t be false.',
     cite: 'Deduction — guaranteed',
     dur: 3.4,
   },
   {
-    p: 6, fill: 1, lock: 1, dice: 0, verdict: 2, lens: 1,
+    p: 274, fill: 1, lock: 1, dice: 0, verdict: 2, lens: 1,
     text: 'That certainty comes from the argument’s form, not from its subject matter.',
     dur: 1.8,
   },

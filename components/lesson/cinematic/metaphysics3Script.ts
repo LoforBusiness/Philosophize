@@ -17,6 +17,10 @@ export interface Meta3Beat extends BaseBeat {
   /** Shadows on the wall 0..1. */ shadow?: number;
   /** The Form's brightness overhead 0..1. */ form?: number;
   /** The wobbling apple present 0..1. */ apple?: number;
+  /** Reality divided in two: the heavy rule draws across and BEING is captioned (0/1). */ divide?: number;
+  /** The lower half is captioned BECOMING (0/1). */ becoming?: number;
+  /** The cave is labelled THE SENSES, and the sun outside it rises (0/1). */ outside?: number;
+  /** The divide is labelled: KNOWLEDGE above it, OPINION below (0/1). */ legend?: number;
 }
 
 export const BEATS: Meta3Beat[] = [
@@ -32,28 +36,30 @@ export const BEATS: Meta3Beat[] = [
     dur: 1.9,
   },
   {
-    p: 167, shadow: 0.9, form: 0.15, apple: 1,
+    // 168 = COUNTING THE POINTS and 459 = EXPLAINING: the other bodies for 167 (N6),
+    // since these two beats now change the chart and are no longer one run.
+    p: 168, shadow: 0.9, form: 0.15, apple: 1, divide: 1,
     text: 'Knowledge needs an object that doesn’t change, so Plato divided reality in two. Being is unchanging, and it can be known.',
     dur: 3,
   },
   {
-    p: 167, shadow: 0.9, form: 0.15, apple: 1,
+    p: 459, shadow: 0.9, form: 0.15, apple: 1, divide: 1, becoming: 1,
     text: 'Becoming is always changing, so it’s grasped only by opinion, through the senses.',
     dur: 1.8,
   },
   {
-    p: 34, shadow: 0.5, form: 0.7, apple: 1,
+    p: 34, shadow: 0.5, form: 0.7, apple: 1, divide: 1, becoming: 1,
     text: 'In Plato’s allegory of the cave, prisoners chained since childhood take shadows for reality. One is freed and forced up into daylight, where he sees the things themselves.',
     cite: 'The Republic, Book VII',
     dur: 2.9,
   },
   {
-    p: 418, shadow: 0.5, form: 0.7, apple: 1,
+    p: 418, shadow: 0.5, form: 0.7, apple: 1, divide: 1, becoming: 1, outside: 1,
     text: 'Plato holds that the cave is the world of the senses. The things outside it, lit by the sun, stand for the Forms.',
     dur: 2.3,
   },
   {
-    p: 147, shadow: 0.3, form: 0.9, apple: 1,
+    p: 147, shadow: 0.3, form: 0.9, apple: 1, divide: 1, becoming: 1, outside: 1,
     quote: {
       id: 'lq-metaphysics-being-3-1',
       text: 'The soul is most like the divine, deathless, intelligible, uniform, indissoluble, always the same as itself.',
@@ -66,18 +72,18 @@ export const BEATS: Meta3Beat[] = [
     dur: 3.6,
   },
   {
-    p: 24, shadow: 0.15, form: 1, apple: 1,
+    p: 275, shadow: 0.15, form: 1, apple: 1, divide: 1, becoming: 1, outside: 1,
     text: 'Every physical thing is an imperfect copy of a Form. Equal sticks fall short of the Form of Equal, which is never unequal.',
     cite: 'The theory of Forms',
     dur: 2.9,
   },
   {
-    p: 24, shadow: 0.15, form: 1, apple: 1,
+    p: 275, shadow: 0.15, form: 1, apple: 1, divide: 1, becoming: 1, outside: 1, legend: 1,
     text: 'So knowledge is possible only of the unchanging Forms. Of changing things, there can be only opinion.',
     dur: 2.3,
   },
   {
-    p: 383, shadow: 0.15, form: 1, apple: 1,
+    p: 383, shadow: 0.15, form: 1, apple: 1, divide: 1, becoming: 1, outside: 1, legend: 1,
     interact: {
       prompt: 'On Plato’s view that reality requires permanence, which of these is most real?',
       explain:
@@ -87,7 +93,7 @@ export const BEATS: Meta3Beat[] = [
     dur: 1.0,
   },
   {
-    p: 165, shadow: 0.15, form: 1, apple: 1,
+    p: 165, shadow: 0.15, form: 1, apple: 1, divide: 1, becoming: 1, outside: 1, legend: 1,
     interact: {
       prompt: 'What does the theory of Forms imply about the apple’s reality, compared with its Form?',
       split: {
@@ -105,6 +111,7 @@ export const BEATS: Meta3Beat[] = [
     dur: 1.0,
   },
   {
+    divide: 1, becoming: 1, outside: 1, legend: 1,
     summary: {
       title: 'Plato’s Being and Becoming',
       points: [

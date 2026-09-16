@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political32Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
@@ -20,7 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // SEVENTY-SEVEN MARKS AND ONE OF THEM IS YOURS. The scale is the argument: the reader
 // has to find their own tick in the row, and how small it looks is the lesson (H64).
@@ -77,9 +78,25 @@ const LAB = BEATS.map((b) => b.labels ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political32'));
 
-export default function Political32Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
+// R7c — the stage follows the poll on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// HOW FAR YOUR OWN MARK IS HELD UP, in the BALLOT'S OWN ORDER (never the shuffled
+// row order — see SceneApi.pickPos): what it expresses · a slim chance of deciding
+// · a tiny chance times vast stakes · being among the votes that cause the result.
+// Only the first puts a vote's value in the mark itself, "whoever wins" — and this
+// mark sits under the smaller pile, so it lost. The other three put the value in
+// deciding or causing the result, which this mark did not do, so they leave it
+// where it is. The two middle rows must be 0 in any case: the ballot rests at 0.5,
+// between them, until the reader has chosen.
+const YOURS_AT = [1, 0, 0, 0];
+
+export default function Political32Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(5);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -102,6 +119,8 @@ export default function Political32Scene({ clock, bt, bi, i, picked, onPick, gaz
       result: carry(cv, 1, n, RES[p], RES[n], grow),
       mark: carry(cv, 2, n, MARK[p], MARK[n], grow),
       labels: carry(cv, 3, n, LAB[p], LAB[n], grow),
+      // R7c — your mark is held up for the account that values it whoever wins.
+      yours: carry(cv, 4, n, 0, reacting ? pickAt(YOURS_AT, pickPos.value) : 0, tr),
     };
   });
 
@@ -112,9 +131,15 @@ export default function Political32Scene({ clock, bt, bi, i, picked, onPick, gaz
     opacity: SCENE.value.result,
     transform: [{ translateY: (1 - SCENE.value.result) * -6 }],
   }));
+  // Held up 6 and grown 10% about its own centre: the leader then reaches up into
+  // the lower pile between two ticks, and the caption stays clear of NOTHING AT ALL
+  // (x 236 on), which is 55 units to its right.
   const markStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.mark,
-    transform: [{ translateY: (1 - SCENE.value.mark) * 8 }],
+    transform: [
+      { translateY: (1 - SCENE.value.mark) * 8 - 6 * SCENE.value.yours },
+      { scale: 1 + 0.1 * SCENE.value.yours },
+    ],
   }));
   const labelStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.labels,
@@ -203,7 +228,7 @@ const styles = StyleSheet.create({
   },
   tick: { position: 'absolute', width: TICK_W, height: TICK_H, backgroundColor: INK },
   // Retreats to the right as the count comes in, so the ticks themselves never move.
-  cover: { position: 'absolute', height: TICK_H + 8, backgroundColor: STONE, transformOrigin: '100% 50%' },
+  cover: { position: 'absolute', height: TICK_H + 8, backgroundColor: STONE, boxShadow: LIP, transformOrigin: '100% 50%' },
 
   markWrap: { position: 'absolute', left: MARK_X - 28, top: 418, width: 56, alignItems: 'center' },
   markLead: { width: 1.5, height: 12, backgroundColor: SOFT },
@@ -222,13 +247,13 @@ const styles = StyleSheet.create({
   margin: { position: 'absolute', ...MARGIN },
   nothing: { position: 'absolute', ...NOTHING },
   box: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   // The margin's target is TALL — its lower half is the empty tap area over the
   // overhang — so only the chip at the top carries the answer state.
   chip: {
-    height: 30, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: 30, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   boxText: {

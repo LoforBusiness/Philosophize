@@ -47,13 +47,13 @@ export const BEATS: Ethics11Beat[] = [
     dur: 5.4,
   },
   {
-    p: 6, x: 126, tok: 1, led: 1, shelf: 1,
+    p: 274, x: 126, tok: 1, led: 1, shelf: 1,
     text: 'John Stuart Mill was raised on Bentham’s ideas, yet he rejected this purely quantitative view of pleasure.',
     cite: 'Mill’s objection',
     dur: 2.8,
   },
   {
-    p: 6, x: 126, tok: 1, led: 1, shelf: 1,
+    p: 274, x: 126, tok: 1, led: 1, shelf: 1,
     text: 'Mill argued that pleasures differ in quality as well as quantity. Some are higher in kind than others.',
     dur: 2.6,
   },

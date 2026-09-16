@@ -50,6 +50,8 @@ import {
 import { ease01, moveTr } from './rig';
 import { quipFor, visitorSays } from './quips';
 import { THOUGHTS } from '@/data/lessonThoughts';
+import { MARKS } from '@/data/lessonMarks';
+import StageMark from './StageMark';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The shared cinematic player shell. It owns everything that is identical across
@@ -88,6 +90,12 @@ export interface SceneApi {
   i: number;                    // current beat index (JS)
   beat: BaseBeat;               // current beat (for bubbles etc.)
   picked: string | null;        // which scene target is chosen (null until answered)
+  /**
+   * Whether the answer given on this beat was the right one — from ANY place it was
+   * given, stage or deck. A card's id is its DISPLAY slot and the cards are shuffled
+   * (./ChoiceCards), so a scene cannot work this out from `picked` and the script.
+   */
+  pickedOk?: boolean;
   onPick: (id: string, correct: boolean) => void;  // scene reports a scene-driven answer
   /**
    * The `drag` question's knob position, 0..1 (see ./DragScale). Meaningless on a
@@ -504,6 +512,13 @@ export default function CinematicPlayer({
     show: boolean;
   };
   const [bubbles, setBubbles] = useState<Bub[]>([]);
+  /**
+   * THE PEN MARKS (StageMark.tsx, data/lessonMarks.ts): on a tap where the scene's art
+   * holds, a mark round the label the voice is naming. Kept as a list for the reason the
+   * bubbles are — the one leaving stays mounted and fades while the next one arrives, and
+   * no mark ever changes which beat it belongs to.
+   */
+  const [marks, setMarks] = useState<{ key: string; beat: number; show: boolean }[]>([]);
   // The foot-plant times for the walk into the current beat, how many have already
   // sounded, and when the walk comes to rest (−1 if it ends mid-stride). Numbers
   // only — a JS closure cannot cross into a worklet (§17).
@@ -1029,6 +1044,20 @@ export default function CinematicPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i, lesson.id]);
 
+  // The pen mark for this beat, if the table has one. It mounts at once and times its
+  // own stroke off the voice (StageMark); the last beat's mark fades where it is. Never
+  // while a harness is measuring, for the bubble's reason: the probe would record the
+  // mark as stage art and every table built on the boxes would steer round it.
+  const MARK_OUT_MS = 240;
+  useEffect(() => {
+    setMarks((ms) => (ms.some((m) => m.show) ? ms.map((m) => (m.show ? { ...m, show: false } : m)) : ms));
+    const sweep = setTimeout(() => setMarks((ms) => (ms.length ? ms.filter((m) => m.show) : ms)), MARK_OUT_MS + 100);
+    if (!thoughtsOff() && MARKS[lesson.id]?.[i]) {
+      setMarks((ms) => [...ms.filter((m) => m.beat !== i), { key: `m${i}:${Date.now()}`, beat: i, show: true }]);
+    }
+    return () => clearTimeout(sweep);
+  }, [i, lesson.id]);
+
   useEffect(() => {
     const d = beat.interact?.drag;
     if (d) dragPos.value = d.start;
@@ -1179,6 +1208,25 @@ export default function CinematicPlayer({
   const fit = boxSize.w > 0 ? Math.min(boxSize.w / STAGE_W, boxSize.h / bandH) : 0;
   const quoteSaved = beat.quote ? savedQuotes.some((q) => q.id === beat.quote!.id) : false;
 
+  // Not a hook — a plain element list, so it may sit below the early return.
+  const stageMarks = marks.map((M) => {
+    const spot = MARKS[lesson.id]?.[M.beat];
+    if (!spot) return null;
+    const line = narrated?.[M.beat];
+    const voiced = !!(narrationOn && line && beats[M.beat]?.text === line.text);
+    return (
+      <StageMark
+        key={M.key}
+        lessonId={lesson.id}
+        beat={M.beat}
+        spot={spot}
+        show={M.show}
+        voiced={voiced}
+        wordAt={line?.words[spot.w] ?? 0}
+      />
+    );
+  });
+
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.header}>
@@ -1243,12 +1291,12 @@ export default function CinematicPlayer({
                       style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
                     >
                       <TargetCountProvider onCount={setTargetCount} onBox={onBox} host={camHost} live={stageLive}>
-                        <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => { if (stageLive) choose(id, ok, true); }} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubbles.map((B) => <Thought key={B.key} text={B.text} kind={B.kind} x={B.at[0]} anchorY={B.at[1]} discs={B.at[2]} headX={B.at[3]} show={B.show} figX={B.refX === undefined ? undefined : figX} refX={B.refX ?? 0} settle={B.refX === undefined ? undefined : figTr} probeId={`${B.key[0] === 'v' ? 'thought-vis' : 'thought-lead'}${B.show ? '' : '-out'}`} />)}</WardrobeProvider>
+                        <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} pickedOk={pickedOk} sound={sounded} onPick={(id, ok) => { if (stageLive) choose(id, ok, true); }} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubbles.map((B) => <Thought key={B.key} text={B.text} kind={B.kind} x={B.at[0]} anchorY={B.at[1]} discs={B.at[2]} headX={B.at[3]} show={B.show} figX={B.refX === undefined ? undefined : figX} refX={B.refX ?? 0} settle={B.refX === undefined ? undefined : figTr} probeId={`${B.key[0] === 'v' ? 'thought-vis' : 'thought-lead'}${B.show ? '' : '-out'}`} />)}{stageMarks}</WardrobeProvider>
                       </TargetCountProvider>
                     </Animated.View>
                   ) : (
                     <TargetCountProvider onCount={setTargetCount} live={stageLive}>
-                      <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} sound={sounded} onPick={(id, ok) => { if (stageLive) choose(id, ok, true); }} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubbles.map((B) => <Thought key={B.key} text={B.text} kind={B.kind} x={B.at[0]} anchorY={B.at[1]} discs={B.at[2]} headX={B.at[3]} show={B.show} figX={B.refX === undefined ? undefined : figX} refX={B.refX ?? 0} settle={B.refX === undefined ? undefined : figTr} probeId={`${B.key[0] === 'v' ? 'thought-vis' : 'thought-lead'}${B.show ? '' : '-out'}`} />)}</WardrobeProvider>
+                      <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} pickedOk={pickedOk} sound={sounded} onPick={(id, ok) => { if (stageLive) choose(id, ok, true); }} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubbles.map((B) => <Thought key={B.key} text={B.text} kind={B.kind} x={B.at[0]} anchorY={B.at[1]} discs={B.at[2]} headX={B.at[3]} show={B.show} figX={B.refX === undefined ? undefined : figX} refX={B.refX ?? 0} settle={B.refX === undefined ? undefined : figTr} probeId={`${B.key[0] === 'v' ? 'thought-vis' : 'thought-lead'}${B.show ? '' : '-out'}`} />)}{stageMarks}</WardrobeProvider>
                     </TargetCountProvider>
                   )}
                 </View>

@@ -18,7 +18,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // The right to rule, drawn as a CIRCUIT and a COMPARISON.
 //
@@ -36,6 +37,19 @@ const { RULE, STONE } = stageTone('political-philosophy');
 // POWER (makes you obey) against LEGITIMACY (makes you owe), then swaps to
 // Rousseau's split: the WILL OF ALL drawn as arrows pulling every which way, the
 // GENERAL WILL as the same arrows in rank.
+//
+// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
+// Four taps of this opener used to hold one frame, and one put the whole Hobbes-
+// to-Locke circuit up on a sentence about the state of nature. Now each sentence
+// brings what it names: the POWER / LEGITIMACY panel on the sentence that defines
+// them; on "a condition with no government … a state of war" the crown lifts off
+// the ruler and the corridor holds two arrows meeting head on; on "escape the war by
+// covenant … set up a sovereign" the consent scroll travels and the crown comes
+// back; the RIGHTS PROTECTED return arrives with Locke, who is the one that says
+// it; the 1776 Declaration is pinned up on the sentence about it, in the panel
+// corridor Rousseau's panel then takes over; and GENERAL WILL is struck in ink on
+// "citizens who obey the general will". Everything that shares a corridor hands
+// over with the same staggered gate the force diagram and the circuit already use.
 //
 // COMPOSITION / OCCLUSION CONTRACT
 //   · Subject at x = 66 (spans ~18–114), ruler at x = 334 (spans ~286–382), both
@@ -62,6 +76,14 @@ const COR_W = 156;
 const UP_Y = 389;                  // the consent arrow
 const DOWN_Y = 458;                // the protection arrow
 const SCROLL_W = 32;
+const CLASH_GAP = 6;               // between the two arrowheads of the state of war
+
+// The Declaration, pinned in the panel corridor (x 134..266, y 240..316): the
+// panels are down on both beats it is up, and it is gone before Rousseau's arrive.
+const DECL_L = 134;
+const DECL_T = 240;
+const DECL_W = 132;
+const DECL_H = 76;
 
 // Mode 1 sets power against legitimacy; mode 2 is Rousseau's split. The panels
 // keep their geometry and swap only their words, so nothing ever reflows.
@@ -95,6 +117,11 @@ const SCROLL = BEATS.map((b) => b.scroll ?? 0);
 const FORCE = BEATS.map((b) => b.force ?? 0);
 const FLOW = BEATS.map((b) => b.flow ?? 0);
 const SEAL = BEATS.map((b) => b.seal ?? 0);
+const NAT = BEATS.map((b) => b.nat ?? 0);
+const CROWN = BEATS.map((b) => b.crown ?? 1);
+const RIGHTS = BEATS.map((b) => b.rights ?? 0);
+const DECL = BEATS.map((b) => b.decl ?? 0);
+const WILL = BEATS.map((b) => b.will ?? 0);
 const PAIR_ON = BEATS.map((b) => ((b.pair ?? 0) > 0 ? 1 : 0));
 // A beat that shows no panel still remembers the last one, so the fade-OUT keeps
 // the words it was showing instead of blanking mid-transition.
@@ -123,7 +150,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political3'));
 export default function Political3Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldSub = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(10);
   const heldR = useHeld();
   const mode = PAIR_MODE[i];
   const panel = PANELS[mode] ?? PANELS[1]!;
@@ -148,13 +175,22 @@ export default function Political3Scene({ clock, bt, bi, i, dragPos }: SceneApi)
       // the same thing' it is struck across the circuit, and it lifts as the reader
       // says a vote reaches less and less of the general will.
       seal: carry(cv, 1, n, SEAL[p], reacting ? 1 - dragPos.value : SEAL[n], tr),
-      pair: carry(cv, 2, n, PAIR_ON[p], PAIR_ON[n], tr),
+      // The panels share their corridor with the Declaration, so they take the same
+      // staggered gate as the two diagrams below: off by 45%, on from 55%.
+      pair: ease01(clamp01((carry(cv, 2, n, PAIR_ON[p], PAIR_ON[n], tr) - 0.55) / 0.45)),
       // The corridor's two diagrams hand over in stages: force is off the rails by
       // 45% of the transition, the circuit goes up from 55%, and the corridor is
       // briefly — deliberately — empty between them. Cross-fading them left both at
       // half opacity on top of each other, which on a phone reads as a smudge.
       force: ease01(clamp01((carry(cv, 3, n, FORCE[p], FORCE[n], tr) - 0.55) / 0.45)),
       flow: ease01(clamp01((carry(cv, 4, n, FLOW[p], FLOW[n], tr) - 0.55) / 0.45)),
+      // The state of nature is the third tenant of that corridor, on the same gate.
+      nat: ease01(clamp01((carry(cv, 5, n, NAT[p], NAT[n], tr) - 0.55) / 0.45)),
+      crown: carry(cv, 6, n, CROWN[p], CROWN[n], tr),
+      // The return half only ever arrives onto a circuit that is already up.
+      rights: carry(cv, 7, n, RIGHTS[p], RIGHTS[n], tr),
+      decl: ease01(clamp01((carry(cv, 8, n, DECL[p], DECL[n], tr) - 0.55) / 0.45)),
+      will: carry(cv, 9, n, WILL[p], WILL[n], tr),
       t,
     };
   });
@@ -177,6 +213,26 @@ export default function Political3Scene({ clock, bt, bi, i, dragPos }: SceneApi)
     opacity: SCENE.value.pair,
     transform: [{ translateY: (1 - SCENE.value.pair) * -8 }],
   }));
+  const natStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.nat }));
+  // No government: the crown lifts clear of the ruler and goes; the covenant sets it back down.
+  const crownStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.crown,
+    transform: [{ translateY: (1 - SCENE.value.crown) * -14 }],
+  }));
+  // Protection flows back from the ruler's end, so the arrow arrives travelling left.
+  // It rides the circuit's gate too, so the summary takes both halves down together.
+  const rightsStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.rights * SCENE.value.flow,
+    transform: [{ translateX: (1 - SCENE.value.rights) * 14 }],
+  }));
+  const declStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.decl,
+    transform: [{ translateY: (1 - SCENE.value.decl) * -8 }, { rotate: '-2deg' }],
+  }));
+  // The GENERAL WILL panel is struck, not tinted: its ink face comes up as its
+  // stone face's words go, so no ink word ever sits under the ink plate.
+  const willStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.will }));
+  const willOffStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.will }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -191,22 +247,51 @@ export default function Political3Scene({ clock, bt, bi, i, dragPos }: SceneApi)
         </View>
 
         <View style={[styles.box, { left: BOX_L[1] }]}>
-          <Text style={styles.boxName}>{panel.right.name}</Text>
-          <Text style={styles.boxSub}>{panel.right.sub}</Text>
-          {rots ? <ArrowRow rots={ALIGNED} /> : null}
+          <Animated.View style={[StyleSheet.absoluteFill, willOffStyle]}>
+            <Text style={styles.boxName}>{panel.right.name}</Text>
+            <Text style={styles.boxSub}>{panel.right.sub}</Text>
+            {rots ? <ArrowRow rots={ALIGNED} /> : null}
+          </Animated.View>
         </View>
+        {/* the same panel, struck in ink — only Rousseau's split ever strikes it */}
+        {rots ? (
+          <Animated.View style={[styles.boxOn, { left: BOX_L[1] }, willStyle]}>
+            <Text style={[styles.boxName, styles.onInk]}>{panel.right.name}</Text>
+            <Text style={[styles.boxSub, styles.onInk]}>{panel.right.sub}</Text>
+            <ArrowRow rots={ALIGNED} color={PAPER} />
+          </Animated.View>
+        ) : null}
 
         <View style={styles.divider} />
         <View style={styles.chip}><Text style={styles.chipText}>VS</Text></View>
       </Animated.View>
 
+      {/* ── the Declaration of 1776, pinned where the panels were ───────────── */}
+      <Animated.View style={[styles.decl, declStyle]} pointerEvents="none">
+        <Text style={styles.declTitle} numberOfLines={1}>DECLARATION</Text>
+        <Text style={styles.declSub} numberOfLines={1}>OF INDEPENDENCE</Text>
+        <View style={styles.declRule} />
+        <Text style={styles.declYear} numberOfLines={1}>1776</Text>
+        <Text style={styles.declIdeas} numberOfLines={1}>CONSENT · RIGHTS</Text>
+      </Animated.View>
+
       {/* ── the crown, riding above the ruler ────────────────────────────────── */}
-      <View style={styles.crown} pointerEvents="none">
+      <Animated.View style={[styles.crown, crownStyle]} pointerEvents="none">
         <View style={[styles.crownPt, { left: 1 }]} />
         <View style={[styles.crownPt, { left: 14 }]} />
         <View style={[styles.crownPt, { left: 27 }]} />
         <View style={styles.crownBand} />
-      </View>
+      </Animated.View>
+
+      {/* ── the state of nature: no government, and two wills meeting head on ── */}
+      <Animated.View style={[StyleSheet.absoluteFill, natStyle]} pointerEvents="none">
+        <Text style={styles.natLabel}>STATE OF NATURE</Text>
+        <View style={[styles.clashShaft, { left: COR_L, width: COR_W / 2 - CLASH_GAP / 2 - 12 }]} />
+        <View style={[styles.clashHeadR, { left: COR_L + COR_W / 2 - CLASH_GAP / 2 - 13 }]} />
+        <View style={[styles.clashShaft, { left: COR_L + COR_W / 2 + CLASH_GAP / 2 + 12, width: COR_W / 2 - CLASH_GAP / 2 - 12 }]} />
+        <View style={[styles.clashHeadL, { left: COR_L + COR_W / 2 + CLASH_GAP / 2 }]} />
+        <Text style={styles.warLabel}>A STATE OF WAR</Text>
+      </Animated.View>
 
       {/* ── bare force: one heavy arrow down, and nothing owed back ──────────── */}
       <Animated.View style={[StyleSheet.absoluteFill, forceStyle]} pointerEvents="none">
@@ -227,6 +312,8 @@ export default function Political3Scene({ clock, bt, bi, i, dragPos }: SceneApi)
         <Text style={styles.upLabel}>CONSENT</Text>
         <View style={styles.upShaft} />
         <View style={styles.upHead} />
+      </Animated.View>
+      <Animated.View style={[StyleSheet.absoluteFill, rightsStyle]} pointerEvents="none">
         <View style={styles.downShaft} />
         <View style={styles.downHead} />
         <Text style={styles.downLabel}>RIGHTS PROTECTED</Text>
@@ -252,13 +339,13 @@ export default function Political3Scene({ clock, bt, bi, i, dragPos }: SceneApi)
 }
 
 /** Six little arrows — scattered for the will of all, in rank for the general will. */
-function ArrowRow({ rots }: { rots: string[] }) {
+function ArrowRow({ rots, color = INK }: { rots: string[]; color?: string }) {
   return (
     <View style={styles.arrowRow} pointerEvents="none">
       {rots.map((rot, k) => (
         <View key={k} style={[styles.arrow, { left: k * 25, transform: [{ rotate: rot }] }]}>
-          <View style={styles.arrowShaft} />
-          <View style={styles.arrowHead} />
+          <View style={[styles.arrowShaft, { backgroundColor: color }]} />
+          <View style={[styles.arrowHead, { borderLeftColor: color }]} />
         </View>
       ))}
     </View>
@@ -276,7 +363,7 @@ const styles = StyleSheet.create({
   },
   box: {
     position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
   },
   boxName: {
     position: 'absolute', left: 0, top: 9, width: BOX_W - 4, textAlign: 'center',
@@ -288,10 +375,16 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular', fontSize: 10, lineHeight: 13, letterSpacing: 0.2, color: INK,
     includeFontPadding: false,
   },
+  // The struck GENERAL WILL: the box's own rectangle, border and all, in ink.
+  boxOn: {
+    position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: INK,
+  },
+  onInk: { color: PAPER },
   divider: { position: 'absolute', left: 199.25, top: 250, width: 1.5, height: 62, backgroundColor: RULE },
   chip: {
     position: 'absolute', left: 185, top: 271, width: 30, height: 20, borderRadius: 3,
-    borderWidth: 1.5, borderColor: SOFT, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   chipText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1, color: INK, includeFontPadding: false },
@@ -346,6 +439,56 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
+  // ── the state of nature: the force diagram's weight, pointed at each other ──
+  // Caption at 362 (where FORCE and CONSENT sit), the two heads meeting at x 200
+  // on the top rail, and the consequence under them at 404 — the stamp's slot,
+  // which is empty on the one beat this is up.
+  natLabel: {
+    position: 'absolute', left: COR_L, top: 362, width: COR_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.6, color: INK,
+    includeFontPadding: false,
+  },
+  clashShaft: { position: 'absolute', top: UP_Y - 1.25, height: 5, backgroundColor: INK },
+  clashHeadR: {
+    position: 'absolute', top: UP_Y - 6.75, width: 0, height: 0,
+    borderTopWidth: 8, borderBottomWidth: 8, borderLeftWidth: 13,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
+  },
+  clashHeadL: {
+    position: 'absolute', top: UP_Y - 6.75, width: 0, height: 0,
+    borderTopWidth: 8, borderBottomWidth: 8, borderRightWidth: 13,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+  },
+  warLabel: {
+    position: 'absolute', left: COR_L, top: 404, width: COR_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.4, color: INK,
+    includeFontPadding: false,
+  },
+
+  // ── the Declaration ───────────────────────────────────────────────────────
+  decl: {
+    position: 'absolute', left: DECL_L, top: DECL_T, width: DECL_W, height: DECL_H,
+    backgroundColor: PAPER, borderWidth: 2, borderColor: INK, borderRadius: 2,
+    alignItems: 'center', paddingTop: 6,
+  },
+  declTitle: {
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.2, color: INK,
+    includeFontPadding: false,
+  },
+  declSub: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 12, letterSpacing: 0.6, color: INK,
+    includeFontPadding: false,
+  },
+  declRule: { width: 84, height: 1.5, backgroundColor: SOFT, marginTop: 3, marginBottom: 2 },
+  declYear: {
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, lineHeight: 18, color: INK,
+    includeFontPadding: false,
+  },
+  declIdeas: {
+    fontFamily: 'Inter_500Medium', fontSize: 9, lineHeight: 12, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+
   upLabel: {
     position: 'absolute', left: COR_L, top: 362, width: COR_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.6, color: INK,
@@ -375,7 +518,7 @@ const styles = StyleSheet.create({
 
   seal: {
     position: 'absolute', left: 142, top: 406, width: 116, height: 40,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   sealText: { fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 1, color: INK, includeFontPadding: false },

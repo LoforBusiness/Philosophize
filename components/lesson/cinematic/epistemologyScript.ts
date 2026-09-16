@@ -19,6 +19,16 @@ export interface EpistBeat extends BaseBeat {
   locks?: [number, number, number];
   /** This beat's correct answer turns the justification key (q1) or proves luck (q2). */
   qkey?: 'q1' | 'q2';
+  /** The sign over the gate names the field that studies it: EPISTEMOLOGY. */
+  field?: boolean;
+  /** All three conditions together are sufficient: with every lock turned, the door opens. */
+  opens?: boolean;
+  /** Justification ties belief to truth: a rod couples the three bolts while REASONS is turned. */
+  tie?: boolean;
+  /** Being persuaded is tried as the reason, and struck out under REASONS. */
+  persuaded?: boolean;
+  /** The third lock, REASONS, is ringed: the condition the next beats are about. */
+  third?: boolean;
 }
 
 export const BEATS: EpistBeat[] = [
@@ -31,42 +41,61 @@ export const BEATS: EpistBeat[] = [
   {
     hpose: 2,
     locks: [0.25, 0.25, 0.25],
+    field: true,
     text: 'Epistemology is the branch of philosophy that studies knowledge. Plato examined this question in his dialogue the Theaetetus.',
     dur: 2.7,
   },
   {
+    // Only TRUE turns here: the sentence names the first condition alone.
     hpose: 3,
-    locks: [1, 1, 1],
+    locks: [1, 0.25, 0.25],
+    field: true,
     text: 'The traditional analysis sets three conditions for knowledge. The first is truth: what you believe must be true.',
     dur: 1.8,
   },
   {
+    // BELIEF and then REASONS, the second and the third.
     hpose: 3,
     locks: [1, 1, 1],
+    field: true,
     text: 'The second is belief: you must accept the claim. The third is justification: you must have good reasons for it.',
     dur: 1.8,
   },
   {
+    // All three are turned, and together they are enough: the door opens.
     hpose: 3,
     locks: [1, 1, 1],
+    field: true,
+    opens: true,
     text: 'A belief that meets all three conditions is knowledge. Each condition is necessary, and the three together are sufficient.',
     dur: 1.8,
   },
   {
     hpose: 2,
     locks: [1, 1, 1],
+    field: true,
+    opens: true,
+    third: true,
     text: 'Without the third condition, a true belief could be held for no reason at all. It would then be correct only by luck.',
     dur: 2.9,
   },
   {
     hpose: 2,
     locks: [1, 1, 1],
+    field: true,
+    opens: true,
+    tie: true,
+    third: true,
     text: 'Justification is meant to connect a belief to the truth, so that being right isn’t a matter of luck.',
     dur: 1.8,
   },
   {
     hpose: 4,
     locks: [1, 1, 0],
+    field: true,
+    opens: true,
+    tie: true,
+    third: true,
     text: 'In the Theaetetus, Socrates describes jurors persuaded by skilled speakers. Their verdict is true, but they never witnessed what happened.',
     cite: 'Plato, Theaetetus 201a–c',
     dur: 3.8,
@@ -74,12 +103,22 @@ export const BEATS: EpistBeat[] = [
   {
     hpose: 4,
     locks: [1, 1, 0],
+    field: true,
+    opens: true,
+    tie: true,
+    third: true,
+    persuaded: true,
     text: 'The jurors believe what’s true. But being persuaded is no good reason, so the jurors lack knowledge.',
     dur: 1.8,
   },
   {
     hpose: 0,
     locks: [1, 1, 0],
+    field: true,
+    opens: true,
+    tie: true,
+    third: true,
+    persuaded: true,
     quote: {
       id: 'lq-epistemology-knowledge-1-1',
       text: 'What I do not know I do not think I know either.',
@@ -94,6 +133,9 @@ export const BEATS: EpistBeat[] = [
   {
     hpose: 5,
     locks: [1, 1, 0.15],
+    field: true,
+    opens: true,
+    tie: true,
     qkey: 'q1',
     interact: {
       prompt: 'Which conditions together make a belief count as knowledge?',
@@ -109,6 +151,9 @@ export const BEATS: EpistBeat[] = [
   {
     hpose: 5,
     locks: [1, 1, 0],
+    field: true,
+    opens: true,
+    tie: true,
     qkey: 'q2',
     interact: {
       prompt: 'How much support must a true belief have to count as knowledge?',
@@ -128,6 +173,9 @@ export const BEATS: EpistBeat[] = [
     dur: 1.0,
   },
   {
+    field: true,
+    opens: true,
+    tie: true,
     summary: {
       title: 'Knowing Versus Believing',
       points: [

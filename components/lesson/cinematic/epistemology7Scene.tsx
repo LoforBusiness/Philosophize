@@ -105,9 +105,26 @@ const TWIST = BEATS.map((b) => b.twist ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology7'));
 
-export default function Epistemology7Scene({ clock, bt, bi, gazeX, gazeY, gazeOn }: SceneApi) {
+// R7c — the chart follows the drag on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+
+// DOES THE READER STILL PROJECT PAST TODAY? `twist` draws the dashed projection
+// past the TOMORROW rule and the column it predicts. The drag's first zone, STOP
+// USING IT (0 … 0.28), "abandon it, since reason can't justify it", makes no
+// inference about tomorrow, so the projection is withdrawn. Both other zones
+// "rely on induction" — by custom, or calling it proved — so both draw it; and the
+// column stays a dashed "?" in both, because relying on a projection, or calling it
+// proved, puts no observed bar there. The past bars (`days`) never move: stopping
+// induction does not un-feed a morning. The swap straddles the zone's edge.
+const RELY_FROM = 0.28;
+const RELY_BAND = 0.08;
+
+export default function Epistemology7Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(2);
+  const reacting = REACT[i] === 1;
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -115,7 +132,8 @@ export default function Epistemology7Scene({ clock, bt, bi, gazeX, gazeY, gazeOn
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     const days = carry(cv, 0, n, DAYS[p], DAYS[n], tr);
-    const twist = carry(cv, 1, n, TWIST[p], TWIST[n], tr);
+    const relies = clamp01((dragPos.value - (RELY_FROM - RELY_BAND)) / (2 * RELY_BAND));
+    const twist = carry(cv, 1, n, TWIST[p], reacting ? relies : TWIST[n], tr);
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       days,

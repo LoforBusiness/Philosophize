@@ -12,11 +12,13 @@ import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, 
 import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHY IS THERE SOMETHING RATHER THAN NOTHING?
@@ -24,7 +26,7 @@ const { RULE, STONE } = stageTone('metaphysics');
 // Four pieces of information design carry the argument:
 //   1. EVERYTHING THERE IS — a framed sky the figure wipes clean. When the last
 //      star is gone a plate stamps over the void: STILL SOMETHING. That is the
-//      Parmenides beat, drawn rather than narrated.
+//      "remove every object" beat, drawn rather than narrated.
 //   2. SUFFICIENT REASON — Leibniz's rule, written line by line on a card the
 //      exact width of the question plate and joined to it by an arrow, so the
 //      stage reads as an argument: this RULE is what FORCES that question.
@@ -42,6 +44,16 @@ const { RULE, STONE } = stageTone('metaphysics');
 // the chain on the three science beats. The Parmenides card deliberately waits
 // until bt = 0.7s to fade up, by which point the rule card it replaces is at 7%,
 // so two cards never read on top of each other in that one slot.
+//
+// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
+// The first lesson of the branch had four taps that held one frame. Each now makes
+// the thing it says: "the first question" writes a caption under the question
+// plate (`first`); "a universe that exists … needs a reason" tags the sky NEEDS A
+// REASON (`needs`); the Parmenides card now arrives on the Parmenides sentence
+// (`parm`) and the sky is wiped on the NEXT one, "suppose you remove every
+// object", where it used to be wiped a beat early; and "it can't explain why they
+// exist at all" lights the unanswered box at the head of the chain and sends its
+// ghosts further back (`open`).
 //
 // CAMERA: none (the old one only translated the stage 2px, which made the band
 // impossible to reason about). Design space is final space, so the figure stands
@@ -107,9 +119,22 @@ const RULEON = BEATS.map((b) => (b.rule ? 1 : 0));
 // Only the beat that RAISES the card writes it. Without this the rule re-writes
 // itself on every forward tap it survives, which reads as a stutter, not a reveal.
 const RULEIN = RULEON.map((v, k) => (v === 1 && (k === 0 || RULEON[k - 1] === 0) ? 1 : 0));
+const FIRST = BEATS.map((b) => (b.first ? 1 : 0));
+const NEEDS = BEATS.map((b) => (b.needs ? 1 : 0));
+const PARM = BEATS.map((b) => (b.parm ? 1 : 0));
+const OPEN = BEATS.map((b) => b.open ?? 0);
+const OPEN_LIT = OPEN.map((v) => (v > 0 ? 1 : 0));
 
-function hHold(code: number, t: number) { 'worklet'; return code === 0 ? stand(t) : narratorHold(code, t); }
-function hLive(code: number, t: number, bt: number) { 'worklet'; return code === 0 ? stand(t) : narratorLive(code, t, bt); }
+function hHold(code: number, t: number) {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);     // the movement catalogue's living holds
+  return code === 0 ? stand(t) : narratorHold(code, t);
+}
+function hLive(code: number, t: number, bt: number) {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  return code === 0 ? stand(t) : narratorLive(code, t, bt);
+}
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -128,7 +153,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics'));
 export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFigS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -137,7 +162,9 @@ export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, i, gazeX,
     const q = clamp01(qv.value);
 
     const figS = keepHeld(heldFigS, mixStance(carryFrom(heldFigS, n,hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
-    const erase = carry(cv, 0, n, ERASE[p], ERASE[n], tr);
+    // The wipe takes its time: a hand sweeping the sky clean, not a light switched
+    // off. STILL SOMETHING lands two thirds of the way through it.
+    const erase = carry(cv, 0, n, ERASE[p], ERASE[n], ease01(bt.value / 1.4));
 
     return {
       fig: lookPose(figS, FIG_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
@@ -149,7 +176,13 @@ export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, i, gazeX,
       // anything at all and the chain of explanation extends behind the reader, until
       // it reaches the end of what it can reach.
       chainOn: carry(cv, 1, n, CHAIN[p], reacting ? dragPos.value : CHAIN[n], tr),
-      regress: QREG[n] === 1 ? ease01(q) : 0,
+      // The ghosts recede as the narration says the chain cannot reach its own
+      // start, and a considered answer sends them further still. Carried, so the
+      // second question starts from where the first one left them.
+      regress: carry(cv, 5, n, OPEN[p], OPEN[n] + (QREG[n] === 1 ? Math.min(0.3, 1 - OPEN[n]) * ease01(q) : 0), tr),
+      headLit: carry(cv, 6, n, OPEN_LIT[p], OPEN_LIT[n], tr),
+      first: carry(cv, 3, n, FIRST[p], FIRST[n], ease01((bt.value - 0.2) / 0.6)),
+      needs: carry(cv, 4, n, NEEDS[p], NEEDS[n], ease01((bt.value - 0.45) / 0.5)),
       intro: n === 0 ? ease01(bt.value / 0.55) : 1,
       ruleOn: carry(cv, 2, n, RULEON[p], RULEON[n], tr),
       // The rule WRITES ITSELF on the beat that raises it: first line, then
@@ -166,12 +199,13 @@ export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, i, gazeX,
       // two cards are never both legible in the same 60 units of stage.
       // And it writes itself — fade up, then the strike — only on the beat it ARRIVES.
       // On a second beat of it the card holds, struck, where it used to be written
-      // and struck out again behind the reader (C20c).
+      // and struck out again behind the reader (C20c). It follows its own track,
+      // `parm`, because it now arrives a beat before the sky is wiped.
       noth:
-        ERASE[n] > 0
-          ? (n > 0 && ERASE[p] > 0 ? 1 : ease01((bt.value - 0.7) / 0.45))
-          : ERASE[p] > 0 ? clamp01(1 - bt.value / 0.3) : 0,
-      nothX: ERASE[n] > 0 && !(n > 0 && ERASE[p] > 0) ? ease01((bt.value - 1.7) / 0.6) : 1,
+        PARM[n] > 0
+          ? (n > 0 && PARM[p] > 0 ? 1 : ease01((bt.value - 0.7) / 0.45))
+          : PARM[p] > 0 ? clamp01(1 - bt.value / 0.3) : 0,
+      nothX: PARM[n] > 0 && !(n > 0 && PARM[p] > 0) ? ease01((bt.value - 1.7) / 0.6) : 1,
     };
   });
 
@@ -216,11 +250,20 @@ function Sky({ S }: { S: SharedValue<any> }) {
     opacity: S.value.voidStamp,
     transform: [{ scale: lerp(1.14, 1, S.value.voidStamp) }],
   }));
+  // "A universe that exists … needs a reason": the tag is stamped onto the sky it
+  // is about, in the corner no star and no plate reaches (sky x 244…348, y 4…20).
+  const needs = useAnimatedStyle(() => ({
+    opacity: S.value.needs,
+    transform: [{ scale: lerp(1.12, 1, S.value.needs) }],
+  }));
   return (
     <View style={styles.sky} pointerEvents="none">
       <Animated.View style={[styles.voidDisc, dark]} />
       {STARS.map((s, k) => <Star key={k} S={S} star={s} />)}
       <Text style={styles.skyCap}>EVERYTHING THERE IS</Text>
+      <Animated.View style={[styles.needsTag, needs]}>
+        <Text style={styles.needsText} numberOfLines={1}>NEEDS A REASON</Text>
+      </Animated.View>
       <Animated.View style={[styles.stillPlate, stamp]}>
         <Text style={styles.stillText}>STILL SOMETHING</Text>
       </Animated.View>
@@ -293,7 +336,14 @@ function Chain({ S }: { S: SharedValue<any> }) {
   // The pulse rides the GLYPH, not the box — a semi-transparent box would let the
   // ghost behind it show through and read as a printing error.
   const pulse = useAnimatedStyle(() => ({
-    opacity: 0.6 + 0.4 * Math.abs(Math.sin(S.value.twinkle * 1.4)),
+    opacity: (0.6 + 0.4 * Math.abs(Math.sin(S.value.twinkle * 1.4))) * (1 - S.value.headLit),
+  }));
+  // "It can't explain why they exist at all": the one box the chain never reaches
+  // is struck solid, its question mark reversed out of the ink. Two glyphs rather
+  // than one recoloured, so neither ever sits at half contrast on the other's ground.
+  const litFill = useAnimatedStyle(() => ({ opacity: S.value.headLit }));
+  const litGlyph = useAnimatedStyle(() => ({
+    opacity: S.value.headLit * (0.75 + 0.25 * Math.abs(Math.sin(S.value.twinkle * 1.4))),
   }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, wrap]} pointerEvents="none">
@@ -305,7 +355,11 @@ function Chain({ S }: { S: SharedValue<any> }) {
         <Text style={styles.qboxText}>?</Text>
       </Animated.View>
       <View style={[styles.qbox, { left: QBOX_X }]}>
+        <Animated.View style={[styles.qboxLit, litFill]} />
         <Animated.Text style={[styles.qboxText, pulse]}>?</Animated.Text>
+        <Animated.View style={[styles.qboxLitWrap, litGlyph]}>
+          <Text style={[styles.qboxText, styles.qboxTextLit]}>?</Text>
+        </Animated.View>
       </View>
 
       {ARROW_X.map((x, k) => (
@@ -328,10 +382,20 @@ function Question({ S }: { S: SharedValue<any> }) {
     opacity: S.value.intro,
     transform: [{ scale: lerp(1.12, 1, S.value.intro) }],
   }));
+  // Leibniz's name for it, written under the plate as the narration gives it.
+  const first = useAnimatedStyle(() => ({
+    opacity: S.value.first,
+    transform: [{ translateY: (1 - S.value.first) * -5 }],
+  }));
   return (
-    <Animated.View style={[styles.qPlate, st]} pointerEvents="none">
-      <Text style={styles.qPlateText}>WHY ANYTHING AT ALL?</Text>
-    </Animated.View>
+    <>
+      <Animated.View style={[styles.qPlate, st]} pointerEvents="none">
+        <Text style={styles.qPlateText}>WHY ANYTHING AT ALL?</Text>
+      </Animated.View>
+      <Animated.Text style={[styles.firstCap, first]} numberOfLines={1}>
+        THE FIRST QUESTION · LEIBNIZ, 1714
+      </Animated.Text>
+    </>
   );
 }
 
@@ -345,26 +409,39 @@ const styles = StyleSheet.create({
 
   sky: {
     position: 'absolute', left: SKY_L, top: SKY_T, width: SKY_W, height: SKY_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, overflow: 'hidden',
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   skyCap: {
     position: 'absolute', left: 10, top: 5,
     fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.4, color: INK, includeFontPadding: false,
   },
-  voidDisc: { position: 'absolute', left: 86, top: 8, width: 180, height: 78, borderRadius: 39, backgroundColor: INK },
+  // From y 18, below EVERYTHING THERE IS (y 5…16): from 8 the dark disc ran under
+  // "THERE IS" and took the caption's contrast with it. It still frames the plate.
+  voidDisc: { position: 'absolute', left: 86, top: 18, width: 180, height: 58, borderRadius: 29, backgroundColor: INK },
   star: { position: 'absolute', backgroundColor: INK },
   stillPlate: {
-    position: 'absolute', left: 92, top: 26, width: 168, height: 32,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    position: 'absolute', left: 92, top: 31, width: 168, height: 32,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   stillText: {
     fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 1.4, color: INK, includeFontPadding: false,
   },
+  // Top right of the sky: clear of every star (the nearest, at sky y 28.5, is below
+  // it) and of STILL SOMETHING, whose plate starts at sky y 31. 92 units of type in
+  // 101 of box, so the glyphs keep their 4dp from the rule (D31c).
+  needsTag: {
+    position: 'absolute', left: 240, top: 3, width: 104, height: 19,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  needsText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+  },
 
   ruleCard: {
     position: 'absolute', left: RULE_L, top: RULE_T, width: RULE_W, height: RULE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
   },
   ruleCap: {
     position: 'absolute', left: 12, top: 7,
@@ -388,7 +465,7 @@ const styles = StyleSheet.create({
 
   nothCard: {
     position: 'absolute', left: RULE_L, top: RULE_T, width: RULE_W, height: RULE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
   },
   nothCap: {
     position: 'absolute', left: 12, top: 7,
@@ -408,15 +485,20 @@ const styles = StyleSheet.create({
 
   qbox: {
     position: 'absolute', top: CH_T, width: 32, height: CH_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   qboxText: {
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: INK, includeFontPadding: false,
   },
+  qboxLit: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: 2, backgroundColor: INK },
+  qboxLitWrap: {
+    position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center',
+  },
+  qboxTextLit: { color: PAPER },
   chainBox: {
     position: 'absolute', top: CH_T, width: BOX_W, height: CH_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   chainText: {
@@ -433,18 +515,26 @@ const styles = StyleSheet.create({
 
   qPlate: {
     position: 'absolute', left: 24, top: 428, width: 252, height: 44,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   qPlateText: {
     fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 1.2, color: INK, includeFontPadding: false,
+  },
+  // Under the plate (its lip ends at 475) and above the floor (500): 202 units of
+  // type across the plate's 252, and the figure's nearest ink is at x 302.
+  firstCap: {
+    position: 'absolute', left: 24, top: 479, width: 252, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 1.2, color: INK,
+    includeFontPadding: false,
   },
 });
 
 // Extremes: the sky frame's top edge (244) down to the figure's ankle joints
 // (~507, on the ground rule at 500). The rule card and the Parmenides card share
 // 354..414, the arrow into the plate runs 414..428, and the chain (358..392), its
-// caption (400..411) and the question plate (428..472) sit between them. Nothing
+// caption (400..411), the question plate (428..472) and its FIRST QUESTION caption
+// (479..490) sit between them. The NEEDS A REASON tag is inside the sky. Nothing
 // is drawn outside that slice: the figure's highest pixel is its crown at ~360
 // (the gaze-up hand at hpose 6 clamps to its arm's reach around 367), so even the
 // tallest pose stays clear of the sky frame's floor at 344.

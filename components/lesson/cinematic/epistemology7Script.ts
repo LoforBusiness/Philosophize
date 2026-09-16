@@ -14,12 +14,12 @@ export interface Epi7Beat extends BaseBeat {
 
 export const BEATS: Epi7Beat[] = [
   {
-    p: 6, days: 1, twist: 0,
+    p: 274, days: 1, twist: 0,
     text: 'The sun has risen every morning in recorded history. What justifies the belief that it will rise tomorrow?',
     dur: 1.8,
   },
   {
-    p: 6, days: 1, twist: 0,
+    p: 274, days: 1, twist: 0,
     text: 'You feel confident that it will. David Hume asked what, if anything, justifies that confidence.',
     dur: 2.3,
   },

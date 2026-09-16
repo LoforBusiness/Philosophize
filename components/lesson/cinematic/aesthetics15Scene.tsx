@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A ROSE WITH FIVE THINGS TIED TO IT, four of which get cut off (H64). The tags are
 // the Q1 targets, so the sorting the lesson is about is the thing the reader does.
@@ -105,6 +106,7 @@ export default function Aesthetics15Scene({ clock, bt, bi, i, picked, onPick, dr
       // interested tags — I could sell it, it would suit my room — fall away, leaving
       // the pleasure with nothing of yours tied to it.
       cut: carry(cv, 2, n, CUT[p], reacting ? dragPos.value : CUT[n], fall),
+      t,
     };
   });
 
@@ -114,6 +116,13 @@ export default function Aesthetics15Scene({ clock, bt, bi, i, picked, onPick, dr
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
 
   const rose = useAnimatedStyle(() => ({ opacity: SCENE.value.rose }));
+  // A living rose: the two leaves stir on their own phases, hinged at the stem.
+  const leafStirL = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${-18 + Math.sin(SCENE.value.t * 1.1) * 4}deg` }],
+  }));
+  const leafStirR = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${16 + Math.sin(SCENE.value.t * 0.9 + 1.4) * 4}deg` }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -122,8 +131,8 @@ export default function Aesthetics15Scene({ clock, bt, bi, i, picked, onPick, dr
       <Animated.View style={[styles.plant, rose]} pointerEvents="none">
         <View style={styles.plinth} />
         <View style={styles.stem} />
-        <View style={styles.leafL} />
-        <View style={styles.leafR} />
+        <Animated.View style={[styles.leafL, leafStirL]} />
+        <Animated.View style={[styles.leafR, leafStirR]} />
         <View style={styles.bloomOuter} />
         <View style={styles.bloomMid} />
         <View style={styles.bloomCore} />
@@ -218,16 +227,16 @@ const styles = StyleSheet.create({
   plinth: {
     position: 'absolute', left: PLINTH_L, top: PLINTH_T, width: PLINTH_W, height: 500 - PLINTH_T,
     borderWidth: 2, borderColor: INK, borderTopLeftRadius: 3, borderTopRightRadius: 3,
-    backgroundColor: STONE,
+    backgroundColor: STONE, boxShadow: LIP,
   },
   stem: { position: 'absolute', left: STEM_X, top: STEM_T, width: 4, height: PLINTH_T - STEM_T, backgroundColor: INK },
   leafL: {
     position: 'absolute', left: STEM_X - 22, top: 398, width: 24, height: 9,
-    borderRadius: 5, backgroundColor: INK, transform: [{ rotate: '-18deg' }],
+    borderRadius: 5, backgroundColor: INK, transform: [{ rotate: '-18deg' }], transformOrigin: '100% 50%',
   },
   leafR: {
     position: 'absolute', left: STEM_X + 2, top: 414, width: 24, height: 9,
-    borderRadius: 5, backgroundColor: INK, transform: [{ rotate: '16deg' }],
+    borderRadius: 5, backgroundColor: INK, transform: [{ rotate: '16deg' }], transformOrigin: '0% 50%',
   },
   // The bloom: three rings, so it reads as petals folded in rather than a dot.
   bloomOuter: {
@@ -246,7 +255,7 @@ const styles = StyleSheet.create({
 
   tag: { position: 'absolute', left: TAG_L, width: TAG_W, height: TAG_H },
   tagInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   tagText: {

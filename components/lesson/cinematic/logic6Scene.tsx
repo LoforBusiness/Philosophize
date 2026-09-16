@@ -19,7 +19,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // The conditional, drawn as one tall column of information down the right of the stage
 // while the figure holds the left:
@@ -224,7 +225,7 @@ const styles = StyleSheet.create({
   boxHit: { position: 'absolute', left: COL_L, width: COL_W },
   box: {
     width: COL_W, height: BOX_H, borderWidth: 3, borderColor: INK, borderRadius: 9,
-    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
   boxRight: { borderColor: INK, backgroundColor: INK },
   boxWrong: { borderColor: SOFT },
@@ -252,7 +253,7 @@ const styles = StyleSheet.create({
   // ── the promise table ──────────────────────────────────────────────────────
   table: {
     position: 'absolute', left: COL_L, top: TBL_T, width: COL_W, height: TBL_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, overflow: 'hidden',
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   trHead: { flexDirection: 'row', height: 20 },
   tr: { flexDirection: 'row', height: 20, borderTopWidth: 1.5, borderTopColor: RULE },

@@ -1,6 +1,7 @@
 import {
   View, Text, Pressable, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useEffect } from 'react';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -11,6 +12,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+  pickAt,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
@@ -20,7 +22,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // THREE CHARTS WITH THE SAME AREA UNDER THEM, and the answer targets are the charts —
 // the largest target in the app, because here the thing being chosen IS the argument
@@ -57,6 +60,13 @@ const CHARTS = [
   { id: 'flat', kicker: 'THE SAME ALL ALONG', bars: RISING.map(() => MEAN), correct: false },
 ];
 
+// R7c — THE PLOT'S THREE CURVES ARE THESE THREE CHARTS, in the same order (rise ·
+// fall · flat), so the one the reader picks is pointed at: a pointer at x 366…378 comes
+// in beside it as the pick lands and says which life they chose. It marks the CHOICE,
+// never the verdict, which the explanation gives.
+const PTR_AT = ROW_T.map((t) => t + ROW_H / 2 - 7);
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
+
 const FIG_X = 60;
 
 const G = BEATS.map((b) => b.g ?? 0);
@@ -72,7 +82,8 @@ const MEANS = BEATS.map((b) => b.mean ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics32'));
 
-export default function Aesthetics32Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Aesthetics32Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -97,6 +108,15 @@ export default function Aesthetics32Scene({ clock, bt, bi, i, picked, onPick, ga
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
 
+  const chose = useSharedValue(0);
+  useEffect(() => {
+    chose.value = withTiming(reacting && answered ? 1 : 0, { duration: 320 });
+  }, [reacting, answered]);
+  const ptrStyle = useAnimatedStyle(() => ({
+    opacity: chose.value,
+    transform: [{ translateY: pickAt(PTR_AT, pickPos.value) }, { translateX: (1 - chose.value) * 8 }],
+  }));
+
   return (
     <Animated.View style={styles.scene}>
       <Text style={styles.badge} numberOfLines={1}>ALL THREE ADD UP TO THE SAME</Text>
@@ -112,6 +132,10 @@ export default function Aesthetics32Scene({ clock, bt, bi, i, picked, onPick, ga
           onPick={onPick}
         />
       ))}
+
+      <Animated.View style={[styles.ptr, ptrStyle]} pointerEvents="none">
+        <View style={styles.ptrTri} />
+      </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -195,7 +219,7 @@ const styles = StyleSheet.create({
 
   row: { position: 'absolute', left: ROW_L, width: ROW_W, height: ROW_H },
   rowInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   kicker: {
     position: 'absolute', left: 10, top: 4,
@@ -212,6 +236,14 @@ const styles = StyleSheet.create({
     backgroundColor: SOFT, transformOrigin: '0% 50%',
   },
   meanOnInk: { backgroundColor: RULE },
+
+  // The pointer: a 12×14 box so the triangle turns and moves about something (a border
+  // triangle has no box of its own), riding at y 0 and translated onto its chart.
+  ptr: { position: 'absolute', left: 366, top: 0, width: 12, height: 14 },
+  ptrTri: {
+    width: 0, height: 0, borderTopWidth: 7, borderBottomWidth: 7, borderRightWidth: 12,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+  },
 
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },

@@ -20,13 +20,13 @@ export const BEATS: Meta5Beat[] = [
     dur: 3.6,
   },
   {
-    p: 24, stars: 1, q: 1,
+    p: 275, stars: 1, q: 1,
     text: 'Heidegger calls this the fundamental question of metaphysics. The question concerns beings as a whole, not why any one thing exists.',
     cite: 'The fundamental question',
     dur: 3.3,
   },
   {
-    p: 24, stars: 1, q: 1,
+    p: 275, stars: 1, q: 1,
     text: 'It asks why there are any beings at all, the questioner included.',
     dur: 1.9,
   },
@@ -61,13 +61,13 @@ export const BEATS: Meta5Beat[] = [
     dur: 3.4,
   },
   {
-    p: 20, stars: 1, q: 0.4, psr: 1, dasein: 1,
+    p: 278, stars: 1, q: 0.4, psr: 1, dasein: 1,
     text: 'The questioner is also part of the question. You’re a being for whom your own being is an issue.',
     cite: 'Heidegger, Being and Time',
     dur: 2.3,
   },
   {
-    p: 20, stars: 1, q: 0.4, psr: 1, dasein: 1,
+    p: 278, stars: 1, q: 0.4, psr: 1, dasein: 1,
     text: 'Heidegger calls such a being Dasein, German for “being-there”. It’s the being that can inquire into being itself.',
     dur: 2.7,
   },

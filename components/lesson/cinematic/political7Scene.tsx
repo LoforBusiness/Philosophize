@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political7Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -63,9 +63,28 @@ const X = BEATS.map((b) => b.x ?? 262);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political7'));
 const DIR = dirsFrom(X, 1);
 
-export default function Political7Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
+// R7c — the stage follows the sort on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
+
+// HOW FAR THE CHARTER COMES FORWARD, in the SORT'S OWN ORDER (never the shuffled
+// bin order — see SceneApi.pickPos): nothing troubling · custom corrects it · no
+// right violated. The first and last are claims about what LAW does to a right
+// ("law settles every right", "no law could ever violate a right"), and the law
+// on this stage is the charter a law has just torn, so it comes forward for both.
+// The middle one's subject is custom, which nothing here draws, and it is also
+// where the chip rests before the reader moves it — so it moves nothing. The
+// stone never reacts: that it does not move is the whole lesson.
+const CHARTER_AT = [1, 0, 1];
+/** The charter's own centre, which it comes forward about. */
+const CH_MID_X = CH_L + CH_W / 2;
+const CH_MID_Y = CH_T + CH_H / 2;
+
+export default function Political7Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(1);
+  const cv = useCarry(2);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -104,6 +123,9 @@ export default function Political7Scene({ clock, bt, bi, i, picked, onPick, gaze
       stone: stoneOn ? (stoneFade ? grow : 1) : 0,
       charter: charterOn ? (charterFade ? grow : 1) : 0,
       tear: tearOn ? (tearFade ? grow : 1) : 0,
+      // R7c — the charter comes forward while the chip sits on a conclusion about
+      // what law does, and settles back everywhere else (CHARTER_AT).
+      near: carry(cv, 1, n, 0, reacting ? pickAt(CHARTER_AT, pickPos.value) : 0, grow),
       t,
     };
   });
@@ -125,7 +147,10 @@ export default function Political7Scene({ clock, bt, bi, i, picked, onPick, gaze
   }));
   const charterStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.charter,
-    transform: [{ translateY: (1 - SCENE.value.charter) * -12 }],
+    // Scaled about the charter's own centre (charterWrap's transformOrigin), so the
+    // rail, the cords and both halves come forward together and nothing slides.
+    // 4% keeps a fully torn corner above y ≈ 351, still clear of the crown at 361.
+    transform: [{ translateY: (1 - SCENE.value.charter) * -12 }, { scale: 1 + 0.04 * SCENE.value.near }],
   }));
   // The two halves hinge apart. Kept small on purpose: at ±7° the lowest corner
   // still lands above y ≈ 348, so a torn charter can never cover the figure.
@@ -283,7 +308,10 @@ const styles = StyleSheet.create({
   },
 
   // ── charter ────────────────────────────────────────────────────────────────
-  charterWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  charterWrap: {
+    position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H,
+    transformOrigin: `${CH_MID_X}px ${CH_MID_Y}px`,
+  },
   rail: { position: 'absolute', left: 230, top: RAIL_Y, width: 166, height: 2.5, backgroundColor: INK, borderRadius: 2 },
   cordL: { position: 'absolute', left: 268, top: RAIL_Y + 2, width: 2, height: 24, backgroundColor: SOFT },
   cordR: { position: 'absolute', left: 358, top: RAIL_Y + 2, width: 2, height: 24, backgroundColor: SOFT },

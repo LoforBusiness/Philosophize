@@ -22,7 +22,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // Two roads seen side-on, stacked as horizontal lanes across the UPPER stage, with
 // a boxy car on each. Road A's car loops forever (nothing ever happens on it); road
@@ -367,7 +368,7 @@ const styles = StyleSheet.create({
   },
   vCard: { position: 'absolute', top: V_TOP, width: V_W },
   vInner: {
-    height: V_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: V_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   vRight: { backgroundColor: INK, borderColor: INK },

@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics12Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose, pickAt,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A copying press on the floor stage-right, and above it a board that fills with
 // identical cards. One card reads "I PROMISE". The figure walks over, strikes the
@@ -121,11 +122,28 @@ const BV = NV.map((n) => (n >= 3 ? 1 : 0));
 const C1V = NV.map((n) => (n >= 6 ? 1 : 0));
 const C2V = NV.map((n) => (n >= 12 ? 1 : 0));
 
-export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
+// R7c — the board follows the sort on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
+
+// DOES THIS PRINCIPLE BUILD "THE WORLD IT MAKES"? Read in the sort's OWN bin order
+// (never the shuffled row order — see SceneApi.pickPos): never a means · a
+// universal rule · more people happy. The board is the maxim universalised, and
+// only the universal-rule test universalises it — so only that row keeps the twelve
+// copies and the emptied PROMISE. The other two judge this one promise, so the
+// board goes back to the lone maxim card as beat 1 drew it, word still legible.
+const LAW_AT = [0, 1, 0];
+
+export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const reacting = REACT[i] === 1;
+  // The beat after the sort eases the board back from wherever the reader left it,
+  // rather than snapping it full on the frame the beat changes (L1/L5).
+  const settle = reacting || (i > 0 && REACT[i - 1] === 1);
 
   // Only what CHANGED this beat animates; everything else holds, so tapping forward
   // never re-stamps a board that is already full (C20c, H58).
@@ -164,6 +182,11 @@ export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick, ga
     // Cards land as the press works, in two waves.
     const growA = ease01(clamp01((bt.value - 1.1) / 0.9));
     const growB = ease01(clamp01((bt.value - 1.8) / 0.9));
+    // How far the reader's bin builds the universalised world (LAW_AT), 1 off the sort.
+    const law = reacting ? pickAt(LAW_AT, pickPos.value) : 1;
+    // A beat that changes nothing still writes its carry slot (mix 1 returns the
+    // track exactly), so the sort beat starts from what is really on the board.
+    const mixB = nChanged ? growA : settle ? tr : 1;
 
     return {
       fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
@@ -171,10 +194,10 @@ export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick, ga
       // maxims start arriving on the same marks (C22).
       field: pickOn ? (pickFade ? 1 - ease01(clamp01(bt.value / 0.3)) : 0) : 1,
       pick: pickOn ? (pickFade ? ease01(clamp01((bt.value - 0.38) / 0.42)) : 1) : 0,
-      b: nChanged ? carry(cv, 1, n, BV[p], BV[n], growA) : BV[n],
-      c1: nChanged ? carry(cv, 2, n, C1V[p], C1V[n], growA) : C1V[n],
-      c2: nChanged ? carry(cv, 3, n, C2V[p], C2V[n], growB) : C2V[n],
-      word: wordChanged ? carry(cv, 4, n, WV[p], WV[n], growA) : WV[n],
+      b: carry(cv, 1, n, BV[p], BV[n] * law, mixB),
+      c1: carry(cv, 2, n, C1V[p], C1V[n] * law, mixB),
+      c2: carry(cv, 3, n, C2V[p], C2V[n] * law, nChanged ? growB : settle ? tr : 1),
+      word: carry(cv, 4, n, WV[p], WV[n] * law, wordChanged ? growA : settle ? tr : 1),
       handle,
       ram,
       // qv only leaves zero once the reader has answered, so the losing maxims are
@@ -304,7 +327,7 @@ const styles = StyleSheet.create({
   // ── one card ────────────────────────────────────────────────────────────────
   cell: {
     position: 'absolute', width: CELL_W, height: CELL_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5,
   },
   cellMain: { backgroundColor: INK, borderWidth: 2 },
@@ -321,7 +344,7 @@ const styles = StyleSheet.create({
   // ── Q2 targets: the deck's option, on the stage (H61) ───────────────────────
   pickSlot: { position: 'absolute', left: PICK_L, width: PICK_W },
   pickInner: {
-    height: PICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: PICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },
@@ -352,7 +375,7 @@ const styles = StyleSheet.create({
   },
   base: {
     position: 'absolute', left: PRESS_L, top: 476, width: PRESS_W, height: 24,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   baseText: {

@@ -51,13 +51,13 @@ export const BEATS: Aes31Beat[] = [
     },
   },
   {
-    g: 40, strings: 1, playing: 1, clapA: 1, clapB: 1,
+    g: 268, strings: 1, playing: 1, clapA: 1, clapB: 1,
     dur: 2.8,
     text: 'This time the audience gives a standing ovation. Yet the sound reaching their ears is unchanged.',
     cite: 'The second performance',
   },
   {
-    g: 40, strings: 1, playing: 1, clapA: 1, clapB: 1,
+    g: 268, strings: 1, playing: 1, clapA: 1, clapB: 1,
     dur: 1.8,
     text: 'Only the audience’s response has changed, so the extra applause must be for something other than the sound.',
   },

@@ -19,7 +19,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // Bentham's counting table, stage right: one plank on two legs with three pleasure
 // tokens standing on it, all drawn the SAME SIZE, and a ledger slung underneath
@@ -289,7 +290,7 @@ const styles = StyleSheet.create({
   // ── tokens ──────────────────────────────────────────────────────────────────
   tokenSlot: { position: 'absolute', top: TOK_T, width: TOK_W },
   tokenInner: {
-    height: TOK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: TOK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     // paddingHorizontal 1, not 2. At 2 of padding and 0.2 of tracking "SYMPHONY"
     // measured 55.4 units in 56 — it fitted by six tenths of a unit, which is not a
     // fit, it is a coincidence. Android's metrics are a shade wider than the

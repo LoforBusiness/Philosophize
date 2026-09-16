@@ -12,11 +12,13 @@ import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, 
 import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // The conscience that steps out of a figure and weighs the deed on a balance.
 //
@@ -42,6 +44,14 @@ const { RULE, STONE } = stageTone('ethics');
 //   ankle joints    y 507  → 329   (the ankle CIRCLE hangs ~7 below GROUND)
 // so the band below is [40, 338] — everything the scene can draw, with margin.
 // Anything added later must be re-measured through the same map before it ships.
+//
+// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
+// The first lesson of the branch had five taps that held one frame. Each now makes
+// the thing it says: "your own conduct" writes under the headline, the reasons FOR
+// and AGAINST drop into the balance's pans, the origin card's question turns to
+// DISPUTED as the narration disputes it, the ledger's YOU column lights when reason
+// is named as what sets humans apart, and a seedling appears on "living well …
+// over a complete life", to grow into FLOURISHING when the word arrives.
 //
 // ACROSS. The balance stands under the ledger's left edge and clear of the figure:
 // its pans span design x 58…190 (screen 15…165), the figure's own ink starts near
@@ -127,6 +137,29 @@ function held(flags: number[]): number[] {
 const HPOSE = BEATS.map((b) => b.hpose ?? 0);
 const JUDGE = held(BEATS.map((b) => (b.judge ? 1 : 0)));
 const PLANT = BEATS.map((b) => (b.plant ? 1 : 0));
+const SEED = BEATS.map((b) => (b.seed || b.plant ? 1 : 0));
+/** How grown the sprout is: a seedling before it has a name, full once it does. */
+const GROW = BEATS.map((b) => (b.plant ? 1 : b.seed ? 0.32 : 0));
+const OWN = BEATS.map((b) => (b.own ? 1 : 0));
+/** The weights land on the beat that names reasons and stay while the balance does. */
+const FIRST_REASONS = BEATS.findIndex((b) => b.reasons);
+const REASONS = BEATS.map((_, k) => (FIRST_REASONS >= 0 && k >= FIRST_REASONS && JUDGE[k] ? 1 : 0));
+const DISPUTED = BEATS.map((b) => (b.disputed ? 1 : 0));
+const YOU = BEATS.map((b) => (b.you ? 1 : 0));
+/** The first graded beat — the balance settles level while it is considered. */
+const Q1_AT = BEATS.findIndex((b) => b.weigh === 'q1');
+
+// R7c — on the drag, the reader fills in the ledger's ANIMAL column themselves:
+// NONE OF IT empties the column, the middle zone ticks the two feelings, and ALL OF IT
+// ticks JUDGES ITSELF as well. The edges are the script's own zone boundaries.
+const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const FEELINGS_FROM = 0.26;
+const JUDGING_FROM = 0.72;
+/** 0 below the edge, 1 above it, over a short ramp so the dot fills as the knob crosses. */
+function past(x: number, edge: number): number {
+  'worklet';
+  return clamp01((x - edge) / 0.05 + 0.5);
+}
 const ORIGINS = BEATS.map((b) => (b.origins ? 1 : 0));
 
 // How many ledger rows are written by each beat. Derived from the script's own
@@ -152,12 +185,14 @@ function actPose(t: number): Stance {
 }
 function hHold(code: number, t: number): Stance {
   'worklet';
+  if (code >= 100) return emoteAny(code, t);     // the movement catalogue's living holds
   if (code === 1) return actPose(t);
   if (code === 0) return stand(t);
   return narratorHold(code, t);
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
   if (code === 1) return actPose(t);
   if (code === 0) return stand(t);
   return narratorLive(code, t, bt);
@@ -171,9 +206,10 @@ function hLive(code: number, t: number, bt: number): Stance {
 const X = BEATS.map((b) => b.x ?? HUMAN_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics'));
 
-export default function EthicsScene({ clock, bt, bi, qv, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function EthicsScene({ clock, bt, bi, qv, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldHumanS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(10);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -210,11 +246,19 @@ export default function EthicsScene({ clock, bt, bi, qv, gazeX, gazeY, gazeOn }:
       cam: { s: lerp(prv.s, cur.s, tr), cx: lerp(prv.cx, cur.cx, tr), cy: lerp(prv.cy, cur.cy, tr) },
       human: lookPose(humanS, HUMAN_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
       scaleOn: conOn,
-      tip: Math.sin(t * 1.2) * 4 * conOn * (1 - (n === 6 ? q : 0)),  // settles level on a considered Q1
+      tip: Math.sin(t * 1.2) * 4 * conOn * (1 - (n === Q1_AT ? q : 0)),  // settles level on a considered Q1
+      a0: carry(cv, 7, n, 1, reacting ? past(dragPos.value, FEELINGS_FROM) : 1, tr),
+      a1: carry(cv, 8, n, 1, reacting ? past(dragPos.value, FEELINGS_FROM) : 1, tr),
+      a2: carry(cv, 9, n, 0, reacting ? past(dragPos.value, JUDGING_FROM) : 0, tr),
       ledOn: cnt > 0 ? (was > 0 ? 1 : write) : 0,
       r0: row(0), r1: row(1), r2: row(2),
       plant: carry(cv, 1, n, PLANT[p], PLANT[n], tr),
-      grow: plants ? ease01(bt.value / 1.1) : 1,
+      seed: carry(cv, 2, n, SEED[p], SEED[n], tr),
+      grow: carry(cv, 3, n, GROW[p], GROW[n], plants ? ease01(bt.value / 1.1) : tr),
+      own: carry(cv, 4, n, OWN[p], OWN[n], tr),
+      reasons: carry(cv, 5, n, REASONS[p], REASONS[n], ease01(bt.value / 0.9)),
+      disputed: DISPUTED[n] ? (DISPUTED[p] ? 1 : here) : DISPUTED[p] ? away : 0,
+      you: carry(cv, 6, n, YOU[p], YOU[n], tr),
       // the opening headline, assembling word by word
       askOn: askHere ? (askWas ? 1 : here) : askWas ? away : 0,
       w0: askWrites ? ease01((bt.value - 0.15) / 0.4) : 1,
@@ -256,6 +300,16 @@ export default function EthicsScene({ clock, bt, bi, qv, gazeX, gazeY, gazeOn }:
 // has, what you have. The first two rows tick twice. The third ticks once.
 function Ledger({ S }: { S: SharedValue<any> }) {
   const card = useAnimatedStyle(() => ({ opacity: S.value.ledOn }));
+  const you = useAnimatedStyle(() => ({ opacity: S.value.you * 0.9 }));
+  const animal = [
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: S.value.a0 })),
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: S.value.a1 })),
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({ opacity: S.value.a2 })),
+  ];
+  const youHead = useAnimatedStyle(() => ({ opacity: S.value.you }));
   const rowStyles = [
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useAnimatedStyle(() => ({ opacity: S.value.r0, transform: [{ translateX: (1 - S.value.r0) * -10 }] })),
@@ -268,18 +322,25 @@ function Ledger({ S }: { S: SharedValue<any> }) {
   return (
     <Animated.View style={[styles.ledger, card]} pointerEvents="none">
       {/* column rules + the header underline */}
+      <Animated.View style={[styles.youWash, you]} />
       <View style={[styles.vRule, { left: COL_A }]} />
       <View style={[styles.vRule, { left: COL_Y }]} />
       <View style={styles.hRule} />
 
       <Text style={[styles.colHead, { left: COL_A, width: COL_W }]}>ANIMAL</Text>
       <Text style={[styles.colHead, { left: COL_Y, width: COL_W }]}>YOU</Text>
+      <Animated.View style={[styles.youHead, youHead]}>
+        <Text style={styles.youHeadText}>YOU</Text>
+      </Animated.View>
 
       {ROWS.map((r, k) => (
         <Animated.View key={r.label} style={[styles.row, { top: LED_HEAD_H + k * LED_ROW_H }, rowStyles[k]]}>
           <Text style={styles.rowLabel} numberOfLines={1}>{r.label}</Text>
           <View style={[styles.mark, { left: COL_A + COL_W / 2 - 7 }]}>
-            {r.animal ? <View style={styles.dotOn} /> : <View style={styles.dotOff} />}
+            {/* the authored tick is the ANIMAL column's resting state (a0–a2), which the
+                drag can rewrite; the hollow ring under it is always there */}
+            <View style={styles.dotOff} />
+            <Animated.View style={[styles.dotOn, styles.dotLayer, animal[k]]} />
           </View>
           <View style={[styles.mark, { left: COL_Y + COL_W / 2 - 7 }]}>
             <View style={styles.dotOn} />
@@ -306,6 +367,7 @@ function AskBanner({ S }: { S: SharedValue<any> }) {
   const rule = useAnimatedStyle(() => ({
     opacity: S.value.wRule, transform: [{ scaleX: S.value.wRule }],
   }));
+  const own = useAnimatedStyle(() => ({ opacity: S.value.own, transform: [{ translateY: (1 - S.value.own) * 5 }] }));
   return (
     <Animated.View style={[styles.ask, card]} pointerEvents="none">
       <View style={styles.askTopRule} />
@@ -318,6 +380,7 @@ function AskBanner({ S }: { S: SharedValue<any> }) {
         ))}
       </View>
       <Animated.View style={[styles.askUnder, rule]} />
+      <Animated.Text style={[styles.askOwn, own]} numberOfLines={1}>ABOUT YOUR OWN CONDUCT</Animated.Text>
     </Animated.View>
   );
 }
@@ -325,6 +388,10 @@ function AskBanner({ S }: { S: SharedValue<any> }) {
 // ── where conscience comes from ───────────────────────────────────────────────
 function Origins({ S }: { S: SharedValue<any> }) {
   const card = useAnimatedStyle(() => ({ opacity: S.value.origOn }));
+  const ask = useAnimatedStyle(() => ({ opacity: 1 - S.value.disputed }));
+  const disputed = useAnimatedStyle(() => ({
+    opacity: S.value.disputed, transform: [{ scale: 1.25 - 0.25 * S.value.disputed }],
+  }));
   const rows = [
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useAnimatedStyle(() => ({ opacity: S.value.o0, transform: [{ translateX: (1 - S.value.o0) * 10 }] })),
@@ -335,7 +402,8 @@ function Origins({ S }: { S: SharedValue<any> }) {
   ];
   return (
     <Animated.View style={[styles.orig, card]} pointerEvents="none">
-      <Text style={styles.origHead} numberOfLines={1}>ORIGIN?</Text>
+      <Animated.Text style={[styles.origHead, ask]} numberOfLines={1}>ORIGIN?</Animated.Text>
+      <Animated.Text style={[styles.origHead, styles.origDisputed, disputed]} numberOfLines={1}>DISPUTED</Animated.Text>
       <View style={styles.origRule} />
       {ORIGIN_ROWS.map((r, k) => (
         <Animated.View key={r.who} style={[styles.origRow, { top: 20 + k * 33 }, rows[k]]}>
@@ -354,6 +422,17 @@ function Scale({ S }: { S: SharedValue<any> }) {
     transform: [{ translateX: PIVOT_X }, { translateY: PIVOT_Y }, { rotate: `${S.value.tip}deg` }],
   }));
   const post = useAnimatedStyle(() => ({ opacity: S.value.scaleOn }));
+  // A weight FALLS into each pan and lands; the two land a beat apart, the way two
+  // considerations are put down one after the other.
+  const dropL = useAnimatedStyle(() => {
+    const u = clamp01(S.value.reasons * 1.25);
+    return { opacity: clamp01(u * 3), transform: [{ translateY: (1 - u) * -34 }] };
+  });
+  const dropR = useAnimatedStyle(() => {
+    const u = clamp01(S.value.reasons * 1.25 - 0.25);
+    return { opacity: clamp01(u * 3), transform: [{ translateY: (1 - u) * -34 }] };
+  });
+  const tags = useAnimatedStyle(() => ({ opacity: clamp01(S.value.reasons * 2 - 1) }));
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       {/* the question the balance exists to answer, stamped above it */}
@@ -370,6 +449,10 @@ function Scale({ S }: { S: SharedValue<any> }) {
         <View style={[styles.pan, { left: 50 }]} />
         <View style={{ position: 'absolute', left: -58, top: 0, width: 1.5, height: 14, backgroundColor: SOFT }} />
         <View style={{ position: 'absolute', left: 56.5, top: 0, width: 1.5, height: 14, backgroundColor: SOFT }} />
+        <Animated.View style={[styles.weight, { left: -63 }, dropL]} />
+        <Animated.View style={[styles.weight, { left: 53 }, dropR]} />
+        <Animated.Text style={[styles.reasonTag, { left: -88 }, tags]}>FOR</Animated.Text>
+        <Animated.Text style={[styles.reasonTag, { left: 28 }, tags]}>AGAINST</Animated.Text>
       </Animated.View>
     </View>
   );
@@ -377,15 +460,18 @@ function Scale({ S }: { S: SharedValue<any> }) {
 
 // ── the sprout — Aristotle's flourishing, growing as the line lands ───────────
 function Sprout({ S }: { S: SharedValue<any> }) {
-  const wrap = useAnimatedStyle(() => ({ opacity: S.value.plant }));
+  const wrap = useAnimatedStyle(() => ({ opacity: S.value.seed }));
+  const label = useAnimatedStyle(() => ({ opacity: S.value.plant }));
   const stem = useAnimatedStyle(() => ({ transform: [{ scaleY: 0.15 + 0.85 * S.value.grow }] }));
   // Each leaf is hinged at the stem (transformOrigin on its inner edge), so it
   // unfurls outward rather than inflating from its own middle.
-  const leafL = useAnimatedStyle(() => ({ opacity: S.value.grow, transform: [{ rotate: '34deg' }, { scaleX: S.value.grow }] }));
-  const leafR = useAnimatedStyle(() => ({ opacity: S.value.grow, transform: [{ rotate: '-34deg' }, { scaleX: S.value.grow }] }));
+  // A seedling's leaves are small, not faint: opacity follows the first third of
+  // the growth only, so at seedling size they are already solid ink.
+  const leafL = useAnimatedStyle(() => ({ opacity: clamp01(S.value.grow * 3), transform: [{ rotate: '34deg' }, { scaleX: S.value.grow }] }));
+  const leafR = useAnimatedStyle(() => ({ opacity: clamp01(S.value.grow * 3), transform: [{ rotate: '-34deg' }, { scaleX: S.value.grow }] }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, wrap]} pointerEvents="none">
-      <Text style={styles.sproutLabel}>FLOURISHING</Text>
+      <Animated.Text style={[styles.sproutLabel, label]}>FLOURISHING</Animated.Text>
       <Animated.View style={[styles.stem, stem]} />
       <Animated.View style={[styles.leaf, { left: 316, top: 470, transformOrigin: '100% 50%' }, leafL]} />
       <Animated.View style={[styles.leaf, { left: 336, top: 462, transformOrigin: '0% 50%' }, leafR]} />
@@ -417,10 +503,28 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
+  // The two weights sit INSIDE the pans (a pan is 16 wide at beam x ±58); their
+  // captions hang under the pans, clear of the post at the pivot and the base.
+  weight: { position: 'absolute', top: 15, width: 10, height: 7, borderRadius: 1.5, backgroundColor: INK },
+  reasonTag: {
+    position: 'absolute', top: 27, width: 60, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.8, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+  },
+
   // ── ledger ──────────────────────────────────────────────────────────────────
+  youWash: {
+    position: 'absolute', left: COL_Y, top: 0, bottom: 0, width: COL_W, backgroundColor: SHADE,
+  },
+  youHead: {
+    position: 'absolute', left: COL_Y + 8, top: 3, width: COL_W - 16, height: 14, borderRadius: 3,
+    backgroundColor: INK, alignItems: 'center', justifyContent: 'center',
+  },
+  youHeadText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.3, color: PAPER, includeFontPadding: false,
+  },
   ledger: {
     position: 'absolute', left: LED_X, top: LED_T, width: LED_W, height: LED_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   vRule: { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: RULE },
   hRule: { position: 'absolute', left: 0, right: 0, top: LED_HEAD_H, height: 1, backgroundColor: RULE },
@@ -438,6 +542,7 @@ const styles = StyleSheet.create({
   mark: { position: 'absolute', top: LED_ROW_H / 2 - 7, width: 14, height: 14, alignItems: 'center', justifyContent: 'center' },
   dotOn: { width: 13, height: 13, borderRadius: 7, backgroundColor: INK },
   dotOff: { width: 13, height: 13, borderRadius: 7, borderWidth: 2, borderColor: SOFT },
+  dotLayer: { position: 'absolute', left: 0.5, top: 0.5 },
 
   // ── the opening headline ────────────────────────────────────────────────────
   // Exactly the ledger's box (58…352 × 260…348), so the band is unchanged and the
@@ -462,6 +567,12 @@ const styles = StyleSheet.create({
     backgroundColor: INK,
   },
 
+  // The second line of the headline, under its rule (68) and inside its box (88).
+  askOwn: {
+    position: 'absolute', left: 0, right: 0, top: 74, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.5, color: INK, includeFontPadding: false,
+  },
+
   // ── where conscience comes from ─────────────────────────────────────────────
   orig: {
     position: 'absolute', left: 298, top: 366, width: 92, height: 120,
@@ -473,6 +584,7 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   origRule: { position: 'absolute', left: 0, right: 0, top: 19, height: 1, backgroundColor: RULE },
+  origDisputed: { color: INK, letterSpacing: 1.5 },
   origRow: { position: 'absolute', left: 0, right: 0, height: 33, alignItems: 'center', justifyContent: 'center' },
   origWho: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,

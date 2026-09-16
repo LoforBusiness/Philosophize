@@ -20,7 +20,8 @@ import { Shapes, ell, bar, tri, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // THE ATTENTION METER AND THE FRAME. Murdoch's argument drawn instead of asserted:
 //
@@ -326,7 +327,7 @@ const styles = StyleSheet.create({
   },
   metBar: {
     position: 'absolute', left: MET_L, top: MET_BAR_T, width: MET_W, height: MET_BAR_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, overflow: 'hidden',
+    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   metTick: { position: 'absolute', top: 0, bottom: 0, width: 1.5, backgroundColor: RULE },
   metFill: {
@@ -364,7 +365,7 @@ const styles = StyleSheet.create({
   ego: { position: 'absolute', left: EGO_L, top: EGO_T, width: EGO_W, height: EGO_H },
   egoBubble: {
     position: 'absolute', left: 0, top: 0, width: EGO_W, height: 46,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 23, backgroundColor: STONE,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 23, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   egoText: {
@@ -425,7 +426,7 @@ const styles = StyleSheet.create({
   // ── the mind's label, struck out ────────────────────────────────────────────
   wordBox: {
     position: 'absolute', left: WORD_L, top: WORD_T, width: WORD_W, height: WORD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   wordText: {
@@ -441,7 +442,7 @@ const styles = StyleSheet.create({
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W, height: CARD_H },
   card: {
     width: CARD_W, height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, justifyContent: 'center', paddingHorizontal: 9,
+    backgroundColor: STONE, boxShadow: LIP, justifyContent: 'center', paddingHorizontal: 9,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },
   cardWrong: { borderColor: SOFT, opacity: 0.45 },

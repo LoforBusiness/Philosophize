@@ -19,7 +19,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // The figure stands on the LEFT (and climbs a ladder in the same spot) so the whole
 // right-hand column — x 150…386 — is free for information design that is drawn BIG:
@@ -391,14 +392,14 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   stair: {
     position: 'absolute', width: STAIR_W, borderWidth: 2.5, borderColor: INK,
-    backgroundColor: STONE, alignItems: 'center', paddingTop: 5,
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', paddingTop: 5,
   },
   stairNum: { fontFamily: 'Inter_700Bold', fontSize: 14, color: INK, includeFontPadding: false },
 
   // ── pipeline ───────────────────────────────────────────────────────────────
   pipeBox: {
     position: 'absolute', left: COL_L, width: COL_W, height: PIPE_BOX_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   pipeOut: { backgroundColor: INK },
@@ -415,7 +416,7 @@ const styles = StyleSheet.create({
 
   gearBox: {
     position: 'absolute', left: GEAR_L, top: GEAR_T, width: GEAR_W, height: GEAR_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, alignItems: 'center', paddingTop: 5,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', paddingTop: 5,
   },
   gearLabel: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: INK, includeFontPadding: false },
   gear: {
@@ -440,7 +441,7 @@ const styles = StyleSheet.create({
   press: { width: '100%' },
   card: {
     width: COL_W, height: CARD_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6,
-    backgroundColor: STONE, overflow: 'hidden',
+    backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   cardWrong: { borderColor: SOFT },
   cardFill: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: INK },
@@ -461,7 +462,7 @@ const styles = StyleSheet.create({
 
   proof: {
     position: 'absolute', left: MID - 90, top: PROOF_T, width: 180, height: PROOF_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   proofTag: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: INK, includeFontPadding: false },

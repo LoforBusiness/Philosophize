@@ -1,9 +1,10 @@
+import type { ReactNode } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
+import { clamp01, ease01, mixStance, pose, type Bundle } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
@@ -18,7 +19,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A ruler and a subject play out power vs authority, under two pieces of ink
 // information design:
@@ -32,6 +34,19 @@ const { RULE, STONE } = stageTone('political-philosophy');
 //     full-width rows. From beat 4 the subject steps out of frame and the ledger
 //     takes that half of the stage; on the question beat the same rows ARE the
 //     tap targets, so the reader answers by choosing a source of legitimacy.
+//
+// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
+// This is an opener, and four of its taps used to hold one frame. Each now puts on
+// the stage the thing its sentence names, and nothing it does not:
+//   · the matrix arrives in two steps — the POWER row on "power controls bodies",
+//     the AUTHORITY row on "authority is power that people accept" (`chart`);
+//   · a MUGGER tag hangs over the ruler on "as a mugger does", and comes off as
+//     the podium rises under him — robber to emperor (`tag`);
+//   · the podium's LEGITIMACY plate is struck in ink on "only legitimacy tells
+//     them apart" (`lit`);
+//   · the ledger is written up row by row as Weber's types are named, and its
+//     fourth row — raw force, which no sentence offers as a source — arrives
+//     with the question it is an option of (`rows`).
 //
 // There is no camera transform: the art is authored straight into stage space and
 // the player crops to the band below, so every measurement here is final.
@@ -65,6 +80,15 @@ const LG_TOP = 310;
 const LG_H = 40;
 const LG_STEP = 46;                // 4 rows: 310 · 356 · 402 · 448 → ends at 488
 
+// ── the MUGGER tag ───────────────────────────────────────────────────────────
+// Centred over the ruler, 34 units under the matrix (which ends at 288) and 36
+// above his crown (398 standing, measured off the rig for gestures 13 and 266 at
+// this scale). Its leader stops 24 units short of the head.
+const TAG_W = 72;
+const TAG_H = 20;
+const TAG_T = 322;
+const TAG_LEAD = 18;               // 342 → 360
+
 /** The four rows, and the four options of the scene-answered question. */
 const ROWS = [
   { id: 'a', title: 'TRADITION', sub: 'custom and bloodline', correct: false },
@@ -78,7 +102,11 @@ const SUB_CODE = BEATS.map((b) => b.sub ?? 0);
 const POD = BEATS.map((b) => (b.podium ? 1 : 0));
 const CHART = BEATS.map((b) => b.chart ?? 0);
 const LED = BEATS.map((b) => (b.ledger ? 1 : 0));
+const TAG = BEATS.map((b) => b.tag ?? 0);
+const LIT = BEATS.map((b) => b.lit ?? 0);
+const LROWS = BEATS.map((b) => b.rows ?? 0);
 const TR = 0.85;
+const ROW_T = BEATS.map((b) => (b.interact ? TR : 2.2));
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
@@ -97,7 +125,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political2'));
 export default function Political2Scene({ clock, bt, bi, i, picked, onPick, pickPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldRulerS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(7);
   const heldSubS = useHeld();
   const cur = BEATS[i];
   const showPick = !!cur.interact && !!cur.ledger;
@@ -113,17 +141,26 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick, pick
     const subS = keepHeld(heldSubS, mixStance(carryFrom(heldSubS, n, emoteHold(SUB_CODE[p], t)), emoteLive(SUB_CODE[n], t, bt.value), tr));
     const pod = carry(cv, 0, n, POD[p], POD[n], tr);
     const led = carry(cv, 1, n, LED[p], LED[n], tr);
+    // The ledger's rows are written up at a reading pace rather than the stage's:
+    // two rows on the charisma beat land one after the other, as each is named. On
+    // the question beat its option has to be on the board promptly, so it keeps TR.
+    const rowTr = ease01(bt.value / ROW_T[n]);
 
     return {
       ruler: pose(rulerS, RULER_X, GROUND - pod * PODIUM_H, K, 1, 1),
       subject: reactPose(subS, SUBJECT_X, GROUND, K, -1, 1 - led),
       pod,
       led,
-      rowP: lerp(clamp01(CHART[p]), clamp01(CHART[n]), tr),
+      // Carried, not lerped off the previous beat's value: after the sort the
+      // AUTHORITY row may be sitting wherever the reader left it (L5).
+      rowP: carry(cv, 2, n, clamp01(CHART[p]), clamp01(CHART[n]), tr),
       // R7c — the AUTHORITY row is what the lever is about. Magnetism and habit fill
       // the POWER row and leave this one empty; the lawful office is the only stop that
       // writes anything here.
-      rowA: lerp(clamp01(CHART[p] - 1), reacting ? pickPos.value : clamp01(CHART[n] - 1), tr),
+      rowA: carry(cv, 3, n, clamp01(CHART[p] - 1), reacting ? pickPos.value : clamp01(CHART[n] - 1), tr),
+      tag: carry(cv, 4, n, TAG[p], TAG[n], tr),
+      lit: carry(cv, 5, n, LIT[p], LIT[n], tr),
+      rows: carry(cv, 6, n, LROWS[p], LROWS[n], rowTr),
     };
   });
 
@@ -149,6 +186,15 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick, pick
     opacity: SCENE.value.led,
     transform: [{ translateX: (1 - SCENE.value.led) * 16 }],
   }));
+  // The tag drops onto its leader as it is named, and lifts off the same way.
+  const tagStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.tag,
+    transform: [{ translateY: (1 - SCENE.value.tag) * -6 }],
+  }));
+  // The plate is struck, not tinted: the ink face comes up as the stone one goes,
+  // so there is never an ink word sitting under an ink plate.
+  const litStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.lit }));
+  const unlitStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.lit }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -192,8 +238,18 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick, pick
       {/* ── the podium of legitimacy under the ruler ────────────────────────── */}
       <Animated.View style={[styles.podWrap, podStyle]} pointerEvents="none">
         <View style={styles.podBox} />
+        <Animated.View style={[styles.podLit, litStyle]} />
         <View style={styles.podCap} />
-        <Text style={styles.podLab}>LEGITIMACY</Text>
+        <Animated.Text style={[styles.podLab, unlitStyle]}>LEGITIMACY</Animated.Text>
+        <Animated.Text style={[styles.podLab, styles.podLabOn, litStyle]}>LEGITIMACY</Animated.Text>
+      </Animated.View>
+
+      {/* ── what the ruler is, before the podium: Weber's mugger ─────────────── */}
+      <Animated.View style={[styles.tag, tagStyle]} pointerEvents="none">
+        <View style={styles.tagPlate}>
+          <Text style={styles.tagText} numberOfLines={1}>MUGGER</Text>
+        </View>
+        <View style={styles.tagLead} />
       </Animated.View>
 
       <Stickman role="second" D={DR} k={K} />
@@ -215,18 +271,35 @@ export default function Political2Scene({ clock, bt, bi, i, picked, onPick, pick
             </View>
           );
           if (!showPick) {
-            return <View key={r.id} style={[styles.ledSlot, { top }]} pointerEvents="none">{body}</View>;
+            return (
+              <View key={r.id} style={[styles.ledSlot, { top }]} pointerEvents="none">
+                <RowReveal S={SCENE} k={k}>{body}</RowReveal>
+              </View>
+            );
           }
           return (
             <Target id={r.id} correct={r.correct} picked={picked} onPick={onPick}
               key={r.id} style={[styles.ledSlot, { top }]} disabled={answered}>
-              {body}
+              <RowReveal S={SCENE} k={k}>{body}</RowReveal>
             </Target>
           );
         })}
       </Animated.View>
     </Animated.View>
   );
+}
+
+/** One ledger row, written up once `rows` passes its index. A row already up holds still (C20c). */
+function RowReveal({ S, k, children }: {
+  S: { value: { rows: number } };   // a read-only view of the scene frame (see knowHowScene's StepCard)
+  k: number;
+  children: ReactNode;
+}) {
+  const st = useAnimatedStyle(() => {
+    const a = clamp01(S.value.rows - k);
+    return { opacity: a, transform: [{ translateX: (1 - a) * 10 }] };
+  });
+  return <Animated.View style={st}>{children}</Animated.View>;
 }
 
 const styles = StyleSheet.create({
@@ -285,13 +358,31 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   podBox: {
     position: 'absolute', left: 7, top: 0, width: PODIUM_W, height: PODIUM_H,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   podCap: { position: 'absolute', left: 0, top: 0, width: PODIUM_W + 14, height: 5, backgroundColor: INK },
   podLab: {
     position: 'absolute', left: 7, top: 11, width: PODIUM_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.2, color: INK, includeFontPadding: false,
   },
+  // The struck face: exactly podBox's rectangle in ink, border and all.
+  podLit: { position: 'absolute', left: 7, top: 0, width: PODIUM_W, height: PODIUM_H, backgroundColor: INK },
+  podLabOn: { color: PAPER },
+
+  // ── the MUGGER tag ────────────────────────────────────────────────────────
+  // x 60..132, y 322..360 — clear of the matrix (ends 288), of the ledger (x ≥ 194)
+  // and of the ruler's crown (≥ 397 on the two beats it hangs over him).
+  tag: { position: 'absolute', left: RULER_X - TAG_W / 2, top: TAG_T, width: TAG_W, height: TAG_H + TAG_LEAD },
+  tagPlate: {
+    position: 'absolute', left: 0, top: 0, width: TAG_W, height: TAG_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  tagText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 1.4, color: INK,
+    includeFontPadding: false,
+  },
+  tagLead: { position: 'absolute', left: TAG_W / 2 - 0.75, top: TAG_H, width: 1.5, height: TAG_LEAD, backgroundColor: SOFT },
 
   // ── ledger ────────────────────────────────────────────────────────────────
   ledger: { position: 'absolute', left: LG_L, top: LG_HDR_Y, width: LG_W, height: 200 },
@@ -304,7 +395,7 @@ const styles = StyleSheet.create({
   ledSlot: { position: 'absolute', left: 0, width: LG_W, height: LG_H },
   ledRow: {
     width: LG_W, height: LG_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, justifyContent: 'center', paddingHorizontal: 10,
+    backgroundColor: STONE, boxShadow: LIP, justifyContent: 'center', paddingHorizontal: 10,
   },
   ledRight: { backgroundColor: INK, borderColor: INK },
   ledWrong: { borderColor: SOFT, opacity: 0.45 },

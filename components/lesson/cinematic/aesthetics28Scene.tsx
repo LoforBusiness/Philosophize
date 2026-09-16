@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO ROOMS SIDE BY SIDE, AND THE LIGHT IN ONE OR BOTH OF THEM.
@@ -207,11 +208,11 @@ const styles = StyleSheet.create({
 
   gallery: {
     position: 'absolute', left: GAL_X, top: ROOM_Y, width: GAL_W, height: ROOM_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
   },
   street: {
     position: 'absolute', left: ST_X, top: ROOM_Y, width: ST_W, height: ROOM_H,
-    backgroundColor: STONE, borderWidth: 2, borderColor: INK,
+    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
   },
   // A LIGHT IS A PAPER WASH. On a mid ground that is the only way to draw one.
   galLight: { position: 'absolute', left: GAL_X + 2, top: ROOM_Y + 2, width: GAL_W - 4, height: ROOM_H - 4, backgroundColor: PAPER },
@@ -220,11 +221,11 @@ const styles = StyleSheet.create({
   galFloor: { position: 'absolute', left: GAL_X + 10, top: FLOOR_Y, width: GAL_W - 20, height: 2, backgroundColor: INK },
   stFloor: { position: 'absolute', left: ST_X + 8, top: FLOOR_Y, width: ST_W - 16, height: 2, backgroundColor: INK },
 
-  art: { position: 'absolute', borderWidth: 3, borderColor: INK, backgroundColor: STONE },
+  art: { position: 'absolute', borderWidth: 3, borderColor: INK, backgroundColor: STONE, boxShadow: LIP },
 
-  cup: { position: 'absolute', left: 292, top: 348, width: 20, height: 18, borderWidth: 2, borderColor: INK, backgroundColor: STONE, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 },
+  cup: { position: 'absolute', left: 292, top: 348, width: 20, height: 18, borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 },
   bench: { position: 'absolute', left: 318, top: 352, width: 44, height: 7, backgroundColor: INK },
-  ball: { position: 'absolute', left: 294, top: 306, width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: INK, backgroundColor: STONE },
+  ball: { position: 'absolute', left: 294, top: 306, width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP },
 
   roomText: {
     position: 'absolute', top: 264, textAlign: 'center',

@@ -93,7 +93,7 @@ function figurePath(B, k) {
 // entirely, so stepping `u` across them draws the same frame six times and the
 // strip says "this does nothing" about a motion that loops perfectly well. This
 // is check-moves' own trap, one instrument over.
-const LIVING = (a) => (a >= 59 && a <= 78) || (a >= 157 && a <= 168);
+const LIVING = (a) => (a >= 59 && a <= 78) || (a >= 157 && a <= 182);
 
 const from = Number(process.argv[2] || 121);
 const to = Number(process.argv[3] || from);

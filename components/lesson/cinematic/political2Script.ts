@@ -21,43 +21,53 @@ export interface Pol2Beat extends BaseBeat {
   /** The ruler stands on a podium (legitimacy, not just force). */ podium?: boolean;
   /** Bar matrix rows shown: 0 none · 1 POWER · 2 POWER + AUTHORITY. */ chart?: number;
   /** The legitimacy ledger is on stage (and the subject steps out). */ ledger?: boolean;
+  /** The MUGGER tag hangs over the ruler (Weber's example of bare power). */ tag?: number;
+  /** The podium's LEGITIMACY plate is struck in ink — the one thing that tells ruler from robber. */ lit?: number;
+  /** How many ledger rows are written up, top down: 1 tradition · 3 + charisma, law · 4 + raw force. */ rows?: number;
 }
 
 export const BEATS: Pol2Beat[] = [
   {
-    r: 161, sub: 8, podium: false, chart: 1,
+    // The opening frame is the two people and nothing else: force, before any
+    // word for it is on the board.
+    r: 161, sub: 8, podium: false, chart: 0,
     text: 'Force can compel obedience. Can force alone make people accept that a command is rightful?',
     dur: 1.8,
   },
   {
+    // "Power controls bodies" — the POWER row writes in: BODIES all, MINDS none.
     r: 161, sub: 8, podium: false, chart: 1,
     text: 'Power controls bodies through the threat of force. Authority also commands minds, because the people who obey accept it as rightful.',
     dur: 2,
   },
   {
-    r: 13, sub: 18, podium: false, chart: 2,
+    // "as a mugger does" — the ruler is labelled for what he is doing.
+    r: 13, sub: 18, podium: false, chart: 1, tag: 1,
     text: 'Max Weber distinguished power from authority. Power is carrying out your will despite resistance, as a mugger does.',
     cite: 'Power and authority',
     dur: 3.1,
   },
   {
-    r: 13, sub: 18, podium: false, chart: 2,
+    // "Authority is power that people accept" — the AUTHORITY row fills both cells.
+    r: 266, sub: 18, podium: false, chart: 2, tag: 1,
     text: 'Authority is power that people accept as legitimate. They obey because they believe the ruler is entitled to command.',
     dur: 1.8,
   },
   {
+    // Robber to emperor: the tag comes off as the podium goes up under him.
     r: 7, sub: 4, podium: true, chart: 2,
     text: 'Augustine tells of a pirate captured by Alexander the Great. The pirate said that a lone ship makes a man a robber, while a whole fleet makes him an emperor.',
     cite: 'Augustine, The City of God',
     dur: 3.3,
   },
   {
-    r: 7, sub: 4, podium: true, chart: 2,
+    // "only legitimacy tells them apart" — the podium's LEGITIMACY plate is struck.
+    r: 260, sub: 257, podium: true, chart: 2, lit: 1,
     text: 'Without justice, Augustine says, a kingdom is a band of robbers. Both take by threat, and only legitimacy tells them apart.',
     dur: 1.8,
   },
   {
-    r: 1, sub: 17, podium: true, chart: 2,
+    r: 1, sub: 17, podium: true, chart: 2, lit: 1,
     quote: {
       id: 'lq-political-political-2-1',
       text: 'A state is a human community that claims the monopoly of the legitimate use of physical force within a given territory.',
@@ -69,18 +79,22 @@ export const BEATS: Pol2Beat[] = [
     dur: 3.4,
   },
   {
-    r: 168, sub: 0, podium: true, chart: 2, ledger: true,
+    // "One kind rests on custom and birth" — the ledger opens on its first row.
+    r: 168, sub: 0, podium: true, chart: 2, ledger: true, lit: 1, rows: 1,
     text: 'Weber named three sources of legitimate power. One kind rests on custom and birth, as in a hereditary monarchy.',
     cite: 'Weber’s three types',
     dur: 1.8,
   },
   {
-    r: 409, sub: 0, podium: true, chart: 2, ledger: true,
+    // "Charisma … Rational-legal authority …" — the next two rows, in that order.
+    r: 409, sub: 0, podium: true, chart: 2, ledger: true, lit: 1, rows: 3,
     text: 'Charisma rests on devotion to one person. Rational-legal authority rests on law, so it stays with the office when the holder goes.',
     dur: 3.2,
   },
   {
-    r: 20, sub: 9, podium: true, chart: 2, ledger: true,
+    // The fourth row is not a source the narration named: it is the question's
+    // fourth option, and it arrives with the question.
+    r: 20, sub: 9, podium: true, chart: 2, ledger: true, lit: 1, rows: 4,
     // Answered ON the ledger: the four rows are the four options, so the reader
     // picks a source of legitimacy rather than reading a list of sentences.
     interact: {
@@ -92,7 +106,7 @@ export const BEATS: Pol2Beat[] = [
     dur: 1.0,
   },
   {
-    r: 16, sub: 19, podium: true, chart: 2, ledger: true,
+    r: 16, sub: 19, podium: true, chart: 2, ledger: true, lit: 1, rows: 4,
     interact: {
       prompt: 'A charismatic mayor wins a landslide election. What makes the mayor’s commands legitimate?',
       sort: {
@@ -109,7 +123,7 @@ export const BEATS: Pol2Beat[] = [
     dur: 1.0,
   },
   {
-    ledger: true,
+    ledger: true, lit: 1, rows: 4,
     summary: {
       title: 'Where Political Power Comes From',
       points: [

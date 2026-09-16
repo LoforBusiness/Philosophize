@@ -17,7 +17,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE LINES IN A LEDGER, AND EXACTLY ONE OF THEM GETS STRUCK.
@@ -193,7 +194,7 @@ const styles = StyleSheet.create({
 
   book: {
     position: 'absolute', left: BOOK_X, top: BOOK_Y, width: BOOK_W, height: BOOK_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   spine: { position: 'absolute', left: BOOK_X + 8, top: BOOK_Y + 6, width: 2, height: BOOK_H - 12, backgroundColor: SOFT },
   headRule: { position: 'absolute', left: ROW_X, top: 284, width: ROW_W, height: 1.5, backgroundColor: SOFT },
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
   row: { position: 'absolute', left: ROW_X, width: ROW_W, height: ROW_H },
   rowBox: {
     position: 'absolute', left: 0, top: 0, width: ROW_W, height: ROW_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   rowWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   rowText: {

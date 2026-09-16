@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE HULL, FIVE CRACKS, AND THE CRACKS ARE THE ONLY THING THAT CHANGES.
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
   },
   hull: {
     position: 'absolute', left: HULL_X, top: HULL_Y, width: HULL_W, height: HULL_H,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
     borderBottomLeftRadius: 26, borderBottomRightRadius: 26,
   },
   deck: { position: 'absolute', left: HULL_X + 6, top: HULL_Y + 10, width: HULL_W - 12, height: 1.5, backgroundColor: SOFT },
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
 
   card: {
     position: 'absolute', left: CARD_X, top: CARD_Y, width: 116, height: 44,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   cardText: {
     position: 'absolute', left: CARD_X, top: CARD_Y + 11, width: 116, textAlign: 'center', lineHeight: 11,

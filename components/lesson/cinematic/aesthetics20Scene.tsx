@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOUR ROWS, THREE OF THEM CROSSED OUT BY WHAT ARRIVED BESIDE THEM.
@@ -75,6 +76,10 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics20'));
 
+// R7c — LEFT STILL ON PURPOSE: the bins name what an elimination ESTABLISHES (proves the last
+// · changes nothing · narrows the field), and the three struck reasons are facts of the case
+// under all three. The only per-bin picture would be a PROVED stamp for a wrong bin, or
+// undoing strikes that did happen, and both would draw a falsehood.
 export default function Aesthetics20Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
@@ -193,7 +198,7 @@ const styles = StyleSheet.create({
 
   claim: {
     position: 'absolute', left: CLAIM_X, width: CLAIM_W, height: ROW_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     justifyContent: 'center', paddingHorizontal: 7,
   },
   claimText: {
@@ -201,7 +206,7 @@ const styles = StyleSheet.create({
   },
   sub: {
     position: 'absolute', left: SUB_X, width: SUB_W, height: ROW_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     justifyContent: 'center', paddingHorizontal: 7,
   },
   subText: {

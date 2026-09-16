@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO COLUMNS, ONE WRONG ARROW, AND THE BOX UNDERNEATH.
@@ -254,7 +255,7 @@ const styles = StyleSheet.create({
   cand: { position: 'absolute', left: CAND_X, width: 100, height: 26 },
   candBox: {
     position: 'absolute', left: 0, top: 0, width: 100, height: 26,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   candLit: {
     position: 'absolute', left: 3, top: 3, width: 94, height: 20,
@@ -268,7 +269,7 @@ const styles = StyleSheet.create({
 
   thirdBox: {
     position: 'absolute', left: THIRD_X, top: THIRD_Y, width: 96, height: 32,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   thirdText: {
     position: 'absolute', left: THIRD_X, top: THIRD_Y + 11, width: 96, textAlign: 'center',

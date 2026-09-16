@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A ROAD OF CARS, A RUN OF THEM STOPPED, AND THE RUN WALKING BACKWARDS.
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
 
   road: {
     position: 'absolute', left: ROAD_X, top: ROAD_Y, width: ROAD_W, height: ROAD_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   centre: {
     position: 'absolute', left: ROAD_X + 6, top: ROAD_Y + ROAD_H / 2, width: ROAD_W - 12, height: 0,

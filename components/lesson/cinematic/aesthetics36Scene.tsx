@@ -15,7 +15,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE SQUARE, DRAWN ONCE, AND A FRAME THAT MOVES OVER IT.
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
 
   print: {
     position: 'absolute', top: PRINT_Y, width: PRINT_W, height: PRINT_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   printPave: { position: 'absolute', top: PRINT_Y + 44, width: PRINT_W - 10, height: 1.5, backgroundColor: SOFT },
   markSmall: { width: 3, height: 16, borderRadius: 1.5, backgroundColor: INK },

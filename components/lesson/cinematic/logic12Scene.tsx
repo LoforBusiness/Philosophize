@@ -22,7 +22,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // FOUR DOORS IN ONE WALL, and the answer targets are the doors — the reader answers
 // by choosing a way out rather than a sentence (E33). A door here is a FRAME plus a
@@ -229,11 +230,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
     textAlign: 'center', includeFontPadding: false,
   },
-  wall: { position: 'absolute', left: WALL_L, top: WALL_T, width: WALL_R - WALL_L, height: 8, backgroundColor: STONE },
+  wall: { position: 'absolute', left: WALL_L, top: WALL_T, width: WALL_R - WALL_L, height: 8, backgroundColor: STONE, boxShadow: LIP },
 
   door: { position: 'absolute', top: DOOR_T, width: DOOR_W, height: DOOR_H },
   frame: {
-    flex: 1, borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   // Hinged on its LEFT edge, so scaleX reads as swinging rather than shrinking.
   leaf: {

@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIVE COLUMNS, A TANK BEHIND THEM, AND ONE CABLE.
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
 
   tank: {
     position: 'absolute', left: TANK_X, top: TANK_Y, width: TANK_W, height: TANK_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 16, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 16, backgroundColor: STONE, boxShadow: LIP,
   },
   tankText: {
     position: 'absolute', left: TANK_X, top: TANK_Y + 13, width: TANK_W, textAlign: 'center',
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
 
   col: {
     position: 'absolute', top: COL_Y, width: COL_W, height: COL_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   colCap: {
     position: 'absolute', top: COL_Y + 8, width: COL_W, textAlign: 'center', lineHeight: 10,

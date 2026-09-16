@@ -26,13 +26,13 @@ export const BEATS: Ethics18Beat[] = [
     dur: 4.6,
   },
   {
-    p: 41, x: 168, line: 1, test: 1,
+    p: 270, x: 168, line: 1, test: 1,
     text: 'Philosophers from Aristotle to Kant tied moral standing to the capacity to reason. Kant held that only rational beings are ends in themselves.',
     cite: 'The rationality test',
     dur: 2.4,
   },
   {
-    p: 41, x: 168, line: 1, test: 1,
+    p: 270, x: 168, line: 1, test: 1,
     text: 'Animals can’t argue, make promises or bear duties. So, on this view, they count only as things.',
     dur: 2.6,
   },

@@ -249,6 +249,11 @@ for (const [id, comp] of map) {
     })),
     band,
     ground,
+    // The generator's follow, asked of the camera that will play it (see lessonTours).
+    (near, far) => checkTour(
+      [{ box: { x: near[0], y: near[1], w: near[2], h: near[3] }, to: { x: far[0], y: far[1], w: far[2], h: far[3] }, tr: 0.8, dwell: 2 }],
+      band, null, ground,
+    ).every((m) => !m.includes('(K9)')),
   );
   for (let k = 0; k < words.length; k++) {
     nBeats++;

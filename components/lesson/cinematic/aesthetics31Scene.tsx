@@ -20,7 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A PLAYHEAD THAT RUNS THE MELODY — the first thing in the app that plays in time —
 // and three answer targets that are three PARTS of one picture: the notes, the
@@ -238,7 +239,7 @@ const styles = StyleSheet.create({
 
   inst: { position: 'absolute', ...INST },
   instInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', paddingTop: 8,
   },
   instText: {
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
 
   mel: { position: 'absolute', ...MEL },
   melInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     justifyContent: 'flex-end', paddingBottom: 5,
   },
   melText: {
@@ -277,7 +278,7 @@ const styles = StyleSheet.create({
 
   plate: { position: 'absolute', ...PLATE },
   plateInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   plateText: {

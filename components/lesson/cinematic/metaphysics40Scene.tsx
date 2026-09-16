@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BOOK OF DAYS WITH TWO LINES WRITTEN AND ONE STILL EMPTY.
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
 
   page: {
     position: 'absolute', left: PAGE_X, top: PAGE_Y, width: PAGE_W, height: PAGE_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   row: {
     position: 'absolute', left: ROW_X, width: ROW_W, height: ROW_H,

@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A doorway with two lamps beneath it. Stage right.
 //
@@ -200,7 +201,7 @@ const styles = StyleSheet.create({
   door: {
     position: 'absolute', left: DOOR_L, top: DOOR_T, width: DOOR_W, height: DOOR_H,
     borderWidth: 3, borderColor: INK, borderTopLeftRadius: 26, borderTopRightRadius: 26,
-    borderBottomWidth: 0, backgroundColor: STONE,
+    borderBottomWidth: 0, backgroundColor: STONE, boxShadow: LIP,
   },
   bar: {
     position: 'absolute', left: DOOR_L + 4, top: DOOR_T + DOOR_H / 2 - 3,
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
 
   lamp: {
     position: 'absolute', top: LAMP_T, width: LAMP_W, height: LAMP_H,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   lampLit: {
@@ -239,7 +240,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', left: DW_L, width: DW_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {

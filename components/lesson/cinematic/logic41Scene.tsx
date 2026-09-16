@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO BOXES, ONE INSIDE THE OTHER, AND A WALL THE INNER ONE CANNOT PASS.
@@ -193,7 +194,7 @@ const styles = StyleSheet.create({
 
   outer: {
     position: 'absolute', left: OUT_X, top: OUT_Y, width: OUT_W, height: OUT_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   // GROWN FROM ITS OWN BOTTOM-LEFT CORNER, so the reader watches one group swell
   // inside the other rather than a rectangle drifting about.
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
 
   swatchOuter: {
     position: 'absolute', top: LEG_Y, width: LEG_SW, height: LEG_SW,
-    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   swatchInner: {
     position: 'absolute', top: LEG_Y, width: LEG_SW, height: LEG_SW,

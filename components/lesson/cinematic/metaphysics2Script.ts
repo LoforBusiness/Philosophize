@@ -59,6 +59,11 @@ export interface Meta2Beat extends BaseBeat {
    * arguing with it. H59: a prop does not leave the room and come back.
    */ pr?: number;
   /** 1 = the three posted claims are live and tappable (Q1). */ pick?: number;
+  /** The riddle headline WHY SOMETHING RATHER THAN NOTHING? is up (0/1). */ ask?: number;
+  /** Under the principle: SO EXISTENCE ITSELF NEEDS A REASON (0/1). */ applied?: number;
+  /** Under that: NOTHING IS SIMPLER THAN SOMETHING (0/1). */ simpler?: number;
+  /** The two ways are signposted, IT IS and then IT IS NOT (0/1). */ ways?: number;
+  /** IT IS is struck solid: the one genuine way (0/1). */ only?: number;
 }
 
 export const BEATS: Meta2Beat[] = [
@@ -70,43 +75,46 @@ export const BEATS: Meta2Beat[] = [
     dur: 1.8,
   },
   {
-    // 167 = TALKING WITH THE HANDS, the narration loop (N2). The hook is somebody
-    // talking to you, and this is what that looks like from the neck down.
-    e: 167, x: 92, gone: 0.3,
+    // 459 = EXPLAINING, from the second living shelf: the other body for talking
+    // with the hands (N6), now that this beat is no longer a piece of beat 0's run.
+    // The riddle is named here, so its headline arrives here (`ask`).
+    e: 459, x: 92, gone: 0.3, ask: 1,
     text: 'This raises the question why there is something rather than nothing. No answer to it is generally accepted.',
     dur: 2.1,
   },
   {
     // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
-    e: 456, x: 150, gone: 0.3, pr: 1,
+    e: 456, x: 150, gone: 0.3, pr: 1, ask: 1,
     text: 'Gottfried Leibniz’s principle of sufficient reason holds that nothing is without a reason.',
     cite: 'The principle of sufficient reason',
     dur: 2.1,
   },
   {
     // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
-    e: 456, x: 150, gone: 0.3, pr: 1,
+    // The principle is applied to existence: its consequence writes in under it.
+    e: 456, x: 150, gone: 0.3, pr: 1, ask: 1, applied: 1,
     text: 'The principle then applies to existence itself. There must be a reason why anything exists at all.',
     dur: 1.8,
   },
   {
     // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
-    e: 456, x: 150, gone: 0.3, pr: 1,
+    // And Leibniz's premise writes in under that.
+    e: 456, x: 150, gone: 0.3, pr: 1, ask: 1, applied: 1, simpler: 1,
     text: 'Leibniz held that nothing is simpler and easier than something. So existence, not nothingness, is what requires a reason.',
     dur: 1.8,
   },
   {
     // 379 = THE IDEA, PLAYED (N2) — it arrives and the finger goes up, once, as he
     // reaches the fork. Held (179) it would just be a man standing with a finger up.
-    e: 379, x: 214, gone: 0.35, pr: 1,
+    e: 379, x: 214, gone: 0.35, pr: 1, ask: 1, applied: 1, simpler: 1,
     text: 'Parmenides, more than two thousand years before Leibniz, asked whether there could be nothing at all.',
     cite: 'Parmenides, On Nature',
     dur: 1.8,
   },
   {
-    // 379 = THE IDEA, PLAYED (N2) — it arrives and the finger goes up, once, as he
-    // reaches the fork. Held (179) it would just be a man standing with a finger up.
-    e: 379, x: 214, gone: 0.35, pr: 1,
+    // 158 = WEIGHT SHIFT, a living hold, while the goddess's two ways are posted
+    // at the fork: IT IS, then IT IS NOT, in the order the sentence names them.
+    e: 158, x: 214, gone: 0.35, pr: 1, ask: 1, applied: 1, simpler: 1, ways: 1,
     text: 'In his poem On Nature, a goddess sets out two ways of inquiry. One says “it is”, and the other says “it is not”.',
     dur: 3.1,
   },
@@ -114,7 +122,7 @@ export const BEATS: Meta2Beat[] = [
     // 161 = ARMS FOLDED, a LIVING hold — it loops and re-settles, so he has small
     // business while the reader reads a quote (H67). A rest beat is the one place
     // a figure is on screen doing nothing, and still is what reads as broken.
-    e: 161, x: 214, gone: 0.35, pr: 1,
+    e: 161, x: 214, gone: 0.35, pr: 1, ask: 1, applied: 1, simpler: 1, ways: 1,
     quote: {
       id: 'lq-metaphysics-being-2-1',
       text: 'The same thing is there for thinking and for being.',
@@ -130,16 +138,15 @@ export const BEATS: Meta2Beat[] = [
     // 318 = STARTLE, PLAYED: a sharp recoil and a step back. This beat is the A1
     // fix — the sentence says he steps onto the second way and finds nothing, so
     // he walks out past the fork and recoils, once, on arrival.
-    e: 318, x: 292, gone: 0.95, pr: 1,
+    e: 318, x: 350, gone: 0.95, pr: 1, ask: 1, applied: 1, simpler: 1, ways: 1,
     text: 'The goddess calls the second way wholly unlearnable. There’s nothing on it to find or follow.',
     cite: 'The second way',
     dur: 2.3,
   },
   {
-    // 318 = STARTLE, PLAYED: a sharp recoil and a step back. This beat is the A1
-    // fix — the sentence says he steps onto the second way and finds nothing, so
-    // he walks out past the fork and recoils, once, on arrival.
-    e: 318, x: 292, gone: 0.95, pr: 1,
+    // 260 = WAITING, OPEN, a living hold after the recoil. "It is not a genuine
+    // alternative to what is": IT IS is struck solid, the one way left (`only`).
+    e: 260, x: 350, gone: 0.95, pr: 1, ask: 1, applied: 1, simpler: 1, ways: 1, only: 1,
     text: 'What is not cannot be walked on, pointed at, or thought about. It is not a genuine alternative to what is.',
     dur: 2.7,
   },
@@ -147,7 +154,8 @@ export const BEATS: Meta2Beat[] = [
     // 178 = SHRUG, held. M6: a shrug is the right pose for a question beat — the
     // reader is weighing two things and "well, that is what the man said" is
     // exactly the attitude to hold while they do it.
-    e: 178, x: 236, gone: 0.95, pr: 1, pick: 1,
+    // The two argument lines leave: this row is where the three claims are posted.
+    e: 178, x: 236, gone: 0.95, pr: 1, pick: 1, ask: 1, ways: 1, only: 1,
     interact: {
       prompt: 'Of a horse, a unicorn, and nothing at all, which one can’t be pictured?',
       explain: 'Nothing at all is the answer. A unicorn doesn’t exist, yet it can still be pictured, so non-existence wasn’t the obstacle. “Nothing at all” gives the mind no content to picture, which is Parmenides\u2019 point.',
@@ -156,7 +164,7 @@ export const BEATS: Meta2Beat[] = [
     dur: 1.0,
   },
   {
-    e: 178, x: 236, gone: 0.95, pr: 1,
+    e: 178, x: 236, gone: 0.95, pr: 1, ask: 1, ways: 1, only: 1,
     interact: {
       prompt: 'For Leibniz’s question to make sense, what must be true of nothingness itself?',
       sort: {
@@ -173,6 +181,9 @@ export const BEATS: Meta2Beat[] = [
     dur: 1.0,
   },
   {
+    // The way that is not stays gone and the principle stays up: a summary beat that
+    // leaves them unset draws them at 0, and the road the lesson proved absent returned.
+    x: 236, gone: 0.95, pr: 1, ask: 1, ways: 1, only: 1,
     summary: {
       title: 'The Riddle of Being',
       points: [

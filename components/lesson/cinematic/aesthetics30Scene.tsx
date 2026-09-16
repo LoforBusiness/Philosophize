@@ -17,7 +17,8 @@ import { Shapes, ell, bar, tri, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A WINDOW WITH A HOVERING KESTREL, AND A MIRROR SLIDING ACROSS IT.
@@ -238,7 +239,7 @@ const styles = StyleSheet.create({
 
   mirror: {
     position: 'absolute', left: WIN_X + PANE, top: WIN_Y + PANE, height: WIN_H - PANE * 2,
-    backgroundColor: STONE, overflow: 'hidden',
+    backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   glint: { position: 'absolute', left: 10, top: -20, width: 14, height: 180, backgroundColor: PAPER, transform: [{ rotate: '24deg' }] },
 

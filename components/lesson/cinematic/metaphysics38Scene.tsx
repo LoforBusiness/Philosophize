@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = stageTone('metaphysics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE DAYS ON THREE PLINTHS, AND TWO LIFELINES OF DIFFERENT LENGTHS.
@@ -204,16 +205,16 @@ const styles = StyleSheet.create({
   lump: {
     position: 'absolute', left: (COL_W - 48) / 2, top: OBJ_H - 32, width: 48, height: 32,
     borderTopLeftRadius: 22, borderTopRightRadius: 15, borderBottomLeftRadius: 9, borderBottomRightRadius: 14,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   vaseBowl: {
     position: 'absolute', left: (COL_W - 40) / 2, top: OBJ_H - 28, width: 40, height: 28,
     borderTopLeftRadius: 6, borderTopRightRadius: 6, borderBottomLeftRadius: 18, borderBottomRightRadius: 18,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   vaseNeck: {
     position: 'absolute', left: (COL_W - 14) / 2, top: OBJ_H - 38, width: 14, height: 12,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   vaseRim: {
     position: 'absolute', left: (COL_W - 24) / 2, top: OBJ_H - 42, width: 24, height: 5,
@@ -222,14 +223,14 @@ const styles = StyleSheet.create({
 
   plinth: {
     position: 'absolute', left: 0, top: PLINTH_Y - DAY_Y, width: COL_W, height: PLINTH_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
   plinthRight: { backgroundColor: INK },
   plinthWrong: { borderColor: SOFT, borderStyle: 'dashed' },
 
   clayBar: {
     position: 'absolute', left: BAR_X, top: CLAY_Y, width: BAR_W, height: BAR_H,
-    borderRadius: 3, backgroundColor: STONE, borderWidth: 1.5, borderColor: INK,
+    borderRadius: 3, backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: INK,
   },
   // BOTH BARS ARE THE SAME MATERIAL, because they are the same clay. What
   // separates them is length, and a second fill would say something the argument
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
   // bar shrinking out from under it.
   vaseBar: {
     position: 'absolute', left: BAR_X, top: VASE_Y, width: BAR_W, height: BAR_H,
-    borderRadius: 3, backgroundColor: STONE, borderWidth: 1.5, borderColor: INK,
+    borderRadius: 3, backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: INK,
     transformOrigin: '50% 50%',
   },
   barText: {

@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A gallery wall stage right, two canvases on it, the figure working downstage left.
 //
@@ -218,7 +219,7 @@ const styles = StyleSheet.create({
   wall: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   frame: {
     position: 'absolute', top: FRAME_T, width: FRAME_W, height: FRAME_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   frameInner: {
     position: 'absolute', top: FRAME_T + 11, width: FRAME_W - 18,
@@ -229,7 +230,7 @@ const styles = StyleSheet.create({
   plaqWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   plaque: {
     position: 'absolute', top: PLAQUE_T, width: FRAME_W, height: PLAQUE_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   plaqueText: {
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
 
   card: { position: 'absolute', left: WALL_L, width: WALL_R - WALL_L },
   cardInner: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   cardText: {

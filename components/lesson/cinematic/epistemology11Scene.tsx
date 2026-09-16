@@ -20,7 +20,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // Two clock dials side by side, high above the figure. The LEFT one is the hallway
 // clock: its hands are frozen at 3:00 and never move again. The RIGHT one is the
@@ -136,6 +137,10 @@ const DIR = dirsFrom(X, 1);
 const REAL = BEATS.map((b) => b.real ?? 180);
 const LINKV = BEATS.map((b) => b.link ?? 0);
 
+// R7c — LEFT STILL ON PURPOSE: the only quantity this stage draws is whether the two clocks
+// agree, which speaks to one of the four bins (TRUTH) and to the answer (NONE OF THEM: they
+// agree at the moment you look). BELIEF and GOOD REASON have no picture, so a table would
+// change the stage for the answer and for one wrong bin alone.
 export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -321,7 +326,7 @@ const styles = StyleSheet.create({
 
   dial: {
     position: 'absolute', top: DIAL_T, width: DIAL_D, height: DIAL_D,
-    borderRadius: DIAL_R, borderWidth: 2.5, borderColor: INK, backgroundColor: STONE,
+    borderRadius: DIAL_R, borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   dialL: { left: LEFT_CX - DIAL_R },
   dialR: { left: RIGHT_CX - DIAL_R },
@@ -368,7 +373,7 @@ const styles = StyleSheet.create({
 
   pickSlot: { position: 'absolute', top: PICK_T, width: PICK_W },
   pickInner: {
-    height: PICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: PICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },

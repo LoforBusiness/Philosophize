@@ -21,7 +21,8 @@ import { Shapes, Outlined, ell, bar, rect, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A FIELD THAT DIES WHILE YOU WATCH — twenty-one blades falling together, the first
 // mass animation in the app — with the arithmetic laid over it at the end. The answer
@@ -274,7 +275,7 @@ const styles = StyleSheet.create({
   gain: { position: 'absolute', ...GAIN },
   cost: { position: 'absolute', ...COST },
   box: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   boxKick: {

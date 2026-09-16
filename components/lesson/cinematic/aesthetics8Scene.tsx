@@ -13,6 +13,7 @@ import {
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
+  pickAt,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -22,7 +23,8 @@ import Target, { useAnswerSpent } from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A gallery wall. Stage right hangs a big framed CANVAS on a picture wire; stage
 // left, a RACK holding two pairs of glasses — square lenses for shapes, round
@@ -102,10 +104,20 @@ const X = BEATS.map((b) => b.x ?? VIEW_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics8'));
 const DIR = dirsFrom(X, 1);
 
+// R7c — THE SORT'S BINS ARE THE CANVAS'S OWN READINGS, so the chip sets the canvas.
+// In the author's bin order, each reading is what that answer claims:
+//   formalism alone     → 1  the geometric FORM rendering
+//   expression alone    → 2  the loose FEELING rendering (the beat's own picture, where the
+//                            chip rests, so nothing moves until the reader does)
+//   different questions → 3  both at once, which is also what answering this beat shows
+const MODE_AT = [1, 2, 3];
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
+
 const M0 = BEATS[0].mode ?? 0;
 const L0 = BEATS[0].lens ?? 0;
 
-export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(1);
   const cur = BEATS[i];
@@ -127,6 +139,9 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick, gaz
   const op1 = useSharedValue(M0 === 1 ? 1 : 0);   // form
   const op2 = useSharedValue(M0 === 2 ? 1 : 0);   // feeling
   const op3 = useSharedValue(M0 === 3 ? 1 : 0);   // both at once
+  // Who sets the canvas: 0 the chip, 1 the beat's own crossfade. Eased both ways, so
+  // the hand-over can never cut, and it goes back to the beat as the answer lands.
+  const hand = useSharedValue(1);
   const rackF = useSharedValue(L0 === 1 ? GHOST_ON_RACK : 1);
   const rackL = useSharedValue(L0 === 2 ? GHOST_ON_RACK : 1);
 
@@ -137,6 +152,20 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick, gaz
     op2.value = withTiming(mode === 2 ? 1 : 0, cfg);
     op3.value = withTiming(mode === 3 ? 1 : 0, cfg);
   }, [mode]);
+
+  useEffect(() => {
+    hand.value = withTiming(reacting && !answered ? 0 : 1, { duration: 520, easing: Easing.inOut(Easing.quad) });
+  }, [reacting, answered]);
+
+  // The four renderings' weights: the beat's crossfade, or the chip's reading.
+  const W = useDerivedValue(() => {
+    const m = pickAt(MODE_AT, pickPos.value);
+    const h = hand.value;
+    const r1 = Math.max(0, 1 - Math.abs(m - 1));
+    const r2 = Math.max(0, 1 - Math.abs(m - 2));
+    const r3 = Math.max(0, 1 - Math.abs(m - 3));
+    return [op0.value * h, op1.value * h + r1 * (1 - h), op2.value * h + r2 * (1 - h), op3.value * h + r3 * (1 - h)];
+  });
 
   // A pair that is off the rack fades down to a ghost, so you can see what is in
   // hand without ever drawing glasses onto the figure's head.
@@ -167,24 +196,24 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick, gaz
 
   // Each rendering breathes very slightly as it arrives, so the swap reads as the
   // painting resolving rather than a light switch.
-  const artPlain = useAnimatedStyle(() => ({ opacity: op0.value }));
+  const artPlain = useAnimatedStyle(() => ({ opacity: W.value[0] }));
   const artForm = useAnimatedStyle(() => {
-    const o = op1.value + op3.value * 0.85;
+    const o = W.value[1] + W.value[3] * 0.85;
     return { opacity: o, transform: [{ scale: 0.96 + 0.04 * Math.min(1, o) }] };
   });
   const artFeel = useAnimatedStyle(() => {
-    const o = op2.value + op3.value * 0.85;
+    const o = W.value[2] + W.value[3] * 0.85;
     return { opacity: o, transform: [{ scale: 0.96 + 0.04 * Math.min(1, o) }] };
   });
-  const cap0 = useAnimatedStyle(() => ({ opacity: op0.value }));
-  const cap1 = useAnimatedStyle(() => ({ opacity: op1.value }));
-  const cap2 = useAnimatedStyle(() => ({ opacity: op2.value }));
-  const cap3 = useAnimatedStyle(() => ({ opacity: op3.value }));
+  const cap0 = useAnimatedStyle(() => ({ opacity: W.value[0] }));
+  const cap1 = useAnimatedStyle(() => ({ opacity: W.value[1] }));
+  const cap2 = useAnimatedStyle(() => ({ opacity: W.value[2] }));
+  const cap3 = useAnimatedStyle(() => ({ opacity: W.value[3] }));
   const specA = useAnimatedStyle(() => ({ opacity: rackF.value }));
   const specB = useAnimatedStyle(() => ({ opacity: rackL.value }));
   // The diagram node for whichever reading is live fills INK on the same crossfade.
-  const nodeFormOn = useAnimatedStyle(() => ({ opacity: Math.min(1, op1.value + op3.value) }));
-  const nodeFeelOn = useAnimatedStyle(() => ({ opacity: Math.min(1, op2.value + op3.value) }));
+  const nodeFormOn = useAnimatedStyle(() => ({ opacity: Math.min(1, W.value[1] + W.value[3]) }));
+  const nodeFeelOn = useAnimatedStyle(() => ({ opacity: Math.min(1, W.value[2] + W.value[3]) }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -334,7 +363,7 @@ const styles = StyleSheet.create({
   // ── the branching diagram ───────────────────────────────────────────────────
   nodeA: {
     position: 'absolute', left: NODE_A_L, top: NODE_A_T, width: NODE_A_W, height: 28,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   nodeAText: {
@@ -351,7 +380,7 @@ const styles = StyleSheet.create({
   },
   node: {
     position: 'absolute', top: NODE_T, width: NODE_W, height: NODE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   nodeOn: { backgroundColor: INK, borderColor: INK },
@@ -440,7 +469,7 @@ const styles = StyleSheet.create({
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: STONE,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, gap: 12,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },

@@ -16,14 +16,34 @@ import type { SceneApi } from './CinematicPlayer';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE WAR OF ALL AGAINST ALL, AND THE SOVEREIGN THEY RAISE.
 //
-// Four citizens brawl on the ground line. When the covenant is made, a pedestal
-// grows out of the ground beneath a fifth figure — crowned, sword aloft — and the
-// fighting settles into a calm stand.
+// Four neighbours stand on the ground line. As the narration strips away law and
+// ruler they square up, then brawl — the state of nature arriving one tap at a
+// time (`nature`). When the covenant is made, a pedestal grows out of the ground
+// beneath a fifth figure — crowned, sword aloft — and the fighting settles into a
+// calm stand. After it, an unsigned CONTRACT (no one ever signed one) and the
+// subjects bowing to the sovereign they authorised.
+//
+// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
+// This is the first lesson of the branch, and its first seven taps used to hold one
+// frame: the brawl, the headline, the ledger and both meters were all on screen
+// before a word about the state of nature was said. They now arrive as they are
+// named — the flow on "the right to rule", the squaring-up on "imagine life
+// without any law", the ledger and the fear on "solitary, poor, nasty", the
+// headline on "war of every man against every man", and the covenant's arrow on
+// "everyone authorises one sovereign" (`reveal`).
+//
+// ── AND THE BRAWL NO LONGER FREEZES AFTER THE FIRST TAP ─────────────────────
+// All four citizens shared ONE `useHeld`, and the stance was
+// `mixStance(carryFrom(held, n, melee), stand, auth)`: `carryFrom` returns the pose
+// captured at the beat change and holds it for the whole beat, so from the second
+// tap on the four stood frozen in the LAST citizen's pose. Each citizen now has its
+// own held value, and blends from it into its live stance over the transition.
 //
 // Four pieces of information design carry Hobbes's argument above the action:
 //   · the headline WAR OF ALL AGAINST ALL, struck through as authority arrives;
@@ -80,6 +100,10 @@ const MTR_W = 24;
 const SPARK_X = [127, 277];
 
 const AUTH = BEATS.map((b) => b.auth ?? 0);
+const NATURE = BEATS.map((b) => b.nature ?? 0);
+const REVEAL = BEATS.map((b) => b.reveal ?? 0);
+const PAPER_ON = BEATS.map((b) => b.paper ?? 0);
+const BOW = BEATS.map((b) => b.bow ?? 0);
 const Q1 = BEATS.map((b) => (b.weigh === 'q1' ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
@@ -106,6 +130,21 @@ function melee(t: number, k: number): Stance {
   const u = (local / period) % 1;
   return boxMove(codes[idx], t, u, k + 1);
 }
+/** A citizen at peace: breathing, weight shifting, each on their own phase; bowing on cue. */
+function calm(t: number, k: number, bow: number): Stance {
+  'worklet';
+  const s = stand(t + k * 1.7);
+  const shift = Math.sin(t * (0.55 + k * 0.08) + k * 2.1);
+  return {
+    ...s,
+    tilt: s.tilt + shift * 0.04 - bow * 0.16,
+    neck: s.neck + shift * 0.05 + bow * 0.32,
+    footL: { x: s.footL.x - shift * 1.8, y: s.footL.y },
+    footR: { x: s.footR.x - shift * 1.8, y: s.footR.y },
+    fistL: { x: -13 - shift * 1.2, y: 4 + shift * 1.5 + bow * 2 },
+    fistR: { x: 13 - shift * 1.2, y: 4 - shift * 1.5 + bow * 2 },
+  };
+}
 function sovereignPose(t: number): Stance {
   'worklet';
   const s = stand(t);
@@ -114,8 +153,11 @@ function sovereignPose(t: number): Stance {
 
 export default function PoliticalScene({ clock, bt, bi, qv, dragPos, i }: SceneApi) {
   const reacting = REACT[i] === 1;
-  const heldS = useHeld();
-  const cv = useCarry(1);
+  const held0 = useHeld();
+  const held1 = useHeld();
+  const held2 = useHeld();
+  const held3 = useHeld();
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -128,11 +170,19 @@ export default function PoliticalScene({ clock, bt, bi, qv, dragPos, i }: SceneA
     // right to resist there is, so it is the same quantity read from the other end.
     const auth = Q1[n] === 1 ? ease01(q) : carry(cv, 0, n, AUTH[p], reacting ? 1 - dragPos.value : AUTH[n], tr);
 
-    const cit = (k: number): Bundle => {
+    // How hard they fight: the state of nature, less whatever the sovereign settles.
+    const nature = carry(cv, 1, n, NATURE[p], NATURE[n], tr);
+    const fight = nature * (1 - auth);
+    const reveal = carry(cv, 2, n, REVEAL[p], REVEAL[n], tr);
+    const paper = carry(cv, 3, n, PAPER_ON[p], PAPER_ON[n], tr);
+    const bow = carry(cv, 4, n, BOW[p], BOW[n], tr);
+
+    const cit = (k: number, held: typeof held0): Bundle => {
       'worklet';
       const dir = CIT_DIR[k];
-      const s = keepHeld(heldS, mixStance(carryFrom(heldS, n,melee(t, k)), stand(t), auth));
-      const x = CIT_X[k] + s.adv * dir * (1 - auth);   // lunges only in the brawl
+      const live = mixStance(melee(t, k), calm(t, k, bow), 1 - fight);
+      const s = keepHeld(held, mixStance(carryFrom(held, n, live), live, tr));
+      const x = CIT_X[k] + (s.adv ?? 0) * dir * fight;   // lunges only in the brawl
       return pose(s, x, GROUND, CIT_K, dir, 1);
     };
 
@@ -140,9 +190,9 @@ export default function PoliticalScene({ clock, bt, bi, qv, dragPos, i }: SceneA
     // on it — the old version floated him in mid-air on the way up.
     const sovGY = GROUND - PED * auth;
     return {
-      c0: cit(0), c1: cit(1), c2: cit(2), c3: cit(3),
+      c0: cit(0, held0), c1: cit(1, held1), c2: cit(2, held2), c3: cit(3, held3),
       sov: reactPose(sovereignPose(t), SOV_X, sovGY, K_FIG, -1, auth),
-      auth, t,
+      auth, fight, reveal, paper, t,
     };
   });
 
@@ -176,6 +226,7 @@ export default function PoliticalScene({ clock, bt, bi, qv, dragPos, i }: SceneA
       <Flow S={SCENE} />
       <Meter S={SCENE} side="left" label="FEAR" invert />
       <Meter S={SCENE} side="right" label="PEACE" />
+      <Contract S={SCENE} />
       {SPARK_X.map((x) => <Spark key={x} S={SCENE} x={x} />)}
 
       <View style={styles.ground} pointerEvents="none" />
@@ -208,12 +259,16 @@ export default function PoliticalScene({ clock, bt, bi, qv, dragPos, i }: SceneA
 
 function Headline({ S }: { S: SharedValue<any> }) {
   const strike = useAnimatedStyle(() => ({ transform: [{ scaleX: S.value.auth }] }));
+  const shown = useAnimatedStyle(() => {
+    const on = clamp01(S.value.reveal - 2);
+    return { opacity: on, transform: [{ translateY: (1 - on) * -6 }] };
+  });
   return (
     <View style={styles.headWrap} pointerEvents="none">
-      <View>
+      <Animated.View style={shown}>
         <Text style={styles.headText}>WAR OF ALL AGAINST ALL</Text>
         <Animated.View style={[styles.strike, strike]} />
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -226,7 +281,7 @@ function Headline({ S }: { S: SharedValue<any> }) {
 // strip is never blank and never doubled.
 
 function Ledger({ S }: { S: SharedValue<any> }) {
-  const war = useAnimatedStyle(() => ({ opacity: clamp01((0.5 - S.value.auth) * 6 + 0.5) }));
+  const war = useAnimatedStyle(() => ({ opacity: clamp01((0.5 - S.value.auth) * 6 + 0.5) * clamp01(S.value.reveal - 1) }));
   const civil = useAnimatedStyle(() => ({ opacity: clamp01((S.value.auth - 0.5) * 6 + 0.5) }));
   return (
     <View style={styles.ledger} pointerEvents="none">
@@ -267,9 +322,15 @@ function FlowBox({ S, x, label, fixed }: { S: SharedValue<any>; x: number; label
   );
 }
 
-function FlowArrow({ S, x }: { S: SharedValue<any>; x: number }) {
-  const on = useAnimatedStyle(() => ({ opacity: S.value.auth }));
-  const off = useAnimatedStyle(() => ({ opacity: 1 - S.value.auth }));
+function FlowArrow({ S, x, covenant }: { S: SharedValue<any>; x: number; covenant?: boolean }) {
+  // The first arrow is the covenant itself — the multitude authorising — so it inks
+  // as the narration makes it, before the sovereign it points at has risen.
+  const on = useAnimatedStyle(() => ({
+    opacity: covenant ? Math.max(S.value.auth, clamp01(S.value.reveal - 3)) : S.value.auth,
+  }));
+  const off = useAnimatedStyle(() => ({
+    opacity: 1 - (covenant ? Math.max(S.value.auth, clamp01(S.value.reveal - 3)) : S.value.auth),
+  }));
   return (
     <View style={[styles.arrowWrap, { left: x }]} pointerEvents="none">
       <Animated.Text style={[styles.arrow, off]}>→</Animated.Text>
@@ -279,14 +340,15 @@ function FlowArrow({ S, x }: { S: SharedValue<any>; x: number }) {
 }
 
 function Flow({ S }: { S: SharedValue<any> }) {
+  const shown = useAnimatedStyle(() => ({ opacity: clamp01(S.value.reveal) }));
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+    <Animated.View style={[StyleSheet.absoluteFill, shown]} pointerEvents="none">
       <FlowBox S={S} x={FLOW_X[0]} label={FLOW_LABEL[0]} fixed />
-      <FlowArrow S={S} x={ARROW_X[0]} />
+      <FlowArrow S={S} x={ARROW_X[0]} covenant />
       <FlowBox S={S} x={FLOW_X[1]} label={FLOW_LABEL[1]} />
       <FlowArrow S={S} x={ARROW_X[1]} />
       <FlowBox S={S} x={FLOW_X[2]} label={FLOW_LABEL[2]} />
-    </View>
+    </Animated.View>
   );
 }
 
@@ -295,10 +357,13 @@ function Flow({ S }: { S: SharedValue<any> }) {
 function Meter({
   S, side, label, invert,
 }: { S: SharedValue<any>; side: 'left' | 'right'; label: string; invert?: boolean }) {
-  const fill = useAnimatedStyle(() => ({ transform: [{ scaleY: invert ? 1 - S.value.auth : S.value.auth }] }));
+  // FEAR is the fight actually going on; PEACE is the sovereign. Both gauges arrive
+  // with the ledger, when the narration first says what life without a power is.
+  const fill = useAnimatedStyle(() => ({ transform: [{ scaleY: invert ? S.value.fight : S.value.auth }] }));
+  const shown = useAnimatedStyle(() => ({ opacity: clamp01(S.value.reveal - 1) }));
   const x = side === 'left' ? 20 : STAGE_W - 20 - MTR_W;
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+    <Animated.View style={[StyleSheet.absoluteFill, shown]} pointerEvents="none">
       <Text style={[styles.meterLabel, { left: x - 12, width: MTR_W + 24 }]}>{label}</Text>
       <View style={[styles.meterTrack, { left: x }]}>
         <Animated.View style={[styles.meterFill, fill]} />
@@ -308,7 +373,34 @@ function Meter({
         <View style={[styles.meterTick, { top: MTR_H * 0.5 }]} />
         <View style={[styles.meterTick, { top: MTR_H * 0.75 }]} />
       </View>
-    </View>
+    </Animated.View>
+  );
+}
+
+// ── the contract nobody signed ───────────────────────────────────────────────
+// "No one ever signed such a contract, and no one needs to." A sheet with a title
+// and two empty signature lines, each with the mark a hand would sign beside.
+
+function Contract({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({
+    opacity: S.value.paper,
+    transform: [
+      { translateY: (1 - S.value.paper) * -8 },
+      { rotate: `${-3 + Math.sin(S.value.t * 0.6) * 0.8}deg` },
+    ],
+  }));
+  return (
+    <Animated.View style={[styles.contract, st]} pointerEvents="none">
+      <Text style={styles.contractTitle}>CONTRACT</Text>
+      <View style={styles.signRow}>
+        <Text style={styles.signMark}>×</Text>
+        <View style={styles.signLine} />
+      </View>
+      <View style={styles.signRow}>
+        <Text style={styles.signMark}>×</Text>
+        <View style={styles.signLine} />
+      </View>
+    </Animated.View>
   );
 }
 
@@ -317,7 +409,7 @@ function Meter({
 function Spark({ S, x }: { S: SharedValue<any>; x: number }) {
   const st = useAnimatedStyle(() => {
     const blink = Math.max(0, Math.sin(S.value.t * 4.6 + x));
-    return { opacity: blink * (1 - S.value.auth) * 0.85, transform: [{ scale: 0.7 + blink * 0.3 }] };
+    return { opacity: blink * S.value.fight * 0.85, transform: [{ scale: 0.7 + blink * 0.3 }] };
   });
   return (
     <Animated.View style={[styles.sparkWrap, { left: x - 11 }, st]} pointerEvents="none">
@@ -363,11 +455,11 @@ const styles = StyleSheet.create({
 
   flowBox: { position: 'absolute', top: FLOW_T, width: FLOW_W, height: FLOW_H },
   flowFixed: {
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   flowOff: {
-    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE,
+    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   flowOn: {
@@ -396,7 +488,7 @@ const styles = StyleSheet.create({
   },
   meterTrack: {
     position: 'absolute', top: MTR_T, width: MTR_W, height: MTR_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, overflow: 'hidden',
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   meterFill: {
     position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
@@ -407,6 +499,18 @@ const styles = StyleSheet.create({
   sparkWrap: { position: 'absolute', top: 353, width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
   sparkBar: { position: 'absolute', width: 2.5, height: 22, backgroundColor: INK, borderRadius: 1 },
 
+  // Right of the sovereign's crown and sword, left of the PEACE gauge's label (344).
+  contract: {
+    position: 'absolute', left: 266, top: 318, width: 72, height: 40,
+    backgroundColor: PAPER, borderWidth: 2, borderColor: INK, borderRadius: 2,
+    alignItems: 'center', paddingTop: 4, transformOrigin: '50% 0%',
+  },
+  contractTitle: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.8, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+  },
+  signRow: { flexDirection: 'row', alignItems: 'flex-end', width: 56, height: 11, marginTop: 1 },
+  signMark: { fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 10, color: INK, includeFontPadding: false, width: 9 },
+  signLine: { flex: 1, height: 1.5, backgroundColor: SOFT, marginBottom: 2 },
   rider: { position: 'absolute', left: 0, top: 0 },
   swordBlade: { position: 'absolute', left: -2, top: -46, width: 4, height: 46, backgroundColor: INK },
   swordGuard: { position: 'absolute', left: -10, top: -4, width: 20, height: 3.5, backgroundColor: INK, borderRadius: 2 },

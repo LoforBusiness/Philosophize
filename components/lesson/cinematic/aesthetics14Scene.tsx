@@ -17,7 +17,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = stageTone('aesthetics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ONE CASK AND THREE VERDICTS, and the cask empties (H64). The verdict cards are
 // the Q1 targets, so the thing tapped is the thing the whole lesson is about (E33).
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
   cask: {
     position: 'absolute', left: CASK_L, top: CASK_T, width: CASK_W, height: CASK_H,
     borderWidth: CASK_WALL, borderColor: INK, borderRadius: 12,
-    backgroundColor: STONE, overflow: 'hidden',
+    backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   wine: {
     position: 'absolute', left: 0, right: 0, bottom: 0, top: IN_T - CASK_T,
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
 
   card: { position: 'absolute', left: BOARD_L, width: BOARD_W, height: CARD_H },
   cardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardText: {

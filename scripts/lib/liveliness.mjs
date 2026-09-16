@@ -332,6 +332,20 @@ export const LIVING_RUN = {
   44: hold(63),   // hands behind back  → hands behind the back
   45: hold(60),   // double take        → listening (what he does AFTER the snap)
   46: hold(74),   // slump              → slouched on one hip
+  // ── THE WORKING SHELF (moves 169–179). A prop pose may only take a twin that
+  // keeps its working hand where the pose put it, which none of the first two
+  // shelves do; these were written for exactly that, one per pose.
+  6: hold(175),   // point up, settled  → a finger still raised
+  20: hold(179),  // hold up            → still holding it up
+  24: hold(176),  // reached up high    → looking up at what he reached
+  26: hold(177),  // stamp              → stamp in hand, ready
+  31: hold(174),  // receive, cupped    → keeping it in cupped hands
+  36: hold(170),  // sign on a surface  → signing it, low
+  37: hold(173),  // the catch          → holding it close
+  40: hold(169),  // write on a board   → writing, line after line
+  41: hold(171),  // tap high on board  → tapping the point
+  42: hold(172),  // carry a load       → carrying the load, the weight shifting
+  43: hold(178),  // set it down        → crouched by it
 };
 
 // ── A BEAT WHERE NOTHING ELSE MOVES ─────────────────────────────────────────
@@ -404,6 +418,27 @@ const STILL_TWIN = {
   44: hold(63),   // hands behind back  → hands behind the back
   45: hold(60),   // double take        → listening
   46: hold(74),   // slump              → slouched on one hip
+  // ── THE WORKING SHELF (moves 169–179). A prop pose may only take a twin that
+  // keeps its working hand where the pose put it, which none of the first two
+  // shelves do; these were written for exactly that, one per pose.
+  6: hold(175),   // point up, settled  → a finger still raised
+  20: hold(179),  // hold up            → still holding it up
+  24: hold(176),  // reached up high    → looking up at what he reached
+  26: hold(177),  // stamp              → stamp in hand, ready
+  31: hold(174),  // receive, cupped    → keeping it in cupped hands
+  36: hold(170),  // sign on a surface  → signing it, low
+  37: hold(173),  // the catch          → holding it close
+  40: hold(169),  // write on a board   → writing, line after line
+  41: hold(171),  // tap high on board  → tapping the point
+  42: hold(172),  // carry a load       → carrying the load, the weight shifting
+  43: hold(178),  // set it down        → crouched by it
+  18: hold(180),  // cower              → cowering, still shaking
+  27: hold(182),  // grip the lever     → gripping the lever
+  49: hold(181),  // kneel beside       → kneeling beside them, still there
+  // A PLAYED action repeated on the next beat shows the pose it ENDS in, held. Both
+  // of these end on an open stand, so the living stand is their honest twin.
+  318: hold(161), // startle, done      → waiting, open, watching
+  379: hold(59),  // the idea, arrived  → weight shift
   47: hold(168),  // frame-it-up        → weighing it, endlessly; two palms
 };
 
@@ -555,12 +590,21 @@ export const RUN_VARIANTS = {
 export const CLOCK_ACTS = new Set([
   ...Array.from({ length: 20 }, (_, i) => 59 + i),    // the first living shelf
   ...Array.from({ length: 12 }, (_, i) => 157 + i),   // the second
+  ...Array.from({ length: 14 }, (_, i) => 169 + i),   // the working shelf — hands on a prop
 ]);
 
 /** Codes that may hold a run: a living hold, or a played act that ignores `u`. */
 export function holdsARun(code) {
+  // The posture and dance shelf, 29–55, ignores `u` as well and loops on the clock
+  // (check-moves measures it: "an act that ignores u returns a stance that does not
+  // mention it"), so held or played it never restarts per piece and never stands still.
+  const act = code >= 300 ? code - 299 : code >= 100 ? code - 99 : -1;
+  if (act >= 29 && act <= 55) return true;
   if (code >= 300) return CLOCK_ACTS.has(code - 299);
-  if (code >= 100 && code < 200) return CLOCK_ACTS.has(code - 99);
+  // The HELD band is 100–299 (moves.emoteAny: `actStance(code - 99)`), not 100–199.
+  // The second living shelf, acts 157–168, is held as 256–267, and a `< 200` bound
+  // counted every one of them as a frozen pose.
+  if (code >= 100) return CLOCK_ACTS.has(code - 99);
   return false;
 }
 

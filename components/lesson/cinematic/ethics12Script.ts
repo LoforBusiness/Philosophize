@@ -34,13 +34,13 @@ export const BEATS: Ethics12Beat[] = [
     dur: 4.8,
   },
   {
-    p: 26, x: 124, n: 3, word: 0.55,
+    p: 276, x: 124, n: 3, word: 0.55,
     text: 'Kant never asks what the act costs you. He asks whether your rule could be a law that everyone follows.',
     cite: 'The test',
     dur: 3.1,
   },
   {
-    p: 26, x: 124, n: 3, word: 0.55,
+    p: 276, x: 124, n: 3, word: 0.55,
     text: 'So suppose everyone adopted the maxim of false promising at once.',
     dur: 1.8,
   },

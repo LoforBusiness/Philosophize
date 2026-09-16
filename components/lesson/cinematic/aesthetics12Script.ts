@@ -60,13 +60,13 @@ export const BEATS: Aes12Beat[] = [
     dur: 3.8,
   },
   {
-    p: 26, r: 45, rx: 224, ticks: 5, box: 1,
+    p: 276, r: 45, rx: 224, ticks: 5, box: 1,
     text: 'The poet now insists that the last line was meant as a joke. Yet two more readers examine the poem and reach the same reading.',
     cite: 'The author’s claim',
     dur: 3.5,
   },
   {
-    p: 26, r: 45, rx: 224, ticks: 5, box: 1,
+    p: 276, r: 45, rx: 224, ticks: 5, box: 1,
     text: 'Wimsatt and Beardsley called appeals like this the intentional fallacy. It treats the author’s intention as the standard of a poem’s meaning.',
     dur: 1.8,
   },

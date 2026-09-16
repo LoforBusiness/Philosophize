@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A COUNT, THE LAW IT MADE, AND A GAUGE OF HOW FAR THAT LAW REACHES.
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
   },
   barAgainst: {
     position: 'absolute', left: BAR_X + BAR_W * FOR, top: BAR_Y, width: BAR_W * (1 - FOR), height: BAR_H,
-    borderTopRightRadius: 3, borderBottomRightRadius: 3, borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderTopRightRadius: 3, borderBottomRightRadius: 3, borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   forText: {
     position: 'absolute', left: BAR_X, top: BAR_Y + 9, width: BAR_W * FOR, textAlign: 'center',
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
   link: { position: 'absolute', left: 261, top: BAR_Y + BAR_H, width: 2, height: LAW_Y - BAR_Y - BAR_H, backgroundColor: INK },
   law: {
     position: 'absolute', left: LAW_X, top: LAW_Y, width: LAW_W, height: LAW_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   lawText: {
     position: 'absolute', left: LAW_X, top: LAW_Y + 11, width: LAW_W, textAlign: 'center',

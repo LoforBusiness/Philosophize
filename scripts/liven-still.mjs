@@ -37,7 +37,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { STILL_TWIN, holdsARun } from './lib/liveliness.mjs';
-import { poseTrack } from './lib/posetrack.mjs';
+import { poseTrack, poseTracks } from './lib/posetrack.mjs';
 
 const DIR = 'components/lesson/cinematic';
 const WRITE = process.argv.includes('--write');
@@ -69,12 +69,16 @@ for (const file of fs.readdirSync(DIR).filter((f) => f.endsWith('Script.ts'))) {
   const scene = [...keys].filter((k) => !PROSE.has(k) && k !== 'x');
 
   // WHICH FIELD IS THE POSE — followed out of the scene, never assumed to be `p`.
-  // A scene posing two figures returns null and is left alone: which of the two is
-  // the lead is a judgement, and guessing it dresses the wrong man.
+  //
+  // A SCENE THAT POSES TWO FIGURES GETS BOTH OF THEM ALIVE. Which of the two is the
+  // lead is a judgement, and guessing it dresses the wrong man — so this never
+  // guesses: on a still beat each figure takes its own pose's living twin, and two
+  // people standing in conversation both keep breathing. That reached the 22
+  // two-figure lessons this pass used to skip whole.
   const stem = file.replace('Script.ts', '');
-  const track = poseTrack(DIR, stem);
-  if (!track) { noTrack += 1; continue; }
-  const POSE = track.field;
+  const single = poseTrack(DIR, stem);
+  const tracks = single ? [single] : poseTracks(DIR, stem);
+  if (!tracks.length) { noTrack += 1; continue; }
 
   const swaps = [];
   for (let i = 1; i < blocks.length; i += 1) {
@@ -85,19 +89,23 @@ for (const file of fs.readdirSync(DIR).filter((f) => f.endsWith('Script.ts'))) {
     // falls back to — read off its own `?? N` rather than assumed, so a beat whose
     // scene defaults to something other than the neutral stand is handled honestly
     // instead of being given a gesture nobody wrote.
-    const declared = field(blocks[i], POSE);
-    const p = Number(declared ?? track.dflt);
-    if (holdsARun(p)) continue;                   // already alive, keeps moving through
+    const poses = tracks.map((t) => {
+      const declared = field(blocks[i], t.field);
+      return { t, declared, p: Number(declared ?? t.dflt) };
+    });
+    if (poses.some(({ p }) => holdsARun(p))) continue;   // somebody is already alive
     stillTotal += 1;
-    const twin = STILL_TWIN[p];
-    if (twin === undefined) { unmapped.set(p, (unmapped.get(p) ?? 0) + 1); continue; }
-    swaps.push([i, declared === undefined ? null : p, twin]);
+    for (const { t, declared, p } of poses) {
+      const twin = STILL_TWIN[p];
+      if (twin === undefined) { unmapped.set(p, (unmapped.get(p) ?? 0) + 1); continue; }
+      swaps.push([i, t.field, declared === undefined ? null : p, twin]);
+    }
   }
   if (!swaps.length) continue;
 
   // Rewrite in the raw text, one beat block at a time, so nothing else can move.
   const parts = src.split('\n  {\n');
-  for (const [i, from, to] of swaps) {
+  for (const [i, POSE, from, to] of swaps) {
     const idx = i + 1;
     const end = parts[idx].indexOf('\n  }');
     const head = parts[idx].slice(0, end);
@@ -121,7 +129,7 @@ const left = [...unmapped.values()].reduce((a, b) => a + b, 0);
 console.log(`\n${stillTotal} still beats — nothing on screen moves at all\n`);
 console.log(`  ${WRITE ? 'given' : 'would be given'} a living hold : ${swapped}  in ${changed.length} lessons`);
 console.log(`  left alone, no honest twin       : ${left}`);
-console.log(`  lessons skipped, two posed figures: ${noTrack}`);
+console.log(`  lessons skipped, no pose track     : ${noTrack}`);
 if (unmapped.size) {
   console.log('\n  the poses with no twin, and why they cannot have one — they work at a');
   console.log('  prop or are on the floor, so moving the hand would break A1:');

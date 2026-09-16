@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const { RULE, STONE, SHADE } = stageTone('logic');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A CARD, A BRACKET LEAVING IT AND RETURNING TO IT, AND TWO LAMPS THAT FLIP.
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
 
   card: {
     position: 'absolute', left: CARD_X, top: CARD_Y, width: CARD_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   cardText: {
     position: 'absolute', left: CARD_X, top: CARD_Y + 22, width: CARD_W, textAlign: 'center',
@@ -232,7 +233,7 @@ const styles = StyleSheet.create({
     position: 'absolute', top: LAMP_Y, width: LAMP_W, height: LAMP_H,
     borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
   },
-  lampFill: { position: 'absolute', top: LAMP_Y + 3, width: LAMP_W - 6, height: LAMP_H - 6, backgroundColor: STONE },
+  lampFill: { position: 'absolute', top: LAMP_Y + 3, width: LAMP_W - 6, height: LAMP_H - 6, backgroundColor: STONE, boxShadow: LIP },
   lampText: {
     position: 'absolute', top: LAMP_Y + 9, width: LAMP_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK, includeFontPadding: false,

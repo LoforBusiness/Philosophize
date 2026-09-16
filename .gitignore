@@ -74,3 +74,6 @@ scripts/.spread-ids.json
 
 # check-nod's scratch measurement
 scripts/.nod.json
+
+# pen-mark candidates, rewritten by every make-marks run (scripts/audit-marks.mjs reads it)
+scripts/.mark-candidates.json

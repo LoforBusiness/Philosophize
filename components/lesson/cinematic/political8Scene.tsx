@@ -23,7 +23,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // THE FENCE. Stage right, a picket fence with a goal beyond it and three onlookers
 // of very different heights peering over. Stage left, a stack of three spare crates.
@@ -429,7 +430,7 @@ const styles = StyleSheet.create({
   // ── crates ──────────────────────────────────────────────────────────────────
   crate: {
     position: 'absolute', width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
   brace: { position: 'absolute', left: 5, top: 8, width: 26, height: 1.5, backgroundColor: SOFT },
   // Centred on x = 0 so a plain translateX puts it at his hands.
@@ -465,7 +466,7 @@ const styles = StyleSheet.create({
     // this badge has inside its border, and it shipped clipped. BLIND is 39.3.
     // That is the whole of why check:fits exists (S8).
     position: 'absolute', left: 4, top: 0, width: 52, height: 16,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 8, backgroundColor: STONE,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   badgeOn: { borderColor: INK, backgroundColor: INK },
@@ -491,7 +492,7 @@ const styles = StyleSheet.create({
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   pickBar: { position: 'absolute', left: 18, bottom: 5, width: 6, backgroundColor: INK, borderRadius: 1 },

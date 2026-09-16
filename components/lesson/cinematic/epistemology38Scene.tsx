@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE ROUNDELS, EACH WITH ONE SOLID SHOT AND SIX HOLLOW NEAR MISSES.
@@ -226,7 +227,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: R_CY - R_OUT / 2, width: R_OUT, height: R_OUT },
   face: {
     position: 'absolute', left: 0, top: 0, width: R_OUT, height: R_OUT, borderRadius: R_OUT / 2,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   faceRight: { borderWidth: 3.5 },
   faceWrong: { borderColor: SOFT, borderStyle: 'dashed' },

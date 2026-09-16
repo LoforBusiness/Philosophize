@@ -19,7 +19,8 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const { RULE, STONE, SHADE } = stageTone('ethics');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A lone traveller walks through snowy Athens — a colonnade behind them, snow
 // drifting past — while the lesson's spine hangs overhead as a piece of
@@ -365,7 +366,7 @@ const styles = StyleSheet.create({
   signHit: { position: 'absolute', top: SIGN_T, width: SIGN_W },
   sign: {
     width: SIGN_W, height: SIGN_H, borderWidth: 2.5, borderColor: INK, borderRadius: 5,
-    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   signRight: { backgroundColor: INK, borderColor: INK },
   signWrong: { borderColor: SOFT },
@@ -389,7 +390,7 @@ const styles = StyleSheet.create({
   panHit: { position: 'absolute', top: PAN_T, width: PAN_W },
   pan: {
     width: PAN_W, height: PAN_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6,
-    backgroundColor: STONE, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   panRight: { backgroundColor: INK, borderColor: INK },
   panWrong: { borderColor: SOFT },

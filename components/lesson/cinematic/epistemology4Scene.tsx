@@ -9,16 +9,18 @@ import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology4Script';
 import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
+  stageAnswered,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
+import Target, { useAnswerSpent } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('epistemology');
+const { RULE, STONE, SHADE } = stageTone('epistemology');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A LABELLED FLOW DIAGRAM standing over the two arguers.
@@ -31,6 +33,21 @@ const { RULE, STONE } = stageTone('epistemology');
 // On the question beat the panels give way to four big name plates, so Q1 is answered
 // by tapping the stage. The camera is identity, so these constants ARE final stage
 // coordinates and the band can be read straight off them.
+//
+// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
+// Four taps held one frame. Each now draws what it names, in the empty row under the
+// panels (y 288…342) that Kant's box does not use until beat 10:
+//   · "this view is called empiricism" — EMPIRICISM under the left panel (x 14…100)
+//   · "is called a priori" — A PRIORI under the right one (x 300…386)
+//   · "how to double a square" — the boy's square, and on "the soul already knew
+//     these truths" the square on its diagonal and KNOWN BEFORE BIRTH (`meno`,
+//     x 106…296). Meno's figure: four cells of 24, and the square through their
+//     diagonals, which is exactly twice one cell (33.94² = 1152 = 2 × 576).
+//   · Kant's box arrives with SENSE DATA alone on "the content … comes through the
+//     senses", and completes — + MIND'S FORMS, = KNOWLEDGE, the second feeder — on
+//     "the mind orders that content through its own forms … Knowledge needs both"
+//     (`forms`). It read = EXPERIENCE; the sentence it stands under says knowledge.
+// Both figures' skulls top out at y ≈ 396, far below all of it.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const E_X = 96;
@@ -65,6 +82,16 @@ const R_CODE = BEATS.map((b) => b.r ?? 0);
 const FILL = BEATS.map((b) => b.fill ?? 0);
 const GLOW = BEATS.map((b) => b.glow ?? 0);
 const BRIDGE = BEATS.map((b) => b.bridge ?? 0);
+const SCHOOL = BEATS.map((b) => b.school ?? 0);
+const APRIORI = BEATS.map((b) => b.apriori ?? 0);
+const MENO = BEATS.map((b) => b.meno ?? 0);
+const FORMS = BEATS.map((b) => b.forms ?? 0);
+
+// Meno's figure: a 2 × 2 grid of 24-unit cells, the boy's square the top-left one.
+const MENO_L = 106;
+const MENO_T = 290;
+const CELL = 24;
+const DIAG = CELL * Math.SQRT2;              // the side of the doubled square
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
@@ -83,11 +110,17 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology4'));
 export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldE = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(7);
   const heldR = useHeld();
   const cur = BEATS[i];
   const answered = picked !== null;
-  const asking = !!cur.interact;
+  // ONLY THE QUESTION ASKED ON THE STAGE mounts its targets (E41). It was
+  // `!!cur.interact`, so on the second question — a control answered below the
+  // figure — the stage swapped its diagram for the first question's cards, and the
+  // diagram the control moves (R7c) could not be seen at all.
+  const asking = stageAnswered(cur);
+  // The instruction retires once answered: the chosen card lifts into its line.
+  const spent = useAnswerSpent(picked);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -106,6 +139,10 @@ export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick, d
       // with it, so the reader sees the claim they are settling on.
       glow: carry(cv, 1, n, GLOW[p], reacting ? dragPos.value : GLOW[n], tr),
       bridge: carry(cv, 2, n, BRIDGE[p], BRIDGE[n], tr),
+      school: carry(cv, 3, n, SCHOOL[p], SCHOOL[n], ease01((bt.value - 0.2) / 0.6)),
+      apriori: carry(cv, 4, n, APRIORI[p], APRIORI[n], ease01((bt.value - 0.9) / 0.6)),
+      meno: carry(cv, 5, n, MENO[p], MENO[n], ease01((bt.value - 0.3) / 1.0)),
+      forms: carry(cv, 6, n, FORMS[p], FORMS[n], ease01((bt.value - 0.4) / 0.8)),
       t,
     };
   });
@@ -120,6 +157,37 @@ export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick, d
     opacity: SCENE.value.bridge,
     transform: [{ translateY: (1 - SCENE.value.bridge) * -8 }],
   }));
+  // Kant's second term, its sum and the rationalist's feeder: one value, one style each.
+  const formsTerm = useAnimatedStyle(() => ({ opacity: SCENE.value.forms }));
+  const formsSum = useAnimatedStyle(() => ({
+    opacity: SCENE.value.forms,
+    transform: [{ translateY: (1 - SCENE.value.forms) * 4 }],
+  }));
+  const formsFeed = useAnimatedStyle(() => ({ opacity: SCENE.value.forms }));
+  const schoolStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.school,
+    transform: [{ translateY: (1 - SCENE.value.school) * -5 }],
+  }));
+  const aprioriStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.apriori,
+    transform: [{ translateY: (1 - SCENE.value.apriori) * -5 }],
+  }));
+  // Meno's figure clears the row for Kant's box, which arrives in the same place.
+  const menoCell = useAnimatedStyle(() => {
+    const u = clamp01(SCENE.value.meno * 2);
+    return { opacity: u * (1 - SCENE.value.bridge), transform: [{ scale: 0.8 + 0.2 * u }] };
+  });
+  const menoGrid = useAnimatedStyle(() => ({
+    opacity: clamp01(SCENE.value.meno * 2 - 1) * (1 - SCENE.value.bridge),
+  }));
+  const menoDiag = useAnimatedStyle(() => {
+    const u = clamp01(SCENE.value.meno * 2 - 1);
+    return { opacity: u * (1 - SCENE.value.bridge), transform: [{ rotate: '45deg' }, { scale: 0.6 + 0.4 * u }] };
+  });
+  const menoCap = useAnimatedStyle(() => {
+    const u = clamp01(SCENE.value.meno * 3 - 2);
+    return { opacity: u * (1 - SCENE.value.bridge), transform: [{ translateX: (1 - u) * -8 }] };
+  });
 
   return (
     <Animated.View style={styles.scene}>
@@ -148,14 +216,30 @@ export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick, d
             {AXIOMS.map((a, k) => <Axiom key={a} S={SCENE} text={a} k={k} />)}
           </View>
 
+          {/* the two schools, named under their panels */}
+          <Animated.Text style={[styles.schoolLbl, { left: PAN_L }, schoolStyle]} numberOfLines={1}>EMPIRICISM</Animated.Text>
+          <Animated.Text style={[styles.schoolLbl, { left: PAN_R + PAN_W - 86 }, aprioriStyle]} numberOfLines={1}>A PRIORI</Animated.Text>
+
+          {/* MENO — the boy's square, then the square on its diagonal */}
+          <Animated.View style={[styles.menoFrame, menoGrid]}>
+            <View style={styles.menoMidV} />
+            <View style={styles.menoMidH} />
+          </Animated.View>
+          <Animated.View style={[styles.menoCell, menoCell]} />
+          <Animated.View style={[styles.menoDiag, menoDiag]} />
+          <Animated.Text style={[styles.menoCap, menoCap]} numberOfLines={1}>KNOWN BEFORE BIRTH</Animated.Text>
+
           {/* KANT — both feed one box */}
           <Animated.View style={[StyleSheet.absoluteFill, kantStyle]}>
             <View style={[styles.feeder, { left: 120 }]} />
-            <View style={[styles.feeder, { left: 280 }]} />
+            <Animated.View style={[styles.feeder, { left: 280 }, formsFeed]} />
             <View style={styles.kant}>
               <Text style={styles.kantTag}>KANT’S TRUCE</Text>
-              <Text style={styles.kantA}>SENSE DATA  +  MIND’S FORMS</Text>
-              <Text style={styles.kantB}>=  EXPERIENCE</Text>
+              <View style={styles.kantRow}>
+                <Text style={styles.kantA}>SENSE DATA</Text>
+                <Animated.Text style={[styles.kantA, formsTerm]}>  +  MIND’S FORMS</Animated.Text>
+              </View>
+              <Animated.Text style={[styles.kantB, formsSum]}>=  KNOWLEDGE</Animated.Text>
             </View>
           </Animated.View>
         </View>
@@ -169,7 +253,7 @@ export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick, d
       {/* ── Q1 answered in the scene: tap the blank-slate thinker ─────────── */}
       {asking && (
         <>
-          <Text style={styles.askLabel}>TAP THE BLANK-SLATE THINKER</Text>
+          <Animated.Text style={[styles.askLabel, spent]}>TAP THE BLANK-SLATE THINKER</Animated.Text>
           {PLATES.map((pl) => (
             <Target id={pl.id} correct={pl.correct} picked={picked} onPick={onPick}
               key={pl.id} style={[styles.plateHit, { left: pl.x, top: pl.y }]} disabled={answered}>
@@ -276,7 +360,7 @@ const styles = StyleSheet.create({
   },
   mind: {
     position: 'absolute', width: PAN_W - 24, height: 52,
-    borderWidth: 2, borderColor: INK, borderRadius: 26, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 26, backgroundColor: STONE, boxShadow: LIP,
   },
   axRow: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
   // 3 / 17 / 31 with a 14-unit line: the last axiom ends at 45, inside the pill's
@@ -290,11 +374,42 @@ const styles = StyleSheet.create({
   // 51 units of interior.
   kant: {
     position: 'absolute', left: 100, top: 286, width: 200, height: 56,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, alignItems: 'center',
+    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP, alignItems: 'center',
   },
   kantTag: { marginTop: 4, fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 1.6, color: INK, includeFontPadding: false },
+  // The first line is two pieces now, so the second term can arrive a beat after
+  // the first. Laid out whole from the start, so nothing reflows when it does.
+  kantRow: { flexDirection: 'row' },
   kantA: { marginTop: 3, fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 0.4, color: INK, includeFontPadding: false },
   kantB: { marginTop: 3, fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 15, letterSpacing: 0.6, color: INK, includeFontPadding: false },
+
+  // Under the panels, outside Kant's box (100…300): 71 and 52 units of type in 86.
+  schoolLbl: {
+    position: 'absolute', top: 290, width: 86, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 1.4, color: INK,
+    includeFontPadding: false,
+  },
+  menoFrame: {
+    position: 'absolute', left: MENO_L, top: MENO_T, width: CELL * 2, height: CELL * 2,
+    borderWidth: 1.5, borderColor: SOFT,
+  },
+  // The cell boundaries sit 24 in from the frame's outer edge, 22.5 inside its border.
+  menoMidV: { position: 'absolute', left: CELL - 1.5 - 0.75, top: 0, bottom: 0, width: 1.5, backgroundColor: SOFT },
+  menoMidH: { position: 'absolute', top: CELL - 1.5 - 0.75, left: 0, right: 0, height: 1.5, backgroundColor: SOFT },
+  menoCell: {
+    position: 'absolute', left: MENO_L, top: MENO_T, width: CELL, height: CELL,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
+  },
+  menoDiag: {
+    position: 'absolute', left: MENO_L + CELL - DIAG / 2, top: MENO_T + CELL - DIAG / 2, width: DIAG, height: DIAG,
+    borderWidth: 2, borderColor: INK,
+  },
+  // Right of the figure, on the grid's middle line; 130 units of type ending at 294.
+  menoCap: {
+    position: 'absolute', left: MENO_L + CELL * 2 + 10, top: MENO_T + CELL - 6,
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 1.2, color: INK,
+    includeFontPadding: false,
+  },
 
   askLabel: {
     position: 'absolute', left: 0, right: 0, top: 198, textAlign: 'center',
@@ -303,7 +418,7 @@ const styles = StyleSheet.create({
   },
   plateHit: { position: 'absolute', width: PAN_W },
   plate: {
-    height: 44, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE,
+    height: 44, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },
@@ -316,7 +431,8 @@ const styles = StyleSheet.create({
 // the ground rule at 500 plus the figures' ankle joints, whose 7.4-unit radius reaches
 // ≈ 507. The arguers' crowns sit at y ≈ 354 even on their bounciest gesture (the shrug
 // on beat 1), so the Kant box (bottom 342) never meets them. The four name plates run
-// 220–318. 328 units instead of 560 renders everything at ~2×.
+// 220–318. The school labels (290–302) and Meno's figure (290–338) share Kant's row.
+// 328 units instead of 560 renders everything at ~2×.
 export function Epistemology4Lesson({ lesson }: { lesson: Lesson }) {
   return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology4Scene} band={[186, 514]} camera={CAM} />;
 }

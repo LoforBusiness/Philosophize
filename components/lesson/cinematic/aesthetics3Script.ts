@@ -14,7 +14,10 @@ import type { BaseBeat } from './cinematicKit';
 //
 // Prop channels the scene reads: `arc` (how much of the tragic curve is drawn),
 // `mask` (the tragic mask), `modes` (the meter's intensity), `cut` (Plato's
-// regulation of the soft modes) and `will` (Schopenhauer's ladder).
+// regulation of the soft modes) and `will` (Schopenhauer's ladder) — and four that
+// write the argument onto those charts as the narration reaches it: `why` (the
+// graph's question), `named` (KATHARSIS, still a question), `framed` (the mask as
+// an image of pain) and `early` (music arrives before reason).
 //
 // Graded questions are the two from data/.../why-humans-love-music-and-stories.ts.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -26,6 +29,10 @@ export interface Aes3Beat extends BaseBeat {
   /** The mode meter is up (0/1) — it shares the lower-left slot with the mask. */ modes?: number;
   /** Plato's regulation: the soft modes fall away (0/1). */ cut?: number;
   /** Schopenhauer's ladder — other arts copy Ideas, music copies the will (0/1). */ will?: number;
+  /** The graph asks its question — WHY SUFFER? — over the stories (0/1). */ why?: number;
+  /** The fall is named KATHARSIS, a word Aristotle never explained (0/1). */ named?: number;
+  /** The mask is framed as a picture: an accurate IMAGE OF PAIN (0/1). */ framed?: number;
+  /** The meter's caption: music arrives before reason (0/1). */ early?: number;
 }
 
 export const BEATS: Aes3Beat[] = [
@@ -39,34 +46,34 @@ export const BEATS: Aes3Beat[] = [
   {
     // Both halves alive at once: a story arc beginning to climb while the modes
     // play — "song or story", drawn rather than asserted.
-    p: 130, arc: 0.3, modes: 1,
+    p: 130, arc: 0.3, modes: 1, why: 1,
     text: 'A practice found in every culture calls for an explanation. Why would people seek out stories that make them suffer?',
     dur: 1.8,
   },
   {
-    p: 22, arc: 0.5, mask: 1,
+    p: 22, arc: 0.5, mask: 1, why: 1,
     text: 'Aristotle held that a tragedy arouses pity and fear in its audience, and then releases them.',
     cite: 'Catharsis',
     dur: 3.1,
   },
   {
-    p: 170, arc: 0.5, mask: 1,
+    p: 170, arc: 0.5, mask: 1, why: 1, named: 1,
     text: 'The effect is called katharsis, a term Aristotle never explained. Readers still disagree about what it means.',
     dur: 1.8,
   },
   {
-    p: 15, arc: 1, mask: 1,
+    p: 15, arc: 1, mask: 1, why: 1, named: 1,
     text: 'In Sophocles’ Oedipus the King, Oedipus discovers that he has killed his own father. Aristotle calls this a recognition, a change from ignorance to knowledge.',
     cite: 'Recognition',
     dur: 2.1,
   },
   {
-    p: 258, arc: 1, mask: 1,
+    p: 258, arc: 1, mask: 1, why: 1, named: 1, framed: 1,
     text: 'Aristotle also writes that people enjoy accurate images of painful things, because learning from them is a pleasure.',
     dur: 2.9,
   },
   {
-    p: 165, arc: 1, mask: 1,
+    p: 165, arc: 1, mask: 1, why: 1, named: 1, framed: 1,
     interact: {
       prompt: 'You leave a tragedy drained and yet relieved. Which of Aristotle’s concepts explains the relief?',
       cards: [
@@ -87,12 +94,12 @@ export const BEATS: Aes3Beat[] = [
     dur: 4,
   },
   {
-    p: 260, modes: 1, will: 1,
+    p: 260, modes: 1, will: 1, early: 1,
     text: 'Plato, over two thousand years earlier, argued that music shapes character before reason develops. So he thought music dangerous.',
     dur: 1.8,
   },
   {
-    p: 141, modes: 1, will: 1,
+    p: 141, modes: 1, will: 1, early: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-3-1',
       text: 'Music is not, like the other arts, a copy of the Ideas, but a copy of the will itself.',
@@ -105,7 +112,7 @@ export const BEATS: Aes3Beat[] = [
     dur: 3.4,
   },
   {
-    p: 168, modes: 1, cut: 1, will: 1,
+    p: 168, modes: 1, cut: 1, will: 1, early: 1,
     interact: {
       prompt: 'If music shapes character before reason develops, how should Plato’s ideal city treat music?',
       drag: {

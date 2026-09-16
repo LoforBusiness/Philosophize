@@ -34,6 +34,16 @@ export interface EthicsBeat extends BaseBeat {
   origins?: boolean;
   /** This beat's answer drives the scene: q1 raises the conscience, q2 parts them. */
   weigh?: 'q1' | 'q2';
+  /** The headline gains its second line: the judgement is about YOUR OWN CONDUCT. */
+  own?: boolean;
+  /** Reasons for and against drop into the balance's pans. */
+  reasons?: boolean;
+  /** The origin card's heading turns from a question to DISPUTED. */
+  disputed?: boolean;
+  /** The ledger's YOU column is lit: reason is what sets humans apart. */
+  you?: boolean;
+  /** A seedling, before the flourishing it grows into has a name. */
+  seed?: boolean;
 }
 
 export const BEATS: EthicsBeat[] = [
@@ -43,7 +53,8 @@ export const BEATS: EthicsBeat[] = [
     dur: 2.2,
   },
   {
-    hpose: 1,                                        // act — a deed is done
+    hpose: 257,                                      // thinking it over — the question has arrived (moves hold 158)
+    own: true,
     text: 'The question is whether the act was right. It’s a judgement about your own conduct.',
     dur: 1.8,
   },
@@ -60,6 +71,7 @@ export const BEATS: EthicsBeat[] = [
     dur: 2.2,
   },
   {
+    reasons: true,
     hpose: 4,
     judge: true,
     text: 'The answer is given in reasons, weighed for and against the act. No other animal is known to deliberate in this way.',
@@ -74,6 +86,7 @@ export const BEATS: EthicsBeat[] = [
     dur: 2.3,
   },
   {
+    disputed: true,
     hpose: 4,
     judge: true,
     origins: true,
@@ -87,16 +100,20 @@ export const BEATS: EthicsBeat[] = [
     dur: 1.8,
   },
   {
+    you: true,
     hpose: 2,
     text: 'Aristotle held that reason is the capacity that distinguishes human beings from other living things.',
     dur: 2.1,
   },
   {
-    hpose: 2,
+    hpose: 259,                                      // explaining, the hands never quite stop (moves hold 160)
+    you: true,
+    seed: true,
     text: 'So, for Aristotle, living well means exercising reason well, and doing so over a complete life.',
     dur: 1.8,
   },
   {
+    seed: true,
     hpose: 0,
     quote: {
       id: 'lq-ethics-ethics-1-1',
@@ -110,6 +127,7 @@ export const BEATS: EthicsBeat[] = [
     dur: 2.6,
   },
   {
+    seed: true,
     hpose: 4,
     judge: true,
     weigh: 'q1',
@@ -125,6 +143,7 @@ export const BEATS: EthicsBeat[] = [
     dur: 1.0,
   },
   {
+    seed: true,
     judge: true,
     weigh: 'q2',
     interact: {

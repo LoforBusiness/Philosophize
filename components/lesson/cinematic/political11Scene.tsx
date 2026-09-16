@@ -5,7 +5,7 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
@@ -20,7 +20,8 @@ import { TargetRing } from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // A three-notch DIAL over three empty plots of ground. Set the dial and that plot
 // builds: a tower, a small house, a ring. The plots accumulate, so by the question
@@ -90,7 +91,26 @@ const DIALV = BEATS.map((b) => b.dial ?? 0);
 const SETV = BEATS.map((b) => b.set ?? 0);
 const BUILT = BEATS.map((b) => b.built ?? 0);
 
-export default function Political11Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
+// R7c — the stage follows the seam on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+
+// THE SEAM IS THE LEFT SIDE'S SHARE (R7b), and the left side is THE READING OF
+// HUMAN NATURE — the very words on the dial. So the dial is as present as the
+// reading is doing work: ABSENT across "each chose a state, then argued back to
+// nature" (the plots stand with no reading behind them), arriving across "each
+// view shaped the other", and FULL by that zone's middle, where the reading is an
+// equal partner, through "the view of human nature determines the state". The
+// boundaries are read off the question itself, so they cannot drift from it. The
+// ramp is short on purpose: the dial carries words, and a word parked half-faded
+// is a smear (D35).
+const SPLIT = BEATS.find((b) => b.interact?.split)?.interact?.split;
+const DIAL_GONE = SPLIT?.zones[0]?.upto ?? 0.3;
+const DIAL_FULL = (DIAL_GONE + (SPLIT?.zones[1]?.upto ?? 0.66)) / 2;
+
+export default function Political11Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(2);
   const cur = BEATS[i];
@@ -126,7 +146,8 @@ export default function Political11Scene({ clock, bt, bi, i, picked, onPick, gaz
 
     return {
       fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
-      dial: carry(cv, 1, n, DIALV[p], DIALV[n], tr, dialFade ? grow : 1),
+      // R7c — on the split beat the dial rides the seam (DIAL_GONE…DIAL_FULL).
+      dial: carry(cv, 1, n, DIALV[p], reacting ? clamp01((dragPos.value - DIAL_GONE) / (DIAL_FULL - DIAL_GONE)) : DIALV[n], tr, dialFade ? grow : 1),
       ptr: lerp(from, to, ease01(bt.value / 0.62)),
       ptrOn: SETV[n] > 0 ? 1 : 0,
       grow,
@@ -309,7 +330,7 @@ const styles = StyleSheet.create({
   // ── the label plate, which is also the answer target ────────────────────────
   plate: { position: 'absolute', top: PLATE_T, width: PLOT_W },
   plateInner: {
-    height: PLATE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    height: PLATE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },

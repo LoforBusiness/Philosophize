@@ -16,9 +16,9 @@ import type { NarrationProvider } from './types';
 // ONE FILE A LESSON. EAS Update takes at most 1,000 assets in an update, and a clip a
 // line would have been 1,718 of them, so a lesson ships one MP3 with its lines laid end
 // to end (scripts/encode-narration.mjs) and one player holds it. A line plays by seeking
-// to its `at` and pausing when `at + dur` is reached. The file holds GAP_S of silence
-// after every line (scripts/lib/narration.mjs), and that is what a pause landing a
-// little late lands in, rather than the next line's first word.
+// to its `at` and pausing END_PAD_S after `at + dur`. The file holds, after every line,
+// a short synthesised release and then silence to GAP_S (scripts/lib/narration.mjs), and
+// the pause lands in that silence — after the release, before the next line's first word.
 //
 // The audio mode is the one the cues already set, stated again here because the
 // narration may start before the cues have prepared: never take audio focus, play on
@@ -30,10 +30,26 @@ const LATENCY_MS = 60;
 /** How long a line may wait for its lesson's audio to load before it is given up on. */
 const LOAD_WAIT_MS = 1500;
 /**
- * The timer that pauses a line when no status update has: this long after the line's
- * last sample is due. Well inside the 400ms of silence that follows it.
+ * WHERE A LINE IS PAUSED: this far PAST its last sample, never before it.
+ *
+ * It used to be `end − 0.05`, and that one number clipped every line in the app. Chirp
+ * trims each take to the voice — the median silence after the last sound is zero — so
+ * the 50ms it cut was the end of the last word, not silence; and on Android the
+ * reported position runs ahead of what the speaker has played, so the cut landed
+ * earlier still. A reader heard it as a sentence that "will stop abruptly or not sound
+ * right at the very end".
+ *
+ * The file holds, after every line, a RELEASE_S decay (scripts/lib/narration.mjs,
+ * 0.08s) and then silence to GAP_S (0.4s). So the pause lands after the release and a
+ * clear 0.2s before the next line's first word; check:narration holds these three
+ * numbers against each other.
  */
-const END_SLACK_MS = 120;
+const END_PAD_S = 0.2;
+/**
+ * The timer that pauses a line when no status update has: this long after END_PAD_S.
+ * In audio time it lands between the release's end and the next line.
+ */
+const END_SLACK_MS = 40;
 
 let loaded: { lessonId: string; player: AudioPlayer } | null = null;
 let current: { lessonId: string; beat: number; player: AudioPlayer; cancel?: () => void } | null = null;
@@ -119,10 +135,11 @@ function play(lessonId: string, beat: number) {
         }
       };
       const watch = player.addListener('playbackStatusUpdate', (status) => {
-        if (status.currentTime < end - 0.05) heard = true;
-        else if (heard) finish();
+        const t = status.currentTime;
+        if (t < end - 0.05) heard = true;
+        else if (heard && t >= end + END_PAD_S) finish();
       });
-      const fallback = setTimeout(finish, line.dur * 1000 + LATENCY_MS + END_SLACK_MS);
+      const fallback = setTimeout(finish, (line.dur + END_PAD_S) * 1000 + LATENCY_MS + END_SLACK_MS);
       me.cancel = finish;
     }).catch(() => {
       if (current === me) current = null;

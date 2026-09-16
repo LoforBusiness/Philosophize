@@ -10,7 +10,7 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political14Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
@@ -20,7 +20,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // THE WILT CHAMBERLAIN CASE AS THREE STAGES, and the answer targets are the stages —
 // the reader answers by pointing at a MOMENT in a process rather than at a claim
@@ -33,7 +34,8 @@ const { RULE, STONE } = stageTone('political-philosophy');
 // · THE START is fourteen equal bars 8 wide on a 14 pitch. THE RESULT is the same
 //   fourteen with thirteen cut to a stub and the last one tall — the same bars, so
 //   the row reads as the first one after the trades rather than as a new chart (A1).
-// · THE TRADES is six coins drifting right on a 40-unit wrap, running off the
+// · THE TRADES is six coins on one conveyor across the art, 190 units at an even
+//   31.7 spacing, fading in at the left and out at the right, and running off the
 //   monotonic clock so tapping through a beat never restarts them (H67).
 // · a correct pick fills its row INK and turns its bars PAPER, which is how a target
 //   this big keeps the standard answer state (H61).
@@ -51,7 +53,12 @@ const BAR_N = 14;
 const BAR_W = 8;
 const BAR_PITCH = 14;
 const COIN_N = 6;
-const COIN_WRAP = 40;
+// ONE BELT, NOT SIX LOOPS. Each coin used to wrap on its own 40-unit loop from a slot
+// 34 apart, so the last one ran 12 units past the row's right border and each one
+// snapped back 40 units in a frame, landing on its neighbour. On one shared span the
+// spacing never changes, and a coin fades in and out at the ends instead of jumping.
+const COIN_SPAN = 190;             // art rel x 82 … 280, less a coin's 8
+const COIN_FADE = 14;
 
 const FIG_X = 46;
 
@@ -73,9 +80,32 @@ const ROWS = BEATS.map((b) => b.rows ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political14'));
 
-export default function Political14Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
+// R7c — the stage follows the sort on its own graded beat, and only there.
+// Derived from the beat rather than declared as a channel so it cannot fall out
+// of step with the control it is about.
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
+
+// WHICH STAGE OF THE STORY EACH CONCLUSION IS ABOUT, one table per row that ever
+// rises, in the SORT'S OWN ORDER (never the shuffled bin order — see
+// SceneApi.pickPos):
+// stars are overpaid · equality is required · patterns stop exchange.
+//   · "star athletes are paid far too much" is about THE RESULT, whose one tall
+//     bar is the star's quarter of a million;
+//   · "keeping any pattern requires stopping free exchanges" is about THE TRADES,
+//     the free exchanges themselves.
+//   · "only equal shares are fair" would point at THE START's equal bars — but it
+//     is the middle bin, where the chip rests before the reader has moved it, so
+//     raising a row there would point before the reader did (aesthetics11 has the
+//     same constraint). It moves nothing.
+// A raised row is only ever "this is the stage that answer is about", never a
+// verdict: one right and one wrong conclusion both raise theirs.
+const TRADES_AT = [0, 0, 1];
+const RESULT_AT = [1, 0, 0];
+
+export default function Political14Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
+  const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(1);
+  const cv = useCarry(3);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -88,7 +118,14 @@ export default function Political14Scene({ clock, bt, bi, i, picked, onPick, gaz
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       rows: carry(cv, 0, n, ROWS[p], ROWS[n], grow),
-      coins: (t * 26) % COIN_WRAP,
+      coins: (t * 26) % COIN_SPAN,
+      // R7c — how far each row is raised, per stage (TRADES_AT / RESULT_AT).
+      // THE START has no table: nothing ever raises it.
+      lifts: [
+        0,
+        carry(cv, 1, n, 0, reacting ? pickAt(TRADES_AT, pickPos.value) : 0, tr),
+        carry(cv, 2, n, 0, reacting ? pickAt(RESULT_AT, pickPos.value) : 0, tr),
+      ],
     };
   });
 
@@ -122,7 +159,7 @@ function Stage({
   k, SCENE, live, answered, picked, onPick,
 }: {
   k: number;
-  SCENE: { value: { rows: number; coins: number } };
+  SCENE: { value: { rows: number; coins: number; lifts: number[] } };
   live: boolean;
   answered: boolean;
   picked: string | null;
@@ -133,7 +170,10 @@ function Stage({
 
   const wrap = useAnimatedStyle(() => {
     const a = clamp01(SCENE.value.rows - k);
-    return { opacity: a, transform: [{ translateY: (1 - a) * 8 }] };
+    // R7c — the row the reader's chip is on rises 5 and comes forward 3%: into the
+    // 12-unit gap above it, and 4 units sideways, still clear of the figure at 85.
+    const up = SCENE.value.lifts[k];
+    return { opacity: a, transform: [{ translateY: (1 - a) * 8 - 5 * up }, { scale: 1 + 0.03 * up }] };
   });
 
   return (
@@ -177,11 +217,15 @@ function Stage({
 
 /** One dollar, on its way across. */
 function Coin({ j, onInk, SCENE }: { j: number; onInk: boolean; SCENE: { value: { coins: number } } }) {
-  const st = useAnimatedStyle(() => ({
-    transform: [{ translateX: (j * COIN_WRAP / COIN_N + SCENE.value.coins) % COIN_WRAP }],
-  }));
+  const st = useAnimatedStyle(() => {
+    const x = (j * COIN_SPAN / COIN_N + SCENE.value.coins) % COIN_SPAN;
+    return {
+      opacity: Math.max(0, Math.min(1, x / COIN_FADE, (COIN_SPAN - x) / COIN_FADE)),
+      transform: [{ translateX: x }],
+    };
+  });
   return (
-    <Animated.View style={[styles.coinSlot, { left: ART_L + j * 34 }, st]} pointerEvents="none">
+    <Animated.View style={[styles.coinSlot, { left: ART_L }, st]} pointerEvents="none">
       <View style={[styles.coin, onInk && styles.coinOnInk]} />
     </Animated.View>
   );
@@ -198,7 +242,7 @@ const styles = StyleSheet.create({
 
   row: { position: 'absolute', left: ROW_L, width: ROW_W, height: ROW_H },
   rowInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
   },
   name: {
     position: 'absolute', left: 10, top: 17, width: 70,

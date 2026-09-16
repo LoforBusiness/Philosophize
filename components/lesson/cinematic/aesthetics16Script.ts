@@ -26,13 +26,13 @@ export const BEATS: Aes16Beat[] = [
     dur: 4.0,
   },
   {
-    p: 41, x: 168, canvas: 1,
+    p: 270, x: 168, canvas: 1,
     text: 'The painting was finished in 1911, and no mark on it has changed since.',
     cite: 'The work',
     dur: 2.8,
   },
   {
-    p: 41, x: 168, canvas: 1,
+    p: 270, x: 168, canvas: 1,
     text: 'Whatever happens next happens to you, not to the canvas.',
     dur: 1.8,
   },

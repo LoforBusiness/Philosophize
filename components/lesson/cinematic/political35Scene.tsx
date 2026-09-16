@@ -16,7 +16,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = stageTone('political-philosophy');
+const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWELVE CHAIRS, THREE OF THEM TAKEN, AND THE THREE MOVE.
@@ -208,7 +209,7 @@ const styles = StyleSheet.create({
   chair: { position: 'absolute', width: SEAT_W, height: 46 },
   back: {
     position: 'absolute', left: 0, top: 0, width: SEAT_W, height: BACK_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
   },
   backFill: { position: 'absolute', left: 3, top: 3, width: SEAT_W - 6, height: BACK_H - 6, borderRadius: 2, backgroundColor: INK },
   seat: { position: 'absolute', left: 0, top: BACK_H + 4, width: SEAT_W, height: 3, backgroundColor: INK },

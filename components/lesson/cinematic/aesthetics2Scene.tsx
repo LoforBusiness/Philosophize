@@ -48,7 +48,9 @@ const { RULE } = stageTone('aesthetics');
 
 const ARTIST_X = 112;
 const VIEWER_X = 292;
-const CHEST_Y = GROUND - 96;
+// The CHEST, from the rig: shoulders 440, pelvis 466, head centre 417. At GROUND − 96
+// (404) the "chest" ring sat round his hat and read as a halo; at 450 it is on his torso.
+const CHEST_Y = GROUND - 50;
 const WAVE_Y = 372;
 
 const A_CODE = BEATS.map((b) => b.a ?? 0);
@@ -56,8 +58,22 @@ const V_CODE = BEATS.map((b) => b.v ?? 0);
 const WAVE = BEATS.map((b) => (b.wave ? 1 : 0));
 const FELT = BEATS.map((b) => (b.felt ? 1 : 0));
 const CHAIN = BEATS.map((b) => b.chain ?? 0);
+const FEAR = BEATS.map((b) => b.fear ?? 0);
+const OUTLIVED = BEATS.map((b) => b.outlived ?? 0);
+
+// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
+// The chain used to fill all three panels on the beat that names "an infection",
+// one sentence before the beat that walks through them — "the artist feels …, the
+// work carries …, and the audience feels it too" — which then held a finished
+// frame. The chain now completes on that walk-through. Tolstoy's wolf story names
+// the feeling: FEAR writes into each panel, artist to work to listener, and leaves
+// again when the lesson returns to feeling in general. And on "the feeling can then
+// outlive its maker" the ARTIST's panel drains while the work's and the viewer's
+// stay full — the feeling surviving the one who had it.
 
 const PANEL_T = 206;
+const FEAR_X = 7;                               // panel-relative: over the three short bars
+const FEAR_T = PANEL_T + 26;                    // y 232…243, under the peak rule at 224
 const PANEL_H = 106;
 const PANEL_W = 108;
 const PANEL_X = [18, 146, 274];
@@ -112,7 +128,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics2'));
 export default function Aesthetics2Scene({ clock, bt, bi, pickPos, i }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldArtistS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(4);
   const heldViewerS = useHeld();
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -137,6 +153,8 @@ export default function Aesthetics2Scene({ clock, bt, bi, pickPos, i }: SceneApi
       felt: carry(cv, 0, n, FELT[p], reacting ? pickAt(POLL_FELT, pickPos.value) : FELT[n], tr),
       // A single continuous 1→3 value: panel j fills as it crosses j + 1.
       chain: carry(cv, 1, n, CHAIN[p], CHAIN[n], tr),
+      fear: carry(cv, 2, n, FEAR[p], FEAR[n], tr),
+      outlived: carry(cv, 3, n, OUTLIVED[p], OUTLIVED[n], tr),
       t,
     };
   });
@@ -162,6 +180,8 @@ export default function Aesthetics2Scene({ clock, bt, bi, pickPos, i }: SceneApi
   const eyeAns = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.chain - 2) }));
   // The peak-alignment rule appears only once all three panels carry the profile.
   const tie = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.chain - 2) }));
+  // The artist's peak marker goes with the artist's feeling.
+  const firstPeak = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.outlived }));
 
   return (
     <Animated.View style={styles.scene} pointerEvents="none">
@@ -179,7 +199,9 @@ export default function Aesthetics2Scene({ clock, bt, bi, pickPos, i }: SceneApi
       {/* the reference line: one level, three peaks — the transfer, measured */}
       <Animated.View style={[StyleSheet.absoluteFill, tie]} pointerEvents="none">
         {TIE_X.map((x) => <View key={x} style={[styles.tieDash, { left: x }]} />)}
-        {PEAK_CX.map((x) => <View key={x} style={[styles.peakDot, { left: x - 4.5 }]} />)}
+        {PEAK_CX.map((x, j) => (
+          <Animated.View key={x} style={[styles.peakDot, { left: x - 4.5 }, j === 0 ? firstPeak : null]} />
+        ))}
       </Animated.View>
 
       {/* ── the studio floor: artist, easel, viewer ───────────────────────── */}
@@ -222,12 +244,19 @@ export default function Aesthetics2Scene({ clock, bt, bi, pickPos, i }: SceneApi
  */
 function Panel({ S, j, x }: { S: SharedValue<any>; j: number; x: number }) {
   const inked = useAnimatedStyle(() => ({ opacity: clamp01(S.value.chain - j) }));
+  // The feeling named, passed along the chain: each panel's word arrives a little
+  // after the one before it, and only in a panel that already carries the profile.
+  const named = useAnimatedStyle(() => {
+    const u = clamp01((S.value.fear - j * 0.25) / 0.5) * clamp01(S.value.chain - j);
+    return { opacity: u, transform: [{ translateY: (1 - u) * 4 }] };
+  });
   return (
     <>
       <View style={[styles.panel, { left: x }]} />
       <Animated.View style={[j === 0 ? styles.panelInkVague : styles.panelInk, { left: x }, inked]} />
       <View style={[styles.panelBase, { left: x + BAR_PAD }]} />
       {SHAPE.map((h, k) => <Bar key={k} S={S} j={j} k={k} h={h} x={x} />)}
+      <Animated.Text style={[styles.fearTag, { left: x + FEAR_X }, named]}>FEAR</Animated.Text>
       <Text style={[styles.panelLabel, { left: x }]}>{LABELS[j]}</Text>
     </>
   );
@@ -240,7 +269,10 @@ function Bar({ S, j, k, h, x }: { S: SharedValue<any>; j: number; k: number; h: 
     const grown = ease01(clamp01((f - k * 0.05) * 2.4));
     // A slow, non-uniform breath so a filled panel never freezes into a diagram.
     const live = 1 + 0.035 * Math.sin(S.value.t * 1.7 + k * 0.7 + j);
-    return { opacity: grown, transform: [{ scaleY: grown * live }] };
+    // The artist's own panel drains, tallest bars last, once the feeling has
+    // outlived its maker; the work's and the viewer's stay full.
+    const gone = j === 0 ? ease01(clamp01((S.value.outlived - (h / 74) * 0.4) / 0.6)) : 0;
+    return { opacity: grown * (1 - 0.45 * gone), transform: [{ scaleY: grown * live * (1 - 0.88 * gone) }] };
   });
   return (
     <Animated.View
@@ -300,6 +332,13 @@ const styles = StyleSheet.create({
   panelLabel: {
     position: 'absolute', top: 316, width: PANEL_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 0.4, color: SOFT,
+    includeFontPadding: false,
+  },
+  // Over the three short bars (x +7…+34, whose tallest reaches up to y 252) and
+  // under the peak rule (y 224); bar 3 starts at x +40. FEAR measures 28 at 9.2px (the 8pt floor at this band's fit).
+  fearTag: {
+    position: 'absolute', top: FEAR_T, width: 32,
+    fontFamily: 'Inter_700Bold', fontSize: 9.2, lineHeight: 11, letterSpacing: 1, color: INK,
     includeFontPadding: false,
   },
   barInk: { position: 'absolute', width: BAR_W, backgroundColor: INK, transformOrigin: '50% 100%' },

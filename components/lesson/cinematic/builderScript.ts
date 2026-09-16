@@ -133,7 +133,7 @@ export const BEATS: Beat[] = [
   {
     act: 2,
     build: { p1: '', p2: '', key: '', tags: true },
-    gest: 6,                                        // point up at the keystone
+    gest: 3,                                        // count them off: therefore, so, thus
     text: 'The words “therefore”, “so” and “thus” often introduce a conclusion.',
     dur: 1.8,
   },
