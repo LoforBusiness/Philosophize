@@ -49,7 +49,7 @@ export const BEATS: Met21Beat[] = [
     dur: 2.8,
   },
   {
-    p: 2, x: 200, line: 1, past: 0.08, future: 0.08,
+    p: 266, x: 200, line: 1, past: 0.08, future: 0.08,
     text: 'On this view, yesterday doesn’t exist anywhere. It existed once, and no longer exists at all.',
     dur: 1.8,
   },

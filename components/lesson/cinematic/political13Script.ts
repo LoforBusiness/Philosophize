@@ -72,7 +72,7 @@ export const BEATS: Pol13Beat[] = [
     dur: 2.8,
   },
   {
-    p: 13, x: 124, steps: 3,
+    p: 266, x: 124, steps: 3,
     text: 'So the town’s whole case depends on the middle step.',
     dur: 2.2,
   },

@@ -43,7 +43,7 @@ export const BEATS: Political37Beat[] = [
     dur: 2.8,
   },
   {
-    p: 2, x: 54, pair: 1, horns: 1, labels: 1,
+    p: 266, x: 54, pair: 1, horns: 1, labels: 1,
     text: 'The other, without money for advertising, reaches only the people nearby.',
     dur: 1.8,
   },

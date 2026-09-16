@@ -53,7 +53,7 @@ export const BEATS: Aes14Beat[] = [
     cite: 'The variety of taste',
   },
   {
-    g: 13, board: 3, level: 1,
+    g: 266, board: 3, level: 1,
     dur: 2.9,
     text: 'Yet Hume denies that every verdict is equally good. The joint verdict of true judges, he argues, is the standard of taste.',
   },

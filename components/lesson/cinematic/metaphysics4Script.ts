@@ -69,7 +69,7 @@ export const BEATS: Meta4Beat[] = [
     dur: 3.4,
   },
   {
-    p: 15, tokens: 3, barred: 1, frozen: 1,
+    p: 258, tokens: 3, barred: 1, frozen: 1,
     text: 'So motion itself is false, a mere show put on by the senses. Aristotle later replied that “being” is said in more than one way, including potential and actual being.',
     dur: 1.8,
   },

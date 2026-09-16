@@ -40,7 +40,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 2.7,
   },
   {
-    p: 34, x: 268, land: 1,
+    p: 262, x: 268, land: 1,
     text: 'The hills and the tree are there whether or not anyone observes them.',
     dur: 1.8,
   },
@@ -71,7 +71,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 2.7,
   },
   {
-    p: 2, x: 148, land: 1, map: 1,
+    p: 266, x: 148, land: 1, map: 1,
     text: 'Truth, on this view, is a relation of fit between a belief and the world. The view is called the correspondence theory.',
     dur: 2.5,
   },
@@ -134,7 +134,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 1.8,
   },
   {
-    p: 13, x: 268, land: 1, map: 1, theory: 2,
+    p: 266, x: 268, land: 1, map: 1, theory: 2,
     text: 'A true map must guide you across the real hills reliably, over time. Being comforting is not enough: the belief must keep working in experience.',
     dur: 3.5,
   },

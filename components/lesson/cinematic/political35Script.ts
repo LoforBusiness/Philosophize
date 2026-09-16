@@ -72,7 +72,7 @@ export const BEATS: Political35Beat[] = [
     dur: 4.1,
   },
   {
-    p: 2, x: 52, chairs: 1, weight: 0.5,
+    p: 266, x: 52, chairs: 1, weight: 0.5,
     text: 'Different children are therefore conceived. Which people exist in the future depends on the policy chosen.',
     dur: 1.8,
   },

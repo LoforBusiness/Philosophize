@@ -49,7 +49,7 @@ export const BEATS: Epi5Beat[] = [
     dur: 1.8,
   },
   {
-    p: 19, star: 1, rungs: 5,
+    p: 169, star: 1, rungs: 5,
     text: 'People enjoy seeing even when it serves no purpose. Sensation is the lowest rung of Aristotle’s ladder of knowledge.',
     dur: 3,
   },

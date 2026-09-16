@@ -43,7 +43,7 @@ export const BEATS: Ethics18Beat[] = [
     dur: 1.8,
   },
   {
-    p: 13, x: 124, line: 1, test: 1,
+    p: 266, x: 124, line: 1, test: 1,
     text: 'Nor can some people with severe mental disabilities. Yet they still count morally, so reason can’t be the test.',
     dur: 3.4,
   },

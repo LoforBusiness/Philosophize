@@ -28,7 +28,7 @@ export const BEATS: Aes5Beat[] = [
     dur: 2.5,
   },
   {
-    p: 11, bird: 0, ego: 1, self: 0.88,
+    p: 257, bird: 0, ego: 1, self: 0.88,
     text: 'Murdoch calls the obstacle “the fat relentless ego”, a self absorbed in its own concerns. Attention draws the mind away from it.',
     dur: 2.7,
   },
@@ -81,7 +81,7 @@ export const BEATS: Aes5Beat[] = [
     dur: 3.8,
   },
   {
-    p: 13, bird: 0, ego: 0, leaf: 1, self: 0.12,
+    p: 266, bird: 0, ego: 0, leaf: 1, self: 0.12,
     text: 'Ruskin’s drawing exercises therefore begin with a single leaf, and only later reach a whole tree.',
     dur: 1.8,
   },

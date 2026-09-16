@@ -48,7 +48,7 @@ export const BEATS: Met16Beat[] = [
     cite: 'Second-order desires',
   },
   {
-    g: 13, panels: 2, crave: 1, second: 1,
+    g: 266, panels: 2, crave: 1, second: 1,
     dur: 1.8,
     text: 'Frankfurt’s central notion is a second-order volition, wanting a particular desire to be the one that moves you.',
   },

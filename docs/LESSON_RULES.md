@@ -8550,6 +8550,64 @@ is a wrong one — the first draft did exactly that and grew **7,589** boxes on 
 corpus where nine acts had moved. `scripts/seed-pose-reach.mjs` writes the
 baseline once, from the `moves.ts` at git HEAD, and applies nothing.
 
+### N16 · A beat where nothing else moves needs a hold that READS
+
+A STILL BEAT is one where no scene channel changed, the figure did not walk, his
+pose did not change, and that pose reads `bt` — so the instant the beat advances,
+every single thing on screen stops. There were **289** of them, in 149 lessons,
+and a reader found them from the outside: *"sometimes there will just be three tabs
+in one lesson where there is no animation above the words."*
+
+The cause is J12 doing its job. The splitter copies every channel onto each piece
+of a sentence so the picture holds still while the words advance; N7 already
+records that being right for the scene and wrong for the figure. `LIVING_RUN`
+fixed 445 such beats and, being deliberately strict about exact re-statements,
+deliberately left the rest frozen.
+
+**A still beat has a second requirement a run does not: the twin must be big enough
+to SEE.** `npm run check:idle` sweeps every clock-driven act through its own cycle
+and measures the distance it travels, against the bare `stand()` breath those poses
+all ride. Two tiers come out of it:
+
+- **ALIVE** — beats the breath. A hold that does not is not adding a movement, it
+  is adding a name for one, and `check:moves` cannot tell: a pose that does not
+  move has no discontinuity to find. Three acts are exempt BY NAME, each because
+  its own header says so — `75 AT ATTENTION` ("almost nothing, on purpose"), `61
+  CHIN IN HAND` ("barely moving") and `157 READING, AND STILL READING`.
+- **READS** — 1.5× the breath, and the only pool a still beat may draw from.
+
+A quiet idle is perfectly good on a beat where the scene is doing something. The
+floor is not raised for everything, because that would delete the library's whole
+quiet register.
+
+`STILL_TWIN` in `scripts/lib/liveliness.mjs` maps a frozen pose to its living twin
+and is **deliberately partial**: every pose that WORKS AT A PROP or is on the FLOOR
+is absent. A living hold puts the hand somewhere else, and if the narration says he
+is writing on the board then his hand belongs on the board — **A1 outranks this
+rule entirely**. Those beats need the SCENE to change instead, and they are the
+135 that remain.
+
+**Three things that will bite the next person:**
+
+1. **The pose field is not `p`.** 190 scenes read `b.p ?? 0`; 47 use one of
+   thirteen other names. Use `scripts/lib/posetrack.mjs`, which follows the array
+   into the poser call rather than trusting a name, and which returns null for a
+   scene that poses two figures — picking the lead off mount order gets it wrong,
+   because mount order is paint order.
+2. **N12 applies to the second shelf too.** Acts 157–168 were written after it and
+   still put their attention on the neck alone. `U.head` is 16, so 0.04 rad moves
+   the head 0.6 units against a head 40 across. Spine, then neck, then a limb.
+3. **Measure the FEET.** An act whose content is below the waist — a tapping foot,
+   stepping in place, pacing — reads as motionless to anything tracking only hands
+   and angles.
+
+**Changing an act's amplitude bills the boxes.** `moves.ts` is in nobody's hash, so
+a wider swing leaves every box holding it quietly too small with nothing going red.
+Run `node scripts/regrow-pose.mjs --write`, which grows them arithmetically the way
+`make:wardrobe` does and re-stamps only what it can prove; then `make:visitor` and
+`make:thoughts`, in that order and once, because a wider lead narrows the clear
+floor and a head that sways further closes the gap under a bubble.
+
 ### AA9 · A costume piece hangs off something the eye can see
 
 > *"the box behind the stickman follow[s] in a bad way, you can remove that box by

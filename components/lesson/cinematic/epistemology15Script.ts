@@ -53,7 +53,7 @@ export const BEATS: Epi15Beat[] = [
     cite: 'The rule',
   },
   {
-    g: 13, cells: 4, dealt: 3,
+    g: 266, cells: 4, dealt: 3,
     dur: 1.8,
     text: 'Put the other way, anything that adds to your knowledge can be known only after looking.',
   },

@@ -42,7 +42,7 @@ export const BEATS: Met20Beat[] = [
     dur: 3.9,
   },
   {
-    p: 2, x: 200, outer: 1, nest: 0.3, tally: 1,
+    p: 266, x: 200, outer: 1, nest: 0.3, tally: 1,
     text: 'Such an advanced civilisation might run many thousands of simulations of its own past history.',
     dur: 1.8,
   },
@@ -58,7 +58,7 @@ export const BEATS: Met20Beat[] = [
     dur: 1.9,
   },
   {
-    p: 13, x: 132, outer: 1, nest: 1, tally: 1, token: 1,
+    p: 266, x: 132, outer: 1, nest: 1, tally: 1, token: 1,
     text: 'By Bostrom’s principle of indifference, your mind is then most likely a simulated one.',
     dur: 1.9,
   },

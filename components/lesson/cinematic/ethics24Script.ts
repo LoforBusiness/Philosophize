@@ -42,7 +42,7 @@ export const BEATS: Eth24Beat[] = [
     dur: 2.2,
   },
   {
-    p: 2, x: 200, slab: 1, names: 1,
+    p: 266, x: 200, slab: 1, names: 1,
     text: 'Rehabilitation aims to make him a better person. Retribution says he should be punished for what he did.',
     dur: 2.2,
   },

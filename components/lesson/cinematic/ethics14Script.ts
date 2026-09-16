@@ -41,7 +41,7 @@ export const BEATS: Eth14Beat[] = [
     cite: 'The state of nature',
   },
   {
-    g: 13, built: 0,
+    g: 266, built: 0,
     dur: 1.8,
     text: 'The case is that everyone else has freedom too, and can use it against you.',
   },

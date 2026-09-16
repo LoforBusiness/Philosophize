@@ -64,12 +64,12 @@ export const BEATS: Epistemology35Beat[] = [
     dur: 1.8,
   },
   {
-    p: 13, x: 58, pens: 1, plaques: 1, chain: 1,
+    p: 266, x: 58, pens: 1, plaques: 1, chain: 1,
     text: 'If you know a claim and know that it rules out another, you know that the other is false.',
     dur: 2,
   },
   {
-    p: 13, x: 58, pens: 1, plaques: 1, chain: 1,
+    p: 266, x: 58, pens: 1, plaques: 1, chain: 1,
     text: 'The principle is called epistemic closure, because knowledge is closed under known entailment.',
     dur: 1.8,
   },

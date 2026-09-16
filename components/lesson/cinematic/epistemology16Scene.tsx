@@ -6,13 +6,17 @@ import CinematicPlayer from './CinematicPlayer';
 import { clamp01, ease01, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology16Script';
-import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
+import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+
+// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
+// Same three tones, same luminance to the third decimal — so every contrast
+// measured against the old greys still holds and nothing on the stage moved.
+const { RULE, STONE } = stageTone('epistemology');
 
 // EVERY RESULT THE ECLIPSE COULD HAVE GIVEN, AND WHAT EACH THEORY PERMITS (H64).
 // A theory's bar is as wide as the results it allows, so "forbids something" is a

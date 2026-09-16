@@ -57,7 +57,7 @@ export const BEATS: Aes8Beat[] = [
     dur: 3.1,
   },
   {
-    p: 47, x: 148, mode: 1, lens: 1,
+    p: 267, x: 148, mode: 1, lens: 1,
     text: 'What the picture represents plays no part in this way of seeing.',
     dur: 1.8,
   },

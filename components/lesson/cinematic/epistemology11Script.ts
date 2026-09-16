@@ -88,7 +88,7 @@ export const BEATS: Epistemology11Beat[] = [
     dur: 2.6,
   },
   {
-    p: 5, x: 226, real: 300,
+    p: 259, x: 226, real: 300,
     text: 'Nothing connected your reason to the fact that made the belief true. A match of this kind is called epistemic luck.',
     dur: 2.4,
   },

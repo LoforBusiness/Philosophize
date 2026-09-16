@@ -10,11 +10,17 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political9Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, reactPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, reactPose,
 } from './cinematicKit';
+import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+
+// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
+// Same three tones, same luminance to the third decimal — so every contrast
+// measured against the old greys still holds and nothing on the stage moved.
+const { RULE, STONE } = stageTone('political-philosophy');
 
 // Four on the left, one on the right, and a line between them.
 //

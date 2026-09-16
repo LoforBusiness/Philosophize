@@ -43,7 +43,7 @@ export const BEATS: Epi18Beat[] = [
     dur: 3.1,
   },
   {
-    p: 2, x: 200, rails: 1, grip: 1, ev: 0,
+    p: 266, x: 200, rails: 1, grip: 1, ev: 0,
     text: 'The claim about your keys rests on a single memory of putting them there.',
     dur: 1.9,
   },

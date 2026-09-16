@@ -44,7 +44,7 @@ export const BEATS: Aes22Beat[] = [
     dur: 1.8,
   },
   {
-    p: 2, x: 200, screen: 1, slime: 1, meters: 1, heart: 1,
+    p: 266, x: 200, screen: 1, slime: 1, meters: 1, heart: 1,
     text: 'Yet Charles never believes that the slime exists. He knows he’s watching a film.',
     dur: 2.9,
   },

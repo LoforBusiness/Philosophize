@@ -13,11 +13,17 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 // he fetches comes from these two — see the header of interact.ts.
 import { carryHands, gripAt } from './interact';
 import { BEATS } from './political8Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
+import { stageTone } from './stageTones';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+
+// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
+// Same three tones, same luminance to the third decimal — so every contrast
+// measured against the old greys still holds and nothing on the stage moved.
+const { RULE, STONE } = stageTone('political-philosophy');
 
 // THE FENCE. Stage right, a picket fence with a goal beyond it and three onlookers
 // of very different heights peering over. Stage left, a stack of three spare crates.

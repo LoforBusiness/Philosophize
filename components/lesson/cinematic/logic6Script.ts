@@ -44,7 +44,7 @@ export const BEATS: Logic6Beat[] = [
     dur: 2.2,
   },
   {
-    p: 13, link: 1, rain: 1, table: 1,
+    p: 266, link: 1, rain: 1, table: 1,
     text: 'Like a promise, the conditional is broken only if it rains and the streets stay dry. On a day without rain, the promise is kept.',
     dur: 2.8,
   },

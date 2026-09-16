@@ -6,12 +6,17 @@ import CinematicPlayer from './CinematicPlayer';
 import { dirsFrom, clamp01, ease01, lerp, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics37Script';
-import {
-  facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
+import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+
+// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
+// Same three tones, same luminance to the third decimal — so every contrast
+// measured against the old greys still holds and nothing on the stage moved.
+const { RULE } = stageTone('aesthetics');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO SYSTEMS, AND ONLY ONE OF THEM HAS ANYTHING WRITTEN ABOVE IT.

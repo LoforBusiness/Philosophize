@@ -40,7 +40,7 @@ export const BEATS: Epistemology12Beat[] = [
     dur: 3.3,
   },
   {
-    p: 2, x: 56, pipes: 0,
+    p: 266, x: 56, pipes: 0,
     text: 'By what routes do beliefs like these reach you?',
     dur: 1.8,
   },

@@ -45,7 +45,7 @@ export const BEATS: Metaphysics35Beat[] = [
     dur: 2.6,
   },
   {
-    p: 13, x: 322, line: 1, arc: 1,
+    p: 266, x: 322, line: 1, arc: 1,
     text: 'Being present in 1925 need not change any event that happened there.',
     dur: 1.8,
   },
@@ -99,7 +99,7 @@ export const BEATS: Metaphysics35Beat[] = [
     dur: 3.6,
   },
   {
-    p: 47, x: 120, line: 1, branch: 1,
+    p: 267, x: 120, line: 1, branch: 1,
     text: 'Your attempt fails for an ordinary reason, such as a jammed gun. In the only consistent history, it never succeeded.',
     dur: 1.8,
   },

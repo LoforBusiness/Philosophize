@@ -50,7 +50,7 @@ export const BEATS: Eth19Beat[] = [
     dur: 3.8,
   },
   {
-    p: 13, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
+    p: 266, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
     text: 'The test asks whether the choice harms anyone other than the person making it.',
     dur: 1.8,
   },

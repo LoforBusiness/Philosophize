@@ -39,7 +39,7 @@ export const BEATS: Meta13Beat[] = [
     dur: 2.4,
   },
   {
-    p: 13, x: 124, track: 1, fork: 1,
+    p: 266, x: 124, track: 1, fork: 1,
     text: 'The replica walks out on Mars with your memories and intentions. Both of you continue the mental life of the person who stepped in.',
     dur: 2.8,
   },
@@ -63,7 +63,7 @@ export const BEATS: Meta13Beat[] = [
     dur: 3.5,
   },
   {
-    p: 29, x: 168, track: 1, fork: 1, both: 1, stuck: 1,
+    p: 258, x: 168, track: 1, fork: 1, both: 1, stuck: 1,
     text: 'Identity can’t branch, because one person can’t be identical to two different people. Psychological continuity, however, has branched.',
     dur: 2,
   },

@@ -26,7 +26,7 @@ export const BEATS: Aes6Beat[] = [
     dur: 2.2,
   },
   {
-    p: 34, vast: 1, flower: 1, split: 3,
+    p: 262, vast: 1, flower: 1, split: 3,
     text: 'The sublime, like a vast mountain, is rugged and overwhelming. It produces a delight mixed with terror.',
     dur: 2.8,
   },
@@ -37,7 +37,7 @@ export const BEATS: Aes6Beat[] = [
     dur: 2.4,
   },
   {
-    p: 15, vast: 1, flower: 0, split: 3,
+    p: 258, vast: 1, flower: 0, split: 3,
     text: 'Burke argued that danger seen from a safe distance is delightful. He distinguished this delight from the positive pleasure of beauty.',
     dur: 2.6,
   },

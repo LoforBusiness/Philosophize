@@ -10,13 +10,18 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political31Script';
-import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
+import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
 import { Shapes, Outlined, ell, bar, rect, type Part } from './Silhouette';
+
+// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
+// Same three tones, same luminance to the third decimal — so every contrast
+// measured against the old greys still holds and nothing on the stage moved.
+const { RULE, STONE } = stageTone('political-philosophy');
 
 // A FIELD THAT DIES WHILE YOU WATCH — twenty-one blades falling together, the first
 // mass animation in the app — with the arithmetic laid over it at the end. The answer

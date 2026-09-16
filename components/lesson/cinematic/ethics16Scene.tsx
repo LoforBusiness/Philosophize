@@ -6,13 +6,17 @@ import CinematicPlayer from './CinematicPlayer';
 import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics16Script';
-import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER,
-  useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
+import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+
+// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
+// Same three tones, same luminance to the third decimal — so every contrast
+// measured against the old greys still holds and nothing on the stage moved.
+const { RULE, STONE } = stageTone('ethics');
 
 // THE SAME HANDOVER TWICE, UNDER THE SAME CHAIN OF CAUSES (H64). One thing differs
 // between them and it is at his back.

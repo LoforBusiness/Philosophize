@@ -31,7 +31,7 @@ export const BEATS: Aes32Beat[] = [
     cite: 'The same years, reversed',
   },
   {
-    g: 2, rows: 2, mean: 0,
+    g: 266, rows: 2, mean: 0,
     dur: 1.8,
     text: 'The second life contains the same goods as the first, and only their order differs.',
   },

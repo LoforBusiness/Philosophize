@@ -42,7 +42,7 @@ export const BEATS: Logic37Beat[] = [
     dur: 3,
   },
   {
-    p: 2, x: 56, boxes: 1, sorted: 1,
+    p: 266, x: 56, boxes: 1, sorted: 1,
     text: 'A man who doesn’t shave himself is shaved by the barber.',
     dur: 1.8,
   },
@@ -66,7 +66,7 @@ export const BEATS: Logic37Beat[] = [
     dur: 3.8,
   },
   {
-    p: 13, x: 56, boxes: 1, sorted: 1, barber: 1, sets: 1,
+    p: 266, x: 56, boxes: 1, sorted: 1, barber: 1, sets: 1,
     text: 'If the set contains itself, it violates its own condition for membership. If the set doesn’t contain itself, it meets the condition and must be included.',
     dur: 1.8,
   },

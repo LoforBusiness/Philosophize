@@ -50,7 +50,7 @@ export const BEATS: A9Beat[] = [
     dur: 2.5,
   },
   {
-    p: 47, x: 144, boxes: true, stands: true,
+    p: 267, x: 144, boxes: true, stands: true,
     text: 'One box is in a supermarket and one is in a gallery. Perception alone can’t tell you which is the artwork.',
     dur: 2.7,
   },
@@ -74,7 +74,7 @@ export const BEATS: A9Beat[] = [
     dur: 3.7,
   },
   {
-    p: 5, x: 208, boxes: true, stands: true,
+    p: 259, x: 208, boxes: true, stands: true,
     text: 'Beauty remains possible in art, but it no longer decides what counts as art.',
     dur: 1.8,
   },

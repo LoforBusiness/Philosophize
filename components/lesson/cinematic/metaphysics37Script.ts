@@ -70,7 +70,7 @@ export const BEATS: Metaphysics37Beat[] = [
     dur: 3.2,
   },
   {
-    p: 2, x: 56, shelf: 1, hammer: 1, swing: 1, ward: 1,
+    p: 266, x: 56, shelf: 1, hammer: 1, swing: 1, ward: 1,
     text: 'Yet until the blow, the glass is as fragile as ever. So the simple conditional analysis fails.',
     dur: 1.8,
   },

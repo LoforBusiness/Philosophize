@@ -52,7 +52,7 @@ export const BEATS: Aes20Beat[] = [
     dur: 2.5,
   },
   {
-    p: 2, x: 132, uses: 1, swaps: 1, struck: 1,
+    p: 266, x: 132, uses: 1, swaps: 1, struck: 1,
     text: 'Third, wallpaper decorates a room more cheaply than art does.',
     dur: 1.9,
   },

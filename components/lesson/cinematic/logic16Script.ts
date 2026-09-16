@@ -61,7 +61,7 @@ export const BEATS: Log16Beat[] = [
     dur: 3.1,
   },
   {
-    p: 13, x: 132, dawns: 5, arrow: 1,
+    p: 266, x: 132, dawns: 5, arrow: 1,
     text: 'Every cause comes before its effect, but so does every coincidence.',
     dur: 1.8,
   },

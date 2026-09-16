@@ -36,7 +36,7 @@ export const BEATS: Meta12Beat[] = [
     cite: 'Descartes’ thinking thing',
   },
   {
-    g: 2, owner: 1, none: 0,
+    g: 266, owner: 1, none: 0,
     dur: 1.8,
     text: 'On this view, the self is a thinking substance that persists while its particular thoughts come and go.',
   },

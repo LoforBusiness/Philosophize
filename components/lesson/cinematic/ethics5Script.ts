@@ -51,20 +51,20 @@ export const BEATS: Ethics5Beat[] = [
     dur: 4.4,
   },
   {
-    x: 217, soc: 2, chart: 1,
+    x: 217, soc: 266, chart: 1,
     // The chart overhead already draws the window and its dates. Saying them again
     // in the narration is the reader reading a number they can see (J6).
     text: 'Scholars dispute why this happened, and some doubt that there was a single Axial Age at all.',
     dur: 1.8,
   },
   {
-    x: 217, soc: 13, chart: 2,
+    x: 217, soc: 266, chart: 2,
     text: 'Socrates wrote nothing. His views are known mainly through the dialogues of his student Plato.',
     cite: 'Greece — Socrates',
     dur: 1.9,
   },
   {
-    x: 217, soc: 13, chart: 2,
+    x: 217, soc: 266, chart: 2,
     text: 'Socrates questioned Athenians about what virtue is. In 399 BCE, Athens executed him for impiety and corrupting the young.',
     dur: 3.5,
   },
@@ -75,7 +75,7 @@ export const BEATS: Ethics5Beat[] = [
     dur: 2.8,
   },
   {
-    x: 265, soc: 5, chart: 3,
+    x: 265, soc: 259, chart: 3,
     text: 'In China, Confucius taught ren, usually translated as humaneness. He held that ren is cultivated in relationships with others.',
     dur: 2.4,
   },

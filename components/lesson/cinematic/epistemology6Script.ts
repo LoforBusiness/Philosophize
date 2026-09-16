@@ -78,7 +78,7 @@ export const BEATS: Epi6Beat[] = [
     dur: 2,
   },
   {
-    p: 12, bal: 0.3, crack: 1, route: 3,
+    p: 165, bal: 0.3, crack: 1, route: 3,
     text: 'Sextus Empiricus avoids the objection by not asserting it. His sceptical phrases, he says, report only how things seem to him.',
     dur: 3,
   },

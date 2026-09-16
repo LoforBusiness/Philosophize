@@ -35,7 +35,7 @@ export const BEATS: Epistemology34Beat[] = [
     dur: 3.5,
   },
   {
-    p: 47, x: 54, claim: 0.3,
+    p: 267, x: 54, claim: 0.3,
     text: 'The mismatch between the two bars is usually small at this level.',
     dur: 1.8,
   },
@@ -46,7 +46,7 @@ export const BEATS: Epistemology34Beat[] = [
     dur: 2,
   },
   {
-    p: 19, x: 54, claim: 0.95, gap: 1,
+    p: 169, x: 54, claim: 0.95, gap: 1,
     text: 'The right bar doesn’t rise as far. The difference between the bars is overconfidence.',
     dur: 2.6,
   },

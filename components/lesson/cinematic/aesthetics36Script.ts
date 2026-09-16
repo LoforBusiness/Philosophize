@@ -65,7 +65,7 @@ export const BEATS: Aesthetics36Beat[] = [
     dur: 1.8,
   },
   {
-    p: 13, x: 54, square: 1, crop: 0.5, prints: 1,
+    p: 266, x: 54, square: 1, crop: 0.5, prints: 1,
     text: 'Both prints are accurate, yet they imply opposite accounts of what happened.',
     dur: 2.6,
   },
@@ -111,7 +111,7 @@ export const BEATS: Aesthetics36Beat[] = [
     dur: 3.3,
   },
   {
-    p: 12, x: 128, square: 1, crop: 0.14, prints: 1,
+    p: 165, x: 128, square: 1, crop: 0.14, prints: 1,
     text: 'With a photograph, viewers easily forget that a photographer also made choices.',
     dur: 1.8,
   },

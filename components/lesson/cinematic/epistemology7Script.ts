@@ -65,7 +65,7 @@ export const BEATS: Epi7Beat[] = [
     dur: 3.8,
   },
   {
-    p: 13, days: 4, twist: 1,
+    p: 266, days: 4, twist: 1,
     text: 'No number of past confirmations can guarantee the next case. The chicken’s evidence was strong, and its conclusion was false.',
     dur: 1.8,
   },

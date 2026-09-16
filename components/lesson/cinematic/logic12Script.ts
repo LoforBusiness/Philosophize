@@ -35,7 +35,7 @@ export const BEATS: Logic12Beat[] = [
     cite: 'An unargued premise',
   },
   {
-    g: 2, lit: 0,
+    g: 266, lit: 0,
     dur: 1.8,
     text: 'A false dilemma presents the options on offer as if they were all the options.',
   },

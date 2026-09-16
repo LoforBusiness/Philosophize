@@ -69,7 +69,7 @@ export const BEATS: Eth21Beat[] = [
     dur: 3.4,
   },
   {
-    p: 13, x: 268, act: 1, arms: 1, means: 1,
+    p: 266, x: 268, act: 1, arms: 1, means: 1,
     text: 'But you may not bring about a harm as the means to your aim.',
     dur: 1.8,
   },

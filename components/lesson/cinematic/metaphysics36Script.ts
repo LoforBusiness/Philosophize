@@ -62,7 +62,7 @@ export const BEATS: Metaphysics36Beat[] = [
     dur: 3,
   },
   {
-    p: 13, x: 54, hotel: 1, shift: 1,
+    p: 266, x: 54, hotel: 1, shift: 1,
     text: 'Every guest still has a room, and room one is now empty.',
     dur: 1.8,
   },

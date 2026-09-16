@@ -41,7 +41,7 @@ export const BEATS: Logic35Beat[] = [
     dur: 2.2,
   },
   {
-    p: 2, x: 62, rise: 1,
+    p: 266, x: 62, rise: 1,
     text: 'The correlation is real, and it holds too consistently to be a coincidence.',
     dur: 2,
   },
@@ -51,7 +51,7 @@ export const BEATS: Logic35Beat[] = [
     dur: 2.1,
   },
   {
-    p: 13, x: 62, rise: 1, arrow: 1,
+    p: 266, x: 62, rise: 1, arrow: 1,
     text: 'No one believes this causal claim, but the correlation alone can’t refute it. The same data fit more than one causal explanation.',
     dur: 2.5,
   },

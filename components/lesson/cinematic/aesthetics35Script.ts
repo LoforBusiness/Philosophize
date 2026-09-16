@@ -83,7 +83,7 @@ export const BEATS: Aesthetics35Beat[] = [
     dur: 3.1,
   },
   {
-    p: 12, x: 56, track: 1, split: 1, run: 1, spoil: 1,
+    p: 165, x: 56, track: 1, split: 1, run: 1, spoil: 1,
     text: 'Explaining a joke reveals the second reading in advance, and so removes the surprise.',
     dur: 1.8,
   },

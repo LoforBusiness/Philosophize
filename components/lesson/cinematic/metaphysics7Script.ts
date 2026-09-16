@@ -37,7 +37,7 @@ export const BEATS: Metaphysics7Beat[] = [
     dur: 2.5,
   },
   {
-    p: 47, x: 200, line: 1, spot: 1,
+    p: 267, x: 200, line: 1, spot: 1,
     text: 'On this picture, the moments look like places, each as real as the others.',
     dur: 1.9,
   },
@@ -81,7 +81,7 @@ export const BEATS: Metaphysics7Beat[] = [
     dur: 2,
   },
   {
-    p: 5, x: 70, line: 1,
+    p: 259, x: 70, line: 1,
     text: 'Page four hundred is as fully printed as page one. Where you happen to be reading makes no page more real.',
     dur: 2.8,
   },
@@ -101,7 +101,7 @@ export const BEATS: Metaphysics7Beat[] = [
     dur: 2.1,
   },
   {
-    p: 33, x: 200, line: 1, solid: 1,
+    p: 260, x: 200, line: 1, solid: 1,
     text: 'On this view, the word “now” works like the word “here”. Each marks the speaker’s position, not a privileged part of reality.',
     dur: 3.1,
   },

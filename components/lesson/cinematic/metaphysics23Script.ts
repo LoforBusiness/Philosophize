@@ -85,7 +85,7 @@ export const BEATS: Met23Beat[] = [
     dur: 2.9,
   },
   {
-    p: 13, x: 268, ships: 1, swap: 1, built: 1,
+    p: 266, x: 268, ships: 1, swap: 1, built: 1,
     text: 'A pile of planks is not a ship, although it contains the same material.',
     dur: 1.8,
   },

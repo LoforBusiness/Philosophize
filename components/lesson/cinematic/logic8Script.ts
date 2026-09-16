@@ -29,7 +29,7 @@ export const BEATS: Logic8Beat[] = [
     dur: 4.1,
   },
   {
-    p: 12, x: 230, wet: 1,
+    p: 165, x: 230, wet: 1,
     text: 'At once, you conclude that it must have rained.',
     dur: 1.8,
   },
@@ -40,7 +40,7 @@ export const BEATS: Logic8Beat[] = [
     dur: 3.4,
   },
   {
-    p: 38, x: 152, wet: 1, rule: 1,
+    p: 266, x: 152, wet: 1, rule: 1,
     text: 'Your second premise is that the streets are wet.',
     dur: 1.8,
   },
@@ -51,7 +51,7 @@ export const BEATS: Logic8Beat[] = [
     dur: 1.8,
   },
   {
-    p: 5, x: 152, wet: 1, rule: 1, trap: 1,
+    p: 259, x: 152, wet: 1, rule: 1, trap: 1,
     text: 'The inference resembles modus ponens, but runs from the consequent back to the antecedent.',
     dur: 2.8,
   },
@@ -82,7 +82,7 @@ export const BEATS: Logic8Beat[] = [
     dur: 3,
   },
   {
-    p: 11, x: 248, wet: 1, rule: 1, trap: 1, cross: 1, spr: 1,
+    p: 257, x: 248, wet: 1, rule: 1, trap: 1, cross: 1, spr: 1,
     text: 'The inference fails whenever something other than rain could leave the street wet.',
     dur: 2.2,
   },

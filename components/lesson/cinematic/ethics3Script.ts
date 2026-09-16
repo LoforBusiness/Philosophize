@@ -34,7 +34,7 @@ export const BEATS: Ethics3Beat[] = [
     dur: 1.8,
   },
   {
-    d: 2, tx: 118, pull: 0, lens: 0,
+    d: 266, tx: 118, pull: 0, lens: 0,
     text: 'All three seek the right action, yet their verdicts differ.',
     dur: 2.4,
   },
@@ -45,7 +45,7 @@ export const BEATS: Ethics3Beat[] = [
     dur: 2.5,
   },
   {
-    d: 13, tx: 158, lens: 0,
+    d: 266, tx: 158, lens: 0,
     text: 'If you pull it, the trolley switches to a side track, where it will kill one person instead.',
     dur: 2.5,
   },
@@ -55,13 +55,13 @@ export const BEATS: Ethics3Beat[] = [
     dur: 4.2,
   },
   {
-    d: 13, tx: 196, pull: 1, lens: 1,
+    d: 432, tx: 196, pull: 1, lens: 1,
     text: 'John Stuart Mill’s utilitarianism says to pull the lever. For Mill, the right act produces the most happiness, counting each person equally.',
     cite: 'Consequentialism — the outcome',
     dur: 2.3,
   },
   {
-    d: 13, tx: 196, pull: 1, lens: 1,
+    d: 266, tx: 196, pull: 1, lens: 1,
     text: 'Five lives saved outweigh one lost. Judging acts by outcomes is consequentialism, and Mill’s version is utilitarianism.',
     dur: 2.3,
   },
@@ -83,7 +83,7 @@ export const BEATS: Ethics3Beat[] = [
     dur: 2.9,
   },
   {
-    d: 22, tx: 196, lens: 3,
+    d: 170, tx: 196, lens: 3,
     text: 'In virtue ethics, the guide is what a practically wise person would do. Aristotle calls this wisdom phronesis.',
     dur: 1.8,
   },

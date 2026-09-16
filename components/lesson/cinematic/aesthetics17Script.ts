@@ -61,7 +61,7 @@ export const BEATS: Aes17Beat[] = [
     cite: 'Three answers',
   },
   {
-    g: 5, x: 160, shape: 1, fear: 0.86, frame: 1,
+    g: 259, x: 160, shape: 1, fear: 0.86, frame: 1,
     dur: 2.9,
     text: 'For Hume, the eloquence of the telling converts the fear into pleasure. For Noël Carroll, fear is the price paid for the pleasure of discovery.',
   },

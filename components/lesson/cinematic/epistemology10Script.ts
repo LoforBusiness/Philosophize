@@ -47,7 +47,7 @@ export const BEATS: E10Beat[] = [
     dur: 3.1,
   },
   {
-    p: 33, x: 92, gauge: 1, band: 2, needle: 0.62,
+    p: 260, x: 92, gauge: 1, band: 2, needle: 0.62,
     text: 'On this view, knowledge is compatible with the possibility of error.',
     dur: 1.8,
   },
@@ -71,7 +71,7 @@ export const BEATS: E10Beat[] = [
     dur: 2.5,
   },
   {
-    p: 5, x: 160, gauge: 1, band: 2, needle: 0.78, revise: true,
+    p: 259, x: 160, gauge: 1, band: 2, needle: 0.78, revise: true,
     text: 'As new evidence arrives, confidence in a theory rises or falls. Such revision is part of scientific method, not a sign of its failure.',
     dur: 2.7,
   },

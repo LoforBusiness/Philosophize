@@ -62,7 +62,7 @@ export const BEATS: Epistemology37Beat[] = [
     dur: 1.9,
   },
   {
-    p: 13, x: 54, hull: 1, quiet: 1,
+    p: 266, x: 54, hull: 1, quiet: 1,
     text: 'Instead he suppressed his doubts, one at a time, until they no longer troubled him.',
     dur: 2.7,
   },
@@ -89,7 +89,7 @@ export const BEATS: Epistemology37Beat[] = [
     dur: 2.8,
   },
   {
-    p: 2, x: 54, hull: 1, quiet: 1, sailed: 1, verdict: 1, safe: 1,
+    p: 266, x: 54, hull: 1, quiet: 1, sailed: 1, verdict: 1, safe: 1,
     text: 'Clifford’s verdict is unchanged, because the owner had no right to believe on that evidence.',
     dur: 1.8,
   },

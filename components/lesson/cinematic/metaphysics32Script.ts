@@ -25,7 +25,7 @@ export const BEATS: Meta32Beat[] = [
     text: 'Consider a universe containing two iron spheres and nothing else: no stars, no observers, no ground.',
   },
   {
-    g: 5, orbs: 1, tether: 0, tag: 0,
+    g: 259, orbs: 1, tether: 0, tag: 0,
     dur: 1.8,
     text: 'Max Black’s case, from 1952, tests Leibniz’s identity of indiscernibles: things sharing every property are identical.',
   },

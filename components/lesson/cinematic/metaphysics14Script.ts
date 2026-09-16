@@ -47,7 +47,7 @@ export const BEATS: Met14Beat[] = [
     cite: 'Necessary and contingent',
   },
   {
-    g: 13, rows: 4, marks: 1,
+    g: 266, rows: 4, marks: 1,
     dur: 1.8,
     text: 'A claim true in only some worlds is a contingent truth. It’s true, but it might have been false.',
   },
@@ -71,7 +71,7 @@ export const BEATS: Met14Beat[] = [
     cite: 'Two ways of knowing',
   },
   {
-    g: 5, rows: 4, marks: 1,
+    g: 259, rows: 4, marks: 1,
     dur: 1.8,
     text: 'The other is a posteriori, known only through watching and testing.',
   },

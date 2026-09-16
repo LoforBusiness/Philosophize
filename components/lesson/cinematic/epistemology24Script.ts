@@ -45,7 +45,7 @@ export const BEATS: Epi24Beat[] = [
     dur: 3.7,
   },
   {
-    p: 2, x: 200, ladder: 1, sure: 1,
+    p: 266, x: 200, ladder: 1, sure: 1,
     text: 'The bars rate the premise that you can’t rule out a dream highest. They rate the sceptic’s conclusion lowest.',
     dur: 1.8,
   },

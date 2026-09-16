@@ -55,12 +55,12 @@ export const BEATS: Epistemology36Beat[] = [
     dur: 2.5,
   },
   {
-    p: 13, x: 56, shelf: 1, given: 1,
+    p: 266, x: 56, shelf: 1, given: 1,
     text: 'Some said their pair had a better knit. Others pointed to a finer weave.',
     dur: 1.8,
   },
   {
-    p: 13, x: 56, shelf: 1, given: 1,
+    p: 266, x: 56, shelf: 1, given: 1,
     text: 'Still others cited sheerness or elasticity, the way a pair felt. However, the four pairs didn’t differ in any of these respects.',
     dur: 1.8,
   },

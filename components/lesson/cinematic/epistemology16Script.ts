@@ -43,7 +43,7 @@ export const BEATS: Epi16Beat[] = [
     cite: 'One that permits everything',
   },
   {
-    g: 13, results: 5, bars: 3,
+    g: 266, results: 5, bars: 3,
     dur: 1.9,
     text: 'Karl Popper argued that this apparent strength is in fact a weakness.',
   },

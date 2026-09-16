@@ -41,7 +41,7 @@ export const BEATS: Epi20Beat[] = [
     dur: 2.5,
   },
   {
-    p: 2, x: 200, voices: 1, agree: 0.9,
+    p: 266, x: 200, voices: 1, agree: 0.9,
     text: 'Your confidence rises, and rightly so: four independent confirmations would be strong evidence.',
     dur: 2.1,
   },
@@ -57,7 +57,7 @@ export const BEATS: Epi20Beat[] = [
     dur: 2.5,
   },
   {
-    p: 13, x: 132, voices: 1, agree: 0.32, wires: 1,
+    p: 266, x: 132, voices: 1, agree: 0.32, wires: 1,
     text: 'Yet there were never four independent sources, only two: one post and one reporter’s own legwork.',
     dur: 1.8,
   },

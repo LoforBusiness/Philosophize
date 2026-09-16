@@ -44,7 +44,7 @@ export const BEATS: Pol12Beat[] = [
     dur: 2.2,
   },
   {
-    p: 13, x: 124, door: 1, open: 1, neg: 1,
+    p: 266, x: 124, door: 1, open: 1, neg: 1,
     text: 'The definition says nothing about whether you can walk through the door.',
     dur: 2.6,
   },
@@ -68,7 +68,7 @@ export const BEATS: Pol12Beat[] = [
     dur: 2.4,
   },
   {
-    p: 29, x: 168, door: 1, open: 1, neg: 1, posi: 1,
+    p: 258, x: 168, door: 1, open: 1, neg: 1, posi: 1,
     text: 'The regime then removes your choices and calls the result freedom, because it serves your supposed real self.',
     dur: 2.8,
   },

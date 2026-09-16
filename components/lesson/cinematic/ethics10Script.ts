@@ -47,7 +47,7 @@ export const BEATS: Et10Beat[] = [
     dur: 1.8,
   },
   {
-    p: 14, x: 168,
+    p: 266, x: 168,
     text: 'Peter Singer’s argument begins from that shared judgement. It then asks what principle explains the reaction.',
     dur: 3,
   },

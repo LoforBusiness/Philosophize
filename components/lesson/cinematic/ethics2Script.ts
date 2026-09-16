@@ -25,7 +25,7 @@ export const BEATS: Ethics2Beat[] = [
     dur: 1.8,
   },
   {
-    p: 12, x: 258, g: -1,
+    p: 165, x: 258, g: -1,
     text: 'Three ethical theories will each deliver a verdict on this one small choice.',
     dur: 1.8,
   },
@@ -39,7 +39,7 @@ export const BEATS: Ethics2Beat[] = [
     dur: 1.9,
   },
   {
-    p: 7, x: 262, g: -1, gx: 48, named: 1,
+    p: 260, x: 262, g: -1, gx: 48, named: 1,
     // Nothing on this stage is labelled "Deontology", and the next three beats show
     // each lens by working the wallet through it. Naming all three first was a
     // vocabulary tax paid before any of them meant anything (J6).
@@ -47,7 +47,7 @@ export const BEATS: Ethics2Beat[] = [
     dur: 2.1,
   },
   {
-    p: 7, x: 262, g: -1, gx: 48, named: 1,
+    p: 260, x: 262, g: -1, gx: 48, named: 1,
     // Nothing on this stage is labelled "Deontology", and the next three beats show
     // each lens by working the wallet through it. Naming all three first was a
     // vocabulary tax paid before any of them meant anything (J6).
@@ -85,7 +85,7 @@ export const BEATS: Ethics2Beat[] = [
     dur: 2.3,
   },
   {
-    p: 14, x: 262, g: 6, gx: 108, named: 1, lens: 2,
+    p: 266, x: 262, g: 6, gx: 108, named: 1, lens: 2,
     text: 'Apply Kant’s test to the rule “keep any wallet you find”. Willed for everyone, it would let others keep your lost wallet, so you couldn’t consistently will it.',
     dur: 2.5,
   },
@@ -96,7 +96,7 @@ export const BEATS: Ethics2Beat[] = [
     dur: 1.8,
   },
   {
-    p: 13, x: 262, g: 22, gx: 108, named: 1, lens: 3,
+    p: 266, x: 262, g: 22, gx: 108, named: 1, lens: 3,
     text: 'Aristotle holds that virtue is acquired by practice. Each honest act makes the next easier, until honesty is part of your character.',
     dur: 3.3,
   },

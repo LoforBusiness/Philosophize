@@ -32,7 +32,7 @@ export const BEATS: Pol31Beat[] = [
     cite: 'One more animal',
   },
   {
-    g: 2, grass: 0.66, herd: 2, sums: 0,
+    g: 266, grass: 0.66, herd: 2, sums: 0,
     dur: 1.8,
     text: 'For you, the gain outweighs your share of the cost, so adding the animal is rational.',
   },

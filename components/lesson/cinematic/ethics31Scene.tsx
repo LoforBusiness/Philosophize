@@ -9,11 +9,17 @@ import {
 // See ethics2Scene: identity for codes under 100, and it opens the catalogue.
 import { emoteAny as emoteHold } from './moves';
 import { BEATS } from './ethics31Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, STONE, SOFT, RULE, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
+import { stageTone } from './stageTones';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+
+// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
+// Same three tones, same luminance to the third decimal — so every contrast
+// measured against the old greys still holds and nothing on the stage moved.
+const { RULE, STONE } = stageTone('ethics');
 
 // A CLIMB, which no other lesson in the app stages: the figure works on the spot
 // and the rungs scroll DOWN past it (C22d — raising a figure up a static ladder

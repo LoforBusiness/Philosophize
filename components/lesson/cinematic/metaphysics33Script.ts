@@ -44,7 +44,7 @@ export const BEATS: Metaphysics33Beat[] = [
     dur: 2.5,
   },
   {
-    p: 19, x: 62, fall: 1, rev: 1,
+    p: 169, x: 62, fall: 1, rev: 1,
     text: 'Anyone can tell at once that the reversed film shows something that doesn’t happen.',
     dur: 1.9,
   },

@@ -28,7 +28,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 2.2,
   },
   {
-    p: 12, x: 80,
+    p: 165, x: 80,
     text: 'Or you could go and sit with them. Care ethicists argue that moral theory long neglected the second response.',
     dur: 2.4,
   },
@@ -39,7 +39,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 3.3,
   },
   {
-    p: 47, x: 80, grid: 1,
+    p: 267, x: 80, grid: 1,
     text: 'Their categories apply to anyone and name no particular person.',
     dur: 1.8,
   },
@@ -88,7 +88,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 4,
   },
   {
-    p: 39, x: 182, grid: 0.5, oth: 1, thread: 1,
+    p: 169, x: 182, grid: 0.5, oth: 1, thread: 1,
     text: 'Gilligan called this a different moral voice, centred on responsibility and relationships.',
     dur: 1.8,
   },
@@ -131,7 +131,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 3.3,
   },
   {
-    p: 38, x: 112, grid: 0.3, oth: 1, thread: 1,
+    p: 266, x: 112, grid: 0.3, oth: 1, thread: 1,
     text: 'Noddings holds that ethical caring grows from natural caring, such as a parent’s care for a child.',
     dur: 1.8,
   },

@@ -43,7 +43,7 @@ export const BEATS: Logic10Beat[] = [
     dur: 3.6,
   },
   {
-    p: 38, x: 96, arg: 1, slot: 1, hid: 1,
+    p: 266, x: 96, arg: 1, slot: 1, hid: 1,
     text: 'To assess such an argument, its unstated premise has to be made explicit.',
     dur: 1.8,
   },
@@ -67,7 +67,7 @@ export const BEATS: Logic10Beat[] = [
     dur: 1.8,
   },
   {
-    p: 30, x: 158, arg: 1, slot: 1, hid: 2,
+    p: 266, x: 158, arg: 1, slot: 1, hid: 2,
     text: 'Once stated, the premise can be assessed, and it’s false: many rich people are unhappy.',
     dur: 3,
   },

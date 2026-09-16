@@ -63,7 +63,7 @@ export const BEATS: Epi13Beat[] = [
     dur: 2.4,
   },
   {
-    p: 29, x: 168, grid: 1, off: 2, winner: 1,
+    p: 258, x: 168, grid: 1, off: 2, winner: 1,
     text: 'Together, the verdicts imply that no ticket wins, yet you know one ticket will. Henry Kyburg set out this lottery paradox in 1961.',
     dur: 2.6,
   },

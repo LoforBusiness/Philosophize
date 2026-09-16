@@ -53,7 +53,7 @@ export const BEATS: Epi19Beat[] = [
     dur: 1.8,
   },
   {
-    p: 13, x: 132, doors: 1, chip: 1, stray: 1,
+    p: 266, x: 132, doors: 1, chip: 1, stray: 1,
     text: 'But the credentials concern the heart, not nutrition. That doesn’t make the answer authoritative on its own.',
     dur: 1.9,
   },

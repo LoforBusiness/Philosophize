@@ -47,7 +47,7 @@ export const BEATS: Log17Beat[] = [
     dur: 2.6,
   },
   {
-    p: 2, x: 200, pair: 1, marks: 1,
+    p: 266, x: 200, pair: 1, marks: 1,
     text: 'The right claim rests on nothing but the speaker’s word, which makes it testimony.',
     dur: 2,
   },

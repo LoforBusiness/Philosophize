@@ -35,7 +35,7 @@ export const BEATS: Ethics34Beat[] = [
     dur: 2.9,
   },
   {
-    p: 47, x: 46, pop: 0.45,
+    p: 267, x: 46, pop: 0.45,
     text: 'The total still rises, because the added lives more than offset the lost quality.',
     dur: 1.8,
   },

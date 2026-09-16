@@ -59,7 +59,7 @@ export const BEATS: Aes21Beat[] = [
     dur: 3,
   },
   {
-    p: 13, x: 132, works: 1, burn: 1,
+    p: 266, x: 132, works: 1, burn: 1,
     text: 'The painting was the physical object itself. Nelson Goodman called such works autographic, and works like the novel allographic.',
     dur: 1.8,
   },

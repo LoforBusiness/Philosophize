@@ -334,6 +334,81 @@ export const LIVING_RUN = {
   46: hold(74),   // slump              → slouched on one hip
 };
 
+// ── A BEAT WHERE NOTHING ELSE MOVES ─────────────────────────────────────────
+//
+// `LIVING_RUN` above is about a split RUN: several beats of one sentence, where
+// the pose must be one continuous movement all the way through. This is the
+// narrower and more urgent case underneath it — a beat on which NO SCENE CHANNEL
+// CHANGES AT ALL, so the figure is the only thing on screen that can move.
+//
+// Measured across the corpus: 978 taps of 2,461 leave the scene frozen, and on
+// 334 of those the figure is holding a `bt`-driven pose as well, so the entire
+// picture is a photograph while the words advance. A reader described it exactly:
+// *"sometimes there will just be three tabs in one lesson where there is no
+// animation above the words. Maybe the stickman does a really small movement."*
+// 84 lessons have a run of three or more.
+//
+// ── WHY THIS TABLE IS NOT `LIVING_RUN` ──────────────────────────────────────
+//
+// Two reasons, and the second is the one that matters.
+//
+// `LIVING_RUN` is deliberately strict — "only EXACT re-statements are listed" —
+// because a run is several beats long and a wrong pose is wrong for all of them.
+// That strictness is right and is kept here: every pair below is the same gesture
+// alive rather than a near-enough one, and the poses with no honest twin are
+// ABSENT rather than approximated.
+//
+// But a still beat has a second requirement a run does not: the twin has to be
+// big enough to SEE. `check:idle` measures that — `stand()` alone travels 3.58
+// units over its own cycle, and before that check existed 20 of the 32 living
+// holds travelled no further than it did. A hold that is technically alive and
+// visually identical to standing there fixes nothing, and every pose named here
+// is one `check:idle` classes as READING.
+//
+// ── WHAT IS DELIBERATELY NOT HERE ───────────────────────────────────────────
+//
+// Every pose that WORKS AT A PROP or is on the FLOOR: write-on-board,
+// tap-high-on-board, carry-load, set-it-down, pull-lever, hold-up, reach-up-high,
+// stamp, receive, grasp-pull, sign-write, sitting and kneeling. A living hold puts
+// the hand somewhere else, and if the narration says he is writing on the board
+// then his hand has to be on the board — A1 outranks this entirely. Those beats
+// need the SCENE to change, not the figure, and they are 51 of the 334.
+const STILL_TWIN = {
+  0: hold(59),    // neutral stand      → weight shift
+  1: hold(68),    // explain            → talking with the hands
+  2: hold(167),   // present-up         → one hand out, still offering
+  3: hold(69),    // count              → counting the points
+  4: hold(158),   // think              → thinking it over (61 is "barely moving" by design)
+  5: hold(160),   // sweep              → explaining, the hands never quite stop
+  7: hold(161),   // both-wide          → waiting for the answer, open
+  8: hold(159),   // shrug              → unconvinced, and staying that way
+  9: hold(64),    // hand on hip        → hands on the hips
+  10: hold(62),   // arms crossed       → arms folded
+  11: hold(158),  // forehead           → thinking it over, hand at the face
+  12: hold(66),   // scratch-head       → fidgeting
+  13: hold(167),  // point forward      → one hand out, still offering
+  14: hold(167),  // reach-out          → one hand out, still offering
+  15: hold(159),  // recoil             → unconvinced, drawn back
+  19: hold(70),   // adore              → hands clasped
+  21: hold(77),   // weigh              → weighing it, slowly
+  22: hold(71),   // clutch-chest       → deep breathing
+  25: hold(65),   // gaze up            → gazing up
+  28: hold(64),   // power pose         → hands on the hips
+  29: hold(159),  // push-out           → unconvinced
+  30: hold(167),  // offer-up           → one hand out, still offering
+  33: hold(161),  // release-open       → waiting for the answer, open
+  34: hold(163),  // shield-eyes        → looking off
+  35: hold(68),   // proclaim           → talking with the hands
+  38: hold(167),  // gesture-down       → one hand out, still offering
+  39: hold(70),   // clasp-forward      → hands clasped
+  44: hold(63),   // hands behind back  → hands behind the back
+  45: hold(60),   // double take        → listening
+  46: hold(74),   // slump              → slouched on one hip
+  47: hold(168),  // frame-it-up        → weighing it, endlessly; two palms
+};
+
+export { STILL_TWIN };
+
 // ── WHERE A JOKE MAY NOT GO ──────────────────────────────────────────────────
 //
 // This is the rule that keeps the whole exercise from being a disaster. A

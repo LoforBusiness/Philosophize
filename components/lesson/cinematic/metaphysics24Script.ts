@@ -61,7 +61,7 @@ export const BEATS: Meta24Beat[] = [
     dur: 3,
   },
   {
-    p: 29, x: 168, grains: 1, lamp: 1,
+    p: 258, x: 168, grains: 1, lamp: 1,
     text: 'This is the sorites paradox, named after the Greek word for heap. One of the assumptions must be given up, and philosophers disagree about which.',
     dur: 2.2,
   },

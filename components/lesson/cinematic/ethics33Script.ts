@@ -42,7 +42,7 @@ export const BEATS: Ethics33Beat[] = [
     dur: 3.5,
   },
   {
-    p: 19, x: 48, give: 0.15, more: 1,
+    p: 169, x: 48, give: 0.15, more: 1,
     text: 'So the question is what, if anything, permits you to stop giving.',
     dur: 1.8,
   },

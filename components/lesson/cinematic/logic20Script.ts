@@ -45,7 +45,7 @@ export const BEATS: Log20Beat[] = [
     dur: 2.6,
   },
   {
-    p: 2, x: 200, boards: 1, struts: 1,
+    p: 266, x: 200, boards: 1, struts: 1,
     text: 'A second repeats some of them. The third repeats a single reason.',
     dur: 2.2,
   },

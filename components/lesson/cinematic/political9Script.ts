@@ -39,7 +39,7 @@ export const BEATS: P9Beat[] = [
     dur: 3.8,
   },
   {
-    vote: 1, tally: true, one: 22,
+    vote: 1, tally: true, one: 170,
     text: 'In Plato’s analogy, a crew that chooses its captain by vote follows whoever flatters it best.',
     dur: 1.8,
   },

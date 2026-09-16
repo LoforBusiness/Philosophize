@@ -54,7 +54,7 @@ export const BEATS: Eth15Beat[] = [
     cite: 'Ayer’s emotivism',
   },
   {
-    g: 13, plain: 1, moral: 1, tilt: 0,
+    g: 266, plain: 1, moral: 1, tilt: 0,
     dur: 2.5,
     text: 'Instead, the word expresses disapproval. Ayer compares it to saying the sentence in a tone of horror.',
   },
@@ -78,7 +78,7 @@ export const BEATS: Eth15Beat[] = [
     cite: 'The realist answers',
   },
   {
-    g: 5, plain: 1, moral: 1, tilt: 0, doubt: 1,
+    g: 259, plain: 1, moral: 1, tilt: 0, doubt: 1,
     dur: 1.8,
     text: 'So a test for observable facts would miss moral facts, if they exist.',
   },

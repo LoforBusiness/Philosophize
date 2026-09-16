@@ -30,7 +30,7 @@ export const BEATS: Pol14Beat[] = [
     cite: 'Twenty-five cents a ticket',
   },
   {
-    g: 2, rows: 2,
+    g: 266, rows: 2,
     dur: 1.8,
     text: 'Every single transfer is free. Each spectator chooses to pay, and the star chooses to play.',
   },

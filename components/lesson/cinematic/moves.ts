@@ -1782,20 +1782,20 @@ export function actStance(code: number, t: number, u: number): Stance {
     // Nobody stands evenly on two legs for long. `stand` already does a version
     // of this at under two units; this is the same idea made visible, with the
     // pelvis riding out over the loaded leg and sinking onto it.
-    const w = life2(t, 0.26, 0.163, 0.9);
+    const w = life2(t, 0.44, 0.28, 0.9);
     const load = Math.abs(w);
     return {
       ...s,
-      tilt: s.tilt + w * 0.025,
-      neck: s.neck + w * 0.035,
-      bob: s.bob - load * 1.6,
-      footL: { x: -5 - w * 1.8, y: 0 }, footR: { x: 5 - w * 1.8, y: 0 },
+      tilt: s.tilt + w * 0.042,
+      neck: s.neck + w * 0.055,
+      bob: s.bob - load * 2.6,
+      footL: { x: -5 - w * 3.0, y: 0 }, footR: { x: 5 - w * 3.0, y: 0 },
       // RULE 1b. The hands used to hang at x ±5.5, inside a trunk 12 thick drawn
       // in the same ink, so the forearms showed about five units of themselves —
       // two pixels at lesson size — and the plainest idle in the library rendered
       // as a head on a slab. They swing with the weight from out here instead.
-      fistL: { x: -14 - w * 2.2, y: 6 + load * 0.6 },
-      fistR: { x: 14 - w * 2.2, y: 6 + load * 0.6 },
+      fistL: { x: -14 - w * 3.6, y: 6 + load * 1.1 },
+      fistR: { x: 14 - w * 3.6, y: 6 + load * 1.1 },
     };
   }
   if (code === 60) {                             // LISTENING — inclined, with the odd small nod
@@ -1807,11 +1807,11 @@ export function actStance(code: number, t: number, u: number): Stance {
     const nod = Math.pow(gate, 14) * Math.sin(t * 6.4);
     return {
       ...s,
-      neck: s.neck + 0.09 + drift * 0.035 + nod * 0.075,
-      tilt: s.tilt + 0.015 + nod * 0.012,
+      neck: s.neck + 0.09 + drift * 0.07 + nod * 0.075,
+      tilt: s.tilt + 0.015 + drift * 0.035 + nod * 0.012,
       // Out at 14 (rule 1b): at ±5.5 the arms were inside the trunk and a pose
       // whose whole content is a small nod had nothing else visible to carry it.
-      fistL: { x: -14 + drift * 1.4, y: 6 }, fistR: { x: 14 + drift * 1.2, y: 6 },
+      fistL: { x: -14 + drift * 2.8, y: 6 }, fistR: { x: 14 + drift * 2.5, y: 6 },
     };
   }
   if (code === 61) {                             // CHIN IN HAND — thinking, and barely moving
@@ -1837,15 +1837,15 @@ export function actStance(code: number, t: number, u: number): Stance {
     // the torso" rule explicitly exempts: the bend is meant to be seen. Every ten
     // seconds or so the fold RE-SETTLES — the top arm shifts and the weight goes
     // over — because a folded figure that never adjusts reads as a statue.
-    const w = life2(t, 0.22, 0.14, 1.9);
+    const w = life2(t, 0.34, 0.22, 1.9);
     const gate = Math.max(0, Math.sin(t * 0.31 + 0.8));
     const adj = Math.pow(gate, 20);
     return {
       ...s,
-      tilt: s.tilt + 0.03 + w * 0.02,
-      neck: s.neck + 0.03,
-      bob: s.bob - Math.abs(w) * 1.1 - adj * 0.8,
-      footL: { x: -6 - w * 1.4, y: 0 }, footR: { x: 6 - w * 1.4, y: 0 },
+      tilt: s.tilt + 0.03 + w * 0.045,
+      neck: s.neck + 0.03 + w * 0.03,
+      bob: s.bob - Math.abs(w) * 2.1 - adj * 0.8,
+      footL: { x: -6 - w * 2.9, y: 0 }, footR: { x: 6 - w * 2.9, y: 0 },
       // (18, −22) and (13, −17) are rig's own arms-crossed targets and they are
       // not a preference. At (8, −19) / (−7, −22) — which is where this pose was
       // first written, and where anyone would write it — the hands sit almost on
@@ -1866,11 +1866,11 @@ export function actStance(code: number, t: number, u: number): Stance {
     const up = Math.max(0, r);
     return {
       ...s,
-      tilt: s.tilt - r * 0.05,
-      neck: s.neck - up * 0.05,
-      bob: s.bob + up * 2.6,
-      footL: { x: -5, y: -up * 2.4 }, footR: { x: 5, y: -up * 2.4 },
-      fistL: { x: -12 - r * 1.4, y: 1 }, fistR: { x: -13 - r * 1.4, y: 3 },
+      tilt: s.tilt - r * 0.09,
+      neck: s.neck - up * 0.09,
+      bob: s.bob + up * 4.4,
+      footL: { x: -5, y: -up * 4.0 }, footR: { x: 5, y: -up * 4.0 },
+      fistL: { x: -12 - r * 2.6, y: 1 }, fistR: { x: -13 - r * 2.6, y: 3 },
     };
   }
   if (code === 64) {                             // HANDS ON THE HIPS — surveying, chest open
@@ -1878,13 +1878,13 @@ export function actStance(code: number, t: number, u: number): Stance {
     // folded forearm encloses a triangle of paper against the torso and the arm
     // reads as a hole punched through the body (rule 1); behind them the same
     // fold has nothing but background inside it.
-    const w = life2(t, 0.24, 0.15, 2.6);
+    const w = life2(t, 0.38, 0.24, 2.6);
     return {
       ...s,
-      tilt: s.tilt - 0.04 + w * 0.02,
-      neck: s.neck - 0.05,
-      bob: s.bob - Math.abs(w) * 0.9,
-      footL: { x: -8 - w * 1.2, y: 0 }, footR: { x: 8 - w * 1.2, y: 0 },
+      tilt: s.tilt - 0.04 + w * 0.05,
+      neck: s.neck - 0.05 + w * 0.11,
+      bob: s.bob - Math.abs(w) * 2.0,
+      footL: { x: -8 - w * 2.6, y: 0 }, footR: { x: 8 - w * 2.6, y: 0 },
       // FURTHER BACK, not further out — the comment above is why the hands are
       // behind rather than in front, and rule 1b is why −9 was not far enough:
       // the pelvis is 12 wide, so a hand at −9 keeps the whole forearm inside the
@@ -1894,15 +1894,16 @@ export function actStance(code: number, t: number, u: number): Stance {
     };
   }
   if (code === 65) {                             // GAZING UP — head back, arms forgotten
-    const d = life2(t, 0.23, 0.145, 0.3);
+    const d = life2(t, 0.36, 0.23, 0.3);
     return {
       ...s,
-      tilt: s.tilt - 0.05, neck: -0.30 + d * 0.05,
-      bob: s.bob + 0.5,
+      tilt: s.tilt - 0.05 + d * 0.07, neck: -0.30 + d * 0.13,
+      bob: s.bob + 0.5 - Math.abs(d) * 2.4,
       // FORGOTTEN, NOT ABSENT (rule 1b). The name is the intent — the arms are
       // doing nothing while he looks up — but at ±5.5 they were not hanging, they
       // were gone, and this was the second-commonest code in the app.
-      fistL: { x: -14 + d * 1.6, y: 7 }, fistR: { x: 14 + d * 1.4, y: 7 },
+      fistL: { x: -14 + d * 2.4, y: 7 }, fistR: { x: 14 + d * 2.2, y: 7 },
+      footL: { x: -5 - d * 2.2, y: 0 }, footR: { x: 5 - d * 2.2, y: 0 },
     };
   }
   if (code === 66) {                             // FIDGETING — nothing is ever quite still
@@ -1935,9 +1936,9 @@ export function actStance(code: number, t: number, u: number): Stance {
     const w = life2(t, 0.5, 0.31, 0.4);
     return {
       ...s,
-      tilt: s.tilt + 0.04, neck: s.neck + 0.02 + w * 0.05,
-      bob: s.bob - 0.4,
-      footL: { x: -6, y: 0 }, footR: { x: 7, y: -tap * 3.4 },
+      tilt: s.tilt + 0.04 + w * 0.035, neck: s.neck + 0.02 + w * 0.085,
+      bob: s.bob - 0.4 - tap * 0.5,
+      footL: { x: -6 - w * 1.6, y: 0 }, footR: { x: 7 - w * 1.6, y: -tap * 4.6 },
       fistL: { x: 18, y: -22 }, fistR: { x: 13, y: -17 },   // the fold, forward — see 62
     };
   }
@@ -1983,14 +1984,14 @@ export function actStance(code: number, t: number, u: number): Stance {
     };
   }
   if (code === 70) {                             // HANDS CLASPED — held in front; nerves
-    const th = Math.sin(t * 2.6) * 1.2 + Math.sin(t * 1.7) * 0.8;
-    const w = life2(t, 0.33, 0.21, 2.9);
+    const th = Math.sin(t * 2.6) * 2.2 + Math.sin(t * 1.7) * 1.5;
+    const w = life2(t, 0.46, 0.29, 2.9);
     return {
       ...s,
-      tilt: s.tilt + 0.04, neck: s.neck + 0.07,
-      bob: s.bob - Math.abs(w) * 1.2,
-      footL: { x: -5 - w * 1.6, y: 0 }, footR: { x: 5 - w * 1.6, y: 0 },
-      fistL: { x: 12 + th * 0.5, y: -3 }, fistR: { x: 13 - th * 0.5, y: -2 },
+      tilt: s.tilt + 0.04 + w * 0.035, neck: s.neck + 0.07 + w * 0.03,
+      bob: s.bob - Math.abs(w) * 2.2,
+      footL: { x: -5 - w * 2.9, y: 0 }, footR: { x: 5 - w * 2.9, y: 0 },
+      fistL: { x: 12 + th * 1.1, y: -3 }, fistR: { x: 13 - th * 1.1, y: -2 },
     };
   }
   if (code === 71) {                             // DEEP BREATHING — a big slow cycle
@@ -2039,15 +2040,15 @@ export function actStance(code: number, t: number, u: number): Stance {
   if (code === 74) {                             // SLOUCHED ON ONE HIP — bored
     // The weight is PARKED, not drifting: one hip carries it for the whole beat
     // and only the free arm moves. That asymmetry is the entire read.
-    const d = life2(t, 0.4, 0.26, 1.1);
+    const d = life2(t, 0.5, 0.32, 1.1);
     return {
       ...s,
-      tilt: s.tilt + 0.06, neck: s.neck + 0.10 + d * 0.02,
-      bob: s.bob - 2.2,
+      tilt: s.tilt + 0.06 + d * 0.055, neck: s.neck + 0.10 + d * 0.09,
+      bob: s.bob - 2.2 - Math.abs(d) * 2.0,
       footL: { x: -9, y: 0 }, footR: { x: 3, y: 0 },
       // The crossing hand goes to 15, not 4: on the sternum the forearm is ink on
       // ink and the arm vanishes, which turns a slouch into a figure with one arm.
-      fistL: { x: -8, y: 2 }, fistR: { x: 15 + d * 1.5, y: -12 },
+      fistL: { x: -12 - d * 1.4, y: 2 + d * 0.8 }, fistR: { x: 15 + d * 3.6, y: -12 },
     };
   }
   if (code === 75) {                             // AT ATTENTION — almost nothing, on purpose
@@ -2071,9 +2072,9 @@ export function actStance(code: number, t: number, u: number): Stance {
     const sh = life2(t, 0.7, 0.44, 2.0);
     return {
       ...s,
-      tilt: s.tilt + 0.05, neck: s.neck + 0.09,
-      bob: s.bob - 1.4 + Math.abs(r) * 0.3,
-      fistL: { x: 13 + r * 2.6, y: -8 }, fistR: { x: 14 - r * 2.6, y: -7 + sh * 0.6 },
+      tilt: s.tilt + 0.05 + sh * 0.03, neck: s.neck + 0.09 + sh * 0.05,
+      bob: s.bob - 1.4 + Math.abs(r) * 0.8,
+      fistL: { x: 13 + r * 3.4, y: -8 }, fistR: { x: 14 - r * 3.4, y: -7 + sh * 1.3 },
     };
   }
   if (code === 77) {                             // WEIGHING IT, SLOWLY — one open palm, up and down
@@ -2096,11 +2097,11 @@ export function actStance(code: number, t: number, u: number): Stance {
     const nod = Math.pow(Math.max(0, Math.sin(t * 0.6 + 1.4)), 12) * Math.sin(t * 6.8);
     return {
       ...s,
-      tilt: s.tilt - 0.18, neck: s.neck + 0.14 + nod * 0.06,
-      bob: s.bob - 1.6,
-      footL: { x: -11, y: 0 }, footR: { x: 7, y: 0 },
-      fistL: { x: -6, y: 4 },
-      fistR: { x: 14 + d * 0.8, y: -38 },
+      tilt: s.tilt - 0.18 + d * 0.035, neck: s.neck + 0.14 + d * 0.05 + nod * 0.09,
+      bob: s.bob - 1.6 - Math.abs(d) * 1.0,
+      footL: { x: -11 - d * 1.8, y: 0 }, footR: { x: 7 - d * 1.8, y: 0 },
+      fistL: { x: -13, y: 4 + d * 0.9 },
+      fistR: { x: 14 + d * 1.4, y: -38 },
       adv: 2,
     };
   }
@@ -3520,13 +3521,14 @@ export function actStance(code: number, t: number, u: number): Stance {
     };
   }
   if (code === 158) {                            // THINKING IT OVER — chin, weight, and the odd shift
-    const shift = Math.sin(t * 0.43);
+    const shift = Math.sin(t * 0.6);
     const settle = Math.max(0, Math.sin(t * 0.27) - 0.86) * 6;
     return {
       ...s,
-      tilt: s.tilt + shift * 0.03,
-      neck: s.neck + 0.10 + settle * 0.02,
-      footL: { x: -5, y: 0 }, footR: { x: 5, y: 0 },
+      tilt: s.tilt + shift * 0.07,
+      neck: s.neck + 0.10 + shift * 0.055 + settle * 0.03,
+      bob: s.bob - Math.abs(shift) * 1.4,
+      footL: { x: -5 - shift * 2.4, y: 0 }, footR: { x: 5 - shift * 2.4, y: 0 },
       // BOTH HANDS FORWARD OF THE TRUNK, and a reader named the pose that taught
       // it: *"I don't like that movement of the hands, it doesn't seem quite
       // natural."* Drawn at lesson size this was a head with a bump on it and no
@@ -3546,19 +3548,21 @@ export function actStance(code: number, t: number, u: number): Stance {
       // standing there turning it over. It hangs at hip height rather than at the
       // thigh, because a forearm dropped to y 5 lands on a swinging leg and the
       // ink-over-ink rule bites one limb further down.
-      fistL: { x: 15, y: -3 + shift * 1.8 },
+      fistL: { x: 15 + shift * 1.2, y: -3 + shift * 3.4 },
       // Face-adjacent by design; registered in FACE_OK beside act 61.
-      fistR: { x: 12 + shift * 0.5, y: -34 + settle * 1.2 },
+      fistR: { x: 12 + shift * 0.9, y: -34 + settle * 1.6 },
     };
   }
   if (code === 159) {                            // UNCONVINCED, AND STAYING THAT WAY
-    const rock = Math.sin(t * 0.55);
+    const rock = Math.sin(t * 0.72);
     return {
       ...s,
-      tilt: s.tilt + 0.03 + rock * 0.02,
-      neck: s.neck - 0.20 + rock * 0.03,
-      fistL: { x: -14, y: -2 },
-      fistR: { x: 14, y: -2 + rock * 1.0 },
+      tilt: s.tilt + 0.03 + rock * 0.065,
+      neck: s.neck - 0.20 + rock * 0.09,
+      bob: s.bob - Math.abs(rock) * 1.9,
+      footL: { x: -5 - rock * 2.8, y: 0 }, footR: { x: 5 - rock * 2.8, y: 0 },
+      fistL: { x: -14 - rock * 1.6, y: -2 },
+      fistR: { x: 14 + rock * 1.4, y: -2 + rock * 2.2 },
     };
   }
   if (code === 160) {                            // EXPLAINING — the hands never quite stop
@@ -3576,29 +3580,30 @@ export function actStance(code: number, t: number, u: number): Stance {
     };
   }
   if (code === 161) {                            // WAITING FOR THE ANSWER — open, patient, watching
-    const breathe = Math.sin(t * 0.62);
+    const breathe = Math.sin(t * 0.8);
     return {
       ...s,
-      tilt: s.tilt - 0.03,
-      neck: s.neck + 0.06 + breathe * 0.02,
-      bob: s.bob + breathe * 0.35,
-      footL: { x: -5, y: -breathe * 0.25 }, footR: { x: 5, y: -breathe * 0.25 },
-      fistL: { x: -16, y: -2 + breathe * 1.0 },
-      fistR: { x: 16, y: -2 + breathe * 1.0 },
+      tilt: s.tilt - 0.03 + breathe * 0.04,
+      neck: s.neck + 0.06 + breathe * 0.06,
+      bob: s.bob + breathe * 1.2,
+      footL: { x: -5 - breathe * 1.4, y: -breathe * 0.9 }, footR: { x: 5 - breathe * 1.4, y: -breathe * 0.9 },
+      fistL: { x: -16 - breathe * 1.4, y: -2 + breathe * 2.4 },
+      fistR: { x: 16 + breathe * 1.4, y: -2 + breathe * 2.4 },
     };
   }
   if (code === 162) {                            // PACING ON THE SPOT — turning it over on the feet
     const step = Math.sin(t * 1.25);
     return {
       ...s,
-      tilt: s.tilt + step * 0.03,
-      neck: s.neck + 0.08,
-      footL: { x: -5, y: Math.max(0, step) * -2.6 },
-      footR: { x: 5, y: Math.max(0, -step) * -2.6 },
+      tilt: s.tilt + step * 0.065,
+      neck: s.neck + 0.08 + step * 0.05,
+      bob: s.bob - Math.abs(step) * 1.4,
+      footL: { x: -5 - step * 2.4, y: Math.max(0, step) * -5.2 },
+      footR: { x: 5 - step * 2.4, y: Math.max(0, -step) * -5.2 },
       // 13 rather than 6, for the reason act 163 states: at 6 the forearm is
       // inside the torso stroke and the figure pacing has no arms to swing.
-      fistL: { x: -13 + step * 1.6, y: 5 },
-      fistR: { x: 14 - step * 1.6, y: 5 },
+      fistL: { x: -13 + step * 3.4, y: 5 },
+      fistR: { x: 14 - step * 3.4, y: 5 },
     };
   }
   if (code === 163) {                            // LOOKING OFF — attention somewhere else entirely
@@ -3612,14 +3617,15 @@ export function actStance(code: number, t: number, u: number): Stance {
     // 13 puts the forearm's inner edge 1.5 units clear of the torso's outer one,
     // which is the least that reads. It is NOT a raised arm — y stays at rest —
     // so the pose still says "arms forgotten"; it just has arms to forget.
-    const drift = Math.sin(t * 0.33);
+    const drift = Math.sin(t * 0.42);
     const back = Math.max(0, Math.sin(t * 0.21) - 0.9) * 8;
     return {
       ...s,
-      tilt: s.tilt - 0.04,
-      neck: s.neck - 0.24 + drift * 0.04 + back * 0.03,
-      fistL: { x: -14 - drift * 0.8, y: 2 + drift * 0.6 },
-      fistR: { x: 15 - drift * 0.8, y: 2 - drift * 0.6 },
+      tilt: s.tilt - 0.04 + drift * 0.09,
+      neck: s.neck - 0.24 + drift * 0.10 + back * 0.05,
+      bob: s.bob - Math.abs(drift) * 0.8,
+      fistL: { x: -14 - drift * 2.4, y: 2 + drift * 1.4 },
+      fistR: { x: 15 - drift * 2.4, y: 2 - drift * 1.4 },
     };
   }
   if (code === 164) {                            // NODDING ALONG — following, and agreeing as it goes
@@ -3627,45 +3633,53 @@ export function actStance(code: number, t: number, u: number): Stance {
     const slow = Math.sin(t * 0.4);
     return {
       ...s,
-      tilt: s.tilt + slow * 0.02,
-      neck: s.neck + 0.08 + Math.max(0, nod) * 0.12,
-      fistL: { x: -14, y: 2 },
-      fistR: { x: 15, y: 2 + slow * 0.8 },
+      tilt: s.tilt + slow * 0.05 + Math.max(0, nod) * 0.03,
+      neck: s.neck + 0.08 + Math.max(0, nod) * 0.20,
+      bob: s.bob - Math.max(0, nod) * 1.4,
+      footL: { x: -5 - slow * 2.2, y: 0 }, footR: { x: 5 - slow * 2.2, y: 0 },
+      fistL: { x: -14 - slow * 2.4, y: 2 },
+      fistR: { x: 15 - slow * 2.4, y: 2 + slow * 2.8 },
     };
   }
   if (code === 165) {                            // ARMS FOLDED, ONE FINGER GOING
     const tap = Math.max(0, Math.sin(t * 3.1));
+    const sway = Math.sin(t * 0.37);
     const settle = Math.max(0, Math.sin(t * 0.29) - 0.88) * 5;
     return {
       ...s,
-      tilt: s.tilt + 0.02,
-      neck: s.neck + 0.04 + settle * 0.02,
-      fistL: { x: -11, y: -12 },
-      fistR: { x: 11, y: -12 - tap * 1.6 },
+      tilt: s.tilt + 0.02 + sway * 0.04,
+      neck: s.neck + 0.04 + sway * 0.045 + settle * 0.02,
+      bob: s.bob - Math.abs(sway) * 2.0,
+      footL: { x: -5 - sway * 3.2, y: 0 }, footR: { x: 5 - sway * 3.2, y: 0 },
+      fistL: { x: -11 - sway * 1.2, y: -12 },
+      fistR: { x: 11 - sway * 1.2, y: -12 - tap * 2.6 },
     };
   }
   if (code === 166) {                            // HOLDING THE PAGE, LISTENING — half in the book
-    const lift = Math.sin(t * 0.5);
+    const lift = Math.sin(t * 0.65);
     const look = Math.max(0, Math.sin(t * 0.36) - 0.82) * 5;
     return {
       ...s,
-      tilt: s.tilt - 0.04,
+      tilt: s.tilt - 0.04 + lift * 0.03 - look * 0.04,
       // The head comes UP out of the page every so often, which is the whole
       // gesture: somebody reading who keeps being interrupted by their own
       // thought.
-      neck: s.neck + 0.24 - look * 0.09,
-      fistL: { x: 14, y: -13 + lift * 0.8 },
-      fistR: { x: 25, y: -17 + lift * 0.9 },
+      neck: s.neck + 0.24 + lift * 0.055 - look * 0.20,
+      bob: s.bob - Math.abs(lift) * 1.2,
+      fistL: { x: 14 + lift * 2.0, y: -13 + lift * 2.8 },
+      fistR: { x: 25 + lift * 2.0, y: -17 + lift * 3.0 },
     };
   }
   if (code === 167) {                            // ONE HAND OUT, STILL OFFERING
-    const breathe = Math.sin(t * 0.58);
+    const breathe = Math.sin(t * 0.74);
     return {
       ...s,
-      tilt: s.tilt - 0.03,
-      neck: s.neck + 0.05 + breathe * 0.02,
-      fistL: { x: -5, y: 6 },
-      fistR: { x: 20 + breathe * 1.4, y: -6 + breathe * 1.2 },
+      tilt: s.tilt - 0.03 + breathe * 0.04,
+      neck: s.neck + 0.05 + breathe * 0.06,
+      bob: s.bob + breathe * 1.3,
+      footL: { x: -5 - breathe * 2.0, y: 0 }, footR: { x: 5 - breathe * 2.0, y: 0 },
+      fistL: { x: -13 - breathe * 1.2, y: 6 + breathe * 1.4 },
+      fistR: { x: 21 + breathe * 3.6, y: -6 + breathe * 3.2 },
     };
   }
   if (code === 168) {                            // WEIGHING IT, ENDLESSLY — the two palms never settle

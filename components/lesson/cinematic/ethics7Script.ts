@@ -40,7 +40,7 @@ export const BEATS: Ethics7Beat[] = [
     dur: 1.8,
   },
   {
-    p: 2, x: 170, laneA: 1, carB: -70,
+    p: 266, x: 170, laneA: 1, carB: -70,
     text: 'The first driver looks away and back, and the road is still clear. She never thinks about it again.',
     dur: 3.3,
   },
@@ -62,7 +62,7 @@ export const BEATS: Ethics7Beat[] = [
     dur: 2.8,
   },
   {
-    p: 47, x: 300, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 150,
+    p: 267, x: 300, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 150,
     text: 'Nothing inside the drivers is different at all. Only their circumstances on the road differ.',
     dur: 2,
   },
@@ -82,7 +82,7 @@ export const BEATS: Ethics7Beat[] = [
     dur: 1.8,
   },
   {
-    p: 15, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
+    p: 258, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
     text: 'The second driver faces trial for causing a death. The first goes home, never learning what might have happened.',
     dur: 3,
   },

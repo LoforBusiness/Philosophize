@@ -38,7 +38,7 @@ export const BEATS: Logic33Beat[] = [
     dur: 2.7,
   },
   {
-    p: 19, x: 52, bend: 1,
+    p: 169, x: 52, bend: 1,
     text: 'No measurement is left unexplained, so this curve seems to be the best available account of the data.',
     dur: 1.8,
   },

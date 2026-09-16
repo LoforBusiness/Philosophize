@@ -61,7 +61,7 @@ export const BEATS: Logic7Beat[] = [
     dur: 3.7,
   },
   {
-    p: 2, x: 124, rule: 1, fact: 1, concl: 1,
+    p: 266, x: 124, rule: 1, fact: 1, concl: 1,
     text: 'The conclusion about the streets follows from the premises alone, without anyone observing the streets.',
     dur: 1.8,
   },

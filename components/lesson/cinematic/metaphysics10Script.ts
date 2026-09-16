@@ -33,7 +33,7 @@ export const BEATS: Metaphysics10Beat[] = [
     dur: 2.9,
   },
   {
-    p: 13, x: 64,
+    p: 266, x: 64,
     text: 'Philosophers call a feature that many things share a universal. What, then, is redness, and where does it exist?',
     dur: 1.8,
   },
@@ -44,7 +44,7 @@ export const BEATS: Metaphysics10Beat[] = [
     dur: 3.5,
   },
   {
-    p: 47, x: 124, card: 1,
+    p: 267, x: 124, card: 1,
     text: 'The competing theories differ over where such an item exists, if it exists at all.',
     dur: 1.8,
   },
@@ -61,7 +61,7 @@ export const BEATS: Metaphysics10Beat[] = [
     dur: 4,
   },
   {
-    p: 5, x: 124, tags: 1,
+    p: 259, x: 124, tags: 1,
     text: 'On this view, if no red objects existed, redness wouldn’t exist either.',
     dur: 1.8,
   },
@@ -85,7 +85,7 @@ export const BEATS: Metaphysics10Beat[] = [
     dur: 3.9,
   },
   {
-    p: 8, x: 124, str: 1, card: 3,
+    p: 258, x: 124, str: 1, card: 3,
     text: 'On this view, there’s no further item called redness, in the red things or above them.',
     dur: 1.8,
   },

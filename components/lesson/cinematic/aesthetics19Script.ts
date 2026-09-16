@@ -45,7 +45,7 @@ export const BEATS: Aes19Beat[] = [
     dur: 1.8,
   },
   {
-    p: 13, x: 124, row: 1, frame: 3, verdict: 1,
+    p: 266, x: 124, row: 1, frame: 3, verdict: 1,
     text: 'Seen only as scenery, the marsh looks ugly. Allen Carlson calls this way of looking the landscape model, and rejects it.',
     dur: 3.3,
   },

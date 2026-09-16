@@ -45,7 +45,7 @@ export const BEATS: Met19Beat[] = [
     dur: 2.4,
   },
   {
-    p: 2, x: 200, props: 1, peg: 0.16, strip: 0.4,
+    p: 266, x: 200, props: 1, peg: 0.16, strip: 0.4,
     text: 'Now remove the shape, the taste, the weight and the location as well.',
     dur: 1.8,
   },

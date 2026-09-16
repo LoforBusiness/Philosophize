@@ -49,7 +49,7 @@ export const BEATS: Epi17Beat[] = [
     cite: 'Normal science',
   },
   {
-    g: 13, facts: 1, frame: 1, odd: 3,
+    g: 266, facts: 1, frame: 1, odd: 3,
     dur: 2,
     text: 'Kuhn calls this work within the frame normal science. He calls the frame itself a paradigm.',
   },

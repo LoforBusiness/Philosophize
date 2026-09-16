@@ -50,7 +50,7 @@ export const BEATS: Aes3Beat[] = [
     dur: 3.1,
   },
   {
-    p: 22, arc: 0.5, mask: 1,
+    p: 170, arc: 0.5, mask: 1,
     text: 'The effect is called katharsis, a term Aristotle never explained. Readers still disagree about what it means.',
     dur: 1.8,
   },
@@ -61,7 +61,7 @@ export const BEATS: Aes3Beat[] = [
     dur: 2.1,
   },
   {
-    p: 15, arc: 1, mask: 1,
+    p: 258, arc: 1, mask: 1,
     text: 'Aristotle also writes that people enjoy accurate images of painful things, because learning from them is a pleasure.',
     dur: 2.9,
   },
@@ -87,7 +87,7 @@ export const BEATS: Aes3Beat[] = [
     dur: 4,
   },
   {
-    p: 33, modes: 1, will: 1,
+    p: 260, modes: 1, will: 1,
     text: 'Plato, over two thousand years earlier, argued that music shapes character before reason develops. So he thought music dangerous.',
     dur: 1.8,
   },

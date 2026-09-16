@@ -85,12 +85,12 @@ export const BEATS: Political11Beat[] = [
     dur: 2,
   },
   {
-    p: 33, x: 120, dial: 1, set: 3, built: 3,
+    p: 260, x: 120, dial: 1, set: 3, built: 3,
     text: 'In Rousseau’s state, no ruler stands above the people. Everybody is bound to the common good, as expressed in the general will.',
     dur: 2,
   },
   {
-    p: 33, x: 120, dial: 1, set: 3, built: 3,
+    p: 260, x: 120, dial: 1, set: 3, built: 3,
     text: 'Rousseau argues that by obeying the general will, each person obeys only himself and remains free.',
     dur: 1.8,
   },

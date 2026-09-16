@@ -40,7 +40,7 @@ export const BEATS: Epi2Beat[] = [
     dur: 4.4,
   },
   {
-    d: 15, m: 13, doubt: 0.62,
+    d: 258, m: 13, doubt: 0.62,
     text: 'Descartes resolves to treat every belief that could possibly be false as if it were false.',
     dur: 1.8,
   },
@@ -64,12 +64,12 @@ export const BEATS: Epi2Beat[] = [
     dur: 2.7,
   },
   {
-    d: 13, m: 6, doubt: 0.85, glow: true,
+    d: 266, m: 6, doubt: 0.85, glow: true,
     text: 'Nearly every belief fails this test. One survives, the belief “I exist”, because a deceiver needs someone to deceive.',
     dur: 1.8,
   },
   {
-    d: 13, m: 6, doubt: 0.85, glow: true,
+    d: 266, m: 6, doubt: 0.85, glow: true,
     text: 'Used as a method, doubt is constructive. It removes uncertain beliefs to reach a foundation on which knowledge can be rebuilt.',
     dur: 1.8,
   },

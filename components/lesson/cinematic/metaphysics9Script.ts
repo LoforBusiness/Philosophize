@@ -59,7 +59,7 @@ export const BEATS: M9Beat[] = [
     dur: 2.5,
   },
   {
-    p: 13, x: 160, panels: 1, cross: 1, puzzle: true,
+    p: 266, x: 160, panels: 1, cross: 1, puzzle: true,
     text: 'Descartes put the link in the pineal gland. Princess Elisabeth of Bohemia objected: moving a body takes contact, and a mind with no extension cannot touch it.',
     dur: 2.5,
   },
@@ -70,7 +70,7 @@ export const BEATS: M9Beat[] = [
     dur: 2.5,
   },
   {
-    p: 33, x: 232, panels: 2,
+    p: 260, x: 232, panels: 2,
     text: 'This evidence suggests that the mind isn’t a separate substance. It is something the brain does, the way digestion is something the gut does.',
     dur: 2.7,
   },

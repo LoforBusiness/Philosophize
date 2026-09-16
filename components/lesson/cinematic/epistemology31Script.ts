@@ -70,7 +70,7 @@ export const BEATS: Epis31Beat[] = [
     cite: 'And a third',
   },
   {
-    g: 8, open: 3,
+    g: 258, open: 3,
     dur: 2.2,
     text: 'Only the door itself lies outside memory, so only the door could check the memory independently.',
   },

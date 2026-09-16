@@ -48,7 +48,7 @@ export const BEATS: Pol21Beat[] = [
     dur: 3.3,
   },
   {
-    p: 2, x: 132, map: 1, claimed: 1, exit: 1,
+    p: 266, x: 132, map: 1, claimed: 1, exit: 1,
     text: 'Leaving one state only places you under the authority of another.',
     dur: 1.8,
   },

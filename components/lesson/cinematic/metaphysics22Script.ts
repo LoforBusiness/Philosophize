@@ -43,7 +43,7 @@ export const BEATS: Met22Beat[] = [
     dur: 2.5,
   },
   {
-    p: 2, x: 200, track: 1, runs: 1,
+    p: 266, x: 200, track: 1, runs: 1,
     text: 'Determinism holds that the past and the laws of nature fix a single future. So every replay takes the same branch.',
     dur: 2.3,
   },

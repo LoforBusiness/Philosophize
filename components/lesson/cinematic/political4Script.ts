@@ -34,7 +34,7 @@ export const BEATS: Pol4Beat[] = [
     dur: 2.4,
   },
   {
-    p: 7, walls: 0.25, harm: 0, panel: 1,
+    p: 260, walls: 0.25, harm: 0, panel: 1,
     text: 'John Stuart Mill’s harm principle marks the boundary of that area. Power may be used against you only to prevent harm to others.',
     dur: 2.6,
   },
@@ -45,7 +45,7 @@ export const BEATS: Pol4Beat[] = [
     dur: 2,
   },
   {
-    p: 13, walls: 0.25, harm: 1, panel: 1, test: 1,
+    p: 266, walls: 0.25, harm: 1, panel: 1, test: 1,
     text: 'Poisoning a well, defrauding a buyer or throwing a punch harms other people. Mill allows coercion only against conduct of this kind.',
     dur: 3.2,
   },

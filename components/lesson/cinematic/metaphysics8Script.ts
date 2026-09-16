@@ -67,7 +67,7 @@ export const BEATS: Metaphysics8Beat[] = [
     dur: 2.8,
   },
   {
-    p: 15, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
+    p: 258, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
     text: 'Even your proudest choices were settled by causes that began long before your birth.',
     dur: 2.2,
   },
@@ -78,7 +78,7 @@ export const BEATS: Metaphysics8Beat[] = [
     dur: 4,
   },
   {
-    p: 33, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
+    p: 260, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
     text: 'This is libertarian free will, which is distinct from political libertarianism.',
     dur: 1.8,
   },
@@ -128,7 +128,7 @@ export const BEATS: Metaphysics8Beat[] = [
     dur: 2.7,
   },
   {
-    p: 29, x: 140, chain: 1, front: 2, tags: 1, mark: 1,
+    p: 258, x: 140, chain: 1, front: 2, tags: 1, mark: 1,
     text: 'For Hume, you act freely when your action comes from your own will, not from external constraint.',
     dur: 2.7,
   },

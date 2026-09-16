@@ -27,7 +27,7 @@ export const BEATS: Pol5Beat[] = [
     dur: 3.2,
   },
   {
-    p: 13, city: 1,
+    p: 266, city: 1,
     text: 'Philosopher-kings rule, because Plato holds that only they know the good. Guardians defend the city, and producers supply it.',
     dur: 2,
   },
@@ -79,12 +79,12 @@ export const BEATS: Pol5Beat[] = [
     dur: 1.8,
   },
   {
-    p: 5, veil: 0.3, city: 0.6, link: 1,
+    p: 259, veil: 0.3, city: 0.6, link: 1,
     text: 'Locke and Jean-Jacques Rousseau ask what makes a government legitimate. John Stuart Mill asks how far its power over the individual may extend.',
     dur: 2.3,
   },
   {
-    p: 5, veil: 0.3, city: 0.6, link: 1,
+    p: 259, veil: 0.3, city: 0.6, link: 1,
     text: 'Plato and Rawls ask what justice itself requires of a whole society.',
     dur: 1.8,
   },

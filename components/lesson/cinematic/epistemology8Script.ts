@@ -90,7 +90,7 @@ export const BEATS: Epi8Beat[] = [
     dur: 2.1,
   },
   {
-    p: 47, x: 98, tower: 0, pile: 1, esc: 1,
+    p: 267, x: 98, tower: 0, pile: 1, esc: 1,
     text: 'Second, the chain may loop back in a circle, with beliefs supporting one another. Third, the chain may end in beliefs needing no further support.',
     dur: 2.9,
   },

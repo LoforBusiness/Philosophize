@@ -49,7 +49,7 @@ export const BEATS: Pol6Beat[] = [
     dur: 1.8,
   },
   {
-    p: 13, bars: 1, prin: 1,
+    p: 266, bars: 1, prin: 1,
     text: 'Higher pay is just if it draws talent that lifts the worst off above the equality line. Justice is judged by how the worst off fare, not the best off.',
     dur: 3.8,
   },

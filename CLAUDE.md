@@ -1001,7 +1001,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **fifty-seven** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **fifty-eight** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1012,7 +1012,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-thoughts` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-thoughts` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
 > replays the figure, and a prop's animation was invisible to every check unless it
@@ -4074,6 +4074,144 @@ covers a word.
 > alongside a man. 34 lessons carried one; both are cut, and the four costumes that
 > lost a piece are re-formed rather than renamed, because a costume id is a name a
 > reader never sees and a table everything else is joined on.
+
+### And on 40% of taps nothing on screen moved at all
+
+> *"sometimes there will just be three tabs in one lesson where there is no
+> animation above the words. Maybe the stickman does a really small movement …
+> I want the stickman moving around a lot."*
+
+Counted rather than argued: of 2,461 taps that advance a beat, **1,056 leave the
+scene art exactly as it was** — and on **289 of those the figure was frozen too**,
+so the entire picture was a photograph while the words advanced. 84 lessons carry
+a run of three or more. The reader's "three tabs" is that run, to the tap.
+
+**THE CAUSE IS J12 WORKING AS DESIGNED.** The beat splitter cut 466 over-packed
+beats into pieces and copied every channel verbatim *"so the picture holds still
+and only the words advance"* — right for the scene, wrong for the figure, which is
+the same thing group N found about repeated poses and fixed for 445 of them with
+`LIVING_RUN`. That table is deliberately strict (only EXACT re-statements) and
+deliberately partial, so everything it could not name honestly stayed frozen.
+
+**AND THE LIVING HOLDS WERE NOT ACTUALLY ALIVE, WHICH IS THE REAL FINDING.**
+`check:idle` sweeps every clock-driven act through 18 seconds of its own cycle and
+measures how far it travels — and `stand()`, the bare breath every pose already
+rides, travels **3.58 units**. Against that, **20 of the 32 living holds moved no
+further than standing still does**, median 2.49. The vocabulary built to cure
+repetition was amplitude-starved, and `check:moves` was green throughout because a
+pose that does not move has no discontinuities to find. §19 records the identical
+shape on the launch screen: three poses that travelled 0.2 units and passed
+everything.
+
+Three sub-findings, each of which had made the number worse than it looked:
+
+- **N12 IN THE SECOND SHELF.** Acts 157–168 were written after N12 and repeat its
+  mistake: `163 LOOKING OFF` held a constant `tilt` and put all its attention on
+  the neck at 0.04 rad, which moves the head 0.6 units against a head 40 across.
+  Attention goes on the SPINE first, then the neck, then a limb.
+- **THE FEET WERE NOT BEING MEASURED.** The first version of the check tracked
+  fists and angles only, so every act whose whole content is below the waist came
+  back as barely moving — `IMPATIENT` is a tapping foot, `STEPPING IN PLACE` is two
+  of them, and `PACING ON THE SPOT` is the pose the reader asked for by name.
+- **AND `162 PACING ON THE SPOT` WAS A 2.6-UNIT FOOT BOB.** The name promised the
+  thing that was asked for and the implementation lifted each foot by about a
+  pixel. The weight travels now: 4.00 → **8.45** units, at 4.45 per half-second.
+
+So there are TWO tiers, and they are different questions. **ALIVE** is beating the
+bare breath — a hold that does not is not adding a movement, it is adding a name
+for one. **READS** is 1.5× it, and that is the pool a STILL BEAT may draw from,
+because there the figure is the only thing on screen that can move. A quiet idle is
+perfectly good on a beat where the scene is doing something, which is why the floor
+is not simply raised for everything. 9 of 32 read before, **28 do now**.
+
+`STILL_TWIN` then carries the same strictness `LIVING_RUN` has, plus that second
+requirement, and **`liven-still.mjs` put a reading hold on 164 beats in 102
+lessons**: 289 → **135** taps where nothing moves. The 135 left are the honest
+remainder — every pose that WORKS AT A PROP or is on the floor is absent from the
+table, because a living hold takes the hand off the board and A1 outranks all of
+this. Those beats need the SCENE to change, not the figure.
+
+> **THE POSE FIELD IS NOT `p`, AND ASSUMING IT SKIPS 47 LESSONS IN SILENCE.**
+> 190 scenes read `b.p ?? 0`; the rest use `g`, `a`, `r`, `d`, `b`, `v`, `e`,
+> `sub`, `q`, `soc`, `str`, `c` or `one` — fourteen names across 237 scenes. The
+> first run of the codemod threw on `aesthetics13`, which has no `p` at all, and
+> that throw is the only reason the other 46 were not quietly passed over.
+> `scripts/lib/posetrack.mjs` FOLLOWS THE CODE instead: the pose track is whichever
+> array reaches `emoteHold`/`emoteLive`/`lookPose`/`reactPose`. A scene that poses
+> two figures returns null and is left alone — mount order is paint order, and
+> §19's wardrobe note records a citizen being taken for the sovereign.
+>
+> It also disagrees with `gestures.gestureKey`, which reads the name out of the
+> beat type's doc comment, on exactly one lesson: `ethics-ethics-5` calls it `soc`
+> and never says so in a comment. Following the code wins, because that is what
+> runs.
+
+> **AND THE BOXES WERE GROWN, NOT RE-MEASURED.** A different pose is a different
+> box and `moves.ts` is in nobody's hash, so raising those amplitudes left 2,156
+> figure boxes quietly too small with nothing going red — `seed-pose-reach.mjs`
+> exists for precisely this and `make:wardrobe` already does the arithmetic.
+> `regrow-pose.mjs` is that arithmetic run for a pose change alone, because
+> `make:wardrobe` would also re-deal the costume rotation. It re-stamps only where
+> the script is PROVEN to differ from HEAD by a gesture value and nothing else;
+> anything else keeps its stale stamp and is named, since blanket re-stamping
+> launders the rot the stamp exists to catch.
+>
+> Growing the lead's box narrows the clear floor, so `make:visitor` had to be
+> re-run after it (that order, once — CLAUDE.md's own generator-chain rule), and
+> `make:thoughts` after that, because a head that now sways further closes the gap
+> under a bubble: 26 of them dropped under the 10-unit floor.
+
+### The stage is coloured now, at exactly the grey's luminance
+
+> *"I want the visuals above the words to look really good, like Imprint's app."*
+
+Imprint's pipeline does not transfer and saying so is half the answer: seven
+illustrators and eight animators hand-key After Effects and export **Lottie JSON**
+per card, which is a full-screen canvas — §17 rule 7, and this app draws all 246
+scenes procedurally from Views for that exact reason. What transfers is the
+principle, that every card earns one visual event and the visual IS the
+explanation.
+
+The colour half was free, and it was already decided. R18 has struck every control
+BELOW the words in the lesson's own branch hue since the controls were gamified;
+the picture ABOVE them was still ink, paper and two greys, so a reader met a
+coloured question under a grey diagram. `stageTones.ts` carries the same
+`BRANCH` hue up over the words — one colour a lesson, ground line to answer button.
+
+**LUMINANCE IS THE CONTRACT.** Every caption in 244 scenes was measured against the
+grey it sits on (`check:shade` pairs a fill with its word three ways, and STONE is
+where SOFT already fails at 3.26:1). A hued mass at a different lightness re-opens
+every one of those pairings. These hold their grey's relative luminance to the
+third decimal — ink on STONE is 10.63:1 before and 10.60–10.66 after, on all six
+branches — so no box moved, no stamp went stale and no contrast changed.
+
+**AND THE OBVIOUS CONSTRUCTION FAILS, MEASURABLY.** Mixing the branch hue toward
+paper until it hits the grey's luminance DESATURATES, and these greys are warm and
+near-neutral (C\* 4.8–7.6), so the two warm branches land on top of them: ethics
+ΔE 1.5 and aesthetics **ΔE 0.4** against the grey they replace. §19's `WASH`
+rendered as white at ΔE 5.0. Four of six branches would have shipped a tint nobody
+could see, with the source claiming otherwise. Holding L\* and taking C\* UP is
+exact — and cannot go far, because at C\* 26 a light mass is `#92d3f5` and
+`#85d7e2`, sky blue and cyan, which is the corner `design.ts` records its own
+search falling into. So the chroma CLIMBS AS THE TONE DARKENS: C\* 10 for the
+hairline, 14 for the light mass, 20 for the shaded side. Light plus saturated is
+candy; mid plus saturated is rich.
+
+> **THE CODEMOD RAN THE UNBOUNDED-MATCH TRAP FIRST.** `import \{([\s\S]*?)\} from
+> './cinematicKit'` is non-greedy and still starts at the file's FIRST `import {`,
+> so it spanned every import in between and silently reformatted the react-native
+> one on its way past — the identical fault CLAUDE.md already records `addImport`
+> committing, found this time only because the diff of one file was read. `[^{}]*`
+> cannot cross a brace. And `git restore` of the 244 scenes re-materialised every
+> one as CRLF, which is the §21 trap that makes `validate-cinematic` see zero beats
+> and call a file clean: normalise to LF after any restore here, and check with
+> `file`.
+>
+> **237 scenes use STONE, 244 use RULE and FOUR use SHADE.** The tonal pass gave
+> the corpus a light mass and stopped, so the depth ramp has three rungs and the
+> corpus uses two — a mass with no shaded side is a shape, not an object. That is
+> the next thing to spend on, and it is why the hued SHADE is exported in the same
+> breath as the rest.
 
 ### The branch road — the same rig, outside a lesson
 

@@ -35,7 +35,7 @@ export const BEATS: Strong4Beat[] = [
     dur: 1.8,
   },
   {
-    p: 2, fill: 0.55, lock: 0, dice: 0, verdict: 0, lens: 0,
+    p: 266, fill: 0.55, lock: 0, dice: 0, verdict: 0, lens: 0,
     text: 'Both kinds of argument are legitimate, and each has its own standard of assessment.',
     dur: 2.1,
   },

@@ -40,7 +40,7 @@ export const BEATS: Political33Beat[] = [
     dur: 3.5,
   },
   {
-    p: 19, x: 52, open: 1, threat: 1,
+    p: 169, x: 52, open: 1, threat: 1,
     text: 'Unlimited tolerance can be used to end tolerance. Popper argues that the intolerant, left unchecked, destroy the tolerant.',
     dur: 1.8,
   },

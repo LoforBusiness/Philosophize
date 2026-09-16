@@ -26,12 +26,12 @@ export const BEATS: Political7Beat[] = [
     dur: 2,
   },
   {
-    p: 8, x: 264,
+    p: 258, x: 264,
     text: 'Does a government grant it, or a written constitution?',
     dur: 1.8,
   },
   {
-    p: 8, x: 264,
+    p: 258, x: 264,
     text: 'Or was the right yours before anyone voted on anything?',
     dur: 1.8,
   },
@@ -42,7 +42,7 @@ export const BEATS: Political7Beat[] = [
     dur: 3,
   },
   {
-    p: 38, x: 190, stone: 1,
+    p: 266, x: 190, stone: 1,
     text: 'On this view, no one grants your rights. Government exists to protect rights you already have, not to create them.',
     dur: 2,
   },
@@ -130,7 +130,7 @@ export const BEATS: Political7Beat[] = [
     dur: 2.4,
   },
   {
-    p: 39, x: 190, stone: 1, charter: 1, tear: 1,
+    p: 169, x: 190, stone: 1, charter: 1, tear: 1,
     text: 'In 1792, Mary Wollstonecraft argued from reason. If reason grounds rights, women share them, because women reason too.',
     dur: 2.6,
   },

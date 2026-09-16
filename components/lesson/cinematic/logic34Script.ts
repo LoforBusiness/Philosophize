@@ -34,7 +34,7 @@ export const BEATS: Logic34Beat[] = [
     dur: 3.6,
   },
   {
-    p: 47, x: 50, n: 0.08,
+    p: 267, x: 50, n: 0.08,
     text: 'A sample this small can give an estimate far from the true fraction.',
     dur: 1.8,
   },

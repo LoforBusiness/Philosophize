@@ -49,12 +49,12 @@ export const BEATS: Epi21Beat[] = [
     dur: 1.8,
   },
   {
-    p: 29, x: 124, dial: 1, will: 1,
+    p: 258, x: 124, dial: 1, will: 1,
     text: 'Add a firm decision to believe it, and the words “it’s raining” repeated to yourself.',
     dur: 1.8,
   },
   {
-    p: 29, x: 124, dial: 1, will: 1,
+    p: 258, x: 124, dial: 1, will: 1,
     text: 'Add a large reward for believing it. The tray fills and the needle does not move.',
     dur: 2.3,
   },

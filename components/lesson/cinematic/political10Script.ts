@@ -54,7 +54,7 @@ export const BEATS: Political10Beat[] = [
     dur: 2.7,
   },
   {
-    p: 13, x: 108, tape: 1,
+    p: 266, x: 108, tape: 1,
     text: 'This one was taken from common land, traded twice and then given as a gift.',
     dur: 1.8,
   },
@@ -89,7 +89,7 @@ export const BEATS: Political10Beat[] = [
     dur: 3,
   },
   {
-    p: 47, x: 108, tape: 1, ptr: 4, ruler: 1,
+    p: 267, x: 108, tape: 1, ptr: 4, ruler: 1,
     text: 'Rawls permits inequality only if it improves the position of whoever is worst off.',
     dur: 2,
   },

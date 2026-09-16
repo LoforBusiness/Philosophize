@@ -26,7 +26,7 @@ export const BEATS: Aes13Beat[] = [
     text: 'Suppose two canvases hang side by side and look identical. One is a Vermeer.',
   },
   {
-    g: 5, art: 1, chain: 0,
+    g: 259, art: 1, chain: 0,
     dur: 3.1,
     text: 'The other is a forgery painted last year. Han van Meegeren’s 1937 fake fooled Abraham Bredius, a leading expert.',
   },

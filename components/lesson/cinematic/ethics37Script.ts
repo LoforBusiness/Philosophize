@@ -41,7 +41,7 @@ export const BEATS: Ethics37Beat[] = [
     dur: 2.4,
   },
   {
-    p: 2, x: 54, posts: 1, cord: 1,
+    p: 266, x: 54, posts: 1, cord: 1,
     text: 'Those words create an obligation that binds the speaker to the other person.',
     dur: 1.8,
   },
@@ -52,7 +52,7 @@ export const BEATS: Ethics37Beat[] = [
     dur: 1.9,
   },
   {
-    p: 13, x: 54, posts: 1, cord: 1,
+    p: 266, x: 54, posts: 1, cord: 1,
     text: 'Yet a duty now exists where none existed a moment before. Hume concluded that only a human convention could explain the change.',
     dur: 2.9,
   },

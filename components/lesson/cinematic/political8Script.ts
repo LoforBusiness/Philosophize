@@ -45,7 +45,7 @@ export const BEATS: Political8Beat[] = [
     dur: 1.8,
   },
   {
-    p: 13, x: 170, pile: 1, marks: 1,
+    p: 266, x: 170, pile: 1, marks: 1,
     text: 'The tallest sees the whole pitch. The other two see only the fence.',
     dur: 2.6,
   },
@@ -87,7 +87,7 @@ export const BEATS: Political8Beat[] = [
     dur: 3.1,
   },
   {
-    p: 47, x: 170, mode: 2, marks: 1, eyeline: 1,
+    p: 267, x: 170, mode: 2, marks: 1, eyeline: 1,
     text: 'All three now see the match from the same eye level.',
     dur: 1.8,
   },
