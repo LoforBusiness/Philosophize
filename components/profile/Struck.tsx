@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, type StyleProp, type ViewStyle } from 'react-na
 import { LinearGradient } from 'expo-linear-gradient';
 import { C, SPACE } from '@/constants/design';
 import {
-  INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, GHOST, SHADOW, METAL, ramp, mix, type Metal, type Ramp, ROYAL, PURPLE, BEIGE, BEIGE_SHADE, BEIGE_LIT,
+  INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, GHOST, SHADOW, METAL, ramp, mix, type Metal, type Ramp, PATINA, SAND, SAND_SHADE, SAND_LIT,
 } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -265,24 +265,24 @@ export function StruckPanel({
         style={s.panel}
       >
         <View pointerEvents="none" style={[s.panelRim, { backgroundColor: PAPER_LIT }]} />
-        {/* THE HEAD IS CUT IN BEIGE, the palette's surface, and its title is
-            struck in the palette's purple. Beige is 1.18:1 on paper, so the band
+        {/* THE HEAD IS CUT IN SAND, the palette's surface, and its title is
+            struck in the palette's teal. Sand is 1.37:1 on paper, so the band
             is carried by its cut edges rather than by the fill. */}
         <LinearGradient
-          colors={[BEIGE_SHADE, BEIGE, BEIGE_LIT]}
+          colors={[SAND_SHADE, SAND, SAND_LIT]}
           locations={[0, 0.55, 1]}
           start={LIGHT_START}
           end={LIGHT_END}
           style={s.panelBand}
         >
-          <View pointerEvents="none" style={[s.bandTop, { backgroundColor: mix(BEIGE_SHADE, INK, 0.28) }]} />
+          <View pointerEvents="none" style={[s.bandTop, { backgroundColor: mix(SAND_SHADE, INK, 0.28) }]} />
           <View style={s.bandBody}>
             {accent ? <View style={[s.bandRule, { backgroundColor: accent }]} /> : null}
             <Text style={[s.panelTitle, EMBOSS]}>{title}</Text>
             <Text style={s.panelSub}>{subtitle}</Text>
           </View>
           {right}
-          <View pointerEvents="none" style={[s.bandFoot, { backgroundColor: BEIGE_LIT }]} />
+          <View pointerEvents="none" style={[s.bandFoot, { backgroundColor: SAND_LIT }]} />
         </LinearGradient>
 
         <View style={s.panelBody}>{children}</View>
@@ -336,7 +336,7 @@ export function MetalPlate({
  * · the branch's HUE identifies the row before the name is read;
  * · the COUNT ("12 / 34") is what a percentage was hiding — 68% of an unknown
  *   number is not a thing anyone can act on, and "22 of 34 done" is;
- * · a PURPLE PLATE at 100%, because a bar that is merely full looks the same as a
+ * · a STRUCK PLATE at 100%, because a bar that is merely full looks the same as a
  *   bar that is nearly full at a glance, and finishing a branch is the largest
  *   single thing a reader does in this app.
  */
@@ -359,7 +359,7 @@ export function MasteryRow({
         <View style={s.mTop}>
           <Text style={[s.mName, { color: r.shade }]} numberOfLines={1}>{name}</Text>
           {complete ? (
-            <MetalPlate metal={ROYAL} label="COMPLETE" style={s.mPlate} />
+            <MetalPlate metal={PATINA} label="COMPLETE" style={s.mPlate} />
           ) : (
             <Text style={s.mCount}>
               <Text style={[s.mDone, { color: r.base }]}>{done}</Text>
@@ -383,7 +383,7 @@ export function MasteryRow({
  * page.
  */
 export function ShelfCount({ earned, total }: { earned: number; total: number }) {
-  const r = ramp(ROYAL.base);
+  const r = ramp(PATINA.base);
   return (
     <View style={s.shelf}>
       <View style={s.shelfTop}>
@@ -394,6 +394,81 @@ export function ShelfCount({ earned, total }: { earned: number; total: number })
         <Text style={s.shelfPct}>{total > 0 ? Math.round((earned / total) * 100) : 0}%</Text>
       </View>
       <StruckBar pct={total > 0 ? earned / total : 0} fill={r} height={7} style={{ marginTop: SPACE[1] }} />
+    </View>
+  );
+}
+
+// ── the condensed statistics, after the Insights tab went ────────────────────
+
+/**
+ * FOUR NUMBERS IN A ROW — the whole of what the statistics tab's ledger said.
+ *
+ * The tab drew these as four struck tiles the size of playing cards, each with an
+ * icon, a caption and an entrance animation, and then three charts under them.
+ * The owner asked for "a much more condensed version of the statistics", and the
+ * condensing is mostly this: a count does not need furniture, it needs to be
+ * READABLE AND SMALL. Four figures on one line is the form a passport or a
+ * scoreboard uses, and it is about a fifth of the height.
+ *
+ * NO ANIMATION AND NO COUNT-UP, on purpose. §19 records what a count-up costs on
+ * this data: "a count-up is a flourish; 'your figures are gone' is a fright", and
+ * every figure on the old tab had to be taught to start at its real value rather
+ * than climb from zero. A number that is simply drawn cannot have that bug.
+ */
+export function CountStrip({ items }: { items: { label: string; value: number }[] }) {
+  return (
+    <View style={s.cStrip}>
+      {items.map((it, i) => (
+        <View key={it.label} style={[s.cCell, i > 0 && s.cCellRule]}>
+          <Text style={s.cValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
+            {it.value.toLocaleString()}
+          </Text>
+          <Text style={s.cLabel} numberOfLines={1}>{it.label}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/**
+ * ONE BRANCH'S SHARE OF THE READING — the icon, the name, a bar and the count.
+ *
+ * THIS IS NOT THE MASTERY ROW ABOVE, AND THE DIFFERENCE IS THE DENOMINATOR.
+ * `MasteryRow` draws `done / total`, which §19 spends a section explaining is the
+ * one shape a target must never take here: the curriculum has gone 60 → 192 →
+ * 246 lessons, so a bar measured against the library MOVES AWAY from a reader who
+ * has done nothing wrong every time content ships. The owner removed that section
+ * ("I don't want the branch of mastery") and kept its furniture ("I like the
+ * icons on the branch mastery for all the six branches").
+ *
+ * So the bar is measured against the reader's OWN leading branch instead. Both
+ * ends of that fraction are theirs, nothing the library does can shrink it, and
+ * the question it answers — where does my reading actually go — is the one a
+ * profile is for. It is the same rule `lib/utils/statsMilestone`'s OVERTAKE and
+ * MARK shapes were built on, which is the only part of that file worth keeping.
+ */
+export function ReadingRow({
+  name, hue, lessons, lead, icon,
+}: {
+  name: string;
+  hue: string;
+  lessons: number;
+  /** The reader's own strongest branch, so the bar is a share rather than a score. */
+  lead: number;
+  icon: React.ReactNode;
+}) {
+  const r = ramp(hue);
+  const pct = lead > 0 ? lessons / lead : 0;
+  return (
+    <View style={s.rRow}>
+      <View style={[s.rChip, { backgroundColor: r.track, borderColor: r.base }]}>{icon}</View>
+      <View style={s.rBody}>
+        <View style={s.rTop}>
+          <Text style={[s.rName, { color: r.shade }]} numberOfLines={1}>{name}</Text>
+          <Text style={[s.rCount, { color: r.base }]}>{lessons}</Text>
+        </View>
+        <StruckBar pct={pct} fill={r} height={8} style={{ marginTop: 4 }} />
+      </View>
     </View>
   );
 }
@@ -453,12 +528,15 @@ const s = StyleSheet.create({
   bandFoot: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 1 },
   bandBody: { flex: 1 },
   bandRule: { width: 26, height: 2, borderRadius: 1, marginBottom: 7 },
-  panelTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: PURPLE },
+  // INK, NOT THE SPARK. A 19px Playfair title is exactly the “larger text” the
+  // owner asked to keep tame, and the ember reads 4.85:1 where ink reads 16.6:1.
+  // The accent belongs on the band and the rule above this title, not in it.
+  panelTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: C.ink },
   panelSub: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
-    // Darker than inkSoft, which is 4.53:1 on beige and 3.66:1 at the band's
+    // Darker than inkSoft, which is 3.88:1 on sand and dimmer still at the band's
     // shaded corner; this is 4.76:1 there.
-    fontSize: 12, color: mix(INK, BEIGE, 0.3), marginTop: 2,
+    fontSize: 12, color: mix(INK, SAND, 0.3), marginTop: 2,
   },
   panelBody: { paddingHorizontal: SPACE[3], paddingTop: SPACE[3] + 2, paddingBottom: SPACE[3] },
 
@@ -509,6 +587,38 @@ const s = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1, color: C.inkSoft,
     includeFontPadding: false,
   },
+
+  // ── the four counts ──
+  cStrip: { flexDirection: 'row', alignItems: 'stretch' },
+  cCell: { flex: 1, alignItems: 'center', paddingHorizontal: 2 },
+  // A hairline BETWEEN cells, never around them: four boxes is a dashboard, four
+  // figures divided by rules is a readout.
+  cCellRule: { borderLeftWidth: 1, borderLeftColor: C.hairline },
+  cValue: {
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: C.ink,
+    includeFontPadding: false,
+  },
+  // 9.5 and tracked, because the longest of these is THINKERS and it has to fit a
+  // quarter of a 320dp card without wrapping. `check:ui` holds the type scale at
+  // 11 for `micro`, and this is a caption under a figure rather than a label in
+  // the scale — it is the same exception "PER ACTIVE DAY" needed in §19.
+  cLabel: {
+    fontFamily: 'Inter_500Medium', fontSize: 9.5, letterSpacing: 0.7,
+    color: C.inkSoft, marginTop: 3, includeFontPadding: false,
+  },
+
+  // ── the reading row ──
+  rRow: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2] },
+  rChip: {
+    width: 30, height: 30, borderRadius: 7, borderWidth: 1.5,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  rBody: { flex: 1 },
+  rTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  rName: {
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 1, includeFontPadding: false, flex: 1,
+  },
+  rCount: { fontFamily: 'Inter_700Bold', fontSize: 13, includeFontPadding: false },
 });
 
 /** Re-exported so callers do not have to import from two places to draw a row. */

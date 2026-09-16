@@ -79,7 +79,7 @@ import { useUIStore } from '@/stores/uiStore';
  * other destination costs a deliberate press on the bar first, and this one
  * is a box on the screen the reader is already standing on.
  */
-const WARM = ['index', 'branches', 'streak', 'philosophers', 'stats', 'pass', 'profile'] as const;
+const WARM = ['index', 'branches', 'streak', 'philosophers', 'pass', 'profile'] as const;
 
 // `launchDone` fires when the launch screen starts to LIFT, not when it leaves:
 // its own art still has a 520ms dissolve to run, and Home's arrival stagger
@@ -256,23 +256,27 @@ export default function AppLayout() {
         name="philosophers"
         options={{ title: 'Thinkers', tabBarIcon: tab('thinkers', current === 'philosophers'), lazy: !built('philosophers') }}
       />
-      <Tabs.Screen
-        name="stats"
-        options={{ title: 'Stats', tabBarIcon: tab('insights', current === 'stats'), lazy: !built('stats') }}
-      />
-      {/* ── THE SIXTH TAB, AND THE NOTE BELOW USED TO ARGUE AGAINST ONE ─────
-          The streak was considered for a sixth slot and rejected because "at
-          390pt that is ~62pt a tab and the labels clip". That reasoning was
-          sound and it does not apply here: `tabBarShowLabel` is false, so there
-          are no labels to clip — the bar carries 28pt icons, and the open one
-          sits on a 46pt tile. Six on the narrowest phone this app supports is
-          53pt a tab, which still leaves the tile room.
+      {/* ── FIVE TABS, AND STATISTICS IS THE ONE THAT WENT (2026-09-15) ─────
+          The bar carried six. The owner asked for five: "instead of a dedicated
+          statistics tab, I want all the statistics to be in the profile. And I
+          want a much more condensed version of the statistics."
 
-          What DID have to be re-checked is the thing the old note was really
-          about: whether a sixth destination earns the room. It does, and for a
-          reason the streak did not have — a paywall that only appears when a
-          reader is BLOCKED is an ambush, and one at a permanent address is a
-          shop they can walk out of. */}
+          The argument for a tab was never that the readings were unimportant, it
+          was that they were interesting. That is the wrong test for a permanent
+          slot: a destination earns one by being somewhere a reader chooses to GO,
+          and a page of charts about what you have already done is somewhere they
+          arrive at once and then stop opening. The Pass, directly below, earns its
+          slot on the opposite ground: an offer that only appears when a reader is
+          BLOCKED is an ambush, and one at a permanent address is a shop they can
+          walk out of. The numbers earn a card inside Profile instead, which is
+          where a reader already looks for facts about themselves.
+
+          Deleting the tab also deleted the screen: `app/(app)/stats`, the whole of
+          `components/stats`, `lib/utils/statsDiscovery`, `statsMilestone`,
+          `dialHit` and `scripts/check-stats.mjs`. Condensing something into a
+          second place and leaving the first one standing is how two screens end
+          up disagreeing about one number, which §14 already records happening to
+          the Pass. */}
       <Tabs.Screen
         name="pass"
         options={{ title: 'Pass', tabBarIcon: tab('pass', current === 'pass'), lazy: !built('pass') }}

@@ -57,33 +57,51 @@ export function restDaysHeld(earned: number, used: number): number {
 //   · the count-up on the reward screen
 //   · the habit panel, on Home and on Profile
 //
-// ── FOUR HUES, AND THE FOURTH IS THE OWNER'S OWN ───────────────────────────
+// ── FIVE HUES, AND THE FIFTH IS WHERE THE RESEARCH POINTED ALL ALONG ───────
 //
 // An EMBER (`#B4541E`) read as Halloween. A VERDIGRIS (`#068177`) read as blue,
-// "kidish". A GILT (`#926B33`, tarnished gilding) was then chosen from what the
-// streaks worth copying do, which is to be warm. On 2026-09-15 the owner replaced
-// every gold in the app, this one included ("the gold looks pretty AI"), with two
-// swatches to be used together: ROYAL PURPLE `#4B0082` and WARM BEIGE `#F5E6CA`.
-// They live in components/shared/tone.ts as PURPLE and BEIGE, and the streak
-// takes its tones from there.
+// "kidish". A GILT (`#926B33`, tarnished gilding) was chosen from what the
+// streaks worth copying do, which is to be WARM — Duolingo's flame is `#FF9600`,
+// a lapsed one turns grey, and the colour IS the state. Then on 2026-09-15 the
+// owner replaced every gold in the app ("the gold looks pretty AI") with a ROYAL
+// PURPLE, and this note recorded, in as many words, that a cool streak "goes
+// against that research, and it is the owner's call."
 //
-// A cool streak goes against that research, and it is the owner's call. What the
-// research was FOR still holds, and check:streak holds it: alive against lapsed
-// is a real difference of colour (ΔE 82 from SLATE), the purple is nowhere near
-// the rejected ember (ΔE 105), and it stays tellable from the rank metals it meets
-// on Profile, AMETHYST included (ΔE 18, floor 15).
+// LATER THE SAME DAY THEY REPLACED THE PURPLE TOO, with a sheet of six, and one
+// of the six is `#D35E36` — a warm orange. So the streak is warm again, not
+// because the note argued it back but because the palette the owner picked has
+// exactly one loud colour in it and that colour is the one every streak worth
+// copying uses. It lives in components/shared/tone.ts as EMBER.
+//
+// IT IS THE DEEPENED EMBER THAT SHIPS HERE, not the swatch. The raw spark is
+// 3.70:1 on paper — over the 3:1 a MARK needs, under the 4.5:1 a WORD needs, and
+// the streak's whole job is to colour a NUMBER. `EMBER_INK` is the smallest
+// deepening that clears the text floor; at half that it measures 4.29 and fails.
+// This is the same trap the first ember fell into from the other side, and it is
+// why the value here is not simply the swatch.
+//
+// WHAT check:streak HOLDS, restated for the new pair: alive against lapsed is a
+// real difference of colour (ΔE 49.8 from SLATE on paper, 40.0 on ink), and the
+// spark stays tellable from the rank metals it can actually meet on Profile —
+// BRONZE at ΔE 18.8 is the close one, AURUM 42.5, SILVER 55.3.
+//
+// THE FLOOR THAT WAS DELETED, AND WHY. The old check asserted ΔE ≥ 105 from the
+// rejected `#B4541E`, which encoded "never go back to the Halloween orange". The
+// streak is now deliberately a warm orange, so that assertion measured the wrong
+// thing and would fail a colour the owner chose. Distance from SLATE is what the
+// research was ever actually about; that one stays.
 //
 // THE HEX VALUES BELOW ARE COPIES, AND THAT IS FORCED. check:streak loads this
 // file in plain Node, which cannot follow an import, so the four are written out
 // here and the check re-derives each one from tone.ts and fails on any drift.
-export const STREAK_PURPLE = '#4B0082'; // PURPLE. 12.38:1 on paper
-export const STREAK_DEEP = '#39095D';   // ROYAL.shade. Carries beige at 12.44:1
-export const STREAK_BEIGE = '#F5E6CA';  // BEIGE. A wash; ink on it is 14.13:1
-/** The purple on a DARK ground — Home's habit panel. LAVENDER, 7.12:1 on ink. */
-export const STREAK_ON_INK = '#B89BCB';
+export const STREAK_EMBER = '#B25231'; // EMBER_INK. 4.85:1 on paper
+export const STREAK_DEEP = '#803F29';  // the spark in shadow, for a struck end
+export const STREAK_SAND = '#F1D49A';  // SAND. A wash; ink on it is 12.12:1
+/** The spark on a DARK ground — Home's habit panel. EMBER_LIT, 6.41:1 on ink. */
+export const STREAK_ON_INK = '#DD8768';
 
 /**
- * A lapsed streak is not a duller purple, it is bare SLATE — cool, flat, dead.
+ * A lapsed streak is not a duller spark, it is bare SLATE — cool, flat, dead.
  *
  * #B8B5AC was the first choice and it FAILED at 1.96:1. The mistake is worth
  * keeping written down because it is the natural one: a dead thing feels pale,

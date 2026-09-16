@@ -13,7 +13,7 @@ import StreakMascot from '@/components/gamification/StreakMascot';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import {
-  STREAK_PURPLE, STREAK_DEEP, STREAK_BEIGE, SLATE,
+  STREAK_EMBER, STREAK_DEEP, STREAK_SAND, SLATE,
   restDaysHeld, restEarnEvery, restCap, tierFor, nextTier,
 } from '@/constants/streak';
 import { effectiveStreak, streakIsAlive, restDaysToSpend } from '@/lib/utils/streak';
@@ -332,7 +332,7 @@ export default function StreakScreen() {
               §19 and constants/streak.ts allow, in the one place they allow it. */}
           <View style={styles.hero} onLayout={onHeroLayout}>
             <StreakMascot mood={mood} alive={alive} hold={hold} />
-            <Text style={[styles.count, { color: alive ? STREAK_PURPLE : SLATE }]}>{shown}</Text>
+            <Text style={[styles.count, { color: alive ? STREAK_EMBER : SLATE }]}>{shown}</Text>
             <Text style={styles.countWord}>
               {alive ? `DAY${shown === 1 ? '' : 'S'} RUNNING` : 'STREAK LAPSED'}
             </Text>
@@ -380,7 +380,7 @@ export default function StreakScreen() {
           <View style={styles.card}>
             <View style={styles.statRow}>
               <View style={styles.stat}>
-                <Text style={[styles.statNum, { color: alive ? STREAK_PURPLE : C.ink }]}>{stats.practised}</Text>
+                <Text style={[styles.statNum, { color: alive ? STREAK_EMBER : C.ink }]}>{stats.practised}</Text>
                 <Text style={styles.statWord}>days practised</Text>
               </View>
               <View style={styles.statDivide} />
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
   countWord: { ...role('micro'), letterSpacing: 2, color: C.inkSoft },
   tierChip: {
     marginTop: SPACE[2], paddingHorizontal: SPACE[2], paddingVertical: 5,
-    borderRadius: RADIUS.pill, backgroundColor: STREAK_BEIGE,
+    borderRadius: RADIUS.pill, backgroundColor: STREAK_SAND,
   },
   tierChipText: { ...role('micro'), letterSpacing: 2, color: STREAK_DEEP, fontFamily: 'Inter_700Bold' },
 
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
 
   nextRow: { gap: SPACE[1] },
   track: { height: 6, borderRadius: RADIUS.pill, backgroundColor: C.hairline, overflow: 'hidden' },
-  fill: { height: 6, borderRadius: RADIUS.pill, backgroundColor: STREAK_PURPLE },
+  fill: { height: 6, borderRadius: RADIUS.pill, backgroundColor: STREAK_EMBER },
   nextText: { ...role('micro'), color: C.inkSoft },
 
   statRow: { flexDirection: 'row', alignItems: 'center' },
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   statWord: { ...role('micro'), color: C.inkSoft },
   perfect: {
     paddingHorizontal: SPACE[2], paddingVertical: 4,
-    borderRadius: RADIUS.pill, backgroundColor: STREAK_BEIGE,
+    borderRadius: RADIUS.pill, backgroundColor: STREAK_SAND,
   },
   perfectText: { ...role('micro'), letterSpacing: 1.5, color: STREAK_DEEP, fontFamily: 'Inter_700Bold' },
 

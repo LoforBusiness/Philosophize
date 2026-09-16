@@ -14,8 +14,15 @@
 
 export const C = {
   /** The accent. STRUCTURAL ONLY — outlines, button lips, rings, tracks.
-   *  Never a flooded surface: the loudest thing on any screen stays ink. */
-  HUE: '#1B3B3C',
+   *  Never a flooded surface: the loudest thing on any screen stays ink.
+   *
+   *  This IS one of the owner's six swatches (DEEP, components/shared/tone.ts).
+   *  It moved #1B3B3C → #2A4343 on 2026-09-15 and almost nothing changed on
+   *  screen, which is the finding rather than the edit: the app's outlines had
+   *  been a slate teal all along, L* 22.6 against the swatch's 26.5, so the
+   *  palette the owner supplied was already the palette the app was drawn in.
+   *  10.13:1 on paper, against the 3:1 an outline needs. */
+  HUE: '#2A4343',
 
   // NO SEPARATE SHADOW COLOUR — and don't add one back. The button's lip is a
   // solid slab of `HUE` itself; the face lands on it, so the lip IS the shadow.
@@ -36,9 +43,12 @@ export const C = {
    *  remainder at all, which is the only thing a progress bar communicates.
    *  It passed 117 checks because it was the ONE token with no contrast pair.
    *  It has two now (see PAIRS in scripts/check-ui.mjs, floor 1.2), and this
-   *  value clears them at 1.33:1 on paper and 1.39:1 on surface. A faint fill
-   *  still has to be a fill you can see. */
-  HUE_SOFT: '#CEDEDC',
+   *  value clears them at 1.31:1 on paper and 1.37:1 on surface. A faint fill
+   *  still has to be a fill you can see.
+   *
+   *  DERIVED, not picked: `HUE` taken 0.84 of the way to paper, so it is the
+   *  accent whispering rather than a fourteenth colour somebody chose. */
+  HUE_SOFT: '#D9DDDA',
 
   ink: '#1A1A1A',
   inkSoft: '#686868',
@@ -80,18 +90,36 @@ export const C = {
   surfaceSoft: '#F4F2EC',
   hairline: '#E7E3DA',
 
-  /** Unchanged, and NOT repurposed: these mean answer states in
-   *  components/lesson/theme.ts and must go on meaning that. */
-  correct: '#4F7A4A',
-  /** `wrong` on `wrongSoft` (the Danger Zone's text on its own fill) measures
-   *  4.54:1 against a 4.5:1 floor — passing, but by only 0.04. Both are
-   *  hard-gated in scripts/check-ui.mjs's PAIRS with no buffer built in, so
-   *  do not nudge either value without re-running the checker: this margin is
-   *  thin enough that a small change to either token, or a different
-   *  contrast calculator's rounding, could tip it under. Left as measured,
-   *  not adjusted — see the checker for the number in context. */
-  wrong: '#A8513F',
-  wrongSoft: '#F7E9E9',
+  // ── THE ANSWER STATES, AND THE ONE PLACE LOUD IS CORRECT ──────────────────
+  //
+  // These mean answer states in components/lesson/theme.ts and must go on
+  // meaning that. They are the ONLY two colours in the app allowed past the
+  // family's C* 30 ceiling, and the reason is not decoration: a verdict is the
+  // one mark a reader must never read as ornament, so it is the one mark that
+  // may out-shout the palette around it.
+  //
+  // BOTH MOVED WHEN THE FAMILY ARRIVED, and both for collisions the old pair
+  // could not have had:
+  //
+  // · `correct` was #4F7A4A, a muted green sitting ΔRGB 27 from the new ethics
+  //   olive and 12 from the new logic. A lesson strikes its controls in the
+  //   BRANCH hue and then re-strikes them on answering, so on those branches the
+  //   verdict and the control would have been the same colour. #2F6440 is deeper
+  //   and richer, and the six branches are placed to leave the green wedge
+  //   (hue 130–175) empty for it.
+  // · `wrong` was #A8513F, a rust — ΔE 21.7 from EMBER, the owner's own spark.
+  //   The app's "you got it wrong" and its "your streak is alive" were the same
+  //   red-orange. #8E3340 is a cooler oxblood, ΔE 56.6 from the spark.
+  //
+  // Neither is a free change: `check-ui` measures both against every branch,
+  // every era and the accent, in ΔE and in raw sRGB.
+  correct: '#2F6440',
+  /** `wrong` on `wrongSoft` is the Danger Zone's text on its own fill. The old
+   *  pair cleared 4.5:1 by 0.04 and this note used to warn about that margin;
+   *  deriving the fill from the ink (0.90 toward paper) rather than picking it
+   *  separately puts the pair at 7.22:1 and retires the warning. */
+  wrong: '#8E3340',
+  wrongSoft: '#EFE6E5',
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -123,12 +151,46 @@ export const C = {
 // file already groups by, so there is no second mapping to drift.
 export type EraKey = 'ANCIENT' | 'MEDIEVAL' | 'MODERN' | 'CONTEMPORARY' | 'EASTERN';
 
+// ── AND ON 2026-09-15 THE FIVE BECAME A LADDER, WHICH IS WHAT AN ERA IS ─────
+//
+// The set above was five unrelated hues — bronze, ultramarine, oxblood, plum,
+// jade — chosen by a search that was allowed the whole colour wheel. Folded into
+// the owner's family (hue 45–198) they would not fit: six branches, five eras,
+// the accent and two answer states is THIRTEEN meaning-carrying colours, and a
+// joint search over all thirteen inside that arc could not clear the old floors
+// however it was run. That is not a tuning failure, it is the owner's own
+// complaint stated numerically — "there's so many different colors and it's too
+// confusing."
+//
+// So one of the two scales had to stop spending hue, and this is the one, for a
+// reason that makes it better rather than merely cheaper: AN ERA IS A POSITION
+// IN TIME, and time is an axis. The four Western eras are now one warm hue at
+// four lightnesses, oldest darkest — a shelf of spines aged by how long they
+// have been on it. EASTERN is the one cool member because it is the one era that
+// is not a step in that sequence.
+//
+// What that buys, measured: the five are told apart by LIGHTNESS (adjacent steps
+// differ by 0.024–0.035 of luminance, against the 0.02 floor), so they survive
+// being small, and they no longer compete with the six branches for the same
+// crowded arc. Every one still clears 4.5:1 on paper, which is what lets an era
+// carry its own name as text and not merely be a rule under one.
+//
+// The chroma is DELIBERATELY BELOW THE BRANCHES' (C* 14–18 against 16–27). That
+// is what separates the two scales where they genuinely do meet — a quote plate
+// is struck in its era while the lesson around it is struck in its branch — and
+// it was added after a first placement put aesthetics and MODERN ΔE 4.2 apart,
+// which is to say the same colour.
 export const ERA: Record<EraKey, string> = {
-  ANCIENT: '#6A5C2F',       // bronze / olive — antiquity
-  MEDIEVAL: '#394974',      // manuscript ultramarine
-  MODERN: '#592C2C',        // oxblood, the colour of a bound library
-  CONTEMPORARY: '#794082',  // muted plum
-  EASTERN: '#3B7D76',       // jade
+  ANCIENT: '#56352F',       // the deepest rung — oldest, darkest
+  MEDIEVAL: '#5F4636',      // umber
+  MODERN: '#665742',        // the ladder, lightening
+  CONTEMPORARY: '#6C6951',  // the newest Western rung, lightest
+  // The one cool member: not a step in that sequence. It is also the LIGHTEST of
+  // the five, and that is a measurement rather than a flourish — three of the six
+  // branches live in the teal-blue band, and at L* 40 this sat ΔE 4.8 from
+  // metaphysics, which is to say it was the same colour. Lifting it to L* 46
+  // clears every one of them and still reads 4.93:1 on paper.
+  EASTERN: '#41757F',
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -183,13 +245,43 @@ export type BranchKey =
   | 'metaphysics' | 'epistemology' | 'logic'
   | 'ethics' | 'aesthetics' | 'political-philosophy';
 
+// ── AND THE SEARCH ABOVE WAS RUN AGAIN, INSIDE THE OWNER'S SIX (2026-09-15) ──
+//
+// Everything the two notes above say about HOW to search still holds — measure in
+// CIELAB, pin the lightness band, take the separation from hue. What changed is
+// the room: the arc is the owner's family (hue 42–242 by the time logic is let
+// back to its slate blue) instead of the whole wheel, and the chroma ceiling is
+// their own register, C* 30, instead of 38.
+//
+// THE FLOOR CAME DOWN FROM ΔE 24 TO 11.4, AND THAT IS THE DECISION RATHER THAN A
+// SLIP. Six hues inside a 200° arc at tame chroma cannot be 24 apart; the
+// optimiser will buy that number if you let it, and what it hands back is
+// #126B46 and #546422 — a set louder than the swatches it was derived from,
+// which is the note the owner wrote. Asked for "blend them a lot", the honest
+// answer is a smaller number, and these are the terms it was accepted on.
+//
+// IT COSTS LESS THAN IT USED TO, because the six no longer have to be told apart
+// by colour alone. The one screen that showed six bars together — Profile's
+// BRANCH MASTERY — is gone (§14), and the row that replaced it carries the
+// branch's ICON and its NAME on every line. A hue that says "this is a set" is
+// worth more there than six that say "these are strangers".
+//
+// TWO OF THE SIX ARE THE OWNER'S OWN SWATCHES within a rounding error —
+// epistemology is their teal (ΔE 1.5 from #416B66) and ethics their olive — and
+// logic is BACK TO SLATE BLUE, which is what this file always called it and what
+// the aubergine-and-rose set had quietly taken away.
+//
+// THE GREEN WEDGE (hue 130–175) IS LEFT EMPTY ON PURPOSE. `correct` lives there.
+// A lesson strikes its controls in the branch hue and re-strikes them green on a
+// right answer, so a green branch makes the verdict unreadable as a verdict —
+// which is exactly what the first placement did, at ΔRGB 12.
 export const BRANCH: Record<BranchKey, string> = {
-  metaphysics: '#5F3D61',           // aubergine — the cosmos
-  epistemology: '#16677C',          // petrol — the clear eye
-  logic: '#466BA2',                 // slate blue — the machinery of proof
-  ethics: '#0F523A',                // pine — conduct
-  aesthetics: '#9A4E61',            // dusty rose — taste
-  'political-philosophy': '#693C19',// burnt sienna — the forum
+  metaphysics: '#2E5B61',           // deep teal — the cosmos
+  epistemology: '#427069',          // the owner's teal — the clear eye
+  logic: '#33647B',                 // slate blue — the machinery of proof
+  ethics: '#656E50',                // the owner's olive — conduct
+  aesthetics: '#6A5733',            // bronze — taste
+  'political-philosophy': '#935D4D',// sienna, the family's warm end — the forum
 };
 
 export type TypeKey = 'display' | 'title' | 'body' | 'label' | 'micro';

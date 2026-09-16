@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ramp, rampFace, mix, PAPER_LIT } from '@/components/shared/tone';
-import { STREAK_PURPLE, STREAK_DEEP, STREAK_BEIGE, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
+import { STREAK_EMBER, STREAK_DEEP, STREAK_SAND, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
 import { buildWeek } from '@/lib/utils/streakCalendar';
 
 const INK = '#1A1A1A';
@@ -74,7 +74,7 @@ const FAINT = '#E4E1D8';
 // ── THE FLAME WENT WHEN THE FIRE DID, AND THE METAL FOLLOWED THE COLOUR ─────
 //
 // This drew a literal flame in two paths while the streak was an EMBER. It is
-// PURPLE now, the streak's colour in the owner's palette (constants/streak.ts),
+// EMBER_INK now, the streak's colour in the owner's palette (constants/streak.ts),
 // so the thing held up at the end of
 // a lesson is the calendar's own day token, struck large, with the count beside
 // it. One object, two sizes, and the grid and the reward screen therefore cannot
@@ -82,10 +82,10 @@ const FAINT = '#E4E1D8';
 //
 // It also inherits the calendar's milestone rule for free: a landmark day wears
 // a COLLAR, the same ring a capstone rank pin and a tier-V badge wear (§7).
-const METAL = ramp(STREAK_PURPLE);
+const METAL = ramp(STREAK_EMBER);
 const FACE = rampFace(METAL);
 /** The chain under the week, same groove the month grid runs. */
-const RAIL = mix(STREAK_PURPLE, PAPER, 0.62);
+const RAIL = mix(STREAK_EMBER, PAPER, 0.62);
 const GROOVE: [string, string, string] = [
   mix(RAIL, INK, 0.16), RAIL, mix(RAIL, PAPER_LIT, 0.5),
 ];
@@ -425,14 +425,15 @@ const styles = StyleSheet.create({
   },
   stampRing: {
     position: 'absolute', width: 44, height: 44, borderRadius: 22,
-    borderWidth: 1.2, borderColor: STREAK_BEIGE, opacity: 0.55,
+    borderWidth: 1.2, borderColor: STREAK_SAND, opacity: 0.55,
   },
   stampWord: {
     fontFamily: 'SpecialElite_400Regular',
     fontSize: STAMP_SIZE,
     lineHeight: STAMP_SIZE * 1.06,
     letterSpacing: 0.6,
-    color: STREAK_BEIGE,
+    // Paper, not sand: the legend sits on the ember face, where sand is 3.53:1.
+    color: PAPER,
     // includeFontPadding is what put the league numeral low in its disc (§19).
     // A typewriter face carries deep, asymmetric padding, so two stacked lines
     // inside a 44 ring are centred on the box rather than on the glyphs without
@@ -449,12 +450,12 @@ const styles = StyleSheet.create({
   },
   pressRing: {
     position: 'absolute', width: 54, height: 54, borderRadius: 27,
-    borderWidth: 2, borderColor: STREAK_PURPLE,
+    borderWidth: 2, borderColor: STREAK_EMBER,
   },
   count: {
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 62,
-    color: STREAK_PURPLE,
+    color: STREAK_EMBER,
     marginLeft: 10,
     includeFontPadding: false,
   },
@@ -481,12 +482,12 @@ const styles = StyleSheet.create({
   disc: { width: DISC, height: DISC, borderRadius: DISC / 2 },
   dayPressRing: {
     position: 'absolute', width: DISC, height: DISC, borderRadius: DISC / 2,
-    borderWidth: 1.5, borderColor: STREAK_PURPLE,
+    borderWidth: 1.5, borderColor: STREAK_EMBER,
   },
-  rested: { backgroundColor: STREAK_BEIGE, borderWidth: 1, borderColor: STREAK_PURPLE },
+  rested: { backgroundColor: STREAK_SAND, borderWidth: 1, borderColor: STREAK_EMBER },
   missed: { borderWidth: 1.5, borderColor: FAINT },
   future: { borderWidth: 1.5, borderColor: FAINT, opacity: 0.55 },
 
-  milestone: { fontFamily: 'Inter_700Bold', fontSize: 11, color: STREAK_PURPLE, letterSpacing: 2.4, marginTop: 20 },
+  milestone: { fontFamily: 'Inter_700Bold', fontSize: 11, color: STREAK_EMBER, letterSpacing: 2.4, marginTop: 20 },
   toGo: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13.5, color: INK_SOFT, marginTop: 20 },
 });

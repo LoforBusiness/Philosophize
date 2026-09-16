@@ -10,6 +10,7 @@ import DailyLimit from '@/components/paywall/DailyLimit';
 import LessonLocked from '@/components/paywall/LessonLocked';
 import TrialOffer from '@/components/paywall/TrialOffer';
 import PassConferred from '@/components/paywall/PassConferred';
+import ProfileScreen from '@/app/(app)/profile';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
@@ -148,6 +149,13 @@ export default function PreviewPass() {
     // reason. The section is reached by the screen's own rail rather than by a
     // prop, so the harness clicks it — see sheet-pass.mjs.
     body = <SettingsScreen />;
+  } else if (s === 'profile') {
+    // THE PROFILE, after the statistics tab was folded into it (2026-09-15).
+    // It is here rather than in a harness of its own because this one already
+    // seeds a mid-journey reader, boots a browser and measures overflow — and
+    // the single thing worth asking about the new YOUR PROGRESS card is whether
+    // its four counts and six reading rows survive a real layout at 320dp.
+    body = <ProfileScreen />;
   } else if (s === 'tab') {
     // THE REAL TAB SCREEN, imported as a component. It is a route, so it renders
     // perfectly well outside the navigator — the only thing it needs from one is

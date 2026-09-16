@@ -30,10 +30,6 @@ const T = await import(emit('components/shared/tone.ts', 'tone.mjs'));
 const I = await import(emit('constants/insignia.ts', 'insignia.mjs'));
 // rankShapes.ts is zero-import for the same reason — the frames are plain data.
 const R = await import(emit('components/shared/rankShapes.ts', 'rankShapes.mjs'));
-// dialHit.ts is zero-import for the same reason — and it has to be, because the
-// bug it exists to prevent is a platform field that only web gets wrong, which
-// no browser harness could ever reproduce (§21, `measureInWindow`).
-const H = await import(emit('lib/utils/dialHit.ts', 'dialHit.mjs'));
 
 let bad = 0;
 const ok = (cond, label, detail = '') => {
@@ -294,33 +290,77 @@ const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
   const Ls = branches.map(([, v]) => Lstar(v));
   ok(Math.max(...Ls) - Math.min(...Ls) <= 20, 'the six sit in one lightness band',
     `L* ${Math.min(...Ls).toFixed(1)}…${Math.max(...Ls).toFixed(1)}`);
+  // ── THE REGISTER MOVED DOWN ON 2026-09-15, AND SO DID THE FLOOR ───────────
+  //
+  // This band was 18…38 and the pairwise floor below it was ΔE 24. Both were
+  // right for a palette allowed the whole colour wheel, and both are wrong for
+  // the one the owner supplied: six swatches spanning hue 45–198, five of them
+  // at C* 10–33. Asked for "the more Tame colors … I want a less punchy color",
+  // a ceiling of 38 permits louder than anything on their sheet.
+  //
+  // 12…30 IS THEIR OWN REGISTER, read off the swatches rather than chosen.
   for (const [name, v] of branches) {
     const c = chroma(v);
-    ok(c >= 18 && c <= 38, `BRANCH.${name} is muted`, `C* ${c.toFixed(1)}, want 18…38`);
+    ok(c >= 12 && c <= 30, `BRANCH.${name} stays in the family's register`,
+      `C* ${c.toFixed(1)}, want 12…30`);
   }
 
-  // Tellable from EACH OTHER — the strict floor, because these six are the one
-  // set that genuinely shares a view (the mastery list, the reading stack).
+  // Tellable from EACH OTHER.
+  //
+  // ── WHY THIS IS 11 AND NOT 24 ────────────────────────────────────────────
+  //
+  // Six hues inside a 200° arc at C* ≤ 30 cannot be 24 apart. That is not a
+  // tuning failure, it is arithmetic, and a joint search over all thirteen
+  // meaning-carrying colours (six branches, five eras, the accent, two answer
+  // states) inside that arc confirmed it from the other direction: every set
+  // that cleared 24 did so by running the chroma to the ceiling and handing back
+  // #126B46 and #546422 — a palette louder than the one it was derived from.
+  //
+  // WHAT PAID FOR THE DROP is that the six no longer have to be told apart by
+  // colour alone. The screen that showed six bars at once — Profile's BRANCH
+  // MASTERY — is gone, and the reading row that replaced it carries each
+  // branch's ICON and its NAME on every line. In a list with an icon and a word
+  // on it, a hue that says "these six are one set" is worth more than six that
+  // say "these six are strangers", which is the note the owner actually wrote.
+  //
+  // 11 is the measured minimum of the shipped set (metaphysics/logic at 11.4).
+  // It is a high-water mark like every other budget here: it may go UP.
   for (let i = 0; i < branches.length; i++) {
     for (let j = i + 1; j < branches.length; j++) {
       const [na, va] = branches[i], [nb, vb] = branches[j];
-      ok(dE(va, vb) >= 24, `BRANCH.${na} and BRANCH.${nb} are tellable apart`,
-        `ΔE ${dE(va, vb).toFixed(1)}, need 24`);
+      ok(dE(va, vb) >= 11, `BRANCH.${na} and BRANCH.${nb} are tellable apart`,
+        `ΔE ${dE(va, vb).toFixed(1)}, need 11`);
     }
   }
 
-  // AND HELD OFF THE SCALES THEY DO NOT SHARE A VIEW WITH, at a lower floor.
-  // An era chip lives on Thinkers and an answer state lives inside a lesson;
-  // neither is ever on screen beside a mastery bar. These are insurance for the
-  // day one of them is, not a claim that they are interchangeable.
+  // AND HELD OFF THE SCALES THEY DO NOT SHARE A VIEW WITH.
+  //
+  // TWO FLOORS NOW, BECAUSE THEY PROTECT DIFFERENT THINGS, and collapsing them
+  // into one number is what made this section unreadable at the old values.
+  //
+  // · AGAINST AN ERA: 5, and deliberately low. The two scales are one family on
+  //   purpose — that is the whole of what "blend them a lot" bought — and the
+  //   only place they meet is a quote plate inside a lesson, where the era is a
+  //   thin spine and a 7% face tint while the branch is the control's lip. The
+  //   closest shipped pair is ethics/CONTEMPORARY at 6.3, two olives.
+  // · AGAINST AN ANSWER STATE: 18, unchanged and NOT negotiable. A lesson strikes
+  //   its controls in the branch hue and re-strikes them on answering, so a
+  //   branch that resembles `correct` makes the verdict unreadable AS a verdict.
+  //   The first placement of this set did exactly that, at ΔRGB 12, which is why
+  //   the six are now laid out around an empty green wedge (hue 130–175).
+  // · AGAINST THE ACCENT: 10. `HUE` is one of the owner's six swatches, so the
+  //   coolest branch being its sibling is the palette working rather than
+  //   failing. It still may not BE it.
   for (const [name, v] of branches) {
     for (const [en, ev] of Object.entries(D.ERA)) {
-      ok(dE(v, ev) >= 15, `BRANCH.${name} is not ERA.${en}`, `ΔE ${dE(v, ev).toFixed(1)}, need 15`);
+      ok(dE(v, ev) >= 5, `BRANCH.${name} is not ERA.${en}`, `ΔE ${dE(v, ev).toFixed(1)}, need 5`);
     }
-    for (const other of ['wrong', 'correct', 'HUE']) {
+    for (const other of ['wrong', 'correct']) {
       ok(dE(v, D.C[other]) >= 18, `BRANCH.${name} is not ${other}`,
         `ΔE ${dE(v, D.C[other]).toFixed(1)}, need 18`);
     }
+    ok(dE(v, D.C.HUE) >= 10, `BRANCH.${name} is not the accent itself`,
+      `ΔE ${dE(v, D.C.HUE).toFixed(1)}, need 10`);
   }
 }
 
@@ -836,7 +876,7 @@ for (const [name, hue] of ERA_FACES) {
     `${r2(D.C.paperSoft, GROUND).toFixed(1)}:1`);
   ok(r2(D.C.dim, GROUND) >= 3, 'panel: the caption grey clears the mark floor',
     `${r2(D.C.dim, GROUND).toFixed(1)}:1`);
-  ok(r2(T.LAVENDER, GROUND) >= 3, 'panel: the XP line reads', `${r2(T.LAVENDER, GROUND).toFixed(1)}:1`);
+  ok(r2(T.EMBER_LIT, GROUND) >= 3, 'panel: the XP line reads', `${r2(T.EMBER_LIT, GROUND).toFixed(1)}:1`);
   ok(r2(T.PANEL_RULE, GROUND) >= 1.15, 'panel: a hairline is actually visible',
     `${r2(T.PANEL_RULE, GROUND).toFixed(2)}:1`);
   // TWO DIFFERENT THINGS, and the first draft measured the wrong one. The
@@ -894,8 +934,14 @@ for (const [name, hue] of ERA_FACES) {
       if (d < worst) { worst = d; worstPair = `${marks[i][0]}/${marks[j][0]}`; }
     }
   }
-  ok(worst >= 24, 'the six jewel tones stay tellable apart',
-    `closest pair ${worstPair} at deltaE ${worst.toFixed(1)}, floor 24`);
+  // 14, DOWN FROM 24, and it tracks the SOURCE rather than being loosened on its
+  // own. `glow` is a function of the branch hues, and those moved into the
+  // owner's family on 2026-09-15 at a measured minimum of ΔE 11.4 (see
+  // constants/design.ts for why that number is the decision and not a slip).
+  // A derived set cannot be further apart than what it is derived from, so this
+  // floor is the shipped minimum of the derived set, 14.8, rounded down.
+  ok(worst >= 14, 'the six jewel tones stay tellable apart',
+    `closest pair ${worstPair} at deltaE ${worst.toFixed(1)}, floor 14`);
 }
 
 // ── 9 · the animation nobody could catch: is it on screen, and will it replay? ─
@@ -1021,9 +1067,15 @@ function stripJs(src) {
   ok(!/screenOptions=\{\{[\s\S]*?\n\s*lazy: false,/.test(lay),
     'no tab is built while the launch screen is still animating',
     'screenOptions must not turn lazy off for every screen at once');
-  ok(/const WARM = \[[^\]]*'index'[^\]]*'branches'[^\]]*'philosophers'[^\]]*'stats'[^\]]*'profile'/.test(lay),
-    'all five are still built without being visited, just later',
+  // 'stats' left this list on 2026-09-15 with the tab it named. The other five
+  // still have to be here: a tab that never warms is the "first switch is slow"
+  // complaint back again.
+  ok(/const WARM = \[[^\]]*'index'[^\]]*'branches'[^\]]*'philosophers'[^\]]*'pass'[^\]]*'profile'/.test(lay),
+    'all five tabs are still built without being visited, just later',
     'a tab that never warms is the "first switch is slow" complaint back again');
+  ok(!/'stats'/.test(lay),
+    'and the statistics tab is gone rather than merely hidden',
+    'its readings live in a card on Profile — two homes for one number is how they drift');
   ok(/useUIStore\(\(s\) => s\.launchDone\)/.test(lay),
     'and the warm-up waits on the launch screen rather than on a bare timer');
   ok(/InteractionManager\.runAfterInteractions/.test(lay),
@@ -1046,7 +1098,15 @@ function stripJs(src) {
     `SETTLE_MS ${settle} against an outro of ${total}ms`);
 }
 
-// -- 11 . the dial: a solid, its palette, and the press that reaches it -------
+// -- 11 . the solid ramp: `disc()`, and the depth it has to keep ------------
+//
+// THE DIAL ITSELF IS GONE (2026-09-15), with the statistics tab it sat at the
+// top of. What it leaves behind is the RAMP: `disc()` still cuts a solid from a
+// branch hue for components/branch/sceneArt.ts and the widget backgrounds, and
+// the three things below are the ones that made it read as metal rather than as
+// six coloured shapes. The press test went with the component — lib/utils/dialHit.ts
+// existed so a platform field no browser harness could reproduce could still be
+// checked in plain Node, and there is no longer anything pressing a wedge.
 //
 // The chart at the top of Insights has been rebuilt three times on the same
 // reader's say-so, and each note ruled out the obvious answer to the last one:
@@ -1091,11 +1151,15 @@ function stripJs(src) {
       if (d < worstPair) { worstPair = d; pairAt = `${faces[i]}/${faces[j]}`; }
     }
   }
-  // 24 is design.ts's own floor between two branches. THE SOURCE SET SITS AT
-  // 25.1, so the lift has almost nothing to spend -- 0.10 is already under. The
-  // lift is not a taste, it is the largest one the palette can afford.
-  ok(worstPair >= 24, 'no two branches collapse into each other on the disc',
-    `worst pair dE ${worstPair.toFixed(1)}, floor 24 — ${pairAt}`);
+  // 12 is design.ts's own floor between two branches (11) plus the headroom the
+  // 0.08 lift happens to add. This USED to read 24, matched to a source set that
+  // sat at 25.1 with nothing to spend -- and the note here said so. The source
+  // is a tamer family now, minimum ΔE 11.4, so the derived floor follows it
+  // down. What has NOT changed is the reasoning: the lift is still the largest
+  // one the palette can afford, because lifting compresses toward white and
+  // every extra point of it spends this margin.
+  ok(worstPair >= 12, 'no two branches collapse into each other on the disc',
+    `worst pair dE ${worstPair.toFixed(1)}, floor 12 — ${pairAt}`);
 
   // WHAT CARRIES THE SILHOUETTE IS THE RIM, NOT THE FACE, and that is the right
   // way round for a struck object: the face may be as quiet as it likes because
@@ -1133,98 +1197,14 @@ function stripJs(src) {
   // AND THE SET KEEPS ITS VARIETY, which is the whole point. Six colours that
   // differ only in hue read as a crayon set however carefully they are chosen;
   // what makes a palette look designed is that its members differ in LIGHTNESS
-  // too. glow's spread was about 2 L. The source's is 15, and disc keeps it.
+  // too. glow's spread was about 2 L. The source's is 9 since the palette moved
+  // into the owner's family -- it was 15 -- and disc keeps whatever it is given,
+  // which is the property being asserted. Floor 7.
   const Ls = faces.map((f) => lab(f)[0]);
   const lRange = Math.max(...Ls) - Math.min(...Ls);
-  ok(lRange >= 12, 'and the six still differ in lightness, not only in hue',
-    `${lRange.toFixed(0)} L apart, floor 12 — this is what glow flattened`);
+  ok(lRange >= 7, 'and the six still differ in lightness, not only in hue',
+    `${lRange.toFixed(0)} L apart, floor 7 — this is what glow flattened`);
 
-  // -- THE PRESS -------------------------------------------------------------
-  //
-  // `locationX` IS A REACT NATIVE FIELD AND REACT-NATIVE-WEB DOES NOT SET IT, so
-  // the hit test the old chart used produced NaN on web -- and every guard
-  // written against it passed, because every comparison with NaN is false. The
-  // tap was received, computed and discarded. Four dispatches were tried against
-  // it, including a native CDP mouse press, before the search moved off the
-  // event and onto the arithmetic.
-  //
-  // Fed the exact points here, in plain Node, because that is what
-  // lib/utils/dialHit.ts was pulled out of the component to allow.
-  // The geometry the dial actually ships: a 132pt box, drawn STRAIGHT ON, set in
-  // a socket ring six units wide.
-  const G = { cx: 66, cy: 66, rx: 60, ry: 60, slop: 6 };
-  // Six wedges of sixty degrees, starting at 12 o'clock and running clockwise.
-  const W = Array.from({ length: 6 }, (_, i) => ({ key: `w${i}`, a0: -90 + i * 60, a1: -90 + (i + 1) * 60 }));
-  const on = (g, deg, frac) => [
-    g.cx + g.rx * frac * Math.cos((deg * Math.PI) / 180),
-    g.cy + g.ry * frac * Math.sin((deg * Math.PI) / 180),
-  ];
-
-  let right = 0;
-  for (const w of W) {
-    const [x, y] = on(G, (w.a0 + w.a1) / 2, 0.6);
-    if (H.wedgeAt(x, y, G, W) === w.key) right++;
-  }
-  ok(right === 6, 'a press in the middle of a wedge picks that wedge', `${right} of 6`);
-
-  // AND RIGHT ROUND THE RIM, not only at the six most forgiving points on the
-  // whole disc. The first staging of the counter-test below pressed wedge
-  // MIDDLES -- thirty degrees from either edge -- and proved nothing in either
-  // direction, which is the trap §21 keeps recording.
-  let edgeRight = 0, edgeSeen = 0;
-  for (let deg = 0; deg < 360; deg += 3) {
-    const [x, y] = on(G, deg, 0.85);
-    const want = W.find((w) => {
-      const rel = ((deg - w.a0) % 360 + 360) % 360;
-      return rel < w.a1 - w.a0;
-    });
-    if (!want) continue;
-    edgeSeen++;
-    if (H.wedgeAt(x, y, G, W) === want.key) edgeRight++;
-  }
-  ok(edgeRight === edgeSeen, 'and so does one anywhere round the rim',
-    `${edgeRight} of ${edgeSeen} points at 0.85 r`);
-
-  // THE ANGLE IS MEASURED IN THE FACE'S OWN SPACE, and it stays that way even
-  // though the shipped face is a circle and the divide is currently a no-op.
-  // That is deliberate: it is one divide, and it is the only version that
-  // survives anyone tipping this again -- a version comparing SCREEN angles
-  // picks the wrong wedge for every press above or below the middle of a tipped
-  // face and looks almost right doing it. Counter-tested against a tipped
-  // geometry, because a circle cannot show the difference.
-  const TIP = { ...G, ry: 34 };
-  const flatLid = { ...TIP, ry: TIP.rx };
-  let wrong = 0, tested = 0;
-  for (let deg = 0; deg < 360; deg += 5) {
-    const [x, y] = on(TIP, deg, 0.8);
-    const truth = H.wedgeAt(x, y, TIP, W);
-    if (!truth) continue;
-    tested++;
-    if (H.wedgeAt(x, y, flatLid, W) !== truth) wrong++;
-  }
-  ok(wrong > 0, 'and it would be wrong if the two radii were treated as one',
-    `${wrong} of ${tested} points misread on a tipped face — the divide is load-bearing`);
-
-  ok(H.wedgeAt(G.cx + (G.rx + G.slop) * 1.15, G.cy, G, W) === null,
-    'a press outside the socket selects nothing');
-  // THE SOCKET RING BELONGS TO THE PIECE IT HUGS. It is the four units of groove
-  // the rosette is set into, it is inside the object as far as a thumb is
-  // concerned, and refusing it makes a visible border of the target inert for no
-  // reason a reader could guess at.
-  ok(H.wedgeAt(G.cx + G.rx + G.slop * 0.5, G.cy, G, W) !== null,
-    'but the socket ring around it belongs to the piece it hugs');
-  ok(H.wedgeAt(NaN, 10, G, W) === null,
-    'and a point that is not a number selects nothing rather than everything',
-    'NaN passed every bounds check the old version had');
-
-  // THE COORDINATE ITSELF. `locationX` on native, `offsetX` on web, and NEITHER
-  // is a reason to fall back to zero: zero is a real point, the top-left corner,
-  // so defaulting to it turns "no coordinates" into a press on whichever wedge
-  // reaches that corner.
-  ok(H.pressPoint({ locationX: 5, locationY: 6 })?.x === 5, 'a press reads locationX where React Native sets it');
-  ok(H.pressPoint({ offsetX: 7, offsetY: 8 })?.x === 7, 'and offsetX where react-native-web does');
-  ok(H.pressPoint({ pageX: 30, pageY: 40 }, 10, 10)?.y === 30, 'and falls back to the page point less the origin');
-  ok(H.pressPoint({}) === null, 'and a press with no point at all is not a press');
 }
 
 // -- 12 · WARMING A SCREEN SPENDS ANY ENTRANCE IT KEYS ON MOUNT ---------------

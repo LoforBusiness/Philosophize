@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/ui/Button';
 import { MetalPlate } from '@/components/profile/Struck';
 import PassChart, { PlanTiles, usePassArrival } from '@/components/paywall/PassChart';
-import { INK, MID, ROYAL } from '@/components/shared/tone';
+import { INK, MID, PATINA } from '@/components/shared/tone';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { libraryStanding } from '@/lib/utils/passValue';
@@ -136,7 +136,7 @@ export default function TrialOffer({ onAccept, onDecline }: Props) {
           showsVerticalScrollIndicator={false}
         >
           <View style={[st.words, { width: cardW }]}>
-            <MetalPlate metal={ROYAL} label={`${days.toUpperCase()} FREE`} />
+            <MetalPlate metal={PATINA} label={`${days.toUpperCase()} FREE`} />
             <Text style={st.kicker}>THAT WAS TODAY’S LESSON</Text>
             <Text style={st.head}>{headline}</Text>
             <Text style={st.sub}>{`Open every lesson free for ${days}.`}</Text>

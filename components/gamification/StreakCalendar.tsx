@@ -8,7 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
-import { STREAK_PURPLE, STREAK_DEEP, STREAK_BEIGE, SLATE, STREAK_MILESTONES } from '@/constants/streak';
+import { STREAK_EMBER, STREAK_DEEP, STREAK_SAND, SLATE, STREAK_MILESTONES } from '@/constants/streak';
 import { ramp, rampFace, mix, PAPER_LIT, PAPER_SHADE } from '@/components/shared/tone';
 import {
   buildMonth,
@@ -110,7 +110,7 @@ const PULSE_MS = 1800;
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** The struck material every lit day is cut from. One light, top-left, always. */
-const METAL = ramp(STREAK_PURPLE);
+const METAL = ramp(STREAK_EMBER);
 const FACE = rampFace(METAL);
 /**
  * THE RAIL, AND WHY IT IS NOT A WASH.
@@ -131,7 +131,7 @@ const FACE = rampFace(METAL);
  * than at PAPER_LIT — running a three-stop gradient out to white put half the
  * rail's length at 1.0:1 and was most of why it disappeared.
  */
-const RAIL = mix(STREAK_PURPLE, PAPER, 0.62); // 2.34:1 on paper
+const RAIL = mix(STREAK_EMBER, PAPER, 0.62); // 2.34:1 on paper
 const GROOVE: [string, string, string] = [
   mix(RAIL, INK, 0.16), RAIL, mix(RAIL, PAPER_LIT, 0.5),
 ];
@@ -470,7 +470,7 @@ export default function StreakCalendar({
           rest days at all. */}
       <View style={styles.key}>
         <Legend fill={METAL.base} label="STUDIED" />
-        <Legend fill={STREAK_BEIGE} rim={STREAK_PURPLE} label="RESTED" />
+        <Legend fill={STREAK_SAND} rim={STREAK_EMBER} label="RESTED" />
         <Legend fill={PAPER} rim={FAINT} label="MISSED" />
       </View>
     </View>
@@ -526,7 +526,7 @@ function TodayRing({ size, pulse }: { size: number; pulse: SharedValue<number> }
           height: size,
           borderRadius: size / 2,
           borderWidth: 2,
-          borderColor: STREAK_PURPLE,
+          borderColor: STREAK_EMBER,
         },
         ringStyle,
       ]}
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
   },
   fill: { height: 6, borderRadius: 3 },
   tally: { includeFontPadding: false },
-  tallyBig: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: STREAK_PURPLE },
+  tallyBig: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: STREAK_EMBER },
   tallyOf: { fontFamily: 'Inter_500Medium', fontSize: 12, color: INK_SOFT },
 
   labels: { flexDirection: 'row', marginTop: 16, marginBottom: 5 },
@@ -732,16 +732,19 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: 'transparent',
   },
-  rest: { backgroundColor: STREAK_BEIGE, borderColor: STREAK_PURPLE },
+  rest: { backgroundColor: STREAK_SAND, borderColor: STREAK_EMBER },
   // Quiet on purpose: a hollow ring, not an accusation.
   missed: { borderColor: FAINT },
   today: { borderWidth: 2, borderColor: INK, backgroundColor: PAPER },
 
   num: { fontFamily: 'Inter_500Medium', color: INK_SOFT },
-  // Beige on the purple measures 10.52:1, and the number sits on the face's MIDDLE
-  // stop rather than on its lit corner — which is the trap §19 records for the
-  // quote plate's byline, and check:streak measures it rather than assuming.
-  numLit: { color: STREAK_BEIGE, fontFamily: 'Inter_700Bold' },
+  // PAPER, NOT SAND, AND THE PALETTE CHANGE IS WHY. Sand on the old purple
+  // measured 10.52:1; sand on the ember that replaced it measures 3.53:1, under
+  // the floor for a number. Paper reads 4.85:1 on the same ground. The warm
+  // cream still belongs on the DEEP end of the ramp (5.50:1) — it is only the
+  // lit face it cannot sit on, which is the trap §19 records for the quote
+  // plate's byline, and check:streak measures it rather than assuming.
+  numLit: { color: PAPER, fontFamily: 'Inter_700Bold' },
   numRest: { color: INK, fontFamily: 'Inter_500Medium' },
   numFuture: { color: FAINT },
   numToday: { color: INK, fontFamily: 'Inter_700Bold' },

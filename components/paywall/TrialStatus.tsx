@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import Button from '@/components/ui/Button';
 import { MetalPlate } from '@/components/profile/Struck';
 import TrialReminderAsk from '@/components/paywall/TrialReminderAsk';
-import { INK, MID, ROYAL } from '@/components/shared/tone';
+import { INK, MID, PATINA } from '@/components/shared/tone';
 import { C, SPACE, RADIUS } from '@/constants/design';
 import { BILLING_PERIOD_LABEL, FALLBACK_PRICE } from '@/constants/subscription';
 import { trialLabel, trialLeft, whenLabel } from '@/lib/utils/trial';
@@ -68,7 +68,7 @@ export default function TrialStatus({ source, compact = false }: {
     return (
       <View style={st.box} nativeID="trial-status">
         <MetalPlate
-          metal={ROYAL}
+          metal={PATINA}
           label={trialLabel(trialLeft(state.endsAt, now)).toUpperCase()}
           style={st.plate}
         />
@@ -113,7 +113,7 @@ export default function TrialStatus({ source, compact = false }: {
     <View style={st.box} nativeID="trial-status">
       {ends != null ? (
         <MetalPlate
-          metal={ROYAL}
+          metal={PATINA}
           label={trialLabel(trialLeft(ends, now)).toUpperCase()}
           style={st.plate}
         />

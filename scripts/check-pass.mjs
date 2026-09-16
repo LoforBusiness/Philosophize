@@ -286,11 +286,11 @@ for (const rel of FAMILY.filter((f) => f.endsWith('.tsx'))) {
 // shaded half of the metal, the palette's purple since 2026-09-15.
 ok(ratio(D.C.inkSoft, PAPER) >= 3, 'the free run of day-ticks is visible on paper',
   `${ratio(D.C.inkSoft, PAPER).toFixed(2)}:1`);
-ok(ratio(T.ROYAL.shade, PAPER) >= 3, 'and so is the single struck one beside it',
-  `${ratio(T.ROYAL.shade, PAPER).toFixed(2)}:1`);
+ok(ratio(T.PATINA.shade, PAPER) >= 3, 'and so is the single struck one beside it',
+  `${ratio(T.PATINA.shade, PAPER).toFixed(2)}:1`);
 {
   const parts = read('components/paywall/PassParts.tsx');
-  ok(/ROYAL\.base, ROYAL\.shade, ROYAL\.rim/.test(parts),
+  ok(/PATINA\.base, PATINA\.shade, PATINA\.rim/.test(parts),
     'and it is struck from that half, not the lit one');
 }
 
@@ -595,18 +595,18 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
       hexes.slice(0, 3).join(' ') || 'every value from tone/METAL/mix');
   }
 
-  // ── THE PURPLE ON PAPER, MEASURED ───────────────────────────────────────────────
+  // ── THE EMBER_INK ON PAPER, MEASURED ───────────────────────────────────────────────
   //
   // The certificate's frame and its section headings are rules and small caps
   // on bare paper. Gold's base read 2.51:1 there and had to be dragged toward
   // ink; the palette's purple is used as it is, and this asserts it clears.
-  const onPaper = ratio(T.PURPLE, D.C.paper);
+  const onPaper = ratio(T.EMBER_INK, D.C.paper);
   ok(onPaper >= 4.5, 'the certificate\'s purple clears 4.5:1 on paper', `${onPaper.toFixed(2)}:1`);
 
   // The label inside a purple plate takes the metal's own `on`, which check-ui
   // owns — but the plate on this certificate is the ACTIVE flag, so it is worth
   // asserting here too rather than assuming.
-  const onPlate = ratio(T.ROYAL.on, T.ROYAL.base);
+  const onPlate = ratio(T.PATINA.on, T.PATINA.base);
   ok(onPlate >= 3, 'the ACTIVE plate\'s label reads on its own metal', `${onPlate.toFixed(2)}:1`);
 
   // ── THE CROSS ON THE TAB'S CHART, READ OUT OF THE TAB ─────────────────────

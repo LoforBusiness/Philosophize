@@ -7,7 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import { StruckTile } from '@/components/profile/Struck';
-import { INK, MID, GHOST, PAPER, PAPER_LIT, PAPER_SHADE, mix, ROYAL, PURPLE, BEIGE, BEIGE_LIT } from '@/components/shared/tone';
+import { INK, MID, GHOST, PAPER, PAPER_LIT, PAPER_SHADE, mix, PATINA, EMBER_INK, SAND, SAND_LIT } from '@/components/shared/tone';
 import { SPACE } from '@/constants/design';
 import {
   compareRows, includedTiles, type Cell, type CompareRow, type IncludedTile,
@@ -25,13 +25,13 @@ import {
 // Brilliant's own paywall is the model (researched against their app, 2025): a
 // Benefits column, a quiet Free column, and the paid column raised in a bright
 // frame, five short rows with a tick, a cross or a few words in each. Here the
-// raised column is struck in royal purple on a hard lip, with a beige card cut
+// raised column is struck in the palette’s slate teal on a hard lip, with a sand card cut
 // into it (the palette in tone.ts; it was gold until 2026-09-15), and a cross
 // only appears where the free tier has none of the thing.
 //
 // ── THE ARRIVAL IS OPTIONAL, AND THAT IS THE READER'S CALL ──────────────────
 //
-// Pass a `play` driver and the chart arrives: a glint crosses the purple, then the
+// Pass a `play` driver and the chart arrives: a glint crosses the plate, then the
 // Pass column's cells stamp in one row at a time. The tab replays it on focus and
 // the post-lesson offer on mount. Settings passes none, on the reader's own
 // instruction: it is somewhere a reader goes to do one thing.
@@ -59,7 +59,7 @@ const LIGHT_END = { x: 0.85, y: 1 } as const;
 
 interface Metrics {
   /** Column widths. */ freeW: number; passW: number;
-  /** Purple showing round the beige card, and the hard lip under the column. */ frame: number; lip: number;
+  /** Teal showing round the sand card, and the hard lip under the column. */ frame: number; lip: number;
   /** How far the Pass column stands above the Free panel. */ lift: number;
   headH: number; rowH: number; mark: number; radius: number; cardRadius: number;
   head: number; headPass: number; label: number; labelLine: number; value: number;
@@ -150,7 +150,7 @@ export default function PassChart({ size = 'full', width = 0, play }: {
             would sit on top of the very rows it is meant to be behind. */}
         <View style={s.passLip} />
         <LinearGradient
-          colors={[ROYAL.lit, ROYAL.base, mix(ROYAL.base, ROYAL.shade, 0.55)]}
+          colors={[PATINA.lit, PATINA.base, mix(PATINA.base, PATINA.shade, 0.55)]}
           locations={[0, 0.42, 1]}
           start={LIGHT_START}
           end={LIGHT_END}
@@ -208,8 +208,8 @@ function Row({ row, index, play, s }: {
 /**
  * A tick, a cross, or a few words.
  *
- * THE TICK IS A PURPLE COIN WITH A BEIGE TICK, because beige is the readable one
- * on purple (`ROYAL.on`) and because a coin is what this app pays rewards in.
+ * THE TICK IS A TEAL COIN WITH A SAND TICK, because sand is the readable one on
+ * the teal (`PATINA.on`, 7.38:1) and because a coin is what this app pays in.
  * THE CROSS IS FLAT AND COOL, the treatment a locked medal gets, so the two
  * tokens differ by material and not only by the mark on them.
  */
@@ -217,7 +217,7 @@ function Mark({ cell, tier, s }: { cell: Cell; tier: 'free' | 'pass'; s: Sized }
   if (cell.kind === 'yes') {
     return (
       <View style={s.coinHalo}>
-        <LinearGradient colors={[ROYAL.lit, ROYAL.base]} start={LIGHT_START} end={LIGHT_END} style={s.coin}>
+        <LinearGradient colors={[PATINA.lit, PATINA.base]} start={LIGHT_START} end={LIGHT_END} style={s.coin}>
           <View style={s.tickShort} />
           <View style={s.tickLong} />
         </LinearGradient>
@@ -257,7 +257,7 @@ function Stamp({ play, index, children }: { play: SharedValue<number>; index: nu
   return <Animated.View style={style}>{children}</Animated.View>;
 }
 
-/** The glint across the purple, once per arrival. Clipped by the frame's own corners. */
+/** The glint across the plate, once per arrival. Clipped by the frame's own corners. */
 function Sheen({ play, tableH, style: box }: {
   play: SharedValue<number>; tableH: SharedValue<number>; style: Sized['sheen'];
 }) {
@@ -307,7 +307,7 @@ function Tile({ tile }: { tile: IncludedTile }) {
   return (
     <StruckTile pad={2} style={st.tile}>
       <View style={st.tileTop}>
-        <SketchIcon name={TILE_ICON[tile.id]} size={17} color={PURPLE} />
+        <SketchIcon name={TILE_ICON[tile.id]} size={17} color={EMBER_INK} />
         <Text style={st.tileFigure} numberOfLines={1}>{tile.figure}</Text>
       </View>
       <Text style={st.tileNoun} numberOfLines={2}>{tile.noun}</Text>
@@ -324,7 +324,7 @@ function sized(m: Metrics) {
   const pad = Math.round(m.rowH * 0.14);
   const halo = m.mark + 8 * k;
   return StyleSheet.create({
-    // It runs under the purple column, so its right-hand corners are tucked behind
+    // It runs under the teal column, so its right-hand corners are tucked behind
     // the frame rather than showing as a second rounded edge beside it.
     freePanel: {
       position: 'absolute', top: m.lift, bottom: m.lip + m.frame,
@@ -334,33 +334,33 @@ function sized(m: Metrics) {
     passFrame: { position: 'absolute', top: 0, bottom: 0, right: 0, width: m.passW },
     passLip: {
       position: 'absolute', left: 0, right: 0, top: m.lip, bottom: 0,
-      borderRadius: m.radius, backgroundColor: ROYAL.rim,
+      borderRadius: m.radius, backgroundColor: PATINA.rim,
     },
     passFace: {
       position: 'absolute', left: 0, right: 0, top: 0, bottom: m.lip,
-      borderRadius: m.radius, overflow: 'hidden', borderWidth: 1, borderColor: ROYAL.shade,
+      borderRadius: m.radius, overflow: 'hidden', borderWidth: 1, borderColor: PATINA.shade,
     },
     passCard: {
       position: 'absolute', top: m.headH - 1, left: m.frame - 1, right: m.frame - 1, bottom: m.frame - 1,
-      borderRadius: m.cardRadius, backgroundColor: BEIGE, overflow: 'hidden',
+      borderRadius: m.cardRadius, backgroundColor: SAND, overflow: 'hidden',
     },
-    // The card is a window cut into the purple, so its top edge is the dark one.
+    // The card is a window cut into the teal, so its top edge is the dark one.
     passCut: {
       position: 'absolute', left: 0, right: 0, top: 0, height: 1.5,
-      backgroundColor: mix(ROYAL.shade, BEIGE, 0.4),
+      backgroundColor: mix(PATINA.shade, SAND, 0.4),
     },
     sheen: { position: 'absolute', left: -m.passW / 2, width: m.passW * 2, top: 0, height: SHEEN_H },
 
     headRow: { flexDirection: 'row', alignItems: 'center', height: m.headH, paddingTop: m.lift / 2 },
     headLabel: { flex: 1, fontFamily: 'Inter_700Bold', fontSize: m.head, color: INK },
     headFree: { fontFamily: 'Inter_700Bold', fontSize: m.head, color: MID },
-    headPass: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: m.headPass, color: ROYAL.on, includeFontPadding: false },
+    headPass: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: m.headPass, color: PATINA.on, includeFontPadding: false },
 
     row: { flexDirection: 'row', alignItems: 'center', minHeight: m.rowH },
     ruleLeft: { position: 'absolute', top: 0, left: 0, right: m.passW, height: 1, backgroundColor: RULE },
     rulePass: {
       position: 'absolute', top: 0, right: inset, width: m.passW - inset * 2,
-      height: 1, backgroundColor: mix(BEIGE, INK, 0.16),
+      height: 1, backgroundColor: mix(SAND, INK, 0.16),
     },
     rowLabel: {
       flex: 1, fontFamily: 'Inter_500Medium', fontSize: m.label, lineHeight: m.labelLine, color: INK,
@@ -376,20 +376,20 @@ function sized(m: Metrics) {
     coinHalo: {
       width: halo, height: halo, borderRadius: halo / 2,
       alignItems: 'center', justifyContent: 'center',
-      backgroundColor: BEIGE_LIT,
+      backgroundColor: SAND_LIT,
     },
     coin: {
-      width: m.mark, height: m.mark, borderRadius: m.mark / 2, borderWidth: 1.5, borderColor: ROYAL.shade,
+      width: m.mark, height: m.mark, borderRadius: m.mark / 2, borderWidth: 1.5, borderColor: PATINA.shade,
       alignItems: 'center', justifyContent: 'center',
     },
     // Two bars rather than a glyph: exact at any size, where a font's checkmark is
     // a smudge. Their ends meet at the tick's lowest point.
     tickShort: {
-      position: 'absolute', width: 9 * k, height: 2.6 * k, borderRadius: 1.3 * k, backgroundColor: BEIGE,
+      position: 'absolute', width: 9 * k, height: 2.6 * k, borderRadius: 1.3 * k, backgroundColor: SAND,
       transform: [{ translateX: -4.25 * k }, { translateY: 1.75 * k }, { rotate: '45deg' }],
     },
     tickLong: {
-      position: 'absolute', width: 14 * k, height: 2.6 * k, borderRadius: 1.3 * k, backgroundColor: BEIGE,
+      position: 'absolute', width: 14 * k, height: 2.6 * k, borderRadius: 1.3 * k, backgroundColor: SAND,
       transform: [{ translateX: 2 * k }, { translateY: 0 }, { rotate: '-45deg' }],
     },
     noDisc: {

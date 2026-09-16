@@ -152,6 +152,17 @@ const SCREENS = [
   // reasoned about: a label that wraps on a narrow phone makes its row taller,
   // and only a real layout says whether the purple column still runs the whole way
   // down and every cell still sits inside it.
+  // -- THE PROFILE, WHICH ABSORBED THE STATISTICS TAB ------------------------
+  //
+  // Four things must be true after the rebuild: the condensed card is there, the
+  // sections the owner removed are NOT, the streak comes first, and nothing in
+  // the new card overflows its box on the narrow phone.
+  { key: 'profile', q: 's=profile',
+    want: ['DAILY STREAK', 'YOUR PROGRESS', 'LESSONS', 'THINKERS', 'QUOTES', 'DAYS',
+           'WHERE YOUR READING GOES', 'XP', 'LAST 30 DAYS',
+           'PROGRESS TO NEXT RANK', 'SAVED QUOTES', 'BADGES EARNED'],
+    notWant: ['AT A GLANCE', 'FROM YOUR INSIGHTS', 'THINKERS YOU KEEP RETURNING TO',
+              'BRANCH MASTERY', 'LESSONS DONE', 'TOTAL XP'] },
   { key: 'pass-tab', q: 's=tab',
     want: ['Every lesson, every day', 'with the Scholar’s', 'Benefits', 'Free', 'Pass',
            'Lessons a day', 'Unlimited', 'Replay lessons', 'In order',

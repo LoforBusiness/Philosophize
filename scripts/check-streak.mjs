@@ -45,19 +45,23 @@ const INK = '#1A1A1A';
 const streak = await loadTs(path.join('constants', 'streak.ts'));
 const mood = await loadTs(path.join('lib', 'utils', 'streakMood.ts'));
 
-head('THE STREAK PURPLE, MEASURED');
+head('THE STREAK EMBER_INK, MEASURED');
 {
   // The numbers written into constants/streak.ts's comments, re-derived. A comment
   // that states a ratio is a claim; this is the check that it is still true.
   const claims = [
-    ['STREAK_PURPLE on paper', streak.STREAK_PURPLE, PAPER, 4.5],
+    ['STREAK_EMBER on paper', streak.STREAK_EMBER, PAPER, 4.5],
     ['STREAK_DEEP on paper', streak.STREAK_DEEP, PAPER, 4.5],
     ['STREAK_DEEP carrying cream', streak.STREAK_DEEP, CREAM, 4.5],
-    ['ink on STREAK_BEIGE', INK, streak.STREAK_BEIGE, 4.5],
-    ['STREAK_DEEP on STREAK_BEIGE (the tier chip)', streak.STREAK_DEEP, streak.STREAK_BEIGE, 4.5],
+    ['ink on STREAK_SAND', INK, streak.STREAK_SAND, 4.5],
+    ['STREAK_DEEP on STREAK_SAND (the tier chip)', streak.STREAK_DEEP, streak.STREAK_SAND, 4.5],
     // A lit calendar day's number, the stamp's legend and the ceremony's button
-    // label are all beige on the purple.
-    ['STREAK_BEIGE on STREAK_PURPLE', streak.STREAK_BEIGE, streak.STREAK_PURPLE, 4.5],
+    // label all sit on the SPARK'S LIT FACE, and the palette change moved which
+    // colour they may be: beige on the old purple was 10.52:1, sand on the ember
+    // is 3.53:1. Paper is 4.85:1 and is what those three carry now. Sand is
+    // still the lettering for the ramp's DEEP end, which is the line below.
+    ['PAPER on STREAK_EMBER', PAPER, streak.STREAK_EMBER, 4.5],
+    ['STREAK_SAND on STREAK_DEEP', streak.STREAK_SAND, streak.STREAK_DEEP, 4.5],
     ['SLATE on paper', streak.SLATE, PAPER, 4.5],
     // THE OTHER PRINTING. Home's habit panel is on ink, where the purple reads
     // 1.34:1 and SLATE 3.31:1, both under the floor for the number they colour.
@@ -93,7 +97,7 @@ head('THE STREAK PURPLE, MEASURED');
     const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
     return [116 * f(Y) - 16, 500 * (f(X) - f(Y)), 200 * (f(Y) - f(Z))];
   };
-  const [L1, a1, b1] = lab(streak.STREAK_PURPLE);
+  const [L1, a1, b1] = lab(streak.STREAK_EMBER);
   const [L2, a2, b2] = lab(streak.SLATE);
   const dE = Math.hypot(L1 - L2, a1 - a2, b1 - b2);
   if (dE > 20) ok('purple and slate are different colours, not two brightnesses',
@@ -121,19 +125,31 @@ head('THE STREAK PURPLE, MEASURED');
       `only ${Math.abs(L1 - L2).toFixed(1)} L apart — the mascot and the copy carry it too`);
   }
 
-  // ── AND IT MUST NOT BE A COLOUR THE READER HAS ALREADY THROWN OUT ──────────
+  // ── AND THE OWNER HAS NOW CHOSEN THE COLOUR THIS USED TO FORBID ───────────
   //
-  // Two hues have now been rejected by name, and the second search nearly
-  // re-shipped the first: maximising chroma in the gold band returns h60 C54,
-  // which is ΔE 8 from the ember. That was why the gilt went
-  // low-chroma. The streak is royal purple now (2026-09-15), nowhere near that
-  // band, and the floor stays so a later retune cannot walk back into a colour
-  // the reader has already thrown out.
-  const EMBER = '#B4541E';   // the burnt orange: "it looks like Halloween"
-  const dEmber = (() => { const [a, b, c] = lab(EMBER); return Math.hypot(L1 - a, a1 - b, b1 - c); })();
-  if (dEmber > 20) ok('the purple is a different answer from the rejected ember, not a re-run',
-    `ΔE ${dEmber.toFixed(1)}, floor 20`);
-  else bad('the streak colour has drifted back into the rejected ember', `ΔE ${dEmber.toFixed(1)}`);
+  // This block asserted ΔE > 20 from `#B4541E`, the burnt orange rejected as
+  // "it just looks like it is fall or it's Halloween". It was a good floor while
+  // the streak was being searched for, and it is measuring the wrong thing now:
+  // the six swatches the owner supplied on 2026-09-15 contain `#D35E36`, and the
+  // deepening of it that ships as STREAK_EMBER sits ΔE 10.0 from the hue this
+  // once refused. That is recorded rather than hidden — it is the one place the
+  // new palette lands near something previously thrown out.
+  //
+  // WHY IT IS NOT THE SAME DECISION. The ember was rejected as the app's ONE
+  // warm accent against paper, where it was the loudest thing on the screen. It
+  // now sits inside a family of five tame teals, olives and sands that carry
+  // every surface, and the rule in tone.ts is that the spark is only ever small.
+  // A colour is a different answer in a different context, and the research this
+  // file already cites — every streak worth copying is warm, and a dead one is
+  // grey — was always pointing here.
+  //
+  // WHAT REPLACES THE FLOOR is the assertion that actually protected readers,
+  // and it is directly below: alive against lapsed must be a real difference of
+  // colour, on BOTH grounds. A hue ban cannot survive the owner picking the hue.
+  const REJECTED = '#B4541E';
+  const dEmber = (() => { const [a, b, c] = lab(REJECTED); return Math.hypot(L1 - a, a1 - b, b1 - c); })();
+  ok('the streak is warm again, and this is the distance from the rejected ember',
+    `ΔE ${dEmber.toFixed(1)} — recorded, not gated: the owner supplied this band`);
 
   // ── AND IT SHARES A SCREEN WITH TWO RANK METALS ────────────────────────────
   //
@@ -165,7 +181,7 @@ head('THE STREAK PURPLE, MEASURED');
     return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, '0').toUpperCase()).join('');
   };
   for (const [name, base, ground] of [
-    ['on paper', streak.STREAK_PURPLE, PAPER],
+    ['on paper', streak.STREAK_EMBER, PAPER],
     ['on ink', streak.STREAK_ON_INK, INK],
   ]) {
     const mid = base;                          // rampFace's 52% stop IS the base
@@ -182,10 +198,10 @@ head('THE STREAK PURPLE, MEASURED');
   // each is re-derived from tone.ts here and must match it exactly.
   const palette = await loadTs(path.join('components', 'shared', 'tone.ts'));
   for (const [name, have, want] of [
-    ['STREAK_PURPLE', streak.STREAK_PURPLE, palette.PURPLE],
-    ['STREAK_DEEP', streak.STREAK_DEEP, palette.ROYAL.shade],
-    ['STREAK_BEIGE', streak.STREAK_BEIGE, palette.BEIGE],
-    ['STREAK_ON_INK', streak.STREAK_ON_INK, palette.LAVENDER],
+    ['STREAK_EMBER', streak.STREAK_EMBER, palette.EMBER_INK],
+    ['STREAK_DEEP', streak.STREAK_DEEP, palette.EMBER_DEEP],
+    ['STREAK_SAND', streak.STREAK_SAND, palette.SAND],
+    ['STREAK_ON_INK', streak.STREAK_ON_INK, palette.EMBER_LIT],
   ]) {
     if (have === want) ok(`${name} is the palette's own tone`, have);
     else bad(`${name} has drifted from the palette`, `${have} in constants/streak.ts, ${want} in tone.ts`);
@@ -415,7 +431,7 @@ head('THE MONTH GRID');
 // showed as nothing.
 {
   const cal = fs.readFileSync(path.join('components', 'gamification', 'StreakCalendar.tsx'), 'utf8');
-  const t = /const RAIL = mix\(STREAK_PURPLE, PAPER, ([\d.]+)\);/.exec(cal);
+  const t = /const RAIL = mix\(STREAK_EMBER, PAPER, ([\d.]+)\);/.exec(cal);
   if (!t) {
     bad('the rail derives its tone from the material', 'RAIL not found -- this check has stopped tracking it');
   } else {
@@ -426,13 +442,13 @@ head('THE MONTH GRID');
       const [A, B] = [px(a), px(b)];
       return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, '0').toUpperCase()).join('');
     };
-    const rail = mix(streak.STREAK_PURPLE, PAPER, +t[1]);
+    const rail = mix(streak.STREAK_EMBER, PAPER, +t[1]);
     const r = ratio(rail, PAPER);
     if (r >= 1.5) ok(`the run's rail is a band on paper, not a rumour`, `${r.toFixed(2)}:1, floor 1.5 — a beige rail would be 1.18`);
     else bad(`the run's rail is only ${r.toFixed(2)}:1 on paper`, 'needs 1.5 — it will read as nothing');
     // ...and it must stay UNDER the lit token, or the chain competes with the
     // days it is joining.
-    const vsToken = ratio(rail, streak.STREAK_PURPLE);
+    const vsToken = ratio(rail, streak.STREAK_EMBER);
     if (vsToken >= 2) ok('and the tokens still out-rank it', `${vsToken.toFixed(2)}x`);
     else bad('the rail is as loud as the days it joins', `${vsToken.toFixed(2)}x`);
   }

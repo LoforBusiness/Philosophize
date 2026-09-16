@@ -6,17 +6,16 @@ import SketchIcon from '@/components/shared/SketchIcon';
 import Glyph from '@/components/shared/Glyph';
 import BadgeMedal from '@/components/shared/BadgeMedal';
 import RankClimbChart from '@/components/shared/RankClimbChart';
-import { ShareBars, StackBar, DayBars } from '@/components/profile/InkCharts';
+import { DayBars } from '@/components/profile/InkCharts';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { C, TYPE, SPACE, BRANCH, type TypeKey, type BranchKey } from '@/constants/design';
-import { GHOST, ramp, ROYAL, PURPLE, LAVENDER } from '@/components/shared/tone';
-import { StruckBar, StruckTile, MetalPlate, MasteryRow, ShelfCount } from '@/components/profile/Struck';
+import { GHOST, ramp, PATINA, EMBER_INK, EMBER_LIT } from '@/components/shared/tone';
+import { StruckBar, MetalPlate, ShelfCount, CountStrip, ReadingRow } from '@/components/profile/Struck';
 import RankSeal from '@/components/shared/RankSeal';
 import { BRANCH_SHORT, BRANCH_ICON } from '@/components/shared/branchMarks';
-import Showcase from '@/components/profile/Showcase';
 import { ProfileArtFill, ProfileAvatar, useProfileArt } from '@/components/shared/ProfileArt';
 import { profileNameStyle, profileNameText } from '@/data/profileFonts';
 import StreakPanel from '@/components/gamification/StreakPanel';
@@ -180,26 +179,31 @@ export default function ProfileScreen() {
   // said 395 XP still to go. The sheet was right.
   const totalXP = xp;
 
-  // `done` and `total` ride along now, because the percentage was hiding them.
-  // "68%" of an unknown number is not something a reader can act on; "23 of 34"
-  // is, and it is the same fact with the denominator left in.
-  const mastery = useMemo(() => ALL_BRANCHES.map((b) => {
-    const total = b.paths.reduce((acc, p) => acc + p.lessons.length, 0);
-    const done = Math.min(total, lessonsByBranch[b.slug] ?? 0);
-    const pct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
+  // ── WHERE THE READING GOES, WHICH IS NOT THE SAME AS HOW MUCH IS LEFT ────
+  //
+  // This was `mastery`: done, total and a percentage per branch, drawn as six
+  // bars under a BRANCH MASTERY heading. The owner removed that section and kept
+  // its furniture — "I don't want the branch of mastery. But a note, I like the
+  // icons on the branch mastery for all the six branches of philosophy."
+  //
+  // The denominator is what actually had to go. §19 spends a section on it: a
+  // target measured against the library MOVES AWAY from a reader who has done
+  // nothing wrong every time content ships, and this app has gone 60 → 192 → 246
+  // lessons. A share of the reader's own leading branch cannot do that, and it
+  // answers the more interesting question anyway.
+  const reading = useMemo(() => ALL_BRANCHES.map((b) => {
     return {
       slug: b.slug,
       name: SHORT[b.slug] ?? b.name.toUpperCase(),
       icon: BICON[b.slug] ?? 'frame',
       hue: BRANCH[b.slug as BranchKey] ?? C.ink,
-      done,
-      total,
-      pct,
+      lessons: lessonsByBranch[b.slug] ?? 0,
     };
-  }).sort((a, b) => b.pct - a.pct), [lessonsByBranch]);
-  const branchesComplete = mastery.filter((m) => m.total > 0 && m.done >= m.total).length;
+  }).sort((a, b) => b.lessons - a.lessons), [lessonsByBranch]);
+  /** The reader's own strongest branch — both ends of every bar are theirs. */
+  const readingLead = reading[0]?.lessons ?? 0;
 
-  const topBranch = (mastery[0]?.pct ?? 0) > 0 ? mastery[0].slug : null;
+  const topBranch = readingLead > 0 ? reading[0].slug : null;
   const descriptor = topBranch ? TITLE[topBranch] ?? 'SEEKER' : 'SEEKER';
 
   // RETURNING TO SOMEONE MEANS YOU OPENED THEM.
@@ -246,25 +250,13 @@ export default function ProfileScreen() {
   // and a single fact has no shape. These are the same facts with their
   // proportions left in, which is the whole difference between "Nietzsche" and
   // "Nietzsche, and by how much".
-  const thinkerRows = useMemo(() => philScores.slice(0, 4).map((ph) => ({
-    label: ph.name,
-    value: ph.score,
-    detail: ph.opened > 0 || ph.kept > 0
-      ? [ph.opened > 0 ? ph.opened + ' opened' : null, ph.kept > 0 ? ph.kept + ' saved' : null]
-          .filter(Boolean).join(' · ')
-      : undefined,
-  })), [philScores]);
-  const branchParts = useMemo(() => branchInterest
-    .filter((b) => b.interactions > 0)
-    .map((b) => ({
-      label: SHORT[b.slug] ?? b.name,
-      value: b.interactions,
-      color: BRANCH[b.slug as BranchKey],
-    })), [branchInterest]);
-  // A fortnight is long enough to show a habit and short enough that one good
-  // Sunday does not flatten every other day into the baseline.
-  const xpDays = useMemo(() => dailyXP(xpEvents, 14, Date.now()), [xpEvents]);
+  // THIRTY DAYS, NOT A FORTNIGHT, because this is the only activity reading left
+  // in the app. The old fortnight was the right window when the statistics tab
+  // drew the same thing at thirty beside it; with the tab gone, a month is what a
+  // reader needs to see a habit rather than a week's weather.
+  const xpDays = useMemo(() => dailyXP(xpEvents, 30, Date.now()), [xpEvents]);
   const daysActive = activeDays(xpDays);
+  const monthXP = useMemo(() => xpDays.reduce((a, b) => a + b, 0), [xpDays]);
 
   // A fun, auto-written character sketch assembled from what the user actually
   // does — lessons taken, quotes saved, thinkers they keep opening.
@@ -284,17 +276,6 @@ export default function ProfileScreen() {
   // One shared computation — see `rankProgress`. This screen used to divide
   // totalXP by the next threshold, which counts from zero rather than from the
   // start of the current band and read 96% where the Ranks sheet read 77%.
-  // The same measurement the store awards from and the Ranks sheet displays —
-  // three copies of one calculation is three chances for the cabinet to disagree
-  // with the badge grid about whether a medal is held.
-  const badgeStats = useMemo(
-    () => progressStats({
-      lessonsByBranch, lessonsByUnit, savedQuotes, philosopherViews, quizScores,
-      streak: shownStreak, totalXP, activeDays: practisedDays, rankIndex,
-    }),
-    [lessonsByBranch, lessonsByUnit, savedQuotes, philosopherViews, quizScores,
-      shownStreak, totalXP, practisedDays, rankIndex],
-  );
 
   const { current: cur, next, pending, pct: rankPct, toNext, inBand, bandSize } =
     rankProgress(rankIndex, totalXP);
@@ -495,116 +476,8 @@ export default function ProfileScreen() {
             ScrollView. Detaching those twelve bought no memory back and put a
             UI-thread pass under every frame of the overscroll stretch. */}
         <View style={styles.body}>
-          {/* THE CABINET, FIRST. The pin you hold and the three medals you chose
-              to be seen holding — see components/profile/Showcase. It is above
-              everything because it is the only part of this page that is a
-              statement rather than a measurement. */}
-          <Showcase stats={badgeStats} rankIndex={rankIndex} />
 
           {showWidget ? <DailyQuoteWidget style={{ marginBottom: SPACE[4] }} /> : null}
-
-          {/* insights */}
-          {useMemo(() => (
-            <>
-          <SectionLabel>FROM YOUR INSIGHTS</SectionLabel>
-          <Card>
-            {/* A NAME IS A FACT WITH NO SHAPE. This said "TOP PHILOSOPHER —
-                Nietzsche", which cannot tell you whether that is a landslide or a
-                one-quote lead, and left out second and third — the interesting
-                part of anyone's reading. Same data, proportions left in. */}
-            <Text style={styles.insightLabel}>THINKERS YOU KEEP RETURNING TO</Text>
-            {topPhilosopher ? (
-              <View style={{ marginTop: SPACE[2] }}>
-                {/* Purple on the leader only — a placing rather than a longer bar. */}
-                <ShareBars rows={thinkerRows} c={CHART_INK} accent={ROYAL.base} />
-              </View>
-            ) : (
-              <>
-                <Text style={styles.insightValue}>Keep exploring</Text>
-                <Text style={styles.insightHint}>
-                  Open a few thinkers and they will rank themselves here.
-                </Text>
-              </>
-            )}
-          </Card>
-            </>
-          ), [topPhilosopher, thinkerRows])}
-
-          {/* becoming */}
-          {useMemo(() => (
-            <>
-          <SectionLabel>WHO YOU'RE BECOMING</SectionLabel>
-          <Card pad={4} style={styles.bioCard}>
-            <View style={styles.bioQuill}>
-              <SketchIcon name="pencil" size={16} color={C.ink} />
-            </View>
-            <Text style={styles.bioText}>{bio}</Text>
-            {/* THE SENTENCE, THEN ITS SHAPE. Six bars would be a chart; one bar
-                cut six ways is a portrait, and it answers this section’s own
-                question in a way the prose cannot — whether this reader is a
-                specialist or a wanderer. */}
-            {branchParts.length > 0 ? (
-              <View style={styles.bioShape}>
-                <Text style={styles.insightLabel}>WHERE YOUR READING GOES</Text>
-                <View style={{ marginTop: SPACE[2] }}>
-                  <StackBar parts={branchParts} c={CHART_INK} />
-                </View>
-              </View>
-            ) : null}
-          </Card>
-            </>
-          ), [bio, branchParts])}
-
-          {/* glance */}
-          {useMemo(() => (
-            <>
-          <SectionLabel>AT A GLANCE</SectionLabel>
-          <View style={styles.glanceRow}>
-            {/* `glanceCol` carries the flex that would otherwise land on Card's
-                FACE, not on the box that has to share the row — the same fix
-                settings.tsx's `planCol` made for its two plan panels. */}
-            {/* EMBOSSED, not flat. These two are the headline numbers on the
-                page and they were drawn on the same inert white face as every
-                other box, so the biggest facts arrived with the least weight.
-                A lit corner, a shaded one and a shadow is the badge treatment
-                applied to a rectangle — which is the point, since a profile is a
-                case of struck things. The top edge and the icon carry the
-                palette: purple for XP, lavender for lessons. */}
-            <View style={styles.glanceCol}>
-              <StruckTile accent={LAVENDER} style={styles.glanceTile}>
-                <View style={styles.glanceTop}>
-                  <SketchIcon name="book" size={15} color={PURPLE} />
-                  <Text style={styles.glanceLabel}>LESSONS DONE</Text>
-                </View>
-                <Text style={styles.glanceValue}>{lessonsDone}</Text>
-                {/* HOW MANY DAYS, not just how many lessons. Six on one Sunday and
-                    one on each of six days are the same total and completely
-                    different habits. */}
-                <Text style={styles.glanceFoot}>
-                  {daysActive > 0
-                    ? daysActive + ' active ' + (daysActive === 1 ? 'day' : 'days') + ' in a fortnight'
-                    : 'Quiet fortnight'}
-                </Text>
-              </StruckTile>
-            </View>
-            <View style={styles.glanceCol}>
-              <StruckTile accent={ROYAL.base} style={styles.glanceTile}>
-                <View style={styles.glanceTop}>
-                  <SketchIcon name="star" size={15} color={PURPLE} />
-                  <Text style={styles.glanceLabel}>TOTAL XP</Text>
-                </View>
-                <Text style={styles.glanceValue}>{totalXP.toLocaleString()}</Text>
-                {/* A fortnight, one bar a day, empty days drawn empty. A line would
-                    join the gaps and imply reading on days there was none — and the
-                    gaps are the habit. */}
-                <View style={{ marginTop: SPACE[1] }}>
-                  <DayBars values={xpDays} c={CHART_INK} />
-                </View>
-              </StruckTile>
-            </View>
-          </View>
-            </>
-          ), [lessonsDone, daysActive, totalXP, xpDays])}
 
           {/* streak */}
           {useMemo(() => (
@@ -638,6 +511,85 @@ export default function ProfileScreen() {
           </Pressable>
             </>
           ), [shownStreak, lastLessonDate, restHeld, restBridging, isPro])}
+
+          {/* progress — the whole of what the statistics tab used to draw */}
+          {useMemo(() => (
+            <>
+          <SectionLabel>YOUR PROGRESS</SectionLabel>
+          {/* ONE CARD WHERE A TAB USED TO BE.
+              The statistics tab drew a four-tile ledger, a dark instrument panel
+              carrying a rosette chart and a thirty-day line, a thinker league, a
+              ranking of eras and a discovery card — about 1,400 points of screen.
+              The owner asked for "a much more condensed version", and what
+              survives is the part that is about the READER rather than about the
+              library: how much they have done, where it went, and whether they
+              have been coming back.
+
+              WHAT WAS DROPPED AND WHY. The rosette needed a tap to read and said
+              the same thing as the rows below it. The thinker league ranked 322
+              people by a formula that counted lessons other people's names were
+              attached to. The era ranking answered a question nobody asked. All
+              three were interesting; none of them changed what a reader does
+              next, which is the test a profile has to pass. */}
+          <Card>
+            <CountStrip
+              items={[
+                { label: 'LESSONS', value: lessonsDone },
+                { label: 'THINKERS', value: distinctViewed },
+                { label: 'QUOTES', value: quotesSaved },
+                { label: 'DAYS', value: daysActive },
+              ]}
+            />
+
+            <View style={styles.statRule} />
+
+            <Text style={styles.statLabel}>WHERE YOUR READING GOES</Text>
+            <View style={styles.readList}>
+              {reading.map((b) => (
+                <ReadingRow
+                  key={b.slug}
+                  name={b.name}
+                  hue={b.hue}
+                  lessons={b.lessons}
+                  lead={readingLead}
+                  icon={<SketchIcon name={b.icon} size={15} color={ramp(b.hue).shade} />}
+                />
+              ))}
+            </View>
+
+            <View style={styles.statRule} />
+
+            <View style={styles.statTop}>
+              <Text style={styles.statLabel}>XP · LAST 30 DAYS</Text>
+              <Text style={styles.statRight}>{monthXP.toLocaleString()} XP</Text>
+            </View>
+            {/* A bar a day, empty days drawn empty. A line would join the gaps and
+                imply reading on days there was none — and the gaps are the habit. */}
+            <View style={{ marginTop: SPACE[2] }}>
+              <DayBars values={xpDays} c={CHART_INK} height={34} />
+            </View>
+          </Card>
+            </>
+          ), [lessonsDone, distinctViewed, quotesSaved, daysActive, reading, readingLead, monthXP, xpDays])}
+
+          {/* becoming */}
+          {useMemo(() => (
+            <>
+          <SectionLabel>WHO YOU'RE BECOMING</SectionLabel>
+          <Card pad={4} style={styles.bioCard}>
+            <View style={styles.bioQuill}>
+              <SketchIcon name="pencil" size={16} color={C.ink} />
+            </View>
+            <Text style={styles.bioText}>{bio}</Text>
+            {/* THE STACK BAR THAT USED TO SIT HERE HAS MOVED UP AND GROWN NAMES.
+                It cut one bar six ways to say whether this reader is a specialist
+                or a wanderer, which is a good question and the same one the
+                reading rows in YOUR PROGRESS now answer — with the branch named
+                and its icon beside it, rather than as six unlabelled segments.
+                One claim, one place. */}
+          </Card>
+            </>
+          ), [bio])}
 
           <SectionLabel>PROGRESS TO NEXT RANK</SectionLabel>
           <Card>
@@ -721,7 +673,7 @@ export default function ProfileScreen() {
                 </View>
               ) : (
                 <View style={styles.rankPin}>
-                  <MetalPlate metal={ROYAL} label="TOP" />
+                  <MetalPlate metal={PATINA} label="TOP" />
                 </View>
               )}
             </View>
@@ -772,37 +724,6 @@ export default function ProfileScreen() {
             </View>
           </Card>
 
-          {/* mastery */}
-          {useMemo(() => (
-            <>
-          <SectionLabel>BRANCH MASTERY</SectionLabel>
-          {/* SIX ROWS THAT ARE NO LONGER THE SAME ROW SIX TIMES.
-              Each carries its branch's own hue — on the icon chip, on the fill,
-              and at a tenth strength on the empty part of the track — so a row is
-              identifiable before its name is read. The percentage moved aside for
-              the count it was hiding, and a branch that is finished says so on a
-              purple plate rather than by having a bar that is full to within a few
-              pixels of one that is not. */}
-          {branchesComplete > 0 ? (
-            <Text style={styles.masteryLead}>
-              {branchesComplete === 1 ? 'One branch finished' : `${branchesComplete} branches finished`}
-              {branchesComplete < mastery.length ? ` · ${mastery.length - branchesComplete} to go` : ' · all six'}
-            </Text>
-          ) : null}
-          <View style={styles.masteryBox}>
-            {mastery.map((m) => (
-              <MasteryRow
-                key={m.slug}
-                name={m.name}
-                hue={m.hue}
-                done={m.done}
-                total={m.total}
-                icon={<SketchIcon name={m.icon} size={17} color={ramp(m.hue).shade} />}
-              />
-            ))}
-          </View>
-            </>
-          ), [mastery, branchesComplete])}
 
           {/* quotes */}
           {useMemo(() => (
@@ -848,9 +769,17 @@ export default function ProfileScreen() {
                   earned={b.earned}
                   size={BADGE_W - 12}
                 />
+                {/* THREE LINES, NOT TWO, AND THE NARROW PHONE IS WHY.
+                    At 320dp a badge column is 69pt, and "The Examined Life" sets
+                    as three lines in it — clamped at two it overflowed its box by
+                    a whole line, which §14 calls the distinction that matters:
+                    declaring a clamp is deliberate, running OUT of lines inside
+                    one is a word the reader does not get. It cost this grid 14pt
+                    a row on the narrowest phone and nothing at 390. Found the
+                    first time a harness ever measured this screen. */}
                 <Text
                   style={[styles.badgeLabel, !b.earned && styles.badgeLabelLocked]}
-                  numberOfLines={2}
+                  numberOfLines={3}
                 >
                   {b.name}
                 </Text>
@@ -953,22 +882,21 @@ const styles = StyleSheet.create({
   sectionLabel: { ...role('micro'), color: C.inkSoft, letterSpacing: 3, marginRight: SPACE[2] },
   sectionLine: { flex: 1, height: 1, backgroundColor: C.hairline },
 
-  glanceRow: { flexDirection: 'row', gap: SPACE[2] },
-  glanceCol: { flex: 1 },
-  // The tile relays the column's growth inwards, the same job Card's `flexGrow`
-  // does — without it the shorter tile floats at content height inside a
-  // stretched column and the row reads as two boxes of different sizes.
-  glanceTile: { flexGrow: 1 },
-  // LEFT-ALIGNED, not centred. A centred number over a centred caption is a
-  // poster; these are two readings side by side, and readings line up on an edge
-  // so the eye can compare them without hunting for each one's middle.
-  glanceTop: { flexDirection: 'row', alignItems: 'center', gap: SPACE[1] },
-  glanceValue: { ...role('display'), color: C.ink, marginTop: SPACE[1] },
-  glanceLabel: { ...role('micro'), color: C.inkSoft, letterSpacing: 1.4 },
-  glanceFoot: {
-    ...role('micro'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic',
-    color: C.inkSoft, marginTop: SPACE[2], lineHeight: 15,
+  // ── the one statistics card ──
+  //
+  // A RULE BETWEEN BLOCKS, NOT A BOX AROUND EACH. The AT A GLANCE section that
+  // used to sit here drew two struck tiles side by side, and the statistics tab
+  // drew four more plus three panels. Every one of those was a container, and
+  // containers are what "too crowded" is made of. Three readings inside one card,
+  // parted by hairlines, is the same information and one edge instead of nine.
+  statRule: {
+    height: 1, backgroundColor: C.hairline,
+    marginTop: SPACE[3], marginBottom: SPACE[3],
   },
+  statTop: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  statLabel: { ...role('micro'), color: C.inkSoft, letterSpacing: 1.5 },
+  statRight: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.8, color: C.ink },
+  readList: { gap: SPACE[2], marginTop: SPACE[2] },
 
   bioCard: { alignItems: 'center' },
   bioQuill: {
@@ -981,7 +909,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: SPACE[2],
   },
-  bioShape: { marginTop: SPACE[3], borderTopWidth: 1, borderTopColor: C.hairline, paddingTop: SPACE[3] },
   bioText: {
     ...role('body'),
     fontFamily: PLAYFAIR_CAPTION,
@@ -989,13 +916,6 @@ const styles = StyleSheet.create({
     color: C.ink,
     textAlign: 'center',
   },
-
-  insightLabel: { ...role('micro'), color: C.inkSoft, letterSpacing: 1.5 },
-  insightHint: {
-    ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic',
-    color: C.inkSoft, marginTop: SPACE[1], lineHeight: 19,
-  },
-  insightValue: { ...role('title'), color: C.ink, marginTop: SPACE[0] },
 
   streakBox: {},
   streakDoor: {
@@ -1035,12 +955,6 @@ const styles = StyleSheet.create({
   // 3:1 against its own track. Naming beat measuring once here; it does not get
   // to twice.
   rankUntil: { ...role('micro'), color: C.inkSoft, letterSpacing: 1, textAlign: 'right', marginTop: SPACE[1] },
-
-  masteryBox: { gap: SPACE[2] },
-  masteryLead: {
-    ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic',
-    color: C.inkSoft, marginBottom: SPACE[2],
-  },
 
   quotesCard: { flexDirection: 'row', alignItems: 'center', gap: SPACE[3] },
   quotesIcon: {

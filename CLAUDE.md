@@ -106,18 +106,17 @@ Philosophize/
 │   ├── index.tsx                # Landing / onboarding
 │   ├── sign-in.tsx              # Modal presentation
 │   ├── thinker/[id].tsx         # Deep-link target (philosophize://thinker/<id>)
-│   └── (app)/                   # Authenticated tab shell (6 tabs)
-│       ├── _layout.tsx          # Tabs: Home · Learn · Thinkers · Insights ·
-│       │                        #   Pass · Profile
+│   └── (app)/                   # Authenticated tab shell (5 tabs)
+│       ├── _layout.tsx          # Tabs: Home · Learn · Thinkers · Pass · Profile
 │       │                        #   animation:'fade' cross-dissolve, 340ms (§19)
+│       │                        #   INSIGHTS WAS THE SIXTH and went on 2026-09-15
 │       ├── index.tsx            # Home: reflection → QuickStart → actions → streak
 │       ├── branches/            # _layout (fade_from_bottom push) → index (Learn)
 │       │                        #   → [branchSlug] (units accordion)
 │       │                        #   → [pathSlug]/lesson/[lessonId]
 │       ├── philosophers/        # "Thinkers" directory (+ its own stack _layout)
-│       ├── stats/               # Insights — the ledger, branch/era rails,
-│       │                        #   the thinker league (§19)
-│       ├── profile/             # Rank, badges, streak, saved quotes
+│       ├── profile/             # Streak · YOUR PROGRESS (the condensed stats) ·
+│       │                        #   rank ladder · bio · saved quotes · badges
 │       ├── settings.tsx         # Hidden route. 9 sections down a LABELLED rail:
 │       │                        #   Profile · Account · Notifications · Learning ·
 │       │                        #   Display · Privacy · Feedback · Subscription ·
@@ -590,23 +589,70 @@ costs milliseconds rather than a Metro and a browser. What it holds:
 > back and watching it go red.
 >
 > **AND THEN THE OWNER REPLACED THE GILT, ALONG WITH EVERY OTHER GOLD (2026-09-15).**
-> *"The gold looks pretty AI"*, and in its place two swatches to be used together:
-> ROYAL PURPLE `#4B0082` and WARM BEIGE `#F5E6CA`. They are `PURPLE` and `BEIGE`
-> in `components/shared/tone.ts`, beside `LAVENDER` for a dark ground (the purple
-> itself is 1.34:1 on ink) and `ROYAL`, the purple as a struck material in the
-> shape `METAL` uses. Purple marks what was earned or chosen; beige is what it
-> sits on, or the lettering on it, at 10.52:1.
+> *"The gold looks pretty AI"*, and in its place ROYAL PURPLE `#4B0082` with WARM
+> BEIGE `#F5E6CA`. **That pair lasted a single day** — see below — but the move it
+> made is permanent: every gold accent in the app became one named pair in
+> `components/shared/tone.ts`, so replacing it again was two constants rather than
+> a sweep.
 >
-> The streak takes `STREAK_PURPLE`, `STREAK_DEEP`, `STREAK_BEIGE` and
+> **AND THE SAME EVENING THEY REPLACED THE PURPLE, WITH SIX SWATCHES.** *"The two
+> colors that I added earlier today, I don't really like how they look together …
+> I want a more abundant amount of colors … and to blend them a lot … the more
+> Tame colors, not as strong of the colors for the larger texts or for the more
+> color on screen. I want a less punchy color."* The sheet:
+>
+> | | | |
+> |---|---|---|
+> | DEEP `#2A4343` | TEAL `#416B66` | OLIVE `#646756` |
+> | SAND `#F1D49A` | EMBER `#D35E36` | SAGE `#C0C29D` |
+>
+> **MEASURED, IT IS NOT SIX PEERS — IT IS FIVE QUIET COLOURS AND ONE SPARK.** Five
+> sit at C\* 10–33; EMBER alone is at C\* 62. So "not as strong for the larger" is
+> not a preference to interpret, it is a description of the palette, and it became
+> the rule tone.ts enforces by naming: **the five tame ones take the area, the
+> spark is only ever small.**
+>
+> **THE PURPLE WAS THE OUTLIER, AND `C.HUE` WAS ALREADY IN THE FAMILY.** The purple
+> measured C\* 74 at hue 314 against a set spanning hue 45–198. Meanwhile the app's
+> structural accent had been `#1B3B3C` — a near-twin of DEEP, L\* 22.6 against 26.5
+> — so the outlines and button lips were already drawn in the palette the owner
+> then chose. `C.HUE` is `#2A4343` now and almost nothing on screen moved.
+>
+> **THE SPARK CANNOT CARRY A WORD, WHICH DECIDED WHERE THE PLATES WENT.** The
+> obvious move was to strike plates in EMBER with SAND lettering, as the purple
+> did with beige. Measured across every mix of EMBER toward INK, sand-on-it and
+> ink-on-it CROSS at about 3.4:1 and neither ever clears 4.5. There is no depth of
+> ember that can hold a label. So the struck material is `PATINA` — DEEP, the
+> quiet end — where sand reads 7.38:1, and the ember stays a mark: a live streak,
+> an earned tick, a coin.
+>
+> The streak takes `STREAK_EMBER`, `STREAK_DEEP`, `STREAK_SAND` and
 > `STREAK_ON_INK` from `constants/streak.ts`, and `check:streak` re-derives each
-> one from tone.ts. A cool streak goes against the research above, which is the
-> owner's call; the floors that research set still hold, at ΔE 82 from slate, 105
-> from the ember and 18 from the AMETHYST rank order it can meet on Profile.
+> from tone.ts. **The streak is warm again**, which is what all the research above
+> said it should be and what the purple went against.
 >
-> The tab icons, the Pass chart and certificate, the Profile plates, Insights'
-> two paper boxes and a lesson's XP coin moved with it. The rank ladder keeps its
-> eight metals, AURUM included: a pin is an earned object in a ladder, and the
-> owner chose to keep it.
+> **AND IT LANDS ΔE 10.0 FROM THE EMBER THIS SECTION REJECTED**, `#B4541E`, "it
+> just looks like it is fall or it's Halloween". That is recorded rather than
+> hidden, and the old ΔE ≥ 105 floor is deleted, because it was measuring a hue
+> ban that the owner has now overruled by supplying the hue. What it is NOT is the
+> same decision: the ember was rejected as the app's one warm accent against bare
+> paper, where it was the loudest thing on screen; it now sits inside five tame
+> colours that carry every surface. **A colour is a different answer in a
+> different context** — and if the owner dislikes it again, the thing to change is
+> `EMBER`'s role, not its hex. The floor that replaced it is the one that ever
+> protected a reader: alive against lapsed, ΔE 49.8 on paper and 40.0 on ink.
+>
+> **TWO COLLISIONS THE OLD PALETTE COULD NOT HAVE HAD**, both in `constants/design.ts`:
+> `wrong` was a rust sitting ΔE 21.7 from the spark, so "you got it wrong" and
+> "your streak is alive" were the same red-orange; and `correct` was a green ΔRGB
+> 27 from the new ethics olive, on a screen where a lesson strikes its controls in
+> the branch hue and then re-strikes them green. Both moved, and the six branches
+> are now laid out around an **empty green wedge** (hue 130–175) reserved for the
+> verdict.
+>
+> The tab icons, the Pass chart and certificate, the Profile plates and a lesson's
+> XP coin moved with all of it. The rank ladder keeps its eight metals, AURUM
+> included: a pin is an earned object in a ladder, and the owner chose to keep it.
 >
 > **AND THE READER'S SECOND SENTENCE WAS ABOUT THE ANIMATION:** *"the animation
 > for the day streak is just a blue dot and it isnt a clean cool animation."*
@@ -955,7 +1001,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **fifty-eight** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **fifty-seven** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -965,7 +1011,7 @@ followed:
 `check-plainwords` · `check-voice` · `check-ear` · `check-narration` · `check-streak` · `check-quips` ·
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
-`check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-stats` · `check-launch` ·
+`check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` ·
 `check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-thoughts` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
@@ -1166,8 +1212,11 @@ they belong to, so the rule book has them and this file did not:
   the pin they held handing over to the pin they just earned, a three-badge
   profile cabinet, XP + level curve, daily streak. Top rank at 50,000 XP.
 - **Screens:** Home (with Quick Start, §19), Learn → branch → unit accordion →
-  lesson, Thinkers, Insights, **Pass**, Profile, Settings, paywall, widget,
-  saved quotes. Six tabs since the Pass got one of its own (§14).
+  lesson, Thinkers, **Pass**, Profile, Settings, paywall, widget, saved quotes.
+  **FIVE tabs since 2026-09-15**, when the owner asked for the app to be
+  simpler — "there's too much information, there's too many statistics … I want
+  the user to be focused on the lessons." Insights was the sixth and its readings
+  are one card inside Profile now (§19).
 - **Money:** RevenueCat `scholars_pass` entitlement; AdMob interstitial after a
   free user's lesson; free daily lesson limit. The offer, the daily limit and the
   locked lesson are **one family** (`components/paywall/`) built out of the
@@ -1247,6 +1296,14 @@ they belong to, so the rule book has them and this file did not:
   encode the *old* per-branch model. The live gate is
   `lessonAccessibility()` in `data/index.ts`. Don't call the old ones.
 - Aesthetics has 3 units where the others have 5.
+- **Quick Start truncates a long lesson title, on the most prominent card in the
+  app.** "Is Morality Universal or Relative?" renders as "Is Morality Universal
+  or …" at 390dp — a `numberOfLines` clamp that runs out by 43pt, which is §14's
+  own distinction: declaring a clamp is deliberate, running out of lines inside
+  one is a word the reader does not get. Found on 2026-09-15 the first time a
+  harness ever loaded Home, and NOT fixed: the card has a fixed height and a
+  photographic ground, so giving the title a third line is a composition decision
+  rather than an edit. Either shorten the titles or re-lay the card.
 - **Deprecated RN style APIs — a KNOWN and deliberately un-swept debt.** ~1,400
   `pointerEvents=` props, 60 `shadow*` declarations across 13 files, and
   `textShadow*` in 10. All three are deprecated, and the decision is to leave them
@@ -2010,10 +2067,10 @@ short rows of ticks and crosses, and one chunky button. NN/g's rule for
 comparisons on a phone says the same from the other end: two options, only the
 rows that differ, and what both share merged rather than repeated.
 
-- **The Pass column is struck in the palette's purple, not a rainbow**, on a
-  hard lip the way a button sits, with a beige card inside it (gold until
-  2026-09-15, §7). Its cells stamp in row by row on every visit, and a glint
-  crosses the purple first. The trigger is FOCUS, because
+- **The Pass column is struck in the palette's own dark teal (`PATINA`), not a
+  rainbow**, on a hard lip the way a button sits, with a sand card inside it —
+  gold until 2026-09-15, then royal purple for one day, then this (§7). Its cells
+  stamp in row by row on every visit, and a glint crosses the plate first. The trigger is FOCUS, because
   the tab is built at startup and a mount animation would spend itself behind the
   launch screen; its callback depends on nothing, because `available` flips when
   RevenueCat answers and a callback listing it would replay the arrival under a
@@ -2096,8 +2153,8 @@ and these three decisions in it stand:
 - **The highlight is a MATERIAL, not a colour.** The obvious way to mark the Pass
   rows is a tint behind them, and §19 records that exact move — large saturated
   fills on paper — as what made Insights read cheap. A `granted` row is instead
-  CUT INTO the page: a beige recess running StruckNiche's gradient backwards, a
-  3pt purple rail down the cut edge, a purple tick. It differs from its neighbours
+  CUT INTO the page: a sand recess running StruckNiche's gradient backwards, a
+  3pt teal rail down the cut edge, a teal tick. It differs from its neighbours
   by depth and by metal, which is how every other reward in this app already
   differs from the thing below it.
 - **A limit is not a tick.** The free certificate's rows carry an open square with
@@ -2365,8 +2422,9 @@ skins, and **group R of the rule book is how to tell which one a claim wants**:
 >   lesson's BRANCH colour (`questionTone.ts`, `QuestionParts.tsx`): raised
 >   `LipPlate` faces on a lip of that hue, a `Medallion` knob, accent rails. The
 >   verdict re-strikes the same plates green or rust, stamps the reader's own choice
->   (`VerdictSeal`) and pays a right answer in purple on the answer card (`XpCoin`).
->   The kicker counts QUESTION 1 OF 2 beside a beige stake struck in purple. None of it makes a sound.
+>   (`VerdictSeal`) and pays a right answer on the answer card (`XpCoin`), struck
+>   in the palette's accent. The kicker counts QUESTION 1 OF 2 beside a sand stake
+>   struck in the same material. None of it makes a sound.
 > - **The poll's gap was the answer (R17).** Holder lines were mounted at opacity 0,
 >   and an invisible View still takes its height; only the correct row had holders
 >   in 7 of the 34 polls. They mount on answering now, on every row at once, and
@@ -4524,6 +4582,41 @@ Two things that were measured rather than judged, and both had already failed:
   offset but `kickerGap`, which makes the band. **Nothing painted over a word is
   acceptable (D31), including the app's own decoration.**
 
+> ## ⚠ EVERYTHING FROM HERE TO "Two of the six launch poses" DESCRIBES A SCREEN
+> ## THAT NO LONGER EXISTS.
+>
+> **The Insights tab was deleted on 2026-09-15**, with `app/(app)/stats`, all of
+> `components/stats` (the Instrument, the Dial, the InsightBoard), plus
+> `lib/utils/statsDiscovery.ts`, `statsMilestone.ts`, `dialHit.ts`,
+> `scripts/check-stats.mjs`, `sheet:dial` and `sheet:boards`. **`npm run
+> check:stats` does not exist**, so every sentence below that says "check:stats
+> holds it" is now describing nothing. The owner asked for the app to be simpler:
+> *"instead of a dedicated statistics tab, I want all the statistics to be in the
+> profile. And I want a much more condensed version of the statistics."*
+>
+> **WHAT REPLACED IT** is one card in Profile — `YOUR PROGRESS`: four counts, six
+> branch reading rows carrying the branch icons, and thirty days of XP as a bar a
+> day. `CountStrip` and `ReadingRow` in `components/profile/Struck.tsx`.
+>
+> **THESE SECTIONS ARE KEPT ANYWAY, and they are kept as FINDINGS rather than as
+> documentation.** Five of them are general and were paid for expensively:
+>
+> - **a target must never come from a ceiling** — the curriculum has gone 60 → 192
+>   → 246 lessons, so any bar measured against the library retreats from a reader
+>   who has done nothing wrong. This is why the new reading row measures a share
+>   of the reader's OWN leading branch and why `MasteryRow` was not simply reused.
+> - **no figure a reader can read may animate through zero** — "a count-up is a
+>   flourish; 'your figures are gone' is a fright". The new card draws its numbers
+>   and animates nothing, which is the cheapest possible version of that fix.
+> - **an arrival is not a reaction** — a screen announces an entrance; a changing
+>   number must never trigger one.
+> - **what made the old tab look cheap was AREA, not the palette** — six saturated
+>   fills on paper. It is the argument the 2026-09-15 palette rests on.
+> - **a metric that disagrees with an example whose answer you already know is a
+>   broken metric** — delete it rather than acting on it.
+>
+> Read them for those. Do not read them for what is on the screen.
+
 ### Insights is coloured now, and no target comes from a total
 
 The tab drew the same numbers three times — a pie of "interest", a pie of
@@ -4769,8 +4862,8 @@ be a dashboard belonging to some other product.
   the ring is measured against something, which is the difference between an
   instrument and a pie. It is also the cheapest depth available.
 - **One accent for everything that is not a branch.** The XP line is `LAVENDER`
-  and nothing else — the palette's purple lifted for this dark ground, the same
-  purple first place is struck in on the paper below. A second data colour would start a
+  and nothing else — the palette's accent lifted for this dark ground, the same
+  one first place is struck in on the paper below. A second data colour would start a
   palette; one accent plus six labels is a system.
 - **Type on the panel is never a branch colour.** Measured on `PANEL_BASE` the
   six run 3.8:1 to 9.1:1 — past the 3:1 a mark needs, and three of them under the

@@ -8,7 +8,7 @@ import { MetalPlate } from '@/components/profile/Struck';
 import PassChart, { PlanTiles, usePassArrival } from '@/components/paywall/PassChart';
 import PassDoor from '@/components/paywall/PassDoor';
 import TrialStatus from '@/components/paywall/TrialStatus';
-import { INK, MID, PAPER, mix, ROYAL, PURPLE, BEIGE } from '@/components/shared/tone';
+import { INK, MID, PAPER, mix, PATINA, SAND } from '@/components/shared/tone';
 import { useSubscriptionStore, usePassState } from '@/stores/subscriptionStore';
 import { C, SPACE } from '@/constants/design';
 import { BILLING_PERIOD_LABEL } from '@/constants/subscription';
@@ -93,7 +93,7 @@ export default function PassTab() {
             across the chart. */}
         <LinearGradient
           pointerEvents="none"
-          colors={[mix(BEIGE, PAPER, 0.15), PAPER, PAPER]}
+          colors={[mix(SAND, PAPER, 0.15), PAPER, PAPER]}
           locations={[0, 0.5, 1]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.55, y: 1 }}
@@ -124,7 +124,7 @@ export default function PassTab() {
           <View style={st.door}>
             {paying ? (
               <View style={st.held}>
-                <MetalPlate metal={ROYAL} label="ACTIVE" />
+                <MetalPlate metal={PATINA} label="ACTIVE" />
                 <Text style={st.heldNote}>
                   Every lesson is open to you. Manage or cancel the Pass any time from Settings.
                 </Text>
@@ -158,7 +158,19 @@ const st = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 30, lineHeight: 37, color: INK,
     textAlign: 'center', includeFontPadding: false, paddingHorizontal: SPACE[1],
   },
-  h1Accent: { color: PURPLE },
+  // THE STRUCK TEAL, NOT THE SPARK, AND THE OWNER'S OWN WORDS ARE THE RULE.
+  //
+  // This was the spark, and at 30px Playfair it was the loudest thing on the
+  // screen — "not as strong of the colors for the larger texts or for the more
+  // color on screen. I want a less punchy color." It passed the contrast floor
+  // at 4.85:1, which is exactly why a floor is not a substitute for looking:
+  // legible and too loud are different failures.
+  //
+  // The teal is 10.13:1 on paper and it is the same material the Pass column
+  // below it is struck in, so the headline now names the object the reader is
+  // about to look at instead of competing with it. The spark keeps the places it
+  // is small — the tile icons, an earned tick, a live streak.
+  h1Accent: { color: PATINA.base },
   trial: { marginTop: SPACE[4] },
 
   chart: { marginTop: SPACE[5] },

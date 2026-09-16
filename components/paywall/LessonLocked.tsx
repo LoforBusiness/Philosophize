@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import SketchIcon from '@/components/shared/SketchIcon';
 import Button from '@/components/ui/Button';
 import { StruckTile, MetalPlate } from '@/components/profile/Struck';
-import { GHOST, ramp, ROYAL } from '@/components/shared/tone';
+import { GHOST, ramp, PATINA } from '@/components/shared/tone';
 import { BRANCH_SHORT } from '@/components/shared/branchMarks';
 import { NextUp, Rule } from '@/components/paywall/PassParts';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -159,7 +159,7 @@ export default function LessonLocked({
                       <Text style={[styles.openLabel, { color: ramp(hue).shade }]}>{l.label}</Text>
                       <Text style={styles.openValue}>{l.pass}</Text>
                     </View>
-                    <MetalPlate metal={ROYAL} label="PASS" />
+                    <MetalPlate metal={PATINA} label="PASS" />
                   </View>
                 </StruckTile>
               ))}

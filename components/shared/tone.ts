@@ -207,52 +207,101 @@ export function mix(a: string, b: string, t: number): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE PALETTE: ROYAL PURPLE AND WARM BEIGE.
+// THE PALETTE: SIX SWATCHES, ONE FAMILY.
 //
-// The owner chose these on 2026-09-15, as two swatches, and asked for them in
-// place of the gold everywhere gold had been the app's accent: the tab icons,
-// the Pass, the streak, the profile's plates and Insights' two paper boxes.
-// "The gold looks pretty AI." The black-and-white identity stays, and these two
-// carry what gold used to.
+// The owner supplied these six on 2026-09-15, as a single sheet, replacing the
+// royal purple and warm beige they had chosen that same morning: "the two colors
+// that I added earlier today, I don't really like how they look together." The
+// brief with them was as specific as the swatches:
 //
-// HOW THEY PAIR. Purple marks what was earned or chosen; beige is the surface it
-// sits on, or the lettering on it. Beige on purple reads 10.52:1, purple on paper
-// 12.38:1, and ink on beige 14.13:1.
+//   · "use these colors and blend them a lot"
+//   · "the more Tame colors, not as strong of the colors for the larger texts or
+//      for the more color on screen. I want a less punchy color."
+//   · and the reason — "there's so many different colors and it's too confusing."
 //
-// TWO GROUNDS THEY CANNOT TAKE. Purple on ink is 1.34:1 and on the Insights
-// panel 1.49:1, so a dark ground takes LAVENDER, the same hue lifted toward paper.
-// Beige as a fill on paper is 1.18:1, so a beige surface is carried by its cut
-// edges, never by the fill alone.
+// WHAT THE MEASUREMENT SAID, because it changed the design. Five of the six sit
+// at C* 10–33; EMBER alone is at C* 62. So the palette is not six peers, it is a
+// QUIET SET WITH ONE SPARK, and the owner's "not as strong for the larger" is
+// exactly that reading. Hence the one rule this file now enforces by naming:
 //
-// The rank ladder keeps its eight metals, AURUM included, by the owner's choice:
-// a pin is an earned object in a ladder, not the app's accent.
+//   THE FIVE TAME ONES TAKE THE AREA. THE SPARK IS ONLY EVER SMALL.
+//
+// AND THE PURPLE WAS THE OUTLIER, NOT A NEIGHBOUR. It measured C* 74 at hue 314,
+// where this set spans hue 45–198. `C.HUE`, the app's structural accent, was
+// already #1B3B3C — a near-twin of DEEP at L* 22.6 against 26.5 — so the app's
+// own outlines and button lips had been living in this family all along.
+//
+// ── WHAT THE SPARK CANNOT DO, AND WHY THE PLATES ARE TEAL ──────────────────
+//
+// The obvious move was to make EMBER the new "earned or chosen" accent the way
+// PURPLE was, struck into plates with SAND lettering. It cannot be: measured
+// across every mix of EMBER toward INK, sand-on-it and ink-on-it CROSS at about
+// 3.4:1 and neither ever clears 4.5. There is no depth of ember that can carry a
+// word. A large ember plate would also be the loudest surface in the app, which
+// is the note the owner actually wrote.
+//
+// So the struck material is PATINA — DEEP, the quiet end of the set — and the
+// ember is kept for marks: a streak that is alive, an earned tick, a coin.
+//
+// ── THE ONE COLLISION WORTH KNOWING ────────────────────────────────────────
+//
+// EMBER sits ΔE 21.7 from the OLD `wrong` (#A8513F), so the app's spark and its
+// error state were the same rust. `wrong` moved to a cooler oxblood (#8E3340,
+// ΔE 56.6 from the spark) rather than the spark moving, because the spark is the
+// owner's own swatch. See constants/design.ts.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Royal purple, #4B0082. L* 20, C* 74, hue 314. */
-export const PURPLE = '#4B0082';
-/** Warm beige, #F5E6CA. L* 92, C* 15, hue 88. */
-export const BEIGE = '#F5E6CA';
-/** Beige a step down: the floor of a beige recess, and a hairline on beige. */
-export const BEIGE_SHADE = mix(BEIGE, INK, 0.1);
-/** Beige a step up: the lit edge of a beige surface. */
-export const BEIGE_LIT = mix(BEIGE, PAPER_LIT, 0.5);
-/** The purple for a dark ground, same hue: 7.12:1 on ink, 7.90:1 on the panel. */
-export const LAVENDER = mix(PURPLE, PAPER, 0.62);
+/** Slate teal — the quiet end, and the app's structural accent. L* 26.5 C* 10. */
+export const DEEP = '#2A4343';
+/** Teal. L* 42.2 C* 16. Carries text on paper at 5.71:1. */
+export const TEAL = '#416B66';
+/** Olive. L* 42.9 C* 10. Carries text on paper at 5.55:1. */
+export const OLIVE = '#646756';
+/** Warm sand — the surface a struck thing sits on, and the lettering on it. */
+export const SAND = '#F1D49A';
+/** THE SPARK. L* 54 C* 62, the only loud value in the app. MARKS ONLY, never a
+ *  large fill and never a word — 3.70:1 on paper clears the 3:1 a mark needs and
+ *  not the 4.5:1 a word needs. For a word use `EMBER_INK`. */
+export const EMBER = '#D35E36';
+/** Sage — a tame fill: a progress track, a quiet panel. 1.76:1 on paper. */
+export const SAGE = '#C0C29D';
+
+/** Sand a step down: the floor of a sand recess, and a hairline on sand. */
+export const SAND_SHADE = mix(SAND, INK, 0.1);
+/** Sand a step up: the lit edge of a sand surface. */
+export const SAND_LIT = mix(SAND, PAPER_LIT, 0.5);
+/** The spark as a WORD on paper: #B25231, 4.85:1. The smallest deepening that
+ *  clears the text floor — at 0.10 it is 4.29 and fails. */
+export const EMBER_INK = mix(EMBER, INK, 0.18);
+/** The spark on a DARK ground: #DD8768, 6.41:1 on ink, 7.12:1 on the panel. */
+export const EMBER_LIT = mix(EMBER, PAPER, 0.26);
+/**
+ * The spark in shadow: #803F29, the shaded end of a struck ember thing and the
+ * lip a struck ember button drops onto.
+ *
+ * THIS IS THE ONLY END OF THE RAMP SAND MAY SIT ON — 5.50:1 here against 3.53:1
+ * on the lit face. A streak object therefore letters in PAPER where it is bright
+ * and may letter in SAND where it is dark, which is the reverse of PATINA, where
+ * sand clears everywhere. Two materials, two rules; check:streak holds both.
+ */
+export const EMBER_DEEP = mix(EMBER, INK, 0.45);
 
 /**
- * The purple as a struck material, in the shape `METAL` uses, so a plate, a coin
- * and a column are cut from it exactly as they were cut from gold. `on` is beige.
+ * DEEP as a struck material, in the shape `METAL` uses, so a plate, a coin and a
+ * column are cut from it exactly as they were cut from gold and then purple.
+ * `on` is SAND, which reads 7.38:1 on the base and 9.05:1 on the shade.
  *
- * The lit corner stops at 0.22 toward paper, where beige still reads 6.22:1 on
- * it. At 0.34, the fraction `ramp()` uses, the corner turns orchid and a label
- * running across it falls under 4.5:1.
+ * The lit corner stops at 0.12 toward paper rather than the 0.34 `ramp()` uses:
+ * at 0.22 sand on the lit corner measures 3.92:1 and a label running across the
+ * top-left of a plate falls under the floor. This is the same trap the purple
+ * plate hit, one hue over — the LIT end of a metal is a ground too.
  */
-export const ROYAL: Metal = {
-  lit: mix(PURPLE, PAPER, 0.22),
-  base: PURPLE,
-  shade: mix(PURPLE, INK, 0.36),
-  rim: mix(PURPLE, INK, 0.58),
-  on: BEIGE,
+export const PATINA: Metal = {
+  lit: mix(DEEP, PAPER, 0.12),
+  base: DEEP,
+  shade: mix(DEEP, INK, 0.36),
+  rim: mix(DEEP, INK, 0.58),
+  on: SAND,
 };
 
 export interface Ramp { lit: string; base: string; shade: string; rim: string; track: string; }

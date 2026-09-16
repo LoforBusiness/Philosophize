@@ -6,7 +6,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ramp, rampFace, mix, PAPER_LIT } from '@/components/shared/tone';
-import { STREAK_PURPLE, STREAK_DEEP, STREAK_BEIGE, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
+import { STREAK_EMBER, STREAK_DEEP, STREAK_SAND, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
 import { buildWeek } from '@/lib/utils/streakCalendar';
 import { LIP } from '@/constants/design';
 import { cue } from '@/lib/feedback';
@@ -88,7 +88,7 @@ const FAINT = '#E4E1D8';
 //
 // ── LEAF, NOT CONFETTI ─────────────────────────────────────────────────
 //
-// The burst is cut from the purple's own ramp plus beige — RankUpScreen's rule ("cut
+// The burst is cut from the ember's own ramp plus sand — RankUpScreen's rule ("cut
 // from the order, not from ink: a celebration that does not know what it is
 // celebrating"), one metal along. Flakes leave from the seal's RIM rather than
 // its centre, which is the other thing that screen learned the hard way:
@@ -103,9 +103,9 @@ const FAINT = '#E4E1D8';
 // frame and stay on the UI thread where they belong.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const METAL = ramp(STREAK_PURPLE);
+const METAL = ramp(STREAK_EMBER);
 const FACE = rampFace(METAL);
-const RAIL = mix(STREAK_PURPLE, PAPER, 0.62);
+const RAIL = mix(STREAK_EMBER, PAPER, 0.62);
 const GROOVE: [string, string, string] = [
   mix(RAIL, INK, 0.16), RAIL, mix(RAIL, PAPER_LIT, 0.5),
 ];
@@ -309,7 +309,7 @@ export default function StreakCeremony({
   // A landmark day gets more of everything the ordinary day gets — the object
   // itself changes, which is Duolingo's own stated milestone rule.
   const flakes = useMemo(() => makeFlakes(hitMilestone ? 44 : 26), [hitMilestone]);
-  const tones = useMemo(() => [METAL.lit, STREAK_PURPLE, METAL.shade, STREAK_BEIGE], []);
+  const tones = useMemo(() => [METAL.lit, STREAK_EMBER, METAL.shade, STREAK_SAND], []);
 
   const sealIn = useSharedValue(0);
   const sealScale = useSharedValue(1.6);
@@ -543,8 +543,8 @@ export default function StreakCeremony({
               </Animated.View>
 
               {/* THE IMPRESSION — a ruled ring and a crooked legend inside it.
-                  The words are BEIGE with an ink shadow down-right: beige
-                  reads 10.52:1 on the purple at the face's centre, and the
+                  The words are PAPER with an ink shadow down-right: sand
+                  reads 3.53:1 on the ember and paper 4.85:1, and the
                   shadow keeps the letters crisp across the lit corner. */}
               <Animated.View pointerEvents="none" style={[styles.stamp, stampStyle]}>
                 <View style={styles.stampRing} />
@@ -700,14 +700,15 @@ const styles = StyleSheet.create({
   },
   stampRing: {
     position: 'absolute', width: STAMP_RING, height: STAMP_RING, borderRadius: STAMP_RING / 2,
-    borderWidth: 2, borderColor: STREAK_BEIGE, opacity: 0.55,
+    borderWidth: 2, borderColor: STREAK_SAND, opacity: 0.55,
   },
   stampWord: {
     fontFamily: 'SpecialElite_400Regular',
     fontSize: STAMP_SIZE,
     lineHeight: STAMP_SIZE * 1.06,
     letterSpacing: 0.6,
-    color: STREAK_BEIGE,
+    // Paper, not sand: the legend sits on the ember face, where sand is 3.53:1.
+    color: PAPER,
     // includeFontPadding is what put the league numeral low in its disc. A
     // typewriter face carries deep, asymmetric padding, so two stacked lines
     // inside a ring are centred on the box rather than on the glyphs without it.
@@ -723,7 +724,7 @@ const styles = StyleSheet.create({
   },
   pressRing: {
     position: 'absolute', width: SEAL, height: SEAL, borderRadius: SEAL / 2,
-    borderWidth: 3, borderColor: STREAK_PURPLE,
+    borderWidth: 3, borderColor: STREAK_EMBER,
   },
   leafOrigin: {
     position: 'absolute', left: BOX / 2, top: BOX / 2,
@@ -733,7 +734,7 @@ const styles = StyleSheet.create({
   count: {
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 84,
-    color: STREAK_PURPLE,
+    color: STREAK_EMBER,
     marginTop: 18,
     includeFontPadding: false,
   },
@@ -759,14 +760,14 @@ const styles = StyleSheet.create({
   disc: { width: DISC, height: DISC, borderRadius: DISC / 2 },
   dayPressRing: {
     position: 'absolute', width: DISC, height: DISC, borderRadius: DISC / 2,
-    borderWidth: 1.5, borderColor: STREAK_PURPLE,
+    borderWidth: 1.5, borderColor: STREAK_EMBER,
   },
-  rested: { backgroundColor: STREAK_BEIGE, borderWidth: 1, borderColor: STREAK_PURPLE },
+  rested: { backgroundColor: STREAK_SAND, borderWidth: 1, borderColor: STREAK_EMBER },
   missed: { borderWidth: 1.5, borderColor: FAINT },
   future: { borderWidth: 1.5, borderColor: FAINT, opacity: 0.55 },
 
   milestone: {
-    fontFamily: 'Inter_700Bold', fontSize: 12, color: STREAK_PURPLE,
+    fontFamily: 'Inter_700Bold', fontSize: 12, color: STREAK_EMBER,
     letterSpacing: 2.6, marginTop: 26, textAlign: 'center',
   },
   tail: {
@@ -774,7 +775,9 @@ const styles = StyleSheet.create({
     color: INK_SOFT, marginTop: 26, textAlign: 'center',
   },
 
-  btn: { borderRadius: 14, paddingVertical: 18, alignItems: 'center', backgroundColor: STREAK_PURPLE },
+  btn: { borderRadius: 14, paddingVertical: 18, alignItems: 'center', backgroundColor: STREAK_EMBER },
   btnLip: { position: 'absolute', left: 0, right: 0, top: LIP.button, bottom: 0, borderRadius: 14, backgroundColor: STREAK_DEEP },
-  btnText: { fontFamily: 'Inter_700Bold', fontSize: 18, color: STREAK_BEIGE },
+  // The button's face is the ember, so its label is paper (4.85:1). Sand is the
+  // lettering for the DEEP end of this ramp, not for the lit one.
+  btnText: { fontFamily: 'Inter_700Bold', fontSize: 18, color: PAPER },
 });
