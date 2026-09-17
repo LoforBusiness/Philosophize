@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
 import RankSeal from '@/components/shared/RankSeal';
 import { StruckBar, StruckTile, MetalPlate } from '@/components/profile/Struck';
-import { INK, PAPER_LIT, PAPER_SHADE, FAINT, SHADOW, ramp, PATINA } from '@/components/shared/tone';
+import { INK, SHADOW, ramp, PATINA, FLAT_FACE, FLAT_EDGE } from '@/components/shared/tone';
 import { C, SPACE, BRANCH, type BranchKey } from '@/constants/design';
 import { rankProgress, rankOrder, rankDegree } from '@/data/ranks';
 import {
@@ -42,11 +42,11 @@ import {
 //
 // ── TWO MEASURED RULES THESE SCREENS LIVE UNDER ─────────────────────────────
 //
-// · `C.inkSoft` IS A PAPER TONE. On paper it is 5.33:1; in the shaded corner of
-//   a StruckTile, where the face has run down to `PAPER_SHADE`, it is 3.07:1 —
-//   under the floor. So secondary text inside a struck tile is `C.ink` or the
-//   branch's own `ramp(hue).shade` (4.66:1 at worst), never inkSoft. It is the
-//   same trap §19 records for the quote plate's byline, one surface along.
+// · `C.inkSoft` IS A PAPER TONE. It measured 3.07:1 in the shaded corner of a
+//   StruckTile, back when that face ran down to the tan `PAPER_SHADE`, so
+//   secondary text inside a struck tile is `C.ink` or the branch's own
+//   `ramp(hue).shade`. The tiles are flat white now (2026-09-16), so the corner
+//   is gone, but the rule costs nothing and survives the next gradient.
 // · A `MetalPlate` LABEL IS AT MOST TWO WORDS. Its text is measured against the
 //   metal's `base` (tone.ts's documented contract, which check-ui owns), and a
 //   longer label runs far enough across the diagonal to sit on `shade`, where
@@ -135,7 +135,6 @@ export function Standing({
         glyph={p.current.glyph}
         state="current"
         size={compact ? 48 : 62}
-        progress={p.next ? p.pct : null}
         order={rankOrder(p.index)}
         degree={rankDegree(p.index)}
       />
@@ -303,15 +302,10 @@ export function PassTable({ width }: { width: number }) {
 
   return (
     <View style={s.table}>
-      {/* The raised column, behind everything, one light for its whole height. */}
+      {/* The raised column, behind everything: flat white on its shadow. It
+          faded into the tan PAPER_SHADE, which read as gold (2026-09-16). */}
       <View style={[s.passPanelShadow, { width: COL }]} pointerEvents="none">
-        <LinearGradient
-          colors={[PAPER_LIT, C.surface, PAPER_SHADE]}
-          locations={[0, 0.55, 1]}
-          start={LIGHT_START}
-          end={LIGHT_END}
-          style={s.passPanel}
-        />
+        <View style={s.passPanel} />
       </View>
 
       <View style={s.headRow}>
@@ -456,7 +450,7 @@ const s = StyleSheet.create({
     elevation: 2,
   },
   passPanel: {
-    flex: 1, borderRadius: 10, borderWidth: 1, borderColor: FAINT,
+    flex: 1, borderRadius: 10, borderWidth: 1, borderColor: FLAT_EDGE, backgroundColor: FLAT_FACE,
   },
   headRow: {
     flexDirection: 'row', alignItems: 'center', paddingBottom: SPACE[1], paddingTop: SPACE[1],

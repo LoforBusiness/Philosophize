@@ -10,9 +10,9 @@
 //      Compared here against a written-down roll, not against git, so the roll
 //      survives a rebase.
 //
-//   2. THE MARK FITS INSIDE THE MEDAL. Six silhouettes and three tiers is
-//      eighteen combinations, and the tier-III hatch band eats 9 units off every
-//      edge. The shield's point and the pennant's notch are the tight ones.
+//   2. THE MARK FITS INSIDE THE MEDAL. Six silhouettes, drawn alone and
+//      dressed, and the recessed face is 8 units in from every edge. The
+//      shield's point and the pennant's notch are the tight ones.
 //      Geometry, not screenshots — the shapes come from the same zero-import
 //      module the renderer draws from, so the check cannot pass a shape that has
 //      since moved.
@@ -22,10 +22,10 @@
 //      wreath smaller than the tier below it. Every check in this file was green
 //      the entire time. See section 4.
 //
-//   4. THE OUTLINE LENGTH IS NOT SHORT. `LEN` is the dasharray the draw-on
-//      animation runs against; if it is under the true perimeter then part of
-//      the medal is already inked on the first frame, which reads as a bug
-//      rather than as a flourish.
+//   4. EVERY TIER IS MORE, AND EVERYTHING FITS. Each tier draws more than the
+//      one below it, no variant leaves its 100-unit box (a phone clips it
+//      without a word), the stars clear the medal they crown, and a locked
+//      badge carries no furniture at all.
 // ─────────────────────────────────────────────────────────────────────────────
 import fs from 'node:fs';
 import path from 'node:path';
@@ -97,190 +97,152 @@ const caps = [...src.matchAll(/^\s{4}caption: (.+),$/gm)].map((m) => m[1].slice(
 for (const c of caps) if (c.length > 64) errs.push(`caption over 64 chars: "${c}" (${c.length})`);
 
 // ─── 2 & 3. the geometry ─────────────────────────────────────────────────────
-// Read the shapes out of the SAME module the renderer uses, transpiled by hand:
-// it is deliberately import-free, so stripping the types is enough to run it.
-// Transpiled by tsc itself rather than by a hand-rolled regex strip — the module
-// is import-free precisely so this works, and a checker that mis-parses the file
-// it is checking is worse than no checker.
+// Read the shapes out of the SAME module the renderer uses. It is deliberately
+// import-free, so transpiling it by tsc itself is enough to run it — and a
+// checker that mis-parses the file it is checking is worse than no checker.
 const ts = (await import('typescript')).default;
-const shapeSrc = fs.readFileSync(path.join(ROOT, 'components/shared/badgeShapes.ts'), 'utf8');
-const js = ts.transpileModule(shapeSrc, {
+const artSrc = fs.readFileSync(path.join(ROOT, 'components/shared/insigniaArt.ts'), 'utf8');
+const js = ts.transpileModule(artSrc, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
 }).outputText;
-const exports = {};
-new Function('exports', js)(exports);
-const mod = exports;
+const A = {};
+new Function('exports', js)(A);
+
+// The materials, read the same way, so a tone check measures what ships.
+const insSrc = fs.readFileSync(path.join(ROOT, 'constants/insignia.ts'), 'utf8');
+const I = {};
+new Function('exports', ts.transpileModule(insSrc, {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
+}).outputText)(I);
+const tonesFor = (tier) => A.tonesOf(I.ORDER[I.TIER_ORDER[tier - 1]]);
 
 const FAMILIES = ['lessons', 'streak', 'thinkers', 'quotes', 'xp', 'mastery'];
 
-const inside = (poly, x, y) => {
-  let hit = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const [xi, yi] = poly[i], [xj, yj] = poly[j];
-    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) hit = !hit;
-  }
-  return hit;
-};
-/** Shortest distance from a point to the polygon's edge. */
-const edgeDist = (poly, x, y) => {
-  let best = Infinity;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const [x1, y1] = poly[j], [x2, y2] = poly[i];
-    const dx = x2 - x1, dy = y2 - y1;
-    const t = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy || 1)));
-    best = Math.min(best, Math.hypot(x - (x1 + t * dx), y - (y1 + t * dy)));
-  }
-  return best;
-};
-
-console.log('mark clearance inside the medal, in units of the 100-box:\n');
-console.log('  family      tier I   tier II  tier III');
+console.log('mark clearance inside the recessed face, in units of the 100-box:\n');
+console.log('  family      alone   dressed');
 for (const f of FAMILIES) {
-  const side = mod.GLYPH_SCALE[f] * 100;
-  const cy = 50 + mod.GLYPH_DY[f] * 100;
-  // The mark's own box, sampled around its rim — corners are the tight case.
-  const box = [];
-  for (let i = 0; i <= 12; i++) {
-    const t = i / 12;
-    box.push([50 - side / 2 + t * side, cy - side / 2]);
-    box.push([50 - side / 2 + t * side, cy + side / 2]);
-    box.push([50 - side / 2, cy - side / 2 + t * side]);
-    box.push([50 + side / 2, cy - side / 2 + t * side]);
-  }
   const cells = [];
-  for (const tier of [1, 2, 3]) {
-    // Tier I is bounded by the outline; II and III by their inner rule, since
-    // the mark must not touch the second line or sit under the hatch band.
-    const poly = mod.outlinePoints(f, tier === 1 ? 0 : mod.INNER[tier]);
+  for (const tier of [1, 2]) {
+    const a = A.badgeArt(f, tier, tonesFor(tier));
+    // The glyph's working box: a 32-unit glyph draws inside about 27 of it.
+    const s = a.mark.size * 0.84, { cx, cy } = a.mark;
     let worst = Infinity;
-    for (const [x, y] of box) {
-      const d = edgeDist(poly, x, y);
-      worst = Math.min(worst, inside(poly, x, y) ? d : -d);
+    for (let i = 0; i <= 12; i++) {
+      const u = (i * s) / 12;
+      for (const [x, y] of [[cx - s / 2 + u, cy - s / 2], [cx - s / 2 + u, cy + s / 2], [cx - s / 2, cy - s / 2 + u], [cx + s / 2, cy - s / 2 + u]]) {
+        const d = A.edgeDistance(a.face, x, y);
+        worst = Math.min(worst, A.insidePoly(a.face, x, y) ? d : -d);
+      }
     }
     cells.push(worst);
-    // WHERE 3.0 COMES FROM, so it is a measurement and not a taste. The rule the
-    // mark is closing on is 1.4 wide (±0.7 from its centreline) and the mark's own
-    // stroke is 2 units in a 32-unit glyph box, which at these scales is ~2.5
-    // wide (±1.25). Touching therefore starts at 1.95, and 3.0 leaves about a
-    // stroke of daylight between the two so it reads as a border rather than as
-    // the mark resting on it.
-    if (worst < 3.0) {
-      errs.push(
-        `${f} tier ${tier}: the mark comes within ${worst.toFixed(1)} of the ` +
-        `${tier === 1 ? 'outline' : 'inner rule'} — shrink GLYPH_SCALE.${f} or move GLYPH_DY.${f}`,
-      );
+    // WHERE 1.5 COMES FROM: the face's own edge is the recess shadow, 2.6 units
+    // deep, and a mark closer than a stroke's width to it reads as resting on
+    // the rim rather than set in the face.
+    if (worst < 1.5) {
+      errs.push(`${f} ${tier === 1 ? 'alone' : 'dressed'}: the mark comes within ${worst.toFixed(1)} of the face's edge — shrink or move FAMILY_MARK.${f}`);
+    }
+    // …and the ribbon may not cross it.
+    if (tier === 2 && cy + s / 2 > 84 - 6 - 0.5) {
+      errs.push(`${f}: the mark reaches y ${(cy + s / 2).toFixed(1)}, into the ribbon at ${84 - 6}`);
     }
   }
   console.log(`  ${f.padEnd(12)}${cells.map((c) => c.toFixed(1).padStart(6)).join('   ')}`);
 }
 
-// ─── 4. the flourish is OUTSIDE the medal, and the higher tier's is bigger ───
+// ─── 4. the furniture is OUTSIDE the medal, and each tier is more of it ──────
 //
-// WHAT THIS EXISTS FOR. Tier IV's wreath used to CLOSE over the medal's crown —
-// both stems carried on over the top, where the tips almost met. Closing an arc
-// means bending it inward, and inward is where the medal is: eight of that
-// wreath's eighteen leaves sat entirely behind a medal, and the whole thing
-// reached 34.7 units from the centre where tier III's open sprigs reach 40.2.
-// So the higher tier wore the SMALLER wreath, and the only part of it a reader
-// could see was two leaf tips over the crown.
-//
-// It is the same failure the crossed swords had, for the reason badgeShapes has
-// recorded since the swords died: a flourish only counts if it is outside the
-// medal, because the part behind the medal is not subtle, it is absent — and the
-// fragment that does show reads as a fault rather than as furniture. Nothing
-// caught it either time. Every number in this file was green; the mark still fit,
-// the roll had not moved, the outline was the right length. It took a contact
-// sheet, and then a reader: "for the red badges … those white things on the side
-// to be out more instead of behind, like what the green badge looks like."
-//
-// So the arithmetic that answers it lives here now rather than in a scratch file.
-// It is exact — the medal's own transform applied to the medal's own outline —
-// and it is counter-tested by putting the closed wreath back and watching this
-// go red.
-console.log('\nthe flourish, against all six medals:\n');
-console.log('  wreath   marks   behind a medal   worst clearance   reach / 48   top edge');
+// WHAT THIS EXISTS FOR. Tier IV's wreath once CLOSED over the medal's crown, and
+// closing an arc means bending it inward, where the medal is: eight of its
+// eighteen leaves sat entirely behind a medal and the whole thing reached less
+// far than tier III's, so the higher tier wore the SMALLER wreath. Crossed
+// swords failed the same way before it. The part of a flourish behind the medal
+// is not subtle, it is absent, and the fragment that does show reads as a fault.
+// Every number in this file was green the whole time; it took a contact sheet,
+// and then a reader: "for the red badges … those white things on the side to be
+// out more instead of behind, like what the green badge looks like."
+console.log('\nthe laurel, against all six dressed medals:\n');
+console.log('  wreath   leaves   behind a medal   worst clearance   reach / 50   top edge');
 {
-  const MS = mod.MEDAL_SCALE, DY = mod.MEDAL_DY;
-  const off = 50 - 50 * MS;
-  const medals = FAMILIES.map((f) => [f, mod.outlinePoints(f, 0).map(([x, y]) => [off + MS * x, off + DY + MS * y])]);
-
+  const medals = FAMILIES.map((f) => [f, A.badgeArt(f, 3, tonesFor(3)).body]);
   const measure = (kind) => {
-    const sprigs = [mod.laurelSprig(-1, kind), mod.laurelSprig(1, kind)];
-    // A leaf is an ellipse and a berry is a circle; both reduce to a centre and
-    // a half-extent, and the half-extent has to account for the leaf's rotation
-    // or the reach comes out short by up to its whole length.
-    const marks = [];
-    for (const s of sprigs) {
-      for (const l of s.leaf) marks.push({ ...l, what: 'leaf' });
-      for (const b of s.berry) marks.push({ cx: b.cx, cy: b.cy, rx: b.r, ry: b.r, rot: 0, what: 'berry' });
-    }
-    // Counted as MARKS and not as mark-family pairs: one leaf behind five of the
-    // six silhouettes is one leaf, and a number six times the truth is the kind
-    // of thing that gets an error message disbelieved.
-    const hiddenMarks = new Set();
+    const { leaves } = A.laurelLeaves(kind);
+    const hidden = new Set();
     let worst = Infinity, where = '', reach = 0, top = 100;
-    for (const [i, m] of marks.entries()) {
-      const a = (m.rot * Math.PI) / 180;
-      reach = Math.max(reach, Math.abs(m.cx - 50) + Math.hypot(m.rx * Math.cos(a), m.ry * Math.sin(a)));
-      top = Math.min(top, m.cy - Math.hypot(m.rx * Math.sin(a), m.ry * Math.cos(a)));
+    for (const [i, l] of leaves.entries()) {
+      const a = (l.rot * Math.PI) / 180;
+      reach = Math.max(reach, Math.abs(l.cx - 50) + Math.hypot(l.rx * Math.cos(a), l.ry * Math.sin(a)));
+      top = Math.min(top, l.cy - Math.hypot(l.rx * Math.sin(a), l.ry * Math.cos(a)));
       for (const [f, poly] of medals) {
-        const d = edgeDist(poly, m.cx, m.cy);
-        const clear = inside(poly, m.cx, m.cy) ? -d : d;
-        if (clear < 0) hiddenMarks.add(i);
-        if (clear < worst) { worst = clear; where = `${m.what} on ${f}`; }
+        const d = A.edgeDistance(poly, l.cx, l.cy);
+        const clear = A.insidePoly(poly, l.cx, l.cy) ? -d : d;
+        if (clear < 0) hidden.add(i);
+        if (clear < worst) { worst = clear; where = `leaf ${i} on ${f}`; }
       }
     }
-    return { marks: marks.length, hidden: hiddenMarks.size, worst, where, reach, top };
+    return { marks: leaves.length, hidden: hidden.size, worst, where, reach, top };
   };
-
   const open = measure('open');
   const full = measure('full');
   for (const [name, r] of [['open', open], ['full', full]]) {
     console.log(
-      `  ${name.padEnd(9)}${String(r.marks).padStart(4)}${String(r.hidden).padStart(15)}` +
+      `  ${name.padEnd(9)}${String(r.marks).padStart(5)}${String(r.hidden).padStart(15)}` +
       `${r.worst.toFixed(1).padStart(18)}${r.reach.toFixed(1).padStart(13)}${r.top.toFixed(1).padStart(11)}`,
     );
     if (r.hidden > 0) {
-      errs.push(
-        `the ${name} wreath has ${r.hidden} mark${r.hidden === 1 ? '' : 's'} behind a medal ` +
-        `(worst: ${r.where}) — a flourish drawn behind the medal is not subtle, it is absent`,
-      );
+      errs.push(`the ${name} laurel has ${r.hidden} leaf${r.hidden === 1 ? '' : 'ves'} behind a medal (worst: ${r.where}) — a flourish drawn behind the medal is not subtle, it is absent`);
     }
-    // 48, not 50: the leaf is drawn with a 1.3-wide stroke, so half of it lives
-    // outside the ellipse the reach is measured on.
-    if (r.reach > 48) errs.push(`the ${name} wreath reaches ${r.reach.toFixed(1)} of the 48 the 100-box allows — it will be clipped`);
+    // 48, not 50: the leaf carries a 1.8-wide edge, half of it outside the ellipse.
+    if (r.reach > 48) errs.push(`the ${name} laurel reaches ${r.reach.toFixed(1)} of the 48 the box allows — it will be clipped`);
   }
-  // TIER IV MUST OUTRANK TIER III AS AN OBJECT, not merely as a colour. Both of
-  // these were false of the closed wreath, which is how it shipped: it carried
-  // more leaves than the open one and still drew a smaller wreath, because most
-  // of them were behind the medal.
-  if (full.marks <= open.marks) {
-    errs.push(`the full wreath carries ${full.marks} marks against the open one's ${open.marks} — tier IV must be more furniture than tier III`);
-  }
-  if (full.reach <= open.reach) {
-    errs.push(`the full wreath reaches ${full.reach.toFixed(1)} against the open one's ${open.reach.toFixed(1)} — tier IV must be the bigger object`);
-  }
-  if (full.top >= open.top) {
-    errs.push(`the full wreath tops out at y ${full.top.toFixed(1)}, no higher than the open one's ${open.top.toFixed(1)} — tier IV must stand taller`);
-  }
+  // TIER IV MUST OUTRANK TIER III AS AN OBJECT, not merely as a colour.
+  if (full.marks <= open.marks) errs.push(`the full laurel carries ${full.marks} leaves against the open one's ${open.marks} — tier IV must be more furniture than tier III`);
+  if (full.reach <= open.reach) errs.push(`the full laurel reaches ${full.reach.toFixed(1)} against the open one's ${open.reach.toFixed(1)} — tier IV must be the bigger object`);
+  if (full.top >= open.top) errs.push(`the full laurel tops out at y ${full.top.toFixed(1)}, no higher than the open one's ${open.top.toFixed(1)} — tier IV must stand taller`);
 }
 
-// The dasharray must be at least the true perimeter, or the shape is partly
-// drawn before the animation starts.
-console.log('\noutline length vs the LEN the draw-on runs against:\n');
-console.log('  family      true   LEN   slack');
-for (const f of FAMILIES) {
-  const poly = mod.outlinePoints(f, 0, 400);
-  let per = 0;
-  for (let i = 0; i < poly.length; i++) {
-    const a = poly[i], b = poly[(i + 1) % poly.length];
-    per += Math.hypot(b[0] - a[0], b[1] - a[1]);
+// Every tier draws more than the one below it, every variant stays inside its
+// box, and the stars over a tier-IV crown clear the medal they crown.
+console.log('\nparts per tier, and the box each variant fills:\n');
+{
+  const count = (nodes) => nodes.reduce((n, x) => n + (x.k === 'clip' ? 1 + count(x.kids) : 1), 0);
+  const boxOf = (nodes) => {
+    const b = { x0: 1e9, y0: 1e9, x1: -1e9, y1: -1e9 };
+    for (const n of nodes) {
+      const half = n.k === 'line' ? n.w / 2 : 0;
+      const nums = (n.d.match(/-?\d*\.?\d+/g) ?? []).map(Number);
+      for (let i = 0; i + 1 < nums.length; i += 2) {
+        b.x0 = Math.min(b.x0, nums[i] - half); b.x1 = Math.max(b.x1, nums[i] + half);
+        b.y0 = Math.min(b.y0, nums[i + 1] - half); b.y1 = Math.max(b.y1, nums[i + 1] + half);
+      }
+    }
+    return b;
+  };
+  for (const f of FAMILIES) {
+    const seq = [];
+    for (let tier = 1; tier <= 5; tier++) {
+      const a = A.badgeArt(f, tier, tonesFor(tier));
+      const all = [...a.back, ...a.medal, ...a.front];
+      seq.push(count(all));
+      // A clipped child cannot draw outside its clip, so the clip outline stands in for it.
+      const b = boxOf(all.map((n) => (n.k === 'clip' ? { k: 'fill', d: n.d } : n)));
+      if (b.x0 < 0 || b.y0 < 0 || b.x1 > 100 || b.y1 > 100) {
+        errs.push(`${f} tier ${tier} leaves its box: x ${b.x0.toFixed(1)}…${b.x1.toFixed(1)}, y ${b.y0.toFixed(1)}…${b.y1.toFixed(1)}`);
+      }
+      if (tier === 4) {
+        const medalTop = Math.min(...a.body.map((p) => p[1])) - 1.8;
+        // the side stars sit lowest: centre 7 + 1, radius 4, half a 2.2 edge
+        const starFoot = 7 + 1 + 4 + 1.1;
+        if (starFoot > medalTop) errs.push(`${f}: the tier-IV stars reach y ${starFoot.toFixed(1)}, into the medal at ${medalTop.toFixed(1)}`);
+      }
+    }
+    console.log(`  ${f.padEnd(12)}${seq.map((n) => String(n).padStart(5)).join('')}`);
+    if (!seq.every((n, i) => i === 0 || n > seq[i - 1])) errs.push(`${f}: a tier draws no more than the one below it (${seq.join(' → ')})`);
   }
-  const len = mod.LEN[f];
-  const slack = ((len / per - 1) * 100);
-  console.log(`  ${f.padEnd(12)}${per.toFixed(0).padStart(5)}${String(len).padStart(6)}${(slack.toFixed(1) + '%').padStart(8)}`);
-  if (len < per) errs.push(`LEN.${f} is ${len} but the outline is ${per.toFixed(0)} — part of it is inked at draw 0`);
-  else if (slack > 25) warns.push(`LEN.${f} overshoots by ${slack.toFixed(0)}% — the draw finishes early`);
+  // A LOCKED BADGE CARRIES NO FURNITURE — the ornament arrives when it is won.
+  for (const f of FAMILIES) {
+    const locked = A.badgeArt(f, 5, A.LOCKED);
+    if (locked.back.length || locked.front.length) errs.push(`${f}: a locked tier-V badge still carries furniture`);
+  }
 }
 
 console.log('');

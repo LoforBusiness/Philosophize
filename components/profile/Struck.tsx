@@ -2,7 +2,8 @@ import { View, Text, StyleSheet, type StyleProp, type ViewStyle } from 'react-na
 import { LinearGradient } from 'expo-linear-gradient';
 import { C, SPACE } from '@/constants/design';
 import {
-  INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, GHOST, SHADOW, METAL, ramp, mix, type Metal, type Ramp, PATINA, SAND, SAND_SHADE, SAND_LIT,
+  INK, PAPER, PAPER_LIT, GHOST, SHADOW, METAL, ramp, mix, type Metal, type Ramp, PATINA,
+  FLAT_FACE, FLAT_EDGE, FLOOR, FLOOR_CUT,
 } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -118,11 +119,12 @@ export function StruckBar({ pct, fill, height = 10, notches = false, style }: Ba
 /**
  * A raised paper tile, for the readings that used to be flat Cards.
  *
- * The face runs PAPER_LIT → PAPER → PAPER_SHADE along the one light, so the tile
- * has a lit corner and a shaded one; a hairline rim picks up the same direction,
- * and it sits on its own shadow. It is the badge treatment applied to a
- * rectangle, which is the whole idea — a profile is a case of struck things, and
- * the numbers on it should be struck too.
+ * FLAT WHITE, WITH ITS DEPTH IN ITS EDGE AND ITS SHADOW. The face used to run
+ * PAPER_LIT → PAPER → PAPER_SHADE along the one light, and PAPER_SHADE is a warm
+ * tan, so every tile faded into beige at its bottom-right corner — the "gold
+ * look" in the background the owner called AI-made (2026-09-16). A hairline and
+ * a shadow falling down-right still say where the light is; the face says
+ * nothing it does not need to.
  */
 export function StruckTile({
   children, accent, style, pad = 3,
@@ -135,16 +137,10 @@ export function StruckTile({
 }) {
   return (
     <View style={[s.tileShadow, style]}>
-      <LinearGradient
-        colors={[PAPER_LIT, PAPER, PAPER_SHADE]}
-        locations={[0, 0.55, 1]}
-        start={LIGHT_START}
-        end={LIGHT_END}
-        style={[s.tile, { padding: SPACE[pad] }]}
-      >
+      <View style={[s.tile, { padding: SPACE[pad] }]}>
         {accent ? <View style={[s.tileAccent, { backgroundColor: accent }]} /> : null}
         {children}
-      </LinearGradient>
+      </View>
     </View>
   );
 }
@@ -157,11 +153,14 @@ export function StruckTile({
  * A tile and a niche are the same gradient run in opposite directions, and that
  * inversion is the whole of it: `StruckBar`'s track already records the rule —
  * "a groove is bright where a dome is dark, and that inversion is the only thing
- * that says CUT IN rather than raised". So the face here runs PAPER_SHADE →
- * PAPER → PAPER_LIT, the dark hairline is at the TOP where the light cannot
- * reach into the cut, and the pale one is at the bottom where it catches the far
- * wall. It casts no shadow, because a hole does not cast onto the surface it is
- * cut into.
+ * that says CUT IN rather than raised". The dark hairline is at the TOP where
+ * the light cannot reach into the cut, and the pale one is at the bottom where
+ * it catches the far wall. It casts no shadow, because a hole does not cast onto
+ * the surface it is cut into.
+ *
+ * THE FLOOR IS FLAT AND NEUTRAL. It ran PAPER_SHADE → PAPER → PAPER_LIT, a tan
+ * corner that read as gold (see StruckTile). The two hairlines were always what
+ * said "cut in"; the gradient only said "beige".
  *
  * WHAT IT IS FOR. Something struck, sitting in something. The profile's cabinet
  * puts a medal in each of three of these, so the medal reads as an object placed
@@ -180,17 +179,11 @@ export function StruckNiche({
     return <View style={[s.niche, s.nicheEmpty, style]}>{children}</View>;
   }
   return (
-    <LinearGradient
-      colors={[PAPER_SHADE, PAPER, PAPER_LIT]}
-      locations={[0, 0.42, 1]}
-      start={LIGHT_START}
-      end={LIGHT_END}
-      style={[s.niche, style]}
-    >
-      <View pointerEvents="none" style={[s.nicheTop, { backgroundColor: mix(PAPER_SHADE, INK, 0.3) }]} />
+    <View style={[s.niche, style]}>
+      <View pointerEvents="none" style={[s.nicheTop, { backgroundColor: FLOOR_CUT }]} />
       <View pointerEvents="none" style={[s.nicheFoot, { backgroundColor: PAPER_LIT }]} />
       {children}
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -250,43 +243,25 @@ export function StruckPanel({
 }) {
   return (
     <View style={[s.panelShadow, style]}>
-      <LinearGradient
-        // A TENTH OF A TILE'S FALL-OFF, and that ratio is the finding. StruckTile
-        // runs the full PAPER_LIT → PAPER_SHADE across about 80px and reads as a
-        // lit face; the identical three stops across a 350px card came out as a
-        // tan stain in the bottom corner — rendered and looked at, which is the
-        // only way that kind of thing is ever caught. A big flat surface lit from
-        // one side barely shades at all. Its depth comes from its EDGES: the lit
-        // rim along the top, the hairline rule, and the shadow it sits on.
-        colors={[PAPER_LIT, PAPER, mix(PAPER, PAPER_SHADE, 0.3)]}
-        locations={[0, 0.45, 1]}
-        start={LIGHT_START}
-        end={LIGHT_END}
-        style={s.panel}
-      >
-        <View pointerEvents="none" style={[s.panelRim, { backgroundColor: PAPER_LIT }]} />
-        {/* THE HEAD IS CUT IN SAND, the palette's surface, and its title is
-            struck in the palette's teal. Sand is 1.37:1 on paper, so the band
-            is carried by its cut edges rather than by the fill. */}
-        <LinearGradient
-          colors={[SAND_SHADE, SAND, SAND_LIT]}
-          locations={[0, 0.55, 1]}
-          start={LIGHT_START}
-          end={LIGHT_END}
-          style={s.panelBand}
-        >
-          <View pointerEvents="none" style={[s.bandTop, { backgroundColor: mix(SAND_SHADE, INK, 0.28) }]} />
+      {/* FLAT. A big surface lit from one side barely shades at all, so its depth
+          was always in its EDGES — the hairline and the shadow it sits on. The
+          gradient it used to carry ended in a tan corner that read as gold. */}
+      <View style={s.panel}>
+        {/* THE HEAD IS A CUT: a neutral floor between a dark hairline and a white
+            one. It was sand, which is the gold the owner asked to be rid of. */}
+        <View style={s.panelBand}>
+          <View pointerEvents="none" style={[s.bandTop, { backgroundColor: FLOOR_CUT }]} />
           <View style={s.bandBody}>
             {accent ? <View style={[s.bandRule, { backgroundColor: accent }]} /> : null}
             <Text style={[s.panelTitle, EMBOSS]}>{title}</Text>
             <Text style={s.panelSub}>{subtitle}</Text>
           </View>
           {right}
-          <View pointerEvents="none" style={[s.bandFoot, { backgroundColor: SAND_LIT }]} />
-        </LinearGradient>
+          <View pointerEvents="none" style={[s.bandFoot, { backgroundColor: PAPER_LIT }]} />
+        </View>
 
         <View style={s.panelBody}>{children}</View>
-      </LinearGradient>
+      </View>
     </View>
   );
 }
@@ -492,13 +467,13 @@ const s = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
-  tile: { borderRadius: 12, borderWidth: 1, borderColor: FAINT, overflow: 'hidden' },
+  tile: { borderRadius: 12, borderWidth: 1, borderColor: FLAT_EDGE, backgroundColor: FLAT_FACE, overflow: 'hidden' },
   tileAccent: { position: 'absolute', left: 0, right: 0, top: 0, height: 3 },
 
   // ── niche ──
   niche: {
     borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-    overflow: 'hidden', borderWidth: 1, borderColor: FAINT,
+    overflow: 'hidden', borderWidth: 1, borderColor: FLAT_EDGE, backgroundColor: FLOOR,
   },
   // A CUT, not a rim: dark along the top edge, pale along the bottom. Reversing
   // these two lines is the one change that turns this back into a tile.
@@ -515,14 +490,14 @@ const s = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
-  panel: { borderRadius: 14, borderWidth: 1, borderColor: FAINT, overflow: 'hidden' },
-  panelRim: { position: 'absolute', left: 0, right: 0, top: 0, height: 1, zIndex: 2 },
+  panel: { borderRadius: 14, borderWidth: 1, borderColor: FLAT_EDGE, backgroundColor: FLAT_FACE, overflow: 'hidden' },
   panelBand: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingHorizontal: SPACE[3],
     paddingTop: SPACE[3],
     paddingBottom: SPACE[2],
+    backgroundColor: FLOOR,
   },
   bandTop: { position: 'absolute', left: 0, right: 0, top: 0, height: 1.5 },
   bandFoot: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 1 },
@@ -534,9 +509,8 @@ const s = StyleSheet.create({
   panelTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: C.ink },
   panelSub: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
-    // Darker than inkSoft, which is 3.88:1 on sand and dimmer still at the band's
-    // shaded corner; this is 4.76:1 there.
-    fontSize: 12, color: mix(INK, SAND, 0.3), marginTop: 2,
+    // Ink a third of the way to paper: about 6:1 on the band's floor.
+    fontSize: 12, color: mix(INK, PAPER, 0.3), marginTop: 2,
   },
   panelBody: { paddingHorizontal: SPACE[3], paddingTop: SPACE[3] + 2, paddingBottom: SPACE[3] },
 

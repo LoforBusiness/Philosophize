@@ -1,136 +1,61 @@
-import { memo } from 'react';
-import React, { useId } from 'react';
+import { memo, useId } from 'react';
+import React from 'react';
 import { View } from 'react-native';
-import Svg, { Path, Ellipse, Circle, ClipPath, Defs, G, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { G } from 'react-native-svg';
 import Animated, { useAnimatedProps, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
-import Glyph, { type GlyphName } from './Glyph';
-import {
-  SHAPE, LEN, GLYPH_SCALE, GLYPH_DY, INNER, COLLAR,
-  ribbonPaths, laurelSprig, MEDAL_SCALE, MEDAL_DY,
-} from './badgeShapes';
-// FACE / RIM / FAINT / PAPER_SHADE / MID are gone from this list on purpose:
-// every one of them was the PAPER ramp, and the medal is struck in metal now.
-import {
-  INK, GHOST, PAPER, LIGHT, LOCKED_FACE, SHADOW,
-  type Stops,
-} from './tone';
-import { tierInsignia, insigniaFace, insigniaRim } from '@/constants/insignia';
+import { type GlyphName } from './Glyph';
+import { InsigniaNodes, StruckMark } from './InsigniaParts';
+import { LOCKED, badgeArt, tonesOf, type BadgeArt } from './insigniaArt';
+import { TIER_ORDER, ORDER } from '@/constants/insignia';
 import type { BadgeFamily, BadgeTier } from '@/data/badges';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// A BADGE IS A STRUCK SHAPE, AND THE SHAPE SAYS WHAT IT WAS FOR.
-//
-// All fifty used to be the same bordered square with a 22px glyph in it, which
-// meant the grid carried exactly one piece of information — how many are lit —
-// and none at all about what kind of thing any of them was. Six families, six
-// silhouettes, so a glance at the grid reads as "I'm strong on reading, thin on
-// thinkers" rather than as fifty identical boxes.
+// A BADGE IS A STRUCK CREST, AND ITS SHAPE SAYS WHAT IT WAS FOR.
 //
 //   stele      lessons finished     an arched standing stone
-//   pennant    days running         a flag, swallow-tailed
+//   pennant    the habit            a flag, swallow-tailed
 //   roundel    thinkers met         a portrait medal
 //   ex-libris  quotes kept          a book label, corners clipped
 //   coin       the long road (XP)   a struck octagon
 //   shield     mastery              a shield
 //
-// THE SIX SHAPES ARE THE POINT AND THEY STAY. It was tempting to make all fifty
-// heraldic shields — it is the more unified look — but a grid of fifty shields
-// distinguished only by a small mark inside says nothing at a glance, and the
-// whole reason the shapes exist is to be readable at a glance.
+// THE SIX SHAPES ARE THE POINT AND THEY STAY. A grid of fifty identical shields
+// says nothing at a glance, and the research names "every badge the same circle
+// with a different glyph" as the most generic look in the genre.
 //
-// ── TIER MOVED FROM THE EDGE TO THE FLOURISH, AND THEN RAN OUT ──────────────
-//
-// Tier used to be edge weight: I a hairline, II an inner rule, III a hatched band
-// between them. It worked and it was legible, but the hatch is a lot of ink at
-// 28px and it fights the tonal face below. So tier became HERALDIC — the medal
-// alone, then a ribbon, then a wreath.
-//
-// Then two tiers were added to the case and given NO FURNITURE, because the
-// vocabulary had three steps in it and there were now five. Thirty-three of the
-// fifty-odd badges — every tier IV and V, the ones that take months — were the
-// tier-III object in a different metal. That is the same fault the rank ladder
-// was carrying at the same time, one cabinet over, and the reader named it
-// there: everything interesting happens early, and then you climb for a long
-// time to watch a colour change. Five tiers, five objects:
+// FIVE TIERS, FIVE OBJECTS, struck in the rank ladder's own materials (iron,
+// bronze, jade, crimson, aurum) so one colour means one thing in both cabinets:
 //
 //   I    the medal alone
-//   II   + a ribbon banner beneath
-//   III  + two laurel sprigs, open at the top
-//   IV   the sprigs GROW — wider, taller, nine leaves apiece, and in fruit
-//   V    + a collar struck outside the edge
+//   II   + a ribbon banner across its foot
+//   III  + a laurel, open
+//   IV   + the laurel grown, and three stars over the crown
+//   V    + a fanned glory of light behind everything, and two glints
 //
-// IV USED TO CLOSE THE SPRIGS OVER THE CROWN, and that is the one of the five
-// that has been redrawn. Closing an arc means bending it inward, and inward is
-// where the medal is: eight of the closed wreath's eighteen leaves sat entirely
-// behind a medal and the whole thing reached LESS FAR than tier III's, so the
-// higher tier wore the smaller wreath and all a reader could see of it was two
-// tips over the crown. Which is the swords, again, exactly as described four
-// paragraphs down. The reader caught it: "for the red badges … those white
-// things on the side to be out more instead of behind, like what the green badge
-// looks like". badgeShapes' `laurelSprig` carries the measurements.
+// EVERY ADDITION IS OUTSIDE THE MEDAL. Crossed swords were tried first and died
+// because the medal covered the crossing ("horns at 168px, mush at 66"); a
+// wreath closed over the crown died for the same reason years later — eight of
+// its leaves were behind a medal, so tier IV wore the SMALLER wreath. The part of
+// a flourish behind the medal is not subtle, it is absent.
+// scripts/validate-badges.mjs measures that on every run.
 //
-// The collar is deliberately the SAME GESTURE as the sixth degree of a rank pin,
-// drawn by the same one-line trick (a negative inset on the shape's own
-// function). One vocabulary, used in both cabinets: a ring around a struck thing
-// means "this is as far as this material goes".
+// ── WHY IT LOOKS THE WAY IT DOES NOW ─────────────────────────────────────────
 //
-// It was CROSSED SWORDS at III first, since that is what the heraldic reference
-// uses, and a contact sheet killed them: the medal covers the crossing, so all
-// that shows is two tips above and two hilts below — horns at 168px, mush at the
-// 66px the grid actually draws. The laurel is a continuous curved mass, so being
-// half-covered costs it nothing, and a wreath is what a philosopher is crowned
-// with. `swordPaths` is kept in badgeShapes, so going back is one line.
+// "really flat, really boring … you can just tell it's all AI drawn … not
+// gamified." The owner chose the GAME CREST from three researched directions:
+// a thick outline, a lip for thickness, a bright rim, a recessed face, glare, a
+// heavy mark, metal leaves with an edge rather than ink outlines on paper. All
+// of it is built in insigniaArt.ts, which scripts/sheet-badges.mjs draws in
+// plain Node — it is the same code, so the sheet cannot flatter the phone.
 //
-// The inner rule survives at exactly its old inset, because that inset is what
-// scripts/validate-badges.mjs measures the mark's clearance against — changing
-// the look must not quietly change the geometry the checker is checking.
+// LOCKED IS FLAT AND COOL, with no furniture: the ornament arrives when it is
+// won, so a locked tier-III badge never carries more than a locked tier-I one.
 //
-// ── EVERY MEDAL IS STRUCK AT THE SAME SIZE ──────────────────────────────────
-//
-// The flourish needs room, so the medal is drawn at MEDAL_SCALE inside the box —
-// AT EVERY TIER, including tier I where the margin is simply empty. Scaling the
-// medal down only when a flourish appears would make a tier-III badge smaller
-// than a tier-I one, which is backwards; scaling it per tier would make the grid
-// jump between rows.
-//
-// ── TONE, AND NOW METAL TOO ─────────────────────────────────────────────────
-//
-// This comment used to end "bronze / silver / gold is still not available and
-// still would not be used — tier is in the flourish, where it can be read rather
-// than compared." The first half stopped being true when METAL entered tone.ts;
-// the second half is still right, which is why THE FLOURISH IS UNCHANGED —
-// ribbon at II, laurel at III, at exactly the geometry validate-badges measures.
-//
-// Tier is now said twice, in furniture and in metal, and that is what struck
-// sets have always done. The furniture carries it for a reader looking at one
-// badge; the metal carries it for a reader scanning fifty, which is the case the
-// furniture alone is weakest at — an open wreath and a closed one are close at
-// the 28px a grid draws, and bronze from gold is not.
-//
-// THE MARK STAYS INK ON EVERY METAL, and that is deliberate rather than lazy.
-// `metal.on` exists for TEXT printed on a plate and is held to 4.5:1; a glyph is
-// a graphic and carries the 3:1 floor instead, which ink clears on all three
-// (4.16:1 on bronze, the tightest). Flipping the mark to white on bronze and ink
-// on the other two would make one badge in the grid read inverted, which looks
-// like a fault rather than like a metal.
-//
-// The ORNAMENT stays ink as well, for a different reason: the laurel and the
-// ribbon tabs sit on PAPER, outside the medal, so they are lit by the page and
-// not by the metal. That rule was written here and then quietly broken when the
-// metals arrived — see `edge` below, and the note on it, which is the whole
-// story of a wreath that was drawn in white on cream for months.
-//
-// LOCKED IS FLAT AND COOL. No gradient, no shadow, no flourish: the ornament
-// arrives when it is won, so a locked tier-III badge never carries more ink than
-// a locked tier-I one.
-//
-// THE OUTLINE CAN DRAW ITSELF. Pass `draw` and the stroke runs on from nothing,
-// which is what the lesson reward screen uses. `LEN` per family is the outline's
-// length with ~6% slack: undershooting would leave part of the shape already
-// visible on the first frame, which is the one error that reads as a bug.
+// THE MEDAL CAN STRIKE ITSELF. Pass `draw` and it lands the way a die does —
+// in from slightly large, the furniture arriving once it is down — which is
+// what the lesson reward screen uses. `reveal` brings the mark in after it.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const APath = Animated.createAnimatedComponent(Path);
 const AG = Animated.createAnimatedComponent(G);
 
 interface Props {
@@ -139,253 +64,74 @@ interface Props {
   glyph: GlyphName;
   earned: boolean;
   size?: number;
-  /** 0..1 — how much of the outline has been drawn. Omit for a finished medal. */
+  /** 0..1 — the medal landing. Omit for a finished medal. */
   draw?: SharedValue<number> | null;
-  /** 0..1 — the mark's own arrival, once the outline is there. */
+  /** 0..1 — the mark's own arrival, once the medal is down. */
   reveal?: SharedValue<number> | null;
 }
 
-const grad = (id: string, stops: Stops) => (
-  <LinearGradient id={id} x1={LIGHT.x1} y1={LIGHT.y1} x2={LIGHT.x2} y2={LIGHT.y2}>
-    {stops.map(([o, c, op], k) => (
-      <Stop key={k} offset={o} stopColor={c} stopOpacity={op} />
-    ))}
-  </LinearGradient>
-);
+// Pure geometry, built once per variant: sixty-odd medals can be on screen at
+// once and none of them ever changes.
+const ART = new Map<string, BadgeArt>();
+function artFor(family: BadgeFamily, tier: BadgeTier, earned: boolean): BadgeArt {
+  const k = `${family}:${tier}:${earned ? 1 : 0}`;
+  let a = ART.get(k);
+  if (!a) {
+    const t = Math.max(1, Math.min(TIER_ORDER.length, tier));
+    a = badgeArt(family, t, earned ? tonesOf(ORDER[TIER_ORDER[t - 1]]) : LOCKED);
+    ART.set(k, a);
+  }
+  return a;
+}
 
-// The furniture, in the OUTER box — the medal is inset to leave room for it.
-// Both wreaths are built once at module scope: they are pure geometry, fifty
-// medals can be on screen at a time, and re-deriving nine leaf placements per
-// badge per render is exactly the sort of thing memoising this component was for.
-const RIBBON = ribbonPaths(84, 34, 13);
-const LAUREL_OPEN = [laurelSprig(-1), laurelSprig(1)];
-const LAUREL_FULL = [laurelSprig(-1, 'full'), laurelSprig(1, 'full')];
+const clamp = (v: number) => {
+  'worklet';
+  return Math.max(0, Math.min(1, v));
+};
 
-// MEMOISED. Every prop below is a primitive, so the comparison is exact and no
-// call site can defeat it with a fresh object (the trap Thinkers records for
-// ThinkerCard). A struck mark is an <Svg> with gradients — the most expensive
-// leaf this app draws — and Profile renders ten of them, none of which change
-// when the screen re-renders for an unrelated reason. Measured: see SketchIcon.
+// MEMOISED. Every prop below is a primitive (the two shared values are stable
+// refs), so the comparison is exact.
 export default memo(function BadgeMedal({
   family, tier, glyph, earned, size = 72, draw = null, reveal = null,
 }: Props) {
-  // FIVE MATERIALS, AND THEY ARE THE RANK LADDER'S OWN.
-  //
-  // This was bronze / silver / gold, which is three steps for a case of badges
-  // a reader is meant to work through for months — and a reader said so: "not
-  // just silver and gold, but a red that's really beautiful, a blue".
-  //
-  // Iron, bronze, jade, crimson, aurum — four of them borrowed straight from
-  // constants/insignia.ts rather than invented here, so a reader who has learnt
-  // that jade sits above bronze on the rank ladder does not have to learn a
-  // second, different order for badges. One language used twice.
-  const ins = tierInsignia(tier);
-  // The mark is white on a struck medal, slate on a locked one. Every order's
-  // face was fitted so white clears 3:1 on its lit corner; ink on crimson is
-  // the combination that disappears.
-  const ink = earned ? ins.on : GHOST;
-  // ── AND THE FURNITURE IS INK, WHICH IT STOPPED BEING WITHOUT ANYONE NOTICING
-  //
-  // The header below this component has said for a long time that "the laurel and
-  // the ribbon tabs sit on PAPER, outside the medal, so they are lit by the page
-  // and not by the metal" — and then the metals arrived, `ink` became `ins.on`,
-  // and `ins.on` is #FFFFFF on every single order by construction (insignia.ts
-  // fitted all eight faces to carry ONE mark colour). So every tier-III badge in
-  // the case has been wearing a WHITE wreath on warm paper: drawn, laid out
-  // correctly, and invisible.
-  //
-  // Nothing could have caught it. The mark is supposed to be white, the laurel is
-  // supposed to take the mark's colour on a metal, and the two rules are correct
-  // separately. It took a contact sheet — scripts/sheet-badges.mjs, written for
-  // the tier redesign — where the wreath simply was not there.
-  const edge = earned ? INK : GHOST;
-  const len = LEN[family];
-  const outer = SHAPE[family](0);
-  const inner = tier > 1 ? SHAPE[family](INNER[tier]) : null;
-  // The ornament arrives when it is won — see the locked note above.
-  const ribbon = tier >= 2 && earned;
-  // The laurel from III up rather than at III alone: it was the top tier's mark
-  // when there were three tiers, and a set where the highest two carry LESS
-  // furniture than the middle one reads as a mistake.
-  const wreath = tier >= 3 && earned;
-  // …and from IV the same sprigs are grown rather than bent: further out, up to
-  // the crown's own height, nine leaves instead of seven, and berries between
-  // them. Measured against all six silhouettes it reaches 45.4 units where the
-  // plain sprig reaches 40.2 and NOTHING of it is behind a medal — which is what
-  // the version before it got wrong, and got wrong invisibly.
-  const laurel = tier >= 4 ? LAUREL_FULL : LAUREL_OPEN;
-  const collar = tier >= 5 && earned;
-
-  // Per-instance, following the rule LoudnessChart wrote down: ClipPath and
-  // gradient ids live in a global-ish namespace and two mounted at once must not
-  // fight over the same `url(#…)`. Fifty medals in the badge case is exactly that
-  // situation. useId embeds ':', which is not a legal id, so strip non-alphanumerics.
+  const art = artFor(family, tier, earned);
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
-  const clipId = `bc${uid}`, face = `bf${uid}`, rim = `br${uid}`;
 
-  const outlineProps = useAnimatedProps(() => ({
-    strokeDashoffset: draw ? (1 - draw.value) * len : 0,
+  // The strike: in from 1.14× and transparent, down onto the page over the
+  // first half of the draw. Scale lives on the wrapper so the mark rides it.
+  const strike = useAnimatedStyle(() => {
+    if (!draw) return { opacity: 1, transform: [{ scale: 1 }] };
+    const v = clamp(draw.value / 0.55);
+    const eased = 1 - (1 - v) * (1 - v);
+    return { opacity: clamp(draw.value / 0.3), transform: [{ scale: 1.14 - 0.14 * eased }] };
+  });
+  // The furniture follows the medal rather than racing it.
+  const furnish = useAnimatedProps(() => ({
+    opacity: draw ? clamp((draw.value - 0.55) / 0.45) : 1,
   }));
-  // The inner rule and the flourish follow the outline rather than racing it:
-  // they start once the outer is most of the way round, so the edge reads as one
-  // gesture and the ornament lands on a finished medal.
-  const innerProps = useAnimatedProps(() => ({
-    opacity: draw ? Math.max(0, Math.min(1, (draw.value - 0.55) / 0.45)) : 1,
-  }));
-  // The nudge lives INSIDE the animated style on purpose: two `transform` keys in
-  // one style array do not merge, the later one replaces the earlier, so a static
-  // translateY beside an animated scale is silently dropped.
-  //
-  // Both terms carry the medal's inset: the mark rides the medal, so when the
-  // medal moved up and shrank to make room for the ribbon, the mark had to as well.
-  const dy = size * (GLYPH_DY[family] * MEDAL_SCALE + MEDAL_DY / 100);
   const markStyle = useAnimatedStyle(() => {
     const v = reveal ? reveal.value : 1;
-    return { opacity: v, transform: [{ translateY: dy }, { scale: 0.86 + 0.14 * v }] };
+    return { opacity: v, transform: [{ scale: 0.86 + 0.14 * v }] };
   });
 
-  const inset = `translate(${50 - 50 * MEDAL_SCALE} ${50 - 50 * MEDAL_SCALE + MEDAL_DY}) scale(${MEDAL_SCALE})`;
-
   return (
-    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+    <Animated.View style={[{ width: size, height: size }, strike]}>
       <Svg width={size} height={size} viewBox="0 0 100 100" style={{ position: 'absolute' }}>
-        <Defs>
-          <ClipPath id={clipId}><Path d={outer} /></ClipPath>
-          {grad(face, earned ? insigniaFace(ins) : LOCKED_FACE)}
-          {grad(rim, earned ? insigniaRim(ins) : [['0%', GHOST, 1], ['100%', GHOST, 1]])}
-        </Defs>
-
-        {/* THE LAUREL, behind everything — tier III up.
-            Crossed swords were drawn first, because that is what the heraldic
-            reference uses, and they were rejected on the evidence: at 168px the
-            medal covers the crossing so only the tips and hilts show, which reads
-            as horns above and blobs below, and at the 66px of the badge grid it
-            is mush. A laurel is a continuous curved mass, so being half-covered
-            costs it nothing — and it is what a philosopher is crowned with.
-            The closed tier-IV wreath then made the identical mistake in a
-            different disguise; badgeShapes carries that story and check:badges §4
-            carries the measurement. */}
-        {wreath && (
-          <AG animatedProps={innerProps}>
-            {laurel.map((sprig, s) => (
-              <G key={s}>
-                <Path d={sprig.stem} fill="none" stroke={edge} strokeWidth={2} strokeLinecap="round" />
-                {sprig.leaf.map((l, k) => (
-                  <Ellipse
-                    key={k}
-                    cx={l.cx} cy={l.cy} rx={l.rx} ry={l.ry}
-                    transform={`rotate(${l.rot.toFixed(1)} ${l.cx.toFixed(2)} ${l.cy.toFixed(2)})`}
-                    fill={PAPER}
-                    stroke={edge}
-                    strokeWidth={1.3}
-                  />
-                ))}
-                {/* THE BERRIES — tier IV up. Drawn exactly as a leaf is, paper
-                    inside an ink edge, because they have to read as the SAME
-                    plant: filled solid they came out as four dark specks and the
-                    render looked like dirt on the sheet rather than fruit on a
-                    branch. Round among ellipses is enough of a difference.
-
-                    They sit in the scallops the leaf chain leaves along its outer
-                    edge. On the branch itself — where a real laurel carries them —
-                    is the one place they cannot be seen at all: the stem is
-                    stroked in the same ink the berry is drawn in, and the first
-                    pass rendered eight of them into it and showed nothing. */}
-                {sprig.berry.map((b, k) => (
-                  <Circle
-                    key={`b${k}`}
-                    cx={b.cx} cy={b.cy} r={b.r}
-                    fill={PAPER}
-                    stroke={edge}
-                    strokeWidth={1.1}
-                  />
-                ))}
-              </G>
-            ))}
+        {art.back.length > 0 && (
+          <AG animatedProps={furnish}>
+            <InsigniaNodes nodes={art.back} id={`${uid}b`} />
           </AG>
         )}
-
-        {/* THE MEDAL. Inset at every tier — see the note above. */}
-        <G transform={inset}>
-          {/* It sits ON the page, so it casts. Earned only: a shadow under a flat
-              locked shape reads as a mistake rather than as depth. */}
-          {earned && (
-            <G transform={`translate(${SHADOW.dx} ${SHADOW.dy})`}>
-              <Path d={outer} fill={INK} opacity={SHADOW.opacity} />
-            </G>
-          )}
-
-          <Path d={outer} fill={`url(#${face})`} />
-
-          {inner && (
-            <APath
-              d={inner}
-              // The inner rule is the metal's own LIT tone once there is metal
-              // under it: `FAINT` is a warm paper grey and disappears completely
-              // on gold, which is where this rule is most needed (tier III).
-              stroke={earned ? ins.rule : GHOST}
-              strokeWidth={1.2}
-              fill="none"
-              opacity={earned ? 1 : 0.5}
-              animatedProps={innerProps}
-            />
-          )}
-
-          <APath
-            d={outer}
-            stroke={earned ? `url(#${rim})` : GHOST}
-            strokeWidth={tier >= 3 ? 2.6 : 2.2}
-            strokeLinejoin="round"
-            fill="none"
-            strokeDasharray={len}
-            animatedProps={outlineProps}
-          />
-
-          {/* THE COLLAR — the top tier only, so it means "this is as far as this
-              material goes" rather than merely "this is a high tier". Drawn in
-              the metal's own body, because it sits on PAPER outside the medal
-              and everything paler than that vanishes there. It follows the
-              outline's own draw-in rather than appearing whole on a medal that
-              is still being struck. */}
-          {collar && (
-            <APath
-              d={SHAPE[family](COLLAR)}
-              // The metal's BODY. Tier V is aurum and `rule` is #FFFFFF there,
-              // so the near-white that is right for a line drawn ON the metal is
-              // invisible for one drawn on the paper beside it — see the note on
-              // the same ring in RankSeal.
-              stroke={ins.base}
-              // Weighted for the grid, not for the sheet: a badge is drawn at
-              // 52px in the profile cabinet and this stroke is inside the
-              // medal's own 0.74 transform, so 2.6 here lands as under a pixel
-              // and a half there.
-              strokeWidth={2.6}
-              strokeLinejoin="round"
-              fill="none"
-              opacity={0.95}
-              animatedProps={innerProps}
-            />
-          )}
-        </G>
-
-        {/* THE RIBBON — tier II and III. Over the medal's foot and the swords'
-            grips, which is what ties the three into one object rather than three
-            stacked ones. Tabs first, so the band overlaps its own folds. */}
-        {ribbon && (
-          <G>
-            {/* The tabs are the band's own metal in shadow — they are the folds
-                BEHIND it, so they take the shaded end of the same ramp rather
-                than a paper grey that would read as a different material. */}
-            <Path d={RIBBON.tabL} fill={ins.shade} stroke={edge} strokeWidth={1.3} strokeLinejoin="round" />
-            <Path d={RIBBON.tabR} fill={ins.shade} stroke={edge} strokeWidth={1.3} strokeLinejoin="round" />
-            <Path d={RIBBON.band} fill={`url(#${face})`} stroke={edge} strokeWidth={1.6} strokeLinejoin="round" />
-          </G>
+        <InsigniaNodes nodes={art.medal} id={`${uid}m`} />
+        {art.front.length > 0 && (
+          <AG animatedProps={furnish}>
+            <InsigniaNodes nodes={art.front} id={`${uid}f`} />
+          </AG>
         )}
       </Svg>
-
-      <Animated.View style={markStyle} pointerEvents="none">
-        <Glyph name={glyph} size={size * GLYPH_SCALE[family] * MEDAL_SCALE} color={ink} />
+      <Animated.View style={[{ position: 'absolute', left: 0, top: 0, width: size, height: size, zIndex: 1 }, markStyle]} pointerEvents="none">
+        <StruckMark glyph={glyph} mark={art.mark} size={size} />
       </Animated.View>
-    </View>
+    </Animated.View>
   );
 });

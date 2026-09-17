@@ -3,7 +3,7 @@
 //
 // `useInView` is the hook; this is the part of it that can be WRONG, so it lives
 // where plain Node can run it — the same rule, for the same reason, as rig.ts,
-// tone.ts and rankShapes.ts. Zero imports. `npm run check:ui` exercises both
+// tone.ts and insigniaArt.ts. Zero imports. `npm run check:ui` exercises both
 // functions against the exact readings that produced the defect below.
 // ─────────────────────────────────────────────────────────────────────────────
 

@@ -6,7 +6,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ramp, rampFace, mix, PAPER_LIT } from '@/components/shared/tone';
-import { STREAK_EMBER, STREAK_DEEP, STREAK_SAND, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
+import { STREAK_EMBER, STREAK_DEEP, STREAK_WASH, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
 import { buildWeek } from '@/lib/utils/streakCalendar';
 import { LIP } from '@/constants/design';
 import { cue } from '@/lib/feedback';
@@ -309,7 +309,7 @@ export default function StreakCeremony({
   // A landmark day gets more of everything the ordinary day gets — the object
   // itself changes, which is Duolingo's own stated milestone rule.
   const flakes = useMemo(() => makeFlakes(hitMilestone ? 44 : 26), [hitMilestone]);
-  const tones = useMemo(() => [METAL.lit, STREAK_EMBER, METAL.shade, STREAK_SAND], []);
+  const tones = useMemo(() => [METAL.lit, STREAK_EMBER, METAL.shade, STREAK_WASH], []);
 
   const sealIn = useSharedValue(0);
   const sealScale = useSharedValue(1.6);
@@ -700,7 +700,7 @@ const styles = StyleSheet.create({
   },
   stampRing: {
     position: 'absolute', width: STAMP_RING, height: STAMP_RING, borderRadius: STAMP_RING / 2,
-    borderWidth: 2, borderColor: STREAK_SAND, opacity: 0.55,
+    borderWidth: 2, borderColor: STREAK_WASH, opacity: 0.55,
   },
   stampWord: {
     fontFamily: 'SpecialElite_400Regular',
@@ -762,7 +762,7 @@ const styles = StyleSheet.create({
     position: 'absolute', width: DISC, height: DISC, borderRadius: DISC / 2,
     borderWidth: 1.5, borderColor: STREAK_EMBER,
   },
-  rested: { backgroundColor: STREAK_SAND, borderWidth: 1, borderColor: STREAK_EMBER },
+  rested: { backgroundColor: STREAK_WASH, borderWidth: 1, borderColor: STREAK_EMBER },
   missed: { borderWidth: 1.5, borderColor: FAINT },
   future: { borderWidth: 1.5, borderColor: FAINT, opacity: 0.55 },
 

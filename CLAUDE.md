@@ -158,6 +158,8 @@ Philosophize/
 │   ├── widget/                  # Android home-screen widget surface
 │   └── shared/                  # SketchIcon, Glyph, PhilosopherSheet, RanksBadgesSheet,
 │                                #   SavedQuotesSheet, PaywallSheet, RankSeal,
+│                                #   BadgeMedal, insigniaArt (every rank pin and
+│                                #   badge, zero imports) + InsigniaParts,
 │                                #   UpdateGate, DailyQuoteWidget, QuotePlate,
 │                                #   Sketch{Bar,Line}Chart (both ORPHANED — nothing
 │                                #   imports them; ship or delete),
@@ -626,7 +628,7 @@ costs milliseconds rather than a Metro and a browser. What it holds:
 > quiet end — where sand reads 7.38:1, and the ember stays a mark: a live streak,
 > an earned tick, a coin.
 >
-> The streak takes `STREAK_EMBER`, `STREAK_DEEP`, `STREAK_SAND` and
+> The streak takes `STREAK_EMBER`, `STREAK_DEEP`, `STREAK_WASH` and
 > `STREAK_ON_INK` from `constants/streak.ts`, and `check:streak` re-derives each
 > from tone.ts. **The streak is warm again**, which is what all the research above
 > said it should be and what the purple went against.
@@ -653,6 +655,38 @@ costs milliseconds rather than a Metro and a browser. What it holds:
 > The tab icons, the Pass chart and certificate, the Profile plates and a lesson's
 > XP coin moved with all of it. The rank ladder keeps its eight metals, AURUM
 > included: a pin is an earned object in a ladder, and the owner chose to keep it.
+>
+> **AND THEN THE GOLD WENT FROM EVERY SURFACE (2026-09-16).** *"One thing that
+> makes an app look really AI is that the background for some shading has a gold
+> look … very common in the background of a lot of the information in the app."*
+> Found on the running app, it had two sources: **SAND laid down as a surface**
+> (the chosen tab's tile, the Pass column, the certificate's granted rows, the
+> lesson's +XP stake, the streak's chips and rested days, the conferral's light)
+> and **`FACE`, whose shaded end `PAPER_SHADE` is a warm tan**, run across every
+> struck tile, niche, panel and seal, so each one faded into beige at a corner.
+> A gradient ending in beige, lit from nowhere in particular, is the first tell
+> design writers list for an AI-made screen.
+>
+> - **A background is flat now, and the light lives in the edges.** tone.ts adds
+>   `FLAT_FACE`, `FLAT_EDGE`, `FLOOR`, `FLOOR_CUT`, `TINT` and `TINT_EDGE`:
+>   a raised surface is white on a hairline and its shadow, a cut-in one is a
+>   neutral floor between a dark top hairline and a white foot, and a CHOSEN
+>   thing sits on a flat 15% tint of the teal with a 50% edge — Duolingo's own
+>   selected-tab construction, measured off their 2026 tab bar.
+> - **SAND is no longer a fill anywhere.** It stays in tone.ts as the owner's
+>   swatch. `STREAK_SAND` became `STREAK_WASH` (`FLOOR`, #F2F2EF), which
+>   `check:streak` still holds to 4.5:1 both ways against `STREAK_DEEP`.
+> - **`FACE` and `PAPER_SHADE` are unchanged on purpose.** The rank pins, the
+>   badge medals and the rank climb chart are struck from them, and those were
+>   being redesigned in another session at the time. They are the only gradients
+>   into tan left, and whoever finishes that work should decide them.
+> - **The five tab icons were redrawn** (`TabIcon.tsx`): flat palette fills with
+>   one hard-edged darker side and no gradient, an ink outline at one weight, one
+>   small ember spark each, and every icon in full colour whether chosen or not.
+>   Learn is an open book, Thinkers a laurelled bust in SIDE profile on a plinth,
+>   so its silhouette cannot be mistaken for Profile's front-facing head. The owner
+>   picked the inked set from a sheet that also offered an unlined one and a
+>   grey-until-chosen one.
 >
 > **AND THE READER'S SECOND SENTENCE WAS ABOUT THE ANIMATION:** *"the animation
 > for the day streak is just a blue dot and it isnt a clean cool animation."*
@@ -758,14 +792,16 @@ costs milliseconds rather than a Metro and a browser. What it holds:
   goal(stats), need }`; evaluated by `recomputeBadges()` and shown in
   `RanksBadgesSheet`. **Five tiers**, struck in four of the rank orders plus gold
   (`constants/insignia.ts`), so both reward ladders speak one language — **and
-  five MOUNTINGS**, one per tier: the medal alone, then a ribbon, then two laurel
-  sprigs, then the SAME SPRIGS GROWN — wider, taller, nine leaves apiece and in
-  fruit — then a collar struck outside the edge. Tiers IV and V were added to the
-  roll and given no furniture of their own, so thirty-three badges — every one
-  that takes months — were the tier-III object in a different metal, which is the
-  same fault the rank ladder was carrying at the same time. **`npm run
-  sheet:badges` draws the whole case in plain Node**; that is what found it, and
-  what found the wreath being drawn in white on cream (see §19).
+  five MOUNTINGS**, one per tier: the medal alone, then a ribbon banner, then an
+  open laurel, then the laurel GROWN with three stars over the crown, then a
+  fanned glory of light behind it all with two glints. Tiers IV and V were once
+  added to the roll with no furniture of their own, so thirty-three badges —
+  every one that takes months — were the tier-III object in a different metal,
+  which is the same fault the rank ladder was carrying at the same time. **`npm
+  run sheet:badges` draws the whole case**, through the same code the app draws
+  it with; that is what found it, and what found the wreath being drawn in white
+  on cream (see §19). Since 2026-09-16 every badge is a GAME CREST — see the
+  note under Ranks below.
 
   > **AND THE FIRST ANSWER FOR TIER IV WAS TO CLOSE THE WREATH OVER THE CROWN,
   > WHICH IS THE CROSSED SWORDS AGAIN.** Closing an arc means bending it INWARD,
@@ -793,20 +829,66 @@ costs milliseconds rather than a Metro and a browser. What it holds:
 - **Ranks** — **48** in `data/ranks.ts` (Novice → Grand Philosopher), in **eight
   orders of six**: clay, iron, bronze, jade, lapis, crimson, amethyst, aurum.
   **TWO AXES, and a pin is the pair.** `order` picks the MATERIAL and the
-  VOCABULARY; `degree` picks how much of that vocabulary is built. No two of the
-  forty-eight draw the same thing, and `check:ui` measures that on the paths
-  rather than on the numbers.
-  - the **VOCABULARY** is per order and never repeats: disc · hex · plate · gem ·
-    cross · mariner · burst · grand. Each is a core shape, a counter-rotated
-    UNDERPLATE behind it, and a facet count (`VOCAB` in
-    `components/shared/rankShapes.ts`).
-  - the **BUILD** is the same six steps in every order, and it RESETS at each new
-    colour: core → inner rule → facets → underplate → studs → collar. Five
-    additions for five rungs, one each.
-  - so complexity is a **sawtooth that climbs**. Clay's capstone is a disc on a
-    square plate; aurum's is a flared cross patée on a twenty-four ray sunburst,
-    cut into facets and ringed twice. Same six steps, nothing in common to look
-    at, and the capstone reach climbs 39 → 48.5 across the ladder.
+  SHAPE; `degree` picks what is BUILT onto it. No two of the forty-eight draw the
+  same thing, and `check:ui` measures that on the paths rather than on the
+  numbers.
+  - the **SHAPE** is per order and never repeats: coin · hex · shield · octagon ·
+    crest · gem · brilliant · star (`ORDER_SHAPES` in
+    `components/shared/insigniaArt.ts`).
+  - the **BUILD** is the same in every order, and it RESETS at each new colour:
+    the crest → + an inner rule and one stone in its foot → three stones →
+    FRAMED in a larger crest of its own shape → + a stone each side of the frame
+    and a glint → + a stone above and below and a second glint.
+  - so complexity is a **sawtooth that climbs**: every order's capstone frame is
+    a little larger than the one below, with more rivets (six, eight, ten,
+    twelve, sixteen) and, from lapis, a second rule.
+
+  > **THE FOURTH DRAWING, AND THE ONE THAT IS NOT FLAT (2026-09-16).** *"I keep
+  > looking at the rank badges and also the badge icons … they're really flat,
+  > and they're really boring, and you can just tell it's all AI drawn … not
+  > gamified … it needs to look like real good designs, like from other
+  > education apps that have badges."* Research came first — 179 real reference
+  > images (Duolingo's leagues and achievements, Brilliant, Khan Academy, Apple
+  > Fitness, Valorant, League of Legends, Clash, Hearthstone, Rocket League,
+  > PlayStation) — then three directions drawn with the app's real marks. The
+  > owner picked the **GAME CREST**, the Duolingo / Brilliant / Clash construction.
+  >
+  > **WHAT MADE THE OLD ONES FLAT, measured against the references:** one
+  > gradient across a shape reads as a sticker, where a professional badge is
+  > FLAT TONES arranged as an object; a hairline edge reads as a diagram; nothing
+  > had THICKNESS; and the mark was a 1.7px line icon, which is the loudest
+  > stock-icon tell there is. The crest is now, bottom to top: a hard ink shadow,
+  > one steady dark outline in the order's own rim pushed toward black, a LIP
+  > (the silhouette again, 4.4 units lower, darker — Duolingo's is 4 of 90), a
+  > bright rim with its lower-right half one step down, a recessed face, two glare
+  > stripes at 45°, and a heavy white mark with a shadow. There is no gradient
+  > anywhere in it.
+  >
+  > **THE FRAME IS THE ORDER'S OWN SHAPE, NOT A MEDALLION.** The first draft
+  > mounted degrees 3–5 of every order on one round medallion, and all eight
+  > colours became the same round button from rung four up — the exact "they are
+  > all the same" complaint an earlier ladder drew. A shield in a shield, a gem in
+  > a gem.
+  >
+  > **ELEVEN MARKS WERE REDRAWN, because at badge weight they read as something
+  > else**: the owl as a devil mask (its ear tufts were lines standing OUT of the
+  > head — horns again), the torch as a palm tree, the pyramid as a warning sign,
+  > the oil lamp as a person, the ripple as a moustache, the scroll as a pill, and
+  > the spiral, harp, bridge, sundial and amphora as blobs. `Glyph` takes a
+  > `weight` now; the insignia draw it at 3.2 of the glyph's 32-unit box.
+  >
+  > **WHITE ON PAPER, A FOURTH TIME.** The top tiers' glints are white, and a glint
+  > past an object's edge sits on paper — so every glint carries the order's dark
+  > line, and `check:ui` §4d fails a bare one.
+  >
+  > **`insigniaArt.ts` HAS NO IMPORTS**, like `rig.ts` and `tone.ts`: it returns
+  > flat fills, lines and clip groups, `InsigniaParts.tsx` paints them, and
+  > `rankShapes.ts` and `badgeShapes.ts` are gone. `npm run sheet:ranks` and
+  > `sheet:badges` draw through the same functions with the REAL marks
+  > (`scripts/lib/insigniasheet.mjs` loads `Glyph.tsx` with React stood in) in
+  > headless Chrome, because a clip path is exactly what an approximating
+  > rasteriser gets wrong. `node scripts/countertest-insignia.mjs` puts ten
+  > defects back, one at a time, and restores the file.
 
   > **AND THE TOP HALF WERE ALL FLOWERS, WHICH IS WHY THEY WENT.** The four
   > orders above jade were a scallop, a notched star, a twelve-lobe coronet and
@@ -872,19 +954,22 @@ costs milliseconds rather than a Metro and a browser. What it holds:
   > of each order looked like a washed copy of the rung below rather than a richer
   > one; they take the material's own `lit` and `rim` now.
 
-  **`check:ui` holds six things a picture cannot report:** that every rung adds an
-  element, that each order's capstone reaches at least as far as the last, that
-  all forty-eight drawings are distinct, that every underplate clears its own core
-  by 4 units, that nothing declares a wing or a coronet again, and that the facets
-  are painted in the material. Every one was confirmed by putting the defect back
-  and watching it fail.
+  **`check:ui` holds what a picture cannot report:** that every rung draws more
+  than the one below it, that each order's capstone is at least as large and as
+  finished as the last, that all forty-eight drawings are distinct as GEOMETRY
+  (two paints of one drawing count as one), that every frame shows past its crest
+  by 8 units, that nothing leaves the 100-unit box, that the mark keeps a unit of
+  daylight inside its face, that each order's tones fall from lit to dark, that
+  nothing declares a wing, a horn or a coronet again, and that every glint on
+  paper is outlined. `node scripts/countertest-insignia.mjs` confirms each by
+  putting the defect back and watching it fail.
 
-  The mark's room stays flat at 0.34–0.40 across all eight while the drawn area
-  grows by half again, so everything a rung gains it gains OUTSIDE the glyph.
-  That discipline is the whole reason it survives being drawn at 44px.
+  Everything a rung gains it gains OUTSIDE the mark's face, and the mark itself
+  only shrinks once, when the crest moves into its frame. That discipline is the
+  whole reason it survives being drawn at 44px.
 
-  **`npm run sheet:ranks` renders all forty-eight in plain Node** and is how they
-  are judged — `PIN=50` draws them at the size the ladder actually uses, and
+  **`npm run sheet:ranks` renders all forty-eight** and is how they are judged —
+  `PIN=50` draws them at the size the ladder actually uses, and
   `sheet:ranks jade` draws one order large. It is the only instrument this
   project has for "does it look good", and every correction above came from it. `check:ui` is what
   stops them breaking (a frame that outgrows the viewBox is clipped silently on
@@ -2084,8 +2169,9 @@ comparisons on a phone says the same from the other end: two options, only the
 rows that differ, and what both share merged rather than repeated.
 
 - **The Pass column is struck in the palette's own dark teal (`PATINA`), not a
-  rainbow**, on a hard lip the way a button sits, with a sand card inside it —
-  gold until 2026-09-15, then royal purple for one day, then this (§7). Its cells
+  rainbow**, flat, on a hard lip the way a button sits, with a white card inside
+  it — gold until 2026-09-15, then royal purple for one day, then teal around a
+  sand card, and since 2026-09-16 no sand at all (§7). Its cells
   stamp in row by row on every visit, and a glint crosses the plate first. The trigger is FOCUS, because
   the tab is built at startup and a mount animation would spend itself behind the
   launch screen; its callback depends on nothing, because `available` flips when
@@ -2169,8 +2255,8 @@ and these three decisions in it stand:
 - **The highlight is a MATERIAL, not a colour.** The obvious way to mark the Pass
   rows is a tint behind them, and §19 records that exact move — large saturated
   fills on paper — as what made Insights read cheap. A `granted` row is instead
-  CUT INTO the page: a sand recess running StruckNiche's gradient backwards, a
-  3pt teal rail down the cut edge, a teal tick. It differs from its neighbours
+  CUT INTO the page: a flat pale-teal recess with StruckNiche's dark top
+  hairline and white foot, a 3pt teal rail down the cut edge, a teal tick. It differs from its neighbours
   by depth and by metal, which is how every other reward in this app already
   differs from the thing below it.
 - **A limit is not a tick.** The free certificate's rows carry an open square with
@@ -2439,8 +2525,8 @@ skins, and **group R of the rule book is how to tell which one a claim wants**:
 >   `LipPlate` faces on a lip of that hue, a `Medallion` knob, accent rails. The
 >   verdict re-strikes the same plates green or rust, stamps the reader's own choice
 >   (`VerdictSeal`) and pays a right answer on the answer card (`XpCoin`), struck
->   in the palette's accent. The kicker counts QUESTION 1 OF 2 beside a sand stake
->   struck in the same material. None of it makes a sound.
+>   in the palette's accent. The kicker counts QUESTION 1 OF 2 beside a paper stake
+>   ringed in the ember. None of it makes a sound.
 > - **The poll's gap was the answer (R17).** Holder lines were mounted at opacity 0,
 >   and an invisible View still takes its height; only the correct row had holders
 >   in 7 of the 34 polls. They mount on answering now, on every row at once, and
@@ -4736,6 +4822,10 @@ after a lesson is the reward. The real fix is to stop Profile being one componen
 
 ### Struck things are shaded, and that is not a second colour
 
+> **Since 2026-09-16 only the rank pins and badge medals still use `FACE`.** Every
+> other surface this section describes is flat, with its depth in its edges and
+> its shadow, because the tan end of `FACE` read as gold (§7).
+
 Rank pins and badges carry **tone**: a lit side, a shaded side and a small drop
 shadow, so a frame reads as an object rather than an outline. This does not bend
 the B&W rule, because there is no new hue in it — every value in
@@ -4772,8 +4862,9 @@ Two findings worth not rediscovering:
 - **Crossed swords do not work behind a medal**, however heraldic the reference.
   The medal covers the crossing, so all that shows is two tips above and two
   hilts below — horns at 168px, mush at the 66px the badge grid actually draws.
-  A laurel is a continuous curved mass, so being half-covered costs it nothing.
-  `swordPaths` is kept in `badgeShapes.ts` so the decision is one line to revisit.
+  A laurel is a continuous curved mass, so being half-covered costs it nothing —
+  and since the game crest, it is drawn entirely OUTSIDE the medal anyway. The
+  swords are gone for good, with `badgeShapes.ts`.
 
 ### A quote is a struck thing too, and its metal is the era
 

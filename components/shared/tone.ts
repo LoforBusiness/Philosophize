@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // THE TONAL SYSTEM FOR STRUCK THINGS — rank pins and badges.
 //
-// ZERO IMPORTS, the same rule as badgeShapes.ts and cinematic/rig.ts: a file with
+// ZERO IMPORTS, the same rule as insigniaArt.ts and cinematic/rig.ts: a file with
 // no React in it can be required by plain Node, so a contact sheet of all
 // seventy-five marks can be generated and measured without Metro or a device.
 //
@@ -289,7 +289,9 @@ export const EMBER_DEEP = mix(EMBER, INK, 0.45);
 /**
  * DEEP as a struck material, in the shape `METAL` uses, so a plate, a coin and a
  * column are cut from it exactly as they were cut from gold and then purple.
- * `on` is SAND, which reads 7.38:1 on the base and 9.05:1 on the shade.
+ * `on` is white: 10.6:1 on the base. It was SAND until 2026-09-16, when the
+ * owner asked for the gold look to go, and gold lettering on every teal chip
+ * ("3 DAYS FREE", "PASS", "ACTIVE") was part of it.
  *
  * The lit corner stops at 0.12 toward paper rather than the 0.34 `ramp()` uses:
  * at 0.22 sand on the lit corner measures 3.92:1 and a label running across the
@@ -301,7 +303,7 @@ export const PATINA: Metal = {
   base: DEEP,
   shade: mix(DEEP, INK, 0.36),
   rim: mix(DEEP, INK, 0.58),
-  on: SAND,
+  on: PAPER_LIT,
 };
 
 export interface Ramp { lit: string; base: string; shade: string; rim: string; track: string; }
@@ -557,3 +559,48 @@ export function disc(hue: string): Disc {
     rim: mix(face, PAPER, 0.52),
   };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FLAT SURFACES: NO GOLD, AND NO GRADIENT IN A BACKGROUND (2026-09-16).
+//
+//   "one thing that makes an app look really AI is that the background for some
+//    shading has a gold look ... it is very common in the background of a lot
+//    of the information in the app."
+//
+// Two sources, both found on the running app. SAND laid down as a SURFACE: the
+// chosen tab's tile, the Pass column, the certificate's rows, the lesson's
+// question tag. And `FACE`, whose shaded end `PAPER_SHADE` is a warm tan, run
+// across every raised card, so each one faded from white into beige at the
+// corner. A gradient that ends in beige, lit from nowhere in particular, is the
+// first thing design writers name when they describe an AI-made screen.
+//
+// So a background is FLAT now, the way Duolingo's are, and the one light lives
+// in the EDGES: a raised surface is white with a hairline and its shadow; a
+// cut-in surface is a neutral floor with a dark hairline along the top, where
+// the light cannot reach, and a white one along the bottom. A chosen thing sits
+// on a flat tint of the palette's teal with a teal edge.
+//
+// SAND IS NOT A SURFACE ANY MORE. It stays above because it is one of the
+// owner's six swatches; nothing should reach for it as a fill.
+//
+// `FACE` and `PAPER_SHADE` are deliberately unchanged: the rank pins and badge
+// medals are struck from them, and those are being redesigned separately.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** A raised surface: plain white. */
+export const FLAT_FACE = PAPER_LIT;
+/** The hairline round a raised surface. Neutral — the old `FAINT` leans tan. */
+export const FLAT_EDGE = mix(PAPER, INK, 0.09);
+/** The floor of a cut-in surface: paper a breath down, with no warmth added. */
+export const FLOOR = mix(PAPER, INK, 0.035);
+/** The dark hairline along the top of a cut, where the light cannot reach. */
+export const FLOOR_CUT = mix(PAPER, INK, 0.2);
+/** A chosen thing's ground: the teal at 15% on paper (#DEE5E1). */
+export const TINT = mix(TEAL, PAPER, 0.85);
+/** The edge of a chosen thing's ground: the teal at 50% (#9EB3AF). */
+export const TINT_EDGE = mix(TEAL, PAPER, 0.5);
+/** `FACE` without the tan: a struck disc's face in SVG, lit by its rim alone. */
+export const FLAT: Stops = [
+  ['0%', PAPER_LIT, 1],
+  ['100%', PAPER_LIT, 1],
+];

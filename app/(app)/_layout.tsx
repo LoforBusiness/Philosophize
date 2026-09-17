@@ -239,9 +239,9 @@ export default function AppLayout() {
               paddingTop: 10,
               paddingBottom: 12 + insets.bottom,
             },
-        // No tint colours. TabIcon draws both states itself: the unchosen grey
-        // this used to set, #B8B8B2, measured 1.9:1 on the bar, under the 3:1 a
-        // mark that carries meaning needs.
+        // No tint colours. TabIcon draws every icon in full colour and marks the
+        // chosen tab with its own tile; the unchosen grey this used to set,
+        // #B8B8B2, measured 1.9:1 on the bar, under the 3:1 a meaningful mark needs.
       }}
     >
       <Tabs.Screen

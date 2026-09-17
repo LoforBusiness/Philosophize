@@ -13,7 +13,7 @@
 // Two groupings over the same ladder, with different names and different
 // boundaries, would be two things for a reader to learn where there is only one
 // fact. So a Circle IS an order: same six ranks, same colour, same SHAPE (each
-// order is struck in its own silhouette now — components/shared/rankShapes.ts),
+// order is struck in its own silhouette now — components/shared/insigniaArt.ts),
 // and the Circle is named after the material. `tierForRank` still returns
 // 1-based groups, so nothing that consumed it has to change; only its divisor
 // moved, from five to six.

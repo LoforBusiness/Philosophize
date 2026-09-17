@@ -33,7 +33,7 @@ import { LIP } from '@/constants/design';
 // It shows both pins now, and the swap is the beat: the pin they HELD is on
 // screen from the first frame, and at the burst it hands over to the pin they
 // have just been given. That is the whole point of an escalating ladder
-// (components/shared/rankShapes.ts) and this is the only screen that can ever
+// (components/shared/insigniaArt.ts) and this is the only screen that can ever
 // show two rungs of it at once.
 //
 // The order is deliberate and reads top-to-bottom, one thing at a time:

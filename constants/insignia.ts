@@ -78,8 +78,8 @@
 //
 // So the two scales are separated. THIS FILE IS THE LONG ONE — eight materials,
 // each better than the last, and nothing about it resets. components/shared/
-// rankShapes.ts is the SHORT one: six frames, keyed on the degree, run through
-// again in every order. A reader always has a grander shape three ranks away
+// insigniaArt.ts is the SHORT one: the six-step build keyed on the degree, run
+// through again in every order, on that order's own silhouette. A reader always has a grander shape three ranks away
 // wherever they stand, and finishing an order buys the thing that never comes
 // round again, which is the metal.
 //
@@ -213,37 +213,28 @@ export const ORDER_LABEL: Record<OrderName, string> = {
 /**
  * WHAT ESCALATES INSIDE AN ORDER.
  *
- * The order says WHAT a pin is made of and it changes every six ranks. Inside
- * those six, TWO things move together and they both reset at the next colour:
- * the SILHOUETTE (components/shared/rankShapes.ts — disc, hexagon, plate,
- * scallop, gem, rosette) and the FINISH below. Every rung of every order is a
- * visible step up from the one under it, and none of the six is more than five
- * steps from plain.
+ * The order says WHAT a pin is made of, and WHAT SHAPE it is, and it changes
+ * every six ranks. Inside those six the BUILD climbs and resets at the next
+ * colour (components/shared/insigniaArt.ts, `rankBuild`). Every rung is a
+ * visible step up from the one under it, and every step lands outside the mark's
+ * room:
  *
- * This is ornament, and RankSeal's own header records that escalating ornament
- * was tried once and rejected as "so busy at 54px that it fought the glyph it
- * framed". The difference is that THAT version escalated across all twenty-five
- * ranks, so by the top the pin was carrying twenty-five steps of decoration.
- * Here it resets every six, no pin is ever more than five steps ornamented, and
- * every step lands on the frame's own edge rather than in the mark's room:
+ *   0  the crest
+ *   1  + an inner rule, and one stone in its foot
+ *   2  + two more stones: three
+ *   3  framed in a larger crest of its own shape
+ *   4  + a stone at each side of the frame, and a glint
+ *   5  + a stone above and below, and a second glint
  *
- *   0  plain. The pin, the rim, the mark.
- *   1  + the inner rule
- *   2  + two studs, left and right
- *   3  + four
- *   4  + all six
- *   5  + the collar: a second rule OUTSIDE the edge
- *
- * Degree 5 is the capstone of its order and is meant to look like one: the
- * finest edge in the set, every stud filled, and a ring around the whole thing.
+ * Degree 5 is the capstone of its order and is meant to look like one, and the
+ * capstones themselves climb: a larger frame at every order, riveted from
+ * bronze, ruled twice from lapis.
  */
 export const DEGREES = 6;
 
-// `Finish` AND `finishFor` LIVED HERE AND HAVE MOVED to `buildFor` in
-// components/shared/rankShapes.ts, beside the geometry they gate. They were
-// split across two files while the finish was the only thing a degree changed;
-// a degree now also picks the silhouette, the underplate and the facets, and one
-// number deciding five things from two files is how the five drift apart.
+// `Finish` AND `finishFor` LIVED HERE AND HAVE MOVED to `rankBuild` in
+// components/shared/insigniaArt.ts, beside the geometry they gate: one number
+// deciding several things from two files is how the several drift apart.
 /** The order a rank index (0-based) belongs to. */
 export function orderOf(index: number): OrderName {
   const i = Math.max(0, Math.floor(index) || 0);

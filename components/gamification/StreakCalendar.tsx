@@ -8,8 +8,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
-import { STREAK_EMBER, STREAK_DEEP, STREAK_SAND, SLATE, STREAK_MILESTONES } from '@/constants/streak';
-import { ramp, rampFace, mix, PAPER_LIT, PAPER_SHADE } from '@/components/shared/tone';
+import { STREAK_EMBER, STREAK_DEEP, STREAK_WASH, SLATE, STREAK_MILESTONES } from '@/constants/streak';
+import { ramp, rampFace, mix, PAPER_LIT, FLAT_EDGE } from '@/components/shared/tone';
 import {
   buildMonth,
   shiftMonth,
@@ -470,7 +470,7 @@ export default function StreakCalendar({
           rest days at all. */}
       <View style={styles.key}>
         <Legend fill={METAL.base} label="STUDIED" />
-        <Legend fill={STREAK_SAND} rim={STREAK_EMBER} label="RESTED" />
+        <Legend fill={STREAK_WASH} rim={STREAK_EMBER} label="RESTED" />
         <Legend fill={PAPER} rim={FAINT} label="MISSED" />
       </View>
     </View>
@@ -703,7 +703,7 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     overflow: 'hidden',
-    backgroundColor: mix(PAPER_SHADE, PAPER, 0.45),
+    backgroundColor: FLAT_EDGE,
   },
   fill: { height: 6, borderRadius: 3 },
   tally: { includeFontPadding: false },
@@ -732,7 +732,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: 'transparent',
   },
-  rest: { backgroundColor: STREAK_SAND, borderColor: STREAK_EMBER },
+  rest: { backgroundColor: STREAK_WASH, borderColor: STREAK_EMBER },
   // Quiet on purpose: a hollow ring, not an accusation.
   missed: { borderColor: FAINT },
   today: { borderWidth: 2, borderColor: INK, backgroundColor: PAPER },

@@ -11,7 +11,7 @@ import Button from '@/components/ui/Button';
 import RankSeal from '@/components/shared/RankSeal';
 import { MetalPlate } from '@/components/profile/Struck';
 import Certificate, { ScheduleHead, ScheduleRow } from '@/components/paywall/Certificate';
-import { INK, MID, PANEL_BASE, mix, PATINA, EMBER_INK, SAND } from '@/components/shared/tone';
+import { INK, MID, PANEL_BASE, PAPER_LIT, mix, PATINA, EMBER_INK } from '@/components/shared/tone';
 import TrialReminderAsk from '@/components/paywall/TrialReminderAsk';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
@@ -72,9 +72,10 @@ import { cue } from '@/lib/feedback';
 // == NO NEW COLOUR ===========================================================
 //
 // Same rule as Certificate and PassParts, and check-pass holds it: every value
-// comes from `tone`, `METAL` or `C`. The light that sweeps across is the
-// palette's SAND -- the surface the certificate's Pass rows are cut into -- so
-// the light passing over it is a colour it already wears, moving.
+// comes from `tone`, `METAL` or `C`. The light that sweeps across is WHITE,
+// the card's own face. It was the palette's sand until 2026-09-16, when the
+// owner asked for the gold look to go from everywhere it was a surface; a
+// sand band and a sand flash were the brightest gold in the app.
 // -----------------------------------------------------------------------------
 
 /**
@@ -91,9 +92,9 @@ const clear = (hex: string) => {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, 0)`;
 };
 
-/** The sand at a stated alpha, for the band. Same rule as above. */
+/** The light at a stated alpha, for the band. Same rule as above. */
 const light = (a: number) => {
-  const n = parseInt(SAND.slice(1), 16);
+  const n = parseInt(PAPER_LIT.slice(1), 16);
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
 };
 
@@ -354,7 +355,7 @@ export default function PassConferred({ kind, onDone }: Props) {
                   <LinearGradient
                     colors={[
                       clear(PANEL_BASE), clear(PANEL_BASE),
-                      light(0.9), SAND,
+                      light(0.9), PAPER_LIT,
                       PANEL_BASE, PANEL_BASE,
                     ]}
                     locations={[0, 0.40, 0.452, 0.468, 0.492, 1]}
@@ -366,7 +367,7 @@ export default function PassConferred({ kind, onDone }: Props) {
 
                 <Animated.View
                   pointerEvents="none"
-                  style={[StyleSheet.absoluteFill, { backgroundColor: SAND }, flashStyle]}
+                  style={[StyleSheet.absoluteFill, { backgroundColor: PAPER_LIT }, flashStyle]}
                 />
               </View>
             </Animated.View>

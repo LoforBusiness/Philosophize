@@ -5,7 +5,7 @@ import PressableScale from '@/components/shared/PressableScale';
 import SectionHead from '@/components/home/SectionHead';
 import { useUIStore } from '@/stores/uiStore';
 import { dayNumber, thinkerOfTheDay, factOfTheDay } from '@/lib/utils/thinkerOfDay';
-import { FACE, RIM, LIGHT, SHADOW, INK, FAINT, MID } from '@/components/shared/tone';
+import { FLAT, RIM, LIGHT, SHADOW, INK, FAINT, MID } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A DIFFERENT THINKER EVERY DAY — the one thing on Home that is new content
@@ -39,7 +39,8 @@ function Seal({ letter }: { letter: string }) {
       <Svg width={SEAL} height={SEAL} viewBox="0 0 100 100">
         <Defs>
           <SvgGradient id="tod-face" {...LIGHT}>
-            {FACE.map(([o, c, a]) => <Stop key={o} offset={o} stopColor={c} stopOpacity={a} />)}
+            {/* A white face: the old one faded into the tan PAPER_SHADE, which read as gold. */}
+            {FLAT.map(([o, c, a]) => <Stop key={o} offset={o} stopColor={c} stopOpacity={a} />)}
           </SvgGradient>
           <SvgGradient id="tod-rim" {...LIGHT}>
             {RIM.map(([o, c, a]) => <Stop key={o} offset={o} stopColor={c} stopOpacity={a} />)}

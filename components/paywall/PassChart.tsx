@@ -7,7 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import { StruckTile } from '@/components/profile/Struck';
-import { INK, MID, GHOST, PAPER, PAPER_LIT, PAPER_SHADE, mix, PATINA, EMBER_INK, SAND, SAND_LIT } from '@/components/shared/tone';
+import { INK, MID, GHOST, PAPER, PAPER_LIT, mix, PATINA, EMBER_INK, FLAT_EDGE } from '@/components/shared/tone';
 import { SPACE } from '@/constants/design';
 import {
   compareRows, includedTiles, type Cell, type CompareRow, type IncludedTile,
@@ -53,13 +53,12 @@ import {
 const FREE_PANEL = mix(PAPER, GHOST, 0.16);
 /** The "not at all" token. check-pass measures it on the panel, and the cross on it. */
 const NO_DISC = mix(GHOST, INK, 0.36);
-const RULE = mix(PAPER_SHADE, PAPER, 0.45);
-const LIGHT_START = { x: 0.15, y: 0 } as const;
-const LIGHT_END = { x: 0.85, y: 1 } as const;
+/** The hairline between rows. Neutral: the tan one it replaced leaned gold. */
+const RULE = FLAT_EDGE;
 
 interface Metrics {
   /** Column widths. */ freeW: number; passW: number;
-  /** Teal showing round the sand card, and the hard lip under the column. */ frame: number; lip: number;
+  /** Teal showing round the white card, and the hard lip under the column. */ frame: number; lip: number;
   /** How far the Pass column stands above the Free panel. */ lift: number;
   headH: number; rowH: number; mark: number; radius: number; cardRadius: number;
   head: number; headPass: number; label: number; labelLine: number; value: number;
@@ -149,18 +148,16 @@ export default function PassChart({ size = 'full', width = 0, play }: {
             its unelevated siblings whatever the JSX order, so a shadowed frame
             would sit on top of the very rows it is meant to be behind. */}
         <View style={s.passLip} />
-        <LinearGradient
-          colors={[PATINA.lit, PATINA.base, mix(PATINA.base, PATINA.shade, 0.55)]}
-          locations={[0, 0.42, 1]}
-          start={LIGHT_START}
-          end={LIGHT_END}
-          style={s.passFace}
-        >
+        {/* FLAT TEAL AND A WHITE CARD (2026-09-16). The frame was a teal
+            gradient and the card inside it was sand, the gold the owner asked to
+            be rid of. The column still stands on its hard lip, which is where
+            its depth always was. */}
+        <View style={s.passFace}>
           {play ? <Sheen play={play} tableH={tableH} style={s.sheen} /> : null}
           <View style={s.passCard}>
             <View style={s.passCut} />
           </View>
-        </LinearGradient>
+        </View>
       </View>
 
       <View style={s.headRow}>
@@ -208,8 +205,8 @@ function Row({ row, index, play, s }: {
 /**
  * A tick, a cross, or a few words.
  *
- * THE TICK IS A TEAL COIN WITH A SAND TICK, because sand is the readable one on
- * the teal (`PATINA.on`, 7.38:1) and because a coin is what this app pays in.
+ * THE TICK IS A FLAT TEAL COIN WITH A WHITE TICK, on the white card. It was a
+ * sand tick in a sand halo on a sand card; white on the teal reads 9.9:1.
  * THE CROSS IS FLAT AND COOL, the treatment a locked medal gets, so the two
  * tokens differ by material and not only by the mark on them.
  */
@@ -217,10 +214,10 @@ function Mark({ cell, tier, s }: { cell: Cell; tier: 'free' | 'pass'; s: Sized }
   if (cell.kind === 'yes') {
     return (
       <View style={s.coinHalo}>
-        <LinearGradient colors={[PATINA.lit, PATINA.base]} start={LIGHT_START} end={LIGHT_END} style={s.coin}>
+        <View style={s.coin}>
           <View style={s.tickShort} />
           <View style={s.tickLong} />
-        </LinearGradient>
+        </View>
       </View>
     );
   }
@@ -339,28 +336,29 @@ function sized(m: Metrics) {
     passFace: {
       position: 'absolute', left: 0, right: 0, top: 0, bottom: m.lip,
       borderRadius: m.radius, overflow: 'hidden', borderWidth: 1, borderColor: PATINA.shade,
+      backgroundColor: PATINA.base,
     },
     passCard: {
       position: 'absolute', top: m.headH - 1, left: m.frame - 1, right: m.frame - 1, bottom: m.frame - 1,
-      borderRadius: m.cardRadius, backgroundColor: SAND, overflow: 'hidden',
+      borderRadius: m.cardRadius, backgroundColor: PAPER_LIT, overflow: 'hidden',
     },
     // The card is a window cut into the teal, so its top edge is the dark one.
     passCut: {
       position: 'absolute', left: 0, right: 0, top: 0, height: 1.5,
-      backgroundColor: mix(PATINA.shade, SAND, 0.4),
+      backgroundColor: mix(PATINA.shade, PAPER_LIT, 0.4),
     },
     sheen: { position: 'absolute', left: -m.passW / 2, width: m.passW * 2, top: 0, height: SHEEN_H },
 
     headRow: { flexDirection: 'row', alignItems: 'center', height: m.headH, paddingTop: m.lift / 2 },
     headLabel: { flex: 1, fontFamily: 'Inter_700Bold', fontSize: m.head, color: INK },
     headFree: { fontFamily: 'Inter_700Bold', fontSize: m.head, color: MID },
-    headPass: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: m.headPass, color: PATINA.on, includeFontPadding: false },
+    headPass: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: m.headPass, color: PAPER_LIT, includeFontPadding: false },
 
     row: { flexDirection: 'row', alignItems: 'center', minHeight: m.rowH },
     ruleLeft: { position: 'absolute', top: 0, left: 0, right: m.passW, height: 1, backgroundColor: RULE },
     rulePass: {
       position: 'absolute', top: 0, right: inset, width: m.passW - inset * 2,
-      height: 1, backgroundColor: mix(SAND, INK, 0.16),
+      height: 1, backgroundColor: RULE,
     },
     rowLabel: {
       flex: 1, fontFamily: 'Inter_500Medium', fontSize: m.label, lineHeight: m.labelLine, color: INK,
@@ -376,20 +374,19 @@ function sized(m: Metrics) {
     coinHalo: {
       width: halo, height: halo, borderRadius: halo / 2,
       alignItems: 'center', justifyContent: 'center',
-      backgroundColor: SAND_LIT,
     },
     coin: {
       width: m.mark, height: m.mark, borderRadius: m.mark / 2, borderWidth: 1.5, borderColor: PATINA.shade,
-      alignItems: 'center', justifyContent: 'center',
+      backgroundColor: PATINA.base, alignItems: 'center', justifyContent: 'center',
     },
     // Two bars rather than a glyph: exact at any size, where a font's checkmark is
     // a smudge. Their ends meet at the tick's lowest point.
     tickShort: {
-      position: 'absolute', width: 9 * k, height: 2.6 * k, borderRadius: 1.3 * k, backgroundColor: SAND,
+      position: 'absolute', width: 9 * k, height: 2.6 * k, borderRadius: 1.3 * k, backgroundColor: PAPER_LIT,
       transform: [{ translateX: -4.25 * k }, { translateY: 1.75 * k }, { rotate: '45deg' }],
     },
     tickLong: {
-      position: 'absolute', width: 14 * k, height: 2.6 * k, borderRadius: 1.3 * k, backgroundColor: SAND,
+      position: 'absolute', width: 14 * k, height: 2.6 * k, borderRadius: 1.3 * k, backgroundColor: PAPER_LIT,
       transform: [{ translateX: 2 * k }, { translateY: 0 }, { rotate: '-45deg' }],
     },
     noDisc: {

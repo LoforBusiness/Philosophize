@@ -1,7 +1,7 @@
 import React, { useId } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
-import { GHOST, LIGHT, FACE, LOCKED_FACE, SHADOW, type Stops } from '@/components/shared/tone';
+import { GHOST, LIGHT, FLAT, LOCKED_FACE, SHADOW, type Stops } from '@/components/shared/tone';
 import { C } from '@/constants/design';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -29,7 +29,8 @@ import { C } from '@/constants/design';
 // ── LOCKED IS FLAT AND COOL, AND THAT IS THE WHOLE REWARD ───────────────────
 //
 // An unmet thinker gets `LOCKED_FACE` — no gradient, no shadow, a slate off the
-// warm ramp — and a met one gets the lit face and their era's colour. "The same
+// warm ramp — and a met one gets a white face, a shadow and their era's colour.
+// (The met face faded into the tan PAPER_SHADE until 2026-09-16; it read as gold.) "The same
 // tile, dimmer" is indistinguishable from a rendering fault; unlit against lit
 // is what makes meeting somebody visibly worth something. Straight out of the
 // rank-pin note in §19, for the same reason.
@@ -69,7 +70,7 @@ export default function ThinkerSeal({
     <View style={{ width: size, height: size }}>
       <Svg width={size} height={size} viewBox="0 0 100 100">
         <Defs>
-          {grad(`face${uid}`, met ? FACE : LOCKED_FACE)}
+          {grad(`face${uid}`, met ? FLAT : LOCKED_FACE)}
         </Defs>
         {/* The shadow, down and right because the light is up and left. Only on
             a struck tile — a locked one is flat, so it casts nothing. */}

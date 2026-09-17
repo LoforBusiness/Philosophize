@@ -2,13 +2,12 @@ import { useCallback, useRef } from 'react';
 import { View, Text, ScrollView, StyleSheet, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import { MetalPlate } from '@/components/profile/Struck';
 import PassChart, { PlanTiles, usePassArrival } from '@/components/paywall/PassChart';
 import PassDoor from '@/components/paywall/PassDoor';
 import TrialStatus from '@/components/paywall/TrialStatus';
-import { INK, MID, PAPER, mix, PATINA, SAND } from '@/components/shared/tone';
+import { INK, MID, PATINA } from '@/components/shared/tone';
 import { useSubscriptionStore, usePassState } from '@/stores/subscriptionStore';
 import { C, SPACE } from '@/constants/design';
 import { BILLING_PERIOD_LABEL } from '@/constants/subscription';
@@ -87,18 +86,9 @@ export default function PassTab() {
   return (
     <ScreenTransition bg={C.paper}>
       <SafeAreaView style={st.safe} edges={['top']}>
-        {/* A warm light from the top left, the corner every struck thing in the
-            app is lit from. It is fully paper well before the box ends: a
-            diagonal that stopped at the box's bottom edge left a hard line
-            across the chart. */}
-        <LinearGradient
-          pointerEvents="none"
-          colors={[mix(SAND, PAPER, 0.15), PAPER, PAPER]}
-          locations={[0, 0.5, 1]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0.55, y: 1 }}
-          style={st.glow}
-        />
+        {/* NO GLOW. A sand light used to wash the top-left corner of this
+            screen, and a gold haze behind the headline is exactly the "AI look"
+            the owner asked to be rid of (2026-09-16). The page is paper. */}
 
         <ScrollView contentContainerStyle={st.body} showsVerticalScrollIndicator={false}>
           {/* The name never breaks across a line: "Scholar’s / Pass" left the
@@ -151,7 +141,6 @@ export default function PassTab() {
 
 const st = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.paper },
-  glow: { position: 'absolute', left: 0, right: 0, top: 0, height: 360 },
   body: { paddingHorizontal: SPACE[4], paddingTop: SPACE[4], paddingBottom: SPACE[5] * 2 },
 
   h1: {

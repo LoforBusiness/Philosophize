@@ -5,7 +5,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { INK, PAPER, PAPER_LIT, SHADOW, mix, PATINA, SAND } from '@/components/shared/tone';
+import { INK, PAPER, PAPER_LIT, SHADOW, mix, PATINA } from '@/components/shared/tone';
 import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import { DEFAULT_ACCENT, accentForLesson, VERDICT, type QAccent } from './questionTone';
 
@@ -244,7 +244,8 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     overflow: 'hidden',
   },
-  coinText: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.5, color: SAND },
+  // White, not sand: gold lettering was the last of the gold on the lesson screen.
+  coinText: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.5, color: PAPER_LIT },
   disc: {
     flex: 1,
     borderWidth: 2,

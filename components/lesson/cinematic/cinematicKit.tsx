@@ -12,7 +12,7 @@ import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import { C, RADIUS, LIP } from '@/constants/design';
 import { ease01, pose, seg, type Bundle, type Stance } from './rig';
 import { gazeAt } from './moves';
-import { EMBER_INK, EMBER_DEEP, SAND } from '@/components/shared/tone';
+import { EMBER_INK } from '@/components/shared/tone';
 import { VerdictSeal, XpCoin, useQuestionAccent } from './QuestionParts';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1856,19 +1856,18 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 2,
   },
   kickerText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.4, color: PAPER },
-  // THE STAKE, a sand pill ringed in the ember: the palette's pair, and the same
-  // spark the XP coin pays out in.
+  // THE STAKE, a paper pill ringed in the ember: the same spark the XP coin pays
+  // out in. It was a SAND pill until 2026-09-16, when the owner asked for the
+  // gold look to go from every surface it was on.
   //
-  // ITS WORD IS `EMBER_DEEP`, NOT `EMBER_INK`, and that is a correction rather
-  // than a tidy-up. The purple this replaced read 10.52:1 on beige; the ember
-  // reads 3.53:1 on sand, under the floor for a 9.5px label. The ramp's deep end
-  // reads 5.50:1 and is still plainly the same spark. The RING may stay at the
-  // lit value: 3.53:1 clears the 3:1 a mark needs, and it is a mark.
+  // ITS WORD IS `EMBER_INK`, which reads 4.85:1 on paper, over the floor for a
+  // 9.5px label. (On sand it could not: the ember read 3.53:1 there and the word
+  // had to drop to the ramp's deep end.)
   stake: {
     borderRadius: RADIUS.pill, paddingHorizontal: 8, paddingVertical: 2,
-    backgroundColor: SAND, borderWidth: 1.5, borderColor: EMBER_INK,
+    backgroundColor: PAPER, borderWidth: 1.5, borderColor: EMBER_INK,
   },
-  stakeText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.8, color: EMBER_DEEP },
+  stakeText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.8, color: EMBER_INK },
 
   prompt: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 16, color: INK, marginBottom: 8, lineHeight: 21 },
   interactHint: { fontFamily: 'Inter_500Medium', fontSize: 12, letterSpacing: 0.5, color: SOFT, fontStyle: 'italic' },

@@ -96,7 +96,11 @@ export function restDaysHeld(earned: number, used: number): number {
 // here and the check re-derives each one from tone.ts and fails on any drift.
 export const STREAK_EMBER = '#B25231'; // EMBER_INK. 4.85:1 on paper
 export const STREAK_DEEP = '#803F29';  // the spark in shadow, for a struck end
-export const STREAK_SAND = '#F1D49A';  // SAND. A wash; ink on it is 12.12:1
+// THE WASH WAS SAND UNTIL 2026-09-16. The owner asked for the gold look to go
+// from every surface it was on, and a sand chip behind "5 DAYS PERFECT" or under
+// a rested day was exactly that. It is the palette's neutral FLOOR now: the
+// ember is what makes the streak warm, and it does not need a beige behind it.
+export const STREAK_WASH = '#F2F2EF';  // FLOOR. A wash; ink on it is 15.52:1
 /** The spark on a DARK ground — Home's habit panel. EMBER_LIT, 6.41:1 on ink. */
 export const STREAK_ON_INK = '#DD8768';
 

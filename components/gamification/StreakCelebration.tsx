@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ramp, rampFace, mix, PAPER_LIT } from '@/components/shared/tone';
-import { STREAK_EMBER, STREAK_DEEP, STREAK_SAND, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
+import { STREAK_EMBER, STREAK_DEEP, STREAK_WASH, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
 import { buildWeek } from '@/lib/utils/streakCalendar';
 
 const INK = '#1A1A1A';
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
   },
   stampRing: {
     position: 'absolute', width: 44, height: 44, borderRadius: 22,
-    borderWidth: 1.2, borderColor: STREAK_SAND, opacity: 0.55,
+    borderWidth: 1.2, borderColor: STREAK_WASH, opacity: 0.55,
   },
   stampWord: {
     fontFamily: 'SpecialElite_400Regular',
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
     position: 'absolute', width: DISC, height: DISC, borderRadius: DISC / 2,
     borderWidth: 1.5, borderColor: STREAK_EMBER,
   },
-  rested: { backgroundColor: STREAK_SAND, borderWidth: 1, borderColor: STREAK_EMBER },
+  rested: { backgroundColor: STREAK_WASH, borderWidth: 1, borderColor: STREAK_EMBER },
   missed: { borderWidth: 1.5, borderColor: FAINT },
   future: { borderWidth: 1.5, borderColor: FAINT, opacity: 0.55 },
 

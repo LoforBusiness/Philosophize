@@ -278,7 +278,7 @@ export default function RanksBadgesSheet() {
                 >
                   {/* HERO — the current rank as a credential */}
                   <View style={styles.hero}>
-                    <RankSeal glyph={current.glyph} state="current" size={104} progress={rankPct}
+                    <RankSeal glyph={current.glyph} state="current" size={104}
                       order={rankOrder(index)} degree={rankDegree(index)} />
                     <View style={styles.heroText}>
                       <Text style={styles.heroKicker}>RANK {current.id} · {toRoman(current.id)}</Text>
@@ -477,11 +477,9 @@ function RankDetail({
   const circle = circleForRank(rank.id);
   const nextRank = RANKS[i + 1] ?? null;
 
-  let progress: number | null = null;
   let statusLine = '';
   if (st === 'current') {
     const p = rankProgress(currentIndex, totalXP);
-    progress = p.pct;
     statusLine = !p.next
       ? 'Highest rank attained'
       : p.pending
@@ -510,7 +508,7 @@ function RankDetail({
       </Pressable>
 
       <View style={styles.detailSealWrap}>
-        <RankSeal glyph={rank.glyph} state={st} size={168} progress={progress}
+        <RankSeal glyph={rank.glyph} state={st} size={168}
           order={rankOrder(rank.id - 1)} degree={rankDegree(rank.id - 1)} />
       </View>
 

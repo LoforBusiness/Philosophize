@@ -3,41 +3,43 @@ import { View, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withSequence, withSpring, withTiming, Easing,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Path, Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
-import { INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, mix, PATINA, EMBER_INK, SAND, SAND_SHADE, SAND_LIT } from '@/components/shared/tone';
+import Svg, { Path, Circle } from 'react-native-svg';
+import {
+  INK, PAPER, PAPER_LIT, DEEP, TEAL, OLIVE, SAGE, EMBER, TINT, TINT_EDGE, mix,
+} from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE SIX TAB ICONS, AS THINGS YOU CAN HOLD.
+// THE FIVE TAB ICONS, DRAWN LIKE GAME STICKERS RATHER THAN LIKE A GRADIENT.
 //
-//   "the six on the very bottom of the app ... They're pretty flat and boring."
+//   "in the five different icons on the bottom ... I'll have that background.
+//    And, really, you can just tell their AI made." (2026-09-16)
 //
-// They were hairline drawings from SketchIcon, the same two-point ink stroke as
-// every small mark in the app, told apart only by colour: ink when chosen, a pale
-// grey when not. That grey measured about 1.9:1 on paper, under the 3:1 WCAG asks
-// of a mark that carries meaning, and with the labels hidden, colour was the ONLY
-// thing saying which tab was open.
+// The previous set was a teal GRADIENT glyph sitting on a SAND GRADIENT tile.
+// Those are the two loudest tells design writers list for AI-made UI — a
+// default gradient, and a soft warm glow lit from nowhere in particular — and
+// the tile was the gold the owner had just asked to be rid of everywhere.
 //
-// ── WHAT THE RESEARCH SAID, AND WHAT THIS KEEPS OF IT ───────────────────────
+// ── WHAT THE RESEARCH SAID, AND WHAT THIS TAKES FROM IT ─────────────────────
 //
-// · A chosen tab is a FILLED shape and an unchosen one an outline. Apple's tab
-//   bar guidance and Material's fill axis both say it, and it means the state is
-//   carried by SHAPE, so it survives colour blindness and a sunlit screen.
-// · Rounded, chunky forms with no sharp points: Duolingo's shape language.
-// · The chosen icon sits on a tile, as in Duolingo's refreshed tab bar (January
-//   2026). Here the tile is pressed INTO the paper, a recess, because a raised
-//   tile with a lip is how this app says "press me", and this tab is already
-//   pressed.
-// · One bounce when it is chosen, once. Apple's own advice is a spring damped
-//   around 0.5 to 0.6: less reads as a toy, more stops reading as a bounce.
+// · Duolingo's refreshed tab bar (their blog, 4 Feb 2026) keeps every icon in
+//   FULL COLOUR whether or not it is chosen, and marks the chosen tab with a
+//   flat tinted rounded tile: a 15% tint of their blue with a 2pt border at
+//   about 50%. No gradient, no shadow. So does this bar, in the palette's teal.
+// · Their icons are flat rounded shapes whose depth is ONE darker tone of the
+//   same hue, hard-edged. Every icon here does the same: a body in TEAL with a
+//   hard DEEP side, or a SAGE body with an olive side, and never a gradient.
+// · One light, top left, as everywhere else in the app: the shade is on the
+//   right or underneath, a small hard highlight on the upper left.
+// · Unlike Duolingo, the shapes carry an INK OUTLINE, one weight on all five,
+//   because this app is ink on paper and every other drawn thing in it has one.
+//   The owner picked this over the unlined version from a sheet of both.
+// · One small EMBER spark per icon — a door, a ribbon, a berry, a star, a
+//   collar pin. The spark is only ever small (tone.ts), and at 28pt these are.
 //
-// And what it deliberately does NOT copy: Duolingo gives each tab its own hue.
-// The six branch colours already mean "this branch" on Insights, and §19 records
-// six saturated colours at once as the thing that made a screen look cheap. So
-// the fill is the app's accent, the palette's slate teal (tone.ts), lit from the
-// top left like every struck thing here, with an ink rim, sand details inside the
-// body and a sand recess behind it. It was gold until the owner called it "pretty
-// AI" (2026-09-15).
+// Two symbols changed. LEARN is an open book: the thought cloud read as "ideas"
+// or "help". THINKERS is a laurelled marble bust in SIDE profile on a plinth:
+// the feathered hat read as a costume, and a FRONT-facing bust would be the
+// Profile icon with a beard. Silhouette is what tells two heads apart at 28pt.
 //
 // ── THE BAR DRAWS EVERY ICON TWICE ──────────────────────────────────────────
 //
@@ -46,11 +48,12 @@ import { INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, mix, PATINA, EMBER_INK, SAND
 // copy ever sees `focused` change, and a bounce keyed on it would never play.
 // `lit` is which copy this is; `open` is whether the tab is the one the reader is
 // on, handed in from the layout, and it is what the tile and the bounce follow.
+// Both copies draw the same coloured glyph; only the lit one carries the tile.
 //
 // ── COST ────────────────────────────────────────────────────────────────────
 //
 // One small <Svg> per copy, never animated: only the Views around it move, which
-// is §17's rule 7. Twelve 28pt bitmaps are a rounding error in the GPU budget §19
+// is §17's rule 7. Ten 28pt bitmaps are a rounding error in the GPU budget §19
 // measures; the full-bleed drawings that broke it were a thousand times larger.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -59,122 +62,125 @@ import { INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, mix, PATINA, EMBER_INK, SAND
 // wires a tab to.
 export type TabIconName = 'home' | 'learn' | 'thinkers' | 'pass' | 'profile';
 
-
-/**
- * The unchosen glyph: ink, faded only as far as a meaningful mark can afford.
- * It measures 4.2:1 on paper, against the 1.9:1 of the grey it replaced.
- */
-export const TAB_IDLE = mix(INK, PAPER, 0.42);
-
 const SIZE = 28;
+/** One outline weight on all five, in the 32-unit drawing box: 1.9pt at 28pt. */
 const STROKE = 2.2;
 const TILE_W = 46;
 const TILE_H = 36;
 
-interface Art {
-  /** The shape that fills with the accent when chosen and is outlined when not. */
-  body: string[];
-  /** Round parts of the body, as [cx, cy, r]. */
-  bodyDots?: [number, number, number][];
-  /** Solid details: ink when chosen, the idle grey when not. */
-  solid?: string[];
-  solidDots?: [number, number, number][];
-  /**
-   * Details INSIDE the body: sand when chosen, the idle grey when not. Ink on the
-   * teal is 1.64:1, so a detail drawn in ink on the chosen body disappears.
-   */
-  inset?: string[];
-  insetDots?: [number, number, number][];
-  insetLines?: string[];
-  /** Lines drawn the same way in both states. */
-  lines?: string[];
-  /** A paper-white part with an ink edge when chosen; an outline when not. */
-  paper?: string[];
-  /** Only there when chosen: the one flourish a tab earns for being open. */
-  flourish?: string[];
-}
+/** The colours a part may be filled with. Flat, every one of them. */
+const FILL = {
+  body: TEAL,
+  bodyShade: DEEP,
+  bodyLit: mix(TEAL, PAPER, 0.5),
+  second: SAGE,
+  secondShade: mix(SAGE, OLIVE, 0.55),
+  paper: PAPER_LIT,
+  paperShade: mix(SAGE, PAPER, 0.35),
+  spark: EMBER,
+} as const;
+type Fill = keyof typeof FILL;
 
-// Every drawing sits in a 32-unit box with a 2-unit margin, and the heaviest
-// mass sits low, so the six share a baseline and read as one set.
-const ART: Record<TabIconName, Art> = {
-  // A house with its roof overhanging the walls, and a dark door.
-  home: {
-    body: ['M7 14.6 L16 6.8 L25 14.6 L25 25.2 C25 26.3 24.1 27.2 23 27.2 L9 27.2 C7.9 27.2 7 26.3 7 25.2 Z'],
-    // The door stops at the wall's inner edge, so a sand door does not notch
-    // the ink outline under it.
-    inset: ['M13.2 26.1 L13.2 21.4 C13.2 20.3 14.1 19.4 15.2 19.4 L16.8 19.4 C17.9 19.4 18.8 20.3 18.8 21.4 L18.8 26.1 Z'],
-    lines: ['M3.8 16.4 L16 5.4 L28.2 16.4'],
-  },
-  // The thought cloud with a question in it: curiosity, which is what the Learn
-  // tab has always been drawn as, so the reader keeps their bearings.
-  learn: {
-    body: ['M9.4 23.2 C5.6 23.2 3.8 20.2 5.4 17.4 C4.4 13.8 7.6 11.2 10.7 12.2 C11.9 8.1 18.2 7.4 20.3 11.2 C24.2 10.2 27.6 13.3 26.5 16.9 C29.1 18.1 28.4 23.2 24.5 23.2 Z'],
-    // Clear of the cloud by a stroke's width: closer than that and the two
-    // outlines met and the bubbles read as a smudge at tab size.
-    bodyDots: [[7.6, 28.2, 1.6], [4.6, 30, 0.9]],
-    insetLines: ['M13.9 14.9 C13.9 12.8 18.3 12.7 18.3 15 C18.3 16.7 16.2 16.9 16.2 18.8'],
-    insetDots: [[16.2, 21, 1.2]],
-  },
-  // The philosopher's hat: a teal crown, a dark brim, a sand feather.
-  thinkers: {
-    body: ['M8.6 20.4 C8.6 12.8 11.6 8.6 16 8.6 C20.4 8.6 23.4 12.8 23.4 20.4 Z'],
-    paper: ['M21.6 14.2 C22.6 10 24.6 6.2 27.8 3.6 C29 8.4 26.2 12.6 22.4 15.4 Z'],
-    solid: ['M3.4 21.4 C3.4 18.7 28.6 18.7 28.6 21.4 C28.6 24.2 3.4 24.2 3.4 21.4 Z'],
-    insetLines: ['M9.2 17.4 C12.4 19 19.6 19 22.8 17.4'],
-  },
-  // An admission ticket, notched at both sides, with a star struck on it.
-  pass: {
-    body: ['M6.2 8 L25.8 8 C26.9 8 27.8 8.9 27.8 10 L27.8 13.1 C26.4 13.4 25.4 14.6 25.4 16 C25.4 17.4 26.4 18.6 27.8 18.9 L27.8 22 C27.8 23.1 26.9 24 25.8 24 L6.2 24 C5.1 24 4.2 23.1 4.2 22 L4.2 18.9 C5.6 18.6 6.6 17.4 6.6 16 C6.6 14.6 5.6 13.4 4.2 13.1 L4.2 10 C4.2 8.9 5.1 8 6.2 8 Z'],
-    inset: ['M16 10.9 L17.35 14.2 L20.9 14.45 L18.2 16.75 L19.05 20.2 L16 18.35 L12.95 20.2 L13.8 16.75 L11.1 14.45 L14.65 14.2 Z'],
-  },
-  // A bust: head and shoulders.
-  profile: {
-    body: ['M6.4 27.6 C6.4 20.9 10.8 18.7 16 18.7 C21.2 18.7 25.6 20.9 25.6 27.6 Z'],
-    bodyDots: [[16, 11.2, 5.2]],
-  },
+/**
+ * One piece of a drawing. `d` or `c` is its geometry, `fill` its colour; `ink`
+ * gives it the outline, at `w` if it wants a finer one. A `line` is a stroke with
+ * no fill — a highlight, a perforation, a line of text on a page.
+ */
+type Part =
+  | { d: string; fill: Fill | null; ink?: boolean; w?: number }
+  | { c: [number, number, number]; fill: Fill | null; ink?: boolean; w?: number }
+  | { line: string; tone: Fill; w: number };
+
+const TICKET = 'M6.2 8 L25.8 8 C26.9 8 27.8 8.9 27.8 10 L27.8 13.1 C26.4 13.4 25.4 14.6 25.4 16 C25.4 17.4 26.4 18.6 27.8 18.9 L27.8 22 C27.8 23.1 26.9 24 25.8 24 L6.2 24 C5.1 24 4.2 23.1 4.2 22 L4.2 18.9 C5.6 18.6 6.6 17.4 6.6 16 C6.6 14.6 5.6 13.4 4.2 13.1 L4.2 10 C4.2 8.9 5.1 8 6.2 8 Z';
+const SHOULDERS = 'M5.6 28.4 C5.6 21.8 10.2 19 16 19 C21.8 19 26.4 21.8 26.4 28.4 Z';
+
+// Every drawing sits in a 32-unit box with a margin, and the heaviest mass sits
+// low, so the five share a baseline and read as one set. Parts paint in order.
+const ART: Record<TabIconName, Part[]> = {
+  // A house: sage walls with a hard olive side, a teal roof that overhangs them,
+  // a paper window and an ember door.
+  home: [
+    { d: 'M7 15 L16 7.4 L25 15 L25 26 C25 27.1 24.1 28 23 28 L9 28 C7.9 28 7 27.1 7 26 Z', fill: 'second', ink: true },
+    { d: 'M20.6 11.3 L25 15 L25 26 C25 27.1 24.1 28 23 28 L20.6 28 Z', fill: 'secondShade' },
+    { d: 'M7 15 L16 7.4 L25 15 L25 26 C25 27.1 24.1 28 23 28 L9 28 C7.9 28 7 27.1 7 26 Z', fill: null, ink: true },
+    { d: 'M13.2 28 L13.2 22.2 C13.2 20.6 14.4 19.4 16 19.4 C17.6 19.4 18.8 20.6 18.8 22.2 L18.8 28 Z', fill: 'spark', ink: true },
+    { d: 'M2.6 15.2 L16 3.8 L29.4 15.2 C29.9 15.7 29.9 16.5 29.4 17 L28.6 17.8 C28.1 18.3 27.3 18.3 26.8 17.8 L16 8.6 L5.2 17.8 C4.7 18.3 3.9 18.3 3.4 17.8 L2.6 17 C2.1 16.5 2.1 15.7 2.6 15.2 Z', fill: 'body', ink: true },
+    { line: 'M6.2 14.6 L14.2 7.8', tone: 'bodyLit', w: 1.3 },
+    { d: 'M9.6 18.6 H12 V21 H9.6 Z', fill: 'paper', ink: true, w: 1.2 },
+  ],
+  // An open book: a teal cover under two pages, the right one in shade, three
+  // lines of text and an ember ribbon.
+  learn: [
+    { d: 'M3 11.2 L3 26.6 C8 25.6 12.6 26 16 28.2 C19.4 26 24 25.6 29 26.6 L29 11.2 Z', fill: 'body', ink: true },
+    { d: 'M16 9.6 C12.6 7.4 8.2 7 4.8 8 L4.8 24.4 C8.2 23.4 12.6 23.8 16 26 Z', fill: 'paper', ink: true },
+    { d: 'M16 9.6 C19.4 7.4 23.8 7 27.2 8 L27.2 24.4 C23.8 23.4 19.4 23.8 16 26 Z', fill: 'paperShade', ink: true },
+    { line: 'M7.6 12.4 C9.6 12 11.6 12.2 13.4 13', tone: 'secondShade', w: 1.3 },
+    { line: 'M7.6 15.8 C9.6 15.4 11.6 15.6 13.4 16.4', tone: 'secondShade', w: 1.3 },
+    { line: 'M7.6 19.2 C9.2 18.9 10.6 19 12 19.5', tone: 'secondShade', w: 1.3 },
+    { d: 'M20.4 7.9 L24.2 7.7 L24.2 17.2 L22.3 15.4 L20.4 17.2 Z', fill: 'spark', ink: true, w: 1.3 },
+  ],
+  // A marble bust in side profile, facing right, laurelled, on a teal plinth.
+  thinkers: [
+    { d: 'M7.8 25.4 H24.2 C25 25.4 25.6 26 25.6 26.8 V27.8 C25.6 28.6 25 29.2 24.2 29.2 H7.8 C7 29.2 6.4 28.6 6.4 27.8 V26.8 C6.4 26 7 25.4 7.8 25.4 Z', fill: 'body', ink: true },
+    { d: 'M7.6 25.4 C7.6 22.4 9.8 20.6 13 20.6 L19 20.6 C22.2 20.6 24.4 22.4 24.4 25.4 Z', fill: 'paper', ink: true },
+    { d: 'M20.8 20.9 C23 21.6 24.4 23.2 24.4 25.4 L21.4 25.4 Z', fill: 'paperShade' },
+    // skull, brow, nose and lips, then down the neck, in one silhouette
+    { d: 'M12 21 L12.2 18.2 C10.2 16.8 9.2 14.4 9.4 11.6 C9.8 7.2 12.8 4.6 16.8 4.6 C20.4 4.6 22.4 6.8 22.5 9.6 L22.6 10.9 L24.5 13.6 C24.7 14 24.5 14.4 24 14.4 L22.7 14.4 L22.9 15.4 L22.3 16 L22.6 16.8 C22.6 17.6 22 18 21.2 18 L18.6 18.2 L18.4 21 Z', fill: 'paper', ink: true },
+    // the beard, under the jaw
+    { d: 'M22.4 16.4 C22.8 19 21.4 21.2 18.8 21.2 C16.8 21.2 15.4 20 15.2 18 C16.8 17.4 18.2 16.6 18.8 15.4 C20 15.8 21.2 16.2 22.4 16.4 Z', fill: 'paperShade', ink: true, w: 1.3 },
+    // the wreath, brow to nape, every leaf pointing back
+    { d: 'M21.83 7.93 Q21.86 4.15 18.2 5.1 Q18.17 8.88 21.83 7.93 Z', fill: 'body', ink: true, w: 1 },
+    { d: 'M19.34 5.58 Q17.48 2.29 14.79 4.94 Q16.65 8.23 19.34 5.58 Z', fill: 'body', ink: true, w: 1 },
+    { d: 'M16.01 4.79 Q12.75 2.87 11.74 6.51 Q15 8.43 16.01 4.79 Z', fill: 'body', ink: true, w: 1 },
+    { d: 'M12.73 5.77 Q8.95 5.74 9.9 9.4 Q13.68 9.43 12.73 5.77 Z', fill: 'body', ink: true, w: 1 },
+    // the berry at the brow
+    { c: [21.2, 6.2, 1.25], fill: 'spark', ink: true, w: 0.9 },
+  ],
+  // An admission ticket: teal, notched, a hard DEEP band along its foot, a
+  // perforated stub and an ember star.
+  pass: [
+    { d: TICKET, fill: 'body' },
+    { d: 'M4.2 20.6 L27.8 20.6 L27.8 22 C27.8 23.1 26.9 24 25.8 24 L6.2 24 C5.1 24 4.2 23.1 4.2 22 Z', fill: 'bodyShade' },
+    { line: 'M11.4 10.4 V11.6 M11.4 13.4 V14.6 M11.4 16.4 V17.6 M11.4 19.4 V20', tone: 'bodyLit', w: 1.3 },
+    { line: 'M7 10.8 H9', tone: 'bodyLit', w: 1.3 },
+    { d: TICKET, fill: null, ink: true },
+    { d: 'M19.4 10.6 L20.75 13.7 L24.1 13.95 L21.55 16.15 L22.35 19.4 L19.4 17.65 L16.45 19.4 L17.25 16.15 L14.7 13.95 L18.05 13.7 Z', fill: 'spark', ink: true, w: 1.2 },
+  ],
+  // Head and shoulders, front on: the universal "you". Teal, shaded on the
+  // right, with a paper collar and an ember pin.
+  profile: [
+    { d: SHOULDERS, fill: 'body' },
+    { d: 'M21.2 19.9 C24.4 21.2 26.4 23.9 26.4 28.4 L22.4 28.4 Z', fill: 'bodyShade' },
+    { d: SHOULDERS, fill: null, ink: true },
+    { d: 'M13.2 19.4 L16 23.4 L18.8 19.4 Z', fill: 'paper', ink: true, w: 1.2 },
+    { d: 'M15 21.6 L16 23.4 L17 21.6 L16 20.8 Z', fill: 'spark' },
+    { c: [16, 11.2, 5.8], fill: 'body' },
+    { d: 'M18.4 6 C20.6 7 21.8 9 21.8 11.2 C21.8 13.8 20 16.2 17.6 16.8 C19.4 15.2 20 13.4 20 11.2 C20 9.2 19.4 7.4 18.4 6 Z', fill: 'bodyShade' },
+    { line: 'M12.6 9.2 C13 8.2 13.8 7.4 14.8 7.1', tone: 'bodyLit', w: 1.4 },
+    { c: [16, 11.2, 5.8], fill: null, ink: true },
+  ],
 };
 
-function Glyph({ name, lit }: { name: TabIconName; lit: boolean }) {
-  const a = ART[name];
-  const id = `tabplate-${name}`;
-  const edge = lit ? INK : TAB_IDLE;
-  const line = {
-    stroke: edge, strokeWidth: STROKE, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
-  };
-  const body = { ...line, fill: lit ? `url(#${id})` : 'none' };
-  const solid = { fill: edge, stroke: edge, strokeWidth: lit ? 0.6 : 0.4, strokeLinejoin: 'round' as const };
-  // A detail inside the chosen body is sand; unchosen, it is the outline's grey.
-  const mark = lit ? SAND : edge;
-
+function Glyph({ name }: { name: TabIconName }) {
   return (
     <Svg width={SIZE} height={SIZE} viewBox="0 0 32 32">
-      {lit ? (
-        <Defs>
-          <SvgGradient id={id} x1="15%" y1="0%" x2="85%" y2="100%">
-            <Stop offset="0%" stopColor={PATINA.lit} />
-            <Stop offset="55%" stopColor={PATINA.base} />
-            <Stop offset="100%" stopColor={PATINA.shade} />
-          </SvgGradient>
-        </Defs>
-      ) : null}
-      {a.body.map((d) => <Path key={d} d={d} {...body} />)}
-      {(a.bodyDots ?? []).map(([cx, cy, r]) => <Circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={r} {...body} />)}
-      {(a.paper ?? []).map((d) => (
-        <Path key={d} d={d} {...line} fill={lit ? SAND : 'none'} />
-      ))}
-      {(a.solid ?? []).map((d) => <Path key={d} d={d} {...solid} />)}
-      {(a.solidDots ?? []).map(([cx, cy, r]) => <Circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={r} fill={edge} />)}
-      {(a.inset ?? []).map((d) => (
-        <Path key={d} d={d} fill={mark} stroke={mark} strokeWidth={lit ? 0.6 : 0.4} strokeLinejoin="round" />
-      ))}
-      {(a.insetDots ?? []).map(([cx, cy, r]) => <Circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={r} fill={mark} />)}
-      {(a.lines ?? []).map((d) => <Path key={d} d={d} {...line} fill="none" />)}
-      {(a.insetLines ?? []).map((d) => <Path key={d} d={d} {...line} stroke={mark} fill="none" />)}
-      {lit
-        ? (a.flourish ?? []).map((d) => (
-          <Path key={d} d={d} fill={EMBER_INK} stroke={EMBER_INK} strokeWidth={0.6} strokeLinejoin="round" />
-        ))
-        : null}
+      {ART[name].map((p, i) => {
+        if ('line' in p) {
+          return (
+            <Path key={i} d={p.line} fill="none" stroke={FILL[p.tone]} strokeWidth={p.w} strokeLinecap="round" />
+          );
+        }
+        const paint = {
+          fill: p.fill ? FILL[p.fill] : 'none',
+          stroke: p.ink ? INK : 'none',
+          strokeWidth: p.ink ? (p.w ?? STROKE) : 0,
+          strokeLinejoin: 'round' as const,
+          strokeLinecap: 'round' as const,
+        };
+        return 'c' in p
+          ? <Circle key={i} cx={p.c[0]} cy={p.c[1]} r={p.c[2]} {...paint} />
+          : <Path key={i} d={p.d} {...paint} />;
+      })}
     </Svg>
   );
 }
@@ -182,11 +188,11 @@ function Glyph({ name, lit }: { name: TabIconName; lit: boolean }) {
 /**
  * One copy of one tab's icon.
  *
- * `lit` picks the drawing: the bar's focused copy is struck, the other an outline.
- * `open` is whether the reader is on this tab, and only the lit copy acts on it:
- * the tile fades in and the icon bounces when the tab is CHOSEN, never on mount,
- * because every tab is built at startup and a mount animation would spend itself
- * behind the launch screen.
+ * `lit` is which of the bar's two copies this is; only the lit copy carries the
+ * tile. `open` is whether the reader is on this tab: the tile fades in and the
+ * icon bounces when the tab is CHOSEN, never on mount, because every tab is
+ * built at startup and a mount animation would spend itself behind the launch
+ * screen.
  */
 function TabIcon({ name, lit, open }: { name: TabIconName; lit: boolean; open: boolean }) {
   const on = useSharedValue(lit && open ? 1 : 0);
@@ -207,7 +213,8 @@ function TabIcon({ name, lit, open }: { name: TabIconName; lit: boolean; open: b
     on.value = withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) });
     if (first) return;
     // A squeeze, then a spring past full size and back: anticipation and
-    // overshoot, the two halves that make a bounce read as a reaction.
+    // overshoot, the two halves that make a bounce read as a reaction. Apple's
+    // own advice for a bounce is a damping ratio around 0.5 to 0.6.
     pop.value = withSequence(
       withTiming(0.82, { duration: 90, easing: Easing.out(Easing.quad) }),
       withSpring(1, { duration: 440, dampingRatio: 0.5 }),
@@ -219,28 +226,14 @@ function TabIcon({ name, lit, open }: { name: TabIconName; lit: boolean; open: b
     transform: [{ scale: 0.8 + 0.2 * on.value }],
   }));
   const icon = useAnimatedStyle(() => ({
-    transform: [{ translateY: -1 * on.value }, { scale: pop.value }],
+    transform: [{ translateY: -1 * on.value }, { scale: pop.value * (1 + 0.06 * on.value) }],
   }));
 
   return (
     <View style={st.box} pointerEvents="none">
-      {lit ? (
-        <Animated.View style={[st.tile, tile]}>
-          {/* A RECESS: the gradient runs a tile's lit corner BACKWARDS and the
-              dark hairline sits along the top, where light cannot reach into a
-              cut. StruckNiche's rule, at tab size. */}
-          <LinearGradient
-            colors={[SAND_SHADE, SAND, SAND_LIT]}
-            locations={[0, 0.5, 1]}
-            start={{ x: 0.15, y: 0 }}
-            end={{ x: 0.85, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
-          <View style={st.tileCut} />
-        </Animated.View>
-      ) : null}
+      {lit ? <Animated.View style={[st.tile, tile]} /> : null}
       <Animated.View style={icon}>
-        <Glyph name={name} lit={lit} />
+        <Glyph name={name} />
       </Animated.View>
     </View>
   );
@@ -253,6 +246,7 @@ const st = StyleSheet.create({
   // centred on it and allowed to overhang, the way the old focused icon grew past
   // its box without disturbing the bar.
   box: { width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' },
+  // FLAT: a tint of the teal with a teal edge, nothing lit and nothing cast.
   tile: {
     position: 'absolute',
     left: (SIZE - TILE_W) / 2,
@@ -260,14 +254,8 @@ const st = StyleSheet.create({
     width: TILE_W,
     height: TILE_H,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: SAND_SHADE,
-    overflow: 'hidden',
-  },
-  // Inset from both corners. Run edge to edge, the tile's own radius clipped it
-  // into a grey band across the top rather than a line inside the cut.
-  tileCut: {
-    position: 'absolute', left: 9, right: 9, top: 0, height: 1,
-    backgroundColor: mix(SAND_SHADE, INK, 0.2),
+    borderWidth: 2,
+    borderColor: TINT_EDGE,
+    backgroundColor: TINT,
   },
 });

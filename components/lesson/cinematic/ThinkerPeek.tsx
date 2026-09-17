@@ -3,10 +3,9 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, {
   Easing, interpolate, useAnimatedStyle, useSharedValue, withTiming, Extrapolation,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ERA, type EraKey } from '@/constants/design';
 import { ALL_PHILOSOPHERS, eraGroupOfId } from '@/data/philosophers';
-import { PAPER_LIT, PAPER_SHADE, SHADOW, mix } from '@/components/shared/tone';
+import { PAPER_LIT, FLOOR_CUT, SHADOW } from '@/components/shared/tone';
 import { INK, PAPER, SOFT } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -181,13 +180,8 @@ export default function ThinkerPeek({ id, anchorX, onClose }: {
           />
           <Animated.View nativeID="peek-card" style={[styles.cardBox, card]}>
             <Pressable onPress={onClose} accessibilityRole="button" style={styles.press}>
-              <LinearGradient
-                colors={[PAPER_LIT, PAPER, mix(PAPER, PAPER_SHADE, 0.3)]}
-                locations={[0, 0.5, 1]}
-                start={{ x: 0.2, y: 0 }}
-                end={{ x: 0.55, y: 1 }}
-                style={styles.card}
-              >
+              {/* Flat white: it faded into the tan PAPER_SHADE, which read as gold. */}
+              <View style={styles.card}>
                 {/* The era's own colour down the cut edge — the same rail a quote
                     plate of theirs carries, so the card and the plate agree. */}
                 <View style={[styles.rail, { backgroundColor: hue }]} />
@@ -198,7 +192,7 @@ export default function ThinkerPeek({ id, anchorX, onClose }: {
                   </View>
                   <Text style={styles.line} numberOfLines={2}>{p.oneLiner}</Text>
                 </Animated.View>
-              </LinearGradient>
+              </View>
             </Pressable>
           </Animated.View>
         </>
@@ -223,7 +217,8 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: mix(PAPER, PAPER_SHADE, 0.7),
+    borderColor: FLOOR_CUT,
+    backgroundColor: PAPER_LIT,
     paddingVertical: 7,
     paddingLeft: 12,
     paddingRight: 10,

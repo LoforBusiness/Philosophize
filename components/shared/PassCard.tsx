@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import RankSeal from './RankSeal';
-import { INK, MID, PAPER, PAPER_SHADE, FAINT } from './tone';
+import { INK, MID, PAPER, FAINT, FLOOR_CUT } from './tone';
 import type { GlyphName } from './Glyph';
 import type { OrderName } from '@/constants/insignia';
 
@@ -84,8 +84,7 @@ export default function PassCard({
   return (
     <View style={[styles.wrap, { width, height }]}>
       {/* The card face. A hair off pure paper so it lifts off the screen behind
-          it without introducing a second colour — PAPER_SHADE is the same warm
-          ramp the seals are struck from. */}
+          it without introducing a second colour. */}
       <View
         style={[
           styles.face,
@@ -184,7 +183,8 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   titleDay: { fontSize: 18, lineHeight: 25, letterSpacing: 3 },
-  rule: { height: 1, backgroundColor: PAPER_SHADE, marginTop: 10, marginBottom: 11, flexShrink: 0 },
+  // Neutral: the tan PAPER_SHADE it used to be read as a gold line.
+  rule: { height: 1, backgroundColor: FLOOR_CUT, marginTop: 10, marginBottom: 11, flexShrink: 0 },
   body: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   holder: { flex: 1 },
   holderLabel: { fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.8, color: MID },

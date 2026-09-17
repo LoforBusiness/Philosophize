@@ -53,15 +53,16 @@ head('THE STREAK EMBER_INK, MEASURED');
     ['STREAK_EMBER on paper', streak.STREAK_EMBER, PAPER, 4.5],
     ['STREAK_DEEP on paper', streak.STREAK_DEEP, PAPER, 4.5],
     ['STREAK_DEEP carrying cream', streak.STREAK_DEEP, CREAM, 4.5],
-    ['ink on STREAK_SAND', INK, streak.STREAK_SAND, 4.5],
-    ['STREAK_DEEP on STREAK_SAND (the tier chip)', streak.STREAK_DEEP, streak.STREAK_SAND, 4.5],
+    ['ink on STREAK_WASH', INK, streak.STREAK_WASH, 4.5],
+    ['STREAK_DEEP on STREAK_WASH (the tier chip)', streak.STREAK_DEEP, streak.STREAK_WASH, 4.5],
     // A lit calendar day's number, the stamp's legend and the ceremony's button
     // label all sit on the SPARK'S LIT FACE, and the palette change moved which
     // colour they may be: beige on the old purple was 10.52:1, sand on the ember
-    // is 3.53:1. Paper is 4.85:1 and is what those three carry now. Sand is
-    // still the lettering for the ramp's DEEP end, which is the line below.
+    // is 3.53:1. Paper is 4.85:1 and is what those three carry now. The wash
+    // (sand until 2026-09-16, the neutral floor now) is still the lettering for
+    // the ramp's DEEP end, which is the line below.
     ['PAPER on STREAK_EMBER', PAPER, streak.STREAK_EMBER, 4.5],
-    ['STREAK_SAND on STREAK_DEEP', streak.STREAK_SAND, streak.STREAK_DEEP, 4.5],
+    ['STREAK_WASH on STREAK_DEEP', streak.STREAK_WASH, streak.STREAK_DEEP, 4.5],
     ['SLATE on paper', streak.SLATE, PAPER, 4.5],
     // THE OTHER PRINTING. Home's habit panel is on ink, where the purple reads
     // 1.34:1 and SLATE 3.31:1, both under the floor for the number they colour.
@@ -200,7 +201,7 @@ head('THE STREAK EMBER_INK, MEASURED');
   for (const [name, have, want] of [
     ['STREAK_EMBER', streak.STREAK_EMBER, palette.EMBER_INK],
     ['STREAK_DEEP', streak.STREAK_DEEP, palette.EMBER_DEEP],
-    ['STREAK_SAND', streak.STREAK_SAND, palette.SAND],
+    ['STREAK_WASH', streak.STREAK_WASH, palette.FLOOR],
     ['STREAK_ON_INK', streak.STREAK_ON_INK, palette.EMBER_LIT],
   ]) {
     if (have === want) ok(`${name} is the palette's own tone`, have);

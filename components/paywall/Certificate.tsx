@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, PixelRatio, type LayoutChangeEvent } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, G } from 'react-native-svg';
-import { INK, PAPER, PAPER_LIT, PAPER_SHADE, FAINT, MID, mix, PATINA, SAND, SAND_SHADE, SAND_LIT } from '@/components/shared/tone';
+import {
+  INK, PAPER, PAPER_LIT, MID, mix, PATINA, FLAT_FACE, FLAT_EDGE, TINT,
+} from '@/components/shared/tone';
 import { EMBOSS } from '@/components/profile/Struck';
 import { SPACE } from '@/constants/design';
 
@@ -40,17 +41,19 @@ import { SPACE } from '@/constants/design';
 // · THE TEAL READS 10.13:1 ON PAPER. Gold's base read 2.51:1 and had to be
 //   dragged toward ink before a hairline in it could be seen; the palette's own
 //   teal needs no such step, so every rule here is PATINA.base as it is.
-// · A BIG FACE BARELY SHADES. StruckPanel measured the full PAPER_LIT →
-//   PAPER_SHADE run across 350px and got a tan stain in one corner. The face
-//   here runs a third of that and takes its depth from its EDGES instead: a lit
-//   top rim, the frame, and the shadow it sits on.
+// · THE FACE IS FLAT WHITE, AND NOTHING ON IT IS GOLD (2026-09-16). It used to
+//   fade toward PAPER_SHADE, a warm tan, and its granted rows were cut in sand;
+//   the owner called that gold look the surest sign of an AI-made screen. The
+//   depth is in the EDGES: a lit top rim, the frame, and the shadow it sits on.
 // · EMBOSS GOES ON DISPLAY TYPE ONLY. Below about 13px an ink shadow stops
 //   reading as depth and starts reading as a rendering fault (Struck.tsx).
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** The one light, as LinearGradient endpoints. Matches tone.LIGHT everywhere. */
-const LIGHT_START = { x: 0.15, y: 0 } as const;
-const LIGHT_END = { x: 0.85, y: 1 } as const;
+/**
+ * A neutral grey at the lightness PAPER_SHADE had, for the rules and marks that
+ * were mixed from it. The tan one leaned gold on a white card.
+ */
+const SHADE = mix(PAPER, INK, 0.23);
 
 
 export type CertVariant = 'scholar' | 'free';
@@ -68,13 +71,13 @@ function dressing(variant: CertVariant) {
     // instead of two grades in two hues.
     /** The frame's two rules. */
     outer: gold ? PATINA.base : INK,
-    inner: gold ? mix(PATINA.base, PAPER, 0.62) : FAINT,
+    inner: gold ? mix(PATINA.base, PAPER, 0.62) : SHADE,
     /** The guilloché ground under the head. */
-    ground: gold ? mix(PATINA.base, PAPER, 0.5) : mix(PAPER_SHADE, INK, 0.06),
+    ground: gold ? mix(PATINA.base, PAPER, 0.5) : mix(SHADE, INK, 0.06),
     /** Display type. */
     title: gold ? INK : INK,
     /** The hairline under the title. */
-    rule: gold ? PATINA.base : mix(PAPER_SHADE, INK, 0.2),
+    rule: gold ? PATINA.base : mix(SHADE, INK, 0.2),
   };
 }
 
@@ -412,15 +415,8 @@ export default function Certificate({
 
   return (
     <View style={[s.shadow, { width }]} onLayout={onLayout}>
-      <LinearGradient
-        // A THIRD OF A TILE'S FALL-OFF — see the header. The rest of the depth is
-        // in the frame, the lit rim and the shadow.
-        colors={[PAPER_LIT, PAPER, mix(PAPER, PAPER_SHADE, 0.34)]}
-        locations={[0, 0.5, 1]}
-        start={LIGHT_START}
-        end={LIGHT_END}
-        style={s.card}
-      >
+      {/* FLAT — see the header. The depth is the frame, the lit rim and the shadow. */}
+      <View style={s.card}>
         {/* The lit rim along the top edge. One pixel, and it is what stops a big
             pale face reading as a flat rectangle. */}
         <View pointerEvents="none" style={[s.rim, { backgroundColor: PAPER_LIT }]} />
@@ -485,7 +481,7 @@ export default function Certificate({
         <View style={[s.body, compact && s.bodySm]}>{children}</View>
 
         {footer ? <View style={[s.footer, compact && s.footerSm]}>{footer}</View> : null}
-      </LinearGradient>
+      </View>
       {/* OVER the face, not under it — the frame is printed on the card. Drawn
           only once the height is known, so it never appears at the wrong size. */}
       {h > 0 ? (
@@ -498,7 +494,7 @@ export default function Certificate({
 }
 
 const s = StyleSheet.create({
-  // The shadow is on a plain wrapper because a LinearGradient with a shadow and a
+  // The shadow is on a plain wrapper because a face with a shadow and a
   // borderRadius renders the shadow through the corners on Android.
   shadow: {
     shadowColor: INK,
@@ -507,7 +503,7 @@ const s = StyleSheet.create({
     shadowOffset: { width: 1.2, height: 3 },
     elevation: 4,
   },
-  card: { borderRadius: 3, overflow: 'hidden', paddingBottom: SPACE[3] },
+  card: { borderRadius: 3, overflow: 'hidden', paddingBottom: SPACE[3], backgroundColor: FLAT_FACE },
   rim: { position: 'absolute', left: 0, right: 0, top: 0, height: 1 },
 
   head: {
@@ -591,7 +587,7 @@ const s = StyleSheet.create({
  * schedule below has two kinds of row that must stay clearly separated.
  */
 export function ScheduleHead({ label, tint, compact = false }: { label: string; tint?: string; compact?: boolean }) {
-  const color = tint ?? mix(PAPER_SHADE, INK, 0.5);
+  const color = tint ?? mix(SHADE, INK, 0.5);
   return (
     <View style={[r.headRow, compact && r.headRowSm]}>
       <Text style={[r.headLabel, { color }]}>{label}</Text>
@@ -643,25 +639,20 @@ export function ScheduleRow({
     <View style={[r.row, granted && r.rowGranted, compact && (granted ? r.rowGrantedSm : r.rowSm)]}>
       <View style={[r.markBox, compact && r.markBoxSm]}>
         {granted ? (
-          <LinearGradient
-            colors={[PATINA.lit, PATINA.base, PATINA.shade]}
-            start={LIGHT_START}
-            end={LIGHT_END}
-            style={[r.mark, compact && r.markSm, { borderColor: PATINA.rim }]}
-          >
-            <View style={[r.tickShort, { backgroundColor: PATINA.on }]} />
-            <View style={[r.tickLong, { backgroundColor: PATINA.on }]} />
-          </LinearGradient>
+          <View style={[r.mark, compact && r.markSm, { borderColor: PATINA.rim, backgroundColor: PATINA.base }]}>
+            <View style={[r.tickShort, { backgroundColor: PAPER_LIT }]} />
+            <View style={[r.tickLong, { backgroundColor: PAPER_LIT }]} />
+          </View>
         ) : grade === 'included' ? (
-          <View style={[r.mark, compact && r.markSm, { borderColor: mix(PAPER_SHADE, INK, 0.45) }]}>
+          <View style={[r.mark, compact && r.markSm, { borderColor: mix(SHADE, INK, 0.45) }]}>
             <View style={[r.tickShort, { backgroundColor: INK }]} />
             <View style={[r.tickLong, { backgroundColor: INK }]} />
           </View>
         ) : (
           // A LIMIT IS NOT A TICK. An open square with a bar across it: the shape
           // says "bounded", which is the honest drawing for "one a day".
-          <View style={[r.mark, compact && r.markSm, { borderColor: mix(PAPER_SHADE, INK, 0.32) }]}>
-            <View style={[r.bar, { backgroundColor: mix(PAPER_SHADE, INK, 0.55) }]} />
+          <View style={[r.mark, compact && r.markSm, { borderColor: mix(SHADE, INK, 0.32) }]}>
+            <View style={[r.bar, { backgroundColor: mix(SHADE, INK, 0.55) }]} />
           </View>
         )}
       </View>
@@ -692,34 +683,23 @@ export function ScheduleRow({
   return (
     <View>
       {granted ? (
-        // THE RECESS. StruckNiche's rule, applied to a strip: a groove is bright
-        // where a dome is dark, so this runs the tile's gradient BACKWARDS and
-        // takes the dark hairline along its top edge, where the light cannot
-        // reach into the cut. Reverse those two and the row stops being cut in
-        // and starts floating off the certificate.
-        <LinearGradient
-          colors={[SAND_SHADE, SAND, SAND_LIT]}
-          locations={[0, 0.45, 1]}
-          start={LIGHT_START}
-          end={LIGHT_END}
-          style={[r.niche, compact && r.nicheSm]}
-        >
-          <View pointerEvents="none" style={[r.nicheTop, { backgroundColor: mix(SAND_SHADE, INK, 0.26) }]} />
-          <LinearGradient
-            colors={[PATINA.lit, PATINA.base, PATINA.shade]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={r.rail}
-            pointerEvents="none"
-          />
+        // THE RECESS. StruckNiche's rule, applied to a strip: the dark hairline
+        // runs along the top edge, where the light cannot reach into the cut, and
+        // a white one along the bottom. Reverse those two and the row stops being
+        // cut in and starts floating off the certificate. The floor is a flat
+        // tint of the teal, which is how the app marks a chosen thing; it was
+        // sand, which is the gold the owner asked to be rid of.
+        <View style={[r.niche, compact && r.nicheSm]}>
+          <View pointerEvents="none" style={[r.nicheTop, { backgroundColor: mix(TINT, INK, 0.2) }]} />
+          <View style={r.rail} pointerEvents="none" />
           {body}
-          <View pointerEvents="none" style={[r.nicheFoot, { backgroundColor: SAND_LIT }]} />
-        </LinearGradient>
+          <View pointerEvents="none" style={[r.nicheFoot, { backgroundColor: PAPER_LIT }]} />
+        </View>
       ) : (
         body
       )}
       {!last && !granted ? (
-        <View style={[r.hair, compact && r.hairSm, { backgroundColor: mix(PAPER_SHADE, PAPER, 0.35) }]} />
+        <View style={[r.hair, compact && r.hairSm, { backgroundColor: FLAT_EDGE }]} />
       ) : null}
     </View>
   );
@@ -734,13 +714,13 @@ const r = StyleSheet.create({
   headLabel: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.7 },
   headRule: { flex: 1, height: 1 },
 
-  niche: { borderRadius: 3, overflow: 'hidden', marginVertical: 3 },
+  niche: { borderRadius: 3, overflow: 'hidden', marginVertical: 3, backgroundColor: TINT },
   nicheSm: { marginVertical: 2 },
   nicheTop: { position: 'absolute', left: 0, right: 0, top: 0, height: 1 },
   nicheFoot: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 1 },
   // 3pt of metal down the cut edge. Wider reads as a highlighter pen, which is
   // the exact "cheap" this redesign is avoiding.
-  rail: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3 },
+  rail: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: PATINA.base },
 
   row: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2], paddingVertical: 7 },
   rowGranted: { paddingLeft: SPACE[2] + 3, paddingRight: SPACE[2], paddingVertical: 9 },

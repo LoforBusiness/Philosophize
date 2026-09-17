@@ -7,7 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { touch } from '@/lib/feedback';
-import { INK, PAPER, PAPER_LIT, PAPER_SHADE, mix } from '@/components/shared/tone';
+import { INK, PAPER, PAPER_LIT, FLOOR, mix } from '@/components/shared/tone';
 import ControlRead from './ControlRead';
 import { orderFor } from './ChoiceCards';
 import { LipPlate, PLATE_LIP, VerdictSeal, useQuestionAccent, type PlateState } from './QuestionParts';
@@ -56,7 +56,8 @@ interface Props {
 }
 
 // A THIRD OF THE FALL-OFF: a wide surface lit from one side barely shades (§19).
-const FACE_FOOT = mix(PAPER, PAPER_SHADE, 0.34);
+// Neutral: this was a third of the way to the tan PAPER_SHADE, which read as gold.
+const FACE_FOOT = FLOOR;
 const CHIP_W = 150;
 const CHIP_H = 34;
 const BIN_H = 46;

@@ -13,7 +13,7 @@ import StreakMascot from '@/components/gamification/StreakMascot';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import {
-  STREAK_EMBER, STREAK_DEEP, STREAK_SAND, SLATE,
+  STREAK_EMBER, STREAK_DEEP, STREAK_WASH, SLATE,
   restDaysHeld, restEarnEvery, restCap, tierFor, nextTier,
 } from '@/constants/streak';
 import { effectiveStreak, streakIsAlive, restDaysToSpend } from '@/lib/utils/streak';
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
   countWord: { ...role('micro'), letterSpacing: 2, color: C.inkSoft },
   tierChip: {
     marginTop: SPACE[2], paddingHorizontal: SPACE[2], paddingVertical: 5,
-    borderRadius: RADIUS.pill, backgroundColor: STREAK_SAND,
+    borderRadius: RADIUS.pill, backgroundColor: STREAK_WASH,
   },
   tierChipText: { ...role('micro'), letterSpacing: 2, color: STREAK_DEEP, fontFamily: 'Inter_700Bold' },
 
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   statWord: { ...role('micro'), color: C.inkSoft },
   perfect: {
     paddingHorizontal: SPACE[2], paddingVertical: 4,
-    borderRadius: RADIUS.pill, backgroundColor: STREAK_SAND,
+    borderRadius: RADIUS.pill, backgroundColor: STREAK_WASH,
   },
   perfectText: { ...role('micro'), letterSpacing: 1.5, color: STREAK_DEEP, fontFamily: 'Inter_700Bold' },
 

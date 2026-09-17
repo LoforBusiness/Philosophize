@@ -28,8 +28,9 @@ const T = await import(emit('components/shared/tone.ts', 'tone.mjs'));
 // insignia.ts is zero-import for the same reason, so the eight order materials
 // can be re-derived here rather than trusted.
 const I = await import(emit('constants/insignia.ts', 'insignia.mjs'));
-// rankShapes.ts is zero-import for the same reason — the frames are plain data.
-const R = await import(emit('components/shared/rankShapes.ts', 'rankShapes.mjs'));
+// insigniaArt.ts is zero-import for the same reason: every rank and badge is
+// plain data until a component paints it.
+const A = await import(emit('components/shared/insigniaArt.ts', 'insigniaArt.mjs'));
 
 let bad = 0;
 const ok = (cond, label, detail = '') => {
@@ -522,174 +523,187 @@ const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
 //   complex ones for each colour, they are all the same, I want uniqueness …
 //   and for the really far ranks they must be extremely complex."
 //
-// Both were satisfied separately by two earlier versions and each broke the
-// other, so this block asserts them together. scripts/sheet-ranks.mjs is how the
-// pins are JUDGED; these are the things a picture cannot report.
+// The fourth drawing (insigniaArt.ts, the game crest the owner chose after "really
+// flat, really boring … not gamified") answers both with an order that picks the
+// SHAPE and a degree that BUILDS onto it, and this block asserts both together.
+// scripts/sheet-ranks.mjs is how the pins are JUDGED; these are the things a
+// picture cannot report.
 {
-  const V = R.VOCAB;
-  ok(V.length === I.ORDERS.length, 'one vocabulary per order',
-    `${V.length} vocabularies, ${I.ORDERS.length} orders`);
-  ok(new Set(V.map((v) => v.label)).size === V.length,
-    'no two orders share a shape name', V.map((v) => v.label).join(' '));
+  const S = A.ORDER_SHAPES;
+  const tonesAt = (o) => A.tonesOf(I.ORDER[I.ORDERS[o]]);
+  ok(S.length === I.ORDERS.length, 'one shape per order',
+    `${S.length} shapes, ${I.ORDERS.length} orders`);
+  ok(new Set(S.map((v) => v.label)).size === S.length,
+    'no two orders share a shape name', S.map((v) => v.label).join(' '));
 
   // NO LIMBS. Wings, a coronet and a ray halo were the top three rungs of the
   // first ladder and the reader ruled on all of them: "looks like horns and then
   // looks as if it gains wings. I don't want this design at all."
-  const shapes = fs.readFileSync(path.join(REPO, 'components/shared/rankShapes.ts'), 'utf8');
-  const limbs = ['wing', 'coronetPath', 'spike', 'halo', 'wreath', 'sunburstRay'];
-  const declared = [...shapes.matchAll(/(?:export\s+)?(?:const|function)\s+([A-Za-z_]\w*)/g)]
-    .map((m) => m[1]);
+  const art = fs.readFileSync(path.join(REPO, 'components/shared/insigniaArt.ts'), 'utf8');
+  const limbs = ['wing', 'coronet', 'spike', 'halo', 'horn', 'sunburstRay', 'antler'];
+  const declared = [...art.matchAll(/(?:export\s+)?(?:const|function)\s+([A-Za-z_]\w*)/g)].map((m) => m[1]);
   const grown = declared.filter((n) => limbs.some((w) => n.toLowerCase().includes(w.toLowerCase())));
   ok(grown.length === 0, 'no pin grows a limb', grown.length ? grown.join(' ') : 'none declared');
 
-  // ALONG a colour: every rung draws strictly MORE than the one below it.
-  //
-  // Counted as elements rather than as area, and that is the honest measure. The
-  // silhouette only grows once per order — at the rung the underplate arrives —
-  // and after that the build is carried by finish. Asserting area would either
-  // pass vacuously or force a footprint change nobody wants, which is exactly
-  // how an earlier version ended up with an octagon narrower than the hexagon
-  // below it.
-  const elements = (o, d) => {
-    const p = R.pinFor(o, d);
-    return (p.build.rule ? 1 : 0) + p.facets.length + (p.under ? 1 : 0)
-      + p.build.studs + (p.build.collar ? 1 : 0);
-  };
-  for (let o = 0; o < V.length; o++) {
-    let prev = -1, rising = true, seq = [];
-    for (let d = 0; d < 6; d++) {
-      const n = elements(o, d);
-      seq.push(n);
-      if (n <= prev) rising = false;
-      prev = n;
-    }
-    ok(rising, `${V[o].label}: every rung adds something`, seq.join(' → '));
+  // ALONG a colour: every rung draws strictly MORE than the one below it. `parts`
+  // weighs a crest and a frame as three each, because each is a whole object —
+  // which is exactly why degree 3 counts as more than degree 2's three stones.
+  for (let o = 0; o < S.length; o++) {
+    const seq = [0, 1, 2, 3, 4, 5].map((d) => A.rankArt(o, d, tonesAt(o)).parts);
+    ok(seq.every((n, i) => i === 0 || n > seq[i - 1]), `${S[o].label}: every rung adds something`, seq.join(' → '));
   }
 
-  // ACROSS the colours: the ceiling climbs, and the top is a bigger object than
-  // the bottom by a margin a reader can see side by side.
-  let prevReach = 0, climbs = true;
-  const reaches = [];
-  for (let o = 0; o < V.length; o++) {
-    const r = R.pinReach(o, 5);
-    reaches.push(Math.round(r * 10) / 10);
-    if (r < prevReach - 0.01) climbs = false;
-    prevReach = r;
-  }
-  ok(climbs, "each order's capstone reaches at least as far as the last", reaches.join(' '));
-  const spread = R.pinReach(V.length - 1, 5) / R.pinReach(0, 5);
-  ok(spread >= 1.18, 'and the top of the ladder is visibly a bigger object',
-    `${spread.toFixed(2)}x the bottom, floor 1.18`);
+  // ACROSS the colours: the ceiling climbs. Each order's capstone frame is at
+  // least as large, at least as riveted and at least as ruled as the one below.
+  const caps = S.map((v, o) => ({ k: A.frameK(o), rivets: v.rivets, rule: v.doubleRule ? 1 : 0, parts: A.rankArt(o, 5, tonesAt(o)).parts }));
+  const climbs = (key) => caps.every((c, i) => i === 0 || c[key] >= caps[i - 1][key]);
+  ok(climbs('k') && caps[caps.length - 1].k > caps[0].k, "each order's capstone frame is at least as large as the last",
+    caps.map((c) => c.k.toFixed(2)).join(' '));
+  ok(climbs('rivets') && climbs('rule') && climbs('parts'), 'and at least as finished',
+    caps.map((c) => `${c.rivets}r${c.rule}/${c.parts}`).join(' '));
+  ok(caps[caps.length - 1].parts >= caps[0].parts + 1, 'and the top of the ladder is visibly the richer object',
+    `${caps[0].parts} → ${caps[caps.length - 1].parts} parts`);
 
-  // UNIQUENESS, measured on the DRAWINGS. Two pins whose numbers differ but whose
-  // paths do not are the failure this exists to catch.
+  // UNIQUENESS, measured on the DRAWINGS, and on the geometry alone: two pins
+  // whose paths match are one drawing in two paints, which is the complaint.
+  const shapeOf = (nodes) => nodes.map((n) => (n.k === 'clip' ? `[${n.d}:${shapeOf(n.kids)}]` : n.d)).join('|');
   const sigs = new Map();
-  for (let o = 0; o < V.length; o++) {
+  for (let o = 0; o < S.length; o++) {
     for (let d = 0; d < 6; d++) {
-      const p = R.pinFor(o, d);
-      const sig = [p.core(0), p.under ?? '', p.facets.length, p.build.studs,
-        p.build.rule, p.build.collar].join('|');
+      const sig = shapeOf(A.rankArt(o, d, tonesAt(o)).nodes);
       if (!sigs.has(sig)) sigs.set(sig, []);
-      sigs.get(sig).push(`${V[o].label}/${d}`);
+      sigs.get(sig).push(`${S[o].label}/${d}`);
     }
   }
   const dupes = [...sigs.values()].filter((g) => g.length > 1);
   ok(dupes.length === 0, 'no two of the forty-eight draw the same thing',
     dupes.length ? dupes.map((g) => g.join('=')).join(' ') : `${sigs.size} distinct of 48`);
 
-  // AN UNDERPLATE THAT DOES NOT CLEAR THE CORE IS A WASTED PATH. The first draft
-  // put jade's plate at 37.5 behind a core of 40 — entirely hidden, so three of
-  // that order's six rungs rendered identically.
-  for (const v of V) {
-    const past = v.under.reach - v.outer;
-    ok(past >= 4, `${v.label}: its underplate shows past the core`,
-      `${past.toFixed(1)} units, floor 4`);
+  // Everything a pin draws, as a box — stroke half-widths included.
+  const boxOf = (nodes, box = { x0: 1e9, y0: 1e9, x1: -1e9, y1: -1e9 }) => {
+    for (const n of nodes) {
+      const half = n.k === 'line' ? n.w / 2 : 0;
+      const nums = (n.d.match(/-?\d*\.?\d+/g) ?? []).map(Number);
+      for (let i = 0; i + 1 < nums.length; i += 2) {
+        box.x0 = Math.min(box.x0, nums[i] - half); box.x1 = Math.max(box.x1, nums[i] + half);
+        box.y0 = Math.min(box.y0, nums[i + 1] - half); box.y1 = Math.max(box.y1, nums[i + 1] + half);
+      }
+      // a clip's own outline bounds what its children can show
+      if (n.k === 'clip') continue;
+    }
+    return box;
+  };
+
+  for (let o = 0; o < S.length; o++) {
+    const v = S[o];
+    const cap = A.rankArt(o, 5, tonesAt(o));
+    // A clipped child cannot draw outside its clip, so only the unclipped nodes
+    // (and the clip outlines themselves) can reach the edge of the box.
+    const drawn = cap.nodes.map((n) => (n.k === 'clip' ? { k: 'fill', d: n.d } : n));
+    const b = boxOf(drawn);
+    ok(b.x0 >= 0 && b.y0 >= 0 && b.x1 <= 100 && b.y1 <= 100, `${v.label} stays inside the viewBox`,
+      `x ${b.x0.toFixed(1)}…${b.x1.toFixed(1)}, y ${b.y0.toFixed(1)}…${b.y1.toFixed(1)}`);
+
+    // A FRAME THAT DOES NOT CLEAR THE CREST IS A WASTED PATH. The underplate this
+    // replaced once sat entirely behind its core, so three rungs drew the same.
+    const past = A.reachOf(cap.frame, 50, A.RANK_CY) - A.reachOf(cap.body, 50, A.RANK_CY);
+    ok(past >= 8, `${v.label}: its frame shows past the crest`, `${past.toFixed(1)} units, floor 8`);
+
+    // THE MARK HAS ITS ROOM, at every rung: the glyph's working box (0.84 of its
+    // side — a 32-unit glyph draws inside about 27) sits inside the recessed face
+    // with daylight to spare.
+    for (const d of [0, 3]) {
+      const r = A.rankArt(o, d, tonesAt(o));
+      const face = A.inset(r.body, d >= 3 ? 6 : A.RIM);
+      const s = r.mark.size * 0.84, { cx, cy } = r.mark;
+      let worst = Infinity;
+      for (let i = 0; i <= 8; i++) {
+        for (const [x, y] of [[cx - s / 2 + (i * s) / 8, cy - s / 2], [cx - s / 2 + (i * s) / 8, cy + s / 2],
+          [cx - s / 2, cy - s / 2 + (i * s) / 8], [cx + s / 2, cy - s / 2 + (i * s) / 8]]) {
+          const dd = A.edgeDistance(face, x, y);
+          worst = Math.min(worst, A.insidePoly(face, x, y) ? dd : -dd);
+        }
+      }
+      ok(worst >= 1, `${v.label} ${d ? 'framed' : 'plain'} leaves the mark its room`, `${worst.toFixed(1)} units of daylight`);
+    }
   }
 
-  for (let o = 0; o < V.length; o++) {
-    const v = V[o];
-    // 49, not 50: the collar is stroked, so half its width lives outside the
-    // path it is drawn on.
-    const reach = R.pinReach(o, 5, R.COLLAR);
-    ok(reach <= 49, `${v.label} stays inside the viewBox`, `reaches ${reach.toFixed(1)} of 50`);
-
-    const p = R.pinFor(o, 5);
-    ok(p.perimeter > 100, `${v.label} has a measurable edge to run an arc along`,
-      `${p.perimeter.toFixed(0)} units`);
-    ok(p.studs.length === 6, `${v.label} offers six stud positions`);
-    const near = Math.min(...p.studs.map(([x, y]) => Math.hypot(x - 50, y - 50)));
-    ok(near > 8, `${v.label}'s studs clear the mark`, `nearest ${near.toFixed(1)} from centre`);
-    ok(v.mark >= 0.34 && v.mark <= 0.42, `${v.label} leaves the mark its room`,
-      `markScale ${v.mark}`);
+  // ONE LAMP, TOP-LEFT: the tones a crest is built from are a real ladder, so
+  // the rim is brightest, the face sits below it and the lip is darkest — and
+  // the white mark still reads on the face with the glare laid over it.
+  for (const name of I.ORDERS) {
+    const t = A.tonesOf(I.ORDER[name]);
+    const ladder = [t.glow, t.hi, t.lit, t.base, t.shade, t.rim, t.line].map(lum);
+    ok(ladder.every((v, i) => i === 0 || v < ladder[i - 1]), `${name}: its tones fall from lit to dark`,
+      ladder.map((v) => v.toFixed(3)).join(' '));
+    const glared = A.mix(t.base, '#FFFFFF', 0.13);
+    ok(ratio(lum(t.mark), lum(glared)) >= 3, `${name}: the mark reads through the glare`,
+      `${ratio(lum(t.mark), lum(glared)).toFixed(2)}:1, need 3`);
   }
-
-  // The facets are lit by ONE rule, from the angle to the lamp, and painted in
-  // the material's own ends. White over a coloured face desaturates it — the
-  // first draft did exactly that and every faceted pin came out a washed copy of
-  // the rung below it.
-  const lit = R.pinFor(7, 5).facets;
-  ok(lit.length > 0, 'the capstone is faceted', `${lit.length} wedges`);
-  ok(lit.some((f) => f.lift > 0.5) && lit.some((f) => f.lift < -0.5),
-    'and the facets run from full light to full shade',
-    `${Math.min(...lit.map((f) => f.lift)).toFixed(2)} … ${Math.max(...lit.map((f) => f.lift)).toFixed(2)}`);
-  ok(!/'#FFFFFF'|"#FFFFFF"/.test(shapes.slice(shapes.indexOf('facetPaint'), shapes.indexOf('facetPaint') + 400)),
-    'and they are painted in the material, not in white');
 
   const seal = fs.readFileSync(path.join(REPO, 'components/shared/RankSeal.tsx'), 'utf8');
-  ok(/pinFor\(oi, degree\)/.test(seal),
+  ok(/rankArt\(oi, degree/.test(seal),
     'the pin is built from BOTH axes — the order and the degree');
 }
 
 
 // ── 4d · anything struck OUTSIDE an edge is sitting on PAPER ─────────────────
 //
-// This trap has now been walked into three times, in three different files, and
-// every time it looked like a different bug:
+// This trap has been walked into three times, in three different files, and
+// every time it looked like a different bug: a ray halo painted in AURUM's
+// #FFFFFF `rule`, a laurel stroked in `ins.on` (#FFFFFF for every order) so
+// every tier-III badge wore a white wreath on cream for months, and a capstone
+// collar in `rule` again. `on` and `rule` are toned for the METAL; the moment a
+// mark is drawn beyond the edge it is on PAPER.
 //
-//   · the rank pin's ray halo, painted in the order's `rule` — and AURUM's
-//     `rule` is #FFFFFF, so the top rank of the ladder wore an ornament nobody
-//     could see (insignia.ts records the fix);
-//   · the badge case's laurel wreath, stroked in `ins.on` — which insignia.ts
-//     fitted to ONE value, #FFFFFF, for every order by construction. Every
-//     tier-III badge has been wearing a white wreath on cream;
-//   · and then the capstone collar, in `rule` again, on both ladders at once.
-//
-// The rule underneath all three: `on` and `rule` are toned for the METAL. The
-// moment a mark is drawn beyond the edge it is on PAPER, and paper needs its own
-// tone. So the collar takes the material's BODY, and this is what says so.
+// The crest answers it by outlining everything in the order's own dark `line`,
+// and this is what holds it: the line reads on paper for every order, and every
+// white glint — which is exactly the kind of thing that lands past an edge — has
+// that line round it.
 {
   const paper = lum(D.C.paper);
   for (const name of I.ORDERS) {
     const m = I.ORDER[name];
-    // 3:1 — a graphic, not text. Same floor the marks are held to.
+    const t = A.tonesOf(m);
+    ok(ratio(lum(t.line), paper) >= 3,
+      `${name}: its outline reads on paper`, `${ratio(lum(t.line), paper).toFixed(2)}:1, need 3`);
     ok(ratio(lum(m.base), paper) >= 3,
-      `${name}: its body reads on paper, so a collar drawn in it does too`,
-      `${ratio(lum(m.base), paper).toFixed(2)}:1, need 3`);
+      `${name}: its body reads on paper`, `${ratio(lum(m.base), paper).toFixed(2)}:1, need 3`);
   }
-  // …and the tones that do NOT, which is what makes the line above worth having.
+  // …and the tones that do NOT, which is what makes the lines above worth having.
   const blind = I.ORDERS.filter((n) => ratio(lum(I.ORDER[n].rule), paper) < 3);
   ok(blind.length >= 4, 'and the near-whites genuinely would not have',
     `${blind.length} of ${I.ORDERS.length} orders vanish on paper in their own rule: ${blind.join(' ')}`);
 
-  // ANCHORED ON THE THING THAT DRAWS IT, not on the word COLLAR — the first
-  // occurrence of that in both files is the import line, and a window measured
-  // from there reaches no code at all. The counter-test caught this: the guard
-  // reported clean with the defect deliberately put back.
-  for (const [file, what, anchor] of [
-    ['components/shared/RankSeal.tsx', 'the pin', 'fin.collar &&'],
-    ['components/shared/BadgeMedal.tsx', 'the medal', '{collar && ('],
-  ]) {
-    const src = fs.readFileSync(path.join(REPO, file), 'utf8');
-    const at = src.indexOf(anchor);
-    ok(at > 0, `${what} draws a collar at all`, anchor);
-    const collar = src.slice(at, at + 1200);
-    ok(!/stroke=\{ins\.rule\}/.test(collar) && !/stroke=\{ins \? ins\.rule/.test(collar),
-      `${what}'s collar is not drawn in a tone made for metal`);
+  // Every glint is outlined: a white fill with no opacity must sit directly on a
+  // line node with the same outline.
+  const naked = [];
+  const scan = (nodes, where) => nodes.forEach((n, i) => {
+    if (n.k === 'clip') return;
+    if (n.k === 'fill' && n.c.toUpperCase() === '#FFFFFF' && n.o == null) {
+      const prev = nodes[i - 1];
+      if (!prev || prev.k !== 'line' || prev.d !== n.d) naked.push(where);
+    }
+  });
+  for (let o = 0; o < I.ORDERS.length; o++) {
+    const t = A.tonesOf(I.ORDER[I.ORDERS[o]]);
+    for (let d = 0; d < 6; d++) scan(A.rankArt(o, d, t).nodes, `rank ${o}/${d}`);
   }
-  // The badge's furniture sits on paper too, and it is what caught this.
+  for (const f of ['lessons', 'streak', 'thinkers', 'quotes', 'xp', 'mastery']) {
+    for (let tier = 1; tier <= 5; tier++) {
+      const a = A.badgeArt(f, tier, A.tonesOf(I.ORDER[I.TIER_ORDER[tier - 1]]));
+      scan([...a.back, ...a.front], `badge ${f}/${tier}`);
+    }
+  }
+  ok(naked.length === 0, 'every white glint carries its dark line', naked.length ? naked.slice(0, 6).join(', ') : 'all outlined');
+
+  // And the badge's furniture — ribbon, laurel, stars — is edged in that line.
+  const top = A.badgeArt('mastery', 5, A.tonesOf(I.ORDER.AURUM));
+  const edged = [...top.back, ...top.front].filter((n) => n.k === 'line' && n.c === A.tonesOf(I.ORDER.AURUM).line);
+  ok(edged.length >= 10, 'and the furniture is edged in it', `${edged.length} edged parts on a tier-V badge`);
   const medal = fs.readFileSync(path.join(REPO, 'components/shared/BadgeMedal.tsx'), 'utf8');
-  ok(!/stroke=\{ink\}/.test(medal),
-    'and neither is the laurel or the ribbon', 'both take `edge`, which is ink');
+  ok(/badgeArt\(/.test(medal) && !/stroke=\{/.test(medal),
+    'and BadgeMedal paints nothing of its own', 'it draws what insigniaArt builds');
 }
 
 
