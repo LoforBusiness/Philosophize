@@ -1,12 +1,9 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Path, Defs, RadialGradient, Stop, Circle } from 'react-native-svg';
 import Animated, {
   useAnimatedProps,
   useAnimatedStyle,
-  useAnimatedReaction,
-  useDerivedValue,
-  runOnJS,
   type SharedValue,
 } from 'react-native-reanimated';
 import { C } from '@/constants/design';
@@ -32,23 +29,26 @@ const AnimatedPath = Animated.createAnimatedComponent(Path);
 // backing bitmap. Fifty-two paths inside one <Svg> would repaint the entire
 // drawing fifty-two times per frame.
 //
-// So the drawing is TILED IN TIME. Each stroke lives in its own <Svg>, sized to
-// its own box and no larger, and:
+// So the drawing is TILED. Each stroke lives in its own <Svg>, sized to its own
+// box and no larger, and only the strokes the pen is actually drawing are ever
+// written to. That last part costs nothing to arrange, because Reanimated does
+// it: the updater behind useAnimatedProps compares the new values with the last
+// ones (`shallowEqual` in useAnimatedStyle.ts) and writes nothing when they
+// match. A stroke the pen has not reached returns its whole length every frame,
+// a finished one returns zero every frame, and neither is ever written again —
+// its bitmap is painted once and thereafter only blitted.
 //
-//   · a stroke already finished has no animatedProps attached at all, so nothing
-//     writes to it — its bitmap is painted once and thereafter only blitted;
-//   · only strokes inside the live window animate: the one being drawn, plus a
-//     short LOOKAHEAD;
-//   · strokes not yet reached are not mounted.
+// ── AND EVERY STROKE IS MOUNTED FROM THE FIRST FRAME ────────────────────────
 //
-// THE LOOKAHEAD IS NOT A FUDGE FACTOR — it is what makes this safe on the boot
-// path. The window is advanced through runOnJS, and the JS thread during launch
-// is the busiest it ever is: §19 measured the old screen's percentage sticking
-// on zero and then jumping twenty while five tab screens mounted. A window that
-// lags would make strokes appear late. Mounting the next few EARLY costs nothing
-// to look at — their offset is their whole length, so they draw nothing — and
-// means a stroke's reveal is already running on the UI thread before JS has
-// noticed it should be. The picture cannot fall behind the animation.
+// This screen used to mount strokes in a window advanced from the JS thread —
+// the one being drawn plus six ahead — on the reasoning that a finished stroke
+// should have nothing attached. It left the picture hostage to the one thread
+// that is busiest at launch: six strokes of lookahead were as little as 34ms of
+// drawing and 259ms at the median, and §19 measured that thread stalling for
+// 392ms here. A stall longer than the window left the pen drawing strokes that
+// did not exist yet, which then popped in finished when JS caught up — "there
+// seems to be gaps in the scribble sometimes". Now nothing about the drawing
+// waits on JS at all: it is mounted once, and the UI thread runs every stroke.
 
 /** A stroke, plus the slice of the timeline it is drawn in. */
 interface Timed extends InkStroke {
@@ -63,10 +63,12 @@ interface Timed extends InkStroke {
  * pausing on every short mark — which is most of what separates a hand drawing
  * from a list of things appearing.
  *
- * `floor` buys the shortest strokes a visible minimum: the tangle holds marks of
- * 21 units against a phase total of 19,677, and at true speed those are a single
- * frame. `overlap` lets a phase run strokes concurrently — a marker scribbling a
- * fill has two or three in the air at once, where a pen drawing a line has one.
+ * `floor` buys the shortest strokes a visible minimum, and a pen LINE must have
+ * none: the tangle is one continuous line cut into strokes only for the tiling,
+ * so a floor would make the pen hesitate at every cut. The marker keeps one, for
+ * its short separate marks. `overlap` lets a phase run strokes concurrently — a
+ * marker scribbling a fill has two or three in the air at once, where a pen
+ * drawing a line has one.
  */
 function schedule(list: InkStroke[], from: number, to: number, overlap: number, floor: number): Timed[] {
   const weight = list.map((s) => s.len + floor);
@@ -102,17 +104,10 @@ const T_STRIKE = 0.8; // the light catches, under the last of the marker
 // different pen speeds on purpose, because one is chaos and the other is the
 // thing the picture is about.
 const INK: Timed[] = [
-  ...schedule(TANGLE, 0, T_TANGLE, 1, 60),
+  ...schedule(TANGLE, 0, T_TANGLE, 1, 0),
   ...schedule(JOURNEY, T_TANGLE, T_JOURNEY, 1, 0),
 ];
 const MARK: Timed[] = schedule(HATCH, T_JOURNEY, T_HATCH, 2.6, 30);
-const ALL: Timed[] = [...INK, ...MARK];
-/** Read by the window worklet. Module-level, so it is captured by value. */
-const ENDS: number[] = ALL.map((s) => s.t1);
-const INK_COUNT = INK.length;
-
-/** How many strokes are mounted ahead of the one being drawn. See the header. */
-const LOOKAHEAD = 6;
 
 /** The pen, measured off the source: 7.24 art units across. */
 const PEN_W = 7.2;
@@ -128,14 +123,14 @@ interface StrokeProps {
   s: Timed;
   u: SharedValue<number>;
   scale: number;
-  live: boolean;
   colour: string;
   width: number;
 }
 
-const Stroke = memo(function Stroke({ s, u, scale, live, colour, width }: StrokeProps) {
-  // Called unconditionally — a hook may not be skipped — but only ATTACHED while
-  // the stroke is live. Unattached it writes to no view and costs no bitmap.
+const Stroke = memo(function Stroke({ s, u, scale, colour, width }: StrokeProps) {
+  // Before its slice of the timeline this returns the whole length, after it
+  // zero — the same value every frame, which Reanimated does not write (see the
+  // header). Only a stroke the pen is on repaints.
   const drawing = useAnimatedProps(() => {
     const span = s.t1 - s.t0;
     const raw = span > 0 ? (u.value - s.t0) / span : 1;
@@ -158,7 +153,13 @@ const Stroke = memo(function Stroke({ s, u, scale, live, colour, width }: Stroke
     >
       {/* ROUND CAPS, for the reason the old title page already recorded: a butt
           cap ends a dashoffset reveal on a hard rectangle and reads as a vector
-          wipe, where a round cap reads as the tip of a pen. */}
+          wipe, where a round cap reads as the tip of a pen. And one continuous
+          line cut into strokes meets end to end: the two caps overlap at the
+          cut, so the join is invisible.
+
+          The dash is the stroke's `len`, which inkArt guarantees is never
+          shorter than the curve, so a finished stroke is drawn whole with the
+          dash still on it. */}
       <AnimatedPath
         d={s.d}
         stroke={colour}
@@ -166,8 +167,8 @@ const Stroke = memo(function Stroke({ s, u, scale, live, colour, width }: Stroke
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
-        strokeDasharray={live ? `${s.len} ${s.len + 2}` : undefined}
-        animatedProps={live ? drawing : undefined}
+        strokeDasharray={`${s.len} ${s.len + 2}`}
+        animatedProps={drawing}
       />
     </Svg>
   );
@@ -182,22 +183,6 @@ interface Props {
 
 export default function InkDrawing({ u, width }: Props) {
   const scale = width / ART.w;
-  const [done, setDone] = useState(0);
-
-  // The live window, advanced from the UI thread. `done` is how many strokes
-  // have finished: everything below it is static, and LOOKAHEAD past it is
-  // mounted early so that a busy JS thread cannot make a stroke appear late.
-  const finished = useDerivedValue(() => {
-    let n = 0;
-    for (let i = 0; i < ENDS.length; i++) if (ENDS[i] <= u.value) n = i + 1;
-    return n;
-  });
-  useAnimatedReaction(
-    () => finished.value,
-    (cur, prev) => {
-      if (cur !== prev) runOnJS(setDone)(cur);
-    }
-  );
 
   // THE LIGHT. A bulb does not fade up, it CATCHES: it strikes, drops, catches
   // harder, and settles. The shape is a function of the timeline rather than a
@@ -216,7 +201,6 @@ export default function InkDrawing({ u, width }: Props) {
     return { opacity: lit, transform: [{ scale: 0.88 + lit * 0.12 }] };
   });
 
-  const mounted = Math.min(ALL.length, done + LOOKAHEAD);
   const glowR = GLASS.r * 2.9;
 
   return (
@@ -262,16 +246,12 @@ export default function InkDrawing({ u, width }: Props) {
       </Animated.View>
 
       {/* The marker goes under the pen, the way it does on the page. */}
-      {ALL.slice(0, mounted).map((s, i) =>
-        i < INK_COUNT ? null : (
-          <Stroke key={`m${i}`} s={s} u={u} scale={scale} live={i >= done} colour={MARK_INK} width={s.sw ?? MARK_W} />
-        )
-      )}
-      {ALL.slice(0, mounted).map((s, i) =>
-        i < INK_COUNT ? (
-          <Stroke key={`i${i}`} s={s} u={u} scale={scale} live={i >= done} colour={C.ink} width={PEN_W} />
-        ) : null
-      )}
+      {MARK.map((s, i) => (
+        <Stroke key={`m${i}`} s={s} u={u} scale={scale} colour={MARK_INK} width={s.sw ?? MARK_W} />
+      ))}
+      {INK.map((s, i) => (
+        <Stroke key={`i${i}`} s={s} u={u} scale={scale} colour={C.ink} width={PEN_W} />
+      ))}
     </View>
   );
 }

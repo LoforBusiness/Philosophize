@@ -5438,21 +5438,26 @@ react-native-svg rather than guessing at it: `RenderableView.setStrokeDashoffset
 ends in a bare `invalidate()` with no equality guard, so every dashoffset written
 in a frame forces that SvgView to redraw its whole backing bitmap. Fifty-two
 paths inside one `<Svg>` would repaint the entire drawing fifty-two times per
-frame. So each stroke gets its own `<Svg>`, sized to its own box and no bigger; a
-finished stroke has no animated props ATTACHED, so nothing writes to it at all;
-and only a short window animates. Measured on this drawing at 390dp: one
-full-screen surface would repaint **53.6%** of a screen per frame and re-stroke
-every path, where the worst real window of concurrent strokes repaints **22.3%**
-with six paths in it.
+frame. So each stroke gets its own `<Svg>`, sized to its own box and no bigger,
+and only the strokes the pen is on are ever written: Reanimated's updater
+compares a mapper's new values with its last (`shallowEqual` in
+`useAnimatedStyle.ts`) and writes nothing when they match, so a stroke before or
+after its slice of the timeline — whole length, or zero, every frame — is never
+written again. Measured on the first drawing at 390dp: one full-screen surface
+would repaint **53.6%** of a screen per frame and re-stroke every path, where the
+worst real window of concurrent strokes repaints **22.3%** with six paths in it.
 
-> **THE LOOKAHEAD IS A SAFETY DEVICE, NOT A FUDGE FACTOR.** The window advances
-> through `runOnJS`, and the JS thread during launch is the busiest it ever is —
-> §19 measured the old screen's percentage sticking on zero and then jumping
-> twenty while five tab screens mounted. Mounting the next few strokes EARLY costs
-> nothing to look at, because their offset is their whole length and they draw
-> nothing, and it means a stroke's reveal is already running on the UI thread
-> before JS has noticed it should be. Widening it from four to six costs 2% of a
-> screen; a stroke arriving late costs the illusion.
+> **THE MOUNTING WINDOW WAS A SAFETY DEVICE, AND IT CAUSED THE GAPS.** Strokes
+> were first mounted six at a time, the window advanced through `runOnJS`, on
+> the reasoning that a finished stroke should have nothing attached and that six
+> ahead would outrun a busy JS thread. Six strokes were as little as **34ms** of
+> drawing and **259ms** at the median, and §19 measured that thread stalling
+> **392ms** at launch — so under load the pen drew strokes that did not exist yet,
+> and they popped in finished when JS caught up. Every stroke is mounted from the
+> first frame now; the UI thread runs the whole drawing and JS is not asked
+> anything. `check:launch` §4b reads the `shallowEqual` guard out of
+> node_modules, because that one line is what makes this affordable and an
+> upgrade that dropped it would repaint every stroke on every frame.
 
 **ONE CLOCK RUNS ALL OF IT.** `progress` is the readout and `u` is that same
 value re-expressed as the drawing's 0→1 timeline; the pen, the marker, the light
@@ -5475,6 +5480,71 @@ the splash colour and settles onto white, so the hand-off has no seam.
 the 3.74s the title page took.** That is a floor on every cold start, so
 `check:launch` holds it as a number rather than leaving it to be tuned by feel
 until somebody notices the app has become slow to open.
+
+### And the scribble had gaps and was sliced at the bottom — the tangle is one line now
+
+> *"for the scribble … it seems to be cut off a little bit on the bottom. And …
+> there seems to be gaps in the scribble sometimes. Is there a way to fix it so
+> it's all one continuous line?"*
+
+Measured before anything changed (`scratchpad/ink2/measure.mjs`), all three
+halves were real, and the graph walk above had produced every one of them:
+
+- **The tangle was 25 pieces with a pen lift between every two** — jumps of 28 to
+  824 units. The pen was never drawing a line; it drew a piece, lifted, and
+  started somewhere else.
+- **17 crossings were simply not drawn** — red in the overlay, the largest a
+  whole cluster 1,340px across. The walk stopped at every node it could not
+  pair, and a stopped walk rules nothing across the crossing it stopped in.
+- **The SOURCE is cropped.** Six lines run off the bottom of the JPEG at five
+  points (two meet in a V right at the edge), and a trace of a cropped picture
+  ends where the picture does. "Cut off at the bottom" was literal.
+- **And the JS mounting window** above, which is the "sometimes".
+
+**THE TANGLE IS RE-TRACED BY FOLLOWING THE INK, NOT THE SKELETON.** A pen has a
+position, a heading and a curvature; at each 1-unit step the follower takes the
+arc that stays on the ink (read off an exact distance field) and changes the
+curvature least, which is what carries a pen straight through a crossing without
+any graph to get wrong. Its one essential rule is learned from its first run: **it
+may not run along ink it has already drawn in the same direction** — one wrong
+turn in the crowded bottom junction and it retraced the whole line backwards to
+the entrance.
+
+**ONE PASS CANNOT DRAW IT ALL, AND THE REMAINDER IS CIRCUITS.** A local follower
+reaches the exit early whatever the pairing, and what it leaves is exactly what a
+one-stroke figure leaves once a pass from one end to the other is taken out:
+closed circuits crossing the drawn line. Each is followed from a crossing and
+spliced in there — **Hierholzer's method, with the follower walking the
+circuits.** Circuits through the dense double line at x ≈ 620–640 (three or four
+strands lying on top of each other) could not close, because the no-retrace rule
+cannot tell a second strand from the first; those last runs are paired by
+geometry instead — ends that face each other across the drawn line with ink
+between — and the rest joined along the ink. Result: **one continuous line, 30
+strokes, 0 lifts, missed ink 17 gaps → 4 slivers of under 112px**, none visible
+at phone scale.
+
+**THE CROPPED ENDS ARE CLOSED BELOW THE OLD FRAME.** The V becomes a teardrop
+(tangent-circle construction from the two arms' own headings); the other four
+pair into a long swoosh and a small loop, each a cubic leaving along one line's
+heading and coming in along the other's. Of the three ways to pair them, the one
+used left the least ink for the circuits and makes the smallest loops. `ART` is
+68 units taller, so the drawing and the title under it sit a few points lower.
+
+**THE SPLINE IS FITTED ONCE, END TO END, AND ONLY THEN CUT.** Fitting each stroke
+separately would clamp the Catmull-Rom tangent at every cut and put a kink
+there. Cut after fitting, consecutive strokes share an end point exactly and meet
+with a continuous tangent, and with a floor of 0 in the tangle's schedule the pen
+holds one speed across every cut. Each box is now measured on the CURVE plus the
+pen's half width — the first emitter measured the simplified points, which a
+curve can bulge past.
+
+`check:launch` §4d holds all of it on the curves themselves: every stroke starts
+where the last ended, the tangle runs straight into the journey, the only lift is
+onto the filament, the line enters at x 0, the lowest ink is below 1128, no
+stroke leaves its box, and every dash covers its curve. Counter-tested seven
+ways, including both shipped files. The tracer lives in `scratchpad/ink2/`
+(`pen.mjs`, `line.mjs`, `splice.mjs`, `leftover.mjs`, `emit2.mjs`) — session
+scratch, like the first one, so the reasoning above is the part that survives.
 
 ### The first four seconds, and the two cuts hiding in them
 

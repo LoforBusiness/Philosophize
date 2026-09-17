@@ -37,9 +37,11 @@ const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm,
 
 const screenRaw = read('components/launch/LaunchScreen.tsx');
 const screen = strip(screenRaw);
-const drawRaw = read('components/launch/InkDrawing.tsx');
+// The two drawing files can be pointed elsewhere, so a counter-test can put a
+// defect back without touching the working tree.
+const drawRaw = read(process.env.LAUNCH_DRAW || 'components/launch/InkDrawing.tsx');
 const draw = strip(drawRaw);
-const artSrc = read('components/launch/inkArt.ts');
+const artSrc = read(process.env.LAUNCH_ART || 'components/launch/inkArt.ts');
 const launchArtSrc = read('components/launch/launchArt.ts');
 const designSrc = read('constants/design.ts');
 
@@ -212,15 +214,29 @@ let GROUND = '#FFFFFF';
 // None of that is visible in a screenshot and none of it is visible in a
 // browser, which is where this project can actually look at itself — so it is
 // held here, structurally, or it will be refactored away by somebody tidying.
+//
+// THE WINDOW IS GONE, AND THIS IS WHY IT IS SAFE. Strokes used to be mounted six
+// at a time from the JS thread, so a launch stall longer than the window left the
+// pen drawing strokes that did not exist yet — the gaps a reader reported. Every
+// stroke is mounted now and keeps its animated props, which is only cheap because
+// Reanimated does not write a value that has not changed: a stroke before or
+// after its slice returns the same number every frame and is never written. That
+// is a property of a DEPENDENCY, so it is read out of node_modules here — an
+// upgrade that drops it would make every stroke repaint on every frame.
 {
-  ok(/const LOOKAHEAD = \d+;/.test(draw),
-    'the live window is a named constant',
-    'strokes past it are not mounted; strokes before it do not animate');
-  ok(/animatedProps=\{live \? drawing : undefined\}/.test(draw),
-    'a finished stroke has no animated props attached',
-    'setStrokeDashoffset ends in a bare invalidate() — an attached prop repaints its SvgView every frame');
-  ok(/ALL\.slice\(0, mounted\)/.test(draw) && /Math\.min\(ALL\.length, done \+ LOOKAHEAD\)/.test(draw),
-    'and only the window is mounted at all');
+  ok(!/runOnJS|useAnimatedReaction|useState/.test(draw),
+    'nothing about the drawing waits on the JS thread',
+    'a window advanced through runOnJS fell behind the pen whenever launch stalled');
+  ok(/MARK\.map\(/.test(draw) && /INK\.map\(/.test(draw) && !/\.slice\(0, /.test(draw),
+    'every stroke is mounted from the first frame');
+  ok(/animatedProps=\{drawing\}/.test(draw) && /strokeDasharray=\{`\$\{s\.len\} \$\{s\.len \+ 2\}`\}/.test(draw),
+    'and each keeps its dash and its animated props for the whole draw');
+  const ras = read('node_modules/react-native-reanimated/src/hook/useAnimatedStyle.ts');
+  const rap = read('node_modules/react-native-reanimated/src/hook/useAnimatedProps.ts');
+  ok(/if \(!shallowEqual\(oldValues, newValues\) \|\| forceUpdate\) \{\s*updateProps\(/.test(ras)
+    && /return \(useAnimatedStyle as UseAnimatedStyleInternal<Props>\)\(/.test(rap),
+    'Reanimated still skips a prop that has not changed',
+    'setStrokeDashoffset ends in a bare invalidate() — were every value written, every stroke would repaint every frame');
   // One <Svg> per stroke, sized to that stroke's own box — the tiling itself.
   ok(/width=\{s\.w \* scale\}/.test(draw) && /height=\{s\.h \* scale\}/.test(draw)
     && /viewBox=\{`\$\{s\.x\} \$\{s\.y\} \$\{s\.w\} \$\{s\.h\}`\}/.test(draw),
@@ -232,6 +248,93 @@ let GROUND = '#FFFFFF';
   ok((draw.match(/<Svg/g) ?? []).length === 2,
     'there are exactly two kinds of <Svg> here: a stroke, and the inert lamp',
     'the light is carried by the View’s opacity and scale, never by SVG properties');
+}
+
+// ── 4d · one continuous line, nothing cut off ────────────────────────────────
+//
+//   "for the scribble … it seems to be cut off a little bit on the bottom. And
+//    … there seems to be gaps in the scribble sometimes. Is there a way to fix
+//    it so it's all one continuous line?"
+//
+// Both were true of the first trace and neither could be seen in its numbers:
+// the tangle was 25 pieces with a pen lift between every two, 17 crossings were
+// not drawn at all, and six lines stopped dead where the source JPEG is cropped.
+// The rules below are the ones that picture breaks, and they are measured on the
+// curves themselves rather than read off the stored boxes.
+{
+  const PEN_HALF = 3.6;               // InkDrawing's PEN_W / 2
+  const MARK_HALF = 21 / 2;           // InkDrawing's MARK_W / 2, when a stroke declares no sw
+  const section = (name) => {
+    const at = artSrc.indexOf(`export const ${name}: InkStroke[] = [`);
+    const end = artSrc.indexOf('\n];', at);
+    return [...artSrc.slice(at, end).matchAll(/\{ d: '([^']*)', len: (\d+), x: (-?\d+), y: (-?\d+), w: (\d+), h: (\d+)(?:, sw: ([\d.]+))? \}/g)]
+      .map((m) => ({ d: m[1], len: +m[2], x: +m[3], y: +m[4], w: +m[5], h: +m[6], sw: m[7] ? +m[7] : null }));
+  };
+  const bez = (p, t) => { const u = 1 - t; return [0, 1].map((k) => u*u*u*p[0][k] + 3*u*u*t*p[1][k] + 3*u*t*t*p[2][k] + t*t*t*p[3][k]); };
+  /** start, end, arc length and sampled points of an M/C path. */
+  const walk = (d) => {
+    const tok = d.match(/[MC]|-?\d*\.?\d+/g);
+    let i = 0, pen = null, start = null, len = 0, lifts = 0;
+    const pts = [];
+    while (i < tok.length) {
+      const t = tok[i++];
+      if (t === 'M') { if (pen) lifts++; pen = [+tok[i++], +tok[i++]]; start ??= pen; pts.push(pen); continue; }
+      const c = [pen, [+tok[i++], +tok[i++]], [+tok[i++], +tok[i++]], [+tok[i++], +tok[i++]]];
+      let prev = pen;
+      for (let s = 1; s <= 48; s++) { const q = bez(c, s / 48); len += Math.hypot(q[0] - prev[0], q[1] - prev[1]); pts.push(q); prev = q; }
+      pen = c[3];
+    }
+    return { start, end: pen, len, pts, lifts };
+  };
+  const tangle = section('TANGLE').map((s) => ({ ...s, w_: walk(s.d), half: PEN_HALF }));
+  const journey = section('JOURNEY').map((s) => ({ ...s, w_: walk(s.d), half: PEN_HALF }));
+  const hatch = section('HATCH').map((s) => ({ ...s, w_: walk(s.d), half: (s.sw ?? 21) / 2 || MARK_HALF }));
+  const same = (a, b) => a && b && a[0] === b[0] && a[1] === b[1];
+
+  const breaks = [];
+  for (let i = 1; i < tangle.length; i++) if (!same(tangle[i - 1].w_.end, tangle[i].w_.start)) breaks.push(i);
+  ok(tangle.length > 0 && breaks.length === 0,
+    'the ball of ink is one line: every stroke starts where the last one ended',
+    breaks.length ? `the pen lifts before stroke${breaks.length > 1 ? 's' : ''} ${breaks.slice(0, 6).join(', ')}${breaks.length > 6 ? ` and ${breaks.length - 6} more` : ''}` : `${tangle.length} strokes, 0 lifts`);
+  ok(same(tangle[tangle.length - 1]?.w_.end, journey[0]?.w_.start),
+    'and it carries straight on into the line to the bulb',
+    `tangle ends at (${tangle[tangle.length - 1]?.w_.end}), the journey starts at (${journey[0]?.w_.start})`);
+  const inner = [...tangle, ...journey].filter((s) => s.w_.lifts > 0).length;
+  ok(inner === 0, 'no stroke lifts the pen inside itself', `${inner} do`);
+  ok(journey.length === 2, 'the only lift in the whole pen line is the one the drawing has: onto the filament',
+    `${journey.length} journey strokes`);
+  ok(tangle[0]?.w_.start[0] <= 0.5,
+    'the line comes in at the very edge of the page',
+    `it starts at x ${tangle[0]?.w_.start[0]}`);
+
+  // A trace that stops where its source is cropped is a line with an end in the
+  // middle of the page, so the rule above already catches the old defect. This
+  // one says it in the reader's words: the lowest ink sits below the source's
+  // bottom edge (1128), because the lines that ran off it are closed there.
+  const lowest = Math.max(...tangle.flatMap((s) => s.w_.pts.map((p) => p[1])));
+  ok(lowest > 1128 + 10, 'the lines that ran off the source are closed below it, not sliced at it',
+    `the tangle reaches y ${lowest.toFixed(0)}; the source ends at 1128`);
+
+  // Each stroke is drawn in an <Svg> exactly its box: anything past the box is
+  // clipped, which is precisely "cut off". And the dash must cover the curve, or
+  // the stroke's last stretch never draws.
+  const clipped = [], short = [];
+  for (const [name, list] of [['TANGLE', tangle], ['JOURNEY', journey], ['HATCH', hatch]]) {
+    list.forEach((s, i) => {
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (const [x, y] of s.w_.pts) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+      const over = Math.max(s.x - (x0 - s.half), s.y - (y0 - s.half), x1 + s.half - (s.x + s.w), y1 + s.half - (s.y + s.h));
+      if (over > 0.05) clipped.push(`${name}[${i}] by ${over.toFixed(1)}`);
+      if (s.w_.len > s.len + 0.01) short.push(`${name}[${i}] ${s.len} < ${s.w_.len.toFixed(1)}`);
+    });
+  }
+  ok(clipped.length === 0, 'no stroke is clipped by its own <Svg>', clipped.slice(0, 4).join(' · ') || 'every curve sits inside its box, pen width included');
+  ok(short.length === 0, 'every dash covers its whole curve', short.slice(0, 4).join(' · ') || 'a finished stroke keeps its dash, so this is what draws its end');
+
+  const art = artSrc.match(/export const ART = \{ x: (-?\d+), y: (-?\d+), w: (\d+), h: (\d+) \}/);
+  const all = [...tangle, ...journey, ...hatch];
+  ok(!!art && all.every((s) => s.x >= +art[1] && s.y >= +art[2] && s.x + s.w <= +art[1] + +art[3] && s.y + s.h <= +art[2] + +art[4]),
+    'and every box sits inside ART, so the page reserves room for all of it');
 }
 
 // ── 4c · ONE clock ───────────────────────────────────────────────────────────
