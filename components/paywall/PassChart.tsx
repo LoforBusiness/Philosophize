@@ -5,9 +5,13 @@ import Animated, {
   useSharedValue, useAnimatedStyle, withDelay, withSequence, withTiming, interpolate,
   Extrapolation, Easing, type SharedValue,
 } from 'react-native-reanimated';
-import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
+import StatSticker from '@/components/shared/StatSticker';
+import RankSeal from '@/components/shared/RankSeal';
+import BadgeMedal from '@/components/shared/BadgeMedal';
+import { RANKS, rankOrder, rankDegree } from '@/data/ranks';
+import { BADGES } from '@/data/badges';
 import { StruckTile } from '@/components/profile/Struck';
-import { INK, MID, GHOST, PAPER, PAPER_LIT, mix, PATINA, EMBER_INK, FLAT_EDGE } from '@/components/shared/tone';
+import { INK, MID, GHOST, PAPER, PAPER_LIT, mix, PATINA, FLAT_EDGE, FLOOR, FLOOR_CUT } from '@/components/shared/tone';
 import { SPACE } from '@/constants/design';
 import {
   compareRows, includedTiles, type Cell, type CompareRow, type IncludedTile,
@@ -49,8 +53,14 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 
 
-/** The Free column's panel: a breath of the locked slate, the quieter of the two. */
-const FREE_PANEL = mix(PAPER, GHOST, 0.16);
+/**
+ * The Free column's panel: a WELL cut into the page, not a raised slab
+ * (2026-09-16). Raised against inset IS the comparison — the Pass column stands
+ * up on its ledge, and the free one sits down into the paper — which says "one
+ * of these is more" without a single extra colour. A neutral floor with its dark
+ * hairline along the top, where the light cannot reach into a cut.
+ */
+const FREE_PANEL = FLOOR;
 /** The "not at all" token. check-pass measures it on the panel, and the cross on it. */
 const NO_DISC = mix(GHOST, INK, 0.36);
 /** The hairline between rows. Neutral: the tan one it replaced leaned gold. */
@@ -95,14 +105,34 @@ const STAMP_AT = 0.26;
 const STAMP_STEP = 0.09;
 const STAMP_LEN = 0.22;
 
-const TILE_ICON: Record<IncludedTile['id'], SketchIconName> = {
-  library: 'book',
-  thinkers: 'hat',
-  quotes: 'bookmark',
-  ranks: 'star',
-  badges: 'spark',
-  streak: 'flame',
-};
+/**
+ * WHAT EACH TILE WEARS (2026-09-16). It was a thin line icon in the ember, which
+ * made six of the app's best things read as a spec sheet. Each now wears the
+ * thing itself: the same stickers Profile's counts wear, a real rank crest and a
+ * real badge medal — the first bronze rung, at its plainest degree, and a first-tier
+ * medal, the two plainest in their sets, because a crest at 20pt keeps only its
+ * silhouette.
+ */
+const TILE_RANK = RANKS.findIndex((_, i) => rankOrder(i) === 'BRONZE' && rankDegree(i) === 0);
+const TILE_BADGE = BADGES.find((b) => b.tier === 1) ?? BADGES[0];
+const ICON = 19;
+
+function TileIcon({ id }: { id: IncludedTile['id'] }) {
+  switch (id) {
+    case 'library': return <StatSticker name="lessons" size={ICON} />;
+    case 'thinkers': return <StatSticker name="thinkers" size={ICON} />;
+    case 'quotes': return <StatSticker name="quotes" size={ICON} />;
+    case 'streak': return <StatSticker name="xp" size={ICON} />;
+    case 'ranks': {
+      const i = Math.max(0, TILE_RANK);
+      return <RankSeal glyph={RANKS[i].glyph} state="earned" size={ICON + 1} order={rankOrder(i)} degree={rankDegree(i)} />;
+    }
+    case 'badges':
+      return (
+        <BadgeMedal family={TILE_BADGE.family} tier={TILE_BADGE.tier} glyph={TILE_BADGE.glyph} earned size={ICON + 1} />
+      );
+  }
+}
 
 /**
  * The driver for a chart's arrival, and the call that plays it.
@@ -142,7 +172,9 @@ export default function PassChart({ size = 'full', width = 0, play }: {
       {/* The two columns are drawn first, as panels, and the rows are laid over
           them. That is what keeps a row one height across all three columns when
           its label wraps on a narrow phone. */}
-      <View style={s.freePanel} />
+      <View style={s.freePanel}>
+        <View style={s.freeCut} />
+      </View>
       <View style={s.passFrame}>
         {/* A SLAB, NOT `elevation`. On Android an elevated view is drawn above
             its unelevated siblings whatever the JSX order, so a shadowed frame
@@ -153,6 +185,11 @@ export default function PassChart({ size = 'full', width = 0, play }: {
             be rid of. The column still stands on its hard lip, which is where
             its depth always was. */}
         <View style={s.passFace}>
+          {/* TWO GLARE STRIPES across the head, hard-edged and faint: the struck
+              object's shine, drawn the way the rank crests and Duolingo's gold
+              draw theirs — flat bands at an angle, never a soft gradient. */}
+          <View pointerEvents="none" style={s.glareA} />
+          <View pointerEvents="none" style={s.glareB} />
           {play ? <Sheen play={play} tableH={tableH} style={s.sheen} /> : null}
           <View style={s.passCard}>
             <View style={s.passCut} />
@@ -304,7 +341,7 @@ function Tile({ tile }: { tile: IncludedTile }) {
   return (
     <StruckTile pad={2} style={st.tile}>
       <View style={st.tileTop}>
-        <SketchIcon name={TILE_ICON[tile.id]} size={17} color={EMBER_INK} />
+        <TileIcon id={tile.id} />
         <Text style={st.tileFigure} numberOfLines={1}>{tile.figure}</Text>
       </View>
       <Text style={st.tileNoun} numberOfLines={2}>{tile.noun}</Text>
@@ -326,12 +363,23 @@ function sized(m: Metrics) {
     freePanel: {
       position: 'absolute', top: m.lift, bottom: m.lip + m.frame,
       right: m.passW - m.frame * 3, width: m.freeW + m.frame * 3,
-      borderRadius: m.radius - 2, backgroundColor: FREE_PANEL,
+      borderRadius: m.radius - 2, backgroundColor: FREE_PANEL, overflow: 'hidden',
     },
     passFrame: { position: 'absolute', top: 0, bottom: 0, right: 0, width: m.passW },
     passLip: {
       position: 'absolute', left: 0, right: 0, top: m.lip, bottom: 0,
       borderRadius: m.radius, backgroundColor: PATINA.rim,
+    },
+    freeCut: {
+      position: 'absolute', left: 0, right: 0, top: 0, height: 2, backgroundColor: FLOOR_CUT,
+    },
+    glareA: {
+      position: 'absolute', top: -m.headH, left: m.passW * 0.14, width: m.passW * 0.16, height: m.headH * 3,
+      backgroundColor: PAPER_LIT, opacity: 0.1, transform: [{ rotate: '34deg' }],
+    },
+    glareB: {
+      position: 'absolute', top: -m.headH, left: m.passW * 0.4, width: m.passW * 0.07, height: m.headH * 3,
+      backgroundColor: PAPER_LIT, opacity: 0.1, transform: [{ rotate: '34deg' }],
     },
     passFace: {
       position: 'absolute', left: 0, right: 0, top: 0, bottom: m.lip,

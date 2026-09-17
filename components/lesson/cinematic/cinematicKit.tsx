@@ -1905,8 +1905,11 @@ export const styles = StyleSheet.create({
   // lesson where the reader most wants to be told which of those it was.
   // A STRUCK CARD, not a tinted box with a rule down one side: a border all the
   // way round and a heavier foot, the same lip every answer control stands on.
+  // Its radius is 12 as a number, not RADIUS.card: the app's cards went to 16 in
+  // the depth pass of 2026-09-16, which was scoped to the five tabs, and the
+  // lessons were deliberately left exactly as they were.
   explain: {
-    marginTop: 4, borderRadius: RADIUS.card, borderWidth: 1.5, borderBottomWidth: 4,
+    marginTop: 4, borderRadius: 12, borderWidth: 1.5, borderBottomWidth: 4,
     paddingHorizontal: 12, paddingTop: 8, paddingBottom: 9,
   },
   explainRight: { backgroundColor: RIGHT_BG, borderColor: RIGHT },

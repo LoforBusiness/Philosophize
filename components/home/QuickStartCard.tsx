@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { View, Text, StyleSheet, ImageBackground, type ImageSourcePropType } from 'react-native';
 import { openLesson } from '@/components/lesson/lessonNav';
 import { LinearGradient } from 'expo-linear-gradient';
-import PressableScale from '@/components/shared/PressableScale';
+import Card from '@/components/ui/Card';
+import { mix } from '@/components/shared/tone';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { pickQuickStart, quickStartArtIndex } from '@/lib/utils/quickStart';
 
@@ -73,7 +74,10 @@ export default function QuickStartCard({ style }: Props) {
   const open = () => openLesson(pick.branch.slug, pick.unit.slug, pick.lesson.id);
 
   return (
-    <PressableScale onPress={open} style={[styles.card, style]}>
+    // ON THE TEAL LEDGE (2026-09-16), like the app's primary button: the card is
+    // the one big thing on Home you press, so it stands on a solid ledge and sinks
+    // onto it rather than shrinking. The hard offset shadow it carried is gone.
+    <Card tone="ink" onPress={open} pad={0} style={styles.card} containerStyle={style} accessibilityLabel={`Start ${pick.lesson.title}`}>
       <ImageBackground source={art} style={styles.bg} imageStyle={styles.img} resizeMode="cover">
         {/* Stops are computed from the card's height: the body is a fixed number
             of dp, so its FRACTION shrinks as the card grows, and a hard-coded
@@ -103,32 +107,30 @@ export default function QuickStartCard({ style }: Props) {
           {/* Full width, not a pill. The whole card has always been tappable, but
               a small button in a corner reads as the only live thing on it — the
               bar says the card is the target. */}
-          <View style={styles.cta}>
-            <Text style={styles.ctaText}>▶   START LESSON</Text>
+          {/* A BUTTON ON ITS OWN LEDGE, not a cream strip. It sinks with the
+              card rather than on its own: the whole card is the target. */}
+          <View style={styles.ctaWrap}>
+            <View style={styles.ctaLedge} />
+            <View style={styles.cta}>
+              <Text style={styles.ctaText}>▶   START LESSON</Text>
+            </View>
           </View>
         </View>
       </ImageBackground>
-    </PressableScale>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 6,
-    backgroundColor: Ink, // holds the frame for the frame before the image decodes
+    // Card draws the ink face, its 2px edge and the ledge; the picture is
+    // clipped to the face's corners.
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 0,
-    shadowOffset: { width: 2, height: 3 },
-    elevation: 3,
   },
   // width must be stated: an ImageBackground with no width takes the picture's
   // own intrinsic width, not the space it was given.
   bg: { width: '100%', height: QS_CARD_H, justifyContent: 'space-between' },
-  img: { borderRadius: 4.5 },
+  img: { borderRadius: 14 },
 
   top: { paddingHorizontal: 14, paddingTop: 14, flexDirection: 'row' },
   tab: {
@@ -140,7 +142,9 @@ const styles = StyleSheet.create({
   tabText: { fontFamily: 'Inter_700Bold', fontSize: 10, color: Cream, letterSpacing: 1.8 },
 
   // These six numbers ARE QS_BODY_DP in constants/quickStartArt.ts — 80 of title
-  // + 10 + 15 of meta + 16 + 53 of button + 17 of padding = 191. The scrim's
+  // + 10 + 15 of meta + 16 + 53 of button + 17 of padding = 191. The button's 53
+  // is 49 of face and 4 of ledge since 2026-09-16: its padding came down by 2 a
+  // side to pay for the ledge, so the total did not move. The scrim's
   // deepening and the check's measuring band are both derived from that figure,
   // so changing a size here without changing it there moves the type out from
   // under the wash that protects it.
@@ -161,13 +165,17 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textTransform: 'uppercase',
   },
+  ctaWrap: { alignSelf: 'stretch', marginTop: 16, paddingBottom: 4 },
+  ctaLedge: {
+    position: 'absolute', left: 0, right: 0, top: 4, bottom: 0,
+    borderRadius: 12,
+    backgroundColor: mix(Cream, Ink, 0.34),
+  },
   cta: {
-    alignSelf: 'stretch',
     alignItems: 'center',
     backgroundColor: Cream,
-    borderRadius: 5,
-    paddingVertical: 17,
-    marginTop: 16,
+    borderRadius: 12,
+    paddingVertical: 15,
   },
   ctaText: { fontFamily: 'Inter_700Bold', fontSize: 15, color: Ink, letterSpacing: 1.7 },
 });

@@ -89,6 +89,15 @@ export const C = {
   surface: '#FFFFFF',
   surfaceSoft: '#F4F2EC',
   hairline: '#E7E3DA',
+  /** THE EDGE OF A SURFACE, AND THE LEDGE UNDER ONE YOU CAN PRESS (2026-09-16).
+   *
+   *  Paper taken 12% toward ink, with no warmth added — `FLAT_EDGE` in
+   *  components/shared/tone.ts is the same mix, and check-ui holds the two equal.
+   *  It is Duolingo's construction measured off their live CSS: a white face,
+   *  a 2px edge in a pale neutral grey, and — only on something you can press —
+   *  a solid ledge in the SAME grey under it. 1.34:1 on white, where theirs is
+   *  1.26. The fourteenth colour, which is the cap. */
+  edge: '#DFDFDC',
 
   // ── THE ANSWER STATES, AND THE ONE PLACE LOUD IS CORRECT ──────────────────
   //
@@ -301,7 +310,20 @@ export const TYPE: Record<TypeKey, {
 export const SPACE = [4, 8, 12, 16, 24, 32] as const;
 export type SpaceKey = 0 | 1 | 2 | 3 | 4 | 5;
 
-export const RADIUS = { card: 12, button: 14, pill: 999 } as const;
+/**
+ * 16 for a card since 2026-09-16: the owner asked for the screens outside the
+ * lessons to feel more gamified, and every reference measured for it (Duolingo's
+ * live CSS uses 16 on 205 rules and 12 on 111; Brilliant's course cards match)
+ * rounds a surface more than the 12 this was. Two radii and the pill, no more.
+ */
+export const RADIUS = { card: 16, button: 14, pill: 999 } as const;
 
-/** How far a pressable drops onto its own shadow. */
-export const LIP = { button: 4, card: 2 } as const;
+/**
+ * How far a pressable drops onto its own ledge.
+ *
+ * The card's went 2 → 3 with the same pass, and the chip is new. Duolingo's
+ * white buttons carry a 2px edge plus a 2px ledge; a card here is a larger
+ * object, and at 2 the ledge read as a slightly heavy bottom border rather than
+ * as something to press.
+ */
+export const LIP = { button: 4, card: 3, chip: 2 } as const;

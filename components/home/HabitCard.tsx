@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
-import PressableScale from '@/components/shared/PressableScale';
+import Card from '@/components/ui/Card';
+import StatSticker from '@/components/shared/StatSticker';
 import StreakPanel from '@/components/gamification/StreakPanel';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -95,11 +96,16 @@ export default function HabitCard({
     // The WHOLE panel opens the month, not just its head. The streak is the thing
     // readers come back to check, and making them find the one strip of it that
     // happened to be pressable is a puzzle nobody asked for.
-    <PressableScale
+    // ON THE TEAL LEDGE (2026-09-16), the depth kit's dark tappable panel: an ink
+    // face standing on the ledge the primary button stands on, sinking onto it
+    // when pressed. It replaced a scale-down over a hard offset shadow.
+    <Card
+      tone="ink"
+      pad={0}
       onPress={() => router.push('/(app)/streak')}
       containerStyle={style}
       style={styles.panel}
-      scaleTo={0.985}
+      accessibilityLabel="Open your streak month"
     >
       {/* The panel's own section head, so all three things below Quick Start are
           named the same way — and the half of it that says where the tap goes.
@@ -126,39 +132,38 @@ export default function HabitCard({
           is a caption about your progress rather than a display of it. */}
       <View style={styles.foot}>
         <View style={styles.stat}>
-          <Text style={styles.statNum} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
-            {lessons.toLocaleString()}
-          </Text>
+          <View style={styles.statTop}>
+            <StatSticker name="lessons" size={24} line={CREAM} />
+            <Text style={styles.statNum} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
+              {lessons.toLocaleString()}
+            </Text>
+          </View>
           <Text style={styles.statWord}>{lessons === 1 ? 'LESSON' : 'LESSONS'}</Text>
         </View>
         <View style={styles.divider} />
         <View style={styles.stat}>
-          <Text style={styles.statNum} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
-            {xp.toLocaleString()}
-          </Text>
+          <View style={styles.statTop}>
+            <StatSticker name="xp" size={24} line={CREAM} />
+            <Text style={styles.statNum} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
+              {xp.toLocaleString()}
+            </Text>
+          </View>
           <Text style={styles.statWord}>XP EARNED</Text>
         </View>
       </View>
-    </PressableScale>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
   panel: {
+    // Card paints the ink face and stands it on the teal ledge Quick Start also
+    // stands on, so the two solid objects on this page are made of the same
+    // stuff. The 2px ink edge is invisible against the face, which is the point.
     backgroundColor: INK,
-    borderRadius: 6,
     paddingTop: 16,
     paddingBottom: 4,
     paddingHorizontal: 16,
-    // The same hard offset shadow Quick Start carries, so the two solid objects
-    // on this page are made of the same stuff. No border: a dark field on cream
-    // paper is already its own edge, and an ink outline round an ink panel is a
-    // line nobody can see.
-    shadowColor: '#000',
-    shadowOpacity: 0.14,
-    shadowRadius: 0,
-    shadowOffset: { width: 2, height: 3 },
-    elevation: 3,
   },
 
   kickerRow: {
@@ -177,6 +182,7 @@ const styles = StyleSheet.create({
 
   foot: { flexDirection: 'row', alignItems: 'stretch', marginTop: 18 },
   stat: { flex: 1, alignItems: 'center', paddingVertical: 14 },
+  statTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   statNum: {
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 30,

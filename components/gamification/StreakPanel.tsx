@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
+import Meter from '@/components/ui/Meter';
 import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { ramp, rampFace } from '@/components/shared/tone';
@@ -239,13 +240,9 @@ export default function StreakPanel({
           {next ? `${toGo} DAY${toGo === 1 ? '' : 'S'}` : `${streak}`}
         </Text>
       </View>
-      {/* The same 10px pill the lesson runner and the welcome questions use, so a
-          reader meets one progress bar in this app rather than four. */}
-      <View style={[styles.track, { backgroundColor: rule }]}>
-        <View style={[styles.fill, { width: `${Math.round(pct * 100)}%`, backgroundColor: mark }]}>
-          <View style={styles.gloss} />
-        </View>
-      </View>
+      {/* The app's one progress bar outside the lessons (components/ui/Meter):
+          chunky, flat, with its shine, on this ground's own rule. */}
+      <Meter pct={pct} color={mark} height={12} track={rule} />
 
       {/* ── and what is in the bank against a bad day ──────────────────────── */}
       <View style={styles.restRow}>
@@ -318,17 +315,6 @@ const styles = StyleSheet.create({
   nextLabel: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 2 },
   nextDays: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.2 },
 
-  track: { height: 10, borderRadius: 999, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 999, justifyContent: 'flex-start' },
-  // The lit top edge every filled track in this app carries — see cinematicKit.
-  gloss: {
-    height: 3,
-    marginTop: 2,
-    marginHorizontal: 3,
-    borderRadius: 999,
-    backgroundColor: '#FFFFFF',
-    opacity: 0.26,
-  },
 
   restRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
   pips: { flexDirection: 'row', gap: 5 },

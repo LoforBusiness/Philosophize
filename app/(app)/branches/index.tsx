@@ -4,8 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import LearnPlate from '@/components/learn/LearnPlate';
-import PressableScale from '@/components/shared/PressableScale';
-import { getBranchBySlug } from '@/data';
+import Card from '@/components/ui/Card';
+import StatSticker from '@/components/shared/StatSticker';
+import { getBranchBySlug, branchCountsFromUnits } from '@/data';
+import { useUserDataStore } from '@/stores/userDataStore';
+import { BRANCH } from '@/constants/design';
+import { lipOf, mix } from '@/components/shared/tone';
 import {
   BRANCH_ART, SCRIM_TOP, SCRIM_MID, SCRIM_DEEP,
   ArtCream, ArtSoft, ArtFaint,
@@ -42,6 +46,8 @@ const SLUGS = PRES.map((p) => p.slug);
 
 export default function LearnScreen() {
   const { width: winW } = useWindowDimensions();
+  const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
+  const done = branchCountsFromUnits(lessonsByUnit);
   const cards = PRES.map((p) => {
     const branch = getBranchBySlug(p.slug);
     const units = branch?.paths ?? [];
@@ -68,10 +74,19 @@ export default function LearnScreen() {
           if (!c.branch) return null;
           const unitNames = c.units.map((u) => u.name.toUpperCase()).join(' · ');
           return (
-            <PressableScale
+            // A PLATE ON A LEDGE OF ITS OWN BRANCH'S COLOUR (2026-09-16). The
+            // photograph is the face and the branch hue, a fifth darker, is the
+            // solid ledge it sinks onto — the one place on this screen the six
+            // colours appear, and only as an edge.
+            <Card
               key={c.slug}
+              tone="ink"
+              pad={0}
+              ledge={lipOf(BRANCH[c.slug as keyof typeof BRANCH])}
               onPress={() => router.push(`/(app)/branches/${c.slug}`)}
               style={styles.card}
+              containerStyle={styles.cardBox}
+              accessibilityLabel={`Open ${c.branch.name}`}
             >
               <ImageBackground
                 source={BRANCH_ART[c.slug]}
@@ -87,6 +102,20 @@ export default function LearnScreen() {
                   locations={[0, 0.48, 1]}
                   style={StyleSheet.absoluteFill}
                 />
+                {/* HOW MUCH OF IT IS YOURS, as a count and never as "of 41":
+                    a bar measured against the library retreats from a reader
+                    every time lessons are added (CLAUDE.md §19). */}
+                {done[c.slug] > 0 && (
+                  <View style={styles.doneWrap}>
+                    <View style={styles.doneLedge} />
+                    <View style={styles.done}>
+                      <StatSticker name="lessons" size={16} />
+                      <Text style={styles.doneText}>
+                        {done[c.slug]} DONE
+                      </Text>
+                    </View>
+                  </View>
+                )}
                 <View style={styles.cardBody}>
                   <Text style={styles.branchKicker}>BRANCH {ROMAN[i]}</Text>
                   <View style={styles.nameRow}>
@@ -103,7 +132,7 @@ export default function LearnScreen() {
                   </Text>
                 </View>
               </ImageBackground>
-            </PressableScale>
+            </Card>
           );
         })}
 
@@ -147,24 +176,15 @@ const styles = StyleSheet.create({
 
   // Branch card — the picture IS the card now. Tall enough that a real part of
   // each portrait shows rather than a thin band of sky.
-  card: {
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 5,
-    backgroundColor: Ink, // shows for the frame before the image decodes
-    marginTop: 14,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 0,
-    shadowOffset: { width: 2, height: 3 },
-    elevation: 2,
-  },
+  // Card paints the ink face (it shows for the frame before the image decodes),
+  // the 2px edge and the ledge; the picture is clipped to the face's corners.
+  card: { overflow: 'hidden' },
+  cardBox: { marginTop: 14 },
   // width must be stated: an ImageBackground with no width takes the image's own
   // intrinsic width, so the narrow pictures left a bare strip of card down the
   // right-hand side and the wide ones overhung it.
   cardBg: { width: '100%', height: 152, justifyContent: 'flex-end' },
-  cardImg: { borderRadius: 3.5 },
+  cardImg: { borderRadius: 14 },
   cardBody: { paddingHorizontal: 16, paddingBottom: 14 },
   nameRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
 
@@ -190,6 +210,19 @@ const styles = StyleSheet.create({
   arrow: { fontFamily: 'Inter_400Regular', fontSize: 20, color: ArtCream, marginLeft: 8 },
 
   unitLine: { fontFamily: 'Inter_500Medium', fontSize: 9.5, color: ArtFaint, letterSpacing: 1, marginTop: 10 },
+
+  // The count in the top-right corner: a small cream pill on its own ledge.
+  doneWrap: { position: 'absolute', top: 12, right: 12, paddingBottom: 2 },
+  doneLedge: {
+    position: 'absolute', left: 0, right: 0, top: 2, bottom: 0,
+    borderRadius: 999, backgroundColor: mix(ArtCream, Ink, 0.34),
+  },
+  done: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    backgroundColor: ArtCream, borderRadius: 999,
+    paddingLeft: 7, paddingRight: 10, paddingVertical: 3,
+  },
+  doneText: { fontFamily: 'Inter_700Bold', fontSize: 10, color: Ink, letterSpacing: 1 },
 
   footer: {
     fontFamily: 'PlayfairDisplay_400Regular',

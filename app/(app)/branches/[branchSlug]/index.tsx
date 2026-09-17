@@ -10,11 +10,13 @@ import type { GlyphName } from '@/components/shared/Glyph';
 import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import Card from '@/components/ui/Card';
+import Meter from '@/components/ui/Meter';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { BRANCH_ART, MAST_SCRIM, ArtCream, ArtSoft, ArtGold } from '@/constants/branchArt';
-import { C, TYPE, SPACE, type TypeKey } from '@/constants/design';
+import { C, TYPE, SPACE, RADIUS, LIP, BRANCH, type TypeKey } from '@/constants/design';
+import { TINT, TINT_EDGE } from '@/components/shared/tone';
 import BranchWorld, { type WorldLesson } from '@/components/branch/BranchWorld';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
@@ -60,6 +62,7 @@ interface UnitModel {
 export default function BranchDetailScreen() {
   const { branchSlug } = useLocalSearchParams<{ branchSlug: string }>();
   const branch = getBranchBySlug(branchSlug);
+  const hue = BRANCH[branchSlug as keyof typeof BRANCH] ?? C.HUE;
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
   const isPro = useSubscriptionStore((s) => s.isPro);
   const openPaywall = useUIStore((s) => s.openPaywall);
@@ -308,15 +311,32 @@ export default function BranchDetailScreen() {
           style={styles.unitsBar}
           onLayout={(e) => setBarBottom(e.nativeEvent.layout.y + e.nativeEvent.layout.height)}
         >
+          {/* A RAISED CHIP ON ITS OWN LEDGE (2026-09-16), pressed in while the
+              drawer is open — the same "chosen" tint as the tab bar and the
+              Thinkers filters, rather than a solid ink swap. */}
           <Pressable
             onPress={() => setDrawerOpen((o) => !o)}
             hitSlop={8}
-            style={({ pressed }) => [styles.unitsBox, drawerOpen && styles.unitsBoxOpen, pressed && { opacity: 0.7 }]}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: drawerOpen }}
           >
-            <Text style={[styles.unitsLabel, drawerOpen && { color: C.paper }]}>Units</Text>
-            <MotiView animate={{ rotate: drawerOpen ? '0deg' : '-90deg' }} transition={{ type: 'timing', duration: 200 }}>
-              <SketchIcon name="chevron-down" size={12} color={drawerOpen ? C.paper : C.inkSoft} />
-            </MotiView>
+            {({ pressed }) => (
+              <View style={styles.unitsWrap}>
+                <View style={styles.unitsLedge} />
+                <View
+                  style={[
+                    styles.unitsBox,
+                    drawerOpen && styles.unitsBoxOpen,
+                    (drawerOpen || pressed) && { transform: [{ translateY: LIP.chip }] },
+                  ]}
+                >
+                  <Text style={styles.unitsLabel}>Units</Text>
+                  <MotiView animate={{ rotate: drawerOpen ? '0deg' : '-90deg' }} transition={{ type: 'timing', duration: 200 }}>
+                    <SketchIcon name="chevron-down" size={12} color={C.inkSoft} />
+                  </MotiView>
+                </View>
+              </View>
+            )}
           </Pressable>
         </View>
 
@@ -442,6 +462,13 @@ export default function BranchDetailScreen() {
                               {here ? ' · HERE' : ''}
                             </Text>
                             <Text style={styles.unitName} numberOfLines={1}>{u.unit.name}</Text>
+                            <Meter
+                              pct={u.total > 0 ? u.done / u.total : 0}
+                              color={hue}
+                              height={8}
+                              ground={here ? TINT : C.surface}
+                              style={styles.unitMeter}
+                            />
                           </View>
                           <Text style={styles.unitCount}>{u.done}/{u.total}</Text>
                           <MotiView
@@ -577,18 +604,23 @@ const styles = StyleSheet.create({
 
   // ── the units box ──────────────────────────────────────────────────────────
   unitsBar: { paddingHorizontal: SPACE[3], paddingBottom: SPACE[2], alignItems: 'flex-start' },
+  unitsWrap: { paddingBottom: LIP.chip },
+  unitsLedge: {
+    position: 'absolute', left: 0, right: 0, top: LIP.chip, bottom: 0,
+    borderRadius: RADIUS.pill, backgroundColor: C.edge,
+  },
   unitsBox: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACE[1],
-    borderWidth: 1.5,
-    borderColor: C.ink,
-    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: C.edge,
+    borderRadius: RADIUS.pill,
     paddingHorizontal: SPACE[2],
     paddingVertical: SPACE[0],
-    backgroundColor: C.paper,
+    backgroundColor: C.surface,
   },
-  unitsBoxOpen: { backgroundColor: C.ink },
+  unitsBoxOpen: { backgroundColor: TINT, borderColor: TINT_EDGE },
   unitsLabel: { ...role('micro'), fontFamily: 'Inter_700Bold', color: C.ink, letterSpacing: 1 },
 
   // ── the drawer ─────────────────────────────────────────────────────────────
@@ -597,11 +629,12 @@ const styles = StyleSheet.create({
     left: SPACE[3],
     right: SPACE[3],
     maxWidth: 320,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: C.ink,
-    borderRadius: 6,
+    borderRadius: RADIUS.card,
     backgroundColor: C.paper,
-    paddingVertical: SPACE[0],
+    paddingVertical: SPACE[1],
+    paddingHorizontal: SPACE[1],
     // A hard offset shadow, the same device the thinker cards use — a blurred
     // one is a grey smudge in a two-tone app. This stays its own hand-rolled
     // box rather than becoming a `Card`: it is a floating popover OVER the
@@ -621,7 +654,8 @@ const styles = StyleSheet.create({
   unitRowInner: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2] },
   // Passed as Card's own `style` override — Card's face is `surface` by
   // default; this is the one row the reader is standing in right now.
-  unitRowHere: { backgroundColor: C.surfaceSoft },
+  unitRowHere: { backgroundColor: TINT, borderColor: TINT_EDGE },
+  unitMeter: { marginTop: SPACE[1] },
   unitKicker: { ...role('micro'), fontFamily: 'Inter_700Bold', color: C.inkSoft, letterSpacing: 1.4 },
   unitName: { ...role('body'), fontFamily: PLAYFAIR_HEAD, color: C.ink, marginTop: SPACE[0] },
   unitCount: { ...role('micro'), color: C.inkSoft, letterSpacing: 0 },
@@ -668,7 +702,10 @@ const styles = StyleSheet.create({
   // Masthead
   masthead: {
     backgroundColor: C.ink, // holds the frame before the image decodes
-    borderRadius: 6,
+    // Rounded on TOP only: the road sits directly under it, square, and the two
+    // read as one object only if they meet on a straight edge.
+    borderTopLeftRadius: RADIUS.card,
+    borderTopRightRadius: RADIUS.card,
     paddingVertical: SPACE[5],
     paddingHorizontal: SPACE[3],
     alignItems: 'center',
@@ -681,7 +718,7 @@ const styles = StyleSheet.create({
     // rather than a horizontal sliver of it.
     minHeight: 232,
   },
-  mastImg: { borderRadius: 6 },
+  mastImg: { borderTopLeftRadius: RADIUS.card, borderTopRightRadius: RADIUS.card },
   mastKicker: { ...role('micro'), color: ArtGold, letterSpacing: 4 },
   mastTitle: {
     ...role('display'),

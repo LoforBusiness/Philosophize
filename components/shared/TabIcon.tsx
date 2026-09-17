@@ -161,9 +161,14 @@ const ART: Record<TabIconName, Part[]> = {
   ],
 };
 
-function Glyph({ name }: { name: TabIconName }) {
+/**
+ * One tab's drawing, on its own. Exported so the stat stickers elsewhere can use
+ * the SAME book and bust rather than a second, drifting copy of them; the tab
+ * bar itself draws it at 28pt exactly as before.
+ */
+export function TabGlyph({ name, size = SIZE, line = INK }: { name: TabIconName; size?: number; line?: string }) {
   return (
-    <Svg width={SIZE} height={SIZE} viewBox="0 0 32 32">
+    <Svg width={size} height={size} viewBox="0 0 32 32">
       {ART[name].map((p, i) => {
         if ('line' in p) {
           return (
@@ -172,7 +177,7 @@ function Glyph({ name }: { name: TabIconName }) {
         }
         const paint = {
           fill: p.fill ? FILL[p.fill] : 'none',
-          stroke: p.ink ? INK : 'none',
+          stroke: p.ink ? line : 'none',
           strokeWidth: p.ink ? (p.w ?? STROKE) : 0,
           strokeLinejoin: 'round' as const,
           strokeLinecap: 'round' as const,
@@ -233,7 +238,7 @@ function TabIcon({ name, lit, open }: { name: TabIconName; lit: boolean; open: b
     <View style={st.box} pointerEvents="none">
       {lit ? <Animated.View style={[st.tile, tile]} /> : null}
       <Animated.View style={icon}>
-        <Glyph name={name} />
+        <TabGlyph name={name} />
       </Animated.View>
     </View>
   );

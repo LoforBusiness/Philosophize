@@ -589,8 +589,12 @@ export function disc(hue: string): Disc {
 
 /** A raised surface: plain white. */
 export const FLAT_FACE = PAPER_LIT;
-/** The hairline round a raised surface. Neutral — the old `FAINT` leans tan. */
-export const FLAT_EDGE = mix(PAPER, INK, 0.09);
+/**
+ * The edge round a raised surface, and the ledge under one you can press.
+ * Neutral — the old `FAINT` leans tan. 0.12 of the way to ink (#DFDFDC), which
+ * is `C.edge` in constants/design.ts; check-ui holds the two equal.
+ */
+export const FLAT_EDGE = mix(PAPER, INK, 0.12);
 /** The floor of a cut-in surface: paper a breath down, with no warmth added. */
 export const FLOOR = mix(PAPER, INK, 0.035);
 /** The dark hairline along the top of a cut, where the light cannot reach. */
@@ -604,3 +608,44 @@ export const FLAT: Stops = [
   ['0%', PAPER_LIT, 1],
   ['100%', PAPER_LIT, 1],
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE DEPTH KIT: LEDGES, TRACKS, SHINE AND LOCKS (2026-09-16).
+//
+//   "it just doesn't look very gamified. It doesn't have a lot of depth … I
+//    don't want you just to put in a bunch of colors … stay away from AI looking
+//    designs."
+//
+// Measured off Duolingo's live stylesheets rather than guessed: 183 of them,
+// where a soft blurred shadow appears about five times (all on popovers) and a
+// hard ledge — `box-shadow: 0 Npx 0 <colour>`, no blur — appears everywhere a
+// thing can be pressed. That is the whole of their depth, and it needs no new
+// colour at all: a ledge is the surface's own colour, darker.
+//
+// So the rules, which the screens outside the lessons now follow:
+//   · a thing you can PRESS stands on a solid ledge and sinks onto it;
+//   · a thing you only READ sits flat in a 2px edge, with no ledge;
+//   · a bar is flat colour with a thin white shine along its top third;
+//   · a thing you have not unlocked keeps its shape and loses its colour —
+//     never its opacity, which reads as a rendering fault.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** The empty part of a bar: paper 7.5% toward ink (#E9E9E6). */
+export const TRACK = mix(PAPER, INK, 0.075);
+/** The shine along the top of a bar's fill: Duolingo's, white at 30%. */
+export const SHINE = 'rgba(255,255,255,0.3)';
+/** A bar's empty part on an INK ground. */
+export const TRACK_ON_INK = 'rgba(255,255,255,0.14)';
+/** A locked tile's face, edge and mark: the shape stays, the colour goes. */
+export const LOCK_FACE = mix(PAPER, INK, 0.06);
+export const LOCK_EDGE = mix(PAPER, INK, 0.16);
+export const LOCK_MARK = mix(PAPER, INK, 0.36);
+
+/**
+ * The ledge under a coloured face: the face taken a fifth of the way to black.
+ * That is Duolingo's own rule — their green #58CC02 stands on #46A302, which is
+ * 0.8 of it channel for channel.
+ */
+export function lipOf(face: string): string {
+  return mix(face, '#000000', 0.2);
+}

@@ -16,11 +16,12 @@
 // tile disappears for them rather than printing a dash, because an empty slot
 // with a label on it reads as a bug and an absent slot reads as a layout.
 // ─────────────────────────────────────────────────────────────────────────────
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { C, ERA, TYPE, SPACE, RADIUS, type EraKey } from '@/constants/design';
 import { ALL_BRANCHES } from '@/data';
 import { timelinePos, yearLabel, FIRST_YEAR, LAST_YEAR, type Lifespan } from '@/lib/utils/lifespan';
 import ThinkerSeal from './ThinkerSeal';
+import Card from '@/components/ui/Card';
 
 export function eraColour(era: string): string {
   return ERA[era as EraKey] ?? C.inkSoft;
@@ -171,12 +172,13 @@ export function ContemporariesRow({
       </Text>
       <View style={styles.contemRow}>
         {notable.map((n) => (
-          <Pressable
+          <Card
             key={n.id}
             onPress={() => onOpen(n.id)}
-            accessibilityRole="button"
             accessibilityLabel={`Open ${n.name}`}
-            style={({ pressed }) => [styles.contemCard, pressed && styles.contemPressed]}
+            pad={2}
+            containerStyle={styles.contemBox}
+            style={styles.contemCard}
           >
             {/* The same struck tile the collection uses, so a contemporary looks
                 like the thing you are about to go and collect. It carries THIS
@@ -185,7 +187,7 @@ export function ContemporariesRow({
                 by their own eras would turn one thought into four. */}
             <ThinkerSeal initial={n.name.charAt(0)} tint={tint} met size={34} />
             <Text style={styles.contemName} numberOfLines={2}>{n.name}</Text>
-          </Pressable>
+          </Card>
         ))}
       </View>
     </View>
@@ -233,17 +235,8 @@ const styles = StyleSheet.create({
   contemLead: { ...TYPE.body, color: C.inkSoft, marginBottom: SPACE[2] },
   contemCount: { ...TYPE.title },
   contemRow: { flexDirection: 'row', gap: SPACE[1] },
-  contemCard: {
-    flex: 1,
-    alignItems: 'center',
-    gap: SPACE[0],
-    paddingVertical: SPACE[2],
-    paddingHorizontal: SPACE[1],
-    borderRadius: RADIUS.card,
-    borderWidth: 1,
-    borderColor: C.hairline,
-    backgroundColor: C.surface,
-  },
-  contemPressed: { backgroundColor: C.surfaceSoft },
+  // A CARD since 2026-09-16: it opens a thinker, so it stands on a ledge.
+  contemBox: { flex: 1 },
+  contemCard: { alignItems: 'center', gap: SPACE[0], paddingHorizontal: SPACE[1] },
   contemName: { ...TYPE.label, color: C.ink, textAlign: 'center' },
 });

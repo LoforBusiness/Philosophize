@@ -17,6 +17,8 @@ import { LinearGradient as Scrim } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import Card from '@/components/ui/Card';
+import Chip from '@/components/ui/Chip';
+import Meter from '@/components/ui/Meter';
 import { C, TYPE, SPACE, RADIUS, type TypeKey } from '@/constants/design';
 import {
   ALL_PHILOSOPHERS, ERA_GROUPS, eraGroupOf, type Philosopher, type EraGroup,
@@ -389,26 +391,22 @@ export default function ThinkersScreen() {
               <View style={styles.filterRow}>
                 {FILTERS.map((f) => {
                   const on = filter === f;
-                  // ALL is the only one with no era, so it keeps ink. The other
-                  // five fill with their own colour when selected and carry it as
-                  // a border when not — which is what teaches the code in the
-                  // first place: a reader picks MEDIEVAL, sees the pill go blue,
-                  // and every blue rule further down the list now means something.
+                  // RAISED CHIPS (2026-09-16). An era's label is in its own colour,
+                  // and the chosen one is PRESSED IN on a tint of it — which is what
+                  // teaches the code in the first place: a reader picks MEDIEVAL,
+                  // sees the chip sink into its colour, and every rule of that
+                  // colour further down the list now means something. ALL has no
+                  // era, so it is ink, and tints in the palette's teal.
                   const tint = f === 'ALL' ? C.ink : eraColour(f);
                   return (
-                    <Pressable
+                    <Chip
                       key={f}
+                      label={f}
+                      selected={on}
                       onPress={() => setFilter(f)}
-                      style={[
-                        styles.filter,
-                        { borderColor: tint },
-                        on && { backgroundColor: tint },
-                      ]}
-                    >
-                      <Text style={[styles.filterText, on ? { color: C.paper } : { color: tint }]}>
-                        {f}
-                      </Text>
-                    </Pressable>
+                      color={tint}
+                      hue={f === 'ALL' ? undefined : tint}
+                    />
                   );
                 })}
               </View>
@@ -495,8 +493,9 @@ const ThinkerCard = memo(function ThinkerCard({
  * Both are tappable and open the thinker they name, so a band is a way INTO the list
  * rather than a decoration sitting beside it.
  *
- * Left as its own Pressable rather than a `Card`: the dark/light alternation IS the
- * point of this element, and `Card` only has one surface.
+ * A `Card` since 2026-09-16, now that Card has the two surfaces this needs:
+ * `tone="ink"` for the fact and `tone="framed"` for the quote, both on the teal
+ * ledge. The dark/light alternation is still the point of the element.
  */
 const BreakBand = memo(function BreakBand({
   kind, pid, text, onOpen,
@@ -508,13 +507,13 @@ const BreakBand = memo(function BreakBand({
   const dark = kind === 'fact';
   return (
     <View style={styles.rowPad}>
-      <Pressable
+      {/* ON THE TEAL LEDGE (2026-09-16), both kinds: a band opens a thinker, so it
+          stands on a ledge and sinks onto it, like the primary button. */}
+      <Card
         onPress={press}
-        style={({ pressed }) => [
-          styles.band,
-          dark ? styles.bandDark : styles.bandLight,
-          pressed && { opacity: 0.86 },
-        ]}
+        tone={dark ? 'ink' : 'framed'}
+        containerStyle={styles.band}
+        accessibilityLabel={`Open ${p.name}`}
       >
         {/* The dark band's caption and attribution are the same on-dark
             secondary role as the hero's — `paperSoft`, not `hairline`. */}
@@ -528,7 +527,7 @@ const BreakBand = memo(function BreakBand({
           <Text style={[styles.bandWho, dark && { color: C.paperSoft }]}>{p.name}</Text>
           <Text style={[styles.bandArrow, dark && { color: C.paper }]}>→</Text>
         </View>
-      </Pressable>
+      </Card>
     </View>
   );
 });
@@ -551,11 +550,8 @@ function SectionHead({ children, met, total }: { children: string; met: number; 
         <View style={styles.sectionLine} />
         <Text style={styles.sectionCount}>{met} / {total}</Text>
       </View>
-      <View style={styles.sectionTrack}>
-        <View
-          style={[styles.sectionFill, { width: `${frac * 100}%`, backgroundColor: tint }]}
-        />
-      </View>
+      {/* Chunky, flat, with the shine (2026-09-16) — see components/ui/Meter. */}
+      <Meter pct={frac} color={tint} height={SPACE[2]} ground={C.paper} style={styles.sectionMeter} />
     </View>
   );
 }
@@ -664,22 +660,12 @@ const styles = StyleSheet.create({
   rowPad: { paddingHorizontal: SPACE[3] },
 
   filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACE[1], marginBottom: SPACE[0] },
-  filter: {
-    borderWidth: 1.5,
-    borderColor: C.ink,
-    borderRadius: 16,
-    paddingHorizontal: SPACE[3],
-    paddingVertical: SPACE[1],
-  },
-  filterOn: { backgroundColor: C.ink },
-  filterText: { ...role('micro'), color: C.ink, letterSpacing: 1 },
 
   sectionRow: { flexDirection: 'row', alignItems: 'center', marginTop: SPACE[4], marginBottom: SPACE[2] },
   sectionLabel: { ...role('micro'), color: C.inkSoft, letterSpacing: 3, marginRight: SPACE[2] },
   sectionLine: { flex: 1, height: 1, backgroundColor: C.hairline },
   sectionCount: { ...role('micro'), fontFamily: 'Inter_400Regular', letterSpacing: 0, color: C.inkSoft, marginLeft: SPACE[2] },
-  sectionTrack: { height: 4, borderRadius: RADIUS.pill, backgroundColor: C.hairline, marginBottom: SPACE[2] },
-  sectionFill: { height: 4, borderRadius: RADIUS.pill },
+  sectionMeter: { marginBottom: SPACE[3] },
 
   // `gap` only separates cards WITHIN a row, and each row is its own FlatList item —
   // so between rows there was nothing at all. SPACE[3] leaves clear paper below
@@ -704,9 +690,8 @@ const styles = StyleSheet.create({
   },
 
   // ── break bands ────────────────────────────────────────────────────────────
-  band: { borderRadius: RADIUS.card, padding: SPACE[3], marginBottom: SPACE[3] },
-  bandDark: { backgroundColor: C.ink },
-  bandLight: { backgroundColor: C.paper, borderWidth: 2, borderColor: C.ink },
+  // Card draws the face, the edge and the ledge; this is only the gap below.
+  band: { marginBottom: SPACE[3] },
   bandKicker: { ...role('micro'), color: C.inkSoft, letterSpacing: 2.5 },
   bandFact: { ...role('body'), marginTop: SPACE[1] },
   bandQuote: {

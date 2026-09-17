@@ -10,6 +10,7 @@ import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import StreakCalendar from '@/components/gamification/StreakCalendar';
 import StreakMascot from '@/components/gamification/StreakMascot';
+import Meter from '@/components/ui/Meter';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import {
@@ -358,14 +359,9 @@ export default function StreakScreen() {
             )}
             {next ? (
               <View style={styles.nextRow}>
-                <View style={styles.track}>
-                  <View
-                    style={[
-                      styles.fill,
-                      { width: `${Math.max(4, Math.round((shown / next.at) * 100))}%` },
-                    ]}
-                  />
-                </View>
+                {/* The app's one progress bar (components/ui/Meter): a chunky
+                    flat rule with a shine, in the streak's own ember. */}
+                <Meter pct={shown / next.at} color={STREAK_EMBER} height={12} />
                 <Text style={styles.nextText}>
                   {toNext} {toNext === 1 ? 'day' : 'days'} to {next.name}
                 </Text>
@@ -448,16 +444,16 @@ const styles = StyleSheet.create({
   },
   tierChipText: { ...role('micro'), letterSpacing: 2, color: STREAK_DEEP, fontFamily: 'Inter_700Bold' },
 
+  // An information panel: white, on the 2px pale-grey edge every card in the
+  // app now wears (2026-09-16). No ledge — only a thing you can press stands up.
   card: {
-    backgroundColor: C.surface, borderRadius: RADIUS.card, borderWidth: 1,
-    borderColor: C.hairline, padding: SPACE[3], gap: SPACE[2],
+    backgroundColor: C.surface, borderRadius: RADIUS.card, borderWidth: 2,
+    borderColor: C.edge, padding: SPACE[3], gap: SPACE[2],
   },
   cardHead: { ...role('micro'), letterSpacing: 2, color: C.inkSoft },
   tierBlurb: { ...role('body'), color: C.ink },
 
   nextRow: { gap: SPACE[1] },
-  track: { height: 6, borderRadius: RADIUS.pill, backgroundColor: C.hairline, overflow: 'hidden' },
-  fill: { height: 6, borderRadius: RADIUS.pill, backgroundColor: STREAK_EMBER },
   nextText: { ...role('micro'), color: C.inkSoft },
 
   statRow: { flexDirection: 'row', alignItems: 'center' },

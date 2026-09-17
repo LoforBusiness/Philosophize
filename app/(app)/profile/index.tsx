@@ -11,7 +11,7 @@ import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
-import { C, TYPE, SPACE, BRANCH, type TypeKey, type BranchKey } from '@/constants/design';
+import { C, TYPE, SPACE, BRANCH, RADIUS, LIP, type TypeKey, type BranchKey } from '@/constants/design';
 import { GHOST, ramp, PATINA, EMBER_INK, EMBER_LIT } from '@/components/shared/tone';
 import { StruckBar, MetalPlate, ShelfCount, CountStrip, ReadingRow } from '@/components/profile/Struck';
 import RankSeal from '@/components/shared/RankSeal';
@@ -430,12 +430,26 @@ export default function ProfileScreen() {
             {descriptor} · {joinedLabel}
           </Text>
 
+          {/* A RAISED CHIP ON ITS LEDGE, CARRYING THE PIN (2026-09-16). It was an
+              outline in the header's line colour with a star in it; it opens the
+              rank ladder, so it stands up and sinks when pressed, and the star is
+              the reader's actual rank pin. White on every header art, which is
+              what lets it read on the dark engravings and the light ones alike. */}
           <Pressable
-            style={({ pressed }) => [styles.rankChip, { borderColor: palette.line }, pressed && { opacity: 0.7 }]}
             onPress={() => openRanksBadges('ranks')}
+            accessibilityRole="button"
+            accessibilityLabel={`Rank: ${cur.name}. Open the rank ladder`}
+            style={styles.rankChipBox}
           >
-            <SketchIcon name="star" size={13} color={palette.text} />
-            <Text style={[styles.rankChipText, { color: palette.text }]}>RANK: {cur.name.toUpperCase()}</Text>
+            {({ pressed }) => (
+              <View style={styles.rankChipWrap}>
+                <View style={styles.rankChipLedge} />
+                <View style={[styles.rankChip, pressed && styles.rankChipDown]}>
+                  <RankSeal glyph={cur.glyph} state="current" size={22} order={rankOrder(rankIndex)} degree={rankDegree(rankIndex)} />
+                  <Text style={styles.rankChipText}>RANK: {cur.name.toUpperCase()}</Text>
+                </View>
+              </View>
+            )}
           </Pressable>
 
           {/* Featured "profile quote" — set from any quote (lesson / saved / thinker).
@@ -534,10 +548,10 @@ export default function ProfileScreen() {
           <Card>
             <CountStrip
               items={[
-                { label: 'LESSONS', value: lessonsDone },
-                { label: 'THINKERS', value: distinctViewed },
-                { label: 'QUOTES', value: quotesSaved },
-                { label: 'DAYS', value: daysActive },
+                { label: 'LESSONS', value: lessonsDone, icon: 'lessons' },
+                { label: 'THINKERS', value: distinctViewed, icon: 'thinkers' },
+                { label: 'QUOTES', value: quotesSaved, icon: 'quotes' },
+                { label: 'DAYS', value: daysActive, icon: 'days' },
               ]}
             />
 
@@ -853,17 +867,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: { ...role('micro'), letterSpacing: 2, marginTop: SPACE[1] },
+  rankChipBox: { marginTop: SPACE[3] },
+  rankChipWrap: { paddingBottom: LIP.card },
+  rankChipLedge: {
+    position: 'absolute', left: 0, right: 0, top: LIP.card, bottom: 0,
+    borderRadius: RADIUS.button, backgroundColor: C.edge,
+  },
   rankChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACE[1],
-    borderWidth: 1.5,
-    borderRadius: 3,
-    paddingHorizontal: SPACE[3],
-    paddingVertical: SPACE[1],
-    marginTop: SPACE[3],
+    backgroundColor: C.surface,
+    borderWidth: 2,
+    borderColor: C.edge,
+    borderRadius: RADIUS.button,
+    paddingLeft: SPACE[1],
+    paddingRight: SPACE[3],
+    paddingVertical: SPACE[0],
   },
-  rankChipText: { ...role('micro'), fontFamily: 'Inter_700Bold', letterSpacing: 1 },
+  rankChipDown: { transform: [{ translateY: LIP.card }] },
+  rankChipText: { ...role('micro'), fontFamily: 'Inter_700Bold', letterSpacing: 1, color: C.ink },
 
   profileQuote: { alignItems: 'center', marginTop: SPACE[3], paddingHorizontal: SPACE[2], maxWidth: 340 },
   profileQuoteText: {

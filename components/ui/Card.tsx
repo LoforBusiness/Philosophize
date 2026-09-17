@@ -5,8 +5,23 @@ import { Easing } from 'react-native-reanimated';
 import { touch } from '@/lib/feedback';
 import { C, RADIUS, LIP, SPACE } from '@/constants/design';
 
-// A surface. With `onPress` it becomes pressable and grows a 2px lip; without
+// A surface. With `onPress` it becomes pressable and stands on a ledge; without
 // one it is flat.
+//
+// ── THE LEDGE IS THE SURFACE'S OWN GREY, AND THE EDGE IS 2px (2026-09-16) ─────
+//
+// "It just doesn't look very gamified. It doesn't have a lot of depth." The face
+// was a 1px warm hairline and the ledge a 2px strip of the accent, so a card read
+// as a sheet with a coloured underline. It is Duolingo's construction now,
+// measured off their live CSS and chosen by the owner over a teal ledge: a white
+// face, a 2px edge in `C.edge`, and — only on a card you can press — a solid
+// ledge in the SAME grey under it, three points deep, that the face sinks onto.
+// A static card keeps the edge and has no ledge, so it never looks tappable.
+//
+// `tone="ink"` is the dark version for the solid panels (the streak, a fact
+// band): an ink face on the TEAL ledge, which is what the primary Button already
+// stands on, so a dark thing you can press reads as the app's own button grown
+// large. `tone="framed"` is paper inside an ink rule, on the same teal ledge.
 //
 // THAT IS THE WHOLE RULE, AND IT IS WHY IT EXISTS: a lip means you can press
 // it. Nothing in this app distinguished a tappable card from a decorative one,
@@ -73,20 +88,33 @@ interface Props {
    *  else, which for a card whose children are marks rather than words leaves a
    *  screen reader with a button it cannot name. */
   accessibilityLabel?: string;
+  /** `paper` (default): white on a grey edge. `ink`: a solid dark panel on the
+   *  teal ledge. `framed`: paper inside an ink rule, on the teal ledge. */
+  tone?: 'paper' | 'ink' | 'framed';
+  /** The ledge's colour, when the card belongs to something with a colour of
+   *  its own (a branch plate). Defaults to the tone's. */
+  ledge?: string;
 }
 
+const TONE = {
+  paper: { face: C.surface, edge: C.edge, ledge: C.edge },
+  ink: { face: C.ink, edge: C.ink, ledge: C.HUE },
+  framed: { face: C.paper, edge: C.ink, ledge: C.HUE },
+} as const;
+
 export default function Card({
-  children, onPress, pad = 3, style, containerStyle, accessibilityLabel,
+  children, onPress, pad = 3, style, containerStyle, accessibilityLabel, tone = 'paper', ledge,
 }: Props) {
   const [down, setDown] = useState(false);
   const lip = onPress ? LIP.card : 0;
   const drop = down ? lip : 0;
+  const t = TONE[tone];
 
   const face = (
     <MotiView
       animate={{ translateY: drop }}
       transition={{ type: 'timing', duration: 90, easing: Easing.out(Easing.quad) }}
-      style={[styles.face, { padding: SPACE[pad] }, style]}
+      style={[styles.face, { padding: SPACE[pad], backgroundColor: t.face, borderColor: t.edge }, style]}
     >
       {children}
     </MotiView>
@@ -117,7 +145,7 @@ export default function Card({
             pointerEvents="none"
             style={{
               position: 'absolute', top: lip, left: 0, right: 0, bottom: 0,
-              backgroundColor: C.HUE, borderRadius: RADIUS.card,
+              backgroundColor: ledge ?? t.ledge, borderRadius: RADIUS.card,
             }}
           />
         )}
@@ -134,8 +162,8 @@ const styles = StyleSheet.create({
   face: {
     backgroundColor: C.surface,
     borderRadius: RADIUS.card,
-    borderWidth: 1,
-    borderColor: C.hairline,
+    borderWidth: 2,
+    borderColor: C.edge,
     flexGrow: 1,
   },
 });

@@ -72,6 +72,10 @@ const spread = (a, b) => {
 // deuteranope or protanope just because it clears this number.
 const shades = Object.entries(D.C).filter(([, v]) => /^#[0-9A-Fa-f]{6}$/.test(v));
 ok(shades.length <= 14, 'the palette stays small', `${shades.length} colours`);
+// `C.edge` is the hex of tone's FLAT_EDGE, written out because design.ts cannot
+// import tone.ts. Two spellings of one colour drift unless something compares them.
+ok(D.C.edge.toUpperCase() === T.FLAT_EDGE.toUpperCase(), 'C.edge is the same grey as FLAT_EDGE',
+  `${D.C.edge} · ${T.FLAT_EDGE}`);
 for (let i = 0; i < shades.length; i++) {
   for (let j = i + 1; j < shades.length; j++) {
     const [na, va] = shades[i], [nb, vb] = shades[j];
@@ -180,7 +184,7 @@ for (const [fg, bg, floor] of PAIRS) {
 // until someone reads their streak in daylight.
 //
 // The tones are read out of the shipping components rather than restated here.
-// They cannot live in `C` — the palette is capped at 14 and holds 13 — and a
+// They cannot live in `C` — the palette is capped at 14 and holds 14 — and a
 // second copy of them in this file would measure a colour the panel might no
 // longer be using, which is the failure mode this whole script exists to stop.
 //

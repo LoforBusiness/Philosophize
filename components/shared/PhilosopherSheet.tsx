@@ -12,7 +12,7 @@ import { useRouter } from 'expo-router';
 import { openLesson as openLessonRoute } from '@/components/lesson/lessonNav';
 import { MotiView, AnimatePresence } from 'moti';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { C, LIP } from '@/constants/design';
+import { C, LIP, RADIUS } from '@/constants/design';
 import { getPhilosopherById, type Philosopher } from '@/data/philosophers';
 import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
 import { hasQuiz, getQuizPronoun } from '@/data/philosopherQuizzes';
@@ -356,16 +356,28 @@ export default function PhilosopherSheet() {
                     {facts.map((f, i) => {
                       const open = revealed.includes(i);
                       return (
+                        // A CARD TO TURN OVER stands on its ledge (2026-09-16),
+                        // sinks under the thumb, and stays down once it is open —
+                        // the same raised-then-pressed a Duolingo tile does, and
+                        // the only thing on this page that says "tap me".
                         <Pressable
                           key={i}
                           onPress={() => setRevealed((r) => (r.includes(i) ? r : [...r, i]))}
                           disabled={open}
-                          style={({ pressed }) => [
-                            styles.factCard,
-                            open && styles.factCardOpen,
-                            pressed && !open && { opacity: 0.75 },
-                          ]}
+                          accessibilityRole="button"
+                          accessibilityLabel={open ? f : `Reveal fact ${i + 1}`}
+                          style={styles.factWrap}
                         >
+                          {({ pressed }) => (
+                          <>
+                          <View style={styles.factLedge} />
+                          <View
+                            style={[
+                              styles.factCard,
+                              open && styles.factCardOpen,
+                              (open || pressed) && styles.factCardDown,
+                            ]}
+                          >
                           <Text style={[styles.factNum, open && { color: InkSoft }]}>
                             {String(i + 1).padStart(2, '0')}
                           </Text>
@@ -380,6 +392,9 @@ export default function PhilosopherSheet() {
                             </MotiView>
                           ) : (
                             <Text style={styles.factPrompt}>Tap to reveal</Text>
+                          )}
+                          </View>
+                          </>
                           )}
                         </Pressable>
                       );
@@ -601,10 +616,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 4,
     padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: InkFaint,
-    backgroundColor: '#FFFFFF',
+    borderRadius: RADIUS.card,
+    borderWidth: 2,
+    borderColor: C.edge,
+    backgroundColor: C.surface,
   },
   statRow: { flexDirection: 'row', alignItems: 'flex-start' },
   contemBlock: { marginTop: 4 },
@@ -663,21 +678,27 @@ const styles = StyleSheet.create({
   bio: { fontFamily: 'Inter_400Regular', fontSize: 15.5, color: Ink, lineHeight: 25 },
 
   // ── facts, face down ───────────────────────────────────────────────────────
+  factWrap: { marginBottom: 10, paddingBottom: LIP.card },
+  factLedge: {
+    position: 'absolute', left: 0, right: 0, top: LIP.card, bottom: 0,
+    borderRadius: RADIUS.card, backgroundColor: C.edge,
+  },
   factCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: C.edge,
+    borderRadius: RADIUS.card,
+    backgroundColor: C.surface,
     paddingVertical: 14,
     paddingHorizontal: 15,
-    marginBottom: 10,
     minHeight: 58,
   },
-  // Turned over, the card stops advertising itself: the border softens and the
-  // number steps back so the fact is the only thing with weight.
-  factCardOpen: { borderColor: InkFaint, borderWidth: 1 },
+  factCardDown: { transform: [{ translateY: LIP.card }] },
+  // Turned over, the card stops advertising itself: it sits down on its ledge
+  // and the number steps back, so the fact is the only thing with weight.
+  factCardOpen: { backgroundColor: C.paper },
   factNum: {
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 19,

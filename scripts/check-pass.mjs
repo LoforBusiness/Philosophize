@@ -619,12 +619,15 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
   // rule section 8 below learned the hard way.
   const tabSrc = read('components/paywall/PassChart.tsx');
   const noMix = /const NO_DISC = mix\(GHOST, INK, ([\d.]+)\)/.exec(tabSrc);
-  const panelMix = /const FREE_PANEL = mix\(PAPER, GHOST, ([\d.]+)\)/.exec(tabSrc);
+  // The Free panel is either a mix of the locked slate or, since 2026-09-16, the
+  // neutral FLOOR it is cut into. Both forms are read; an unknown one fails.
+  const panelMix = /const FREE_PANEL = mix\(PAPER, GHOST, ([\d.]+)\)/.exec(tabSrc)
+    ?? (/const FREE_PANEL = FLOOR;/.test(tabSrc) ? [null, 'FLOOR'] : null);
   ok(!!noMix && !!panelMix, 'the chart\'s cross and Free panel are readable from the shared chart',
     noMix && panelMix ? `disc ${noMix[1]} · panel ${panelMix[1]}` : 'NOT FOUND — this checker has stopped tracking them');
   if (noMix && panelMix) {
     const disc = T.mix(T.GHOST, T.INK, +noMix[1]);
-    const panel = T.mix(T.PAPER, T.GHOST, +panelMix[1]);
+    const panel = panelMix[1] === 'FLOOR' ? T.FLOOR : T.mix(T.PAPER, T.GHOST, +panelMix[1]);
     ok(ratio(disc, panel) >= 3, 'the cross\'s disc reads against the Free panel', `${ratio(disc, panel).toFixed(2)}:1`);
     ok(ratio(T.PAPER_LIT, disc) >= 3, 'and the cross reads on its disc', `${ratio(T.PAPER_LIT, disc).toFixed(2)}:1`);
     ok(ratio(T.MID, panel) >= 4.5, 'and a limit said in words reads on the Free panel', `${ratio(T.MID, panel).toFixed(2)}:1`);

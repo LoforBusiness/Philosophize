@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
-import PressableScale from '@/components/shared/PressableScale';
+import Card from '@/components/ui/Card';
+import ThinkerSeal from '@/components/thinkers/ThinkerSeal';
+import { eraColour } from '@/components/thinkers/ThinkerStats';
+import { eraGroupOfId } from '@/data/philosophers';
 import SectionHead from '@/components/home/SectionHead';
 import { useUIStore } from '@/stores/uiStore';
 import { dayNumber, thinkerOfTheDay, factOfTheDay } from '@/lib/utils/thinkerOfDay';
-import { FLAT, RIM, LIGHT, SHADOW, INK, FAINT, MID } from '@/components/shared/tone';
+import { INK, MID } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A DIFFERENT THINKER EVERY DAY — the one thing on Home that is new content
@@ -30,34 +32,12 @@ import { FLAT, RIM, LIGHT, SHADOW, INK, FAINT, MID } from '@/components/shared/t
 // WHO it is lives in lib/utils/thinkerOfDay, because the Thinkers tab features a
 // thinker of the day too and the two must agree. This file only draws it.
 
-const SEAL = 58;
+const SEAL = 50;
 
-/** A struck disc bearing one letter. */
-function Seal({ letter }: { letter: string }) {
-  return (
-    <View style={styles.seal}>
-      <Svg width={SEAL} height={SEAL} viewBox="0 0 100 100">
-        <Defs>
-          <SvgGradient id="tod-face" {...LIGHT}>
-            {/* A white face: the old one faded into the tan PAPER_SHADE, which read as gold. */}
-            {FLAT.map(([o, c, a]) => <Stop key={o} offset={o} stopColor={c} stopOpacity={a} />)}
-          </SvgGradient>
-          <SvgGradient id="tod-rim" {...LIGHT}>
-            {RIM.map(([o, c, a]) => <Stop key={o} offset={o} stopColor={c} stopOpacity={a} />)}
-          </SvgGradient>
-        </Defs>
-        {/* Down and to the right, because the light is up and to the left. */}
-        <Circle cx={50 + SHADOW.dx} cy={50 + SHADOW.dy} r={45} fill={INK} opacity={SHADOW.opacity} />
-        <Circle cx={50} cy={50} r={45} fill="url(#tod-face)" stroke="url(#tod-rim)" strokeWidth={4} />
-        <Circle cx={50} cy={50} r={37} fill="none" stroke={FAINT} strokeWidth={1.5} />
-      </Svg>
-      {/* The letter is a real <Text>, not <SvgText>: react-native-svg resolves a
-          custom fontFamily inconsistently on Android and a silently-substituted
-          system serif beside Playfair everywhere else is exactly the kind of
-          near-miss nobody spots until it ships. */}
-      <Text style={styles.sealLetter} allowFontScaling={false}>{letter}</Text>
-    </View>
-  );
+/** The thinker's era colour, or ink for the few with no era on record. */
+function tintOf(id: string): string {
+  const g = eraGroupOfId(id);
+  return g ? eraColour(g) : INK;
 }
 
 export default function ThinkerOfTheDay({ style }: { style?: object }) {
@@ -70,9 +50,17 @@ export default function ThinkerOfTheDay({ style }: { style?: object }) {
   return (
     <View style={style}>
       <SectionHead>THINKER OF THE DAY</SectionHead>
-      <PressableScale onPress={() => openPhilosopher(who.id)} style={styles.block}>
+      {/* A CARD NOW (2026-09-16): it opens the thinker, and a thing you can
+          press stands on a ledge — the depth kit's one rule. The seal is the
+          Thinkers tab's own collectible tile, in this thinker's era. */}
+      <Card onPress={() => openPhilosopher(who.id)} containerStyle={styles.block} accessibilityLabel={`Open ${who.name}`}>
         <View style={styles.row}>
-          <Seal letter={who.name.trim().charAt(0).toUpperCase()} />
+          <ThinkerSeal
+            initial={who.name.trim().charAt(0).toUpperCase()}
+            tint={tintOf(who.id)}
+            met
+            size={SEAL}
+          />
           <View style={styles.body}>
             <Text style={styles.name} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
               {who.name}
@@ -83,7 +71,7 @@ export default function ThinkerOfTheDay({ style }: { style?: object }) {
           </View>
         </View>
         <Text style={styles.fact} numberOfLines={3}>{fact}</Text>
-      </PressableScale>
+      </Card>
     </View>
   );
 }
@@ -92,14 +80,6 @@ const styles = StyleSheet.create({
   block: { marginTop: 14 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
 
-  seal: { width: SEAL, height: SEAL, alignItems: 'center', justifyContent: 'center' },
-  sealLetter: {
-    position: 'absolute',
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 26,
-    color: INK,
-    includeFontPadding: false,
-  },
 
   body: { flex: 1 },
   name: {

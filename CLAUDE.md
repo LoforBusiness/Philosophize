@@ -4820,6 +4820,42 @@ after a lesson is the reward. The real fix is to stop Profile being one componen
 — and that is a refactor of a 961-line file, not a patch.
 
 
+### The five tabs have depth now, and it is one kit (2026-09-16)
+
+> *"it just doesn't look very gamified. It doesn't have a lot of depth … I want
+> the same color palette … stay away from AI looking designs."*
+
+Researched from Duolingo's live stylesheet and Brilliant's cards, and the rule
+that came out is short: **a thing you can press stands on a hard ledge; a thing
+you only read is a flat panel with an edge; a chosen thing is pressed in.** No
+gradients, no glows, no new colours. The lessons were deliberately not touched —
+`cinematicKit`'s explanation card pins its radius to 12 for that reason.
+
+- **`C.edge` (#DFDFDC) is the 14th and last palette colour**, paper taken 12%
+  toward ink. A card is white on a 2px `C.edge` border; a pressable one stands
+  on a ledge of the same grey (`Card`, `LIP.card` 3). `check-ui` holds it equal
+  to tone's `FLAT_EDGE`. `RADIUS.card` is 16.
+- **`Card` takes `tone`**: `paper`, `ink` (a dark card on a `C.HUE` ledge — Quick
+  Start, Home's streak panel, the Learn cards on their own branch's ledge via
+  `lipOf()`), and `framed`.
+- **`components/ui/Meter.tsx` is the one progress bar outside the lessons**:
+  chunky, flat, a 30% white shine along its top, never narrower than 1.5× its
+  height. `StruckBar`, the streak panel, the streak calendar, the branch units
+  and the Thinkers sections all draw it.
+- **`components/ui/Chip.tsx`** is a raised filter chip; chosen, it sinks into the
+  teal tint. **`components/shared/StatSticker.tsx`** puts a small sticker over a
+  count, drawn like the tab bar (the book and bust ARE `TabGlyph`), with a cream
+  outline on a dark panel because an ink outline on ink is no outline.
+- **Locked keeps its shape and loses its colour** (`LOCK_FACE`/`LOCK_EDGE`/
+  `LOCK_MARK`): an unmet thinker's seal is the same raised tile in grey.
+- **Pass:** the Free column is a WELL (`FLOOR` with a `FLOOR_CUT` top) against the
+  raised Pass column, which carries two faint glare stripes; the plan tiles wear
+  the stickers, a real bronze rank crest and a real first-tier badge medal.
+- **Learn says "N DONE", never "N of 41"** — §19's rule that a target must never
+  come from a ceiling, because the library grows.
+- The rank pins, badge medals and tab icons were not changed. `TabGlyph` only
+  gained an optional outline colour, which the tab bar does not pass.
+
 ### Struck things are shaded, and that is not a second colour
 
 > **Since 2026-09-16 only the rank pins and badge medals still use `FACE`.** Every

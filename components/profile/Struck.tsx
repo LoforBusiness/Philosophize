@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { C, SPACE } from '@/constants/design';
+import { C, SPACE, RADIUS } from '@/constants/design';
+import Meter from '@/components/ui/Meter';
+import StatSticker, { type StickerName } from '@/components/shared/StatSticker';
 import {
   INK, PAPER, PAPER_LIT, GHOST, SHADOW, METAL, ramp, mix, type Metal, type Ramp, PATINA,
   FLAT_FACE, FLAT_EDGE, FLOOR, FLOOR_CUT,
@@ -18,19 +19,19 @@ import {
 //
 // ── THE SAME ONE LIGHT, AND IT STILL NEVER MOVES ────────────────────────────
 //
-// Top-left, exactly as components/shared/tone.ts sets out. A bar's fill runs
-// light→dark down-right; a tile's face does the same and drops a shadow to the
-// bottom right; a track is the INVERSE, dark at the top-left, because a groove
-// is bright where a dome is dark and that inversion is the only thing that says
-// "cut in" rather than "raised". Get that backwards on one element and it stops
-// being a set.
+// Top-left, exactly as components/shared/tone.ts sets out — and since 2026-09-16
+// it is carried by EDGES rather than gradients. A raised thing has a 2px edge
+// and, if it can be pressed, a solid ledge under it; a cut-in thing has its dark
+// hairline along the TOP, because a groove is bright where a dome is dark and
+// that inversion is the only thing that says "cut in" rather than "raised". Get
+// that backwards on one element and it stops being a set.
 //
-// ── WHY LinearGradient AND NOT SVG ──────────────────────────────────────────
+// ── WHY VIEWS AND NOT SVG ─────────────────────────────────────────────────────
 //
 // §17's performance rule: what costs is the AREA being repainted. These are
 // static (nothing here animates), but the profile is the longest page in the app
 // and it scrolls — so every one of them is repainted on every frame of a fling.
-// expo-linear-gradient is a native view; an <Svg> per bar would put ~20 of them
+// A View is the cheapest thing there is; an <Svg> per bar would put ~20 of them
 // on the longest scroll surface in the app for a rectangle each.
 //
 // ── NO COLOUR IS DECIDED HERE ───────────────────────────────────────────────
@@ -41,9 +42,6 @@ import {
 // there are exactly two.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** The one light, as LinearGradient start/end points. Matches tone.LIGHT. */
-const LIGHT_START = { x: 0.15, y: 0 } as const;
-const LIGHT_END = { x: 0.85, y: 1 } as const;
 
 // ── a struck progress bar ────────────────────────────────────────────────────
 
@@ -61,56 +59,27 @@ interface BarProps {
 /**
  * A bar you could run a thumbnail over.
  *
- * THE TRACK IS A GROOVE, NOT A GAP. It was `C.hairline` — the same flat tone as
- * a rule — so an empty bar and a horizontal line were the same drawing, and the
- * six mastery bars in particular read as six lines with some ink on the left. A
- * groove has a dark top edge where the light does not reach into it and a pale
- * bottom edge where it catches the far wall, and those two hairlines are the
- * entire difference between a slot and a stripe.
+ * FLAT NOW, WITH A SHINE, AND DRAWN BY `Meter` (2026-09-16). It was a
+ * lit→base→shade gradient in a groove with hairlines above and below; the owner
+ * asked for the screens outside the lessons to read as a game, and the game
+ * every reference points at draws a bar as one flat colour with a thin white
+ * stripe along its top third. See components/ui/Meter.tsx for the recipe.
  *
- * THE TRACK IS ALSO THE BRANCH'S OWN COLOUR at a tenth strength (`ramp().track`)
- * rather than grey. Six grey gutters say nothing; six tinted ones say which row
- * you are looking at even where the bar is empty, which is exactly the row a
- * reader most needs to identify.
+ * THE TRACK IS STILL THE BRANCH'S OWN COLOUR at a tenth strength
+ * (`ramp().track`) rather than grey. Six grey gutters say nothing; six tinted
+ * ones say which row you are looking at even where the bar is empty, which is
+ * exactly the row a reader most needs to identify.
  */
-export function StruckBar({ pct, fill, height = 10, notches = false, style }: BarProps) {
-  const p = Math.max(0, Math.min(1, pct));
-  const r = height / 2;
+export function StruckBar({ pct, fill, height = 12, notches = false, style }: BarProps) {
   return (
-    <View style={[{ height, borderRadius: r, backgroundColor: fill.track, overflow: 'hidden' }, style]}>
-      {/* The groove: a dark lip at the top, a pale one at the bottom. */}
-      <View style={[s.grooveTop, { backgroundColor: mix(fill.track, INK, 0.14) }]} />
-
-      {notches && (
-        <View style={s.notchRow} pointerEvents="none">
-          {[0.25, 0.5, 0.75].map((n) => (
-            <View key={n} style={[s.notch, { left: `${n * 100}%`, backgroundColor: mix(fill.track, INK, 0.2) }]} />
-          ))}
-        </View>
-      )}
-
-      {p > 0 && (
-        <LinearGradient
-          colors={[fill.lit, fill.base, fill.shade]}
-          locations={[0, 0.52, 1]}
-          start={LIGHT_START}
-          end={LIGHT_END}
-          style={{
-            // A floor of 3% so a single finished lesson is a visible mark rather
-            // than a bar that looks untouched.
-            width: `${Math.max(p > 0 ? 3 : 0, p * 100)}%`,
-            height: '100%',
-            borderRadius: r,
-          }}
-        >
-          {/* The lit rim along the top of the fill — what makes it sit PROUD of
-              the groove rather than sit in it. */}
-          <View style={[s.fillRim, { backgroundColor: mix(fill.lit, PAPER_LIT, 0.5) }]} />
-        </LinearGradient>
-      )}
-
-      <View style={[s.grooveBottom, { backgroundColor: mix(fill.track, PAPER_LIT, 0.6) }]} />
-    </View>
+    <Meter
+      pct={pct}
+      color={fill.base}
+      height={height}
+      track={fill.track}
+      notches={notches ? [0.25, 0.5, 0.75] : undefined}
+      style={style}
+    />
   );
 }
 
@@ -284,17 +253,12 @@ export function MetalPlate({
   style?: StyleProp<ViewStyle>;
 }) {
   return (
-    <View style={[s.plateShadow, style]}>
-      <LinearGradient
-        colors={[metal.lit, metal.base, metal.shade]}
-        locations={[0, 0.52, 1]}
-        start={LIGHT_START}
-        end={LIGHT_END}
-        style={[s.plate, { borderColor: metal.rim }]}
-      >
-        {icon}
-        <Text style={[s.plateText, { color: metal.on }]}>{label}</Text>
-      </LinearGradient>
+    // FLAT, ON A HARD LEDGE (2026-09-16): the face was a lit-to-shade gradient
+    // over a soft shadow. It is the metal's own colour now, standing on a 2pt
+    // ledge in its rim, the same construction as every other raised thing here.
+    <View style={[s.plate, { backgroundColor: metal.base, borderColor: metal.rim, boxShadow: `0px 2px 0px ${metal.rim}` }, style]}>
+      {icon}
+      <Text style={[s.plateText, { color: metal.on }]}>{label}</Text>
     </View>
   );
 }
@@ -390,11 +354,15 @@ export function ShelfCount({ earned, total }: { earned: number; total: number })
  * every figure on the old tab had to be taught to start at its real value rather
  * than climb from zero. A number that is simply drawn cannot have that bug.
  */
-export function CountStrip({ items }: { items: { label: string; value: number }[] }) {
+export function CountStrip({ items }: { items: { label: string; value: number; icon?: StickerName }[] }) {
   return (
     <View style={s.cStrip}>
       {items.map((it, i) => (
         <View key={it.label} style={[s.cCell, i > 0 && s.cCellRule]}>
+          {/* A STICKER OVER EACH FIGURE (2026-09-16), in the tab bar's own
+              drawing style — the game-like "123 days" with its flame, and still
+              no box round any one number. */}
+          {it.icon ? <View style={s.cIcon}><StatSticker name={it.icon} size={24} /></View> : null}
           <Text style={s.cValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
             {it.value.toLocaleString()}
           </Text>
@@ -449,48 +417,29 @@ export function ReadingRow({
 }
 
 const s = StyleSheet.create({
-  // ── bar ──
-  grooveTop: { position: 'absolute', left: 0, right: 0, top: 0, height: 1 },
-  grooveBottom: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 1 },
-  fillRim: { position: 'absolute', left: 0, right: 0, top: 0, height: 1, opacity: 0.55 },
-  notchRow: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
-  notch: { position: 'absolute', top: 0, bottom: 0, width: 1 },
-
   // ── tile ──
-  tileShadow: {
-    borderRadius: 12,
-    // The same direction the gradient is lit from, so the object and its shadow
-    // agree about where the light is.
-    shadowColor: INK,
-    shadowOffset: { width: SHADOW.dx, height: SHADOW.dy + 1 },
-    shadowOpacity: SHADOW.opacity,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  tile: { borderRadius: 12, borderWidth: 1, borderColor: FLAT_EDGE, backgroundColor: FLAT_FACE, overflow: 'hidden' },
+  // NO SOFT SHADOW (2026-09-16). A blurred drop shadow under every tile is one of
+  // the named tells of a generated screen, and a tile only READS — it cannot be
+  // pressed — so by the depth kit's rule it gets an edge and no ledge.
+  tileShadow: { borderRadius: RADIUS.card },
+  tile: { borderRadius: RADIUS.card, borderWidth: 2, borderColor: FLAT_EDGE, backgroundColor: FLAT_FACE, overflow: 'hidden' },
   tileAccent: { position: 'absolute', left: 0, right: 0, top: 0, height: 3 },
 
   // ── niche ──
   niche: {
     borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-    overflow: 'hidden', borderWidth: 1, borderColor: FLAT_EDGE, backgroundColor: FLOOR,
+    overflow: 'hidden', borderWidth: 0, backgroundColor: FLOOR,
   },
   // A CUT, not a rim: dark along the top edge, pale along the bottom. Reversing
   // these two lines is the one change that turns this back into a tile.
-  nicheTop: { position: 'absolute', left: 0, right: 0, top: 0, height: 1.5 },
+  nicheTop: { position: 'absolute', left: 0, right: 0, top: 0, height: 2 },
   nicheFoot: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 1 },
   nicheEmpty: { borderStyle: 'dashed', borderColor: GHOST, backgroundColor: 'transparent' },
 
   // ── panel ──
-  panelShadow: {
-    borderRadius: 14,
-    shadowColor: INK,
-    shadowOffset: { width: SHADOW.dx, height: SHADOW.dy + 2 },
-    shadowOpacity: SHADOW.opacity + 0.04,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  panel: { borderRadius: 14, borderWidth: 1, borderColor: FLAT_EDGE, backgroundColor: FLAT_FACE, overflow: 'hidden' },
+  // The same reasoning as the tile: an edge, no blurred shadow.
+  panelShadow: { borderRadius: RADIUS.card },
+  panel: { borderRadius: RADIUS.card, borderWidth: 2, borderColor: FLAT_EDGE, backgroundColor: FLAT_FACE, overflow: 'hidden' },
   panelBand: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -515,19 +464,13 @@ const s = StyleSheet.create({
   panelBody: { paddingHorizontal: SPACE[3], paddingTop: SPACE[3] + 2, paddingBottom: SPACE[3] },
 
   // ── plate ──
-  plateShadow: {
-    shadowColor: INK,
-    shadowOffset: { width: SHADOW.dx, height: SHADOW.dy },
-    shadowOpacity: SHADOW.opacity,
-    shadowRadius: 2,
-    elevation: 1,
-  },
   plate: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
     borderWidth: 1,
-    borderRadius: 3,
+    borderRadius: 5,
+    marginBottom: 2,
     paddingHorizontal: 7,
     paddingVertical: 3,
   },
@@ -568,6 +511,7 @@ const s = StyleSheet.create({
   // A hairline BETWEEN cells, never around them: four boxes is a dashboard, four
   // figures divided by rules is a readout.
   cCellRule: { borderLeftWidth: 1, borderLeftColor: C.hairline },
+  cIcon: { marginBottom: SPACE[1] },
   cValue: {
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: C.ink,
     includeFontPadding: false,

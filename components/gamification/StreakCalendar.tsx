@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
+import Meter from '@/components/ui/Meter';
 import { STREAK_EMBER, STREAK_DEEP, STREAK_WASH, SLATE, STREAK_MILESTONES } from '@/constants/streak';
 import { ramp, rampFace, mix, PAPER_LIT, FLAT_EDGE } from '@/components/shared/tone';
 import {
@@ -361,17 +362,16 @@ export default function StreakCalendar({
           practised" beside "1 rest days used". A bar says the same thing and
           also the part a number cannot: how much of the month is still open. */}
       <View style={styles.tallyRow}>
-        <View style={styles.track}>
-          <LinearGradient
-            colors={[METAL.lit, METAL.base, METAL.shade]}
-            start={LIGHT_START}
-            end={LIGHT_END}
-            style={[
-              styles.fill,
-              { width: `${Math.round((month.doneThisMonth / Math.max(1, month.elapsedThisMonth)) * 100)}%` },
-            ]}
-          />
-        </View>
+        {/* The app's one bar (components/ui/Meter), flat with its shine. It was a
+            lit-to-shade gradient along the fill, which is the look the depth pass
+            of 2026-09-16 took off every bar outside the rank ladder. */}
+        <Meter
+          pct={month.doneThisMonth / Math.max(1, month.elapsedThisMonth)}
+          color={METAL.base}
+          height={10}
+          track={FLAT_EDGE}
+          style={styles.meter}
+        />
         <Text style={styles.tally}>
           <Text style={styles.tallyBig}>{month.doneThisMonth}</Text>
           <Text style={styles.tallyOf}>{` / ${month.elapsedThisMonth}`}</Text>
@@ -698,14 +698,7 @@ const styles = StyleSheet.create({
   month: { fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, letterSpacing: 2 },
 
   tallyRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 },
-  track: {
-    flex: 1,
-    height: 6,
-    borderRadius: 3,
-    overflow: 'hidden',
-    backgroundColor: FLAT_EDGE,
-  },
-  fill: { height: 6, borderRadius: 3 },
+  meter: { flex: 1 },
   tally: { includeFontPadding: false },
   tallyBig: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: STREAK_EMBER },
   tallyOf: { fontFamily: 'Inter_500Medium', fontSize: 12, color: INK_SOFT },
