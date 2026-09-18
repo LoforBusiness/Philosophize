@@ -11,6 +11,7 @@ import { BEATS } from './political5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -18,8 +19,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // THREE PIECES OF INK INFORMATION DESIGN, one per idea in the lesson:
 //
@@ -109,6 +111,25 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const CITY = BEATS.map((b) => (b.interact ? 0 : b.city ?? 0));
 const VEIL = BEATS.map((b) => (b.interact ? 0 : b.veil ?? 0));
 const LINK = BEATS.map((b) => b.link ?? 0);
+const NAMED = BEATS.map((b) => b.named ?? 0);
+const MINE = BEATS.map((b) => b.mine ?? 0);
+const LIT = BEATS.map((b) => b.lit ?? 0);
+
+/** Which stops each `lit` setting raises — the sentence's own names, in its order. */
+const LIT_STOPS = [[], ['HOBBES'], ['LOCKE', 'MILL'], ['RAWLS']];
+/**
+ * EACH STOP AS ITS OWN TRACK, one value per beat.
+ *
+ * Carrying "is anything lit" instead and reading membership off the setting flips
+ * the pair in a single frame wherever two sentences in a row light something — six
+ * cuts in `check:replay`. A track per stop crossfades: Locke goes out as Rawls
+ * comes in, and no beat lights a pair its sentence did not name.
+ */
+const LIT_AT = STOPS.map((st) => BEATS.map((b) => (LIT_STOPS[b.lit ?? 0].includes(st.name) ? 1 : 0)));
+/** And the rule down to Plato's city, which only the third setting draws. */
+const PLATO_AT = BEATS.map((b) => ((b.lit ?? 0) === 3 ? 1 : 0));
+/** The card the veil rules out, at the veil's own foot. */
+const MINE_T = VEIL_T + VEIL_H + 6;
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -124,10 +145,35 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political5'));
 
+/**
+ * ONE STOP ON THE TIMELINE, LIT WHEN THE SENTENCE NAMES IT.
+ *
+ * Its own component for the reason `TestCell` is one next door: a hook inside a
+ * `map` is a hook count that changes with the data, and §17 rule 1 is the one this
+ * app has actually been broken by. Each stop reads its own membership out of the
+ * `lit` SETTING, so two named together arrive together.
+ */
+function LitStop({ st, k, S }: { st: { x: number; name: string }; k: number; S: { value: { lit0: number; lit1: number; lit2: number; lit3: number } } }) {
+  const style = useAnimatedStyle(() => {
+    const v = S.value;
+    // Read by index rather than by a computed key, so the type stays exact: a
+    // Record<string, number> would not accept the derived value the scene builds
+    // (it also carries the figure's bundle).
+    const on = k === 0 ? v.lit0 : k === 1 ? v.lit1 : k === 2 ? v.lit2 : v.lit3;
+    return { opacity: on, transform: [{ translateY: -3 * on }] };
+  });
+  return (
+    <Animated.View style={[styles.layer, style]} pointerEvents="none">
+      <View style={[styles.litTick, { left: st.x - 2 }]} />
+      <View style={[styles.litGlow, { left: st.x - STOP_W / 2 }]} />
+    </Animated.View>
+  );
+}
+
 export default function Political5Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(10);
   const cur = BEATS[i];
   const showPick = !!cur.interact;
   const answered = picked !== null;
@@ -146,6 +192,14 @@ export default function Political5Scene({ clock, bt, bi, i, picked, onPick, pick
       // when its reason does.
       veil: carry(cv, 1, n, VEIL[p], reacting ? pickPos.value : VEIL[n], tr),
       link: carry(cv, 2, n, LINK[p], LINK[n], tr),
+      named: carry(cv, 3, n, NAMED[p], NAMED[n], tr),
+      mine: carry(cv, 4, n, MINE[p], MINE[n], tr),
+      // ONE VALUE PER STOP, so a named pair fades out as the next fades in.
+      lit0: carry(cv, 5, n, LIT_AT[0][p], LIT_AT[0][n], tr),
+      lit1: carry(cv, 6, n, LIT_AT[1][p], LIT_AT[1][n], tr),
+      lit2: carry(cv, 7, n, LIT_AT[2][p], LIT_AT[2][n], tr),
+      lit3: carry(cv, 8, n, LIT_AT[3][p], LIT_AT[3][n], tr),
+      plato: carry(cv, 9, n, PLATO_AT[p], PLATO_AT[n], tr),
     };
   });
 
@@ -172,7 +226,35 @@ export default function Political5Scene({ clock, bt, bi, i, picked, onPick, pick
     opacity: SCENE.value.link,
     transform: [{ translateY: (1 - SCENE.value.link) * -8 }],
   }));
-  const veilStyle = useAnimatedStyle(() => ({
+  // THE TIERS ARE NAMED IN TURN, each caption struck 0.28 of the track after the one
+  // above it, which is about the pace the voice says them at. THREE EXPLICIT HOOKS,
+  // never a factory called from a map: §17's first standing rule is that the hook
+  // count may not change between renders, and a lesson once threw on its final tap
+  // for breaking it.
+  const namedAt = (u: number, k: number) => {
+    'worklet';
+    return (u <= 0 ? 0 : clamp01((u - k * 0.28) / 0.42));
+  };
+  const name0Style = useAnimatedStyle(() => ({ opacity: namedAt(SCENE.value.named, 0) }));
+  const name1Style = useAnimatedStyle(() => ({ opacity: namedAt(SCENE.value.named, 1) }));
+  const name2Style = useAnimatedStyle(() => ({ opacity: namedAt(SCENE.value.named, 2) }));
+  const nameStyles = [name0Style, name1Style, name2Style];
+  const mineStyle = useAnimatedStyle(() => ({
+    opacity: clamp01(SCENE.value.mine * 2),
+    transform: [{ translateY: (1 - SCENE.value.mine) * 8 }],
+  }));
+  // The rule through it draws AFTER the card has arrived: a card that turns up
+  // already crossed out never says what it was.
+  const mineRuleStyle = useAnimatedStyle(() => ({
+    transform: [{ scaleX: clamp01((SCENE.value.mine - 0.45) / 0.55) }],
+  }));
+  // The rule from Rawls's stop down to the city: it only exists on the beat that
+  // says the two are asking one question, so it draws and goes with that sentence.
+  const platoStyle = useAnimatedStyle(() => {
+    const on = SCENE.value.plato;
+    return { opacity: on, transform: [{ scaleY: on }] };
+  });
+    const veilStyle = useAnimatedStyle(() => ({
     // Twice the rate on the fade, for the reason Tier gives: one beat rests the
     // veil at 0.3 and the words under it were reaching the reader at 1.5:1. The
     // DROP still runs on the raw track, and so does the strike-through inside
@@ -202,6 +284,23 @@ export default function Political5Scene({ clock, bt, bi, i, picked, onPick, pick
             <Text style={[styles.tlSub, { left: s.x - STOP_W / 2 }]}>{s.q}</Text>
           </View>
         ))}
+      </Animated.View>
+
+      {/* The stops the sentence is naming: their tick thickens and the name lifts. */}
+      {STOPS.map((st, k) => <LitStop key={`lit${st.name}`} st={st} k={k} S={SCENE} />)}
+
+      {/* Rawls asks Plato's question, so the rule runs from his stop to the city. */}
+      <Animated.View style={[styles.platoRule, platoStyle]} pointerEvents="none" />
+
+      {/* Each tier is named in turn: a rule struck under the caption as it is said. */}
+      {TIERS.map((tr, k) => (
+        <Animated.View key={`nm${tr.title}`} style={[styles.tierMark, { top: tr.top + TIER_H - 9, width: tr.w - 28, left: CITY_CX - (tr.w - 28) / 2 }, nameStyles[k]]} pointerEvents="none" />
+      ))}
+
+      {/* What the veil is FOR: the rules you would have written for yourself. */}
+      <Animated.View style={[styles.mineCard, mineStyle]} pointerEvents="none">
+        <Text style={styles.mineText}>RULES THAT FAVOUR ME</Text>
+        <Animated.View style={[styles.mineRule, mineRuleStyle]} />
       </Animated.View>
 
       {/* ── PLATO'S CITY: three parts, each doing its own work ───────────────── */}
@@ -308,7 +407,43 @@ const styles = StyleSheet.create({
     borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
   },
   tlTick: { position: 'absolute', top: TL_TICK_T, width: 2.5, height: 14, backgroundColor: INK },
-  tlName: {
+  // ── the four tap events (group AH) ─────────────────────────────────────────
+  //
+  // A LIT STOP IS A THICKER TICK AND A RULE UNDER THE NAME, not a colour: the stage
+  // has one hue and it is spent on the tones, so emphasis here is weight.
+  litTick: {
+    position: 'absolute', top: TL_TICK_T - 2, width: 4, height: 18,
+    backgroundColor: INK, borderRadius: 2,
+  },
+  litGlow: {
+    position: 'absolute', top: TL_SUB_T + 15, width: STOP_W, height: 2,
+    backgroundColor: INK, borderRadius: 1,
+  },
+  // Rawls asks Plato's question: the rule runs from his tick down to the city's cap.
+  platoRule: {
+    position: 'absolute', left: STOPS[3].x - 1, top: TL_SUB_T + 17, width: 2,
+    height: CITY_CAP_T - (TL_SUB_T + 17), backgroundColor: SOFT,
+    transformOrigin: '50% 0%',
+  },
+  // The strike under a tier's caption as it is named.
+  tierMark: {
+    position: 'absolute', height: 2, backgroundColor: PAPER, borderRadius: 1, opacity: 0.9,
+  },
+  mineCard: {
+    position: 'absolute', left: VEIL_L + 6, top: MINE_T, width: VEIL_W - 12, height: 26,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  mineText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK,
+    includeFontPadding: false,
+  },
+  mineRule: {
+    position: 'absolute', left: 8, right: 8, top: 12, height: 2,
+    backgroundColor: INK, transformOrigin: '0% 50%',
+  },
+
+    tlName: {
     position: 'absolute', top: TL_NAME_T, width: STOP_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 1.2, color: INK,
     includeFontPadding: false,
@@ -371,7 +506,7 @@ const styles = StyleSheet.create({
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W, height: CARD_H },
   card: {
     width: CARD_W, height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, boxShadow: LIP, justifyContent: 'center', paddingHorizontal: 10,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, justifyContent: 'center', paddingHorizontal: 10,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },
   cardWrong: { borderColor: SOFT, opacity: 0.45 },

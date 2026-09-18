@@ -12,14 +12,16 @@ import { BEATS } from './metaphysics6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // The Ship of Theseus drawn as INFORMATION, not just mood.
 //
@@ -67,6 +69,11 @@ const SWAP = BEATS.map((b) => b.swap ?? 0);
 const TWO = BEATS.map((b) => b.two ?? 0);
 const ORIG = BEATS.map((b) => b.orig ?? 0);
 const YOU = BEATS.map((b) => b.you ?? 0);
+// group AH — still-tap events, each on for one beat only and carried both ways.
+const DISPUTED = BEATS.map((b) => b.disputed ?? 0);
+const COINS = BEATS.map((b) => b.coins ?? 0);
+const SAME_TAG = BEATS.map((b) => b.sameTag ?? 0);
+const YOU_EQ = BEATS.map((b) => b.youEq ?? 0);
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -85,7 +92,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics6'));
 export default function Metaphysics6Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(8);
   const orig = ORIG[i];
   const changed = i > 0 && ORIG[i - 1] !== orig;
 
@@ -106,6 +113,12 @@ export default function Metaphysics6Scene({ clock, bt, bi, i, dragPos, gazeX, ga
       two: carry(cv, 2, n, TWO[p], reacting ? 1 - dragPos.value : TWO[n], tr),
       you: carry(cv, 3, n, YOU[p], YOU[n], tr),
       worked: clamp01((1 - remaining) * 3),
+      // group AH — one still-tap event each, carried in and back out over the
+      // beats either side rather than switched, so none of them is a CUT.
+      disputed: carry(cv, 4, n, DISPUTED[p], DISPUTED[n], tr),
+      coins: carry(cv, 5, n, COINS[p], COINS[n], tr),
+      sameTag: carry(cv, 6, n, SAME_TAG[p], SAME_TAG[n], tr),
+      youEq: carry(cv, 7, n, YOU_EQ[p], YOU_EQ[n], tr),
       t,
     };
   });
@@ -142,6 +155,20 @@ export default function Metaphysics6Scene({ clock, bt, bi, i, dragPos, gazeX, ga
     const y = lerp(STEP_Y[i0], STEP_Y[i1], u - i0);
     return { transform: [{ translateX: p * (PLOT_R - PLOT_L) }, { translateY: y - STEP_Y[0] }] };
   });
+  // group AH — the four still-tap events.
+  const disputedStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.disputed,
+    transform: [{ translateY: (1 - SCENE.value.disputed) * 8 }],
+  }));
+  const coinsStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.coins,
+    transform: [{ scale: 0.6 + 0.4 * SCENE.value.coins }],
+  }));
+  const sameTagStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.sameTag,
+    transform: [{ translateX: (1 - SCENE.value.sameTag) * -10 }],
+  }));
+  const youEqStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.youEq }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -170,10 +197,33 @@ export default function Metaphysics6Scene({ clock, bt, bi, i, dragPos, gazeX, ga
         <Text style={styles.youT}>SO DO YOUR CELLS</Text>
       </Animated.View>
 
+      {/* group AH — "yet you still regard that child as numerically identical to
+          yourself": a small badge quoting the beat's own word lands beside the tag. */}
+      <Animated.View style={[styles.youEqBadge, youEqStyle]} pointerEvents="none">
+        <Text style={styles.youEqT}>STILL</Text>
+      </Animated.View>
+
+      {/* group AH — "philosophers disputed whether it remained the same ship": a
+          callout settles in the open water beside the hull, unsettled itself. */}
+      <Animated.View style={[styles.disputedTag, disputedStyle]} pointerEvents="none">
+        <Text style={styles.disputedT}>DISPUTED?</Text>
+      </Animated.View>
+
+      {/* group AH — "two new coins can be qualitatively identical": two matching
+          coins appear in the open water, same size, same face, side by side. */}
+      <Animated.View style={[styles.coin, { left: 267 }, coinsStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.coin, { left: 295 }, coinsStyle]} pointerEvents="none" />
+
       {/* ── the ship that kept sailing ────────────────────────────────────────── */}
       <Ship S={SCENE} x={SHIP_X} live />
       <Animated.View style={[styles.shipLabel, { left: SHIP_X - 58 }, labelStyle]} pointerEvents="none">
         <Text style={styles.shipLabelT}>REPAIRED</Text>
+      </Animated.View>
+
+      {/* group AH — "the repaired ship seems to keep numerical identity": a verdict
+          tag lands beside its own label. */}
+      <Animated.View style={[styles.sameTag, sameTagStyle]} pointerEvents="none">
+        <Text style={styles.sameTagT}>SAME</Text>
       </Animated.View>
 
       {/* ── the ship rebuilt from the hoarded planks, and the question it forces ─ */}
@@ -372,10 +422,46 @@ const styles = StyleSheet.create({
   // right-aligned 300-YEARS-ON tick (whose glyphs start ≈ 300).
   youTag: {
     position: 'absolute', left: 124, top: 331, width: 116, height: 18,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   youT: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.8, color: INK, includeFontPadding: false },
+
+  // group AH — "yet you still regard that child as numerically identical to
+  // yourself". Sits right of the youTag (ends x 240) and before the 300-YEARS-ON
+  // glyphs (start ≈ 300, per the comment above), so it never touches either.
+  youEqBadge: {
+    position: 'absolute', left: 244, top: 331, width: 50, height: 18,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  youEqT: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.8, color: INK, includeFontPadding: false },
+
+  // group AH — "philosophers disputed whether it remained the same ship": a
+  // callout in the open water beside the hull (clear of the mast/sail, which
+  // top out at x ≈ 190, and above the hull courses, which start at y 428).
+  disputedTag: {
+    position: 'absolute', left: 250, top: 396, width: 100, height: 20,
+    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, borderStyle: 'dashed',
+    backgroundColor: RULE, alignItems: 'center', justifyContent: 'center',
+  },
+  disputedT: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1, color: INK, includeFontPadding: false },
+
+  // group AH — "two new coins can be qualitatively identical": two identical
+  // discs, same size and face, in the same open water as the tag above.
+  coin: {
+    position: 'absolute', top: 428, width: 22, height: 22, borderRadius: 11,
+    borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
+  },
+
+  // group AH — "the repaired ship seems to keep numerical identity": a verdict
+  // beside its own REPAIRED label, same row (top 482), same plate language.
+  sameTag: {
+    position: 'absolute', left: 252, top: 482, width: 60, height: 16,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  sameTagT: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1, color: INK, includeFontPadding: false },
 });
 
 // BAND. No camera transform here, so design y IS screen y. Measured extremes across

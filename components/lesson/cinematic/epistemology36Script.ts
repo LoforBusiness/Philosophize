@@ -27,6 +27,11 @@ export interface Epistemology36Beat extends BaseBeat {
   /** 1 = the real cause is shown under the counter. */ real?: number;
   /** 1 = the two labels are shown side by side, refusing to match. */ clash?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a question mark rises over the row: the shoppers are being asked. */ ask?: number;
+  /** 0…2 = how many stated reasons have piled up beside the given-reason card. */ tally?: number;
+  /** 1 = a check mark confirms the stated reason was sincerely held. */ sincere?: number;
+  /** 1 = a check mark confirms the shopper's own judgement of the pair. */ judgeOk?: number;
+  /** 1 = a blocked mark shows the causal process itself cannot be seen. */ blind?: number;
 }
 
 export const BEATS: Epistemology36Beat[] = [
@@ -36,7 +41,7 @@ export const BEATS: Epistemology36Beat[] = [
     dur: 2.8,
   },
   {
-    p: 164, x: 56, shelf: 1,
+    p: 164, x: 56, shelf: 1, ask: 1,
     text: 'Richard Nisbett and Timothy Wilson asked shoppers which pair was the best quality. Nobody was told the pairs were identical.',
     dur: 1.8,
   },
@@ -55,27 +60,27 @@ export const BEATS: Epistemology36Beat[] = [
     dur: 2.5,
   },
   {
-    p: 266, x: 56, shelf: 1, given: 1,
+    p: 266, x: 56, shelf: 1, given: 1, tally: 1,
     text: 'Some said their pair had a better knit. Others pointed to a finer weave.',
     dur: 1.8,
   },
   {
-    p: 266, x: 56, shelf: 1, given: 1,
+    p: 266, x: 56, shelf: 1, given: 1, tally: 2,
     text: 'Still others cited sheerness or elasticity, the way a pair felt. However, the four pairs didn’t differ in any of these respects.',
     dur: 1.8,
   },
   {
-    p: 176, x: 56, shelf: 1, given: 1, real: 1,
+    p: 176, x: 56, shelf: 1, given: 1, real: 1, tally: 2,
     text: 'In fact, the choices were influenced by position in the row. Asked directly, nearly every shopper denied that position had played a part.',
     dur: 2.4,
   },
   {
-    p: 176, x: 56, shelf: 1, given: 1, real: 1,
+    p: 176, x: 56, shelf: 1, given: 1, real: 1, tally: 2, sincere: 1,
     text: 'The denials were sincere. The effect of position was hidden from the shoppers themselves.',
     dur: 2.2,
   },
   {
-    p: 385, x: 56, shelf: 1, given: 1, real: 1, clash: 1,
+    p: 385, x: 56, shelf: 1, given: 1, real: 1, clash: 1, tally: 2, sincere: 1,
     quote: {
       id: 'lq-epistemology-knowledge-36-1',
       text: 'Evidence is reviewed which suggests that there may be little or no direct introspective access to higher order cognitive processes.',
@@ -87,12 +92,12 @@ export const BEATS: Epistemology36Beat[] = [
     dur: 3.6,
   },
   {
-    p: 167, x: 56, shelf: 1, given: 1, real: 1, clash: 1,
+    p: 167, x: 56, shelf: 1, given: 1, real: 1, clash: 1, tally: 2, sincere: 1, judgeOk: 1,
     text: 'Each shopper could correctly report which pair seemed best. Nisbett and Wilson grant that people know such judgements.',
     dur: 2.6,
   },
   {
-    p: 400, x: 56, shelf: 1, given: 1, real: 1, clash: 1,
+    p: 400, x: 56, shelf: 1, given: 1, real: 1, clash: 1, tally: 2, sincere: 1, judgeOk: 1, blind: 1,
     text: 'The process behind the choice went unobserved. Introspection, the mind’s view of itself, couldn’t detect it.',
     dur: 1.8,
   },

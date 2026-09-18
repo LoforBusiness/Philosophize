@@ -17,6 +17,9 @@ export interface Meta31Beat extends BaseBeat {
   /** How many tally marks have been counted, 0…3. */ ticks?: number;
   /** 1 = the three candidates are labelled. */ chips?: number;
   /** 1 = the slab and the rings are live targets (Q1). */ pick?: number;
+  /** 1 = a ring flashes round each of the three holes — the new count (group AH). */ countRing?: number;
+  /** 1 = a bracket marks the tally itself — talk that commits you (group AH). */ tickMark?: number;
+  /** 1 = the three answer chips highlight in the order the sentence names them (group AH). */ listReveal?: number;
 }
 
 export const BEATS: Meta31Beat[] = [
@@ -32,7 +35,7 @@ export const BEATS: Meta31Beat[] = [
     cite: 'Three more things',
   },
   {
-    g: 159, holes: 1, ticks: 0, chips: 0,
+    g: 159, holes: 1, ticks: 0, chips: 0, countRing: 1,
     dur: 2.6,
     text: 'Yet a count now finds three more things than before, the three holes.',
   },
@@ -43,7 +46,7 @@ export const BEATS: Meta31Beat[] = [
     cite: 'Counting holes',
   },
   {
-    g: 456, holes: 1, ticks: 3, chips: 0,
+    g: 456, holes: 1, ticks: 3, chips: 0, tickMark: 1,
     dur: 1.8,
     text: 'Talk about holes therefore seems to commit you to the existence of holes.',
   },
@@ -67,7 +70,7 @@ export const BEATS: Meta31Beat[] = [
     cite: 'Three candidates',
   },
   {
-    g: 415, holes: 1, ticks: 3, chips: 1,
+    g: 415, holes: 1, ticks: 3, chips: 1, listReveal: 1,
     dur: 2.5,
     text: 'The cheese, the ring of cheese around each gap, or the empty gap itself.',
   },

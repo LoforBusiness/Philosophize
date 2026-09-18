@@ -9,6 +9,7 @@ import { BEATS } from './political17Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A WELL AND A ROTA, AND ONE ROW WITH NOBODY ON IT (H64). The rota is where the
 // argument lives: the well is what everybody agrees about.
@@ -36,6 +38,8 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 //
 // Band 222…512 = 290, holding one figure at 36% of the frame (check:scale).
 
+const NOBODY = BEATS.map((b) => b.nobody ?? 0);
+const OWE = BEATS.map((b) => b.owe ?? 0);
 const FIG_X = 52;
 
 const LABEL_T = 228;
@@ -79,7 +83,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political17'));
 export default function Political17Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const cur = BEATS[i];
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -106,12 +110,29 @@ export default function Political17Scene({ clock, bt, bi, i, picked, onPick, pic
       // drinking arrive together, with no signature anywhere.
       taken: carry(cv, 3, n, TAKEN[p], reacting ? pickPos.value : TAKEN[n], slow),
       boards: carry(cv, 4, n, PICKV[p], PICKV[n], grow),
+      // Carried, so each fades out as well as in (group L).
+      nobody: carry(cv, 5, n, NOBODY[p], NOBODY[n], grow),
+      owe: carry(cv, 6, n, OWE[p], OWE[n], grow),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
 
   const well = useAnimatedStyle(() => ({ opacity: SCENE.value.well }));
+  // ── the two tap events ─────────────────────────────────────────────────────
+  // The blank is not his: nobody signed. Said under the signature board, which is
+  // the board the claim is about.
+  const nobodyStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.nobody,
+    transform: [{ translateY: (1 - SCENE.value.nobody) * -6 }],
+  }));
+  // Fair play stops asking: the signature board is ruled through, and the rule
+  // draws across it.
+  const oweStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.owe,
+    transform: [{ scaleX: SCENE.value.owe }],
+  }));
+  const oweTagStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.owe - 0.5) / 0.5) }));
   const cup = useAnimatedStyle(() => ({ opacity: SCENE.value.taken }));
 
   return (
@@ -122,6 +143,15 @@ export default function Political17Scene({ clock, bt, bi, i, picked, onPick, pic
       {BOARDS.map((b, k) => (
         <Board key={b.id} k={k} SCENE={SCENE} live={live} answered={answered} picked={picked} onPick={onPick} />
       ))}
+
+      {/* Nobody signed — not him, and not them either. */}
+      <Animated.View style={[styles.nobodyTag, nobodyStyle]} pointerEvents="none">
+        <Text style={styles.nobodyText} numberOfLines={1}>NOR DID ANYONE ELSE</Text>
+      </Animated.View>
+
+      {/* So the signature stops being the question. */}
+      <Animated.View style={[styles.oweRule, oweStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.oweTag, oweTagStyle]} pointerEvents="none">WHO BENEFITS</Animated.Text>
 
       {/* ── THE WELL ─────────────────────────────────────────────────────── */}
       <Animated.View style={[styles.wellWrap, well]} pointerEvents="none">
@@ -195,12 +225,36 @@ function Board({
 }
 
 const styles = StyleSheet.create({
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // Under the signature board, which is BOARD_X[0]: the claim is about that board.
+  nobodyTag: {
+    position: 'absolute', left: BOARD_X[0], top: BOARD_T + BOARD_H + 6,
+    width: BOARD_W, height: 24,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 6,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  nobodyText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: SOFT,
+    includeFontPadding: false,
+  },
+  oweRule: {
+    position: 'absolute', left: BOARD_X[0] + 8, top: BOARD_T + BOARD_H / 2 - 1,
+    width: BOARD_W - 16, height: 2, backgroundColor: INK, borderRadius: 1,
+    transformOrigin: '0% 50%',
+  },
+  oweTag: {
+    position: 'absolute', left: BOARD_X[0], top: BOARD_T + BOARD_H + 10, width: BOARD_W,
+    textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   label: {
@@ -211,7 +265,7 @@ const styles = StyleSheet.create({
 
   board: { position: 'absolute', top: BOARD_T, width: BOARD_W, height: BOARD_H },
   boardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   boardText: {
@@ -240,7 +294,7 @@ const styles = StyleSheet.create({
   },
   drum: {
     position: 'absolute', left: WELL_L, top: WELL_T, width: WELL_W, height: 470 - WELL_T,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   rim: {
     position: 'absolute', left: WELL_L - 6, top: WELL_T - 4, width: WELL_W + 12, height: 10,

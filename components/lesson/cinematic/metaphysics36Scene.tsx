@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics36Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A HOTEL FRONT, SIXTEEN DOORS, AND GUESTS THAT WALK RIGHT.
@@ -77,15 +79,29 @@ const SHIFT = BEATS.map((b) => b.shift ?? 0);
 const DBL = BEATS.map((b) => (b.dbl ? 1 : 0));
 const LIVE_D = BEATS.map((b) => (b.live_d ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const EMPTYV = BEATS.map((b) => ((b.emptyRing ?? 0) > 0 ? 1 : 0));
+const NOLASTV = BEATS.map((b) => ((b.noLastRing ?? 0) > 0 ? 1 : 0));
+const REALCROSSV = BEATS.map((b) => ((b.realCross ?? 0) > 0 ? 1 : 0));
+const MATHCHECKV = BEATS.map((b) => ((b.mathCheck ?? 0) > 0 ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics36'));
 
 export default function Metaphysics36Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(8);
+  // Group AH — each still tap gets exactly one new mark; a fade re-plays only
+  // on the beat that actually changes that channel's value (C20c).
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const emptyFade = (cur.emptyRing ?? 0) !== (prev?.emptyRing ?? 0);
+  const noLastFade = (cur.noLastRing ?? 0) !== (prev?.noLastRing ?? 0);
+  const realCrossFade = (cur.realCross ?? 0) !== (prev?.realCross ?? 0);
+  const mathCheckFade = (cur.mathCheck ?? 0) !== (prev?.mathCheck ?? 0);
+
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
+    const grow = ease01(bt.value / 0.55);
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr). A fixed length
     // here sprinted every long journey and left the footfalls — which the player
     // computes from moveTr — arriving after the figure had stopped.
@@ -111,6 +127,12 @@ export default function Metaphysics36Scene({ clock, bt, bi, i, picked, onPick, d
       fig: lookPose(figS, carry(cv, 2, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       t,
       hotelOn: carry(cv, 3, n, HOTEL[p], HOTEL[n], tr),
+      // Four new marks, one per still tap — never a re-fade of one already
+      // settled (C20c).
+      emptyRing: carry(cv, 4, n, EMPTYV[p], EMPTYV[n], emptyFade ? grow : 1),
+      noLastRing: carry(cv, 5, n, NOLASTV[p], NOLASTV[n], noLastFade ? grow : 1),
+      realCross: carry(cv, 6, n, REALCROSSV[p], REALCROSSV[n], realCrossFade ? grow : 1),
+      mathCheck: carry(cv, 7, n, MATHCHECKV[p], MATHCHECKV[n], mathCheckFade ? grow : 1),
       move,
     };
   });
@@ -119,6 +141,10 @@ export default function Metaphysics36Scene({ clock, bt, bi, i, picked, onPick, d
   const answered = picked !== null;
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.drag && LIVE[i] === 1;
   const hotelStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.hotelOn }));
+  const emptyRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.emptyRing }));
+  const noLastRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.noLastRing }));
+  const realCrossStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.realCross }));
+  const mathCheckStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.mathCheck }));
 
   const rooms: number[] = [];
   for (let r = 1; r <= 16; r++) rooms.push(r);
@@ -146,8 +172,27 @@ export default function Metaphysics36Scene({ clock, bt, bi, i, picked, onPick, d
         ))}
         <Text style={styles.more}>…</Text>
 
+        {/* A dashed ring settles round room one's door — it is the one that
+            is now empty (group AH). */}
+        <Animated.View style={[styles.emptyRing, emptyRingStyle]} pointerEvents="none" />
+        {/* A dashed ring, then later a cross, settle round the ellipsis —
+            first "no last room", then Craig's doubt that the endlessness it
+            stands for is real (group AH). */}
+        <Animated.View style={[styles.moreRing, noLastRingStyle]} pointerEvents="none" />
+        <Animated.View style={[styles.moreCross, realCrossStyle]} pointerEvents="none">
+          <View style={styles.moreCrossA} />
+          <View style={styles.moreCrossB} />
+        </Animated.View>
+
         <View style={styles.desk} pointerEvents="none" />
         <Text style={styles.deskLabel}>DESK</Text>
+
+        {/* A check ticks onto the desk — the arithmetic still balances
+            (group AH). */}
+        <Animated.View style={[styles.mathBadge, mathCheckStyle]} pointerEvents="none">
+          <View style={styles.mathCheckA} />
+          <View style={styles.mathCheckB} />
+        </Animated.View>
 
         {rooms.map((r) => {
           const at = doorAt(r);
@@ -208,7 +253,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 110, top: CAP_T, width: 260,
@@ -218,7 +263,7 @@ const styles = StyleSheet.create({
   door: { position: 'absolute', width: DOOR_W, height: DOOR_H + 12 },
   doorBox: {
     position: 'absolute', left: 0, top: 0, width: DOOR_W, height: DOOR_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   doorNo: {
     position: 'absolute', left: 0, top: DOOR_H + 1, width: DOOR_W, textAlign: 'center',
@@ -245,7 +290,7 @@ const styles = StyleSheet.create({
     // arrives AT reception, which is a better reading of the beat as well. Nothing
     // else occupies y 402…432 right of the doors, which stop at y 368.
     position: 'absolute', left: 176, top: 402, width: 78, height: 30,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   deskLabel: {
     position: 'absolute', left: 176, top: 412, width: 78, textAlign: 'center',
@@ -255,6 +300,26 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', width: DOOR_W, height: DOOR_H },
   hitBox: { position: 'absolute', left: 0, top: 0, width: DOOR_W, height: DOOR_H, borderRadius: 3 },
   hitWrong: { borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed' },
+
+  // GROUP AH — the four still-tap marks.
+  emptyRing: {
+    position: 'absolute', left: 106, top: 258, width: 38, height: 42,
+    borderRadius: 10, borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
+  moreRing: {
+    position: 'absolute', left: 380, top: ROW_Y[1], width: 24, height: 22,
+    borderRadius: 8, borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
+  moreCross: { position: 'absolute', left: 384, top: ROW_Y[1] + 4, width: 16, height: 16 },
+  moreCrossA: { position: 'absolute', left: -1, top: 7, width: 18, height: 2, backgroundColor: INK, transform: [{ rotate: '45deg' }] },
+  moreCrossB: { position: 'absolute', left: -1, top: 7, width: 18, height: 2, backgroundColor: INK, transform: [{ rotate: '-45deg' }] },
+
+  mathBadge: {
+    position: 'absolute', left: 244, top: 392, width: 20, height: 20, borderRadius: 10,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  mathCheckA: { position: 'absolute', left: 5, top: 10, width: 5, height: 2, backgroundColor: INK, borderRadius: 1, transform: [{ rotate: '45deg' }] },
+  mathCheckB: { position: 'absolute', left: 7, top: 8, width: 9, height: 2, backgroundColor: INK, borderRadius: 1, transform: [{ rotate: '-50deg' }] },
 });
 
 export function Metaphysics36Lesson({ lesson }: { lesson: Lesson }) {

@@ -10,14 +10,16 @@ import { BEATS } from './aesthetics33Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A CANVAS THAT CLEANS FROM THE LEFT AS THE READER DRAGS.
 //
@@ -55,13 +57,14 @@ const LAYERS = ['DIRT', 'VARNISH', 'GLAZE', 'PAINT'];
 
 const CLEAN = BEATS.map((b) => b.clean ?? 0);
 const LAYERED = BEATS.map((b) => b.layers ?? 0);
+const DISPUTE = BEATS.map((b) => ((b.dispute ?? 0) > 0 ? 1 : 0));
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics33'));
 
 export default function Aesthetics33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(3);
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -75,6 +78,9 @@ export default function Aesthetics33Scene({ clock, bt, bi, i, dragPos, gazeX, ga
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       clean: live ? dragPos.value : carry(cv, 0, n, CLEAN[p], CLEAN[n], wipe),
       layers: carry(cv, 1, n, LAYERED[p], LAYERED[n], tr),
+      // A plain carry: the value is 0/1, so its own interpolation is the fade
+      // both in and out — no separate envelope needed.
+      dispute: carry(cv, 2, n, DISPUTE[p], DISPUTE[n], tr),
     };
   });
 
@@ -84,6 +90,9 @@ export default function Aesthetics33Scene({ clock, bt, bi, i, dragPos, gazeX, ga
   const grimeStyle = useAnimatedStyle(() => ({ width: PIC_W * (1 - SCENE.value.clean) }));
   const swabStyle = useAnimatedStyle(() => ({ left: PIC_L + PIC_W * SCENE.value.clean - 2 }));
   const layerStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.layers }));
+  // GLAZE's own dashed box: once historians disagree about it, its label wears
+  // the boundary mark this app uses for a contested claim, never a fill (H58).
+  const disputeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.dispute }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -109,8 +118,14 @@ export default function Aesthetics33Scene({ clock, bt, bi, i, dragPos, gazeX, ga
       <Animated.View style={[styles.swab, swabStyle]} pointerEvents="none" />
 
       <Animated.View style={[styles.layerCol, layerStyle]} pointerEvents="none">
-        {LAYERS.map((l) => (
-          <Text key={l} style={styles.layerName} numberOfLines={1}>{l}</Text>
+        {LAYERS.map((l, k) => (
+          k === 2 ? (
+            <Animated.View key={l} style={[styles.disputeBox, disputeStyle]}>
+              <Text style={styles.layerName} numberOfLines={1}>{l}</Text>
+            </Animated.View>
+          ) : (
+            <Text key={l} style={styles.layerName} numberOfLines={1}>{l}</Text>
+          )
         ))}
       </Animated.View>
 
@@ -167,6 +182,10 @@ const styles = StyleSheet.create({
   layerName: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     includeFontPadding: false,
+  },
+  disputeBox: {
+    alignSelf: 'flex-start', borderWidth: 1, borderStyle: 'dashed', borderColor: INK,
+    borderRadius: 3, paddingHorizontal: 3, paddingVertical: 1,
   },
 });
 

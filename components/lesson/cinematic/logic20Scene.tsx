@@ -9,6 +9,7 @@ import { BEATS } from './logic20Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE BOARDS SAYING THE SAME THING, ON ONE LEG, THREE LEGS AND FIVE.
@@ -47,6 +49,7 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const ECHOED = BEATS.map((b) => b.echoed ?? 0);
 const BASE_TR = 0.85;
 
 const BOARD_Y = 254;
@@ -85,7 +88,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic20'));
 export default function Logic20Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -109,6 +112,8 @@ export default function Logic20Scene({ clock, bt, bi, i, picked, onPick, pickPos
       // the best case there is.
       struts: carry(cv, 2, n, STRUTS[p], reacting ? pickPos.value : STRUTS[n], tr),
       strike: carry(cv, 3, n, STRIKE[p], STRIKE[n], tr),
+      // Carried, so it fades out as well as in (group L).
+      echoed: carry(cv, 4, n, ECHOED[p], ECHOED[n], tr),
       t,
     };
   });
@@ -121,6 +126,14 @@ export default function Logic20Scene({ clock, bt, bi, i, picked, onPick, pickPos
     opacity: clamp01(SCENE.value.strike * 3),
     transform: [{ translateY: (BOARD_Y - HAMMER_TOP - 10) * SCENE.value.strike }],
   }));
+
+  // ── the tap event ──────────────────────────────────────────────────────────
+  //
+  // THE SENTENCE NAMES THEM IN TURN — "a second repeats some of them", then "the
+  // third repeats a single reason" — so the two tags arrive in that order (AH5).
+  const echo1Style = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.echoed / 0.6) }));
+  const echo2Style = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.echoed - 0.4) / 0.6) }));
+  const echoStyles = [echo1Style, echo2Style];
 
   return (
     <View style={styles.scene}>
@@ -155,6 +168,13 @@ export default function Logic20Scene({ clock, bt, bi, i, picked, onPick, pickPos
             pointerEvents="none"
           />
         </Target>
+      ))}
+
+      {/* The second and third tellings are the first one again. */}
+      {[1, 2].map((k) => (
+        <Animated.View key={`ec${k}`} style={[styles.echoTag, { left: BOARD_X[k] }, echoStyles[k - 1]]} pointerEvents="none">
+          <Text style={styles.echoText} numberOfLines={1}>REPEATED</Text>
+        </Animated.View>
       ))}
 
       <View style={styles.ground} pointerEvents="none" />
@@ -195,12 +215,24 @@ function Board({ S, index }: { S: { value: { boards: number; struts: number; str
 }
 
 const styles = StyleSheet.create({
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // Under each board's own struts, which end at STRUT_Y + STRUT_H.
+  echoTag: {
+    position: 'absolute', top: STRUT_Y + STRUT_H + 8, width: BOARD_W, height: 22,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  echoText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   // RIGHT OF THE BLOW. It sat at x 34, which is the one column the strike falls
   // through: the bar crossed the caption on its way down, came to rest on its
@@ -214,7 +246,7 @@ const styles = StyleSheet.create({
 
   board: {
     position: 'absolute', top: BOARD_Y, width: BOARD_W, height: BOARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     justifyContent: 'center', paddingHorizontal: 7,
   },
   boardText: {

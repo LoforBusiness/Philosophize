@@ -29,6 +29,8 @@ export interface Political36Beat extends BaseBeat {
   /** 1 = the guard box is shown EMPTY behind the lamp. */ empty?: number;
   /** 1 = the three candidate causes stand below. */ picks?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed line drops from the empty guard box down to the street — the belief doing the work with nobody behind it. */ link?: number;
+  /** 1 = a dashed boundary appears inside the block of windows, drawn smaller than the block itself. */ shrink?: number;
 }
 
 export const BEATS: Political36Beat[] = [
@@ -67,7 +69,7 @@ export const BEATS: Political36Beat[] = [
     dur: 4.1,
   },
   {
-    p: 467, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1,
+    p: 467, x: 52, street: 1, watch: 0.6, lamp: 1, empty: 1, link: 1,
     text: 'The watchtower may therefore stand empty. The belief that someone might be watching does the work.',
     dur: 1.8,
   },
@@ -99,7 +101,7 @@ export const BEATS: Political36Beat[] = [
     dur: 2.2,
   },
   {
-    p: 459, x: 84, street: 1, watch: 0.6, lamp: 1, picks: 1,
+    p: 459, x: 84, street: 1, watch: 0.6, lamp: 1, picks: 1, shrink: 1,
     text: 'This is called a chilling effect: the range of lawful things people are willing to do shrinks.',
     dur: 2.4,
   },

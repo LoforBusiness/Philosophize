@@ -29,6 +29,7 @@ export interface Ethics41Beat extends BaseBeat {
   /** How far the floor is tilted toward the default door, 0…1. */ tilt?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a check stamps onto the DECLINE door, marking that opting out costs the same instant under either default. */ tick?: number;
 }
 
 export const BEATS: Ethics41Beat[] = [
@@ -80,7 +81,7 @@ export const BEATS: Ethics41Beat[] = [
     dur: 5.0,
   },
   {
-    p: 389, x: 88, doors: 1, floorOn: 1, tilt: 0.45,
+    p: 389, x: 88, doors: 1, floorOn: 1, tilt: 0.45, tick: 1,
     text: 'Declining takes the same few seconds in either system. Only the default has changed, yet the outcomes differ widely.',
     dur: 4.6,
   },

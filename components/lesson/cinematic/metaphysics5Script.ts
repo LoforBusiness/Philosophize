@@ -11,6 +11,9 @@ export interface Meta5Beat extends BaseBeat {
   /** The great "?" standing between NOTHING and SOMETHING 0..1. */ q?: number;
   /** The figure glows and the DASEIN tag stamps in 0..1. */ dasein?: number;
   /** Leibniz's principle of sufficient reason, ruled under the panels 0..1. */ psr?: number;
+  /** A dashed loop appears around the figure — the questioner is himself one of the beings being asked about (group AH). 0..1. */ included?: number;
+  /** A small "?" appears at the tip of Leibniz's rule, asking what the reason could be (group AH). 0..1. */ psrQ?: number;
+  /** A rule settles in beneath the tag as Heidegger formally names the being Dasein (group AH). 0..1. */ dName?: number;
 }
 
 export const BEATS: Meta5Beat[] = [
@@ -26,7 +29,7 @@ export const BEATS: Meta5Beat[] = [
     dur: 3.3,
   },
   {
-    p: 275, stars: 1, q: 1,
+    p: 275, stars: 1, q: 1, included: 1,
     text: 'It asks why there are any beings at all, the questioner included.',
     dur: 1.9,
   },
@@ -40,7 +43,7 @@ export const BEATS: Meta5Beat[] = [
     dur: 2.2,
   },
   {
-    p: 404, stars: 1, q: 1, psr: 1,
+    p: 404, stars: 1, q: 1, psr: 1, psrQ: 1,
     // The rule is drawn on stage in plain words — EVERY FACT NEEDS A REASON. Naming
     // it "the Principle of Sufficient Reason" over the top of that adds a term and
     // no meaning, and undoes the choice the scene already made (J7).
@@ -67,7 +70,7 @@ export const BEATS: Meta5Beat[] = [
     dur: 2.3,
   },
   {
-    p: 278, stars: 1, q: 0.4, psr: 1, dasein: 1,
+    p: 278, stars: 1, q: 0.4, psr: 1, dasein: 1, dName: 1,
     text: 'Heidegger calls such a being Dasein, German for “being-there”. It’s the being that can inquire into being itself.',
     dur: 2.7,
   },

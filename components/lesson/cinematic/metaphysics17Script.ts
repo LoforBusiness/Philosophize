@@ -23,6 +23,9 @@ export interface Met17Beat extends BaseBeat {
   /** The door, 0 shut · 1 open. */ door?: number;
   /** The card on the other side, 0…1. */ card?: number;
   /** 1 = the three boards are live targets (Q1). */ pick?: number;
+  /** 1 = a COMPLETE stamp appears above the wall. */ seal?: number;
+  /** 1 = a dashed room frames the figure, confining him to it. */ room?: number;
+  /** 1 = EASY labels the wall and HARD labels the card. */ tag?: number;
 }
 
 export const BEATS: Met17Beat[] = [
@@ -32,12 +35,12 @@ export const BEATS: Met17Beat[] = [
     text: 'Frank Jackson imagines Mary, a scientist who knows every physical fact about colour vision, down to which neurons fire.',
   },
   {
-    g: 462, wall: 1,
+    g: 462, wall: 1, seal: 1,
     dur: 1.8,
     text: 'By the terms of the case, her physical knowledge of colour is complete.',
   },
   {
-    g: 379, wall: 1,
+    g: 379, wall: 1, room: 1,
     dur: 4.6,
     text: 'However, Mary has never seen colour. She’s lived her whole life in a black and white room.',
     cite: 'A black and white room',
@@ -62,7 +65,7 @@ export const BEATS: Met17Beat[] = [
     },
   },
   {
-    g: 440, wall: 1, door: 1, card: 1,
+    g: 440, wall: 1, door: 1, card: 1, tag: 1,
     dur: 5.0,
     text: 'David Chalmers classes explaining how the brain processes light among the easy problems. Explaining why any of it is felt is the hard problem.',
     cite: 'The hard problem',

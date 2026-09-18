@@ -9,6 +9,7 @@ import { BEATS } from './ethics39Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A STAIRCASE FROM KNOWS BETTER TO DOES BETTER, AND A TOKEN THAT STALLS ON IT.
@@ -85,6 +87,7 @@ const STAIR = BEATS.map((b) => (b.stair ? 1 : 0));
 const RUNGS = BEATS.map((b) => (b.rungs ? 1 : 0));
 const CLIMB = BEATS.map((b) => b.climb ?? 0);
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const BLAME = BEATS.map((b) => (b.blame ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
@@ -101,6 +104,10 @@ export default function Ethics39Scene({ clock, bt, bi, i, picked, onPick, pickPo
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // RUNS ONCE, ON THE BEAT THAT ASKS FOR IT (C20c) — a hold re-draws nothing.
+  const blameNow = (cur.blame ?? 0) > 0 && (cur.blame ?? 0) !== (prev?.blame ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -122,6 +129,9 @@ export default function Ethics39Scene({ clock, bt, bi, i, picked, onPick, pickPo
       // R7c — the chip's bin IS the token's height. The reader watches it run to
       // the top or refuse to leave the floor as they move it.
       climb: carry(cv, 3, n, CLIMB[p], reacting ? pickAt(CLIMB_AT, pickPos.value) : CLIMB[n], tr),
+      // THE BLAME RING — Socrates relocating the error down to JUDGE, against the
+      // token still stalled up at ACT. Rides `bt` directly: one pulse per tap.
+      blame: blameNow ? ease01(bt.value / 1.2) : 0,
     };
   });
 
@@ -134,6 +144,13 @@ export default function Ethics39Scene({ clock, bt, bi, i, picked, onPick, pickPo
   const tokenStyle = useAnimatedStyle(() => {
     const u = SCENE.value.climb;
     return { transform: [{ translateX: pickAt(TOK_X, u) - TOK_X[0] }, { translateY: pickAt(TOK_Y, u) - TOK_Y[0] }] };
+  });
+  // The blame ring: a dashed pulse round JUDGE, marking where Socrates puts the
+  // error, then gone.
+  const blameStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.blame;
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, u / 0.3) * (1 - u);
+    return { opacity: on * 0.9, transform: [{ scale: 0.85 + 0.35 * u }] };
   });
 
   return (
@@ -174,6 +191,9 @@ export default function Ethics39Scene({ clock, bt, bi, i, picked, onPick, pickPo
         ))}
 
         <Animated.View style={[styles.token, tokenStyle]} pointerEvents="none" />
+
+        {/* THE BLAME RING — Socrates relocates the fault to JUDGE, not ACT. */}
+        <Animated.View style={[styles.blameRing, blameStyle]} pointerEvents="none" />
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
@@ -187,7 +207,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — political7 and political8 both stand
   // their subject on a filled mass rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 132, top: CAP_T, width: 250,
@@ -196,7 +216,7 @@ const styles = StyleSheet.create({
 
   low: {
     position: 'absolute', left: LOW_X, top: LOW_Y, width: LOW_W, height: LOW_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   lowText: {
     position: 'absolute', left: LOW_X, top: LOW_Y + 13, width: LOW_W, textAlign: 'center',
@@ -204,7 +224,7 @@ const styles = StyleSheet.create({
   },
   up: {
     position: 'absolute', left: UP_X, top: UP_Y, width: UP_W, height: UP_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   upText: {
     position: 'absolute', left: UP_X, top: UP_Y + 10, width: UP_W, textAlign: 'center',
@@ -214,7 +234,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', width: ST_W, height: ST_H },
   step: {
     position: 'absolute', left: 0, top: 0, width: ST_W, height: ST_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   stepRight: { backgroundColor: INK },
   stepWrong: { borderColor: SOFT, borderStyle: 'dashed' },
@@ -227,6 +247,12 @@ const styles = StyleSheet.create({
   token: {
     position: 'absolute', left: TOK_X[0] - TOK / 2, top: TOK_Y[0], width: TOK, height: TOK,
     borderRadius: TOK / 2, backgroundColor: INK,
+  },
+  // A dashed boundary round JUDGE (D31): a claim about where the fault sits,
+  // never a fill.
+  blameRing: {
+    position: 'absolute', left: ST_X[0] - 8, top: ST_Y[0] - 8, width: ST_W + 16, height: ST_H + 16,
+    borderRadius: 14, borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed', transformOrigin: '50% 50%',
   },
 });
 

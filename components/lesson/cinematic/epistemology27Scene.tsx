@@ -9,6 +9,7 @@ import { BEATS } from './epistemology27Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHAT SHE SAID, THE PASSAGE, AND THE GAUGE AT THE FAR END OF IT.
@@ -54,6 +56,12 @@ const SAID_H = 36;
 const PASS_X = 246;
 const PASS_Y = 316;
 
+const SHORTFALL_TAG_W = 70;
+const NO_WORD_X = 246;
+const NO_WORD_Y = 384;
+const NO_WORD_W = 96;
+const NO_WORD_H = 26;
+
 const GAUGE_X = 284;
 const GAUGE_Y = 306;
 const GAUGE_W = 96;
@@ -81,6 +89,8 @@ const GAUGE = BEATS.map((b) => (b.gauge ? 1 : 0));
 const CREDIT = BEATS.map((b) => b.credit ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const SHORTFALL = BEATS.map((b) => (b.shortfall ? 1 : 0));
+const NO_WORD_YET = BEATS.map((b) => (b.noWordYet ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -100,7 +110,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology27'));
 export default function Epistemology27Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(6);
+  const cv = useCarry(8);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -122,6 +132,8 @@ export default function Epistemology27Scene({ clock, bt, bi, i, picked, onPick, 
       credit: carry(cv, 3, n, CREDIT[p], reacting ? pickAt(CREDIT_AT, pickPos.value) : CREDIT[n], tr),
       words: carry(cv, 4, n, 1, reacting ? pickAt(WORDS_AT, pickPos.value) : 1, tr),
       platesOn: carry(cv, 5, n, PLATES[p], PLATES[n], tr),
+      shortfall: carry(cv, 6, n, SHORTFALL[p], SHORTFALL[n], tr),
+      noWordYet: carry(cv, 7, n, NO_WORD_YET[p], NO_WORD_YET[n], tr),
     };
   });
 
@@ -137,6 +149,20 @@ export default function Epistemology27Scene({ clock, bt, bi, i, picked, onPick, 
     width: FILL_MAX * SCENE.value.credit,
   }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
+  // SHORTFALL — a bracket measuring the gap between the fill and the full mark:
+  // what prejudice took. Read live off the credit value, so it never mismatches it.
+  const shortfallLineStyle = useAnimatedStyle(() => {
+    const left = GAUGE_X + 2 + FILL_MAX * SCENE.value.credit;
+    const right = GAUGE_X + FILL_MAX + 3;
+    return { opacity: SCENE.value.shortfall, left, width: Math.max(0, right - left) };
+  });
+  const shortfallTagStyle = useAnimatedStyle(() => {
+    const left = GAUGE_X + 2 + FILL_MAX * SCENE.value.credit;
+    const right = GAUGE_X + FILL_MAX + 3;
+    const mid = (left + right) / 2;
+    return { opacity: SCENE.value.shortfall, left: mid - SHORTFALL_TAG_W / 2 };
+  });
+  const noWordYetStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.noWordYet }));
 
   return (
     <View style={styles.scene}>
@@ -156,6 +182,13 @@ export default function Epistemology27Scene({ clock, bt, bi, i, picked, onPick, 
         <Text style={styles.gaugeText}>CREDIT GIVEN</Text>
       </Animated.View>
       <Animated.View style={[styles.fill, fillStyle]} pointerEvents="none" />
+
+      <Animated.View style={[styles.shortfallLine, shortfallLineStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.shortfallTag, shortfallTagStyle]} pointerEvents="none">SHORTFALL</Animated.Text>
+
+      <Animated.View style={[styles.noWordYet, noWordYetStyle]} pointerEvents="none">
+        <Text style={styles.noWordYetTag} pointerEvents="none">1970s</Text>
+      </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
         {PLATE_ID.map((id, k) => (
@@ -186,7 +219,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: SAID_X, top: CAP_T, width: 250,
@@ -222,10 +255,29 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,
   },
 
+  // SHORTFALL_LINE / TAG — a dashed bracket over the gap between the fill and the
+  // full mark, labelled what prejudice took. Positioned live off the fill's own edge.
+  shortfallLine: {
+    position: 'absolute', top: GAUGE_Y - 8, height: 0,
+    borderTopWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
+  shortfallTag: {
+    position: 'absolute', top: GAUGE_Y - 20, width: SHORTFALL_TAG_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: SOFT, includeFontPadding: false,
+  },
+  // NO_WORD_YET — an empty dashed box: a harm nobody yet had the words for, until
+  // the term arrived in the 1970s.
+  noWordYet: {
+    position: 'absolute', left: NO_WORD_X, top: NO_WORD_Y, width: NO_WORD_W, height: NO_WORD_H,
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'flex-end',
+  },
+  noWordYetTag: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: SOFT, includeFontPadding: false, marginBottom: 3,
+  },
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

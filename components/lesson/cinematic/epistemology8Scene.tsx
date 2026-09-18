@@ -13,6 +13,7 @@ import { BEATS } from './epistemology8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import { TargetRing } from './Target';
@@ -20,8 +21,9 @@ import { TargetRing } from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A pile of spare BECAUSE-blocks downstage far-left, and a tower of reasons hanging
 // stage-right that grows DOWNWARD — each new reason wedged UNDER the last, because
@@ -88,6 +90,16 @@ const DIR = dirsFrom(X, 1);
 const TOWER = BEATS.map((b) => b.tower ?? 0);
 const PILE = BEATS.map((b) => b.pile ?? 0);
 const HOLD = BEATS.map((b) => b.hold ?? 0);
+// group AH — one still-tap event each, plain carried 0/1 tracks
+const ASK1 = BEATS.map((b) => b.ask1 ?? 0);
+const PILE_RING = BEATS.map((b) => b.pileRing ?? 0);
+const BELIEF_TAG = BEATS.map((b) => b.beliefTag ?? 0);
+const ASK2 = BEATS.map((b) => b.ask2 ?? 0);
+const CITY_TAG = BEATS.map((b) => b.cityTag ?? 0);
+const ASK2_TAIL = BEATS.map((b) => b.ask2Tail ?? 0);
+const CIRCLE_RING = BEATS.map((b) => b.circleRing ?? 0);
+const REST_TAG = BEATS.map((b) => b.restTag ?? 0);
+const BOTH_RING = BEATS.map((b) => b.bothRing ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -97,7 +109,7 @@ const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(14);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -140,6 +152,15 @@ export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick, d
       // up as the web widens — so the reader's own curve is how many rows stand.
       tower: carry(cv, 4, n, TOWER[p], reacting ? 1 + dragPos.value * 3 : TOWER[n], tr, open),
       esc: escOn ? (escFade ? grow : 1) : 0,
+      ask1: carry(cv, 5, n, ASK1[p], ASK1[n], tr),
+      pileRing: carry(cv, 6, n, PILE_RING[p], PILE_RING[n], tr),
+      beliefTag: carry(cv, 7, n, BELIEF_TAG[p], BELIEF_TAG[n], tr),
+      ask2: carry(cv, 8, n, ASK2[p], ASK2[n], tr),
+      cityTag: carry(cv, 9, n, CITY_TAG[p], CITY_TAG[n], tr),
+      ask2Tail: carry(cv, 10, n, ASK2_TAIL[p], ASK2_TAIL[n], tr),
+      circleRing: carry(cv, 11, n, CIRCLE_RING[p], CIRCLE_RING[n], tr),
+      restTag: carry(cv, 12, n, REST_TAG[p], REST_TAG[n], tr),
+      bothRing: carry(cv, 13, n, BOTH_RING[p], BOTH_RING[n], tr),
     };
   });
 
@@ -159,6 +180,20 @@ export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick, d
   }));
   const escLabelStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.esc }));
 
+  // ── group AH: one still-tap event each ────────────────────────────────────
+  // The two "?" marks sit in the row the tower hasn't built yet, and fade the
+  // instant the real row arrives to fill that slot — so a mark is never seen
+  // fighting the thing it was standing in for.
+  const ask1Style = useAnimatedStyle(() => ({ opacity: SCENE.value.ask1 * clamp01(2 - SCENE.value.tower) }));
+  const pileRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pileRing * clamp01(SCENE.value.pile) }));
+  const beliefTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.beliefTag }));
+  const ask2Style = useAnimatedStyle(() => ({ opacity: SCENE.value.ask2 * clamp01(3 - SCENE.value.tower) }));
+  const cityTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.cityTag }));
+  const ask2TailStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ask2Tail * clamp01(3 - SCENE.value.tower) }));
+  const circleRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.circleRing }));
+  const restTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.restTag }));
+  const bothRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.bothRing }));
+
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
   const land = cur.land ?? 0;
@@ -171,6 +206,17 @@ export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick, d
       {PILE_TOPS.map((top, k) => (
         <PileBlock key={k} S={SCENE} k={k} top={top} />
       ))}
+      {/* "whether this process must ever stop" — a ring round the whole pile,
+          fading with it once the last spare block is gone. */}
+      <Animated.View style={[styles.pileRing, pileRingStyle]} pointerEvents="none" />
+      {/* "each block stands for a belief" / "the city printed it" — the two never
+          overlap in time, so one fixed plate serves both. */}
+      <Animated.View style={[styles.pileTag, beliefTagStyle]} pointerEvents="none">
+        <Text style={styles.pileTagT}>A BELIEF</Text>
+      </Animated.View>
+      <Animated.View style={[styles.pileTag, cityTagStyle]} pointerEvents="none">
+        <Text style={styles.pileTagT}>THE CITY</Text>
+      </Animated.View>
 
       {/* ── the tower of reasons, hanging with no floor beneath it ───────────── */}
       {towerOn ? (
@@ -181,6 +227,18 @@ export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick, d
           {ROWS.map((r, k) => (
             <TowerRow key={r.txt} S={SCENE} k={k} lab={r.lab} txt={r.txt} ghost={k === ROWS.length - 1} />
           ))}
+          {/* "what justifies that reason?" / "the questions never run out" — a "?"
+              waiting in each row the tower hasn't built yet, gone the instant the
+              real row fills that slot. */}
+          <Animated.Text style={[styles.rowAsk, { top: ROW_TOP + 1 * (ROW_H + ROW_GAP) + 14 }, ask1Style]} pointerEvents="none">
+            ?
+          </Animated.Text>
+          <Animated.Text style={[styles.rowAsk, { top: ROW_TOP + 2 * (ROW_H + ROW_GAP) + 4 }, ask2Style]} pointerEvents="none">
+            ?
+          </Animated.Text>
+          <Animated.View style={[styles.rowAskTail, { top: ROW_TOP + 2 * (ROW_H + ROW_GAP) + 40 }, ask2TailStyle]} pointerEvents="none">
+            <Text style={styles.rowAskTailT}>NEVER STOPS</Text>
+          </Animated.View>
           <Animated.View style={[styles.dots, dotsStyle]} pointerEvents="none">
             <View style={[styles.dot, { opacity: 0.9 }]} />
             <View style={[styles.dot, { opacity: 0.55 }]} />
@@ -214,6 +272,27 @@ export default function Epistemology8Scene({ clock, bt, bi, i, picked, onPick, d
               />
             );
           })}
+          {/* "Second... circle... Third... bedrock" — a dashed bracket names both together. */}
+          <Animated.View
+            style={[
+              styles.pairRing,
+              { top: ESC_TOP + 1 * (ESC_H + ESC_GAP) - 8, height: ESC_H * 2 + ESC_GAP + 16 },
+              bothRingStyle,
+            ]}
+            pointerEvents="none"
+          />
+          {/* "loop back in a circle" — a ring round the escape this beat names. */}
+          <Animated.View
+            style={[styles.escRing, { top: ESC_TOP + 1 * (ESC_H + ESC_GAP) - 4 }, circleRingStyle]}
+            pointerEvents="none"
+          />
+          {/* "finally ends at a basic belief" — landed under the bedrock escape. */}
+          <Animated.View
+            style={[styles.restTag, { top: ESC_TOP + 2 * (ESC_H + ESC_GAP) + ESC_H + 4 }, restTagStyle]}
+            pointerEvents="none"
+          >
+            <Text style={styles.restTagT}>AT LAST</Text>
+          </Animated.View>
         </>
       ) : null}
 
@@ -333,7 +412,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   // ── the pile ────────────────────────────────────────────────────────────────
   pileLabel: {
@@ -345,6 +424,17 @@ const styles = StyleSheet.create({
     position: 'absolute', left: PILE_L, width: PILE_W, height: 15,
     borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
+  // ── group AH: the eight still-tap events ───────────────────────────────────
+  pileRing: {
+    position: 'absolute', left: 0, top: 448, width: PILE_L + PILE_W + 5, height: 55,
+    borderWidth: 2, borderColor: INK, borderRadius: 8,
+  },
+  pileTag: {
+    position: 'absolute', left: 54, top: 470, width: 90, paddingVertical: 3,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center',
+  },
+  pileTagT: { fontFamily: 'Inter_700Bold', fontSize: 9.8, letterSpacing: 0.5, color: INK, includeFontPadding: false },
 
   // ── the tower ───────────────────────────────────────────────────────────────
   towerLabel: {
@@ -354,7 +444,7 @@ const styles = StyleSheet.create({
   },
   row: {
     position: 'absolute', left: TOWER_L, width: TOWER_W, height: ROW_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     paddingHorizontal: 7, paddingTop: 5, justifyContent: 'flex-start',
   },
   rowClaim: { backgroundColor: INK, borderColor: INK },
@@ -370,6 +460,17 @@ const styles = StyleSheet.create({
     width: TOWER_W, alignItems: 'center',
   },
   dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: INK, marginBottom: 6 },
+  // A "?" waiting in the row slot the tower hasn't built yet.
+  rowAsk: {
+    position: 'absolute', left: TOWER_L, width: TOWER_W, textAlign: 'center',
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: INK, includeFontPadding: false,
+  },
+  rowAskTail: {
+    position: 'absolute', left: TOWER_L, width: TOWER_W, paddingVertical: 3,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center',
+  },
+  rowAskTailT: { fontFamily: 'Inter_700Bold', fontSize: 9.8, letterSpacing: 0.5, color: INK, includeFontPadding: false },
 
   // ── the three escapes ───────────────────────────────────────────────────────
   escHead: {
@@ -380,7 +481,7 @@ const styles = StyleSheet.create({
   escWrap: { position: 'absolute', left: ESC_L, width: ESC_W },
   escCard: {
     flexDirection: 'row', alignItems: 'center', height: ESC_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     paddingHorizontal: 8,
   },
   escOn: { backgroundColor: INK, borderColor: INK },
@@ -391,6 +492,23 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   escLabelOn: { color: PAPER },
+  // "loop back in a circle" — a ring round that one escape card.
+  escRing: {
+    position: 'absolute', left: ESC_L - 4, width: ESC_W + 8, height: ESC_H + 8,
+    borderWidth: 2, borderColor: INK, borderRadius: 8,
+  },
+  // "Second... circle... Third... bedrock" — a dashed bracket round both cards at once.
+  pairRing: {
+    position: 'absolute', left: ESC_L - 8, width: ESC_W + 16,
+    borderWidth: 2, borderColor: INK, borderRadius: 10, borderStyle: 'dashed',
+  },
+  // "finally ends at a basic belief" — landed under the bedrock card.
+  restTag: {
+    position: 'absolute', left: ESC_L, width: ESC_W, paddingVertical: 3,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center',
+  },
+  restTagT: { fontFamily: 'Inter_700Bold', fontSize: 9.8, letterSpacing: 0.6, color: INK, includeFontPadding: false },
 
   diag: { width: 34, height: 34 },
   dash: { position: 'absolute', left: 7, width: 20, height: 3, borderRadius: 1.5 },
@@ -414,7 +532,7 @@ const styles = StyleSheet.create({
   // ── the carried block ───────────────────────────────────────────────────────
   carry: {
     position: 'absolute', left: 0, top: CARRY_TOP, width: CARRY_W, height: CARRY_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   // 56 WIDE, AND THE COMMENT THAT USED TO BE HERE WAS WRONG BY A THIRD.

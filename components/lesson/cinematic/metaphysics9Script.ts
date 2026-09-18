@@ -20,6 +20,9 @@ export interface M9Beat extends BaseBeat {
   /** How far the thought has crossed the gap, 0→1. It never reaches 1. */ cross?: number;
   /** The "?" hanging over the gap. */ puzzle?: boolean;
   /** The three claim cards for the tap question. */ cards?: boolean;
+  /** 1 = the BODY panel dims, showing the mind could exist without it. */ apart?: boolean;
+  /** 1 = a dashed barrier marks the gap's midpoint, where contact fails (Elisabeth's objection). */ noTouch?: boolean;
+  /** 1 = a GUT DIGESTS tag appears, the digestion analogy the sentence draws. */ analogy?: boolean;
 }
 
 export const BEATS: M9Beat[] = [
@@ -35,7 +38,7 @@ export const BEATS: M9Beat[] = [
     dur: 4.6,
   },
   {
-    p: 167, x: 96, panels: 1,
+    p: 167, x: 96, panels: 1, apart: true,
     text: 'This view is called substance dualism. On it, the mind could exist without the body.',
     dur: 1.8,
   },
@@ -59,7 +62,7 @@ export const BEATS: M9Beat[] = [
     dur: 2.5,
   },
   {
-    p: 266, x: 160, panels: 1, cross: 1, puzzle: true,
+    p: 266, x: 160, panels: 1, cross: 1, puzzle: true, noTouch: true,
     text: 'Descartes put the link in the pineal gland. Princess Elisabeth of Bohemia objected: moving a body takes contact, and a mind with no extension cannot touch it.',
     dur: 2.5,
   },
@@ -70,7 +73,7 @@ export const BEATS: M9Beat[] = [
     dur: 2.5,
   },
   {
-    p: 260, x: 232, panels: 2,
+    p: 260, x: 232, panels: 2, analogy: true,
     text: 'This evidence suggests that the mind isn’t a separate substance. It is something the brain does, the way digestion is something the gut does.',
     dur: 2.7,
   },

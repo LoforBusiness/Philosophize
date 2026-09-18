@@ -29,6 +29,7 @@ export interface Metaphysics28Beat extends BaseBeat {
   /** How much light is in the things on the rail, 0…1. */ glow?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed threshold marks where emergentism says experience begins (group AH). */ threshold?: number;
 };
 
 export const BEATS: Metaphysics28Beat[] = [
@@ -80,7 +81,7 @@ export const BEATS: Metaphysics28Beat[] = [
     dur: 4.8,
   },
   {
-    p: 449, x: 82, field: 1, rail: 1, glow: 0.9,
+    p: 449, x: 82, field: 1, rail: 1, glow: 0.9, threshold: 1,
     text: 'Emergentism answers instead that experience appears only once matter reaches a certain level of organisation.',
     dur: 4.8,
   },

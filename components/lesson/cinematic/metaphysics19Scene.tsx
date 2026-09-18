@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics19Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A STACK COMING OFF A POST, AND WHAT IS UNDER THE LAST CARD.
@@ -47,6 +49,7 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const NAMED = BEATS.map((b) => b.named ?? 0);
 const BASE_TR = 0.85;
 
 const PEG_X = 154;
@@ -89,7 +92,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics19'));
 export default function Metaphysics19Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -114,6 +117,8 @@ export default function Metaphysics19Scene({ clock, bt, bi, i, picked, onPick, p
       // that is the one that says there are two of them; at either end there is one
       // thing, or no case at all.
       twin: carry(cv, 4, n, TWIN[p], reacting ? 1 - Math.abs(pickPos.value * 2 - 1) : TWIN[n], tr),
+      // Carried, so it fades out as well as in (group L).
+      named: carry(cv, 5, n, NAMED[p], NAMED[n], tr),
       t,
     };
   });
@@ -125,6 +130,22 @@ export default function Metaphysics19Scene({ clock, bt, bi, i, picked, onPick, p
   const pegStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.peg }));
   const twinStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.twin }));
   const cards = [0, 1, 2, 3, 4];
+
+  // ── the tap event ──────────────────────────────────────────────────────────
+  //
+  // FOUR PROPERTIES, NAMED IN ORDER, so the marks arrive in that order: shape,
+  // taste, weight, location — cards 1 to 4 on the peg (AH5). The stripping value
+  // itself holds on this beat, which is why the beat needed an event at all: the
+  // sentence is naming what goes next, not taking it off yet.
+  const namedAt = (u: number, k: number) => {
+    'worklet';
+    return (u <= 0 ? 0 : clamp01((u - k * 0.18) / 0.3));
+  };
+  const named0 = useAnimatedStyle(() => ({ opacity: namedAt(SCENE.value.named, 0) }));
+  const named1 = useAnimatedStyle(() => ({ opacity: namedAt(SCENE.value.named, 1) }));
+  const named2 = useAnimatedStyle(() => ({ opacity: namedAt(SCENE.value.named, 2) }));
+  const named3 = useAnimatedStyle(() => ({ opacity: namedAt(SCENE.value.named, 3) }));
+  const namedStyles = [named0, named1, named2, named3];
 
   return (
     <View style={styles.scene}>
@@ -191,6 +212,14 @@ export default function Metaphysics19Scene({ clock, bt, bi, i, picked, onPick, p
         {live ? <Text style={styles.hitCap} numberOfLines={1}>NOTHING</Text> : null}
       </Target>
 
+      {/* Shape, taste, weight, location — marked off in the order they are said. */}
+      {[1, 2, 3, 4].map((k) => (
+        <Animated.View key={`nm${k}`} style={[styles.namedMark, { top: CARD_TOP[k] + 3 }, namedStyles[k - 1]]} pointerEvents="none">
+          <View style={styles.namedBarA} />
+          <View style={styles.namedBarB} />
+        </Animated.View>
+      ))}
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -221,12 +250,28 @@ function Prop({ S, index }: { S: { value: { props: number; strip: number } }; in
 }
 
 const styles = StyleSheet.create({
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // In the gap between the cards (which end at CARD_X + CARD_W) and the pile of
+  // what has come off (which starts at PILE_X), against each card's own row.
+  namedMark: {
+    position: 'absolute', left: CARD_X + CARD_W + 6, width: 14, height: 14,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  namedBarA: {
+    position: 'absolute', left: 0, top: 6, width: 14, height: 2,
+    backgroundColor: INK, borderRadius: 1, transform: [{ rotate: '45deg' }],
+  },
+  namedBarB: {
+    position: 'absolute', left: 0, top: 6, width: 14, height: 2,
+    backgroundColor: INK, borderRadius: 1, transform: [{ rotate: '-45deg' }],
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 100, top: 236, width: 260,
@@ -248,7 +293,7 @@ const styles = StyleSheet.create({
   twinPeg: { position: 'absolute', left: TWIN_X + 24, top: PEG_Y, width: 6, height: PEG_H, backgroundColor: INK, borderRadius: 2 },
   twinCard: {
     position: 'absolute', left: TWIN_X, width: PILE_W, height: CARD_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: PLATE_FACE, boxShadow: LIP,
     justifyContent: 'center', paddingLeft: 6,
   },
   twinText: {

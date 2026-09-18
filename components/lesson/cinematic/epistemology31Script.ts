@@ -15,6 +15,10 @@ export interface Epis31Beat extends BaseBeat {
   /** Figure gesture (emote code). */ g?: number;
   /** How many drawers are pulled out, 0…3. */ open?: number;
   /** 1 = the drawers and the door are live targets (Q1). */ pick?: number;
+  /** 1 = a dashed outline round the whole closed cabinet — your only evidence so far. */ onlyEvidence?: number;
+  /** 1 = a dashed ring on the open drawer's own front — vividness alone doesn't show it's accurate. */ vividRing?: number;
+  /** 1 = a dashed brace joining the two open drawers — the second checks the first with the same faculty. */ sameFaculty?: number;
+  /** 1 = a small tag above the door — OUTSIDE MEMORY, the one thing that could check it independently. */ outsideTag?: number;
 }
 
 export const BEATS: Epis31Beat[] = [
@@ -24,7 +28,7 @@ export const BEATS: Epis31Beat[] = [
     text: 'Suppose you’ve left home and wonder whether you locked the door. You can recall locking it.',
   },
   {
-    g: 467, open: 0,
+    g: 467, open: 0, onlyEvidence: 1,
     dur: 1.8,
     text: 'That memory of locking the door is your only evidence.',
   },
@@ -35,7 +39,7 @@ export const BEATS: Epis31Beat[] = [
     cite: 'The first drawer',
   },
   {
-    g: 459, open: 1,
+    g: 459, open: 1, vividRing: 1,
     dur: 1.8,
     text: 'Yet a memory’s vividness doesn’t show that it’s accurate.',
   },
@@ -46,7 +50,7 @@ export const BEATS: Epis31Beat[] = [
     cite: 'The second drawer',
   },
   {
-    g: 168, open: 2,
+    g: 168, open: 2, sameFaculty: 1,
     dur: 2.5,
     text: 'That recollection is a second memory, so it relies on the same faculty it’s meant to check.',
   },
@@ -70,7 +74,7 @@ export const BEATS: Epis31Beat[] = [
     cite: 'And a third',
   },
   {
-    g: 258, open: 3,
+    g: 258, open: 3, outsideTag: 1,
     dur: 2.2,
     text: 'Only the door itself lies outside memory, so only the door could check the memory independently.',
   },

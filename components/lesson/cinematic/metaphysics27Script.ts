@@ -28,6 +28,8 @@ export interface Metaphysics27Beat extends BaseBeat {
   /** 1 = the painting machine stands over the right-hand bag. */ machine?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed link joins the two bag labels — Hume's one pattern (group AH). */ patternLink?: number;
+  /** 1 = a preview of the power mark on every marble, before the poll (group AH). */ powerPreview?: number;
 }
 
 export const BEATS: Metaphysics27Beat[] = [
@@ -47,7 +49,7 @@ export const BEATS: Metaphysics27Beat[] = [
     dur: 5.0,
   },
   {
-    p: 264, x: 28, bags: 1, machine: 1,
+    p: 264, x: 28, bags: 1, machine: 1, patternLink: 1,
     text: 'David Hume found no necessary connection between events. For him, a law is only a pattern that always holds.',
     dur: 5.0,
   },
@@ -79,7 +81,7 @@ export const BEATS: Metaphysics27Beat[] = [
     dur: 5.0,
   },
   {
-    p: 448, x: 88, bags: 1, machine: 1,
+    p: 448, x: 88, bags: 1, machine: 1, powerPreview: 1,
     text: 'Dispositional essentialism puts the necessity inside things. Mass attracts because attracting is part of what mass is.',
     dur: 5.0,
   },

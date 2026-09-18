@@ -10,6 +10,7 @@ import { BEATS } from './logic15Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A CROWD, TWO OF THEM RINGED, AND A CLAIM AS WIDE AS THE CROWD (H64). The sample
 // and the conclusion are drawn at their real relative sizes, so the leap between
@@ -74,6 +76,9 @@ const SAMPLE = BEATS.map((b) => b.sample ?? 0);
 const LEAP = BEATS.map((b) => b.leap ?? 0);
 const CLAIM = BEATS.map((b) => b.claim ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
+const VERIFY = BEATS.map((b) => b.verify ?? 0);
+const VIVID = BEATS.map((b) => b.vivid ?? 0);
+const WEAK = BEATS.map((b) => b.weak ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
 
@@ -86,8 +91,15 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic15'));
 export default function Logic15Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(8);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+
+  // The three tap events (group AH) only re-animate on the beat that changes
+  // them (C20c) — once confirmed/darkened/marked, they hold without re-drawing.
+  const verifyFade = (cur.verify ?? 0) !== (prev?.verify ?? 0);
+  const vividFade = (cur.vivid ?? 0) !== (prev?.vivid ?? 0);
+  const weakFade = (cur.weak ?? 0) !== (prev?.weak ?? 0);
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
   const answered = picked !== null;
@@ -115,12 +127,22 @@ export default function Logic15Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // two dots' worth of evidence stretch to cover the whole crowd.
       claim: carry(cv, 3, n, CLAIM[p], CLAIM[n], wide),
       parts: carry(cv, 4, n, PICKV[p], PICKV[n], grow),
+      // "In this case, both observations are true" — a check confirms the ring.
+      verify: carry(cv, 5, n, VERIFY[p], VERIFY[n], verifyFade ? grow : 1),
+      // "you witnessed it … however vivid" — the two sampled dots darken to ink.
+      vivid: carry(cv, 6, n, VIVID[p], VIVID[n], vividFade ? grow : 1),
+      // "a sample of two people met by chance is neither [large nor fair]" — the
+      // leap the whole argument rests on gets a dashed, unsupported outline.
+      weak: carry(cv, 7, n, WEAK[p], WEAK[n], weakFade ? grow : 1),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
 
   const crowd = useAnimatedStyle(() => ({ opacity: SCENE.value.crowd }));
+  const verify = useAnimatedStyle(() => ({ opacity: SCENE.value.verify }));
+  const vivid = useAnimatedStyle(() => ({ opacity: SCENE.value.vivid }));
+  const weak = useAnimatedStyle(() => ({ opacity: SCENE.value.weak }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -143,6 +165,10 @@ export default function Logic15Scene({ clock, bt, bi, i, picked, onPick, dragPos
         label="THEREFORE ALL OF THEM" size={9}
       />
 
+      {/* A dashed ring round the leap: the step never firmed up into something
+          solid — it stays a boundary, never a fill (D31). */}
+      <Animated.View style={[styles.weak, weak]} pointerEvents="none" />
+
       {/* ── THE CROWD, AND THE TWO YOU MET ───────────────────────────────── */}
       <Animated.View style={[styles.crowd, crowd]} pointerEvents="none">
         {ROW_T.map((y, r) => (
@@ -155,12 +181,23 @@ export default function Logic15Scene({ clock, bt, bi, i, picked, onPick, dragPos
         ))}
       </Animated.View>
 
+      {/* The two you actually met darken to ink — vivid, unlike the pale rest. */}
+      <Animated.View style={[styles.vividWrap, vivid]} pointerEvents="none">
+        <View style={styles.vividDot} />
+        <View style={[styles.vividDot, { left: CROWD_L + CROWD_PITCH }]} />
+      </Animated.View>
+
       <Part
         id="sample" correct={false}
         style={styles.ring} SCENE={SCENE} field="sample" bare
         live={live} answered={answered} picked={picked} onPick={onPick}
         label="" size={9}
       />
+
+      {/* A check confirms the two observations themselves are true. */}
+      <Animated.View style={[styles.verify, verify]} pointerEvents="none">
+        <Text style={styles.verifyMark}>✓</Text>
+      </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -220,7 +257,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   label: {
@@ -234,7 +271,7 @@ const styles = StyleSheet.create({
   ring: { position: 'absolute', left: RING_L, top: RING_T, width: RING_W, height: RING_H },
 
   partInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   // The sample ring is drawn round two dots that must stay visible through it, so
@@ -251,6 +288,30 @@ const styles = StyleSheet.create({
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT },
+
+  // ── THE THREE TAP EVENTS (group AH) ──────────────────────────────────────
+  // A check confirms the two observations; the two witnessed dots darken to
+  // mark them as vividly recalled; a dashed ring shows the leap itself never
+  // firmed up into something solid.
+  verify: {
+    position: 'absolute', left: RING_L + RING_W - 16, top: RING_T + 2, width: 16, height: 20,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  verifyMark: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, color: INK, textAlign: 'center',
+    includeFontPadding: false,
+  },
+
+  vividWrap: { position: 'absolute', left: 0, top: ROW_T[0], width: STAGE_W, height: DOT },
+  vividDot: {
+    position: 'absolute', left: CROWD_L, top: 0, width: DOT, height: DOT, borderRadius: DOT / 2,
+    backgroundColor: INK,
+  },
+
+  weak: {
+    position: 'absolute', left: LEAP_L - 5, top: LEAP_T - 5, width: LEAP_W + 10, height: LEAP_H + 10,
+    borderWidth: 1.5, borderColor: SHADE, borderRadius: 9, borderStyle: 'dashed',
+  },
 });
 
 // Ink runs from the label (228) to the ground line (500). Band 222…512 = 290.

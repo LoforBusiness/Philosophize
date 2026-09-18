@@ -29,6 +29,8 @@ export interface Epistemology28Beat extends BaseBeat {
   /** The share of the scrutiny aimed at the welcome study, 0…1. */ lean?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed FAIR LINE crossing both hurdles at the unbiased height. */ fairLine?: number;
+  /** 1 = a dashed arrow in the gap, pointing back at the low bar — reasons follow. */ reasonsFollow?: number;
 };
 
 export const BEATS: Epistemology28Beat[] = [
@@ -48,7 +50,7 @@ export const BEATS: Epistemology28Beat[] = [
     dur: 5.0,
   },
   {
-    p: 261, x: 26, track: 1, bars: 1, lean: 0.16,
+    p: 261, x: 26, track: 1, bars: 1, lean: 0.16, fairLine: 1,
     text: 'The evidence is of equal quality, but the standards differ. Your preference, not the data, set the standard.',
     dur: 5.0,
   },
@@ -79,7 +81,7 @@ export const BEATS: Epistemology28Beat[] = [
     dur: 4.8,
   },
   {
-    p: 450, x: 82, track: 1, bars: 1, lean: 0.16,
+    p: 450, x: 82, track: 1, bars: 1, lean: 0.16, reasonsFollow: 1,
     text: 'In motivated reasoning the conclusion comes first, and reasons are gathered afterwards to support it.',
     dur: 5.0,
   },

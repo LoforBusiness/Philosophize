@@ -29,6 +29,9 @@ export interface Aesthetics28Beat extends BaseBeat {
   /** How far the framed work has shrunk toward a cup, 0…1. */ flat?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a trail arcs above the ball — the unexpected pass just described. */ pass?: number;
+  /** 1 = a tag names the field beneath the rooms. */ label?: number;
+  /** 1 = a dashed line links the painting and the cup — the objection's comparison. */ doubt?: number;
 };
 
 export const BEATS: Aesthetics28Beat[] = [
@@ -38,7 +41,7 @@ export const BEATS: Aesthetics28Beat[] = [
     dur: 5.0,
   },
   {
-    p: 177, x: 26, rooms: 1, lit: 1,
+    p: 177, x: 26, rooms: 1, lit: 1, pass: 1,
     text: 'Examples include the smell of rain, a well-ordered desk and an unexpected pass in a football match.',
     dur: 4.6,
   },
@@ -48,7 +51,7 @@ export const BEATS: Aesthetics28Beat[] = [
     dur: 5.0,
   },
   {
-    p: 264, x: 26, rooms: 1, lit: 1, street: 1,
+    p: 264, x: 26, rooms: 1, lit: 1, street: 1, label: 1,
     text: 'Yuriko Saito argues that cooking, dressing, cleaning and commuting deserve aesthetic attention too. This field is called everyday aesthetics.',
     dur: 5.0,
   },
@@ -79,7 +82,7 @@ export const BEATS: Aesthetics28Beat[] = [
     dur: 5.0,
   },
   {
-    p: 453, x: 82, rooms: 1, lit: 1, street: 1,
+    p: 453, x: 82, rooms: 1, lit: 1, street: 1, doubt: 1,
     text: 'The view faces an objection. If a tidy drawer and a Rembrandt are both aesthetic, the word marks nothing special.',
     dur: 5.0,
   },

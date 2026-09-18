@@ -9,6 +9,7 @@ import { BEATS } from './logic29Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BEAM ON A PIVOT, AND ONE WEIGHT THAT HAS TO GO SOMEWHERE.
@@ -97,6 +99,7 @@ const LOAD = BEATS.map((b) => (b.load ? 1 : 0));
 const SIDE = BEATS.map((b) => b.side ?? 0.5);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const HOLLOW = BEATS.map((b) => (b.hollow ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -107,13 +110,20 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic29'));
 export default function Logic29Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // ONE JOSTLE, ON THE BEAT THAT ASKS FOR IT (C20c): rides bt directly and never
+  // carries, because it is a single push-and-spring-back, not a level that holds.
+  const testNow = (cur.test ?? 0) > 0 && (cur.test ?? 0) !== (prev?.test ?? 0) ? 1 : 0;
+  const hollowFade = (cur.hollow ?? 0) !== (prev?.hollow ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -130,6 +140,10 @@ export default function Logic29Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // the claimant, so a high seam means the person asserting carries it.
       side: carry(cv, 3, n, SIDE[p], reacting ? dragPos.value : SIDE[n], tr),
       plates: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // A push tried against the beam, and nothing to show for it: it decays back
+      // to level rather than settling anywhere new (A1 — no test moves it).
+      test: testNow ? ease01(bt.value / 1.2) : 0,
+      hollow: carry(cv, 5, n, HOLLOW[p], HOLLOW[n], hollowFade ? grow : 1),
     };
   });
 
@@ -144,7 +158,11 @@ export default function Logic29Scene({ clock, bt, bi, i, picked, onPick, dragPos
   // it. `load` scales the tilt so an empty beam is dead level (A1).
   const beamStyle = useAnimatedStyle(() => {
     const lean = (clamp01(SCENE.value.side) - 0.5) * 2;
-    return { transform: [{ rotate: `${-lean * TILT * clamp01(SCENE.value.load)}deg` }] };
+    // The jostle: a decaying oscillation that dies back to 0, so the beam always
+    // returns to exactly the tilt the load alone would give it.
+    const w = SCENE.value.test;
+    const jostle = w > 0 ? Math.sin(w * Math.PI * 3) * (1 - w) * 6 : 0;
+    return { transform: [{ rotate: `${-lean * TILT * clamp01(SCENE.value.load) + jostle}deg` }] };
   });
   // THE WEIGHT RIDES THE BEAM RATHER THAN FLOATING OVER IT: at dx from the pivot
   // the beam's surface has dropped by dx·tan(theta), and the block follows it.
@@ -153,7 +171,16 @@ export default function Logic29Scene({ clock, bt, bi, i, picked, onPick, dragPos
     const lean = (clamp01(SCENE.value.side) - 0.5) * 2;
     const dx = -lean * LOAD_REACH;
     const dy = dx * Math.tan((-lean * TILT * on * Math.PI) / 180);
-    return { opacity: on, left: PIV_MID + dx - LOAD_W / 2, top: BEAM_Y - LOAD_H + dy };
+    return { opacity: on * (1 - SCENE.value.hollow), left: PIV_MID + dx - LOAD_W / 2, top: BEAM_Y - LOAD_H + dy };
+  });
+  // The same block, turned to a dashed outline — the weight it claims to carry
+  // is empty, so it reads exactly like a hole where the solid one just was.
+  const hollowStyle = useAnimatedStyle(() => {
+    const on = clamp01(SCENE.value.load);
+    const lean = (clamp01(SCENE.value.side) - 0.5) * 2;
+    const dx = -lean * LOAD_REACH;
+    const dy = dx * Math.tan((-lean * TILT * on * Math.PI) / 180);
+    return { opacity: on * SCENE.value.hollow, left: PIV_MID + dx - LOAD_W / 2, top: BEAM_Y - LOAD_H + dy };
   });
 
   return (
@@ -171,6 +198,7 @@ export default function Logic29Scene({ clock, bt, bi, i, picked, onPick, dragPos
       </Animated.View>
 
       <Animated.View style={[styles.load, loadStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.loadHollow, hollowStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
         {PLATE_ID.map((id, k) => (
@@ -205,7 +233,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: LAND_X, top: CAP_T, width: LAND_W, textAlign: 'center',
@@ -228,6 +256,11 @@ const styles = StyleSheet.create({
     position: 'absolute', width: LOAD_W, height: LOAD_H,
     backgroundColor: INK, borderWidth: 2, borderColor: INK,
   },
+  // The hollowed twin: same box, dashed and unfilled.
+  loadHollow: {
+    position: 'absolute', width: LOAD_W, height: LOAD_H,
+    backgroundColor: 'transparent', borderWidth: 2, borderColor: INK, borderStyle: 'dashed',
+  },
   land: { position: 'absolute', left: LAND_X, top: LAND_Y, width: LAND_W, height: 8, backgroundColor: RULE },
   name: {
     position: 'absolute', top: NAME_T, width: NAME_W, textAlign: 'center',
@@ -237,7 +270,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,

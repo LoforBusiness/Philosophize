@@ -12,6 +12,7 @@ import { BEATS } from './logic5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -19,8 +20,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // The figure stands on the LEFT (and climbs a ladder in the same spot) so the whole
 // right-hand column — x 150…386 — is free for information design that is drawn BIG:
@@ -120,6 +122,16 @@ const CHAIN = BEATS.map((b) => b.chain ?? 0);
 const LADDER = BEATS.map((b) => b.ladder ?? 0);
 const STAIRV = BEATS.map((b) => b.steps ?? 0);
 const CHUTE = BEATS.map((b) => b.chute ?? 0);
+const EQUAL = BEATS.map((b) => b.equalCount ?? 0);
+
+// ── the three-tick row (group AH) — sits in the free strip above the two
+// premise boxes, the same header band `stairHdr`/`qHdr` use on the other beats
+// this scene shows (they never overlap it in time).
+const TICK_W = 14;
+const TICK_GAP = 10;
+const TICK_ROW_W = TICK_W * 3 + TICK_GAP * 2;
+const TICK_L = MID - TICK_ROW_W / 2;
+const TICK_T = 225;
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -132,12 +144,18 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic5'));
 
 export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(6);
+  const cv = useCarry(7);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // The tick row fades in on the first beat that sets it, and just carries a
+  // smooth count from there — it never needs to fade OUT, since it stays true
+  // for the rest of the proof.
+  const equalFade = (cur.equalCount ?? 0) !== (prev?.equalCount ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
+    const grow = ease01(bt.value / 0.55);
     const t = clock.value;
 
     const climbNow = CLIMB[n] > 0.5, climbPrev = CLIMB[p] > 0.5;
@@ -156,6 +174,9 @@ export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick, gaze
       ladder: carry(cv, 3, n, LADDER[p], LADDER[n], tr),
       stairs: carry(cv, 4, n, STAIRV[p], STAIRV[n], tr),
       chute: carry(cv, 5, n, CHUTE[p], CHUTE[n], tr),
+      // How many of the three equal sides are confirmed, as a continuous 0..3
+      // count so each tick fills in turn rather than the row jumping at once.
+      equalCount: carry(cv, 6, n, EQUAL[p], EQUAL[n], equalFade ? grow : 1),
       gear: t * 80,
       feed: (t * 0.55) % 1,
       // Rungs scroll DOWN so the climber ascends — at the speed HIS LEGS ARE GOING.
@@ -186,6 +207,12 @@ export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick, gaze
   const stairStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.stairs }));
   const chainStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.chain }));
   const chuteStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.chute }));
+  // Each tick's ink fill lights as the count passes its index, so the row fills
+  // left to right rather than jumping to a new total in one frame.
+  const tick0Style = useAnimatedStyle(() => ({ opacity: Math.max(0, Math.min(1, SCENE.value.equalCount - 0)) }));
+  const tick1Style = useAnimatedStyle(() => ({ opacity: Math.max(0, Math.min(1, SCENE.value.equalCount - 1)) }));
+  const tick2Style = useAnimatedStyle(() => ({ opacity: Math.max(0, Math.min(1, SCENE.value.equalCount - 2)) }));
+  const tickRowStyle = useAnimatedStyle(() => ({ opacity: Math.min(1, SCENE.value.equalCount * 4) }));
 
   const answered = picked !== null;
   const showChain = (cur.chain ?? 0) > 0 && !!cur.interact;
@@ -227,6 +254,15 @@ export default function Logic5Scene({ clock, bt, bi, qv, i, picked, onPick, gaze
 
       {/* ── the pipeline: premises → inference → conclusion ────────────────── */}
       <Animated.View style={[styles.fill, machineStyle]} pointerEvents="none">
+        {/* The three-tick row (group AH): how many of the triangle's equal sides
+            the proof has confirmed, filling left to right as the reasoning does. */}
+        <Animated.View style={[styles.tickRow, tickRowStyle]} pointerEvents="none">
+          {[tick0Style, tick1Style, tick2Style].map((st, k) => (
+            <View key={k} style={[styles.tickSlot, { left: k * (TICK_W + TICK_GAP) }]}>
+              <Animated.View style={[styles.tickFill, st]} />
+            </View>
+          ))}
+        </Animated.View>
         <View style={[styles.pipeBox, { top: P1_T }]}>
           <Text style={styles.pipeTag}>PREMISE</Text>
           <Text style={styles.pipeVal}>AB = AC</Text>
@@ -396,10 +432,21 @@ const styles = StyleSheet.create({
   },
   stairNum: { fontFamily: 'Inter_700Bold', fontSize: 14, color: INK, includeFontPadding: false },
 
+  // ── the three-tick row (group AH) — how many of the triangle's three equal
+  // sides the proof has confirmed. A slot is an outline (STONE); a confirmed
+  // side is the same box filled INK, so the row reads as filling in rather
+  // than as a fresh object appearing.
+  tickRow: { position: 'absolute', left: TICK_L, top: TICK_T, width: TICK_ROW_W, height: TICK_W },
+  tickSlot: {
+    position: 'absolute', top: 0, width: TICK_W, height: TICK_W, borderRadius: 3,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE, overflow: 'hidden',
+  },
+  tickFill: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: INK },
+
   // ── pipeline ───────────────────────────────────────────────────────────────
   pipeBox: {
     position: 'absolute', left: COL_L, width: COL_W, height: PIPE_BOX_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   pipeOut: { backgroundColor: INK },
@@ -416,7 +463,7 @@ const styles = StyleSheet.create({
 
   gearBox: {
     position: 'absolute', left: GEAR_L, top: GEAR_T, width: GEAR_W, height: GEAR_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', paddingTop: 5,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', paddingTop: 5,
   },
   gearLabel: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: INK, includeFontPadding: false },
   gear: {
@@ -440,7 +487,7 @@ const styles = StyleSheet.create({
   cardHit: { position: 'absolute', left: COL_L, width: COL_W },
   press: { width: '100%' },
   card: {
-    width: COL_W, height: CARD_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6,
+    width: COL_W, height: CARD_H, borderWidth: 2.5, borderColor: INK, borderRadius: 8,
     backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   cardWrong: { borderColor: SOFT },
@@ -462,7 +509,7 @@ const styles = StyleSheet.create({
 
   proof: {
     position: 'absolute', left: MID - 90, top: PROOF_T, width: 180, height: PROOF_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   proofTag: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.6, color: INK, includeFontPadding: false },

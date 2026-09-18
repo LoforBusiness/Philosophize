@@ -28,6 +28,8 @@ export interface Pol24Beat extends BaseBeat {
   /** The three place plates and the speaker bars, 0…1. */ signs?: number;
   /** How lit the two PUBLIC plates are, 0…1 — the bars follow it. */ pub?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = an ink bridge marks the two public plates as one pair (group AH). */ link?: number;
+  /** 1 = a dashed line marks the split between the public pair and the private plate (group AH). */ clash?: number;
 }
 
 export const BEATS: Pol24Beat[] = [
@@ -37,7 +39,7 @@ export const BEATS: Pol24Beat[] = [
     dur: 4.8,
   },
   {
-    p: 384, x: 200, signs: 1, pub: 1,
+    p: 384, x: 200, signs: 1, pub: 1, link: 1,
     text: 'Charles Taylor holds that identity is formed in dialogue with others. So due recognition is a vital human need, not a courtesy.',
     cite: 'Identity is dialogical',
     dur: 4.8,
@@ -76,7 +78,7 @@ export const BEATS: Pol24Beat[] = [
     dur: 4.6,
   },
   {
-    p: 383, x: 268, signs: 1, pub: 0,
+    p: 383, x: 268, signs: 1, pub: 0, clash: 1,
     text: 'Taylor sees two demands in conflict. One is to treat everyone alike, and the other is to recognise each group’s way of life.',
     dur: 4.6,
   },

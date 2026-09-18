@@ -13,6 +13,7 @@ import { BEATS } from './ethics13Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,7 +21,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('ethics');
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
 
 // ONE RAIL FROM TOO LITTLE TO TOO MUCH, and the answer targets are POSITIONS on it —
 // the reader answers with a place rather than a proposition (E33). Answering slides
@@ -57,9 +59,33 @@ const KICK_T = 330;
 
 const NAMES = ['COWARD', 'TIMID', 'COURAGE', 'RASH', 'RECKLESS'];
 
+// Group AH — two still taps, each an event drawn from that beat's own words.
+//
+// VICE: "the coward fears too much" — a highlighted lane grows over the
+// deficiency end of the rail (COWARD·TIMID), sweeping in from the left the way
+// the sentence reads. It sits behind the rail and the ticks, never in front.
+const VICE_L = RAIL_L;
+const VICE_R = (POS_X[1] + POS_X[2]) / 2;
+const VICE_W = VICE_R - VICE_L;
+const VICE_T = 368;
+const VICE_H = 28;
+
+// RANGE: "isn't a fixed halfway point … shifts with the person and the
+// situation" — a dashed zone (a boundary, never a fill — D31) widens beneath
+// the scale between TIMID and RASH, showing the right amount as a span rather
+// than a single point.
+const RANGE_L = POS_X[1];
+const RANGE_R = POS_X[3];
+const RANGE_W = RANGE_R - RANGE_L;
+const RANGE_T = HIT_T + HIT_H + 6;
+const RANGE_H = 14;
+
 const G = BEATS.map((b) => b.g ?? 0);
 const POS = BEATS.map((b) => b.pos ?? 0);
 const HABIT = BEATS.map((b) => b.habit ?? 0);
+// Group AH — two still taps, each an event drawn from that beat's own words.
+const VICE = BEATS.map((b) => ((b.vice ?? 0) > 0 ? 1 : 0));
+const RANGE = BEATS.map((b) => ((b.range ?? 0) > 0 ? 1 : 0));
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -78,9 +104,14 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics13'));
 export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(4);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
   const revealing = (cur.pick ?? 0) > 0;
+
+  // Group AH — each fires only on the beat that asks for it (C20c).
+  const viceFade = (cur.vice ?? 0) !== (prev?.vice ?? 0);
+  const rangeFade = (cur.range ?? 0) !== (prev?.range ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -90,6 +121,7 @@ export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick, dr
     // The marker crosses up to four positions, which is 232 units — 1.2s, so it
     // travels at a readable rate rather than teleporting (C17).
     const slide = ease01(bt.value / 1.2);
+    const grow = ease01(bt.value / 0.55);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     // R7b — the knob IS the marker. The rail runs from no fear to fear of
     // everything and so does the spectrum on stage, so the reader slides the mark
@@ -102,6 +134,8 @@ export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick, dr
       // mean once the reader has answered — so the picture never gives it away.
       pos: revealing ? lerp(base, MEAN, qv.value) : base,
       habit: revealing ? qv.value : carry(cv, 1, n, HABIT[p], HABIT[n], slide),
+      vice: carry(cv, 2, n, VICE[p], VICE[n], viceFade ? grow : 1),
+      range: carry(cv, 3, n, RANGE[p], RANGE[n], rangeFade ? grow : 1),
     };
   });
 
@@ -116,6 +150,19 @@ export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick, dr
     opacity: SCENE.value.habit,
     transform: [{ scaleY: 0.2 + 0.8 * SCENE.value.habit }],
   }));
+  // "The coward fears too much" — a lane sweeps in from the rail's left edge over
+  // the deficiency end (COWARD·TIMID), growing from the reading direction.
+  const viceStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.vice,
+    transform: [{ scaleX: SCENE.value.vice }],
+  }));
+  // "Isn't a fixed halfway point … shifts with the person and the situation" — a
+  // dashed span widens outward from the mean, standing for a range rather than
+  // a single spot.
+  const rangeStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.range,
+    transform: [{ scaleX: 0.2 + 0.8 * SCENE.value.range }],
+  }));
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -125,8 +172,10 @@ export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick, dr
       <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.kicker} numberOfLines={1}>HOW MUCH FEAR?</Text>
 
+      <Animated.View style={[styles.viceZone, viceStyle]} pointerEvents="none" />
       <View style={styles.rail} pointerEvents="none" />
       <Animated.View style={[styles.groove, grooveStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.rangeZone, rangeStyle]} pointerEvents="none" />
       <Animated.View style={[styles.marker, markStyle]} pointerEvents="none" />
 
       {NAMES.map((name, k) => (
@@ -162,7 +211,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   kicker: {
     position: 'absolute', left: RAIL_L, top: KICK_T, width: RAIL_R - RAIL_L,
@@ -180,6 +229,23 @@ const styles = StyleSheet.create({
   marker: {
     position: 'absolute', left: POS_X[0] - MARK / 2, top: MARK_T, width: MARK, height: MARK,
     backgroundColor: INK,
+  },
+
+  // ── the two still-tap events (group AH) ──────────────────────────────────
+  //
+  // VICE: a lit lane behind the rail's deficiency end — "the coward fears too
+  // much" — a light mass, never a claim, so it sits below the rail and the
+  // ticks rather than over them.
+  viceZone: {
+    position: 'absolute', left: VICE_L, top: VICE_T, width: VICE_W, height: VICE_H,
+    borderRadius: VICE_H / 2, backgroundColor: STONE, transformOrigin: '0% 50%',
+  },
+  // RANGE: a dashed span, never a fill (D31) — the mean is a zone that moves
+  // with the person and the situation, not one fixed point.
+  rangeZone: {
+    position: 'absolute', left: RANGE_L, top: RANGE_T, width: RANGE_W, height: RANGE_H,
+    borderWidth: 1.5, borderColor: SHADE, borderRadius: 7, borderStyle: 'dashed',
+    transformOrigin: '50% 50%',
   },
 
   // NO alignItems HERE, AND THAT IS THE WHOLE OF WHY THE RAIL HAD NO WORDS ON IT.
@@ -203,7 +269,7 @@ const styles = StyleSheet.create({
   tick: { position: 'absolute', top: 20, left: HIT_W / 2 - 1.5, width: 3, height: 20, backgroundColor: INK },
   plate: {
     position: 'absolute', left: 0, right: 0, top: 46, height: 32,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE,
     alignItems: 'center', justifyContent: 'center',
   },
   plateText: {

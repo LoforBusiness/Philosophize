@@ -13,6 +13,7 @@ import { BEATS } from './knowHowScript';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A column of instructions stage right, with the outcome box beneath it.
 //
@@ -95,16 +97,31 @@ const DONE = BEATS.map((b) => b.done ?? 0);
 // facts, yet none of the skill" the box empties and the column comes back up.
 const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 
+// ── the three still-tap events (group AH) ───────────────────────────────────
+const SLOTS = BEATS.map((b) => (b.slots ? 1 : 0));
+const LEAD = BEATS.map((b) => (b.lead ? 1 : 0));
+const GATHER = BEATS.map((b) => (b.gather ? 1 : 0));
+// The gap between the visible instructions and the box, where those three
+// events draw what serves what. Read off the column's own geometry so a
+// change to the card pitch moves these with it.
+const CARD1_B = STEP_T + STEP_H;                    // bottom of the first card
+const CARD3_B = STEP_T + 2 * STEP_PITCH + STEP_H;    // bottom of the third card
+const LEAD_T = CARD1_B + (BOX_T - CARD1_B) / 2 - 7;  // centred in the wider gap after one card
+const GATHER_Y = CARD3_B + 4;                        // just under the third card
+
 export default function KnowHowScene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(6);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
   const shown = cur.steps ?? 0;
   const prevShown = prev?.steps ?? 0;
   const doneFade = (cur.done ?? 0) !== (prev?.done ?? 0);
+  const slotsFade = (cur.slots ?? false) !== (prev?.slots ?? false);
+  const leadFade = (cur.lead ?? false) !== (prev?.lead ?? false);
+  const gatherFade = (cur.gather ?? false) !== (prev?.gather ?? false);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -126,6 +143,9 @@ export default function KnowHowScene({ clock, bt, bi, i, picked, onPick, dragPos
       // The column recedes as the box fills — the two are one movement, so the
       // reader reads it as a handover rather than as two things happening.
       dim: 1 - 0.45 * done,
+      slots: carry(cv, 3, n, SLOTS[p], SLOTS[n], slotsFade ? grow : 1),
+      lead: carry(cv, 4, n, LEAD[p], LEAD[n], leadFade ? grow : 1),
+      gather: carry(cv, 5, n, GATHER[p], GATHER[n], gatherFade ? grow : 1),
     };
   });
 
@@ -133,6 +153,12 @@ export default function KnowHowScene({ clock, bt, bi, i, picked, onPick, dragPos
   const columnStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.dim }));
   const boxFillStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.done }));
   const emptyStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.done }));
+  // The three still-tap events (group AH): the empty slots before any instruction
+  // is written in, the arrow from the first instruction down to the box, and the
+  // bar that later gathers all three down to the same still-empty box.
+  const slotsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.slots }));
+  const leadStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.lead }));
+  const gatherStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.gather }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -140,12 +166,26 @@ export default function KnowHowScene({ clock, bt, bi, i, picked, onPick, dragPos
   return (
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
+      {/* The three instruction slots outline in empty, before any of them is
+          written — "all that reading" as a shape with nothing filled yet. */}
+      {[0, 1, 2].map((k) => (
+        <Animated.View key={`slot-${k}`} pointerEvents="none"
+          style={[styles.slotGhost, { top: STEP_T + k * STEP_PITCH }, slotsStyle]} />
+      ))}
       {/* ── the instructions ────────────────────────────────────────────────── */}
       <Animated.View style={[styles.column, columnStyle]} pointerEvents="none">
         {STEPS.map((s, k) => (
           <StepCard key={s} index={k} label={s} shown={shown} prevShown={prevShown} SCENE={SCENE} />
         ))}
       </Animated.View>
+
+      {/* An arrow drops from the one instruction so far: it serves an end
+          beyond itself. */}
+      <Animated.Text style={[styles.lead, leadStyle]} numberOfLines={1} pointerEvents="none">↓</Animated.Text>
+      {/* A bar gathers all three instructions and drops toward the box, which
+          still sits empty underneath them. */}
+      <Animated.View style={[styles.gatherBar, gatherStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.gatherDrop, gatherStyle]} pointerEvents="none" />
 
       {/* ── the thing the instructions are for ──────────────────────────────── */}
       <View style={styles.box} pointerEvents="none">
@@ -216,12 +256,12 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   column: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   step: {
     position: 'absolute', left: WALL_L, width: WALL_W, height: STEP_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, gap: 8,
   },
   stepNum: {
@@ -233,9 +273,29 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
+  // ── the three tap events (group AH) ──────────────────────────────────────
+  // An outline of the slot an instruction will fill — never a fill itself,
+  // so it reads as an empty space rather than another card (D31).
+  slotGhost: {
+    position: 'absolute', left: WALL_L, width: WALL_W, height: STEP_H,
+    borderWidth: 1.5, borderColor: SHADE, borderRadius: 8, borderStyle: 'dashed',
+  },
+  lead: {
+    position: 'absolute', left: WALL_L, top: LEAD_T, width: WALL_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 15, color: SHADE, includeFontPadding: false,
+  },
+  gatherBar: {
+    position: 'absolute', left: WALL_L + 20, top: GATHER_Y, width: WALL_W - 40, height: 2,
+    backgroundColor: SHADE,
+  },
+  gatherDrop: {
+    position: 'absolute', left: WALL_L + WALL_W / 2 - 1, top: GATHER_Y, width: 2, height: BOX_T - GATHER_Y,
+    backgroundColor: SHADE,
+  },
+
   box: {
     position: 'absolute', left: BOX_L, top: BOX_T, width: BOX_W, height: BOX_H,
-    borderWidth: 3, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 3, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   boxEmpty: {
@@ -258,7 +318,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   // 9/0 rather than 9.5/0.3: these chips are ~52 units of inner width on ONE line,

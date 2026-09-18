@@ -13,6 +13,7 @@ import { BEATS } from './logic25Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A positive test result and the two bars underneath it, stage right.
 //
@@ -43,6 +45,7 @@ const CH_W = 176;
 const RES_T = 226;
 const RES_H = 36;
 
+const RARE = BEATS.map((b) => b.rare ?? 0);
 const REAL_N = 1;
 const FAKE_N = 100;
 /** One person, in stage units. 100 of them is the full chart width. */
@@ -87,7 +90,7 @@ const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 export default function Logic25Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -109,12 +112,18 @@ export default function Logic25Scene({ clock, bt, bi, i, picked, onPick, dragPos
     ));
     return {
       fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
-      result: carry(cv, 1, n, RES[p], RES[n], tr, resFade ? grow : 1),
+      // THE RAMP IS THE PROGRESS, NOT A MULTIPLIER (AH4): as `mul` it zeroes the
+      // whole carried value on the first frame of the beat the card goes out, which
+      // is the POP the plain ternary makes one argument along. Its two neighbours
+      // below already had it the right way round.
+      result: carry(cv, 1, n, RES[p], RES[n], resFade ? grow : tr),
       real: carry(cv, 2, n, REAL[p], REAL[n], realFade ? grow : tr),
       // R7b — the seam grows the false-positive bar. The more of the population the
       // reader gives to the larger group, the taller the pile of people who fit the
       // description and are not what it suggests. Base rates, drawn.
       fake: carry(cv, 3, n, FAKE[p], reacting ? dragPos.value : FAKE[n], fakeFade ? grow : tr),
+      // Carried, so it fades out as well as in (group L).
+      rare: carry(cv, 4, n, RARE[p], RARE[n], tr),
     };
   });
 
@@ -132,6 +141,15 @@ export default function Logic25Scene({ clock, bt, bi, i, picked, onPick, dragPos
   }));
   const realLab = useAnimatedStyle(() => ({ opacity: SCENE.value.real }));
   const fakeLab = useAnimatedStyle(() => ({ opacity: SCENE.value.fake }));
+
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // WHAT THE QUICK READING LEAVES OUT, set beside the result it is read off. Left
+  // of the card rather than under it, because the two bars arrive under it on the
+  // beats that follow and the reader should not have to unlearn a position.
+  const rareStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.rare,
+    transform: [{ translateY: (1 - SCENE.value.rare) * -6 }],
+  }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -177,6 +195,11 @@ export default function Logic25Scene({ clock, bt, bi, i, picked, onPick, dragPos
           );
         })}
 
+      {/* It ignores the one number that decides the answer. */}
+      <Animated.View style={[styles.rareTag, rareStyle]} pointerEvents="none">
+        <Text style={styles.rareText} numberOfLines={1}>IGNORES HOW RARE IT IS</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </Animated.View>
@@ -184,16 +207,28 @@ export default function Logic25Scene({ clock, bt, bi, i, picked, onPick, dragPos
 }
 
 const styles = StyleSheet.create({
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // Left of the result card, which runs CH_L … CH_L + CH_W at RES_T.
+  rareTag: {
+    position: 'absolute', left: 36, top: RES_T + 4, width: 168, height: 26,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  rareText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 24, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   result: {
     position: 'absolute', left: CH_L, top: RES_T, width: CH_W, height: RES_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   resultText: {
@@ -212,7 +247,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {

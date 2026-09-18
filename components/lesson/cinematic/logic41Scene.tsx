@@ -9,6 +9,7 @@ import { BEATS } from './logic41Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO BOXES, ONE INSIDE THE OTHER, AND A WALL THE INNER ONE CANNOT PASS.
@@ -85,6 +87,16 @@ const INNER = BEATS.map((b) => (b.inner ? 1 : 0));
 const FILL = BEATS.map((b) => b.fill ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const MEMBER = BEATS.map((b) => (b.member ? 1 : 0));
+const NARROWS = BEATS.map((b) => (b.narrows ? 1 : 0));
+
+// ── the two tap events (group AH) ──────────────────────────────────────────
+// Both are one-shot, self-contained inside the single beat that asks for them —
+// they fade in and back out on `bt` alone (L5's carry rule is for values that
+// cross a beat boundary; these never do, so there is nothing to cut).
+const MEMBER_X = IN_X + 20;
+const MEMBER_Y0 = 380;
+const MEMBER_Y1 = 396;
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -96,6 +108,12 @@ export default function Logic41Scene({ clock, bt, bi, i, picked, onPick, dragPos
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // C20c — each fires only on the beat whose own value turns it on; a beat that
+  // merely holds the same value draws nothing.
+  const memberNow = (cur.member ?? 0) > 0 && (cur.member ?? 0) !== (prev?.member ?? 0);
+  const narrowsNow = (cur.narrows ?? 0) > 0 && (cur.narrows ?? 0) !== (prev?.narrows ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -118,6 +136,9 @@ export default function Logic41Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // mapped, and the wall the drag runs into is the conjunction rule.
       fill: carry(cv, 3, n, FILL[p], reacting ? dragPos.value : FILL[n], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // ONE-SHOT, driven by `bt` alone — see the comment above MEMBER_X.
+      member: memberNow ? ease01(bt.value / 1.6) : 0,
+      narrows: narrowsNow ? ease01(bt.value / 2.0) : 0,
     };
   });
 
@@ -137,17 +158,52 @@ export default function Logic41Scene({ clock, bt, bi, i, picked, onPick, dragPos
       top: IN_FLOOR - h,
     };
   });
+  // The dot fades in over the first fifth of its drop and out over the last, so
+  // it arrives rather than stopping dead (same envelope as logic7's `flow`).
+  const memberStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.member;
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2);
+    return {
+      opacity: on,
+      transform: [
+        { translateX: MEMBER_X },
+        { translateY: MEMBER_Y0 + (MEMBER_Y1 - MEMBER_Y0) * u },
+      ],
+    };
+  });
+  const narrowsStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.narrows;
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2);
+    const targetW = IN_W_MIN + (IN_W_MAX - IN_W_MIN) * SCENE.value.fill;
+    return {
+      opacity: on,
+      left: OUT_X + (IN_X - OUT_X) * u,
+      width: OUT_W + (targetW - OUT_W) * u,
+    };
+  });
 
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap} pointerEvents="none">ONE GROUP INSIDE ANOTHER</Text>
 
+      {/* Beat 7 — a bracket narrows once from the outer box's width to the inner
+          box's, showing how the added detail narrows the claim. */}
+      <Animated.View style={[styles.narrowsWrap, narrowsStyle]} pointerEvents="none">
+        <View style={styles.narrowsRule} />
+        <View style={[styles.narrowsTick, { left: 0 }]} />
+        <View style={[styles.narrowsTick, { right: 0 }]} />
+      </Animated.View>
+
       <Animated.View style={[StyleSheet.absoluteFill, outerStyle]} pointerEvents="none">
         <View style={styles.outer} />
       </Animated.View>
 
       <Animated.View style={[styles.inner, innerStyle]} pointerEvents="none" />
+
+      {/* Beat 3 — a member of the inner group drops into the gap that is still
+          inside the outer box, showing it never leaves the larger group. */}
+      <Animated.View style={[styles.member, memberStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, legendStyle]} pointerEvents="none">
         <View style={[styles.swatchOuter, { left: 152 }]} />
@@ -185,7 +241,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: OUT_X, top: CAP_T, width: OUT_W,
@@ -201,6 +257,21 @@ const styles = StyleSheet.create({
   inner: {
     position: 'absolute', left: IN_X,
     borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
+  },
+
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // A caliper: a top rule with a tick at each end, narrowing from the outer
+  // box's width to the inner box's. `left`/`width` are animated; `top`/`height`
+  // are fixed so the wrap is never a childless, heightless box (S12).
+  narrowsWrap: { position: 'absolute', top: OUT_Y - 9, height: 6 },
+  narrowsRule: { position: 'absolute', left: 0, right: 0, top: 0, height: 2, backgroundColor: SHADE },
+  narrowsTick: { position: 'absolute', top: 0, width: 2, height: 6, backgroundColor: SHADE },
+
+  // A single member, the size of a full stop, dropping from the inner group
+  // into the sliver of the outer group it never actually leaves.
+  member: {
+    position: 'absolute', left: 0, top: 0, width: 7, height: 7, borderRadius: 3.5,
+    backgroundColor: INK,
   },
 
   swatchOuter: {
@@ -219,7 +290,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

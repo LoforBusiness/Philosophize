@@ -27,6 +27,12 @@ export interface Aesthetics36Beat extends BaseBeat {
   /** Where the viewfinder sits, 0 (the crowd) … 1 (the lone man). */ crop?: number;
   /** 1 = the reader's thumb is driving the viewfinder. */ live_d?: number;
   /** 1 = the two printed results hang below, both true. */ prints?: number;
+  /** 1 = a tick confirms the square is unaltered. */ real?: number;
+  /** 1 = arrows above the prints point away from each other — opposite accounts. */ oppose?: number;
+  /** 1 = light-ray ticks mark where the photograph's light comes from. */ light?: number;
+  /** 1 = a dashed line ties one person in the square straight through to their
+   *  mark in the print — Walton's transparency. */ through?: number;
+  /** 1 = the viewfinder dims — the choice a photographer made, now overlooked. */ forget?: number;
 }
 
 export const BEATS: Aesthetics36Beat[] = [
@@ -36,7 +42,7 @@ export const BEATS: Aesthetics36Beat[] = [
     dur: 2.4,
   },
   {
-    p: 164, x: 54, square: 1,
+    p: 164, x: 54, square: 1, real: 1,
     text: 'Everything in the square is real, and none of it will be altered.',
     dur: 1.8,
   },
@@ -65,17 +71,17 @@ export const BEATS: Aesthetics36Beat[] = [
     dur: 1.8,
   },
   {
-    p: 266, x: 54, square: 1, crop: 0.5, prints: 1,
+    p: 266, x: 54, square: 1, crop: 0.5, prints: 1, oppose: 1,
     text: 'Both prints are accurate, yet they imply opposite accounts of what happened.',
     dur: 2.6,
   },
   {
-    p: 467, x: 54, square: 1, crop: 0.5, prints: 1,
+    p: 467, x: 54, square: 1, crop: 0.5, prints: 1, light: 1,
     text: 'Photographs have this power because they’re made mechanically, by light from the scene itself.',
     dur: 2.6,
   },
   {
-    p: 467, x: 54, square: 1, crop: 0.5, prints: 1,
+    p: 467, x: 54, square: 1, crop: 0.5, prints: 1, through: 1,
     text: 'Kendall Walton argues that photographs are transparent: through them, you literally see the square itself.',
     dur: 2.2,
   },
@@ -111,7 +117,7 @@ export const BEATS: Aesthetics36Beat[] = [
     dur: 3.3,
   },
   {
-    p: 165, x: 128, square: 1, crop: 0.14, prints: 1,
+    p: 165, x: 128, square: 1, crop: 0.14, prints: 1, forget: 1,
     text: 'With a photograph, viewers easily forget that a photographer also made choices.',
     dur: 1.8,
   },

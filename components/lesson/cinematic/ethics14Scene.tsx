@@ -9,6 +9,7 @@ import { BEATS } from './ethics14Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A STACK THAT BECOMES A WALL (H64). Five blocks stand in a pile; five courses go
 // up; the pile is empty when the wall is finished, and the wall is exactly as tall
@@ -67,6 +69,32 @@ const G = BEATS.map((b) => b.g ?? 0);
 const BUILT = BEATS.map((b) => b.built ?? 0);
 const DOOR = BEATS.map((b) => b.door ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
+// Group AH — three still taps, each an event drawn from that beat's own words.
+const LICENSE = BEATS.map((b) => ((b.license ?? 0) > 0 ? 1 : 0));
+const NOTBAD = BEATS.map((b) => ((b.notBad ?? 0) > 0 ? 1 : 0));
+const AIMED = BEATS.map((b) => ((b.aimed ?? 0) > 0 ? 1 : 0));
+
+// LICENSE: "you may do whatever you judge necessary, and so may everyone
+// else" — a scatter of short scratches over the wall's own empty footprint,
+// which is bare ground until beat 4 lays the first course. Unregulated marks
+// on unregulated ground.
+const SCATTER_MARKS = [
+  { x: 270, y: 356, rot: 24 },
+  { x: 322, y: 398, rot: -18 },
+  { x: 352, y: 444, rot: 32 },
+  { x: 288, y: 466, rot: -26 },
+  { x: 366, y: 352, rot: 12 },
+];
+
+// NOTBAD: "the case for leaving is not that freedom is bad" — a small tag
+// over the pile itself, naming the liberties as fine on their own.
+const NOTE_CX = STACK_L + STACK_W / 2;
+const NOTE_T = 338;
+
+// AIMED: "everyone else has freedom too, and can use it against you" — two
+// marks in the gap between the figure and the pile, pointed back at him.
+const AIM_X = 80;
+const AIM_Y = [404, 432];
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
 
@@ -79,11 +107,17 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics14'));
 export default function Ethics14Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(6);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
   const answered = picked !== null;
+
+  // Group AH — each fires only on the beat that asks for it (C20c).
+  const licenseFade = (cur.license ?? 0) !== (prev?.license ?? 0);
+  const notBadFade = (cur.notBad ?? 0) !== (prev?.notBad ?? 0);
+  const aimedFade = (cur.aimed ?? 0) !== (prev?.aimed ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -104,16 +138,50 @@ export default function Ethics14Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // doorway opens in the wall both men built; slide back and it closes.
       door: carry(cv, 1, n, DOOR[p], reacting ? dragPos.value : DOOR[n], grow),
       boards: carry(cv, 2, n, PICKV[p], PICKV[n], grow),
+      license: carry(cv, 3, n, LICENSE[p], LICENSE[n], licenseFade ? grow : 1),
+      notBad: carry(cv, 4, n, NOTBAD[p], NOTBAD[n], notBadFade ? grow : 1),
+      aimed: carry(cv, 5, n, AIMED[p], AIMED[n], aimedFade ? grow : 1),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  const scatterStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.license }));
+  const noteStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.notBad,
+    transform: [{ translateY: (1 - SCENE.value.notBad) * -6 }],
+  }));
+  const aimedStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.aimed,
+    transform: [{ translateX: (1 - SCENE.value.aimed) * 8 }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       {/* ── THE PILE, WHICH DRAINS INTO THE WALL ─────────────────────────── */}
       {[0, 1, 2, 3, 4].map((k) => <Block key={k} k={k} SCENE={SCENE} />)}
+
+      {/* LICENSE — scattered scratches across the wall's own bare footprint,
+          before there is anything there to regulate them. */}
+      {SCATTER_MARKS.map((m, k) => (
+        <Animated.View
+          key={k}
+          style={[styles.scratch, { left: m.x, top: m.y, transform: [{ rotate: `${m.rot}deg` }] }, scatterStyle]}
+          pointerEvents="none"
+        />
+      ))}
+
+      {/* NOTBAD — a small tag over the pile, naming the liberties as fine. */}
+      <Animated.View style={[styles.noteWrap, noteStyle]} pointerEvents="none">
+        <View style={styles.note}>
+          <Text style={styles.noteText}>NOT THE ISSUE</Text>
+        </View>
+      </Animated.View>
+
+      {/* AIMED — two marks in the gap, pointed back at the figure. */}
+      {AIM_Y.map((y, k) => (
+        <Animated.Text key={k} style={[styles.aim, { top: y }, aimedStyle]} pointerEvents="none">‹</Animated.Text>
+      ))}
 
       {/* ── THE WALL ─────────────────────────────────────────────────────── */}
       <Text style={styles.wallLabel} numberOfLines={2}>WHAT COMES BACK OVER IT</Text>
@@ -220,12 +288,12 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   block: {
     position: 'absolute', left: STACK_L, width: STACK_W, height: BLOCK_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   course: {
     position: 'absolute', left: WALL_L, width: WALL_W, height: COURSE_H,
@@ -244,9 +312,28 @@ const styles = StyleSheet.create({
     textAlign: 'center', includeFontPadding: false,
   },
 
+  // ── the three still-tap events (group AH) ────────────────────────────────
+  //
+  // LICENSE: a scratch, not a claim — short unruled marks on the wall's own
+  // bare footprint, before beat 4 lays anything there.
+  scratch: { position: 'absolute', width: 14, height: 2, backgroundColor: SOFT },
+  // NOTBAD: a small tag over the pile, auto-width so it always fits its text.
+  noteWrap: { position: 'absolute', left: NOTE_CX - 60, top: NOTE_T, width: 120, alignItems: 'center' },
+  note: {
+    paddingHorizontal: 6, paddingVertical: 2, borderWidth: 1.5, borderColor: INK,
+    borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  noteText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK,
+    includeFontPadding: false,
+  },
+  // AIMED: two small marks in the gap between the figure and the pile.
+  aim: { position: 'absolute', left: AIM_X, fontFamily: 'Inter_700Bold', fontSize: 14, color: INK,
+    includeFontPadding: false,
+  },
+
   board: { position: 'absolute', left: BOARD_L, width: BOARD_W, height: BOARD_H },
   boardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   boardText: {

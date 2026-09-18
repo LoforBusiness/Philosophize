@@ -28,6 +28,8 @@ export interface Political29Beat extends BaseBeat {
   /** How much the line decides about the two lives, 0…1. */ decide?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a heraldic mark flashes on the line — citizenship named as an inherited rank (group AH). */ crest?: number;
+  /** 1 = a small disc flashes at the line's centre — "at the core of" self-determination (group AH). */ core?: number;
 };
 
 export const BEATS: Political29Beat[] = [
@@ -47,7 +49,7 @@ export const BEATS: Political29Beat[] = [
     dur: 5.0,
   },
   {
-    p: 259, x: 24, cribs: 1, wall: 1, decide: 0.9,
+    p: 259, x: 24, cribs: 1, wall: 1, decide: 0.9, crest: 1,
     text: 'Like feudal rank, citizenship is an inherited status that shapes a life. Liberal states reject inherited rank among citizens.',
     dur: 5.0,
   },
@@ -78,7 +80,7 @@ export const BEATS: Political29Beat[] = [
     dur: 5.0,
   },
   {
-    p: 457, x: 80, cribs: 1, wall: 1, decide: 0.9,
+    p: 457, x: 80, cribs: 1, wall: 1, decide: 0.9, core: 1,
     text: 'For Walzer, admission and exclusion are at the core of self-determination. Without them, no community could keep its character.',
     dur: 4.8,
   },

@@ -28,6 +28,8 @@ export interface Aesthetics26Beat extends BaseBeat {
   /** How far the difference has been handed to the beholder, 0…1. */ wink?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** How many tears kitsch brings, 0…2 — Kundera's ready-made emotion, arriving whole. */ tears?: number;
+  /** 1 = a tear and a grin flank the eye — the same bird, admired two ways. */ pair?: number;
 }
 
 export const BEATS: Aesthetics26Beat[] = [
@@ -37,12 +39,12 @@ export const BEATS: Aesthetics26Beat[] = [
     dur: 4.2,
   },
   {
-    p: 172, x: 28, bird: 1,
+    p: 172, x: 28, bird: 1, tears: 1,
     text: 'Kitsch is art that supplies ready-made emotion. A painted kitten with enormous wet eyes is a standard example.',
     dur: 4.6,
   },
   {
-    p: 435, x: 28, bird: 1,
+    p: 435, x: 28, bird: 1, tears: 2,
     text: 'Milan Kundera wrote that kitsch brings two tears. The first is for children running on grass, the second for the pleasure of being moved.',
     dur: 5.0,
   },
@@ -78,7 +80,7 @@ export const BEATS: Aesthetics26Beat[] = [
     dur: 4.6,
   },
   {
-    p: 445, x: 88, bird: 1, eye: 1,
+    p: 445, x: 88, bird: 1, eye: 1, pair: 1,
     text: 'The same flamingo can be either kitsch or camp. One neighbour admires it sincerely, and another enjoys it as absurd.',
     dur: 5.0,
   },

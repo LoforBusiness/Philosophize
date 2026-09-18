@@ -41,8 +41,15 @@ const OWN_PLAYER = new Set(['logic-arguments-1', 'logic-arguments-2']);
  *
  * 69 once the audit read each label's real opacity (AE7): 35 candidates were labels
  * not yet on screen, so a quarter of the 91 had been ringing empty paper.
+ *
+ * 3 once every still tap had its own scene event (group AH, AH14). The pen was the
+ * answer to a tap whose art holds, and there are none left outside a question, a quote
+ * or a summary: `check:still` holds that at zero, and one event per tap (AH2) keeps
+ * the pen off a beat that now draws its own. This is the floor moving because the
+ * thing it counted was replaced, not because a table was lost — the candidate report
+ * says so: 224 frozen taps, 190 of them a question, quote or summary.
  */
-const MARKS_FLOOR = 69;
+const MARKS_FLOOR = 3;
 
 let fails = 0;
 const ok = (m, d = '') => console.log(`  ok    ${m}${d ? `  ${d}` : ''}`);

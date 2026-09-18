@@ -5,7 +5,7 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
@@ -13,6 +13,7 @@ import { BEATS } from './epistemology21Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A belief gauge stage right: a track with a needle, and two loading trays beneath
 // it. The figure works downstage left.
@@ -81,6 +83,9 @@ const DIR = dirsFrom(X, 1);
 const DIALV = BEATS.map((b) => b.dial ?? 0);
 const WILLV = BEATS.map((b) => b.will ?? 0);
 const EVV = BEATS.map((b) => b.ev ?? 0);
+const TEST_FRAME = BEATS.map((b) => (b.testFrame ? 1 : 0));
+const TRAYS_RING = BEATS.map((b) => (b.traysRing ? 1 : 0));
+const WILL_TICKS = BEATS.map((b) => b.willTicks ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -90,7 +95,7 @@ const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 export default function Epistemology21Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -119,6 +124,9 @@ export default function Epistemology21Scene({ clock, bt, bi, i, picked, onPick, 
       ev,
       // The needle. `will` is deliberately not in this expression.
       needle: lerp(NEEDLE_L, NEEDLE_R, ev),
+      testFrame: carry(cv, 4, n, TEST_FRAME[p], TEST_FRAME[n], grow),
+      traysRing: carry(cv, 5, n, TRAYS_RING[p], TRAYS_RING[n], grow),
+      willTicks: carry(cv, 6, n, WILL_TICKS[p], WILL_TICKS[n], grow),
     };
   });
 
@@ -128,6 +136,11 @@ export default function Epistemology21Scene({ clock, bt, bi, i, picked, onPick, 
   // Each tray fills from the bottom, so "how loaded" is a height rather than a fade.
   const willFill = useAnimatedStyle(() => ({ height: (TRAY_H - 6) * SCENE.value.will }));
   const evFill = useAnimatedStyle(() => ({ height: (TRAY_H - 6) * SCENE.value.ev }));
+  const testFrameStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.testFrame }));
+  const traysRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.traysRing }));
+  const tick1Style = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.willTicks - 0) }));
+  const tick2Style = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.willTicks - 1) }));
+  const tick3Style = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.willTicks - 2) }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -135,6 +148,10 @@ export default function Epistemology21Scene({ clock, bt, bi, i, picked, onPick, 
   return (
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
+
+      {/* TEST_FRAME — a dashed outline of the coming rig, before the gauge itself renders. */}
+      <Animated.View style={[styles.testFrame, testFrameStyle]} pointerEvents="none" />
+
       <Animated.View style={[styles.gauge, dialStyle]} pointerEvents="none">
         <Text style={[styles.end, { left: GA_L, textAlign: 'left' }]} numberOfLines={1}>DOUBT</Text>
         <Text style={[styles.end, { left: GA_L, width: GA_W, textAlign: 'right' }]} numberOfLines={1}>BELIEF</Text>
@@ -142,9 +159,16 @@ export default function Epistemology21Scene({ clock, bt, bi, i, picked, onPick, 
         <View style={styles.track} />
         <Animated.View style={[styles.needle, needleStyle]} />
 
+        {/* TRAYS_RING — a dashed brace naming both trays as the two candidate inputs. */}
+        <Animated.View style={[styles.traysRing, traysRingStyle]} pointerEvents="none" />
+
         {/* the two inputs */}
         <View style={[styles.tray, { left: GA_L }]}>
           <Animated.View style={[styles.trayFill, willFill]} />
+          {/* WILL_TICKS — one tick per act of will named, on the tray's own rim. */}
+          <Animated.View style={[styles.tick, { left: 8 }, tick1Style]} pointerEvents="none" />
+          <Animated.View style={[styles.tick, { left: TRAY_W / 2 - 1 }, tick2Style]} pointerEvents="none" />
+          <Animated.View style={[styles.tick, { left: TRAY_W - 14 }, tick3Style]} pointerEvents="none" />
         </View>
         <Text style={[styles.trayLabel, { left: GA_L }]} numberOfLines={1}>WILL</Text>
 
@@ -193,7 +217,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   gauge: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   end: {
@@ -212,10 +236,22 @@ const styles = StyleSheet.create({
 
   tray: {
     position: 'absolute', top: TRAY_T, width: TRAY_W, height: TRAY_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     justifyContent: 'flex-end', padding: 3,
   },
   trayFill: { width: '100%', backgroundColor: INK, borderRadius: 1 },
+  // WILL_TICKS — one small mark per act of will named, riding the fill's own rim.
+  tick: { position: 'absolute', top: 6, width: 4, height: 10, backgroundColor: PAPER, borderRadius: 1 },
+  // TEST_FRAME — a dashed outline of the rig to come, before the gauge itself renders.
+  testFrame: {
+    position: 'absolute', left: GA_L, top: TRACK_T, width: GA_W, height: TRAY_T + TRAY_H - TRACK_T,
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 6,
+  },
+  // TRAYS_RING — a dashed brace naming both trays as the two candidate inputs.
+  traysRing: {
+    position: 'absolute', left: GA_L - 4, top: TRAY_T - 4, width: GA_W + 8, height: TRAY_H + 8,
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 10,
+  },
   trayLabel: {
     position: 'absolute', top: TRAY_T + TRAY_H + 4, width: TRAY_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: INK,
@@ -224,7 +260,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   // 9 rather than the 9.5 its siblings use, with the tracking spent: "EVIDENCE" is

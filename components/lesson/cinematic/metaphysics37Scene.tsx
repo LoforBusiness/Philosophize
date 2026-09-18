@@ -10,6 +10,7 @@ import { BEATS } from './metaphysics37Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE GLASS THAT NEVER MOVES, AND EVERYTHING ELSE THAT DOES.
@@ -62,6 +64,26 @@ const LABEL_Y = [258, 286, 314, 342];
 const LABEL_TEXT = ['WHAT IT DID', 'WHAT IT IS MADE OF', 'WHAT IT WOULD DO', 'WHAT WE EXPECT'];
 const LABEL_ID = ['did', 'made', 'would', 'expect'];
 
+// THE QUESTION (group AH) — a bubble over the glass, clear of the cap above and
+// the bowl below; it is gone before the labels or the hammer ever appear.
+const WONDER_X = 246;
+const WONDER_Y = 294;
+const WONDER_D = 30;
+
+// THE CONTACT (group AH) — a small mark right at the bowl's rim, where the
+// hammer's head comes down.
+const TOUCH_X = 255;
+const TOUCH_Y = 335;
+const TOUCH_D = 6;
+
+// THE REJECTED ANALYSIS (group AH) — clear of the ward ring (its right edge sits
+// at 321) and of the hammer (247…269), in the open air above the shelf's right
+// half.
+const FAIL_X = 326;
+const FAIL_Y = 346;
+const FAIL_W = 56;
+const FAIL_H = 34;
+
 const CAP_T = 236;
 const FIG_X = 56;
 
@@ -78,12 +100,22 @@ const WARD = BEATS.map((b) => (b.ward ? 1 : 0));
 const LABELS = BEATS.map((b) => (b.labels ? 1 : 0));
 const LIVE_D = BEATS.map((b) => (b.live_d ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const WONDER = BEATS.map((b) => (b.wonder ? 1 : 0));
+const TOUCH = BEATS.map((b) => (b.touch ? 1 : 0));
+const FAILS = BEATS.map((b) => (b.fails ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics37'));
 
 export default function Metaphysics37Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(7);
+  const cv = useCarry(10);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // Each of the three marks fades in on the beat that introduces it and back out
+  // once the scene has moved past it (C20c).
+  const wonderFade = (cur.wonder ?? 0) !== (prev?.wonder ?? 0);
+  const touchFade = (cur.touch ?? 0) !== (prev?.touch ?? 0);
+  const failsFade = (cur.fails ?? 0) !== (prev?.fails ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -92,6 +124,7 @@ export default function Metaphysics37Scene({ clock, bt, bi, i, picked, onPick, d
     // computes from moveTr — arriving after the figure had stopped.
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -115,6 +148,11 @@ export default function Metaphysics37Scene({ clock, bt, bi, i, picked, onPick, d
       // The rail reads the reader's thumb only on its own beat.
       grip: LIVE_D[n] === 1 ? clamp01(dragPos.value) : 0,
       gripOn: carry(cv, 6, n, LIVE_D[p], LIVE_D[n], tr),
+      // THE QUESTION, THE CONTACT AND THE REJECTED ANALYSIS (group AH) — each a
+      // one-beat mark, on and gone.
+      wonderOn: carry(cv, 7, n, WONDER[p], WONDER[n], wonderFade ? grow : 1),
+      touchOn: carry(cv, 8, n, TOUCH[p], TOUCH[n], touchFade ? grow : 1),
+      failsOn: carry(cv, 9, n, FAILS[p], FAILS[n], failsFade ? grow : 1),
     };
   });
 
@@ -135,6 +173,9 @@ export default function Metaphysics37Scene({ clock, bt, bi, i, picked, onPick, d
     opacity: SCENE.value.gripOn * SCENE.value.grip,
     transform: [{ scale: 1.25 - 0.25 * SCENE.value.grip }],
   }));
+  const wonderStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.wonderOn }));
+  const touchStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.touchOn }));
+  const failsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.failsOn }));
 
   return (
     <View style={styles.scene}>
@@ -156,6 +197,20 @@ export default function Metaphysics37Scene({ clock, bt, bi, i, picked, onPick, d
 
       <Animated.View style={[styles.ward, wardStyle]} pointerEvents="none" />
       <Animated.View style={[styles.grip, gripStyle]} pointerEvents="none" />
+
+      {/* THE QUESTION (group AH) — what the claim about the glass is even about. */}
+      <Animated.View style={[styles.wonder, wonderStyle]} pointerEvents="none">
+        <Text style={styles.wonderText}>?</Text>
+      </Animated.View>
+
+      {/* THE CONTACT (group AH) — the hammer's head, right at the glass. */}
+      <Animated.View style={[styles.touch, touchStyle]} pointerEvents="none" />
+
+      {/* THE REJECTED ANALYSIS (group AH) — struck through, once it has failed. */}
+      <Animated.View style={[styles.failTag, failsStyle]} pointerEvents="none">
+        <Text style={styles.failText}>STRUCK{'\n'}BREAKS</Text>
+        <View style={styles.failStrike} />
+      </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, labelsStyle]}>
         {LABEL_Y.map((ly, k) => (
@@ -203,6 +258,34 @@ const styles = StyleSheet.create({
   stem: { position: 'absolute', left: GLASS_X + 19, top: 374, width: 4, height: 16, backgroundColor: INK },
   foot: { position: 'absolute', left: GLASS_X + 8, top: 390, width: 26, height: 4, borderRadius: 2, backgroundColor: INK },
 
+  // THE QUESTION — a bubble over the glass, holding nothing but its own "?".
+  wonder: {
+    position: 'absolute', left: WONDER_X, top: WONDER_Y, width: WONDER_D, height: WONDER_D, borderRadius: WONDER_D / 2,
+    borderWidth: 2, borderColor: INK, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  wonderText: { fontFamily: 'Inter_700Bold', fontSize: 15, color: INK, includeFontPadding: false },
+
+  // THE CONTACT — a filled dot, the size of the mark logic7's token uses.
+  touch: {
+    position: 'absolute', left: TOUCH_X, top: TOUCH_Y, width: TOUCH_D, height: TOUCH_D, borderRadius: TOUCH_D / 2,
+    backgroundColor: INK,
+  },
+
+  // THE REJECTED ANALYSIS — a tile carrying a word (PLATE_FACE/LIP), struck.
+  failTag: {
+    position: 'absolute', left: FAIL_X, top: FAIL_Y, width: FAIL_W, height: FAIL_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  failText: {
+    position: 'absolute', left: 0, top: 5, width: FAIL_W, textAlign: 'center', lineHeight: 11,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.3, color: INK, includeFontPadding: false,
+  },
+  failStrike: {
+    position: 'absolute', left: FAIL_W / 2 - 33, top: FAIL_H / 2 - 1.5, width: 66, height: 3,
+    backgroundColor: INK, transform: [{ rotate: '-31deg' }],
+  },
+
   // Pivots about its top end, which is where a hammer is held.
   shaft: {
     position: 'absolute', left: PIVOT_X - 1.5, top: PIVOT_Y, width: 3, height: 58,
@@ -225,7 +308,7 @@ const styles = StyleSheet.create({
   label: { position: 'absolute', left: LABEL_X, width: 150, height: 24 },
   labelBox: {
     position: 'absolute', left: 0, top: 0, width: 150, height: 24,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   labelWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   labelText: {

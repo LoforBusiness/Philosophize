@@ -9,6 +9,7 @@ import { BEATS } from './logic16Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { Shapes, ell, bar, rect, tri, type Part } from './Silhouette';
@@ -17,8 +18,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A WEEK OF MORNINGS, AND THE ONE WITH A HOLE IN IT.
@@ -93,6 +95,15 @@ const CLAIM_Y = 232;
 const ARROW_Y = 246;
 const FIG_X = 60;
 
+// THE TWIN ARROW (group AH) — a small, generic version of the claim, clear of
+// the figure (who stands x 110…170 at these beats) and clear of the strip
+// (bottom 342) and the day labels (bottom ≈358) above, and of the figure's
+// crown (397) below.
+const TWIN_L = 210;
+const TWIN_R = 330;
+const TWIN_Y = 388;
+const TWIN_TAG_T = 362;
+
 const X = BEATS.map((b) => b.x ?? FIG_X);
 // WHICH WAY HE IS POINTING, read off the same x track he walks along:
 // +1 where it rises, -1 where it falls, and HOLD while he stands still, so a
@@ -104,6 +115,9 @@ const ARROW = BEATS.map((b) => b.arrow ?? 0);
 const CANDS = BEATS.map((b) => b.cands ?? 0);
 const SILENT = BEATS.map((b) => b.silent ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+const ECHO = BEATS.map((b) => b.echo ?? 0);
+const NAMED = BEATS.map((b) => b.named ?? 0);
+const LUCK = BEATS.map((b) => b.luck ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -124,7 +138,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic16'));
 export default function Logic16Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(8);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -151,6 +165,11 @@ export default function Logic16Scene({ clock, bt, bi, i, picked, onPick, pickPos
       arrow: carry(cv, 2, n, ARROW[p], reacting ? pickAt(POLL_ARROW, pickPos.value) : ARROW[n], tr),
       cands: carry(cv, 3, n, CANDS[p], CANDS[n], tr),
       silent: carry(cv, 4, n, SILENT[p], SILENT[n], tr),
+      // "the same form of inference is common" — a small, unlabelled twin of the
+      // claim arrow appears below the strip, then gets named, then gets doubted.
+      echo: carry(cv, 5, n, ECHO[p], ECHO[n], tr),
+      named: carry(cv, 6, n, NAMED[p], NAMED[n], tr),
+      luck: carry(cv, 7, n, LUCK[p], LUCK[n], tr),
       t,
     };
   });
@@ -164,6 +183,9 @@ export default function Logic16Scene({ clock, bt, bi, i, picked, onPick, pickPos
   const stripStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.cands }));
   const candStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.cands }));
   const arrowStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.arrow }));
+  const echoStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.echo }));
+  const namedStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.named }));
+  const luckStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.luck }));
 
   const panels = [0, 1, 2, 3, 4, 5];
 
@@ -219,6 +241,24 @@ export default function Logic16Scene({ clock, bt, bi, i, picked, onPick, pickPos
         ))}
       </Animated.View>
 
+      {/* ── THE THREE TAP EVENTS (group AH) ─────────────────────────────────
+          "The same form of inference is common": a small, unlabelled twin of
+          the crow→sun arrow, below the strip — any cause, any effect. Then it
+          gets the fallacy's name, then a question mark for the coincidence
+          reading the same order could just as well be. */}
+      <Animated.View style={[styles.twinWrap, echoStyle]} pointerEvents="none">
+        <View style={styles.twinDot} />
+        <View style={[styles.twinDot, { left: TWIN_R - 6 }]} />
+        <View style={styles.twinLine} />
+        <View style={styles.twinHead} />
+      </Animated.View>
+      <Animated.View style={[styles.twinTag, namedStyle]} pointerEvents="none">
+        <Text style={styles.twinTagText}>POST HOC</Text>
+      </Animated.View>
+      <Animated.View style={[styles.twinDoubt, luckStyle]} pointerEvents="none">
+        <Text style={styles.twinDoubtText}>?</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -259,7 +299,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   claim: {
     position: 'absolute', top: CLAIM_Y, width: 60, textAlign: 'center',
@@ -288,8 +328,8 @@ const styles = StyleSheet.create({
 
   cand: { position: 'absolute', top: CAND_Y, width: CAND_W, height: PANEL_H },
   candBox: {
-    width: CAND_W, height: PANEL_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
+    width: CAND_W, height: PANEL_H, borderWidth: 2, borderColor: INK, borderRadius: 8,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   candRight: { backgroundColor: INK },
   candWrong: { borderColor: SOFT, opacity: 0.45 },
@@ -303,6 +343,32 @@ const styles = StyleSheet.create({
     textAlign: 'center', marginTop: 5, includeFontPadding: false,
   },
   candSubOn: { color: PAPER },
+
+  // ── THE THREE TAP EVENTS (group AH) ──────────────────────────────────────
+  twinWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  twinDot: {
+    position: 'absolute', left: TWIN_L, top: TWIN_Y - 3, width: 6, height: 6, borderRadius: 3,
+    backgroundColor: INK,
+  },
+  twinLine: {
+    position: 'absolute', left: TWIN_L + 6, top: TWIN_Y - 0.75, width: TWIN_R - 6 - (TWIN_L + 6), height: 1.5,
+    backgroundColor: INK,
+  },
+  twinHead: {
+    position: 'absolute', left: TWIN_R - 12, top: TWIN_Y - 3.5, width: 7, height: 7,
+    borderRightWidth: 1.5, borderTopWidth: 1.5, borderColor: INK, transform: [{ rotate: '45deg' }],
+  },
+  twinTag: {
+    position: 'absolute', left: (TWIN_L + TWIN_R) / 2 - 32, top: TWIN_TAG_T, width: 64,
+    paddingVertical: 2, borderWidth: 1.5, borderColor: INK, borderRadius: 5,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center',
+  },
+  twinTagText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false },
+  twinDoubt: {
+    position: 'absolute', left: TWIN_R + 4, top: TWIN_Y - 8, width: 12, height: 16,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  twinDoubtText: { fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, includeFontPadding: false },
 });
 
 export function Logic16Lesson({ lesson }: { lesson: Lesson }) {

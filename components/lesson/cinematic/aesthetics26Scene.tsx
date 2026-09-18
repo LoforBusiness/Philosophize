@@ -3,12 +3,13 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { dirsFrom, ease01, moveTr, travelStance, WALK, type Bundle } from './rig';
+import { clamp01, dirsFrom, ease01, moveTr, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics26Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { Shapes, Outlined, ell, bar, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A LAWN FLAMINGO THAT NEVER MOVES, AND AN EYE BESIDE IT THAT DOES.
@@ -102,6 +104,11 @@ const EYE = BEATS.map((b) => (b.eye ? 1 : 0));
 const WINK = BEATS.map((b) => b.wink ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// GROUP AH — three still taps, both away from the bird itself (A1's header rule):
+// TEARS counts up 0…2 as Kundera's two tears are named; PAIR flanks the eye with
+// a tear and a grin, the same object read two ways.
+const TEARS = BEATS.map((b) => b.tears ?? 0);
+const PAIR = BEATS.map((b) => (b.pair ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -112,7 +119,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics26'));
 export default function Aesthetics26Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -135,6 +142,8 @@ export default function Aesthetics26Scene({ clock, bt, bi, i, picked, onPick, dr
       // beholder, and the only thing in the picture that answers to it is the eye.
       wink: carry(cv, 3, n, WINK[p], reacting ? dragPos.value : WINK[n], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      tearsV: carry(cv, 5, n, TEARS[p], TEARS[n], tr),
+      pairOn: carry(cv, 6, n, PAIR[p], PAIR[n], tr),
     };
   });
 
@@ -146,11 +155,19 @@ export default function Aesthetics26Scene({ clock, bt, bi, i, picked, onPick, dr
   const eyeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.eyeOn }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
   const lidStyle = useAnimatedStyle(() => ({ height: LID_MAX * SCENE.value.wink }));
+  const tearAStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.tearsV) }));
+  const tearBStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.tearsV - 1) }));
+  const pairStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pairOn }));
 
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap} pointerEvents="none">THE SAME BIRD, TWICE</Text>
+
+      <Animated.View style={[styles.tear, styles.tearA, tearAStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.tear, styles.tearB, tearBStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.tearMini, pairStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.grin, pairStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, birdStyle]} pointerEvents="none">
         <View style={styles.plinth} />
@@ -198,7 +215,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 140, top: CAP_T, width: 246,
@@ -225,10 +242,31 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,
   },
 
+  // A TEAR ARRIVING WHOLE (beats 1–2) — kitsch's ready-made emotion, never built
+  // up in pieces. Never on the bird itself (A1's own header rule for this lesson).
+  tear: {
+    position: 'absolute', width: 16, height: 16, backgroundColor: INK,
+    borderTopLeftRadius: 8, borderTopRightRadius: 8, borderBottomRightRadius: 8,
+    transform: [{ rotate: '-45deg' }],
+  },
+  tearA: { left: 165, top: 326 },
+  tearB: { left: 180, top: 342 },
+  // A TEAR AND A GRIN FLANKING THE EYE (beat 7) — the same bird, admired sincerely
+  // by one neighbour and enjoyed as absurd by another.
+  tearMini: {
+    position: 'absolute', left: 148, top: 278, width: 10, height: 10, backgroundColor: INK,
+    borderTopLeftRadius: 5, borderTopRightRadius: 5, borderBottomRightRadius: 5,
+    transform: [{ rotate: '-45deg' }],
+  },
+  grin: {
+    position: 'absolute', left: 176, top: 280, width: 14, height: 7,
+    borderBottomLeftRadius: 7, borderBottomRightRadius: 7, borderWidth: 1.6, borderTopWidth: 0, borderColor: INK,
+  },
+
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

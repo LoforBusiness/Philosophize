@@ -21,6 +21,7 @@ export interface Log13Beat extends BaseBeat {
   /** The empty joins between them, 0…1. */ joins?: number;
   /** The honest slope shown alongside, 0…1. */ honest?: number;
   /** 1 = the four steps are live targets (Q1). */ pick?: number;
+  /** 1 = a highlight ring lands on step three, then step four, following the sentence as it names each in turn. */ trace?: number;
 }
 
 export const BEATS: Log13Beat[] = [
@@ -36,7 +37,7 @@ export const BEATS: Log13Beat[] = [
     cite: 'A chain of predictions',
   },
   {
-    g: 465, steps: 4,
+    g: 465, steps: 4, trace: 1,
     dur: 2.4,
     text: 'Next, grades will lose their meaning. So, the argument concludes, no retakes at all should be allowed.',
   },

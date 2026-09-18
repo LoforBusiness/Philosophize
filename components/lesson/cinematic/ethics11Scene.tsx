@@ -12,6 +12,7 @@ import { BEATS } from './ethics11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -19,8 +20,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // Bentham's counting table, stage right: one plank on two legs with three pleasure
 // tokens standing on it, all drawn the SAME SIZE, and a ledger slung underneath
@@ -136,6 +138,9 @@ const UPV = BEATS.map((b) => b.up ?? 0);
 // 2 = "still there, but it no longer settles anything" — a dim, never a slab drawn
 // across it (D31).
 const LEDV = BEATS.map((b) => (b.led === 2 ? 0.3 : b.led === 1 ? 1 : 0));
+// group AH — the two still-tap events, both one-beat pulses (fade both ways).
+const LEVELV = BEATS.map((b) => (b.level ? 1 : 0));
+const GUIDEV = BEATS.map((b) => (b.guide ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -145,8 +150,9 @@ const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
 
   // The rise is the reader's own answer playing out, so on the interact beat it is
   // driven by `qv` (0 until they tap, then 0→1 over 780ms). On every later beat both
@@ -155,12 +161,17 @@ export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick, dr
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
   const answered = picked !== null;
   const live = showPick && !answered;
+  // group AH — still-tap events (C20c): each is a one-beat pulse, so it fades
+  // both ways rather than off (L5).
+  const levelFade = !!cur.level !== !!prev?.level;
+  const guideFade = !!cur.guide !== !!prev?.guide;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / moveTr(X[p], X[n], 0.85));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const s = keepHeld(heldS, travelStance(
       X[p], X[n],
@@ -176,6 +187,10 @@ export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick, dr
       // climbs to the higher shelf; slide back to HOW MUCH and it drops among the
       // cheap thrills to be counted with them. Mill's whole claim, under a thumb.
       rise: riseNow ? ease01(qv.value) : carry(cv, 4, n, UPV[p], reacting ? dragPos.value : UPV[n], tr),
+      // group AH — one-beat pulses; each fades both ways since it must close
+      // again on the very next beat.
+      level: carry(cv, 5, n, LEVELV[p], LEVELV[n], levelFade ? grow : 1),
+      guide: carry(cv, 6, n, GUIDEV[p], GUIDEV[n], guideFade ? grow : 1),
     };
   });
 
@@ -206,6 +221,9 @@ export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick, dr
       ],
     };
   });
+  // group AH — the two still-tap events.
+  const levelStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.level }));
+  const guideStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.guide }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -268,6 +286,18 @@ export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick, dr
         );
       })}
 
+      {/* A level line connects the tops of the three tokens, once, as Bentham
+          says none is better in itself than another (group AH). */}
+      <Animated.View style={[styles.levelLine, levelStyle]} pointerEvents="none" />
+
+      {/* A dashed line rises from the symphony token toward the empty shelf,
+          once, hinting where "higher in kind" points (group AH). */}
+      <Animated.View style={[styles.guideWrap, guideStyle]} pointerEvents="none">
+        {[0, 1, 2, 3].map((k) => (
+          <View key={k} style={[styles.guideDash, { top: 348 + k * 13 }]} />
+        ))}
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </Animated.View>
@@ -290,7 +320,7 @@ const styles = StyleSheet.create({
   // ── tokens ──────────────────────────────────────────────────────────────────
   tokenSlot: { position: 'absolute', top: TOK_T, width: TOK_W },
   tokenInner: {
-    height: TOK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: TOK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     // paddingHorizontal 1, not 2. At 2 of padding and 0.2 of tracking "SYMPHONY"
     // measured 55.4 units in 56 — it fitted by six tenths of a unit, which is not a
     // fit, it is a coincidence. Android's metrics are a shade wider than the
@@ -323,7 +353,7 @@ const styles = StyleSheet.create({
   // ── ledger ──────────────────────────────────────────────────────────────────
   ledger: {
     position: 'absolute', left: LED_L, top: LED_T, width: LED_W, height: LED_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   /** The same box, without the furniture — see ledTextStyle. */
   ledgerText: {
@@ -356,6 +386,24 @@ const styles = StyleSheet.create({
   bracket: {
     position: 'absolute', top: SHELF_T + SHELF_TH, width: 3, height: BRACKET_H,
     backgroundColor: SOFT,
+  },
+
+  // ── the two still-tap events (group AH) ────────────────────────────────────
+  // A level rule across the three token tops: the same currency, added as one
+  // total. Its own beat only — the ledger takes over the "add them up" idea
+  // from the next beat on.
+  levelLine: {
+    position: 'absolute', left: TOK_L + TOK_W / 2, top: TOK_T - 10,
+    width: TOK_L + 2 * TOK_PITCH + TOK_W / 2 - (TOK_L + TOK_W / 2), height: 1.5,
+    backgroundColor: INK,
+  },
+  // A dashed guide up the empty corridor the symphony token will later rise
+  // through — a boundary mark (dashed, never filled), gone again before that
+  // real rise plays.
+  guideWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  guideDash: {
+    position: 'absolute', left: TOK_L + 2 * TOK_PITCH + TOK_W / 2 - 1, width: 2, height: 7,
+    backgroundColor: SHADE,
   },
 });
 

@@ -9,6 +9,7 @@ import { BEATS } from './political26Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A DECISION WITH A STAMP ON IT, FED FROM A BALLOT BOX AND FROM A TABLE.
@@ -74,6 +76,10 @@ const FEED_H = 44;
 const FEED_THIN = 3;
 const FEED_FAT = 13;
 
+// group AH — the open column beside the sources, before the answer plates ever
+// stand there (PLATES is 0 on all three still beats these marks belong to).
+const TALLY_X = [296, 303, 310, 317];
+
 const PLATE_X = 256;
 const PLATE_W = 140;
 const PLATE_H = 26;
@@ -96,6 +102,11 @@ const TABLE = BEATS.map((b) => (b.table ? 1 : 0));
 const FEEDS = BEATS.map((b) => (b.feeds ? 1 : 0));
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// group AH — one-shot marks for the three still taps, drawn in the open column
+// to the right of the sources (where the answer plates sit on their own beat).
+const TALLY = BEATS.map((b) => ((b.tally ?? 0) > 0 ? 1 : 0));
+const AGREE = BEATS.map((b) => ((b.agree ?? 0) > 0 ? 1 : 0));
+const WEIGH = BEATS.map((b) => ((b.weigh ?? 0) > 0 ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -106,13 +117,21 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political26'));
 export default function Political26Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(7);
+  const cv = useCarry(10);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // A mark fades IN on the beat that asks for it and back OUT on the next, rather
+  // than cutting (see "AND FADE AN EVENT OUT, NOT OFF").
+  const tallyFade = (cur.tally ?? 0) !== (prev?.tally ?? 0);
+  const agreeFade = (cur.agree ?? 0) !== (prev?.agree ?? 0);
+  const weighFade = (cur.weigh ?? 0) !== (prev?.weigh ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -131,6 +150,10 @@ export default function Political26Scene({ clock, bt, bi, i, picked, onPick, dra
       // counting. The stamp fills from what is left over, which is the reasoning.
       counted: carry(cv, 5, n, 0.5, reacting ? dragPos.value : 0.5, tr),
       platesOn: carry(cv, 6, n, PLATES[p], PLATES[n], tr),
+      // group AH — one-shot, fades in on its own beat and back out on the next.
+      tally: carry(cv, 7, n, TALLY[p], TALLY[n], tallyFade ? grow : 1),
+      agree: carry(cv, 8, n, AGREE[p], AGREE[n], agreeFade ? grow : 1),
+      weigh: carry(cv, 9, n, WEIGH[p], WEIGH[n], weighFade ? grow : 1),
     };
   });
 
@@ -139,6 +162,12 @@ export default function Political26Scene({ clock, bt, bi, i, picked, onPick, dra
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.cards && LIVE[i] === 1;
 
   const decStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.decOn }));
+  // Small tally marks: "adding up the preferences people already have."
+  const tallyStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tally }));
+  // A checkmark: "everyone it affects could agree to it in rational discussion."
+  const agreeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.agree }));
+  // An "=" mark: "a vote gives each person the same weight."
+  const weighStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.weigh }));
   const boxStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.boxOn }));
   const tableStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tableOn }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
@@ -175,6 +204,19 @@ export default function Political26Scene({ clock, bt, bi, i, picked, onPick, dra
 
       <Animated.View style={[styles.feed, { left: FEED_X[0] }, leftFeed]} pointerEvents="none" />
       <Animated.View style={[styles.feed, { left: FEED_X[1] }, rightFeed]} pointerEvents="none" />
+
+      {/* group AH — three one-shot marks in the open column beside the sources. */}
+      <Animated.View style={tallyStyle} pointerEvents="none">
+        {TALLY_X.map((tx) => <View key={tx} style={[styles.tallyBar, { left: tx }]} />)}
+      </Animated.View>
+      <Animated.View style={agreeStyle} pointerEvents="none">
+        <View style={styles.checkA} />
+        <View style={styles.checkB} />
+      </Animated.View>
+      <Animated.View style={weighStyle} pointerEvents="none">
+        <View style={[styles.weighBar, { top: 356 }]} />
+        <View style={[styles.weighBar, { top: 366 }]} />
+      </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, boxStyle]} pointerEvents="none">
         <View style={[styles.source, { left: SRC_X[0] }]} />
@@ -217,7 +259,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: DEC_X, top: CAP_T, width: 250,
@@ -257,12 +299,21 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', left: PLATE_X, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,
   },
+
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  // Tally marks: preferences being added up.
+  tallyBar: { position: 'absolute', top: 352, width: 2, height: 18, backgroundColor: INK, borderRadius: 1 },
+  // A checkmark: agreement reached in discussion.
+  checkA: { position: 'absolute', left: 298, top: 365, width: 7, height: 2.5, backgroundColor: INK, borderRadius: 1, transform: [{ rotate: '45deg' }] },
+  checkB: { position: 'absolute', left: 302, top: 361, width: 15, height: 2.5, backgroundColor: INK, borderRadius: 1, transform: [{ rotate: '-50deg' }] },
+  // An "=" mark: each vote weighed the same.
+  weighBar: { position: 'absolute', left: 296, width: 24, height: 3, backgroundColor: INK, borderRadius: 1 },
 });
 
 export function Political26Lesson({ lesson }: { lesson: Lesson }) {

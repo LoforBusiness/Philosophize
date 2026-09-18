@@ -31,6 +31,9 @@ export interface Epistemology35Beat extends BaseBeat {
   /** 1 = the middle link is shown parting. */ gap?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
   /** 1 = the drag rail drives how far the "relevant" fence stands. */ scan?: number;
+  /** 1 = the chain's own conclusion is ticked: the third follows from the first two. */ follows?: number;
+  /** 1 = the principle's name is printed under the chain it describes. */ named?: number;
+  /** 1 = the ordinary answer, given anyway: you would still say you knew. */ stillSay?: number;
 }
 
 export const BEATS: Epistemology35Beat[] = [
@@ -65,11 +68,13 @@ export const BEATS: Epistemology35Beat[] = [
   },
   {
     p: 266, x: 58, pens: 1, plaques: 1, chain: 1,
+    follows: 1,
     text: 'If you know a claim and know that it rules out another, you know that the other is false.',
     dur: 2,
   },
   {
     p: 266, x: 58, pens: 1, plaques: 1, chain: 1,
+    named: 1,
     text: 'The principle is called epistemic closure, because knowledge is closed under known entailment.',
     dur: 1.8,
   },
@@ -101,6 +106,7 @@ export const BEATS: Epistemology35Beat[] = [
   },
   {
     p: 167, x: 58, pens: 1, plaques: 1, chain: 1, gap: 1,
+    stillSay: 1,
     text: 'The question would strike you as strange, and you’d still say you knew it was a zebra.',
     dur: 2.6,
   },

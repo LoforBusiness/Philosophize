@@ -29,6 +29,9 @@ export interface Met21Beat extends BaseBeat {
   /** How solid the past half is, 0…1. */ past?: number;
   /** How solid the future half is, 0…1. */ future?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = each stretch of the line is put in question, in the order they are named. */ whichParts?: number;
+  /** 1 = yesterday's own box is marked as nowhere at all. */ nowhere?: number;
+  /** 1 = two observers' NOWs stand at different places on the line. */ twoNows?: number;
 }
 
 export const BEATS: Met21Beat[] = [
@@ -39,6 +42,7 @@ export const BEATS: Met21Beat[] = [
   },
   {
     p: 462, x: 200, line: 1, past: 1, future: 1,
+    whichParts: 1,
     text: 'It asks which parts of the line exist: the past, the present, the future, or only some of them.',
     dur: 1.8,
   },
@@ -50,6 +54,7 @@ export const BEATS: Met21Beat[] = [
   },
   {
     p: 266, x: 200, line: 1, past: 0.08, future: 0.08,
+    nowhere: 1,
     text: 'On this view, yesterday doesn’t exist anywhere. It existed once, and no longer exists at all.',
     dur: 1.8,
   },
@@ -88,6 +93,7 @@ export const BEATS: Met21Beat[] = [
   },
   {
     p: 395, x: 268, line: 1, past: 1, future: 1,
+    twoNows: 1,
     text: 'Einstein’s theory makes it hard to say presentism is true. Two people moving at different speeds do not agree on which events are happening now.',
     dur: 4.8,
   },

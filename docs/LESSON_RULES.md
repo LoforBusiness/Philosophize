@@ -9274,3 +9274,411 @@ a label that is not there reads 0. `make:marks` refuses a mark below 0.5 and
 
 `node scripts/countertest-marks.mjs` stages every rule above going red, and the shipped
 table silent.
+
+---
+
+## Group AF · The figure moves himself
+
+A reader, after the living holds, the working shelf and the answer nod had all
+shipped: *"the stickman does not move a lot. I do not mean with its hands moving …
+instead, during the words that are being spoken, if there's nothing happening on
+screen, the stickman will look up and down a lot, move back and forth, maybe sit
+on the ground for a little bit … right now the stickman is too stationary."*
+
+Every idle in the library moves a LIMB. This group is the man.
+
+`components/lesson/cinematic/wander.ts` is the maths, `data/lessonWander.ts` the
+choreography (`npm run make:wander`), `npm run check:wander` the ratchet,
+`node scripts/sheet-wander.mjs` the filmstrip and `node scripts/shot-wander.mjs`
+the live probe.
+
+### AF1 · The plan is a table, and the player installs it
+
+A plan is flat numbers — `[lo, hi, kind, at, dur, target, …]` — read against the
+BEAT clock, which is rewound in the same statement that swaps the plan. Timing it
+off the scene clock needs a start time recorded, which can only be read across
+threads a frame late, and a plan read one frame at the previous beat's elapsed time
+is a plan jumped to its end state and back (group L).
+
+It reaches the figure through `lookPose`, which all 244 scenes call exactly once —
+the `REACT` seam, for the same reason: 244 scene edits inside `muststamp` is a
+corpus-wide re-measure for a change that moves no prop.
+
+### AF2 · Only when his pose leaves him free
+
+`wanderrule.poseTier` classifies every pose code as free, late or bound, out of the
+same tables `liveliness.mjs` keeps.
+
+- **bound** — his hands are on something (pointing, presenting, writing, carrying),
+  he is already on the floor, or the pose is itself a whole-body movement (the dance
+  shelf, pacing on the spot). A1 outranks this group entirely: if the narration says
+  he is writing on the board, walking him away from it is a lie about the picture.
+- **late** — a PLAYED action, which is over in `PLAY_SECONDS`. It keeps the in-place
+  moves, starting after the action rather than over the top of it. Holding the whole
+  man still because of the first second and a half is how 958 beats were once classed
+  as busy.
+- **free** — everything else: a stand, a think, a shrug, a living hold.
+
+Never on a graded beat or the summary, never on a beat the scene already walks him
+through, and never on the beat the second figure walks in — that is the visitor's
+moment, not the lead's.
+
+### AF3 · The room is measured, and the camera is not touched
+
+`make:wander` reads `mustBoxes` for the clear floor on his own beat AND the next
+one, because a tap can arrive at any moment and a plan that ends where the next
+beat's art stands would walk him out of it. The visitor's box blocks him, the pen
+mark's box blocks him, and a box only blocks at all if it comes down to the height
+he occupies.
+
+His box must then sit inside every frame the camera shows on that beat, read out of
+`tours.ts` the way `make:thoughts` reads it (AB15). **No station is ever changed to
+make room**: a step that would leave the picture is not offered.
+
+`roomFor` returning null means he is standing against the thing the lesson is about,
+which is most of these stages — that beat keeps the in-place moves rather than
+losing its plan. 343 beats are in that state.
+
+### AF4 · A bubble beat is in place only
+
+A thought is placed against his RESTING head (AB10), so a beat that draws one may
+not move his feet or his height: no step, no sit, no crouch.
+
+### AF5 · He is home when it matters
+
+A plan ends back where the scene put him whenever the next beat is a question or
+walks him, and never leaves him seated, crouched or facing the other way. A tap that
+interrupts a step lets him FINISH the step — the remaining distance at the walk's
+own speed — rather than stopping dead.
+
+### AF6 · A move must beat the breath
+
+`stand()` travels 2.6 units on its own, so a plan that travels no further is not
+adding a movement, it is adding a name for one (`check:idle`'s calibration, one
+system over). `check:wander` fails a plan under 1.4× it.
+
+A LOOK is the case that proves the rule and it took three attempts: the head centre
+is driven by `tilt` and by `tilt + neck`, and `sin(π + e) ≈ −e`, so a lean back to
+carry a look up cancels the neck that carries it — measured at 0.7 units. The
+corpus's own looking poses, acts 65 and 152, move the body the SAME way as the neck,
+and the difference between up and down is the bob. **On this figure nothing raises
+the head**: `y` is at its most negative when tilt and neck are zero, so standing
+upright is the highest his head ever gets, and "up" has to be said with the body.
+
+### AF7 · A step is continuous at both ends and through a tap
+
+Three numbers, all measured, all budgets in `check:wander`:
+
+- **out of a stand**, `strideStance` starts its cycle with the feet a stride apart,
+  which was a 16-unit foot jump on the frame the step began. `rig.strideStance` takes
+  a `lead` — the phase offset `moves.strideMode` has had since the branch road — and
+  the first eleven units are a departure blend, which is `settleStep` read backwards:
+  the standing feet pinned in the world, the foot with further to go arcing over the
+  gap.
+- **through a tap**, the continuation is an EXTENDED leg: start the journey back by
+  however far has already been walked and scale `tr` to match, so the body does not
+  move and the gait is handed its own phase. It must carry the same `lead`, and the
+  "is he walking" guard must count the distance already walked — the last half unit
+  of a step was otherwise thrown away and both feet went flat.
+- **into a stop**, `settleStep` shares its foot arc BY GAP rather than giving it to
+  whichever foot is further. That comparison flips mid-settle, and on the frame it
+  flipped one ankle rose 8.5 units while the other fell 7.3. Every walk in the app
+  had it.
+
+### AF8 · Standing him still for a measurement
+
+`tourFlag.setWanderOff` is the switch, and every harness that measures the stage sets
+it: a must-box is a MOMENT, not a place, so measuring with the layer live records
+whichever step he happened to be taking — and the room the layer is allowed to walk
+him through is derived from those very boxes. `check:alive` (the figure is excluded
+by his box at rest), `check:nod` and `check:moved` pass it for their own reasons.
+
+`node scripts/shot-wander.mjs <lesson-id> [beat]` is the only instrument that can say
+the layer is WIRED: it records his ankle and his fist every frame in the real app. It
+found the layer switched off a frame after it was switched on — `wanderReset` in a
+mount effect, which runs after the render that installs the first plan — and its own
+first draft measured the figure's ROOT, which `Stickman` states is a zero-size box,
+and reported the same dead figure for a different reason.
+
+`node scripts/countertest-wander.mjs` stages all twelve defects going red, the
+shipped table silent, and a single beat with no plan silent.
+
+---
+
+## Group AG · The picture has the app's depth
+
+The five tabs were given a depth kit on 2026-09-17 and the lessons were left out of
+it on purpose. The owner then asked for the other half: *"everything in the app
+other than the lessons looks more gamified … we will select the gamified look that
+is in the app as well … that gamified, that really clean, gamified depth look."*
+
+`components/lesson/cinematic/stageSkin.ts` is the kit, `scripts/skin-stage.mjs`
+applies it, `npm run check:skin` holds it, and `scripts/restamp-skin.mjs` renews the
+must-box stamps by proof.
+
+### AG1 · Four decorations, and none of them moves a box
+
+A radius, a `boxShadow` and a colour are the only things a stage can be given for
+free. That is what made a corpus-wide pass affordable at all: 239 scenes changed and
+the stored measurements were PROVED still valid rather than recorded again (hours of
+browser time for numbers that cannot have moved).
+
+What the kit may never touch: a border WIDTH (it shrinks the content area inside the
+plate and can re-wrap a word — `check:fits`' whole subject), and a TONE (the
+luminance contract in `stageTones` is what keeps 244 scenes' captions legible).
+
+### AG2 · A tile's face is white; an object keeps its tone
+
+The owner chose white from three rendered options of one real lesson. Two reasons it
+is the right answer and not merely the prettiest: it is the kit the rest of the app
+already uses, and it drops the beige — `STONE` is the branch hue at L\* 81, a tan on
+the warm branches, and a face of it is the "gold look in the background of a lot of
+the information" the owner had removed from every other surface (§7).
+
+The hue does not leave the stage. It moves to the GROUND, the LEDGE and the shaded
+side, which is where this app has always kept its colour.
+
+**A mass keeps its tone**: a white stone is not a stone (A1). `skin-stage` tells a
+tile from a mass by CONSTRUCTION — bordered in ink, rounded, under 190×96, not a
+disc or a capsule (which catches the ball, the coin, the wheel and the dial without
+anyone listing them), and not scenery by name.
+
+### AG3 · A white face SPENDS a mass, so the skin is capped
+
+`check:shade` counts filled tonal masses per scene and holds every scene to three,
+because a reader said the pictures were flat. A white card is the absence of a tone
+— which is exactly why political7's charter reads against its stone tablet — so
+facing a tile spends one.
+
+Facing them all took **105 scenes below the floor**. A scene may therefore spend down
+to three and no further, smallest tiles first (the smallest is most likely the label,
+the largest most likely the thing the label is about). 47 scenes keep their toned
+tiles because they have nothing spare, and that is the correct answer rather than a
+compromise: there is nothing there for a white card to read against.
+
+**The cap is measured by `check:shade`'s own counter** (`scripts/lib/masscount.mjs`).
+The first draft re-implemented the count and disagreed with the check about the very
+first scene it was tested on — 0 against 1 — so it let 102 scenes fall through while
+reporting that it had held them. One rule, two readers.
+
+### AG4 · The ground is a band with two edges
+
+172 scenes lay a floor of flat `RULE` from the ground line to the foot of the band.
+It gets the two edges an object gets: a lit hairline along the top where the light
+this app has used since `tone.ts` catches the near edge, and the tone's own SHADE
+along the foot where the floor turns away. Both inside the band's own box.
+
+**Moving the fill into the shared kit nearly cost 102 scenes their masses**, because
+`check:shade` counts source text and the text `backgroundColor: RULE` was no longer
+in the scene. `masscount` counts `floorStyle(` as two masses — the band and its
+shaded foot — which is what is drawn. That is the "a checker's input comes from
+another instrument" class this repo keeps paying for.
+
+### AG5 · A figure stands in a pill
+
+*"Shadows always appear below characters and objects as a pill shape — never an
+oval, because ovals imply perspective"* (Duolingo's illustration rules). This drawing
+is flat and seen straight on, so the rule applies exactly, and it is the one thing
+that puts him ON the floor rather than in front of it.
+
+`Stickman` draws it, so every figure in every lesson has one: sized from his own
+scale, placed at the midpoint of his ankles at whichever is lower, and fading as his
+feet part — a figure mid-stride is not standing on one spot.
+
+### AG6 · The corner a plate turns
+
+Measured before the pass: 210 plates at radius 3, 282 at 4, 163 at 2, 89 at 1.5 or
+less. At 2 units on a 28-unit plate the corner is a diagram's box. The floor is 8,
+or a third of the short side where that is smaller, and a plate that has drawn its
+own corners keeps them — Duolingo's own guard is a quarter of the short side, and at
+radius 8 an 18-unit chip is a pill rather than a tile.
+
+---
+
+## Group AH · Every tap changes the picture
+
+Group N18 gave the first three lessons of each branch an event on every tap, and the
+owner then asked for the other 240: *"I want a different animation tapping every
+time the user taps the screen in every lesson."*
+
+Counted before the pass, **607 taps across 212 lessons left the scene art exactly as
+it was.** The figure moved (group AF walks, sits and looks on almost every beat) and
+a pen mark or a thought could appear, but the drawing itself held — so a reader who
+had just tapped saw the words advance and nothing else.
+
+`node scripts/still-worklist.mjs [<lesson-id>|<branch>]` is the worklist. Per still
+beat it prints the sentence that beat says, what the stage already draws, and the
+channels the script declares with the value that beat holds.
+
+### AH1 · The event comes from the beat's own words
+
+A1 is the app's first rule and this is it read forwards: what the text says, the
+picture must do. Read the sentence and draw what it CLAIMS — a thing appearing,
+filling, emptying, breaking, splitting, turning, lighting, crossing out, travelling
+from one element to another, measured against another thing.
+
+Where the sentence names something already on the stage, move THAT rather than
+adding an object beside it. `political-political-8` beat 1 says a match is being
+played; the ball was already drawn and standing still, so the event is that ball
+crossing the goalmouth — not a second ball, and not a label saying so.
+
+### AH2 · One event per tap, and never a decoration
+
+A beat is one sentence and two to seven seconds. Two events in it are a scene
+changing twice while the reader reads once.
+
+No sparkles, no glows, no confetti, no pulsing for its own sake. The test is a
+sentence: if you cannot say in one line what the event MEANS, it is wrong. A
+statement counts — `political-political-31` beat 2 returns the verdict RATIONAL, FOR
+YOU on the herder's own sum, which is the claim the beat makes — but a thing that
+merely moves does not.
+
+### AH3 · Derive the event from a value CHANGING (C20c)
+
+`const fooNow = (cur.foo ?? 0) !== (prev?.foo ?? 0)`. A beat that merely holds the
+value must re-draw nothing, and `check:replay` fails a scene that replays an event
+on a beat which did not ask for it.
+
+### AH4 · Carry it, so it fades out as well as in
+
+The house idiom `foo: fooOn ? (fooFade ? grow : 1) : 0` fades a thing IN and
+switches it OFF: on the beat its value returns to zero the ternary yields 0 and the
+element vanishes between two frames. `check:replay` counts that as a CUT, and
+`CUT_BUDGET` is a high-water mark, so a new event may not add one.
+
+Write it as a carried track instead — the same three numbers, and it fades both
+ways:
+
+    const FOOV = BEATS.map((b) => ((b.foo ?? 0) > 0 ? 1 : 0));
+    …
+    foo: carry(cv, <slot>, n, FOOV[p], FOOV[n], fooFade ? grow : 1),
+
+Raise `useCarry(<n>)` to match the slots used. A plain `lerp(T[p], T[n], tr)` jumps
+when the reader taps mid-transition (L5), and `check:smooth` holds both.
+
+### AH5 · Two of the same thing arrive in turn, not together
+
+Where the sentence lists things in order, the drawing lists them in order: a fifth
+of the track apart, off the one carried value.
+
+    const inTurn = (u: number, k: number, of: number) =>
+      (u <= 0 ? 0 : clamp01((u - (k * 0.7) / of) / 0.34));
+
+Three figures appearing at once is one fact about a group; three appearing in turn
+is the reader's eye being walked along them, which is what the sentence is doing.
+And where a beat states something and then judges it — "one crate each" then
+"identical shares" — the judgement waits for the statement it is a judgement of.
+
+### AH6 · The event goes where the composition is already empty
+
+Every scene header states its own occlusion band. New art goes in the paper that
+band leaves, and the figure's own reach is part of it: `political-political-8` keeps
+x 46…232 clear for the figure, so the question that ends the agreement is struck
+there, 100 units above his crown.
+
+Two traps, both of which have already cost a render:
+
+- **a caption set below a badge or a plate that MOVES.** In `political-political-8`
+  the middle onlooker's badge rides up 22 units for every crate under them, so a
+  caption that clears it at one crate is underneath it at two.
+- **two events in one row on consecutive beats.** They cross while one is fading out
+  and the other in. Put the second in a different row — `political-political-8`
+  stands the three candidate answers in one row and the answer that replaces them in
+  the row below, which also reads as an answer arriving under a question.
+
+### AH7 · A boundary is dashed; a mass keeps its tone; a word is 8pt
+
+The kit, not new colours: `INK`, `PAPER`, `SOFT`, the scene's own `RULE` / `STONE` /
+`SHADE` from `stageTones`, and `PLATE_FACE` + `lipOf(TONE)` from `./stageSkin` for a
+tile that carries a word (group AG). A claim that is a boundary rather than an
+object is a dashed border and never a fill — `political-political-7`'s "only a wish"
+tag is dashed because it is the other view's verdict, not a thing in the room.
+
+And a chip out of a solid is the PAGE, not a darker grey: `political-political-7`
+strikes two wedges of `PAPER` out of the stone's edge on the beat a government
+violates a right, which is material gone rather than a mark drawn on.
+
+### AH8 · What the pass may not touch
+
+The camera (`camera={…}` / `SHOTS`), the figure's pose track, the narration, the
+prompts, the quotes and the summary. **Not one word of any script may change** —
+the words are voiced (group AC), pinned to the generated name index, to the maxim
+table and to group Q's neighbour rules. You are adding channels and drawing them.
+
+Nothing in `data/`, `mustBoxes.ts*`, `tours.ts` or any other generated table is
+edited by hand either: those are re-derived centrally once the authoring lands, in
+the order CLAUDE.md gives.
+
+### AH9 · Checks
+
+Offline, after each lesson: `npx tsc --noEmit`. After a batch:
+`check:replay` (its cut line must stay within budget), `check:smooth`, `check:fits`,
+`check:shade` (0 flat scenes), `check:skin` (its toned-tile budget must not rise)
+and `check:echo` — which compares NEIGHBOURING lessons' declared channels, so a new
+channel whose name a neighbour already uses has to be renamed to whatever the thing
+actually is.
+
+A channel name is a noun for the thing, never a verb for the animation: `windows`,
+`chip`, `quarter`, `gap`. `check:echo` reads them, and so does the next author.
+
+### AH10 · A helper called from an animated style is a WORKLET
+
+The "in turn" stagger in AH5 is a small arrow function, and the first draft of it
+was a plain one — `const inTurn = (u, k, of) => …` — called from inside
+`useAnimatedStyle`. Reanimated packs a plain function found in a worklet's closure
+as a RemoteFunction, and on the UI thread a RemoteFunction only THROWS: fatally, in
+release, on every lesson that draws one. A browser has no second thread and runs it
+perfectly, so no render, no contact sheet and no probe will ever see it.
+`check:worklets` is the only instrument, and it found **37 call sites in nine
+lessons** after the pass had been green in every other check. The helper's body
+starts with `'worklet';`. This is §17 rule 6 of CLAUDE.md arriving a third time.
+
+### AH11 · 8pt is measured AFTER the stage is scaled
+
+D34 holds every stage word to 8pt as it reaches the reader, which is the declared
+`fontSize` times the lesson's fit — and a lesson with a tall band is scaled well
+below 1. An 8.4 caption lands at 5.4pt in a 460-unit band. `check:legible` prints
+each lesson's floor ("raise anything under 12.5pt"); a new label is sized from that
+floor, not from the number the scene's other captions happen to use. The pass
+landed **107 labels in 70 lessons** under it before the check was run, because it
+was not in the list its authors ran.
+
+### AH12 · A word swapped in a fixed box is one event repeated
+
+No two taps in a lesson may produce the same object in the same place. Two lessons
+of the pass gave eight and six taps one shared tag slot and changed the word inside
+it — SAME · THEORY · ATTEND · IGNORED … — which satisfies "one event per tap" on the
+letter and is precisely the complaint the pass answers: the reader taps, a caption
+swaps, and the picture has done nothing. Both were redrawn so that each tap moves
+something the stage already draws. A short word on a plate is a good event once or
+twice in a lesson, where the claim really is a verdict or a name.
+
+### AH13 · A person on the stage is drawn by the rig or not at all
+
+`check:scale` holds hand-built people — a disc head on a box body — to a recorded
+three, and the pass made a fourth: *"a small figure appears beside the window"*
+(`aesthetics-aesthetics-30`, Murdoch's bird as practice for a person). A person
+assembled from boxes is not the character the lesson has taught the reader to
+follow. Draw what the sentence is actually about instead — there, the attention
+leaving the window from the bird's height, captioned TO A PERSON.
+
+### AH14 · A tap with its own event no longer takes the pen
+
+Group AE puts the teacher's pen on a tap where the picture holds still, and after
+this pass there is no such tap: **0 of 2,461**, held by `check:still`. So the pen
+marks retire wherever the beat they sat on now carries its own event — AH2's one
+event per tap — and `make:marks` withdraws them when the tables are regenerated.
+That is not a loss of the pen; the pen was the answer to a still tap, and each of
+those taps now has an event written for its own sentence.
+
+### AH15 · The pieces of a split sentence are recorded, not inferred
+
+N6 and N7 excuse a repeated pose inside a RUN — the pieces J12 cut one sentence
+into, where the figure must hold one movement. `check-life` recognised a run by its
+beats declaring identical channels, which stopped being true the moment each piece
+got its own event, and 62 repeats that are REQUIRED read as defects. Counting a
+one- or two-beat channel as a pulse recovered most; the rest were events that
+arrive on the second piece and stay, which no count can tell from a new beat. So
+the run structure is read once from before the pass (`scripts/make-splitruns.mjs`,
+`scripts/lib/splitruns.json`) and used wherever a lesson's beat count still
+matches; the pulse rule is the fallback for a lesson re-cut since.

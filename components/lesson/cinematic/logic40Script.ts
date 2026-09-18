@@ -30,6 +30,12 @@ export interface Logic40Beat extends BaseBeat {
   /** 1 = the tray of stones is on. */ tray?: number;
   /** How many of the three stones carry a check mark, 0…1. */ checked?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /**
+   * 1 = a small balance needle between the two cards tips toward GREEN once,
+   * then levels off — showing the claim that green seems simpler give way to
+   * it depending on which predicates a language takes as basic.
+   */
+  balance?: number;
 }
 
 export const BEATS: Logic40Beat[] = [
@@ -80,7 +86,7 @@ export const BEATS: Logic40Beat[] = [
     dur: 4.0,
   },
   {
-    p: 348, x: 96, tray: 1, checked: 0.67, rules: 1, links: 1,
+    p: 348, x: 96, tray: 1, checked: 0.67, rules: 1, links: 1, balance: 1,
     text: 'Green seems the simpler predicate. However, simplicity depends on which predicates a language takes as basic.',
     dur: 4.2,
   },

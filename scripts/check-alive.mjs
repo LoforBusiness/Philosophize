@@ -64,7 +64,9 @@ const shot = async () => {
 };
 
 for (const id of process.argv.slice(2)) {
-  await send('Page.navigate', { url: `http://localhost:8861/previewsheet23?id=${id}` });
+  // `nowander=1` — the figure is excluded from this difference by his box at REST, so a
+  // figure who walks out of that box reports the scene as alive when it is not (group AF).
+  await send('Page.navigate', { url: `http://localhost:8861/previewsheet23?id=${id}&nowander=1` });
   let ok = false;
   for (let i = 0; i < 90; i++) { const c = await ev("document.querySelectorAll('div').length"); if (c > 60) { ok = true; break; } await wait(700); }
   if (!ok) { console.log(`${id.padEnd(30)} NEVER RENDERED`); continue; }

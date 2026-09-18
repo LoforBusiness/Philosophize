@@ -24,6 +24,11 @@ export interface Ethics36Beat extends BaseBeat {
   /** 1 = the "excusing" panel is shown beside it, striking the wrong line. */ excuse?: number;
   /** 1 = the hand-over is drawn: whose gift it is. */ gift?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed ring outlines the whole ledger, for "now suppose you forgive". */ regard?: number;
+  /** 1 = a "?" holds beside the ledger, for "what does forgiveness change". */ query?: number;
+  /** 1 = a check marks the WHOSE FAULT row, for it standing rather than lapsing. */ affirm?: number;
+  /** 1 = a dashed box outlines the YOURS TO GIVE label, for "a gift". */ own?: number;
+  /** 1 = a struck "NOT A DUTY" plate holds in the clear corner. */ notDuty?: number;
 }
 
 export const BEATS: Ethics36Beat[] = [
@@ -33,12 +38,12 @@ export const BEATS: Ethics36Beat[] = [
     dur: 4.2,
   },
   {
-    p: 432, x: 56, book: 1,
+    p: 432, x: 56, book: 1, regard: 1,
     text: 'Now suppose you forgive the person who wronged you.',
     dur: 2.6,
   },
   {
-    p: 404, x: 56, book: 1,
+    p: 404, x: 56, book: 1, query: 1,
     text: 'Forgiving leaves the past unchanged. So what does forgiveness change?',
     dur: 1.8,
   },
@@ -57,7 +62,7 @@ export const BEATS: Ethics36Beat[] = [
     dur: 3.9,
   },
   {
-    p: 176, x: 56, book: 1, struck: 1, excuse: 1,
+    p: 176, x: 56, book: 1, struck: 1, excuse: 1, affirm: 1,
     text: 'Forgiving, by contrast, assumes that the person was responsible for the wrong.',
     dur: 1.8,
   },
@@ -79,7 +84,7 @@ export const BEATS: Ethics36Beat[] = [
     dur: 2.9,
   },
   {
-    p: 459, x: 130, book: 1, struck: 1, gift: 1,
+    p: 459, x: 130, book: 1, struck: 1, gift: 1, own: 1,
     text: 'Forgiveness is therefore a gift, which only the wronged person may give or withhold.',
     dur: 1.8,
   },
@@ -101,7 +106,7 @@ export const BEATS: Ethics36Beat[] = [
     dur: 1.0,
   },
   {
-    p: 379, x: 130, book: 1, struck: 1, gift: 1,
+    p: 379, x: 130, book: 1, struck: 1, gift: 1, notDuty: 1,
     text: 'This account doesn’t make forgiveness easy, owed or always right. It explains why only the person wronged can choose to forgive.',
     dur: 4.4,
   },

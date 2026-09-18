@@ -9,13 +9,16 @@ import { BEATS } from './ethics34Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE } = stageTone('ethics');
+const TONE = stageTone('ethics');
+const { RULE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A CROWD THAT GROWS WHILE EVERY LIFE IN IT SHRINKS.
 //
@@ -53,13 +56,15 @@ const FIG_X = 46;
 
 const POP = BEATS.map((b) => b.pop ?? 0);
 const AVG = BEATS.map((b) => b.avg ?? 0);
+const CLIMB = BEATS.map((b) => (b.climb ? 1 : 0));
+const NAMED = BEATS.map((b) => (b.named ? 1 : 0));
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics34'));
 
 export default function Ethics34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(4);
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -78,12 +83,18 @@ export default function Ethics34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY,
       // which climbs the whole way and climbs slowly, exactly as it should.
       total: ((10 + u * 30) * (1 - u * 0.70)) / 12,
       avg: carry(cv, 1, n, AVG[p], AVG[n], tr),
+      // "The total still rises" — a small chevron holds beside TOTAL GOOD.
+      climb: carry(cv, 2, n, CLIMB[p], CLIMB[n], tr),
+      // "Named the result the Repugnant Conclusion" — a plate beside the crowd.
+      named: carry(cv, 3, n, NAMED[p], NAMED[n], tr),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const barStyle = useAnimatedStyle(() => ({ width: BAR_W * SCENE.value.total }));
   const avgStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.avg }));
+  const climbStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.climb }));
+  const namedStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.named }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -98,6 +109,14 @@ export default function Ethics34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY,
       <View style={styles.barTrack} pointerEvents="none" />
       <Animated.View style={[styles.bar, barStyle]} pointerEvents="none" />
       <Text style={styles.barLabel} numberOfLines={1}>TOTAL GOOD</Text>
+
+      {/* "The total still rises" — a small chevron beside the label. */}
+      <Animated.Text style={[styles.climb, climbStyle]} numberOfLines={1}>▲</Animated.Text>
+
+      {/* "Named the result the Repugnant Conclusion" — a plate beside the crowd. */}
+      <Animated.View style={[styles.namedTag, namedStyle]} pointerEvents="none">
+        <Text style={styles.namedText} numberOfLines={1}>REPUGNANT</Text>
+      </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -134,7 +153,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   kicker: {
     position: 'absolute', left: GRID_L - 8, top: CAP_T, width: 220,
@@ -160,6 +179,22 @@ const styles = StyleSheet.create({
     position: 'absolute', left: BAR_L, top: BAR_T - 12, width: BAR_W,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     includeFontPadding: false,
+  },
+
+  // "THE TOTAL STILL RISES" — a small chevron just past the TOTAL GOOD label.
+  climb: {
+    position: 'absolute', left: BAR_L + 74, top: BAR_T - 14, width: 14, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9, color: INK, includeFontPadding: false,
+  },
+  // "NAMED THE RESULT THE REPUGNANT CONCLUSION" — a plate beside the crowd.
+  namedTag: {
+    position: 'absolute', left: 328, top: 350, width: 68, height: 30,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2,
+  },
+  namedText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.2, color: INK,
+    includeFontPadding: false, textAlign: 'center',
   },
 });
 

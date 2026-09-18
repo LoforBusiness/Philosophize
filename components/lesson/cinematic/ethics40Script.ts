@@ -29,6 +29,8 @@ export interface Ethics40Beat extends BaseBeat {
   /** 1 = the tie runs from the promise to whatever it binds. */ tie?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed ring pulses out from the empty seat and fades unanswered — Epicurus's claim that the dead feel nothing. */ ping?: number;
+  /** 1 = a mark travels in and touches the promise — an event its owner never lives to see, reaching what still stands for him. */ reach?: number;
 }
 
 export const BEATS: Ethics40Beat[] = [
@@ -48,7 +50,7 @@ export const BEATS: Ethics40Beat[] = [
     dur: 4.4,
   },
   {
-    p: 262, x: 36, promise: 1, seat: 1,
+    p: 262, x: 36, promise: 1, seat: 1, ping: 1,
     text: 'A wrong usually has a victim who can feel its effects. Epicurus held that the dead feel nothing and so can’t be harmed.',
     dur: 4.6,
   },
@@ -80,7 +82,7 @@ export const BEATS: Ethics40Beat[] = [
     dur: 4.8,
   },
   {
-    p: 439, x: 96, promise: 1, seat: 1,
+    p: 439, x: 96, promise: 1, seat: 1, reach: 1,
     text: 'So an interest can be set back by events its owner never lives to see.',
     dur: 4.0,
   },

@@ -13,6 +13,7 @@ import { BEATS } from './aesthetics19Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A row of ordinary things and a frame that slides along them. Stage right.
 //
@@ -75,6 +77,10 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics19'));
 const DIR = dirsFrom(X, 1);
 const ROW = BEATS.map((b) => b.row ?? 0);
 const FRAME = BEATS.map((b) => b.frame ?? 0);
+// GROUP AH — three still taps, each moving a new mass rather than a caption.
+const DETAIL = BEATS.map((b) => ((b.detail ?? 0) > 0 ? 1 : 0));
+const REJECT = BEATS.map((b) => ((b.reject ?? 0) > 0 ? 1 : 0));
+const SAMEV = BEATS.map((b) => ((b.same ?? 0) > 0 ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -84,7 +90,7 @@ const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 export default function Aesthetics19Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(6);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -93,6 +99,9 @@ export default function Aesthetics19Scene({ clock, bt, bi, i, picked, onPick, dr
   const verOn = (cur.verdict ?? 0) > 0;
   const knowOn = (cur.know ?? 0) > 0;
   const knowFade = (cur.know ?? 0) !== (prev?.know ?? 0);
+  const detailFade = (cur.detail ?? 0) !== (prev?.detail ?? 0);
+  const rejectFade = (cur.reject ?? 0) !== (prev?.reject ?? 0);
+  const sameFade = (cur.same ?? 0) !== (prev?.same ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -117,6 +126,12 @@ export default function Aesthetics19Scene({ clock, bt, bi, i, picked, onPick, dr
       // R7c — the ecology card IS what the drag asks for. A pretty glance and it slides
       // out; 'knowing what you are looking at' and it is back beside the marsh.
       know: (knowOn ? (knowFade ? grow : 1) : 0) * (reacting ? 1 - (1 - dragPos.value) * tr : 1),
+      // A stain mark inside the framed item — the quality attention finds.
+      detail: carry(cv, 3, n, DETAIL[p], DETAIL[n], detailFade ? grow : 1),
+      // A strike across the verdict plate — the reading Carlson rejects.
+      reject: carry(cv, 4, n, REJECT[p], REJECT[n], rejectFade ? grow : 1),
+      // A small mark pinned to the frame's own edge, confirming it hasn't moved.
+      same: carry(cv, 5, n, SAMEV[p], SAMEV[n], sameFade ? grow : 1),
     };
   });
 
@@ -127,6 +142,12 @@ export default function Aesthetics19Scene({ clock, bt, bi, i, picked, onPick, dr
   const knowStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.know,
     transform: [{ translateX: (1 - SCENE.value.know) * -10 }],
+  }));
+  const detailStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.detail }));
+  const rejectStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.reject }));
+  const sameStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.same,
+    left: SCENE.value.frameX + (ITEM_W + 10) / 2 - 5,
   }));
 
   const answered = picked !== null;
@@ -142,14 +163,27 @@ export default function Aesthetics19Scene({ clock, bt, bi, i, picked, onPick, dr
             <Text style={styles.itemText} numberOfLines={1}>{it}</Text>
           </View>
         ))}
+        {/* the stain-pattern attention finds once the drain is framed */}
+        <Animated.View style={[styles.detail, { left: ITEM_X[0] }, detailStyle]} pointerEvents="none">
+          <View style={styles.stain} />
+          <View style={[styles.stain, { left: 8 }]} />
+          <View style={[styles.stain, { left: 16 }]} />
+        </Animated.View>
       </Animated.View>
 
       {/* the frame: it points, and that is all it does */}
       <Animated.View style={[styles.frame, frameStyle]} pointerEvents="none" />
+      {/* pinned to the frame's own edge — confirming it has not moved */}
+      <Animated.View style={[styles.same, sameStyle]} pointerEvents="none">
+        <View style={styles.sameBar} />
+        <View style={[styles.sameBar, { top: 4 }]} />
+      </Animated.View>
 
       <Animated.View style={[styles.verdict, verStyle]} pointerEvents="none">
         <Text style={styles.verdictText} numberOfLines={1}>{VERDICTS[cur.verdict ?? 0]}</Text>
       </Animated.View>
+      {/* the landscape model's own reading, struck through — Carlson rejects it */}
+      <Animated.View style={[styles.reject, rejectStyle]} pointerEvents="none" />
 
       <Animated.View style={[styles.know, knowStyle]} pointerEvents="none">
         <Text style={styles.knowText} numberOfLines={1}>NATURAL HISTORY: A HABITAT</Text>
@@ -191,7 +225,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule alone leaves the figure
   // standing on bare page; a filled band under it is what the two lessons
   // the reader holds up both do, and it costs one View.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   layer: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
 
   head: {
@@ -208,6 +242,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
     includeFontPadding: false,
   },
+  // THE STAIN. Three short marks, low in the item box — the pattern everyday use
+  // passes over.
+  detail: { position: 'absolute', top: ITEM_T + ITEM_H - 14, width: ITEM_W },
+  stain: { position: 'absolute', left: 22, width: 5, height: 2, borderRadius: 1, backgroundColor: SOFT },
+
+  // A SMALL PINNED MARK, not a fill — it names a fact about the frame rather than
+  // decorating it.
+  same: { position: 'absolute', top: ITEM_T - 16, width: 10, height: 8 },
+  sameBar: { position: 'absolute', left: 0, width: 10, height: 2, backgroundColor: INK },
+
+  // THE STRIKE. A single rule across the plate it rejects, drawn on top of it.
+  reject: {
+    position: 'absolute', left: RW_L, top: VER_T + VER_H / 2 - 1, width: RW_W,
+    height: 2, backgroundColor: PAPER,
+  },
+
   frame: {
     // NO FILL. Its own comment says "it points, and that is all it does" — and it
     // was drawn after the items with a STONE fill, so it painted over the very
@@ -239,7 +289,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {

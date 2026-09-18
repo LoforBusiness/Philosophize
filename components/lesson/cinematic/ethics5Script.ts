@@ -32,6 +32,12 @@ export interface Ethics5Beat extends BaseBeat {
    * The Axial-Age timeline overhead: 0 off · 1 axis + empty lanes · 2 + Socrates ·
    * 3 + Dharma and Confucius. It builds up as the narration names each one.
    */ chart?: number;
+  /**
+   * A one-shot marginal note on the chart, timed to this beat's own sentence.
+   * 0 none · 1 a "?" in the axial window (the age itself is disputed) · 2 the
+   * exact death-date tagged under the Socrates pill · 3 a two-dot "link" beside
+   * the Confucius pill (ren cultivated WITH others, not alone).
+   */ gloss?: number;
 }
 
 export const BEATS: Ethics5Beat[] = [
@@ -51,7 +57,7 @@ export const BEATS: Ethics5Beat[] = [
     dur: 4.4,
   },
   {
-    x: 217, soc: 266, chart: 1,
+    x: 217, soc: 266, chart: 1, gloss: 1,
     // The chart overhead already draws the window and its dates. Saying them again
     // in the narration is the reader reading a number they can see (J6).
     text: 'Scholars dispute why this happened, and some doubt that there was a single Axial Age at all.',
@@ -64,7 +70,7 @@ export const BEATS: Ethics5Beat[] = [
     dur: 1.9,
   },
   {
-    x: 217, soc: 266, chart: 2,
+    x: 217, soc: 266, chart: 2, gloss: 2,
     text: 'Socrates questioned Athenians about what virtue is. In 399 BCE, Athens executed him for impiety and corrupting the young.',
     dur: 3.5,
   },
@@ -75,7 +81,7 @@ export const BEATS: Ethics5Beat[] = [
     dur: 2.8,
   },
   {
-    x: 265, soc: 259, chart: 3,
+    x: 265, soc: 259, chart: 3, gloss: 3,
     text: 'In China, Confucius taught ren, usually translated as humaneness. He held that ren is cultivated in relationships with others.',
     dur: 2.4,
   },

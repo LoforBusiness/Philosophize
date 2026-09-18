@@ -30,6 +30,11 @@ export interface Eth19Beat extends BaseBeat {
   /** The AFFECTS column filled in beside each row, 0…1. */ affects?: number;
   /** Somebody else's name appearing in slots, 0…1. */ taken?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /**
+   * A one-shot flash on the form's own columns: 1 = an underline grows under
+   * AFFECTS as Mill's single test is named · 2 = a STATE 3 / YOU 1 tally
+   * flashes beside SIGNED BY, counting the contrast the line just stated.
+   */ spot?: number;
 }
 
 export const BEATS: Eth19Beat[] = [
@@ -50,7 +55,7 @@ export const BEATS: Eth19Beat[] = [
     dur: 3.8,
   },
   {
-    p: 266, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
+    p: 266, x: 132, doc: 1, rows: 1, affects: 1, taken: 1, spot: 1,
     text: 'The test asks whether the choice harms anyone other than the person making it.',
     dur: 1.8,
   },
@@ -68,7 +73,7 @@ export const BEATS: Eth19Beat[] = [
     dur: 3.8,
   },
   {
-    p: 384, x: 132, doc: 1, rows: 1, affects: 1, taken: 1,
+    p: 384, x: 132, doc: 1, rows: 1, affects: 1, taken: 1, spot: 2,
     text: 'Three rows are signed by the state, and one by you. Mill’s test asks which of these signatures is legitimate.',
     dur: 4.0,
   },

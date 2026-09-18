@@ -9,6 +9,7 @@ import { BEATS } from './epistemology24Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HOW SURE YOU ARE, DRAWN AS LENGTH.
@@ -85,6 +87,8 @@ const SURE = BEATS.map((b) => b.sure ?? 0);
 const HAND = BEATS.map((b) => b.hand ?? 0);
 const GIVE = BEATS.map((b) => b.give ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+const EXTREMES_RING = BEATS.map((b) => (b.extremesRing ? 1 : 0));
+const HAND_QUESTION = BEATS.map((b) => (b.handQuestion ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -96,7 +100,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology24'));
 export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -121,6 +125,8 @@ export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick, 
       // thing to give up when a valid argument reaches a conclusion you cannot accept,
       // and the mark travels to whichever rung the reader is naming.
       give: carry(cv, 4, n, GIVE[p], reacting ? pickPos.value : GIVE[n], tr),
+      extremesRing: carry(cv, 5, n, EXTREMES_RING[p], EXTREMES_RING[n], tr),
+      handQuestion: carry(cv, 6, n, HAND_QUESTION[p], HAND_QUESTION[n], tr),
       t,
     };
   });
@@ -134,6 +140,8 @@ export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick, 
   const giveStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.give, width: (L_W - 12) * SCENE.value.give,
   }));
+  const extremesRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.extremesRing }));
+  const handQuestionStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.handQuestion }));
 
   const rungs = [0, 1, 2];
 
@@ -158,6 +166,15 @@ export default function Epistemology24Scene({ clock, bt, bi, i, picked, onPick, 
 
       {/* THE PREMISE THAT HAS TO MOVE — marked, not named. */}
       <Animated.View style={[styles.give, giveStyle]} pointerEvents="none" />
+
+      {/* EXTREMES_RING — the highest-rated rung and the lowest-rated conclusion, ringed together. */}
+      <Animated.View style={[styles.extremeRing, { top: RUNG_TOP[1] - 4 }, extremesRingStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.extremeRing, { top: CONC_Y - 4, height: CONC_H + 8 }, extremesRingStyle]} pointerEvents="none" />
+
+      {/* HAND_QUESTION — a "?" beside the hand's own bar: what does this bar measure? */}
+      <Animated.View style={[styles.handQuestion, handQuestionStyle]} pointerEvents="none">
+        <Text style={styles.handQuestionMark}>?</Text>
+      </Animated.View>
 
       {/* THE HAND IS THE ANSWER, so the hand rises (E39). Its Target held an empty
           box, so answering lifted an outline off HERE IS ONE HAND. */}
@@ -211,11 +228,11 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   conc: {
     position: 'absolute', left: L_X, top: CONC_Y, width: L_W, height: CONC_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   concText: {
     position: 'absolute', left: L_X + 6, top: CONC_Y + 5, width: L_W - 12,
@@ -239,12 +256,25 @@ const styles = StyleSheet.create({
 
   hand: {
     position: 'absolute', left: HAND_X, top: HAND_Y, width: HAND_W, height: HAND_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   handText: {
     position: 'absolute', left: HAND_X, top: HAND_Y + 20, width: HAND_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1, color: INK, includeFontPadding: false,
   },
+
+  // EXTREMES_RING — a dashed ring on the highest-rated rung and the lowest-rated conclusion.
+  extremeRing: {
+    position: 'absolute', left: L_X - 4, width: L_W + 8, height: RUNG_H + 8,
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 6,
+  },
+  // HAND_QUESTION — a small "?" beside the hand's own bar.
+  handQuestion: {
+    position: 'absolute', left: HAND_X + 8 + HAND_BAR + 6, top: HAND_Y + HAND_H - 24, width: 16, height: 16,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  handQuestionMark: { fontFamily: 'Inter_700Bold', fontSize: 10, color: INK, includeFontPadding: false },
 
   hit: { position: 'absolute', height: RUNG_H },
   hitBox: { height: RUNG_H, borderRadius: 3 },

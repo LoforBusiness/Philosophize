@@ -28,6 +28,8 @@ export interface Epistemology27Beat extends BaseBeat {
   /** How much credit her word was given, 0…1. */ credit?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed bracket over the gap between the fill and the full mark, labelled SHORTFALL. */ shortfall?: number;
+  /** 1 = an empty dashed box captioned 1970s — a harm nobody yet had the words for. */ noWordYet?: number;
 }
 
 export const BEATS: Epistemology27Beat[] = [
@@ -47,7 +49,7 @@ export const BEATS: Epistemology27Beat[] = [
     dur: 4.8,
   },
   {
-    p: 264, x: 28, said: 1, gauge: 1, credit: 0.35,
+    p: 264, x: 28, said: 1, gauge: 1, credit: 0.35, shortfall: 1,
     text: 'Miranda Fricker calls this testimonial injustice. Prejudice makes a hearer give a speaker too little credibility.',
     dur: 5.0,
   },
@@ -78,7 +80,7 @@ export const BEATS: Epistemology27Beat[] = [
     dur: 5.0,
   },
   {
-    p: 448, x: 88, said: 1, gauge: 1, credit: 0.35,
+    p: 448, x: 88, said: 1, gauge: 1, credit: 0.35, noWordYet: 1,
     text: 'Victims of sexual harassment had no shared concept for the wrong until the term was coined in the 1970s.',
     dur: 5.0,
   },

@@ -28,6 +28,10 @@ export interface Pol20Beat extends BaseBeat {
   /** The shelf beneath them, 0…1. */ shelf?: number;
   /** The winning reason resting on the shelf, 0…1. */ landed?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = both neighbours are marked as having reasoned soundly. */ sound?: number;
+  /** 1 = the disagreement is bracketed as permanent, under both stacks. */ always?: number;
+  /** 1 = what a public reason has to clear, said under the shelf. */ binds?: number;
+  /** 1 = each stack is enclosed: neither is asked to give any of it up. */ kept?: number;
 }
 
 export const BEATS: Pol20Beat[] = [
@@ -38,12 +42,14 @@ export const BEATS: Pol20Beat[] = [
   },
   {
     p: 177, x: 200, stacks: 1,
+    sound: 1,
     text: 'The two doctrines share almost nothing, and neither neighbour can persuade the other. Yet neither need have reasoned badly.',
     cite: 'Reasonable pluralism',
     dur: 3.2,
   },
   {
     p: 416, x: 200, stacks: 1,
+    always: 1,
     text: 'Rawls held that free societies will always contain such disagreement, because reasonable people weigh hard questions differently.',
     dur: 1.8,
   },
@@ -54,6 +60,7 @@ export const BEATS: Pol20Beat[] = [
   },
   {
     p: 383, x: 132, stacks: 1, shelf: 1, cands: 1,
+    binds: 1,
     text: 'The idea of public reason holds that such a law must be justifiable to everyone it binds. So its reasons can’t presuppose either neighbour’s doctrine.',
     cite: 'Public reason',
     dur: 4.6,
@@ -82,6 +89,7 @@ export const BEATS: Pol20Beat[] = [
   },
   {
     p: 453, x: 268, stacks: 1, shelf: 1, cands: 1, landed: 1,
+    kept: 1,
     text: 'The reasons both can weigh are few. Almost everything each neighbour values stays within their own doctrine, and neither is asked to abandon it.',
     dur: 4.2,
   },

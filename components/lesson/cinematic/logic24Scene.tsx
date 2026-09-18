@@ -10,6 +10,7 @@ import { BEATS } from './logic24Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE IDENTICAL ENGINES, ONE TOKEN EACH, AND THREE DIFFERENT THINGS OUT.
@@ -47,6 +49,7 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const NONEW = BEATS.map((b) => b.nonew ?? 0);
 const BASE_TR = 0.85;
 
 const ENG_X = [140, 226, 312];
@@ -89,7 +92,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic24'));
 export default function Logic24Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -110,6 +113,8 @@ export default function Logic24Scene({ clock, bt, bi, i, picked, onPick, pickPos
       feedOn: carry(cv, 2, n, FEED[p], FEED[n], tr),
       outOn: carry(cv, 3, n, OUT[p], OUT[n], tr),
       ringAt: carry(cv, 4, n, RING_AT[0], reacting ? pickAt(RING_AT, pickPos.value) : RING_AT[0], tr),
+      // Carried, so it fades out as well as in (group L).
+      nonew: carry(cv, 5, n, NONEW[p], NONEW[n], tr),
       ringOn: reacting ? 1 : 0,
     };
   });
@@ -121,6 +126,15 @@ export default function Logic24Scene({ clock, bt, bi, i, picked, onPick, pickPos
   const feedStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.feedOn }));
   const outStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.outOn }));
   const ringStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ringOn, left: SCENE.value.ringAt }));
+
+  // ── the tap event ──────────────────────────────────────────────────────────
+  // UNDER DEDUCTION'S OWN ENGINE, because the cost is that engine's: the other
+  // two put out something their input did not contain, which is the contrast the
+  // whole bench is drawn for.
+  const nonewStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.nonew,
+    transform: [{ translateY: (1 - SCENE.value.nonew) * 8 }],
+  }));
 
   return (
     <View style={styles.scene}>
@@ -163,6 +177,11 @@ export default function Logic24Scene({ clock, bt, bi, i, picked, onPick, pickPos
         <Text style={styles.rowCap}>WHAT COMES OUT</Text>
       </Animated.View>
 
+      {/* What it costs: nothing comes out that was not already in. */}
+      <Animated.View style={[styles.nonewTag, nonewStyle]} pointerEvents="none">
+        <Text style={styles.nonewText} numberOfLines={1}>NO NEW FACT</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -176,11 +195,23 @@ function Engine({ S, index, children }: { S: SharedValue<any>; index: number; ch
 }
 
 const styles = StyleSheet.create({
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // Below the row captions at ROW_CAP_Y, under the first engine's own column.
+  nonewTag: {
+    position: 'absolute', left: ENG_X[0] - 12, top: ROW_CAP_Y + 20, width: ENG_W + 24, height: 22,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  nonewText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.7, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 140, top: CAP_T, width: 246,

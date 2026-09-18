@@ -11,6 +11,10 @@ export interface Aes6Beat extends BaseBeat {
   /** The little flower (beauty) shown 0..1. */ flower?: number;
   /** Rows of Burke's two-column table written up, 0..3. */ split?: number;
   /** Kant's card — reason holding the infinite — shown 0..1. */ mind?: number;
+  /** 1 = an ink underline draws in beneath OVERWHELMS, marking the intensity the sentence names. */ emphasis?: number;
+  /** 1 = a SAFE / DISTANCE tag lands on the mountain face, naming Burke's safe distance. */ distanceTag?: number;
+  /** 1 = a NOT / SUBLIME tag lands on the mountain, marking Kant's claim that it isn't the mountain itself. */ notSublimeTag?: number;
+  /** 1 = a SUPERIOR tag lands above Kant's card, naming reason's claim over nature. */ superiorTag?: number;
 }
 
 export const BEATS: Aes6Beat[] = [
@@ -26,7 +30,7 @@ export const BEATS: Aes6Beat[] = [
     dur: 2.2,
   },
   {
-    p: 262, vast: 1, flower: 1, split: 3,
+    p: 262, vast: 1, flower: 1, split: 3, emphasis: 1,
     text: 'The sublime, like a vast mountain, is rugged and overwhelming. It produces a delight mixed with terror.',
     dur: 2.8,
   },
@@ -37,7 +41,7 @@ export const BEATS: Aes6Beat[] = [
     dur: 2.4,
   },
   {
-    p: 258, vast: 1, flower: 0, split: 3,
+    p: 258, vast: 1, flower: 0, split: 3, distanceTag: 1,
     text: 'Burke argued that danger seen from a safe distance is delightful. He distinguished this delight from the positive pleasure of beauty.',
     dur: 2.6,
   },
@@ -74,12 +78,12 @@ export const BEATS: Aes6Beat[] = [
     dur: 1.8,
   },
   {
-    p: 457, vast: 1, split: 3, mind: 1,
+    p: 457, vast: 1, split: 3, mind: 1, notSublimeTag: 1,
     text: 'Yet reason can think the infinite as a whole, where the imagination fails. The mountain is not the sublime thing.',
     dur: 3.2,
   },
   {
-    p: 457, vast: 1, split: 3, mind: 1,
+    p: 457, vast: 1, split: 3, mind: 1, superiorTag: 1,
     text: 'Sublimity lies in your awareness that your reason is superior to nature.',
     dur: 1.8,
   },

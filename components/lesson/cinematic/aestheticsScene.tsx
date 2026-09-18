@@ -10,14 +10,16 @@ import {
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, SIGH, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHY THINGS FEEL BEAUTIFUL — Kant's two strange facts, drawn as a chart.
@@ -531,7 +533,7 @@ const styles = StyleSheet.create({
 
   critCard: {
     position: 'absolute', left: CR_L, top: CR_T, width: CR_W, height: CR_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   critCap: {
     position: 'absolute', left: 12, top: 7,
@@ -557,7 +559,7 @@ const styles = StyleSheet.create({
 
   panel: {
     position: 'absolute', left: P_L, top: P_T, width: P_W, height: P_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   panelCap: {
     position: 'absolute', left: 12, top: 8,

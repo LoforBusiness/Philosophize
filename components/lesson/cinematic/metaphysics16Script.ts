@@ -22,6 +22,11 @@ export interface Met16Beat extends BaseBeat {
   /** The first-order craving arrows, 0…1. */ crave?: number;
   /** The second-order arrows above them, 0…1. */ second?: number;
   /** 1 = the two panels are live targets (Q1). */ pick?: number;
+  /** Dashed spotlight: 0 none, 1 = the unwilling panel's whole arrow column
+   *  (the craving overriding the hated second-order arrow), 2 = both panels'
+   *  second-order arrow (naming it), 3 = the willing panel's whole arrow column
+   *  (the endorsed desire that moves him), 4 = both panels' endorsement tag row. */
+  spot?: number;
 }
 
 export const BEATS: Met16Beat[] = [
@@ -37,18 +42,18 @@ export const BEATS: Met16Beat[] = [
     cite: 'Attitudes to the craving',
   },
   {
-    g: 465, panels: 2, crave: 1, second: 1,
+    g: 465, panels: 2, crave: 1, second: 1, spot: 1,
     dur: 2,
     text: 'The unwilling addict hates his craving, yet it still moves him to take the drug.',
   },
   {
-    g: 13, panels: 2, crave: 1, second: 1,
+    g: 13, panels: 2, crave: 1, second: 1, spot: 2,
     dur: 3.3,
     text: 'Frankfurt calls a desire about a desire a second-order desire. A first-order desire is a desire to do something, such as take the drug.',
     cite: 'Second-order desires',
   },
   {
-    g: 266, panels: 2, crave: 1, second: 1,
+    g: 266, panels: 2, crave: 1, second: 1, spot: 3,
     dur: 1.8,
     text: 'Frankfurt’s central notion is a second-order volition, wanting a particular desire to be the one that moves you.',
   },
@@ -66,7 +71,7 @@ export const BEATS: Met16Beat[] = [
     },
   },
   {
-    g: 399, panels: 2, crave: 1, second: 1,
+    g: 399, panels: 2, crave: 1, second: 1, spot: 4,
     dur: 4.8,
     text: 'Freedom of the will, on this account, doesn’t depend on a desire’s origin. It depends on something beyond the desire itself, whether the agent endorses it.',
     cite: 'Freedom of the will',

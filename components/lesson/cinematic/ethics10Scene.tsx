@@ -13,6 +13,7 @@ import { BEATS } from './ethics10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A pond stage right with a child in it, and the same child again far off to the
 // left — smaller, standing higher up the picture at the end of a dotted line, which
@@ -107,6 +109,18 @@ const CHILD_REACH_Y = 470;
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics10'));
 const DIR = dirsFrom(X, 1);
 
+// group AH — the still-tap events.
+// A one-beat pulse: the argument asks its question over the pond.
+const ASKV = BEATS.map((b) => (b.ask ? 1 : 0));
+// The duty token's one-shot journey rides `bt` like logic7's `flow`: it plays
+// only on the beat that turns `duty` on, never on a beat that merely holds it
+// (computed inline from the beat objects, so no track is needed here).
+/** The dotted line's own path, read off its geometry above — from the near end
+ * (where the dashes stop, by the pond) to the far child's mark. */
+const DUTY_X0 = 240;
+const DUTY_X1 = FAR_X + 2;
+const DUTY_Y = FAR_G;
+
 // R7c — LEFT STILL ON PURPOSE: the drag asks how much moral THEORY Singer's argument needs
 // (ONE MODEST PREMISE … ALL OF SINGER'S ETHICS), and nothing on this stage is an amount of
 // theory. The only moving quantity is how far he reaches for the child, and driving it off
@@ -114,7 +128,7 @@ const DIR = dirsFrom(X, 1);
 // does not make.
 export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -123,6 +137,10 @@ export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: Scen
   const cardsOn = !!cur.factors;
   const cardsFade = cardsOn !== !!prev?.factors;
   const answered = picked !== null;
+  // group AH — still-tap events (C20c).
+  const askFade = !!cur.ask !== !!prev?.ask;
+  // The token plays once, only on the beat that turns `duty` on.
+  const dutyNow = !!cur.duty && !prev?.duty;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -170,6 +188,12 @@ export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: Scen
       near: pose(nearS, NEAR_X, GROUND, NEAR_K, -1, 1),
       far: pose(farS, FAR_X, FAR_G, FAR_K, 1, farOn ? (farFade ? grow : 1) : 0),
       farOn: farOn ? (farFade ? grow : 1) : 0,
+      // group AH — a one-beat pulse; it fades both ways since it must close
+      // again on the very next beat (L5 / "fade an event out, not off").
+      ask: carry(cv, 2, n, ASKV[p], ASKV[n], askFade ? grow : 1),
+      // The duty token's own progress, 0..1 across 1.1s of the beat that asks
+      // for it, and flatly 0 on every other beat — one journey per tap.
+      duty: dutyNow ? ease01(bt.value / 1.1) : 0,
       t,
     };
   });
@@ -181,6 +205,19 @@ export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: Scen
   const cardStyle = useAnimatedStyle(() => ({
     opacity: cardsOn ? (cardsFade ? ease01(bt.value / 0.6) : 1) : 0,
   }));
+  // group AH — the two still-tap events.
+  const askStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.ask,
+    transform: [{ translateY: (1 - SCENE.value.ask) * 6 }],
+  }));
+  const dutyStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.duty;
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2);
+    return {
+      opacity: on,
+      transform: [{ translateX: DUTY_X0 + (DUTY_X1 - DUTY_X0) * u }],
+    };
+  });
 
   return (
     <Animated.View style={styles.scene}>
@@ -193,8 +230,16 @@ export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: Scen
         <Text style={styles.farLabel}>9,000 KM</Text>
       </Animated.View>
 
+      {/* The duty token travels the dotted line toward the distant child, once,
+          as the argument says the duty extends to him (group AH). */}
+      <Animated.View style={[styles.dutyToken, dutyStyle]} pointerEvents="none" />
+
       {/* ── the pond: three rules, nothing filled ───────────────────────────── */}
       {RIPPLES.map((y, k) => <Ripple key={y} S={SCENE} y={y} k={k} />)}
+
+      {/* A question mark over the pond, once, as the argument starts asking
+          what principle explains the reaction (group AH). */}
+      <Animated.Text style={[styles.askMark, askStyle]} pointerEvents="none">?</Animated.Text>
 
       {/* ── Q1: which difference carries no moral weight? ───────────────────── */}
       {cardsOn &&
@@ -272,7 +317,7 @@ const styles = StyleSheet.create({
 
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W },
   card: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },
@@ -282,6 +327,20 @@ const styles = StyleSheet.create({
   },
   cardTextOn: { color: PAPER, fontFamily: 'Inter_700Bold',
     includeFontPadding: false,
+  },
+
+  // ── the two still-tap events (group AH) ────────────────────────────────────
+  // The question the argument asks, floating over the pond for one beat only.
+  askMark: {
+    position: 'absolute', left: 292, top: 225, width: 24, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 26, color: INK,
+    includeFontPadding: false,
+  },
+  // The duty itself, the size of a full stop — it travels, it is not an
+  // object — along the same dotted line the distance is already drawn on.
+  dutyToken: {
+    position: 'absolute', left: 0, top: FAR_G - 3, width: 8, height: 8, borderRadius: 4,
+    backgroundColor: INK,
   },
 });
 

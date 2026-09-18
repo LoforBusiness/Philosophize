@@ -12,14 +12,16 @@ import { BEATS } from './ethics6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // The footbridge — and, written up beside it, the SPLIT drawn as a chart: two bars
 // for the same trade, landing at opposite heights over one shared footing that
@@ -74,6 +76,7 @@ const TX = BEATS.map((b) => b.tx ?? 60);
 const SHOVE = BEATS.map((b) => b.shove ?? 0);
 const CARD = BEATS.map((b) => b.card ?? 0);
 const STAMP = BEATS.map((b) => b.stamp ?? 0);
+const VERDICT = BEATS.map((b) => b.verdict ?? 0);
 
 // Sleepers under the rail: cheap, and the difference between "a line" and "a track".
 const SLEEPERS = Array.from({ length: 14 }, (_, k) => 34 + k * 26);
@@ -99,6 +102,11 @@ export default function Ethics6Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
   const heldD = useHeld();
   const cv = useCarry(4);
   const heldStr = useHeld();
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // ANIMATE ONLY WHAT CHANGED (C20c) — a one-shot, so it fires only on the beat
+  // that raises its own point, never on a beat that merely holds it.
+  const verdictNow = (cur.verdict ?? 0) > 0 && (cur.verdict ?? 0) !== (prev?.verdict ?? 0) ? (cur.verdict ?? 0) : 0;
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -117,6 +125,9 @@ export default function Ethics6Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
       card: carry(cv, 2, n, CARD[p], CARD[n], tr),
       stamp: carry(cv, 3, n, STAMP[p], STAMP[n], tr),
       wheel: (t * 220) % 360,
+      // THE FLASH'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to,
+      // flatly 0 on every other beat — one flash per tap, not a loop.
+      verdict: verdictNow ? ease01(bt.value / 1.1) : 0,
       t,
     };
   });
@@ -125,6 +136,11 @@ export default function Ethics6Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
   const DS = useDerivedValue<Bundle>(() => SCENE.value.str);
   const trolleyStyle = useAnimatedStyle(() => ({ transform: [{ translateX: SCENE.value.tx }] }));
   const wheelStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.wheel}deg` }] }));
+  // Fades in over the first fifth of its window and out over the last.
+  const verdictStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.verdict;
+    return { opacity: u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2) };
+  });
   const chartStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.card) }));
   // The stamp lands: it drops the last few units and settles slightly off-square,
   // the way a rubber stamp does — one beat, then it just stays up.
@@ -184,6 +200,46 @@ export default function Ethics6Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
         <Text style={styles.stampT}>USED AS</Text>
         <Text style={styles.stampT}>A MEANS</Text>
       </Animated.View>
+
+      {/* ── group AH: one flash per still tap, in the stamp's own free column ── */}
+      {/* Beat 2: the raw arithmetic, before intuition reverses it — same 5 either way. */}
+      {verdictNow === 1 && (
+        <Animated.View style={[styles.verdictBox, verdictStyle]} pointerEvents="none">
+          <View style={styles.verdictPair}>
+            <Text style={styles.verdictFive}>5</Text>
+            <View style={styles.verdictBar} />
+            <Text style={styles.verdictLabel}>LEVER</Text>
+          </View>
+          <Text style={styles.verdictEq}>=</Text>
+          <View style={styles.verdictPair}>
+            <Text style={styles.verdictFive}>5</Text>
+            <View style={styles.verdictBar} />
+            <Text style={styles.verdictLabel}>PUSH</Text>
+          </View>
+        </Animated.View>
+      )}
+
+      {/* Beat 4: what the survey actually finds — one permitted, one not. */}
+      {verdictNow === 2 && (
+        <Animated.View style={[styles.verdictBox, verdictStyle]} pointerEvents="none">
+          <View style={styles.verdictPair}>
+            <Text style={styles.verdictMark}>✓</Text>
+            <Text style={styles.verdictLabel}>LEVER</Text>
+          </View>
+          <View style={styles.verdictPair}>
+            <Text style={[styles.verdictMark, styles.verdictMarkOff]}>✕</Text>
+            <Text style={styles.verdictLabel}>PUSH</Text>
+          </View>
+        </Animated.View>
+      )}
+
+      {/* Beat 6: the term the stamp doesn't say — pairs with "A MEANS" below it. */}
+      {verdictNow === 3 && (
+        <Animated.View style={[styles.sideTag, verdictStyle]} pointerEvents="none">
+          <Text style={styles.sideTagT}>(A SIDE</Text>
+          <Text style={styles.sideTagT}>EFFECT)</Text>
+        </Animated.View>
+      )}
 
       {/* ── the split, drawn as two bars over one shared footing ──────────────── */}
       <Animated.View style={[styles.chart, chartStyle]} pointerEvents="none">
@@ -282,7 +338,7 @@ const styles = StyleSheet.create({
   trolleyWrap: { position: 'absolute', left: 0, top: GROUND - 78, width: 104, height: 78 },
   car: {
     position: 'absolute', left: 0, top: 12, width: 104, height: 50,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   carRoof: { position: 'absolute', left: 13, top: 0, width: 78, height: 10, backgroundColor: INK, borderRadius: 3 },
   window: { position: 'absolute', top: 22, width: 14, height: 16, backgroundColor: INK, borderRadius: 2 },
@@ -317,13 +373,29 @@ const styles = StyleSheet.create({
   // wider box would be brushed by a hand on the last question beat.
   stamp: {
     position: 'absolute', left: 12, top: 292, width: 92, height: 60,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   stampT: {
     fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 17, letterSpacing: 0.8,
     color: INK, includeFontPadding: false,
   },
+
+  // ── group AH: two flashes sharing the stamp's own footprint before it lands,
+  // and a third tagged just above it once it has ──────────────────────────────
+  verdictBox: {
+    position: 'absolute', left: 12, top: 292, width: 92, height: 60,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly',
+  },
+  verdictPair: { alignItems: 'center', gap: 3 },
+  verdictFive: { fontFamily: 'Inter_700Bold', fontSize: 11, color: SOFT, includeFontPadding: false },
+  verdictBar: { width: 16, height: 20, borderRadius: 2, backgroundColor: INK },
+  verdictLabel: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false },
+  verdictEq: { fontFamily: 'Inter_700Bold', fontSize: 14, color: SOFT, includeFontPadding: false },
+  verdictMark: { fontFamily: 'Inter_700Bold', fontSize: 17, color: INK, includeFontPadding: false },
+  verdictMarkOff: { color: SOFT },
+  sideTag: { position: 'absolute', left: 12, top: 264, width: 92, alignItems: 'center' },
+  sideTagT: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.6, color: SOFT, includeFontPadding: false },
 
   // ── the chart ───────────────────────────────────────────────────────────────
   chart: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
@@ -346,7 +418,7 @@ const styles = StyleSheet.create({
   },
   chFoot: {
     position: 'absolute', left: CH_L, top: 370, width: CH_W, height: 22,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   chFootT: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.6, color: INK, includeFontPadding: false },

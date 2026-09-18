@@ -24,6 +24,9 @@ export interface P9Beat extends BaseBeat {
   /** The rights line is drawn. */ rights?: boolean;
   /** The lone figure's gesture (emote code). */ one?: number;
   /** The three cards for the tap question. */ cards?: boolean;
+  /** 1 = the promise the four want to hear is held up over them. */ flatter?: number;
+  /** 1 = the count is stamped with the name for what it is doing. */ tyranny?: number;
+  /** 1 = the rights line is capped, and captioned as the limit no vote may cross. */ stop?: number;
 }
 
 export const BEATS: P9Beat[] = [
@@ -40,6 +43,7 @@ export const BEATS: P9Beat[] = [
   },
   {
     vote: 1, tally: true, one: 170,
+    flatter: 1,
     text: 'In Plato’s analogy, a crew that chooses its captain by vote follows whoever flatters it best.',
     dur: 1.8,
   },
@@ -51,6 +55,7 @@ export const BEATS: P9Beat[] = [
   },
   {
     vote: 0, tally: true, advance: true, one: 279,
+    tyranny: 1,
     text: 'This is democracy working, not democracy failing. Alexis de Tocqueville called the danger the tyranny of the majority.',
     dur: 1.8,
   },
@@ -69,6 +74,7 @@ export const BEATS: P9Beat[] = [
   },
   {
     vote: 0, tally: true, advance: true, rights: true, one: 378,
+    stop: 1,
     text: 'Mill and Tocqueville both held that a majority’s power has limits no vote may cross. Constitutional rights enforced by courts express the same principle.',
     cite: 'Limits on the majority',
     dur: 5.0,

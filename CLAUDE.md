@@ -1086,7 +1086,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **fifty-nine** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **sixty-two** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1097,7 +1097,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-thoughts` · `check-marks` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-wander` · `check-skin` · `check-thoughts` · `check-marks` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
 > replays the figure, and a prop's animation was invisible to every check unless it
@@ -1239,7 +1239,7 @@ they belong to, so the rule book has them and this file did not:
   he reacts**: 78 of 246 lessons put a costume on him from a wardrobe of eleven
   (`npm run sheet:wardrobe`), neighbours never match, grave lessons are held to
   the sober set, and he nods or draws back on every answer in the scenes that
-  route through `lookPose`. **31 lessons also have a second figure walk in** on the
+  route through `lookPose`. **36 lessons also have a second figure walk in** on the
   beat before a two-sided question, dressed differently and turned to face him
   (group AA) — the count moves whenever the must-boxes are re-measured, because
   whether there is ROOM for him is derived from them.
@@ -3767,7 +3767,7 @@ from the lead's neighbours, which is all it can know. It cannot know the BAND.
 top hat pokes seven units above that lesson's band, and nothing in the component
 could have seen it.
 
-**AND A SECOND FIGURE WALKS IN, IN 31 LESSONS (AA8).** He arrives on the beat
+**AND A SECOND FIGURE WALKS IN, IN 36 LESSONS (AA8).** He arrives on the beat
 before a `poll` or a `split` and is standing there when the question is asked —
 the person who holds the OTHER position, which is what keeps A1 true and makes him
 an argument rather than a cameo. **Which lessons is taken from STRUCTURE, never
@@ -4278,8 +4278,8 @@ On a tap where the scene's art holds, the PLAYER draws one hand-drawn mark — a
 an underline, brackets, a box or an arrow — round the stage label the narration names,
 as the voice reaches the word (`StageMark.tsx`, `data/lessonMarks.ts`). It is the
 teacher's pen at a board: Mayer's signalling, which is what transfers from Imprint's
-"every card earns one event" without seven illustrators. **69 marks in
-60 lessons.** `make:marks` writes the table and `check:marks` re-derives it
+"every card earns one event" without seven illustrators. **3 marks in
+3 lessons** since group AH gave every still tap its own event; 69 before it. `make:marks` writes the table and `check:marks` re-derives it
 from one set of rules in `scripts/lib/marks.mjs`; `countertest-marks` stages each.
 
 - **Only a still tap, only a label the voice names, never the coming answer.** The
@@ -4320,6 +4320,133 @@ frozen everywhere, and acts 29–55 loop on the clock too; and **`liven-lessons`
 flag WRITES** — its dry run is `--dry` — which placed sixty jokes nobody asked for
 until the 90 scripts were restored from HEAD.
 
+### And the picture has the app's own depth now (group AG)
+
+> *"I have recently updated the UI of the app. Everything in the app other than the
+> lessons, it looks more gamified … can you also do research and look at the kind of
+> design that has been done into lessons? … we will select the gamified look that is
+> in the app as well … that gamified, that really clean, gamified depth look."*
+
+The five tabs got the depth kit on 2026-09-17 and the lessons were deliberately left
+out of it (§19). This is the other half, and the research and the app agreed: every
+shape rounded, flat fills and no gradients, a chunky ledge on anything that stands,
+and **a PILL shadow under every character and object — never an oval, because an
+oval implies a perspective the drawing does not have** (Duolingo's illustration
+rules, which the tab kit was built from).
+
+**`components/lesson/cinematic/stageSkin.ts` is the kit and `scripts/skin-stage.mjs`
+applied it to 239 scenes**: 235 plates given a real corner, 184 tiles given a white
+face, 170 grounds given a lit near edge and a shaded foot, 231 ledges given an ink
+drop, and a pill under every figure in every lesson.
+
+**THE OWNER PICKED THE WHITE FACE FROM THREE RENDERS of one real lesson** — today's
+tinted tile, the tinted tile with the new depth, and white. It is also the answer
+that drops the beige: `STONE` is the branch hue at L\* 81, a tan on the warm
+branches, and a face of it is the "gold look in the background of a lot of the
+information" that came off every other surface in the app (§7). The hue moves to the
+GROUND, the LEDGE and the shaded side, which is where this app has always kept it.
+
+**IT COST NO RE-MEASURE, AND THAT IS THE ONLY REASON IT WAS AFFORDABLE.** A radius, a
+`boxShadow` and a colour move no box, so `restamp-skin.mjs` renews all 239 stamps on
+`restamp-lip`'s two-part proof rather than on hours of browser time. What the kit may
+never touch is a border WIDTH (it shrinks the content area and can re-wrap a word)
+or a TONE (the luminance contract is what keeps 244 scenes' captions legible).
+
+**A WHITE FACE SPENDS A TONAL MASS, AND FACING THEM ALL TOOK 105 SCENES BELOW THE
+FLOOR.** `check:shade` holds every scene to three filled masses because a reader
+said the pictures were flat, and its own note says why a white card is not one: *"a
+white card is the absence of a tone, which is exactly why political7's charter reads
+against its stone tablet."* So a scene may spend down to three and no further,
+smallest tiles first; 47 keep their toned tiles because they have nothing spare,
+which is the correct answer rather than a shortfall.
+
+> **AND THE CAP'S FIRST DRAFT COUNTED THE MASSES ITSELF.** It disagreed with
+> `check:shade` about the very first scene it was tested on — 0 against 1 — and so
+> let 102 scenes fall below the floor while reporting that it had held them. The
+> count lives in `scripts/lib/masscount.mjs` now and both read it, which is this
+> file's own recurring lesson (T6's three pairings) arriving again.
+>
+> **Then moving the floor's fill into the shared kit nearly cost the same 102
+> scenes**, because the check counts source TEXT and `backgroundColor: RULE` was no
+> longer in the scene — the floor was drawn exactly as before and more of it.
+> `masscount` counts `floorStyle(` as the two masses it actually draws.
+>
+> **And two committed regexes turned out to contain a BACKSPACE byte** where `\b`
+> was meant, found with `od -c` while chasing a codemod that matched nothing:
+> `check-blank.mjs` had been skipping the very beats it exists to measure. That is
+> the third time this file has recorded a shell heredoc eating a backslash.
+
+### And he moves around now, not just his hands (group AF)
+
+> *"the stickman does not move a lot. I do not mean with its hands moving … those
+> aren't really that good. Instead, during the words that are being spoken, if
+> there's nothing happening on screen, the stickman will look up and down a lot,
+> move back and forth, maybe sit on the ground for a little bit — him actually
+> moving around in a really natural way. Right now the stickman is too stationary."*
+
+Every idle this app had built moved a LIMB. Both living shelves are arms and a head,
+the working shelf keeps a hand on a prop, and `check:idle` measures all of them
+against `stand()`'s own breath — so a lesson where the picture holds was a figure
+rooted to one x for eight beats doing something slightly different with his arms.
+
+**`components/lesson/cinematic/wander.ts` is the maths and `data/lessonWander.ts` is
+the choreography: 880 beats across 218 lessons**, out of 895 where his pose leaves
+him free. Six moves — a step (with a turn if it is behind him), a look up or down,
+sitting on the ground, a crouch, a glance over his shoulder, a weight shift — timed
+to the PAUSES in the line being spoken, which the narration manifest already
+measures. That is Duolingo's own construction for their characters: idle behaviour
+triggered against the audio rather than looped on its own clock.
+
+**It reaches every lesson without editing a scene**, through `lookPose` — the one
+call all 244 scenes make for the lead figure — exactly as `REACT` does. A per-scene
+prop would have been 244 edits inside `muststamp`, which is a corpus-wide re-measure
+for a change that moves no prop.
+
+**WHERE HE MAY GO IS MEASURED, AND THE CAMERA IS NEVER TOUCHED.** `make:wander`
+reads `mustBoxes` for the clear floor on his beat AND the next one (a tap can arrive
+at any moment), blocks on the visitor and on the pen mark, and clips the range to
+the frames `tours.ts` already shows. A beat that draws a thought bubble gets the
+in-place moves only, because the bubble is placed against his resting head.
+
+**FOUR DEFECTS, AND EVERY ONE WAS FOUND BY MEASURING RATHER THAN BY READING:**
+
+- **A look whose lean cancelled its own neck.** N12 says attention goes on the spine
+  as well as the neck; obeying it moved the head **0.7 units** against a breath of
+  2.6. The head centre is driven by `tilt` and by `tilt + neck`, and `sin(π + e) ≈
+  −e`, so leaning back to carry a look up moves the chest one way and the head the
+  other. The corpus's own two looking poses (acts 65 and 152) put the body the SAME
+  way as the neck; the difference between up and down is the bob.
+- **A step that began with a 16-unit foot jump**, because `strideStance`'s phase
+  starts with the feet a stride apart. `rig.strideStance` takes a `lead` now — the
+  offset `moves.strideMode` has had since the branch road — plus a departure blend
+  that is `settleStep` read backwards.
+- **A step a tap could not continue: 23 units in one frame.** The continuation has to
+  hand the gait the distance already walked AND the same phase offset; and the guard
+  that asks "is he walking" counted only the distance LEFT, so the last half unit of
+  a step was thrown away and both feet went flat.
+- **A settling walk handed its whole foot arc to whichever foot was further** — a
+  hard switch on a comparison that flips mid-settle, so one ankle rose 8.5 units and
+  the other fell 7.3 between two frames. That one is in `rig.settleStep` and every
+  walk in the app had it; the lift is shared by gap now.
+
+**`npm run check:wander` replays all 880 plans through the real rig at 60fps**,
+including a tap at every tenth of a second: the worst one-frame move inside a plan is
+4.05 units, at a tap it is **0.00**, and the planted-foot slide is 3.06 — the shipped
+settle's own residue. `node scripts/sheet-wander.mjs` draws every pattern as a
+filmstrip in plain Node, and `node scripts/countertest-wander.mjs` puts all twelve
+defects back.
+
+> **AND THE LAYER WAS SWITCHED OFF A FRAME AFTER IT WAS SWITCHED ON.** Every number
+> above was green while the figure stood perfectly still in the browser: `wanderReset`
+> ran in a mount effect, which fires AFTER the render that installs the first beat's
+> plan, so beat 0 was blanked every time. Measured live, his ankle moved 0.5px through
+> a beat that walks him forty units. `node scripts/shot-wander.mjs <id> [beat]` is the
+> instrument — it records his ankle and his fist every frame in the real app — and it
+> exists because this seam cannot be greped: no scene mentions the layer by name, which
+> is exactly why it was affordable. **The probe's own first draft read the figure's
+> ROOT**, which `Stickman`'s comment already says is a zero-size box, and reported the
+> same dead figure for a second, entirely different reason.
+
 ### Four brawlers froze after the first tap (L9)
 
 `politicalScene`'s citizens shared ONE `useHeld()` and blended `carryFrom` by `auth`:
@@ -4339,6 +4466,73 @@ FOR/AGAINST weights into the balance, turns ORIGIN? to DISPUTED, lights the YOU 
 and grows a seedling into FLOURISHING. The ledger's ANIMAL column became the drag's own
 reading (R7c). Across the corpus `check:idle` counts the taps on which nothing moves at
 all — **0**, from 289 two days earlier, and `DEAD_TAPS_BUDGET` holds it there.
+
+### And then every tap in every lesson (group AH)
+
+> *"I want implemented into all lessons the new animations, a different animation
+> for every time the user taps the screen in every lesson."*
+
+N18 did the eighteen opener lessons and the owner asked for the other 228. Counted
+before the pass, **607 taps across 212 lessons left the scene art exactly as it
+was** — the figure moved (group AF), a pen mark or a thought could appear, and the
+drawing itself held. `node scripts/still-worklist.mjs [<lesson-id>|<branch>]` is the
+worklist: per still beat it prints the sentence, what the stage already draws, and
+the channels that beat holds.
+
+**THE EVENT IS AUTHORED PER LESSON, which was a decision rather than a default.** A
+shared effect — a wipe, a settle, a highlight the player could draw on any beat —
+would have taken one day instead of many, and it is the move group AB records as
+the wrong one: `make:thoughts` places a bubble *"without asking what the beat says,
+which is N9's failure (a gag about nothing) in a different hat."* A tap event is a
+claim about that sentence, so a corpus-wide effect is 607 claims nobody made. The
+owner chose the same way: *"written per lesson"*.
+
+**Group AH of the rule book is the how**, and its five load-bearing rules are the
+ones that cost a render each: the event comes from the beat's own words and moves
+something already on the stage where the sentence names one (AH1); one event per
+tap and never a decoration (AH2); it is derived from a value CHANGING, so a beat
+that merely holds re-draws nothing (AH3); it is CARRIED, because the house idiom
+`on ? (fade ? grow : 1) : 0` switches a thing OFF between two frames and
+`check:replay`'s cut budget is a high-water mark (AH4); and where the sentence lists
+things in order the drawing lists them in order, off the one carried value (AH5).
+
+**NOT ONE WORD OF ANY SCRIPT MAY CHANGE** (AH8). The words are voiced, pinned to the
+generated name index, to `lessonFocus` and to group Q's neighbour rules, so a pass
+that rewrote a sentence would owe a re-render, a re-stamp and three regenerated
+tables. Channels are added and drawn; nothing else moves.
+
+**607 → 0, and `npm run check:still` holds it there at a budget of zero.** It reads
+the scripts offline: a tap fails when no channel the beat declares changes from the
+beat before, setting aside prose, the pose track and beats that are their own event
+(a question, a quote, the summary). Five things the pass cost, each now a rule
+(AH10–AH15):
+
+- **The stagger helper was a plain function called from an animated style** — 37
+  sites in nine lessons, fatal on the UI thread in release and perfect in a browser.
+  Only `check:worklets` could see it (§17 rule 6, a third time).
+- **107 new labels in 70 lessons landed under 8pt**, because a tall band scales the
+  whole stage down and a caption was sized by copying its neighbours. Size from the
+  floor `check:legible` prints.
+- **Two lessons gave every tap one shared tag slot and changed the word in it.** One
+  event per tap on the letter, and exactly the complaint on the screen. Both redrawn.
+- **The pen retires where a tap now has its own event.** 0 still taps means AE's
+  marks have nowhere left to go but the few taps where the event and the mark are
+  one gesture; `make:marks` withdrew the rest when the tables regenerated,
+  69 → 3.
+- **The events take room, and the re-measure shows where.** All 246 lessons were
+  measured again and spliced back onto the costume and pose bookkeeping (a plain
+  `measure-must` drops both, and the growth would have been applied twice). The
+  mascot is a little quieter: thoughts shown 279 → 269, answer lines 316 → 298,
+  second-figure lines 17 → 15. Visitors went 31 → 36: ten lost their floor to new
+  art, every one in a scene this pass changed, and fifteen gained one.
+- **`check-life` could no longer find J12's runs**, because the pieces of a split
+  sentence now differ by exactly their events. The run structure is read once from
+  the commit before the pass (`scripts/lib/splitruns.json`, 259 continuations in 244
+  lessons) — a TABLE, for the same reason the maxim is one.
+
+The cut count went DOWN, 301 → 299: two of the new events were first written with
+the ramp passed as `carry`'s multiplier, which starts it from zero on the first frame
+— a pop — where the same ramp passed as its progress starts from where it was.
 
 ### The stage is coloured now, at exactly the grey's luminance
 

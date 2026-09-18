@@ -21,6 +21,9 @@ export interface Met14Beat extends BaseBeat {
   /** How many claim rows are down, 0…4. */ rows?: number;
   /** How far the world marks have been filled in, 0…1. */ marks?: number;
   /** 1 = the four claims are live targets (Q1). */ pick?: number;
+  /** Spotlight frame: 0 none, 1 = both contingent rows (Paris, rain), 2 = both
+   *  necessary rows (triangle, water), 3 = the triangle row alone, 4 = the water
+   *  row alone. */ spot?: number;
 }
 
 export const BEATS: Met14Beat[] = [
@@ -36,18 +39,18 @@ export const BEATS: Met14Beat[] = [
     cite: 'True in which worlds?',
   },
   {
-    g: 463, rows: 4, marks: 1,
+    g: 463, rows: 4, marks: 1, spot: 1,
     dur: 1.8,
     text: 'The other two claims are true in some worlds and false in others.',
   },
   {
-    g: 13, rows: 4, marks: 1,
+    g: 13, rows: 4, marks: 1, spot: 2,
     dur: 3.1,
     text: 'A claim true in every possible world is a necessary truth. It could not have been false.',
     cite: 'Necessary and contingent',
   },
   {
-    g: 266, rows: 4, marks: 1,
+    g: 266, rows: 4, marks: 1, spot: 1,
     dur: 1.8,
     text: 'A claim true in only some worlds is a contingent truth. It’s true, but it might have been false.',
   },
@@ -65,13 +68,13 @@ export const BEATS: Met14Beat[] = [
     },
   },
   {
-    g: 5, rows: 4, marks: 1,
+    g: 5, rows: 4, marks: 1, spot: 3,
     dur: 4.1,
     text: 'The two necessary truths differ in how they can be known. One is a priori, knowable by reason alone.',
     cite: 'Two ways of knowing',
   },
   {
-    g: 259, rows: 4, marks: 1,
+    g: 259, rows: 4, marks: 1, spot: 4,
     dur: 1.8,
     text: 'The other is a posteriori, known only through watching and testing.',
   },

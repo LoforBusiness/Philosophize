@@ -13,6 +13,7 @@ import { BEATS } from './ethics8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import type { Shot } from './camera';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A room with two halves. Up top, a rigid grid of empty rule-boxes — impartial,
 // tidy, nobody's name in them. Down on the floor, stage right, a second figure
@@ -81,6 +83,7 @@ const DIR = dirsFrom(X, 1);
 const GRIDV = BEATS.map((b) => b.grid ?? 0);
 const OTHV = BEATS.map((b) => b.oth ?? 0);
 const THRV = BEATS.map((b) => b.thread ?? 0);
+const NOTE = BEATS.map((b) => b.note ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -92,6 +95,10 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick, dragPos
   const heldS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // ANIMATE ONLY WHAT CHANGED (C20c) — a one-shot, so it fires only on the beat
+  // that raises its own point, never on a beat that merely holds it.
+  const noteNow = (cur.note ?? 0) > 0 && (cur.note ?? 0) !== (prev?.note ?? 0) ? (cur.note ?? 0) : 0;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -126,11 +133,19 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // and the rigid boxes come back overhead: care with demands in it looks like
       // the thing it was being contrasted with, which is the argument.
       grid: carry(cv, 3, n, GRIDV[p], reacting ? dragPos.value : GRIDV[n], tr),
+      // THE NOTE'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to,
+      // flatly 0 on every other beat — one flash per tap, not a loop.
+      note: noteNow ? ease01(bt.value / 1.1) : 0,
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const DO = useDerivedValue<Bundle>(() => SCENE.value.other);
+  // Fades in over the first fifth of its window and out over the last.
+  const noteStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.note;
+    return { opacity: u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2) };
+  });
 
   const gridStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.grid }));
   // THE GRID SITS BACK, ITS HEADER DOES NOT (D35). `grid` rests at 0.3 once the
@@ -170,6 +185,60 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick, dragPos
           </View>
         ))}
       </Animated.View>
+
+      {/* ── group AH: one flash per still tap, in the clear strip above the walk
+          band (y 130–172 — free of the grid, the cards and both figures) ──── */}
+      {noteNow === 1 && (
+        <Animated.View style={[styles.noteStrip, noteStyle]} pointerEvents="none">
+          <Text style={styles.noteT}>OR: SIT WITH THEM</Text>
+        </Animated.View>
+      )}
+      {noteNow === 2 && (
+        <Animated.View style={[styles.noteStrip, noteStyle]} pointerEvents="none">
+          <View style={styles.noteRingDashed} />
+          <Text style={styles.noteT}>NO ONE IN PARTICULAR</Text>
+        </Animated.View>
+      )}
+      {noteNow === 3 && (
+        <Animated.View style={[styles.noteStrip, noteStyle]} pointerEvents="none">
+          <View style={styles.noteRingSolid} />
+          <Text style={styles.noteT}>SOMEONE, NOT A NUMBER</Text>
+        </Animated.View>
+      )}
+      {noteNow === 4 && (
+        <Animated.View style={[styles.noteStrip, noteStyle]} pointerEvents="none">
+          <View style={styles.noteArrow} />
+          <Text style={styles.noteT}>SOMETHING ELSE</Text>
+        </Animated.View>
+      )}
+      {noteNow === 5 && (
+        <Animated.View style={[styles.noteStrip, noteStyle]} pointerEvents="none">
+          <View style={styles.noteBubble}>
+            <View style={styles.noteBubbleTail} />
+          </View>
+          <Text style={styles.noteT}>A DIFFERENT VOICE</Text>
+        </Animated.View>
+      )}
+      {noteNow === 6 && (
+        <Animated.View style={[styles.noteStrip, noteStyle]} pointerEvents="none">
+          <View style={styles.noteSprout}>
+            <View style={styles.noteStem} />
+            <View style={styles.noteLeaf} />
+          </View>
+          <Text style={styles.noteT}>GROWS FROM CARING</Text>
+        </Animated.View>
+      )}
+      {noteNow === 7 && (
+        <Animated.View style={[styles.noteStrip, noteStyle]} pointerEvents="none">
+          <View style={styles.noteBars}>
+            <View style={styles.noteBar} />
+            <View style={styles.noteBar} />
+            <View style={styles.noteBar} />
+          </View>
+          <Text style={styles.notePlus}>+</Text>
+          <View style={styles.noteRingSolid} />
+        </Animated.View>
+      )}
 
       {/* ── the thread of connection between the two figures ────────────────── */}
       <Animated.View style={[styles.threadLine, threadStyle]} pointerEvents="none" />
@@ -252,6 +321,36 @@ const styles = StyleSheet.create({
   },
   gridSlot: { width: 20, height: 2, backgroundColor: SOFT, borderRadius: 1 },
 
+  // ── group AH: the seven still-tap flashes, in the clear strip above the walk
+  // band — free of the grid (ends 114), the cards (start 176) and both figures.
+  noteStrip: {
+    position: 'absolute', left: 60, right: 60, top: 132,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+  },
+  noteT: { fontFamily: 'Inter_700Bold', fontSize: 12.8, letterSpacing: 1, color: INK, includeFontPadding: false },
+  noteRingDashed: { width: 14, height: 14, borderRadius: 7, borderWidth: 1.5, borderStyle: 'dashed', borderColor: SOFT },
+  noteRingSolid: { width: 14, height: 14, borderRadius: 7, backgroundColor: INK },
+  noteArrow: {
+    width: 0, height: 0, borderLeftWidth: 5, borderRightWidth: 5, borderBottomWidth: 10,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: INK,
+    transform: [{ rotate: '-45deg' }],
+  },
+  noteBubble: {
+    width: 18, height: 13, borderRadius: 4, borderWidth: 1.5, borderColor: INK,
+    backgroundColor: PAPER, position: 'relative',
+  },
+  noteBubbleTail: {
+    position: 'absolute', left: 4, bottom: -4, width: 0, height: 0,
+    borderLeftWidth: 3, borderRightWidth: 3, borderTopWidth: 5,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: INK,
+  },
+  noteSprout: { width: 14, height: 16, position: 'relative' },
+  noteStem: { position: 'absolute', left: 6, bottom: 0, width: 2, height: 12, borderRadius: 1, backgroundColor: INK },
+  noteLeaf: { position: 'absolute', left: 2, top: 0, width: 10, height: 7, borderRadius: 5, backgroundColor: INK, transform: [{ rotate: '-20deg' }] },
+  noteBars: { width: 16, height: 14, justifyContent: 'space-between' },
+  noteBar: { width: 16, height: 2, borderRadius: 1, backgroundColor: INK },
+  notePlus: { fontFamily: 'Inter_700Bold', fontSize: 14, color: SOFT, includeFontPadding: false },
+
   // ── the thread ──────────────────────────────────────────────────────────────
   // A 1-wide bar stretched by scaleX from its left edge, exactly like a rig bone.
   threadLine: {
@@ -279,7 +378,7 @@ const styles = StyleSheet.create({
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   pickRight: { backgroundColor: INK, borderColor: INK },

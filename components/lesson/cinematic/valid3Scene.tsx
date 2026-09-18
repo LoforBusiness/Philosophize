@@ -11,6 +11,7 @@ import { BEATS } from './valid3Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerSpent } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -18,8 +19,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // The argument pinned up as a FORM the inspector reads, stage right.
 //
@@ -144,7 +146,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('valid3'));
 export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldInsp = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
   const showPick = !!cur.interact;
@@ -182,7 +184,10 @@ export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, pickPos,
       // appears: good form with a false ending has to have a bad premise somewhere.
       // Two axes, and the reader finds the corner where truth and validity come apart.
       flaw: carry(cv, 2, n, FLAW[p], reacting ? pickAt(POLL_FLAW, pickPos.value) : FLAW[n], tr),
-      wordsP: swappedP ? grow : 1,
+      // CARRIED for the reason group L gives: a value that snaps back to 1 the beat
+      // after it changed is a cut, even when the thing it drives is only a word's
+      // opacity.
+      wordsP: carry(cv, 4, n, 1, 1, swappedP ? grow : 1),
       wordsC: swappedC ? grow : 1,
       // The checklist is written up test by test; the SOUND bracket closes it.
       tests: carry(cv, 3, n, TESTS[p], TESTS[n], tr),
@@ -379,7 +384,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   board: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   frame: {
@@ -393,7 +398,7 @@ const styles = StyleSheet.create({
 
   row: {
     position: 'absolute', left: BX, width: BW, height: ROW_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     justifyContent: 'center', paddingHorizontal: 10,
   },
   concl: { borderWidth: 2.5 },
@@ -414,7 +419,7 @@ const styles = StyleSheet.create({
   },
   vdBox: {
     marginTop: 1, height: VD_BOX_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   vdLine: {
     fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 15, color: INK,
@@ -466,7 +471,7 @@ const styles = StyleSheet.create({
   check: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   ckBox: {
     position: 'absolute', left: FR_L, width: CK_BOX, height: CK_BOX,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   ckMark: {
@@ -517,7 +522,7 @@ const styles = StyleSheet.create({
   // Tap target: 258 × 44 stage units, a 14px title over a 12px gloss.
   balSlot: { position: 'absolute', left: 0, width: BAL_W, height: BAL_H },
   balCard: {
-    width: BAL_W, height: BAL_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
+    width: BAL_W, height: BAL_H, borderWidth: 2, borderColor: INK, borderRadius: 8,
     backgroundColor: STONE, boxShadow: LIP, justifyContent: 'center', paddingHorizontal: 12,
   },
   balRight: { backgroundColor: INK, borderColor: INK },

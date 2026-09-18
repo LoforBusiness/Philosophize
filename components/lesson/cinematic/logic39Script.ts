@@ -30,6 +30,7 @@ export interface Logic39Beat extends BaseBeat {
   /** How far the blade has run along the middle plank, 0…1. */ saw?: number;
   /** How far the sawn plank has come down, 0…1. */ snap?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a test line is drawn over all three planks at once, identically — the same standard, applied to each. */ test?: number;
 }
 
 export const BEATS: Logic39Beat[] = [
@@ -39,7 +40,7 @@ export const BEATS: Logic39Beat[] = [
     dur: 4.0,
   },
   {
-    p: 47, x: 58, planks: 1,
+    p: 47, x: 58, planks: 1, test: 1,
     text: 'Consider three claims, each on its own plank. The test is whether each claim meets the standard it sets.',
     dur: 3.6,
   },

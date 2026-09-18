@@ -12,6 +12,7 @@ import { BEATS } from './epistemology14Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -19,8 +20,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A SCREEN, A GAP, AND A WORLD — and the world is swapped for a vat while the screen
 // holds absolutely still. The argument is carried by the thing that does NOT animate,
@@ -57,6 +59,9 @@ const FIG_X = 48;
 const G = BEATS.map((b) => b.g ?? 0);
 const VAT = BEATS.map((b) => b.vat ?? 0);
 const LEAP = BEATS.map((b) => b.leap ?? 0);
+// group AH — one still-tap event each, plain carried 0/1 tracks
+const CHECK_RING = BEATS.map((b) => b.checkRing ?? 0);
+const MATCH_MARK = BEATS.map((b) => b.matchMark ?? 0);
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -84,7 +89,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology14'));
 export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(4);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -105,6 +110,8 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, 
       // And across: the more the two experiences match, the further the leap between
       // them has to be drawn. Both axes move something, which is what a pad is for.
       leap: carry(cv, 1, n, LEAP[p], reacting ? pickAt(POLL_LEAP, pickPos.value) : LEAP[n], grow),
+      checkRing: carry(cv, 2, n, CHECK_RING[p], CHECK_RING[n], tr),
+      matchMark: carry(cv, 3, n, MATCH_MARK[p], MATCH_MARK[n], tr),
     };
   });
 
@@ -119,6 +126,8 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, 
     opacity: clamp01(SCENE.value.leap * 3),
     transform: [{ translateY: (1 - SCENE.value.leap) * -6 }],
   }));
+  const checkRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.checkRing }));
+  const matchMarkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.matchMark }));
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -136,6 +145,8 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, 
           <View style={styles.canopy} pointerEvents="none" />
         </View>
       </Target>
+      {/* "every check happens on this side of the screen" — a ring round its frame. */}
+      <Animated.View style={[styles.checkRing, checkRingStyle]} pointerEvents="none" />
       {/* A CAPTION, NOT A SECOND BUTTON. The question panel counts the mounted
           targets and prints the number — "tap one of the N marked parts above" —
           so offering this answer through both its picture AND its label told the
@@ -176,6 +187,11 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, 
       {/* the step from one to the other */}
       <Animated.View style={[styles.bridge, leapStyle]} pointerEvents="none" />
       <Animated.View style={[styles.leader, leapStyle]} pointerEvents="none" />
+      {/* "every experience in the vat would match an experience in the world" —
+          a mark lands on the leap itself. */}
+      <Animated.View style={[styles.matchMark, matchMarkStyle]} pointerEvents="none">
+        <Text style={styles.matchMarkT}>=</Text>
+      </Animated.View>
       <Animated.View style={[styles.chip, leapStyle]}>
         <Target id={'leap'} correct={false} picked={picked} onPick={onPick}
               style={styles.fill} disabled={!live || answered}>
@@ -197,8 +213,14 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
 
   screen: { position: 'absolute', left: SCR_L, top: BOX_T, width: SCR_W, height: BOX_H },
+  // "every check happens on this side of the screen" — a dashed ring on the frame,
+  // never on what is drawn inside it, which must not move (A1).
+  checkRing: {
+    position: 'absolute', left: SCR_L - 5, top: BOX_T - 5, width: SCR_W + 10, height: BOX_H + 10,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, borderStyle: 'dashed',
+  },
   world: { position: 'absolute', left: WOR_L, top: BOX_T, width: WOR_W, height: BOX_H },
-  box: { flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden' },
+  box: { flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP, overflow: 'hidden' },
   layer: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
 
   horizon: { position: 'absolute', left: 0, right: 0, top: 96, height: 1.5, backgroundColor: SOFT },
@@ -215,7 +237,7 @@ const styles = StyleSheet.create({
   // whose contents are drawn in INK puts ink on ink and erases the picture (H61).
   label: { position: 'absolute', top: LAB_T, height: 30 },
   labelInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   labelText: {
@@ -225,10 +247,17 @@ const styles = StyleSheet.create({
   onInk: { color: PAPER },
 
   bridge: { position: 'absolute', left: 218, top: 388, width: 54, height: 2, backgroundColor: SOFT },
+  // "every experience in the vat would match" — a small badge on the leap itself.
+  matchMark: {
+    position: 'absolute', left: 237, top: 381, width: 16, height: 16, borderRadius: 8,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  matchMarkT: { fontFamily: 'Inter_700Bold', fontSize: 11, color: INK, includeFontPadding: false },
   leader: { position: 'absolute', left: 244, top: 320, width: 2, height: 68, backgroundColor: SOFT },
   chip: { position: 'absolute', left: CHIP_L, top: CHIP_T, width: CHIP_W, height: CHIP_H },
   chipInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   chipText: {

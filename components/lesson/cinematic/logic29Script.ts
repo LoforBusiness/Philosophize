@@ -28,6 +28,8 @@ export interface Logic29Beat extends BaseBeat {
   /** The claimant's share of the burden, 0…1. */ side?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = an attempt jostles the beam — it springs back level, unmoved. */ test?: number;
+  /** 1 = the weight on the beam turns from a solid block to a dashed outline — no different from carrying nothing. */ hollow?: number;
 };
 
 export const BEATS: Logic29Beat[] = [
@@ -37,7 +39,7 @@ export const BEATS: Logic29Beat[] = [
     dur: 4.8,
   },
   {
-    p: 178, x: 24, beam: 1,
+    p: 178, x: 24, beam: 1, test: 1,
     text: 'No one could disprove the claim, and Bertrand Russell chose the example for that reason. Yet being impossible to disprove gives no reason to believe a claim.',
     dur: 5.0,
   },
@@ -79,7 +81,7 @@ export const BEATS: Logic29Beat[] = [
     dur: 5.0,
   },
   {
-    p: 457, x: 80, beam: 1, load: 1, side: 0.9,
+    p: 457, x: 80, beam: 1, load: 1, side: 0.9, hollow: 1,
     text: 'Sagan argues that a dragon no test can detect is no different from no dragon at all.',
     dur: 5.0,
   },

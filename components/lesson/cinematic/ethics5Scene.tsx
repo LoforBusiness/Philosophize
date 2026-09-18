@@ -12,6 +12,7 @@ import { BEATS } from './ethics5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -19,8 +20,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A lone traveller walks through snowy Athens — a colonnade behind them, snow
 // drifting past — while the lesson's spine hangs overhead as a piece of
@@ -126,11 +128,13 @@ const SOC = BEATS.map((b) => b.soc ?? 0);
 const FORK = BEATS.map((b) => b.fork ?? 0);
 const BAL = BEATS.map((b) => b.balance ?? 0);
 const CHART = BEATS.map((b) => b.chart ?? 0);
+const GLOSS = BEATS.map((b) => b.gloss ?? 0);
 
 export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldSocS = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
   // Answer-direction constants resolved on the JS thread — the worklet stays free of
   // array methods, and strideStance is called DIRECTLY (calling it from a nested
   // worklet, which itself calls walk/mixStance, hard-crashes the runtime).
@@ -138,6 +142,9 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick, gaz
   const balAnswered = (cur.balance ?? 0) > 0 && picked !== null;
   const stepX = picked === 'solitude' ? -22 : picked === 'among' ? 22 : 0;
   const tiltDir = picked === 'thesis' ? 1 : picked === 'fact' ? -1 : 0;
+  // ANIMATE ONLY WHAT CHANGED (C20c) — a one-shot marginal note, so it fires
+  // only on the beat that raises its own point, never on a beat that repeats it.
+  const glossNow = (cur.gloss ?? 0) > 0 && (cur.gloss ?? 0) !== (prev?.gloss ?? 0) ? (cur.gloss ?? 0) : 0;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -164,6 +171,9 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick, gaz
       balance: carry(cv, 2, n, BAL[p], BAL[n], tr),
       chart: carry(cv, 3, n, CHART[p], CHART[n], tr),
       tilt: balAnswered ? qv.value * tiltDir : 0,
+      // THE NOTE'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to,
+      // flatly 0 on every other beat — one flash per tap, not a loop.
+      gloss: glossNow ? ease01(bt.value / 1.1) : 0,
       t,
     };
   });
@@ -173,6 +183,11 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick, gaz
   const forkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.fork }));
   const balStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.balance }));
   const beamStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.tilt * 10}deg` }] }));
+  // Fades in over the first fifth of its window and out over the last.
+  const glossStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.gloss;
+    return { opacity: u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2) };
+  });
 
   const answered = picked !== null;
   const showFork = (cur.fork ?? 0) > 0 && !!cur.interact;
@@ -195,6 +210,35 @@ export default function Ethics5Scene({ clock, bt, bi, qv, i, picked, onPick, gaz
         ))}
       </Animated.View>
       {LANES.map((l) => <Pill key={l.id} l={l} S={SCENE} />)}
+
+      {/* ── group AH: one marginal note per still tap, in the chart's own margins ── */}
+      {/* Beat 3: the window itself is disputed — a "?" in the gap above the lanes. */}
+      {glossNow === 1 && (
+        <Animated.View style={[styles.glossQ, glossStyle]} pointerEvents="none">
+          <Text style={styles.glossQText}>?</Text>
+        </Animated.View>
+      )}
+      {/* Beat 5: the exact death-date, tagged under the pill it belongs to. */}
+      {glossNow === 2 && (
+        <Animated.View
+          style={[styles.glossTag, glossStyle, { left: atYear(LANES[0].year) - 30, top: LANES[0].row + PILL_H / 2 + 4 }]}
+          pointerEvents="none"
+        >
+          <Text style={styles.glossTagText}>399 BCE</Text>
+        </Animated.View>
+      )}
+      {/* Beat 7: "cultivated in relationships with others" — two figures, linked,
+          beside the pill that names it. */}
+      {glossNow === 3 && (
+        <Animated.View
+          style={[styles.glossLink, glossStyle, { left: atYear(LANES[2].year) + LANES[2].w / 2 + 12, top: LANES[2].row - 5 }]}
+          pointerEvents="none"
+        >
+          <View style={styles.glossDot} />
+          <View style={styles.glossLinkBar} />
+          <View style={styles.glossDot} />
+        </Animated.View>
+      )}
 
       {/* ── the colonnade + the ground it stands on ────────────────────────── */}
       {COLUMNS.map((x) => <Column key={x} x={x} />)}
@@ -365,8 +409,8 @@ const styles = StyleSheet.create({
   // ── Q1: the signposts ──────────────────────────────────────────────────────
   signHit: { position: 'absolute', top: SIGN_T, width: SIGN_W },
   sign: {
-    width: SIGN_W, height: SIGN_H, borderWidth: 2.5, borderColor: INK, borderRadius: 5,
-    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+    width: SIGN_W, height: SIGN_H, borderWidth: 2.5, borderColor: INK, borderRadius: 8,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   signRight: { backgroundColor: INK, borderColor: INK },
   signWrong: { borderColor: SOFT },
@@ -387,10 +431,25 @@ const styles = StyleSheet.create({
     backgroundColor: INK, borderRadius: 2, transformOrigin: '50% 50%',
   },
   balHang: { position: 'absolute', top: 0, width: 2.5, height: 18, backgroundColor: SOFT },
+
+  // ── group AH: three marginal notes in the chart's own free space ────────────
+  // The gap between the year marks (233) and the first lane rule (268) is open
+  // paper — the window itself sits there, so a doubt about the window belongs
+  // right inside it.
+  glossQ: {
+    position: 'absolute', left: 230, top: 248, width: 20, height: 18,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  glossQText: { fontFamily: 'Inter_700Bold', fontSize: 16, color: INK, includeFontPadding: false },
+  glossTag: { position: 'absolute', width: 60, alignItems: 'center' },
+  glossTagText: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.6, color: SOFT, includeFontPadding: false },
+  glossLink: { position: 'absolute', flexDirection: 'row', alignItems: 'center', gap: 3 },
+  glossDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: INK },
+  glossLinkBar: { width: 14, height: 2, borderRadius: 1, backgroundColor: INK },
   panHit: { position: 'absolute', top: PAN_T, width: PAN_W },
   pan: {
-    width: PAN_W, height: PAN_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6,
-    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+    width: PAN_W, height: PAN_H, borderWidth: 2.5, borderColor: INK, borderRadius: 8,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   panRight: { backgroundColor: INK, borderColor: INK },
   panWrong: { borderColor: SOFT },

@@ -9,6 +9,7 @@ import { BEATS } from './epistemology19Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, pickAt,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIVE DOORS WITH SUBJECTS ON THEM, AND A KEY CUT FOR ONE.
@@ -76,6 +78,8 @@ const CHIP = BEATS.map((b) => b.chip ?? 0);
 const STRAY = BEATS.map((b) => b.stray ?? 0);
 const SPLIT = BEATS.map((b) => b.split ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+const CRED_CHECK = BEATS.map((b) => (b.credCheck ? 1 : 0));
+const NO_BRIDGE = BEATS.map((b) => (b.noBridge ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology19'));
 
@@ -96,7 +100,7 @@ const DOORS_AT = [0, 1, 1];
 
 export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const reacting = REACT[i] === 1;
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -119,6 +123,8 @@ export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick, 
       chip: carry(cv, 2, n, CHIP[p], CHIP[n], tr),
       stray: carry(cv, 3, n, STRAY[p], STRAY[n], tr),
       split: carry(cv, 4, n, SPLIT[p], SPLIT[n], tr),
+      credCheck: carry(cv, 5, n, CRED_CHECK[p], CRED_CHECK[n], tr),
+      noBridge: carry(cv, 6, n, NO_BRIDGE[p], NO_BRIDGE[n], tr),
       t,
     };
   });
@@ -143,6 +149,8 @@ export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick, 
     };
   });
   const barStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.stray }));
+  const credCheckStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.credCheck }));
+  const noBridgeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.noBridge }));
 
   return (
     <View style={styles.scene}>
@@ -190,6 +198,18 @@ export default function Epistemology19Scene({ clock, bt, bi, i, picked, onPick, 
 
         {/* The bar across the heart door: tried, did not turn. */}
         <Animated.View style={[styles.tried, barStyle]} pointerEvents="none" />
+
+        {/* CRED_CHECK — a checkmark on the heart door: the credential itself is real. */}
+        <Animated.View style={[styles.credCheck, credCheckStyle]} pointerEvents="none">
+          <Text style={styles.credCheckMark}>✓</Text>
+        </Animated.View>
+
+        {/* NO_BRIDGE — the credential line reaches for nutrition and snaps before it lands. */}
+        <Animated.View style={[StyleSheet.absoluteFill, noBridgeStyle]} pointerEvents="none">
+          <View style={styles.bridgeLeft} />
+          <View style={styles.bridgeRight} />
+          <Text style={styles.bridgeX}>✕</Text>
+        </Animated.View>
       </Animated.View>
 
       <Animated.View style={[styles.chip, chipStyle]} pointerEvents="none">
@@ -208,14 +228,14 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   // EVERY DOOR PART IS POSITIONED INSIDE THE TARGET, not in scene space, because
   // the Target IS the door now and its box is exactly `hit`. Relative coordinates
   // are what let the whole thing be lifted as one object.
   doorFace: {
     position: 'absolute', left: 0, top: 0, width: DOOR_W, height: DOOR_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   doorCap: {
     position: 'absolute', left: 0, top: 8, width: DOOR_W, textAlign: 'center',
@@ -236,6 +256,28 @@ const styles = StyleSheet.create({
   tried: {
     position: 'absolute', left: DOOR_X[1] - 4, top: DOOR_Y + DOOR_H / 2, width: DOOR_W + 8, height: 2.5,
     backgroundColor: INK,
+  },
+
+  // CRED_CHECK — a small checkmark badge on the heart door's own corner.
+  credCheck: {
+    position: 'absolute', left: DOOR_X[1] + DOOR_W - 14, top: DOOR_Y - 10, width: 18, height: 18,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 9, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  credCheckMark: { fontFamily: 'Inter_700Bold', fontSize: 10, color: INK, includeFontPadding: false },
+  // NO_BRIDGE — the credential's own line, reaching from the heart door toward
+  // nutrition and breaking before it lands, at the height of the standing bars.
+  bridgeLeft: {
+    position: 'absolute', left: DOOR_X[1] + DOOR_W / 2, top: DOOR_Y + DOOR_H - 13, width: 27, height: 2,
+    backgroundColor: INK,
+  },
+  bridgeRight: {
+    position: 'absolute', left: DOOR_X[2] + DOOR_W / 2 - 27, top: DOOR_Y + DOOR_H - 13, width: 27, height: 2,
+    backgroundColor: INK,
+  },
+  bridgeX: {
+    position: 'absolute', left: DOOR_X[1] + DOOR_W / 2 + 22, top: DOOR_Y + DOOR_H - 20,
+    fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', top: DOOR_Y, width: DOOR_W, height: DOOR_H },

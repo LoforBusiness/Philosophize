@@ -14,14 +14,16 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A VERDICT BOARD over a found wallet.
@@ -433,7 +435,7 @@ const styles = StyleSheet.create({
   // marks in the band 18…39.
   note: {
     position: 'absolute', left: NOTE_L, width: NOTE_W, height: NOTE_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   noteBadge: {
     position: 'absolute', left: 5, top: 4, width: 13, height: 13, borderRadius: 6.5,
@@ -473,7 +475,7 @@ const styles = StyleSheet.create({
     borderRadius: 3, backgroundColor: RULE,
   },
   wallet: {
-    position: 'absolute', left: WALLET_X - 37, top: GROUND - 40, width: 74, height: 40, borderRadius: 4,
+    position: 'absolute', left: WALLET_X - 37, top: GROUND - 40, width: 74, height: 40, borderRadius: 8,
     borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   stitch: { position: 'absolute', top: 5, width: 6, height: 1.5, backgroundColor: RULE },

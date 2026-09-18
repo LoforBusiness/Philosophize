@@ -13,6 +13,7 @@ import { BEATS } from './logic8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A street at night: a soaked patch of pavement stage LEFT, a garden with a
 // sprinkler stage RIGHT, behind a kerb. The figure double-takes, walks back to the
@@ -117,6 +119,11 @@ const DIR = dirsFrom(X, 1);
 const WETV = BEATS.map((b) => b.wet ?? 0);
 const RULEV = BEATS.map((b) => b.rule ?? 0);
 const SPRV = BEATS.map((b) => b.spr ?? 0);
+const HASTY = BEATS.map((b) => b.hasty ?? 0);
+const WET_TAG = BEATS.map((b) => b.wetTag ?? 0);
+const REVERSED = BEATS.map((b) => b.reversed ?? 0);
+const ALT_CAUSE = BEATS.map((b) => b.altCause ?? 0);
+const ALT_GENERAL = BEATS.map((b) => b.altGeneral ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -126,7 +133,7 @@ const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 export default function Logic8Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(9);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -138,6 +145,11 @@ export default function Logic8Scene({ clock, bt, bi, i, picked, onPick, dragPos,
   const crossFade = (cur.cross ?? 0) !== (prev?.cross ?? 0);
   const trapOn = (cur.trap ?? 0) > 0;
   const crossOn = (cur.cross ?? 0) > 0;
+  const hastyFade = (cur.hasty ?? 0) !== (prev?.hasty ?? 0);
+  const wetTagFade = (cur.wetTag ?? 0) !== (prev?.wetTag ?? 0);
+  const reversedFade = (cur.reversed ?? 0) !== (prev?.reversed ?? 0);
+  const altCauseFade = (cur.altCause ?? 0) !== (prev?.altCause ?? 0);
+  const altGeneralFade = (cur.altGeneral ?? 0) !== (prev?.altGeneral ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -161,6 +173,13 @@ export default function Logic8Scene({ clock, bt, bi, i, picked, onPick, dragPos,
       spr: carry(cv, 3, n, SPRV[p], SPRV[n], tr),
       trap: trapOn ? (trapFade ? grow : 1) : 0,
       cross: crossOn ? (crossFade ? grow : 1) : 0,
+      // The five group-AH markers — each fades fully in and fully out on its
+      // own, so none of them is ever left half-lit at rest.
+      hasty: carry(cv, 4, n, HASTY[p], HASTY[n], hastyFade ? grow : 1),
+      wetTag: carry(cv, 5, n, WET_TAG[p], WET_TAG[n], wetTagFade ? grow : 1),
+      reversed: carry(cv, 6, n, REVERSED[p], REVERSED[n], reversedFade ? grow : 1),
+      altCause: carry(cv, 7, n, ALT_CAUSE[p], ALT_CAUSE[n], altCauseFade ? grow : 1),
+      altGeneral: carry(cv, 8, n, ALT_GENERAL[p], ALT_GENERAL[n], altGeneralFade ? grow : 1),
       t,
     };
   });
@@ -195,6 +214,19 @@ export default function Logic8Scene({ clock, bt, bi, i, picked, onPick, dragPos,
     opacity: SCENE.value.cross,
     transform: [{ scale: 1 + (1 - SCENE.value.cross) * 0.4 }, { rotate: '-12deg' }],
   }));
+  // The five group-AH markers.
+  const hastyStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.hasty }));
+  const wetTagStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.wetTag,
+    transform: [{ translateY: (1 - SCENE.value.wetTag) * 6 }],
+  }));
+  const reversedStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.reversed }));
+  const altCauseStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.altCause,
+    transform: [{ scaleX: SCENE.value.altCause }],
+  }));
+  const altArrowStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.altCause }));
+  const altGeneralStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.altGeneral }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -218,6 +250,17 @@ export default function Logic8Scene({ clock, bt, bi, i, picked, onPick, dragPos,
         <View style={styles.dropletA} />
         <View style={styles.dropletB} />
         <Text style={styles.puddleLabel}>WET PATCH</Text>
+        {/* group AH: names the wet patch as the second premise, the moment the
+            narration calls it that. */}
+        <Animated.View style={[styles.wetTag, wetTagStyle]} pointerEvents="none">
+          <Text style={styles.wetTagText}>PREMISE 2</Text>
+        </Animated.View>
+      </Animated.View>
+
+      {/* group AH: a tentative, unearned conclusion — before any premise is
+          named, the walker has already jumped to one. */}
+      <Animated.View style={[styles.hastyBox, hastyStyle]} pointerEvents="none">
+        <Text style={styles.hastyText}>SO… IT RAINED?</Text>
       </Animated.View>
 
       {/* ── next door's garden, right of the walk band ────────────────────────── */}
@@ -271,6 +314,18 @@ export default function Logic8Scene({ clock, bt, bi, i, picked, onPick, dragPos,
           <View style={styles.stampSlash} />
         </Animated.View>
       ) : null}
+
+      {/* group AH: the reversed arrow — this trap runs the rule backward. Sits in
+          the trap card's own reserved right-hand gap, empty until the stamp
+          later lands there. */}
+      <Animated.Text style={[styles.reversedArrow, reversedStyle]} pointerEvents="none">↑</Animated.Text>
+
+      {/* group AH: the sprinkler could be the reason the patch is wet — a
+          dashed, uncertain link, drawn in the strip above the walker's head
+          where nothing else is ever drawn. */}
+      <Animated.View style={[styles.altLine, altCauseStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.altArrow, altArrowStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.altCaption, altGeneralStyle]} pointerEvents="none">OR ANYTHING ELSE</Animated.Text>
 
       {/* ── Q1: tap what the wet street actually proves ───────────────────────── */}
       {showPick ? (
@@ -339,6 +394,46 @@ const styles = StyleSheet.create({
     backgroundColor: PAPER,
   },
   star: { position: 'absolute', width: 4, height: 4, backgroundColor: SOFT, transform: [{ rotate: '45deg' }] },
+
+  // ── group AH: the five still-tap markers ────────────────────────────────────
+  // The thought, above the walker, in the card zone that is empty until the
+  // rule card arrives on the next beat.
+  hastyBox: {
+    position: 'absolute', left: 100, top: 272, width: 200, height: 28,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 6,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  hastyText: { fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 0.8, color: SOFT, includeFontPadding: false },
+  // Sits just above the puddle and its WET PATCH label (the puddle's own layer
+  // has no offset, so this is an absolute stage position like its siblings).
+  wetTag: {
+    position: 'absolute', left: 6, top: 445, width: 104, height: 16,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  wetTagText: { fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 1, color: INK, includeFontPadding: false },
+  // Sits in the tempting-move card's own reserved right-hand gap (paddingRight
+  // 56), empty until the NO stamp lands there several beats later.
+  reversedArrow: {
+    position: 'absolute', left: 216, top: 139, width: 56, height: 26, lineHeight: 26,
+    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 22, color: INK,
+    includeFontPadding: false,
+  },
+  // The dashed link and its caption sit in the one strip nothing else ever
+  // draws in: below the card column (338) and above the figure's crown (361).
+  altLine: {
+    position: 'absolute', left: 90, top: 347, width: 220, height: 0,
+    borderTopWidth: 2, borderStyle: 'dashed', borderColor: SOFT, transformOrigin: '100% 0%',
+  },
+  altArrow: {
+    position: 'absolute', left: 78, top: 342, width: 0, height: 0,
+    borderTopWidth: 6, borderBottomWidth: 6, borderRightWidth: 10,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: SOFT,
+  },
+  altCaption: {
+    position: 'absolute', left: 100, top: 330, width: 200, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+  },
 
   // ── the wet patch ────────────────────────────────────────────────────────────
   puddle: {
@@ -447,7 +542,7 @@ const styles = StyleSheet.create({
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
-    height: CARD_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
+    height: CARD_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },

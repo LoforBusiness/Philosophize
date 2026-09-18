@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { View, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import { BONE_SRC, STR, type Bundle } from './rig';
+import { pillStyle } from './stageSkin';
 import type { Piece } from './wardrobe';
 import { useWorn } from './wardrobeContext';
 
@@ -129,6 +130,13 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
       pelvis: dotBase(torso / 2),
       head: dotBase(headR),
       fist: dotBase(gloves ? gloveR : limb / 2),
+      // THE SHADOW HE STANDS IN, AS A PILL (group AG). Duolingo's illustration
+      // rules are explicit about the shape: *"shadows always appear below
+      // characters and objects as a pill shape — never an oval, because ovals imply
+      // perspective"* — and this drawing is flat and seen straight on, so the rule
+      // applies exactly. It is the one thing that puts him ON the floor rather than
+      // in front of it.
+      pill: pillStyle(k),
     };
   }, [k, color, gloves]);
 
@@ -141,6 +149,20 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
   // figure composite as one flat shape first — the same fix WelcomeAnimation
   // uses to match SVG group-opacity semantics.
   const a = {
+    // WHERE HE IS TOUCHING THE FLOOR — the midpoint of his ankles, at whichever of
+    // them is lower, so the pill travels with a walk and does not slide out from
+    // under a sit. It fades as his feet part: a figure mid-stride is not standing on
+    // one spot, and a full-strength pill under a stride reads as a puddle.
+    pill: useAnimatedStyle(() => {
+      const B = D.value;
+      const lx = B.ankL[0].translateX; const rx = B.ankR[0].translateX;
+      const ly = B.ankL[1].translateY; const ry = B.ankR[1].translateY;
+      const part = Math.min(1, Math.abs(lx - rx) / (26 * k));
+      return {
+        transform: [{ translateX: (lx + rx) / 2 }, { translateY: Math.max(ly, ry) }],
+        opacity: 1 - 0.45 * part,
+      };
+    }),
     thighL: useAnimatedStyle(() => ({ transform: D.value.thighL })),
     shinL: useAnimatedStyle(() => ({ transform: D.value.shinL })),
     thighR: useAnimatedStyle(() => ({ transform: D.value.thighR })),
@@ -250,6 +272,8 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
       testID="figure"
       style={[{ position: 'absolute', left: 0, top: 0 }, groupFade]}
     >
+      {/* The floor he is standing on, before anything that stands on it. */}
+      <Animated.View style={[S.pill, a.pill]} />
       {/* Far side first, so the near limbs read in front. */}
       <Animated.View style={[S.limbBone, a.thighL]} />
       <Animated.View style={[S.limbBone, a.shinL]} />

@@ -9,6 +9,7 @@ import { BEATS } from './aesthetics25Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE CANVAS DRAWN TWICE, AND WHAT EACH VIEWER BROUGHT TO IT.
@@ -93,6 +95,11 @@ const SHELVES = BEATS.map((b) => b.shelves ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 const FEEDS = BEATS.map((b) => (b.feeds ? 1 : 0));
+// GROUP AH — two still taps. READ marks each visitor's own reaction (never the
+// canvas, which must stay identical); BASE solidifies the rail the shelves stand
+// on, for the beat that argues detachment needs an economic footing.
+const READ = BEATS.map((b) => b.read ?? 0);
+const BASE = BEATS.map((b) => b.base ?? 0);
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -111,7 +118,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics25'));
 export default function Aesthetics25Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(7);
+  const cv = useCarry(9);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -136,6 +143,8 @@ export default function Aesthetics25Scene({ clock, bt, bi, i, picked, onPick, pi
       // R7c — the chip decides which way the viewer is being fed, under the thumb.
       heart: carry(cv, 5, n, 0, reacting ? pickAt(FROM_HEART, pickPos.value) : 0, tr),
       shelf: carry(cv, 6, n, 0, reacting ? pickAt(FROM_SHELF, pickPos.value) : 0, tr),
+      read: carry(cv, 7, n, READ[p], READ[n], tr),
+      base: carry(cv, 8, n, BASE[p], BASE[n], tr),
     };
   });
 
@@ -148,6 +157,8 @@ export default function Aesthetics25Scene({ clock, bt, bi, i, picked, onPick, pi
   const feedsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.feedsOn }));
   const heartStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.heart }));
   const shelfStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.shelf }));
+  const readStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.read }));
+  const baseStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.base }));
   // E39 — the MEASURE between the two stacks is what the right answer reveals, so
   // it belongs to the thing that was chosen and appears only once it has been.
   const gapStyle = useAnimatedStyle(() => ({
@@ -169,7 +180,11 @@ export default function Aesthetics25Scene({ clock, bt, bi, i, picked, onPick, pi
             <Text style={[styles.name, { left: fx }]}>{NAME[k]}</Text>
           </View>
         ))}
+        <Animated.View style={[styles.readMark, styles.readDot, readStyle]} pointerEvents="none" />
+        <Animated.View style={[styles.readMark, styles.readRing, readStyle]} pointerEvents="none" />
+
         <View style={styles.rail} />
+        <Animated.View style={[styles.railStrong, baseStyle]} pointerEvents="none" />
         {FRAME_X.map((fx, k) => (
           <Shelf key={fx} S={SCENE} left={fx + (FRAME_W - SLAB_W) / 2} count={SLABS[k]} />
         ))}
@@ -235,7 +250,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — political7 and political8 both stand their
   // subject on a filled mass rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 150, top: CAP_T, width: 232,
@@ -259,6 +274,14 @@ const styles = StyleSheet.create({
   },
 
   rail: { position: 'absolute', left: 146, top: RAIL_Y, width: 210, height: 1.5, backgroundColor: RULE },
+  // THE RAIL SOLIDIFIED (beat 8) — the economic base Bourdieu says disinterested
+  // judgement quietly depends on.
+  railStrong: { position: 'absolute', left: 146, top: RAIL_Y - 1.25, width: 210, height: 4, backgroundColor: INK },
+  // A MARK UNDER EACH VISITOR (beat 2) — never on the canvas, which stays
+  // identical: solid where one recognises it at once, hollow where the other can't.
+  readMark: { position: 'absolute', top: 336, width: 12, height: 12, borderRadius: 6 },
+  readDot: { left: FRAME_X[0] + FRAME_W / 2 - 6, backgroundColor: INK },
+  readRing: { left: FRAME_X[1] + FRAME_W / 2 - 6, borderWidth: 1.5, borderStyle: 'dashed', borderColor: SOFT },
   slab: { position: 'absolute', width: SLAB_W, height: SLAB_H, borderRadius: 2, backgroundColor: INK },
   // The measure the right answer draws: the height one visitor has that the other
   // has not, stated as a bar rather than as a word.
@@ -270,7 +293,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   // TWO LINES OF ROOM, because three of these captions need it: measured against
   // the real .ttf, WHAT THEY BROUGHT is 101.6px into a 94-wide plate. A caption

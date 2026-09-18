@@ -29,6 +29,10 @@ export interface Political37Beat extends BaseBeat {
   /** 1 = the reader's thumb is on the cap rail. */ live_d?: number;
   /** 1 = the two labels stand below: EQUAL VOTE and UNEQUAL REACH. */ labels?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = two small marks appear at the quiet mouth's opening — the few it actually reaches. */ near?: number;
+  /** 1 = an equals mark appears between the two ballots — the vote itself is unchanged. */ eq?: number;
+  /** 1 = a small divider appears between the two labels — the two positions in dispute. */ vs?: number;
+  /** 1 = a row of small marks appears between the two labels — one of the many rules a democracy could set. */ range?: number;
 }
 
 export const BEATS: Political37Beat[] = [
@@ -43,7 +47,7 @@ export const BEATS: Political37Beat[] = [
     dur: 2.8,
   },
   {
-    p: 266, x: 54, pair: 1, horns: 1, labels: 1,
+    p: 266, x: 54, pair: 1, horns: 1, labels: 1, near: 1,
     text: 'The other, without money for advertising, reaches only the people nearby.',
     dur: 1.8,
   },
@@ -72,7 +76,7 @@ export const BEATS: Political37Beat[] = [
     dur: 2.1,
   },
   {
-    p: 414, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1,
+    p: 414, x: 54, pair: 1, horns: 1, cap: 0.5, labels: 1, eq: 1,
     text: 'Both citizens have equal political liberties but unequal power to use them. Rawls argues these liberties need fair value.',
     dur: 2.7,
   },
@@ -104,12 +108,12 @@ export const BEATS: Political37Beat[] = [
     dur: 2.3,
   },
   {
-    p: 459, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
+    p: 459, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1, vs: 1,
     text: 'The other defends the fair value of every citizen’s political voice. They disagree about which liberty comes first.',
     dur: 2.3,
   },
   {
-    p: 379, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1,
+    p: 379, x: 126, pair: 1, horns: 1, cap: 0.5, labels: 1, range: 1,
     text: 'Democracies differ in how they regulate campaign money. Each rule reflects a view of what political equality requires.',
     dur: 4.8,
   },

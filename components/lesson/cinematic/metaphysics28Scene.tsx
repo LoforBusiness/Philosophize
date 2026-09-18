@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics28Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { Shapes, ell, bar, tri, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A DARK FIELD, FOUR THINGS STANDING IN IT, AND A LAMP IN EVERY ONE.
@@ -119,6 +121,9 @@ const RAIL = BEATS.map((b) => (b.rail ? 1 : 0));
 const GLOW = BEATS.map((b) => b.glow ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const THRESHOLD = BEATS.map((b) => (b.threshold ? 1 : 0));
+/** Between MOUSE and BRAIN — where emergentism draws its line of organisation. */
+const THRESHOLD_X = (NAME_CX[2] + NAME_CX[3]) / 2;
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -129,13 +134,17 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics28'));
 export default function Metaphysics28Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const thresholdFade = (cur.threshold ?? 0) !== (prev?.threshold ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -152,6 +161,9 @@ export default function Metaphysics28Scene({ clock, bt, bi, i, picked, onPick, d
       // there is in nature altogether is exactly what it means here.
       glow: carry(cv, 3, n, GLOW[p], reacting ? dragPos.value : GLOW[n], tr),
       plates: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // A dashed threshold between MOUSE and BRAIN — emergentism's line, drawn
+      // where panpsychism draws none.
+      threshold: carry(cv, 5, n, THRESHOLD[p], THRESHOLD[n], thresholdFade ? grow : 1),
     };
   });
 
@@ -161,6 +173,7 @@ export default function Metaphysics28Scene({ clock, bt, bi, i, picked, onPick, d
 
   const fieldStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.field }));
   const railStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.rail }));
+  const thresholdStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.threshold }));
   // EVERY LAMP ON THE RAIL ANSWERS AT ONCE, because the value is one reading of
   // how much experience there is rather than four separate ones.
   const coreStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.glow) }));
@@ -186,6 +199,9 @@ export default function Metaphysics28Scene({ clock, bt, bi, i, picked, onPick, d
       <Animated.View style={[StyleSheet.absoluteFill, coreStyle]} pointerEvents="none">
         <Shapes parts={LAMPS} />
       </Animated.View>
+
+      {/* group AH — a dashed threshold: emergentism's line between mouse and brain. */}
+      <Animated.View style={[styles.threshold, thresholdStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
         {PLATE_ID.map((id, k) => (
@@ -216,11 +232,18 @@ export default function Metaphysics28Scene({ clock, bt, bi, i, picked, onPick, d
 }
 
 const styles = StyleSheet.create({
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // A dashed vertical line between MOUSE and BRAIN — the level emergentism says
+  // experience begins at, where panpsychism's own glow already runs unbroken.
+  threshold: {
+    position: 'absolute', left: THRESHOLD_X, top: FIELD_Y + 18, width: 0, height: BASE_Y - (FIELD_Y + 18),
+    borderLeftWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   field: {
     position: 'absolute', left: FIELD_X, top: FIELD_Y, width: FIELD_W, height: FIELD_H,
@@ -242,7 +265,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,

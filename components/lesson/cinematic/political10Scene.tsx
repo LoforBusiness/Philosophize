@@ -13,6 +13,7 @@ import { BEATS } from './political10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // AN UNEQUAL STACK OF HOLDINGS, READ TWICE. Stage right, three columns of very
 // different heights standing on a HISTORY TAPE whose four marks read ACQUIRED ·
@@ -122,6 +124,25 @@ const PLATES = [
   { id: 'tape', label: 'HISTORY TAPE', correct: true },
 ];
 
+const SIZES = BEATS.map((b) => b.sizes ?? 0);
+const COMMON = BEATS.map((b) => b.common ?? 0);
+const LABOUR = BEATS.map((b) => b.labour ?? 0);
+const STORY = BEATS.map((b) => b.story ?? 0);
+const JUST = BEATS.map((b) => b.just ?? 0);
+const RISE = BEATS.map((b) => b.rise ?? 0);
+
+// ── where the six tap events sit, off the chart's own geometry ───────────────
+// The sizes are the columns' OWN heights read against the shortest — 88, 168 and 54
+// against 54 — so the hook's "three times the smallest" is arithmetic rather than a
+// claim, and the figures cannot drift from the drawing.
+const RATIO = COL_H.map((h) => h / COL_H[LOW]);
+const SIZE_LABEL = RATIO.map((r) => (Math.abs(r - Math.round(r)) < 0.08 ? `${Math.round(r)}x` : `${r.toFixed(1)}x`));
+/** The stack's own bounding box, which is what "in common" is drawn around. */
+const STACK_L = COL_X[0] - 8;                                    // 182
+const STACK_R = COL_X[2] + COL_W + 8;                            // 396
+const STACK_T = TAPE_T - Math.max(...COL_H) - 8;                 // 258
+/** The row under the tape, empty on every beat these events use. */
+const UNDER_T = PTR_T;
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_B);
 // The camera, from the staging: it follows the figure this track describes,
@@ -135,7 +156,7 @@ const DIR = dirsFrom(X, 1);
 // holdings Nozick and Rawls read, and by design they never change; only the reading does.
 export default function Political10Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(1);
+  const cv = useCarry(7);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -193,6 +214,13 @@ export default function Political10Scene({ clock, bt, bi, i, picked, onPick, gaz
       // after the drop is most of the way down and finishes just behind it (C20d).
       low: lvlOn ? (lvlFade ? ease01(clamp01((bt.value - 1.2) / 0.7)) : 1) : 0,
       plates: platesOn ? (platesFade ? ease01(clamp01(bt.value / 0.6)) : 1) : 0,
+      // The six tap events, carried, so each fades out as well as in (group L).
+      sizes: carry(cv, 1, n, SIZES[p], SIZES[n], tr),
+      common: carry(cv, 2, n, COMMON[p], COMMON[n], tr),
+      labour: carry(cv, 3, n, LABOUR[p], LABOUR[n], tr),
+      story: carry(cv, 4, n, STORY[p], STORY[n], tr),
+      just: carry(cv, 5, n, JUST[p], JUST[n], tr),
+      rise: carry(cv, 6, n, RISE[p], RISE[n], tr),
     };
   });
 
@@ -208,6 +236,57 @@ export default function Political10Scene({ clock, bt, bi, i, picked, onPick, gaz
   }));
   const lowStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.low }));
   const plateStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
+
+  // ── the six tap events ─────────────────────────────────────────────────────
+  //
+  // THREE THINGS ARRIVE IN TURN wherever the sentence lists them in turn — the
+  // sizes, and the four marks of the record. A fifth of the track apart, so the
+  // reader's eye is walked along rather than handed the whole row at once.
+  const inTurn = (u: number, k: number, of: number) => {
+    'worklet';
+    return (u <= 0 ? 0 : clamp01((u - (k * 0.7) / of) / 0.34));
+  };
+  const size0Style = useAnimatedStyle(() => ({ opacity: inTurn(SCENE.value.sizes, 0, 3) }));
+  const size1Style = useAnimatedStyle(() => ({ opacity: inTurn(SCENE.value.sizes, 1, 3) }));
+  const size2Style = useAnimatedStyle(() => ({ opacity: inTurn(SCENE.value.sizes, 2, 3) }));
+  const sizeStyles = [size0Style, size1Style, size2Style];
+  // The rule through the figures is the SECOND half of that beat's sentence, so it
+  // waits until all three have been stated.
+  const sizeCutStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.sizes - 0.72) / 0.28) }));
+
+  // In common: the enclosure DRAWS from its own left edge rather than fading, so it
+  // reads as being laid round the stack.
+  const commonStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.common,
+    transform: [{ scaleX: 0.9 + 0.1 * SCENE.value.common }],
+  }));
+
+  // Labour: the first holding FILLS FROM THE BOTTOM, which is the direction the
+  // work went in. transformOrigin is at its foot, so nothing above it moves.
+  const labourStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.labour > 0 ? 1 : 0,
+    transform: [{ scaleY: SCENE.value.labour }],
+  }));
+  const labourTextStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.labour - 0.5) / 0.5) }));
+
+  const ul0Style = useAnimatedStyle(() => ({ opacity: inTurn(SCENE.value.story, 0, 4) }));
+  const ul1Style = useAnimatedStyle(() => ({ opacity: inTurn(SCENE.value.story, 1, 4) }));
+  const ul2Style = useAnimatedStyle(() => ({ opacity: inTurn(SCENE.value.story, 2, 4) }));
+  const ul3Style = useAnimatedStyle(() => ({ opacity: inTurn(SCENE.value.story, 3, 4) }));
+  const ulStyles = [ul0Style, ul1Style, ul2Style, ul3Style];
+
+  // A STAMP, NOT A LABEL: struck across the tallest column, tilted, landing from
+  // slightly large — it is a verdict ON the holding rather than part of the chart.
+  const justStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.just,
+    transform: [{ rotate: '-5deg' }, { scale: 1.12 - 0.12 * SCENE.value.just }],
+  }));
+
+  // The shortest column is asked to RISE, so the arrow travels up as it arrives.
+  const riseStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.rise,
+    transform: [{ translateY: (1 - SCENE.value.rise) * 10 }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -265,6 +344,44 @@ export default function Political10Scene({ clock, bt, bi, i, picked, onPick, gaz
         <View style={styles.lvlTickR} />
       </Animated.View>
 
+      {/* Each column states its own size, and then the figures are ruled through:
+          the sizes are stated and set aside in one beat. */}
+      {COL_X.map((cx, k) => (
+        <Animated.View key={`sz${k}`} style={[styles.sizeWrap, { left: cx, top: TAPE_T - COL_H[k] + 3 }, sizeStyles[k]]} pointerEvents="none">
+          <Text style={styles.sizeText}>{SIZE_LABEL[k]}</Text>
+          <Animated.View style={[styles.sizeCut, sizeCutStyle]} />
+        </Animated.View>
+      ))}
+
+      {/* Before anything is owned: a dashed boundary round the whole stack. */}
+      <Animated.View style={[styles.commonBox, commonStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.commonCap, commonStyle]} pointerEvents="none">
+        <Text style={styles.commonText}>FIRST GIVEN IN COMMON</Text>
+      </Animated.View>
+
+      {/* Labour mixed in: the first holding fills from its foot. */}
+      <Animated.View style={[styles.labourFill, labourStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.labourCap, labourTextStyle]} pointerEvents="none">
+        <Text style={styles.labourText}>LABOUR MIXED IN</Text>
+      </Animated.View>
+
+      {/* The record read out: one mark underlined after another, in its order. */}
+      {MARKS.map((m, k) => (
+        <Animated.View key={`ul${k}`} style={[styles.storyUL, { left: TAPE_IN_L + k * CELL_W + 10 }, ulStyles[k]]} pointerEvents="none" />
+      ))}
+
+      {/* However large: the verdict struck across the tallest holding. */}
+      <Animated.View style={[styles.justStamp, justStyle]} pointerEvents="none">
+        <Text style={styles.justText}>STILL JUST</Text>
+      </Animated.View>
+
+      {/* Whoever is worst off: the shortest column is asked to rise. */}
+      <Animated.View style={[styles.riseWrap, riseStyle]} pointerEvents="none">
+        <Text style={styles.riseText}>MUST RISE</Text>
+        <View style={styles.riseHead} />
+        <View style={styles.riseShaft} />
+      </Animated.View>
+
       {/* ── Q2: which of the two does Nozick read? ──────────────────────────── */}
       {platesOn &&
         PLATES.map((pl, k) => {
@@ -318,7 +435,7 @@ const styles = StyleSheet.create({
 
   tape: {
     position: 'absolute', left: TAPE_L, top: TAPE_T, width: TAPE_W, height: TAPE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     flexDirection: 'row',
   },
   marks: {
@@ -345,9 +462,88 @@ const styles = StyleSheet.create({
   lvlTickL: { width: 3, height: LVL_H, backgroundColor: INK },
   lvlTickR: { width: 3, height: LVL_H, backgroundColor: INK },
 
+  // ── the six tap events (group AH) ──────────────────────────────────────────
+  //
+  // The size figures sit INSIDE their own columns, which is the only clear paper
+  // this composition has at three different heights: the caption owns 238…252 and
+  // the tallest column's top is 266, so there are 14 units above the stack and no
+  // room for a plate over each.
+  sizeWrap: { position: 'absolute', width: COL_W, height: 15, alignItems: 'center', justifyContent: 'center' },
+  sizeText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 0.2, color: INK,
+    includeFontPadding: false,
+  },
+  sizeCut: { position: 'absolute', left: 8, right: 8, top: 7, height: 2, backgroundColor: INK, borderRadius: 1 },
+
+  // A BOUNDARY IS DASHED, never a fill: the stack is not enclosed by an object, it
+  // is held under a claim. Drawn from its own left edge, so it is laid round them.
+  commonBox: {
+    position: 'absolute', left: STACK_L, top: STACK_T, width: STACK_R - STACK_L, height: TAPE_T - STACK_T,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 6,
+    transformOrigin: '0% 50%',
+  },
+  commonCap: { position: 'absolute', left: TAPE_L, top: UNDER_T, width: TAPE_W, alignItems: 'center' },
+  commonText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
+    includeFontPadding: false,
+  },
+
+  // The fill is STONE rather than ink, because the level has to stay visible where
+  // it later crosses this column — an ink bar on an ink column is nothing.
+  labourFill: {
+    position: 'absolute', left: COL_X[0] + 2, top: TAPE_T - COL_H[0] + 2,
+    width: COL_W - 4, height: COL_H[0] - 4, backgroundColor: STONE, borderRadius: 2,
+    transformOrigin: '50% 100%',
+  },
+  // Set 20 below the row the enclosure's caption uses, so the two do not cross
+  // during the beat where one is fading out and the other in.
+  labourCap: { position: 'absolute', left: COL_X[0] - 30, top: UNDER_T + 20, width: 106, alignItems: 'center' },
+  labourText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+
+  storyUL: {
+    position: 'absolute', top: TAPE_T + TAPE_H - 6, width: CELL_W - 20, height: 2,
+    backgroundColor: INK, borderRadius: 1,
+  },
+
+  // 241…337 sits between column 0 (ends 236) and column 2 (starts 342), so the
+  // stamp overhangs the tallest column onto bare paper and touches neither.
+  justStamp: {
+    position: 'absolute', left: 241, top: 292, width: 96, height: 22,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  justText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK,
+    includeFontPadding: false,
+  },
+
+  riseWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
+  // The caption clears column 1 (which ends at x 312) by 10 units, and the shaft
+  // stops 6 above the level's resting line at 380.
+  riseText: {
+    position: 'absolute', left: COL_X[2] - 20, top: 318, width: 86, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+  // A TRIANGLE IN A SIZED WRAPPER: a border triangle has a zero-size box, so a
+  // percentage origin on one resolves against nothing (§13).
+  riseHead: {
+    position: 'absolute', left: COL_X[2] + COL_W / 2 - 8, top: 336, width: 16, height: 12,
+    borderLeftWidth: 8, borderRightWidth: 8, borderBottomWidth: 12,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: INK,
+    borderStyle: 'solid',
+  },
+  riseShaft: {
+    position: 'absolute', left: COL_X[2] + COL_W / 2 - 1.5, top: 348, width: 3, height: 26,
+    backgroundColor: INK, borderRadius: 1.5,
+  },
+
   plateSlot: { position: 'absolute', left: PL_L, width: PL_W },
   plate: {
-    height: PL_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: PL_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },

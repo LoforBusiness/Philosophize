@@ -9,6 +9,7 @@ import { BEATS } from './epistemology35Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { Shapes, Outlined, ell, bar, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO PENS DRAWN THE SAME, AND A CHAIN THAT WILL NOT REACH.
@@ -47,6 +49,9 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const FOLLOWS = BEATS.map((b) => b.follows ?? 0);
+const NAMED = BEATS.map((b) => b.named ?? 0);
+const STILL_SAY = BEATS.map((b) => b.stillSay ?? 0);
 const BASE_TR = 0.85;
 
 const PLATE_W = 96;
@@ -127,7 +132,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology35'));
 
 export default function Epistemology35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(8);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -156,6 +161,10 @@ export default function Epistemology35Scene({ clock, bt, bi, qv, i, picked, onPi
       plaqOn: carry(cv, 2, n, PLAQUES[p], PLAQUES[n], tr),
       chainOn: carry(cv, 3, n, CHAIN[p], CHAIN[n], tr),
       fenceOn: carry(cv, 4, n, SCAN[p], SCAN[n], tr),
+      // The three tap events, carried, so each fades out as well as in (group L).
+      follows: carry(cv, 5, n, FOLLOWS[p], FOLLOWS[n], tr),
+      named: carry(cv, 6, n, NAMED[p], NAMED[n], tr),
+      stillSay: carry(cv, 7, n, STILL_SAY[p], STILL_SAY[n], tr),
       fenceX: FENCE_LO + (FENCE_HI - FENCE_LO) * scan,
       // The second link parts on the beat that shows the gap, and stays parted — held
       // parted on the beats after, where it used to close and part again (C20c).
@@ -174,6 +183,23 @@ export default function Epistemology35Scene({ clock, bt, bi, qv, i, picked, onPi
   const fenceStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.fenceOn,
     transform: [{ translateX: SCENE.value.fenceX }],
+  }));
+
+  // ── the three tap events ───────────────────────────────────────────────────
+  //
+  // The tick goes on the THIRD plate, because the sentence is about what follows
+  // from the first two — the conclusion is the thing being claimed, not the chain.
+  const followsStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.follows,
+    transform: [{ scale: 1.1 - 0.1 * SCENE.value.follows }],
+  }));
+  const namedStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.named,
+    transform: [{ translateY: (1 - SCENE.value.named) * -6 }],
+  }));
+  const stillSayStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.stillSay,
+    transform: [{ translateY: (1 - SCENE.value.stillSay) * 8 }],
   }));
 
   return (
@@ -203,6 +229,21 @@ export default function Epistemology35Scene({ clock, bt, bi, qv, i, picked, onPi
       <Animated.View style={[styles.fence, fenceStyle]} pointerEvents="none">
         <View style={styles.fencePost} />
         <Text style={styles.fenceLabel}>RELEVANT</Text>
+      </Animated.View>
+
+      {/* The third plate is what the first two give you. */}
+      <Animated.View style={[styles.followsTick, followsStyle]} pointerEvents="none">
+        <Text style={styles.followsText}>✓</Text>
+      </Animated.View>
+
+      {/* What the principle is called. */}
+      <Animated.View style={[styles.namedPlate, namedStyle]} pointerEvents="none">
+        <Text style={styles.namedText} numberOfLines={1}>EPISTEMIC CLOSURE</Text>
+      </Animated.View>
+
+      {/* And what you would say anyway. */}
+      <Animated.View style={[styles.stillPlate, stillSayStyle]} pointerEvents="none">
+        <Text style={styles.stillText} numberOfLines={1}>STILL A ZEBRA</Text>
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
@@ -250,12 +291,45 @@ function Chain({
 }
 
 const styles = StyleSheet.create({
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  // On the third plate's own top-right corner.
+  followsTick: {
+    position: 'absolute', left: PLATE_X[2] + PLATE_W - 12, top: PLATE_Y - 10,
+    width: 22, height: 22, borderRadius: 11,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  followsText: {
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 13, color: INK,
+    includeFontPadding: false,
+  },
+  // Under the chain of plates, above the pens at PEN_Y.
+  namedPlate: {
+    position: 'absolute', left: PLATE_X[0], top: PLATE_Y + PLATE_H + 8, width: 180, height: 22,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  namedText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+  // Under the first pen, which is the zebra's own.
+  stillPlate: {
+    position: 'absolute', left: PEN_X[0], top: PEN_Y + PEN_H + 8, width: PEN_W, height: 24,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  stillText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: PAPER,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 116, top: CAP_T, width: 260,
@@ -265,7 +339,7 @@ const styles = StyleSheet.create({
   plate: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plateBox: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   plateLit: {
     position: 'absolute', left: 3, top: 3, width: PLATE_W - 6, height: PLATE_H - 6,
@@ -284,7 +358,7 @@ const styles = StyleSheet.create({
 
   pen: {
     position: 'absolute', top: PEN_Y, width: PEN_W, height: PEN_H,
-    borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 3, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
 
   plaque: {

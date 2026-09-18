@@ -30,6 +30,9 @@ export interface Ethics25Beat extends BaseBeat {
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
   /** How much of the gate is built, 0…1. */ gate?: number;
+  /** 1 = a stop-line marks the edge of the gap: the limit of justified power. */ limit?: number;
+  /** 1 = a dashed nudge and a struck bar: persuasion allowed, force is not. */ method?: number;
+  /** 1 = a small fork over the far deck: his own choice, once he is told. */ choice?: number;
 }
 
 export const BEATS: Ethics25Beat[] = [
@@ -44,12 +47,12 @@ export const BEATS: Ethics25Beat[] = [
     dur: 4.4,
   },
   {
-    p: 36, x: 40, bridge: 1,
+    p: 36, x: 40, bridge: 1, limit: 1,
     text: 'On this principle, power over an adult is justified only to prevent harm to others.',
     dur: 4.0,
   },
   {
-    p: 160, x: 40, bridge: 1,
+    p: 160, x: 40, bridge: 1, method: 1,
     text: 'For Mill, a person’s own good is not a sufficient warrant for compulsion. It justifies persuasion, but never force.',
     dur: 4.4,
   },
@@ -86,7 +89,7 @@ export const BEATS: Ethics25Beat[] = [
     dur: 5.0,
   },
   {
-    p: 383, x: 96, bridge: 1, sign: 1,
+    p: 383, x: 96, bridge: 1, sign: 1, choice: 1,
     text: 'Once the stranger is warned, Mill holds, he may decide for himself whether the risk is worth taking. A warning informs his will, whereas force would override it.',
     dur: 4.8,
   },

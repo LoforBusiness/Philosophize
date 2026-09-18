@@ -21,6 +21,14 @@ export interface Meta6Beat extends BaseBeat {
    * beat sets it, so the annotation lands exactly when the line is read.
    */
   you?: number;
+  /** A "DISPUTED?" tag flashes near the ship as philosophers argue over it (group AH). 0..1. */
+  disputed?: number;
+  /** Two matching coins appear stage right — qualitatively identical, same in every feature (group AH). 0..1. */
+  coins?: number;
+  /** A "SAME" tag lands beside the repaired ship — it keeps its numerical identity through every repair (group AH). 0..1. */
+  sameTag?: number;
+  /** A small "STILL" badge lands beside the reader's own tag, quoting the beat's own word (group AH). 0..1. */
+  youEq?: number;
 }
 
 export const BEATS: Meta6Beat[] = [
@@ -36,7 +44,7 @@ export const BEATS: Meta6Beat[] = [
     dur: 3.9,
   },
   {
-    p: 269, swap: 1, orig: 0.06,
+    p: 269, swap: 1, orig: 0.06, disputed: 1,
     text: 'Plutarch adds that philosophers disputed whether it remained the same ship.',
     dur: 1.8,
   },
@@ -54,13 +62,13 @@ export const BEATS: Meta6Beat[] = [
     dur: 3.6,
   },
   {
-    p: 459, swap: 1, orig: 0,
+    p: 459, swap: 1, orig: 0, coins: 1,
     text: 'Philosophers distinguish two senses of the word “same”. Two new coins can be qualitatively identical, sharing every feature.',
     cite: 'Two senses of sameness',
     dur: 2.5,
   },
   {
-    p: 459, swap: 1, orig: 0,
+    p: 459, swap: 1, orig: 0, sameTag: 1,
     text: 'Numerical identity is being one and the same thing over time. The repaired ship seems to keep numerical identity even as its material changes.',
     dur: 2.7,
   },
@@ -71,7 +79,7 @@ export const BEATS: Meta6Beat[] = [
     dur: 4.1,
   },
   {
-    p: 403, swap: 1, orig: 0, you: 1,
+    p: 403, swap: 1, orig: 0, you: 1, youEq: 1,
     text: 'Yet you still regard that child as numerically identical to yourself.',
     dur: 1.8,
   },

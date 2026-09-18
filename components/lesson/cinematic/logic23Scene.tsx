@@ -9,6 +9,7 @@ import { BEATS } from './logic23Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,7 +17,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A TRUTH TABLE, DRAWN AS LAMPS RATHER THAN AS LETTERS.
@@ -83,6 +85,9 @@ const ROWS = BEATS.map((b) => b.rows ?? 0);
 const OR_ON = BEATS.map((b) => (b.orCol ? 1 : 0));
 const IF_ON = BEATS.map((b) => (b.ifCol ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// group AH — two rings, each marking the row(s) the beat's own sentence is about.
+const BOTH_ON = BEATS.map((b) => ((b.bothRow ?? 0) > 0 ? 1 : 0));
+const PFALSE_ON = BEATS.map((b) => ((b.pFalse ?? 0) > 0 ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
@@ -92,7 +97,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic23'));
 export default function Logic23Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const bothFade = (cur.bothRow ?? 0) !== (prev?.bothRow ?? 0);
+  const pFalseFade = (cur.pFalse ?? 0) !== (prev?.pFalse ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -115,6 +124,9 @@ export default function Logic23Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // R7c — the seam IS the reader's answer. `split` reads dragPos, whose 0…1 is
       // the left side's share, so nothing has to be mapped.
       seam: carry(cv, 4, n, 0, reacting ? dragPos.value : 0, tr),
+      // The two rings: each marks the row(s) its own beat's sentence names.
+      bothRow: carry(cv, 5, n, BOTH_ON[p], BOTH_ON[n], bothFade ? tr : 1),
+      pFalse: carry(cv, 6, n, PFALSE_ON[p], PFALSE_ON[n], pFalseFade ? tr : 1),
     };
   });
 
@@ -128,6 +140,14 @@ export default function Logic23Scene({ clock, bt, bi, i, picked, onPick, dragPos
   const seamStyle = useAnimatedStyle(() => ({
     opacity: reacting ? 1 : 0,
     top: ROW_Y[0] - 6 + SCENE.value.seam * (ROW_Y[ROW_N - 1] + ROW_H + 6 - (ROW_Y[0] - 6)),
+  }));
+  // Two breathing rings, each round the row(s) the current beat's own sentence
+  // is about — never both at once, since bothRow and pFalse never overlap.
+  const bothRingStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.bothRow * (0.55 + 0.45 * Math.sin(SCENE.value.t * 3.2)),
+  }));
+  const pFalseRingStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.pFalse * (0.55 + 0.45 * Math.sin(SCENE.value.t * 3.2)),
   }));
 
   return (
@@ -170,6 +190,14 @@ export default function Logic23Scene({ clock, bt, bi, i, picked, onPick, dragPos
 
       <Animated.View style={[styles.seam, seamStyle]} pointerEvents="none" />
 
+      {/* the "day with both" row — top row, P and Q both true */}
+      <Animated.View style={[styles.rowRing, { top: ROW_Y[0] - 4 }, bothRingStyle]} pointerEvents="none" />
+      {/* the two rows where P is false, both counted true under "if" */}
+      <Animated.View
+        style={[styles.rowRing, { top: ROW_Y[2] - 4, height: ROW_Y[3] + ROW_H + 4 - (ROW_Y[2] - 4) }, pFalseRingStyle]}
+        pointerEvents="none"
+      />
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -203,7 +231,7 @@ const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — the subject stands on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 150, top: CAP_T, width: 240,
@@ -238,6 +266,14 @@ const styles = StyleSheet.create({
   // THE SEAM RUNS ACROSS THE ROWS rather than down them, because what is being
   // divided is the table itself.
   seam: { position: 'absolute', left: TAB_L - 8, width: TAB_R - TAB_L + 16, height: 3, backgroundColor: INK },
+
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // A breathing ring round the row(s) the beat's own sentence is about — an
+  // outline, never a fill, so it reads as a mark rather than another mass.
+  rowRing: {
+    position: 'absolute', left: TAB_L - 6, width: TAB_R - TAB_L + 12, height: ROW_H + 8,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6,
+  },
 });
 
 export function Logic23Lesson({ lesson }: { lesson: Lesson }) {

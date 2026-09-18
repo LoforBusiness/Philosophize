@@ -9,14 +9,16 @@ import { BEATS } from './logic18Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A MACHINE WITH A HOLE IN THE MIDDLE OF IT.
@@ -86,6 +88,11 @@ const G_X = 286;
 const G_W = 96;
 const G_TRACK_Y = 340;
 
+// THE TWO TAP EVENTS (group AH). NAMED sits in the evidence box's own
+// footprint, which is empty until `meshed` fades that box in at beat 6, so
+// nothing collides. BROKEN marks the actual 38-unit gap between the shaft ends.
+const BREAK_CX = (SHAFT_A[1] + SHAFT_B[0]) / 2;
+
 const FIG_X = 200;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
@@ -99,12 +106,14 @@ const GAP = BEATS.map((b) => b.gap ?? 0);
 const MESHED = BEATS.map((b) => b.meshed ?? 0);
 const NEEDLE = BEATS.map((b) => b.needle ?? 0.5);
 const LIVE_D = BEATS.map((b) => (b.live_d ? 1 : 0));
+const NAMED = BEATS.map((b) => b.named ?? 0);
+const BROKEN = BEATS.map((b) => b.broken ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic18'));
 
 export default function Logic18Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -132,6 +141,11 @@ export default function Logic18Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gaz
       gap: carry(cv, 2, n, GAP[p], GAP[n], tr),
       meshed: carry(cv, 3, n, MESHED[p], MESHED[n], tr),
       needle: carry(cv, 4, n, NEEDLE[p], NEEDLE[n], tr),
+      // "the bandwagon fallacy … the appeal to emotion" — a tag names both
+      // inputs, where the working evidence box will later sit.
+      named: carry(cv, 5, n, NAMED[p], NAMED[n], tr),
+      // "the shaft between them is broken" — a cross marks the break itself.
+      broken: carry(cv, 6, n, BROKEN[p], BROKEN[n], tr),
       t,
     };
   });
@@ -147,6 +161,8 @@ export default function Logic18Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gaz
   const needleStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: (G_W - 22) * SCENE.value.needle }],
   }));
+  const namedStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.named }));
+  const brokenStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.broken }));
 
   const crowd: number[] = [];
   for (let c = 0; c < CROWD_N; c++) crowd.push(c);
@@ -156,6 +172,13 @@ export default function Logic18Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gaz
       <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap} pointerEvents="none">HOW MANY SAY SO</Text>
       {crowd.map((c) => <Tick key={c} S={SCENE} index={c} />)}
+
+      {/* NAMED — "the bandwagon fallacy … the appeal to emotion": a tag names
+          both inputs, sitting where the working evidence box will later fade
+          in (empty until `meshed`, beat 6), so nothing collides. */}
+      <Animated.View style={[styles.namedTag, namedStyle]} pointerEvents="none">
+        <Text style={styles.namedText}>BANDWAGON{'\n'}EMOTION</Text>
+      </Animated.View>
 
       {/* THE LINKAGE THAT WORKS — drawn second, so it lands as the answer. */}
       <Animated.View style={[StyleSheet.absoluteFill, meshStyle]} pointerEvents="none">
@@ -171,6 +194,12 @@ export default function Logic18Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gaz
         <View style={[styles.cap2, { left: SHAFT_B[0] }]} />
         <View style={[styles.shaft, { left: SHAFT_B[0], width: SHAFT_B[1] - SHAFT_B[0] }]} />
         <Text style={styles.gapCap}>NOT CONNECTED</Text>
+
+        {/* BROKEN — "the shaft between them is broken": a cross in the gap
+            itself, the exact 38-unit hole between the two shaft ends. */}
+        <Animated.View style={[styles.brokenMark, brokenStyle]}>
+          <Text style={styles.brokenText}>✕</Text>
+        </Animated.View>
 
         <View style={styles.crank} />
         <Animated.View style={[styles.handleWrap, handleStyle]}>
@@ -211,7 +240,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 34, top: CROWD_Y - 14, width: 200,
@@ -223,7 +252,7 @@ const styles = StyleSheet.create({
 
   evBox: {
     position: 'absolute', left: EV_X, top: EV_Y, width: EV_W, height: EV_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   evText: {
     position: 'absolute', left: EV_X, top: EV_Y + 5, width: EV_W, textAlign: 'center', lineHeight: 10.8,
@@ -259,6 +288,22 @@ const styles = StyleSheet.create({
   needle: {
     position: 'absolute', left: G_X + 11, top: G_TRACK_Y - 9, width: 3, height: 20, backgroundColor: INK,
   },
+
+  // ── THE TWO TAP EVENTS (group AH) ────────────────────────────────────────
+  namedTag: {
+    position: 'absolute', left: EV_X, top: EV_Y, width: EV_W, height: EV_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  namedText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, lineHeight: 11,
+    textAlign: 'center', includeFontPadding: false,
+  },
+  brokenMark: {
+    position: 'absolute', left: BREAK_CX - 7, top: SHAFT_Y - 10, width: 14, height: 18,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  brokenText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: INK, includeFontPadding: false },
 });
 
 export function Logic18Lesson({ lesson }: { lesson: Lesson }) {

@@ -12,14 +12,16 @@ import { BEATS } from './political3Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // The right to rule, drawn as a CIRCUIT and a COMPARISON.
 //
@@ -363,7 +365,7 @@ const styles = StyleSheet.create({
   },
   box: {
     position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   boxName: {
     position: 'absolute', left: 0, top: 9, width: BOX_W - 4, textAlign: 'center',
@@ -468,7 +470,7 @@ const styles = StyleSheet.create({
   // ── the Declaration ───────────────────────────────────────────────────────
   decl: {
     position: 'absolute', left: DECL_L, top: DECL_T, width: DECL_W, height: DECL_H,
-    backgroundColor: PAPER, borderWidth: 2, borderColor: INK, borderRadius: 2,
+    backgroundColor: PAPER, borderWidth: 2, borderColor: INK, borderRadius: 8,
     alignItems: 'center', paddingTop: 6,
   },
   declTitle: {
@@ -518,7 +520,7 @@ const styles = StyleSheet.create({
 
   seal: {
     position: 'absolute', left: 142, top: 406, width: 116, height: 40,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   sealText: { fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 1, color: INK, includeFontPadding: false },

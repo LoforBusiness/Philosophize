@@ -11,13 +11,15 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE } = stageTone('aesthetics');
+const TONE = stageTone('aesthetics');
+const { RULE, SHADE } = TONE;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE INFECTION CHAIN.
@@ -364,7 +366,7 @@ const styles = StyleSheet.create({
   // ── the easel and its canvas ──────────────────────────────────────────────
   canvas: {
     position: 'absolute', left: CANVAS_L, top: CANVAS_T, width: CANVAS_W, height: CANVAS_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   // the stretched face inside the frame, so the canvas reads as a made object
   canvasMat: {

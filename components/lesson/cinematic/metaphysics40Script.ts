@@ -30,6 +30,7 @@ export interface Metaphysics40Beat extends BaseBeat {
   /** 1 = the clasp is shut over tomorrow's line — settled AND forced. */ clasp?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a small ship is drawn on the sea, the battle Aristotle's example predicts. */ ship?: number;
 }
 
 export const BEATS: Metaphysics40Beat[] = [
@@ -49,12 +50,12 @@ export const BEATS: Metaphysics40Beat[] = [
     dur: 4.0,
   },
   {
-    p: 168, x: 40, ledger: 1, written: 0.67,
+    p: 168, x: 40, ledger: 1, written: 0.67, ship: 1,
     text: 'In Aristotle’s example, a sea battle is predicted for tomorrow. If the prediction is true today, the battle seems bound to happen.',
     dur: 4.6,
   },
   {
-    p: 161, x: 40, ledger: 1, written: 0.67, plates: 1, live: 1,
+    p: 161, x: 40, ledger: 1, written: 0.67, plates: 1, live: 1, ship: 1,
     interact: {
       prompt: 'What does bivalence assign to a statement about tomorrow, before the day has come?',
       explain: 'One of the two. Bivalence makes every statement true or false, even one about a day to come. “Nothing yet” denies bivalence, and that’s Aristotle’s reply on the traditional reading.',

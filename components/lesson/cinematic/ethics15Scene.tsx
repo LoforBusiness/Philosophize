@@ -9,6 +9,7 @@ import { BEATS } from './ethics15Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A BALANCE THAT WEIGHS FACTS, with a sentence in each pan (H64). The right-hand
 // sentence is four words longer and the beam never moves — which is the argument.
@@ -70,6 +72,25 @@ const MORAL = BEATS.map((b) => b.moral ?? 0);
 const TILT = BEATS.map((b) => b.tilt ?? 0);
 const DOUBT = BEATS.map((b) => b.doubt ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
+// Group AH — five still taps, each an event drawn from that beat's own words.
+const CHECKABLE = BEATS.map((b) => ((b.checkable ?? 0) > 0 ? 1 : 0));
+const EQUAL = BEATS.map((b) => ((b.equal ?? 0) > 0 ? 1 : 0));
+const ZERO = BEATS.map((b) => ((b.zero ?? 0) > 0 ? 1 : 0));
+const TONEV = BEATS.map((b) => ((b.tone ?? 0) > 0 ? 1 : 0));
+const MISS = BEATS.map((b) => ((b.miss ?? 0) > 0 ? 1 : 0));
+
+// The gap between the beam (350…356) and the pans (392) — 36 units, where the
+// checkmark and the +0 tag sit, each over its own pan.
+const CHECK_X = PAN_L[0] + PAN_W / 2 - 6;
+const ZERO_CX = PAN_L[1] + PAN_W / 2;
+const TAG_GAP_T = 366;
+
+// The open air above the beam (234…350), clear of the figure — his crown sits
+// at 397, level with the pans, so nothing of him reaches this high.
+const EQUAL_CX = FULCRUM_X;
+const TONE_T = 308;
+const MISS_T = 272;
+const MISS_D = 24;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
 
@@ -82,11 +103,19 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics15'));
 export default function Ethics15Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(10);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
   const answered = picked !== null;
+
+  // Group AH — each fires only on the beat that asks for it (C20c).
+  const checkFade = (cur.checkable ?? 0) !== (prev?.checkable ?? 0);
+  const equalFade = (cur.equal ?? 0) !== (prev?.equal ?? 0);
+  const zeroFade = (cur.zero ?? 0) !== (prev?.zero ?? 0);
+  const toneFade = (cur.tone ?? 0) !== (prev?.tone ?? 0);
+  const missFade = (cur.miss ?? 0) !== (prev?.miss ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -112,6 +141,11 @@ export default function Ethics15Scene({ clock, bt, bi, i, picked, onPick, pickPo
       // that is the scene's own point and the control does not touch it.
       doubt: carry(cv, 3, n, DOUBT[p], reacting ? pickPos.value : DOUBT[n], grow),
       boards: carry(cv, 4, n, PICKV[p], PICKV[n], grow),
+      checkable: carry(cv, 5, n, CHECKABLE[p], CHECKABLE[n], checkFade ? grow : 1),
+      equal: carry(cv, 6, n, EQUAL[p], EQUAL[n], equalFade ? grow : 1),
+      zero: carry(cv, 7, n, ZERO[p], ZERO[n], zeroFade ? grow : 1),
+      tone: carry(cv, 8, n, TONEV[p], TONEV[n], toneFade ? grow : 1),
+      miss: carry(cv, 9, n, MISS[p], MISS[n], missFade ? grow : 1),
     };
   });
 
@@ -121,6 +155,20 @@ export default function Ethics15Scene({ clock, bt, bi, i, picked, onPick, pickPo
   const plain = useAnimatedStyle(() => ({ opacity: SCENE.value.plain }));
   const moral = useAnimatedStyle(() => ({ opacity: SCENE.value.moral }));
   const doubt = useAnimatedStyle(() => ({ opacity: SCENE.value.doubt }));
+  const checkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.checkable }));
+  const equalStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.equal }));
+  const zeroStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.zero,
+    transform: [{ translateY: (1 - SCENE.value.zero) * -6 }],
+  }));
+  const toneStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.tone,
+    transform: [{ translateY: (1 - SCENE.value.tone) * -6 }],
+  }));
+  const missStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.miss,
+    transform: [{ scale: 0.5 + 0.5 * SCENE.value.miss }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -145,6 +193,34 @@ export default function Ethics15Scene({ clock, bt, bi, i, picked, onPick, pickPo
       <Animated.View style={[styles.pan, { left: PAN_L[1] }, moral]} pointerEvents="none">
         <Text style={styles.panText} numberOfLines={4}>YOU ACTED WRONGLY IN STEALING THAT MONEY</Text>
       </Animated.View>
+
+      {/* CHECKABLE — "anyone can check it against the world": a checkmark over
+          the plain pan alone. */}
+      <Animated.Text style={[styles.check, checkStyle]} pointerEvents="none">✓</Animated.Text>
+
+      {/* EQUAL — "the second sentence weighs no more than the first": an
+          equals mark over the fulcrum itself. */}
+      <Animated.Text style={[styles.equal, equalStyle]} pointerEvents="none">=</Animated.Text>
+
+      {/* ZERO — "a moral word adds no further fact": a tag over the pan that
+          carries the extra word. */}
+      <Animated.View style={[styles.zeroWrap, zeroStyle]} pointerEvents="none">
+        <View style={styles.tag}>
+          <Text style={styles.tagText}>+0 FACTS</Text>
+        </View>
+      </Animated.View>
+
+      {/* TONE — "Ayer compares it to saying the sentence in a tone of
+          horror": a tag naming the expression, not a further claim. */}
+      <Animated.View style={[styles.toneWrap, toneStyle]} pointerEvents="none">
+        <View style={styles.tag}>
+          <Text style={styles.tagText}>TONE OF HORROR</Text>
+        </View>
+      </Animated.View>
+
+      {/* MISS — "a test for observable facts would miss moral facts": an
+          empty, dashed shape floating above the beam, in neither pan. */}
+      <Animated.View style={[styles.miss, missStyle]} pointerEvents="none" />
 
       <Animated.Text style={[styles.doubt, doubt]} pointerEvents="none" numberOfLines={1}>
         IS THIS THE RIGHT INSTRUMENT?
@@ -195,7 +271,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   label: {
@@ -206,7 +282,7 @@ const styles = StyleSheet.create({
 
   board: { position: 'absolute', top: BOARD_T, width: BOARD_W, height: BOARD_H },
   boardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   boardText: {
@@ -227,12 +303,36 @@ const styles = StyleSheet.create({
 
   pan: {
     position: 'absolute', top: PAN_T, width: PAN_W, height: PAN_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   panText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.6, color: INK,
     textAlign: 'center', includeFontPadding: false,
+  },
+
+  // ── the five still-tap events (group AH) ─────────────────────────────────
+  check: {
+    position: 'absolute', left: CHECK_X, top: TAG_GAP_T, fontFamily: 'Inter_700Bold', fontSize: 16, color: INK,
+    includeFontPadding: false,
+  },
+  equal: {
+    position: 'absolute', left: EQUAL_CX - 7, top: 326, fontFamily: 'Inter_700Bold', fontSize: 18, color: INK,
+    includeFontPadding: false,
+  },
+  zeroWrap: { position: 'absolute', left: ZERO_CX - 55, top: TAG_GAP_T, width: 110, alignItems: 'center' },
+  toneWrap: { position: 'absolute', left: 0, top: TONE_T, width: 140, alignItems: 'center' },
+  tag: {
+    paddingHorizontal: 6, paddingVertical: 2, borderWidth: 1.5, borderColor: INK,
+    borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  tagText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK,
+    includeFontPadding: false,
+  },
+  // A fact the scale can't catch — a boundary, never a fill (D31).
+  miss: {
+    position: 'absolute', left: FULCRUM_X - MISS_D / 2, top: MISS_T, width: MISS_D, height: MISS_D,
+    borderRadius: MISS_D / 2, borderWidth: 1.5, borderColor: SHADE, borderStyle: 'dashed',
   },
 
   doubt: {

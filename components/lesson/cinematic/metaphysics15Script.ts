@@ -17,6 +17,8 @@ export interface Meta15Beat extends BaseBeat {
   /** 1 = the gap between them is marked and being searched. */ gap?: number;
   /** Search verdict: 0 none · 1 NOT FOUND out there · 2 FOUND, in the observer. */ found?: number;
   /** 1 = the three answer cards are live (Q2). */ pick?: number;
+  /** 1 = an empty dashed frame marks the space about to be observed. */ frame?: number;
+  /** 1 = the second ball has been struck and rolls a little further away. */ hit?: number;
 }
 
 export const BEATS: Meta15Beat[] = [
@@ -26,7 +28,7 @@ export const BEATS: Meta15Beat[] = [
     dur: 3.5,
   },
   {
-    p: 462, x: 70,
+    p: 462, x: 70, frame: 1,
     text: 'David Hume asks what observation reveals when one event causes another.',
     dur: 1.8,
   },
@@ -37,18 +39,18 @@ export const BEATS: Meta15Beat[] = [
     dur: 1.8,
   },
   {
-    p: 270, x: 168, balls: 1,
+    p: 270, x: 168, balls: 1, hit: 1,
     text: 'Then the second ball moves. You see contact and one event after another, but you never see the necessary connection.',
     dur: 3.2,
   },
   {
-    p: 383, x: 124, balls: 1, gap: 1,
+    p: 383, x: 124, balls: 1, gap: 1, hit: 1,
     text: 'A necessary connection is a link that makes the effect follow. If such a link can be observed, it must lie between contact and motion.',
     cite: 'Where the connection should be',
     dur: 4.4,
   },
   {
-    p: 147, x: 124, balls: 1, gap: 1,
+    p: 147, x: 124, balls: 1, gap: 1, hit: 1,
     quote: {
       id: 'lq-metaphysics-being-15-1',
       text: 'All inferences from experience suppose, as their foundation, that the future will resemble the past.',
@@ -61,13 +63,13 @@ export const BEATS: Meta15Beat[] = [
     dur: 3.8,
   },
   {
-    p: 34, x: 168, balls: 1, gap: 1, found: 1,
+    p: 34, x: 168, balls: 1, gap: 1, found: 1, hit: 1,
     text: 'Hume finds the two events conjoined but never observed to be connected. So the idea of connection can’t come from the objects.',
     cite: 'Conjoined, never connected',
     dur: 4.6,
   },
   {
-    p: 165, x: 124, balls: 1, gap: 1, found: 2,
+    p: 165, x: 124, balls: 1, gap: 1, found: 2, hit: 1,
     interact: {
       prompt: 'If no link between events is ever observed, what does a claim about cause contain?',
       drag: {
@@ -86,7 +88,7 @@ export const BEATS: Meta15Beat[] = [
     dur: 1.0,
   },
   {
-    p: 6, x: 124, balls: 1, gap: 1, found: 2, pick: 1,
+    p: 6, x: 124, balls: 1, gap: 1, found: 2, hit: 1, pick: 1,
     interact: {
       prompt: 'If necessary connection isn’t observed in the objects, where must it come from?',
       explain: 'The mind. Repeated conjunction produces a habit of expecting the second event. Hume holds that the idea of necessity is copied from this felt expectation, not from the gap.',

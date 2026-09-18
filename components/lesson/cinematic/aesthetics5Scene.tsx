@@ -12,6 +12,7 @@ import { BEATS } from './aesthetics5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { Shapes, ell, bar, tri, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // THE ATTENTION METER AND THE FRAME. Murdoch's argument drawn instead of asserted:
 //
@@ -128,6 +130,10 @@ const BIRD = BEATS.map((b) => b.bird ?? 0);
 const EGO = BEATS.map((b) => b.ego ?? 0);
 const LEAF = BEATS.map((b) => b.leaf ?? 0);
 const SELF = BEATS.map((b) => b.self ?? 0);
+// group AH — the three still taps, each named from that beat's own sentence.
+const OBSTACLE = BEATS.map((b) => ((b.obstacleTag ?? 0) > 0 ? 1 : 0));
+const UNSELF = BEATS.map((b) => ((b.unselfTag ?? 0) > 0 ? 1 : 0));
+const TREE = BEATS.map((b) => ((b.treeCue ?? 0) > 0 ? 1 : 0));
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -146,17 +152,24 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics5'));
 export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
   const showPick = !!cur.interact;
   const showWord = (cur.leaf ?? 0) > 0 && !cur.interact;
   const answered = picked !== null;
+  // group AH — each tag/cue fades in on the beat that names it and fades back
+  // out (never cuts) the moment the beat moves on.
+  const obstacleFade = (cur.obstacleTag ?? 0) !== (prev?.obstacleTag ?? 0);
+  const unselfFade = (cur.unselfTag ?? 0) !== (prev?.unselfTag ?? 0);
+  const treeFade = (cur.treeCue ?? 0) !== (prev?.treeCue ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     const leaf = carry(cv, 0, n, LEAF[p], LEAF[n], tr);
     return {
@@ -173,6 +186,10 @@ export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick, dra
       hover: Math.sin(t * 2.4) * 7,
       flap: Math.sin(t * 9) * 16,
       sway: Math.sin(t * 1.25) * 4,
+      // group AH — named the beat Murdoch names it, gone the beat she moves on.
+      obstacle: carry(cv, 4, n, OBSTACLE[p], OBSTACLE[n], obstacleFade ? grow : 1),
+      unself: carry(cv, 5, n, UNSELF[p], UNSELF[n], unselfFade ? grow : 1),
+      tree: carry(cv, 6, n, TREE[p], TREE[n], treeFade ? grow : 1),
     };
   });
 
@@ -204,6 +221,16 @@ export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick, dra
     transform: [{ translateX: (1 - SCENE.value.leaf) * 16 }],
   }));
   const strikeStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: SCENE.value.strike }] }));
+  // group AH — the three still-tap events.
+  const obstacleStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.obstacle,
+    transform: [{ translateY: (1 - SCENE.value.obstacle) * -6 }],
+  }));
+  const unselfStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.unself,
+    transform: [{ translateY: (1 - SCENE.value.unself) * -6 }],
+  }));
+  const treeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tree }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -243,6 +270,11 @@ export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick, dra
         <View style={styles.egoTail2} />
       </Animated.View>
 
+      {/* group AH — Murdoch names the obstacle, and the tag lands on it. */}
+      <Animated.View style={[styles.obstacleTag, obstacleStyle]} pointerEvents="none">
+        <Text style={styles.tagText}>THE OBSTACLE</Text>
+      </Animated.View>
+
       {/* ── the hovering kestrel ─────────────────────────────────────────────── */}
       <Animated.View style={[styles.bird, birdStyle]} pointerEvents="none">
         <Animated.View style={[styles.wing, styles.wingLeft, wingL]}>
@@ -256,6 +288,11 @@ export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick, dra
         <Shapes parts={KESTREL} />
       </Animated.View>
 
+      {/* group AH — the moment Murdoch names it, over the kestrel that is now all that's left. */}
+      <Animated.View style={[styles.unselfTag, unselfStyle]} pointerEvents="none">
+        <Text style={styles.tagText}>UNSELFING</Text>
+      </Animated.View>
+
       {/* ── Ruskin's single leaf ─────────────────────────────────────────────── */}
       <Animated.View style={[styles.leaf, leafStyle]} pointerEvents="none">
         <View style={styles.leafBlade} />
@@ -267,6 +304,12 @@ export default function Aesthetics5Scene({ clock, bt, bi, i, picked, onPick, dra
           <View key={`r${y}`} style={[styles.veinR, { top: y + 12 }]} />
         ))}
         <View style={styles.leafStem} />
+      </Animated.View>
+
+      {/* group AH — "only later reach a whole tree": sketched, not yet real. */}
+      <Animated.View style={[styles.treeCue, treeStyle]} pointerEvents="none">
+        <View style={styles.treeCanopy} />
+        <View style={styles.treeTrunk} />
       </Animated.View>
 
       {/* ── the word the mind swaps in, struck out ───────────────────────────── */}
@@ -327,7 +370,7 @@ const styles = StyleSheet.create({
   },
   metBar: {
     position: 'absolute', left: MET_L, top: MET_BAR_T, width: MET_W, height: MET_BAR_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   metTick: { position: 'absolute', top: 0, bottom: 0, width: 1.5, backgroundColor: RULE },
   metFill: {
@@ -349,7 +392,7 @@ const styles = StyleSheet.create({
   // ── the frame ───────────────────────────────────────────────────────────────
   frame: {
     position: 'absolute', left: FR_L, top: FR_T, width: FR_W, height: FR_H,
-    borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 3, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   sill: {
     position: 'absolute', left: FR_L - 10, top: FR_T + FR_H, width: FR_W + 20, height: 8,
@@ -426,7 +469,7 @@ const styles = StyleSheet.create({
   // ── the mind's label, struck out ────────────────────────────────────────────
   wordBox: {
     position: 'absolute', left: WORD_L, top: WORD_T, width: WORD_W, height: WORD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   wordText: {
@@ -442,7 +485,7 @@ const styles = StyleSheet.create({
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W, height: CARD_H },
   card: {
     width: CARD_W, height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, boxShadow: LIP, justifyContent: 'center', paddingHorizontal: 9,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, justifyContent: 'center', paddingHorizontal: 9,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },
   cardWrong: { borderColor: SOFT, opacity: 0.45 },
@@ -456,6 +499,33 @@ const styles = StyleSheet.create({
   // 4.5 units — about 4dp — clear of the rule top and bottom.
   cardSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 14, color: INK, includeFontPadding: false },
   cardSubOn: { color: RULE },
+
+  // ── group AH: three still-tap events ───────────────────────────────────────
+  // "the obstacle" — a plate naming the self-cloud in Murdoch's own words.
+  obstacleTag: {
+    position: 'absolute', left: 24, top: 273, paddingHorizontal: 7, paddingVertical: 3,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  // "unselfing" — a plate naming the moment, over the kestrel that alone remains.
+  unselfTag: {
+    position: 'absolute', left: 246, top: 316, paddingHorizontal: 7, paddingVertical: 3,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  tagText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 1, color: INK,
+    includeFontPadding: false,
+  },
+  // the whole tree a single leaf eventually leads to — sketched, not yet real, so
+  // it is a dashed outline (SOFT) rather than a filled mass, under the leaf.
+  treeCue: { position: 'absolute', left: 236, top: 422, width: 136, height: 50 },
+  treeCanopy: {
+    position: 'absolute', left: 33, top: 4, width: 70, height: 26, borderRadius: 13,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed',
+  },
+  treeTrunk: {
+    position: 'absolute', left: 66, top: 28, width: 4, height: 16, borderRadius: 2,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed',
+  },
 });
 
 // BAND. Topmost ink is the meter's title at 236; the lowest is the figure's ankle

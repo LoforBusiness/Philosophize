@@ -13,6 +13,7 @@ import { BEATS } from './epistemology10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // One gauge across the top of the stage: a guess at the left end, absolute certainty
 // at the right. A shaded BAND says where knowledge is allowed to live — a sliver at
@@ -66,6 +68,10 @@ const DIR = dirsFrom(X, 1);
 const GAUGE = BEATS.map((b) => b.gauge ?? 0);
 const BAND = BEATS.map((b) => b.band ?? 0);
 const NEEDLE = BEATS.map((b) => b.needle ?? 0.5);
+// group AH — one still-tap event each, plain carried 0/1 tracks
+const OPEN_Q = BEATS.map((b) => b.openQ ?? 0);
+const COMPAT_RING = BEATS.map((b) => b.compatRing ?? 0);
+const RISE_FALL = BEATS.map((b) => b.riseFall ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -78,7 +84,7 @@ const BAND_L = [0.98, 0.93, 0.34];
 export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(6);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -118,6 +124,9 @@ export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick, 
       // multiplied in again on every beat: the needle's first frame landed tens of
       // thousands of units off the stage and slid back over 1.4s (C20c).
       needle: SC_L + SC_W * carry(cv, 2, n, NEEDLE[p], reacting ? dragPos.value : NEEDLE[n], ease01(clamp01(bt.value / 1.4))),
+      openQ: carry(cv, 3, n, OPEN_Q[p], OPEN_Q[n], tr),
+      compatRing: carry(cv, 4, n, COMPAT_RING[p], COMPAT_RING[n], tr),
+      riseFall: carry(cv, 5, n, RISE_FALL[p], RISE_FALL[n], tr),
       t,
     };
   });
@@ -136,6 +145,16 @@ export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick, 
   const flagStyle = useAnimatedStyle(() => ({
     opacity: flagsOn ? (flagsFade ? ease01(bt.value / 0.6) : 1) : 0,
   }));
+  // group AH — one still-tap event each
+  const openQStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.openQ * (1 - SCENE.value.gauge) }));
+  const compatRingStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.compatRing * SCENE.value.gauge,
+    transform: [{ translateX: SCENE.value.needle - SC_L }],
+  }));
+  const riseFallStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.riseFall * SCENE.value.gauge,
+    transform: [{ translateX: SCENE.value.needle - SC_L }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -153,6 +172,16 @@ export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick, 
       {/* where knowledge is allowed to live */}
       <Animated.View style={[styles.band, bandStyle]} pointerEvents="none" />
       <Animated.View style={[styles.needle, needleStyle]} pointerEvents="none" />
+
+      {/* "can you know... without being certain?" — before the gauge itself exists. */}
+      <Animated.Text style={[styles.openQ, openQStyle]} pointerEvents="none">?</Animated.Text>
+      {/* "compatible with the possibility of error" — a ring riding the needle. */}
+      <Animated.View style={[styles.compatRing, compatRingStyle]} pointerEvents="none" />
+      {/* "rises or falls" — a pair of arrows riding the needle. */}
+      <Animated.View style={[styles.riseFallWrap, riseFallStyle]} pointerEvents="none">
+        <View style={styles.arrowUp} />
+        <View style={styles.arrowDown} />
+      </Animated.View>
 
       {/* ── Q1: plant the flag where knowledge begins ───────────────────────── */}
       {flagsOn &&
@@ -194,7 +223,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   gaugeWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   rail: { position: 'absolute', left: SC_L, top: SC_Y, width: SC_W, height: 2.5, backgroundColor: INK },
@@ -217,10 +246,31 @@ const styles = StyleSheet.create({
     backgroundColor: INK,
   },
 
+  // ── group AH: the three still-tap events ───────────────────────────────────
+  openQ: {
+    position: 'absolute', left: SC_L, top: 286, width: SC_W, textAlign: 'center',
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: INK, includeFontPadding: false,
+  },
+  compatRing: {
+    position: 'absolute', left: SC_L - 13, top: SC_Y - 13, width: 26, height: 26,
+    borderRadius: 13, borderWidth: 2, borderColor: INK,
+  },
+  riseFallWrap: { position: 'absolute', left: SC_L - 9, top: SC_Y - 34, width: 18, height: 68 },
+  arrowUp: {
+    position: 'absolute', left: 4, top: 0, width: 0, height: 0,
+    borderLeftWidth: 5, borderRightWidth: 5, borderBottomWidth: 8,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: INK,
+  },
+  arrowDown: {
+    position: 'absolute', left: 4, top: 60, width: 0, height: 0,
+    borderLeftWidth: 5, borderRightWidth: 5, borderTopWidth: 8,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: INK,
+  },
+
   flagSlot: { position: 'absolute', top: SC_Y + 12, width: FLAG_W, alignItems: 'center' },
   stem: { width: 2, height: FLAG_T - (SC_Y + 12), backgroundColor: SOFT },
   flag: {
-    width: FLAG_W, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    width: FLAG_W, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     paddingVertical: 5, paddingHorizontal: 4, alignItems: 'center',
   },
   flagRight: { backgroundColor: INK, borderColor: INK },

@@ -9,6 +9,7 @@ import { BEATS } from './aesthetics39Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOUR COLUMNS, EACH A PLAN AND THE ROUTE TAKEN FROM IT.
@@ -219,7 +221,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — political7 and political8 both stand
   // their subject on a filled mass rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 140, top: CAP_T, width: 246,
@@ -238,7 +240,7 @@ const styles = StyleSheet.create({
 
   plan: {
     position: 'absolute', left: (COL_W - PLAN_W) / 2, top: PLAN_Y - NAME_Y, width: PLAN_W, height: PLAN_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   // NO PLAN, AND THE BOX SAYS SO. A dashed empty outline is a boundary with
   // nothing inside it, which is exactly the claim being made about this maker.
@@ -248,7 +250,7 @@ const styles = StyleSheet.create({
   },
   planAbs: {
     position: 'absolute', top: PLAN_Y, width: PLAN_W, height: PLAN_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   // THE CORRECT PLAN STAYS DASHED AND EMPTY. Filling it in on a right answer
   // would delete the reason it was the right answer.
@@ -260,7 +262,7 @@ const styles = StyleSheet.create({
   rail: { position: 'absolute', left: 138, top: RAIL_Y, width: 248, height: 1.5, backgroundColor: RULE },
   work: {
     position: 'absolute', top: WORK_Y, width: WORK_W, height: WORK_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
 });
 

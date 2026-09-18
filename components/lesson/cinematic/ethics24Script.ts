@@ -27,6 +27,9 @@ export interface Eth24Beat extends BaseBeat {
   /** The names under the pillars, 0…1. */ names?: number;
   /** How many pillars the test case has taken away, 0…1. */ gone?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a rule underlines the pillar named right now: reform, then desert. */ pair2?: number;
+  /** 1 = a small arrowhead marks the one pillar still bearing the slab. */ bear?: number;
+  /** 1 = a "?" rises over the fallen deterrence pillar. */ raise?: number;
 }
 
 export const BEATS: Eth24Beat[] = [
@@ -42,7 +45,7 @@ export const BEATS: Eth24Beat[] = [
     dur: 2.2,
   },
   {
-    p: 266, x: 200, slab: 1, names: 1,
+    p: 266, x: 200, slab: 1, names: 1, pair2: 1,
     text: 'Rehabilitation aims to make him a better person. Retribution says he should be punished for what he did.',
     dur: 2.2,
   },
@@ -53,7 +56,7 @@ export const BEATS: Eth24Beat[] = [
     dur: 4.8,
   },
   {
-    p: 383, x: 132, slab: 1, names: 1, gone: 1,
+    p: 383, x: 132, slab: 1, names: 1, gone: 1, bear: 1,
     text: 'Three of the four justifications no longer apply to him. If his sentence still seems right, some other justification must support it.',
     dur: 4.2,
   },
@@ -80,7 +83,7 @@ export const BEATS: Eth24Beat[] = [
     dur: 4.0,
   },
   {
-    p: 399, x: 268, slab: 1, names: 1, gone: 1,
+    p: 399, x: 268, slab: 1, names: 1, gone: 1, raise: 1,
     text: 'Critics of deterrence turn the test around. Suppose the truth stays hidden, and framing an innocent man would stop others from crime.',
     cite: 'The other direction',
     dur: 4.6,

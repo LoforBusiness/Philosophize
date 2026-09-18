@@ -13,6 +13,7 @@ import { BEATS } from './political13Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A three-step argument, stage right. The steps are the tap targets.
 //
@@ -51,6 +53,38 @@ const STEP_SLOP = (STEP_PITCH - STEP_H) / 2;
 const TAG_T = 398;
 const TAG_H = 18;
 
+// ── the five tap events (group AH) ──────────────────────────────────────────
+//
+// REJECT — the two disqualified reasons for coercion, in the exact footprint the
+// real steps will take (beat 1, before any step exists).
+const REJECT_T = [STEP_T, STEP_T + STEP_PITCH];
+const REJECT_H = 34;
+const REJECT_LABELS = ['YOUR OWN GOOD', 'OTHERS DISLIKE IT'];
+
+// GOAL — a short arrow dropping from the first step into the space the argument
+// has not filled yet (beat 3).
+const GOAL_X = AR_L + AR_W / 2;
+const GOAL_TOP = STEP_T + STEP_H + 4;
+const GOAL_H = 32;
+
+// CHAIN — a spine down the right margin marking the two "follows from" joins,
+// at the step boundaries (beat 5).
+const CHAIN_X = AR_L + AR_W + 4;
+const CHAIN_TOP = STEP_T;
+const CHAIN_BOT = STEP_T + 2 * STEP_PITCH + STEP_H;
+const CHAIN_HEADS_Y = [STEP_T + STEP_H + (STEP_PITCH - STEP_H) / 2, STEP_T + STEP_PITCH + STEP_H + (STEP_PITCH - STEP_H) / 2];
+
+// ACCEPT — a check beside the first and third steps, the same margin CHAIN used
+// (which has faded out by beat 7).
+const ACCEPT_X = AR_L + AR_W + 6;
+const ACCEPT_Y = [STEP_T + STEP_H / 2 - 7, STEP_T + 2 * STEP_PITCH + STEP_H / 2 - 7];
+
+// CRUX — a dashed frame around the middle step alone (beat 8, gone before Q1 asks).
+const CRUX_L = AR_L - 4;
+const CRUX_T = STEP_T + STEP_PITCH - 4;
+const CRUX_W = AR_W + 8;
+const CRUX_H = STEP_H + 8;
+
 const STEPS = [
   { id: 's1', label: '1 · THE SPEECH OFFENDS MANY', correct: false },
   { id: 's2', label: '2 · SO IT HARMS THEM', correct: true },
@@ -65,6 +99,13 @@ const X = BEATS.map((b) => b.x ?? 124);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political13'));
 const DIR = dirsFrom(X, 1);
 const NSTEPS = BEATS.map((b) => b.steps ?? 0);
+// The five tap events (group AH) — each turns on and off within the run, so
+// each is carried rather than switched (C20c).
+const REJECTV = BEATS.map((b) => ((b.reject ?? 0) > 0 ? 1 : 0));
+const GOALV = BEATS.map((b) => ((b.goal ?? 0) > 0 ? 1 : 0));
+const CHAINV = BEATS.map((b) => ((b.chain ?? 0) > 0 ? 1 : 0));
+const ACCEPTV = BEATS.map((b) => ((b.accept ?? 0) > 0 ? 1 : 0));
+const CRUXV = BEATS.map((b) => ((b.crux ?? 0) > 0 ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -81,7 +122,7 @@ const POLL_TAG = [1, 0, 0, 0];
 export default function Political13Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(7);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -89,6 +130,13 @@ export default function Political13Scene({ clock, bt, bi, i, picked, onPick, pic
   const prevShown = prev?.steps ?? 0;
   const tagOn = (cur.tag ?? 0) > 0;
   const tagFade = (cur.tag ?? 0) !== (prev?.tag ?? 0);
+
+  // ── the five tap events (group AH) ─────────────────────────────────────────
+  const rejectFade = ((cur.reject ?? 0) > 0) !== ((prev?.reject ?? 0) > 0);
+  const goalFade = ((cur.goal ?? 0) > 0) !== ((prev?.goal ?? 0) > 0);
+  const chainFade = ((cur.chain ?? 0) > 0) !== ((prev?.chain ?? 0) > 0);
+  const acceptFade = ((cur.accept ?? 0) > 0) !== ((prev?.accept ?? 0) > 0);
+  const cruxFade = ((cur.crux ?? 0) > 0) !== ((prev?.crux ?? 0) > 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -109,6 +157,13 @@ export default function Political13Scene({ clock, bt, bi, i, picked, onPick, pic
       // a great many object (x high) and nobody is set back (y low). The reader finds
       // it by moving there rather than by being told.
       tag: reacting ? pickAt(POLL_TAG, pickPos.value) : tagOn ? (tagFade ? grow : 1) : 0,
+      // The five tap events (group AH) — each turns on and off within the run,
+      // so each is carried rather than switched (C20c).
+      reject: carry(cv, 2, n, REJECTV[p], REJECTV[n], rejectFade ? grow : 1),
+      goal: carry(cv, 3, n, GOALV[p], GOALV[n], goalFade ? grow : 1),
+      chain: carry(cv, 4, n, CHAINV[p], CHAINV[n], chainFade ? grow : 1),
+      accept: carry(cv, 5, n, ACCEPTV[p], ACCEPTV[n], acceptFade ? grow : 1),
+      crux: carry(cv, 6, n, CRUXV[p], CRUXV[n], cruxFade ? grow : 1),
     };
   });
 
@@ -117,6 +172,11 @@ export default function Political13Scene({ clock, bt, bi, i, picked, onPick, pic
     opacity: SCENE.value.tag,
     transform: [{ translateY: (1 - SCENE.value.tag) * -5 }],
   }));
+  const rejectStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.reject }));
+  const goalStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.goal }));
+  const chainStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.chain }));
+  const acceptStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.accept }));
+  const cruxStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.crux }));
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -125,6 +185,14 @@ export default function Political13Scene({ clock, bt, bi, i, picked, onPick, pic
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.head} numberOfLines={1} pointerEvents="none">THE TOWN&apos;S ARGUMENT</Text>
+
+      {/* REJECT — the two reasons Mill refuses, before the real argument exists (beat 1). */}
+      {REJECT_LABELS.map((label, k) => (
+        <Animated.View key={`rj${k}`} style={[styles.rejectCard, { top: REJECT_T[k] }, rejectStyle]} pointerEvents="none">
+          <Text style={styles.rejectText} numberOfLines={1}>{label}</Text>
+          <View style={styles.rejectStrike} />
+        </Animated.View>
+      ))}
 
       {STEPS.map((s, k) => (
         <Step
@@ -144,6 +212,26 @@ export default function Political13Scene({ clock, bt, bi, i, picked, onPick, pic
       <Animated.View style={[styles.tag, tagStyle]} pointerEvents="none">
         <Text style={styles.tagText} numberOfLines={1}>OFFENCE IS NOT HARM</Text>
       </Animated.View>
+
+      {/* GOAL — the argument heading toward a conclusion not yet written (beat 3). */}
+      <Animated.View style={[styles.goalBar, { left: GOAL_X - 1, top: GOAL_TOP, height: GOAL_H }, goalStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.goalHead, { left: GOAL_X - 5, top: GOAL_TOP + GOAL_H }, goalStyle]} pointerEvents="none" />
+
+      {/* CHAIN — each step following from the one before it (beat 5). */}
+      <Animated.View style={[styles.chainSpine, { left: CHAIN_X - 1, top: CHAIN_TOP, height: CHAIN_BOT - CHAIN_TOP }, chainStyle]} pointerEvents="none" />
+      {CHAIN_HEADS_Y.map((y, k) => (
+        <Animated.View key={`ch${k}`} style={[styles.chainHead, { left: CHAIN_X - 4, top: y - 2 }, chainStyle]} pointerEvents="none" />
+      ))}
+
+      {/* ACCEPT — Mill accepts the first and third steps; the middle one is left unmarked (beat 7). */}
+      {ACCEPT_Y.map((y, k) => (
+        <Animated.View key={`ac${k}`} style={[styles.acceptWrap, { left: ACCEPT_X, top: y }, acceptStyle]} pointerEvents="none">
+          <Text style={styles.acceptMark}>✓</Text>
+        </Animated.View>
+      ))}
+
+      {/* CRUX — the whole case depends on this one step alone (beat 8, gone before Q1). */}
+      <Animated.View style={[styles.crux, { left: CRUX_L, top: CRUX_T, width: CRUX_W, height: CRUX_H }, cruxStyle]} pointerEvents="none" />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
@@ -199,7 +287,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   head: {
     position: 'absolute', left: AR_L, top: HEAD_T, width: AR_W, textAlign: 'center',
@@ -229,6 +317,48 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK,
     includeFontPadding: false,
   },
+
+  // ── the five tap events (group AH) ───────────────────────────────────────
+  //
+  // REJECT — a boundary is a dashed edge (D31): these two are excluded, not
+  // live cards, so they never take a solid fill.
+  rejectCard: {
+    position: 'absolute', left: AR_L, width: AR_W, height: REJECT_H,
+    borderWidth: 1.5, borderColor: SHADE, borderStyle: 'dashed', borderRadius: 4,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  rejectText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: SOFT,
+    includeFontPadding: false,
+  },
+  rejectStrike: {
+    position: 'absolute', left: 10, top: REJECT_H / 2 - 1, width: AR_W - 20, height: 1.5,
+    backgroundColor: SOFT, transform: [{ rotate: '-6deg' }],
+  },
+
+  // GOAL — a short pointer, the same weight as any other held mark.
+  goalBar: { position: 'absolute', width: 2, backgroundColor: SHADE },
+  goalHead: {
+    position: 'absolute', width: 0, height: 0,
+    borderLeftWidth: 4, borderRightWidth: 4, borderTopWidth: 6,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: SHADE,
+  },
+
+  // CHAIN — a spine down the margin with a chevron at each "follows from" join.
+  chainSpine: { position: 'absolute', width: 2, backgroundColor: SHADE },
+  chainHead: {
+    position: 'absolute', width: 0, height: 0,
+    borderLeftWidth: 4, borderRightWidth: 4, borderTopWidth: 5,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: SHADE,
+  },
+
+  // ACCEPT — a plain check, no plate: it marks a step Mill has already granted,
+  // not a new control.
+  acceptWrap: { position: 'absolute', width: 14, height: 14, alignItems: 'center', justifyContent: 'center' },
+  acceptMark: { fontFamily: 'Inter_700Bold', fontSize: 13, color: INK, includeFontPadding: false },
+
+  // CRUX — a dashed frame, never a fill, around the one step the whole case rests on.
+  crux: { position: 'absolute', borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 6 },
 });
 
 // Ink runs from the header (226) to the ground line (500). Band 220…512 = 292 (H59).

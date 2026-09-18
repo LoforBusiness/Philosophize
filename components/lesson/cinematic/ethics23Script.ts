@@ -17,6 +17,8 @@ export interface Ethics23Beat extends BaseBeat {
   /** How full the NEAR obligation reads, 0..1. */ near?: number;
   /** How full the FAR obligation reads, 0..1. */ far?: number;
   /** 1 = the three answer cards are live (Q1). */ pick?: number;
+  /** 1 = a shoe print by his feet appears already struck through. */ shoe?: number;
+  /** 1 = a dashed span between him and the board is struck through. */ moot?: number;
 }
 
 export const BEATS: Ethics23Beat[] = [
@@ -26,7 +28,7 @@ export const BEATS: Ethics23Beat[] = [
     dur: 3.5,
   },
   {
-    p: 462, x: 70,
+    p: 462, x: 70, shoe: 1,
     text: 'Peter Singer holds that you ought to wade in. The ruined shoes are insignificant beside the death of a child.',
     dur: 1.8,
   },
@@ -62,7 +64,7 @@ export const BEATS: Ethics23Beat[] = [
     dur: 2.2,
   },
   {
-    p: 167, x: 168, gauges: 1, near: 1, far: 1,
+    p: 167, x: 168, gauges: 1, near: 1, far: 1, moot: 1,
     text: 'Nor can it be your ability to help, which is also equal. For Singer, the only difference left is distance, and distance is not a moral property.',
     dur: 3.2,
   },

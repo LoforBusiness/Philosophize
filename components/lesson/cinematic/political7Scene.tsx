@@ -5,7 +5,7 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
@@ -13,6 +13,7 @@ import { BEATS } from './political7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerLiftValues } from './Target';
@@ -20,7 +21,9 @@ import Target, { useAnswerLiftValues } from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a raised plate stands on (./stageSkin)
 
 // TWO SOURCES for the same right, facing each other across the stage:
 //   · stage LEFT  — a STONE TABLET, half-buried, "SPEAK YOUR MIND" chiselled into it
@@ -55,6 +58,26 @@ const CH_H = 156;
 const CH_HALF = CH_W / 2;               // the tear runs straight down the middle
 const RAIL_Y = 154;
 
+const CLAIM = BEATS.map((b) => b.claim ?? 0);
+const BEFORE = BEATS.map((b) => b.before ?? 0);
+const PROTECT = BEATS.map((b) => b.protect ?? 0);
+const WISH = BEATS.map((b) => b.wish ?? 0);
+const LAW = BEATS.map((b) => b.law ?? 0);
+const CHIP = BEATS.map((b) => b.chip ?? 0);
+const STANDS = BEATS.map((b) => b.stands ?? 0);
+const REASON = BEATS.map((b) => b.reason ?? 0);
+
+// ── where the opening pair sits ──────────────────────────────────────────────
+// Beats 1–2 are the only ones with a bare stage: the stone arrives on 3 and the
+// charter on 5, so the middle of the picture is free and the pair is struck there.
+// ONE CARD, TWO PLACES. The right is drawn once and travels, because the question
+// those two beats ask is about the same right in two different stories — a second
+// card would be a second right.
+const CARD_W = 100;
+const CARD_GRANTED_L = 150;      // under the GOVERNMENT plate
+const CARD_BEFORE_L = 60;        // left of the rule marked THE VOTE at x 178
+const CARD_T = 254;
+const VOTE_X = 178;
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? 262);
 // The camera, from the staging: it follows the figure this track describes,
@@ -84,7 +107,7 @@ const CH_MID_Y = CH_T + CH_H / 2;
 export default function Political7Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(10);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -126,6 +149,15 @@ export default function Political7Scene({ clock, bt, bi, i, picked, onPick, pick
       // R7c — the charter comes forward while the chip sits on a conclusion about
       // what law does, and settles back everywhere else (CHARTER_AT).
       near: carry(cv, 1, n, 0, reacting ? pickAt(CHARTER_AT, pickPos.value) : 0, grow),
+      // The eight tap events, carried, so each fades out as well as in (group L).
+      claim: carry(cv, 2, n, CLAIM[p], CLAIM[n], grow),
+      before: carry(cv, 3, n, BEFORE[p], BEFORE[n], grow),
+      protect: carry(cv, 4, n, PROTECT[p], PROTECT[n], grow),
+      wish: carry(cv, 5, n, WISH[p], WISH[n], grow),
+      law: carry(cv, 6, n, LAW[p], LAW[n], grow),
+      chip: carry(cv, 7, n, CHIP[p], CHIP[n], grow),
+      stands: carry(cv, 8, n, STANDS[p], STANDS[n], grow),
+      reason: carry(cv, 9, n, REASON[p], REASON[n], grow),
       t,
     };
   });
@@ -154,6 +186,59 @@ export default function Political7Scene({ clock, bt, bi, i, picked, onPick, pick
   }));
   // The two halves hinge apart. Kept small on purpose: at ±7° the lowest corner
   // still lands above y ≈ 348, so a torn charter can never cover the figure.
+  // ── the eight tap events ───────────────────────────────────────────────────
+  //
+  // The plate and its arrow belong to the FIRST story only, so they leave as the
+  // card travels: what the second beat says is that nothing handed it over.
+  const grantStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.claim * (1 - SCENE.value.before),
+  }));
+  // One card, two places. It is present for either beat and its x is the story it
+  // is in, so the reader watches the same right change hands rather than reappear.
+  const cardStyle = useAnimatedStyle(() => {
+    const on = Math.max(SCENE.value.claim, SCENE.value.before);
+    return {
+      opacity: on,
+      left: CARD_GRANTED_L + (CARD_BEFORE_L - CARD_GRANTED_L) * SCENE.value.before,
+      transform: [{ translateY: (1 - on) * -8 }],
+    };
+  });
+  const voteStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.before }));
+
+  // The bracket DRAWS DOWN over the stone's shoulders rather than fading: it is
+  // being laid over something that was already there, which is the claim.
+  const protectStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.protect,
+    transform: [{ translateY: (1 - SCENE.value.protect) * -10 }],
+  }));
+  const wishStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.wish,
+    transform: [{ scale: 0.94 + 0.06 * SCENE.value.wish }],
+  }));
+  // The law comes DOWN into the frame, the way an instrument is posted up, and its
+  // stamp lands late and slightly large — struck onto the card, not printed with it.
+  const lawStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.law,
+    transform: [{ translateY: (1 - SCENE.value.law) * -14 }],
+  }));
+  const enactStyle = useAnimatedStyle(() => {
+    const u = clamp01((SCENE.value.law - 0.55) / 0.45);
+    return { opacity: u, transform: [{ rotate: '-6deg' }, { scale: 1.18 - 0.18 * u }] };
+  });
+  const chipStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.chip }));
+  // The rule under the caption draws out from the left, so the words are underwritten
+  // rather than boxed.
+  const standsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.stands }));
+  const standsRuleStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.stands,
+    transform: [{ scaleX: SCENE.value.stands }],
+  }));
+  const reasonStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.reason }));
+  const reasonLeadStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.reason,
+    transform: [{ scaleY: clamp01((SCENE.value.reason - 0.4) / 0.6) }],
+  }));
+
   const halfLStyle = useAnimatedStyle(() => {
     const v = SCENE.value.tear;
     return { transform: [{ translateX: -13 * v }, { translateY: 5 * v }, { rotate: `${-6 * v}deg` }] };
@@ -181,6 +266,14 @@ export default function Political7Scene({ clock, bt, bi, i, picked, onPick, pick
         {/* earth piled against the base, so the slab reads as buried, not standing */}
         <View style={styles.moundL} />
         <View style={styles.moundR} />
+
+        {/* A government can violate one: two wedges of the PAGE taken out of the
+            slab's right edge. Inside this wrapper, so the chip cannot drift off the
+            stone it was struck from. */}
+        <Animated.View style={[styles.chipWrap, chipStyle]} pointerEvents="none">
+          <View style={styles.chipA} />
+          <View style={styles.chipB} />
+        </Animated.View>
       </Animated.View>
 
       {/* ── the charter: hung from a rail, and tearable in two ───────────────── */}
@@ -203,6 +296,55 @@ export default function Political7Scene({ clock, bt, bi, i, picked, onPick, pick
           <TearEdge side="right" S={SCENE} />
         </Animated.View>
       </Animated.View>
+
+      {/* Granted from above: a plate, an arrow, and the right handed down. */}
+      <Animated.View style={[styles.grantWrap, grantStyle]} pointerEvents="none">
+        <View style={styles.govPlate}>
+          <Text style={styles.govText}>GOVERNMENT</Text>
+        </View>
+        <View style={styles.grantShaft} />
+        <View style={styles.grantHead} />
+      </Animated.View>
+
+      {/* The vote, and the right standing on the far side of it. */}
+      <Animated.View style={[styles.voteWrap, voteStyle]} pointerEvents="none">
+        <View style={styles.voteRule} />
+        <Text style={styles.voteText}>THE VOTE</Text>
+      </Animated.View>
+      <Animated.View style={[styles.rightCard, cardStyle]} pointerEvents="none">
+        <Text style={styles.rightText}>YOUR RIGHT</Text>
+      </Animated.View>
+
+      {/* Protected, not granted: an open bracket laid over the stone's shoulders. */}
+      <Animated.View style={[styles.protectWrap, protectStyle]} pointerEvents="none">
+        <Text style={styles.protectText}>PROTECTED, NOT GRANTED</Text>
+        <View style={styles.protectBracket} />
+      </Animated.View>
+
+      {/* The other view's verdict on the stone, written in a dashed hand. */}
+      <Animated.View style={[styles.wishTag, wishStyle]} pointerEvents="none">
+        <Text style={styles.wishText}>ONLY A WISH</Text>
+      </Animated.View>
+
+      {/* The law of the thought experiment, posted up and stamped. */}
+      <Animated.View style={[styles.lawCard, lawStyle]} pointerEvents="none">
+        <Text style={styles.lawText}>{'LAW: YOU MAY\nNOT SPEAK'}</Text>
+      </Animated.View>
+      <Animated.View style={[styles.enactStamp, enactStyle]} pointerEvents="none">
+        <Text style={styles.enactText}>ENACTED</Text>
+      </Animated.View>
+
+      {/* What it never granted, it cannot take away. */}
+      <Animated.View style={[styles.standsWrap, standsStyle]} pointerEvents="none">
+        <Text style={styles.standsText}>CANNOT BE TAKEN AWAY</Text>
+        <Animated.View style={[styles.standsRule, standsRuleStyle]} />
+      </Animated.View>
+
+      {/* Who the stone is for, on a leader down into it. */}
+      <Animated.View style={[styles.reasonPlate, reasonStyle]} pointerEvents="none">
+        <Text style={styles.reasonText}>WHOEVER REASONS</Text>
+      </Animated.View>
+      <Animated.View style={[styles.reasonLead, reasonLeadStyle]} pointerEvents="none" />
 
       {/* ── Q1: tap the source that survives the repeal ──────────────────────── */}
       {qOn && (
@@ -320,7 +462,7 @@ const styles = StyleSheet.create({
   halfR: { position: 'absolute', left: CH_L + CH_HALF, top: CH_T, width: CH_HALF, height: CH_H, overflow: 'hidden' },
   face: {
     position: 'absolute', top: 0, width: CH_W, height: CH_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
     alignItems: 'center', paddingTop: 9,
   },
   faceL: { left: 0 },
@@ -366,6 +508,139 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 0, width: 0, height: 0,
     borderRightWidth: 8, borderTopWidth: 9, borderBottomWidth: 9,
     borderRightColor: INK, borderTopColor: 'transparent', borderBottomColor: 'transparent',
+  },
+
+  // ── the eight tap events (group AH) ────────────────────────────────────────
+  //
+  // THE CHIP IS THE PAGE, NOT A DARKER GREY. By the beat it is struck the stone has
+  // been answered and its slab is INK, so a wedge of PAPER is material gone rather
+  // than a mark drawn on. It sits at local x 102…128 — right of "YOUR MIND", which
+  // sets 78 units wide inside a 122-unit slab and so ends at x 106.
+  chipWrap: { position: 'absolute', left: 0, top: 0, width: 150, height: 160 },
+  chipA: {
+    position: 'absolute', left: 102, top: 20, width: 26, height: 12,
+    backgroundColor: PAPER, transform: [{ rotate: '24deg' }],
+  },
+  chipB: {
+    position: 'absolute', left: 106, top: 40, width: 22, height: 9,
+    backgroundColor: PAPER, transform: [{ rotate: '-18deg' }],
+  },
+
+  // The opening pair. Both live in the middle of the picture, which is the only
+  // clear ground this scene has and only on beats 1–2.
+  grantWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
+  govPlate: {
+    position: 'absolute', left: CARD_GRANTED_L, top: 196, width: CARD_W, height: 26,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  govText: {
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1, color: INK,
+    includeFontPadding: false,
+  },
+  grantShaft: {
+    position: 'absolute', left: CARD_GRANTED_L + CARD_W / 2 - 1, top: 228, width: 2, height: 14,
+    backgroundColor: SOFT,
+  },
+  // A TRIANGLE IN A SIZED BOX: a border triangle has no box of its own, so anything
+  // measured or transformed against it resolves against nothing (§13).
+  grantHead: {
+    position: 'absolute', left: CARD_GRANTED_L + CARD_W / 2 - 6, top: 242, width: 12, height: 9,
+    borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 9,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: SOFT,
+    borderStyle: 'solid',
+  },
+  voteWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
+  voteRule: { position: 'absolute', left: VOTE_X, top: 236, width: 2, height: 64, backgroundColor: SOFT },
+  voteText: {
+    position: 'absolute', left: VOTE_X - 38, top: 304, width: 76, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1, color: SOFT,
+    includeFontPadding: false,
+  },
+  // `left` is animated, so it is not set here — cardStyle carries it.
+  rightCard: {
+    position: 'absolute', top: CARD_T, width: CARD_W, height: 34,
+    borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  rightText: {
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.6, color: INK,
+    includeFontPadding: false,
+  },
+
+  // Open at the bottom, because the stone is not contained by it: the claim is that
+  // something stands over what was already there.
+  protectWrap: { position: 'absolute', left: 2, top: 312, width: 130 },
+  protectText: {
+    width: 130, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.7, color: SOFT,
+    includeFontPadding: false,
+  },
+  protectBracket: {
+    marginTop: 4, width: 130, height: 22,
+    borderWidth: 1.5, borderBottomWidth: 0, borderColor: SOFT, borderStyle: 'dashed',
+    borderTopLeftRadius: 8, borderTopRightRadius: 8,
+  },
+
+  // DASHED, because it is the tag of the view that says this right is not secured.
+  wishTag: {
+    position: 'absolute', left: 12, top: 312, width: 110, height: 28,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 6,
+    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+  },
+  wishText: {
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.8, color: SOFT,
+    includeFontPadding: false,
+  },
+
+  // Above the rail at y 154 and above the charter at 178, in the one band this
+  // composition keeps clear — and gone by the beat the question's own caption
+  // arrives at y 104.
+  lawCard: {
+    position: 'absolute', left: 120, top: 100, width: 180, height: 48,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  lawText: {
+    textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 13, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
+  enactStamp: {
+    position: 'absolute', left: 240, top: 130, width: 68, height: 20,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  enactText: {
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1, color: INK,
+    includeFontPadding: false,
+  },
+
+  standsWrap: { position: 'absolute', left: 2, top: 312, width: 130 },
+  standsText: {
+    width: 130, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.7, color: INK,
+    includeFontPadding: false,
+  },
+  standsRule: {
+    marginTop: 4, width: 130, height: 2, backgroundColor: INK, borderRadius: 1,
+    transformOrigin: '0% 50%',
+  },
+
+  // Right of the stone (which ends at x 128) and left of the charter (which starts
+  // at 240), in the corridor between them.
+  reasonPlate: {
+    position: 'absolute', left: 134, top: 306, width: 102, height: 26,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  reasonText: {
+    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+  reasonLead: {
+    position: 'absolute', left: 138, top: 332, width: 1.5, height: 18,
+    backgroundColor: SOFT, transformOrigin: '50% 0%',
   },
 
   // ── Q1 ─────────────────────────────────────────────────────────────────────

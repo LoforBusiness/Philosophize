@@ -14,14 +14,16 @@ import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useCarry, carry, lookPose, pickAt,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE ROAD THAT FORKS, AND THE WAY THAT ISN'T THERE.
@@ -341,7 +343,7 @@ const styles = StyleSheet.create({
 
   qBox: {
     position: 'absolute', left: 40, top: 236, width: 320, height: 28,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   qText: {
@@ -369,7 +371,7 @@ const styles = StyleSheet.create({
   // answer UI, however different the thing being tapped is.
   claim: { position: 'absolute', top: CLAIM_T, width: CLAIM_W },
   claimInner: {
-    height: CLAIM_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: CLAIM_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   claimRight: { backgroundColor: INK, borderColor: INK },
@@ -386,7 +388,7 @@ const styles = StyleSheet.create({
   },
   signIs: {
     position: 'absolute', left: SIGN_IS_X - 30, top: 356, width: 60, height: 26,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   signIsText: {

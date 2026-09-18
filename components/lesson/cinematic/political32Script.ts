@@ -18,6 +18,7 @@ export interface Pol32Beat extends BaseBeat {
   /** 1 = your own mark is picked out. */ mark?: number;
   /** 1 = the margin and the third option are labelled. */ labels?: number;
   /** 1 = the three answers are live targets (Q1). */ pick?: number;
+  /** 1 = the two sides of Downs's sum are stated under the count. */ sum?: number;
 }
 
 export const BEATS: Pol32Beat[] = [
@@ -41,6 +42,7 @@ export const BEATS: Pol32Beat[] = [
   {
     g: 459, fill: 1, result: 1, mark: 1, labels: 0,
     dur: 1.8,
+    sum: 1,
     text: 'Anthony Downs argued in 1957 that voting seems irrational. A vote’s tiny chance of deciding rarely repays its cost.',
   },
   {

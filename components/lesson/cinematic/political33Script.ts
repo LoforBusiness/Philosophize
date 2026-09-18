@@ -19,6 +19,8 @@ export interface Political33Beat extends BaseBeat {
   /** How far the doors stand open, 0 (shut) … 1 (everything admitted). */ open?: number;
   /** 1 = the figure that will shut the doors is standing in the gateway. */ threat?: number;
   /** 1 = the reader is driving the doors from the rail (Q1). */ live?: number;
+  /** 1 = the figure in the gateway is holding the doors he came through. */ shutter?: number;
+  /** 1 = the policy's own list is up on the gate: which arguments may be heard. */ vetted?: number;
 }
 
 export const BEATS: Political33Beat[] = [
@@ -41,6 +43,7 @@ export const BEATS: Political33Beat[] = [
   },
   {
     p: 169, x: 52, open: 1, threat: 1,
+    shutter: 1,
     text: 'Unlimited tolerance can be used to end tolerance. Popper argues that the intolerant, left unchecked, destroy the tolerant.',
     dur: 1.8,
   },
@@ -52,6 +55,7 @@ export const BEATS: Political33Beat[] = [
   },
   {
     p: 160, x: 52, open: 0.1, threat: 1,
+    vetted: 1,
     text: 'Deciding in advance which arguments may be heard is the very intolerance the policy set out to prevent.',
     dur: 3.3,
   },

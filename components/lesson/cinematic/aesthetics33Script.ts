@@ -18,6 +18,7 @@ export interface Aesthetics33Beat extends BaseBeat {
   /** Figure gesture code. */ p?: number;
   /** How far the cleaning has gone, 0 (untouched) … 1 (down to bare canvas). */ clean?: number;
   /** 1 = the layer stack is labelled beside the canvas. */ layers?: number;
+  /** 1 = a dashed box marks GLAZE disputed, once historians disagree about it. */ dispute?: number;
   /** 1 = the reader is driving the swab from the rail (Q1). */ live?: number;
 }
 
@@ -46,7 +47,7 @@ export const BEATS: Aesthetics33Beat[] = [
     dur: 2.8,
   },
   {
-    p: 467, x: 52, clean: 0.85, layers: 1,
+    p: 467, x: 52, clean: 0.85, layers: 1, dispute: 1,
     text: 'James Beck, an art historian, argued that Michelangelo’s own final glazes had been removed. The restorers answered that the dark layer was soot and wax from candles.',
     dur: 2.4,
   },

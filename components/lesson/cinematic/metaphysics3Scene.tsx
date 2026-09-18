@@ -13,6 +13,7 @@ import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld
   stageAnswered,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerSpent } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PLATO'S LADDER OF REALITY, drawn as a labelled three-tier chart, stage right.
@@ -340,7 +342,7 @@ const styles = StyleSheet.create({
   // they read as cast ON the wall instead of floating beside it.
   cave: {
     position: 'absolute', left: CAVE_L, top: CAVE_T, width: CAVE_W, height: CAVE_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   // ONE line now (85 units of type in 94 of box — at 82 it wrapped to two, and the
   // second caption line needs the row under it). Both lines end above the wall's
@@ -380,7 +382,7 @@ const styles = StyleSheet.create({
 
   tier: {
     position: 'absolute', left: COL_L, width: COL_W, height: TIER_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     flexDirection: 'row', alignItems: 'center', paddingLeft: 8, gap: 8,
   },
   iconCell: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
@@ -437,7 +439,7 @@ const styles = StyleSheet.create({
   },
   cardHit: { position: 'absolute', left: COL_L, width: COL_W },
   card: {
-    height: 40, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    height: 40, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },

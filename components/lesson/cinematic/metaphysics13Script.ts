@@ -18,6 +18,8 @@ export interface Meta13Beat extends BaseBeat {
   /** 1 = both destinations are labelled and equally filled. */ both?: number;
   /** 1 = the label has been tried on the fork and stuck. */ stuck?: number;
   /** 1 = the three answer cards are live (Q2). */ pick?: number;
+  /** 1 = a token runs once from the fork down the Mars-side branch to its foot — the replica walking out (group AH). */ arrive?: number;
+  /** 1 = a break mark appears where the stem meets the fork — identity itself cannot pass this point (group AH). */ crack?: number;
 }
 
 export const BEATS: Meta13Beat[] = [
@@ -39,7 +41,7 @@ export const BEATS: Meta13Beat[] = [
     dur: 2.4,
   },
   {
-    p: 266, x: 124, track: 1, fork: 1,
+    p: 266, x: 124, track: 1, fork: 1, arrive: 1,
     text: 'The replica walks out on Mars with your memories and intentions. Both of you continue the mental life of the person who stepped in.',
     dur: 2.8,
   },
@@ -63,7 +65,7 @@ export const BEATS: Meta13Beat[] = [
     dur: 3.5,
   },
   {
-    p: 258, x: 168, track: 1, fork: 1, both: 1, stuck: 1,
+    p: 258, x: 168, track: 1, fork: 1, both: 1, stuck: 1, crack: 1,
     text: 'Identity can’t branch, because one person can’t be identical to two different people. Psychological continuity, however, has branched.',
     dur: 2,
   },

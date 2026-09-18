@@ -23,6 +23,9 @@ export interface Log15Beat extends BaseBeat {
   /** The step from the two to all of them, 0…1. */ leap?: number;
   /** The conclusion drawn across the whole crowd, 0…1. */ claim?: number;
   /** 1 = the three parts are live targets (Q1). */ pick?: number;
+  /** 1 = a check mark confirms the two observations, beside the sample ring. */ verify?: number;
+  /** 1 = the two sampled dots fill solid ink, marking them as vividly witnessed. */ vivid?: number;
+  /** 1 = a dashed ring appears round the leap card, marking it as unsupported. */ weak?: number;
 }
 
 export const BEATS: Log15Beat[] = [
@@ -32,24 +35,24 @@ export const BEATS: Log15Beat[] = [
     text: 'Suppose two tourists were rude to you last week, and both came from the same country.',
   },
   {
-    g: 462, crowd: 1, sample: 1,
+    g: 462, crowd: 1, sample: 1, verify: 1,
     dur: 1.8,
     text: 'In this case, both observations are true.',
   },
   {
-    g: 447, crowd: 1, sample: 1, leap: 1, claim: 1,
+    g: 447, crowd: 1, sample: 1, leap: 1, claim: 1, verify: 1,
     dur: 4.8,
     text: 'You conclude that people from the country are rude. This hasty generalisation draws a claim about a nation from two people.',
     cite: 'From two to all',
   },
   {
-    g: 383, crowd: 1, sample: 1, leap: 1, claim: 1,
+    g: 383, crowd: 1, sample: 1, leap: 1, claim: 1, verify: 1, vivid: 1,
     dur: 4.8,
     text: 'Firsthand evidence feels compelling because you witnessed it. Yet two cases, however vivid, don’t establish a pattern.',
     cite: 'Why it seems strong',
   },
   {
-    g: 139, crowd: 1, sample: 1, leap: 1, claim: 1,
+    g: 139, crowd: 1, sample: 1, leap: 1, claim: 1, verify: 1, vivid: 1,
     dur: 3.8,
     quote: {
       id: 'lq-logic-arguments-15',
@@ -62,13 +65,13 @@ export const BEATS: Log15Beat[] = [
     },
   },
   {
-    g: 412, crowd: 1, sample: 1, leap: 1, claim: 1,
+    g: 412, crowd: 1, sample: 1, leap: 1, claim: 1, verify: 1, vivid: 1, weak: 1,
     dur: 4.8,
     text: 'A sample supports a general conclusion when it’s large enough and fairly chosen. A sample of two people met by chance is neither.',
     cite: 'A fair sample',
   },
   {
-    g: 4, crowd: 1, sample: 1, leap: 1, claim: 1, pick: 1,
+    g: 4, crowd: 1, sample: 1, leap: 1, claim: 1, verify: 1, vivid: 1, weak: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'The observations are true. Which part of the argument lacks support?',
@@ -77,7 +80,7 @@ export const BEATS: Log15Beat[] = [
     },
   },
   {
-    g: 442, crowd: 1, sample: 1, leap: 1, claim: 1,
+    g: 442, crowd: 1, sample: 1, leap: 1, claim: 1, verify: 1, vivid: 1, weak: 1,
     dur: 1.0,
     interact: {
       prompt: 'What evidence would support a generalisation about the whole country?',

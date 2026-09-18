@@ -13,6 +13,7 @@ import { BEATS } from './logic10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A rule straight across the stage labelled SAID. Above it, the two sentences that
 // were actually spoken; below it, in dashed outline, the one that was not. The
@@ -109,6 +111,8 @@ const X = BEATS.map((b) => b.x ?? 158);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic10'));
 const DIR = dirsFrom(X, 1);
 const SLOTV = BEATS.map((b) => b.slot ?? 0);
+const HINT = BEATS.map((b) => b.hint ?? 0);
+const FALSE_STAMP = BEATS.map((b) => b.falseStamp ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -137,7 +141,7 @@ const HIDSOL: number[] = [];
 export default function Logic10Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -146,6 +150,8 @@ export default function Logic10Scene({ clock, bt, bi, i, picked, onPick, pickPos
   const argN = cur.arg ?? 0;
   const argFade = argN !== (prev?.arg ?? 0);
   const slotFade = (cur.slot ?? 0) !== (prev?.slot ?? 0);
+  const hintFade = (cur.hint ?? 0) !== (prev?.hint ?? 0);
+  const falseFade = (cur.falseStamp ?? 0) !== (prev?.falseStamp ?? 0);
   const pickOn = (cur.pick ?? 0) > 0 && !!cur.interact;
   const pickFade = pickOn !== ((prev?.pick ?? 0) > 0 && !!prev?.interact);
   const answered = picked !== null;
@@ -175,6 +181,11 @@ export default function Logic10Scene({ clock, bt, bi, i, picked, onPick, pickPos
       // nobody said into the open, which is the only way to check whether it is true.
       hid: carry(cv, 3, n, HIDOP[p], reacting ? pickPos.value * 2 : HIDOP[n], tr),
       sol: carry(cv, 4, n, HIDSOL[p], HIDSOL[n], cross),
+      // group AH: a chevron points up at the socket the premise still owes, and
+      // a FALSE stamp lands on it once the narration checks it and finds it
+      // wanting. Both fade fully in and fully out on their own.
+      hint: carry(cv, 5, n, HINT[p], HINT[n], hintFade ? grow : 1),
+      falseStamp: carry(cv, 6, n, FALSE_STAMP[p], FALSE_STAMP[n], falseFade ? grow : 1),
     };
   });
 
@@ -197,6 +208,15 @@ export default function Logic10Scene({ clock, bt, bi, i, picked, onPick, pickPos
   const hidTextStyle = useAnimatedStyle(() => ({ opacity: 0.62 + 0.38 * SCENE.value.sol }));
   const pickStyle = useAnimatedStyle(() => ({
     opacity: pickOn ? (pickFade ? ease01(bt.value / 0.6) : 1) : 0,
+  }));
+  // group AH: the chevron pointing at the socket, and the FALSE stamp.
+  const hintStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.hint,
+    transform: [{ translateY: (1 - SCENE.value.hint) * 6 }],
+  }));
+  const falseStampStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.falseStamp,
+    transform: [{ scale: 0.7 + SCENE.value.falseStamp * 0.3 }, { rotate: '-9deg' }],
   }));
 
   return (
@@ -224,12 +244,20 @@ export default function Logic10Scene({ clock, bt, bi, i, picked, onPick, pickPos
         <Text style={styles.socketMark}>?</Text>
       </Animated.View>
 
+      {/* group AH: it still owes the socket above — a chevron in the one gap
+          between the dashed premise and the line it has not crossed yet. */}
+      <Animated.View style={[styles.hintChev, hintStyle]} pointerEvents="none" />
+
       {/* the premise nobody said: dashed under the line, solid once it is hauled up */}
       <Animated.View style={[styles.hidCard, hidStyle]} pointerEvents="none">
         <Animated.View style={[styles.frame, styles.frameDash, dashStyle]} />
         <Animated.View style={[styles.frame, styles.frameSolid, solidStyle]} />
         <Animated.View style={hidTextStyle}>
           <Text style={styles.hidText}>{'ALL RICH PEOPLE\nARE HAPPY'}</Text>
+        </Animated.View>
+        {/* group AH: checked, and found false. */}
+        <Animated.View style={[styles.falseStamp, falseStampStyle]} pointerEvents="none">
+          <Text style={styles.falseStampText}>FALSE</Text>
         </Animated.View>
       </Animated.View>
 
@@ -272,7 +300,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   // The one line the whole lesson is about, so it is the heaviest stroke on stage.
   saidRule: { position: 'absolute', left: 14, right: 10, top: LINE_Y, height: 2, backgroundColor: INK },
@@ -283,9 +311,23 @@ const styles = StyleSheet.create({
     color: SOFT, includeFontPadding: false,
   },
 
+  // group AH: the chevron in the one gap between the socket (ends 306) and the
+  // dashed premise (starts 322) — the only free strip on this stage.
+  hintChev: {
+    position: 'absolute', left: CARD_L + CARD_W / 2 - 7, top: 309, width: 0, height: 0,
+    borderLeftWidth: 7, borderRightWidth: 7, borderBottomWidth: 8,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: SOFT,
+  },
+  // group AH: the FALSE stamp, at the premise card's own corner.
+  falseStamp: {
+    position: 'absolute', top: -11, right: -8, paddingHorizontal: 6, paddingVertical: 2,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  falseStampText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1, color: INK, includeFontPadding: false },
+
   card: {
     position: 'absolute', left: CARD_L, width: CARD_W, height: SAID_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   cardA: { top: SAID_A_T },

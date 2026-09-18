@@ -21,6 +21,10 @@ export interface Ethics33Beat extends BaseBeat {
   /** How much has moved across, 0 (nothing) … 1 (you are level with them). */ give?: number;
   /** 1 = the reader is driving the transfer from the rail (Q1). */ live?: number;
   /** 1 = the "STILL ANOTHER LIFE" tag is showing above the far column. */ more?: number;
+  /** 1 = a "?" holds in the gap between the columns, for the open question of
+   *  where giving may stop. */ ask?: number;
+  /** 1 = a dashed bracket presses in around the "YOURS" label, for the life it
+   *  crowds out. */ squeeze?: number;
 }
 
 export const BEATS: Ethics33Beat[] = [
@@ -42,7 +46,7 @@ export const BEATS: Ethics33Beat[] = [
     dur: 3.5,
   },
   {
-    p: 169, x: 48, give: 0.15, more: 1,
+    p: 169, x: 48, give: 0.15, more: 1, ask: 1,
     text: 'So the question is what, if anything, permits you to stop giving.',
     dur: 1.8,
   },
@@ -90,7 +94,7 @@ export const BEATS: Ethics33Beat[] = [
     dur: 3.9,
   },
   {
-    p: 459, x: 48, give: 0.45,
+    p: 459, x: 48, give: 0.45, squeeze: 1,
     text: 'In Wolf’s view, such a life crowds out the non-moral interests and talents that make up a rich, well-rounded character.',
     dur: 1.8,
   },

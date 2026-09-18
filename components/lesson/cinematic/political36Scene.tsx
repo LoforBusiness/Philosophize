@@ -9,6 +9,7 @@ import { BEATS } from './political36Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWENTY-FOUR LIT WINDOWS, AND A LAMP WITH NOBODY BEHIND IT.
@@ -92,12 +94,21 @@ const LAMP = BEATS.map((b) => (b.lamp ? 1 : 0));
 const EMPTY = BEATS.map((b) => (b.empty ? 1 : 0));
 const PICKS = BEATS.map((b) => (b.picks ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// group AH — one still-tap event each, set on exactly one beat and left to fade
+// out on the next (cinematicKit's carry() and the "fade an event out, not off"
+// recipe).
+const LINK = BEATS.map((b) => (b.link ? 1 : 0));
+const SHRINK = BEATS.map((b) => (b.shrink ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political36'));
 
 export default function Political36Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(6);
+  const cv = useCarry(8);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const linkFade = (cur.link ?? 0) !== (prev?.link ?? 0);
+  const shrinkFade = (cur.shrink ?? 0) !== (prev?.shrink ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -106,6 +117,7 @@ export default function Political36Scene({ clock, bt, bi, i, picked, onPick, dra
     // computes from moveTr — arriving after the figure had stopped.
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -125,6 +137,10 @@ export default function Political36Scene({ clock, bt, bi, i, picked, onPick, dra
       // The beam sweeps on the wall clock, not the beat clock, so it keeps moving
       // whatever the reader does — which is the point of it.
       sweep: Math.sin(t * 0.9) * 22,
+      // group AH — the empty box's belief reaching the street, then the block's
+      // own boundary drawn smaller than itself.
+      linkOn: carry(cv, 6, n, LINK[p], LINK[n], tr, linkFade ? grow : 1),
+      shrinkOn: carry(cv, 7, n, SHRINK[p], SHRINK[n], tr, shrinkFade ? grow : 1),
     };
   });
 
@@ -137,6 +153,10 @@ export default function Political36Scene({ clock, bt, bi, i, picked, onPick, dra
   const beamStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.sweep}deg` }] }));
   const emptyStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.emptyOn }));
   const picksStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.picksOn }));
+  // group AH — the belief reaching down from the empty box, and the block's own
+  // range drawn shrunk inside itself.
+  const linkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.linkOn }));
+  const shrinkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.shrinkOn }));
 
   const wins: number[] = [];
   for (let w = 0; w < WINDOWS; w++) wins.push(w);
@@ -154,6 +174,7 @@ export default function Political36Scene({ clock, bt, bi, i, picked, onPick, dra
         <View style={styles.guardBox} />
         <Text style={styles.guardLabel}>EMPTY</Text>
       </Animated.View>
+      <Animated.View style={[styles.linkLine, linkStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, streetStyle]} pointerEvents="none">
         {wins.map((w) => {
@@ -161,6 +182,7 @@ export default function Political36Scene({ clock, bt, bi, i, picked, onPick, dra
           const top = GRID_Y + Math.floor(w / COLS) * (WIN_H + 6);
           return <Window key={w} S={SCENE} index={w} left={left} top={top} />;
         })}
+        <Animated.View style={[styles.shrinkBox, shrinkStyle]} pointerEvents="none" />
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, picksStyle]}>
@@ -215,7 +237,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 118, top: CAP_T, width: 270,
@@ -224,7 +246,7 @@ const styles = StyleSheet.create({
 
   winFrame: {
     position: 'absolute', left: 0, top: 0, width: WIN_W, height: WIN_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   winLit: { position: 'absolute', left: 3, top: 3, width: WIN_W - 6, height: WIN_H - 6, backgroundColor: INK, borderRadius: 1 },
 
@@ -245,6 +267,17 @@ const styles = StyleSheet.create({
   guardLabel: {
     position: 'absolute', left: 188, top: 270, width: 44, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: SOFT, includeFontPadding: false,
+  },
+
+  // group AH — the belief dropping from the empty guard box (bottom 268) down to
+  // the street (top 300), and the block's own range drawn inside itself.
+  linkLine: {
+    position: 'absolute', left: 210, top: 268, width: 0, height: 32,
+    borderLeftWidth: 2, borderLeftColor: SHADE, borderStyle: 'dashed',
+  },
+  shrinkBox: {
+    position: 'absolute', left: 126, top: 308, width: 194, height: 90,
+    borderWidth: 1.5, borderStyle: 'dashed', borderColor: SHADE, borderRadius: 4,
   },
 
   pick: { position: 'absolute', height: 24 },

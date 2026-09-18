@@ -13,6 +13,7 @@ import { BEATS } from './metaphysics32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // THE APP'S FIRST ORBIT, and the answer targets are three NUMBERS — the reader answers
 // by counting what is in front of them (E33). Nothing in the frame ever breaks the
@@ -67,6 +69,10 @@ const G = BEATS.map((b) => b.g ?? 0);
 const ORBS = BEATS.map((b) => b.orbs ?? 0);
 const TETHER = BEATS.map((b) => b.tether ?? 0);
 const TAG = BEATS.map((b) => b.tag ?? 0);
+const UNIVERSE_RING = BEATS.map((b) => (b.universeRing ? 1 : 0));
+const ALIKE_RING = BEATS.map((b) => (b.alikeRing ? 1 : 0));
+const TETHER_MARK = BEATS.map((b) => (b.tetherMark ? 1 : 0));
+const TAG_RING = BEATS.map((b) => (b.tagRing ? 1 : 0));
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -94,8 +100,13 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics32'));
 export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(7);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const universeRingFade = (cur.universeRing ?? 0) !== (prev?.universeRing ?? 0);
+  const alikeRingFade = (cur.alikeRing ?? 0) !== (prev?.alikeRing ?? 0);
+  const tetherMarkFade = (cur.tetherMark ?? 0) !== (prev?.tetherMark ?? 0);
+  const tagRingFade = (cur.tagRing ?? 0) !== (prev?.tagRing ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -115,6 +126,16 @@ export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick, p
       // them — which is the move the case forbids. Both axes, and the interesting
       // corner is the one where the tag is gone and there are still two.
       tag: carry(cv, 2, n, TAG[p], reacting ? pickAt(POLL_TAG, pickPos.value) : TAG[n], grow),
+      // A ring settles round the universe's own rim — this is the test case.
+      universeRing: carry(cv, 3, n, UNIVERSE_RING[p], UNIVERSE_RING[n], universeRingFade ? grow : 1),
+      // A ring settles round both spheres AT ONCE, never one alone — alike in
+      // every way, so nothing here may favour one over the other.
+      alikeRing: carry(cv, 4, n, ALIKE_RING[p], ALIKE_RING[n], alikeRingFade ? grow : 1),
+      // End-caps mark both ends of the tether: what is true of one end is true
+      // of the other.
+      tetherMark: carry(cv, 5, n, TETHER_MARK[p], TETHER_MARK[n], tetherMarkFade ? grow : 1),
+      // A dashed ring settles round the label — it is already on its way out.
+      tagRing: carry(cv, 6, n, TAG_RING[p], TAG_RING[n], tagRingFade ? grow : 1),
     };
   });
 
@@ -147,6 +168,10 @@ export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick, p
     transform: [{ rotate: `${SCENE.value.theta}rad` }],
   }));
   const tagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tag }));
+  const universeRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.universeRing }));
+  const alikeRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.alikeRing }));
+  const tetherMarkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tetherMark }));
+  const tagRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tagRing }));
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -157,12 +182,25 @@ export default function Metaphysics32Scene({ clock, bt, bi, i, picked, onPick, p
       <Text style={styles.kicker} numberOfLines={1}>A UNIVERSE, AND NOTHING ELSE IN IT</Text>
       <View style={styles.universe} pointerEvents="none" />
 
-      <Animated.View style={[styles.tether, tetherStyle]} pointerEvents="none" />
+      {/* group AH — a ring settles round the universe's own rim: this is the test case. */}
+      <Animated.View style={[styles.universeRing, universeRingStyle]} pointerEvents="none" />
+
+      <Animated.View style={[styles.tether, tetherStyle]} pointerEvents="none">
+        {/* group AH — end-caps at both ends: what is true of one end is true of the other. */}
+        <Animated.View style={[styles.tetherCap, { left: -1 }, tetherMarkStyle]} />
+        <Animated.View style={[styles.tetherCap, { left: ORB_R * 2 - 1 }, tetherMarkStyle]} />
+      </Animated.View>
 
       <Animated.View style={[styles.orb, orbA]} pointerEvents="none">
         <Animated.Text style={[styles.tag, tagStyle]} numberOfLines={1}>A</Animated.Text>
+        {/* group AH — a dashed ring round the label: already on its way out. */}
+        <Animated.View style={[styles.tagRing, tagRingStyle]} pointerEvents="none" />
+        {/* group AH — a ring settles here too, matched on orbB: alike in every way. */}
+        <Animated.View style={[styles.alikeRing, alikeRingStyle]} pointerEvents="none" />
       </Animated.View>
-      <Animated.View style={[styles.orb, orbB]} pointerEvents="none" />
+      <Animated.View style={[styles.orb, orbB]} pointerEvents="none">
+        <Animated.View style={[styles.alikeRing, alikeRingStyle]} pointerEvents="none" />
+      </Animated.View>
 
       {COUNTS.map((c, k) => (
         <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
@@ -196,7 +234,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   kicker: {
     position: 'absolute', left: 20, top: 288, width: 360,
@@ -225,9 +263,29 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
+  // ── the four tap events (group AH) ─────────────────────────────────────────
+  // A ring on the universe's own rim: this is the test case.
+  universeRing: {
+    position: 'absolute', left: UNI_CX - UNI_R - 4, top: UNI_CY - UNI_R - 4, width: (UNI_R + 4) * 2, height: (UNI_R + 4) * 2,
+    borderRadius: UNI_R + 4, borderWidth: 2, borderColor: INK,
+  },
+  // A ring drawn identically inside both orbs — a matched pair, never favouring
+  // one sphere over the other.
+  alikeRing: {
+    position: 'absolute', left: -4, top: -4, width: SPH_R * 2 + 8, height: SPH_R * 2 + 8,
+    borderRadius: SPH_R + 4, borderWidth: 2, borderColor: INK,
+  },
+  // A short end-cap at each end of the tether, inside its own rotating wrapper.
+  tetherCap: { position: 'absolute', top: -3, width: 1.5, height: 8, backgroundColor: INK },
+  // A dashed ring round the label, inside the orb it sits on: already leaving.
+  tagRing: {
+    position: 'absolute', left: SPH_R - 15, top: SPH_R - 15, width: 30, height: 30,
+    borderRadius: 15, borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
+
   plate: { position: 'absolute', top: PLATE_T, width: PLATE_W, height: PLATE_H },
   plateInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   plateText: {

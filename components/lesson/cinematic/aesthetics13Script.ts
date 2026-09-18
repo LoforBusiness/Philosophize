@@ -17,6 +17,10 @@ export interface Aes13Beat extends BaseBeat {
   /** How far the provenance has been drawn back, 0…1. */ chain?: number;
   /** 1 = the two canvases are on the wall. */ art?: number;
   /** 1 = the pictures and the history are live targets (Q1). */ pick?: number;
+  /** A small loupe appears in the gap between the two canvases — the expert's inspection. */ loupe?: boolean;
+  /** A dashed span with an “=” joins the two canvases — no feature tells them apart. */ noTell?: boolean;
+  /** A tag reading THE FORGER points at the single link in the short chain. */ forgerTag?: boolean;
+  /** A tag above the canvases: HAILED → DISMISSED, the verdict that moved while the paint did not. */ verdictShift?: boolean;
 }
 
 export const BEATS: Aes13Beat[] = [
@@ -26,12 +30,12 @@ export const BEATS: Aes13Beat[] = [
     text: 'Suppose two canvases hang side by side and look identical. One is a Vermeer.',
   },
   {
-    g: 259, art: 1, chain: 0,
+    g: 259, art: 1, chain: 0, loupe: true,
     dur: 3.1,
     text: 'The other is a forgery painted last year. Han van Meegeren’s 1937 fake fooled Abraham Bredius, a leading expert.',
   },
   {
-    g: 461, art: 1, chain: 0,
+    g: 461, art: 1, chain: 0, noTell: true,
     dur: 4.4,
     text: 'By hypothesis, no visible feature tells the two canvases apart. No amount of close inspection reveals which is genuine.',
     cite: 'Perceptually indistinguishable',
@@ -43,7 +47,7 @@ export const BEATS: Aes13Beat[] = [
     cite: 'Provenance',
   },
   {
-    g: 459, art: 1, chain: 1,
+    g: 459, art: 1, chain: 1, forgerTag: true,
     dur: 1.8,
     text: 'The forgery’s history begins last year, with the forger who painted it.',
   },
@@ -61,7 +65,7 @@ export const BEATS: Aes13Beat[] = [
     },
   },
   {
-    g: 406, art: 1, chain: 1,
+    g: 406, art: 1, chain: 1, verdictShift: true,
     dur: 4.6,
     text: 'When van Meegeren confessed in 1945, the canvases themselves did not change. Yet paintings once hailed as masterpieces were soon dismissed as forgeries.',
     cite: 'The confession',

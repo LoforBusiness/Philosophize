@@ -28,6 +28,8 @@ export interface Epi19Beat extends BaseBeat {
   /** The chip has been tried at the wrong door and not turned, 0…1. */ stray?: number;
   /** Two doors disagreeing with each other, 0…1. */ split?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a checkmark on the heart door, confirming the credential is real. */ credCheck?: number;
+  /** 1 = the credential line to the heart door snaps before it reaches nutrition. */ noBridge?: number;
 }
 
 export const BEATS: Epi19Beat[] = [
@@ -48,12 +50,12 @@ export const BEATS: Epi19Beat[] = [
     dur: 4.2,
   },
   {
-    p: 13, x: 132, doors: 1, chip: 1, stray: 1,
+    p: 13, x: 132, doors: 1, chip: 1, stray: 1, credCheck: 1,
     text: 'The doctor’s credentials are genuine, and nobody has lied.',
     dur: 1.8,
   },
   {
-    p: 266, x: 132, doors: 1, chip: 1, stray: 1,
+    p: 266, x: 132, doors: 1, chip: 1, stray: 1, noBridge: 1,
     text: 'But the credentials concern the heart, not nutrition. That doesn’t make the answer authoritative on its own.',
     dur: 1.9,
   },

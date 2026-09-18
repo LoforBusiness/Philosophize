@@ -19,6 +19,8 @@ export interface Log14Beat extends BaseBeat {
   /** The shared word ringed in both premises, 0…1. */ mark?: number;
   /** The two meanings written underneath, 0…1. */ gloss?: number;
   /** 1 = the three word chips are live targets (Q1). */ pick?: number;
+  /** 1 = each premise nods in turn — a brief scale pulse — read true on its own. */ alone?: number;
+  /** 1 = the two rings marking "nothing" pull apart and strain, showing the premises no longer share it. */ diverge?: number;
 }
 
 export const BEATS: Log14Beat[] = [
@@ -28,7 +30,7 @@ export const BEATS: Log14Beat[] = [
     text: 'Consider two premises: nothing is better than eternal happiness, and a ham sandwich is better than nothing.',
   },
   {
-    g: 164, lines: 2,
+    g: 164, lines: 2, alone: 1,
     dur: 1.8,
     text: 'Each premise, read on its own, seems true.',
   },
@@ -73,7 +75,7 @@ export const BEATS: Log14Beat[] = [
     cite: 'Two senses of one word',
   },
   {
-    g: 176, lines: 3, mark: 1, gloss: 1,
+    g: 176, lines: 3, mark: 1, gloss: 1, diverge: 1,
     dur: 1.8,
     text: 'Because the word “nothing” shifts meaning, the premises share no common term. This fallacy is called equivocation.',
   },

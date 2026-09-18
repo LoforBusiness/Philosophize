@@ -9,6 +9,7 @@ import { BEATS } from './epistemology17Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // FACTS THAT NEVER MOVE, AND A FRAME THAT DOES (H64). Not one dot changes position
 // across the whole lesson; a second frame is simply drawn somewhere else over them.
@@ -66,6 +68,10 @@ const FRAME = BEATS.map((b) => b.frame ?? 0);
 const ODD = BEATS.map((b) => b.odd ?? 0);
 const SHIFT = BEATS.map((b) => b.shift ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
+// group AH — one still-tap event each, plain carried 0/1 tracks
+const PATCH = BEATS.map((b) => b.patch ?? 0);
+const INSIDE_FILL = BEATS.map((b) => b.insideFill ?? 0);
+const PARADIGM_TAG = BEATS.map((b) => b.paradigmTag ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
 
@@ -78,7 +84,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology17'));
 export default function Epistemology17Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(8);
   const cur = BEATS[i];
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -105,12 +111,17 @@ export default function Epistemology17Scene({ clock, bt, bi, i, picked, onPick, 
       odd: carry(cv, 2, n, ODD[p], reacting ? dragPos.value * 3 : ODD[n], slow),
       shift: carry(cv, 3, n, SHIFT[p], SHIFT[n], slow),
       boards: carry(cv, 4, n, PICKV[p], PICKV[n], grow),
+      patch: carry(cv, 5, n, PATCH[p], PATCH[n], tr),
+      insideFill: carry(cv, 6, n, INSIDE_FILL[p], INSIDE_FILL[n], tr),
+      paradigmTag: carry(cv, 7, n, PARADIGM_TAG[p], PARADIGM_TAG[n], tr),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
 
   const facts = useAnimatedStyle(() => ({ opacity: SCENE.value.facts }));
+  const insideFillStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.insideFill }));
+  const paradigmTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.paradigmTag }));
   // The old frame fades as the new one is drawn, so for a moment both are up and
   // the reader can see they enclose the same dots.
   const oldFrame = useAnimatedStyle(() => ({ opacity: SCENE.value.frame * (1 - 0.65 * SCENE.value.shift) }));
@@ -129,6 +140,12 @@ export default function Epistemology17Scene({ clock, bt, bi, i, picked, onPick, 
       ))}
 
       <Animated.View style={[styles.oldFrame, oldFrame]} pointerEvents="none" />
+      {/* "most of science is not testing the frame" — the interior it never tests. */}
+      <Animated.View style={[styles.insideFill, insideFillStyle]} pointerEvents="none" />
+      {/* "he calls the frame itself a paradigm" — the name lands on it. */}
+      <Animated.View style={[styles.paradigmTag, paradigmTagStyle]} pointerEvents="none">
+        <Text style={styles.paradigmTagT} numberOfLines={1}>PARADIGM</Text>
+      </Animated.View>
       <Animated.View style={[styles.newFrame, newFrame]} pointerEvents="none" />
 
       <Animated.View style={[styles.field, facts]} pointerEvents="none">
@@ -140,6 +157,9 @@ export default function Epistemology17Scene({ clock, bt, bi, i, picked, onPick, 
       </Animated.View>
 
       {ODD_AT.map((at, k) => <Odd key={k} k={k} SCENE={SCENE} />)}
+      {/* "they adjust the theory to absorb each anomaly... their system of
+          circles" — a small dashed loop patches each one, Ptolemy's own fix. */}
+      {ODD_AT.map((at, k) => <Patch key={`p${k}`} k={k} SCENE={SCENE} />)}
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -159,6 +179,19 @@ function Odd({ k, SCENE }: { k: number; SCENE: { value: { odd: number } } }) {
       <View style={styles.oddBar} />
       <View style={[styles.oddBar, styles.oddBarB]} />
     </Animated.View>
+  );
+}
+
+/** A small dashed loop round one anomaly — Ptolemy's own fix, one circle at a
+ *  time, patched on rather than redrawing the frame. */
+function Patch({ k, SCENE }: { k: number; SCENE: { value: { patch: number } } }) {
+  const st = useAnimatedStyle(() => ({ opacity: SCENE.value.patch }));
+  const [x, y] = ODD_AT[k];
+  return (
+    <Animated.View
+      style={[styles.patch, { left: x - 6, top: y - 6 }, st]}
+      pointerEvents="none"
+    />
   );
 }
 
@@ -201,7 +234,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   label: {
@@ -212,7 +245,7 @@ const styles = StyleSheet.create({
 
   board: { position: 'absolute', top: BOARD_T, width: BOARD_W, height: BOARD_H },
   boardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   boardText: {
@@ -227,9 +260,26 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 96, top: 306, width: 194, height: 86,
     borderWidth: 2, borderColor: SOFT, borderRadius: 4,
   },
+  // "most of science is not testing the frame" — its own interior, tinted.
+  insideFill: {
+    position: 'absolute', left: 98, top: 308, width: 190, height: 82,
+    borderRadius: 3, backgroundColor: STONE,
+  },
+  // "he calls the frame itself a paradigm" — a tag naming it, above its corner.
+  paradigmTag: {
+    position: 'absolute', left: 96, top: 288, width: 64, height: 14, borderRadius: 3,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  paradigmTagT: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.3, color: INK, includeFontPadding: false },
+  // "kept adjusting their system of circles" — a small dashed loop, Ptolemy's fix.
+  patch: {
+    position: 'absolute', width: 26, height: 26, borderRadius: 13,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed',
+  },
   newFrame: {
     position: 'absolute', left: 160, top: 352, width: 220, height: 104,
-    borderWidth: 3, borderColor: INK, backgroundColor: STONE, boxShadow: LIP, borderRadius: 4,
+    borderWidth: 3, borderColor: INK, backgroundColor: STONE, boxShadow: LIP, borderRadius: 8,
   },
 
   odd: { position: 'absolute', width: 14, height: 14 },

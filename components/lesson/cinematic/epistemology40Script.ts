@@ -30,6 +30,7 @@ export interface Epistemology40Beat extends BaseBeat {
   /** 1 = the verdict bar is down, across the whole dock. */ verdict?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = the same reasoning's two outcomes are posted under the dock, in turn. */ twice?: number;
 }
 
 export const BEATS: Epistemology40Beat[] = [
@@ -82,6 +83,7 @@ export const BEATS: Epistemology40Beat[] = [
   },
   {
     p: 382, x: 108, dock: 1, rope: 1,
+    twice: 1,
     text: 'Neptune was found where his calculation predicted. But when the same reasoning was applied to Mercury, it found nothing.',
     dur: 4.8,
   },

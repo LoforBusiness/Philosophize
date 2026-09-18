@@ -31,6 +31,12 @@ export interface Epistemology12Beat extends BaseBeat {
    */ pipes?: number;
   /** 1 = the belief-token "THE GREAT WALL OF CHINA EXISTS" is floating in the tank. */ token?: number;
   /** 1 = the three pipe plates are live tap targets (Q2). */ pick?: number;
+  /** 1 = a "?" badge hovers over the tank — the question, before any route is
+   *  named. */ askRoute?: number;
+  /** 1 = a dashed ring marks the memory pipe's whole bent path — the longer
+   *  route this beat names. */ memRing?: number;
+  /** 1 = a dashed ring marks the testimony band inside the tank — the biggest
+   *  share, which this beat names. */ mostRing?: number;
 }
 
 export const BEATS: Epistemology12Beat[] = [
@@ -40,7 +46,7 @@ export const BEATS: Epistemology12Beat[] = [
     dur: 3.3,
   },
   {
-    p: 266, x: 56, pipes: 0,
+    p: 266, x: 56, pipes: 0, askRoute: 1,
     text: 'By what routes do beliefs like these reach you?',
     dur: 1.8,
   },
@@ -57,7 +63,7 @@ export const BEATS: Epistemology12Beat[] = [
     dur: 3.8,
   },
   {
-    p: 457, x: 124, pipes: 2,
+    p: 457, x: 124, pipes: 2, memRing: 1,
     text: 'A remembered belief travels a longer route, because it must be stored and later recalled.',
     dur: 1.8,
   },
@@ -81,7 +87,7 @@ export const BEATS: Epistemology12Beat[] = [
     dur: 3.8,
   },
   {
-    p: 463, x: 124, pipes: 3,
+    p: 463, x: 124, pipes: 3, mostRing: 1,
     text: 'Most of what you know reaches you by testimony rather than by your own observation.',
     dur: 1.8,
   },

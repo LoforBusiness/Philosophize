@@ -24,6 +24,10 @@ export interface Metaphysics10Beat extends BaseBeat {
   /** Three small RED tags pinned onto the rose, the ruby and the flag (Aristotle). */ tags?: number;
   /** The two bare tag-strings hanging under the shelf — the nominalist's peg. */ str?: number;
   /** 1 = the three candidate homes are live as answer targets (Q2). */ slots?: number;
+  /** 1 = a "?" hovers over the shelf — the question the beat poses before REDNESS gets a card. */ query?: boolean;
+  /** 1 = a dashed halo flickers round the REDNESS card, showing its address isn't settled. */ unsettled?: boolean;
+  /** 1 = the objects and their RED tags dim together, picturing them not existing. */ absent?: boolean;
+  /** 1 = strike marks appear where Plato's realm and Aristotle's things would be, ruling out both. */ negate?: boolean;
 }
 
 export const BEATS: Metaphysics10Beat[] = [
@@ -33,7 +37,7 @@ export const BEATS: Metaphysics10Beat[] = [
     dur: 2.9,
   },
   {
-    p: 266, x: 64,
+    p: 266, x: 64, query: true,
     text: 'Philosophers call a feature that many things share a universal. What, then, is redness, and where does it exist?',
     dur: 1.8,
   },
@@ -44,7 +48,7 @@ export const BEATS: Metaphysics10Beat[] = [
     dur: 3.5,
   },
   {
-    p: 267, x: 124, card: 1,
+    p: 267, x: 124, card: 1, unsettled: true,
     text: 'The competing theories differ over where such an item exists, if it exists at all.',
     dur: 1.8,
   },
@@ -61,7 +65,7 @@ export const BEATS: Metaphysics10Beat[] = [
     dur: 4,
   },
   {
-    p: 259, x: 124, tags: 1,
+    p: 259, x: 124, tags: 1, absent: true,
     text: 'On this view, if no red objects existed, redness wouldn’t exist either.',
     dur: 1.8,
   },
@@ -85,7 +89,7 @@ export const BEATS: Metaphysics10Beat[] = [
     dur: 3.9,
   },
   {
-    p: 258, x: 124, str: 1, card: 3,
+    p: 258, x: 124, str: 1, card: 3, negate: true,
     text: 'On this view, there’s no further item called redness, in the red things or above them.',
     dur: 1.8,
   },

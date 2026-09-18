@@ -4,7 +4,7 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import {
+import { clamp01,
   WALK, dirsFrom, ease01, lerp, mixStance, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
@@ -13,6 +13,7 @@ import { BEATS } from './aesthetics7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
@@ -20,8 +21,9 @@ import Target, { AnswerLift } from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A small gallery. Two framed works hang side by side on a picture rail — a
 // three-second scribble on the left, a thirty-year composition on the right — each
@@ -120,6 +122,15 @@ const DIR = dirsFrom(X, 1);
 const Q = BEATS.map((b) => b.q ?? 0);
 const ARTV = BEATS.map((b) => b.art ?? 0);
 const MKV = BEATS.map((b) => b.marks ?? 0);
+// group AH — the six still taps, each named from that beat's own sentence, all
+// living in the empty gap between the two frames (x 184…216) so nothing else on
+// the wall ever has to move for them.
+const GROUNDSV = BEATS.map((b) => ((b.grounds ?? 0) > 0 ? 1 : 0));
+const POPCV = BEATS.map((b) => ((b.popCorrect ?? 0) > 0 ? 1 : 0));
+const MINDV = BEATS.map((b) => ((b.viewerMind ?? 0) > 0 ? 1 : 0));
+const MOLEV = BEATS.map((b) => ((b.molehill ?? 0) > 0 ? 1 : 0));
+const STDV = BEATS.map((b) => ((b.standard ?? 0) > 0 ? 1 : 0));
+const MOREV = BEATS.map((b) => ((b.perceiveMore ?? 0) > 0 ? 1 : 0));
 // The chart owns the top strip only while the plates still name the WORKS; once the
 // plates become viewers the strip belongs to the question, then to the marks.
 const CHV = BEATS.map((b) => (b.summary ? 0 : (b.capt ?? 0) <= 1 ? 1 : 0));
@@ -132,7 +143,7 @@ const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(10);
   const heldC = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
@@ -144,6 +155,14 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dra
   const captFade = mode !== (prev?.capt ?? 0);
   const marksFade = (cur.marks ?? 0) !== (prev?.marks ?? 0);
   const chartFade = CHV[i] !== (i > 0 ? CHV[i - 1] : CHV[i]);
+  // group AH — each gap-tag fades in on the beat that names it and fades back
+  // out (never cuts) the moment the beat moves on.
+  const groundsFade = (cur.grounds ?? 0) !== (prev?.grounds ?? 0);
+  const popCFade = (cur.popCorrect ?? 0) !== (prev?.popCorrect ?? 0);
+  const mindFade = (cur.viewerMind ?? 0) !== (prev?.viewerMind ?? 0);
+  const moleFade = (cur.molehill ?? 0) !== (prev?.molehill ?? 0);
+  const stdFade = (cur.standard ?? 0) !== (prev?.standard ?? 0);
+  const moreFade = (cur.perceiveMore ?? 0) !== (prev?.perceiveMore ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -173,6 +192,13 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dra
       // thing that can be practised, and the reader watches that follow.
       marks: carry(cv, 2, n, MKV[p], reacting ? dragPos.value : MKV[n], tr, marksFade ? grow : 1),
       chart: carry(cv, 3, n, CHV[p], CHV[n], tr, chartFade ? grow : 1),
+      // group AH — named the beat the sentence names it, gone the beat it moves on.
+      grounds: carry(cv, 4, n, GROUNDSV[p], GROUNDSV[n], groundsFade ? grow : 1),
+      popC: carry(cv, 5, n, POPCV[p], POPCV[n], popCFade ? grow : 1),
+      mind: carry(cv, 6, n, MINDV[p], MINDV[n], mindFade ? grow : 1),
+      mole: carry(cv, 7, n, MOLEV[p], MOLEV[n], moleFade ? grow : 1),
+      std: carry(cv, 8, n, STDV[p], STDV[n], stdFade ? grow : 1),
+      more: carry(cv, 9, n, MOREV[p], MOREV[n], moreFade ? grow : 1),
     };
   });
 
@@ -193,6 +219,42 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dra
   }));
   const chartStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.chart }));
   const chartFillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: SCENE.value.chart }] }));
+  // group AH — the six still-tap events, all sharing one gap-tag opacity shape.
+  // group AH — FIVE DIFFERENT THINGS, and each one moves the way its own claim
+  // does: a line is drawn, a chart is struck, something travels, a level is laid
+  // across, marks appear inside a picture. (The first pass gave all five one tag
+  // slot and changed the word in it, which is a subtitle track.)
+  //
+  // The empty line under both works DRAWS OUT, because what the beat says is that
+  // there is nowhere yet to write the reason.
+  const groundsStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.grounds, transform: [{ scaleX: SCENE.value.grounds }],
+  }));
+  // A strike is a stroke: across the chart, from its own left end.
+  const popCStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.popC,
+    transform: [{ rotate: '-6deg' }, { scaleX: SCENE.value.popC }],
+  }));
+  // The beauty leaves the canvas toward whoever is looking at it.
+  const mindStyleTag = useAnimatedStyle(() => ({
+    opacity: SCENE.value.mind, transform: [{ translateX: (1 - SCENE.value.mind) * 24 }],
+  }));
+  const moleStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.mole }));
+  // One level laid ACROSS both works, drawn from the middle outward so it reads as
+  // being applied to the pair rather than to either one.
+  const stdStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.std, transform: [{ scaleX: SCENE.value.std }],
+  }));
+  // And the further marks arrive in turn, because seeing more is not one act.
+  const moreStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.more }));
+  const moreAt = (u: number, k: number) => {
+    'worklet';
+    return (u <= 0 ? 0 : clamp01((u - k * 0.2) / 0.34));
+  };
+  const more0Style = useAnimatedStyle(() => ({ opacity: moreAt(SCENE.value.more, 0) }));
+  const more1Style = useAnimatedStyle(() => ({ opacity: moreAt(SCENE.value.more, 1) }));
+  const more2Style = useAnimatedStyle(() => ({ opacity: moreAt(SCENE.value.more, 2) }));
+  const moreStyles = [more0Style, more1Style, more2Style];
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -236,6 +298,35 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dra
           <View style={[styles.wire, { left: f.left + FR_W / 2, transform: [{ rotate: '-13deg' }] }]} />
         </View>
       ))}
+
+      {/* group AH — six still-tap events, each on what the wall already draws. */}
+
+      {/* On what grounds? The line a reason would be written on, still empty. */}
+      <Animated.View style={[styles.groundsLine, groundsStyle]} pointerEvents="none" />
+
+      {/* Nearly all of them prefer it — and a count is not a verdict. */}
+      <Animated.View style={[styles.popCut, popCStyle]} pointerEvents="none" />
+
+      {/* No quality in the thing: it arises in the mind that contemplates it. */}
+      <Animated.View style={[styles.mindArm, mindStyleTag]} pointerEvents="none">
+        <View style={styles.mindHead} />
+      </Animated.View>
+
+      {/* One level across both works: what a verdict answers to. */}
+      <Animated.View style={[styles.stdLevel, stdStyle]} pointerEvents="none" />
+
+      {/* And what practice lets you see in the one that took thirty years. */}
+      <Animated.View style={[styles.moreWrap, moreStyle]} pointerEvents="none">
+        {[[18, 24, 30], [46, 46, 22], [26, 66, 36]].map(([ml, mt, mw], k) => (
+          <Animated.View key={k} style={[styles.moreMark, { left: ml, top: mt, width: mw }, moreStyles[k]]} />
+        ))}
+      </Animated.View>
+      {/* Hume's own image: a molehill next to a mountain, plainly not the same height. */}
+      <Animated.View style={[styles.layer, moleStyle]} pointerEvents="none">
+        <View style={styles.moleGround} />
+        <View style={styles.molehillBump} />
+        <View style={styles.mountainBump} />
+      </Animated.View>
 
       {/* ── the two framed works, each with its caption plate ────────────────── */}
       {FRAMES.map((f, k) => {
@@ -374,7 +465,7 @@ const styles = StyleSheet.create({
   // the four marks of a trained eye
   mkChip: {
     position: 'absolute', top: MK_T, width: MK_W, height: MK_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2,
   },
   mkText: {
@@ -394,7 +485,7 @@ const styles = StyleSheet.create({
   dim: { opacity: 0.55 },
   frameBox: {
     position: 'absolute', left: 0, top: 0, width: FR_W, height: FR_H,
-    borderWidth: 3, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
+    borderWidth: 3, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   mat: {
     position: 'absolute', left: 9, top: 9, width: FR_W - 18, height: FR_H - 18,
@@ -431,7 +522,7 @@ const styles = StyleSheet.create({
   // ── the caption plate under each frame ──────────────────────────────────────
   plate: {
     position: 'absolute', left: 0, top: CAP_T, width: FR_W, height: CAP_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },
@@ -469,6 +560,59 @@ const styles = StyleSheet.create({
   },
   ringRight: { borderColor: INK, borderStyle: 'solid' },
   ringWrong: { borderColor: SOFT },
+
+  // ── group AH: six still-tap events, all in the gap between the two frames ───
+  // (x 184…216), which is empty on the wall for the whole life of the lesson.
+  // ── group AH: five still-tap events, on the chart, the frames and the art ──
+  //
+  // All of these live in paper the composition header already accounts for: the
+  // chart's own track in the top strip, the margin left of the first frame, the
+  // band just above the frames, the strip under the caption plates, and the art
+  // inside the right-hand frame.
+
+  // Under both frame columns, where a REASON would be written and is not.
+  groundsLine: {
+    position: 'absolute', left: FR_A, top: TOP_T + COL_H + 8,
+    width: FR_B + FR_W - FR_A, height: 2,
+    borderTopWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
+    transformOrigin: '0% 50%',
+  },
+  // Across the visitors' chart's own track, through both rows at once.
+  popCut: {
+    position: 'absolute', left: CH_TRACK_L - 8, top: CH_ROW_T + CH_ROW_GAP,
+    width: CH_TRACK_W + 16, height: 2.5,
+    backgroundColor: INK, borderRadius: 1.5, transformOrigin: '0% 50%',
+  },
+  // Off the left frame's art toward the reader's side of the wall.
+  mindArm: {
+    position: 'absolute', left: FR_A - 36, top: FR_T + FR_H / 2, width: 30, height: 3,
+    backgroundColor: INK, borderRadius: 1.5,
+  },
+  mindHead: {
+    position: 'absolute', left: -9, top: -3.5, width: 9, height: 10,
+    borderTopWidth: 5, borderBottomWidth: 5, borderRightWidth: 9,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+    borderStyle: 'solid',
+  },
+  // One height across both frames: a level, not a label.
+  stdLevel: {
+    position: 'absolute', left: FR_A - 6, top: FR_T - 12,
+    width: FR_B + FR_W - FR_A + 12, height: 3,
+    backgroundColor: INK, borderRadius: 1.5, transformOrigin: '50% 50%',
+  },
+  // Inside the right-hand frame's art: three marks that were not there before.
+  moreWrap: { position: 'absolute', left: FR_B, top: FR_T, width: FR_W, height: FR_H },
+  moreMark: { position: 'absolute', height: 2.5, backgroundColor: INK, borderRadius: 1.5 },
+  // the molehill and the mountain, on their own short baseline, plainly unequal.
+  moleGround: { position: 'absolute', left: 185, top: 312, width: 30, height: 1.5, backgroundColor: SOFT },
+  molehillBump: {
+    position: 'absolute', left: 186, top: 306, width: 12, height: 6, borderRadius: 6, backgroundColor: INK,
+  },
+  mountainBump: {
+    position: 'absolute', left: 200, top: 290, width: 0, height: 0,
+    borderLeftWidth: 7, borderRightWidth: 7, borderBottomWidth: 22,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: INK,
+  },
 });
 
 // Art runs from the top strip's header (y 112, lifted 6 as the marks slide in) down

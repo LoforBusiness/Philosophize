@@ -13,6 +13,7 @@ import { BEATS } from './aesthetics11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A gallery wall stage right, two canvases on it, the figure working downstage left.
 //
@@ -72,6 +74,19 @@ const CARDS = [
   { id: 'colour', label: 'THE COLOURS', correct: false },
 ];
 
+// The gauge: downstage, clear of the figure's widest ink at x 70 (span 34…106)
+// and well short of the wall (x >= 214).
+const GEN_L = 128;
+const GEN_T = 272;
+const GEN_W = 64;
+const GEN_H = 12;
+
+// The registration mark: dead centre of each frame — inside the gap between the
+// first and second bar rows (260…269), so it never touches the artwork itself.
+const MARK_LX = FRAME_LX + FRAME_W / 2;
+const MARK_RX = FRAME_RX + FRAME_W / 2;
+const MARK_Y = FRAME_T + FRAME_H / 2;
+
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? 124);
 // The camera, from the staging: it follows the figure this track describes,
@@ -80,6 +95,9 @@ const X = BEATS.map((b) => b.x ?? 124);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics11'));
 const DIR = dirsFrom(X, 1);
 const FRAMES = BEATS.map((b) => b.frames ?? 0);
+// GROUP AH — two still taps, each moving a new mass rather than a caption.
+const GENV = BEATS.map((b) => ((b.gen ?? 0) > 0 ? 1 : 0));
+const MARKV = BEATS.map((b) => ((b.mark ?? 0) > 0 ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -107,7 +125,7 @@ function Canvas({ left }: { left: number }) {
 export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(4);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -116,6 +134,8 @@ export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick, pi
   const plaqFade = (cur.plaques ?? 0) !== (prev?.plaques ?? 0);
   const sameOn = (cur.same ?? 0) > 0;
   const sameFade = (cur.same ?? 0) !== (prev?.same ?? 0);
+  const genFade = (cur.gen ?? 0) !== (prev?.gen ?? 0);
+  const markFade = (cur.mark ?? 0) !== (prev?.mark ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -137,6 +157,12 @@ export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick, pi
       // At 'nothing; identical surfaces, identical works' it stays struck; it lifts as
       // the reader says the maker put something in.
       same: (sameOn ? (sameFade ? grow : 1) : 0) * (reacting ? 1 - (1 - pickAt(SAME_AT, pickPos.value)) * tr : 1),
+      // A gauge that fills almost at once — the machine's nine seconds, staged
+      // literally rather than named twice. Fades out the moment the wall arrives.
+      gen: carry(cv, 2, n, GENV[p], GENV[n], genFade ? grow : 1),
+      // A registration mark on both canvases at once, at the identical point —
+      // the claim ("every mark is in the same place") drawn rather than repeated.
+      mark: carry(cv, 3, n, MARKV[p], MARKV[n], markFade ? grow : 1),
     };
   });
 
@@ -147,6 +173,9 @@ export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick, pi
     opacity: SCENE.value.same,
     transform: [{ scaleX: 0.9 + 0.1 * SCENE.value.same }],
   }));
+  const genStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.gen }));
+  const genFillStyle = useAnimatedStyle(() => ({ width: GEN_W * SCENE.value.gen }));
+  const markStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.mark }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -154,6 +183,10 @@ export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick, pi
   return (
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
+      {/* the machine's nine seconds, staged as a gauge that fills almost at once */}
+      <Animated.View style={[styles.genTrack, genStyle]} pointerEvents="none">
+        <Animated.View style={[styles.genFill, genFillStyle]} />
+      </Animated.View>
       {/* ── the wall ────────────────────────────────────────────────────────── */}
       <Animated.View style={[styles.wall, framesStyle]} pointerEvents="none">
         <View style={[styles.frame, { left: FRAME_LX }]} />
@@ -172,6 +205,13 @@ export default function Aesthetics11Scene({ clock, bt, bi, i, picked, onPick, pi
         </View>
       </Animated.View>
 
+      {/* a registration mark lands at the same point on both canvases, at once */}
+      <Animated.View style={[styles.markWrap, markStyle]} pointerEvents="none">
+        <View style={[styles.regH, { left: MARK_LX - 5, top: MARK_Y - 1 }]} />
+        <View style={[styles.regV, { left: MARK_LX - 1, top: MARK_Y - 5 }]} />
+        <View style={[styles.regH, { left: MARK_RX - 5, top: MARK_Y - 1 }]} />
+        <View style={[styles.regV, { left: MARK_RX - 1, top: MARK_Y - 5 }]} />
+      </Animated.View>
       {/* the measurement drawn across both */}
       <Animated.View style={[styles.sameTag, sameStyle]} pointerEvents="none">
         <Text style={styles.sameText} numberOfLines={1}>IDENTICAL, MARK FOR MARK</Text>
@@ -214,12 +254,12 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule alone leaves the figure
   // standing on bare page; a filled band under it is what the two lessons
   // the reader holds up both do, and it costs one View.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   wall: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   frame: {
     position: 'absolute', top: FRAME_T, width: FRAME_W, height: FRAME_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   frameInner: {
     position: 'absolute', top: FRAME_T + 11, width: FRAME_W - 18,
@@ -250,7 +290,7 @@ const styles = StyleSheet.create({
 
   card: { position: 'absolute', left: WALL_L, width: WALL_R - WALL_L },
   cardInner: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   cardText: {
@@ -260,6 +300,21 @@ const styles = StyleSheet.create({
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT },
+
+  // THE MACHINE'S GAUGE. A track and a fill, nothing else — it is gone again
+  // before the wall arrives, so it never competes with the canvases.
+  genTrack: {
+    position: 'absolute', left: GEN_L, top: GEN_T, width: GEN_W, height: GEN_H,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE,
+    overflow: 'hidden',
+  },
+  genFill: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: INK },
+
+  // THE REGISTRATION MARK. Two identical crosses, one per canvas, at the same
+  // relative point — a printer's own way of proving two plates line up.
+  markWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  regH: { position: 'absolute', width: 10, height: 2, backgroundColor: INK },
+  regV: { position: 'absolute', width: 2, height: 10, backgroundColor: INK },
 });
 
 // Ink runs from the frames' top edge (226) to the ground line (500). Band 220…512

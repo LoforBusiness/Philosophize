@@ -13,6 +13,7 @@ import { BEATS } from './political32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // SEVENTY-SEVEN MARKS AND ONE OF THEM IS YOURS. The scale is the argument: the reader
 // has to find their own tick in the row, and how small it looks is the lesson (H64).
@@ -43,6 +45,7 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // · the figure is at x 56 facing right; its widest ink is a fist at x 89, twenty-seven
 //   clear of the piles, and its crown at y 397 sits in the gap between them.
 
+const SUMV = BEATS.map((b) => b.sum ?? 0);
 const BAR_L = 116;
 const PITCH = 6;
 const TICK_W = 2;
@@ -96,7 +99,7 @@ const YOURS_AT = [1, 0, 0, 0];
 export default function Political32Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -121,6 +124,8 @@ export default function Political32Scene({ clock, bt, bi, i, picked, onPick, pic
       labels: carry(cv, 3, n, LAB[p], LAB[n], grow),
       // R7c — your mark is held up for the account that values it whoever wins.
       yours: carry(cv, 4, n, 0, reacting ? pickAt(YOURS_AT, pickPos.value) : 0, tr),
+      // Carried, so it fades out as well as in (group L).
+      sum: carry(cv, 5, n, SUMV[p], SUMV[n], grow),
     };
   });
 
@@ -150,9 +155,24 @@ export default function Political32Scene({ clock, bt, bi, i, picked, onPick, pic
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
   const wrong = (id: string) => answered && picked === id;
 
+  // THE SUM, IN ITS TWO HALVES. Downs's argument is a comparison, so both sides
+  // are stated and the second arrives after the first — a comparison read in one
+  // frame is a slogan.
+  const sumStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.sum,
+    transform: [{ translateY: (1 - SCENE.value.sum) * 8 }],
+  }));
+  const sumTwoStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.sum - 0.5) / 0.5) }));
+
   return (
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
+
+      {/* Under the count, because it is a reading OF the count. */}
+      <Animated.View style={[styles.sumPlate, sumStyle]} pointerEvents="none">
+        <Text style={styles.sumText} numberOfLines={1}>CHANCE OF DECIDING</Text>
+        <Animated.Text style={[styles.sumBig, sumTwoStyle]} numberOfLines={1}>ALMOST NONE</Animated.Text>
+      </Animated.View>
       {/* the two piles */}
       <Text style={[styles.rowLabel, { top: 324 }]} numberOfLines={1}>FOR</Text>
       {Array.from({ length: A_N }, (_, j) => (
@@ -213,12 +233,29 @@ export default function Political32Scene({ clock, bt, bi, i, picked, onPick, pic
 }
 
 const styles = StyleSheet.create({
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // Below the AGAINST row, which ends at B_TOP + TICK_H, and starting at the bars'
+  // own left edge so it sits under the thing it is about.
+  sumPlate: {
+    position: 'absolute', left: BAR_L, top: B_TOP + TICK_H + 10, width: 212, height: 34,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  sumText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT,
+    includeFontPadding: false,
+  },
+  sumBig: {
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.6, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   rowLabel: {
@@ -247,13 +284,13 @@ const styles = StyleSheet.create({
   margin: { position: 'absolute', ...MARGIN },
   nothing: { position: 'absolute', ...NOTHING },
   box: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   // The margin's target is TALL — its lower half is the empty tap area over the
   // overhang — so only the chip at the top carries the answer state.
   chip: {
-    height: 30, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: 30, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   boxText: {

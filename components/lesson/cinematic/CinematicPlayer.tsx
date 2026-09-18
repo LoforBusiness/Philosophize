@@ -24,7 +24,7 @@ import { GAZE } from './gazeTargets';
 import { WardrobeProvider } from './wardrobeContext';
 import Visitor from './Visitor';
 import { VISITOR } from '../../../data/lessonVisitor';
-import { thoughtsOff, toursOff } from './tourFlag';
+import { thoughtsOff, toursOff, wanderOff } from './tourFlag';
 import { cue, touch, heard } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import ChoiceCards, { seedFor } from './ChoiceCards';
@@ -46,12 +46,17 @@ import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, stageAnswered, styles,
   XpPill, TapNudge,
   COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, GROUND, INK,
-  type BaseBeat, REACT, Thought, useCarry, carry,} from './cinematicKit';
+  type BaseBeat, REACT, WANDER, wanderReset, Thought, useCarry, carry,} from './cinematicKit';
 import { ease01, moveTr } from './rig';
 import { quipFor, visitorSays } from './quips';
 import { THOUGHTS } from '@/data/lessonThoughts';
 import { MARKS } from '@/data/lessonMarks';
+import { WANDER_PLANS } from '@/data/lessonWander';
 import StageMark from './StageMark';
+
+/** One array, shared by every beat with no movement plan: a new `[]` per beat would
+ *  make the layer's plan a different object each time for no change in content. */
+const EMPTY_PLAN: readonly number[] = [];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The shared cinematic player shell. It owns everything that is identical across
@@ -437,6 +442,10 @@ export default function CinematicPlayer({
   // over). A lesson with no `walk` track reports 0 and nothing follows anything.
   const walkSv = useSharedValue<number[]>([]);
   useEffect(() => { walkSv.value = walk ?? []; }, [walk, walkSv]);
+  // The movement layer is a module-level singleton, like `REACT` — one lesson plays
+  // at a time — so it is put back to standing when a player goes. On the way IN it
+  // is reset in the beat block above, where it cannot race the first plan.
+  useEffect(() => wanderReset, []);
   const figCarry = useCarry(1);
   const figX = useDerivedValue(() => {
     const t = walkSv.value;
@@ -870,6 +879,7 @@ export default function CinematicPlayer({
   // frame of the previous beat's finished state first, which reads as a pop.
   const prevBeat = useRef(-1);
   if (prevBeat.current !== i) {
+    const firstBeat = prevBeat.current === -1;
     prevBeat.current = i;
     rt.value = 0;
     bt.value = 0;
@@ -887,6 +897,23 @@ export default function CinematicPlayer({
     swishAt.value = g.map((x) => x.at);
     swishKind.value = g.map((x) => x.kind);
     swished.value = 0;
+    // ── AND THE BEAT'S MOVEMENT PLAN (wander.ts, group AF) ──────────────────
+    //
+    // In the same statement that rewinds `bt`, because the plan is READ against
+    // `bt`: swapping the plan a frame before or after the rewind would read the
+    // new plan at the old beat's elapsed time for one frame, which jumps it to its
+    // end state and back. `gen` is what tells `lookPose` to carry the values it
+    // last drew into the new plan, so a tap mid-step finishes the step.
+    //
+    // A LESSON STARTS HIM STANDING, and the reset belongs HERE rather than in a
+    // mount effect: an effect runs after the render that installs the first plan,
+    // so resetting there blanked beat 0 every time. Measured in the browser, his
+    // ankle moved 0.5px through a beat that walks him forty units — the wiring
+    // looked dead and was being switched off a frame after it was switched on.
+    if (firstBeat) wanderReset();
+    WANDER.plan.value = (wanderOff() ? null : WANDER_PLANS[lesson.id]?.[i]) ?? EMPTY_PLAN;
+    WANDER.bt.value = 0;
+    WANDER.gen.value += 1;
   }
 
   useFrameCallback((f) => {
@@ -911,6 +938,12 @@ export default function CinematicPlayer({
       bt.value = rt.value;
       si.value = 0;
     }
+    // The two clocks the movement layer reads, mirrored where they are computed.
+    // `lookPose` is called from inside each scene's own derived value and cannot be
+    // handed a clock without editing 244 scenes; these are the same two numbers the
+    // scene itself is drawn from.
+    WANDER.bt.value = bt.value;
+    WANDER.now.value = clock.value;
   }, true);
 
   // A FOOTFALL LANDS ON THE BEAT CLOCK, NOT THE WALL CLOCK. `bt` accumulates frame

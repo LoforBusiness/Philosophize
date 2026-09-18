@@ -22,6 +22,8 @@ export interface Logic10Beat extends BaseBeat {
   /** 1 = the empty dashed socket above the SAID line is drawn. */ slot?: number;
   /** The premise nobody said: 0 absent · 1 dashed, below the line · 2 hauled up into the socket, solid. */ hid?: number;
   /** 1 = the three candidate premises are live below the line (Q2). */ pick?: number;
+  /** 1 = a chevron in the gap points up at the socket the premise still owes. */ hint?: number;
+  /** 1 = a FALSE stamp lands on the premise, once it has been checked. */ falseStamp?: number;
 }
 
 export const BEATS: Logic10Beat[] = [
@@ -43,7 +45,7 @@ export const BEATS: Logic10Beat[] = [
     dur: 3.6,
   },
   {
-    p: 266, x: 96, arg: 1, slot: 1, hid: 1,
+    p: 266, x: 96, arg: 1, slot: 1, hid: 1, hint: 1,
     text: 'To assess such an argument, its unstated premise has to be made explicit.',
     dur: 1.8,
   },
@@ -67,7 +69,7 @@ export const BEATS: Logic10Beat[] = [
     dur: 1.8,
   },
   {
-    p: 266, x: 158, arg: 1, slot: 1, hid: 2,
+    p: 266, x: 158, arg: 1, slot: 1, hid: 2, falseStamp: 1,
     text: 'Once stated, the premise can be assessed, and it’s false: many rich people are unhappy.',
     dur: 3,
   },

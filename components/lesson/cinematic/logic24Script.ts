@@ -27,6 +27,7 @@ export interface Logic24Beat extends BaseBeat {
   /** 1 = the token going in is drawn above each engine. */ feed?: number;
   /** 1 = what each engine puts out is drawn below it. */ out?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = what deduction's certainty costs, said under its own engine. */ nonew?: number;
 }
 
 export const BEATS: Logic24Beat[] = [
@@ -79,6 +80,7 @@ export const BEATS: Logic24Beat[] = [
   },
   {
     p: 448, x: 88, bench: 1, feed: 1, out: 1,
+    nonew: 1,
     text: 'Deduction’s certainty has a cost. The conclusion adds no fact that the premises did not already give.',
     dur: 4.4,
   },

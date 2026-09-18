@@ -23,6 +23,11 @@ export interface Epi17Beat extends BaseBeat {
   /** How many anomalies have collected outside it, 0…3. */ odd?: number;
   /** The new frame, drawn over the same facts, 0…1. */ shift?: number;
   /** 1 = the three boards are live targets (Q1). */ pick?: number;
+  /** 1 = a small dashed loop patches each anomaly — the theory adjusted to
+   *  absorb it. */ patch?: number;
+  /** 1 = the old frame's own interior is tinted — the work that never tests
+   *  its boundary. */ insideFill?: number;
+  /** 1 = a "PARADIGM" tag names the old frame. */ paradigmTag?: number;
 }
 
 export const BEATS: Epi17Beat[] = [
@@ -38,18 +43,18 @@ export const BEATS: Epi17Beat[] = [
     cite: 'Anomalies',
   },
   {
-    g: 159, facts: 1, frame: 1, odd: 3,
+    g: 159, facts: 1, frame: 1, odd: 3, patch: 1,
     dur: 2.1,
     text: 'Instead, they adjust the theory to absorb each anomaly. Ptolemaic astronomers, for example, kept adjusting their system of circles.',
   },
   {
-    g: 13, facts: 1, frame: 1, odd: 3,
+    g: 13, facts: 1, frame: 1, odd: 3, insideFill: 1,
     dur: 2.6,
     text: 'Thomas Kuhn based his account on the history of science. Most of science is not testing the frame.',
     cite: 'Normal science',
   },
   {
-    g: 266, facts: 1, frame: 1, odd: 3,
+    g: 266, facts: 1, frame: 1, odd: 3, paradigmTag: 1,
     dur: 2,
     text: 'Kuhn calls this work within the frame normal science. He calls the frame itself a paradigm.',
   },

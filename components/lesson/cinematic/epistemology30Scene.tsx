@@ -9,6 +9,7 @@ import { BEATS } from './epistemology30Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A LIT DISC THAT BARELY CHANGES, AND A RING THAT KEEPS OPENING ROUND IT.
@@ -57,6 +59,13 @@ const RING_HI = 140;
 
 const CAP_T = 234;
 
+// VIRTUE_XY — four marks near the field's own corners, clear of the ring at
+// every radius it reaches during this beat.
+const VIRTUE_XY: [number, number][] = [
+  [128, 256], [358, 256], [128, 390], [358, 390],
+];
+const BAL_Y = 366;
+
 const PLATE_X = [124, 216, 308];
 const PLATE_Y = 452;
 const PLATE_W = 90;
@@ -76,6 +85,8 @@ const DISC_ON = BEATS.map((b) => (b.disc ? 1 : 0));
 const EDGE = BEATS.map((b) => b.edge ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const VIRTUES = BEATS.map((b) => (b.virtues ? 1 : 0));
+const HOLD_BALANCE = BEATS.map((b) => (b.holdBalance ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -86,7 +97,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology30'));
 export default function Epistemology30Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -107,6 +118,8 @@ export default function Epistemology30Scene({ clock, bt, bi, i, picked, onPick, 
       // HOW FAR THE EDGE HAS OPENED, which is what the drawn curve reports.
       edge: carry(cv, 2, n, EDGE[p], reacting ? dragPos.value : EDGE[n], tr),
       plates: carry(cv, 3, n, PLATES[p], PLATES[n], tr),
+      virtues: carry(cv, 4, n, VIRTUES[p], VIRTUES[n], tr),
+      holdBalance: carry(cv, 5, n, HOLD_BALANCE[p], HOLD_BALANCE[n], tr),
     };
   });
 
@@ -116,6 +129,8 @@ export default function Epistemology30Scene({ clock, bt, bi, i, picked, onPick, 
 
   const fieldStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.disc }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
+  const virtuesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.virtues }));
+  const holdBalanceStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.holdBalance }));
   const ringStyle = useAnimatedStyle(() => {
     const d = RING_LO + (RING_HI - RING_LO) * clamp01(SCENE.value.edge);
     return { left: MID_X - d / 2, top: MID_Y - d / 2, width: d, height: d, borderRadius: d / 2 };
@@ -134,7 +149,16 @@ export default function Epistemology30Scene({ clock, bt, bi, i, picked, onPick, 
         <Text style={styles.discText}>KNOWN</Text>
       </Animated.View>
 
+      {VIRTUE_XY.map(([vx, vy], k) => (
+        <Animated.View key={k} style={[styles.virtueDot, { left: vx, top: vy }, virtuesStyle]} pointerEvents="none" />
+      ))}
+
       <Animated.View style={[styles.ring, ringStyle]} pointerEvents="none" />
+
+      <Animated.View style={[styles.balLeft, holdBalanceStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.balRight, holdBalanceStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.balHeadL, holdBalanceStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.balHeadR, holdBalanceStyle]} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, edgeCapStyle]} pointerEvents="none">
         <Text style={styles.edgeText}>QUESTIONS IN VIEW</Text>
       </Animated.View>
@@ -172,8 +196,27 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
+  // VIRTUE_DOT — one mark per intellectual virtue named, at the field's corners.
+  virtueDot: { position: 'absolute', width: 6, height: 6, borderRadius: 3, backgroundColor: INK },
+  // BAL_LEFT/RIGHT/HEAD — a double arrow below the disc: dashed on the revise
+  // side, solid on the act side. Firm enough to act, loose enough to revise.
+  balLeft: {
+    position: 'absolute', left: 223, top: BAL_Y, width: 22,
+    height: 0, borderTopWidth: 2, borderColor: INK, borderStyle: 'dashed',
+  },
+  balRight: { position: 'absolute', left: 245, top: BAL_Y, width: 22, height: 2, backgroundColor: INK },
+  balHeadL: {
+    position: 'absolute', left: 215, top: BAL_Y - 5, width: 0, height: 0,
+    borderTopWidth: 5, borderBottomWidth: 5, borderRightWidth: 8,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+  },
+  balHeadR: {
+    position: 'absolute', left: 267, top: BAL_Y - 5, width: 0, height: 0,
+    borderTopWidth: 5, borderBottomWidth: 5, borderLeftWidth: 8,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
+  },
   cap: {
     position: 'absolute', left: FIELD_X, top: CAP_T, width: FIELD_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
@@ -202,7 +245,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,

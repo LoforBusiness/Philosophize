@@ -3,12 +3,13 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { dirsFrom, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
+import { clamp01, dirsFrom, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political23Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,7 +17,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('political-philosophy');
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE TAGS COMING OFF, AND A BOX MARKED WHAT IS LEFT.
@@ -45,6 +47,8 @@ const { RULE, STONE } = stageTone('political-philosophy');
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const GIVEN = BEATS.map((b) => b.given ?? 0);
+const NOJUDGE = BEATS.map((b) => b.nojudge ?? 0);
 const BASE_TR = 0.85;
 
 const TAG_X = 40;
@@ -85,7 +89,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political23'));
 export default function Political23Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -109,6 +113,9 @@ export default function Political23Scene({ clock, bt, bi, i, picked, onPick, dra
       // R7c — the seam is how much was HANDED to you, so the chooser said to be left
       // in the box thins out as it travels right. The reader empties the box themselves.
       left: carry(cv, 4, n, LEFT[p], reacting ? 1 - dragPos.value : LEFT[n], tr),
+      // The two tap events, carried, so each fades out as well as in (group L).
+      given: carry(cv, 5, n, GIVEN[p], GIVEN[n], tr),
+      nojudge: carry(cv, 6, n, NOJUDGE[p], NOJUDGE[n], tr),
       t,
     };
   });
@@ -120,6 +127,21 @@ export default function Political23Scene({ clock, bt, bi, i, picked, onPick, dra
   const capStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tags }));
   const boxStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.box }));
   const discStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.left }));
+
+  // ── the two tap events ─────────────────────────────────────────────────────
+  //
+  // THE RING SAYS WHICH ONE and the caption says what is true of it, and the
+  // caption waits for the ring: a reader who is told "this one" before they can
+  // see which one has to read the sentence twice.
+  const givenStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.given,
+    transform: [{ scale: 1.06 - 0.06 * SCENE.value.given }],
+  }));
+  const givenCapStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.given - 0.45) / 0.55) }));
+  const nojudgeStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.nojudge,
+    transform: [{ translateY: (1 - SCENE.value.nojudge) * 8 }],
+  }));
 
   const tags = [0, 1, 2];
 
@@ -164,6 +186,17 @@ export default function Political23Scene({ clock, bt, bi, i, picked, onPick, dra
         </Target>
       ))}
 
+      {/* Which of the three was never chosen, and that it was not. */}
+      <Animated.View style={[styles.givenRing, givenStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.givenCap, givenCapStyle]} pointerEvents="none">
+        TRUE BEFORE ANY CHOICE
+      </Animated.Text>
+
+      {/* And with the tags off, nothing is left to judge by. */}
+      <Animated.View style={[styles.nojudgePlate, nojudgeStyle]} pointerEvents="none">
+        <Text style={styles.nojudgeText} numberOfLines={1}>NO WAY TO JUDGE</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -190,12 +223,36 @@ function Tag({ S, k }: { S: { value: { tags: number; strip: number } }; k: numbe
 }
 
 const styles = StyleSheet.create({
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // Round the DAUGHTER tag, which is the first of the three (TAG_TOP[0]).
+  givenRing: {
+    position: 'absolute', left: TAG_X - 5, top: TAG_TOP[0] - 5, width: TAG_W + 10, height: TAG_H + 10,
+    borderWidth: 2, borderColor: INK, borderRadius: 10,
+  },
+  // Under the tag column, which ends at TAG_TOP[2] + TAG_H.
+  givenCap: {
+    position: 'absolute', left: TAG_X - 6, top: TAG_TOP[2] + TAG_H + 8, width: TAG_W + 12,
+    textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+  // Under the box the tags were taken off into.
+  nojudgePlate: {
+    position: 'absolute', left: BOX_X, top: BOX_Y + BOX_H + 8, width: BOX_W, height: 26,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  nojudgeText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: PAPER,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   tagCap: {
     position: 'absolute', left: TAG_X, top: CAP_Y, width: TAG_W,
@@ -203,7 +260,7 @@ const styles = StyleSheet.create({
   },
   tag: {
     position: 'absolute', left: TAG_X, width: TAG_W, height: TAG_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   spine: { position: 'absolute', left: TAG_X, width: 5, height: TAG_H, backgroundColor: STONE, borderRadius: 2 },
   tagText: {

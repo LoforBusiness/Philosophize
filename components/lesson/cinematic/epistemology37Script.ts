@@ -29,6 +29,9 @@ export interface Epistemology37Beat extends BaseBeat {
   /** 1 = she has sailed, and the wake is drawn. */ sailed?: number;
   /** 1 = the verdict card stands beside the hull. */ verdict?: number;
   /** 1 = the ship arrived safely — same hull, same cracks. */ safe?: number;
+  /** 1 = the doubts are struck out one at a time, the way he put them down. */ hushed?: number;
+  /** 1 = the cracks are marked as exactly what they were, after the crossing. */ same?: number;
+  /** 1 = whose risk it was, said under the hull. */ whose?: number;
 }
 
 export const BEATS: Epistemology37Beat[] = [
@@ -63,6 +66,7 @@ export const BEATS: Epistemology37Beat[] = [
   },
   {
     p: 266, x: 54, hull: 1, quiet: 1,
+    hushed: 1,
     text: 'Instead he suppressed his doubts, one at a time, until they no longer troubled him.',
     dur: 2.7,
   },
@@ -90,6 +94,7 @@ export const BEATS: Epistemology37Beat[] = [
   },
   {
     p: 266, x: 54, hull: 1, quiet: 1, sailed: 1, verdict: 1, safe: 1,
+    same: 1,
     text: 'Clifford’s verdict is unchanged, because the owner had no right to believe on that evidence.',
     dur: 1.8,
   },
@@ -108,6 +113,7 @@ export const BEATS: Epistemology37Beat[] = [
   },
   {
     p: 419, x: 126, hull: 1, quiet: 1, verdict: 1, safe: 1,
+    whose: 1,
     text: 'Both are right about different cases. Clifford’s verdict still holds where other people bear the risk of a false belief.',
     dur: 4.8,
   },

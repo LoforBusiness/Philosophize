@@ -13,6 +13,7 @@ import { BEATS } from './metaphysics24Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A pile of grains and the verdict lamp above it. Stage right.
 //
@@ -88,6 +90,10 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics24'));
 const DIR = dirsFrom(X, 1);
 const GRAINS = BEATS.map((b) => b.grains ?? 0);
 const LAMP = BEATS.map((b) => b.lamp ?? 0);
+const ONE = BEATS.map((b) => b.one ?? 0);
+const NAME = BEATS.map((b) => b.name ?? 0);
+/** Where the pile's own first grain will land — the preview sits there too. */
+const ONE_POS = grainPos(0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -97,7 +103,7 @@ const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 export default function Metaphysics24Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -125,11 +131,15 @@ export default function Metaphysics24Scene({ clock, bt, bi, i, picked, onPick, d
       // of the reader's line, so the verdict brightens with how much of a heap they
       // have said it is — and the vague middle is exactly where it half-glows.
       lamp: carry(cv, 2, n, LAMP[p], reacting ? dragPos.value : LAMP[n], lampFade ? grow : tr),
+      one: carry(cv, 3, n, ONE[p], ONE[n], grow),
+      name: carry(cv, 4, n, NAME[p], NAME[n], grow),
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const lampStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.lamp }));
+  const oneStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.one }));
+  const nameStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.name }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -140,6 +150,14 @@ export default function Metaphysics24Scene({ clock, bt, bi, i, picked, onPick, d
       <View style={styles.counter} pointerEvents="none">
         <Text style={styles.counterText} numberOfLines={1}>GRAINS LEFT · {shown}</Text>
       </View>
+      {/* Naming the whole diagram, once the walk through it is done (A1). */}
+      <Animated.Text style={[styles.nameTag, nameStyle]} numberOfLines={1}>SORITES</Animated.Text>
+
+      {/* A single grain, tried on its own before the full pile ever appears. */}
+      <Animated.View
+        style={[styles.grain, { left: ONE_POS.left, top: ONE_POS.top }, oneStyle]}
+        pointerEvents="none"
+      />
 
       {Array.from({ length: TOTAL }, (_, k) => (
         <Grain key={k} index={k} SCENE={SCENE} />
@@ -195,7 +213,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   counter: {
     position: 'absolute', left: PL_L, top: CNT_T, width: PL_W, height: CNT_H,
@@ -210,6 +228,10 @@ const styles = StyleSheet.create({
   grain: {
     position: 'absolute', width: G, height: G, borderRadius: G / 2, backgroundColor: INK,
   },
+  nameTag: {
+    position: 'absolute', left: PL_L, top: CNT_T + CNT_H + 2, width: PL_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+  },
 
   lamp: {
     position: 'absolute', left: PL_L, top: LAMP_T, width: PL_W, height: LAMP_H,
@@ -223,7 +245,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {

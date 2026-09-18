@@ -9,6 +9,7 @@ import { BEATS } from './political37Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO BALLOTS THE SAME SIZE, AND TWO VOICES THAT ARE NOT.
@@ -81,12 +83,25 @@ const CAP = BEATS.map((b) => b.cap ?? 0);
 const LIVE_D = BEATS.map((b) => (b.live_d ? 1 : 0));
 const LABELS = BEATS.map((b) => (b.labels ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// group AH — one still-tap event each, set on exactly one beat and left to fade
+// out on the next (cinematicKit's carry() and the "fade an event out, not off"
+// recipe).
+const NEAR = BEATS.map((b) => (b.near ? 1 : 0));
+const EQ = BEATS.map((b) => (b.eq ? 1 : 0));
+const VS = BEATS.map((b) => (b.vs ? 1 : 0));
+const RANGE = BEATS.map((b) => (b.range ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political37'));
 
 export default function Political37Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(9);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const nearFade = (cur.near ?? 0) !== (prev?.near ?? 0);
+  const eqFade = (cur.eq ?? 0) !== (prev?.eq ?? 0);
+  const vsFade = (cur.vs ?? 0) !== (prev?.vs ?? 0);
+  const rangeFade = (cur.range ?? 0) !== (prev?.range ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -95,6 +110,7 @@ export default function Political37Scene({ clock, bt, bi, i, picked, onPick, dra
     // computes from moveTr — arriving after the figure had stopped.
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -114,6 +130,13 @@ export default function Political37Scene({ clock, bt, bi, i, picked, onPick, dra
       // and the quiet one never moves at all.
       loud: LOUD_MAX - (LOUD_MAX - QUIET_MOUTH) * cap,
       labelsOn: carry(cv, 4, n, LABELS[p], LABELS[n], tr),
+      // group AH — who the quiet voice reaches, that the vote itself stays equal,
+      // the split between the two positions, and one rule among the many a
+      // democracy could set.
+      nearOn: carry(cv, 5, n, NEAR[p], NEAR[n], tr, nearFade ? grow : 1),
+      eqOn: carry(cv, 6, n, EQ[p], EQ[n], tr, eqFade ? grow : 1),
+      vsOn: carry(cv, 7, n, VS[p], VS[n], tr, vsFade ? grow : 1),
+      rangeOn: carry(cv, 8, n, RANGE[p], RANGE[n], tr, rangeFade ? grow : 1),
     };
   });
 
@@ -133,6 +156,12 @@ export default function Political37Scene({ clock, bt, bi, i, picked, onPick, dra
     width: SCENE.value.loud + 12,
     marginLeft: -(SCENE.value.loud + 12) / 2,
   }));
+  // group AH — who the quiet voice reaches, that the vote stays equal, the split
+  // between the two positions, and one rule among the many a democracy could set.
+  const nearStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.nearOn }));
+  const eqStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.eqOn }));
+  const vsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.vsOn }));
+  const rangeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.rangeOn }));
 
   return (
     <View style={styles.scene}>
@@ -147,6 +176,9 @@ export default function Political37Scene({ clock, bt, bi, i, picked, onPick, dra
         <View style={[styles.throat, { left: BALLOT_X[1] + BALLOT_W / 2 - 8 }]} />
         <Animated.View style={[styles.mouth, { left: BALLOT_X[1] + BALLOT_W / 2 }, loudStyle]} />
         <Animated.View style={[styles.capBar, { left: BALLOT_X[1] + BALLOT_W / 2 }, capStyle]} />
+        {/* The few people close enough for the quiet voice to reach. */}
+        <Animated.View style={[styles.nearDot, { left: BALLOT_X[0] + BALLOT_W / 2 - 12 }, nearStyle]} />
+        <Animated.View style={[styles.nearDot, { left: BALLOT_X[0] + BALLOT_W / 2 + 8 }, nearStyle]} />
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, pairStyle]} pointerEvents="none">
@@ -157,6 +189,9 @@ export default function Political37Scene({ clock, bt, bi, i, picked, onPick, dra
             <View style={[styles.tickTail, { left: bx + 8 }]} />
           </View>
         ))}
+        {/* The ballots themselves stay exactly equal. */}
+        <Animated.View style={[styles.eqBar, styles.eqBarTop, eqStyle]} />
+        <Animated.View style={[styles.eqBar, styles.eqBarBot, eqStyle]} />
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, labelsStyle]}>
@@ -188,6 +223,12 @@ export default function Political37Scene({ clock, bt, bi, i, picked, onPick, dra
           <View style={styles.speechBox} pointerEvents="none" />
           <Text style={styles.speechText}>SPEECH</Text>
         </Target>
+        {/* The split between the two positions, and one rule among the many a
+            democracy could set — same gap between the labels, never both at once. */}
+        <Animated.View style={[styles.vsMark, vsStyle]} pointerEvents="none" />
+        <Animated.View style={[styles.rangeDot, { left: 245 }, rangeStyle]} pointerEvents="none" />
+        <Animated.View style={[styles.rangeDot, { left: 257 }, rangeStyle]} pointerEvents="none" />
+        <Animated.View style={[styles.rangeDot, { left: 269 }, rangeStyle]} pointerEvents="none" />
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
@@ -202,7 +243,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 146, top: CAP_T, width: 240,
@@ -211,32 +252,46 @@ const styles = StyleSheet.create({
 
   ballot: {
     position: 'absolute', top: BALLOT_Y, width: BALLOT_W, height: BALLOT_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   tick: { position: 'absolute', top: BALLOT_Y + 16, width: 3, height: 16, backgroundColor: INK, transform: [{ rotate: '-40deg' }] },
   tickTail: { position: 'absolute', top: BALLOT_Y + 22, width: 3, height: 9, backgroundColor: INK, transform: [{ rotate: '40deg' }] },
+  // group AH — the two ballots stay exactly equal: a plain "=" between them.
+  eqBar: { position: 'absolute', left: 247, width: 14, height: 2, backgroundColor: SHADE },
+  eqBarTop: { top: 414 },
+  eqBarBot: { top: 422 },
 
   throat: { position: 'absolute', top: HORN_BOT - 18, width: 16, height: 18, backgroundColor: INK, borderRadius: 2 },
   mouth: { position: 'absolute', top: HORN_TOP, height: HORN_BOT - HORN_TOP - 18, borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER, borderRadius: 3 },
   // The mark that says a limit was imposed. On the loud side only, because that is
   // the only side a cap reaches.
   capBar: { position: 'absolute', top: HORN_TOP - 8, height: 3, backgroundColor: INK, borderRadius: 2 },
+  // group AH — the few people close enough for the quiet voice to reach.
+  nearDot: { position: 'absolute', top: 282, width: 5, height: 5, borderRadius: 2.5, backgroundColor: SHADE },
 
   label: { position: 'absolute', top: LABEL_Y, width: 96, height: 22 },
   labelBox: {
     position: 'absolute', left: 0, top: 0, width: 96, height: 22,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   labelWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   labelText: {
     position: 'absolute', left: 0, top: 6, width: 96, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK, includeFontPadding: false,
   },
+  // group AH — in the gap between the two labels: first the split between the two
+  // positions in dispute, then one rule among the many a democracy could set.
+  // Never both at once, so the one gap does double duty.
+  vsMark: {
+    position: 'absolute', left: 255, top: 459, width: 8, height: 8,
+    backgroundColor: INK, transform: [{ rotate: '45deg' }],
+  },
+  rangeDot: { position: 'absolute', top: 461, width: 4, height: 4, borderRadius: 2, backgroundColor: INK },
 
   speech: { position: 'absolute', left: 206, top: 262, width: 88, height: 22 },
   speechBox: {
     position: 'absolute', left: 0, top: 0, width: 88, height: 22,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   speechText: {
     position: 'absolute', left: 0, top: 6, width: 88, textAlign: 'center',

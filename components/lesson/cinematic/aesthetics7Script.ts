@@ -20,6 +20,12 @@ export interface Aesthetics7Beat extends BaseBeat {
   /** Caption plates: 0 none · 1 the works · 2 the two viewers (live) · 3 the two viewers, verdict settled. */ capt?: number;
   /** The four marks of Hume's true critic, 0..1. */ marks?: number;
   /** 1 = the two frames are live tap targets (Q1). */ pick?: number;
+  /** 1 = the line a reason would be written on lies empty under both works. */ grounds?: number;
+  /** 1 = the visitors’ chart is struck through: a count is not a verdict. */ popCorrect?: number;
+  /** 1 = the beauty travels off the canvas into whoever is looking. */ viewerMind?: number;
+  /** 1 = a tiny molehill and mountain appear side by side, Hume's own image. */ molehill?: number;
+  /** 1 = one level is laid across both works: the standard their verdicts answer to. */ standard?: number;
+  /** 1 = further marks appear inside the masterwork: what practice lets you see in it. */ perceiveMore?: number;
 }
 
 export const BEATS: Aesthetics7Beat[] = [
@@ -29,7 +35,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 3.5,
   },
   {
-    p: 462, x: 90, q: 8, art: 1, capt: 0,
+    p: 462, x: 90, q: 8, art: 1, capt: 0, grounds: 1,
     text: 'The difficulty is to say on what grounds, if beauty is a matter of feeling.',
     dur: 1.8,
   },
@@ -40,7 +46,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 1.8,
   },
   {
-    p: 267, x: 250, q: 163, art: 1, capt: 1,
+    p: 267, x: 250, q: 163, art: 1, capt: 1, popCorrect: 1,
     text: 'Nearly all visitors prefer the masterwork, and only a few the scribble. Yet popularity doesn’t make a verdict correct.',
     dur: 2.9,
   },
@@ -51,7 +57,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 3.6,
   },
   {
-    p: 260, x: 160, q: 161, art: 1, capt: 1,
+    p: 260, x: 160, q: 161, art: 1, capt: 1, viewerMind: 1,
     text: 'Beauty, for Hume, is a sentiment, a feeling that arises in the mind of the viewer.',
     dur: 1.8,
   },
@@ -75,7 +81,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 3.5,
   },
   {
-    p: 165, x: 90, q: 260, art: 1, capt: 1,
+    p: 165, x: 90, q: 260, art: 1, capt: 1, molehill: 1,
     text: 'Hume rejected the tie. Ranking the minor poet Ogilby equal to Milton, he wrote, is like calling a molehill as high as a mountain.',
     dur: 1.8,
   },
@@ -95,7 +101,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 3.6,
   },
   {
-    p: 459, x: 170, q: 45, art: 1, capt: 3, marks: 1,
+    p: 459, x: 170, q: 45, art: 1, capt: 3, marks: 1, standard: 1,
     text: 'Hume holds that the joint verdict of such critics is the standard of taste.',
     dur: 1.8,
   },
@@ -106,7 +112,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 2.4,
   },
   {
-    p: 275, x: 250, q: 25, art: 1, capt: 3, marks: 1,
+    p: 275, x: 250, q: 25, art: 1, capt: 3, marks: 1, perceiveMore: 1,
     text: 'If you return after studying many works, you’ll perceive more in this canvas than you do today.',
     dur: 2.6,
   },

@@ -17,6 +17,9 @@ export interface Logic33Beat extends BaseBeat {
   /** How many bends the curve has, 0 straight … 1 threading every dot. */ bend?: number;
   /** 1 = the eighth dot (the new measurement) is on the grid. */ nextDot?: number;
   /** 1 = the reader is driving the curve from the rail (Q1). */ live?: number;
+  /** 1 = a ring confirms each of the seven measured dots — nothing is left unexplained. */ matched?: number;
+  /** 1 = a dashed line marks the gap between the curve's end and the eighth measurement — the overfit named. */ gap?: number;
+  /** 1 = the plain, zero-bend line appears beneath the curve — the extra parts added beyond it. */ base?: number;
 }
 
 export const BEATS: Logic33Beat[] = [
@@ -38,7 +41,7 @@ export const BEATS: Logic33Beat[] = [
     dur: 2.7,
   },
   {
-    p: 169, x: 52, bend: 1,
+    p: 169, x: 52, bend: 1, matched: 1,
     text: 'No measurement is left unexplained, so this curve seems to be the best available account of the data.',
     dur: 1.8,
   },
@@ -49,7 +52,7 @@ export const BEATS: Logic33Beat[] = [
     dur: 3.3,
   },
   {
-    p: 467, x: 52, bend: 1, nextDot: 1,
+    p: 467, x: 52, bend: 1, nextDot: 1, gap: 1,
     text: 'The curve had fitted the errors in the seven measurements along with the pattern. This failure is called overfitting.',
     dur: 1.8,
   },
@@ -91,7 +94,7 @@ export const BEATS: Logic33Beat[] = [
     dur: 3.4,
   },
   {
-    p: 167, x: 52, bend: 0.5, nextDot: 1,
+    p: 167, x: 52, bend: 0.5, nextDot: 1, base: 1,
     text: 'Every extra part is another assumption that could be false, and another way to fit measurement error.',
     dur: 1.8,
   },

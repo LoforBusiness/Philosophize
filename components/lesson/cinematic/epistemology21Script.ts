@@ -18,6 +18,9 @@ export interface Epi21Beat extends BaseBeat {
   /** How loaded the WILL tray is, 0..1 — effort, which the needle ignores. */ will?: number;
   /** How loaded the EVIDENCE tray is, 0..1 — the only thing the needle answers to. */ ev?: number;
   /** 1 = the three answer cards are live (Q1). */ pick?: number;
+  /** 1 = a dashed outline of the coming test rig, before the gauge itself appears. */ testFrame?: number;
+  /** 1 = a dashed brace around both trays, naming the two candidate inputs. */ traysRing?: number;
+  /** How many acts of will have been named so far, 0…3 — ticks on the will tray. */ willTicks?: number;
 }
 
 export const BEATS: Epi21Beat[] = [
@@ -27,7 +30,7 @@ export const BEATS: Epi21Beat[] = [
     dur: 2.9,
   },
   {
-    p: 164, x: 70,
+    p: 164, x: 70, testFrame: 1,
     text: 'Doxastic voluntarism is the view that you can believe something just by deciding to. This attempt puts the view to the test.',
     dur: 1.8,
   },
@@ -38,28 +41,28 @@ export const BEATS: Epi21Beat[] = [
     dur: 3.9,
   },
   {
-    p: 270, x: 168, dial: 1,
+    p: 270, x: 168, dial: 1, traysRing: 1,
     text: 'Two kinds of input might move the needle: acts of will and evidence.',
     dur: 1.8,
   },
   {
-    p: 29, x: 124, dial: 1, will: 1,
+    p: 29, x: 124, dial: 1, will: 1, willTicks: 1,
     text: 'The first tray holds acts of will, beginning with a strong desire that it be raining.',
     cite: 'Acts of will',
     dur: 1.8,
   },
   {
-    p: 258, x: 124, dial: 1, will: 1,
+    p: 258, x: 124, dial: 1, will: 1, willTicks: 2,
     text: 'Add a firm decision to believe it, and the words “it’s raining” repeated to yourself.',
     dur: 1.8,
   },
   {
-    p: 258, x: 124, dial: 1, will: 1,
+    p: 258, x: 124, dial: 1, will: 1, willTicks: 3,
     text: 'Add a large reward for believing it. The tray fills and the needle does not move.',
     dur: 2.3,
   },
   {
-    p: 141, x: 124, dial: 1, will: 1,
+    p: 141, x: 124, dial: 1, will: 1, willTicks: 3,
     quote: {
       id: 'lq-epistemology-knowledge-21-1',
       text: 'It is wrong always, everywhere, and for anyone, to believe anything upon insufficient evidence.',
@@ -71,13 +74,13 @@ export const BEATS: Epi21Beat[] = [
     dur: 3.6,
   },
   {
-    p: 384, x: 168, dial: 1, will: 1, ev: 1,
+    p: 384, x: 168, dial: 1, will: 1, ev: 1, willTicks: 3,
     text: 'Now put one item in the evidence tray: rain on the window. With no act of will at all, the needle swings to belief.',
     cite: 'Evidence',
     dur: 4.8,
   },
   {
-    p: 383, x: 124, dial: 1, will: 1, ev: 1, pick: 1,
+    p: 383, x: 124, dial: 1, will: 1, ev: 1, pick: 1, willTicks: 3,
     interact: {
       prompt: 'Which input moved the needle from doubt to belief?',
       explain: 'Evidence. Belief responds to how the world appears, not to how much you want it to be a certain way. Wanting and trying left the needle where it was.',
@@ -86,7 +89,7 @@ export const BEATS: Epi21Beat[] = [
     dur: 1.0,
   },
   {
-    p: 165, x: 124, dial: 1, will: 1, ev: 1,
+    p: 165, x: 124, dial: 1, will: 1, ev: 1, willTicks: 3,
     interact: {
       prompt: 'How much of what you believe is up to you?',
       drag: {

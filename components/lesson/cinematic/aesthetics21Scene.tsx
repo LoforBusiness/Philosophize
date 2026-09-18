@@ -12,6 +12,7 @@ import { BEATS } from './aesthetics21Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -19,8 +20,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE COLUMNS OF STOCK, EMPTIED, AND ONE VERDICT THAT DIFFERS.
@@ -71,6 +73,15 @@ const SLAB_STEP = [14, 14, 0];
 const STOCK_TOP = 252;
 const PLATE_Y = 352;
 
+// The empty-set mark sits above the ash (331…344) and below the caption (234…244).
+const NO_SCORE_Y = 274;
+// The term row sits at the same height as the (still-hidden) verdict plates —
+// gone again well before either verdict has a reason to show.
+const TERM_Y = 352;
+// The new case's own mark sits inside the symphony column's emptied body — clear
+// of the verdict row, which is already visible by the beat this one arrives on.
+const PHOTO_Y = 288;
+
 const FIG_X = 200;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
@@ -85,6 +96,10 @@ const GONE = BEATS.map((b) => b.gone ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 /** The beat that asks on the stage — the one the verdict plates must wait for. */
 const ASK_BEAT = LIVE.findIndex((v) => v === 1);
+// GROUP AH — three still taps, each moving a new mass rather than a caption.
+const NO_SCORE = BEATS.map((b) => ((b.noScore ?? 0) > 0 ? 1 : 0));
+const LABEL = BEATS.map((b) => ((b.label ?? 0) > 0 ? 1 : 0));
+const PHOTO_TAG = BEATS.map((b) => ((b.photoTag ?? 0) > 0 ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics21'));
 
@@ -94,7 +109,12 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics21'));
 // wrong answer's verdict at each end, and a blur of both in the middle.
 export default function Aesthetics21Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const noScoreFade = (cur.noScore ?? 0) !== (prev?.noScore ?? 0);
+  const labelFade = (cur.label ?? 0) !== (prev?.label ?? 0);
+  const photoTagFade = (cur.photoTag ?? 0) !== (prev?.photoTag ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -103,6 +123,7 @@ export default function Aesthetics21Scene({ clock, bt, bi, i, picked, onPick, ga
     // computes from moveTr — arriving after the figure had stopped.
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -115,6 +136,12 @@ export default function Aesthetics21Scene({ clock, bt, bi, i, picked, onPick, ga
       works: carry(cv, 1, n, WORKS[p], WORKS[n], tr),
       burn: carry(cv, 2, n, BURN[p], BURN[n], tr),
       gone: carry(cv, 3, n, GONE[p], GONE[n], tr),
+      // An empty-set mark over the ash — nothing survives to notate it from.
+      noScore: carry(cv, 4, n, NO_SCORE[p], NO_SCORE[n], noScoreFade ? grow : 1),
+      // The two categories, bracketed onto the columns that hold them.
+      label: carry(cv, 5, n, LABEL[p], LABEL[n], labelFade ? grow : 1),
+      // The new case, not yet sorted into either column.
+      photoTag: carry(cv, 6, n, PHOTO_TAG[p], PHOTO_TAG[n], photoTagFade ? grow : 1),
       t,
     };
   });
@@ -139,6 +166,9 @@ export default function Aesthetics21Scene({ clock, bt, bi, i, picked, onPick, ga
     revealed.value = withTiming(on ? 1 : 0, { duration: 320, easing: Easing.out(Easing.cubic) });
   }, [i, picked, revealed]);
   const goneStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.gone * revealed.value }));
+  const noScoreStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.noScore }));
+  const labelStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.label }));
+  const photoTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.photoTag }));
 
   return (
     <View style={styles.scene}>
@@ -155,6 +185,24 @@ export default function Aesthetics21Scene({ clock, bt, bi, i, picked, onPick, ga
           {k === 2 ? <Ash S={SCENE} col={k} /> : null}
         </AnswerLift>
       ))}
+
+      {/* nothing survives to remake the painting from */}
+      <Animated.Text style={[styles.noScore, noScoreStyle]} pointerEvents="none">∅</Animated.Text>
+
+      {/* the two categories, bracketed onto the columns that hold them */}
+      <Animated.View style={[styles.termPlate, styles.alloPlate, labelStyle]} pointerEvents="none">
+        <Text style={styles.termText} numberOfLines={1}>ALLOGRAPHIC</Text>
+      </Animated.View>
+      <Animated.View style={[styles.termPlate, styles.autoPlate, labelStyle]} pointerEvents="none">
+        <Text style={styles.termText} numberOfLines={1}>AUTOGRAPHIC</Text>
+      </Animated.View>
+
+      {/* the new case, introduced unsorted — in the symphony column's own emptied
+          body, clear of the verdict row already showing by this beat (ASK_BEAT
+          has passed) */}
+      <Animated.View style={[styles.photoPlate, photoTagStyle]} pointerEvents="none">
+        <Text style={styles.termText} numberOfLines={1}>A PRINT?</Text>
+      </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, goneStyle]} pointerEvents="none">
         {COL_X.map((cx, k) => (
@@ -260,7 +308,32 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule alone leaves the figure
   // standing on bare page; a filled band under it is what the two lessons
   // the reader holds up both do, and it costs one View.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
+
+  noScore: {
+    position: 'absolute', top: NO_SCORE_Y, left: COL_X[2], width: COL_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 16, color: INK, includeFontPadding: false,
+  },
+
+  // A TERM NAMED ON THE THING IT APPLIES TO. Dashed for the unsorted case, solid
+  // once a column actually holds the category.
+  termPlate: {
+    position: 'absolute', top: TERM_Y, height: 20,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  alloPlate: { left: COL_X[0], width: (COL_X[1] + COL_W) - COL_X[0] },
+  autoPlate: { left: COL_X[2], width: COL_W },
+  // In the symphony column's own emptied body — clear of the verdict row, which
+  // is already showing by the beat this arrives on.
+  photoPlate: {
+    position: 'absolute', left: COL_X[1], top: PHOTO_Y, width: COL_W, height: 20,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center',
+  },
+  termText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK, includeFontPadding: false,
+  },
 
   cap: {
     position: 'absolute', top: 234, width: COL_W, textAlign: 'center',

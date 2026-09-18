@@ -14,6 +14,7 @@ import { BEATS } from './ethics7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { cue } from '@/lib/feedback';
 import type { SceneApi } from './CinematicPlayer';
@@ -22,8 +23,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // Two roads seen side-on, stacked as horizontal lanes across the UPPER stage, with
 // a boxy car on each. Road A's car loops forever (nothing ever happens on it); road
@@ -73,6 +75,7 @@ const KD = BEATS.map((b) => b.kid ?? 0);
 const HT = BEATS.map((b) => b.hit ?? 0);
 const GL = BEATS.map((b) => b.glance ?? 0);
 const CB = BEATS.map((b) => b.carB ?? -70);
+const NOTE = BEATS.map((b) => b.note ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -131,6 +134,9 @@ export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick, 
   const kidFade = (cur.kid ?? 0) !== (prev?.kid ?? 0);
   const hitFade = (cur.hit ?? 0) !== (prev?.hit ?? 0);
   const glanceFade = (cur.glance ?? 0) !== (prev?.glance ?? 0);
+  // ANIMATE ONLY WHAT CHANGED (C20c) — a one-shot, so it fires only on the beat
+  // that raises its own point, never on a beat that merely holds it.
+  const noteNow = (cur.note ?? 0) > 0 && (cur.note ?? 0) !== (prev?.note ?? 0) ? (cur.note ?? 0) : 0;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -166,6 +172,9 @@ export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick, 
       // Wheels spin off DISTANCE, not time, so a parked car's wheels are still.
       spinA: xa * 9.5,
       spinB: xb * 9.5,
+      // THE NOTE'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to,
+      // flatly 0 on every other beat — one flash per tap, not a loop.
+      note: noteNow ? ease01(bt.value / 1.1) : 0,
     };
   });
 
@@ -188,6 +197,11 @@ export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick, 
     opacity: SCENE.value.hit,
     transform: [{ scale: 0.55 + 0.45 * SCENE.value.hit }],
   }));
+  // Fades in over the first fifth of its window and out over the last.
+  const noteStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.note;
+    return { opacity: u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2) };
+  });
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -234,6 +248,48 @@ export default function Ethics7Scene({ clock, bt, bi, i, picked, sound, onPick, 
           <View style={styles.hitOuter} />
           <View style={styles.hitInner} />
         </Animated.View>
+
+        {/* ── group AH: one flash per still tap, in the clear gap between the
+            two roads (y 121–205, empty until Road B's own content begins). ── */}
+        {/* Beat 1: the shared choice, before either road is even drawn. */}
+        {noteNow === 1 && (
+          <Animated.View style={[styles.noteMid, noteStyle]} pointerEvents="none">
+            <Text style={styles.noteEqT}>2s  =  2s</Text>
+          </Animated.View>
+        )}
+        {/* Beat 3: the road stays clear a second time. */}
+        {noteNow === 2 && (
+          <Animated.View style={[styles.noteMid, noteStyle]} pointerEvents="none">
+            <Text style={styles.noteCheck}>✓</Text>
+            <Text style={styles.noteWordT}>CLEAR</Text>
+          </Animated.View>
+        )}
+        {/* Beat 5: the one outside difference, ringed where it already stands. */}
+        {noteNow === 3 && <Animated.View style={[styles.kidRing, noteStyle]} pointerEvents="none" />}
+        {/* Beat 7: the drivers themselves are identical — only the road differs. */}
+        {noteNow === 4 && (
+          <Animated.View style={[styles.noteMid, noteStyle]} pointerEvents="none">
+            <View style={styles.noteHead} />
+            <Text style={styles.noteEqT}>=</Text>
+            <View style={styles.noteHead} />
+          </Animated.View>
+        )}
+        {/* Beat 10: the first driver's half of the outcome — nothing at all. */}
+        {noteNow === 5 && (
+          <Animated.View style={[styles.noteLeft, noteStyle]} pointerEvents="none">
+            <Text style={styles.noteWordT}>NEVER</Text>
+            <Text style={styles.noteWordT}>KNOWS</Text>
+          </Animated.View>
+        )}
+        {/* Beat 13: the principle the judgement seems to violate. */}
+        {noteNow === 6 && (
+          <Animated.View style={[styles.noteMid, noteStyle]} pointerEvents="none">
+            <View style={styles.controlRing}>
+              <View style={styles.controlCrack} />
+            </View>
+            <Text style={styles.noteWordT}>CONTROL</Text>
+          </Animated.View>
+        )}
       </View>
 
       {/* ── Q1: three verdict cards, in their own band well above the walk ──── */}
@@ -358,6 +414,33 @@ const styles = StyleSheet.create({
   hitOuter: { position: 'absolute', width: 52, height: 52, borderRadius: 26, borderWidth: 1.5, borderColor: SOFT },
   hitInner: { position: 'absolute', width: 34, height: 34, borderRadius: 17, borderWidth: 2.5, borderColor: INK },
 
+  // ── group AH: the six still-tap flashes, in the clear gap between the roads
+  // (y 121–205) — the one strip that never carries a road, a car or the kid.
+  noteMid: {
+    position: 'absolute', left: 0, right: 0, top: 150,
+    flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8,
+  },
+  noteLeft: { position: 'absolute', left: 40, top: 142, alignItems: 'center' },
+  noteEqT: { fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 1, color: INK, includeFontPadding: false },
+  noteCheck: { fontFamily: 'Inter_700Bold', fontSize: 18, color: INK, includeFontPadding: false },
+  noteWordT: { fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false },
+  noteHead: { width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: INK, backgroundColor: PAPER },
+
+  // A dashed ring around the child — the one difference the sentence names.
+  kidRing: {
+    position: 'absolute', left: KID_X - 15, top: 170, width: 30, height: 44, borderRadius: 18,
+    borderWidth: 2, borderStyle: 'dashed', borderColor: INK,
+  },
+
+  // A ring standing for the principle, cracked by the judgement it seems to violate.
+  controlRing: {
+    width: 20, height: 20, borderRadius: 10, borderWidth: 2.5, borderColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  controlCrack: {
+    position: 'absolute', width: 2, height: 22, backgroundColor: INK, transform: [{ rotate: '22deg' }],
+  },
+
   // ── Q1: the verdict row ────────────────────────────────────────────────────
   vHead: { position: 'absolute', left: 0, top: 228, width: STAGE_W, alignItems: 'center' },
   vTag: { fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 2, color: INK,
@@ -368,7 +451,7 @@ const styles = StyleSheet.create({
   },
   vCard: { position: 'absolute', top: V_TOP, width: V_W },
   vInner: {
-    height: V_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: V_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   vRight: { backgroundColor: INK, borderColor: INK },

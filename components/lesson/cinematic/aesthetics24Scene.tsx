@@ -9,6 +9,7 @@ import { BEATS } from './aesthetics24Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE PANEL, AND FOUR FAITHFUL COPIES OF IT GETTING SMALLER.
@@ -73,6 +75,8 @@ const P = BEATS.map((b) => b.p ?? 0);
 const PANEL = BEATS.map((b) => b.panel ?? 0);
 const COPIES = BEATS.map((b) => b.copies ?? 0);
 const PLATES = BEATS.map((b) => b.plates ?? 0);
+// GROUP AH — one still tap: a line grows past the last copy, freed from the room.
+const REACH = BEATS.map((b) => b.reach ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics24'));
@@ -83,7 +87,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics24'));
 // as faithful as the panel.
 export default function Aesthetics24Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -104,6 +108,7 @@ export default function Aesthetics24Scene({ clock, bt, bi, i, picked, onPick, ga
       panel: carry(cv, 1, n, PANEL[p], PANEL[n], tr),
       copies: carry(cv, 2, n, COPIES[p], COPIES[n], tr),
       plates: carry(cv, 3, n, PLATES[p], PLATES[n], tr),
+      reach: carry(cv, 4, n, REACH[p], REACH[n], tr),
       t,
     };
   });
@@ -114,6 +119,7 @@ export default function Aesthetics24Scene({ clock, bt, bi, i, picked, onPick, ga
 
   const panStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.panel }));
   const plStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
+  const reachStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: SCENE.value.reach }] }));
 
   const cps = [0, 1, 2, 3];
 
@@ -127,6 +133,8 @@ export default function Aesthetics24Scene({ clock, bt, bi, i, picked, onPick, ga
       </Animated.View>
 
       {cps.map((k) => <Copy key={k} S={SCENE} k={k} />)}
+
+      <Animated.View style={[styles.reach, reachStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, plStyle]} pointerEvents="none">
         {PL_X.map((px, k) => (
@@ -188,11 +196,11 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   frame: {
     position: 'absolute', left: PAN_X, top: PAN_Y, width: PAN_W, height: PAN_H,
-    borderWidth: 3, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
+    borderWidth: 3, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   mount: {
     position: 'absolute', left: PAN_X + 7, top: PAN_Y + 7, width: PAN_W - 14, height: PAN_H - 14,
@@ -202,12 +210,18 @@ const styles = StyleSheet.create({
     position: 'absolute', left: PAN_X + 16, width: PAN_W - 32, height: 1.2, backgroundColor: SOFT,
   },
   copyFrame: {
-    position: 'absolute', borderWidth: 1.8, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
+    position: 'absolute', borderWidth: 1.8, borderColor: INK, borderRadius: 2, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  // A LINE GROWING PAST THE LAST COPY (beat 6) — the work reaching everybody
+  // once it is freed from the room, scaled out from the panel's own edge.
+  reach: {
+    position: 'absolute', left: PAN_X + PAN_W, top: 334, width: 262, height: 2,
+    backgroundColor: SOFT, transformOrigin: '0% 50%',
   },
 
   plate: {
     position: 'absolute', top: PL_Y, width: PL_W, height: PL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   plateText: {
     position: 'absolute', top: PL_Y + 10, width: PL_W, textAlign: 'center', lineHeight: 11,

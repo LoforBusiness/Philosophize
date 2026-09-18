@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics14Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // FOUR CLAIMS AND FIVE WORLDS, WITH A MARK WHEREVER A CLAIM SURVIVES (H64). A
 // necessary truth is a full row and you can count the gaps in the others.
@@ -60,6 +62,22 @@ const ROWS = BEATS.map((b) => b.rows ?? 0);
 const MARKS = BEATS.map((b) => b.marks ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
 
+// SPOT — a dashed frame that moves to whichever row(s) the sentence is about,
+// rather than a new object per beat (H group Q / "move what changed").
+const SPOT = BEATS.map((b) => b.spot ?? 0);
+function spotRange(v: number): [number, number] {
+  if (v === 1) return [CLAIM_T[2] - 4, CLAIM_T[3] + CLAIM_H + 4];   // Paris + rain
+  if (v === 2) return [CLAIM_T[0] - 4, CLAIM_T[1] + CLAIM_H + 4];   // triangle + water
+  if (v === 3) return [CLAIM_T[0] - 4, CLAIM_T[0] + CLAIM_H + 4];   // triangle alone
+  if (v === 4) return [CLAIM_T[1] - 4, CLAIM_T[1] + CLAIM_H + 4];   // water alone
+  return [CLAIM_T[0] - 4, CLAIM_T[0] + CLAIM_H + 4];
+}
+const SPOT_TOP = SPOT.map((v) => spotRange(v)[0]);
+const SPOT_BOT = SPOT.map((v) => spotRange(v)[1]);
+const SPOT_ON = SPOT.map((v) => (v > 0 ? 1 : 0));
+const SPOT_L = CLAIM_L - 4;
+const SPOT_W = (WORLD_L - CLAIM_L) + (WORLDS - 1) * WORLD_PITCH + MARK + 8;
+
 const X = BEATS.map((b) => b.x ?? FIG_X);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
@@ -78,7 +96,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics14'));
 export default function Metaphysics14Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(6);
   const cur = BEATS[i];
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -105,6 +123,9 @@ export default function Metaphysics14Scene({ clock, bt, bi, i, picked, onPick, p
       // about the reader rather than the worlds, and it deliberately moves nothing.
       marks: carry(cv, 1, n, MARKS[p], reacting ? pickAt(POLL_MARKS, pickPos.value) : MARKS[n], fill),
       pick: carry(cv, 2, n, PICKV[p], PICKV[n], grow),
+      spotTop: carry(cv, 3, n, SPOT_TOP[p], SPOT_TOP[n], grow),
+      spotBot: carry(cv, 4, n, SPOT_BOT[p], SPOT_BOT[n], grow),
+      spotOn: carry(cv, 5, n, SPOT_ON[p], SPOT_ON[n], grow),
     };
   });
 
@@ -118,6 +139,7 @@ export default function Metaphysics14Scene({ clock, bt, bi, i, picked, onPick, p
       {CLAIMS.map((c, k) => (
         <Claim key={c.id} k={k} SCENE={SCENE} live={live} answered={answered} picked={picked} onPick={onPick} />
       ))}
+      <SpotFrame SCENE={SCENE} />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -187,13 +209,24 @@ function Mark({
   );
 }
 
+// THE SPOTLIGHT — a dashed frame round whichever row(s) the sentence names,
+// travelling there rather than a fresh box arriving each time (H group Q).
+function SpotFrame({ SCENE }: { SCENE: { value: { spotTop: number; spotBot: number; spotOn: number } } }) {
+  const st = useAnimatedStyle(() => ({
+    opacity: SCENE.value.spotOn,
+    top: SCENE.value.spotTop,
+    height: SCENE.value.spotBot - SCENE.value.spotTop,
+  }));
+  return <Animated.View pointerEvents="none" style={[styles.spot, st]} />;
+}
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   head: {
@@ -204,12 +237,18 @@ const styles = StyleSheet.create({
 
   claim: { position: 'absolute', left: CLAIM_L, width: CLAIM_W, height: CLAIM_H },
   claimInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7,
   },
   claimText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.8, color: INK,
     textAlign: 'center', includeFontPadding: false,
+  },
+
+  // A dashed frame is a boundary, never a fill — it never covers the plates or marks it rings.
+  spot: {
+    position: 'absolute', left: SPOT_L, width: SPOT_W,
+    borderWidth: 1.5, borderStyle: 'dashed', borderColor: SOFT, borderRadius: 5,
   },
 
   mark: { position: 'absolute', width: MARK, height: MARK, borderRadius: MARK / 2 },

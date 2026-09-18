@@ -27,6 +27,9 @@ export interface Metaphysics30Beat extends BaseBeat {
   /** How much of the cavern has been charted, 0…1. */ charted?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a bracket marks the far wall — the questions raised since antiquity (group AH). */ wallBracket?: number;
+  /** 1 = two dead-end stubs appear in the cavern — the recorded false starts (group AH). */ deadEnds?: number;
+  /** 1 = a "?" tag hovers at the far wall — what physics takes for granted (group AH). */ wallQuery?: number;
 };
 
 export const BEATS: Metaphysics30Beat[] = [
@@ -36,7 +39,7 @@ export const BEATS: Metaphysics30Beat[] = [
     dur: 5.0,
   },
   {
-    p: 172, x: 24, cave: 1, charted: 0.15,
+    p: 172, x: 24, cave: 1, charted: 0.15, wallBracket: 1,
     text: 'The critic’s charge is that science settles questions and moves on, while metaphysics still debates claims raised in antiquity.',
     dur: 5.0,
   },
@@ -46,7 +49,7 @@ export const BEATS: Metaphysics30Beat[] = [
     dur: 5.0,
   },
   {
-    p: 264, x: 24, cave: 1, charted: 0.55,
+    p: 264, x: 24, cave: 1, charted: 0.55, deadEnds: 1,
     text: 'Consider an analogy: a cave explored in darkness. Each expedition charts new passages and records the dead ends.',
     dur: 5.0,
   },
@@ -78,7 +81,7 @@ export const BEATS: Metaphysics30Beat[] = [
     dur: 5.0,
   },
   {
-    p: 459, x: 80, cave: 1, charted: 0.75,
+    p: 459, x: 80, cave: 1, charted: 0.75, wallQuery: 1,
     text: 'Physics takes time, cause, law and possibility for granted. Working out what these really are is not a job for experiments.',
     dur: 5.0,
   },

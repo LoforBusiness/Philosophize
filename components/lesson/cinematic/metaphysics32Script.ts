@@ -16,6 +16,10 @@ export interface Meta32Beat extends BaseBeat {
   /** 1 = the tether between them is drawn. */ tether?: number;
   /** 1 = one sphere is wearing the label we gave it. */ tag?: number;
   /** 1 = the three counts are live targets (Q1). */ pick?: number;
+  /** 1 = a ring settles round the universe's own rim (group AH). */ universeRing?: number;
+  /** 1 = a ring settles round both spheres at once, kept symmetric (group AH). */ alikeRing?: number;
+  /** 1 = end-caps mark both ends of the tether (group AH). */ tetherMark?: number;
+  /** 1 = a dashed ring settles round the label, foreshadowing its removal (group AH). */ tagRing?: number;
 }
 
 export const BEATS: Meta32Beat[] = [
@@ -25,12 +29,12 @@ export const BEATS: Meta32Beat[] = [
     text: 'Consider a universe containing two iron spheres and nothing else: no stars, no observers, no ground.',
   },
   {
-    g: 259, orbs: 1, tether: 0, tag: 0,
+    g: 259, orbs: 1, tether: 0, tag: 0, universeRing: 1,
     dur: 1.8,
     text: 'Max Black’s case, from 1952, tests Leibniz’s identity of indiscernibles: things sharing every property are identical.',
   },
   {
-    g: 384, orbs: 1, tether: 0, tag: 0,
+    g: 384, orbs: 1, tether: 0, tag: 0, alikeRing: 1,
     dur: 4.4,
     text: 'The two spheres are alike in every way: same size, same material, same age, and same warmth. They have always existed together.',
     cite: 'Alike in every way',
@@ -42,7 +46,7 @@ export const BEATS: Meta32Beat[] = [
     cite: 'Even the relations',
   },
   {
-    g: 168, orbs: 1, tether: 1, tag: 0,
+    g: 168, orbs: 1, tether: 1, tag: 0, tetherMark: 1,
     dur: 2.3,
     text: 'Every description you write of one is a true description of the other.',
   },
@@ -66,7 +70,7 @@ export const BEATS: Meta32Beat[] = [
     cite: 'A label from outside',
   },
   {
-    g: 167, orbs: 1, tether: 1, tag: 1,
+    g: 167, orbs: 1, tether: 1, tag: 1, tagRing: 1,
     dur: 1.8,
     text: 'Remove the label and nothing in the universe changes, because the label was never part of it.',
   },

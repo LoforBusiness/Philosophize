@@ -17,6 +17,13 @@ export interface Metaphysics7Beat extends BaseBeat {
   /** 0 = presentism (only NOW is inked) · 1 = eternalism (all three inked). */ solid?: number;
   /** 1 = the travelling "YOUR NOW" spotlight ring is lit. */ spot?: number;
   /** 1 = the four slice targets are live (Q1). */ pick?: number;
+  /** A "?" rises above the figure as the metaphysical question is put (group AH). 0..1. */ qMark?: number;
+  /** A bracket spans beneath all three slices, marking them as equally real places (group AH). 0..1. */ equalRule?: number;
+  /** The stem connecting PAST to the line fades — it no longer exists at all (group AH). 0..1. */ pastCut?: number;
+  /** The stem connecting FUTURE to the line fades — that moment hasn't occurred yet (group AH). 0..1. */ futureCut?: number;
+  /** A small "KEEPS CHANGING" tag appears under the travelling spotlight (group AH). 0..1. */ keepsChanging?: number;
+  /** Two page rectangles appear — page one and page four hundred, equally printed (group AH). 0..1. */ pages?: number;
+  /** A small "HERE" marker plants beside the figure — "now" works like "here" (group AH). 0..1. */ hereFlag?: number;
 }
 
 export const BEATS: Metaphysics7Beat[] = [
@@ -26,7 +33,7 @@ export const BEATS: Metaphysics7Beat[] = [
     dur: 2.9,
   },
   {
-    p: 462, x: 200,
+    p: 462, x: 200, qMark: 1,
     text: 'This raises a metaphysical question. Do past and future moments exist, or only the present one?',
     dur: 1.8,
   },
@@ -37,7 +44,7 @@ export const BEATS: Metaphysics7Beat[] = [
     dur: 2.5,
   },
   {
-    p: 267, x: 200, line: 1, spot: 1,
+    p: 267, x: 200, line: 1, spot: 1, equalRule: 1,
     text: 'On this picture, the moments look like places, each as real as the others.',
     dur: 1.9,
   },
@@ -48,7 +55,7 @@ export const BEATS: Metaphysics7Beat[] = [
     dur: 2.4,
   },
   {
-    p: 274, x: 70, line: 1, spot: 1,
+    p: 274, x: 70, line: 1, spot: 1, pastCut: 1,
     text: 'On this view, the past isn’t stored somewhere else. It no longer exists at all.',
     dur: 2,
   },
@@ -59,7 +66,7 @@ export const BEATS: Metaphysics7Beat[] = [
     dur: 1.9,
   },
   {
-    p: 270, x: 330, line: 1, spot: 1,
+    p: 270, x: 330, line: 1, spot: 1, futureCut: 1,
     text: 'So its frame is empty too, because that moment hasn’t yet occurred.',
     dur: 2.3,
   },
@@ -70,7 +77,7 @@ export const BEATS: Metaphysics7Beat[] = [
     dur: 3.4,
   },
   {
-    p: 458, x: 200, line: 1, spot: 1,
+    p: 458, x: 200, line: 1, spot: 1, keepsChanging: 1,
     text: 'For the presentist, reality consists of a single moment, and which moment that is keeps changing.',
     dur: 1.8,
   },
@@ -81,7 +88,7 @@ export const BEATS: Metaphysics7Beat[] = [
     dur: 2,
   },
   {
-    p: 259, x: 70, line: 1,
+    p: 259, x: 70, line: 1, pages: 1,
     text: 'Page four hundred is as fully printed as page one. Where you happen to be reading makes no page more real.',
     dur: 2.8,
   },
@@ -101,7 +108,7 @@ export const BEATS: Metaphysics7Beat[] = [
     dur: 2.1,
   },
   {
-    p: 260, x: 200, line: 1, solid: 1,
+    p: 260, x: 200, line: 1, solid: 1, hereFlag: 1,
     text: 'On this view, the word “now” works like the word “here”. Each marks the speaker’s position, not a privileged part of reality.',
     dur: 3.1,
   },

@@ -9,6 +9,7 @@ import { BEATS } from './aesthetics30Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { Shapes, ell, bar, tri, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A WINDOW WITH A HOVERING KESTREL, AND A MIRROR SLIDING ACROSS IT.
@@ -91,6 +93,12 @@ const WINDOW = BEATS.map((b) => (b.window ? 1 : 0));
 const SELF = BEATS.map((b) => b.self ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// GROUP AH — three still taps, none touching the bird or the mirror's own fill
+// (the header's own rule): DECO sits on the frame corner, NAMED tags the change
+// below the window, PERSON adds the practice's next object beside it.
+const DECO = BEATS.map((b) => (b.deco ? 1 : 0));
+const NAMED = BEATS.map((b) => (b.named ? 1 : 0));
+const PERSON = BEATS.map((b) => (b.person ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -101,7 +109,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics30'));
 export default function Aesthetics30Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -123,6 +131,9 @@ export default function Aesthetics30Scene({ clock, bt, bi, i, picked, onPick, dr
       // the self, so a high seam slides the mirror right across the bird.
       self: carry(cv, 2, n, SELF[p], reacting ? dragPos.value : SELF[n], tr),
       plates: carry(cv, 3, n, PLATES[p], PLATES[n], tr),
+      deco: carry(cv, 4, n, DECO[p], DECO[n], tr),
+      named: carry(cv, 5, n, NAMED[p], NAMED[n], tr),
+      person: carry(cv, 6, n, PERSON[p], PERSON[n], tr),
     };
   });
 
@@ -133,6 +144,9 @@ export default function Aesthetics30Scene({ clock, bt, bi, i, picked, onPick, dr
   const winStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.window }));
   const mirrorStyle = useAnimatedStyle(() => ({ width: (WIN_W - PANE * 2) * clamp01(SCENE.value.self) }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
+  const decoStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.deco }));
+  const namedStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.named }));
+  const personStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.person }));
 
   return (
     <View style={styles.scene}>
@@ -163,7 +177,14 @@ export default function Aesthetics30Scene({ clock, bt, bi, i, picked, onPick, dr
 
         <Text style={[styles.name, { left: WIN_X + 6 }]}>{NAME[0]}</Text>
         <Text style={[styles.name, { left: WIN_X + 114 }]}>{NAME[1]}</Text>
+        <Animated.View style={[styles.deco, decoStyle]} pointerEvents="none" />
       </Animated.View>
+
+      <Animated.Text style={[styles.namedTag, namedStyle]} pointerEvents="none">UNSELFING</Animated.Text>
+      <Animated.View style={[styles.personArm, personStyle]} pointerEvents="none">
+        <View style={styles.personTip} />
+      </Animated.View>
+      <Animated.Text style={[styles.personCap, personStyle]} pointerEvents="none">TO A PERSON</Animated.Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
         {PLATE_ID.map((id, k) => (
@@ -198,7 +219,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: WIN_X, top: CAP_T, width: WIN_W, textAlign: 'center',
@@ -214,6 +235,36 @@ const styles = StyleSheet.create({
   frame: {
     position: 'absolute', left: WIN_X, top: WIN_Y, width: WIN_W, height: WIN_H,
     borderWidth: PANE, borderColor: INK,
+  },
+  // A CORNER ORNAMENT ON THE FRAME (beat 1) — beauty read as decoration, never a
+  // change to the bird or the mirror themselves.
+  deco: {
+    position: 'absolute', left: WIN_X - 7, top: WIN_Y - 2, width: 14, height: 14,
+    backgroundColor: INK, transform: [{ rotate: '45deg' }],
+  },
+  // THE CHANGE NAMED (beat 3) — Murdoch's own word for it, said once beneath the
+  // window it just happened in.
+  namedTag: {
+    position: 'absolute', left: WIN_X, top: 413, width: WIN_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+  },
+  // THE ATTENTION LEAVES THE WINDOW (beat 7). The practice's next object is a
+  // person, and a person on this stage is drawn by the rig or not at all — so it
+  // is the ATTENTION that is drawn, going out of the window from the bird's height
+  // toward whoever is next, rather than a figure assembled from boxes (check:scale).
+  personArm: {
+    position: 'absolute', left: WIN_X + WIN_W + 4, top: BIRD_Y - 1.5, width: 36, height: 3,
+    backgroundColor: INK, borderRadius: 1.5,
+  },
+  personTip: {
+    position: 'absolute', left: 36, top: -3.5, width: 9, height: 10,
+    borderTopWidth: 5, borderBottomWidth: 5, borderLeftWidth: 9,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
+    borderStyle: 'solid',
+  },
+  personCap: {
+    position: 'absolute', left: WIN_X + WIN_W, top: BIRD_Y + 10, width: 70, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
   mullion: { position: 'absolute', left: WIN_X + WIN_W / 2 - 2, top: WIN_Y + PANE, width: 3, height: WIN_H - PANE * 2, backgroundColor: RULE },
 
@@ -251,7 +302,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,

@@ -1,0 +1,1366 @@
+{
+ "ethicsScript.ts": {
+  "beats": 16,
+  "cont": [
+   4,
+   5,
+   6,
+   8,
+   14
+  ]
+ },
+ "epistemologyScript.ts": {
+  "beats": 13,
+  "cont": [
+   1,
+   3,
+   4,
+   6,
+   8
+  ]
+ },
+ "metaphysicsScript.ts": {
+  "beats": 12,
+  "cont": [
+   1,
+   3
+  ]
+ },
+ "aestheticsScript.ts": {
+  "beats": 16,
+  "cont": [
+   1,
+   2,
+   4,
+   5,
+   7,
+   8,
+   12,
+   13
+  ]
+ },
+ "politicalScript.ts": {
+  "beats": 12,
+  "cont": [
+   6
+  ]
+ },
+ "ethics2Script.ts": {
+  "beats": 15,
+  "cont": []
+ },
+ "epistemology2Script.ts": {
+  "beats": 12,
+  "cont": []
+ },
+ "metaphysics2Script.ts": {
+  "beats": 13,
+  "cont": []
+ },
+ "aesthetics2Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "political2Script.ts": {
+  "beats": 12,
+  "cont": []
+ },
+ "valid3Script.ts": {
+  "beats": 11,
+  "cont": []
+ },
+ "strong4Script.ts": {
+  "beats": 12,
+  "cont": [
+   3,
+   5
+  ]
+ },
+ "ethics3Script.ts": {
+  "beats": 15,
+  "cont": []
+ },
+ "ethics4Script.ts": {
+  "beats": 15,
+  "cont": [
+   1,
+   4,
+   11
+  ]
+ },
+ "epistemology4Script.ts": {
+  "beats": 14,
+  "cont": []
+ },
+ "epistemology5Script.ts": {
+  "beats": 14,
+  "cont": [
+   1,
+   3,
+   7,
+   9
+  ]
+ },
+ "metaphysics3Script.ts": {
+  "beats": 12,
+  "cont": []
+ },
+ "metaphysics4Script.ts": {
+  "beats": 11,
+  "cont": [
+   2,
+   4
+  ]
+ },
+ "aesthetics3Script.ts": {
+  "beats": 12,
+  "cont": []
+ },
+ "aesthetics4Script.ts": {
+  "beats": 13,
+  "cont": [
+   3,
+   5,
+   6
+  ]
+ },
+ "political3Script.ts": {
+  "beats": 12,
+  "cont": []
+ },
+ "political4Script.ts": {
+  "beats": 11,
+  "cont": [
+   7
+  ]
+ },
+ "logic5Script.ts": {
+  "beats": 10,
+  "cont": [
+   4
+  ]
+ },
+ "ethics5Script.ts": {
+  "beats": 11,
+  "cont": [
+   4
+  ]
+ },
+ "logic6Script.ts": {
+  "beats": 9,
+  "cont": [
+   2
+  ]
+ },
+ "metaphysics6Script.ts": {
+  "beats": 11,
+  "cont": [
+   2,
+   5
+  ]
+ },
+ "aesthetics6Script.ts": {
+  "beats": 12,
+  "cont": [
+   8,
+   9
+  ]
+ },
+ "ethics6Script.ts": {
+  "beats": 11,
+  "cont": []
+ },
+ "epistemology6Script.ts": {
+  "beats": 11,
+  "cont": [
+   2,
+   4
+  ]
+ },
+ "epistemology7Script.ts": {
+  "beats": 12,
+  "cont": [
+   1,
+   3
+  ]
+ },
+ "metaphysics5Script.ts": {
+  "beats": 11,
+  "cont": [
+   2,
+   7
+  ]
+ },
+ "aesthetics5Script.ts": {
+  "beats": 11,
+  "cont": []
+ },
+ "political5Script.ts": {
+  "beats": 12,
+  "cont": [
+   9
+  ]
+ },
+ "political6Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "logic7Script.ts": {
+  "beats": 15,
+  "cont": [
+   2,
+   4,
+   9,
+   12
+  ]
+ },
+ "logic8Script.ts": {
+  "beats": 16,
+  "cont": [
+   8
+  ]
+ },
+ "ethics7Script.ts": {
+  "beats": 16,
+  "cont": [
+   1,
+   5,
+   13
+  ]
+ },
+ "ethics8Script.ts": {
+  "beats": 18,
+  "cont": [
+   5,
+   16
+  ]
+ },
+ "ethics9Script.ts": {
+  "beats": 11,
+  "cont": [
+   1,
+   3,
+   7
+  ]
+ },
+ "ethics31Script.ts": {
+  "beats": 11,
+  "cont": [
+   2,
+   4,
+   7
+  ]
+ },
+ "ethics32Script.ts": {
+  "beats": 8,
+  "cont": []
+ },
+ "logic31Script.ts": {
+  "beats": 11,
+  "cont": [
+   2
+  ]
+ },
+ "logic32Script.ts": {
+  "beats": 10,
+  "cont": [
+   3,
+   5
+  ]
+ },
+ "epistemology31Script.ts": {
+  "beats": 12,
+  "cont": [
+   1,
+   3,
+   5
+  ]
+ },
+ "epistemology32Script.ts": {
+  "beats": 11,
+  "cont": [
+   2,
+   4,
+   7
+  ]
+ },
+ "metaphysics31Script.ts": {
+  "beats": 11,
+  "cont": [
+   2,
+   4
+  ]
+ },
+ "metaphysics32Script.ts": {
+  "beats": 11,
+  "cont": [
+   4,
+   7
+  ]
+ },
+ "political33Script.ts": {
+  "beats": 11,
+  "cont": [
+   5
+  ]
+ },
+ "political34Script.ts": {
+  "beats": 10,
+  "cont": [
+   7
+  ]
+ },
+ "metaphysics35Script.ts": {
+  "beats": 12,
+  "cont": [
+   4
+  ]
+ },
+ "epistemology35Script.ts": {
+  "beats": 12,
+  "cont": [
+   4,
+   8
+  ]
+ },
+ "logic35Script.ts": {
+  "beats": 13,
+  "cont": [
+   7,
+   10
+  ]
+ },
+ "ethics35Script.ts": {
+  "beats": 10,
+  "cont": [
+   1,
+   4
+  ]
+ },
+ "aesthetics35Script.ts": {
+  "beats": 13,
+  "cont": [
+   5,
+   10
+  ]
+ },
+ "political35Script.ts": {
+  "beats": 12,
+  "cont": [
+   1,
+   7
+  ]
+ },
+ "metaphysics36Script.ts": {
+  "beats": 11,
+  "cont": [
+   9
+  ]
+ },
+ "epistemology36Script.ts": {
+  "beats": 14,
+  "cont": [
+   1,
+   5,
+   7
+  ]
+ },
+ "logic36Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "ethics36Script.ts": {
+  "beats": 12,
+  "cont": [
+   5,
+   8
+  ]
+ },
+ "aesthetics36Script.ts": {
+  "beats": 12,
+  "cont": [
+   1,
+   6
+  ]
+ },
+ "political36Script.ts": {
+  "beats": 11,
+  "cont": [
+   4,
+   8
+  ]
+ },
+ "metaphysics37Script.ts": {
+  "beats": 11,
+  "cont": [
+   4
+  ]
+ },
+ "metaphysics38Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "metaphysics39Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "epistemology37Script.ts": {
+  "beats": 11,
+  "cont": []
+ },
+ "epistemology38Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "epistemology39Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "logic37Script.ts": {
+  "beats": 11,
+  "cont": []
+ },
+ "logic38Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "logic39Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "logic16Script.ts": {
+  "beats": 11,
+  "cont": [
+   3
+  ]
+ },
+ "logic17Script.ts": {
+  "beats": 11,
+  "cont": [
+   4
+  ]
+ },
+ "logic18Script.ts": {
+  "beats": 10,
+  "cont": [
+   3
+  ]
+ },
+ "ethics17Script.ts": {
+  "beats": 11,
+  "cont": [
+   1,
+   3
+  ]
+ },
+ "ethics19Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "ethics20Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "epistemology18Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "epistemology19Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "epistemology20Script.ts": {
+  "beats": 11,
+  "cont": []
+ },
+ "metaphysics18Script.ts": {
+  "beats": 10,
+  "cont": [
+   3
+  ]
+ },
+ "metaphysics19Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "metaphysics20Script.ts": {
+  "beats": 12,
+  "cont": [
+   9
+  ]
+ },
+ "aesthetics18Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "aesthetics20Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "aesthetics21Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "political19Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "political20Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "political21Script.ts": {
+  "beats": 11,
+  "cont": [
+   8
+  ]
+ },
+ "logic19Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "logic20Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "logic21Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "ethics21Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "ethics22Script.ts": {
+  "beats": 10,
+  "cont": [
+   5
+  ]
+ },
+ "ethics24Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "ethics25Script.ts": {
+  "beats": 11,
+  "cont": []
+ },
+ "epistemology22Script.ts": {
+  "beats": 11,
+  "cont": [
+   1,
+   4
+  ]
+ },
+ "epistemology23Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "epistemology24Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "epistemology25Script.ts": {
+  "beats": 11,
+  "cont": []
+ },
+ "metaphysics21Script.ts": {
+  "beats": 11,
+  "cont": [
+   1
+  ]
+ },
+ "metaphysics22Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "metaphysics23Script.ts": {
+  "beats": 11,
+  "cont": [
+   5
+  ]
+ },
+ "aesthetics22Script.ts": {
+  "beats": 11,
+  "cont": [
+   4
+  ]
+ },
+ "aesthetics23Script.ts": {
+  "beats": 11,
+  "cont": [
+   1,
+   6
+  ]
+ },
+ "aesthetics24Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "aesthetics25Script.ts": {
+  "beats": 11,
+  "cont": []
+ },
+ "political22Script.ts": {
+  "beats": 10,
+  "cont": [
+   1
+  ]
+ },
+ "political23Script.ts": {
+  "beats": 10,
+  "cont": [
+   1
+  ]
+ },
+ "political24Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "political25Script.ts": {
+  "beats": 11,
+  "cont": []
+ },
+ "ethics37Script.ts": {
+  "beats": 12,
+  "cont": [
+   7
+  ]
+ },
+ "ethics38Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "ethics39Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "aesthetics37Script.ts": {
+  "beats": 10,
+  "cont": [
+   8
+  ]
+ },
+ "aesthetics38Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "aesthetics39Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "political37Script.ts": {
+  "beats": 12,
+  "cont": [
+   9
+  ]
+ },
+ "political38Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "political39Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "aesthetics33Script.ts": {
+  "beats": 10,
+  "cont": [
+   4
+  ]
+ },
+ "aesthetics34Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "ethics33Script.ts": {
+  "beats": 11,
+  "cont": [
+   8
+  ]
+ },
+ "ethics34Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "logic33Script.ts": {
+  "beats": 12,
+  "cont": [
+   5,
+   9
+  ]
+ },
+ "logic34Script.ts": {
+  "beats": 12,
+  "cont": [
+   5,
+   9
+  ]
+ },
+ "epistemology33Script.ts": {
+  "beats": 10,
+  "cont": [
+   4
+  ]
+ },
+ "epistemology34Script.ts": {
+  "beats": 13,
+  "cont": [
+   1,
+   7
+  ]
+ },
+ "metaphysics33Script.ts": {
+  "beats": 12,
+  "cont": [
+   5,
+   9
+  ]
+ },
+ "metaphysics34Script.ts": {
+  "beats": 13,
+  "cont": [
+   1,
+   3,
+   10
+  ]
+ },
+ "aesthetics31Script.ts": {
+  "beats": 9,
+  "cont": [
+   5
+  ]
+ },
+ "aesthetics32Script.ts": {
+  "beats": 10,
+  "cont": [
+   6
+  ]
+ },
+ "political31Script.ts": {
+  "beats": 10,
+  "cont": [
+   6
+  ]
+ },
+ "political32Script.ts": {
+  "beats": 9,
+  "cont": [
+   3
+  ]
+ },
+ "logic22Script.ts": {
+  "beats": 8,
+  "cont": []
+ },
+ "logic23Script.ts": {
+  "beats": 11,
+  "cont": []
+ },
+ "ethics18Script.ts": {
+  "beats": 10,
+  "cont": [
+   2
+  ]
+ },
+ "metaphysics13Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "metaphysics15Script.ts": {
+  "beats": 10,
+  "cont": [
+   1,
+   3
+  ]
+ },
+ "metaphysics24Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "metaphysics25Script.ts": {
+  "beats": 11,
+  "cont": []
+ },
+ "aesthetics19Script.ts": {
+  "beats": 11,
+  "cont": [
+   2,
+   7
+  ]
+ },
+ "political12Script.ts": {
+  "beats": 11,
+  "cont": [
+   1
+  ]
+ },
+ "political13Script.ts": {
+  "beats": 12,
+  "cont": [
+   1,
+   3,
+   5
+  ]
+ },
+ "political15Script.ts": {
+  "beats": 9,
+  "cont": [
+   2
+  ]
+ },
+ "ethics23Script.ts": {
+  "beats": 10,
+  "cont": [
+   1,
+   6
+  ]
+ },
+ "logic25Script.ts": {
+  "beats": 9,
+  "cont": [
+   1
+  ]
+ },
+ "logic26Script.ts": {
+  "beats": 12,
+  "cont": [
+   1,
+   3,
+   8
+  ]
+ },
+ "aesthetics11Script.ts": {
+  "beats": 10,
+  "cont": [
+   1,
+   3
+  ]
+ },
+ "aesthetics16Script.ts": {
+  "beats": 9,
+  "cont": [
+   2
+  ]
+ },
+ "knowHowScript.ts": {
+  "beats": 11,
+  "cont": [
+   1,
+   3
+  ]
+ },
+ "epistemology13Script.ts": {
+  "beats": 10,
+  "cont": [
+   1
+  ]
+ },
+ "epistemology21Script.ts": {
+  "beats": 12,
+  "cont": [
+   1,
+   3,
+   6
+  ]
+ },
+ "epistemology8Script.ts": {
+  "beats": 19,
+  "cont": [
+   1,
+   2,
+   4,
+   6,
+   8,
+   9
+  ]
+ },
+ "epistemology9Script.ts": {
+  "beats": 18,
+  "cont": [
+   1,
+   5,
+   14
+  ]
+ },
+ "metaphysics7Script.ts": {
+  "beats": 18,
+  "cont": [
+   1,
+   5,
+   7,
+   9
+  ]
+ },
+ "metaphysics8Script.ts": {
+  "beats": 18,
+  "cont": [
+   1,
+   3,
+   5
+  ]
+ },
+ "aesthetics7Script.ts": {
+  "beats": 16,
+  "cont": [
+   1,
+   11,
+   13
+  ]
+ },
+ "aesthetics8Script.ts": {
+  "beats": 19,
+  "cont": [
+   1,
+   2,
+   4,
+   8,
+   10,
+   16
+  ]
+ },
+ "political7Script.ts": {
+  "beats": 18,
+  "cont": [
+   2,
+   6,
+   9,
+   12,
+   13
+  ]
+ },
+ "political8Script.ts": {
+  "beats": 18,
+  "cont": [
+   1,
+   2,
+   6,
+   8,
+   14,
+   15
+  ]
+ },
+ "metaphysics9Script.ts": {
+  "beats": 11,
+  "cont": [
+   2
+  ]
+ },
+ "epistemology10Script.ts": {
+  "beats": 11,
+  "cont": [
+   1
+  ]
+ },
+ "logic9Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "ethics10Script.ts": {
+  "beats": 10,
+  "cont": [
+   6
+  ]
+ },
+ "aesthetics9Script.ts": {
+  "beats": 12,
+  "cont": [
+   1,
+   3
+  ]
+ },
+ "political9Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "logic10Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "logic11Script.ts": {
+  "beats": 10,
+  "cont": [
+   2,
+   6
+  ]
+ },
+ "ethics11Script.ts": {
+  "beats": 11,
+  "cont": [
+   2,
+   5,
+   10
+  ]
+ },
+ "ethics12Script.ts": {
+  "beats": 10,
+  "cont": [
+   3,
+   6
+  ]
+ },
+ "epistemology11Script.ts": {
+  "beats": 13,
+  "cont": [
+   1,
+   3,
+   5,
+   6
+  ]
+ },
+ "epistemology12Script.ts": {
+  "beats": 11,
+  "cont": [
+   4,
+   7
+  ]
+ },
+ "metaphysics10Script.ts": {
+  "beats": 13,
+  "cont": []
+ },
+ "metaphysics11Script.ts": {
+  "beats": 12,
+  "cont": [
+   1,
+   5
+  ]
+ },
+ "aesthetics10Script.ts": {
+  "beats": 10,
+  "cont": [
+   1
+  ]
+ },
+ "aesthetics12Script.ts": {
+  "beats": 10,
+  "cont": [
+   2,
+   6
+  ]
+ },
+ "political10Script.ts": {
+  "beats": 14,
+  "cont": [
+   1,
+   3,
+   7
+  ]
+ },
+ "political11Script.ts": {
+  "beats": 14,
+  "cont": [
+   1,
+   4,
+   7,
+   10
+  ]
+ },
+ "logic12Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "ethics13Script.ts": {
+  "beats": 8,
+  "cont": []
+ },
+ "epistemology14Script.ts": {
+  "beats": 9,
+  "cont": [
+   5
+  ]
+ },
+ "metaphysics12Script.ts": {
+  "beats": 11,
+  "cont": [
+   1
+  ]
+ },
+ "aesthetics13Script.ts": {
+  "beats": 10,
+  "cont": [
+   4
+  ]
+ },
+ "political14Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "aesthetics14Script.ts": {
+  "beats": 11,
+  "cont": [
+   1,
+   3
+  ]
+ },
+ "aesthetics15Script.ts": {
+  "beats": 13,
+  "cont": [
+   3,
+   5,
+   6,
+   10
+  ]
+ },
+ "aesthetics17Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "ethics14Script.ts": {
+  "beats": 10,
+  "cont": [
+   1
+  ]
+ },
+ "ethics15Script.ts": {
+  "beats": 12,
+  "cont": [
+   1,
+   3
+  ]
+ },
+ "ethics16Script.ts": {
+  "beats": 8,
+  "cont": []
+ },
+ "logic13Script.ts": {
+  "beats": 9,
+  "cont": [
+   2
+  ]
+ },
+ "logic14Script.ts": {
+  "beats": 10,
+  "cont": [
+   1,
+   7
+  ]
+ },
+ "logic15Script.ts": {
+  "beats": 9,
+  "cont": [
+   1
+  ]
+ },
+ "epistemology15Script.ts": {
+  "beats": 12,
+  "cont": [
+   1,
+   3,
+   8
+  ]
+ },
+ "epistemology16Script.ts": {
+  "beats": 9,
+  "cont": []
+ },
+ "epistemology17Script.ts": {
+  "beats": 10,
+  "cont": [
+   2
+  ]
+ },
+ "metaphysics14Script.ts": {
+  "beats": 11,
+  "cont": [
+   2
+  ]
+ },
+ "metaphysics16Script.ts": {
+  "beats": 10,
+  "cont": [
+   2
+  ]
+ },
+ "metaphysics17Script.ts": {
+  "beats": 9,
+  "cont": [
+   1
+  ]
+ },
+ "political16Script.ts": {
+  "beats": 10,
+  "cont": [
+   1,
+   3
+  ]
+ },
+ "political17Script.ts": {
+  "beats": 8,
+  "cont": []
+ },
+ "metaphysics40Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "epistemology40Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "logic40Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "ethics40Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "aesthetics40Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "political40Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "metaphysics41Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "epistemology41Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "logic41Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "ethics41Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "aesthetics41Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "political41Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "metaphysics26Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "epistemology26Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "logic24Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "ethics26Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "aesthetics26Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "political26Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "metaphysics27Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "epistemology27Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "logic27Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "ethics27Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "aesthetics27Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "political27Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "metaphysics28Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "epistemology28Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "logic28Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "ethics28Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "aesthetics28Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "political28Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "metaphysics29Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "epistemology29Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "logic29Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "ethics29Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "aesthetics29Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "political29Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "metaphysics30Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "epistemology30Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "logic30Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "ethics30Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "aesthetics30Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "political30Script.ts": {
+  "beats": 10,
+  "cont": []
+ },
+ "political18Script.ts": {
+  "beats": 9,
+  "cont": [
+   2
+  ]
+ }
+}

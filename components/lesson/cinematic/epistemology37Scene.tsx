@@ -10,14 +10,16 @@ import { BEATS } from './epistemology37Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE HULL, FIVE CRACKS, AND THE CRACKS ARE THE ONLY THING THAT CHANGES.
@@ -47,6 +49,9 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const HUSHED = BEATS.map((b) => b.hushed ?? 0);
+const SAME = BEATS.map((b) => b.same ?? 0);
+const WHOSE = BEATS.map((b) => b.whose ?? 0);
 const BASE_TR = 0.85;
 
 const HULL_X = 150;
@@ -80,7 +85,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology37'));
 
 export default function Epistemology37Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(6);
+  const cv = useCarry(9);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -121,6 +126,10 @@ export default function Epistemology37Scene({ clock, bt, bi, dragPos, gazeX, gaz
       sailedOn: carry(cv, 3, n, SAILED[p], SAILED[n], tr),
       verdictOn: carry(cv, 4, n, VERDICT[p], VERDICT[n], tr),
       safeOn: carry(cv, 5, n, SAFE[p], SAFE[n], tr),
+      // The three tap events, carried, so each fades out as well as in (group L).
+      hushed: carry(cv, 6, n, HUSHED[p], HUSHED[n], tr),
+      same: carry(cv, 7, n, SAME[p], SAME[n], tr),
+      whose: carry(cv, 8, n, WHOSE[p], WHOSE[n], tr),
     };
   });
 
@@ -135,6 +144,33 @@ export default function Epistemology37Scene({ clock, bt, bi, dragPos, gazeX, gaz
   const wakeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.sailedOn }));
   const cardStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.verdictOn }));
   const safeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.safeOn }));
+
+  // ── the three tap events ───────────────────────────────────────────────────
+  //
+  // ONE AT A TIME IS THE SENTENCE, so the five strikes go on in order across the
+  // five cracks: five at once would be a man who dismissed his doubts, and what
+  // he did was put them down one after another (AH5).
+  const hushAt = (u: number, k: number) => {
+    'worklet';
+    return (u <= 0 ? 0 : clamp01((u - k * 0.15) / 0.26));
+  };
+  const hush0 = useAnimatedStyle(() => ({ opacity: hushAt(SCENE.value.hushed, 0) }));
+  const hush1 = useAnimatedStyle(() => ({ opacity: hushAt(SCENE.value.hushed, 1) }));
+  const hush2 = useAnimatedStyle(() => ({ opacity: hushAt(SCENE.value.hushed, 2) }));
+  const hush3 = useAnimatedStyle(() => ({ opacity: hushAt(SCENE.value.hushed, 3) }));
+  const hush4 = useAnimatedStyle(() => ({ opacity: hushAt(SCENE.value.hushed, 4) }));
+  const hushStyles = [hush0, hush1, hush2, hush3, hush4];
+  // After the crossing the hull is the hull it was, and the point is that nothing
+  // about it moved — so the mark is a measurement, not a change.
+  const sameStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.same,
+    transform: [{ scaleX: SCENE.value.same }],
+  }));
+  const sameCapStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.same - 0.5) / 0.5) }));
+  const whoseStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.whose,
+    transform: [{ translateY: (1 - SCENE.value.whose) * 8 }],
+  }));
 
   return (
     <View style={styles.scene}>
@@ -167,6 +203,20 @@ export default function Epistemology37Scene({ clock, bt, bi, dragPos, gazeX, gaz
         <Text style={styles.cardText}>HAD NO RIGHT{'\n'}TO BELIEVE IT</Text>
       </Animated.View>
 
+      {/* He put each doubt down, one after another. */}
+      {CRACK_X.map((cx, k) => (
+        <Animated.View key={`hu${k}`} style={[styles.hushMark, { left: cx - 7 }, hushStyles[k]]} pointerEvents="none" />
+      ))}
+
+      {/* And the hull that came back is the hull that went out. */}
+      <Animated.View style={[styles.sameRule, sameStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.sameCap, sameCapStyle]} pointerEvents="none">THE SAME CRACKS</Animated.Text>
+
+      {/* Whose risk it was. */}
+      <Animated.View style={[styles.whosePlate, whoseStyle]} pointerEvents="none">
+        <Text style={styles.whoseText} numberOfLines={1}>THEIR RISK, NOT HIS</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -180,6 +230,35 @@ function Crack({ S, left, index }: { S: SharedValue<any>; left: number; index: n
 }
 
 const styles = StyleSheet.create({
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  // A SMALL CROSS ON EACH CRACK, at the crack's own x: the doubts are the cracks,
+  // and a doubt put down is one struck out rather than one removed.
+  hushMark: {
+    position: 'absolute', top: HULL_Y + HULL_H / 2 - 7, width: 14, height: 3,
+    backgroundColor: INK, borderRadius: 1.5, transform: [{ rotate: '45deg' }],
+  },
+  // Across the hull's own width, above it, with the caption over the rule.
+  sameRule: {
+    position: 'absolute', left: HULL_X, top: HULL_Y - 14, width: HULL_W, height: 2,
+    borderTopWidth: 2, borderColor: INK, borderStyle: 'dashed',
+    transformOrigin: '0% 50%',
+  },
+  sameCap: {
+    position: 'absolute', left: HULL_X, top: HULL_Y - 32, width: HULL_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+  // Below the water line, clear of the verdict card at CARD_X / CARD_Y.
+  whosePlate: {
+    position: 'absolute', left: 86, top: CARD_Y + 44, width: 160, height: 24,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  whoseText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: PAPER,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
 
@@ -216,7 +295,7 @@ const styles = StyleSheet.create({
 
   card: {
     position: 'absolute', left: CARD_X, top: CARD_Y, width: 116, height: 44,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   cardText: {
     position: 'absolute', left: CARD_X, top: CARD_Y + 11, width: 116, textAlign: 'center', lineHeight: 11,

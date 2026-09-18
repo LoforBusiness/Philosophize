@@ -12,14 +12,16 @@ import { BEATS } from './aesthetics6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A tiny figure at the foot of a vast range — and, written up beside it, the TABLE
 // Burke actually drew: two columns that are two different responses, not two doses
@@ -66,6 +68,11 @@ const VAST = BEATS.map((b) => b.vast ?? 0);
 const FLOWER = BEATS.map((b) => b.flower ?? 0);
 const SPLIT = BEATS.map((b) => b.split ?? 0);
 const MIND = BEATS.map((b) => b.mind ?? 0);
+// group AH — the four still taps, each named from that beat's own sentence.
+const EMPH = BEATS.map((b) => ((b.emphasis ?? 0) > 0 ? 1 : 0));
+const DIST = BEATS.map((b) => ((b.distanceTag ?? 0) > 0 ? 1 : 0));
+const NOTSUB = BEATS.map((b) => ((b.notSublimeTag ?? 0) > 0 ? 1 : 0));
+const SUP = BEATS.map((b) => ((b.superiorTag ?? 0) > 0 ? 1 : 0));
 const FLAKES = Array.from({ length: 16 }, (_, k) => ({
   x: 78 + (k * 311) % 300, ph: (k * 0.17) % 1, sp: 0.14 + (k % 4) * 0.03,
 }));
@@ -106,12 +113,21 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics6'));
 export default function Aesthetics6Scene({ clock, bt, bi, pickPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(8);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // group AH — each tag/mark fades in on the beat that names it and fades back
+  // out (never cuts) the moment the beat moves on.
+  const emphFade = (cur.emphasis ?? 0) !== (prev?.emphasis ?? 0);
+  const distFade = (cur.distanceTag ?? 0) !== (prev?.distanceTag ?? 0);
+  const notSubFade = (cur.notSublimeTag ?? 0) !== (prev?.notSublimeTag ?? 0);
+  const supFade = (cur.superiorTag ?? 0) !== (prev?.superiorTag ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
@@ -125,6 +141,11 @@ export default function Aesthetics6Scene({ clock, bt, bi, pickPos, i, gazeX, gaz
       split: carry(cv, 2, n, SPLIT[p], SPLIT[n], tr),
       mind: carry(cv, 3, n, MIND[p], MIND[n], tr),
       t,
+      // group AH — named the beat the sentence names it, gone the beat it moves on.
+      emphasis: carry(cv, 4, n, EMPH[p], EMPH[n], emphFade ? grow : 1),
+      dist: carry(cv, 5, n, DIST[p], DIST[n], distFade ? grow : 1),
+      notSub: carry(cv, 6, n, NOTSUB[p], NOTSUB[n], notSubFade ? grow : 1),
+      sup: carry(cv, 7, n, SUP[p], SUP[n], supFade ? grow : 1),
     };
   });
 
@@ -146,6 +167,20 @@ export default function Aesthetics6Scene({ clock, bt, bi, pickPos, i, gazeX, gaz
   // The two rings breathe against each other — reason turning the endless over.
   const ringA = useAnimatedStyle(() => ({ transform: [{ scale: 1 + 0.07 * Math.sin(SCENE.value.t * 1.7) }] }));
   const ringB = useAnimatedStyle(() => ({ transform: [{ scale: 1 + 0.07 * Math.sin(SCENE.value.t * 1.7 + Math.PI) }] }));
+  // group AH — the four still-tap events.
+  const emphStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: SCENE.value.emphasis }] }));
+  const distStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.dist,
+    transform: [{ translateY: (1 - SCENE.value.dist) * -6 }],
+  }));
+  const notSubStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.notSub,
+    transform: [{ translateY: (1 - SCENE.value.notSub) * -6 }],
+  }));
+  const supStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.sup,
+    transform: [{ translateY: (1 - SCENE.value.sup) * -6 }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -207,12 +242,32 @@ export default function Aesthetics6Scene({ clock, bt, bi, pickPos, i, gazeX, gaz
       </Animated.View>
       {ROWS.map((r, k) => <Row key={r.a} S={SCENE} k={k} a={r.a} b={r.b} />)}
 
+      {/* group AH — "it produces a delight mixed with terror": the word it lands on. */}
+      <Animated.View style={[styles.emphMark, emphStyle]} pointerEvents="none" />
+
+      {/* group AH — "danger seen from a safe distance": named on the rock itself. */}
+      <Animated.View style={[styles.distTag, distStyle]} pointerEvents="none">
+        <Text style={styles.distLine1}>SAFE</Text>
+        <Text style={styles.distLine2}>DISTANCE</Text>
+      </Animated.View>
+
+      {/* group AH — "the mountain is not the sublime thing": named on the rock. */}
+      <Animated.View style={[styles.notSubTag, notSubStyle]} pointerEvents="none">
+        <Text style={styles.distLine1}>NOT</Text>
+        <Text style={styles.distLine2}>SUBLIME</Text>
+      </Animated.View>
+
       {/* ── Kant: the awe moves inside ────────────────────────────────────────── */}
       <Animated.View style={[styles.mindCard, mindStyle]} pointerEvents="none">
         <Text style={styles.mindWho}>KANT</Text>
         <Animated.View style={[styles.ring, { left: 43 }, ringA]} />
         <Animated.View style={[styles.ring, { left: 71 }, ringB]} />
         <Text style={styles.mindT}>REASON HOLDS IT</Text>
+      </Animated.View>
+
+      {/* group AH — "your reason is superior to nature": lands over Kant's own card. */}
+      <Animated.View style={[styles.supTag, supStyle]} pointerEvents="none">
+        <Text style={styles.supText}>SUPERIOR</Text>
       </Animated.View>
 
       <Stickman D={DF} k={K_FIG} />
@@ -329,7 +384,7 @@ const styles = StyleSheet.create({
 
   tagWrap: { position: 'absolute', left: 132, top: 400, width: 80, alignItems: 'center' },
   tagBox: {
-    width: 80, height: 22, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    width: 80, height: 22, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   tagT: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: INK, includeFontPadding: false },
@@ -362,7 +417,7 @@ const styles = StyleSheet.create({
   // reads at a glance. Card x 236–384, y 294–372, clear of the table (ends x 186).
   mindCard: {
     position: 'absolute', left: 236, top: 294, width: 148, height: 78,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   // 143, not 148: an absolutely-positioned child sits inside the border box, so a
   // child given the card's OUTER width overhangs it by the two 2.5-unit borders —
@@ -374,6 +429,36 @@ const styles = StyleSheet.create({
   ring: { position: 'absolute', top: 19, width: 34, height: 34, borderRadius: 17, borderWidth: 2.5, borderColor: INK },
   mindT: {
     position: 'absolute', left: 0, top: 55, width: 143, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.2, color: INK, includeFontPadding: false,
+  },
+
+  // ── group AH: four still-tap events ────────────────────────────────────────
+  // the word the sentence lands on — an ink underline drawn in under OVERWHELMS.
+  emphMark: {
+    position: 'absolute', left: 104, top: 344, width: 82, height: 2,
+    backgroundColor: INK, borderRadius: 1, transformOrigin: '0% 50%',
+  },
+  // "a safe distance" / "not the sublime thing" — two small plates affixed to the
+  // rock face itself (PLATE_FACE reads against SOFT or sky alike), clear of the
+  // table, the figure and Kant's card.
+  distTag: {
+    position: 'absolute', left: 132, top: 400, width: 80, paddingVertical: 6,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center',
+  },
+  notSubTag: {
+    position: 'absolute', left: 272, top: 414, width: 84, paddingVertical: 6,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center',
+  },
+  distLine1: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: INK, includeFontPadding: false },
+  distLine2: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.6, color: INK, includeFontPadding: false },
+  // "superior" — a small plate landing over Kant's own card.
+  supTag: {
+    position: 'absolute', left: 280, top: 258, paddingHorizontal: 8, paddingVertical: 3,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  supText: {
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.2, color: INK, includeFontPadding: false,
   },
 });

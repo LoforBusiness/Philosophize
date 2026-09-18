@@ -22,6 +22,11 @@ export interface Aes15Beat extends BaseBeat {
   /** How many tags are tied on, 0…5. */ tags?: number;
   /** 1 = the four interested tags have been cut away. */ cut?: number;
   /** 1 = the five tags are live targets (Q1). */ pick?: number;
+  /** 1 = a dashed boundary is drawn round all five tags — "the five" under test. */ zoneTags?: number;
+  /** 1 = an INTEREST plate appears between the rose and the tags, naming the term. */ term?: number;
+  /** 1 = a dashed boundary is drawn round the rose alone — what the test leaves. */ zoneRose?: number;
+  /** How many of the four "interested" tags carry a small flag, in the order named: pick, sell, room, seen. 0…4. */ flag?: number;
+  /** 1 = a dashed line joins the surviving tag to the rose — the remark now read as being about it. */ connect?: number;
 }
 
 export const BEATS: Aes15Beat[] = [
@@ -31,34 +36,34 @@ export const BEATS: Aes15Beat[] = [
     text: 'Consider a rose and five sincere remarks a person might make about it. Each expresses a real attitude towards the flower.',
   },
   {
-    g: 413, rose: 1, tags: 5,
+    g: 413, rose: 1, tags: 5, zoneTags: 1,
     dur: 4.8,
     text: 'Immanuel Kant asks which one of the five is a judgement of beauty at all. The question isn’t which remark is true.',
     cite: 'The judgement of taste',
   },
   {
-    g: 159, rose: 1, tags: 5,
+    g: 159, rose: 1, tags: 5, term: 1,
     dur: 2.9,
     text: 'Kant’s test is to set aside every personal stake in the rose. Kant calls such a stake an interest.',
     cite: 'The test of disinterest',
   },
   {
-    g: 159, rose: 1, tags: 5,
+    g: 159, rose: 1, tags: 5, zoneRose: 1,
     dur: 1.8,
     text: 'A judgement of beauty is one whose delight survives when every interest is set aside.',
   },
   {
-    g: 456, rose: 1, tags: 5,
+    g: 456, rose: 1, tags: 5, flag: 1,
     dur: 2.3,
     text: 'An interest is anything you want from the rose, such as owning it.',
   },
   {
-    g: 456, rose: 1, tags: 5,
+    g: 456, rose: 1, tags: 5, flag: 3,
     dur: 1.8,
     text: 'Selling the rose and decorating a room with it are interests too.',
   },
   {
-    g: 456, rose: 1, tags: 5,
+    g: 456, rose: 1, tags: 5, flag: 4,
     dur: 1.8,
     text: 'So is the wish to impress someone by being seen with it.',
   },
@@ -91,7 +96,7 @@ export const BEATS: Aes15Beat[] = [
     cite: 'What remains',
   },
   {
-    g: 467, rose: 1, tags: 5, cut: 1,
+    g: 467, rose: 1, tags: 5, cut: 1, connect: 1,
     dur: 1.8,
     text: 'That remark addresses someone else. Kant holds that a judgement of beauty claims everyone’s agreement, as if beauty were in the rose.',
   },

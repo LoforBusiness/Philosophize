@@ -9,6 +9,7 @@ import { BEATS } from './political27Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO GATES ON ONE ROAD, AND WHICHEVER OF THEM IS STANDING OPEN.
@@ -66,6 +68,9 @@ const ROAD_Y = 368;
 const ROAD_W = 250;
 const ROAD_H = 48;
 
+// group AH — three ticks spaced across the first gate's lintel (186…242).
+const THREE_X = [200, 214, 228];
+
 const PLATE_X = [124, 216, 308];
 const PLATE_Y = 450;
 const PLATE_W = 90;
@@ -86,6 +91,10 @@ const ENTRY = BEATS.map((b) => b.entry ?? 0);
 const CONDUCT = BEATS.map((b) => b.conduct ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// group AH — one-shot marks for the two still taps: a dashed split between the
+// two gates, and three ticks on the first gate's lintel.
+const DIVIDE = BEATS.map((b) => ((b.divide ?? 0) > 0 ? 1 : 0));
+const THREE = BEATS.map((b) => ((b.three ?? 0) > 0 ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -102,7 +111,13 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political27'));
 export default function Political27Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // A mark fades IN on the beat that asks for it and back OUT on the next, rather
+  // than cutting (see "AND FADE AN EVENT OUT, NOT OFF").
+  const divideFade = (cur.divide ?? 0) !== (prev?.divide ?? 0);
+  const threeFade = (cur.three ?? 0) !== (prev?.three ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -110,6 +125,7 @@ export default function Political27Scene({ clock, bt, bi, i, picked, onPick, pic
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
     const u = pickPos.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -124,6 +140,9 @@ export default function Political27Scene({ clock, bt, bi, i, picked, onPick, pic
       entry: carry(cv, 2, n, ENTRY[p], reacting ? pickAt(ENTRY_AT, u) : ENTRY[n], tr),
       conduct: carry(cv, 3, n, CONDUCT[p], reacting ? pickAt(CONDUCT_AT, u) : CONDUCT[n], tr),
       plates: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // group AH — one-shot, fades in on its own beat and back out on the next.
+      divide: carry(cv, 5, n, DIVIDE[p], DIVIDE[n], divideFade ? grow : 1),
+      three: carry(cv, 6, n, THREE[p], THREE[n], threeFade ? grow : 1),
     };
   });
 
@@ -132,6 +151,10 @@ export default function Political27Scene({ clock, bt, bi, i, picked, onPick, pic
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.cards && LIVE[i] === 1;
 
   const roadStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.road }));
+  // A dashed split between the two gates: "two separate sets of tests."
+  const divideStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.divide }));
+  // Three ticks on the first gate's lintel: Aquinas's three named conditions.
+  const threeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.three }));
   const entryStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.entry }));
   const conductStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.conduct }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
@@ -154,6 +177,14 @@ export default function Political27Scene({ clock, bt, bi, i, picked, onPick, pic
 
       <Animated.View style={[styles.fill, { left: LINT_X[0] }, entryStyle]} pointerEvents="none" />
       <Animated.View style={[styles.fill, { left: LINT_X[1] }, conductStyle]} pointerEvents="none" />
+
+      {/* group AH — a dashed split between the two gates. */}
+      <Animated.View style={[styles.divideLine, divideStyle]} pointerEvents="none" />
+
+      {/* group AH — three ticks on the first gate's lintel. */}
+      <Animated.View style={threeStyle} pointerEvents="none">
+        {THREE_X.map((tx) => <View key={tx} style={[styles.threeTick, { left: tx }]} />)}
+      </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
         {PLATE_ID.map((id, k) => (
@@ -188,7 +219,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   road: {
     position: 'absolute', left: ROAD_X, top: ROAD_Y, width: ROAD_W, height: ROAD_H,
@@ -215,12 +246,21 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },
+
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // A dashed divider between the two gates — a boundary, never a fill (D31).
+  divideLine: {
+    position: 'absolute', left: (POST_X[1] + POST_W + POST_X[2]) / 2, top: LINT_Y, width: 0,
+    height: POST_Y + POST_H - LINT_Y, borderLeftWidth: 1.5, borderColor: SHADE, borderStyle: 'dashed',
+  },
+  // Three ticks on the first gate's lintel: Aquinas's three named conditions.
+  threeTick: { position: 'absolute', top: LINT_Y + 3, width: 2, height: 8, backgroundColor: PAPER, borderRadius: 1 },
 });
 
 export function Political27Lesson({ lesson }: { lesson: Lesson }) {

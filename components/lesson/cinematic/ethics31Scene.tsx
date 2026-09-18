@@ -12,6 +12,7 @@ import { BEATS } from './ethics31Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -19,8 +20,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A CLIMB, which no other lesson in the app stages: the figure works on the spot
 // and the rungs scroll DOWN past it (C22d — raising a figure up a static ladder
@@ -77,6 +79,9 @@ const P = BEATS.map((b) => b.p ?? 0);
 const RUNGS = BEATS.map((b) => b.rungs ?? 0);
 const LADDER = BEATS.map((b) => b.ladder ?? 0);
 const DUTY = BEATS.map((b) => b.duty ?? 0);
+const FLAT = BEATS.map((b) => (b.flat ? 1 : 0));
+const NAMED = BEATS.map((b) => (b.named ? 1 : 0));
+const WIRED = BEATS.map((b) => (b.wired ? 1 : 0));
 
 /** Non-climbing attitudes, so the figure is not frozen mid-step when it rests. */
 const HOLD: Record<number, number> = { 0: 0, 1: 41, 2: 46, 3: 25 };
@@ -107,13 +112,16 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics31'));
 export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(6);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
   const dr = Math.abs((cur.rungs ?? 0) - (prev?.rungs ?? 0));
   const ladderFade = (cur.ladder ?? 0) !== (prev?.ladder ?? 0);
   const dutyFade = (cur.duty ?? 0) !== (prev?.duty ?? 0);
+  const flatFade = (cur.flat ?? 0) !== (prev?.flat ?? 0);
+  const namedFade = (cur.named ?? 0) !== (prev?.named ?? 0);
+  const wiredFade = (cur.wired ?? 0) !== (prev?.wired ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -148,6 +156,13 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick, pickPo
       // yourself. Both axes drive something, which is what a pad is for — the reader
       // finds the corner where the ladder is gone and the lamp is still burning.
       duty: carry(cv, 2, n, DUTY[p], reacting ? pickAt(POLL_DUTY, pickPos.value) : DUTY[n], dutyFade ? grow : tr),
+      // "The duty is unchanged" — a flat "=" holds above the lamp for that one beat.
+      flat: carry(cv, 3, n, FLAT[p], FLAT[n], flatFade ? grow : 1),
+      // "Called ought implies can" — the principle gets a name above the dark lamp.
+      named: carry(cv, 4, n, NAMED[p], NAMED[n], namedFade ? grow : 1),
+      // "Depends on ability, not on merit" — a dashed bracket frames the lamp and
+      // the top rung as one linked system.
+      wired: carry(cv, 5, n, WIRED[p], WIRED[n], wiredFade ? grow : 1),
     };
   });
 
@@ -155,6 +170,9 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick, pickPo
   const rungStyle = useAnimatedStyle(() => ({ transform: [{ translateY: SCENE.value.scroll }] }));
   const ladderStyle = useAnimatedStyle(() => ({ opacity: Math.min(1, SCENE.value.ladder) }));
   const lampStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.duty }));
+  const flatStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.flat }));
+  const namedStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.named }));
+  const wiredStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.wired }));
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -217,6 +235,21 @@ export default function Ethics31Scene({ clock, bt, bi, i, picked, onPick, pickPo
         </View>
       </Target>
 
+      {/* "The duty is unchanged" — a flat "=" over the blank strip above the lamp. */}
+      <Animated.View style={[styles.flatWrap, flatStyle]} pointerEvents="none">
+        <View style={styles.flatBar} />
+        <View style={[styles.flatBar, { top: 6 }]} />
+      </Animated.View>
+
+      {/* "Called ought implies can" — the principle named above the dark lamp. */}
+      <Animated.View style={[styles.namedTag, namedStyle]} pointerEvents="none">
+        <Text style={styles.namedText} numberOfLines={1}>OUGHT → CAN</Text>
+      </Animated.View>
+
+      {/* "Depends on ability, not on merit" — a dashed bracket frames the lamp and
+          the top rung as one linked system, tied to reach rather than to him. */}
+      <Animated.View style={[styles.wiredFrame, wiredStyle]} pointerEvents="none" />
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </Animated.View>
@@ -229,7 +262,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   shelf: { position: 'absolute', left: SHELF_L, top: SHELF_T, width: SHELF_W },
   shelfInner: {
@@ -254,7 +287,7 @@ const styles = StyleSheet.create({
 
   topRung: { position: 'absolute', left: 216, top: TOPRUNG_T, width: 176 },
   topRungInner: {
-    height: TOPRUNG_H, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    height: TOPRUNG_H, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   topRungText: {
@@ -264,7 +297,7 @@ const styles = StyleSheet.create({
 
   lamp: { position: 'absolute', left: LAMP_L, top: LAMP_T, width: LAMP_W },
   lampBox: {
-    height: LAMP_H, borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: LAMP_H, borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   lampWord: {
@@ -274,6 +307,27 @@ const styles = StyleSheet.create({
   lampRing: {
     position: 'absolute', left: 3, top: 3, right: 3, bottom: 3,
     borderWidth: 1.5, borderColor: INK, borderRadius: 2,
+  },
+
+  // "UNCHANGED" — a flat "=" in the blank strip between the shelf and the lamp.
+  flatWrap: { position: 'absolute', left: LAMP_L + LAMP_W / 2 - 16, top: 246, width: 32, height: 12 },
+  flatBar: { position: 'absolute', left: 0, top: 0, width: 32, height: 2.5, backgroundColor: INK, borderRadius: 1.5 },
+
+  // "OUGHT IMPLIES CAN" — the principle named on a small plate above the lamp.
+  namedTag: {
+    position: 'absolute', left: LAMP_L + LAMP_W / 2 - 55, top: 244, width: 110, height: 15,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  namedText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  },
+
+  // "TIED TO REACH, NOT TO THE CLIMBER" — a dashed bracket framing the lamp and
+  // the top rung together, as one system.
+  wiredFrame: {
+    position: 'absolute', left: LAMP_L - 6, top: LAMP_T - 6, width: LAMP_W + 12, height: TOPRUNG_T + TOPRUNG_H - LAMP_T + 12,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 8,
   },
 
   onInk: { color: PAPER },

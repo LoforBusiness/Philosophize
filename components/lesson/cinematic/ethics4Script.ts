@@ -19,6 +19,16 @@ export interface Ethics4Beat extends BaseBeat {
   /** Right figure gesture. */ b?: number;
   /** Shared moral floor lit (0/1) — drives the universals bar chart. */ floor?: number;
   /** How many rows of each culture's code are written up (0..3). */ rows?: number;
+  /**
+   * A one-shot annotation between the two tablets, timed to this beat's own
+   * claim. 0 none · 1 "A STRONGER CLAIM?" (tentative, dashed) · 2 "MORAL
+   * RELATIVISM" (the claim now named) · 3 "DOESN'T FOLLOW" (struck through,
+   * the inference rejected) · 4 "WRONG EVERYWHERE" (boxed, the objectivist's
+   * universal claim) · 5 FLAT/ROUND (the earth-shape analogy, FLAT struck) ·
+   * 6 a bracket beside the three named universals on the floor chart ·
+   * 7 a bridge linking the surface down toward the floor beneath it.
+   */
+  note?: number;
 }
 
 export const BEATS: Ethics4Beat[] = [
@@ -28,7 +38,7 @@ export const BEATS: Ethics4Beat[] = [
     dur: 1.8,
   },
   {
-    a: 167, b: 8, floor: 0, rows: 1,
+    a: 167, b: 8, floor: 0, rows: 1, note: 1,
     text: 'The claim that no correct answer lies behind the disagreement is much stronger, and logically separate.',
     dur: 2.3,
   },
@@ -39,12 +49,12 @@ export const BEATS: Ethics4Beat[] = [
     dur: 1.8,
   },
   {
-    a: 266, b: 161, rows: 2,
+    a: 266, b: 161, rows: 2, note: 2,
     text: 'The second claim is moral relativism. It holds that rightness depends on a group’s code, with no higher standard.',
     dur: 2.9,
   },
   {
-    a: 266, b: 161, rows: 2,
+    a: 266, b: 161, rows: 2, note: 3,
     text: 'Inferring the second from the first is a common error. Disagreement doesn’t show there’s no answer.',
     dur: 1.8,
   },
@@ -67,13 +77,13 @@ export const BEATS: Ethics4Beat[] = [
     dur: 3.2,
   },
   {
-    a: 13, b: 15, rows: 3,
+    a: 13, b: 15, rows: 3, note: 4,
     text: 'Moral objectivists reply that some moral truths hold regardless of culture. Torturing a child for fun is wrong everywhere.',
     cite: 'Moral objectivism',
     dur: 3.4,
   },
   {
-    a: 266, b: 258, rows: 3,
+    a: 266, b: 258, rows: 3, note: 5,
     text: 'Cultures differing does not make every code equally true. Disagreement about the Earth’s shape didn’t make every answer true.',
     dur: 1.8,
   },
@@ -84,12 +94,12 @@ export const BEATS: Ethics4Beat[] = [
     dur: 2.8,
   },
   {
-    a: 266, b: 266, floor: 1, rows: 3,
+    a: 266, b: 266, floor: 1, rows: 3, note: 6,
     text: 'Human universals include returning a favour, and forbidding murder and incest.',
     dur: 1.8,
   },
   {
-    a: 266, b: 266, floor: 1, rows: 3,
+    a: 266, b: 266, floor: 1, rows: 3, note: 7,
     text: 'These universals suggest a shared moral foundation beneath the differences between cultures.',
     dur: 1.8,
   },

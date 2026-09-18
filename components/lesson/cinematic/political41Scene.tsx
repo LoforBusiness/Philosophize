@@ -9,6 +9,7 @@ import { BEATS } from './political41Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A STACK OF RULES ON A STAND, AND THE HOLE THAT OPENS IN IT.
@@ -49,6 +51,8 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const UNFORESEEN = BEATS.map((b) => b.unforeseen ?? 0);
+const JUDGED = BEATS.map((b) => b.judged ?? 0);
 const BASE_TR = 0.85;
 
 const RULE_X = 156;
@@ -103,7 +107,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political41'));
 export default function Political41Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -126,6 +130,9 @@ export default function Political41Scene({ clock, bt, bi, i, picked, onPick, dra
       // drawn, which is exactly how much room to act they have granted overall.
       lift: carry(cv, 3, n, LIFT[p], reacting ? dragPos.value : LIFT[n], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // Carried, so each fades out as well as in (group L).
+      unforeseen: carry(cv, 5, n, UNFORESEEN[p], UNFORESEEN[n], tr),
+      judged: carry(cv, 6, n, JUDGED[p], JUDGED[n], tr),
     };
   });
 
@@ -136,6 +143,18 @@ export default function Political41Scene({ clock, bt, bi, i, picked, onPick, dra
   const slotsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.slotsOn }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
   const standStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.book }));
+
+  // ── the two tap events ─────────────────────────────────────────────────────
+  //
+  // THE TWO CASES ARE DRAWN OUTSIDE THE STACK, which is the claim: they fall
+  // outside every rule written in advance. Dashed, because neither is a rule.
+  const case0Style = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.unforeseen / 0.6) }));
+  const case1Style = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.unforeseen - 0.4) / 0.6) }));
+  const caseStyles = [case0Style, case1Style];
+  const judgedStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.judged,
+    transform: [{ translateY: (1 - SCENE.value.judged) * 8 }],
+  }));
 
   return (
     <View style={styles.scene}>
@@ -178,6 +197,18 @@ export default function Political41Scene({ clock, bt, bi, i, picked, onPick, dra
         ))}
       </Animated.View>
 
+      {/* What no written rule covers. */}
+      {['A PLAGUE', 'AN INVASION'].map((w, k) => (
+        <Animated.View key={w} style={[styles.outsideCard, { top: 296 + k * 32 }, caseStyles[k]]} pointerEvents="none">
+          <Text style={styles.outsideText} numberOfLines={1}>{w}</Text>
+        </Animated.View>
+      ))}
+
+      {/* And the limit on the power that acts without one. */}
+      <Animated.View style={[styles.judgedPlate, judgedStyle]} pointerEvents="none">
+        <Text style={styles.judgedText} numberOfLines={1}>FOR THE PUBLIC GOOD, JUDGED AFTER</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -201,11 +232,34 @@ function Rule({ S, index }: { S: SharedValue<any>; index: number }) {
 }
 
 const styles = StyleSheet.create({
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // LEFT OF THE STACK, which starts at RULE_X: the two cases are outside the book
+  // rather than entries in it, and a dashed card is a thing that is not a rule.
+  outsideCard: {
+    position: 'absolute', left: 24, width: 106, height: 26,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 6,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  outsideText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+  // Below the stand the book rests on.
+  judgedPlate: {
+    position: 'absolute', left: STAND_X, top: STAND_Y + 24, width: STAND_W, height: 26,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  judgedText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: PAPER,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: STAND_X, top: CAP_T, width: STAND_W,
@@ -237,7 +291,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

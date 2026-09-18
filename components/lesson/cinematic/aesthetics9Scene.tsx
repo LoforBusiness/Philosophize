@@ -13,6 +13,7 @@ import { BEATS } from './aesthetics9Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // Two boxes, drawn identically down to the last rule, because the lesson dies the
 // moment the reader can tell them apart by looking. One sits on a shop shelf, one
@@ -75,6 +77,10 @@ const LABELS = [
 
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? 96);
+const SEALV = BEATS.map((b) => (b.seal ? 1 : 0));
+const ORDINARYV = BEATS.map((b) => (b.ordinary ? 1 : 0));
+const TWINV = BEATS.map((b) => (b.twin ? 1 : 0));
+const MAYBEV = BEATS.map((b) => (b.maybe ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -101,7 +107,7 @@ function BrilloBox({ left }: { left: number }) {
 export default function Aesthetics9Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(1);
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -114,6 +120,11 @@ export default function Aesthetics9Scene({ clock, bt, bi, i, picked, onPick, pic
   const labelsOn = !!cur.labels;
   const labelsFade = labelsOn !== !!prev?.labels;
   const answered = picked !== null;
+  // ── the four tap events (group AH) ───────────────────────────────────────
+  const sealFade = !!cur.seal !== !!prev?.seal;
+  const ordinaryFade = !!cur.ordinary !== !!prev?.ordinary;
+  const twinFade = !!cur.twin !== !!prev?.twin;
+  const maybeFade = !!cur.maybe !== !!prev?.maybe;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -135,6 +146,12 @@ export default function Aesthetics9Scene({ clock, bt, bi, i, picked, onPick, pic
       // lever is asking whether it still does. It sits back on at 'a work must be
       // beautiful' and is gone by 'thrown out altogether'.
       crown: reacting ? (1 - pickPos.value) * tr : (crownOn ? 1 : 0) * (crownFade ? grow : 1),
+      // The four tap events (group AH) — each carried so it fades OUT as well as in,
+      // never cutting between two frames when its beat ends (see logic7's brace/tag).
+      seal: carry(cv, 1, n, SEALV[p], SEALV[n], sealFade ? grow : 1),
+      ordinary: carry(cv, 2, n, ORDINARYV[p], ORDINARYV[n], ordinaryFade ? grow : 1),
+      twin: carry(cv, 3, n, TWINV[p], TWINV[n], twinFade ? grow : 1),
+      maybe: carry(cv, 4, n, MAYBEV[p], MAYBEV[n], maybeFade ? grow : 1),
       t,
     };
   });
@@ -146,6 +163,16 @@ export default function Aesthetics9Scene({ clock, bt, bi, i, picked, onPick, pic
   const labelStyle = useAnimatedStyle(() => ({
     opacity: labelsOn ? (labelsFade ? ease01(bt.value / 0.6) : 1) : 0,
   }));
+  const sealStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.seal }));
+  const ordinaryStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.ordinary,
+    transform: [{ translateY: (1 - SCENE.value.ordinary) * -8 }],
+  }));
+  const twinStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.twin }));
+  const maybeStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.maybe,
+    transform: [{ scale: 0.7 + SCENE.value.maybe * 0.3 }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -155,10 +182,21 @@ export default function Aesthetics9Scene({ clock, bt, bi, i, picked, onPick, pic
         <View style={styles.crownRule} />
       </Animated.View>
 
+      {/* A hairline frame closes round BEAUTY — a necessary condition is a sealed one. */}
+      <Animated.View style={[styles.sealFrame, sealStyle]} pointerEvents="none" />
+
       {/* ── the pair. Identical by construction, not by care ─────────────────── */}
       <Animated.View style={boxStyle} pointerEvents="none">
         <BrilloBox left={SHELF_X} />
         <BrilloBox left={PLINTH_X} />
+      </Animated.View>
+
+      {/* A tag hangs off the shelf box: an ordinary commercial package, not a beautiful one. */}
+      <Animated.View style={[styles.ordinaryWrap, ordinaryStyle]} pointerEvents="none">
+        <View style={styles.ordinaryString} />
+        <View style={styles.ordinaryTag}>
+          <Text style={styles.ordinaryText}>NOT BEAUTIFUL</Text>
+        </View>
       </Animated.View>
 
       {/* ── and the only difference on the stage ─────────────────────────────── */}
@@ -170,6 +208,16 @@ export default function Aesthetics9Scene({ clock, bt, bi, i, picked, onPick, pic
 
         <View style={[styles.plinth, { left: PLINTH_X + 10 }]} />
         <Text style={[styles.standTag, { left: PLINTH_X - 12, width: BOX_W + 24 }]}>GALLERY</Text>
+      </Animated.View>
+
+      {/* A dashed span joins the two boxes, an “=” at its middle: perception alone can’t
+          tell them apart. */}
+      <Animated.View style={[styles.twinLine, twinStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.twinMark, twinStyle]} pointerEvents="none">=</Animated.Text>
+
+      {/* A small corner badge: beauty remains possible, just no longer the ruling crown. */}
+      <Animated.View style={[styles.maybeBadge, maybeStyle]} pointerEvents="none">
+        <Text style={styles.maybeText}>BEAUTY?</Text>
       </Animated.View>
 
 
@@ -209,7 +257,7 @@ const styles = StyleSheet.create({
 
   box: {
     position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5,
   },
   boxBrand: {
@@ -266,6 +314,46 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   labelTextOn: { color: PAPER },
+
+  // ── the four tap events (group AH) ───────────────────────────────────────
+  // A hairline frame round the crown — a necessary condition is a sealed one,
+  // nothing more than the border BEAUTY already had.
+  sealFrame: {
+    position: 'absolute', left: SHELF_X - 12, top: 196, width: BOX_W + 24, height: 44,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6,
+  },
+
+  // A price tag on a string: the shelf box is ordinary and commercial, not beautiful.
+  ordinaryWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  ordinaryString: { position: 'absolute', left: 132, top: 222, width: 1.5, height: 14, backgroundColor: SHADE },
+  ordinaryTag: {
+    position: 'absolute', left: 96, top: 204, paddingHorizontal: 5, paddingVertical: 1.5,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  ordinaryText: { fontFamily: 'Inter_700Bold', fontSize: 8.7, letterSpacing: 0.6, color: INK,
+    includeFontPadding: false,
+  },
+
+  // A dashed span joins the two boxes with an “=” — perception alone can't tell
+  // them apart, so the gap between the shelf and the plinth is bridged, not filled.
+  twinLine: {
+    position: 'absolute', left: SHELF_X + BOX_W, top: BOX_T + BOX_H / 2, width: PLINTH_X - (SHELF_X + BOX_W),
+    height: 2, borderTopWidth: 2, borderColor: SHADE, borderStyle: 'dashed',
+  },
+  twinMark: {
+    position: 'absolute', left: 192, top: BOX_T + BOX_H / 2 - 11, width: 16, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 14, color: INK, includeFontPadding: false,
+  },
+
+  // A small corner badge on the plinth box: beauty remains possible, but it is a
+  // pinned-on maybe now, not the crown that used to rule the whole stage.
+  maybeBadge: {
+    position: 'absolute', left: 322, top: 298, paddingHorizontal: 5, paddingVertical: 2,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 9, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  maybeText: { fontFamily: 'Inter_700Bold', fontSize: 8.7, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
 });
 
 // Art runs from the BEAUTY crown (200) to the ground line (500). The stands stop at

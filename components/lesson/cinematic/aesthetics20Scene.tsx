@@ -9,6 +9,7 @@ import { BEATS } from './aesthetics20Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOUR ROWS, THREE OF THEM CROSSED OUT BY WHAT ARRIVED BESIDE THEM.
@@ -73,6 +75,10 @@ const USES = BEATS.map((b) => b.uses ?? 0);
 const SWAPS = BEATS.map((b) => b.swaps ?? 0);
 const STRUCK = BEATS.map((b) => b.struck ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+// GROUP AH — three still taps, each moving a new mass rather than a caption.
+const SPOT_DECOR = BEATS.map((b) => ((b.spotDecor ?? 0) > 0 ? 1 : 0));
+const SPOT_SEEING = BEATS.map((b) => ((b.spotSeeing ?? 0) > 0 ? 1 : 0));
+const WORTH = BEATS.map((b) => ((b.worth ?? 0) > 0 ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics20'));
 
@@ -82,7 +88,12 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics20'));
 // undoing strikes that did happen, and both would draw a falsehood.
 export default function Aesthetics20Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const spotDecorFade = (cur.spotDecor ?? 0) !== (prev?.spotDecor ?? 0);
+  const spotSeeingFade = (cur.spotSeeing ?? 0) !== (prev?.spotSeeing ?? 0);
+  const worthFade = (cur.worth ?? 0) !== (prev?.worth ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -91,6 +102,7 @@ export default function Aesthetics20Scene({ clock, bt, bi, i, picked, onPick, ga
     // computes from moveTr — arriving after the figure had stopped.
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -103,6 +115,12 @@ export default function Aesthetics20Scene({ clock, bt, bi, i, picked, onPick, ga
       uses: carry(cv, 1, n, USES[p], USES[n], tr),
       swaps: carry(cv, 2, n, SWAPS[p], SWAPS[n], tr),
       struck: carry(cv, 3, n, STRUCK[p], STRUCK[n], tr),
+      // Rings that follow the narration onto the row it's currently naming —
+      // the strikes themselves already happened; this is what's being SAID now.
+      spotDecor: carry(cv, 4, n, SPOT_DECOR[p], SPOT_DECOR[n], spotDecorFade ? grow : 1),
+      spotSeeing: carry(cv, 5, n, SPOT_SEEING[p], SPOT_SEEING[n], spotSeeingFade ? grow : 1),
+      // A tick on each replaced claim — replaceable, and still worth having.
+      worth: carry(cv, 6, n, WORTH[p], WORTH[n], worthFade ? grow : 1),
       t,
     };
   });
@@ -122,6 +140,14 @@ export default function Aesthetics20Scene({ clock, bt, bi, i, picked, onPick, ga
         <AnswerLift key={r.id} id={r.id} picked={picked} correct={r.sub === null}>
           <Row S={SCENE} index={k} />
         </AnswerLift>
+      ))}
+
+      {/* the ring that follows the narration onto whichever row it's naming */}
+      <Spot S={SCENE} field="spotDecor" index={2} />
+      <Spot S={SCENE} field="spotSeeing" index={3} />
+      {/* a tick on each replaced claim — still worth having */}
+      {[0, 1, 2].map((k) => (
+        <WorthMark key={k} k={k} S={SCENE} />
       ))}
 
       {ROWS.map((r, k) => (
@@ -148,6 +174,29 @@ export default function Aesthetics20Scene({ clock, bt, bi, i, picked, onPick, ga
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
+  );
+}
+
+/** A ring on whichever row the narration is currently naming — the strike
+ *  already happened; this is what's being said right now. */
+function Spot({
+  S, field, index,
+}: {
+  S: { value: { spotDecor: number; spotSeeing: number } };
+  field: 'spotDecor' | 'spotSeeing';
+  index: number;
+}) {
+  const style = useAnimatedStyle(() => ({ opacity: field === 'spotDecor' ? S.value.spotDecor : S.value.spotSeeing }));
+  return <Animated.View style={[styles.spot, { top: ROW_TOP[index] - 3 }, style]} pointerEvents="none" />;
+}
+
+/** A tick on one replaced claim — struck, and still worth having. */
+function WorthMark({ k, S }: { k: number; S: { value: { worth: number } } }) {
+  const style = useAnimatedStyle(() => ({ opacity: S.value.worth }));
+  return (
+    <Animated.Text style={[styles.worthMark, { top: ROW_TOP[k] + 5, left: CLAIM_X + CLAIM_W - 15 }, style]} pointerEvents="none">
+      ✓
+    </Animated.Text>
   );
 }
 
@@ -189,16 +238,27 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule alone leaves the figure
   // standing on bare page; a filled band under it is what the two lessons
   // the reader holds up both do, and it costs one View.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', top: 232,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
 
+  // A RING, NOT A FILL — it names which row the voice is on without re-claiming
+  // anything the strike already settled.
+  spot: {
+    position: 'absolute', left: CLAIM_X - 3, width: (SUB_X + SUB_W) - (CLAIM_X - 3) + 3, height: ROW_H + 6,
+    borderWidth: 2, borderColor: INK, borderRadius: 10, borderStyle: 'dashed',
+  },
+  worthMark: {
+    position: 'absolute', width: 12, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10, color: INK, includeFontPadding: false,
+  },
+
   claim: {
     position: 'absolute', left: CLAIM_X, width: CLAIM_W, height: ROW_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     justifyContent: 'center', paddingHorizontal: 7,
   },
   claimText: {

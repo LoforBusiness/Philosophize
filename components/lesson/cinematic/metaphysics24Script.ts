@@ -16,6 +16,8 @@ export interface Meta24Beat extends BaseBeat {
   /** How many grains are left, 0…18. */ grains?: number;
   /** 1 = the HEAP verdict lamp is showing. */ lamp?: number;
   /** 1 = the three answer cards are live (Q2). */ pick?: number;
+  /** 1 = a single preview grain sits where the pile's first grain will land. */ one?: number;
+  /** 1 = a SORITES tag names the diagram, above the counter. */ name?: number;
 }
 
 export const BEATS: Meta24Beat[] = [
@@ -25,7 +27,7 @@ export const BEATS: Meta24Beat[] = [
     dur: 1.8,
   },
   {
-    p: 402, x: 70,
+    p: 402, x: 70, one: 1,
     text: 'What remains is still a heap, which seems obvious. A single grain seems too small to make a difference.',
     dur: 3,
   },
@@ -61,7 +63,7 @@ export const BEATS: Meta24Beat[] = [
     dur: 3,
   },
   {
-    p: 258, x: 168, grains: 1, lamp: 1,
+    p: 258, x: 168, grains: 1, lamp: 1, name: 1,
     text: 'This is the sorites paradox, named after the Greek word for heap. One of the assumptions must be given up, and philosophers disagree about which.',
     dur: 2.2,
   },

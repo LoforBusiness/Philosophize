@@ -10,6 +10,7 @@ import { BEATS } from './ethics36Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE LINES IN A LEDGER, AND EXACTLY ONE OF THEM GETS STRUCK.
@@ -79,6 +81,11 @@ const STRUCK = BEATS.map((b) => (b.struck ? 1 : 0));
 const EXCUSE = BEATS.map((b) => (b.excuse ? 1 : 0));
 const GIFT = BEATS.map((b) => (b.gift ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const REGARD = BEATS.map((b) => (b.regard ? 1 : 0));
+const QUERY = BEATS.map((b) => (b.query ? 1 : 0));
+const AFFIRM = BEATS.map((b) => (b.affirm ? 1 : 0));
+const OWN = BEATS.map((b) => (b.own ? 1 : 0));
+const NOT_DUTY = BEATS.map((b) => (b.notDuty ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -90,7 +97,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics36'));
 export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(10);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -120,6 +127,16 @@ export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick, pi
       // that was the wronged person's to give appears in somebody else's hand, which
       // is the whole objection.
       giftOn: carry(cv, 4, n, GIFT[p], reacting ? pickPos.value : GIFT[n], tr),
+      // "Now suppose you forgive" — a dashed ring outlines the whole ledger.
+      regard: carry(cv, 5, n, REGARD[p], REGARD[n], tr),
+      // "So what does forgiveness change" — a "?" holds beside the ledger.
+      query: carry(cv, 6, n, QUERY[p], QUERY[n], tr),
+      // "Assumes the person was responsible" — a check marks WHOSE FAULT.
+      affirm: carry(cv, 7, n, AFFIRM[p], AFFIRM[n], tr),
+      // "A gift, which only the wronged person may give" — a dashed box owns it.
+      own: carry(cv, 8, n, OWN[p], OWN[n], tr),
+      // "Doesn't make forgiveness... owed" — a struck "NOT A DUTY" plate.
+      notDuty: carry(cv, 9, n, NOT_DUTY[p], NOT_DUTY[n], tr),
     };
   });
 
@@ -131,6 +148,11 @@ export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick, pi
   const strikeStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: SCENE.value.strike }] }));
   const excuseStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.excuseOn }));
   const giftStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.giftOn }));
+  const regardStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.regard }));
+  const queryStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.query }));
+  const affirmStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.affirm }));
+  const ownStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.own }));
+  const notDutyStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.notDuty }));
 
   return (
     <View style={styles.scene}>
@@ -177,6 +199,24 @@ export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick, pi
         <Text style={styles.giftLabel}>YOURS{'\n'}TO GIVE</Text>
       </Animated.View>
 
+      {/* "Now suppose you forgive" — a dashed ring finds the ledger. */}
+      <Animated.View style={[styles.regard, regardStyle]} pointerEvents="none" />
+
+      {/* "So what does forgiveness change" — a "?" holds beside the ledger. */}
+      <Animated.Text style={[styles.query, queryStyle]} numberOfLines={1}>?</Animated.Text>
+
+      {/* "Assumes the person was responsible" — a check marks WHOSE FAULT. */}
+      <Animated.Text style={[styles.affirm, affirmStyle]} numberOfLines={1}>✓</Animated.Text>
+
+      {/* "A gift, which only the wronged person may give" — a dashed box owns it. */}
+      <Animated.View style={[styles.own, ownStyle]} pointerEvents="none" />
+
+      {/* "Doesn't make forgiveness... owed" — a struck "NOT A DUTY" plate. */}
+      <Animated.View style={[styles.notDutyTag, notDutyStyle]} pointerEvents="none">
+        <Text style={styles.notDutyText} numberOfLines={1}>NOT A DUTY</Text>
+        <View style={styles.notDutyStrike} />
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -194,7 +234,7 @@ const styles = StyleSheet.create({
 
   book: {
     position: 'absolute', left: BOOK_X, top: BOOK_Y, width: BOOK_W, height: BOOK_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   spine: { position: 'absolute', left: BOOK_X + 8, top: BOOK_Y + 6, width: 2, height: BOOK_H - 12, backgroundColor: SOFT },
   headRule: { position: 'absolute', left: ROW_X, top: 284, width: ROW_W, height: 1.5, backgroundColor: SOFT },
@@ -202,7 +242,7 @@ const styles = StyleSheet.create({
   row: { position: 'absolute', left: ROW_X, width: ROW_W, height: ROW_H },
   rowBox: {
     position: 'absolute', left: 0, top: 0, width: ROW_W, height: ROW_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   rowWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   rowText: {
@@ -243,6 +283,39 @@ const styles = StyleSheet.create({
     // INK, not SOFT: a control drives this layer, so it rests at values SOFT does
     // not survive — 5.3:1 on paper is 2.3:1 at 0.57 (D35, R7c).
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+  },
+
+  // "NOW SUPPOSE YOU FORGIVE" — a dashed ring finds the whole ledger.
+  regard: {
+    position: 'absolute', left: BOOK_X - 4, top: BOOK_Y - 4, width: BOOK_W + 8, height: BOOK_H + 8,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 10,
+  },
+  // "SO WHAT DOES FORGIVENESS CHANGE" — a "?" beside the ledger.
+  query: {
+    position: 'absolute', left: 384, top: 314, width: 14, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 13, color: INK, includeFontPadding: false,
+  },
+  // "ASSUMES THE PERSON WAS RESPONSIBLE" — a check beside WHOSE FAULT.
+  affirm: {
+    position: 'absolute', left: ROW_X + ROW_W + 6, top: ROW_Y[1] + 9, width: 14, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11, color: INK, includeFontPadding: false,
+  },
+  // "ONLY THE WRONGED PERSON MAY GIVE" — a dashed box owns the label.
+  own: {
+    position: 'absolute', left: 330, top: 390, width: 70, height: 26,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 4,
+  },
+  // "DOESN'T MAKE FORGIVENESS... OWED" — a struck plate in the clear corner.
+  notDutyTag: {
+    position: 'absolute', left: 262, top: 418, width: 94, height: 16,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  notDutyText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false,
+  },
+  notDutyStrike: {
+    position: 'absolute', left: 4, top: 7, width: 86, height: 2, backgroundColor: INK, transform: [{ rotate: '-8deg' }],
   },
 });
 

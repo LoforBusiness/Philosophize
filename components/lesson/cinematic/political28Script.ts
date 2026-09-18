@@ -28,6 +28,8 @@ export interface Political28Beat extends BaseBeat {
   /** How far the watching eye above the cell has opened, 0…1. */ watch?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a ring marks the cell — the act that would be a crime for anyone else (group AH). */ mark?: number;
+  /** 1 = a row of lives beside one framed man appears — the scapegoat case (group AH). */ crowd?: number;
 };
 
 export const BEATS: Political28Beat[] = [
@@ -37,7 +39,7 @@ export const BEATS: Political28Beat[] = [
     dur: 4.8,
   },
   {
-    p: 179, x: 24, cell: 1,
+    p: 179, x: 24, cell: 1, mark: 1,
     text: 'Punishment does on purpose what the law forbids everyone else. So the state needs a justification that no private person could give.',
     dur: 5.0,
   },
@@ -52,7 +54,7 @@ export const BEATS: Political28Beat[] = [
     dur: 4.8,
   },
   {
-    p: 458, x: 24, cell: 1, past: 1, future: 1,
+    p: 458, x: 24, cell: 1, past: 1, future: 1, crowd: 1,
     text: 'Suppose a town is rioting over a crime. Framing one innocent man would end the riot and save many lives.',
     dur: 5.0,
   },

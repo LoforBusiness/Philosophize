@@ -13,6 +13,7 @@ import { BEATS } from './metaphysics11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // Two men on two low stands, each stand carrying a name, and a plate reading
 // MEMORIES hanging over one head on a short leader line. The plate travels from
@@ -107,6 +109,10 @@ const CX = BEATS.map((b) => b.cx ?? COB_X);
 const CDIR = dirsFrom(CX, -1);
 const TOK = BEATS.map((b) => b.tok ?? 0);
 const SWAP = BEATS.map((b) => b.swap ?? 0);
+// ── group AH: give the still taps their own events ─────────────────────────
+const QUERY = BEATS.map((b) => (b.query ? 1 : 0));
+const DISAGREE = BEATS.map((b) => (b.disagree ? 1 : 0));
+const PERSON = BEATS.map((b) => (b.person ? 1 : 0));
 
 /**
  * The crown (top of the head) of a figure in this stance, in stage units — derived
@@ -141,7 +147,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics11'));
 export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldCS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(6);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -149,6 +155,10 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick, d
   // it holds instead of re-revealing itself behind the reader (C20c).
   const twoOn = (cur.cx ?? COB_X) < 380;
   const twoFade = twoOn !== ((prev?.cx ?? COB_X) < 380);
+  // group AH — each still tap's own event.
+  const queryFade = !!cur.query !== !!prev?.query;
+  const disagreeFade = !!cur.disagree !== !!prev?.disagree;
+  const personFade = !!cur.person !== !!prev?.person;
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -212,6 +222,14 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick, d
       n1x: lerp(COB_X, PRI_X, sw) - PLINTH_W / 2,
       n1y: NAME_T + NAME_SEP * part,
       two: (twoOn ? 1 : 0) * (twoFade ? ease01(clamp01((bt.value - 1.1) / 0.8)) : 1),
+      // "what makes someone the same person" — the open question, before the case
+      // names anyone, hanging in the gap between the two empty stands.
+      query: carry(cv, 3, n, QUERY[p], QUERY[n], queryFade ? ease01(bt.value / 0.5) : 1),
+      // "pulls apart two things that usually stay together" — body and memory now
+      // disagree, marked where the badge already sits (cr0/cr1 by way of tokX/tokY).
+      disagree: carry(cv, 4, n, DISAGREE[p], DISAGREE[n], disagreeFade ? ease01(bt.value / 0.5) : 1),
+      // "the same person, one continuing consciousness" — glosses the badge itself.
+      person: carry(cv, 5, n, PERSON[p], PERSON[n], personFade ? ease01(bt.value / 0.5) : 1),
     };
   });
 
@@ -227,6 +245,17 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick, d
   const name1Style = useAnimatedStyle(() => ({
     opacity: SCENE.value.two,
     transform: [{ translateX: SCENE.value.n1x }, { translateY: SCENE.value.n1y }],
+  }));
+  // ── group AH: the still taps' own events ───────────────────────────────────
+  const queryStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.query }));
+  // Both ride the badge's OWN position (tokX/tokY), so they never drift off it.
+  const disagreeStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.disagree,
+    transform: [{ translateX: SCENE.value.tokX }, { translateY: SCENE.value.tokY + 90 }],
+  }));
+  const personStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.person,
+    transform: [{ translateX: SCENE.value.tokX }, { translateY: SCENE.value.tokY + TOK_H + 4 }],
   }));
 
   return (
@@ -274,6 +303,21 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick, d
         <View style={styles.tokLeader} pointerEvents="none" />
       </Animated.View>
 
+      {/* the open question, before the case names anyone */}
+      <Animated.View style={[styles.queryWrap, queryStyle]} pointerEvents="none">
+        <Text style={styles.query}>?</Text>
+      </Animated.View>
+
+      {/* body and memory now disagree — marked where the badge already sits */}
+      <Animated.View style={[styles.tinyWrap, disagreeStyle]} pointerEvents="none">
+        <Text style={styles.tinyText}>≠</Text>
+      </Animated.View>
+
+      {/* consciousness glossed as the person */}
+      <Animated.View style={[styles.tinyWrap, personStyle]} pointerEvents="none">
+        <Text style={styles.tinyText}>= PERSON</Text>
+      </Animated.View>
+
       <Stickman D={PF} k={K_FIG} />
       <Stickman role="second" D={CF} k={K_FIG} />
     </Animated.View>
@@ -286,7 +330,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   slot: { position: 'absolute', top: PLINTH_T, width: PLINTH_W, height: PLINTH_H },
   slotFill: { width: '100%', height: '100%' },
@@ -317,6 +361,15 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   tokLeader: { width: 2, height: LEADER, backgroundColor: INK, opacity: 0.55 },
+
+  // ── group AH: the still taps' own events ───────────────────────────────────
+  // The gap between the two (still empty) stands — nothing else stands here
+  // before the cobbler walks on.
+  queryWrap: { position: 'absolute', left: 180, top: 372, width: 40, alignItems: 'center' },
+  query: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: INK, includeFontPadding: false },
+  // Rides the MEMORIES badge's own position (TOK_W wide, centred, like tokWrap).
+  tinyWrap: { position: 'absolute', left: 0, top: 0, width: TOK_W, alignItems: 'center' },
+  tinyText: { fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.6, color: SHADE, includeFontPadding: false },
 });
 
 // Art runs from the MEMORIES plate at the top of its arc (measured worst case

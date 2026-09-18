@@ -17,6 +17,7 @@ export interface Aes16Beat extends BaseBeat {
   /** The canvas is hung, 0..1. */ canvas?: number;
   /** How many biography cards are on the rail: 0…3. */ facts?: number;
   /** 1 = the three answer cards are live (Q2). */ pick?: number;
+  /** 1 = an empty dashed slot appears on the rail, below the canvas — where the next change lands, not on the work. */ slot?: number;
 }
 
 export const BEATS: Aes16Beat[] = [
@@ -32,7 +33,7 @@ export const BEATS: Aes16Beat[] = [
     dur: 2.8,
   },
   {
-    p: 270, x: 168, canvas: 1,
+    p: 270, x: 168, canvas: 1, slot: 1,
     text: 'Whatever happens next happens to you, not to the canvas.',
     dur: 1.8,
   },

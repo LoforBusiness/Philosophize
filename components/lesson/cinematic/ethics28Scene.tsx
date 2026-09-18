@@ -9,6 +9,7 @@ import { BEATS } from './ethics28Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO BLOCKS SLIDING TOWARD EACH OTHER ON ONE RAIL.
@@ -81,6 +83,7 @@ const BLOCKS = BEATS.map((b) => (b.blocks ? 1 : 0));
 const GIVE = BEATS.map((b) => b.give ?? 0.5);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const LINK = BEATS.map((b) => (b.link ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -91,13 +94,18 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics28'));
 export default function Ethics28Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // One one-shot mark: struck on the beat that names it, gone by the next.
+  const linkFade = (cur.link ?? 0) !== (prev?.link ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -114,6 +122,9 @@ export default function Ethics28Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // the principle, so a high seam means the RULE did the bending.
       give: carry(cv, 3, n, GIVE[p], reacting ? dragPos.value : GIVE[n], tr),
       plates: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // One one-shot mark, fading in AND out on a carried track (never an on/off
+      // ternary), so a tap mid-fade never cuts it between two frames (C20c).
+      link: carry(cv, 5, n, LINK[p], LINK[n], linkFade ? grow : 1),
     };
   });
 
@@ -133,6 +144,13 @@ export default function Ethics28Scene({ clock, bt, bi, i, picked, onPick, dragPo
     const rEdge = R_HOME - (1 - g) * TRAVEL;
     return { left: (lEdge + rEdge) / 2 - 1.5 };
   });
+  // The clasp rides the same seam the tick does, so it never drifts from it.
+  const linkStyle = useAnimatedStyle(() => {
+    const g = clamp01(SCENE.value.give);
+    const lEdge = L_HOME + g * TRAVEL + BLOCK_W;
+    const rEdge = R_HOME - (1 - g) * TRAVEL;
+    return { left: (lEdge + rEdge) / 2 - 5, opacity: SCENE.value.link };
+  });
 
   return (
     <View style={styles.scene}>
@@ -151,6 +169,8 @@ export default function Ethics28Scene({ clock, bt, bi, i, picked, onPick, dragPo
           <Text style={styles.blockText} numberOfLines={2}>{BLOCK_CAP[1]}</Text>
         </Animated.View>
         <Animated.View style={[styles.tick, tickStyle]} />
+        {/* A ring clasping the seam: the two now cohere, nothing fixed either side. */}
+        <Animated.View style={[styles.link, linkStyle]} />
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
@@ -186,7 +206,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: RAIL_X, top: CAP_T, width: RAIL_W, textAlign: 'center',
@@ -206,11 +226,17 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },
   tick: { position: 'absolute', top: TICK_T, width: 3, height: TICK_B - TICK_T, backgroundColor: INK },
+  // A ring, never a fill, so it reads as a joint clasping the seam rather than
+  // another block (D31).
+  link: {
+    position: 'absolute', top: (TICK_T + TICK_B) / 2 - 5, width: 10, height: 10, borderRadius: 5,
+    borderWidth: 1.5, borderColor: INK,
+  },
 
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,

@@ -12,6 +12,7 @@ import { BEATS } from './logic6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -19,8 +20,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // The conditional, drawn as one tall column of information down the right of the stage
 // while the figure holds the left:
@@ -74,6 +76,15 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const LINK = BEATS.map((b) => b.link ?? 0);
 const RAIN = BEATS.map((b) => b.rain ?? 0);
 const TABLE = BEATS.map((b) => b.table ?? 0);
+const FOCUS_THEN = BEATS.map((b) => b.focusThen ?? 0);
+const FOCUS_KEPT = BEATS.map((b) => b.focusKept ?? 0);
+
+// ── the two markers (group AH) ──────────────────────────────────────────────
+// Both live in the gap between the figure's widest reach (111) and the column
+// (138), so neither ever competes with the boxes or the table it is pointing at.
+const MARK_X = 120;
+const KEPT_BAR_T = TBL_T + 20 + 20 * 2;   // past the header and the first two rows
+const KEPT_BAR_H = 20 * 2;                 // spans the "NO" rows, r3 and r4
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -92,12 +103,16 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic6'));
 export default function Logic6Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(5);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const focusThenFade = (cur.focusThen ?? 0) !== (prev?.focusThen ?? 0);
+  const focusKeptFade = (cur.focusKept ?? 0) !== (prev?.focusKept ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
+    const grow = ease01(bt.value / 0.55);
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
@@ -108,6 +123,10 @@ export default function Logic6Scene({ clock, bt, bi, i, picked, onPick, dragPos,
       // with nothing happening under it, which is all a conditional ever claimed.
       rain: carry(cv, 1, n, RAIN[p], reacting ? 1 - dragPos.value : RAIN[n], tr),
       table: carry(cv, 2, n, TABLE[p], TABLE[n], tr),
+      // The two group-AH markers, each fading fully in and fully out on its own
+      // (never a hard cut), so neither ever sits half-lit at rest.
+      focusThen: carry(cv, 3, n, FOCUS_THEN[p], FOCUS_THEN[n], focusThenFade ? grow : 1),
+      focusKept: carry(cv, 4, n, FOCUS_KEPT[p], FOCUS_KEPT[n], focusKeptFade ? grow : 1),
       t,
     };
   });
@@ -128,6 +147,16 @@ export default function Logic6Scene({ clock, bt, bi, i, picked, onPick, dragPos,
   const tableStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.table,
     transform: [{ translateY: (1 - SCENE.value.table) * 12 }],
+  }));
+  // The chevron that points at the box the narration just named, and the bar
+  // that marks the table's two no-rain rows where the promise still holds.
+  const focusThenStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.focusThen,
+    transform: [{ translateX: (1 - SCENE.value.focusThen) * -8 }],
+  }));
+  const focusKeptStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.focusKept,
+    transform: [{ scaleY: SCENE.value.focusKept }],
   }));
 
   const answered = picked !== null;
@@ -175,6 +204,13 @@ export default function Logic6Scene({ clock, bt, bi, i, picked, onPick, dragPos,
       <Animated.Text style={[styles.linkLabel, linkLabelStyle]} pointerEvents="none">THE LINK</Animated.Text>
 
       {box('then', THEN_T, 'CONSEQUENT', 'THEN', 'the streets get wet')}
+
+      {/* group AH: a chevron points at the box the narration just named. */}
+      <Animated.View style={[styles.focusChev, { top: THEN_T + BOX_H / 2 - 7 }, focusThenStyle]} pointerEvents="none" />
+
+      {/* group AH: a bar marks the table's two no-rain rows — the promise still
+          holds in both, which is what this beat's second sentence says. */}
+      <Animated.View style={[styles.focusBar, { top: KEPT_BAR_T }, focusKeptStyle]} pointerEvents="none" />
 
       {/* ── the promise table ──────────────────────────────────────────────── */}
       <Animated.View style={[styles.table, tableStyle]} pointerEvents="none">
@@ -235,6 +271,19 @@ const styles = StyleSheet.create({
   boxKw: { fontFamily: 'Inter_700Bold', fontSize: 18, letterSpacing: 1.2, color: INK, includeFontPadding: false },
   boxVal: { fontFamily: 'Inter_400Regular', fontSize: 16, color: INK, marginLeft: 8, includeFontPadding: false },
 
+  // ── the two group-AH markers ───────────────────────────────────────────────
+  // Both sit in the strip left of the column (x 111…138) that the figure never
+  // reaches, so they never compete with the boxes or the table.
+  focusChev: {
+    position: 'absolute', left: MARK_X, width: 0, height: 0,
+    borderTopWidth: 7, borderBottomWidth: 7, borderLeftWidth: 10,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
+  },
+  focusBar: {
+    position: 'absolute', left: MARK_X + 3, width: 4, height: KEPT_BAR_H,
+    backgroundColor: INK, borderRadius: 2, transformOrigin: '50% 0%',
+  },
+
   // ── the arrow ──────────────────────────────────────────────────────────────
   shaft: {
     position: 'absolute', left: COL_MID - 3.5, top: SHAFT_T, width: 7, height: HEAD_T - SHAFT_T,
@@ -253,7 +302,7 @@ const styles = StyleSheet.create({
   // ── the promise table ──────────────────────────────────────────────────────
   table: {
     position: 'absolute', left: COL_L, top: TBL_T, width: COL_W, height: TBL_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   trHead: { flexDirection: 'row', height: 20 },
   tr: { flexDirection: 'row', height: 20, borderTopWidth: 1.5, borderTopColor: RULE },

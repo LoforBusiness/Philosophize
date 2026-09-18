@@ -28,6 +28,12 @@ export interface Eth22Beat extends BaseBeat {
   /** The machine drawn behind them, 0…1. */ machine?: number;
   /** The cable from the machine into the first column only, 0…1. */ cable?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /**
+   * A one-shot flash: 1 = a dashed rule over the four non-pleasure columns,
+   * for "the machine can supply only the experience of them" · 2 = a struck
+   * plate beside the tank reading PLEASURE ALONE, for hedonism's claim
+   * undone by the refusal.
+   */ note?: number;
 }
 
 export const BEATS: Eth22Beat[] = [
@@ -62,7 +68,7 @@ export const BEATS: Eth22Beat[] = [
     dur: 3.1,
   },
   {
-    p: 467, x: 132, wants: 1, machine: 1, cable: 1,
+    p: 467, x: 132, wants: 1, machine: 1, cable: 1, note: 1,
     text: 'The other four goods require facts about the world. The machine can supply only the experience of them.',
     dur: 1.8,
   },
@@ -80,7 +86,7 @@ export const BEATS: Eth22Beat[] = [
     dur: 3.6,
   },
   {
-    p: 407, x: 268, wants: 1, machine: 1, cable: 1,
+    p: 407, x: 268, wants: 1, machine: 1, cable: 1, note: 2,
     text: 'Hedonism holds that pleasure is the only thing good in itself. If it were true, plugging in would be an easy choice, so refusing is evidence against hedonism.',
     cite: 'Against hedonism',
     dur: 4.6,

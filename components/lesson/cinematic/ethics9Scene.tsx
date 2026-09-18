@@ -13,6 +13,7 @@ import { BEATS } from './ethics9Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // Two claims pinned side by side on a board, stage right, with the figure working
 // downstage left of them.
@@ -66,6 +68,13 @@ const X = BEATS.map((b) => b.x ?? 124);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics9'));
 const DIR = dirsFrom(X, 1);
 const NOTES = BEATS.map((b) => b.notes ?? 0);
+// group AH — the still-tap events. FORKV is a pulse (only beat 1 is 1, so it
+// closes again once the claims are pinned up); WEIGHT and REMAINS persist
+// like NOTES/TAKEN once they start, and fall away with everything else into
+// the summary because no later beat repeats them there.
+const FORKV = BEATS.map((b) => ((b.fork ?? 0) > 0 ? 1 : 0));
+const WEIGHT = BEATS.map((b) => b.weight ?? 0);
+const REMAINS = BEATS.map((b) => b.remains ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -84,7 +93,7 @@ const TARGETS = [
 export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -95,6 +104,11 @@ export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick, pickPos
   const takenFade = (cur.taken ?? 0) !== (prev?.taken ?? 0);
   const owedOn = (cur.owed ?? 0) > 0;
   const owedFade = (cur.owed ?? 0) !== (prev?.owed ?? 0);
+  // group AH — still-tap events (C20c: each only animates on the beat that
+  // actually changes its value).
+  const forkFade = (cur.fork ?? 0) !== (prev?.fork ?? 0);
+  const weightFade = (cur.weight ?? 0) !== (prev?.weight ?? 0);
+  const remainsFade = (cur.remains ?? 0) !== (prev?.remains ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -116,6 +130,14 @@ export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick, pickPos
       // missed and there is nothing under the claim; say a real duty went unmet and it
       // is written there. `* tr` so the tag grows out of what the last beat drew (L5).
       owed: reacting ? pickPos.value * tr : owedOn ? (owedFade ? grow : 1) : 0,
+      // group AH — a one-beat pulse in the ground before either claim is named
+      // (fades both ways, L5/§ "fade an event out, not off").
+      fork: carry(cv, 2, n, FORKV[p], FORKV[n], forkFade ? grow : 1),
+      // The pin over "stay with her" grows once the mother's claim is shown to
+      // carry real weight, and stays grown.
+      weight: carry(cv, 3, n, WEIGHT[p], WEIGHT[n], tr, weightFade ? grow : 1),
+      // A small mark beside that same claim, once the lesson says it "remains".
+      remains: carry(cv, 4, n, REMAINS[p], REMAINS[n], tr, remainsFade ? grow : 1),
     };
   });
 
@@ -127,6 +149,15 @@ export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick, pickPos
   const owedStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.owed,
     transform: [{ translateY: (1 - SCENE.value.owed) * -6 }],
+  }));
+  // group AH — the three still-tap events.
+  const forkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.fork }));
+  const weightPinStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 + SCENE.value.weight * 0.6 }],
+  }));
+  const remainsStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.remains,
+    transform: [{ scale: 0.4 + SCENE.value.remains * 0.6 }],
   }));
 
   const answered = picked !== null;
@@ -145,8 +176,16 @@ export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick, pickPos
     <Animated.View style={styles.scene}>
       {/* ── the two pinned claims ───────────────────────────────────────────── */}
       <Animated.View style={[styles.boardWrap, notesStyle]} pointerEvents="box-none">
-        <View style={[styles.pin, { left: NOTE_LX + NOTE_W / 2 - 3 }]} pointerEvents="none" />
+        {/* The pin over "stay with her" grows once that claim is shown to carry
+            real weight (group AH). */}
+        <Animated.View style={[styles.pin, weightPinStyle, { left: NOTE_LX + NOTE_W / 2 - 3 }]} pointerEvents="none" />
         <View style={[styles.pin, { left: NOTE_RX + NOTE_W / 2 - 3 }]} pointerEvents="none" />
+        {/* A small mark beside the mother claim, once the lesson says it still
+            stands untouched (group AH). */}
+        <Animated.View
+          style={[styles.remainsMark, remainsStyle, { left: NOTE_LX - 10, top: NOTE_T + NOTE_H / 2 - 3 }]}
+          pointerEvents="none"
+        />
 
         <Target id={'mother'} correct={target('mother').correct} picked={picked} onPick={onPick}
           style={[styles.note, { left: NOTE_LX }]}
@@ -223,6 +262,11 @@ export default function Ethics9Scene({ clock, bt, bi, i, picked, onPick, pickPos
         </Target>
       )}
 
+      {/* A fork opens in the ground where he stands, before either claim is
+          named — the shape of "two things, and you can't do both" (group AH). */}
+      <Animated.View style={[styles.forkL, forkStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.forkR, forkStyle]} pointerEvents="none" />
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </Animated.View>
@@ -273,7 +317,7 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   owedTag: {
     position: 'absolute', left: NOTE_LX, top: OWED_T, width: NOTE_W, height: OWED_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   owedText: {
@@ -293,6 +337,26 @@ const styles = StyleSheet.create({
 
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT, opacity: 0.45 },
+
+  // ── the three still-tap events (group AH) ──────────────────────────────────
+  // Two short ticks meeting at the ground where he first stands: the fork the
+  // dilemma opens up before either claim is named. A one-beat preview — it
+  // closes again once the real claims are pinned up in their place.
+  forkL: {
+    position: 'absolute', left: 66, top: 486, width: 2, height: 15, borderRadius: 1,
+    backgroundColor: INK, transform: [{ rotate: '-24deg' }],
+  },
+  forkR: {
+    position: 'absolute', left: 74, top: 486, width: 2, height: 15, borderRadius: 1,
+    backgroundColor: INK, transform: [{ rotate: '24deg' }],
+  },
+  // A small diamond floating clear of the mother claim's own box (the figure's
+  // reach and the note's kicker text both stay untouched) — a mark that the
+  // claim still stands, once the lesson says so in words.
+  remainsMark: {
+    position: 'absolute', width: 6, height: 6, backgroundColor: INK,
+    transform: [{ rotate: '45deg' }],
+  },
 });
 
 // Art runs from the pins (226) down to the ground line (500). Band 218…512 is 294

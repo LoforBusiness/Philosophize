@@ -10,6 +10,7 @@ import { BEATS } from './aesthetics35Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A JOKE DRAWN AS TRACK, AND THE POINTS SWITCHING UNDER IT.
@@ -70,6 +72,10 @@ const SPLIT = BEATS.map((b) => (b.split ? 1 : 0));
 const RUN = BEATS.map((b) => b.run ?? 0);
 const SPOIL = BEATS.map((b) => (b.spoil ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const EXPECT = BEATS.map((b) => (b.expect ? 1 : 0));
+const ERR_BRANCH = BEATS.map((b) => (b.errBranch ? 1 : 0));
+const SOLID = BEATS.map((b) => (b.solid ? 1 : 0));
+const STEAM = BEATS.map((b) => (b.steam ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics35'));
 
@@ -79,7 +85,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics35'));
 // victim, so there is nothing the chip could move honestly.
 export default function Aesthetics35Scene({ clock, bt, bi, qv, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(9);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -111,6 +117,12 @@ export default function Aesthetics35Scene({ clock, bt, bi, qv, i, picked, onPick
       run: runNow,
       spoilOn: carry(cv, 4, n, SPOIL[p], SPOIL[n], tr),
       lit: LIVE[n] === 1 ? ease01(q) : 0,
+      // Plain carries: each value is 0/1, so its own interpolation is the fade,
+      // both in and out (C20c).
+      expect: carry(cv, 5, n, EXPECT[p], EXPECT[n], tr),
+      errBranch: carry(cv, 6, n, ERR_BRANCH[p], ERR_BRANCH[n], tr),
+      solid: carry(cv, 7, n, SOLID[p], SOLID[n], tr),
+      steam: carry(cv, 8, n, STEAM[p], STEAM[n], tr),
     };
   });
 
@@ -120,12 +132,29 @@ export default function Aesthetics35Scene({ clock, bt, bi, qv, i, picked, onPick
 
   const trackStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.trackOn }));
   const splitStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.splitOn }));
-  const spoilStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.spoilOn }));
+  // The dashed preview crossfades to a solid line once it's been explained —
+  // no longer a hint, now fully known (H58: move the thing already on stage).
+  const spoilStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.spoilOn * (1 - SCENE.value.solid) }));
+  const spoilSolidStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.spoilOn * SCENE.value.solid }));
   // The train runs the setup, then the middle branch — the reading that lands.
   const trainStyle = useAnimatedStyle(() => {
     const u = SCENE.value.run;
     return { transform: [{ translateX: (JUNC_X - SETUP_L) + (PLATE_X - JUNC_X) * u }] };
   });
+  // A signal at the junction, leaning toward the natural (ward) reading, before
+  // the switch (H64 — the natural reading is what "waiting for a diagnosis" is).
+  const signalStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.expect,
+    transform: [{ rotate: `${ARM_DEG[0]}deg` }, { scaleX: SCENE.value.expect }],
+  }));
+  // The umbrella branch's arm, crossed out — it fits no reading of the setup.
+  const errStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.errBranch }));
+  // A puff of steam off the train — Freud's own image for the energy his theory
+  // says a joke releases.
+  const steamStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.steam,
+    transform: [{ translateY: -14 * SCENE.value.steam }, { scale: 0.5 + 0.5 * SCENE.value.steam }],
+  }));
 
   return (
     <View style={styles.scene}>
@@ -142,13 +171,25 @@ export default function Aesthetics35Scene({ clock, bt, bi, qv, i, picked, onPick
           <View key={d}>
             <View style={[styles.arm, { transform: [{ rotate: `${d}deg` }] }]} />
             <View style={[styles.armRun, { top: PLATE_TOP[k] + 13 }]} />
+            {k === 2 ? (
+              <Animated.View style={[styles.errCross, errStyle]} pointerEvents="none">
+                <View style={[styles.errBar, { transform: [{ rotate: '45deg' }] }]} />
+                <View style={[styles.errBar, { transform: [{ rotate: '-45deg' }] }]} />
+              </Animated.View>
+            ) : null}
           </View>
         ))}
       </Animated.View>
 
       <Animated.View style={[styles.spoilLine, spoilStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.spoilLine, styles.spoilLineSolid, spoilSolidStyle]} pointerEvents="none" />
+
+      {/* the signal: leans toward the natural reading before the points switch */}
+      <Animated.View style={[styles.signal, signalStyle]} pointerEvents="none" />
 
       <Animated.View style={[styles.train, trainStyle]} pointerEvents="none" />
+      {/* the puff: the train's own energy, released */}
+      <Animated.View style={[styles.steam, steamStyle]} pointerEvents="none" />
 
       <Plates S={SCENE} picked={picked} onPick={onPick} answered={answered} live={live} />
 
@@ -194,7 +235,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 150, top: CAP_T, width: 240,
@@ -215,13 +256,33 @@ const styles = StyleSheet.create({
     position: 'absolute', left: SETUP_L, top: JUNC_Y - 12, width: PLATE_X - SETUP_L, height: 0,
     borderTopWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
   },
+  // The same line, turned solid and dark once it's been explained (H58).
+  spoilLineSolid: { borderColor: INK, borderStyle: 'solid' },
+
+  // A short signal off the junction, leaning toward the reading the setup implies.
+  signal: {
+    position: 'absolute', left: JUNC_X, top: JUNC_Y - 10, width: 20, height: 2,
+    backgroundColor: INK, transformOrigin: '0% 50%',
+  },
+
+  // The umbrella arm's own cross — it fits no reading of the setup.
+  errCross: {
+    position: 'absolute', left: 225, top: 347, width: 14, height: 14,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  errBar: { position: 'absolute', width: 14, height: 2, backgroundColor: INK, borderRadius: 1 },
 
   train: { position: 'absolute', left: SETUP_L, top: JUNC_Y - 12, width: 22, height: 11, borderRadius: 2, backgroundColor: INK },
+  // Freud's own image: a puff of the energy his theory says a joke releases.
+  steam: {
+    position: 'absolute', left: JUNC_X + 3, top: 318, width: 16, height: 11,
+    borderRadius: 6, backgroundColor: SOFT,
+  },
 
   plate: { position: 'absolute', left: PLATE_X, width: PLATE_W, height: 26 },
   plateBox: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: 26,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   plateLit: {
     position: 'absolute', left: 3, top: 3, width: PLATE_W - 6, height: 20,

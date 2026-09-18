@@ -13,6 +13,7 @@ import { BEATS } from './metaphysics9Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // Two panels stand over the stage — MIND on the left, BODY on the right — with a
 // strip of bare paper between them that is the whole lesson. A thought sets out
@@ -87,6 +89,10 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics9'));
 const DIR = dirsFrom(X, 1);
 const PANELS = BEATS.map((b) => b.panels ?? 0);
 const CROSS = BEATS.map((b) => (b.cross ?? 0));
+// ── group AH: give the still taps their own events ─────────────────────────
+const APART = BEATS.map((b) => (b.apart ? 1 : 0));
+const NOTOUCH = BEATS.map((b) => (b.noTouch ? 1 : 0));
+const ANALOGY = BEATS.map((b) => (b.analogy ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -96,7 +102,7 @@ const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -108,6 +114,12 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick, pi
   const cardsOn = !!cur.cards;
   const cardsFade = cardsOn !== !!prev?.cards;
   const answered = picked !== null;
+  // group AH — each still tap's own event: BODY dims (mind alone), a barrier
+  // marks the failed contact, a digestion tag glosses the analogy.
+  const apartFade = !!cur.apart !== !!prev?.apart;
+  const noTouchFade = !!cur.noTouch !== !!prev?.noTouch;
+  const analogyOn = !!cur.analogy;
+  const analogyFade = analogyOn !== !!prev?.analogy;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -144,12 +156,23 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick, pi
       // stage as the reader travels between them.
       shut: carry(cv, 3, n, PANELS[p] === 2 ? 1 : 0, reacting ? pickPos.value : (PANELS[n] === 2 ? 1 : 0), tr),
       reach,
+      // "the mind could exist without the body" — BODY dims further, hypothetically.
+      apart: carry(cv, 4, n, APART[p], APART[n], apartFade ? grow : 1),
+      // "a mind with no extension cannot touch it" — a barrier at the gap the
+      // stalled thought cannot cross.
+      noTouch: carry(cv, 5, n, NOTOUCH[p], NOTOUCH[n], noTouchFade ? grow : 1),
+      // "the way digestion is something the gut does" — the second example.
+      analogy: carry(cv, 6, n, ANALOGY[p], ANALOGY[n], analogyFade ? grow : 1),
       t,
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
-  const litStyle = useAnimatedStyle(() => ({ opacity: 0.55 + 0.45 * SCENE.value.lit }));
+  // BODY dims an extra third when `apart` is up, standing in for the hypothetical
+  // it names: the panel that could not be there.
+  const litStyle = useAnimatedStyle(() => ({
+    opacity: (0.55 + 0.45 * SCENE.value.lit) * (1 - 0.35 * SCENE.value.apart),
+  }));
   // MIND slides right to meet BODY; that closing move IS the physicalist reply, so
   // it is the one thing on the stage allowed to move under its own text.
   const mindStyle = useAnimatedStyle(() => ({
@@ -165,6 +188,13 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick, pi
   }));
   const cardStyle = useAnimatedStyle(() => ({
     opacity: cardsOn ? (cardsFade ? ease01(bt.value / 0.6) : 1) : 0,
+  }));
+  // The barrier at the gap: a dashed mark, never a fill (D31) — it is a boundary,
+  // not an object.
+  const noTouchStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.noTouch }));
+  const analogyStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.analogy,
+    transform: [{ translateY: (1 - SCENE.value.analogy) * 6 }],
   }));
 
   return (
@@ -184,6 +214,14 @@ export default function Metaphysics9Scene({ clock, bt, bi, i, picked, onPick, pi
       <Animated.View style={[styles.thought, thoughtStyle]} pointerEvents="none" />
       <Animated.View style={[styles.puzzleWrap, puzzleStyle]} pointerEvents="none">
         <Text style={styles.puzzle}>?</Text>
+      </Animated.View>
+
+      {/* the barrier where contact fails — Elisabeth's objection */}
+      <Animated.View style={[styles.barrier, noTouchStyle]} pointerEvents="none" />
+
+      {/* the digestion analogy the sentence draws */}
+      <Animated.View style={[styles.analogyTag, analogyStyle]} pointerEvents="none">
+        <Text style={styles.analogyText}>GUT DIGESTS</Text>
       </Animated.View>
 
       {/* ── Q2: tap what the cogito actually gets you ──────────────────────── */}
@@ -227,7 +265,7 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   panel: {
     position: 'absolute', top: PANEL_T, width: PANEL_W, height: PANEL_B - PANEL_T,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: RULE,
     alignItems: 'center', justifyContent: 'center',
   },
   mind: { left: MIND_X },
@@ -253,6 +291,23 @@ const styles = StyleSheet.create({
   puzzleWrap: { position: 'absolute', left: GAP_MID - 20, top: 196, width: 40, alignItems: 'center' },
   puzzle: {
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 30, color: INK, includeFontPadding: false,
+  },
+
+  // ── group AH: the still taps' own events ───────────────────────────────────
+  // A dashed vertical mark at the gap's midpoint, right where the stalled
+  // thought sits — the wall Elisabeth's objection says can never be crossed.
+  barrier: {
+    position: 'absolute', left: GAP_MID, top: 232, width: 0, height: 24,
+    borderLeftWidth: 2, borderColor: SHADE, borderStyle: 'dashed',
+  },
+  // A small second example, in the kit's tile treatment (white face, ink
+  // border, ledge) since it carries a word.
+  analogyTag: {
+    position: 'absolute', left: CARD_L, top: CARD_T, paddingHorizontal: 8, paddingVertical: 5,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  analogyText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 0.3, color: INK, includeFontPadding: false,
   },
 
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W },

@@ -15,6 +15,10 @@ export interface Epis14Beat extends BaseBeat {
   /** 0 = a real world behind the screen · 1 = a vat. */ vat?: number;
   /** 1 = the leap between them is drawn. */ leap?: number;
   /** 1 = the three parts are live targets (Q1). */ pick?: number;
+  /** 1 = a dashed ring marks the screen — every check happens on this side of
+   *  it. */ checkRing?: number;
+  /** 1 = a small "=" badge lands on the leap — what the vat delivers matches
+   *  what the world did. */ matchMark?: number;
 }
 
 export const BEATS: Epis14Beat[] = [
@@ -24,7 +28,7 @@ export const BEATS: Epis14Beat[] = [
     text: 'Indirect realism holds that you perceive the world only through your experience of it. A leap separates what you see from the world.',
   },
   {
-    g: 443, vat: 0, leap: 0,
+    g: 443, vat: 0, leap: 0, checkRing: 1,
     dur: 4.4,
     text: 'Every check you make on a belief relies on your own experience. So every check happens on this side of the screen, never against the world itself.',
     cite: 'What you can check',
@@ -55,7 +59,7 @@ export const BEATS: Epis14Beat[] = [
     cite: 'The brain in a vat',
   },
   {
-    g: 159, vat: 1, leap: 1,
+    g: 159, vat: 1, leap: 1, matchMark: 1,
     dur: 1.8,
     text: 'What appears on the screen doesn’t change. Every experience in the vat would match an experience in the world.',
   },

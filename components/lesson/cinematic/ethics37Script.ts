@@ -27,6 +27,11 @@ export interface Ethics37Beat extends BaseBeat {
   /** 1 = the cord is cut and the plans have fallen. */ cut?: number;
   /** 1 = it was done unseen — the curtain is drawn across. */ unseen?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = "SPEAKER" and "PROMISED" hold under the two posts, for who is bound. */ who?: number;
+  /** 1 = a circle-slash holds low between the posts, for "nothing else changes". */ nothing?: number;
+  /** 1 = a plate names the convention above the cord: "CONVENTION". */ named?: number;
+  /** 1 = a dashed ring finds the first leaning plan. */ thisPlan?: number;
+  /** 1 = a dashed ring finds the second leaning plan. */ anotherPlan?: number;
 }
 
 export const BEATS: Ethics37Beat[] = [
@@ -41,18 +46,18 @@ export const BEATS: Ethics37Beat[] = [
     dur: 2.4,
   },
   {
-    p: 266, x: 54, posts: 1, cord: 1,
+    p: 266, x: 54, posts: 1, cord: 1, who: 1,
     text: 'Those words create an obligation that binds the speaker to the other person.',
     dur: 1.8,
   },
   {
-    p: 13, x: 54, posts: 1, cord: 1,
+    p: 13, x: 54, posts: 1, cord: 1, nothing: 1,
     text: 'David Hume found this puzzling. Nothing else changes: no money moves and no law is passed.',
     cite: 'Hume, 1740',
     dur: 1.9,
   },
   {
-    p: 266, x: 54, posts: 1, cord: 1,
+    p: 266, x: 54, posts: 1, cord: 1, named: 1,
     text: 'Yet a duty now exists where none existed a moment before. Hume concluded that only a human convention could explain the change.',
     dur: 2.9,
   },
@@ -75,12 +80,12 @@ export const BEATS: Ethics37Beat[] = [
     dur: 1.0,
   },
   {
-    p: 467, x: 54, posts: 1, cord: 1, lean: 1,
+    p: 467, x: 54, posts: 1, cord: 1, lean: 1, thisPlan: 1,
     text: 'Meanwhile, the other person has come to rely on the promise, and has cancelled a plan.',
     dur: 2.9,
   },
   {
-    p: 467, x: 54, posts: 1, cord: 1, lean: 1,
+    p: 467, x: 54, posts: 1, cord: 1, lean: 1, anotherPlan: 1,
     text: 'They’ve told a friend and stopped looking for any other arrangement.',
     dur: 1.8,
   },

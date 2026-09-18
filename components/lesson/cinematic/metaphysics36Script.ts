@@ -29,6 +29,14 @@ export interface Metaphysics36Beat extends BaseBeat {
   /** 1 = guests have gone to DOUBLE their room number instead. */ dbl?: number;
   /** 1 = the reader's thumb is driving the shift. */ live_d?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed ring settles round room one's door — it is the one that is
+   * now empty (group AH). */ emptyRing?: number;
+  /** 1 = a dashed ring settles round the ellipsis — there is no last room to
+   * run out of (group AH). */ noLastRing?: number;
+  /** 1 = a cross lands on the ellipsis — whether that endlessness is real is
+   * doubted (group AH). */ realCross?: number;
+  /** 1 = a check ticks onto the desk — the arithmetic still balances
+   * (group AH). */ mathCheck?: number;
 }
 
 export const BEATS: Metaphysics36Beat[] = [
@@ -62,12 +70,12 @@ export const BEATS: Metaphysics36Beat[] = [
     dur: 3,
   },
   {
-    p: 266, x: 54, hotel: 1, shift: 1,
+    p: 266, x: 54, hotel: 1, shift: 1, emptyRing: 1,
     text: 'Every guest still has a room, and room one is now empty.',
     dur: 1.8,
   },
   {
-    p: 380, x: 54, hotel: 1, shift: 1,
+    p: 380, x: 54, hotel: 1, shift: 1, noLastRing: 1,
     text: 'The move works only because there’s no last room. In a hotel of a hundred rooms, the guest in room one hundred would have nowhere to go.',
     dur: 4.8,
   },
@@ -98,13 +106,13 @@ export const BEATS: Metaphysics36Beat[] = [
     dur: 4.4,
   },
   {
-    p: 463, x: 128, hotel: 1, dbl: 1,
+    p: 463, x: 128, hotel: 1, dbl: 1, realCross: 1,
     text: 'William Lane Craig argues that such a hotel shows an actual infinite can’t exist in reality.',
     cite: 'Craig on actual infinites',
     dur: 3,
   },
   {
-    p: 463, x: 128, hotel: 1, dbl: 1,
+    p: 463, x: 128, hotel: 1, dbl: 1, realCross: 1, mathCheck: 1,
     text: 'Whether any real collection behaves this way is a separate question from whether the mathematics is consistent.',
     dur: 1.8,
   },

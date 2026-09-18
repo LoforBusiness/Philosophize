@@ -41,7 +41,11 @@ export async function loadRig() {
   };
   const RIG = await import(emit(`${SRC}/rig.ts`, 'rig.mjs'));
   const MOVES = await import(emit(`${SRC}/moves.ts`, 'moves.mjs'));
-  loaded = { RIG, MOVES };
+  // `wander.ts` keeps the same rule — it imports `rig` and `moves` and nothing else
+  // — so the movement layer replays here too, which is what lets `check:wander`
+  // measure a foot skate and a tap without Metro or a browser.
+  const WANDER = await import(emit(`${SRC}/wander.ts`, 'wander.mjs'));
+  loaded = { RIG, MOVES, WANDER };
   return loaded;
 }
 

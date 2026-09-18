@@ -26,6 +26,8 @@ export interface Epistemology30Beat extends BaseBeat {
   /** How far the edge of the known unknown has opened, 0…1. */ edge?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = four small marks at the field's corners — the four intellectual virtues named. */ virtues?: number;
+  /** 1 = a double arrow below the disc, dashed one side and solid the other — firm enough to act, loose enough to revise. */ holdBalance?: number;
 };
 
 export const BEATS: Epistemology30Beat[] = [
@@ -45,7 +47,7 @@ export const BEATS: Epistemology30Beat[] = [
     dur: 5.0,
   },
   {
-    p: 265, x: 24, disc: 1, edge: 0.6,
+    p: 265, x: 24, disc: 1, edge: 0.6, virtues: 1,
     text: 'Intellectual virtues include humility about your own errors, curiosity, intellectual courage, and fairness to the views of others.',
     dur: 5.0,
   },
@@ -77,7 +79,7 @@ export const BEATS: Epistemology30Beat[] = [
     dur: 5.0,
   },
   {
-    p: 460, x: 80, disc: 1, edge: 0.75,
+    p: 460, x: 80, disc: 1, edge: 0.75, holdBalance: 1,
     text: 'A wise knower holds a belief firmly enough to act on it, and loosely enough to revise it.',
     dur: 4.8,
   },

@@ -29,6 +29,8 @@ export interface Aesthetics25Beat extends BaseBeat {
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
   /** 1 = the single viewer and the two feeds into him are drawn. */ feeds?: number;
+  /** 1 = a mark under each visitor — solid for recognising at once, hollow for not. */ read?: number;
+  /** 1 = the rail under the shelves solidifies — the economic base Kant's view leaves out. */ base?: number;
 }
 
 export const BEATS: Aesthetics25Beat[] = [
@@ -43,7 +45,7 @@ export const BEATS: Aesthetics25Beat[] = [
     dur: 2.8,
   },
   {
-    p: 36, x: 40, frames: 1,
+    p: 36, x: 40, frames: 1, read: 1,
     text: 'One recognises its style and subject at once. The other can’t tell what to look for.',
     dur: 3.6,
   },
@@ -85,7 +87,7 @@ export const BEATS: Aesthetics25Beat[] = [
     dur: 4.0,
   },
   {
-    p: 383, x: 96, frames: 1, shelves: 1,
+    p: 383, x: 96, frames: 1, shelves: 1, base: 1,
     text: 'Kant said a judgement of beauty is disinterested. Bourdieu replied that such detachment requires freedom from economic need.',
     dur: 4.6,
   },

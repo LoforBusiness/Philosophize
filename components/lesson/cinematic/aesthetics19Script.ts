@@ -19,6 +19,9 @@ export interface Aes19Beat extends BaseBeat {
   /** The verdict under the frame: 0 none · 1 UGLY · 2 the informed reading. */ verdict?: number;
   /** 1 = the ecology card has slid in. */ know?: number;
   /** 1 = the three answer cards are live (Q2). */ pick?: number;
+  /** 1 = a small stain mark appears inside the framed item — the quality attention finds. */ detail?: number;
+  /** 1 = a strike lands across the verdict plate — the landscape model's reading, rejected. */ reject?: number;
+  /** 1 = a small "unchanged" mark pins itself to the frame — it has not moved. */ same?: number;
 }
 
 export const BEATS: Aes19Beat[] = [
@@ -34,7 +37,7 @@ export const BEATS: Aes19Beat[] = [
     dur: 3,
   },
   {
-    p: 270, x: 168, row: 1, frame: 1,
+    p: 270, x: 168, row: 1, frame: 1, detail: 1,
     text: 'Framing an object directs aesthetic attention to qualities that everyday use passes over.',
     dur: 2.2,
   },
@@ -45,7 +48,7 @@ export const BEATS: Aes19Beat[] = [
     dur: 1.8,
   },
   {
-    p: 266, x: 124, row: 1, frame: 3, verdict: 1,
+    p: 266, x: 124, row: 1, frame: 3, verdict: 1, reject: 1,
     text: 'Seen only as scenery, the marsh looks ugly. Allen Carlson calls this way of looking the landscape model, and rejects it.',
     dur: 3.3,
   },
@@ -68,7 +71,7 @@ export const BEATS: Aes19Beat[] = [
     dur: 2.8,
   },
   {
-    p: 269, x: 168, row: 1, frame: 3, verdict: 2, know: 1,
+    p: 269, x: 168, row: 1, frame: 3, verdict: 2, know: 1, same: 1,
     text: 'Neither the frame nor the marsh has changed, yet the verdict on the marsh has.',
     dur: 2.4,
   },

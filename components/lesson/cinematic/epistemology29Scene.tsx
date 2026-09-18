@@ -9,6 +9,7 @@ import { BEATS } from './epistemology29Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // NINE TILES THAT NEVER MOVE, AND THE WIRES BETWEEN THEM.
@@ -58,6 +60,11 @@ const FRESH_Y = 234;
 const FRESH_W = 78;
 const FRESH_H = 26;
 
+const POT_X = 232;
+const POT_Y = 236;
+const POT_W = 36;
+const POT_H = 13;
+
 const PLATE_X = [124, 216, 308];
 const PLATE_Y = 452;
 const PLATE_W = 90;
@@ -79,6 +86,7 @@ const FRESH = BEATS.map((b) => (b.fresh ? 1 : 0));
 const SOLVED = BEATS.map((b) => b.solved ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const SAUCE_SPLIT = BEATS.map((b) => (b.sauceSplit ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -95,7 +103,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology29'));
 export default function Epistemology29Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(6);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -118,6 +126,7 @@ export default function Epistemology29Scene({ clock, bt, bi, i, picked, onPick, 
       fresh: carry(cv, 3, n, FRESH[p], FRESH[n], tr),
       solved: carry(cv, 4, n, SOLVED[p], reacting ? pickAt(SOLVED_AT, u) : SOLVED[n], tr),
       plates: carry(cv, 5, n, PLATES[p], PLATES[n], tr),
+      sauceSplit: carry(cv, 6, n, SAUCE_SPLIT[p], SAUCE_SPLIT[n], tr),
     };
   });
 
@@ -129,11 +138,15 @@ export default function Epistemology29Scene({ clock, bt, bi, i, picked, onPick, 
   const freshStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.fresh }));
   const solvedStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.solved) }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
+  const sauceSplitStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.sauceSplit }));
 
 
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
+
+      <Animated.View style={[styles.pot, sauceSplitStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.crack, sauceSplitStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, freshStyle]} pointerEvents="none">
         <View style={styles.freshStem} />
@@ -197,8 +210,18 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
+  // POT / CRACK — the sauce the two cooks face, above the board: a filled pot
+  // split by a dashed crack down its middle. Neither cook is shown succeeding yet.
+  pot: {
+    position: 'absolute', left: POT_X, top: POT_Y, width: POT_W, height: POT_H,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+  },
+  crack: {
+    position: 'absolute', left: POT_X, top: POT_Y + POT_H / 2 - 0.75, width: POT_W,
+    height: 0, borderTopWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
   board: {
     position: 'absolute', left: BOARD_X, top: BOARD_Y, width: BOARD_W, height: BOARD_H,
     backgroundColor: STONE, boxShadow: LIP, borderWidth: 1.5, borderColor: RULE,
@@ -224,7 +247,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,

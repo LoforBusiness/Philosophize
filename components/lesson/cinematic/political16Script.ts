@@ -20,6 +20,9 @@ export interface Pol16Beat extends BaseBeat {
   /** How many cords are drawn, 0…4. */ cords?: number;
   /** How many of them have been cut, 0…4. */ cut?: number;
   /** 1 = the four cords are live targets (Q1). */ pick?: number;
+  /** 1 = the four are counted off, one numeral at a time, as the sentence lists them. */ counted?: number;
+  /** 1 = the severed ends are left open: nothing joins the worker to those two. */ adrift?: number;
+  /** 1 = what it actually turns on, said at the trunk: who owns, who controls. */ owns?: number;
 }
 
 export const BEATS: Pol16Beat[] = [
@@ -31,6 +34,7 @@ export const BEATS: Pol16Beat[] = [
   {
     g: 462, cords: 4,
     dur: 2.5,
+    counted: 1,
     text: 'These are the product, the activity of working, your human potential and your fellow workers.',
   },
   {
@@ -42,6 +46,7 @@ export const BEATS: Pol16Beat[] = [
   {
     g: 465, cords: 4, cut: 2,
     dur: 1.8,
+    adrift: 1,
     text: 'So the worker is separated from both the product and the activity of working.',
   },
   {
@@ -66,6 +71,7 @@ export const BEATS: Pol16Beat[] = [
   {
     g: 418, cords: 4, cut: 4,
     dur: 4.8,
+    owns: 1,
     text: 'Marx argues that none of this depends on the wage. It follows from who owns the means of production and who controls the work.',
     cite: 'The source of alienation',
   },

@@ -26,6 +26,12 @@ export interface Aesthetics35Beat extends BaseBeat {
   /** 1 = the three branches are drawn. */ split?: number;
   /** How far the train has run along the chosen branch, 0…1. */ run?: number;
   /** 1 = the second reading is drawn IN ADVANCE — the explained joke. */ spoil?: number;
+  /** 1 = a signal at the junction leans toward the natural (ward) reading, before
+   *  the switch. */ expect?: number;
+  /** 1 = the umbrella branch's arm is crossed out — it fits no reading. */ errBranch?: number;
+  /** 1 = the pre-shown reading's dashed line turns solid: no longer a hint. */ solid?: number;
+  /** 1 = a puff of steam releases from the train — the energy Freud's theory
+   *  names. */ steam?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
 }
 
@@ -41,7 +47,7 @@ export const BEATS: Aesthetics35Beat[] = [
     dur: 2.6,
   },
   {
-    p: 394, x: 56, track: 1, split: 1,
+    p: 394, x: 56, track: 1, split: 1, expect: 1,
     text: 'On the natural reading, the two places are points on the arm, and you’re waiting for a diagnosis.',
     dur: 1.8,
   },
@@ -60,7 +66,7 @@ export const BEATS: Aesthetics35Beat[] = [
     dur: 2,
   },
   {
-    p: 467, x: 56, track: 1, split: 1, run: 1,
+    p: 467, x: 56, track: 1, split: 1, run: 1, errBranch: 1,
     text: 'A punchline that fits no reading of the setup is an error, not a surprise.',
     dur: 2.6,
   },
@@ -83,7 +89,7 @@ export const BEATS: Aesthetics35Beat[] = [
     dur: 3.1,
   },
   {
-    p: 165, x: 56, track: 1, split: 1, run: 1, spoil: 1,
+    p: 165, x: 56, track: 1, split: 1, run: 1, spoil: 1, solid: 1,
     text: 'Explaining a joke reveals the second reading in advance, and so removes the surprise.',
     dur: 1.8,
   },
@@ -93,7 +99,7 @@ export const BEATS: Aesthetics35Beat[] = [
     dur: 3.3,
   },
   {
-    p: 167, x: 128, track: 1, split: 1, spoil: 1,
+    p: 167, x: 128, track: 1, split: 1, spoil: 1, steam: 1,
     text: 'Sigmund Freud’s relief theory holds that a joke releases energy normally used to repress the feelings it expresses.',
     dur: 1.8,
   },

@@ -148,7 +148,7 @@ import { getLessonById } from '@/data/index';
 import { CINEMATIC } from './(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId]';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { setThoughtsOff, setToursOff } from '@/components/lesson/cinematic/tourFlag';
+import { setThoughtsOff, setToursOff, setWanderOff } from '@/components/lesson/cinematic/tourFlag';
 
 export default function PreviewFrame() {
   const [go, setGo] = useState(false);
@@ -167,6 +167,11 @@ export default function PreviewFrame() {
   // art — and every table derived from these boxes then protects the bubble. 29 stored
   // rows carried one when this went in. Unconditional: no reading here wants it.
   setThoughtsOff(true);
+  // AND NEVER WITH HIM WALKING ABOUT. The movement layer (wander.ts) is derived from
+  // these very boxes, so measuring with it live is the table feeding on its own
+  // output — a box recorded mid-step narrows the clear floor, which moves the next
+  // run's plan, which moves the box again. See tourFlag.ts.
+  setWanderOff(true);
   const id = q?.get('id') ?? '';
   const found = getLessonById(id);
   const Comp = (CINEMATIC as Record<string, any>)[id];

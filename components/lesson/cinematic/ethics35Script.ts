@@ -28,6 +28,8 @@ export interface Ethics35Beat extends BaseBeat {
   /** 1 = the balance beam is drawn above. */ beam?: number;
   /** 1 = the reader's thumb is driving the beam (the drag beat). */ tip?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed ring highlights the STOOD BACK panel, for the second man. */ focus2?: number;
+  /** 1 = a check marks the SAME OUTCOME tag, for the outcome specifically. */ stress?: number;
 }
 
 export const BEATS: Ethics35Beat[] = [
@@ -37,7 +39,7 @@ export const BEATS: Ethics35Beat[] = [
     dur: 2.4,
   },
   {
-    p: 462, x: 54, pair: 1,
+    p: 462, x: 54, pair: 1, focus2: 1,
     text: 'The second man sees the child slip under the water and does nothing to save him.',
     dur: 2.2,
   },
@@ -59,7 +61,7 @@ export const BEATS: Ethics35Beat[] = [
     dur: 2.4,
   },
   {
-    p: 160, x: 54, pair: 1, tags: 2,
+    p: 160, x: 54, pair: 1, tags: 2, stress: 1,
     text: 'The outcome is the same as well, since the child dies in both cases.',
     dur: 1.8,
   },

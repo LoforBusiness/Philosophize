@@ -26,6 +26,9 @@ export interface Epi20Beat extends BaseBeat {
   /** How full the confidence bar is, 0…1. */ agree?: number;
   /** The wires behind the sources, drawn, 0…1. */ wires?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a STRONG tag over the confidence bar, before the wires undercut it. */ barTag?: number;
+  /** 1 = each origin base takes a small "1", counting the two real sources. */ originCount?: number;
+  /** 1 = a ring on the shared post, what a feed selects for. */ feedRing?: number;
 }
 
 export const BEATS: Epi20Beat[] = [
@@ -41,7 +44,7 @@ export const BEATS: Epi20Beat[] = [
     dur: 2.5,
   },
   {
-    p: 266, x: 200, voices: 1, agree: 0.9,
+    p: 266, x: 200, voices: 1, agree: 0.9, barTag: 1,
     text: 'Your confidence rises, and rightly so: four independent confirmations would be strong evidence.',
     dur: 2.1,
   },
@@ -57,7 +60,7 @@ export const BEATS: Epi20Beat[] = [
     dur: 2.5,
   },
   {
-    p: 266, x: 132, voices: 1, agree: 0.32, wires: 1,
+    p: 266, x: 132, voices: 1, agree: 0.32, wires: 1, originCount: 1,
     text: 'Yet there were never four independent sources, only two: one post and one reporter’s own legwork.',
     dur: 1.8,
   },
@@ -84,7 +87,7 @@ export const BEATS: Epi20Beat[] = [
     dur: 3.4,
   },
   {
-    p: 380, x: 268, voices: 1, agree: 0.32, wires: 1,
+    p: 380, x: 268, voices: 1, agree: 0.32, wires: 1, feedRing: 1,
     text: 'A social media feed favours posts shared by people like you. So the agreement in a feed often looks independent when it isn’t.',
     dur: 4.4,
   },

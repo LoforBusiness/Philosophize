@@ -30,6 +30,8 @@ export interface Pol22Beat extends BaseBeat {
   /** The caption naming the slot, 0…1. */ reach?: number;
   /** The lever down, and her choices struck out, 0…1. */ flip?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = her day is marked free by Berlin's test, while the lever is still up. */ berlin?: number;
+  /** 1 = the slot is latched: laws, rights and courts, checking the lever. */ checked?: number;
 }
 
 export const BEATS: Pol22Beat[] = [
@@ -40,6 +42,7 @@ export const BEATS: Pol22Beat[] = [
   },
   {
     p: 164, x: 200, switchOn: 1, tiles: 1,
+    berlin: 1,
     text: 'Isaiah Berlin called the absence of interference negative liberty. By that standard, the servant is free.',
     dur: 1.8,
   },
@@ -83,6 +86,7 @@ export const BEATS: Pol22Beat[] = [
   },
   {
     p: 13, x: 268, switchOn: 1, tiles: 1, reach: 1,
+    checked: 1,
     text: 'Kindness from the powerful can’t make her free, since it can be withdrawn. Pettit argues that freedom needs laws, rights and courts that check arbitrary power.',
     dur: 4.8,
   },

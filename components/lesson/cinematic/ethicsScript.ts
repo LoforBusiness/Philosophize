@@ -44,6 +44,8 @@ export interface EthicsBeat extends BaseBeat {
   you?: boolean;
   /** A seedling, before the flourishing it grows into has a name. */
   seed?: boolean;
+  /** A flower opens at the sprout's tip once flourishing is named — the life cycle completing, "over a complete life". */
+  bloom?: boolean;
 }
 
 export const BEATS: EthicsBeat[] = [
@@ -172,6 +174,7 @@ export const BEATS: EthicsBeat[] = [
   {
     hpose: 2,
     plant: true,
+    bloom: true,
     text: 'Flourishing is a closer translation. It means living and acting well, from a virtuous character, over a complete life.',
     dur: 2.2,
   },

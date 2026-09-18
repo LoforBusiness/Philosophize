@@ -13,6 +13,7 @@ import { BEATS } from './metaphysics7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A timeline strung across the top of the stage, and a figure that WALKS it.
 //
@@ -77,6 +79,14 @@ const DIR = dirsFrom(X, 1);
 const LINE = BEATS.map((b) => b.line ?? 0);
 const SOLID = BEATS.map((b) => b.solid ?? 0);
 const SPOT = BEATS.map((b) => b.spot ?? 0);
+// group AH — still-tap events, each on for one beat only and carried both ways.
+const QMARK = BEATS.map((b) => b.qMark ?? 0);
+const EQUAL_RULE = BEATS.map((b) => b.equalRule ?? 0);
+const PAST_CUT = BEATS.map((b) => b.pastCut ?? 0);
+const FUTURE_CUT = BEATS.map((b) => b.futureCut ?? 0);
+const KEEPS_CHANGING = BEATS.map((b) => b.keepsChanging ?? 0);
+const PAGES = BEATS.map((b) => b.pages ?? 0);
+const HERE_FLAG = BEATS.map((b) => b.hereFlag ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -86,7 +96,7 @@ const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(11);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -109,12 +119,24 @@ export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dr
     return {
       fig: lookPose(s, fx, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       fx,
-      line: carry(cv, 1, n, LINE[p], LINE[n], tr, lineFade ? grow : 1),
+      // THE RAMP IS THE PROGRESS, NOT A MULTIPLIER (AH4). As `mul` it multiplied
+      // the whole carried value, so on the beat the timeline goes out it read 0 on
+      // the first frame — a POP, which the two stems added in group AH then rode.
+      line: carry(cv, 1, n, LINE[p], LINE[n], lineFade ? grow : tr),
       solid: carry(cv, 2, n, SOLID[p], SOLID[n], tr),
       // R7b — the knob lights the moving now. Drag toward A SPOTLIGHT SWEEPS THE LINE
       // and the travelling YOUR NOW ring appears on the timeline: the reader turns on
       // the very thing the block universe says is not there.
       spot: carry(cv, 3, n, SPOT[p], reacting ? dragPos.value : SPOT[n], tr),
+      // group AH — one still-tap event each, carried in and back out over the
+      // beats either side rather than switched, so none of them is a CUT.
+      qMark: carry(cv, 4, n, QMARK[p], QMARK[n], tr),
+      equalRule: carry(cv, 5, n, EQUAL_RULE[p], EQUAL_RULE[n], tr),
+      pastCut: carry(cv, 6, n, PAST_CUT[p], PAST_CUT[n], tr),
+      futureCut: carry(cv, 7, n, FUTURE_CUT[p], FUTURE_CUT[n], tr),
+      keepsChanging: carry(cv, 8, n, KEEPS_CHANGING[p], KEEPS_CHANGING[n], tr),
+      pages: carry(cv, 9, n, PAGES[p], PAGES[n], tr),
+      hereFlag: carry(cv, 10, n, HERE_FLAG[p], HERE_FLAG[n], tr),
       t,
     };
   });
@@ -126,6 +148,28 @@ export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dr
     opacity: SCENE.value.spot * SCENE.value.line,
     transform: [{ translateX: SCENE.value.fx - RING_W / 2 }],
   }));
+  // group AH — the still-tap events.
+  const qMarkStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.qMark,
+    transform: [
+      { translateX: SCENE.value.fx },
+      { translateY: (1 - SCENE.value.qMark) * 8 },
+    ],
+  }));
+  const equalRuleStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.equalRule }));
+  // The PAST/FUTURE stems fade under their own cut on top of the shared `line`
+  // opacity, so the rest of the timeline is untouched.
+  const pastStemStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.line * (1 - SCENE.value.pastCut) }));
+  const futureStemStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.line * (1 - SCENE.value.futureCut) }));
+  const changeTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.keepsChanging }));
+  const pagesStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.pages,
+    transform: [{ translateY: (1 - SCENE.value.pages) * 6 }],
+  }));
+  const hereFlagStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.hereFlag,
+    transform: [{ translateX: SCENE.value.fx + 50 }],
+  }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -136,9 +180,12 @@ export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dr
       <Animated.View style={[styles.rule, lineStyle]} pointerEvents="none" />
       <Animated.View style={[styles.capL, lineStyle]} pointerEvents="none" />
       <Animated.View style={[styles.capR, lineStyle]} pointerEvents="none" />
-      {SLOT_X.map((c) => (
-        <Animated.View key={`stem-${c}`} style={[styles.stem, { left: c - 1 }, lineStyle]} pointerEvents="none" />
-      ))}
+      {/* group AH — "it no longer exists at all" / "hasn't yet occurred": the PAST
+          and FUTURE stems get their own fade on top of the shared line, so the rest
+          of the timeline is untouched. */}
+      <Animated.View key="stem-past" style={[styles.stem, { left: SLOT_X[0] - 1 }, pastStemStyle]} pointerEvents="none" />
+      <Animated.View key="stem-now" style={[styles.stem, { left: SLOT_X[1] - 1 }, lineStyle]} pointerEvents="none" />
+      <Animated.View key="stem-future" style={[styles.stem, { left: SLOT_X[2] - 1 }, futureStemStyle]} pointerEvents="none" />
       <Animated.View style={[styles.edgeL, lineStyle]} pointerEvents="none">
         <Text style={styles.edgeText}>EARLIER</Text>
       </Animated.View>
@@ -160,10 +207,40 @@ export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dr
         />
       ))}
 
+      {/* group AH — "each as real as the others": a bracket spans beneath all
+          three slices, treating them as one measured row. */}
+      <Animated.View style={[styles.equalBracket, equalRuleStyle]} pointerEvents="none">
+        <View style={styles.equalTickL} />
+        <View style={styles.equalTickR} />
+      </Animated.View>
+
+      {/* group AH — "page four hundred is as fully printed as page one": two
+          identical pages, side by side. */}
+      <Animated.View style={[styles.pageBox, { left: 140 }, pagesStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.pageBox, { left: 168 }, pagesStyle]} pointerEvents="none" />
+
       {/* ── the travelling "your now" spotlight ──────────────────────────────── */}
       <Animated.View style={[styles.ringWrap, ringStyle]} pointerEvents="none">
         <View style={styles.ring} />
         <Text style={styles.ringLabel}>YOUR NOW</Text>
+        {/* group AH — "which moment that is keeps changing": a small note rides
+            along with the spotlight it describes. */}
+        <Animated.View style={[styles.changeTagWrap, changeTagStyle]} pointerEvents="none">
+          <Text style={styles.changeTagT}>KEEPS CHANGING</Text>
+        </Animated.View>
+      </Animated.View>
+
+      {/* group AH — "the word 'now' works like the word 'here'": a small marker
+          plants beside the figure's own ground, the way a pin marks a place. */}
+      <Animated.View style={[styles.hereWrap, hereFlagStyle]} pointerEvents="none">
+        <Text style={styles.hereLabel}>HERE</Text>
+        <View style={styles.herePole} />
+      </Animated.View>
+
+      {/* group AH — "this raises a metaphysical question": the question itself,
+          over the figure, before the timeline has even arrived. */}
+      <Animated.View style={[styles.qMarkWrap, qMarkStyle]} pointerEvents="none">
+        <Text style={styles.qMarkT}>?</Text>
       </Animated.View>
 
       {/* ── Q1: answered on the timeline itself ──────────────────────────────── */}
@@ -295,7 +372,7 @@ const styles = StyleSheet.create({
   },
   allWrap: { position: 'absolute', left: ALL_L, top: ALL_T, width: ALL_W },
   allBox: {
-    height: 44, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    height: 44, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   allRight: { backgroundColor: INK, borderColor: INK },
@@ -307,6 +384,44 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   allSubOn: { color: RULE },
+
+  // group AH — "each as real as the others": a caliper spans the whole row.
+  equalBracket: { position: 'absolute', left: 10, top: 278, width: 380, height: 2, backgroundColor: SOFT },
+  equalTickL: { position: 'absolute', left: 0, top: -4, width: 2, height: 10, backgroundColor: SOFT },
+  equalTickR: { position: 'absolute', left: 378, top: -4, width: 2, height: 10, backgroundColor: SOFT },
+
+  // group AH — "page four hundred is as fully printed as page one": two
+  // identical, blank-printed pages, well clear of the slices above (end 272)
+  // and the Q1 target below (starts 318).
+  pageBox: {
+    position: 'absolute', top: 282, width: 22, height: 26,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
+  },
+
+  // group AH — "which moment that is keeps changing": rides inside the ringWrap
+  // so it travels with the spotlight it is describing, for free.
+  changeTagWrap: { position: 'absolute', left: 0, top: 104, width: RING_W, alignItems: 'center' },
+  changeTagT: { fontFamily: 'Inter_700Bold', fontSize: 10.3, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+
+  // group AH — "the word 'now' works like the word 'here'": a small marker
+  // planted at the figure's own ground, offset clear of his silhouette (±36).
+  hereWrap: { position: 'absolute', left: -22, top: 0, width: 44, height: 504 },
+  hereLabel: {
+    position: 'absolute', left: 0, top: 452, width: 44, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 10.3, letterSpacing: 0.6, color: INK,
+    includeFontPadding: false,
+  },
+  herePole: { position: 'absolute', left: 21, top: 464, width: 2, height: 36, backgroundColor: INK },
+
+  // group AH — "this raises a metaphysical question": the "?" over the figure,
+  // before the timeline itself has arrived.
+  qMarkWrap: {
+    position: 'absolute', left: -10, top: 350, width: 20, height: 30,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  qMarkT: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, color: INK, includeFontPadding: false },
 });
 
 export function Metaphysics7Lesson({ lesson }: { lesson: Lesson }) {

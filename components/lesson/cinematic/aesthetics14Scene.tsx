@@ -10,6 +10,7 @@ import { BEATS } from './aesthetics14Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ONE CASK AND THREE VERDICTS, and the cask empties (H64). The verdict cards are
 // the Q1 targets, so the thing tapped is the thing the whole lesson is about (E33).
@@ -67,6 +69,10 @@ const G = BEATS.map((b) => b.g ?? 0);
 const BOARD = BEATS.map((b) => b.board ?? 0);
 const LEVEL = BEATS.map((b) => b.level ?? 0);
 const KEY = BEATS.map((b) => b.key ?? 0);
+const TICKV = BEATS.map((b) => (b.unanimousTick ? 1 : 0));
+const DIFFV = BEATS.map((b) => (b.diffType ? 1 : 0));
+const ESSAYV = BEATS.map((b) => (b.essayTag ? 1 : 0));
+const EQUALV = BEATS.map((b) => (b.noEqual ? 1 : 0));
 
 // The camera, from the staging (H60b): the figure never moves, so `followMoves`
 // gives the still-lesson rhythm — a push on the quote, a pull back to the whole
@@ -82,12 +88,17 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics14'));
 export default function Aesthetics14Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(7);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
   // Only what CHANGED this beat re-draws itself; everything else holds (C20c/H58).
   const keyFade = (cur.key ?? 0) !== (prev?.key ?? 0);
+  // The four tap events (group AH).
+  const tickFade = !!cur.unanimousTick !== !!prev?.unanimousTick;
+  const diffFade = !!cur.diffType !== !!prev?.diffType;
+  const essayFade = !!cur.essayTag !== !!prev?.essayTag;
+  const equalFade = !!cur.noEqual !== !!prev?.noEqual;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -109,6 +120,11 @@ export default function Aesthetics14Scene({ clock, bt, bi, i, picked, onPick, dr
       board: carry(cv, 0, n, BOARD[p], reacting ? 3 - dragPos.value * 2 : BOARD[n], grow),
       level: carry(cv, 1, n, LEVEL[p], LEVEL[n], drain),
       key: carry(cv, 2, n, KEY[p], KEY[n], tr, keyFade ? grow : 1),
+      // The four tap events (group AH) — each carried so it fades OUT as well as in.
+      tick: carry(cv, 3, n, TICKV[p], TICKV[n], tickFade ? grow : 1),
+      diff: carry(cv, 4, n, DIFFV[p], DIFFV[n], diffFade ? grow : 1),
+      essay: carry(cv, 5, n, ESSAYV[p], ESSAYV[n], essayFade ? grow : 1),
+      equal: carry(cv, 6, n, EQUALV[p], EQUALV[n], equalFade ? grow : 1),
     };
   });
 
@@ -121,9 +137,24 @@ export default function Aesthetics14Scene({ clock, bt, bi, i, picked, onPick, dr
   // the surface is the only edge that moves.
   const wine = useAnimatedStyle(() => ({ transform: [{ scaleY: SCENE.value.level }] }));
   const keyStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.key }));
+  const tickStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.tick,
+    transform: [{ scale: 0.6 + SCENE.value.tick * 0.4 }],
+  }));
+  const diffStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.diff }));
+  const essayStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.essay,
+    transform: [{ translateY: (1 - SCENE.value.essay) * 6 }],
+  }));
+  const equalStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.equal }));
 
   return (
     <Animated.View style={styles.scene}>
+      {/* A small plaque above the figure: the essay just named. */}
+      <Animated.View style={[styles.essayTag, essayStyle]} pointerEvents="none">
+        <Text style={styles.essayText}>HUME, 1757</Text>
+      </Animated.View>
+
       {/* ── THE CASK ─────────────────────────────────────────────────────── */}
       <View style={styles.cask} pointerEvents="none">
         <Animated.View style={[styles.wine, wine]} pointerEvents="none" />
@@ -154,6 +185,18 @@ export default function Aesthetics14Scene({ clock, bt, bi, i, picked, onPick, dr
           onPick={onPick}
         />
       ))}
+
+      {/* A tick badges the room's own card: the verdict was unanimous. */}
+      <Animated.View style={[styles.tickBadge, tickStyle]} pointerEvents="none">
+        <Text style={styles.tickText}>✓</Text>
+      </Animated.View>
+
+      {/* A “≠” sits between the two dissents — a complaint of a different type. */}
+      <Animated.Text style={[styles.diffMark, diffStyle]} pointerEvents="none">≠</Animated.Text>
+
+      {/* A struck brace runs down the board: Hume denies the three are equally good. */}
+      <Animated.View style={[styles.equalBrace, equalStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.equalStrike, equalStyle]} pointerEvents="none" />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -242,7 +285,7 @@ const styles = StyleSheet.create({
 
   card: { position: 'absolute', left: BOARD_L, width: BOARD_W, height: CARD_H },
   cardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardText: {
@@ -253,6 +296,37 @@ const styles = StyleSheet.create({
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT },
+
+  // ── the four tap events (group AH) ───────────────────────────────────────
+  // A plaque above the figure: the essay just named.
+  essayTag: {
+    position: 'absolute', left: 18, top: 362, paddingHorizontal: 5, paddingVertical: 1.5,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  essayText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
+
+  // A tick on the room's own card — the room's verdict was unanimous.
+  tickBadge: {
+    position: 'absolute', left: 372, top: 256, width: 18, height: 18, borderRadius: 9,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  tickText: { fontFamily: 'Inter_700Bold', fontSize: 11, color: INK, includeFontPadding: false },
+
+  // The gap between the iron and sweet cards — two different kinds of complaint.
+  diffMark: {
+    position: 'absolute', left: BOARD_L, top: 341, width: BOARD_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 13, color: INK, includeFontPadding: false,
+  },
+
+  // A struck brace down the board's left edge: Hume denies the three are equal.
+  equalBrace: { position: 'absolute', left: 232, top: 226, width: 2, height: 180, backgroundColor: SHADE },
+  equalStrike: {
+    position: 'absolute', left: 224, top: 308, width: 18, height: 2, backgroundColor: INK,
+    transform: [{ rotate: '45deg' }],
+  },
 });
 
 // Ink runs from the top verdict card (226) to the ground line (500). Band 220…512

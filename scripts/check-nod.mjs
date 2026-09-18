@@ -162,7 +162,9 @@ async function nod(tab, id) {
   const { evalJs } = tab;
   await tab.send('Page.navigate', { url: 'about:blank' });
   await new Promise((r) => setTimeout(r, 120));
-  await tab.send('Page.navigate', { url: `http://localhost:${WEB}/${ROUTE}?id=${id}&notour=1` });
+  // `nowander=1`: this measures the figure's own answer, against a baseline taken from
+  // his idling — and the movement layer would put a step into both (group AF).
+  await tab.send('Page.navigate', { url: `http://localhost:${WEB}/${ROUTE}?id=${id}&notour=1&nowander=1` });
   for (let i = 0; i < STAGE_TRIES; i++) {
     if (await evalJs(`!!${STAGE}`)) break;
     await new Promise((r) => setTimeout(r, 1000));

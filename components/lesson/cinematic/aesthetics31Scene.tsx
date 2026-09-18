@@ -13,6 +13,7 @@ import { BEATS } from './aesthetics31Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A PLAYHEAD THAT RUNS THE MELODY — the first thing in the app that plays in time —
 // and three answer targets that are three PARTS of one picture: the notes, the
@@ -76,6 +78,7 @@ const STR = BEATS.map((b) => b.strings ?? 4);
 const PLAY = BEATS.map((b) => b.playing ?? 0);
 const CA = BEATS.map((b) => b.clapA ?? 0);
 const CB = BEATS.map((b) => b.clapB ?? 0);
+const SAME = BEATS.map((b) => ((b.same ?? 0) > 0 ? 1 : 0));
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -101,8 +104,12 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics31'));
 export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(5);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // The tick fades in only on the beat that asks for it, so it doesn't re-animate
+  // on every later tap that merely holds the picture (C20c).
+  const sameFade = (cur.same ?? 0) !== (prev?.same ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -122,6 +129,7 @@ export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick, pi
       strings: carry(cv, 1, n, STR[p], reacting ? pickAt(POLL_STR, pickPos.value) : STR[n], grow),
       clapA: carry(cv, 2, n, CA[p], CA[n], grow),
       clapB: carry(cv, 3, n, CB[p], CB[n], grow),
+      same: carry(cv, 4, n, SAME[p], SAME[n], sameFade ? grow : 1),
     };
   });
 
@@ -129,6 +137,11 @@ export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick, pi
   const headStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.playing * 0.85,
     transform: [{ translateX: SCENE.value.play * HEAD_SPAN }],
+  }));
+  // The tick that lands on THE MUSIC plate once the sound is confirmed unchanged.
+  const sameStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.same,
+    transform: [{ scale: 0.6 + 0.4 * SCENE.value.same }],
   }));
 
   const answered = picked !== null;
@@ -160,6 +173,12 @@ export default function Aesthetics31Scene({ clock, bt, bi, i, picked, onPick, pi
         <Note key={j} j={j} top={NOTE_TOP + y} SCENE={SCENE} />
       ))}
       <Animated.View style={[styles.head, headStyle]} pointerEvents="none" />
+      {/* the tick: the same notes, confirmed unchanged, once the reader has heard
+          them played twice. */}
+      <Animated.View style={[styles.sameBadge, sameStyle]} pointerEvents="none">
+        <View style={styles.sameTickShort} />
+        <View style={styles.sameTickLong} />
+      </Animated.View>
 
       {/* the applause */}
       <Text style={styles.clapKick} numberOfLines={1}>APPLAUSE</Text>
@@ -235,11 +254,11 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule alone leaves the figure
   // standing on bare page; a filled band under it is what the two lessons
   // the reader holds up both do, and it costs one View.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   inst: { position: 'absolute', ...INST },
   instInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', paddingTop: 8,
   },
   instText: {
@@ -250,7 +269,7 @@ const styles = StyleSheet.create({
 
   mel: { position: 'absolute', ...MEL },
   melInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     justifyContent: 'flex-end', paddingBottom: 5,
   },
   melText: {
@@ -289,6 +308,22 @@ const styles = StyleSheet.create({
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT },
+
+  // A small tick badge overlapping THE MUSIC plate's top-right corner — the notes,
+  // confirmed unchanged. Sits above the highest note (y 318) so it never covers one.
+  sameBadge: {
+    position: 'absolute', left: 358, top: 304, width: 16, height: 16, borderRadius: 8,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  sameTickShort: {
+    position: 'absolute', left: 3.5, top: 7, width: 4.5, height: 2, borderRadius: 1,
+    backgroundColor: INK, transformOrigin: '0% 50%', transform: [{ rotate: '45deg' }],
+  },
+  sameTickLong: {
+    position: 'absolute', left: 6.5, top: 9.5, width: 8, height: 2, borderRadius: 1,
+    backgroundColor: INK, transformOrigin: '0% 50%', transform: [{ rotate: '-50deg' }],
+  },
 });
 
 // Ink runs from the two target boxes (308) to the ground line (500). Band 302…512 = 210 (H59).

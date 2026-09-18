@@ -9,6 +9,7 @@ import { BEATS } from './political21Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIFTEEN SQUARES, FOURTEEN OF THEM SOMEBODY'S.
@@ -43,6 +45,10 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const EITHER = BEATS.map((b) => b.either ?? 0);
+const NO_HOME = BEATS.map((b) => b.noHome ?? 0);
+const NO_REVOLT = BEATS.map((b) => b.noRevolt ?? 0);
+const EARNED = BEATS.map((b) => b.earned ?? 0);
 const BASE_TR = 0.85;
 
 const COLS = 5;
@@ -90,7 +96,7 @@ const cellY = (i: number) => MAP_Y + Math.floor(i / COLS) * (CELL_H + GAP);
 export default function Political21Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(8);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -113,6 +119,11 @@ export default function Political21Scene({ clock, bt, bi, i, picked, onPick, pic
       // R7c — the leaving arrow IS the lever's top stop. Nothing to take at 'knowing
       // the law exists', a real way out at 'a refusal you could actually take'.
       exit: carry(cv, 3, n, EXIT[p], reacting ? pickPos.value : EXIT[n], tr),
+      // The four tap events, carried, so each fades out as well as in (group L).
+      either: carry(cv, 4, n, EITHER[p], EITHER[n], tr),
+      noHome: carry(cv, 5, n, NO_HOME[p], NO_HOME[n], tr),
+      noRevolt: carry(cv, 6, n, NO_REVOLT[p], NO_REVOLT[n], tr),
+      earned: carry(cv, 7, n, EARNED[p], EARNED[n], tr),
       t,
     };
   });
@@ -131,6 +142,28 @@ export default function Political21Scene({ clock, bt, bi, i, picked, onPick, pic
   }));
 
   const cells = MARKS.map((_, k) => k);
+
+  // ── the four tap events ────────────────────────────────────────────────────
+  //
+  // EVERY ONE OF THESE SITS BELOW THE MAP, and that is the composition rather than
+  // a preference: each cell carries a word, and nothing may be painted over a word
+  // (D31), so a stamp across the grid is not available however well it would read.
+  const eitherStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.either,
+    transform: [{ rotate: '-3deg' }, { scale: 1.1 - 0.1 * SCENE.value.either }],
+  }));
+  const noHomeStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.noHome,
+    transform: [{ translateY: (1 - SCENE.value.noHome) * -6 }],
+  }));
+  const noRevoltStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.noRevolt,
+    transform: [{ translateY: (1 - SCENE.value.noRevolt) * 8 }],
+  }));
+  const earnedStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.earned,
+    transform: [{ translateY: (1 - SCENE.value.earned) * 8 }],
+  }));
 
   return (
     <View style={styles.scene}>
@@ -184,6 +217,26 @@ export default function Political21Scene({ clock, bt, bi, i, picked, onPick, pic
         </Target>
       ))}
 
+      {/* Leaving one square only puts you in another one. */}
+      <Animated.View style={[styles.eitherStamp, eitherStyle]} pointerEvents="none">
+        <Text style={styles.eitherText} numberOfLines={1}>SOMEBODY&apos;S EITHER WAY</Text>
+      </Animated.View>
+
+      {/* The sea is unclaimed and uninhabitable, which is not an exit. */}
+      <Animated.View style={[styles.noHomeTag, noHomeStyle]} pointerEvents="none">
+        <Text style={styles.noHomeText} numberOfLines={1}>NO HOME HERE</Text>
+      </Animated.View>
+
+      {/* The conclusion is limited. */}
+      <Animated.View style={[styles.limitPlate, noRevoltStyle]} pointerEvents="none">
+        <Text style={styles.limitText} numberOfLines={1}>NO CALL TO REVOLT</Text>
+      </Animated.View>
+
+      {/* Claimed is not earned. */}
+      <Animated.View style={[styles.earnedPlate, earnedStyle]} pointerEvents="none">
+        <Text style={styles.earnedText} numberOfLines={1}>CLAIMED, NOT EARNED</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -191,12 +244,54 @@ export default function Political21Scene({ clock, bt, bi, i, picked, onPick, pic
 }
 
 const styles = StyleSheet.create({
+  // ── the four tap events (group AH) ─────────────────────────────────────────
+  // MAP_BOT is the grid's own foot: MAP_Y plus three rows and their gaps.
+  eitherStamp: {
+    position: 'absolute', left: 110, top: MAP_Y + ROWS * (CELL_H + GAP) + 8, width: 190, height: 26,
+    borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  eitherText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+  // Under the sea cell's own column, which is the last column of the last row.
+  noHomeTag: {
+    position: 'absolute', left: MAP_X + (COLS - 1) * (CELL_W + GAP) - 22,
+    top: MAP_Y + ROWS * (CELL_H + GAP) + 38, width: 92, height: 22,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 6,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  noHomeText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+  // Left of the figure's own column on the beats these land on.
+  limitPlate: {
+    position: 'absolute', left: 40, top: MAP_Y + ROWS * (CELL_H + GAP) + 34, width: 170, height: 26,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  limitText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+  earnedPlate: {
+    position: 'absolute', left: 40, top: MAP_Y + ROWS * (CELL_H + GAP) + 66, width: 170, height: 26,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  earnedText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: PAPER,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: MAP_X, top: 234, width: 260,
@@ -205,7 +300,7 @@ const styles = StyleSheet.create({
 
   cell: {
     position: 'absolute', width: CELL_W, height: CELL_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   sea: { borderStyle: 'dashed', borderColor: SOFT },
   mark: {

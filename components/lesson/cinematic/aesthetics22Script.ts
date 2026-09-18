@@ -29,6 +29,9 @@ export interface Aes22Beat extends BaseBeat {
   /** The two instrument tracks and their labels, 0…1. */ meters?: number;
   /** What the heart meter reads, 0…1. */ heart?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed ring marks the belief track — drawing attention to the zero, not filling it. */ emptyRing?: number;
+  /** 1 = a "≠" mark sits between the two meters — the heart says one thing, belief another. */ contrast?: number;
+  /** 1 = an "IMAGINING" tag sits by the heart meter — the thought theory's own claim about what moved it. */ thoughtTag?: number;
 }
 
 export const BEATS: Aes22Beat[] = [
@@ -44,7 +47,7 @@ export const BEATS: Aes22Beat[] = [
     dur: 1.8,
   },
   {
-    p: 266, x: 200, screen: 1, slime: 1, meters: 1, heart: 1,
+    p: 266, x: 200, screen: 1, slime: 1, meters: 1, heart: 1, emptyRing: 1,
     text: 'Yet Charles never believes that the slime exists. He knows he’s watching a film.',
     dur: 2.9,
   },
@@ -55,7 +58,7 @@ export const BEATS: Aes22Beat[] = [
     dur: 2.2,
   },
   {
-    p: 463, x: 132, screen: 1, slime: 1, meters: 1, heart: 1,
+    p: 463, x: 132, screen: 1, slime: 1, meters: 1, heart: 1, contrast: 1,
     text: 'Second, an emotion requires a belief that its object exists. Third, you don’t believe the film’s events are real.',
     dur: 2.2,
   },
@@ -87,7 +90,7 @@ export const BEATS: Aes22Beat[] = [
     dur: 4.2,
   },
   {
-    p: 383, x: 268, screen: 1, slime: 1, meters: 1, heart: 1,
+    p: 383, x: 268, screen: 1, slime: 1, meters: 1, heart: 1, thoughtTag: 1,
     text: 'The thought theory, held by Peter Lamarque and Noël Carroll, rejects the second claim instead. Vividly imagining a thing is enough to move you.',
     dur: 4.6,
   },

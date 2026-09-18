@@ -23,6 +23,11 @@ export interface Eth15Beat extends BaseBeat {
   /** The beam's tilt in degrees. It is 0 for the whole lesson, and that IS the point. */ tilt?: number;
   /** The doubt mark under the fulcrum — is a balance the right instrument? */ doubt?: number;
   /** 1 = the three boards are live targets (Q1). */ pick?: number;
+  /** 1 = a checkmark appears over the plain pan, marking it as checkable against the world. */ checkable?: number;
+  /** 1 = an equals mark appears over the fulcrum, showing the two pans weigh the same. */ equal?: number;
+  /** 1 = a tag reading +0 FACTS appears over the moral pan, marking the added word as no further fact. */ zero?: number;
+  /** 1 = a tag reading TONE OF HORROR appears above the scene, marking the word as an expression rather than a claim. */ tone?: number;
+  /** 1 = a dashed, empty shape floats above the beam — a fact the scale would miss, resting in neither pan. */ miss?: number;
 }
 
 export const BEATS: Eth15Beat[] = [
@@ -32,7 +37,7 @@ export const BEATS: Eth15Beat[] = [
     text: 'Consider a plain report, the sentence “You stole that money.”',
   },
   {
-    g: 462, plain: 1, tilt: 0,
+    g: 462, plain: 1, tilt: 0, checkable: 1,
     dur: 1.9,
     text: 'The sentence is true or false, and anyone can check it against the world.',
   },
@@ -43,18 +48,18 @@ export const BEATS: Eth15Beat[] = [
     cite: 'Adding a moral word',
   },
   {
-    g: 465, plain: 1, moral: 1, tilt: 0,
+    g: 465, plain: 1, moral: 1, tilt: 0, equal: 1,
     dur: 1.8,
     text: 'On a scale that weighs facts, the second sentence weighs no more than the first.',
   },
   {
-    g: 13, plain: 1, moral: 1, tilt: 0,
+    g: 13, plain: 1, moral: 1, tilt: 0, zero: 1,
     dur: 2.1,
     text: 'Ayer’s emotivism holds that a moral word adds no further fact to the sentence.',
     cite: 'Ayer’s emotivism',
   },
   {
-    g: 266, plain: 1, moral: 1, tilt: 0,
+    g: 266, plain: 1, moral: 1, tilt: 0, tone: 1,
     dur: 2.5,
     text: 'Instead, the word expresses disapproval. Ayer compares it to saying the sentence in a tone of horror.',
   },
@@ -78,7 +83,7 @@ export const BEATS: Eth15Beat[] = [
     cite: 'The realist answers',
   },
   {
-    g: 259, plain: 1, moral: 1, tilt: 0, doubt: 1,
+    g: 259, plain: 1, moral: 1, tilt: 0, doubt: 1, miss: 1,
     dur: 1.8,
     text: 'So a test for observable facts would miss moral facts, if they exist.',
   },

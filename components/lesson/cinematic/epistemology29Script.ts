@@ -27,6 +27,7 @@ export interface Epistemology29Beat extends BaseBeat {
   /** How far the new case has been solved, 0…1. */ solved?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a small pot above the board, split by a dashed crack — the sauce the two cooks face. */ sauceSplit?: number;
 };
 
 export const BEATS: Epistemology29Beat[] = [
@@ -36,7 +37,7 @@ export const BEATS: Epistemology29Beat[] = [
     dur: 4.4,
   },
   {
-    p: 170, x: 26, tiles: 1,
+    p: 170, x: 26, tiles: 1, sauceSplit: 1,
     text: 'Consider two cooks who both know a recipe word for word. When the sauce splits, one of them can’t save it.',
     dur: 4.8,
   },

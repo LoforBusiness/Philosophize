@@ -28,6 +28,8 @@ export interface Epi22Beat extends BaseBeat {
   /** How far the two tokens have travelled, 0…1. */ run?: number;
   /** The gaps under the lucky route, drawn, 0…1. */ gaps?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** Which lane is named this beat: 1 = the road, 2 = the stepping stones. */ laneFocus?: number;
+  /** 1 = the road's dashed extension past the address, the trip that keeps working. */ roadAhead?: number;
 }
 
 export const BEATS: Epi22Beat[] = [
@@ -37,7 +39,7 @@ export const BEATS: Epi22Beat[] = [
     dur: 3.4,
   },
   {
-    p: 462, x: 200, routes: 1,
+    p: 462, x: 200, routes: 1, laneFocus: 2,
     text: 'The second person has no information and guesses the way.',
     dur: 1.8,
   },
@@ -48,12 +50,12 @@ export const BEATS: Epi22Beat[] = [
     dur: 4.4,
   },
   {
-    p: 463, x: 132, routes: 1, run: 1, gaps: 1,
+    p: 463, x: 132, routes: 1, run: 1, gaps: 1, laneFocus: 1,
     text: 'Yet the two routes differ. The first person’s route is a road that can be travelled again.',
     dur: 1.8,
   },
   {
-    p: 463, x: 132, routes: 1, run: 1, gaps: 1,
+    p: 463, x: 132, routes: 1, run: 1, gaps: 1, laneFocus: 2,
     text: 'The guesser’s route is a row of stepping stones with gaps between them.',
     dur: 2.9,
   },
@@ -86,7 +88,7 @@ export const BEATS: Epi22Beat[] = [
     dur: 4.0,
   },
   {
-    p: 383, x: 268, routes: 1, run: 1, gaps: 1,
+    p: 383, x: 268, routes: 1, run: 1, gaps: 1, roadAhead: 1,
     text: 'So the extra value is not in today at all. It lies in stability over time, which a lucky guess lacks.',
     dur: 4.2,
   },

@@ -9,6 +9,7 @@ import { BEATS } from './logic37Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO BOXES, EIGHT TOKENS THAT SETTLE, AND ONE THAT NEVER DOES.
@@ -77,6 +79,8 @@ const SORTED = BEATS.map((b) => b.sorted ?? 0);
 const BARBER = BEATS.map((b) => (b.barber ? 1 : 0));
 const SETS = BEATS.map((b) => (b.sets ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const SHOW_RIGHT = BEATS.map((b) => (b.showRight ? 1 : 0));
+const SET_SWING = BEATS.map((b) => (b.setSwing ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -88,7 +92,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic37'));
 export default function Logic37Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -118,6 +122,8 @@ export default function Logic37Scene({ clock, bt, bi, i, picked, onPick, pickPos
       // settle for as long as he is on stage — a swing that finished would be a
       // picture of an answer arriving.
       swing: Math.sin(t * 2.6),
+      showRight: carry(cv, 5, n, SHOW_RIGHT[p], SHOW_RIGHT[n], tr),
+      setSwing: carry(cv, 6, n, SET_SWING[p], SET_SWING[n], tr),
     };
   });
 
@@ -131,6 +137,13 @@ export default function Logic37Scene({ clock, bt, bi, i, picked, onPick, pickPos
     transform: [{ translateX: SCENE.value.swing * 46 }],
   }));
   const setsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.setsOn }));
+  const showRightStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.showRight }));
+  // The same swing the barber's token rides, crossing the panel's own edge —
+  // in when it would contain itself, out when it would not, never settling.
+  const setTokenStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.setSwing,
+    transform: [{ translateX: SCENE.value.swing * 14 }],
+  }));
 
   const villagers: number[] = [];
   for (let v = 0; v < 8; v++) villagers.push(v);
@@ -172,10 +185,13 @@ export default function Logic37Scene({ clock, bt, bi, i, picked, onPick, pickPos
         <View style={styles.ring} />
       </Animated.View>
 
+      <Animated.View style={[styles.rightRing, showRightStyle, { left: BOX_X[1] - 4 }]} pointerEvents="none" />
+
       <Animated.View style={[StyleSheet.absoluteFill, setsStyle]} pointerEvents="none">
         <View style={styles.setPanel} />
         <Text style={styles.setText}>THE SET OF ALL SETS{'\n'}THAT DO NOT CONTAIN THEMSELVES</Text>
       </Animated.View>
+      <Animated.View style={[styles.setToken, setTokenStyle]} pointerEvents="none" />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
@@ -202,7 +218,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 136, top: CAP_T, width: 240,
@@ -211,7 +227,7 @@ const styles = StyleSheet.create({
 
   box: {
     position: 'absolute', top: BOX_Y, width: BOX_W, height: BOX_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   boxCap: {
     position: 'absolute', top: BOX_Y - 16, width: BOX_W, textAlign: 'center',
@@ -234,6 +250,15 @@ const styles = StyleSheet.create({
     position: 'absolute', left: SET_X, top: SET_Y + 12, width: 236, textAlign: 'center', lineHeight: 11,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK, includeFontPadding: false,
   },
+
+  // The ring that names which box this beat is about.
+  rightRing: {
+    position: 'absolute', top: BOX_Y - 4, width: BOX_W + 8, height: BOX_H + 8,
+    borderWidth: 2, borderColor: INK, borderRadius: 12,
+  },
+  // The set version's own token, crossing the panel's edge exactly as the
+  // barber's token crosses between the two boxes.
+  setToken: { position: 'absolute', left: SET_X - 6, top: SET_Y + 18, width: 10, height: 10, borderRadius: 5, backgroundColor: INK },
 
   hit: { position: 'absolute', top: BOX_Y, width: BOX_W, height: BOX_H },
   hitBox: { position: 'absolute', left: 0, top: 0, width: BOX_W, height: BOX_H, borderRadius: 4 },

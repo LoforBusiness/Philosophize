@@ -28,6 +28,7 @@ export interface Aesthetics29Beat extends BaseBeat {
   /** How much the novel hands over, 0…1. */ gives?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed ring questions the UNDERSTANDING tray — Stolnitz's "unconfirmed". */ doubt?: number;
 };
 
 export const BEATS: Aesthetics29Beat[] = [
@@ -79,7 +80,7 @@ export const BEATS: Aesthetics29Beat[] = [
     dur: 4.8,
   },
   {
-    p: 456, x: 80, trays: 1, book: 1, gives: 0.45,
+    p: 456, x: 80, trays: 1, book: 1, gives: 0.45, doubt: 1,
     text: 'Jerome Stolnitz argued that fiction’s truths are trivial and unconfirmed. Its soldiers are invented, so nothing in the novel confirms what real soldiers feel.',
     dur: 5.0,
   },

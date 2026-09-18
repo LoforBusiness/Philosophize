@@ -30,6 +30,8 @@ export interface Political41Beat extends BaseBeat {
   /** How much of the book has lifted away, 0…1. */ lift?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = the case no written rule covers is set beside the stand. */ unforeseen?: number;
+  /** 1 = the limit Locke puts on the power, and who judges it afterwards. */ judged?: number;
 }
 
 export const BEATS: Political41Beat[] = [
@@ -40,6 +42,7 @@ export const BEATS: Political41Beat[] = [
   },
   {
     p: 162, x: 28, book: 1,
+    unforeseen: 1,
     text: 'Some emergencies, such as a plague or an invasion, fall outside every rule written in advance.',
     dur: 4.2,
   },
@@ -82,6 +85,7 @@ export const BEATS: Political41Beat[] = [
   },
   {
     p: 389, x: 88, book: 1, slots: 1, lift: 0.34,
+    judged: 1,
     text: 'Locke limits the power to the public good, so the people can judge afterwards whether it was used well.',
     dur: 4.8,
   },

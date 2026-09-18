@@ -16,6 +16,8 @@ export interface Logic32Beat extends BaseBeat {
   /** Cornered figure's gesture (emote code). */ b?: number;
   /** 1 = the question is on the board. */ q?: number;
   /** Which answer is being tried: 0 none · 1 YES · 2 NO. */ tried?: number;
+  /** 1 = the tried answer is stamped solid ink, as if now entered on the record. */ record?: number;
+  /** 1 = the claim slot names the TERM "loaded question", before the specific hidden claim is shown there. */ named?: number;
   /** 1 = the hidden claim is showing under the sentence. */ hidden?: number;
   /** 1 = the words are live targets (Q1). */ pick?: number;
 }
@@ -39,7 +41,7 @@ export const BEATS: Logic32Beat[] = [
     cite: 'Answer: yes',
   },
   {
-    a: 163, b: 4, q: 1, tried: 1,
+    a: 163, b: 4, q: 1, tried: 1, record: 1,
     dur: 2.4,
     text: 'The accusation is now on the record, although no one ever stated it.',
   },
@@ -50,7 +52,7 @@ export const BEATS: Logic32Beat[] = [
     cite: 'Answer: no',
   },
   {
-    a: 163, b: 46, q: 1, tried: 2,
+    a: 163, b: 46, q: 1, tried: 2, named: 1,
     dur: 1.8,
     text: 'A question like this is called a loaded question: it presupposes a claim that any direct answer concedes.',
   },

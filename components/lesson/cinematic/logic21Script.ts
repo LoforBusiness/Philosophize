@@ -30,6 +30,7 @@ export interface Log21Beat extends BaseBeat {
   /** The bench and its two lamps, 0…1. */ bench?: number;
   /** Which chip is under test, 0…3. */ under?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = the second lamp's test is named under the bench: starts it alone. */ alone?: number;
 }
 
 export const BEATS: Log21Beat[] = [
@@ -46,6 +47,7 @@ export const BEATS: Log21Beat[] = [
   },
   {
     p: 400, x: 200, chips: 1, bench: 1, under: 0,
+    alone: 1,
     text: 'A condition is sufficient when it starts the fire alone.',
     dur: 1.8,
   },

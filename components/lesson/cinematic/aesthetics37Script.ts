@@ -27,6 +27,10 @@ export interface Aesthetics37Beat extends BaseBeat {
   /** How much of the improvised row has been played, 0…1. */ played?: number;
   /** How far the solo has been transcribed upward, 0…1. */ lift?: number;
   /** 1 = the reader's thumb is doing the transcribing. */ live_d?: number;
+  /** 1 = a record mark by the improvised row — it has begun acquiring a fixed
+   *  version. */ rec?: number;
+  /** 1 = a bracket ties the two staves — the sound now matches, though what it
+   *  is still differs. */ tie?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
 }
 
@@ -68,7 +72,7 @@ export const BEATS: Aesthetics37Beat[] = [
     dur: 3.6,
   },
   {
-    p: 309, x: 54, staves: 1, score: 1, played: 1,
+    p: 309, x: 54, staves: 1, score: 1, played: 1, rec: 1,
     text: 'Recording changed this. Players began learning famous solos note for note, so an event meant to happen once acquired a correct version.',
     dur: 4.8,
   },
@@ -97,7 +101,7 @@ export const BEATS: Aesthetics37Beat[] = [
     dur: 4.1,
   },
   {
-    p: 167, x: 126, staves: 1, score: 1, lift: 1,
+    p: 167, x: 126, staves: 1, score: 1, lift: 1, tie: 1,
     text: 'The difference lies not in how the music sounds, but in what the music is.',
     dur: 1.8,
   },

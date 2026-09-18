@@ -12,6 +12,7 @@ import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, 
   stageAnswered,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -19,8 +20,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // The trolley problem, staged as a schematic.
 //
@@ -424,7 +426,7 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   car: {
     position: 'absolute', left: 0, top: 16, width: 84, height: 47,
-    borderWidth: 3, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 3, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   window: {
     position: 'absolute', top: 25, width: 20, height: 17,
@@ -440,7 +442,7 @@ const styles = StyleSheet.create({
   board: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   card: {
     position: 'absolute', top: CARD_TOP, width: CARD_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     paddingHorizontal: 7, paddingTop: 8, overflow: 'hidden',
   },
   cardOn: { position: 'absolute', left: 0, top: 0, right: 0, height: 4, backgroundColor: INK },
@@ -461,7 +463,7 @@ const styles = StyleSheet.create({
   lens: { fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 15, letterSpacing: 0.2, color: INK, includeFontPadding: false },
   rule: {
     marginTop: 6, height: 24, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
-    alignItems: 'center', justifyContent: 'center', backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
+    alignItems: 'center', justifyContent: 'center', backgroundColor: PLATE_FACE, boxShadow: LIP, overflow: 'hidden',
   },
   ruleOn: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: INK },
   ruleT: {
@@ -497,7 +499,7 @@ const styles = StyleSheet.create({
     // the ONE label on the branch, which `check:readable` reported as UNDER the
     // moment the fill changed. The car is the mass in this picture; a card the
     // reader is being asked to read is not.
-    width: BAL_W, height: BAL_H, borderWidth: 2.5, borderColor: INK, borderRadius: 5,
+    width: BAL_W, height: BAL_H, borderWidth: 2.5, borderColor: INK, borderRadius: 8,
     backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   plateRight: { backgroundColor: INK, borderColor: INK },

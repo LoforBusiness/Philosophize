@@ -11,14 +11,16 @@ import { BEATS } from './political4Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A figure walled in by interference, drawn as an information graphic rather than a
 // mood piece:
@@ -86,6 +88,15 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const WALLS = BEATS.map((b) => b.walls ?? 0);
 const HARM = BEATS.map((b) => b.harm ?? 0);
 const TEST = BEATS.map((b) => b.test ?? 0);
+const EDGE = BEATS.map((b) => b.edge ?? 0);
+const ONLY = BEATS.map((b) => b.only ?? 0);
+const ROLE = BEATS.map((b) => b.role ?? 0);
+
+// The role bar runs under the POSITIVE LIBERTY card, from its left edge, and stops
+// short of the card's right so it reads as a MEASURE of the role rather than as a
+// second card. Read off the card's own geometry so moving the card moves the bar.
+const ROLE_T = CARD_T + CARD_H + 7;
+const ROLE_W = CARD_W - 18;
 const NEG = BEATS.map((b) => ((b.panel ?? 0) === 1 ? 1 : 0));
 const POS = BEATS.map((b) => ((b.panel ?? 0) === 2 ? 1 : 0));
 
@@ -106,7 +117,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political4'));
 export default function Political4Scene({ clock, bt, bi, dragPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(8);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -126,6 +137,9 @@ export default function Political4Scene({ clock, bt, bi, dragPos, i, gazeX, gaze
       // one eats the first when a state is holding it, and the bar is the only place
       // in the lesson where the reader can watch that happen to them.
       pos: carry(cv, 4, n, POS[p], reacting ? 1 - dragPos.value : POS[n], tr),
+      edge: carry(cv, 5, n, EDGE[p], EDGE[n], tr),
+      only: carry(cv, 6, n, ONLY[p], ONLY[n], tr),
+      role: carry(cv, 7, n, ROLE[p], ROLE[n], tr),
     };
   });
 
@@ -153,6 +167,24 @@ export default function Political4Scene({ clock, bt, bi, dragPos, i, gazeX, gaze
 
   const harmStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.harm }));
 
+  // THE BOUNDARY, BEFORE THE PERSON IT PROTECTS. `harm` brings the whole apparatus —
+  // the line, the label and the other person — and this beat's sentence only marks
+  // where the area ENDS, so the line draws on its own and hands over when `harm`
+  // arrives: the two never both carry it.
+  const edgeStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.edge * (1 - SCENE.value.harm),
+    transform: [{ scaleY: 0.4 + 0.6 * SCENE.value.edge }],
+  }));
+  // …and the role the positive card backs, as a bar that grows out of it.
+  const roleStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.role }));
+  const roleBarStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: SCENE.value.role }] }));
+  // A WASH OF THE GROUND, NOT A DIM. Dropping the three cells' own opacity would take
+  // their words with them, and they are still the reader's own call — §17's rule is
+  // that emphasis goes on the live one and is never taken from the others. So the
+  // ground is laid back over them at 0.62, which quiets the cell without touching any
+  // type's contrast on the beats where nothing is being singled out.
+  const quietStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.only * 0.62 }));
+
   return (
     <View style={styles.scene}>
       {/* ── the two liberty cards, one of which stamps ─────────────────────── */}
@@ -169,6 +201,21 @@ export default function Political4Scene({ clock, bt, bi, dragPos, i, gazeX, gaze
 
       {/* ── Mill's test, tallied in the same strip as the measure ──────────── */}
       {TESTS.map((c, k) => <TestCell key={c.act} c={c} k={k} S={SCENE} />)}
+
+      {/* Only the harming act may be coerced: the other three go quiet rather than
+          away, because they are still the reader's own call and still on the strip. */}
+      {TESTS.map((c, k) => (c.harm ? null : (
+        <Animated.View key={`q${c.act}`} style={[styles.quiet, { left: c.left, width: c.w }, quietStyle]} pointerEvents="none" />
+      )))}
+
+      {/* The boundary of the area, drawn before the person it protects. */}
+      <Animated.View style={[styles.edge, edgeStyle]} pointerEvents="none" />
+
+      {/* The role the positive card backs. */}
+      <Animated.View style={[styles.roleWrap, roleStyle]} pointerEvents="none">
+        <Animated.View style={[styles.roleBar, roleBarStyle]} />
+        <Text style={styles.roleLabel}>A BIGGER ROLE</Text>
+      </Animated.View>
 
       {/* ── the walls of interference, coursed like brick ──────────────────── */}
       <Animated.View style={[styles.wall, { left: WALL_L }, wallLStyle]} pointerEvents="none">
@@ -258,7 +305,7 @@ const styles = StyleSheet.create({
   // ── comparison cards ───────────────────────────────────────────────────────
   card: {
     position: 'absolute', top: CARD_T, width: CARD_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP, overflow: 'hidden',
   },
   cardFill: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: INK, transformOrigin: '0% 50%' },
   cardText: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
@@ -308,6 +355,30 @@ const styles = StyleSheet.create({
   // ── the harm boundary + the other person ───────────────────────────────────
   harmWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
   dash: { position: 'absolute', left: HARM_X, width: 2, height: 9, backgroundColor: SOFT },
+
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  //
+  // The boundary is the same 2-unit rule the harm line is drawn from and sits at
+  // the same x, so when `harm` arrives the reader is watching the line they have
+  // already been shown gain its label and the person behind it.
+  edge: {
+    position: 'absolute', left: HARM_X, top: DASH_T, width: 2, height: 160,
+    backgroundColor: SOFT, transformOrigin: '50% 100%',
+  },
+  quiet: {
+    position: 'absolute', top: TEST_T, height: TEST_H, backgroundColor: PAPER,
+    borderRadius: 6,
+  },
+  roleWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
+  roleBar: {
+    position: 'absolute', left: CARD_BL + 9, top: ROLE_T, width: ROLE_W, height: 5,
+    backgroundColor: INK, borderRadius: 2.5, transformOrigin: '0% 50%',
+  },
+  roleLabel: {
+    position: 'absolute', left: CARD_BL, top: ROLE_T + 9, width: CARD_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: SOFT,
+    includeFontPadding: false,
+  },
   harmLabel: {
     position: 'absolute', left: 296, top: 340, width: 108, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,

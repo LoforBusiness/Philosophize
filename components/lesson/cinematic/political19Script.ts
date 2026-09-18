@@ -30,6 +30,7 @@ export interface Pol19Beat extends BaseBeat {
   /** The falling OBLIGATION-FELT line, 0…1 of its length. */ pull?: number;
   /** The marker showing where you are standing on the axis, 0…1. */ mark?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = the axis runs on off the picture: the principle has no stopping point. */ onward?: number;
 }
 
 export const BEATS: Pol19Beat[] = [
@@ -79,6 +80,7 @@ export const BEATS: Pol19Beat[] = [
   },
   {
     p: 380, x: 268, axis: 1, cost: 1, pull: 1, mark: 1,
+    onward: 1,
     text: 'The trouble is where that principle stops. Another death can always be prevented at the cost of one more possession.',
     cite: 'The demandingness objection',
     dur: 4.8,

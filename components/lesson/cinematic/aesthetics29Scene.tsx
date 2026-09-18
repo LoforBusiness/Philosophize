@@ -9,6 +9,7 @@ import { BEATS } from './aesthetics29Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO TRAYS OVER ONE BOOK, AND WHAT ENDS UP IN EACH.
@@ -81,6 +83,9 @@ const BOOK = BEATS.map((b) => (b.book ? 1 : 0));
 const GIVES = BEATS.map((b) => b.gives ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// GROUP AH — one still tap: a dashed ring rings the UNDERSTANDING tray, the fill
+// Stolnitz's objection puts in question, rather than the tray's own fill.
+const DOUBT = BEATS.map((b) => (b.doubt ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -91,7 +96,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics29'));
 export default function Aesthetics29Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -113,6 +118,7 @@ export default function Aesthetics29Scene({ clock, bt, bi, i, picked, onPick, dr
       // HOW MUCH THE NOVEL HANDS OVER, which is the only thing the knob measures.
       gives: carry(cv, 3, n, GIVES[p], reacting ? dragPos.value : GIVES[n], tr),
       plates: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      doubt: carry(cv, 5, n, DOUBT[p], DOUBT[n], tr),
     };
   });
 
@@ -123,6 +129,7 @@ export default function Aesthetics29Scene({ clock, bt, bi, i, picked, onPick, dr
   const traysStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.trays }));
   const bookStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.book }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
+  const doubtStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.doubt }));
   // FACTS ARRIVE LATE AND UNDERSTANDING ARRIVES EARLY, off one value. That
   // difference IS the claim, so it is stated here rather than in two channels.
   const factFill = useAnimatedStyle(() => ({ width: (TRAY_W - 4) * clamp01((SCENE.value.gives - 0.7) / 0.3) }));
@@ -142,6 +149,7 @@ export default function Aesthetics29Scene({ clock, bt, bi, i, picked, onPick, dr
         ))}
         <Animated.View style={[styles.fill, { top: TRAY_Y[0] + 2 }, factFill]} />
         <Animated.View style={[styles.fill, { top: TRAY_Y[1] + 2 }, graspFill]} />
+        <Animated.View style={[styles.doubtRing, doubtStyle]} pointerEvents="none" />
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, bookStyle]} pointerEvents="none">
@@ -186,7 +194,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   head: {
     position: 'absolute', left: TRAY_X, top: HEAD_T, width: 252,
@@ -202,6 +210,12 @@ const styles = StyleSheet.create({
     position: 'absolute', left: CAP_X, width: CAP_W,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
+  // A DASHED RING ROUND THE UNDERSTANDING TRAY (beat 7) — Stolnitz calling its
+  // fill trivial and unconfirmed, drawn on the tray rather than said again.
+  doubtRing: {
+    position: 'absolute', left: TRAY_X - 3, top: TRAY_Y[1] - 3, width: TRAY_W + 6, height: TRAY_H + 6,
+    borderRadius: 4, borderWidth: 1.5, borderStyle: 'dashed', borderColor: SOFT,
+  },
 
   stem: { position: 'absolute', left: BOOK_X + BOOK_W / 2 - 1.5, top: TRAY_Y[1] + TRAY_H, width: 3, height: BOOK_Y - TRAY_Y[1] - TRAY_H, backgroundColor: INK },
   book: {
@@ -214,7 +228,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,

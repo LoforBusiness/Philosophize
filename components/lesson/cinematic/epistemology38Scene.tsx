@@ -9,6 +9,7 @@ import { BEATS } from './epistemology38Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE ROUNDELS, EACH WITH ONE SOLID SHOT AND SIX HOLLOW NEAR MISSES.
@@ -47,6 +49,7 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const TRUE_TWO = BEATS.map((b) => b.trueTwo ?? 0);
 const BASE_TR = 0.85;
 
 const R_OUT = 76;
@@ -91,7 +94,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology38'));
 export default function Epistemology38Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -115,6 +118,8 @@ export default function Epistemology38Scene({ clock, bt, bi, i, picked, onPick, 
       // and the left side is THE SHOOTER, so handing the bar to the shooter must
       // CLOSE the near shots: the wider they sit, the less of the hit was aim.
       wide: carry(cv, 4, n, WIDE[p], reacting ? 1 - dragPos.value : WIDE[n], tr),
+      // Carried, so it fades out as well as in (group L).
+      trueTwo: carry(cv, 5, n, TRUE_TWO[p], TRUE_TWO[n], tr),
     };
   });
 
@@ -124,6 +129,15 @@ export default function Epistemology38Scene({ clock, bt, bi, i, picked, onPick, 
 
   const onStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.roundelsOn }));
   const nameStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.namesOn }));
+
+  // ── the tap event ──────────────────────────────────────────────────────────
+  //
+  // TWO OF THE THREE, AND IN TURN. The sentence's whole point is that being true
+  // does not sort the first from the second, so the mark has to be the SAME mark
+  // on both — a different one on each would answer the question the lesson asks.
+  const true0Style = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.trueTwo / 0.6) }));
+  const true1Style = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.trueTwo - 0.4) / 0.6) }));
+  const trueStyles = [true0Style, true1Style];
 
   return (
     <View style={styles.scene}>
@@ -166,6 +180,13 @@ export default function Epistemology38Scene({ clock, bt, bi, i, picked, onPick, 
           ))}
         </Animated.View>
       </Animated.View>
+
+      {/* Both of these beliefs are true, and that is all it says. */}
+      {[0, 1].map((k) => (
+        <Animated.View key={`tt${k}`} style={[styles.trueTag, { left: R_CX[k] - 22 }, trueStyles[k]]} pointerEvents="none">
+          <Text style={styles.trueText} numberOfLines={1}>TRUE</Text>
+        </Animated.View>
+      ))}
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
@@ -211,11 +232,24 @@ function Near({ S, roundel, index }: { S: SharedValue<any>; roundel: number; ind
 }
 
 const styles = StyleSheet.create({
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // Above each roundel, clear of its outer ring: R_OUT is the outer diameter, so
+  // the ring's top edge is R_CY − R_OUT / 2.
+  trueTag: {
+    position: 'absolute', top: R_CY - R_OUT / 2 - 26, width: 44, height: 20,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  trueText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — political7 and political8 both stand
   // their subject on a filled mass rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 128, top: CAP_T, width: 256,

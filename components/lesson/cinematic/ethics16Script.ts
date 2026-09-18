@@ -22,6 +22,8 @@ export interface Eth16Beat extends BaseBeat {
   /** Where the money is: 0 in his hand · 1 handed over. */ money?: number;
   /** The label on the box the money goes into: 0 TAKEN · 1 REPAID. */ repaid?: number;
   /** 1 = the three boards are live targets (Q1). */ pick?: number;
+  /** 1 = a dashed line drops from the causal rail to the box, showing the chain reaching this act too. */ bound?: number;
+  /** 1 = a tag reading FREE appears by the box, naming this unforced act free on Hume's account. */ free?: number;
 }
 
 export const BEATS: Eth16Beat[] = [
@@ -37,7 +39,7 @@ export const BEATS: Eth16Beat[] = [
     cite: 'The same act, unforced',
   },
   {
-    g: 383, causes: 1, knife: 0, money: 1, repaid: 1,
+    g: 383, causes: 1, knife: 0, money: 1, repaid: 1, bound: 1,
     dur: 4.8,
     text: 'Hard determinists hold that every event, including every choice, is fixed by earlier causes. So neither act was free.',
     cite: 'Hard determinism',
@@ -56,7 +58,7 @@ export const BEATS: Eth16Beat[] = [
     },
   },
   {
-    g: 412, causes: 1, knife: 0, money: 1, repaid: 1,
+    g: 412, causes: 1, knife: 0, money: 1, repaid: 1, free: 1,
     dur: 5.0,
     text: 'David Hume defends a smaller notion of freedom, compatible with causation. You act freely when you do as you will and nothing forces you.',
     cite: 'Compatibilism',

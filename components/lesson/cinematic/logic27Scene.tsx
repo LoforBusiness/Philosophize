@@ -9,6 +9,7 @@ import { BEATS } from './logic27Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A CARD, A BRACKET LEAVING IT AND RETURNING TO IT, AND TWO LAMPS THAT FLIP.
@@ -85,6 +87,9 @@ const LOOP = BEATS.map((b) => (b.loop ? 1 : 0));
 const LAMPS = BEATS.map((b) => (b.lamps ? 1 : 0));
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// group AH — two still-beat events, each derived from its own beat's sentence.
+const TESTFALSE_ON = BEATS.map((b) => ((b.testFalse ?? 0) > 0 ? 1 : 0));
+const ELSEWHERE_ON = BEATS.map((b) => ((b.elsewhere ?? 0) > 0 ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -105,7 +110,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic27'));
 export default function Logic27Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(8);
+  const cv = useCarry(10);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const testFalseFade = (cur.testFalse ?? 0) !== (prev?.testFalse ?? 0);
+  const elsewhereFade = (cur.elsewhere ?? 0) !== (prev?.elsewhere ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -131,6 +140,10 @@ export default function Logic27Scene({ clock, bt, bi, i, picked, onPick, pickPos
       both: carry(cv, 5, n, 0, reacting ? pickAt(BOTH_AT, pickPos.value) : 0, tr),
       cut: carry(cv, 6, n, 0, reacting ? pickAt(CUT_AT, pickPos.value) : 0, tr),
       platesOn: carry(cv, 7, n, PLATES[p], PLATES[n], tr),
+      // A ring on the FALSE lamp — the supposition this beat is testing.
+      testFalse: carry(cv, 8, n, TESTFALSE_ON[p], TESTFALSE_ON[n], testFalseFade ? tr : 1),
+      // A tag below the lamps — the shape recurs beyond this one sentence.
+      elsewhere: carry(cv, 9, n, ELSEWHERE_ON[p], ELSEWHERE_ON[n], elsewhereFade ? tr : 1),
     };
   });
 
@@ -149,6 +162,14 @@ export default function Logic27Scene({ clock, bt, bi, i, picked, onPick, pickPos
     opacity: SCENE.value.lampsOn * Math.max(SCENE.value.alternating * (1 - SCENE.value.flip), SCENE.value.both),
   }));
   const lampsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.lampsOn }));
+  // A breathing ring on the FALSE lamp — the supposition this beat tests.
+  const testFalseStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.testFalse * (0.55 + 0.45 * Math.sin(SCENE.value.t * 3.2)),
+  }));
+  const elsewhereStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.elsewhere,
+    transform: [{ translateY: (1 - SCENE.value.elsewhere) * 6 }],
+  }));
 
   return (
     <View style={styles.scene}>
@@ -177,6 +198,14 @@ export default function Logic27Scene({ clock, bt, bi, i, picked, onPick, pickPos
         {LAMP_X.map((lx, k) => (
           <Text key={lx} style={[styles.lampText, { left: lx }]}>{LAMP_CAP[k]}</Text>
         ))}
+      </Animated.View>
+
+      {/* the ring on the FALSE lamp — the supposition this beat tests */}
+      <Animated.View style={[styles.lampRing, { left: LAMP_X[1] - 4 }, testFalseStyle]} pointerEvents="none" />
+
+      {/* the shape recurs beyond this one sentence */}
+      <Animated.View style={[styles.elsewhere, elsewhereStyle]} pointerEvents="none">
+        <Text style={styles.elsewhereText} numberOfLines={1}>SAME SHAPE, ELSEWHERE</Text>
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
@@ -208,7 +237,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: CARD_X, top: CAP_T, width: CARD_W,
@@ -242,11 +271,29 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,
+  },
+
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // A breathing ring, like the ones that mark a row or a link elsewhere in
+  // this branch — an outline only, never a fill.
+  lampRing: {
+    position: 'absolute', top: LAMP_Y - 4, width: LAMP_W + 8, height: LAMP_H + 8,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8,
+  },
+  // The tag: the plates' own row is empty at this beat, so it lands there.
+  elsewhere: {
+    position: 'absolute', left: CARD_X, top: PLATE_Y, width: CARD_W, height: PLATE_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  elsewhereText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.6, color: INK,
+    includeFontPadding: false,
   },
 });
 

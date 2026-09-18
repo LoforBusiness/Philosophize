@@ -15,6 +15,8 @@ export interface Pol14Beat extends BaseBeat {
   /** Figure gesture (emote code). */ g?: number;
   /** How many stages of the story are on stage, 0…3. */ rows?: number;
   /** 1 = the three stages are live targets (Q1). */ pick?: number;
+  /** 1 = a bracket marks each end of the trades row — the spectator's payment and the star's choice to play, both freely made. */ consent?: number;
+  /** 1 = a question mark settles below the three rows — Nozick's challenge of which stage to stop, still open. */ query?: number;
 }
 
 export const BEATS: Pol14Beat[] = [
@@ -30,7 +32,7 @@ export const BEATS: Pol14Beat[] = [
     cite: 'Twenty-five cents a ticket',
   },
   {
-    g: 266, rows: 2,
+    g: 266, rows: 2, consent: 1,
     dur: 1.8,
     text: 'Every single transfer is free. Each spectator chooses to pay, and the star chooses to play.',
   },
@@ -54,7 +56,7 @@ export const BEATS: Pol14Beat[] = [
     },
   },
   {
-    g: 383, rows: 3,
+    g: 383, rows: 3, query: 1,
     dur: 4.8,
     text: 'To restore the original pattern, something in this sequence must be stopped. Nozick asks which stage you’d stop.',
     cite: 'Something must be stopped',

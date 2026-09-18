@@ -13,6 +13,7 @@ import { BEATS } from './aesthetics13Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // TWO CANVASES THE READER CANNOT TELL APART, and a provenance line that draws
 // BACKWARDS in time underneath them — six links under one, a single link under the
@@ -58,6 +60,10 @@ const FIG_X = 46;
 const G = BEATS.map((b) => b.g ?? 0);
 const ART = BEATS.map((b) => b.art ?? 0);
 const CHAIN = BEATS.map((b) => b.chain ?? 0);
+const LOUPEV = BEATS.map((b) => (b.loupe ? 1 : 0));
+const NOTELLV = BEATS.map((b) => (b.noTell ? 1 : 0));
+const FORGERV = BEATS.map((b) => (b.forgerTag ? 1 : 0));
+const SHIFTV = BEATS.map((b) => (b.verdictShift ? 1 : 0));
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -83,8 +89,14 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics13'));
 export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(6);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // The four tap events (group AH).
+  const loupeFade = !!cur.loupe !== !!prev?.loupe;
+  const noTellFade = !!cur.noTell !== !!prev?.noTell;
+  const forgerFade = !!cur.forgerTag !== !!prev?.forgerTag;
+  const shiftFade = !!cur.verdictShift !== !!prev?.verdictShift;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -94,6 +106,7 @@ export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick, pi
     // Six links over 1.5s — slow enough that the reader watches it travel back,
     // which is the only way the short chain stopping reads as an event (C17).
     const draw = ease01(bt.value / 1.5);
+    const grow = ease01(bt.value / 0.55);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
@@ -102,6 +115,11 @@ export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick, pi
       // different hands, the chain behind the canvases is traced back — and the x axis
       // can hold the two forms identical while it happens, which is the whole case.
       chain: carry(cv, 1, n, CHAIN[p], reacting ? pickAt(POLL_CHAIN, pickPos.value) : CHAIN[n], draw),
+      // The four tap events (group AH) — each carried so it fades OUT as well as in.
+      loupe: carry(cv, 2, n, LOUPEV[p], LOUPEV[n], loupeFade ? grow : 1),
+      noTell: carry(cv, 3, n, NOTELLV[p], NOTELLV[n], noTellFade ? grow : 1),
+      forger: carry(cv, 4, n, FORGERV[p], FORGERV[n], forgerFade ? grow : 1),
+      shift: carry(cv, 5, n, SHIFTV[p], SHIFTV[n], shiftFade ? grow : 1),
     };
   });
 
@@ -112,6 +130,22 @@ export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick, pi
     transform: [{ scaleX: SCENE.value.chain }],
   }));
   const dateStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.chain * 2 - 1) }));
+  const loupeStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.loupe,
+    transform: [{ scale: 0.6 + SCENE.value.loupe * 0.4 }],
+  }));
+  // No `transform` here — the handle keeps its static rotate, which a shared
+  // transform array would otherwise overwrite.
+  const loupeHandleStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.loupe }));
+  const noTellStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.noTell }));
+  const forgerStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.forger,
+    transform: [{ translateY: (1 - SCENE.value.forger) * -6 }],
+  }));
+  const shiftStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.shift,
+    transform: [{ translateY: (1 - SCENE.value.shift) * -8 }],
+  }));
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -138,6 +172,19 @@ export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick, pi
         </Animated.View>
       ))}
 
+      {/* the expert's inspection, in the gap between the two canvases */}
+      <Animated.View style={[styles.loupeGlass, loupeStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.loupeHandle, loupeHandleStyle]} pointerEvents="none" />
+
+      {/* a dashed span with an “=” — no visible feature tells the two apart */}
+      <Animated.View style={[styles.noTellLine, noTellStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.noTellMark, noTellStyle]} pointerEvents="none">=</Animated.Text>
+
+      {/* the verdict that moved while the paint did not */}
+      <Animated.View style={[styles.shiftTag, shiftStyle]} pointerEvents="none">
+        <Text style={styles.shiftText}>HAILED → DISMISSED</Text>
+      </Animated.View>
+
       {/* where each canvas has been */}
       <View style={styles.strip}>
         <Target id={'history'} correct={true} picked={picked} onPick={onPick}
@@ -147,6 +194,9 @@ export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick, pi
             <Link key={x} k={k} left={x - STRIP.left} SCENE={SCENE} />
           ))}
           <Link k={0} left={FAKE_X - STRIP.left} SCENE={SCENE} />
+          <Animated.View style={[styles.forgerTag, forgerStyle]} pointerEvents="none">
+            <Text style={styles.forgerText}>THE FORGER</Text>
+          </Animated.View>
           <Animated.Text style={[styles.date, { left: 8 }, dateStyle]} numberOfLines={1}>
             1660
           </Animated.Text>
@@ -206,7 +256,7 @@ const styles = StyleSheet.create({
   // top carries the answer state instead (H61).
   tab: {
     position: 'absolute', left: 82, top: 52, width: 120, height: 22,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   tabText: {
@@ -217,6 +267,46 @@ const styles = StyleSheet.create({
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT },
+
+  // ── the four tap events (group AH) ───────────────────────────────────────
+  // A loupe in the gap between the two canvases — the expert's inspection.
+  loupeGlass: {
+    position: 'absolute', left: 234, top: 346, width: 16, height: 16, borderRadius: 8,
+    borderWidth: 1.5, borderColor: INK,
+  },
+  loupeHandle: {
+    position: 'absolute', left: 245, top: 357, width: 2, height: 10, backgroundColor: INK,
+    transform: [{ rotate: '45deg' }],
+  },
+
+  // A dashed span with an “=” — no visible feature tells the two canvases apart.
+  noTellLine: {
+    position: 'absolute', left: 232, top: 354, width: 20,
+    height: 2, borderTopWidth: 2, borderColor: SHADE, borderStyle: 'dashed',
+  },
+  noTellMark: {
+    position: 'absolute', left: 234, top: 343, width: 16, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 14, color: INK, includeFontPadding: false,
+  },
+
+  // The one link at FAKE_X, named the moment the words name it.
+  forgerTag: {
+    position: 'absolute', left: 214, top: 2, paddingHorizontal: 5, paddingVertical: 1.5,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  forgerText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
+
+  // The verdict that moved while the paint did not — a tag above the pair, naming
+  // neither canvas.
+  shiftTag: {
+    position: 'absolute', left: 170, top: 410, paddingHorizontal: 6, paddingVertical: 2,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  shiftText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.3, color: INK,
+    includeFontPadding: false,
+  },
 });
 
 // Ink runs from the canvases (304) to the strip's tab (496). Band 298…512 = 214 (H59).

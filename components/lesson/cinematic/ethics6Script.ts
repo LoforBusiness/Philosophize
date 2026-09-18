@@ -21,6 +21,14 @@ export interface Ethics6Beat extends BaseBeat {
    * effect both point at. It lands on the doing-vs-using beat and stays up.
    */
   stamp?: number;
+  /**
+   * A one-shot flash in the stamp's own (otherwise empty) column, timed to this
+   * beat's own claim. 0 none · 1 two equal bars, LEVER = PUSH, both topped 5 —
+   * the raw arithmetic, before intuition reverses it · 2 a check over LEVER and
+   * a cross over PUSH — the surveyed verdict · 3 "(A SIDE EFFECT)" tagged above
+   * the landed stamp, pairing with the "A MEANS" it already reads.
+   */
+  verdict?: number;
 }
 
 export const BEATS: Ethics6Beat[] = [
@@ -30,7 +38,7 @@ export const BEATS: Ethics6Beat[] = [
     dur: 1.8,
   },
   {
-    d: 266, str: 158, tx: 70, card: 0,
+    d: 266, str: 158, tx: 70, card: 0, verdict: 1,
     text: 'The numbers can stay fixed while moral intuitions reverse. What changes is how the harm is brought about.',
     dur: 2,
   },
@@ -47,7 +55,7 @@ export const BEATS: Ethics6Beat[] = [
     dur: 3.8,
   },
   {
-    d: 266, str: 258, tx: 150, shove: 1, card: 2,
+    d: 266, str: 258, tx: 150, shove: 1, card: 2, verdict: 2,
     text: 'In surveys, most people who would pull the lever judge pushing impermissible.',
     dur: 1.8,
   },
@@ -58,7 +66,7 @@ export const BEATS: Ethics6Beat[] = [
     dur: 3.2,
   },
   {
-    d: 170, str: 18, tx: 180, card: 2, stamp: 1,
+    d: 170, str: 18, tx: 180, card: 2, stamp: 1, verdict: 3,
     text: 'The doctrine of double effect offers an explanation. Diverting kills as a side effect, whereas shoving uses a person as a means.',
     dur: 1.8,
   },

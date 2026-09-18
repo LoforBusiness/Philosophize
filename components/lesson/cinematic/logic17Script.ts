@@ -32,6 +32,9 @@ export interface Log17Beat extends BaseBeat {
   /** How far the claims have been lifted off their speakers, 0…1. */ lift?: number;
   /** The unsupported claim coming apart in mid-air, 0…1. */ falls?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed, empty footing appears under the right claim — the reasons the left one has, and the right one lacks. */ bare?: number;
+  /** 1 = a dashed box marks the two speaker labels — what the insult actually reaches. */ hits?: number;
+  /** 1 = a check marks the reasons list as untouched by the insult above it. */ safe?: number;
 }
 
 export const BEATS: Log17Beat[] = [
@@ -47,28 +50,28 @@ export const BEATS: Log17Beat[] = [
     dur: 2.6,
   },
   {
-    p: 266, x: 200, pair: 1, marks: 1,
+    p: 266, x: 200, pair: 1, marks: 1, bare: 1,
     text: 'The right claim rests on nothing but the speaker’s word, which makes it testimony.',
     dur: 2,
   },
   {
-    p: 465, x: 132, pair: 1, marks: 1, slur: 1,
+    p: 465, x: 132, pair: 1, marks: 1, slur: 1, bare: 1,
     text: 'Suppose you reply by attacking the man: he lies, so no one should listen to him.',
     dur: 3.5,
   },
   {
-    p: 465, x: 132, pair: 1, marks: 1, slur: 1,
+    p: 465, x: 132, pair: 1, marks: 1, slur: 1, bare: 1, hits: 1,
     text: 'The reply feels decisive, but it addresses only the speaker.',
     dur: 1.8,
   },
   {
-    p: 396, x: 132, pair: 1, marks: 1, slur: 1,
+    p: 396, x: 132, pair: 1, marks: 1, slur: 1, bare: 1, hits: 1, safe: 1,
     text: 'Only the reasons escape the insult, which lands equally on both columns.',
     cite: 'Ad hominem',
     dur: 4.0,
   },
   {
-    p: 137, x: 132, pair: 1, marks: 1, slur: 1,
+    p: 137, x: 132, pair: 1, marks: 1, slur: 1, bare: 1, hits: 1, safe: 1,
     quote: {
       id: 'lq-logic-arguments-17-1',
       text: 'A last trick is to become personal, insulting and rude. It is very popular, because everyone is able to carry it into effect.',

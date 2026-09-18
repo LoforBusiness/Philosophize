@@ -15,6 +15,9 @@ export interface Epi6Beat extends BaseBeat {
    * written one box at a time as the narration reaches each step.
    */
   route?: number;
+  /** 1 = a ring marks the EQUAL REASONS box, naming that balance "equipollence". */ equip?: number;
+  /** 1 = a ring marks the ATARAXIA box, the calm this beat names. */ ataraxia?: number;
+  /** 1 = a tag reading “SEEMS TO ME” lands beside the claim — Sextus's own defence. */ seems?: number;
 }
 
 export const BEATS: Epi6Beat[] = [
@@ -30,23 +33,23 @@ export const BEATS: Epi6Beat[] = [
     dur: 3.5,
   },
   {
-    p: 176, bal: 1, route: 1,
+    p: 176, bal: 1, route: 1, equip: 1,
     text: 'Equipollence is a balance of opposing reasons on both sides. Neither belief is then better supported than the other.',
     dur: 1.8,
   },
   {
-    p: 158, bal: 1, route: 3,
+    p: 158, bal: 1, route: 3, equip: 1,
     text: 'Pyrrhonian sceptics, named after Pyrrho of Elis, respond by suspending judgement. The Greek term for this suspension is epoche.',
     cite: 'Suspending judgement',
     dur: 3.1,
   },
   {
-    p: 158, bal: 1, route: 3,
+    p: 158, bal: 1, route: 3, equip: 1, ataraxia: 1,
     text: 'Sextus Empiricus holds that suspending judgement brings not despair but tranquillity, or ataraxia.',
     dur: 1.9,
   },
   {
-    p: 139, bal: 1, route: 3,
+    p: 139, bal: 1, route: 3, equip: 1, ataraxia: 1,
     quote: {
       id: 'lq-epistemology-knowledge-6-1',
       text: 'To every argument an equal argument is opposed.',
@@ -59,7 +62,7 @@ export const BEATS: Epi6Beat[] = [
     dur: 3.2,
   },
   {
-    p: 22, bal: 1, route: 3,
+    p: 22, bal: 1, route: 3, equip: 1, ataraxia: 1,
     interact: {
       prompt: 'What do Pyrrhonian sceptics claim that suspending judgement brings?',
       cards: [
@@ -72,18 +75,18 @@ export const BEATS: Epi6Beat[] = [
     dur: 1.0,
   },
   {
-    p: 12, bal: 0.3, crack: 1, route: 3,
+    p: 12, bal: 0.3, crack: 1, route: 3, equip: 1, ataraxia: 1,
     text: 'However, the claim that nothing can be known refutes itself. To know that claim would be to know something.',
     cite: 'A self-refuting claim',
     dur: 2,
   },
   {
-    p: 165, bal: 0.3, crack: 1, route: 3,
+    p: 165, bal: 0.3, crack: 1, route: 3, equip: 1, ataraxia: 1, seems: 1,
     text: 'Sextus Empiricus avoids the objection by not asserting it. His sceptical phrases, he says, report only how things seem to him.',
     dur: 3,
   },
   {
-    p: 165, crack: 1, route: 3,
+    p: 165, crack: 1, route: 3, equip: 1, ataraxia: 1, seems: 1,
     interact: {
       prompt: 'What is the problem with asserting that nothing can be known?',
       sort: {

@@ -9,6 +9,7 @@ import { BEATS } from './ethics25Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BRIDGE WITH A PLANK MISSING, AND THE THREE THINGS ANYONE CAN DO ABOUT IT.
@@ -89,6 +91,9 @@ const BRIDGE = BEATS.map((b) => (b.bridge ? 1 : 0));
 const SIGN = BEATS.map((b) => (b.sign ? 1 : 0));
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const LIMIT = BEATS.map((b) => (b.limit ? 1 : 0));
+const METHOD = BEATS.map((b) => (b.method ? 1 : 0));
+const CHOICE = BEATS.map((b) => (b.choice ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -99,13 +104,20 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics25'));
 export default function Ethics25Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(8);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // Three one-shot marks: each struck on the beat that names it, gone by the next.
+  const limitFade = (cur.limit ?? 0) !== (prev?.limit ?? 0);
+  const methodFade = (cur.method ?? 0) !== (prev?.method ?? 0);
+  const choiceFade = (cur.choice ?? 0) !== (prev?.choice ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -122,6 +134,11 @@ export default function Ethics25Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // R7c — the gate IS the reader's position. `drag` reads dragPos, whose own
       // 0…1 is the answer, so nothing has to be mapped.
       gate: carry(cv, 4, n, 0, reacting ? dragPos.value : 0, tr),
+      // Three one-shot marks, fading in AND out on a carried track (never an
+      // on/off ternary), so a tap mid-fade never cuts one between two frames (C20c).
+      limit: carry(cv, 5, n, LIMIT[p], LIMIT[n], limitFade ? grow : 1),
+      method: carry(cv, 6, n, METHOD[p], METHOD[n], methodFade ? grow : 1),
+      choice: carry(cv, 7, n, CHOICE[p], CHOICE[n], choiceFade ? grow : 1),
     };
   });
 
@@ -132,6 +149,9 @@ export default function Ethics25Scene({ clock, bt, bi, i, picked, onPick, dragPo
   const bridgeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.bridgeOn }));
   const signStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.signOn }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
+  const limitStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.limit }));
+  const methodStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.method }));
+  const choiceStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.choice }));
   const gateStyle = useAnimatedStyle(() => ({
     height: GATE_H * SCENE.value.gate,
     opacity: SCENE.value.gate > 0.02 ? 1 : 0,
@@ -157,6 +177,27 @@ export default function Ethics25Scene({ clock, bt, bi, i, picked, onPick, dragPo
       </Animated.View>
 
       <Animated.View style={[styles.gate, gateStyle]} pointerEvents="none" />
+
+      {/* The limit of justified power: a stop-line at the near edge of the gap. */}
+      <Animated.View style={[styles.limitWrap, limitStyle]} pointerEvents="none">
+        <View style={styles.limitPost} />
+        <View style={styles.limitCap} />
+      </Animated.View>
+
+      {/* The two methods, drawn apart: a nudge that is allowed, a force that is
+          struck out. */}
+      <Animated.View style={[styles.methodWrap, methodStyle]} pointerEvents="none">
+        <View style={styles.persuade} />
+        <View style={styles.force} />
+        <View style={styles.forceStrike} />
+      </Animated.View>
+
+      {/* The stranger's own choice, once he is told: a small fork past the gap. */}
+      <Animated.View style={[styles.choiceWrap, choiceStyle]} pointerEvents="none">
+        <View style={styles.forkStem} />
+        <View style={styles.forkA} />
+        <View style={styles.forkB} />
+      </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
         {PLATE_ID.map((id, k) => (
@@ -186,7 +227,7 @@ const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — the subject stands on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 140, top: CAP_T, width: 240,
@@ -220,11 +261,43 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,
+  },
+
+  // THE LIMIT OF JUSTIFIED POWER: a stop-line standing at the near edge of the
+  // gap — an upside-down T, the shape a boundary marker already reads as here.
+  limitWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  limitPost: { position: 'absolute', left: GAP_L - 1, top: 314, width: 1.5, height: 20, backgroundColor: INK },
+  limitCap: { position: 'absolute', left: GAP_L - 5, top: 314, width: 10, height: 1.5, backgroundColor: INK },
+
+  // THE TWO METHODS: a dashed nudge (persuasion, open) beside a solid bar
+  // struck through (force, ruled out) — one boundary, one strike (D31).
+  methodWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  persuade: {
+    position: 'absolute', left: 198, top: 309, width: 16, height: 0,
+    borderTopWidth: 1.5, borderColor: SHADE, borderStyle: 'dashed',
+  },
+  force: { position: 'absolute', left: 222, top: 308, width: 16, height: 1.5, backgroundColor: INK },
+  forceStrike: {
+    position: 'absolute', left: 221, top: 302, width: 20, height: 1.5, backgroundColor: INK,
+    transform: [{ rotate: '-40deg' }],
+  },
+
+  // THE FORK: his own choice past the gap, once he has been told — a stem with
+  // two branches, the shape a decision point already reads as.
+  choiceWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  forkStem: { position: 'absolute', left: 317, top: 312, width: 1.5, height: 8, backgroundColor: SHADE },
+  forkA: {
+    position: 'absolute', left: 310, top: 302, width: 9, height: 1.5, backgroundColor: SHADE,
+    transform: [{ rotate: '35deg' }],
+  },
+  forkB: {
+    position: 'absolute', left: 316, top: 302, width: 9, height: 1.5, backgroundColor: SHADE,
+    transform: [{ rotate: '-35deg' }],
   },
 });
 

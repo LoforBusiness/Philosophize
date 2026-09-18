@@ -15,6 +15,16 @@ export interface Logic7Beat extends BaseBeat {
   /** The fact card: 0 none · 1 "IT IS RAINING" · 2 "STREETS ARE DRY". */ fact?: number;
   /** The conclusion card: 0 none · 1 "SO: STREETS ARE WET" · 2 "SO: NO RAIN". */ concl?: number;
   /** 1 = the three answer cards are live on the board (Q1). */ pick?: number;
+  /**
+   * WHICH WAY THE INFERENCE IS RUNNING, as a token travelling the board:
+   * 0 none · 1 down the rule, IF → THEN · 2 the premises into the conclusion ·
+   * 3 back up from the streets to the sky.
+   */
+  flow?: number;
+  /** 1 = a brace gathers the two premises, with an empty slot under them. */
+  brace?: number;
+  /** 1 = the fact card wears a 2ND PREMISE tag. */
+  tag?: number;
 }
 
 export const BEATS: Logic7Beat[] = [
@@ -30,7 +40,7 @@ export const BEATS: Logic7Beat[] = [
     dur: 2.3,
   },
   {
-    p: 270, x: 168, rule: 1,
+    p: 270, x: 168, rule: 1, flow: 1,
     text: 'The rule claims only that rain, whenever it falls, makes the streets wet. The rule alone says nothing about today’s weather.',
     dur: 2.7,
   },
@@ -41,7 +51,7 @@ export const BEATS: Logic7Beat[] = [
     dur: 2.6,
   },
   {
-    p: 268, x: 168, rule: 1, fact: 1,
+    p: 268, x: 168, rule: 1, fact: 1, brace: 1,
     text: 'The question is what, if anything, these two premises together allow you to conclude.',
     dur: 1.8,
   },
@@ -61,7 +71,7 @@ export const BEATS: Logic7Beat[] = [
     dur: 3.7,
   },
   {
-    p: 266, x: 124, rule: 1, fact: 1, concl: 1,
+    p: 266, x: 124, rule: 1, fact: 1, concl: 1, flow: 2,
     text: 'The conclusion about the streets follows from the premises alone, without anyone observing the streets.',
     dur: 1.8,
   },
@@ -72,7 +82,7 @@ export const BEATS: Logic7Beat[] = [
     dur: 3.8,
   },
   {
-    p: 268, x: 168, rule: 1, fact: 2,
+    p: 268, x: 168, rule: 1, fact: 2, tag: 1,
     text: 'The second premise is now that the streets are dry.',
     dur: 1.8,
   },
@@ -100,7 +110,7 @@ export const BEATS: Logic7Beat[] = [
     dur: 3.3,
   },
   {
-    p: 459, x: 168, rule: 1, fact: 2, concl: 2,
+    p: 459, x: 168, rule: 1, fact: 2, concl: 2, flow: 3,
     text: 'A fact about the streets, together with the rule, settles a question about the sky.',
     dur: 1.8,
   },

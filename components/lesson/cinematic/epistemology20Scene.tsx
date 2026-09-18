@@ -10,6 +10,7 @@ import { BEATS } from './epistemology20Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOUR REPORTS, TWO ORIGINS, AND A BAR THAT WAS COUNTING WRONG.
@@ -82,6 +84,9 @@ const VOICES = BEATS.map((b) => b.voices ?? 0);
 const AGREE = BEATS.map((b) => b.agree ?? 0);
 const WIRES = BEATS.map((b) => b.wires ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+const BAR_TAG = BEATS.map((b) => (b.barTag ? 1 : 0));
+const ORIGIN_COUNT = BEATS.map((b) => (b.originCount ? 1 : 0));
+const FEED_RING = BEATS.map((b) => (b.feedRing ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -100,7 +105,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology20'));
 export default function Epistemology20Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -125,6 +130,9 @@ export default function Epistemology20Scene({ clock, bt, bi, i, picked, onPick, 
       // origin. The y axis is deliberately left dead, because it is the axis that
       // does nothing — a big name adds reach, not evidence.
       wires: carry(cv, 3, n, WIRES[p], reacting ? pickAt(POLL_WIRES, pickPos.value) : WIRES[n], tr),
+      barTag: carry(cv, 4, n, BAR_TAG[p], BAR_TAG[n], tr),
+      originCount: carry(cv, 5, n, ORIGIN_COUNT[p], ORIGIN_COUNT[n], tr),
+      feedRing: carry(cv, 6, n, FEED_RING[p], FEED_RING[n], tr),
       t,
     };
   });
@@ -135,6 +143,9 @@ export default function Epistemology20Scene({ clock, bt, bi, i, picked, onPick, 
 
   const wireStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.wires }));
   const fillStyle = useAnimatedStyle(() => ({ width: (BAR_W - 4) * SCENE.value.agree }));
+  const barTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.barTag }));
+  const originCountStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.originCount }));
+  const feedRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.feedRing }));
 
   return (
     <View style={styles.scene}>
@@ -165,6 +176,22 @@ export default function Epistemology20Scene({ clock, bt, bi, i, picked, onPick, 
         <Text style={[styles.originText, { left: OWN_X, width: OWN_W }]}>OWN LEGWORK</Text>
       </Animated.View>
 
+      {/* ORIGIN_COUNT — each real origin takes its own "1", the two the sentence names. */}
+      <Animated.View style={[StyleSheet.absoluteFill, originCountStyle]} pointerEvents="none">
+        <View style={[styles.originCount, { left: SHARED_X + SHARED_W / 2 - 8 }]}>
+          <Text style={styles.originCountText}>1</Text>
+        </View>
+        <View style={[styles.originCount, { left: OWN_X + OWN_W / 2 - 8 }]}>
+          <Text style={styles.originCountText}>1</Text>
+        </View>
+      </Animated.View>
+
+      {/* FEED_RING — a ring on the shared post, what a feed selects for. */}
+      <Animated.View
+        style={[styles.feedRing, { left: SHARED_X - 4, width: SHARED_W + 8 }, feedRingStyle]}
+        pointerEvents="none"
+      />
+
       {BOX_X.map((bx, k) => (
         <Target
           key={`t${BOX_ID[k]}`}
@@ -190,6 +217,10 @@ export default function Epistemology20Scene({ clock, bt, bi, i, picked, onPick, 
       <View style={styles.barBox} pointerEvents="none">
         <Animated.View style={[styles.barFill, fillStyle]} />
       </View>
+      {/* BAR_TAG — the bar's own reading, named, before the wires undercut it. */}
+      <Animated.View style={[styles.barTag, barTagStyle]} pointerEvents="none">
+        <Text style={styles.barTagText}>STRONG</Text>
+      </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
@@ -216,7 +247,7 @@ const styles = StyleSheet.create({
 
   box: {
     position: 'absolute', top: BOX_Y, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   boxCap: {
     position: 'absolute', top: BOX_Y + 7, width: BOX_W, textAlign: 'center',
@@ -245,6 +276,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center', paddingHorizontal: 2,
   },
   barFill: { height: BAR_H - 8, backgroundColor: INK, borderRadius: 1 },
+  // BAR_TAG — the bar's own reading, named in the room the label leaves spare.
+  barTag: {
+    position: 'absolute', left: BAR_X + 280, top: BAR_Y - 16, width: 60, height: 14,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  barTagText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false },
+  // ORIGIN_COUNT — a small "1" over each real origin, the two the sentence counts.
+  originCount: {
+    position: 'absolute', top: ORIGIN_Y - 16, width: 16, height: 16, borderRadius: 8,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  originCountText: { fontFamily: 'Inter_700Bold', fontSize: 9, color: INK, includeFontPadding: false },
+  // FEED_RING — a dashed ring on the shared post, what a feed selects for.
+  feedRing: {
+    position: 'absolute', top: ORIGIN_Y - 4, height: 32,
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 7,
+  },
 
   hit: { position: 'absolute', top: BOX_Y, width: BOX_W, height: BOX_H },
   hitBox: { width: BOX_W, height: BOX_H, borderRadius: 3 },

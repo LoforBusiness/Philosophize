@@ -30,6 +30,7 @@ export interface Epistemology38Beat extends BaseBeat {
   /** How far the middle roundel's near shots sit from its bull, 0…1. */ wide?: number;
   /** 1 = the three verdicts are printed under them. */ names?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = the two roundels whose belief is true are marked, in turn. */ trueTwo?: number;
 }
 
 export const BEATS: Epistemology38Beat[] = [
@@ -45,6 +46,7 @@ export const BEATS: Epistemology38Beat[] = [
   },
   {
     p: 47, x: 52, roundels: 1, shots: 1, wide: 1,
+    trueTwo: 1,
     text: 'Two of the beliefs are true. A true belief on its own can’t show whether a reliable method produced it.',
     dur: 4.0,
   },

@@ -9,6 +9,7 @@ import { BEATS } from './political40Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE REGISTERS STACKED, AND ONE GOOD LOOKING FOR THE SHELF IT BELONGS ON.
@@ -44,6 +46,8 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const SPOILED = BEATS.map((b) => b.spoiled ?? 0);
+const QUEUE = BEATS.map((b) => b.queue ?? 0);
 const BASE_TR = 0.85;
 
 const SHELF_X = 150;
@@ -89,7 +93,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political40'));
 export default function Political40Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -113,6 +117,9 @@ export default function Political40Scene({ clock, bt, bi, i, picked, onPick, pic
       // to bottom, so the good travels between shelves rather than jumping.
       shelf: carry(cv, 3, n, TOKEN_AT[0], reacting ? pickAt(TOKEN_AT, pickPos.value) : TOKEN_AT[0], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // Carried, so each fades out as well as in (group L).
+      spoiled: carry(cv, 5, n, SPOILED[p], SPOILED[n], tr),
+      queue: carry(cv, 6, n, QUEUE[p], QUEUE[n], tr),
     };
   });
 
@@ -124,6 +131,20 @@ export default function Political40Scene({ clock, bt, bi, i, picked, onPick, pic
   const tokenStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.tokenOn,
     top: SCENE.value.shelf,
+  }));
+
+  // ── the two tap events ─────────────────────────────────────────────────────
+  //
+  // WHAT THE MIDDLE REGISTER DOES TO WHAT PASSES THROUGH IT: the same thing on
+  // both sides of an arrow, and only one of them still a judgement. The second
+  // chip waits, because a before and an after shown at once is not a change.
+  const spoiledStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.spoiled }));
+  const spoiledAfterStyle = useAnimatedStyle(() => ({
+    opacity: clamp01((SCENE.value.spoiled - 0.45) / 0.55),
+  }));
+  const queueStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.queue,
+    transform: [{ translateY: (1 - SCENE.value.queue) * 8 }],
   }));
 
   return (
@@ -157,6 +178,22 @@ export default function Political40Scene({ clock, bt, bi, i, picked, onPick, pic
         ))}
       </Animated.View>
 
+      {/* A vote priced is not a vote judged. */}
+      <Animated.View style={[styles.spoilRow, spoiledStyle]} pointerEvents="none">
+        <View style={styles.spoilChip}>
+          <Text style={styles.spoilText} numberOfLines={1}>A VOTE</Text>
+        </View>
+        <View style={styles.spoilArrow} />
+        <Animated.View style={[styles.spoilChipWide, spoiledAfterStyle]}>
+          <Text style={styles.spoilText} numberOfLines={1}>NOT A JUDGEMENT</Text>
+        </Animated.View>
+      </Animated.View>
+
+      {/* What a queue sorts by instead. */}
+      <Animated.View style={[styles.queuePlate, queueStyle]} pointerEvents="none">
+        <Text style={styles.queueText} numberOfLines={1}>FIRST TO ARRIVE, LONGEST TO WAIT</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -175,11 +212,40 @@ function Register({ S, top, index }: { S: SharedValue<any>; top: number; index: 
 }
 
 const styles = StyleSheet.create({
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // Below the lowest shelf, which ends at SHELF_Y[2] + SHELF_H.
+  spoilRow: {
+    position: 'absolute', left: SHELF_X, top: SHELF_Y[2] + SHELF_H + 8, width: SHELF_W, height: 26,
+    flexDirection: 'row', alignItems: 'center',
+  },
+  spoilChip: {
+    width: 56, height: 24, borderWidth: 1.5, borderColor: INK, borderRadius: 6,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  spoilChipWide: {
+    width: 116, height: 24, borderWidth: 1.5, borderColor: INK, borderRadius: 6,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  spoilArrow: { width: 26, height: 2, marginHorizontal: 5, backgroundColor: SOFT },
+  spoilText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
+  queuePlate: {
+    position: 'absolute', left: SHELF_X, top: SHELF_Y[2] + SHELF_H + 42, width: SHELF_W, height: 24,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  queueText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: PAPER,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: SHELF_X, top: CAP_T, width: SHELF_W,
@@ -209,7 +275,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

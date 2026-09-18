@@ -3,12 +3,13 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, mixStance, pose, type Bundle } from './rig';
+import { clamp01, ease01, mixStance, pose, seg, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './logic13Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // FOUR STEPS DOWN A HILL, AND THE JOINS BETWEEN THEM (H64). The steps are the Q1
 // targets, so the reader points at the argument itself (E33).
@@ -65,6 +67,7 @@ const G = BEATS.map((b) => b.g ?? 0);
 const STEPN = BEATS.map((b) => b.steps ?? 0);
 const JOINS = BEATS.map((b) => b.joins ?? 0);
 const HONEST = BEATS.map((b) => b.honest ?? 0);
+const TRACE = BEATS.map((b) => b.trace ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
 
@@ -79,9 +82,14 @@ export default function Logic13Scene({ clock, bt, bi, i, picked, onPick, pickPos
   const heldS = useHeld();
   const cv = useCarry(3);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
   const answered = picked !== null;
+  // A one-shot event (group AH): it runs once, entirely inside the beat that
+  // asks for it, off `bt` alone — nothing to carry, since it is back at rest
+  // well before a patient reader taps again.
+  const traceNow = (cur.trace ?? 0) > 0 && (cur.trace ?? 0) !== (prev?.trace ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -96,6 +104,14 @@ export default function Logic13Scene({ clock, bt, bi, i, picked, onPick, pickPos
     const s = keepHeld(heldS, mixStance(
       carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr,
     ));
+
+    // TRACE — "Next, grades will lose their meaning. So… no retakes at all should
+    // be allowed": a highlight ring lands on step three, holds, then moves on to
+    // step four, following the sentence's own two clauses in order.
+    const traceU = traceNow ? ease01(bt.value / 2.0) : 0;
+    const trace3 = ease01(seg(traceU, 0.0, 0.18)) * (1 - ease01(seg(traceU, 0.42, 0.6)));
+    const trace4 = ease01(seg(traceU, 0.5, 0.68)) * (1 - ease01(seg(traceU, 0.92, 1.0)));
+
     return {
       // He faces LEFT, up the hill he is being told he will fall down.
       fig: lookPose(s, FIG_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
@@ -105,12 +121,15 @@ export default function Logic13Scene({ clock, bt, bi, i, picked, onPick, pickPos
       // reaches it: the defect is drawn rather than named.
       joins: carry(cv, 1, n, JOINS[p], reacting ? pickPos.value : JOINS[n], grow),
       honest: carry(cv, 2, n, HONEST[p], HONEST[n], grow),
+      trace3, trace4,
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
 
   const honest = useAnimatedStyle(() => ({ opacity: SCENE.value.honest }));
+  const trace3Style = useAnimatedStyle(() => ({ opacity: SCENE.value.trace3 }));
+  const trace4Style = useAnimatedStyle(() => ({ opacity: SCENE.value.trace4 }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -119,6 +138,11 @@ export default function Logic13Scene({ clock, bt, bi, i, picked, onPick, pickPos
         <Step key={s.id} k={k} SCENE={SCENE} live={live} answered={answered} picked={picked} onPick={onPick} />
       ))}
       {JOIN_X.map((_, k) => <Join key={k} k={k} SCENE={SCENE} />)}
+
+      {/* AH — "Next, grades will lose their meaning. So… no retakes at all": a
+          ring lands on step three, then step four, in the sentence's own order. */}
+      <Animated.View style={[styles.traceRing, { left: STEP_X[2] - 3, top: STEP_T[2] - 3 }, trace3Style]} pointerEvents="none" />
+      <Animated.View style={[styles.traceRing, { left: STEP_X[3] - 3, top: STEP_T[3] - 3 }, trace4Style]} pointerEvents="none" />
 
       {/* ── THE SLOPE THAT DOES HOLD, FOR COMPARISON ─────────────────────── */}
       <Animated.View style={[styles.honest, honest]} pointerEvents="none">
@@ -186,7 +210,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   step: { position: 'absolute', width: STEP_W, height: STEP_H },
@@ -197,6 +221,13 @@ const styles = StyleSheet.create({
   stepText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.7, color: INK,
     textAlign: 'center', includeFontPadding: false,
+  },
+
+  // A highlight ring, not a fill (D31) — it marks an already-drawn step, never
+  // adds a mass, so check:shade's tonal count on this scene doesn't move.
+  traceRing: {
+    position: 'absolute', width: STEP_W + 6, height: STEP_H + 6, borderWidth: 2.5,
+    borderColor: INK, borderRadius: 6,
   },
 
   join: { position: 'absolute', width: 26, height: 14, alignItems: 'center', justifyContent: 'center' },

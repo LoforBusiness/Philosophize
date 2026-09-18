@@ -9,6 +9,7 @@ import { BEATS } from './aesthetics15Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A ROSE WITH FIVE THINGS TIED TO IT, four of which get cut off (H64). The tags are
 // the Q1 targets, so the sorting the lesson is about is the thing the reader does.
@@ -63,10 +65,32 @@ const TAGS = [
   { id: 'seen', text: 'IT WOULD IMPRESS HER', stake: true },
 ];
 
+// The tags' own box, four clear of the top tag and the bottom one (228…494), and
+// the rose's own box, six clear of the bloom's ring (102…378) — both inside the
+// 226…512 band.
+const ZONE_TAGS_BOX = { left: TAG_L - 4, top: TAG_T[0] - 4, width: TAG_W + 8, height: (TAG_T[4] + TAG_H) - TAG_T[0] + 8 };
+const ZONE_ROSE_BOX = { left: BLOOM_CX - BLOOM_R - 6, top: BLOOM_CY - BLOOM_R - 6, width: (BLOOM_R + 6) * 2, height: (BLOOM_R + 6) * 2 };
+// Clear of both the rose (right edge 164) and the tags (left edge 214), above the
+// bloom's own top (316).
+const TERM_L = 148;
+const TERM_T = 294;
+const TERM_W = 60;
+const TERM_H = 18;
+// The line the surviving remark's own height shares with the bloom's centre.
+const CONNECT_Y = (BLOOM_CY + (TAG_T[2] + 17)) / 2;
+
 const G = BEATS.map((b) => b.g ?? 0);
 const ROSE = BEATS.map((b) => b.rose ?? 0);
 const TAGN = BEATS.map((b) => b.tags ?? 0);
 const CUT = BEATS.map((b) => b.cut ?? 0);
+// GROUP AH — seven still taps, each moving a new mass rather than a caption.
+const ZONE_TAGS = BEATS.map((b) => ((b.zoneTags ?? 0) > 0 ? 1 : 0));
+const TERM = BEATS.map((b) => ((b.term ?? 0) > 0 ? 1 : 0));
+const ZONE_ROSE = BEATS.map((b) => ((b.zoneRose ?? 0) > 0 ? 1 : 0));
+const FLAGN = BEATS.map((b) => b.flag ?? 0);
+const CONNECT = BEATS.map((b) => ((b.connect ?? 0) > 0 ? 1 : 0));
+// The order the four "interested" tags are named in: owning, selling, room, impress.
+const FLAG_ORDER = [0, 1, 3, 4];
 
 // The camera, from the staging (H60b): the figure never moves, so `followMoves`
 // gives the still-lesson rhythm — a push on the quote, a pull back to the whole
@@ -82,8 +106,14 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics15'));
 export default function Aesthetics15Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(8);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const zoneTagsFade = (cur.zoneTags ?? 0) !== (prev?.zoneTags ?? 0);
+  const termFade = (cur.term ?? 0) !== (prev?.term ?? 0);
+  const zoneRoseFade = (cur.zoneRose ?? 0) !== (prev?.zoneRose ?? 0);
+  const flagFade = (cur.flag ?? 0) !== (prev?.flag ?? 0);
+  const connectFade = (cur.connect ?? 0) !== (prev?.connect ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -106,6 +136,13 @@ export default function Aesthetics15Scene({ clock, bt, bi, i, picked, onPick, dr
       // interested tags — I could sell it, it would suit my room — fall away, leaving
       // the pleasure with nothing of yours tied to it.
       cut: carry(cv, 2, n, CUT[p], reacting ? dragPos.value : CUT[n], fall),
+      // A boundary round the five, naming which group the test currently applies
+      // to — the tags together, then (once the term is named) the rose alone.
+      zoneTags: carry(cv, 3, n, ZONE_TAGS[p], ZONE_TAGS[n], zoneTagsFade ? grow : 1),
+      term: carry(cv, 4, n, TERM[p], TERM[n], termFade ? grow : 1),
+      zoneRose: carry(cv, 5, n, ZONE_ROSE[p], ZONE_ROSE[n], zoneRoseFade ? grow : 1),
+      flag: carry(cv, 6, n, FLAGN[p], FLAGN[n], flagFade ? grow : 1),
+      connect: carry(cv, 7, n, CONNECT[p], CONNECT[n], connectFade ? grow : 1),
       t,
     };
   });
@@ -123,10 +160,19 @@ export default function Aesthetics15Scene({ clock, bt, bi, i, picked, onPick, dr
   const leafStirR = useAnimatedStyle(() => ({
     transform: [{ rotate: `${16 + Math.sin(SCENE.value.t * 0.9 + 1.4) * 4}deg` }],
   }));
+  const zoneTagsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.zoneTags }));
+  const termStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.term,
+    transform: [{ translateY: (1 - SCENE.value.term) * -5 }],
+  }));
+  const zoneRoseStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.zoneRose }));
+  const connectStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.connect }));
 
   return (
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
+      {/* the connecting line, drawn first so the tag and rose sit on top of it */}
+      <Animated.View style={[styles.connectLine, connectStyle]} pointerEvents="none" />
       {/* ── THE ROSE ─────────────────────────────────────────────────────── */}
       <Animated.View style={[styles.plant, rose]} pointerEvents="none">
         <View style={styles.plinth} />
@@ -137,6 +183,18 @@ export default function Aesthetics15Scene({ clock, bt, bi, i, picked, onPick, dr
         <View style={styles.bloomMid} />
         <View style={styles.bloomCore} />
       </Animated.View>
+
+      {/* the test's own boundary — first round the five, then round what remains */}
+      <Animated.View style={[styles.zoneBox, styles.zoneTagsBox, zoneTagsStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.zoneBox, styles.zoneRoseBox, zoneRoseStyle]} pointerEvents="none" />
+      {/* the term itself, named once */}
+      <Animated.View style={[styles.termPlate, termStyle]} pointerEvents="none">
+        <Text style={styles.termText} numberOfLines={1}>INTEREST</Text>
+      </Animated.View>
+      {/* a flag lands on each tag as its own interest gets named */}
+      {FLAG_ORDER.map((k, rank) => (
+        <FlagMark key={k} k={k} rank={rank} SCENE={SCENE} />
+      ))}
 
       {/* ── THE FIVE THINGS SAID ABOUT IT ────────────────────────────────── */}
       {TAGS.map((tg, k) => (
@@ -153,6 +211,26 @@ export default function Aesthetics15Scene({ clock, bt, bi, i, picked, onPick, dr
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
+    </Animated.View>
+  );
+}
+
+/** A small tick beside a tag once its own interest has been named, gone again
+ *  the moment its tag is cut (E39 — the mark moves only with what it marks). */
+function FlagMark({
+  k, rank, SCENE,
+}: {
+  k: number;
+  rank: number;
+  SCENE: { value: { flag: number; cut: number } };
+}) {
+  const style = useAnimatedStyle(() => ({
+    opacity: clamp01(SCENE.value.flag - rank) * (1 - SCENE.value.cut),
+  }));
+  return (
+    <Animated.View style={[styles.flag, { top: TAG_T[k] + 13 }, style]} pointerEvents="none">
+      <View style={styles.flagH} />
+      <View style={styles.flagV} />
     </Animated.View>
   );
 }
@@ -220,8 +298,37 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule alone leaves the figure
   // standing on bare page; a filled band under it is what the two lessons
   // the reader holds up both do, and it costs one View.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
+
+  // THE TEST'S OWN BOUNDARY. A dashed border, never a fill — a boundary names a
+  // group without claiming to be a member of it.
+  zoneBox: {
+    position: 'absolute', borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 6,
+  },
+  zoneTagsBox: ZONE_TAGS_BOX,
+  zoneRoseBox: ZONE_ROSE_BOX,
+
+  termPlate: {
+    position: 'absolute', left: TERM_L, top: TERM_T, width: TERM_W, height: TERM_H,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  termText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: PAPER,
+    includeFontPadding: false,
+  },
+
+  // A tick beside a tag, once its own interest is named — a small "+" the same
+  // shape aesthetics-11's registration mark uses, at the tag's own left edge.
+  flag: { position: 'absolute', left: TAG_L - 14, width: 10, height: 10 },
+  flagH: { position: 'absolute', left: 0, top: 4, width: 10, height: 2, backgroundColor: INK },
+  flagV: { position: 'absolute', left: 4, top: 0, width: 2, height: 10, backgroundColor: INK },
+
+  connectLine: {
+    position: 'absolute', left: BLOOM_CX + BLOOM_R, top: CONNECT_Y, width: TAG_L - (BLOOM_CX + BLOOM_R),
+    height: 2, borderTopWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
+  },
 
   plant: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   plinth: {
@@ -255,7 +362,7 @@ const styles = StyleSheet.create({
 
   tag: { position: 'absolute', left: TAG_L, width: TAG_W, height: TAG_H },
   tagInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   tagText: {

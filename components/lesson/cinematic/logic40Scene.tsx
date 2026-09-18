@@ -9,6 +9,7 @@ import { BEATS } from './logic40Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO RULE CARDS FEEDING ONE TRAY, AND A STONE NOBODY HAS TURNED OVER.
@@ -88,6 +90,15 @@ const LINKS = BEATS.map((b) => (b.links ? 1 : 0));
 const TRAY = BEATS.map((b) => (b.tray ? 1 : 0));
 const CHECKED = BEATS.map((b) => b.checked ?? 0);
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const BALANCE = BEATS.map((b) => (b.balance ? 1 : 0));
+
+// ── the tap event (group AH) ────────────────────────────────────────────────
+// A one-shot needle between the two cards, driven by `bt` alone (L5's carry
+// rule is for values that cross a beat boundary; this never does).
+const BAL_CX = (244 + 282) / 2;
+const BAL_CY = 282;
+const BAL_LEN = 30;
+const BAL_TILT = 12;
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -103,6 +114,10 @@ export default function Logic40Scene({ clock, bt, bi, i, picked, onPick, dragPos
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(6);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // C20c — fires only on the beat whose own value turns it on.
+  const balanceNow = (cur.balance ?? 0) > 0 && (cur.balance ?? 0) !== (prev?.balance ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -127,6 +142,8 @@ export default function Logic40Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // Off the split beat it rests at an even half and the seam is not drawn.
       share: carry(cv, 5, n, 0.5, reacting ? dragPos.value : 0.5, tr),
       seamOn: reacting ? 1 : 0,
+      // ONE-SHOT, driven by `bt` alone — see the comment above BAL_CX.
+      balance: balanceNow ? ease01(bt.value / 2.2) : 0,
     };
   });
 
@@ -148,6 +165,19 @@ export default function Logic40Scene({ clock, bt, bi, i, picked, onPick, dragPos
     opacity: SCENE.value.seamOn,
     left: TRAY_X + TRAY_W * SCENE.value.share - 2,
   }));
+  // The needle tips toward GREEN then re-levels; the envelope both fades it in
+  // and out and drives the tilt back to zero, so the two always land together.
+  const balanceStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.balance;
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.15);
+    const tilt = BAL_TILT * Math.sin(Math.PI * u);
+    return { opacity: on, transform: [{ rotate: `${-tilt}deg` }] };
+  });
+  const fulcrumStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.balance;
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.15);
+    return { opacity: on };
+  });
 
   return (
     <View style={styles.scene}>
@@ -162,6 +192,12 @@ export default function Logic40Scene({ clock, bt, bi, i, picked, onPick, dragPos
           </View>
         ))}
       </Animated.View>
+
+      {/* Beat 7 — a balance needle between the cards tips toward GREEN, then
+          levels off, showing green's apparent edge give way once simplicity is
+          shown to depend on the language. */}
+      <Animated.View style={[styles.balFulcrum, fulcrumStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.balNeedle, balanceStyle]} pointerEvents="none" />
 
       <Animated.View style={[styles.feed, { left: FEED_X[0] }, leftFeed]} pointerEvents="none" />
       <Animated.View style={[styles.feed, { left: FEED_X[1] }, rightFeed]} pointerEvents="none" />
@@ -209,7 +245,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: TRAY_X, top: CAP_T, width: TRAY_W,
@@ -228,6 +264,18 @@ const styles = StyleSheet.create({
   // THE FEEDS CARRY THE SHARE IN THEIR WIDTH. A rule that the reader has given
   // most of the evidence to is drawn heavier; neither word ever dims.
   feed: { position: 'absolute', top: FEED_Y, height: FEED_H, backgroundColor: INK },
+
+  // ── the tap event (group AH) ────────────────────────────────────────────
+  // A tiny seesaw sitting in the gap between the two cards. The needle rotates
+  // about its own centre, which is fixed to sit over the fulcrum dot.
+  balNeedle: {
+    position: 'absolute', left: BAL_CX - BAL_LEN / 2, top: BAL_CY - 1,
+    width: BAL_LEN, height: 2, backgroundColor: SHADE,
+  },
+  balFulcrum: {
+    position: 'absolute', left: BAL_CX - 2.5, top: BAL_CY + 4, width: 5, height: 5,
+    borderRadius: 2.5, backgroundColor: SHADE,
+  },
 
   tray: {
     position: 'absolute', left: TRAY_X, top: TRAY_Y, width: TRAY_W, height: TRAY_H,

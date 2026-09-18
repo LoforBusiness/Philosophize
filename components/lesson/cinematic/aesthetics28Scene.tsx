@@ -9,6 +9,7 @@ import { BEATS } from './aesthetics28Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO ROOMS SIDE BY SIDE, AND THE LIGHT IN ONE OR BOTH OF THEM.
@@ -84,6 +86,12 @@ const STREET = BEATS.map((b) => b.street ?? 0);
 const FLAT = BEATS.map((b) => b.flat ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// GROUP AH — three still taps: a trail above the already-drawn ball (the pass
+// named in beat 1), a tag naming the field (beat 3), and a dashed line measuring
+// the painting against the cup — the objection's comparison drawn (beat 7).
+const PASS = BEATS.map((b) => (b.pass ? 1 : 0));
+const LABEL = BEATS.map((b) => (b.label ? 1 : 0));
+const DOUBT = BEATS.map((b) => (b.doubt ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -100,7 +108,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics28'));
 export default function Aesthetics28Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(6);
+  const cv = useCarry(9);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -123,6 +131,9 @@ export default function Aesthetics28Scene({ clock, bt, bi, i, picked, onPick, pi
       street: carry(cv, 3, n, STREET[p], reacting ? pickAt(ST_AT, u) : STREET[n], tr),
       flat: carry(cv, 4, n, FLAT[p], reacting ? pickAt(FLAT_AT, u) : FLAT[n], tr),
       plates: carry(cv, 5, n, PLATES[p], PLATES[n], tr),
+      pass: carry(cv, 6, n, PASS[p], PASS[n], tr),
+      label: carry(cv, 7, n, LABEL[p], LABEL[n], tr),
+      doubt: carry(cv, 8, n, DOUBT[p], DOUBT[n], tr),
     };
   });
 
@@ -134,6 +145,9 @@ export default function Aesthetics28Scene({ clock, bt, bi, i, picked, onPick, pi
   const galLight = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.lit) * 0.85 }));
   const stLight = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.street) * 0.85 }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
+  const passStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pass }));
+  const labelStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.label }));
+  const doubtStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.doubt }));
   // THE PAINTING SHRINKS TO A CUP where the reader says every pleasure is equal.
   const artStyle = useAnimatedStyle(() => {
     const f = clamp01(SCENE.value.flat);
@@ -161,9 +175,13 @@ export default function Aesthetics28Scene({ clock, bt, bi, i, picked, onPick, pi
         <View style={styles.cup} />
         <View style={styles.bench} />
         <View style={styles.ball} />
+        <Animated.View style={[styles.passDot, styles.passDotA, passStyle]} pointerEvents="none" />
+        <Animated.View style={[styles.passDot, styles.passDotB, passStyle]} pointerEvents="none" />
+        <Animated.View style={[styles.doubtLine, doubtStyle]} pointerEvents="none" />
 
         <Text style={[styles.roomText, { left: GAL_X, width: GAL_W }]}>{ROOM_CAP[0]}</Text>
         <Text style={[styles.roomText, { left: ST_X, width: ST_W }]}>{ROOM_CAP[1]}</Text>
+        <Animated.Text style={[styles.fieldTag, labelStyle]} pointerEvents="none">EVERYDAY AESTHETICS</Animated.Text>
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
@@ -199,7 +217,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: GAL_X, top: CAP_T, width: 264, textAlign: 'center',
@@ -226,16 +244,34 @@ const styles = StyleSheet.create({
   cup: { position: 'absolute', left: 292, top: 348, width: 20, height: 18, borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 },
   bench: { position: 'absolute', left: 318, top: 352, width: 44, height: 7, backgroundColor: INK },
   ball: { position: 'absolute', left: 294, top: 306, width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP },
+  // A TRAIL ABOVE THE BALL (beat 1) — the unexpected pass the sentence names,
+  // never a relocation of the ball itself.
+  passDot: { position: 'absolute', borderRadius: 4, backgroundColor: INK },
+  passDotA: { left: 298, top: 274, width: 4, height: 4 },
+  passDotB: { left: 296, top: 289, width: 5, height: 5 },
+  // A DASHED LINE FROM THE PAINTING TO THE CUP (beat 7) — the objection's own
+  // comparison, measured against something already on the stage.
+  doubtLine: {
+    position: 'absolute', left: 193, top: 314, width: 117, height: 0,
+    borderTopWidth: 1.5, borderStyle: 'dashed', borderColor: SOFT,
+    transform: [{ rotate: '21.5deg' }], transformOrigin: '0% 0%',
+  },
 
   roomText: {
     position: 'absolute', top: 264, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
+  // THE FIELD NAMED (beat 3) — "this field is called everyday aesthetics", said
+  // once as a tag beneath the rooms it describes.
+  fieldTag: {
+    position: 'absolute', left: 160, top: 400, width: 180, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+  },
 
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,

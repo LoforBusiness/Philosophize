@@ -29,6 +29,7 @@ export interface Ethics38Beat extends BaseBeat {
   /** 1 = the rack of three reasons hangs above it. */ weights?: number;
   /** How far the beam leans toward the near pan, 0 (level) … 1 (hard over). */ tilt?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = both discs flash together, marking that each life counts the same regardless of whose it is. */ equal?: number;
 }
 
 export const BEATS: Ethics38Beat[] = [
@@ -38,7 +39,7 @@ export const BEATS: Ethics38Beat[] = [
     dur: 3.8,
   },
   {
-    p: 2, x: 46, beam: 1,
+    p: 2, x: 46, beam: 1, equal: 1,
     text: 'Impartial moral theories set aside whose child is whose. Each life counts equally, whoever it belongs to.',
     dur: 4.4,
   },

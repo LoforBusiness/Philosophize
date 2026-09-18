@@ -13,6 +13,7 @@ import { BEATS } from './aesthetics12Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A poem pinned up on a public board stage right, the poet who wrote it planted
 // stage left, and a small SEALED BOX riding above his head. Marks accumulate under
@@ -119,6 +121,8 @@ const RX = BEATS.map((b) => b.rx ?? 224);
 const RDIR = dirsFrom(RX, -1);
 const TICKS = BEATS.map((b) => b.ticks ?? 0);
 const BOXV = BEATS.map((b) => b.box ?? 0);
+const SETTLEDV = BEATS.map((b) => (b.settled ? 1 : 0));
+const FALLACYV = BEATS.map((b) => (b.fallacyTag ? 1 : 0));
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
@@ -136,13 +140,16 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics12'));
 export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldRMix = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
   // The box only fades in on the beat that PUTS it there; afterwards it simply
   // stays, instead of re-revealing itself every time the reader taps (C20c).
   const boxFade = (cur.box ?? 0) !== (prev?.box ?? 0);
+  // The two tap events (group AH).
+  const settledFade = !!cur.settled !== !!prev?.settled;
+  const fallacyFade = !!cur.fallacyTag !== !!prev?.fallacyTag;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -194,6 +201,8 @@ export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick, dr
       tally,
       // The verdict only exists once somebody has read the thing.
       verdict: clamp01(tally),
+      settled: carry(cv, 3, n, SETTLEDV[p], SETTLEDV[n], settledFade ? grow : 1),
+      fallacy: carry(cv, 4, n, FALLACYV[p], FALLACYV[n], fallacyFade ? grow : 1),
       t,
     };
   });
@@ -216,6 +225,14 @@ export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick, dr
     transform: [{ translateX: (SCENE.value.tally / TICKS_MAX) * TALLY_W }],
   }));
   const cardStyle = useAnimatedStyle(() => ({ opacity: ease01(bt.value / 0.6) }));
+  const settledStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.settled,
+    transform: [{ scale: 0.85 + SCENE.value.settled * 0.15 }],
+  }));
+  const fallacyStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.fallacy,
+    transform: [{ translateY: (1 - SCENE.value.fallacy) * 6 }],
+  }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -235,6 +252,10 @@ export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick, dr
       <Animated.View style={[styles.divider, verdictStyle]} pointerEvents="none" />
       <Animated.Text style={[styles.verdictTag, verdictStyle]} pointerEvents="none">READERS SAY</Animated.Text>
       <Animated.Text style={[styles.verdictWord, verdictStyle]} pointerEvents="none">GRIEF</Animated.Text>
+
+      {/* A ring closes round GRIEF — nothing in the poem argues the other way. */}
+      <Animated.View style={[styles.settledRing, settledStyle]} pointerEvents="none" />
+
       <View style={styles.tallyClip} pointerEvents="none">
         <View style={[styles.tick, styles.tick0]} pointerEvents="none" />
         <View style={[styles.tick, styles.tick1]} pointerEvents="none" />
@@ -252,6 +273,11 @@ export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick, dr
         <View style={styles.seal} pointerEvents="none">
           <Text style={styles.sealText} pointerEvents="none">SEALED</Text>
         </View>
+      </Animated.View>
+
+      {/* A tag names what this is, the moment the poet's claim is named too. */}
+      <Animated.View style={[styles.fallacyTag, fallacyStyle]} pointerEvents="none">
+        <Text style={styles.fallacyText}>THE FALLACY</Text>
       </Animated.View>
 
       {/* ── Q2: which of the two can settle the meaning? ────────────────────── */}
@@ -291,7 +317,7 @@ const styles = StyleSheet.create({
 
   board: {
     position: 'absolute', left: BOARD_L, top: BOARD_T, width: BOARD_W, height: BOARD_B - BOARD_T,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   post: { position: 'absolute', top: BOARD_B - 2, width: 2.5, height: 18, backgroundColor: SOFT },
   postL: { left: BOARD_L + 26 },
@@ -337,7 +363,7 @@ const styles = StyleSheet.create({
   tether: { position: 'absolute', left: 0, top: 0, width: 6, height: 6, borderRadius: 3, backgroundColor: INK },
   box: {
     position: 'absolute', left: 0, top: 0, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center',
   },
   lid: { width: BOX_W - 4, height: 3.5, backgroundColor: INK },
@@ -356,7 +382,7 @@ const styles = StyleSheet.create({
 
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W },
   card: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },
@@ -366,6 +392,24 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   cardTextOn: { color: PAPER },
+
+  // ── the two tap events (group AH) ────────────────────────────────────────
+  // A ring closing round GRIEF — nothing in the text argues the other way, so the
+  // reading the board already gave gets circled rather than restated.
+  settledRing: {
+    position: 'absolute', left: 299, top: 316, width: 70, height: 26,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 14,
+  },
+
+  // A small tag naming this configuration the moment the words name it too —
+  // sized for the 19-unit gap between the box's underside and the poet's crown.
+  fallacyTag: {
+    position: 'absolute', left: 18, top: 380, paddingHorizontal: 5, paddingVertical: 1.5,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  fallacyText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK,
+    includeFontPadding: false,
+  },
 });
 
 // Art runs from the board's top edge (224) down to the ground line (500), and the

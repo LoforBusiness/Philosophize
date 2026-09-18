@@ -35,6 +35,7 @@ import path from 'node:path';
 import { softOnToneByBox } from './lib/tonefit.mjs';
 import { softOnToneByNest } from './lib/tonenest.mjs';
 import { lipScene } from './lip-stage.mjs';
+import { MASSES as MASS_TONES, MIN_MASSES as FLOOR, massFills } from './lib/masscount.mjs';
 
 const DIR = 'components/lesson/cinematic';
 
@@ -46,7 +47,12 @@ const DIR = 'components/lesson/cinematic';
  * every scene already has ink, and a scene of ink and white is the flat case this
  * exists to find.
  */
-const MASSES = ['RULE', 'STONE', 'SHADE', 'SOFT'];
+// THE COUNT LIVES IN scripts/lib/masscount.mjs NOW, because `skin-stage` has to
+// spend against the same number: a white tile face removes a mass, so the skin may
+// only be applied down to this floor. Two implementations of one rule is what this
+// file's own history is full of (T6's three pairings), and the skin's first draft
+// re-implemented the count and got the very first scene wrong.
+const MASSES = MASS_TONES;
 
 /** Tones no SOFT text may sit on — derived from the ramp, not typed twice. */
 const TOO_DARK_FOR_SOFT = ['STONE', 'SHADE', 'SOFT', 'INK'];
@@ -60,7 +66,7 @@ const TOO_DARK_FOR_SOFT = ['STONE', 'SHADE', 'SOFT', 'INK'];
  * first batch of eighteen — three per branch, the flattest in reading order —
  * took it to 112.
  */
-const MIN_MASSES = 3;
+const MIN_MASSES = FLOOR;
 const FLAT_BUDGET = 0;
 
 const files = fs.readdirSync(DIR).filter((f) => f.endsWith('Scene.tsx')).sort();
@@ -115,20 +121,16 @@ for (const f of files) {
   const body = at < 0 ? src : src.slice(0, at);
   const sheet = at < 0 ? '' : src.slice(at);
 
-  const used = new Map();
-  for (const e of sheetEntries(sheet)) {
-    const drawn = new RegExp(`styles\\.${e.name}\\b`).test(body);
-    for (const m of e.text.matchAll(/backgroundColor:\s*([A-Z_][A-Z_0-9]*)/g)) {
-      if (!MASSES.includes(m[1])) continue;
-      if (drawn) used.set(m[1], (used.get(m[1]) ?? 0) + 1);
-      else deadMass.push(`${f}  ${e.name} is ${m[1]} and nothing renders it`);
-    }
-  }
-  for (const m of body.matchAll(/backgroundColor:\s*([A-Z_][A-Z_0-9]*)/g)) {
-    if (MASSES.includes(m[1])) used.set(m[1], (used.get(m[1]) ?? 0) + 1);
-  }
+  // COUNTED BY scripts/lib/masscount.mjs, which `skin-stage` also reads: the white
+  // tile face it applies SPENDS a mass, so its cap has to be measured against the
+  // same number this ratchet is measured against. Two implementations of one rule
+  // is this file's own recurring fault (T6's three pairings), and the skin's first
+  // cap re-counted here and disagreed about the very first scene it was given.
+  const counted = massFills(src);
+  const used = counted.used;
+  for (const d of counted.dead) deadMass.push(`${f}  ${d}`);
 
-  const fills = [...used.values()].reduce((a, b) => a + b, 0);
+  const fills = counted.fills;
   rows.push({ id: f.replace('Scene.tsx', ''), fills, tones: used.size, used });
 
   // SOFT type inside a style object that also carries a dark fill. Style objects

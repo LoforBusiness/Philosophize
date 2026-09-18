@@ -13,6 +13,7 @@ import { BEATS } from './epistemology9Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // An easel with a hand-drawn MAP stage left, and the real LAND it claims to
 // describe out on the horizon stage right. The figure walks between the two —
@@ -85,6 +87,14 @@ const X = BEATS.map((b) => b.x ?? 208);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology9'));
 const DIR = dirsFrom(X, 1);
 const THEORY = BEATS.map((b) => b.theory ?? 0);
+// group AH — one still-tap event each, plain carried 0/1 tracks
+const TRUE_TAG = BEATS.map((b) => b.trueTag ?? 0);
+const REAL_TAG = BEATS.map((b) => b.realTag ?? 0);
+const MAPQ_TAG = BEATS.map((b) => b.mapQTag ?? 0);
+const FITS_TAG = BEATS.map((b) => b.fitsTag ?? 0);
+const MAP_DOUBT_RING = BEATS.map((b) => b.mapDoubtRing ?? 0);
+const WEB_ICON = BEATS.map((b) => b.webIcon ?? 0);
+const PATH_TAG = BEATS.map((b) => b.pathTag ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -94,7 +104,7 @@ const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 export default function Epistemology9Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(9);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -133,6 +143,13 @@ export default function Epistemology9Scene({ clock, bt, bi, i, picked, onPick, p
       // different account of what the map gets checked against, and the rival theories
       // come and go with it.
       theory: carry(cv, 1, n, THEORY[p], reacting ? pickPos.value * 2 : THEORY[n], tr),
+      trueTag: carry(cv, 2, n, TRUE_TAG[p], TRUE_TAG[n], tr),
+      realTag: carry(cv, 3, n, REAL_TAG[p], REAL_TAG[n], tr),
+      mapQTag: carry(cv, 4, n, MAPQ_TAG[p], MAPQ_TAG[n], tr),
+      fitsTag: carry(cv, 5, n, FITS_TAG[p], FITS_TAG[n], tr),
+      mapDoubtRing: carry(cv, 6, n, MAP_DOUBT_RING[p], MAP_DOUBT_RING[n], tr),
+      webIcon: carry(cv, 7, n, WEB_ICON[p], WEB_ICON[n], tr),
+      pathTag: carry(cv, 8, n, PATH_TAG[p], PATH_TAG[n], tr),
       t,
     };
   });
@@ -154,6 +171,17 @@ export default function Epistemology9Scene({ clock, bt, bi, i, picked, onPick, p
     opacity: SCENE.value.cards,
     transform: [{ translateY: (1 - SCENE.value.cards) * 12 }],
   }));
+  // group AH — one still-tap event each
+  const trueTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.trueTag }));
+  const realTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.realTag }));
+  const mapQTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.mapQTag }));
+  const fitsTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.fitsTag }));
+  const mapDoubtRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.mapDoubtRing }));
+  const webIconStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.webIcon,
+    transform: [{ scale: 0.7 + 0.3 * SCENE.value.webIcon }],
+  }));
+  const pathTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pathTag }));
 
   const answered = picked !== null;
 
@@ -170,6 +198,15 @@ export default function Epistemology9Scene({ clock, bt, bi, i, picked, onPick, p
           hills={BIG_HILLS} treeX={178} treeR={13} line={INK} fill={PAPER}
         />
         <Text style={styles.landLabel}>THE LAND</Text>
+      </Animated.View>
+
+      {/* group AH — "what are you claiming?" before any prop is up. */}
+      <Animated.View style={[styles.smallTag, styles.trueTagPos, trueTagStyle]} pointerEvents="none">
+        <Text style={styles.smallTagT}>TRUE?</Text>
+      </Animated.View>
+      {/* "there whether or not anyone observes them" — landed under the land. */}
+      <Animated.View style={[styles.smallTag, styles.realTagPos, realTagStyle]} pointerEvents="none">
+        <Text style={styles.smallTagT}>REAL, EITHER WAY</Text>
       </Animated.View>
 
       {/* ── the easel: post and legs live left of x=100, clear of the figure ─── */}
@@ -189,6 +226,17 @@ export default function Epistemology9Scene({ clock, bt, bi, i, picked, onPick, p
           </Animated.View>
         </View>
       )}
+
+      {/* "what makes such a claim true?" then, later, "a relation of fit" — the same
+          slot over the board asks the question and then answers it. */}
+      <Animated.View style={[styles.smallTag, styles.boardTagPos, mapQTagStyle]} pointerEvents="none">
+        <Text style={styles.smallTagT}>TRUE?</Text>
+      </Animated.View>
+      <Animated.View style={[styles.smallTag, styles.boardTagPos, fitsTagStyle]} pointerEvents="none">
+        <Text style={styles.smallTagT}>✓ FITS</Text>
+      </Animated.View>
+      {/* "what is the sketch compared against?" — a ring round the sketch itself. */}
+      <Animated.View style={[styles.mapDoubtRing, mapDoubtRingStyle]} pointerEvents="none" />
 
       {/* ── "how do you check the match?" — arrows both ways, and a ? ────────── */}
       {linkOn && (
@@ -210,6 +258,23 @@ export default function Epistemology9Scene({ clock, bt, bi, i, picked, onPick, p
       {/* ── the rival theories, placarded on the right ───────────────────────── */}
       <Placard S={SCENE} k={0} top={244} head="COHERENCE" body="fits the web" />
       <Placard S={SCENE} k={1} top={296} head="PRAGMATISM" body="keeps working" />
+      {/* "the whole web of belief" — three dots, chained, beside COHERENCE. */}
+      <Animated.View style={[styles.webIcon, webIconStyle]} pointerEvents="none">
+        <View style={[styles.webDot, { left: 10, top: 0 }]} />
+        <View style={[styles.webDot, { left: 0, top: 18 }]} />
+        <View style={[styles.webDot, { left: 20, top: 18 }]} />
+        <View style={[styles.webLine, { left: 11, top: 3, width: 12, transform: [{ rotate: '58deg' }] }]} />
+        <View style={[styles.webLine, { left: 11, top: 3, width: 12, transform: [{ rotate: '-58deg' }] }]} />
+        <View style={[styles.webLine, { left: 5, top: 21, width: 15 }]} />
+      </Animated.View>
+      {/* "guide you across the real hills reliably" — a little trail of footfalls
+          leading into the land, at the foot of its own hills. */}
+      <Animated.View style={[styles.pathTag, pathTagStyle]} pointerEvents="none">
+        <View style={[styles.pathDash, { left: 0 }]} />
+        <View style={[styles.pathDash, { left: 16 }]} />
+        <View style={[styles.pathDash, { left: 32 }]} />
+        <View style={styles.pathHead} />
+      </Animated.View>
 
       {/* ── Q1: two candidate maps. Tap the one that matches the land. ───────── */}
       {/* box-none, not none: this wrapper carries the tap targets, so it must let
@@ -341,13 +406,40 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
+  // ── group AH: the seven still-tap events ───────────────────────────────────
+  smallTag: {
+    position: 'absolute', paddingVertical: 3,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center',
+  },
+  smallTagT: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.5, color: INK, includeFontPadding: false },
+  trueTagPos: { left: 20, top: 150, width: 100 },
+  realTagPos: { left: LAND_L + 20, top: LAND_T + LAND_H + 4, width: 160 },
+  boardTagPos: { left: BOARD_L, top: BOARD_T - 26, width: BOARD_W },
+  mapDoubtRing: {
+    position: 'absolute', left: BOARD_L - 4, top: BOARD_T - 4, width: BOARD_W + 8, height: BOARD_H + 8,
+    borderWidth: 2, borderColor: INK, borderRadius: 12,
+  },
+  // A tiny web of three dots, tucked inside the COHERENCE placard's own corner.
+  webIcon: { position: 'absolute', left: 366, top: 250, width: 24, height: 22 },
+  webDot: { position: 'absolute', width: 4, height: 4, borderRadius: 2, backgroundColor: INK },
+  webLine: { position: 'absolute', height: 1.5, backgroundColor: INK, transformOrigin: '0% 50%' },
+  // A little trail at the foot of the hills, leading into the land.
+  pathTag: { position: 'absolute', left: 296, top: 212, width: 56, height: 10 },
+  pathDash: { position: 'absolute', top: 3, width: 8, height: 2, borderRadius: 1, backgroundColor: SOFT },
+  pathHead: {
+    position: 'absolute', left: 48, top: 0, width: 0, height: 0,
+    borderTopWidth: 4, borderBottomWidth: 4, borderLeftWidth: 7,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: SOFT,
+  },
+
   // ── easel ──────────────────────────────────────────────────────────────────
   easelPost: { position: 'absolute', left: 81, top: BOARD_T + BOARD_H - 4, width: 4, height: 128, backgroundColor: SOFT },
   legL: { position: 'absolute', left: 72, top: 448, width: 3, height: 56, backgroundColor: SOFT, transform: [{ rotate: '12deg' }] },
   legR: { position: 'absolute', left: 88, top: 448, width: 3, height: 56, backgroundColor: SOFT, transform: [{ rotate: '-12deg' }] },
   board: {
     position: 'absolute', left: BOARD_L, top: BOARD_T, width: BOARD_W, height: BOARD_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   boardLabel: {
     position: 'absolute', left: 0, right: 0, top: 9, textAlign: 'center',
@@ -381,7 +473,7 @@ const styles = StyleSheet.create({
   // ── rival theories ─────────────────────────────────────────────────────────
   placard: {
     position: 'absolute', left: 276, width: 118, height: 44,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     justifyContent: 'center', paddingHorizontal: 9,
   },
   placardHead: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 1.4, color: INK,
@@ -395,7 +487,7 @@ const styles = StyleSheet.create({
   cardLayer: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   card: {
     position: 'absolute', top: CARD_T, width: CARD_W, height: CARD_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PAPER, overflow: 'hidden',
   },
   cardRight: { backgroundColor: INK, borderColor: INK },
   cardWrong: { borderColor: SOFT },

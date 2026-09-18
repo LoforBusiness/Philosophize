@@ -21,6 +21,16 @@ export interface Ethics11Beat extends BaseBeat {
   /** The higher shelf above the table: 0 absent · 1 built, and standing empty. */ shelf?: number;
   /** Where the symphony token sits: 0 on the table · 1 up on the shelf, larger. */ up?: number;
   /** 1 = the three tokens are live tap targets (Q2). */ pick?: number;
+  /**
+   * 1 = a level line connects the tops of the three tokens, showing Bentham
+   * treats them as the same currency. One beat only.
+   */
+  level?: boolean;
+  /**
+   * 1 = a dashed line rises from the symphony token toward the empty shelf,
+   * hinting where "higher in kind" points. One beat only.
+   */
+  guide?: boolean;
 }
 
 export const BEATS: Ethics11Beat[] = [
@@ -36,7 +46,7 @@ export const BEATS: Ethics11Beat[] = [
     dur: 2.5,
   },
   {
-    p: 168, x: 60, tok: 1,
+    p: 168, x: 60, tok: 1, level: true,
     text: 'For Bentham, pleasures differ only in quantity, so no pleasure is better in itself than another.',
     dur: 2.5,
   },
@@ -53,7 +63,7 @@ export const BEATS: Ethics11Beat[] = [
     dur: 2.8,
   },
   {
-    p: 274, x: 126, tok: 1, led: 1, shelf: 1,
+    p: 274, x: 126, tok: 1, led: 1, shelf: 1, guide: true,
     text: 'Mill argued that pleasures differ in quality as well as quantity. Some are higher in kind than others.',
     dur: 2.6,
   },

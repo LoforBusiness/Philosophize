@@ -9,6 +9,9 @@ export interface Pol6Beat extends BaseBeat {
   /** The two bar-chart societies shown 0..1. */ bars?: number;
   /** 1 = the ranked ladder (1 LIBERTY → 2 DIFFERENCE) is up. */ prin?: number;
   /** Q1: the two societies are tappable this beat. */ pick?: number;
+  /** 1 = a "?" stands over each bar of the equal society in turn: any could be you. */ place?: number;
+  /** 1 = the gap between the best and worst paid is measured and captioned. */ gap?: number;
+  /** 1 = the worst-off bar is ticked and the best-off one goes quiet. */ judge?: number;
 }
 
 export const BEATS: Pol6Beat[] = [
@@ -19,6 +22,7 @@ export const BEATS: Pol6Beat[] = [
   },
   {
     p: 418, bars: 1,
+    place: 1,
     text: 'Behind the veil of ignorance, you choose principles without knowing your place in society. Rawls argues that this fair choice yields two principles, ranked in strict order.',
     cite: 'The two principles',
     dur: 4.8,
@@ -44,12 +48,14 @@ export const BEATS: Pol6Beat[] = [
   },
   {
     p: 13, bars: 1, prin: 1,
+    gap: 1,
     text: 'Suppose a surgeon earns far more than a clerk. Rawls’s difference principle asks whether that gap helps the worst off.',
     cite: 'The difference principle',
     dur: 1.8,
   },
   {
     p: 266, bars: 1, prin: 1,
+    judge: 1,
     text: 'Higher pay is just if it draws talent that lifts the worst off above the equality line. Justice is judged by how the worst off fare, not the best off.',
     dur: 3.8,
   },

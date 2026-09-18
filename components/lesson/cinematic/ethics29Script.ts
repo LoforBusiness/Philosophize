@@ -26,6 +26,10 @@ export interface Ethics29Beat extends BaseBeat {
   /** Where the line of duty falls along the scale, 0…1. */ line?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed ghost stands beside the kidney mark: the road not taken. */ stay?: number;
+  /** 1 = a dashed span measures the gap from the line to the kidney mark. */ span?: number;
+  /** 1 = a small tick marks the kidney act as earning praise. */ earn?: number;
+  /** 1 = three bars over the marks read how each is judged. */ weigh?: number;
 };
 
 export const BEATS: Ethics29Beat[] = [
@@ -35,17 +39,17 @@ export const BEATS: Ethics29Beat[] = [
     dur: 5.0,
   },
   {
-    p: 179, x: 24, scale: 1, line: 0.4,
+    p: 179, x: 24, scale: 1, line: 0.4, stay: 1,
     text: 'A second question is harder. Would the soldier have been blameworthy if he had stayed where he was?',
     dur: 5.0,
   },
   {
-    p: 448, x: 24, scale: 1, line: 0.4,
+    p: 448, x: 24, scale: 1, line: 0.4, span: 1,
     text: 'Urmson argued that he wouldn’t be, so the act goes beyond duty. A supererogatory act is good and not required.',
     dur: 5.0,
   },
   {
-    p: 269, x: 24, scale: 1, line: 0.4,
+    p: 269, x: 24, scale: 1, line: 0.4, earn: 1,
     text: 'Such an act is praiseworthy if done, and not blameworthy if left undone. The special praise it earns depends on its not being owed.',
     dur: 5.0,
   },
@@ -76,7 +80,7 @@ export const BEATS: Ethics29Beat[] = [
     dur: 5.0,
   },
   {
-    p: 458, x: 80, scale: 1, line: 0.4,
+    p: 458, x: 80, scale: 1, line: 0.4, weigh: 1,
     text: 'Common sense praises the kidney donor highly and expects the fair share. Whether walking past deserves blame is less clear.',
     dur: 5.0,
   },

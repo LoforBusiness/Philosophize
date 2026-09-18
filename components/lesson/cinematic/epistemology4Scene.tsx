@@ -12,6 +12,7 @@ import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld
   stageAnswered,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerSpent } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -19,8 +20,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A LABELLED FLOW DIAGRAM standing over the two arguers.
@@ -374,7 +376,7 @@ const styles = StyleSheet.create({
   // 51 units of interior.
   kant: {
     position: 'absolute', left: 100, top: 286, width: 200, height: 56,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP, alignItems: 'center',
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, alignItems: 'center',
   },
   kantTag: { marginTop: 4, fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 1.6, color: INK, includeFontPadding: false },
   // The first line is two pieces now, so the second term can arrive a beat after
@@ -418,7 +420,7 @@ const styles = StyleSheet.create({
   },
   plateHit: { position: 'absolute', width: PAN_W },
   plate: {
-    height: 44, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    height: 44, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },

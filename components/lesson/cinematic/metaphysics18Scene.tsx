@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics18Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE ARROWS THAT TOUCH SOMETHING, AND A FOURTH THAT DOES NOT.
@@ -79,6 +81,8 @@ const AIM = BEATS.map((b) => b.aim ?? 0);
 const HANG = BEATS.map((b) => b.hang ?? 0);
 const BEYOND = BEATS.map((b) => b.beyond ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+const CHALK = BEATS.map((b) => b.chalk ?? 0);
+const PRIME = BEATS.map((b) => b.prime ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -90,7 +94,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics18'));
 export default function Metaphysics18Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -119,6 +123,8 @@ export default function Metaphysics18Scene({ clock, bt, bi, i, picked, onPick, d
       // reads. A waver that finished would be a picture of it arriving.
       waver: Math.sin(t * 2.2),
       t,
+      chalk: carry(cv, 5, n, CHALK[p], CHALK[n], tr),
+      prime: carry(cv, 6, n, PRIME[p], PRIME[n], tr),
     };
   });
 
@@ -128,6 +134,8 @@ export default function Metaphysics18Scene({ clock, bt, bi, i, picked, onPick, d
 
   const shelfStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.shelf }));
   const beyondStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.beyond }));
+  const chalkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.chalk }));
+  const primeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.prime }));
 
   return (
     <View style={styles.scene}>
@@ -146,6 +154,18 @@ export default function Metaphysics18Scene({ clock, bt, bi, i, picked, onPick, d
         ))}
 
         {PL_X.map((px, k) => <Aim key={`a${px}`} S={SCENE} index={k} />)}
+
+        {/* A chalked numeral tries the fourth arrow's gap, and is struck through:
+            a sign for the number, not the number (A1). */}
+        <Animated.View style={[styles.chalkWrap, chalkStyle]} pointerEvents="none">
+          <Text style={styles.chalkNum} numberOfLines={1}>3</Text>
+          <View style={styles.chalkStrike} />
+        </Animated.View>
+
+        {/* A true claim stamped on the fourth plinth, despite its empty gap (A1). */}
+        <Animated.View style={[styles.primeTag, primeStyle]} pointerEvents="none">
+          <Text style={styles.primeText} numberOfLines={1}>PRIME</Text>
+        </Animated.View>
 
         {PL_X.map((px, k) => (
           <Target
@@ -219,7 +239,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 30, top: 230, width: 200,
@@ -234,7 +254,7 @@ const styles = StyleSheet.create({
 
   plinth: {
     position: 'absolute', top: PL_Y, width: PL_W, height: PL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   plinthCap: {
     position: 'absolute', top: PL_Y + 13, width: PL_W, textAlign: 'center', lineHeight: 10,
@@ -252,6 +272,27 @@ const styles = StyleSheet.create({
   beyondText: {
     position: 'absolute', left: BEY_X, top: BEY_Y + 8, width: BEY_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+  },
+
+  chalkWrap: {
+    position: 'absolute', left: PL_X[3] + PL_W / 2 - 8, top: 272, width: 16, height: 16,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  chalkNum: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 15, color: SOFT, includeFontPadding: false,
+  },
+  chalkStrike: {
+    position: 'absolute', left: -2, top: 7, width: 20, height: 2, backgroundColor: SOFT,
+    transform: [{ rotate: '-30deg' }],
+  },
+  // Just under the plinth — a true claim about it, even though nothing landed above.
+  primeTag: {
+    position: 'absolute', left: PL_X[3] + PL_W / 2 - 19, top: PL_Y + PL_H, width: 38, height: 11,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  primeText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 9, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
 
   hit: { position: 'absolute', top: PL_Y, width: PL_W, height: PL_H },

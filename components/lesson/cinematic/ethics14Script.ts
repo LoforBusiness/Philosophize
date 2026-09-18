@@ -21,6 +21,9 @@ export interface Eth14Beat extends BaseBeat {
   /** How many courses of the wall are laid, 0…5. The stack holds the rest. */ built?: number;
   /** The doorway cut through the wall, 0…1. */ door?: number;
   /** 1 = the three answer boards are live targets (Q1). */ pick?: number;
+  /** 1 = a scatter of short marks crosses the open ground, showing anyone free to act as they judge necessary. */ license?: number;
+  /** 1 = a small tag reading NOT THE ISSUE appears over the pile, marking freedom itself as fine on its own. */ notBad?: number;
+  /** 1 = two small marks point in from the open ground toward the figure, showing others' freedom aimed back at him. */ aimed?: number;
 }
 
 export const BEATS: Eth14Beat[] = [
@@ -30,18 +33,18 @@ export const BEATS: Eth14Beat[] = [
     text: 'Imagine a condition with no laws, no police and no government. Hobbes and Locke call it the state of nature.',
   },
   {
-    g: 164, built: 0,
+    g: 164, built: 0, license: 1,
     dur: 1.8,
     text: 'In it, you may do whatever you judge necessary, and so may everyone else.',
   },
   {
-    g: 13, built: 0,
+    g: 13, built: 0, notBad: 1,
     dur: 3.1,
     text: 'Hobbes argues that everyone should leave this condition. The case for leaving is not that freedom is bad.',
     cite: 'The state of nature',
   },
   {
-    g: 266, built: 0,
+    g: 266, built: 0, aimed: 1,
     dur: 1.8,
     text: 'The case is that everyone else has freedom too, and can use it against you.',
   },

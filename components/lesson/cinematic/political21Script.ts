@@ -28,6 +28,10 @@ export interface Pol21Beat extends BaseBeat {
   /** How many cells have been marked as claimed, 0…1. */ claimed?: number;
   /** The leaving arrow, hopping cell to cell, 0…1. */ exit?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = leaving lands you in another state's square, said under the map. */ either?: number;
+  /** 1 = the open sea is marked as somewhere nobody can live. */ noHome?: number;
+  /** 1 = the conclusion is limited: this is not a call to revolt. */ noRevolt?: number;
+  /** 1 = claimed is not the same as earned, said of the whole map. */ earned?: number;
 }
 
 export const BEATS: Pol21Beat[] = [
@@ -49,11 +53,13 @@ export const BEATS: Pol21Beat[] = [
   },
   {
     p: 266, x: 132, map: 1, claimed: 1, exit: 1,
+    either: 1,
     text: 'Leaving one state only places you under the authority of another.',
     dur: 1.8,
   },
   {
     p: 400, x: 132, map: 1, claimed: 1, exit: 1,
+    noHome: 1,
     text: 'Almost all habitable land is claimed by some state. The open sea is unclaimed, but no one can make a home there.',
     cite: 'The open sea',
     dur: 3.8,
@@ -82,12 +88,14 @@ export const BEATS: Pol21Beat[] = [
   },
   {
     p: 176, x: 268, map: 1, claimed: 1, exit: 1,
+    noRevolt: 1,
     text: 'Philosophical anarchism draws a limited conclusion from such arguments. It does not call for revolt against the state.',
     cite: 'The modest conclusion',
     dur: 2.6,
   },
   {
     p: 176, x: 268, map: 1, claimed: 1, exit: 1,
+    earned: 1,
     text: 'The view holds only that no existing state has earned the authority it claims. There may still be moral reasons to obey many particular laws.',
     dur: 2.2,
   },

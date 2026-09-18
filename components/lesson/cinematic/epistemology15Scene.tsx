@@ -9,6 +9,7 @@ import { BEATS } from './epistemology15Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A GRID OF FOUR BOXES, ONE OF WHICH IS SUPPOSED TO BE EMPTY (H64). The cells are
 // the Q1 targets, so the answer is a position rather than a piece of vocabulary.
@@ -59,6 +61,12 @@ const CELLN = BEATS.map((b) => b.cells ?? 0);
 const DEALT = BEATS.map((b) => b.dealt ?? 0);
 const SUM = BEATS.map((b) => b.sum ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
+// group AH — one still-tap event each, plain carried 0/1 tracks
+const COL_RING = BEATS.map((b) => b.colRing ?? 0);
+const CHAIR_RING = BEATS.map((b) => b.chairRing ?? 0);
+const EMPTY_RING = BEATS.map((b) => b.emptyRing ?? 0);
+const AFTER_ROW_RING = BEATS.map((b) => b.afterRowRing ?? 0);
+const CONFIRM_MARK = BEATS.map((b) => b.confirmMark ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
 
@@ -71,7 +79,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology15'));
 export default function Epistemology15Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(8);
   const cur = BEATS[i];
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -96,10 +104,20 @@ export default function Epistemology15Scene({ clock, bt, bi, i, picked, onPick, 
       // GENUINELY NEW and the sum arrives from outside the row; slide back and it
       // sinks into what was already there.
       sum: carry(cv, 2, n, SUM[p], reacting ? 1 - dragPos.value : SUM[n], grow),
+      colRing: carry(cv, 3, n, COL_RING[p], COL_RING[n], tr),
+      chairRing: carry(cv, 4, n, CHAIR_RING[p], CHAIR_RING[n], tr),
+      emptyRing: carry(cv, 5, n, EMPTY_RING[p], EMPTY_RING[n], tr),
+      afterRowRing: carry(cv, 6, n, AFTER_ROW_RING[p], AFTER_ROW_RING[n], tr),
+      confirmMark: carry(cv, 7, n, CONFIRM_MARK[p], CONFIRM_MARK[n], tr),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  const colRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.colRing }));
+  const chairRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.chairRing }));
+  const emptyRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.emptyRing }));
+  const afterRowRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.afterRowRing }));
+  const confirmMarkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.confirmMark }));
   // The Q1 reveal rides the same track as the cells: they are already on stage, so
   // becoming answerable is a state of theirs and not a new prop (C20c).
   const pickable = live;
@@ -112,9 +130,27 @@ export default function Epistemology15Scene({ clock, bt, bi, i, picked, onPick, 
       <Text style={[styles.rowHead, { top: ROW_Y[0] + 30 }]} numberOfLines={3}>BEFORE YOU LOOK</Text>
       <Text style={[styles.rowHead, { top: ROW_Y[1] + 30 }]} numberOfLines={3}>ONLY AFTER YOU LOOK</Text>
 
+      {/* "second, does it add something... or only unpack a definition?" — both
+          column headings, bracketed together, now that the second axis is named. */}
+      <Animated.View style={[styles.colRing, colRingStyle]} pointerEvents="none" />
+
       {CELLS.map((c, k) => (
         <Cell key={c.id} k={k} SCENE={SCENE} live={pickable} answered={answered} picked={picked} onPick={onPick} />
       ))}
+
+      {/* Drawn AFTER the cells, so a ring on a cell's own edge is not painted over
+          by that cell's opaque face. */}
+      {/* "you know that the chair is over there" — a ring on that cell. */}
+      <Animated.View style={[styles.cellRing, styles.chairCellRing, chairRingStyle]} pointerEvents="none" />
+      {/* "the synthetic a priori box is empty" — a ring on that cell, still bare. */}
+      <Animated.View style={[styles.cellRing, styles.emptyCellRing, emptyRingStyle]} pointerEvents="none" />
+      {/* "anything that adds... can be known only after looking" — the whole row. */}
+      <Animated.View style={[styles.afterRowRing, afterRowRingStyle]} pointerEvents="none" />
+      {/* "you need no experiment... yet the concept of twelve isn't contained" —
+          a small check confirms the cell Kant has just filled. */}
+      <Animated.View style={[styles.confirmMark, confirmMarkStyle]} pointerEvents="none">
+        <Text style={styles.confirmMarkT}>✓</Text>
+      </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -174,7 +210,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   colHead: {
@@ -188,8 +224,36 @@ const styles = StyleSheet.create({
     textAlign: 'left', includeFontPadding: false, backgroundColor: STONE, boxShadow: LIP },
 
   cell: { position: 'absolute', width: CELL_W, height: CELL_H },
+
+  // "second, does it add something... or only unpack a definition?" — a dashed
+  // bracket over both column headings, now that the second axis is named.
+  colRing: {
+    position: 'absolute', left: 92, top: 242, width: 224, height: 24,
+    borderRadius: 8, borderWidth: 2, borderColor: INK, borderStyle: 'dashed',
+  },
+  // The shared shape for a single-cell ring; each user picks its own left/top.
+  cellRing: {
+    position: 'absolute', width: CELL_W + 10, height: CELL_H + 10,
+    borderRadius: 8, borderWidth: 2, borderColor: INK, borderStyle: 'dashed',
+  },
+  chairCellRing: { left: COL_X[1] - 5, top: ROW_Y[1] - 5 },
+  emptyCellRing: { left: COL_X[1] - 5, top: ROW_Y[0] - 5 },
+  // "anything that adds... can be known only after looking" — the whole row.
+  afterRowRing: {
+    position: 'absolute', left: COL_X[0] - 4, top: ROW_Y[1] - 4,
+    width: COL_X[1] + CELL_W - COL_X[0] + 8, height: CELL_H + 8,
+    borderRadius: 10, borderWidth: 2, borderColor: INK, borderStyle: 'dashed',
+  },
+  // "the concept of twelve isn't contained... so it's synthetic" — a small check
+  // in the corner of the cell Kant has just filled.
+  confirmMark: {
+    position: 'absolute', left: 292, top: 272, width: 14, height: 14, borderRadius: 7,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  confirmMarkT: { fontFamily: 'Inter_700Bold', fontSize: 9, color: INK, includeFontPadding: false },
   cellInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   note: {

@@ -13,6 +13,7 @@ import { BEATS } from './metaphysics31Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // THREE NESTED ANSWERS. The slab, the ring drawn round the big hole, and the empty
 // middle of that ring are three targets drawn INSIDE ONE ANOTHER, so the reader picks
@@ -101,6 +103,8 @@ const G = BEATS.map((b) => b.g ?? 0);
 const HOLES = BEATS.map((b) => b.holes ?? 0);
 const TICKS = BEATS.map((b) => b.ticks ?? 0);
 const CHIPS = BEATS.map((b) => b.chips ?? 0);
+const COUNT_RING = BEATS.map((b) => (b.countRing ? 1 : 0));
+const TICK_MARK = BEATS.map((b) => (b.tickMark ? 1 : 0));
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -119,9 +123,14 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics31'));
 export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(5);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
   const revealing = (cur.pick ?? 0) > 0;
+  const countRingFade = (cur.countRing ?? 0) !== (prev?.countRing ?? 0);
+  const tickMarkFade = (cur.tickMark ?? 0) !== (prev?.tickMark ?? 0);
+  // THE LIST RUNS ONCE, ON THE BEAT THAT ASKS FOR IT (C20c).
+  const listNow = (cur.listReveal ?? 0) > 0 && (cur.listReveal ?? 0) !== (prev?.listReveal ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -142,6 +151,12 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
       // explanation appears, so the picture makes the point at the same moment
       // the words do.
       fade: revealing ? 1 - 0.86 * qv.value : 1,
+      // A ring flashes round each of the three holes — the count the text names.
+      countRing: carry(cv, 3, n, COUNT_RING[p], COUNT_RING[n], countRingFade ? grow : 1),
+      // A bracket marks the tally itself — the talk that commits you.
+      tickMark: carry(cv, 4, n, TICK_MARK[p], TICK_MARK[n], tickMarkFade ? grow : 1),
+      // THE LIST'S OWN PROGRESS, once per tap, flatly 0 on every other beat.
+      list: listNow ? ease01(bt.value / 2.0) : 0,
     };
   });
 
@@ -154,6 +169,21 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
   const bigStyle = useAnimatedStyle(() => {
     const a = clamp01(SCENE.value.holes * 3 - 2);
     return { opacity: a, transform: [{ scale: 0.4 + 0.6 * a }] };
+  });
+  const countRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.countRing }));
+  const tickMarkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tickMark }));
+  // The three chips highlight in the order the sentence names them: cheese, rim, gap.
+  const listCheeseStyle = useAnimatedStyle(() => {
+    const w = SCENE.value.list * 3 - 0;
+    return { opacity: Math.max(0, Math.min(w, 1 - w) * 2) };
+  });
+  const listRimStyle = useAnimatedStyle(() => {
+    const w = SCENE.value.list * 3 - 1;
+    return { opacity: Math.max(0, Math.min(w, 1 - w) * 2) };
+  });
+  const listGapStyle = useAnimatedStyle(() => {
+    const w = SCENE.value.list * 3 - 2;
+    return { opacity: Math.max(0, Math.min(w, 1 - w) * 2) };
   });
 
   const answered = picked !== null;
@@ -190,11 +220,19 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
         <View style={styles.rimEdge} />
       </Animated.View>
 
+      {/* group AH — a ring flashes round each of the three holes: the new count. */}
+      <Animated.View style={[styles.countRingBig, countRingStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.countRingSmall, { left: SMALL[0].cx - SMALL[0].r - 3, top: SMALL[0].cy - SMALL[0].r - 3, width: (SMALL[0].r + 3) * 2, height: (SMALL[0].r + 3) * 2, borderRadius: SMALL[0].r + 3 }, countRingStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.countRingSmall, { left: SMALL[1].cx - SMALL[1].r - 3, top: SMALL[1].cy - SMALL[1].r - 3, width: (SMALL[1].r + 3) * 2, height: (SMALL[1].r + 3) * 2, borderRadius: SMALL[1].r + 3 }, countRingStyle]} pointerEvents="none" />
+
       {/* the count */}
       <Text style={styles.kicker} numberOfLines={1}>COUNTING</Text>
       {[0, 1, 2].map((j) => (
         <Tick key={j} j={j} SCENE={SCENE} />
       ))}
+
+      {/* group AH — a bracket under the tally: this talk is what commits you. */}
+      <Animated.View style={[styles.tickMark, tickMarkStyle]} pointerEvents="none" />
 
       {/* the three leaders, each running from a tab to what it names */}
       <Animated.View style={[styles.leadCheese, chipStyle]} pointerEvents="none" />
@@ -238,6 +276,11 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
           </View>
         </Target>
       </Animated.View>
+
+      {/* group AH — the three chips highlight in the order the sentence names them. */}
+      <Animated.View style={[styles.listRing, TAB_CHEESE, listCheeseStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.listRing, TAB_RIM, listRimStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.listRing, TAB_GAP, listGapStyle]} pointerEvents="none" />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -360,8 +403,23 @@ const styles = StyleSheet.create({
   leadGapDown: { position: 'absolute', left: 306, top: 360, width: 2, height: 88, backgroundColor: INK },
   leadGapIn: { position: 'absolute', left: BIG_CX + GAP_R, top: 447, width: 306 - (BIG_CX + GAP_R), height: 2, backgroundColor: INK },
   tab: { position: 'absolute', height: TAB_H },
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  // A ring flashes round each of the three holes: the new count the text names.
+  countRingBig: {
+    position: 'absolute', left: BIG_CX - BIG_R - 4, top: BIG_CY - BIG_R - 4, width: (BIG_R + 4) * 2, height: (BIG_R + 4) * 2,
+    borderRadius: BIG_R + 4, borderWidth: 2, borderColor: INK,
+  },
+  countRingSmall: { position: 'absolute', borderWidth: 2, borderColor: INK },
+  // A bracket under the tally itself: this talk is what commits you.
+  tickMark: {
+    position: 'absolute', left: TICK_X - 4, top: TICK_T + 14, width: 44, height: 0,
+    borderTopWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
+  // A ring on each chip, exactly its own size, highlighted in the order the
+  // sentence names them: the cheese, then the rim, then the gap.
+  listRing: { position: 'absolute', height: TAB_H, borderWidth: 2.5, borderColor: INK, borderRadius: 6 },
   tabInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   tabText: {

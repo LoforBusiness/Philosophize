@@ -11,14 +11,16 @@ import { BEATS } from './epistemology6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // Skepticism drawn as METHOD, not mood.
 //
@@ -73,6 +75,11 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const BAL = BEATS.map((b) => b.bal ?? 0);
 const CRACK = BEATS.map((b) => b.crack ?? 0);
 const ROUTE = BEATS.map((b) => b.route ?? 0);
+// group AH — one still-tap event each, plain carried 0/1 tracks so the tap's own
+// tr fades them in and out with everything else; no separate grow needed.
+const EQUIP = BEATS.map((b) => b.equip ?? 0);
+const ATARAXIA = BEATS.map((b) => b.ataraxia ?? 0);
+const SEEMS = BEATS.map((b) => b.seems ?? 0);
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -91,7 +98,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology6'));
 export default function Epistemology6Scene({ clock, bt, bi, pickPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -108,6 +115,9 @@ export default function Epistemology6Scene({ clock, bt, bi, pickPos, i, gazeX, g
       route: carry(cv, 2, n, ROUTE[p], ROUTE[n], tr),
       // the beam quivers a hair but never commits — suspended judgment
       tilt: Math.sin(t * 1.1) * 2,
+      equip: carry(cv, 3, n, EQUIP[p], EQUIP[n], tr),
+      ataraxia: carry(cv, 4, n, ATARAXIA[p], ATARAXIA[n], tr),
+      seems: carry(cv, 5, n, SEEMS[p], SEEMS[n], tr),
       t,
     };
   });
@@ -136,6 +146,13 @@ export default function Epistemology6Scene({ clock, bt, bi, pickPos, i, gazeX, g
     ],
   }));
   const crackLine = useAnimatedStyle(() => ({ opacity: SCENE.value.crack }));
+  // group AH — one still-tap event each
+  const equipStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.equip }));
+  const ataraxiaStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ataraxia }));
+  const seemsStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.seems,
+    transform: [{ translateX: (1 - SCENE.value.seems) * -8 }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -148,6 +165,10 @@ export default function Epistemology6Scene({ clock, bt, bi, pickPos, i, gazeX, g
       {STEPS.map((s, k) => <Step key={s.head} S={SCENE} k={k} head={s.head} sub={s.sub} />)}
       <Arrow S={SCENE} k={1} left={127} />
       <Arrow S={SCENE} k={2} left={253} />
+      {/* group AH — "equipollence" names the EQUAL REASONS box; a beat later, the
+          box this beat names is ATARAXIA. Both are the same ring on a different box. */}
+      <Animated.View style={[styles.boxRing, { left: BOX_X[0] - 4 }, equipStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.boxRing, { left: BOX_X[2] - 4 }, ataraxiaStyle]} pointerEvents="none" />
 
       {/* ── the balance that never tips ───────────────────────────────────────── */}
       <Animated.View style={balStyle} pointerEvents="none">
@@ -180,6 +201,12 @@ export default function Epistemology6Scene({ clock, bt, bi, pickPos, i, gazeX, g
         <Animated.View style={[styles.crackA, crackLine]} />
         <Animated.View style={[styles.crackB, crackLine]} />
         <Animated.View style={[styles.crackC, crackLine]} />
+      </Animated.View>
+
+      {/* group AH — "report only how things seem to him": his own defence, landed
+          beside the claim it excuses him from asserting. */}
+      <Animated.View style={[styles.seemsTag, seemsStyle]} pointerEvents="none">
+        <Text style={styles.seemsText}>“SEEMS TO ME”</Text>
       </Animated.View>
 
       <Stickman D={DF} k={K_FIG} />
@@ -224,7 +251,7 @@ const styles = StyleSheet.create({
   },
   box: {
     position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: RULE,
     alignItems: 'center', justifyContent: 'center',
   },
   boxHead: {
@@ -278,7 +305,7 @@ const styles = StyleSheet.create({
   // ── the boast that breaks itself ────────────────────────────────────────────
   claim: {
     position: 'absolute', left: 240, top: 402, width: 152, height: 60,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   claimT: {
@@ -293,6 +320,21 @@ const styles = StyleSheet.create({
   crackA: { position: 'absolute', left: 52, top: -1, width: 2, height: 26, backgroundColor: INK, transform: [{ rotate: '20deg' }] },
   crackB: { position: 'absolute', left: 60, top: 24, width: 2, height: 22, backgroundColor: INK, transform: [{ rotate: '-26deg' }] },
   crackC: { position: 'absolute', left: 52, top: 42, width: 2, height: 16, backgroundColor: INK, transform: [{ rotate: '16deg' }] },
+
+  // ── group AH: the three still-tap events ───────────────────────────────────
+  // A ring round one route box, 8 units proud of it on every side — reused for
+  // EQUAL REASONS (equipollence) and, a beat later, for ATARAXIA.
+  boxRing: {
+    position: 'absolute', top: BOX_T - 4, width: BOX_W + 8, height: BOX_H + 8,
+    borderWidth: 2, borderColor: INK, borderRadius: 12,
+  },
+  // Sextus's own defence, parked in the clear gap between the figure and the claim.
+  seemsTag: {
+    position: 'absolute', left: 130, top: 422, width: 100, height: 20,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  seemsText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.3, color: INK, includeFontPadding: false },
 });
 
 // BAND. There is no camera any more, so design y IS screen y. Measured extremes

@@ -9,6 +9,7 @@ import { BEATS } from './ethics26Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIVE BEINGS IN A ROW, AND ONE GATE STANDING SOMEWHERE ALONG IT.
@@ -87,6 +89,8 @@ const RAIL = BEATS.map((b) => b.rail ?? 0);
 const LINE = BEATS.map((b) => (b.line ? 1 : 0));
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const GUESS = BEATS.map((b) => (b.guess ? 1 : 0));
+const ALT = BEATS.map((b) => (b.alt ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -105,13 +109,19 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics26'));
 export default function Ethics26Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // Two one-shot marks: each struck on the beat that names it, gone by the next.
+  const guessFade = (cur.guess ?? 0) !== (prev?.guess ?? 0);
+  const altFade = (cur.alt ?? 0) !== (prev?.alt ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -128,6 +138,10 @@ export default function Ethics26Scene({ clock, bt, bi, i, picked, onPick, pickPo
       // it, and travels only under the reader's own answer.
       lineAt: carry(cv, 3, n, LINE_AT[2], reacting ? pickAt(SORT_GATE, pickPos.value) : LINE_AT[2], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // Two one-shot marks, fading in AND out on a carried track (never an on/off
+      // ternary), so a tap mid-fade never cuts one between two frames (C20c).
+      guess: carry(cv, 5, n, GUESS[p], GUESS[n], guessFade ? grow : 1),
+      alt: carry(cv, 6, n, ALT[p], ALT[n], altFade ? grow : 1),
     };
   });
 
@@ -136,6 +150,8 @@ export default function Ethics26Scene({ clock, bt, bi, i, picked, onPick, pickPo
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.cards && LIVE[i] === 1;
 
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
+  const guessStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.guess }));
+  const altStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.alt }));
   const railStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.rail * 4) }));
   const lineStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.lineOn,
@@ -157,6 +173,21 @@ export default function Ethics26Scene({ clock, bt, bi, i, picked, onPick, pickPo
 
       <Animated.View style={[styles.line, lineStyle]} pointerEvents="none" />
       <Text style={styles.inside} pointerEvents="none">INSIDE THE CIRCLE</Text>
+
+      {/* Three faint ticks over the rail's three candidate lines — the three
+          criteria, before any one of them is drawn as the standing gate. */}
+      <Animated.View style={[StyleSheet.absoluteFill, guessStyle]} pointerEvents="none">
+        {LINE_AT.map((x) => (
+          <View key={x} style={[styles.guessTick, { left: x }]} />
+        ))}
+      </Animated.View>
+
+      {/* What the other two lines would add: a dot over the fish (suffering)
+          and the chimp (planning), the two beings the standing gate excludes. */}
+      <Animated.View style={[StyleSheet.absoluteFill, altStyle]} pointerEvents="none">
+        <View style={[styles.altDot, { left: BEING_X0 + 2 * BEING_PITCH + BEING_W / 2 - 2.5 }]} />
+        <View style={[styles.altDot, { left: BEING_X0 + 3 * BEING_PITCH + BEING_W / 2 - 2.5 }]} />
+      </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
         {PLATE_ID.map((id, k) => (
@@ -199,7 +230,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: RAIL_X, top: CAP_T, width: RAIL_W,
@@ -211,7 +242,7 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   being: {
-    position: 'absolute', top: BEING_Y, width: BEING_W, height: BEING_H, borderRadius: 3,
+    position: 'absolute', top: BEING_Y, width: BEING_W, height: BEING_H, borderRadius: 8,
     borderWidth: 1.5, borderColor: INK, backgroundColor: PAPER,
   },
   beingText: {
@@ -229,11 +260,23 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,
+  },
+
+  // A ghost of the gate — dashed and short, above the rail, never as tall or as
+  // solid as the standing line (which is 78 tall and filled INK).
+  guessTick: {
+    position: 'absolute', top: 322, width: 1.5, height: 12,
+    borderLeftWidth: 1.5, borderColor: SHADE, borderStyle: 'dashed',
+  },
+  // A small dot on the rail's own top edge, over the being an alternate line
+  // would add — never the gate itself, just what it would gather in.
+  altDot: {
+    position: 'absolute', top: 338, width: 5, height: 5, borderRadius: 2.5, backgroundColor: INK,
   },
 });
 

@@ -21,6 +21,14 @@ export interface Aes8Beat extends BaseBeat {
   /** Which pair is off the rack: 0 none · 1 shapes · 2 feeling. */ lens?: number;
   /** The mode the canvas switches to once THIS beat's question is answered. */ modeAns?: number;
   /** 1 = the two lens cards are live in the stage (Q1). */ pick?: number;
+  /** 1 = a leader runs from each reading back to the one canvas both are judging. */ sameTag?: number;
+  /** 1 = each branch of the diagram is enclosed: each reason is a theory of its own. */ theoryTag?: number;
+  /** 1 = a viewfinder stands on one region of the canvas: what you attend to, not what is there. */ attendTag?: number;
+  /** 1 = what the picture depicts is struck out under the canvas: it plays no part. */ ignoredTag?: number;
+  /** 1 = a "not equal" mark stands between the two readings: two paintings, one canvas. */ differentTag?: number;
+  /** 1 = an arrow carries the feeling off the canvas toward whoever is looking. */ moodTag?: number;
+  /** 1 = the canvas is measured across and down: the arrangement is what is left. */ irrelevantTag?: number;
+  /** 1 = a mark is found ON the canvas, where the painter came upon the feeling. */ discoveredTag?: number;
 }
 
 export const BEATS: Aes8Beat[] = [
@@ -30,12 +38,12 @@ export const BEATS: Aes8Beat[] = [
     dur: 2.2,
   },
   {
-    p: 164, x: 148, mode: 0, lens: 0,
+    p: 164, x: 148, mode: 0, lens: 0, sameTag: 1,
     text: 'The other says it succeeds because it expresses a feeling. Both are judging the same canvas.',
     dur: 1.8,
   },
   {
-    p: 164, x: 148, mode: 0, lens: 0,
+    p: 164, x: 148, mode: 0, lens: 0, theoryTag: 1,
     text: 'Each reason corresponds to a different theory of what makes art valuable.',
     dur: 1.8,
   },
@@ -46,7 +54,7 @@ export const BEATS: Aes8Beat[] = [
     dur: 2.4,
   },
   {
-    p: 275, x: 68, mode: 0, lens: 1,
+    p: 275, x: 68, mode: 0, lens: 1, attendTag: 1,
     text: 'The glasses change nothing in the painting. They change which of its features you attend to.',
     dur: 1.8,
   },
@@ -57,7 +65,7 @@ export const BEATS: Aes8Beat[] = [
     dur: 3.1,
   },
   {
-    p: 267, x: 148, mode: 1, lens: 1,
+    p: 267, x: 148, mode: 1, lens: 1, ignoredTag: 1,
     text: 'What the picture represents plays no part in this way of seeing.',
     dur: 1.8,
   },
@@ -68,7 +76,7 @@ export const BEATS: Aes8Beat[] = [
     dur: 1.8,
   },
   {
-    p: 273, x: 68, mode: 0, lens: 2,
+    p: 273, x: 68, mode: 0, lens: 2, differentTag: 1,
     text: 'This pair picks out different features, so the same canvas presents a different painting.',
     dur: 2.2,
   },
@@ -79,7 +87,7 @@ export const BEATS: Aes8Beat[] = [
     dur: 1.8,
   },
   {
-    p: 130, x: 148, mode: 2, lens: 2,
+    p: 130, x: 148, mode: 2, lens: 2, moodTag: 1,
     text: 'What matters now is the feeling the strokes convey, as if the painter had passed on a mood.',
     dur: 2.8,
   },
@@ -99,7 +107,7 @@ export const BEATS: Aes8Beat[] = [
     dur: 2.6,
   },
   {
-    p: 418, x: 148, mode: 1, lens: 1,
+    p: 418, x: 148, mode: 1, lens: 1, irrelevantTag: 1,
     text: 'Bell called it significant form, an arrangement of lines and colours that stirs aesthetic emotion. Subject matter is irrelevant.',
     dur: 2.6,
   },
@@ -122,7 +130,7 @@ export const BEATS: Aes8Beat[] = [
     dur: 2.9,
   },
   {
-    p: 272, x: 68, mode: 2, lens: 2,
+    p: 272, x: 68, mode: 2, lens: 2, discoveredTag: 1,
     text: 'Collingwood developed a different version. A painter, he held, often discovers the feeling only in the act of painting.',
     dur: 2.1,
   },

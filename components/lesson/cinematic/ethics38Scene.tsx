@@ -9,6 +9,7 @@ import { BEATS } from './ethics38Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BALANCE THAT STARTS LEVEL, AND A RACK OF REASONS HANGING OVER IT.
@@ -93,6 +95,7 @@ const BEAM = BEATS.map((b) => (b.beam ? 1 : 0));
 const WEIGHTS = BEATS.map((b) => (b.weights ? 1 : 0));
 const TILT = BEATS.map((b) => b.tilt ?? 0);
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const EQUALV = BEATS.map((b) => (b.equal ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
@@ -103,6 +106,10 @@ export default function Ethics38Scene({ clock, bt, bi, i, picked, onPick, dragPo
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // RUNS ONCE, ON THE BEAT THAT ASKS FOR IT (C20c) — a hold re-draws nothing.
+  const equalNow = (cur.equal ?? 0) > 0 && (cur.equal ?? 0) !== (prev?.equal ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -125,6 +132,9 @@ export default function Ethics38Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // the near pan are the reader's own thumb; everywhere else it is the
       // script's own track, and the two never disagree because it is one number.
       tilt: carry(cv, 3, n, TILT[p], reacting ? dragPos.value : TILT[n], tr),
+      // THE EQUAL PULSE — both discs flash together, one weight and the other
+      // never distinguished. Rides `bt` directly: one pulse per tap.
+      equal: equalNow ? ease01(bt.value / 1.2) : 0,
     };
   });
 
@@ -143,6 +153,12 @@ export default function Ethics38Scene({ clock, bt, bi, i, picked, onPick, dragPo
   // that tips with the beam is a tray, and this is what keeps them hanging.
   const armStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${LEAN * SCENE.value.tilt}deg` }] }));
   const tieStyle = useAnimatedStyle(() => ({ transform: [{ scaleY: SCENE.value.tilt }] }));
+  // Both discs pulse together — the same mark, at the same moment, on either side.
+  const equalStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.equal;
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, u / 0.3) * (1 - u);
+    return { opacity: on * 0.85, transform: [{ scale: 0.6 + 0.6 * u }] };
+  });
 
   return (
     <View style={styles.scene}>
@@ -160,6 +176,7 @@ export default function Ethics38Scene({ clock, bt, bi, i, picked, onPick, dragPo
             <View style={styles.pan} />
             <Text style={styles.panText}>MY CHILD</Text>
             <View style={styles.disc} />
+            <Animated.View style={[styles.equalRing, equalStyle]} pointerEvents="none" />
             <Animated.View style={[styles.tie, tieStyle]} />
           </Animated.View>
 
@@ -168,6 +185,7 @@ export default function Ethics38Scene({ clock, bt, bi, i, picked, onPick, dragPo
             <View style={styles.pan} />
             <Text style={styles.panText}>A STRANGER</Text>
             <View style={styles.disc} />
+            <Animated.View style={[styles.equalRing, equalStyle]} pointerEvents="none" />
           </Animated.View>
         </Animated.View>
       </Animated.View>
@@ -210,7 +228,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — political7 and political8 both stand
   // their subject on a filled mass rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 140, top: CAP_T, width: 240,
@@ -255,12 +273,18 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 8, top: CORD_H + PAN_H - 2 - TIE_H, width: 16, height: TIE_H,
     backgroundColor: SOFT, transformOrigin: '50% 100%',
   },
+  // A dashed pulse round each disc (D31 — a boundary, never a fill), the same
+  // mark landing on both at once.
+  equalRing: {
+    position: 'absolute', left: PAN_W / 2 - 13, top: CORD_H - 3, width: 26, height: 26,
+    borderRadius: 13, borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed', transformOrigin: '50% 50%',
+  },
 
   shelf: { position: 'absolute', left: 132, top: SHELF_Y, width: 250, height: 1.5, backgroundColor: RULE },
   hit: { position: 'absolute', top: W_Y, width: W_W, height: W_H },
   weight: {
     position: 'absolute', left: 0, top: 0, width: W_W, height: W_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   weightRight: { backgroundColor: INK },
   weightWrong: { borderColor: SOFT, borderStyle: 'dashed' },

@@ -30,6 +30,18 @@ export interface Logic41Beat extends BaseBeat {
   /** How much of the outer box the inner one fills, 0…1. */ fill?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /**
+   * 1 = a dot travels once from inside the inner box down into the gap between
+   * the inner box's floor and the outer box's — showing that a member of the
+   * smaller group is still inside the larger one.
+   */
+  member?: number;
+  /**
+   * 1 = a bracket above the outer box narrows once, from the outer box's own
+   * width down to the inner box's current width — showing how an added detail
+   * narrows a claim to fewer cases.
+   */
+  narrows?: number;
 }
 
 export const BEATS: Logic41Beat[] = [
@@ -49,7 +61,7 @@ export const BEATS: Logic41Beat[] = [
     dur: 4.4,
   },
   {
-    p: 263, x: 28, outer: 1, inner: 1, fill: 0.34,
+    p: 263, x: 28, outer: 1, inner: 1, fill: 0.34, member: 1,
     text: 'However, every activist bank teller is a bank teller. So the second group is a subset of the first.',
     dur: 4.6,
   },
@@ -80,7 +92,7 @@ export const BEATS: Logic41Beat[] = [
     dur: 4.2,
   },
   {
-    p: 446, x: 88, outer: 1, inner: 1, fill: 0.34,
+    p: 446, x: 88, outer: 1, inner: 1, fill: 0.34, narrows: 1,
     text: 'Adding a detail narrows a claim, so the claim fits the same cases or fewer. Detail can make a story more convincing while never making it more probable.',
     dur: 4.2,
   },

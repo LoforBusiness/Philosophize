@@ -30,6 +30,8 @@ export interface Met18Beat extends BaseBeat {
   /** The fourth arrow's gap, and its waver, 0…1. */ hang?: number;
   /** The other place, dashed, under the fourth plinth, 0…1. */ beyond?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a chalked, crossed-out 3 sits in the fourth arrow's gap. */ chalk?: number;
+  /** 1 = a PRIME tag is stamped on the fourth plinth. */ prime?: number;
 }
 
 export const BEATS: Met18Beat[] = [
@@ -50,12 +52,12 @@ export const BEATS: Met18Beat[] = [
     dur: 2.3,
   },
   {
-    p: 159, x: 132, shelf: 1, aim: 1, hang: 1,
+    p: 159, x: 132, shelf: 1, aim: 1, hang: 1, chalk: 1,
     text: 'Nor is it the numeral chalked on a board, which is only a sign for the number.',
     dur: 2.3,
   },
   {
-    p: 383, x: 132, shelf: 1, aim: 1, hang: 1,
+    p: 383, x: 132, shelf: 1, aim: 1, hang: 1, prime: 1,
     text: 'Yet claims about three are true. Three is a prime number, and it was prime before anyone counted.',
     dur: 4.2,
   },

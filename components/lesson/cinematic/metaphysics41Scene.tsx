@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics41Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE BODIES IN A FRAME, SLID EAST, AND A SCALE THAT MAY OR MAY NOT COME ALONG.
@@ -79,6 +81,16 @@ const REASON = 0;
 const CAP_T = 244;
 const FIG_X = 28;
 
+// NEWTON'S BUCKET (group AH) — clear of the frame (136…386) and of the figure's
+// widest span at the walked mark (63…113): the vessel sits at x 18…54.
+const VESSEL_X = 18;
+const VESSEL_W = 36;
+const VESSEL_TOP = 308;
+const VESSEL_BOT = 372;
+const WATER_H = 18;
+const RISE_H = 26;
+const RISER_W = 6;
+
 const X = BEATS.map((b) => b.x ?? FIG_X);
 // WHICH WAY HE IS POINTING, read off the same x track he walks along.
 const DIR = dirsFrom(X, 1);
@@ -88,6 +100,7 @@ const SCALE = BEATS.map((b) => (b.scale ? 1 : 0));
 const SHIFT = BEATS.map((b) => b.shift ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const SPIN = BEATS.map((b) => (b.spin ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -107,13 +120,19 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics41'));
 export default function Metaphysics41Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(6);
+  const cv = useCarry(7);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // The vessel fades in on the beat that introduces it; otherwise it stays put,
+  // so it doesn't re-animate every time the reader taps forward (C20c).
+  const spinFade = (cur.spin ?? 0) !== (prev?.spin ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -130,6 +149,9 @@ export default function Metaphysics41Scene({ clock, bt, bi, i, picked, onPick, p
       // Whether the scale travelled with the bodies is the whole answer.
       scaleShift: carry(cv, 4, n, 0, reacting ? pickAt(SCALE_SHIFT_AT, pickPos.value) : 0, tr),
       platesOn: carry(cv, 5, n, PLATES[p], PLATES[n], tr),
+      // NEWTON'S BUCKET (group AH) — 0..1, how far the water has climbed the
+      // vessel's sides. Fades in once, on the beat that names the rotation case.
+      spin: carry(cv, 6, n, SPIN[p], SPIN[n], spinFade ? grow : 1),
     };
   });
 
@@ -145,6 +167,11 @@ export default function Metaphysics41Scene({ clock, bt, bi, i, picked, onPick, p
   const worldStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: SLIDE * SCENE.value.shift }],
   }));
+  // NEWTON'S BUCKET — the vessel and its flat base water fade in together;
+  // the two risers grow up the walls from the same value (C20c: one channel,
+  // one event).
+  const vesselStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.spin }));
+  const riserStyle = useAnimatedStyle(() => ({ transform: [{ scaleY: SCENE.value.spin }] }));
 
   return (
     <View style={styles.scene}>
@@ -152,6 +179,13 @@ export default function Metaphysics41Scene({ clock, bt, bi, i, picked, onPick, p
       <Text style={styles.cap} pointerEvents="none">THE SAME WORLD, MOVED</Text>
 
       <View style={styles.frame} pointerEvents="none" />
+
+      {/* NEWTON'S BUCKET (group AH) — water rises up the vessel's sides. */}
+      <Animated.View style={[styles.vessel, vesselStyle]} pointerEvents="none">
+        <View style={styles.waterBase} />
+      </Animated.View>
+      <Animated.View style={[styles.riser, styles.riserL, riserStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.riser, styles.riserR, riserStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, scaleStyle]} pointerEvents="none">
         {Array.from({ length: TICK_N }, (_, k) => (
@@ -210,7 +244,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: FRAME_X, top: CAP_T, width: FRAME_W,
@@ -223,6 +257,23 @@ const styles = StyleSheet.create({
   },
   tick: { position: 'absolute', top: TICK_Y, width: 2, height: 9, backgroundColor: INK },
 
+  // ── NEWTON'S BUCKET (group AH) — the open-topped vessel, its flat water and
+  // the two risers that climb its walls when the case for rotation is made. ──
+  vessel: {
+    position: 'absolute', left: VESSEL_X, top: VESSEL_TOP, width: VESSEL_W, height: VESSEL_BOT - VESSEL_TOP,
+    borderLeftWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderColor: INK,
+    borderBottomLeftRadius: 5, borderBottomRightRadius: 5,
+  },
+  waterBase: {
+    position: 'absolute', left: 2, bottom: 0, width: VESSEL_W - 4, height: WATER_H, backgroundColor: STONE,
+  },
+  riser: {
+    position: 'absolute', top: VESSEL_BOT - WATER_H - RISE_H, width: RISER_W, height: RISE_H,
+    backgroundColor: STONE, transformOrigin: '50% 100%',
+  },
+  riserL: { left: VESSEL_X + 2 },
+  riserR: { left: VESSEL_X + VESSEL_W - 2 - RISER_W },
+
   body: {
     position: 'absolute', top: BODY_Y, width: BODY_D, height: BODY_D, borderRadius: BODY_D / 2,
     borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
@@ -232,7 +283,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

@@ -9,6 +9,7 @@ import { BEATS } from './ethics22Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIVE COLUMNS, A TANK BEHIND THEM, AND ONE CABLE.
@@ -85,6 +87,11 @@ export default function Ethics22Scene({ clock, bt, bi, i, picked, onPick, dragPo
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // ANIMATE ONLY WHAT CHANGED (C20c) — a one-shot flash, so it fires only on
+  // the beat that raises its own point, never on a beat that merely holds it.
+  const noteNow = (cur.note ?? 0) > 0 && (cur.note ?? 0) !== (prev?.note ?? 0) ? (cur.note ?? 0) : 0;
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -108,6 +115,9 @@ export default function Ethics22Scene({ clock, bt, bi, i, picked, onPick, dragPo
       wants: carry(cv, 1, n, WANTS[p], reacting ? dragPos.value : WANTS[n], tr),
       machine: carry(cv, 2, n, MACHINE[p], MACHINE[n], tr),
       cable: carry(cv, 3, n, CABLE[p], CABLE[n], tr),
+      // THE NOTE'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to,
+      // flatly 0 on every other beat — one flash per tap, not a loop.
+      note: noteNow ? ease01(bt.value / 1.1) : 0,
       t,
     };
   });
@@ -118,6 +128,11 @@ export default function Ethics22Scene({ clock, bt, bi, i, picked, onPick, dragPo
 
   const tankStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.machine }));
   const cableStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.cable }));
+  // Fades in over the first fifth of its window and out over the last.
+  const noteStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.note;
+    return { opacity: u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2) };
+  });
 
   return (
     <View style={styles.scene}>
@@ -132,6 +147,21 @@ export default function Ethics22Scene({ clock, bt, bi, i, picked, onPick, dragPo
         <View style={styles.cRun} />
         <View style={styles.cDrop} />
       </Animated.View>
+
+      {/* group AH, beat 5: "the machine can supply only the experience of
+          them" — a broken line over the four columns the real cable never
+          reaches, against the solid one that does. */}
+      {noteNow === 1 && <Animated.View style={[styles.noBar, noteStyle]} pointerEvents="none" />}
+
+      {/* group AH, beat 7: hedonism's own claim, struck by the refusal. */}
+      {noteNow === 2 && (
+        <Animated.View style={[styles.claimWrap, noteStyle]} pointerEvents="none">
+          <View style={styles.claimPlate}>
+            <Text style={styles.claimT}>PLEASURE ALONE</Text>
+          </View>
+          <View style={styles.claimStrike} />
+        </Animated.View>
+      )}
 
       {/* Each answer rides with its own target (E39). */}
       {COL_X.map((cx, k) => (
@@ -185,11 +215,11 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   tank: {
     position: 'absolute', left: TANK_X, top: TANK_Y, width: TANK_W, height: TANK_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 16, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 16, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   tankText: {
     position: 'absolute', left: TANK_X, top: TANK_Y + 13, width: TANK_W, textAlign: 'center',
@@ -199,6 +229,25 @@ const styles = StyleSheet.create({
   cStem: { position: 'absolute', left: 199, top: TANK_Y + TANK_H, width: 2.5, height: 0 },
   cRun: { position: 'absolute', left: 62, top: CABLE_Y, width: 138, height: 2.5, backgroundColor: INK },
   cDrop: { position: 'absolute', left: 61, top: CABLE_Y, width: 2.5, height: COL_Y - CABLE_Y, backgroundColor: INK },
+
+  // ── the two tap events (group AH) — a broken line where the real cable
+  // never reaches, and the hedonist's own claim struck by the refusal.
+  noBar: {
+    position: 'absolute', left: COL_X[1], top: COL_Y - 8, width: COL_X[4] + COL_W - COL_X[1], height: 0,
+    borderTopWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed',
+  },
+  claimWrap: { position: 'absolute', left: 20, top: 222, width: 96, height: 28 },
+  claimPlate: {
+    width: 96, height: 28, borderWidth: 1.5, borderColor: SOFT, borderRadius: 6,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  claimT: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.5, color: INK, includeFontPadding: false,
+  },
+  claimStrike: {
+    position: 'absolute', left: -2, top: 12.75, width: 100, height: 2.5, borderRadius: 1.25,
+    backgroundColor: INK, transform: [{ rotate: '16.26deg' }],
+  },
 
   col: {
     position: 'absolute', top: COL_Y, width: COL_W, height: COL_H,

@@ -9,6 +9,7 @@ import { BEATS } from './political39Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A COUNT, THE LAW IT MADE, AND A GAUGE OF HOW FAR THAT LAW REACHES.
@@ -193,7 +195,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — political7 and political8 both stand
   // their subject on a filled mass rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: BAR_X, top: CAP_T, width: BAR_W,
@@ -220,7 +222,7 @@ const styles = StyleSheet.create({
   link: { position: 'absolute', left: 261, top: BAR_Y + BAR_H, width: 2, height: LAW_Y - BAR_Y - BAR_H, backgroundColor: INK },
   law: {
     position: 'absolute', left: LAW_X, top: LAW_Y, width: LAW_W, height: LAW_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   lawText: {
     position: 'absolute', left: LAW_X, top: LAW_Y + 11, width: LAW_W, textAlign: 'center',
@@ -245,7 +247,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', width: RS_W, height: RS_H },
   reason: {
     position: 'absolute', left: 0, top: 0, width: RS_W, height: RS_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   reasonRight: { backgroundColor: INK },
   reasonWrong: { borderColor: SOFT, borderStyle: 'dashed' },

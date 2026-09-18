@@ -10,6 +10,7 @@ import { BEATS } from './logic21Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO LAMPS ON A BENCH, AND EVERY CONDITION PUT THROUGH BOTH.
@@ -44,6 +46,7 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const ALONE = BEATS.map((b) => b.alone ?? 0);
 const BASE_TR = 0.85;
 
 const CHIP_Y = 224;
@@ -83,7 +86,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic21'));
 // false reading standing beside its own explanation.
 export default function Logic21Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(5);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -106,6 +109,8 @@ export default function Logic21Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
       // The chip under test slides between whole numbers, so the pointer travels
       // and the lamps cross-fade rather than snapping between conditions.
       under: carry(cv, 3, n, UNDER[p], UNDER[n], tr),
+      // Carried, so it fades out as well as in (group L).
+      alone: carry(cv, 4, n, ALONE[p], ALONE[n], tr),
       t,
     };
   });
@@ -124,6 +129,14 @@ export default function Logic21Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
     const cx = CHIP_X[lo] + (CHIP_X[hi] - CHIP_X[lo]) * f + CHIP_W / 2;
     return { opacity: SCENE.value.bench, transform: [{ translateX: cx - 1 }] };
   });
+
+  // ── the tap event ──────────────────────────────────────────────────────────
+  // What the second lamp is actually asking, said under the bench where both
+  // lamps' captions already live.
+  const aloneStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.alone,
+    transform: [{ translateY: (1 - SCENE.value.alone) * 8 }],
+  }));
 
   return (
     <View style={styles.scene}>
@@ -171,6 +184,11 @@ export default function Logic21Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
         <Lamp S={SCENE} side={1} />
       </Animated.View>
 
+      {/* Sufficient is the second lamp's question, and this is what it means. */}
+      <Animated.View style={[styles.aloneTag, aloneStyle]} pointerEvents="none">
+        <Text style={styles.aloneText} numberOfLines={1}>SUFFICIENT: STARTS IT ALONE</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -200,6 +218,18 @@ function Lamp({ S, side }: { S: { value: { under: number } }; side: 0 | 1 }) {
 }
 
 const styles = StyleSheet.create({
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // Under the bench, which ends at BENCH_Y + BENCH_H.
+  aloneTag: {
+    position: 'absolute', left: BENCH_X + 40, top: BENCH_Y + BENCH_H + 8, width: 220, height: 24,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  aloneText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
 
@@ -219,7 +249,7 @@ const styles = StyleSheet.create({
 
   bench: {
     position: 'absolute', left: BENCH_X, top: BENCH_Y, width: BENCH_W, height: BENCH_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   split: {
     position: 'absolute', left: BENCH_X + BENCH_W / 2, top: BENCH_Y, width: 1, height: BENCH_H,

@@ -29,6 +29,9 @@ export interface Metaphysics26Beat extends BaseBeat {
   /** 1 = a run of cars is stopped, and the run is marked. */ jam?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a "WET" tag settles over the road — a property of the whole (group AH). */ wetTag?: number;
+  /** 1 = a token runs once from the car ahead to the one responding (group AH). */ respFlow?: number;
+  /** 1 = a dashed frame marks the space a strong emergent feature would occupy (group AH). */ extraFrame?: number;
 }
 
 export const BEATS: Metaphysics26Beat[] = [
@@ -38,7 +41,7 @@ export const BEATS: Metaphysics26Beat[] = [
     dur: 4.0,
   },
   {
-    p: 160, x: 28, road: 1,
+    p: 160, x: 28, road: 1, wetTag: 1,
     text: 'Neither gas is wet, yet water is. Wetness is a property of the whole that neither part has.',
     dur: 4.4,
   },
@@ -48,7 +51,7 @@ export const BEATS: Metaphysics26Beat[] = [
     dur: 3.8,
   },
   {
-    p: 262, x: 28, road: 1, jam: 1,
+    p: 262, x: 28, road: 1, jam: 1, respFlow: 1,
     text: 'Each driver brakes in response to the car ahead. Yet the jam as a whole moves backwards along the road at its own speed.',
     dur: 4.8,
   },
@@ -79,7 +82,7 @@ export const BEATS: Metaphysics26Beat[] = [
     dur: 4.4,
   },
   {
-    p: 447, x: 88, road: 1, jam: 1,
+    p: 447, x: 88, road: 1, jam: 1, extraFrame: 1,
     text: 'Strong emergence claims more: some features of a whole can’t be derived, even in principle, from its parts.',
     dur: 4.8,
   },

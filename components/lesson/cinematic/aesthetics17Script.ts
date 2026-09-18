@@ -21,6 +21,8 @@ export interface Aes17Beat extends BaseBeat {
   /** How high the fear meter stands, 0…1. */ fear?: number;
   /** The frame around the shape, 0…1. */ frame?: number;
   /** 1 = the three stage elements are live targets (Q1). */ pick?: number;
+  /** 1 = a dashed line crosses unbroken from the fear meter into the frame's edge. */ bridge?: number;
+  /** How many of the three philosophers' answers carry a small mark, 0…3. */ answerN?: number;
 }
 
 export const BEATS: Aes17Beat[] = [
@@ -36,7 +38,7 @@ export const BEATS: Aes17Beat[] = [
     cite: 'The paradox of horror',
   },
   {
-    g: 383, x: 160, shape: 1, fear: 0.86, frame: 1,
+    g: 383, x: 160, shape: 1, fear: 0.86, frame: 1, bridge: 1,
     dur: 4.6,
     text: 'Framing the scene as fiction doesn’t reduce the fear. The physical response is as strong inside the frame as outside it.',
     cite: 'The same fear',
@@ -55,13 +57,13 @@ export const BEATS: Aes17Beat[] = [
     },
   },
   {
-    g: 5, x: 160, shape: 1, fear: 0.86, frame: 1,
+    g: 5, x: 160, shape: 1, fear: 0.86, frame: 1, answerN: 1,
     dur: 2.1,
     text: 'Philosophers have offered three answers. For Aristotle, tragedy arouses pity and fear and brings about their catharsis, or purging.',
     cite: 'Three answers',
   },
   {
-    g: 259, x: 160, shape: 1, fear: 0.86, frame: 1,
+    g: 259, x: 160, shape: 1, fear: 0.86, frame: 1, answerN: 3,
     dur: 2.9,
     text: 'For Hume, the eloquence of the telling converts the fear into pleasure. For Noël Carroll, fear is the price paid for the pleasure of discovery.',
   },

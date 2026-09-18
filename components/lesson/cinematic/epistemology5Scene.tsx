@@ -11,6 +11,7 @@ import { BEATS } from './epistemology5Script';
 import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -18,8 +19,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ARISTOTLE'S LADDER, drawn as a stepped bar chart and climbed by the eye.
@@ -67,6 +69,13 @@ const RUNGS = [
 const rungX = (k: number) => RUNG_BASE_X + k * RUNG_STEP;
 const rungY = (k: number) => RUNG_BASE_Y - k * RUNG_PITCH;
 
+// group AH — a ring that lands on one rung's number badge, marking it out from the
+// rest. Read off the same geometry the badge itself uses (paddingLeft 6, an 8-unit
+// half-width, half the row height), so a ring never drifts from the mark it circles.
+const RING_SIZE = 24;
+const ringLeft = (k: number) => rungX(k) + 14 - RING_SIZE / 2;
+const ringTop = (k: number) => rungY(k) + RUNG_H / 2 - RING_SIZE / 2;
+
 // Bacon's line runs down the clear right-hand margin (x 372 misses every rung but
 // the top one, which it leaves from) into the box beneath the ladder.
 const BACON_X = 371;
@@ -92,6 +101,14 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const STARB = BEATS.map((b) => b.star ?? 0);
 const POWER = BEATS.map((b) => b.power ?? 0);
 const RUNGN = BEATS.map((b) => b.rungs ?? 0);
+// ── group AH: one still-tap event each, all binary reveals that only ever turn
+// on and hold, so a plain carried 0/1 track with a grow-fade never produces a cut.
+const BORNV = BEATS.map((b) => ((b.born ?? 0) > 0 ? 1 : 0));
+const FREERINGV = BEATS.map((b) => ((b.freeRing ?? 0) > 0 ? 1 : 0));
+const SIGHTRINGV = BEATS.map((b) => ((b.sightRing ?? 0) > 0 ? 1 : 0));
+const TWINV = BEATS.map((b) => ((b.twin ?? 0) > 0 ? 1 : 0));
+const PUZZLERINGV = BEATS.map((b) => ((b.puzzleRing ?? 0) > 0 ? 1 : 0));
+const VSV = BEATS.map((b) => ((b.vs ?? 0) > 0 ? 1 : 0));
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -110,16 +127,26 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology5'));
 export default function Epistemology5Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(9);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
   const answered = picked !== null;
   const asking = !!cur.interact;
+
+  // group AH — each fires once, on the beat that changes it (C20c), and then holds.
+  const bornFade = (cur.born ?? 0) !== (prev?.born ?? 0);
+  const freeRingFade = (cur.freeRing ?? 0) !== (prev?.freeRing ?? 0);
+  const sightRingFade = (cur.sightRing ?? 0) !== (prev?.sightRing ?? 0);
+  const twinFade = (cur.twin ?? 0) !== (prev?.twin ?? 0);
+  const puzzleRingFade = (cur.puzzleRing ?? 0) !== (prev?.puzzleRing ?? 0);
+  const vsFade = (cur.vs ?? 0) !== (prev?.vs ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
@@ -130,6 +157,12 @@ export default function Epistemology5Scene({ clock, bt, bi, i, picked, onPick, d
       star: carry(cv, 0, n, STARB[p], reacting ? dragPos.value : STARB[n], tr),
       power: carry(cv, 1, n, POWER[p], POWER[n], tr),
       rungs: carry(cv, 2, n, RUNGN[p], RUNGN[n], tr),
+      born: carry(cv, 3, n, BORNV[p], BORNV[n], bornFade ? grow : 1),
+      freeRing: carry(cv, 4, n, FREERINGV[p], FREERINGV[n], freeRingFade ? grow : 1),
+      sightRing: carry(cv, 5, n, SIGHTRINGV[p], SIGHTRINGV[n], sightRingFade ? grow : 1),
+      twin: carry(cv, 6, n, TWINV[p], TWINV[n], twinFade ? grow : 1),
+      puzzleRing: carry(cv, 7, n, PUZZLERINGV[p], PUZZLERINGV[n], puzzleRingFade ? grow : 1),
+      vs: carry(cv, 8, n, VSV[p], VSV[n], vsFade ? grow : 1),
       t,
     };
   });
@@ -150,6 +183,31 @@ export default function Epistemology5Scene({ clock, bt, bi, i, picked, onPick, d
   const baconStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.power }));
   const runStyle = useAnimatedStyle(() => ({
     transform: [{ scaleY: clamp01(SCENE.value.power * 1.6) }],
+  }));
+  // ── group AH: one still-tap event each ──────────────────────────────────
+  const bornStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.born,
+    transform: [{ translateY: (1 - SCENE.value.born) * 8 }],
+  }));
+  const freeRingStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.freeRing,
+    transform: [{ scale: 0.6 + 0.4 * SCENE.value.freeRing }],
+  }));
+  const sightRingStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.sightRing,
+    transform: [{ scale: 0.6 + 0.4 * SCENE.value.sightRing }],
+  }));
+  const twinStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.twin * 0.85,
+    transform: [{ scale: 0.4 + 0.6 * SCENE.value.twin }],
+  }));
+  const puzzleRingStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.puzzleRing,
+    transform: [{ scale: 0.6 + 0.4 * SCENE.value.puzzleRing }],
+  }));
+  const vsStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.vs,
+    transform: [{ scale: 0.6 + 0.4 * SCENE.value.vs }],
   }));
 
   return (
@@ -174,6 +232,18 @@ export default function Epistemology5Scene({ clock, bt, bi, i, picked, onPick, d
           <Animated.View style={[styles.baconBox, baconStyle]}>
             <Text style={styles.baconT}>KNOWLEDGE  →  POWER</Text>
             <Text style={styles.baconSub}>COMMAND OVER NATURE · BACON, 1597</Text>
+          </Animated.View>
+
+          {/* group AH — one still-tap event each, all tied to this beat's own words */}
+          <Animated.View style={[styles.bornTag, bornStyle]} pointerEvents="none">
+            <Text style={styles.bornText}>BORN WITH IT</Text>
+          </Animated.View>
+          <Animated.View style={[styles.ring, { left: ringLeft(4), top: ringTop(4) }, freeRingStyle]} pointerEvents="none" />
+          <Animated.View style={[styles.ring, { left: ringLeft(0), top: ringTop(0) }, sightRingStyle]} pointerEvents="none" />
+          <Animated.View style={[styles.twinSpark, twinStyle]} pointerEvents="none" />
+          <Animated.View style={[styles.ring, { left: ringLeft(3), top: ringTop(3) }, puzzleRingStyle]} pointerEvents="none" />
+          <Animated.View style={[styles.vsTag, vsStyle]} pointerEvents="none">
+            <Text style={styles.vsText}>VS</Text>
           </Animated.View>
         </View>
       )}
@@ -247,7 +317,7 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   rung: {
     position: 'absolute', width: RUNG_W, height: RUNG_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     flexDirection: 'row', alignItems: 'center', paddingLeft: 6, gap: 7,
   },
   rungNum: {
@@ -272,11 +342,42 @@ const styles = StyleSheet.create({
   },
   baconBox: {
     position: 'absolute', left: 140, top: BACON_T, width: 238, height: 34,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   baconT: { fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 15, letterSpacing: 0.8, color: INK, includeFontPadding: false },
   baconSub: { fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 1.1, color: INK, includeFontPadding: false },
+
+  // ── group AH: the six still-tap events ─────────────────────────────────
+  // "The desire comes with being human" — a tag lands in the clear sky, parked
+  // above the ladder tag rather than on the figure so the figure stays untouched.
+  bornTag: {
+    position: 'absolute', left: 14, top: 216, width: 118, paddingVertical: 3,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center',
+  },
+  bornText: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.8, color: INK, includeFontPadding: false },
+  // A ring that lands on one rung's number badge, marking it out. Reused for the
+  // WISDOM rung ("the only free science"), the SENSATION rung ("the lowest rung"),
+  // and the SCIENCE rung ("knowing the why" that answers a perplexity).
+  ring: {
+    position: 'absolute', width: RING_SIZE, height: RING_SIZE, borderRadius: RING_SIZE / 2,
+    borderWidth: 2, borderColor: INK,
+  },
+  // "Plato and Aristotle both hold" — a second, smaller spark joins the star,
+  // parked clear of its rays and of the WISDOM rung beneath it.
+  twinSpark: {
+    position: 'absolute', left: STAR.x - 60, top: STAR.y - 30, width: 12, height: 12,
+    borderRadius: 6, borderWidth: 2, borderColor: INK,
+  },
+  // "Aristotle prized … Bacon prized …" — a VS lands on the line already running
+  // from the WISDOM rung down to Bacon's box, marking the contrast between them.
+  vsTag: {
+    position: 'absolute', left: BACON_X - 15, top: 397, width: 30, height: 16,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  vsText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false },
 
   askLabel: {
     position: 'absolute', left: PLATE_X, top: 300, width: PLATE_W, textAlign: 'left',

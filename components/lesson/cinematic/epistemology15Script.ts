@@ -22,6 +22,14 @@ export interface Epi15Beat extends BaseBeat {
   /** How many example cards have been dealt into cells, 0…3. */ dealt?: number;
   /** The sum sitting in the fourth cell, 0…1. */ sum?: number;
   /** 1 = the four cells are live targets (Q1). */ pick?: number;
+  /** 1 = a dashed bracket spans both column headings — the second axis, just
+   *  named. */ colRing?: number;
+  /** 1 = a dashed ring marks the chair cell — the example this beat names. */ chairRing?: number;
+  /** 1 = a dashed ring marks the synthetic a priori cell, while it is still
+   *  empty. */ emptyRing?: number;
+  /** 1 = a dashed bracket spans the whole "only after you look" row — anything
+   *  that adds belongs in it. */ afterRowRing?: number;
+  /** 1 = a small check badge lands on the filled synthetic a priori cell. */ confirmMark?: number;
 }
 
 export const BEATS: Epi15Beat[] = [
@@ -31,7 +39,7 @@ export const BEATS: Epi15Beat[] = [
     text: 'Two questions can be asked of anything you know. First, could you know it before looking, or only after?',
   },
   {
-    g: 462, cells: 4,
+    g: 462, cells: 4, colRing: 1,
     dur: 2.3,
     text: 'Second, does it add something to what you know, or only unpack a definition?',
   },
@@ -42,18 +50,18 @@ export const BEATS: Epi15Beat[] = [
     cite: 'Two easy cases',
   },
   {
-    g: 465, cells: 4, dealt: 3,
+    g: 465, cells: 4, dealt: 3, chairRing: 1,
     dur: 2.9,
     text: 'You know that the chair is over there only after looking, and it adds something. Kant calls such a truth synthetic and a posteriori.',
   },
   {
-    g: 13, cells: 4, dealt: 3,
+    g: 13, cells: 4, dealt: 3, emptyRing: 1,
     dur: 3.1,
     text: 'An empiricist rule, traced to David Hume, holds that the synthetic a priori box is empty. If you did not have to look, you learned nothing new.',
     cite: 'The rule',
   },
   {
-    g: 266, cells: 4, dealt: 3,
+    g: 266, cells: 4, dealt: 3, afterRowRing: 1,
     dur: 1.8,
     text: 'Put the other way, anything that adds to your knowledge can be known only after looking.',
   },
@@ -77,7 +85,7 @@ export const BEATS: Epi15Beat[] = [
     cite: 'Kant’s example',
   },
   {
-    g: 176, cells: 4, dealt: 3, sum: 1,
+    g: 176, cells: 4, dealt: 3, sum: 1, confirmMark: 1,
     dur: 2.4,
     text: 'You need no experiment to know it, so it’s a priori. Yet, Kant argues, the concept of twelve isn’t contained in seven, five and addition, so it’s synthetic.',
   },

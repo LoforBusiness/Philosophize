@@ -53,3 +53,25 @@ export function setThoughtsOff(v: boolean) {
 export function thoughtsOff(): boolean {
   return quiet;
 }
+
+// AND A THIRD SWITCH, FOR THE MOVEMENT LAYER (wander.ts), FOR THE SAME HARNESS.
+//
+// A must-box is a MOMENT, not a place — the probe reads one instant of a beat, and
+// CLAUDE.md records what that already cost once: on a walking beat it caught the
+// figure mid-stride, so 113 of 317 beats recorded him 40 units from where the beat
+// leaves him, and every bubble anchored on that offset came to rest beside him.
+//
+// The movement layer walks him about on purpose, so measuring with it live would
+// record whichever step he happened to be taking — and the room it is allowed to
+// walk him through is derived from those very boxes. That is the bubbles' own
+// feedback loop with a longer lever: a box recorded 40 units left narrows the clear
+// floor, which moves the next run's plan, which moves the box again.
+let rooted = false;
+
+export function setWanderOff(v: boolean) {
+  rooted = v;
+}
+
+export function wanderOff(): boolean {
+  return rooted;
+}

@@ -29,6 +29,8 @@ export interface Logic23Beat extends BaseBeat {
   /** How many rows of the table have been drawn, 0…1. */ rows?: number;
   /** 1 = the OR column and its heading are shown. */ orCol?: number;
   /** 1 = the IF column and its heading are shown. */ ifCol?: number;
+  /** 1 = a ring marks the row where P and Q are both true — the "day with both". */ bothRow?: number;
+  /** 1 = a ring marks the two rows where P is false, both counted true. */ pFalse?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
 }
 
@@ -49,7 +51,7 @@ export const BEATS: Logic23Beat[] = [
     dur: 5.0,
   },
   {
-    p: 160, x: 44, rows: 1, orCol: 1,
+    p: 160, x: 44, rows: 1, orCol: 1, bothRow: 1,
     text: 'So the claim “it will rain or snow” is true on a day with both. This is called inclusive disjunction.',
     dur: 4.8,
   },
@@ -86,7 +88,7 @@ export const BEATS: Logic23Beat[] = [
     dur: 4.2,
   },
   {
-    p: 383, x: 100, rows: 1, ifCol: 1,
+    p: 383, x: 100, rows: 1, ifCol: 1, pFalse: 1,
     text: 'When P is false, the conditional isn’t falsified. So the material conditional of classical logic counts it as true.',
     dur: 4.2,
   },

@@ -13,6 +13,7 @@ import { BEATS } from './epistemology31Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, lookPose, useCarry, carry, pickAt,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A CABINET WHOSE DRAWERS SLIDE OUT, and a door nobody walks to. The answer targets
 // are containers rather than cards — three drawers and the door — so choosing an
@@ -77,6 +79,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology31'));
 /** How many drawers are pulled out on each beat (see the script). */
 const OPEN = BEATS.map((b) => b.open ?? 0);
+const ONLY_EVIDENCE = BEATS.map((b) => (b.onlyEvidence ? 1 : 0));
+const VIVID_RING = BEATS.map((b) => (b.vividRing ? 1 : 0));
+const SAME_FACULTY = BEATS.map((b) => (b.sameFaculty ? 1 : 0));
+const OUTSIDE_TAG = BEATS.map((b) => (b.outsideTag ? 1 : 0));
 
 // R7c — the cabinet follows the sort on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -96,7 +102,7 @@ const OPEN_AT = [0, 1, 3];
 
 export default function Epistemology31Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(1);
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const reacting = REACT[i] === 1;
 
@@ -114,6 +120,10 @@ export default function Epistemology31Scene({ clock, bt, bi, i, picked, onPick, 
       // Through the carry, so a drawer slides from where it was DRAWN — which after
       // the sort is wherever the reader left the cabinet.
       open: carry(cv, 0, n, OPEN[p], reacting ? pickAt(OPEN_AT, pickPos.value) : OPEN[n], slide),
+      onlyEvidence: carry(cv, 1, n, ONLY_EVIDENCE[p], ONLY_EVIDENCE[n], tr),
+      vividRing: carry(cv, 2, n, VIVID_RING[p], VIVID_RING[n], tr),
+      sameFaculty: carry(cv, 3, n, SAME_FACULTY[p], SAME_FACULTY[n], tr),
+      outsideTag: carry(cv, 4, n, OUTSIDE_TAG[p], OUTSIDE_TAG[n], tr),
     };
   });
 
@@ -122,11 +132,22 @@ export default function Epistemology31Scene({ clock, bt, bi, i, picked, onPick, 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
 
+  const onlyEvidenceStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.onlyEvidence }));
+  const vividRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.vividRing }));
+  const sameFacultyStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.sameFaculty }));
+  const outsideTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.outsideTag }));
+
   return (
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.kicker} numberOfLines={1}>WHAT I REMEMBER</Text>
       <View style={styles.cabinet} pointerEvents="none" />
+      <Animated.View style={[styles.onlyEvidence, onlyEvidenceStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.vividRing, vividRingStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.sameFaculty, sameFacultyStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.outsideTag, outsideTagStyle]} pointerEvents="none">
+        <Text style={styles.outsideTagText}>OUTSIDE MEMORY</Text>
+      </Animated.View>
 
       {LABELS.map((label, k) => (
         <Drawer
@@ -208,9 +229,37 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
+  // ONLY_EVIDENCE — a dashed outline round the whole closed cabinet: this,
+  // closed, is your only evidence so far.
+  onlyEvidence: {
+    position: 'absolute', left: CAB_L - 4, top: CAB_T - 4, width: CAB_W + 8, height: CAB_T + CAB_H - (CAB_T - 4),
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 10,
+  },
+  // VIVID_RING — a dashed ring on the open drawer's own front, at rest fully open.
+  vividRing: {
+    position: 'absolute', left: DRW_L + SLIDE - 4, top: DRW_T0 - 4, width: DRW_W + 8, height: DRW_H + 8,
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 6,
+  },
+  // SAME_FACULTY — a dashed brace joining the two open drawers on their own
+  // right edge: the second memory checks the first with the same faculty.
+  sameFaculty: {
+    position: 'absolute', left: DRW_L + SLIDE + DRW_W + 4, top: DRW_T0 + DRW_H / 2,
+    width: 6, height: DRW_T0 + DRW_PITCH + DRW_H / 2 - (DRW_T0 + DRW_H / 2),
+    borderLeftWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
+  // OUTSIDE_TAG — a small plate above the door: the one thing that could check
+  // a memory independently, because it isn't a memory itself.
+  outsideTag: {
+    position: 'absolute', left: DOOR_L - 18, top: DOOR_T - 30, width: DOOR_W + 36, height: 22,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  outsideTagText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: SOFT, textAlign: 'center',
+    includeFontPadding: false,
+  },
   kicker: {
     position: 'absolute', left: CAB_L, top: KICK_T, width: CAB_W,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
@@ -219,12 +268,12 @@ const styles = StyleSheet.create({
 
   cabinet: {
     position: 'absolute', left: CAB_L, top: CAB_T, width: CAB_W, height: CAB_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
 
   drawer: { position: 'absolute', left: DRW_L, width: DRW_W, height: DRW_H },
   drawerInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
     justifyContent: 'center', paddingLeft: 10, paddingRight: 26,
   },
   drawerText: {

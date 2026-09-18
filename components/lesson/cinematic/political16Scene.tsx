@@ -10,6 +10,7 @@ import { BEATS } from './political16Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ONE WORKER, FOUR CORDS, AND THE CORDS BEING CUT (H64). Every one of them runs
 // from the same trunk beside him, so the four severings are visibly four and
@@ -56,6 +58,9 @@ const CORDS = [
   { id: 'others', text: 'THE PEOPLE BESIDE YOU', correct: false },
 ];
 
+const COUNTED = BEATS.map((b) => b.counted ?? 0);
+const ADRIFT = BEATS.map((b) => b.adrift ?? 0);
+const OWNS = BEATS.map((b) => b.owns ?? 0);
 const G = BEATS.map((b) => b.g ?? 0);
 const CORDN = BEATS.map((b) => b.cords ?? 0);
 const CUT = BEATS.map((b) => b.cut ?? 0);
@@ -72,7 +77,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political16'));
 export default function Political16Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(6);
   const cur = BEATS[i];
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -99,11 +104,22 @@ export default function Political16Scene({ clock, bt, bi, i, picked, onPick, dra
       // the reader can see how little a raise actually reconnects.
       cut: carry(cv, 1, n, CUT[p], reacting ? dragPos.value * 4 : CUT[n], part),
       pick: carry(cv, 2, n, PICKV[p], PICKV[n], grow),
+      // The three tap events, carried, so each fades out as well as in (group L).
+      counted: carry(cv, 3, n, COUNTED[p], COUNTED[n], grow),
+      adrift: carry(cv, 4, n, ADRIFT[p], ADRIFT[n], grow),
+      owns: carry(cv, 5, n, OWNS[p], OWNS[n], grow),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const trunk = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.cords) }));
+
+  // WHAT IT ACTUALLY TURNS ON, said at the foot of the trunk — the one place in
+  // this composition that is neither a card nor the figure's own floor.
+  const ownsStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.owns,
+    transform: [{ translateY: (1 - SCENE.value.owns) * 8 }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -116,6 +132,11 @@ export default function Political16Scene({ clock, bt, bi, i, picked, onPick, dra
         <Cord key={c.id} k={k} SCENE={SCENE} live={live} answered={answered} picked={picked} onPick={onPick} />
       ))}
 
+      {/* It does not turn on the wage. */}
+      <Animated.View style={[styles.ownsPlate, ownsStyle]} pointerEvents="none">
+        <Text style={styles.ownsText} numberOfLines={1}>WHO OWNS, WHO CONTROLS</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
     </Animated.View>
@@ -127,7 +148,7 @@ function Cord({
   k, SCENE, live, answered, picked, onPick,
 }: {
   k: number;
-  SCENE: { value: { cords: number; cut: number } };
+  SCENE: { value: { cords: number; cut: number; counted: number; adrift: number } };
   live: boolean;
   answered: boolean;
   picked: string | null;
@@ -143,6 +164,16 @@ function Cord({
     return { opacity: there, transform: [{ scaleX: 1 - 0.72 * gone }] };
   });
   const stub = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.cut - k) }));
+  // ── this card's two tap events (group AH) ──────────────────────────────────
+  // THE FOUR ARE COUNTED OFF IN THE SENTENCE'S OWN ORDER, a fifth of the track
+  // apart: four numerals at once is one fact about a group, four in turn is the
+  // list the beat is reading out (AH5).
+  const counted = useAnimatedStyle(() => ({
+    opacity: SCENE.value.counted <= 0 ? 0 : clamp01((SCENE.value.counted - k * 0.18) / 0.3),
+  }));
+  // And the end a cut cord used to hold is left OPEN — a dashed socket, not a
+  // shorter cord, because what the beat claims is that nothing joins them now.
+  const adrift = useAnimatedStyle(() => ({ opacity: SCENE.value.adrift }));
   const card = useAnimatedStyle(() => {
     const a = clamp01(SCENE.value.cords - k);
     const gone = clamp01(SCENE.value.cut - k);
@@ -159,6 +190,15 @@ function Cord({
         style={[styles.stub, { top: CARD_T[k] + CARD_H / 2 - 1.5 }, stub]}
         pointerEvents="none"
       />
+      {/* Counted off as the sentence lists them, a fifth of the track apart. */}
+      <Animated.View style={[styles.count, { top: CARD_T[k] + CARD_H / 2 - 9 }, counted]} pointerEvents="none">
+        <Text style={styles.countText}>{k + 1}</Text>
+      </Animated.View>
+      {/* And where a cord has been cut, the end it used to hold is left open. */}
+      {k < 2 ? (
+        <Animated.View style={[styles.openEnd, { top: CARD_T[k] + CARD_H / 2 - 7 }, adrift]} pointerEvents="none" />
+      ) : null}
+
       <Animated.View style={[styles.card, { top: CARD_T[k] }, card]}>
         <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
                 style={styles.fill} disabled={!live || answered}>
@@ -176,12 +216,39 @@ function Cord({
 }
 
 const styles = StyleSheet.create({
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  // Inside the card's own left edge, so the numeral belongs to the thing it counts.
+  count: {
+    position: 'absolute', left: CARD_L + 6, width: 18, height: 18, borderRadius: 9,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  countText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12, color: INK,
+    includeFontPadding: false,
+  },
+  // A DASHED SOCKET where the cord used to attach: an open end, not a shorter cord.
+  openEnd: {
+    position: 'absolute', left: CARD_L - 16, width: 14, height: 14, borderRadius: 7,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed',
+  },
+  // At the foot of the trunk, below the lowest card, which ends at CARD_T[3] + CARD_H.
+  ownsPlate: {
+    position: 'absolute', left: TRUNK_X, top: CARD_T[3] + CARD_H + 8, width: 200, height: 28,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  ownsText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   label: {
@@ -200,7 +267,7 @@ const styles = StyleSheet.create({
 
   card: { position: 'absolute', left: CARD_L, width: CARD_W, height: CARD_H },
   cardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardText: {

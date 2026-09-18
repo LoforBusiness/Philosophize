@@ -12,14 +12,16 @@ import { BEATS } from './metaphysics4Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A LEDGER of failed attempts to name nothing, and the void that keeps refuting
 // them. Parmenides' trap drawn as information rather than mood.
@@ -76,6 +78,8 @@ const P_CODE = BEATS.map((b) => b.p ?? 0);
 const TOK = BEATS.map((b) => b.tokens ?? 0);
 const BAR = BEATS.map((b) => b.barred ?? 0);
 const FRZ = BEATS.map((b) => b.frozen ?? 0);
+const SEALED = BEATS.map((b) => b.sealed ?? 0);
+const MANY = BEATS.map((b) => b.manyWays ?? 0);
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -94,14 +98,22 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics4'));
 export default function Metaphysics4Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(5);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+
+  // group AH — three still taps get one event each (C20c: only the beat that
+  // changes the flag plays anything).
+  const catch1Now = (cur.catch1 ?? 0) > 0 && (cur.catch1 ?? 0) !== (prev?.catch1 ?? 0);
+  const sealedFade = (cur.sealed ?? 0) !== (prev?.sealed ?? 0);
+  const manyFade = (cur.manyWays ?? 0) !== (prev?.manyWays ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
     return {
@@ -112,6 +124,14 @@ export default function Metaphysics4Scene({ clock, bt, bi, i, dragPos, gazeX, ga
       // over the second way: the end of the rail is the end he says cannot be gone to.
       barred: carry(cv, 1, n, BAR[p], reacting ? dragPos.value : BAR[n], tr),
       frozen: carry(cv, 2, n, FRZ[p], FRZ[n], tr),
+      // A one-shot spark: it rides the tap's own clock rather than being carried,
+      // since it is a single journey along row 0's arrow, not a value that holds.
+      catch1: catch1Now ? ease01(bt.value / 1.0) : 0,
+      // The void gets a second ring the instant the second way is rejected — sealed
+      // off rather than merely barred.
+      sealed: carry(cv, 3, n, SEALED[p], SEALED[n], sealedFade ? grow : 1),
+      // Aristotle's reply: "being" said in more than one way.
+      manyWays: carry(cv, 4, n, MANY[p], MANY[n], manyFade ? grow : 1),
       t,
     };
   });
@@ -142,6 +162,24 @@ export default function Metaphysics4Scene({ clock, bt, bi, i, dragPos, gazeX, ga
     transform: [{ scaleX: ease01(clamp01((SCENE.value.frozen - 0.45) / 0.55)) }],
   }));
 
+  // group AH — the one-shot spark: it slides along row 0's arrow from "nothing"
+  // to "a thought", fading in and out over its own short journey.
+  const catch1Style = useAnimatedStyle(() => {
+    const u = SCENE.value.catch1;
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.3);
+    const x = ARROW_L + (ARROW_W - 6) * u;
+    return { opacity: on, transform: [{ translateX: x }, { translateY: ROW_T[0] + ROW_H / 2 - 4 }] };
+  });
+  // The second ring: the void seals shut the instant the second way is rejected.
+  const sealStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.sealed,
+    transform: [{ scale: 0.85 + 0.15 * ease01(SCENE.value.sealed) }],
+  }));
+  const manyStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.manyWays,
+    transform: [{ translateY: (1 - SCENE.value.manyWays) * 6 }],
+  }));
+
   return (
     <Animated.View style={styles.scene}>
       {/* ── the ledger: every grab at nothing, and what it produced ──────────── */}
@@ -160,10 +198,19 @@ export default function Metaphysics4Scene({ clock, bt, bi, i, dragPos, gazeX, ga
       {/* the tokens the void keeps handing over */}
       {TOKENS.map((tk, k) => <Token key={k} S={SCENE} tk={tk} k={k} />)}
 
+      {/* group AH — the spark: row 0's grab, caught turning into a thought. */}
+      <Animated.View style={[styles.spark, catch1Style]} pointerEvents="none" />
+
       {/* ── the claim that cannot survive the trap ───────────────────────────── */}
       <Animated.View style={[styles.frozenBox, frozenStyle]} pointerEvents="none">
         <Text style={styles.frozenText}>CHANGE IS REAL</Text>
         <Animated.View style={[styles.strike, strikeStyle]} />
+      </Animated.View>
+
+      {/* group AH — Aristotle's reply, pinned beside the frozen claim: being is
+          said in more than one way, so the "impossible" verdict has an out. */}
+      <Animated.View style={[styles.manyTag, manyStyle]} pointerEvents="none">
+        <Text style={styles.manyText}>MANY WAYS</Text>
       </Animated.View>
 
       {/* ── the void: what-is-not, hanging over the figure's head ────────────── */}
@@ -177,6 +224,11 @@ export default function Metaphysics4Scene({ clock, bt, bi, i, dragPos, gazeX, ga
         pointerEvents="none"
       />
       <Animated.View style={[styles.slash, slashStyle]} pointerEvents="none" />
+      {/* group AH — the second ring: the void seals shut on rejection. */}
+      <Animated.View
+        style={[styles.sealRing, { left: VOID.x - (VOID_RIM + 16) / 2, top: VOID.y - (VOID_RIM + 16) / 2 }, sealStyle]}
+        pointerEvents="none"
+      />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
@@ -283,7 +335,7 @@ const styles = StyleSheet.create({
   },
   cellB: {
     position: 'absolute', left: CELL_B_L, top: 0, width: CELL_B_W, height: ROW_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   cellBText: {
@@ -296,7 +348,7 @@ const styles = StyleSheet.create({
 
   frozenBox: {
     position: 'absolute', left: LED_L, top: 400, width: LED_W, height: 40,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   frozenText: { fontFamily: 'Inter_700Bold', fontSize: 14.5, letterSpacing: 1, color: INK, includeFontPadding: false },
@@ -312,6 +364,28 @@ const styles = StyleSheet.create({
   },
   voidCore: { position: 'absolute', width: VOID_CORE, height: VOID_CORE, borderRadius: VOID_CORE / 2, backgroundColor: INK },
   voidRim: { position: 'absolute', width: VOID_RIM, height: VOID_RIM, borderRadius: VOID_RIM / 2, borderWidth: 1.5, borderColor: SOFT },
+  // group AH — the second ring that locks around the void once the second way is
+  // rejected: a plain concentric circle, sealing rather than merely barring it.
+  sealRing: {
+    position: 'absolute', width: VOID_RIM + 16, height: VOID_RIM + 16, borderRadius: (VOID_RIM + 16) / 2,
+    borderWidth: 1.5, borderColor: INK,
+  },
+  // group AH — the spark that carries one grab from "nothing" into "a thought",
+  // travelling row 0's own arrow. Ink, the size of the arrowhead it rides past.
+  spark: {
+    position: 'absolute', left: 0, top: 0, width: 6, height: 6, borderRadius: 3,
+    backgroundColor: INK,
+  },
+  // group AH — Aristotle's reply, a small tag beside the frozen claim: being is
+  // said in more than one way, so the "impossible" conclusion has an escape.
+  manyTag: {
+    position: 'absolute', left: LED_L + LED_W + 4, top: 408, width: 52, paddingVertical: 3,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 5, alignItems: 'center',
+    backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  manyText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 9.5, letterSpacing: 0.2, color: INK,
+    includeFontPadding: false, textAlign: 'center',
+  },
   // Anchored at its LEFT end so the rotate and the scaleX share an origin and the
   // slash draws itself ACROSS the void instead of growing out of its middle. Its
   // length is the core's diameter and its colour is PAPER, so it reads as a stroke

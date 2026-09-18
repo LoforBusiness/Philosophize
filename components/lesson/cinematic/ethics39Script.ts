@@ -30,6 +30,7 @@ export interface Ethics39Beat extends BaseBeat {
   /** 1 = the three steps carry their names. */ rungs?: number;
   /** How far the token has climbed, 0 (the floor) … 1 (the top platform). */ climb?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed ring pulses round the JUDGE step — where Socrates puts the error, against the token stalled higher up at ACT. */ blame?: number;
 }
 
 export const BEATS: Ethics39Beat[] = [
@@ -58,7 +59,7 @@ export const BEATS: Ethics39Beat[] = [
     dur: 4.2,
   },
   {
-    p: 383, x: 52, stair: 1, rungs: 1, climb: 0.75,
+    p: 383, x: 52, stair: 1, rungs: 1, climb: 0.75, blame: 1,
     text: 'In Plato’s Protagoras, Socrates holds that choosing an act means judging it best at that moment. So a worse choice is an error of judgement, not a failure of will.',
     dur: 4.8,
   },

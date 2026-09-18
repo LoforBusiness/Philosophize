@@ -9,14 +9,16 @@ import { BEATS } from './ethics33Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // TWELVE COINS THAT MOVE ACROSS UNDER THE READER'S THUMB.
 //
@@ -49,13 +51,15 @@ const FIG_X = 48;
 
 const GIVE = BEATS.map((b) => b.give ?? 0);
 const MORE = BEATS.map((b) => b.more ?? 0);
+const ASK = BEATS.map((b) => (b.ask ? 1 : 0));
+const SQUEEZE = BEATS.map((b) => (b.squeeze ? 1 : 0));
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics33'));
 
 export default function Ethics33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(4);
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -69,11 +73,18 @@ export default function Ethics33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY,
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       give: live ? dragPos.value : carry(cv, 0, n, GIVE[p], GIVE[n], slide),
       more: carry(cv, 1, n, MORE[p], MORE[n], tr),
+      // "What permits you to stop giving" — a "?" holds in the gap between columns.
+      ask: carry(cv, 2, n, ASK[p], ASK[n], tr),
+      // "Crowds out... a rich, well-rounded character" — a dashed bracket presses
+      // in around the YOURS label.
+      squeeze: carry(cv, 3, n, SQUEEZE[p], SQUEEZE[n], tr),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const moreStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.more }));
+  const askStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ask }));
+  const squeezeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.squeeze }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -83,6 +94,13 @@ export default function Ethics33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY,
       {Array.from({ length: TOTAL }, (_, k) => <Coin key={k} k={k} SCENE={SCENE} />)}
 
       <Animated.Text style={[styles.more, moreStyle]} numberOfLines={1}>STILL ANOTHER LIFE ▸</Animated.Text>
+
+      {/* "What, if anything, permits you to stop giving" — a "?" in the gap. */}
+      <Animated.Text style={[styles.ask, askStyle]} numberOfLines={1}>?</Animated.Text>
+
+      {/* "Crowds out... a rich, well-rounded character" — a dashed bracket
+          presses in around the YOURS label. */}
+      <Animated.View style={[styles.squeeze, squeezeStyle]} pointerEvents="none" />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -131,7 +149,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   kicker: {
     position: 'absolute', left: LEFT_X - 10, top: CAP_T, width: 200,
@@ -147,6 +165,18 @@ const styles = StyleSheet.create({
   coin: {
     position: 'absolute', width: COIN_W, height: COIN_H, borderRadius: 3,
     borderWidth: 1.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
+  },
+
+  // "WHAT PERMITS YOU TO STOP" — a "?" holding in the gap between the columns.
+  ask: {
+    position: 'absolute', left: 200, top: 320, width: 24, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 14, color: INK, includeFontPadding: false,
+  },
+  // "CROWDS OUT... A RICH, WELL-ROUNDED CHARACTER" — a dashed bracket presses in
+  // around the YOURS label, never a fill (D31).
+  squeeze: {
+    position: 'absolute', left: 152, top: 241, width: 58, height: 16,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 4,
   },
 });
 

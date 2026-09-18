@@ -30,6 +30,8 @@ export interface Log18Beat extends BaseBeat {
   /** The second linkage — evidence, properly meshed — 0…1. */ meshed?: number;
   /** Where the needle sits on TRUE…FALSE, 0…1. */ needle?: number;
   /** 1 = the crank is the reader's to turn this beat. */ live_d?: number;
+  /** 1 = a tag names the two inputs, BANDWAGON and EMOTION, where the evidence box will later sit. */ named?: number;
+  /** 1 = a cross marks the break itself, in the gap between the two shaft ends. */ broken?: number;
 }
 
 export const BEATS: Log18Beat[] = [
@@ -50,17 +52,17 @@ export const BEATS: Log18Beat[] = [
     dur: 2.4,
   },
   {
-    p: 465, x: 128, crowd: 1, gap: 1, needle: 0.5,
+    p: 465, x: 128, crowd: 1, gap: 1, needle: 0.5, named: 1,
     text: 'Treating popularity as evidence is the bandwagon fallacy. Treating strong feeling as evidence is the appeal to emotion.',
     dur: 2,
   },
   {
-    p: 383, x: 128, crowd: 1, gap: 1, needle: 0.5,
+    p: 383, x: 128, crowd: 1, gap: 1, needle: 0.5, named: 1, broken: 1,
     text: 'The shaft between them is broken. Popularity and feeling have no bearing on whether a claim is true.',
     dur: 3.8,
   },
   {
-    p: 165, x: 128, crowd: 1, gap: 1, needle: 0.5, live_d: 1,
+    p: 165, x: 128, crowd: 1, gap: 1, needle: 0.5, broken: 1, live_d: 1,
     interact: {
       prompt: 'If everyone asserts that the water is safe, where does the needle point?',
       drag: {
@@ -79,13 +81,13 @@ export const BEATS: Log18Beat[] = [
     dur: 1.0,
   },
   {
-    p: 467, x: 128, crowd: 1, gap: 1, meshed: 1, needle: 0.78,
+    p: 467, x: 128, crowd: 1, gap: 1, meshed: 1, needle: 0.78, broken: 1,
     text: 'Evidence, unlike popularity, is connected to the truth of a claim. A test of the water bears on whether it’s safe.',
     cite: 'Evidence',
     dur: 4.2,
   },
   {
-    p: 137, x: 268, crowd: 1, gap: 1, meshed: 1, needle: 0.78,
+    p: 137, x: 268, crowd: 1, gap: 1, meshed: 1, needle: 0.78, broken: 1,
     quote: {
       id: 'lq-logic-arguments-18-1',
       text: 'The fact that an opinion has been widely held is no evidence whatever that it is not utterly absurd.',
@@ -98,7 +100,7 @@ export const BEATS: Log18Beat[] = [
     dur: 3.6,
   },
   {
-    p: 442, x: 268, crowd: 1, gap: 1, meshed: 1, needle: 0.78,
+    p: 442, x: 268, crowd: 1, gap: 1, meshed: 1, needle: 0.78, broken: 1,
     interact: {
       prompt: 'Is it always a fallacy to be persuaded by a moving story?',
       cards: [

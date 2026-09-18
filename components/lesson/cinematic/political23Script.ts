@@ -30,6 +30,8 @@ export interface Pol23Beat extends BaseBeat {
   /** The empty box and its caption, 0…1. */ box?: number;
   /** The chooser said to remain inside it, 0…1. */ left?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = the tag that was true before any choice is ringed and said to be so. */ given?: number;
+  /** 1 = the emptied box is captioned: nothing left to judge by. */ nojudge?: number;
 }
 
 export const BEATS: Pol23Beat[] = [
@@ -40,6 +42,7 @@ export const BEATS: Pol23Beat[] = [
   },
   {
     p: 462, x: 200, tags: 1,
+    given: 1,
     text: 'The third, being a daughter, was true of you before you could make any choice.',
     dur: 1.8,
   },
@@ -84,6 +87,7 @@ export const BEATS: Pol23Beat[] = [
   },
   {
     p: 383, x: 268, tags: 1, strip: 1, box: 1,
+    nojudge: 1,
     text: 'Alasdair MacIntyre argues that morality only makes sense inside a tradition. Without one, a person has no way to judge what to value.',
     dur: 4.8,
   },

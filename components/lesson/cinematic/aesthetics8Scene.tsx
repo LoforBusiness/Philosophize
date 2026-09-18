@@ -6,7 +6,7 @@ import Animated, {
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import {
+import { clamp01,
   WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
@@ -16,6 +16,7 @@ import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, 
   pickAt,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerSpent } from './Target';
@@ -23,8 +24,9 @@ import Target, { useAnswerSpent } from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A gallery wall. Stage right hangs a big framed CANVAS on a picture wire; stage
 // left, a RACK holding two pairs of glasses — square lenses for shapes, round
@@ -116,12 +118,40 @@ const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const M0 = BEATS[0].mode ?? 0;
 const L0 = BEATS[0].lens ?? 0;
 
+// group AH — THE EIGHT STILL TAPS, AND EIGHT DIFFERENT THINGS.
+//
+// The first pass gave all eight one tag slot in the gap between the rack and the
+// canvas and changed the word inside it. That is a subtitle track: the reader taps,
+// a caption swaps, and the wall has not done anything. Each one now moves something
+// the lesson already draws — the diagram's branches, the canvas itself, the gap
+// between the two readings — and no two of them are the same object in the same
+// place.
+const SAMEV = BEATS.map((b) => ((b.sameTag ?? 0) > 0 ? 1 : 0));
+const THEORYV = BEATS.map((b) => ((b.theoryTag ?? 0) > 0 ? 1 : 0));
+const ATTENDV = BEATS.map((b) => ((b.attendTag ?? 0) > 0 ? 1 : 0));
+const IGNOREDV = BEATS.map((b) => ((b.ignoredTag ?? 0) > 0 ? 1 : 0));
+const DIFFV = BEATS.map((b) => ((b.differentTag ?? 0) > 0 ? 1 : 0));
+const MOODV = BEATS.map((b) => ((b.moodTag ?? 0) > 0 ? 1 : 0));
+const IRRELV = BEATS.map((b) => ((b.irrelevantTag ?? 0) > 0 ? 1 : 0));
+const DISCV = BEATS.map((b) => ((b.discoveredTag ?? 0) > 0 ? 1 : 0));
+
 export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(1);
+  const cv = useCarry(9);
   const cur = BEATS[i];
+  const prevBeat = i > 0 ? BEATS[i - 1] : undefined;
   const answered = picked !== null;
+  // group AH — each gap-tag fades in on the beat that names it and fades back
+  // out (never cuts) the moment the beat moves on.
+  const sameFade = (cur.sameTag ?? 0) !== (prevBeat?.sameTag ?? 0);
+  const theoryFade = (cur.theoryTag ?? 0) !== (prevBeat?.theoryTag ?? 0);
+  const attendFade = (cur.attendTag ?? 0) !== (prevBeat?.attendTag ?? 0);
+  const ignoredFade = (cur.ignoredTag ?? 0) !== (prevBeat?.ignoredTag ?? 0);
+  const diffFade = (cur.differentTag ?? 0) !== (prevBeat?.differentTag ?? 0);
+  const moodFade = (cur.moodTag ?? 0) !== (prevBeat?.moodTag ?? 0);
+  const irrelFade = (cur.irrelevantTag ?? 0) !== (prevBeat?.irrelevantTag ?? 0);
+  const discFade = (cur.discoveredTag ?? 0) !== (prevBeat?.discoveredTag ?? 0);
   // The stage's own instruction, spent the moment the answer lands (S11).
   const spent = useAnswerSpent(picked);
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -180,6 +210,7 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick, pic
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / moveTr(X[p], X[n], 0.85));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     // The canonical travel body: walks the 80-unit gap when the beat moves them,
     // blends gesture-to-gesture when it doesn't. WALK is passed EXPLICITLY — a
@@ -189,7 +220,18 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick, pic
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
-    return { fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value) };
+    return {
+      fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
+      // group AH — named the beat the sentence names it, gone the beat it moves on.
+      same: carry(cv, 1, n, SAMEV[p], SAMEV[n], sameFade ? grow : 1),
+      theory: carry(cv, 2, n, THEORYV[p], THEORYV[n], theoryFade ? grow : 1),
+      attend: carry(cv, 3, n, ATTENDV[p], ATTENDV[n], attendFade ? grow : 1),
+      ignored: carry(cv, 4, n, IGNOREDV[p], IGNOREDV[n], ignoredFade ? grow : 1),
+      diff: carry(cv, 5, n, DIFFV[p], DIFFV[n], diffFade ? grow : 1),
+      mood: carry(cv, 6, n, MOODV[p], MOODV[n], moodFade ? grow : 1),
+      irrel: carry(cv, 7, n, IRRELV[p], IRRELV[n], irrelFade ? grow : 1),
+      disc: carry(cv, 8, n, DISCV[p], DISCV[n], discFade ? grow : 1),
+    };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
@@ -214,6 +256,44 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick, pic
   // The diagram node for whichever reading is live fills INK on the same crossfade.
   const nodeFormOn = useAnimatedStyle(() => ({ opacity: Math.min(1, W.value[1] + W.value[3]) }));
   const nodeFeelOn = useAnimatedStyle(() => ({ opacity: Math.min(1, W.value[2] + W.value[3]) }));
+  // group AH — the eight still-tap events, all sharing one gap-tag shape.
+  // Both leaders draw at once: what the beat claims is that the two readings share
+  // one object, and drawing them in turn would make it a sequence of two claims.
+  const sameStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.same, transform: [{ scaleX: SCENE.value.same }],
+  }));
+  // The two enclosures likewise: each reason is a theory, said of both at once.
+  const theoryStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.theory, transform: [{ scale: 0.96 + 0.04 * SCENE.value.theory }],
+  }));
+  // The viewfinder comes DOWN onto the canvas, which is what a pair of glasses
+  // does to a picture: it selects a part of something already there.
+  const attendStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.attend, transform: [{ translateY: (1 - SCENE.value.attend) * -14 }],
+  }));
+  // The strike is a stroke, so it draws across rather than fading in.
+  const ignoredStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ignored }));
+  const ignoredCutStyle = useAnimatedStyle(() => ({
+    opacity: clamp01((SCENE.value.ignored - 0.35) / 0.65),
+    transform: [{ scaleX: clamp01((SCENE.value.ignored - 0.35) / 0.65) }],
+  }));
+  const diffStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.diff, transform: [{ scale: 1.15 - 0.15 * SCENE.value.diff }],
+  }));
+  // The feeling travels OFF the canvas toward whoever is looking at it.
+  const moodStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.mood, transform: [{ translateX: (1 - SCENE.value.mood) * 26 }],
+  }));
+  // Two measures, across and down, each drawing from its own origin.
+  const irrelStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.irrel }));
+  const irrelHStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: SCENE.value.irrel }] }));
+  const irrelVStyle = useAnimatedStyle(() => ({ transform: [{ scaleY: SCENE.value.irrel }] }));
+  // Found IN the act: the ring closes onto the mark rather than arriving with it.
+  const discStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.disc }));
+  const discRingStyle = useAnimatedStyle(() => ({
+    opacity: clamp01((SCENE.value.disc - 0.3) / 0.7),
+    transform: [{ scale: 1.8 - 0.8 * clamp01((SCENE.value.disc - 0.3) / 0.7) }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -243,6 +323,46 @@ export default function Aesthetics8Scene({ clock, bt, bi, i, picked, onPick, pic
           <Text style={styles.nodeTextOn}>FEELING</Text>
         </Animated.View>
       </View>
+
+      {/* group AH — eight still-tap events, all in the gap between rack and canvas. */}
+      {/* Both readings are of the SAME canvas: a leader from each branch to it. */}
+      <Animated.View style={[styles.sameLeadA, sameStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.sameLeadB, sameStyle]} pointerEvents="none" />
+
+      {/* Each reason is a theory of its own: a boundary round each branch. */}
+      <Animated.View style={[styles.theoryBox, { left: NODE_B_L - 5 }, theoryStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.theoryBox, { left: NODE_C_L - 5 }, theoryStyle]} pointerEvents="none" />
+
+      {/* The glasses change nothing on the wall; they pick out part of it. */}
+      <Animated.View style={[styles.attendFrame, attendStyle]} pointerEvents="none" />
+
+      {/* What the picture depicts plays no part — struck out under the canvas. */}
+      <Animated.View style={[styles.depictPlate, ignoredStyle]} pointerEvents="none">
+        <Text style={styles.depictText} numberOfLines={1}>WHAT IT DEPICTS</Text>
+        <Animated.View style={[styles.depictCut, ignoredCutStyle]} />
+      </Animated.View>
+
+      {/* Two paintings out of one canvas. */}
+      <Animated.View style={[styles.diffMark, diffStyle]} pointerEvents="none">
+        <Text style={styles.diffText}>≠</Text>
+      </Animated.View>
+
+      {/* The mood is handed off the canvas to whoever is standing in front of it. */}
+      <Animated.View style={[styles.moodArm, moodStyle]} pointerEvents="none">
+        <View style={styles.moodHead} />
+      </Animated.View>
+
+      {/* Subject matter gone, the arrangement is what is measured. */}
+      <Animated.View style={[styles.irrelWrap, irrelStyle]} pointerEvents="none">
+        <Animated.View style={[styles.irrelH, irrelHStyle]} />
+        <Animated.View style={[styles.irrelV, irrelVStyle]} />
+      </Animated.View>
+
+      {/* And the feeling is found in the act, at the stroke that has it. */}
+      <Animated.View style={[styles.discWrap, discStyle]} pointerEvents="none">
+        <View style={styles.discDot} />
+        <Animated.View style={[styles.discRing, discRingStyle]} />
+      </Animated.View>
 
       {/* ── the picture wire and its nail, high on the wall ─────────────────── */}
       <View style={styles.nail} pointerEvents="none" />
@@ -363,7 +483,7 @@ const styles = StyleSheet.create({
   // ── the branching diagram ───────────────────────────────────────────────────
   nodeA: {
     position: 'absolute', left: NODE_A_L, top: NODE_A_T, width: NODE_A_W, height: 28,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   nodeAText: {
@@ -380,7 +500,7 @@ const styles = StyleSheet.create({
   },
   node: {
     position: 'absolute', top: NODE_T, width: NODE_W, height: NODE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   nodeOn: { backgroundColor: INK, borderColor: INK },
@@ -404,7 +524,7 @@ const styles = StyleSheet.create({
   // ── the canvas ──────────────────────────────────────────────────────────────
   canvas: {
     position: 'absolute', left: CANV_L, top: CANV_T, width: CANV_W, height: CANV_H,
-    borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: PAPER, overflow: 'hidden',
+    borderWidth: 3, borderColor: INK, borderRadius: 8, backgroundColor: PAPER, overflow: 'hidden',
   },
   plate: {
     position: 'absolute', left: 0, right: 0, bottom: 6, textAlign: 'center',
@@ -469,7 +589,7 @@ const styles = StyleSheet.create({
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: STONE, boxShadow: LIP,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, gap: 12,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },
@@ -487,6 +607,91 @@ const styles = StyleSheet.create({
   gBridge: { width: 5, height: 2, backgroundColor: INK },
   gOn: { borderColor: PAPER },
   gBridgeOn: { backgroundColor: PAPER },
+
+  // ── group AH: eight still-tap events, each on what the wall already draws ───
+  //
+  // Every one of these lives in paper the composition header already accounts for:
+  // the gap between the diagram and the canvas (x 152…206), the canvas's own face
+  // (x 206…392, y 162…328) and the strip under it, all above y 350 where a crown
+  // never reaches.
+
+  // From each branch node's outer edge across to the canvas, drawn together.
+  sameLeadA: {
+    position: 'absolute', left: NODE_B_L + NODE_W, top: NODE_T + NODE_H / 2 - 1,
+    width: CANV_L - (NODE_B_L + NODE_W), height: 2,
+    borderTopWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
+    transformOrigin: '0% 50%',
+  },
+  sameLeadB: {
+    position: 'absolute', left: NODE_C_L + NODE_W, top: NODE_T + NODE_H - 4,
+    width: CANV_L - (NODE_C_L + NODE_W), height: 2,
+    borderTopWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
+    transformOrigin: '0% 50%',
+  },
+  // A boundary round a branch — `left` comes from the node it encloses.
+  theoryBox: {
+    position: 'absolute', top: NODE_T - 5, width: NODE_W + 10, height: NODE_H + 10,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 8,
+  },
+  // ON the canvas, over its upper-left quarter: a part of what is there.
+  attendFrame: {
+    position: 'absolute', left: CANV_L + 16, top: CANV_T + 18, width: 74, height: 62,
+    borderWidth: 2, borderColor: INK, borderStyle: 'dashed', borderRadius: 4,
+  },
+  // Under the canvas, in the strip above the Q1 cards at CARD_T.
+  depictPlate: {
+    position: 'absolute', left: CANV_L + 24, top: CANV_T + CANV_H + 8, width: 138, height: 24,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  depictText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10.2, letterSpacing: 0.6, color: INK,
+    includeFontPadding: false,
+  },
+  depictCut: {
+    position: 'absolute', left: 10, right: 10, top: 11, height: 2,
+    backgroundColor: INK, borderRadius: 1, transformOrigin: '0% 50%',
+  },
+  // Between the two branch nodes, which is where the two readings part.
+  diffMark: {
+    position: 'absolute', left: NODE_B_L + NODE_W + 1, top: NODE_T + 4, width: 24, height: 22,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  diffText: {
+    fontFamily: 'Inter_700Bold', fontSize: 15, lineHeight: 18, color: INK,
+    includeFontPadding: false,
+  },
+  // Off the canvas's left edge toward the figure standing at VIEW_X.
+  moodArm: {
+    position: 'absolute', left: CANV_L - 44, top: 246, width: 34, height: 3,
+    backgroundColor: INK, borderRadius: 1.5,
+  },
+  moodHead: {
+    position: 'absolute', left: -9, top: -3.5, width: 9, height: 10,
+    borderTopWidth: 5, borderBottomWidth: 5, borderRightWidth: 9,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+    borderStyle: 'solid',
+  },
+  // The arrangement, measured across and down the canvas's own face.
+  irrelWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
+  irrelH: {
+    position: 'absolute', left: CANV_L + 12, top: CANV_T + CANV_H / 2 - 1, width: CANV_W - 24, height: 2,
+    borderTopWidth: 2, borderColor: INK, borderStyle: 'dashed', transformOrigin: '0% 50%',
+  },
+  irrelV: {
+    position: 'absolute', left: CANV_L + CANV_W / 2 - 1, top: CANV_T + 12, width: 2, height: CANV_H - 24,
+    borderLeftWidth: 2, borderColor: INK, borderStyle: 'dashed', transformOrigin: '50% 0%',
+  },
+  // A mark found on the canvas, with the ring closing onto it.
+  discWrap: {
+    position: 'absolute', left: CANV_L + CANV_W - 74, top: CANV_T + CANV_H - 68, width: 34, height: 34,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  discDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: INK },
+  discRing: {
+    position: 'absolute', left: 3, top: 3, width: 28, height: 28, borderRadius: 14,
+    borderWidth: 2, borderColor: INK,
+  },
 });
 
 // Art runs from the picture nail (y 147) down to the ground rule (y 501.5); the

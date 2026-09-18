@@ -26,6 +26,10 @@ export interface Strong4Beat extends BaseBeat {
   /** Dice shown and wobbling — probable (0/1). */ dice?: number;
   /** Banner: 0 blank · 1 LIKELY · 2 GUARANTEED. */ verdict?: number;
   /** Which ruler card is inked: 0 neither · 1 deductive · 2 inductive. */ lens?: number;
+  /** 1 = a dashed rule draws between the two ruler cards — each family gets its own separate standard. */ divide?: number;
+  /** 1 = a check mark lands on the inductive card's COGENT line. */ tick?: number;
+  /** 1 = a token travels once from the lock down to the deductive card's VALID/INVALID line, tying the guarantee to the argument's form. */ link?: number;
+  /** 1 = a stroke crosses out the deductive card's VALID/INVALID line — the wrong standard for judging this argument. */ strike?: number;
 }
 
 export const BEATS: Strong4Beat[] = [
@@ -35,45 +39,45 @@ export const BEATS: Strong4Beat[] = [
     dur: 1.8,
   },
   {
-    p: 266, fill: 0.55, lock: 0, dice: 0, verdict: 0, lens: 0,
+    p: 266, fill: 0.55, lock: 0, dice: 0, verdict: 0, lens: 0, divide: 1,
     text: 'Both kinds of argument are legitimate, and each has its own standard of assessment.',
     dur: 2.1,
   },
   {
-    p: 459, fill: 0.55, verdict: 0, lens: 0,
+    p: 459, fill: 0.55, verdict: 0, lens: 0, divide: 1,
     text: 'A deductive argument aims to guarantee its conclusion. It’s judged valid or invalid, and a valid one with true premises is sound.',
     cite: 'Two families of argument',
     dur: 1.8,
   },
   {
-    p: 459, fill: 0.55, verdict: 0, lens: 0,
+    p: 459, fill: 0.55, verdict: 0, lens: 0, divide: 1, tick: 1,
     text: 'An inductive argument aims only to make its conclusion likely, so it’s judged strong or weak. A strong one with true premises is cogent.',
     dur: 3.5,
   },
   {
-    p: 274, fill: 1, lock: 1, dice: 0, verdict: 2, lens: 1,
+    p: 274, fill: 1, lock: 1, dice: 0, verdict: 2, lens: 1, divide: 1, tick: 1,
     text: 'Consider the argument “all men are mortal, Socrates is a man, so Socrates is mortal”. If both premises are true, the conclusion can’t be false.',
     cite: 'Deduction — guaranteed',
     dur: 3.4,
   },
   {
-    p: 274, fill: 1, lock: 1, dice: 0, verdict: 2, lens: 1,
+    p: 274, fill: 1, lock: 1, dice: 0, verdict: 2, lens: 1, divide: 1, tick: 1, link: 1,
     text: 'That certainty comes from the argument’s form, not from its subject matter.',
     dur: 1.8,
   },
   {
-    p: 173, fill: 0.78, lock: 0, dice: 1, verdict: 1, lens: 2,
+    p: 173, fill: 0.78, lock: 0, dice: 1, verdict: 1, lens: 2, divide: 1, tick: 1,
     text: 'Now consider the argument “most Greeks eat olives, Socrates is Greek, so he eats olives”. The premises could be true and the conclusion false.',
     cite: 'Induction — likely',
     dur: 3.1,
   },
   {
-    p: 398, fill: 0.78, lock: 0, dice: 1, verdict: 1, lens: 2,
+    p: 398, fill: 0.78, lock: 0, dice: 1, verdict: 1, lens: 2, divide: 1, tick: 1, strike: 1,
     text: 'So the conclusion is only probable. Judging such an argument by the standard of validity is a mistake.',
     dur: 1.8,
   },
   {
-    p: 147, fill: 0.78, dice: 1, verdict: 1, lens: 2,
+    p: 147, fill: 0.78, dice: 1, verdict: 1, lens: 2, divide: 1, tick: 1, strike: 1,
     quote: {
       id: 'lq-logic-arguments-4',
       text: 'Custom, then, is the great guide of human life.',

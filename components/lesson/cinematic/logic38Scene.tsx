@@ -9,6 +9,7 @@ import { BEATS } from './logic38Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO MILLS, THE SAME THREE STEPS IN BOTH, AND ONE TRAY THAT IS ABSURD.
@@ -262,7 +264,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 140, top: CAP_T, width: 246,
@@ -271,7 +273,7 @@ const styles = StyleSheet.create({
 
   hopper: {
     position: 'absolute', top: HOP_Y, width: MILL_W, height: HOP_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   hopText: {
     position: 'absolute', top: HOP_Y + 7, width: MILL_W, textAlign: 'center',
@@ -282,7 +284,7 @@ const styles = StyleSheet.create({
 
   frame: {
     position: 'absolute', top: FRAME_Y, width: MILL_W, height: FRAME_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   step: {
     position: 'absolute', width: STEP_W, height: STEP_H,
@@ -295,7 +297,7 @@ const styles = StyleSheet.create({
 
   tray: {
     position: 'absolute', top: TRAY_Y, width: MILL_W, height: TRAY_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   trayText: {
     position: 'absolute', top: TRAY_Y + 10, width: MILL_W, textAlign: 'center',
@@ -312,7 +314,7 @@ const styles = StyleSheet.create({
   verHit: { position: 'absolute', top: VER_Y, width: VER_W, height: VER_H },
   verBox: {
     position: 'absolute', left: 0, top: 0, width: VER_W, height: VER_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   verRight: { backgroundColor: INK },
   verWrong: { borderColor: SOFT, borderStyle: 'dashed' },

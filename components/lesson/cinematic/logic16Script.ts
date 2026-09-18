@@ -30,6 +30,9 @@ export interface Log16Beat extends BaseBeat {
   /** The strip gives way to three candidate tomorrows, 0…1. */ cands?: number;
   /** The sixth morning has no crow in it, 0…1. */ silent?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a small, unlabelled twin of the crow→sun arrow appears below the strip — the same shape, elsewhere. */ echo?: number;
+  /** 1 = the twin arrow is labelled POST HOC. */ named?: number;
+  /** 1 = a question mark lands on the twin arrow's head — the same order, but maybe only luck. */ luck?: number;
 }
 
 export const BEATS: Log16Beat[] = [
@@ -50,23 +53,23 @@ export const BEATS: Log16Beat[] = [
     dur: 2.6,
   },
   {
-    p: 159, x: 132, dawns: 5, arrow: 1,
+    p: 159, x: 132, dawns: 5, arrow: 1, echo: 1,
     text: 'Yet the same form of inference is common where the conclusion seems plausible.',
     dur: 2,
   },
   {
-    p: 13, x: 132, dawns: 5, arrow: 1,
+    p: 13, x: 132, dawns: 5, arrow: 1, echo: 1, named: 1,
     text: 'The fallacy is called post hoc ergo propter hoc. In Latin that means “after this, therefore because of this”.',
     cite: 'Post hoc ergo propter hoc',
     dur: 3.1,
   },
   {
-    p: 266, x: 132, dawns: 5, arrow: 1,
+    p: 266, x: 132, dawns: 5, arrow: 1, echo: 1, named: 1, luck: 1,
     text: 'Every cause comes before its effect, but so does every coincidence.',
     dur: 1.8,
   },
   {
-    p: 165, x: 132, dawns: 5, arrow: 1, cands: 1, live: 1,
+    p: 165, x: 132, dawns: 5, arrow: 1, echo: 1, named: 1, luck: 1, cands: 1, live: 1,
     interact: {
       prompt: 'Which observation would test whether the crowing causes the sunrise?',
       explain: 'No crow: a morning when the bird stays quiet. If the sun still rises, the crowing isn’t needed for the sunrise. Another crowing morning only repeats the evidence already gathered, and a morning without sunrise can’t be arranged.',
@@ -75,7 +78,7 @@ export const BEATS: Log16Beat[] = [
     dur: 1.0,
   },
   {
-    p: 380, x: 132, dawns: 6, arrow: 1, silent: 1,
+    p: 380, x: 132, dawns: 6, arrow: 1, echo: 1, named: 1, luck: 1, silent: 1,
     text: 'On the sixth morning the cockerel is ill and silent. The sun rises at the usual time.',
     cite: 'The sixth morning',
     dur: 4.4,

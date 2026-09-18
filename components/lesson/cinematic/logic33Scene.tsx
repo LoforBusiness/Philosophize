@@ -80,13 +80,25 @@ function fit(u: number, b: number) {
 
 const BEND = BEATS.map((b) => b.bend ?? 0);
 const NEXTD = BEATS.map((b) => b.nextDot ?? 0);
+const MATCHED = BEATS.map((b) => (b.matched ? 1 : 0));
+const GAP = BEATS.map((b) => (b.gap ? 1 : 0));
+const BASE = BEATS.map((b) => (b.base ? 1 : 0));
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic33'));
 
+// THE PLAIN, ZERO-BEND ACCOUNT — a straight line, computed once from the same
+// `fit` the curve itself uses, so it can never disagree with it. This is what
+// "every extra part" is measured against: the gap between this line and the
+// actual curve IS the assumptions.
+const BASE_Y0 = gridY(fit(0, 0));
+const BASE_Y1 = gridY(fit(1, 0));
+const BASE_LEN = Math.sqrt((GRID_R - GRID_L) ** 2 + (BASE_Y1 - BASE_Y0) ** 2);
+const BASE_ANGLE = Math.atan2(BASE_Y1 - BASE_Y0, GRID_R - GRID_L);
+
 export default function Logic33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(5);
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -100,11 +112,35 @@ export default function Logic33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, 
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       bend: live ? dragPos.value : carry(cv, 0, n, BEND[p], BEND[n], grow),
       next: carry(cv, 1, n, NEXTD[p], NEXTD[n], tr),
+      matched: carry(cv, 2, n, MATCHED[p], MATCHED[n], tr),
+      gap: carry(cv, 3, n, GAP[p], GAP[n], tr),
+      base: carry(cv, 4, n, BASE[p], BASE[n], tr),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const nextStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.next }));
+  // A ring on each of the seven dots — the curve accounts for every one of them.
+  const matchedStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.matched }));
+  // The dashed reach from where the curve ends to where the new measurement
+  // actually sits — the overfit, drawn as the distance it names.
+  const gapStyle = useAnimatedStyle(() => {
+    const b = SCENE.value.bend;
+    const x0 = GRID_R;
+    const y0 = gridY(fit(1, b));
+    const x1 = GRID_L + NEXT[0] * (GRID_R - GRID_L);
+    const y1 = gridY(NEXT[1]);
+    const dx = x1 - x0;
+    const dy = y1 - y0;
+    return {
+      opacity: SCENE.value.gap,
+      left: x0,
+      top: y0,
+      width: Math.sqrt(dx * dx + dy * dy),
+      transform: [{ rotate: `${Math.atan2(dy, dx)}rad` }],
+    };
+  });
+  const baseStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.base }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -123,6 +159,17 @@ export default function Logic33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, 
         style={[styles.nextDot, { left: GRID_L + NEXT[0] * (GRID_R - GRID_L) - 5, top: gridY(NEXT[1]) - 5 }, nextStyle]}
         pointerEvents="none"
       />
+
+      {DOTS.map(([u, v], k) => (
+        <Animated.View
+          key={`tick${k}`}
+          style={[styles.tick, { left: GRID_L + u * (GRID_R - GRID_L) - 7, top: gridY(v) - 7 }, matchedStyle]}
+          pointerEvents="none"
+        />
+      ))}
+
+      <Animated.View style={[styles.gapLine, gapStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.baseLine, baseStyle]} pointerEvents="none" />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -171,6 +218,19 @@ const styles = StyleSheet.create({
   // Hollow, so the measurement the curve failed to predict is plainly a different
   // kind of thing from the seven it was fitted to.
   nextDot: { position: 'absolute', width: 10, height: 10, borderRadius: 5, borderWidth: 2, borderColor: INK },
+  // The confirming ring: a hollow circle round a dot that has been threaded.
+  tick: { position: 'absolute', width: 14, height: 14, borderRadius: 7, borderWidth: 1.5, borderColor: INK },
+  // The reach between the curve's end and the eighth measurement.
+  gapLine: {
+    position: 'absolute', height: 4, borderTopWidth: 1.5, borderStyle: 'dashed', borderTopColor: SOFT,
+    transformOrigin: '0% 0%',
+  },
+  // The plain straight-line account, fixed under the curve as its baseline.
+  baseLine: {
+    position: 'absolute', left: GRID_L, top: BASE_Y0, width: BASE_LEN, height: 4,
+    borderTopWidth: 1.5, borderStyle: 'dashed', borderTopColor: SOFT, transformOrigin: '0% 0%',
+    transform: [{ rotate: `${BASE_ANGLE}rad` }],
+  },
 });
 
 export function Logic33Lesson({ lesson }: { lesson: Lesson }) {

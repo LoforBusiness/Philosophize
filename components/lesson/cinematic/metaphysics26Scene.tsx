@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics26Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A ROAD OF CARS, A RUN OF THEM STOPPED, AND THE RUN WALKING BACKWARDS.
@@ -89,6 +91,12 @@ const ROAD = BEATS.map((b) => (b.road ? 1 : 0));
 const JAM = BEATS.map((b) => (b.jam ? 1 : 0));
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const WET_TAG = BEATS.map((b) => (b.wetTag ? 1 : 0));
+const EXTRA_FRAME = BEATS.map((b) => (b.extraFrame ? 1 : 0));
+/** The token's journey: the car "ahead" braking first, to the one responding. */
+const RESP_FROM_X = CAR_X0 + 2 * CAR_PITCH;
+const RESP_TO_X = CAR_X0 + 1 * CAR_PITCH;
+const RESP_Y = CAR_Y + CAR_H / 2;
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -99,13 +107,20 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics26'));
 export default function Metaphysics26Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const wetTagFade = (cur.wetTag ?? 0) !== (prev?.wetTag ?? 0);
+  const extraFrameFade = (cur.extraFrame ?? 0) !== (prev?.extraFrame ?? 0);
+  // THE TOKEN RUNS ONCE, ON THE BEAT THAT ASKS FOR IT (C20c).
+  const respNow = (cur.respFlow ?? 0) > 0 && (cur.respFlow ?? 0) !== (prev?.respFlow ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -127,6 +142,15 @@ export default function Metaphysics26Scene({ clock, bt, bi, i, picked, onPick, d
       // So a seam at 1 puts the whole jam in the cars and the ghost band goes.
       inCars: carry(cv, 3, n, 1, reacting ? dragPos.value : 1, tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // A "WET" tag settles over the road once — the whole has a property no
+      // single gas does.
+      wetTag: carry(cv, 5, n, WET_TAG[p], WET_TAG[n], wetTagFade ? grow : 1),
+      // A dashed frame marks the space a strong emergent feature would occupy —
+      // drawn empty, since the claim is only that it might not reduce to the cars.
+      extraFrame: carry(cv, 6, n, EXTRA_FRAME[p], EXTRA_FRAME[n], extraFrameFade ? grow : 1),
+      // THE TOKEN'S OWN PROGRESS, once per tap, flatly 0 on every other beat —
+      // one driver's brake passed back to the one behind.
+      resp: respNow ? ease01(bt.value / 1.0) : 0,
     };
   });
 
@@ -136,6 +160,17 @@ export default function Metaphysics26Scene({ clock, bt, bi, i, picked, onPick, d
 
   const roadStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.roadOn }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
+  const wetTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.wetTag }));
+  const extraFrameStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.extraFrame }));
+  // The token fades in over its first fifth and out over its last, invisible at rest.
+  const respStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.resp;
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2);
+    return {
+      opacity: on,
+      transform: [{ translateX: (RESP_TO_X - RESP_FROM_X) * u }],
+    };
+  });
   const jamStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.jamOn,
     transform: [{ translateX: SCENE.value.drift }],
@@ -172,6 +207,17 @@ export default function Metaphysics26Scene({ clock, bt, bi, i, picked, onPick, d
         </Animated.View>
       </View>
 
+      {/* group AH — "WET": a property of the whole, over the road, not a car. */}
+      <Animated.View style={[styles.wetTag, wetTagStyle]} pointerEvents="none">
+        <Text style={styles.wetText}>WET</Text>
+      </Animated.View>
+
+      {/* group AH — a dashed frame for the feature strong emergence claims. */}
+      <Animated.View style={[styles.extraFrame, extraFrameStyle]} pointerEvents="none" />
+
+      {/* group AH — a token passed once from the car ahead to the one behind it. */}
+      <Animated.View style={[styles.respToken, respStyle]} pointerEvents="none" />
+
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
         {PLATE_ID.map((id, k) => (
           <Target
@@ -198,10 +244,29 @@ export default function Metaphysics26Scene({ clock, bt, bi, i, picked, onPick, d
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  // A small tag over the road: the whole has a property no gas alone has.
+  wetTag: {
+    position: 'absolute', left: ROAD_X + ROAD_W / 2 - 17, top: GHOST_Y + 2, width: 34, height: 14,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 7, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  wetText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false },
+  // An empty dashed frame in the space a strong emergent feature would occupy —
+  // a boundary, never a fill (rule 7), because the claim is only proposed here.
+  extraFrame: {
+    position: 'absolute', left: ROAD_X, top: GHOST_Y, width: ROAD_W, height: GHOST_H,
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
+  // The token: one driver's brake, passed back to the car behind.
+  respToken: {
+    position: 'absolute', left: RESP_FROM_X - 3, top: RESP_Y - 3, width: 6, height: 6,
+    borderRadius: 3, backgroundColor: INK,
+  },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: ROAD_X, top: CAP_T, width: ROAD_W,
@@ -244,7 +309,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

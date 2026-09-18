@@ -15,6 +15,10 @@ export interface Logic26Beat extends BaseBeat {
   /** Where the figure stands (stage x). */ x?: number;
   /** How many links of the chain are drawn: 0…4. */ links?: number;
   /** 1 = the assumption has been marked false — the break, at the top. */ snap?: number;
+  /** 1 = the four link slots are traced empty, before the chain is written. */ preview?: number;
+  /** 1 = a tag beside the assumption reads "not asserted" — supposing isn't claiming. */ supposed?: number;
+  /** 1 = a ring marks the assumption, the thing this new step is said to contradict. */ implicate?: number;
+  /** 1 = a plate beneath the chain states what the proof has established. */ qed?: number;
   /** 1 = the three answer cards are live (Q2). */ pick?: number;
 }
 
@@ -25,7 +29,7 @@ export const BEATS: Logic26Beat[] = [
     dur: 2.8,
   },
   {
-    p: 164, x: 70,
+    p: 164, x: 70, preview: 1,
     text: 'Then reason validly, one careful step at a time, from that assumption until a contradiction appears.',
     dur: 1.8,
   },
@@ -36,7 +40,7 @@ export const BEATS: Logic26Beat[] = [
     dur: 1.8,
   },
   {
-    p: 270, x: 168, links: 1,
+    p: 270, x: 168, links: 1, supposed: 1,
     text: 'Supposing a claim doesn’t assert it. Any claim may be assumed for the sake of argument.',
     dur: 3.3,
   },
@@ -47,7 +51,7 @@ export const BEATS: Logic26Beat[] = [
     dur: 2.3,
   },
   {
-    p: 409, x: 168, links: 3,
+    p: 409, x: 168, links: 3, implicate: 1,
     text: 'So N is not the largest after all, which contradicts the original assumption.',
     dur: 2.7,
   },
@@ -70,7 +74,7 @@ export const BEATS: Logic26Beat[] = [
     dur: 3.5,
   },
   {
-    p: 459, x: 168, links: 4, snap: 1,
+    p: 459, x: 168, links: 4, snap: 1, qed: 1,
     text: 'So the assumption is false, and there’s no largest whole number.',
     dur: 1.8,
   },

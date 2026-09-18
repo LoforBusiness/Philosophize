@@ -193,6 +193,7 @@ import { getLessonById } from '@/data/index';
 import { CINEMATIC } from './(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId]';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
+import { setWanderOff } from '@/components/lesson/cinematic/tourFlag';
 
 export default function PreviewFrame() {
   const [go, setGo] = useState(false);
@@ -201,6 +202,10 @@ export default function PreviewFrame() {
     useUIStore.setState({ launchDone: true } as any);
     setGo(true);
   }, []);
+  // THE FIGURE STANDS STILL FOR A MEASUREMENT. The movement layer (wander.ts) walks
+  // him about, sits him down and turns him round, so a reading taken while he is
+  // mid-step is a reading of one arbitrary frame of it. See tourFlag.ts.
+  setWanderOff(true);
   const q = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const id = q?.get('id') ?? '';
   const found = getLessonById(id);

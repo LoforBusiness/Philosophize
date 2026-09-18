@@ -16,6 +16,7 @@ import { BEATS } from './political8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -23,8 +24,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // THE FENCE. Stage right, a picket fence with a goal beyond it and three onlookers
 // of very different heights peering over. Stage left, a stack of three spare crates.
@@ -99,6 +101,26 @@ const SEES = [
   [true, true, true],
 ];
 
+const PLAYV = BEATS.map((b) => b.play ?? 0);
+const ASKEDV = BEATS.map((b) => b.asked ?? 0);
+const WINV = BEATS.map((b) => b.windows ?? 0);
+const SAMEV = BEATS.map((b) => b.same ?? 0);
+const BELOWV = BEATS.map((b) => b.below ?? 0);
+const ALLV = BEATS.map((b) => b.allsee ?? 0);
+const ASKSV = BEATS.map((b) => b.asks ?? 0);
+const CAPV = BEATS.map((b) => b.capab ?? 0);
+
+// ── where the eight tap events sit ──────────────────────────────────────────
+// Each onlooker's HEAD CENTRE, off their own wrapper: `folk` is 60 wide and the
+// head sits at local left 19, width 22, so the centre is wrapper + 30. Derived
+// rather than typed, because three numbers typed out is three numbers that can
+// drift from the drawing.
+const FOLK_L = [242, 290, 336];
+const HEAD_CX = FOLK_L.map((l) => l + 30);
+/** The clear band this composition keeps between the goal and the badges. */
+const MID_T = 244;
+/** The shortest onlooker's eye once they are standing on one crate. */
+const SHORT_EYE = 413;
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? 170);
 // The camera, from the staging: it follows the figure this track describes,
@@ -153,7 +175,7 @@ const POLL_MARKS = [1, 0, 0, 1];
 export default function Political8Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(8);
+  const cv = useCarry(16);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -218,6 +240,15 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick, pick
       n0: carry(cv, 5, n, N0[p], N0[n], tr),
       n1: carry(cv, 6, n, N1[p], N1[n], tr),
       n2: carry(cv, 7, n, N2[p], N2[n], tr),
+      // The eight tap events, carried, so each fades out as well as in (group L).
+      play: carry(cv, 8, n, PLAYV[p], PLAYV[n], tr),
+      asked: carry(cv, 9, n, ASKEDV[p], ASKEDV[n], tr),
+      windows: carry(cv, 10, n, WINV[p], WINV[n], tr),
+      same: carry(cv, 11, n, SAMEV[p], SAMEV[n], tr),
+      below: carry(cv, 12, n, BELOWV[p], BELOWV[n], tr),
+      allsee: carry(cv, 13, n, ALLV[p], ALLV[n], tr),
+      asks: carry(cv, 14, n, ASKSV[p], ASKSV[n], tr),
+      capab: carry(cv, 15, n, CAPV[p], CAPV[n], tr),
     };
   });
 
@@ -247,6 +278,62 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick, pick
     ],
   }));
 
+  // ── the eight tap events ───────────────────────────────────────────────────
+  //
+  // THE BALL IS ALREADY ON THE PITCH, so the match starting is that ball moving —
+  // not a second ball. It travels across the goalmouth and back as the channel
+  // falls, which is what a ball in play does.
+  const playStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: 44 * SCENE.value.play }, { translateY: -8 * Math.sin(Math.PI * SCENE.value.play) }],
+  }));
+  const trailStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.play }));
+
+  const askedStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.asked,
+    transform: [{ translateY: (1 - SCENE.value.asked) * -8 }],
+  }));
+
+  // THE THREE WINDOWS ARRIVE IN TURN, in the order the sentence names them: the
+  // tallest first, then the two who see only the fence.
+  const inTurn = (u: number, k: number, of: number) => {
+    'worklet';
+    return (u <= 0 ? 0 : clamp01((u - (k * 0.66) / of) / 0.34));
+  };
+  const win0Style = useAnimatedStyle(() => ({ opacity: inTurn(SCENE.value.windows, 0, 3) }));
+  const win1Style = useAnimatedStyle(() => ({ opacity: inTurn(SCENE.value.windows, 1, 3) }));
+  const win2Style = useAnimatedStyle(() => ({ opacity: inTurn(SCENE.value.windows, 2, 3) }));
+  const winStyles = [win0Style, win1Style, win2Style];
+
+  const sameStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.same }));
+  // The three figures are stated first and the verdict under them second, because
+  // "identical" is a reading OF the figures.
+  const sameCapStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.same - 0.55) / 0.45) }));
+
+  // The dashed rule is drawn from the fence outwards, so it reads as being taken
+  // off the shortest onlooker's own eyes rather than laid across them.
+  const belowStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.below,
+    transform: [{ scaleX: SCENE.value.below }],
+  }));
+  const belowCapStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.below - 0.4) / 0.6) }));
+
+  const allseeStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.allsee,
+    transform: [{ scale: 0.95 + 0.05 * SCENE.value.allsee }],
+  }));
+
+  const ask0Style = useAnimatedStyle(() => ({ opacity: inTurn(SCENE.value.asks, 0, 3) }));
+  const ask1Style = useAnimatedStyle(() => ({ opacity: inTurn(SCENE.value.asks, 1, 3) }));
+  const ask2Style = useAnimatedStyle(() => ({ opacity: inTurn(SCENE.value.asks, 2, 3) }));
+  const askStyles = [ask0Style, ask1Style, ask2Style];
+
+  // The answer sits a row BELOW the three it answers, so the two never cross while
+  // one is fading out and the other in.
+  const capabStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.capab,
+    transform: [{ translateY: (1 - SCENE.value.capab) * 10 }],
+  }));
+
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
 
@@ -262,7 +349,8 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick, pick
         <View style={[styles.netV, { left: 340 }]} />
         <View style={styles.netH} />
         <View style={styles.pitchLine} />
-        <View style={styles.ball} />
+        <Animated.View style={[styles.playTrail, trailStyle]} />
+        <Animated.View style={[styles.ball, playStyle]} />
       </View>
 
       {/* ── the fence itself ────────────────────────────────────────────────── */}
@@ -328,6 +416,60 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick, pick
         <View style={[styles.folkTorso, { height: 30 }]} />
         <View style={[styles.folkLeg, { left: 25, top: 80 }]} />
         <View style={[styles.folkLeg, { left: 32, top: 80 }]} />
+      </Animated.View>
+
+      {/* What each of them can actually see, over their own head. */}
+      {HEAD_CX.map((cx, k) => (
+        <Animated.View key={`win${k}`} style={[styles.winWrap, { left: cx - 13 }, winStyles[k]]} pointerEvents="none">
+          <View style={styles.window}>
+            {k === 0 ? (
+              <>
+                <View style={styles.winBar} />
+                <View style={[styles.winPost, { left: 5 }]} />
+                <View style={[styles.winPost, { left: 19 }]} />
+              </>
+            ) : (
+              <>
+                <View style={[styles.winPicket, { left: 7 }]} />
+                <View style={[styles.winPicket, { left: 12.5 }]} />
+                <View style={[styles.winPicket, { left: 18 }]} />
+              </>
+            )}
+          </View>
+          <View style={styles.winLead} />
+        </Animated.View>
+      ))}
+
+      {/* The question that ends the agreement. */}
+      <Animated.View style={[styles.askedPlate, askedStyle]} pointerEvents="none">
+        <Text style={styles.askedText}>AN EQUAL SHARE OF WHAT?</Text>
+      </Animated.View>
+
+      {/* One crate each, set out as identical shares. */}
+      <Animated.View style={[styles.sameWrap, sameStyle]} pointerEvents="none">
+        <Text style={styles.sameText}>1   =   1   =   1</Text>
+        <Animated.Text style={[styles.sameCap, sameCapStyle]}>IDENTICAL SHARES</Animated.Text>
+      </Animated.View>
+
+      {/* Where the shortest's eyes actually are, with the rail above them. */}
+      <Animated.View style={[styles.belowRule, belowStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.belowCap, belowCapStyle]} pointerEvents="none">STILL BELOW</Animated.Text>
+
+      {/* One level, said outright. */}
+      <Animated.View style={[styles.allseePlate, allseeStyle]} pointerEvents="none">
+        <Text style={styles.allseeText}>ALL THREE, ONE LEVEL</Text>
+      </Animated.View>
+
+      {/* Equal what? The three candidate answers. */}
+      {['RESOURCES', 'OPPORTUNITIES', 'HAPPINESS'].map((w, k) => (
+        <Animated.View key={w} style={[styles.askPlate, { left: 20 + k * 122 }, askStyles[k]]} pointerEvents="none">
+          <Text style={styles.askText}>{w}</Text>
+        </Animated.View>
+      ))}
+
+      {/* And the answer that replaces them. */}
+      <Animated.View style={[styles.capabPlate, capabStyle]} pointerEvents="none">
+        <Text style={styles.capabText}>WHAT EACH CAN DO OR BE</Text>
       </Animated.View>
 
       {/* ── the spare crates, far stage left of every walk ──────────────────── */}
@@ -484,6 +626,95 @@ const styles = StyleSheet.create({
   },
   folkLeg: { position: 'absolute', width: 3, height: 26, backgroundColor: INK, borderRadius: 1.5 },
 
+  // ── the eight tap events (group AH) ────────────────────────────────────────
+  //
+  // The run of play, dashed in behind the ball's travel.
+  playTrail: {
+    position: 'absolute', left: 266, top: 128, width: 44, height: 1.5,
+    borderTopWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed',
+  },
+
+  // A WINDOW ONTO WHAT THEY SEE, in the clear band between the goal and the
+  // badges: the badges' top is y 350 and these stop at 344.
+  winWrap: { position: 'absolute', top: 318, width: 26, alignItems: 'center' },
+  window: {
+    width: 26, height: 26, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
+    backgroundColor: PAPER,
+  },
+  winBar: { position: 'absolute', left: 5, top: 6, width: 16, height: 2, backgroundColor: INK },
+  winPost: { position: 'absolute', top: 6, width: 2, height: 12, backgroundColor: INK },
+  winPicket: { position: 'absolute', top: 6, width: 2, height: 14, backgroundColor: SOFT },
+  winLead: { width: 1.5, height: 6, backgroundColor: SOFT },
+
+  // The middle of the picture is empty by composition — nothing lives between
+  // x 46 and x 232 but the figure, and he is 100 units below this.
+  askedPlate: {
+    position: 'absolute', left: 56, top: MID_T + 2, width: 168, height: 28,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  askedText: {
+    fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 0.6, color: INK,
+    includeFontPadding: false,
+  },
+
+  sameWrap: { position: 'absolute', left: 236, top: 302, width: 160, alignItems: 'center' },
+  sameText: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
+  sameCap: {
+    marginTop: 3,
+    fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 1, color: SOFT,
+    includeFontPadding: false,
+  },
+
+  // At the shortest onlooker's own eye level, which is 13 units UNDER the top rail
+  // at y 400 — the whole point of the beat.
+  belowRule: {
+    position: 'absolute', left: 330, top: SHORT_EYE, width: 66, height: 1.5,
+    borderTopWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+    transformOrigin: '100% 50%',
+  },
+  // ABOVE every badge (which top out at y 350), because at one crate each the
+  // middle onlooker's badge runs x 294…346 — straight through a caption set any
+  // lower than this.
+  belowCap: {
+    position: 'absolute', left: 296, top: 326, width: 100, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+
+  allseePlate: {
+    position: 'absolute', left: 236, top: 300, width: 160, height: 28,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  allseeText: {
+    fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+
+  askPlate: {
+    position: 'absolute', top: MID_T, width: 116, height: 28,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  askText: {
+    fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 0.7, color: INK,
+    includeFontPadding: false,
+  },
+  // STRUCK IN INK, because this one is an answer rather than a candidate.
+  capabPlate: {
+    position: 'absolute', left: 100, top: 288, width: 220, height: 30,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  capabText: {
+    fontFamily: 'Inter_700Bold', fontSize: 12.6, letterSpacing: 0.7, color: PAPER,
+    includeFontPadding: false,
+  },
+
   // ── Q1 cards ────────────────────────────────────────────────────────────────
   pickLabelWrap: { position: 'absolute', left: 0, top: 144, width: STAGE_W },
   pickLabel: {
@@ -492,7 +723,7 @@ const styles = StyleSheet.create({
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   pickBar: { position: 'absolute', left: 18, bottom: 5, width: 6, backgroundColor: INK, borderRadius: 1 },

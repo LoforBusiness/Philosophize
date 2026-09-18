@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics22Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A SET OF POINTS, AND THREE RUNS THAT ALL TAKE THE SAME BRANCH.
@@ -79,6 +81,12 @@ const TRACK = BEATS.map((b) => b.track ?? 0);
 const RUNS = BEATS.map((b) => b.runs ?? 0);
 const OPEN = BEATS.map((b) => b.open ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+const TRAVEL = BEATS.map((b) => b.travel ?? 0);
+const SPLIT = BEATS.map((b) => b.split ?? 0);
+// Where the tokens converge — just short of the plate's own left edge, so
+// they read as arriving rather than sitting inside its text (D31).
+const TOK_TARGET = [280, 285, 290];
+const SPLIT_DY = DN_Y - UP_Y;   // the third token drops to the lower rail's height
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -90,7 +98,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics22'));
 export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -115,6 +123,8 @@ export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick, p
       // firmer as the reader travels between them.
       open: carry(cv, 3, n, OPEN[p], reacting ? pickPos.value : OPEN[n], tr),
       t,
+      travel: carry(cv, 4, n, TRAVEL[p], TRAVEL[n], tr),
+      split: carry(cv, 5, n, SPLIT[p], SPLIT[n], tr),
     };
   });
 
@@ -159,7 +169,7 @@ export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick, p
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, runStyle]} pointerEvents="none">
-        {TOK_X.map((tx) => <View key={tx} style={[styles.token, { left: tx }]} />)}
+        {TOK_X.map((tx, k) => <Token key={tx} tx={tx} k={k} SCENE={SCENE} />)}
       </Animated.View>
 
       <Target
@@ -190,13 +200,30 @@ export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick, p
   );
 }
 
+/**
+ * One replay token. All three slide toward the taken branch's plate as
+ * `travel` rises; the third one instead peels down toward the OTHER branch
+ * as `split` rises — the same replay landing somewhere else (A1).
+ */
+function Token({ tx, k, SCENE }: { tx: number; k: number; SCENE: { value: { travel: number; split: number } } }) {
+  const st = useAnimatedStyle(() => {
+    const toward = TOK_TARGET[k] - tx;
+    if (k === 2) {
+      const dx = toward * (1 - SCENE.value.split) + (TOK_TARGET[0] - tx) * SCENE.value.split;
+      return { transform: [{ translateX: SCENE.value.travel * dx }, { translateY: SCENE.value.split * SPLIT_DY }] };
+    }
+    return { transform: [{ translateX: SCENE.value.travel * toward }, { translateY: 0 }] };
+  });
+  return <Animated.View style={[styles.token, { left: tx }, st]} />;
+}
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   runup: { position: 'absolute', left: RAIL_L, top: RAIL_Y, width: J_X - RAIL_L, height: 3, backgroundColor: INK },
   before: {
@@ -213,7 +240,7 @@ const styles = StyleSheet.create({
 
   plate: {
     position: 'absolute', left: PL_X, width: PL_W, height: PL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   plateText: {
     position: 'absolute', left: PL_X, width: PL_W, textAlign: 'center',

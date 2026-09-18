@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics40Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BOOK OF DAYS WITH TWO LINES WRITTEN AND ONE STILL EMPTY.
@@ -84,6 +86,16 @@ const ONE = 0;
 const CAP_T = 244;
 const FIG_X = 40;
 
+// ARISTOTLE'S SEA BATTLE (group AH) — clear of the figure at x 40 and of the
+// page's left edge at 146: the ship floats in the gap between them, at the same
+// height as the TOMORROW row so the eye reads it as that row's own example.
+const SHIP_X = 88;
+const SHIP_W = 40;
+const WATER_Y = 430;
+const HULL_W = 34;
+const HULL_H = 12;
+const MAST_H = 22;
+
 const X = BEATS.map((b) => b.x ?? FIG_X);
 // WHICH WAY HE IS POINTING, read off the same x track he walks along.
 const DIR = dirsFrom(X, 1);
@@ -93,6 +105,7 @@ const WRITTEN = BEATS.map((b) => b.written ?? 0);
 const CLASP = BEATS.map((b) => (b.clasp ? 1 : 0));
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const SHIP = BEATS.map((b) => (b.ship ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -113,13 +126,19 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics40'));
 export default function Metaphysics40Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // The ship fades in on the beat that names it, and fades back out once the
+  // argument moves on to the replies (C20c).
+  const shipFade = (cur.ship ?? 0) !== (prev?.ship ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -134,6 +153,9 @@ export default function Metaphysics40Scene({ clock, bt, bi, i, picked, onPick, p
       written: carry(cv, 2, n, WRITTEN[p], reacting ? pickAt(WRITE_AT, pickPos.value) : WRITTEN[n], tr),
       strap: carry(cv, 3, n, CLASP[p], reacting ? pickAt(STRAP_AT, pickPos.value) : CLASP[n], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // ARISTOTLE'S SEA BATTLE (group AH) — the ship on the water, named once
+      // and gone once the reader has moved past it.
+      ship: carry(cv, 5, n, SHIP[p], SHIP[n], shipFade ? grow : 1),
     };
   });
 
@@ -144,11 +166,20 @@ export default function Metaphysics40Scene({ clock, bt, bi, i, picked, onPick, p
   const pageStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ledger }));
   const strapStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.strap }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
+  const shipStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ship }));
 
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap} pointerEvents="none">THE BOOK OF DAYS</Text>
+
+      {/* ARISTOTLE'S SEA BATTLE (group AH) — the event the example predicts. */}
+      <Animated.View style={[StyleSheet.absoluteFill, shipStyle]} pointerEvents="none">
+        <View style={styles.waterline} />
+        <View style={styles.hull} />
+        <View style={styles.mast} />
+        <View style={styles.flag} />
+      </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, pageStyle]} pointerEvents="none">
         <View style={styles.page} />
@@ -206,11 +237,30 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: PAGE_X, top: CAP_T, width: PAGE_W,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+  },
+
+  // ── ARISTOTLE'S SEA BATTLE (group AH) — a hull on the water, a mast and its
+  // flag, in the gap between the figure and the ledger. ──
+  waterline: {
+    position: 'absolute', left: SHIP_X, top: WATER_Y, width: SHIP_W, height: 2, backgroundColor: SHADE,
+  },
+  hull: {
+    position: 'absolute', left: SHIP_X + (SHIP_W - HULL_W) / 2, top: WATER_Y - HULL_H, width: HULL_W, height: HULL_H,
+    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
+    borderBottomLeftRadius: 9, borderBottomRightRadius: 9,
+  },
+  mast: {
+    position: 'absolute', left: SHIP_X + SHIP_W / 2 - 1, top: WATER_Y - HULL_H - MAST_H, width: 2, height: MAST_H,
+    backgroundColor: INK,
+  },
+  flag: {
+    position: 'absolute', left: SHIP_X + SHIP_W / 2, top: WATER_Y - HULL_H - MAST_H, width: 8, height: 6,
+    backgroundColor: INK,
   },
 
   page: {
@@ -240,7 +290,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

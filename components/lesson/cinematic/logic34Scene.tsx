@@ -9,13 +9,15 @@ import { BEATS } from './logic34Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('logic');
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
 
 // AN ERROR BAND THAT CLOSES TOO SLOWLY TO FEEL FAIR.
 //
@@ -61,14 +63,30 @@ function halfWidth(u: number) {
 
 const N = BEATS.map((b) => b.n ?? 0);
 const BIAS = BEATS.map((b) => b.biased ?? 0);
+const WIDE = BEATS.map((b) => (b.wide ? 1 : 0));
+const MISS = BEATS.map((b) => (b.miss ? 1 : 0));
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic34'));
 
+// THE GHOST BAND — the width the bracket had at the earlier, wider sample (beat
+// 3's n), fixed once from the same `halfWidth` law the live band uses, so it can
+// never disagree with it. It is what "each gain costs more than the last" looks
+// like: this used to be this wide, and it is barely wider than the sliver now.
+const GHOST_HW = Math.min(halfWidth(N[3] ?? 0.45), 0.5);
+const GHOST_L = SCL_L + (TRUE_AT - GHOST_HW) * SCL_W;
+const GHOST_W = GHOST_HW * 2 * SCL_W;
+const MISS_Y = BAND_T + 90;
+
 export default function Logic34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(4);
   const live = (BEATS[i].live ?? 0) > 0;
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // ONE SWING, ON THE BEAT THAT ASKS FOR IT (C20c): rides bt directly and never
+  // carries, because it is a single stray-and-return, not a level that holds.
+  const strayNow = (cur.wander ?? 0) > 0 && (cur.wander ?? 0) !== (prev?.wander ?? 0) ? 1 : 0;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -86,6 +104,10 @@ export default function Logic34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, 
       hw: Math.min(halfWidth(u), 0.5),
       at: lerp(TRUE_AT, BIASED_AT, bias),
       bias,
+      // The stray: a single out-and-back arc, gone by the time it returns.
+      stray: strayNow ? ease01(bt.value / 1.4) : 0,
+      wide: carry(cv, 2, n, WIDE[p], WIDE[n], tr),
+      miss: carry(cv, 3, n, MISS[p], MISS[n], tr),
     };
   });
 
@@ -97,8 +119,21 @@ export default function Logic34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, 
     const r = Math.min(1, c + hw);
     return { left: SCL_L + l * SCL_W, width: (r - l) * SCL_W };
   });
-  const estStyle = useAnimatedStyle(() => ({ left: SCL_L + SCENE.value.at * SCL_W - 1.5 }));
+  const estStyle = useAnimatedStyle(() => {
+    // The stray swings the mark toward the biased side and lets it settle back —
+    // one draw that landed far from true, inside a band wide enough to allow it.
+    const w = SCENE.value.stray;
+    const off = w > 0 ? -Math.sin(w * Math.PI) * SCENE.value.hw * 0.85 * SCL_W : 0;
+    return { left: SCL_L + SCENE.value.at * SCL_W - 1.5 + off };
+  });
   const estLabelStyle = useAnimatedStyle(() => ({ left: SCL_L + SCENE.value.at * SCL_W - 40 }));
+  const wideStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.wide }));
+  const missStyle = useAnimatedStyle(() => {
+    const x0 = SCL_L + TRUE_AT * SCL_W;
+    const x1 = SCL_L + SCENE.value.at * SCL_W;
+    const l = Math.min(x0, x1);
+    return { opacity: SCENE.value.miss, left: l, width: Math.abs(x1 - x0) };
+  });
 
   return (
     <Animated.View style={styles.scene}>
@@ -111,6 +146,8 @@ export default function Logic34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, 
       <View style={styles.trueLine} pointerEvents="none" />
       <Text style={styles.trueLabel} numberOfLines={1}>TRUE</Text>
 
+      <Animated.View style={[styles.ghostBand, wideStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.missLine, missStyle]} pointerEvents="none" />
       <Animated.View style={[styles.band, bandStyle]} pointerEvents="none" />
       <Animated.View style={[styles.est, estStyle]} pointerEvents="none" />
       <Animated.Text style={[styles.estLabel, estLabelStyle]} numberOfLines={1}>ESTIMATE</Animated.Text>
@@ -127,7 +164,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   kicker: {
     position: 'absolute', left: SCL_L - 16, top: CAP_T, width: 240,
@@ -163,6 +200,15 @@ const styles = StyleSheet.create({
     position: 'absolute', top: BAND_T - 24, width: 80,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK,
     textAlign: 'center', includeFontPadding: false,
+  },
+  // The earlier, wider bracket, held as an outline behind the live one.
+  ghostBand: {
+    position: 'absolute', left: GHOST_L, top: BAND_T, width: GHOST_W, height: BAND_H,
+    borderWidth: 2, borderStyle: 'dashed', borderColor: SOFT, borderRadius: 3,
+  },
+  // The measured reach between the (biased) estimate and the truth it missed.
+  missLine: {
+    position: 'absolute', top: MISS_Y, height: 4, borderTopWidth: 1.5, borderStyle: 'dashed', borderTopColor: SOFT,
   },
 });
 

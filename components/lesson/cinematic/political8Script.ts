@@ -20,6 +20,14 @@ export interface Political8Beat extends BaseBeat {
   /** 1 = the SEES / BLOCKED badges are up over the onlookers. */ marks?: number;
   /** 1 = the level eye-line rule is drawn across the fence. */ eyeline?: number;
   /** 1 = the three onlooker cards are live (Q1). */ pick?: number;
+  /** 1 = the ball is played across the goalmouth: the match is under way. */ play?: number;
+  /** 1 = the question that ends the agreement is up: an equal share of what? */ asked?: number;
+  /** 1 = a view window over each head — what that onlooker can actually see. */ windows?: number;
+  /** 1 = the three shares are set out as identical: 1 = 1 = 1. */ same?: number;
+  /** 1 = where the shortest's eyes actually are, against the rail above them. */ below?: number;
+  /** 1 = the three are said to be on one level, in words. */ allsee?: number;
+  /** 1 = the three candidate answers stand in a row: resources, opportunities, happiness. */ asks?: number;
+  /** 1 = the capability answer replaces the row. */ capab?: number;
 }
 
 export const BEATS: Political8Beat[] = [
@@ -30,11 +38,13 @@ export const BEATS: Political8Beat[] = [
   },
   {
     p: 164, x: 100, pile: 1,
+    play: 1,
     text: 'A match is being played on the far side, and all three want to watch. Everyone agrees that each of them should be able to.',
     dur: 2.7,
   },
   {
     p: 164, x: 100, pile: 1,
+    asked: 1,
     text: 'The agreement ends as soon as anyone asks what equal shares actually require.',
     dur: 1.8,
   },
@@ -46,6 +56,7 @@ export const BEATS: Political8Beat[] = [
   },
   {
     p: 266, x: 170, pile: 1, marks: 1,
+    windows: 1,
     text: 'The tallest sees the whole pitch. The other two see only the fence.',
     dur: 2.6,
   },
@@ -57,6 +68,7 @@ export const BEATS: Political8Beat[] = [
   },
   {
     p: 271, x: 100, carry: 1, pile: 1, marks: 1,
+    same: 1,
     text: 'One crate each looks like the fairest possible division.',
     dur: 2,
   },
@@ -68,6 +80,7 @@ export const BEATS: Political8Beat[] = [
   },
   {
     p: 277, x: 170, pile: 1, mode: 1, marks: 1,
+    below: 1,
     text: 'Yet the shortest person still can’t see over the fence.',
     dur: 2.1,
   },
@@ -88,6 +101,7 @@ export const BEATS: Political8Beat[] = [
   },
   {
     p: 267, x: 170, mode: 2, marks: 1, eyeline: 1,
+    allsee: 1,
     text: 'All three now see the match from the same eye level.',
     dur: 1.8,
   },
@@ -116,11 +130,13 @@ export const BEATS: Political8Beat[] = [
   },
   {
     p: 456, x: 170, mode: 2, marks: 1, eyeline: 1,
+    asks: 1,
     text: 'Should it be equal resources, equal opportunities or equal happiness?',
     dur: 1.8,
   },
   {
     p: 456, x: 170, mode: 2, marks: 1, eyeline: 1,
+    capab: 1,
     text: 'Amartya Sen and Martha Nussbaum look at what people can do. They call these capabilities: what a person is able to do or to be.',
     dur: 3,
   },

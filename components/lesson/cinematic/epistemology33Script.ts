@@ -16,6 +16,8 @@ export interface Epistemology33Beat extends BaseBeat {
   /** Where the bar sits, 0 low stakes … 1 the house is on it. */ bar?: number;
   /** How many bricks of evidence are stacked, 0..1 of the full column. */ ev?: number;
   /** 1 = the reader is driving the bar from the rail (Q1). */ live?: number;
+  /** 1 = a datum line marks the evidence column's height, and says it has not moved. */ datum?: number;
+  /** 1 = the verdict that now seems wrong, beside the column it is about. */ seems?: number;
 }
 
 export const BEATS: Epistemology33Beat[] = [
@@ -38,12 +40,14 @@ export const BEATS: Epistemology33Beat[] = [
   },
   {
     p: 457, x: 56, ev: 1, bar: 0.85,
+    datum: 1,
     text: 'Your evidence hasn’t changed. The column of evidence is the same height as before.',
     cite: 'The evidence did not move',
     dur: 3.5,
   },
   {
     p: 457, x: 56, ev: 1, bar: 0.85,
+    seems: 1,
     text: 'Yet it now seems wrong to say that you know the bank will be open.',
     dur: 1.8,
   },

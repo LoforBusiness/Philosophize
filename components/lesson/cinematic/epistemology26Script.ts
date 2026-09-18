@@ -27,6 +27,9 @@ export interface Epistemology26Beat extends BaseBeat {
   /** How far the reader has held their own view, 0…1. Both start level. */ hold?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed tie under the bill, joining both columns — she is named a peer. */ peerTie?: number;
+  /** 1 = a plate reading EQUALLY LIKELY, between the columns — neither is assumed wrong. */ equalOdds?: number;
+  /** 1 = a peg pins the YOURS column to the floor — a well-reasoned belief may stand. */ steadfastPeg?: number;
 }
 
 export const BEATS: Epistemology26Beat[] = [
@@ -41,12 +44,12 @@ export const BEATS: Epistemology26Beat[] = [
     dur: 4.4,
   },
   {
-    p: 438, x: 28, bill: 1, pair: 1,
+    p: 438, x: 28, bill: 1, pair: 1, peerTie: 1,
     text: 'Your friend is therefore an epistemic peer: someone with the same evidence and the same competence as you.',
     dur: 4.6,
   },
   {
-    p: 258, x: 28, bill: 1, pair: 1,
+    p: 258, x: 28, bill: 1, pair: 1, equalOdds: 1,
     text: 'So you can’t assume that she made the mistake. As your peer, she’s as likely to be right as you are.',
     dur: 4.8,
   },
@@ -77,7 +80,7 @@ export const BEATS: Epistemology26Beat[] = [
     dur: 5.0,
   },
   {
-    p: 446, x: 88, bill: 1, pair: 1,
+    p: 446, x: 88, bill: 1, pair: 1, steadfastPeg: 1,
     text: 'The steadfast view, defended by Thomas Kelly, holds that a well-reasoned belief may stand. Otherwise anyone who disagrees could force a retreat.',
     dur: 5.0,
   },

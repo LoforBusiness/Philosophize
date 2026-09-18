@@ -10,9 +10,10 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political9Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, reactPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, reactPose, useCarry, carry,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // Four on the left, one on the right, and a line between them.
 //
@@ -81,6 +83,9 @@ const CARDS = [
 
 const VOTE = BEATS.map((b) => b.vote ?? 0);
 const ADV = BEATS.map((b) => (b.advance ? 1 : 0));
+const FLATTER = BEATS.map((b) => b.flatter ?? 0);
+const TYRANNY = BEATS.map((b) => b.tyranny ?? 0);
+const STOP = BEATS.map((b) => b.stop ?? 0);
 const ONE = BEATS.map((b) => b.one ?? 0);
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
@@ -95,6 +100,10 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political9'));
 // power · the many) are three sources of oppression with no quantity behind them, so any
 // monotone track lies at two of the three, and AN OUTSIDE POWER has no picture on this stage.
 export default function Political9Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  // This scene had no carry bag: every track was a ternary on the beat's own flags,
+  // which is fine for a thing that is either up or not and wrong for the three tap
+  // events below, whose whole job is to arrive and leave smoothly (group L).
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -147,6 +156,10 @@ export default function Political9Scene({ clock, bt, bi, i, picked, onPick }: Sc
       // The line is DRAWN, downward, on the beat it arrives — it is the one thing on
       // this stage that answers the advance, so it gets to be the thing that moves.
       rights: rightsOn ? (rightsFade ? ease01(clamp01(bt.value / 0.7)) : 1) : 0,
+      // Carried, so each fades out as well as in (group L).
+      flatter: carry(cv, 0, n, FLATTER[p], FLATTER[n], tr),
+      tyranny: carry(cv, 1, n, TYRANNY[p], TYRANNY[n], tr),
+      stop: carry(cv, 2, n, STOP[p], STOP[n], tr),
       t,
     };
   });
@@ -158,6 +171,18 @@ export default function Political9Scene({ clock, bt, bi, i, picked, onPick }: Sc
   const OF = useDerivedValue<Bundle>(() => SCENE.value.one);
 
   const tallyStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tally }));
+  // The promise rises a little as it arrives: it is being held up TO them.
+  const flatterStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.flatter,
+    transform: [{ translateY: (1 - SCENE.value.flatter) * 8 }],
+  }));
+  // The stamp is struck across the count, tilted, because it is a verdict ON the
+  // count rather than another row in it.
+  const tyrannyStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.tyranny,
+    transform: [{ rotate: '-4deg' }, { scale: 0.94 + 0.06 * SCENE.value.tyranny }],
+  }));
+  const stopStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.stop }));
   const railStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.rights > 0 ? 1 : 0,
     height: SCENE.value.rights * (GROUND - RIGHTS_T),
@@ -180,10 +205,26 @@ export default function Political9Scene({ clock, bt, bi, i, picked, onPick }: Sc
         </View>
       </Animated.View>
 
+      {/* What the four want to hear, held up over them (Plato's flatterer). */}
+      <Animated.View style={[styles.flatter, flatterStyle]} pointerEvents="none">
+        <Text style={styles.flatterText}>WHAT YOU WANT TO HEAR</Text>
+      </Animated.View>
+
+      {/* The name for what the count is doing, struck across it. */}
+      <Animated.View style={[styles.tyranny, tyrannyStyle]} pointerEvents="none">
+        <Text style={styles.tyrannyText}>TYRANNY OF THE MAJORITY</Text>
+      </Animated.View>
+
       {/* ── the line the count does not cross ───────────────────────────────── */}
       <Animated.View style={[styles.rail, railStyle]} pointerEvents="none" />
       <Animated.View style={[styles.rightsCap, rightsCapStyle]} pointerEvents="none">
         <Text style={styles.rightsText}>RIGHTS</Text>
+      </Animated.View>
+      {/* The limit itself: the line gets a foot, a head and the words for it. */}
+      <Animated.View style={[styles.stopWrap, stopStyle]} pointerEvents="none">
+        <View style={[styles.stopCap, { top: RIGHTS_T - 2 }]} />
+        <View style={[styles.stopCap, { top: GROUND - 2 }]} />
+        <Text style={styles.stopText}>NO VOTE MAY CROSS</Text>
       </Animated.View>
 
       {/* ── Q2: what is actually holding them? ──────────────────────────────── */}
@@ -226,7 +267,41 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
+
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  //
+  // The promise sits over the four, left of the rights line, and is a tile with a
+  // word on it, so it takes the kit (white face, ink border, its own ledge).
+  flatter: {
+    position: 'absolute', left: CROWD_A[0] - 6, top: 276, width: 214, height: 24,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  flatterText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.1, color: INK,
+    includeFontPadding: false,
+  },
+  // A STAMP, NOT A ROW: it is struck across the count rather than added to it, so
+  // it reads as a verdict on what the four have just done.
+  tyranny: {
+    position: 'absolute', left: TALLY_L - 26, top: TALLY_T + 16, width: TALLY_W + 52,
+    paddingVertical: 3, borderWidth: 2, borderColor: INK, borderRadius: 6,
+    backgroundColor: PLATE_FACE, alignItems: 'center', justifyContent: 'center',
+  },
+  tyrannyText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+  // The limit: a foot and a head on the rights rule, and the words for it, set
+  // right of the line where the lone figure's own column is clear.
+  stopWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
+  stopCap: { position: 'absolute', left: RIGHTS_X - 7, width: 17, height: 4, backgroundColor: INK, borderRadius: 2 },
+  stopText: {
+    position: 'absolute', left: RIGHTS_X - 52, top: RIGHTS_T + 16, width: 104, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT,
+    includeFontPadding: false,
+  },
 
   tally: {
     position: 'absolute', left: TALLY_L, top: TALLY_T, width: TALLY_W,
@@ -254,7 +329,7 @@ const styles = StyleSheet.create({
 
   cardSlot: { position: 'absolute', left: CARD_L, width: CARD_W },
   card: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK, borderColor: INK },

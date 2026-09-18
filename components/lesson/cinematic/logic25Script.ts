@@ -17,6 +17,7 @@ export interface Logic25Beat extends BaseBeat {
   /** The true-positive bar is drawn, 0..1. */ real?: number;
   /** The false-positive bar is drawn, 0..1. */ fake?: number;
   /** 1 = the three answer cards are live (Q1). */ pick?: number;
+  /** 1 = what the quick inference leaves out, beside the result it reads. */ rare?: number;
 }
 
 export const BEATS: Logic25Beat[] = [
@@ -27,6 +28,7 @@ export const BEATS: Logic25Beat[] = [
   },
   {
     p: 462, x: 70,
+    rare: 1,
     text: 'That inference can be badly wrong, because it ignores how rare the disease is.',
     dur: 1.8,
   },

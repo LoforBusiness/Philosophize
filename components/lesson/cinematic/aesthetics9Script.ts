@@ -19,6 +19,10 @@ export interface A9Beat extends BaseBeat {
   /** The shelf under the left box and the plinth under the right one. */ stands?: boolean;
   /** The crown over the left box — beauty, while it still ruled. */ crown?: boolean;
   /** The three labels for the tap question. */ labels?: boolean;
+  /** A hairline frame closes round BEAUTY, sealing it in as the necessary condition. */ seal?: boolean;
+  /** A small tag reading NOT BEAUTIFUL hangs off the shelf box — a commercial package, not a beautiful one. */ ordinary?: boolean;
+  /** A dashed span with an “=” joins the two boxes — perception can’t tell them apart. */ twin?: boolean;
+  /** A small corner badge on the plinth box — beauty is still possible, just no longer decisive. */ maybe?: boolean;
 }
 
 export const BEATS: A9Beat[] = [
@@ -28,7 +32,7 @@ export const BEATS: A9Beat[] = [
     dur: 2.9,
   },
   {
-    p: 462, x: 80, boxes: true, crown: true,
+    p: 462, x: 80, boxes: true, crown: true, seal: true,
     text: 'On this view, beauty is a necessary condition, so a work without beauty couldn’t count as art.',
     dur: 1.8,
   },
@@ -39,7 +43,7 @@ export const BEATS: A9Beat[] = [
     dur: 3.6,
   },
   {
-    p: 459, x: 80, boxes: true, stands: true,
+    p: 459, x: 80, boxes: true, stands: true, ordinary: true,
     text: 'Warhol’s work copied an ordinary commercial package rather than anything beautiful.',
     dur: 1.8,
   },
@@ -50,7 +54,7 @@ export const BEATS: A9Beat[] = [
     dur: 2.5,
   },
   {
-    p: 267, x: 144, boxes: true, stands: true,
+    p: 267, x: 144, boxes: true, stands: true, twin: true,
     text: 'One box is in a supermarket and one is in a gallery. Perception alone can’t tell you which is the artwork.',
     dur: 2.7,
   },
@@ -74,7 +78,7 @@ export const BEATS: A9Beat[] = [
     dur: 3.7,
   },
   {
-    p: 259, x: 208, boxes: true, stands: true,
+    p: 259, x: 208, boxes: true, stands: true, maybe: true,
     text: 'Beauty remains possible in art, but it no longer decides what counts as art.',
     dur: 1.8,
   },

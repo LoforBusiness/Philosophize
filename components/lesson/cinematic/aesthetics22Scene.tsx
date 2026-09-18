@@ -9,6 +9,7 @@ import { BEATS } from './aesthetics22Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO INSTRUMENTS ON ONE VIEWER, AND ONLY ONE OF THEM MOVES.
@@ -63,6 +65,9 @@ const M_H = 30;
 const HEART_Y = 256;
 const BELIEF_Y = 312;
 
+// The gap between the heart track (bottom 286) and the belief label (top 300).
+const GAP_Y = 289;
+
 const FIG_X = 200;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
@@ -76,6 +81,10 @@ const SLIME = BEATS.map((b) => b.slime ?? 0);
 const METERS = BEATS.map((b) => b.meters ?? 0);
 const HEART = BEATS.map((b) => b.heart ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+// GROUP AH — three still taps, each moving a new mass rather than a caption.
+const EMPTY_RING = BEATS.map((b) => ((b.emptyRing ?? 0) > 0 ? 1 : 0));
+const CONTRAST = BEATS.map((b) => ((b.contrast ?? 0) > 0 ? 1 : 0));
+const THOUGHT_TAG = BEATS.map((b) => ((b.thoughtTag ?? 0) > 0 ? 1 : 0));
 
 // On its own split beat the seam drives the instrument (R7). Giving the left
 // side more empties the heart meter, so a reader who says it was all a game is
@@ -88,8 +97,13 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics22'));
 export default function Aesthetics22Scene({
   clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(8);
   const pulling = PULL[i] === 1;
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const emptyRingFade = (cur.emptyRing ?? 0) !== (prev?.emptyRing ?? 0);
+  const contrastFade = (cur.contrast ?? 0) !== (prev?.contrast ?? 0);
+  const thoughtTagFade = (cur.thoughtTag ?? 0) !== (prev?.thoughtTag ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -98,6 +112,7 @@ export default function Aesthetics22Scene({
     // computes from moveTr — arriving after the figure had stopped.
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -116,6 +131,12 @@ export default function Aesthetics22Scene({
       // on one frame — see metaphysics21Scene for why that matters.
       heart: carry(cv, 4, n, HEART[p], pulling ? 1 - dragPos.value : HEART[n], tr)
         * (0.86 + 0.07 * Math.sin(t * 3.1)),
+      // A ring on the belief track — drawing attention to the zero, never filling it.
+      emptyRing: carry(cv, 5, n, EMPTY_RING[p], EMPTY_RING[n], emptyRingFade ? grow : 1),
+      // What sits between the two readings when they disagree.
+      contrast: carry(cv, 6, n, CONTRAST[p], CONTRAST[n], contrastFade ? grow : 1),
+      // The thought theory's own claim, attached to the reading it explains.
+      thoughtTag: carry(cv, 7, n, THOUGHT_TAG[p], THOUGHT_TAG[n], thoughtTagFade ? grow : 1),
       t,
     };
   });
@@ -130,6 +151,9 @@ export default function Aesthetics22Scene({
   const heartStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.meters, width: (M_W - 8) * SCENE.value.heart,
   }));
+  const emptyRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.emptyRing }));
+  const contrastStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.contrast }));
+  const thoughtTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.thoughtTag }));
 
   const lobes = [0, 1, 2];
 
@@ -149,6 +173,15 @@ export default function Aesthetics22Scene({
         <View style={[styles.track, { top: HEART_Y }]} />
       </Animated.View>
       <Animated.View style={[styles.fill, { top: HEART_Y + 4 }, heartStyle]} pointerEvents="none" />
+
+      {/* a ring on the belief track — the zero, pointed at rather than filled */}
+      <Animated.View style={[styles.emptyRing, emptyRingStyle]} pointerEvents="none" />
+      {/* what sits between the two readings when they disagree */}
+      <Animated.Text style={[styles.contrast, contrastStyle]} pointerEvents="none">≠</Animated.Text>
+      {/* the thought theory's own claim, attached to the reading it explains */}
+      <Animated.View style={[styles.thoughtTag, thoughtTagStyle]} pointerEvents="none">
+        <Text style={styles.thoughtText} numberOfLines={1}>IMAGINING</Text>
+      </Animated.View>
 
       <Target
         id="screen" correct={false} picked={picked} onPick={onPick}
@@ -204,15 +237,33 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   screen: {
     position: 'absolute', left: SC_X, top: SC_Y, width: SC_W, height: SC_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   lobe: {
     position: 'absolute', width: LOBE_W, backgroundColor: SOFT,
     borderTopLeftRadius: 26, borderTopRightRadius: 26,
+  },
+
+  // A RING, NOT A FILL — it names the reading without claiming one.
+  emptyRing: {
+    position: 'absolute', left: M_X - 3, top: BELIEF_Y - 3, width: M_W + 6, height: M_H + 6,
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 10,
+  },
+  contrast: {
+    position: 'absolute', left: M_X, top: GAP_Y, width: M_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11, color: INK, includeFontPadding: false,
+  },
+  thoughtTag: {
+    position: 'absolute', left: M_X, top: GAP_Y, width: M_W, height: 14,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  thoughtText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
 
   mLabel: {
@@ -221,7 +272,7 @@ const styles = StyleSheet.create({
   },
   track: {
     position: 'absolute', left: M_X, width: M_W, height: M_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   fill: {
     position: 'absolute', left: M_X + 4, height: M_H - 8, backgroundColor: INK, borderRadius: 2,
@@ -235,7 +286,7 @@ const styles = StyleSheet.create({
   },
   trackIn: {
     position: 'absolute', left: 0, top: 0, width: M_W, height: M_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   fillIn: {
     position: 'absolute', left: 4, top: 4, height: M_H - 8, backgroundColor: INK, borderRadius: 2,

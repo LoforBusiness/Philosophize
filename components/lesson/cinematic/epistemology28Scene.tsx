@@ -9,6 +9,7 @@ import { BEATS } from './epistemology28Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO HURDLES ON ONE TRACK, FED BY ONE NUMBER.
@@ -73,6 +75,10 @@ const PLATE_ID = ['lower', 'level', 'raise'];
 /** Symmetry is the whole repair: one standard, applied both ways. */
 const LEVEL = 1;
 
+// FAIR_LINE — the height both bars would share under one honest standard.
+const FAIR_H = (H_LO + H_HI) / 2;
+const FAIR_Y = TRACK_Y - FAIR_H;
+
 const FIG_X = 26;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
@@ -84,6 +90,8 @@ const BARS = BEATS.map((b) => (b.bars ? 1 : 0));
 const LEAN = BEATS.map((b) => b.lean ?? 0.5);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const FAIR_LINE = BEATS.map((b) => (b.fairLine ? 1 : 0));
+const REASONS_FOLLOW = BEATS.map((b) => (b.reasonsFollow ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -94,7 +102,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology28'));
 export default function Epistemology28Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -117,6 +125,8 @@ export default function Epistemology28Scene({ clock, bt, bi, i, picked, onPick, 
       // the study you were hoping to believe.
       lean: carry(cv, 3, n, LEAN[p], reacting ? dragPos.value : LEAN[n], tr),
       plates: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      fairLine: carry(cv, 5, n, FAIR_LINE[p], FAIR_LINE[n], tr),
+      reasonsFollow: carry(cv, 6, n, REASONS_FOLLOW[p], REASONS_FOLLOW[n], tr),
     };
   });
 
@@ -127,6 +137,8 @@ export default function Epistemology28Scene({ clock, bt, bi, i, picked, onPick, 
   const trackStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.track }));
   const barsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.bars }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
+  const fairLineStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.fairLine }));
+  const reasonsFollowStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.reasonsFollow }));
 
   // TWO HURDLES OFF ONE VALUE. The uprights and the crossbar are one worklet each
   // so the bar and its legs can never disagree about where the top is.
@@ -170,6 +182,13 @@ export default function Epistemology28Scene({ clock, bt, bi, i, picked, onPick, 
         ))}
       </Animated.View>
 
+      <Animated.View style={[styles.fairLine, fairLineStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.fairTag, fairLineStyle]} pointerEvents="none">FAIR LINE</Animated.Text>
+
+      <Animated.View style={[styles.reasonShaft, reasonsFollowStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.reasonHead, reasonsFollowStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.reasonTag, reasonsFollowStyle]} pointerEvents="none">REASONS FOLLOW</Animated.Text>
+
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
         {PLATE_ID.map((id, k) => (
           <AnswerLift key={id} id={id} picked={picked} correct={k === LEVEL}>
@@ -203,7 +222,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: TRACK_X, top: CAP_T, width: TRACK_W, textAlign: 'center',
@@ -221,10 +240,32 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: SOFT, includeFontPadding: false,
   },
 
+  // FAIR_LINE / TAG — a dashed line at the unbiased height, crossing both hurdles:
+  // your preference, not the data, set where each one actually stands.
+  fairLine: {
+    position: 'absolute', left: HUR_MID[0], top: FAIR_Y, width: HUR_MID[1] - HUR_MID[0],
+    height: 0, borderTopWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
+  fairTag: {
+    position: 'absolute', left: HUR_MID[0], top: FAIR_Y - 12, width: HUR_MID[1] - HUR_MID[0], textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: SOFT, includeFontPadding: false,
+  },
+  // REASON_SHAFT / HEAD / TAG — a dashed arrow in the open gap between the
+  // hurdles, pointing back at the low bar: the conclusion came first.
+  reasonShaft: { position: 'absolute', left: 222, top: 329, width: 52, height: 2, backgroundColor: INK },
+  reasonHead: {
+    position: 'absolute', left: 210, top: 324, width: 0, height: 0,
+    borderTopWidth: 6, borderBottomWidth: 6, borderRightWidth: 10,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+  },
+  reasonTag: {
+    position: 'absolute', left: 200, top: 314, width: 96, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: SOFT, includeFontPadding: false,
+  },
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,

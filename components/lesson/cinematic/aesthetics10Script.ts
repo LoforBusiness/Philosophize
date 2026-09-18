@@ -24,6 +24,7 @@ export interface Aes10Beat extends BaseBeat {
   /** The shutter across the lower panel: 0 open (run off to the right) · 1 closed. */ shut?: number;
   /** The line drawn from the lower panel up into the craft verdict, 0..1. */ link?: number;
   /** 1 = the two camp boards are live in the left column (Q1). */ boards?: number;
+  /** A rule underlines GLORY IN CRUELTY on the lower panel — the feeling the craft is spent on. */ mark?: boolean;
 }
 
 export const BEATS: Aes10Beat[] = [
@@ -33,7 +34,7 @@ export const BEATS: Aes10Beat[] = [
     dur: 2.6,
   },
   {
-    p: 164, x: 44, film: 1, panel: 1, shut: 0,
+    p: 164, x: 44, film: 1, panel: 1, shut: 0, mark: true,
     text: 'Yet all that skill is used to make cruelty look glorious.',
     dur: 1.8,
   },

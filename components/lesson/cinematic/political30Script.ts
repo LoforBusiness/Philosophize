@@ -28,6 +28,8 @@ export interface Political30Beat extends BaseBeat {
   /** How much of the stack has been cleared, 0…1. */ cleared?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a ring marks the ideal box — Rawls begins there (group AH). */ idealmark?: number;
+  /** 1 = a chevron braces the dotted road — reform needs the ideal as its aim (group AH). */ aim?: number;
 };
 
 export const BEATS: Political30Beat[] = [
@@ -37,7 +39,7 @@ export const BEATS: Political30Beat[] = [
     dur: 5.0,
   },
   {
-    p: 167, x: 24, stack: 1,
+    p: 167, x: 24, stack: 1, idealmark: 1,
     text: 'Ideal theory describes what perfect justice would require. John Rawls begins there and treats it as a guide to reform.',
     dur: 5.0,
   },
@@ -79,7 +81,7 @@ export const BEATS: Political30Beat[] = [
     dur: 5.0,
   },
   {
-    p: 464, x: 80, stack: 1, cleared: 0.6,
+    p: 464, x: 80, stack: 1, cleared: 0.6, aim: 1,
     text: 'Rawls holds that non-ideal theory needs an ideal. Without one, it lacks an aim by which to judge reforms.',
     dur: 4.8,
   },

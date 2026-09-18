@@ -16,6 +16,8 @@ export interface Ethics13Beat extends BaseBeat {
   /** Where the marker sits on the rail, 0…4. */ pos?: number;
   /** How deep the groove of habit is worn, 0…1. */ habit?: number;
   /** 1 = the five positions are live targets (Q1). */ pick?: number;
+  /** 1 = a highlighted lane grows along the deficiency end of the rail (COWARD·TIMID), marking where "too much fear" sits on the scale. */ vice?: number;
+  /** 1 = a dashed zone widens beneath the scale, showing the mean isn't one fixed point but shifts with the person and the situation. */ range?: number;
 }
 
 export const BEATS: Ethics13Beat[] = [
@@ -25,7 +27,7 @@ export const BEATS: Ethics13Beat[] = [
     text: 'Theories of rules and of outcomes judge what you do. Aristotle’s virtue ethics judges who you are: your traits of character.',
   },
   {
-    g: 173, pos: 0, habit: 0,
+    g: 173, pos: 0, habit: 0, vice: 1,
     dur: 4.2,
     text: 'Aristotle places courage between two vices. The coward fears too much and flees dangers that should be faced.',
     cite: 'Deficiency',
@@ -50,7 +52,7 @@ export const BEATS: Ethics13Beat[] = [
     },
   },
   {
-    g: 396, pos: 4, habit: 0,
+    g: 396, pos: 4, habit: 0, range: 1,
     dur: 4.6,
     text: 'Yet the mean isn’t a fixed halfway point. Aristotle holds that it shifts with the person and the situation.',
     cite: 'Not a fixed midpoint',

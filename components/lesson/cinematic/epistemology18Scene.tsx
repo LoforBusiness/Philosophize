@@ -10,14 +10,16 @@ import { BEATS } from './epistemology18Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO RAILS, TWO MARKERS, ONE PUSH.
@@ -81,12 +83,14 @@ const RAILS = BEATS.map((b) => b.rails ?? 0);
 const GRIPV = BEATS.map((b) => b.grip ?? 0);
 const EV = BEATS.map((b) => b.ev ?? 0);
 const LIVE_D = BEATS.map((b) => (b.live_d ? 1 : 0));
+const WEAK_RING = BEATS.map((b) => (b.weakRing ? 1 : 0));
+const GRIP_BRACE = BEATS.map((b) => (b.gripBrace ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology18'));
 
 export default function Epistemology18Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -107,6 +111,8 @@ export default function Epistemology18Scene({ clock, bt, bi, dragPos, gazeX, gaz
       fig: lookPose(figS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       rails: carry(cv, 2, n, RAILS[p], RAILS[n], tr),
       grip: carry(cv, 3, n, GRIPV[p], GRIPV[n], tr),
+      weakRing: carry(cv, 4, n, WEAK_RING[p], WEAK_RING[n], tr),
+      gripBrace: carry(cv, 5, n, GRIP_BRACE[p], GRIP_BRACE[n], tr),
       ev: LIVE_D[n] === 1 ? clamp01(dragPos.value) : scripted,
       // WHETHER THE CHIP IS THERE, which is not the same question as how much it
       // weighs. On the graded beat `ev` IS the reader's setting, so tying the chip's
@@ -123,6 +129,8 @@ export default function Epistemology18Scene({ clock, bt, bi, dragPos, gazeX, gaz
 
   const railsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.rails }));
   const evStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.evShow }));
+  const weakRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.weakRing }));
+  const gripBraceStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.gripBrace }));
 
   return (
     <View style={styles.scene}>
@@ -138,6 +146,11 @@ export default function Epistemology18Scene({ clock, bt, bi, dragPos, gazeX, gaz
         <Text style={[styles.end, { left: 344 }]}>YES</Text>
         {[0, 1].map((k) => <Rail key={k} S={SCENE} index={k} />)}
       </Animated.View>
+
+      {/* WEAK_RING — rings the keys claim's own caption, naming which belief the line means. */}
+      <Animated.View style={[styles.weakRing, weakRingStyle]} pointerEvents="none" />
+      {/* GRIP_BRACE — a dashed brace across both tethers' left ends, showing one report meeting two grips. */}
+      <Animated.View style={[styles.gripBrace, gripBraceStyle]} pointerEvents="none" />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
@@ -177,7 +190,7 @@ const styles = StyleSheet.create({
 
   evBox: {
     position: 'absolute', left: EV_X, top: EV_Y, width: EV_W, height: EV_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   evText: {
     position: 'absolute', left: EV_X, top: EV_Y + 4, width: EV_W, textAlign: 'center', lineHeight: 9,
@@ -198,6 +211,17 @@ const styles = StyleSheet.create({
   end: {
     position: 'absolute', top: 302, width: 30,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
+  },
+
+  // WEAK_RING — a dashed ring on the keys claim's own caption, naming which belief the line means.
+  weakRing: {
+    position: 'absolute', left: RAIL_X - 4, top: RAIL_Y[1] - 22, width: RAIL_W + 8, height: 16,
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 4,
+  },
+  // GRIP_BRACE — a dashed vertical brace joining both tethers' left ends, one report meeting two grips.
+  gripBrace: {
+    position: 'absolute', left: RAIL_X - 10, top: RAIL_Y[0], width: 6, height: RAIL_Y[1] - RAIL_Y[0],
+    borderLeftWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
   },
 });
 

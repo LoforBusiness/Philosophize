@@ -9,6 +9,7 @@ import { BEATS } from './logic39Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE PLANKS ACROSS TWO POSTS, AND THE MIDDLE ONE IS SAWN BY ITS OWN DEMAND.
@@ -84,6 +86,7 @@ const PLANKS = BEATS.map((b) => (b.planks ? 1 : 0));
 const SAW = BEATS.map((b) => b.saw ?? 0);
 const SNAP = BEATS.map((b) => b.snap ?? 0);
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const TEST = BEATS.map((b) => (b.test ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
@@ -102,7 +105,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic39'));
 export default function Logic39Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(7);
+  const cv = useCarry(8);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -126,6 +129,9 @@ export default function Logic39Scene({ clock, bt, bi, i, picked, onPick, pickPos
       mend: carry(cv, 4, n, 0, reacting ? pickAt(MEND, u) : 0, tr),
       lift: carry(cv, 5, n, 0, reacting ? pickAt(LIFT, u) : 0, tr),
       patch: carry(cv, 6, n, 0, reacting ? pickAt(PATCH, u) : 0, tr),
+      // A single line, laid over all three planks alike — nothing here favours
+      // one plank over another (group O).
+      test: carry(cv, 7, n, TEST[p], TEST[n], tr),
     };
   });
 
@@ -140,6 +146,7 @@ export default function Logic39Scene({ clock, bt, bi, i, picked, onPick, pickPos
   }));
   const cutStyle = useAnimatedStyle(() => ({ transform: [{ translateY: -38 * SCENE.value.lift }] }));
   const patchStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.patch }));
+  const testStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.test }));
 
   return (
     <View style={styles.scene}>
@@ -152,6 +159,12 @@ export default function Logic39Scene({ clock, bt, bi, i, picked, onPick, pickPos
         <Animated.View style={[styles.blade, bladeStyle]} pointerEvents="none">
           <Text style={styles.bladeText}>PROVE IT</Text>
         </Animated.View>
+
+        {/* The same test line, laid over all three planks at once — the standard
+            each claim is held to, shown before any of them is picked (group O). */}
+        {PL_Y.map((py) => (
+          <Animated.View key={`test${py}`} style={[styles.testLine, { top: py - 6 }, testStyle]} pointerEvents="none" />
+        ))}
 
         {/* E39 — THE PLANK IS INSIDE ITS OWN TARGET, so the thing that lifts on an
             answer is the thing that was chosen, and the ring hugs the claim rather
@@ -214,10 +227,13 @@ function Half({ S, side, shown }: { S: SharedValue<any>; side: number; shown: bo
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
+  // The test line: identical over every plank, so it names the question rather
+  // than the answer.
+  testLine: { position: 'absolute', left: PL_X, width: PL_W, height: 4, borderTopWidth: 1.5, borderStyle: 'dashed', borderTopColor: SOFT },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — political7 and political8 both stand
   // their subject on a filled mass rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 138, top: CAP_T, width: 250,
@@ -231,7 +247,7 @@ const styles = StyleSheet.create({
 
   plank: {
     position: 'absolute', left: 0, top: 0, width: PL_W, height: PL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   plankWrong: { borderColor: SOFT, borderStyle: 'dashed' },
   cut: { position: 'absolute', left: 0, top: 0, width: PL_W, height: PL_H },

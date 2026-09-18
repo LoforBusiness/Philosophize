@@ -10,6 +10,7 @@ import { BEATS } from './epistemology36Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOUR THINGS THAT ARE THE SAME THING, AND TWO LABELS THAT DISAGREE.
@@ -71,6 +73,12 @@ const GIVEN = BEATS.map((b) => (b.given ? 1 : 0));
 const REAL = BEATS.map((b) => (b.real ? 1 : 0));
 const CLASH = BEATS.map((b) => (b.clash ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// group AH — one event per still tap, each derived from a channel that CHANGES.
+const ASK = BEATS.map((b) => ((b.ask ?? 0) > 0 ? 1 : 0));
+const TALLY = BEATS.map((b) => (b.tally ?? 0));
+const SINCERE = BEATS.map((b) => ((b.sincere ?? 0) > 0 ? 1 : 0));
+const JUDGE_OK = BEATS.map((b) => ((b.judgeOk ?? 0) > 0 ? 1 : 0));
+const BLIND = BEATS.map((b) => ((b.blind ?? 0) > 0 ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -82,7 +90,16 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology36'));
 export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(10);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // group AH — each flag fires only on the beat that CHANGES its own channel
+  // (C20c), so a beat that merely holds a value re-draws nothing.
+  const askFade = (cur.ask ?? 0) !== (prev?.ask ?? 0);
+  const tallyFade = (cur.tally ?? 0) !== (prev?.tally ?? 0);
+  const sincereFade = (cur.sincere ?? 0) !== (prev?.sincere ?? 0);
+  const judgeOkFade = (cur.judgeOk ?? 0) !== (prev?.judgeOk ?? 0);
+  const blindFade = (cur.blind ?? 0) !== (prev?.blind ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -91,6 +108,9 @@ export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick, 
     // computes from moveTr — arriving after the figure had stopped.
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    // A faster ramp for the group-AH events below, decoupled from the walk's own
+    // crossfade, so a mark can pop in over 0.55s whatever the figure is doing.
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -109,6 +129,17 @@ export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick, 
       // between the reason given and the cause actually at work is drawn; the feeling
       // side of the bar leaves it untouched, which is the finding.
       clashOn: carry(cv, 4, n, CLASH[p], reacting ? dragPos.value : CLASH[n], tr),
+      // group AH — one event per still tap:
+      //  · ask      a question mark rises over the row (beat 1: they were asked)
+      //  · tally    reasons pile up beside the given-reason card (beats 4, 5)
+      //  · sincere  a check confirms the stated reason was sincerely held (beat 7)
+      //  · judgeOk  a check confirms the shopper knew their own pick (beat 9)
+      //  · blind    a blocked mark: the process itself went unseen (beat 10)
+      askOn: carry(cv, 5, n, ASK[p], ASK[n], askFade ? grow : 1),
+      tallyOn: carry(cv, 6, n, TALLY[p], TALLY[n], tallyFade ? grow : 1),
+      sincereOn: carry(cv, 7, n, SINCERE[p], SINCERE[n], sincereFade ? grow : 1),
+      judgeOkOn: carry(cv, 8, n, JUDGE_OK[p], JUDGE_OK[n], judgeOkFade ? grow : 1),
+      blindOn: carry(cv, 9, n, BLIND[p], BLIND[n], blindFade ? grow : 1),
     };
   });
 
@@ -120,6 +151,12 @@ export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick, 
   const givenStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.givenOn }));
   const realStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.realOn }));
   const clashStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.clashOn }));
+  const askStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.askOn }));
+  const tally0Style = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.tallyOn) }));
+  const tally1Style = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.tallyOn - 1) }));
+  const sincereStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.sincereOn }));
+  const judgeOkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.judgeOkOn }));
+  const blindStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.blindOn }));
 
   return (
     <View style={styles.scene}>
@@ -172,6 +209,20 @@ export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick, 
 
       <Animated.View style={[styles.clashMark, clashStyle]} pointerEvents="none" />
 
+      {/* group AH — one event per still tap (see the SCENE comment above). */}
+      <Animated.Text style={[styles.askMark, askStyle]} pointerEvents="none">?</Animated.Text>
+
+      <Animated.View style={[styles.tallyDot, styles.tallyDot0, tally0Style]} pointerEvents="none" />
+      <Animated.View style={[styles.tallyDot, styles.tallyDot1, tally1Style]} pointerEvents="none" />
+
+      <Animated.Text style={[styles.sincereMark, sincereStyle]} pointerEvents="none">✓</Animated.Text>
+      <Animated.Text style={[styles.judgeMark, judgeOkStyle]} pointerEvents="none">✓</Animated.Text>
+
+      <Animated.View style={[styles.blindWrap, blindStyle]} pointerEvents="none">
+        <View style={styles.blindRing} />
+        <View style={styles.blindBar} />
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -188,7 +239,7 @@ const styles = StyleSheet.create({
   pair: { position: 'absolute', top: PAIR_Y, width: PAIR_W, height: PAIR_H },
   pairBox: {
     position: 'absolute', left: 0, top: 0, width: PAIR_W, height: PAIR_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   seam: { position: 'absolute', left: 8, width: PAIR_W - 16, height: 1.5, backgroundColor: SOFT },
 
@@ -197,7 +248,7 @@ const styles = StyleSheet.create({
 
   realCard: {
     position: 'absolute', left: 236, top: 412, width: 128, height: 30,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   realText: {
     position: 'absolute', left: 236, top: 417, width: 128, textAlign: 'center', lineHeight: 10,
@@ -228,6 +279,42 @@ const styles = StyleSheet.create({
    */
   hitLive: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
   hitWrong: { borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed' },
+
+  // ── group AH: one event per still tap ──────────────────────────────────────
+  //
+  // The question mark: they are being asked. It borrows the given-reason card's
+  // own footprint, which is empty this early — the card itself does not fade in
+  // until beat 3 — so nothing is ever on screen twice.
+  askMark: {
+    position: 'absolute', left: 236, top: 240, width: 128, height: 46, lineHeight: 46,
+    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 30, color: INK,
+    includeFontPadding: false,
+  },
+
+  // Two dots that pile up to the left of the given-reason card as the shoppers'
+  // stated reasons accumulate — knit, then weave and the rest — in the same clear
+  // strip above pair one and two.
+  tallyDot: { position: 'absolute', left: 210, width: 8, height: 8, borderRadius: 4, backgroundColor: INK },
+  tallyDot0: { top: 248 },
+  tallyDot1: { top: 262 },
+
+  // The check beside the given-reason card: the shopper sincerely believed it.
+  sincereMark: {
+    position: 'absolute', left: 372, top: 250, width: 14, height: 16, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 14, color: INK, includeFontPadding: false,
+  },
+  // The check above the pair actually chosen: the shopper's own judgement was
+  // correct, even though the reason for it was not.
+  judgeMark: {
+    position: 'absolute', left: 337, top: 288, width: 14, height: 16, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 14, color: INK, includeFontPadding: false,
+  },
+
+  // A blocked sign beside the real-cause card: the process itself cannot be seen,
+  // never a fill — an outline, the way every boundary in this app is drawn (D31).
+  blindWrap: { position: 'absolute', left: 372, top: 420, width: 14, height: 14 },
+  blindRing: { position: 'absolute', left: 0, top: 0, width: 14, height: 14, borderWidth: 1.5, borderColor: INK, borderRadius: 7 },
+  blindBar: { position: 'absolute', left: 0, top: 6, width: 14, height: 1.5, backgroundColor: INK, transform: [{ rotate: '45deg' }] },
 });
 
 export function Epistemology36Lesson({ lesson }: { lesson: Lesson }) {

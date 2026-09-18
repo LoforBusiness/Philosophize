@@ -29,6 +29,9 @@ export interface Metaphysics29Beat extends BaseBeat {
   /** How far the eye above has closed, 0…1. */ lid?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed wall separates the eye from the peaks — realism's claim (group AH). */ mindWall?: number;
+  /** 1 = a short dashed link joins the eye to the peak — anti-realism's claim (group AH). */ mindLink?: number;
+  /** 1 = a ring marks the eye itself — Berkeley's perceiving mind (group AH). */ eyeRing?: number;
 };
 
 export const BEATS: Metaphysics29Beat[] = [
@@ -38,17 +41,17 @@ export const BEATS: Metaphysics29Beat[] = [
     dur: 4.8,
   },
   {
-    p: 174, x: 24, land: 1, rock: 1,
+    p: 174, x: 24, land: 1, rock: 1, mindWall: 1,
     text: 'Realism holds that the world exists and has its nature independently of minds. Unobserved mountains would still exist.',
     dur: 5.0,
   },
   {
-    p: 445, x: 24, land: 1, rock: 1,
+    p: 445, x: 24, land: 1, rock: 1, mindLink: 1,
     text: 'Anti-realism holds that what’s real depends on minds. For the idealist, to exist is to be perceived.',
     dur: 5.0,
   },
   {
-    p: 267, x: 24, land: 1, rock: 1,
+    p: 267, x: 24, land: 1, rock: 1, eyeRing: 1,
     text: 'George Berkeley argued that an unperceived tree can’t even be conceived. Anyone imagining one is perceiving it in thought.',
     dur: 5.0,
   },

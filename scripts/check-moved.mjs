@@ -38,6 +38,7 @@ import { getLessonById } from '@/data/index';
 import { CINEMATIC } from './(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId]';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
+import { setWanderOff } from '@/components/lesson/cinematic/tourFlag';
 
 export default function PreviewMoved() {
   const [go, setGo] = useState(false);
@@ -46,6 +47,10 @@ export default function PreviewMoved() {
     useUIStore.setState({ launchDone: true } as any);
     setGo(true);
   }, []);
+  // THE QUESTION HERE IS WHETHER THE CONTROL MOVED THE STAGE, so the figure is held
+  // still: he is inside the stage and the movement layer would put his own steps into
+  // the difference this measures.
+  setWanderOff(true);
   const q = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const id = q?.get('id') ?? '';
   const found = getLessonById(id);

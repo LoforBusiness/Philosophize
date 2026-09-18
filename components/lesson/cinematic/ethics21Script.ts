@@ -29,6 +29,10 @@ export interface Eth21Beat extends BaseBeat {
   /** The sight-mark on the outcome that was aimed at, 0…1. */ aim?: number;
   /** The second case, where the bad outcome is on the path, 0…1. */ means?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /**
+   * 1 = a one-shot cross stamps the point where the means path cuts through
+   * the harm box, for "you may not bring about a harm as the means".
+   */ forbid?: number;
 }
 
 export const BEATS: Eth21Beat[] = [
@@ -69,7 +73,7 @@ export const BEATS: Eth21Beat[] = [
     dur: 3.4,
   },
   {
-    p: 266, x: 268, act: 1, arms: 1, means: 1,
+    p: 266, x: 268, act: 1, arms: 1, means: 1, forbid: 1,
     text: 'But you may not bring about a harm as the means to your aim.',
     dur: 1.8,
   },

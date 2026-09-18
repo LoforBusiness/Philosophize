@@ -26,6 +26,9 @@ export interface Aesthetics30Beat extends BaseBeat {
   /** The self's share of the attention, 0…1 — how far the mirror has slid. */ self?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a corner ornament sits on the frame — beauty read as mere decoration. */ deco?: number;
+  /** 1 = a tag names the change beneath the window — Murdoch's word for it. */ named?: number;
+  /** 1 = the attention leaves the window from the bird: the practice extends to a person. */ person?: number;
 };
 
 export const BEATS: Aesthetics30Beat[] = [
@@ -35,7 +38,7 @@ export const BEATS: Aesthetics30Beat[] = [
     dur: 4.8,
   },
   {
-    p: 168, x: 24, window: 1, self: 0.8,
+    p: 168, x: 24, window: 1, self: 0.8, deco: 1,
     text: 'What, then, is beauty for? One answer treats it as decoration, the first thing given up when life gets hard.',
     dur: 5.0,
   },
@@ -45,7 +48,7 @@ export const BEATS: Aesthetics30Beat[] = [
     dur: 5.0,
   },
   {
-    p: 261, x: 24, window: 1, self: 0.15,
+    p: 261, x: 24, window: 1, self: 0.15, named: 1,
     text: 'Murdoch called the change unselfing. The brooding self disappears, and attention rests on something real.',
     dur: 5.0,
   },
@@ -76,7 +79,7 @@ export const BEATS: Aesthetics30Beat[] = [
     dur: 5.0,
   },
   {
-    p: 463, x: 80, window: 1, self: 0.15,
+    p: 463, x: 80, window: 1, self: 0.15, person: 1,
     text: 'For Murdoch, learning to attend properly to a bird is practice for attending properly to a person.',
     dur: 5.0,
   },

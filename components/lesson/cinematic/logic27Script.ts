@@ -27,6 +27,8 @@ export interface Logic27Beat extends BaseBeat {
   /** 1 = the bracket showing the sentence point at itself is drawn. */ loop?: number;
   /** 1 = the two truth lamps are under it, alternating. */ lamps?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
+  /** 1 = a ring marks the FALSE lamp — the supposition being tested this beat. */ testFalse?: number;
+  /** 1 = a tag below the lamps says the shape recurs beyond this one sentence. */ elsewhere?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
 }
 
@@ -42,7 +44,7 @@ export const BEATS: Logic27Beat[] = [
     dur: 4.0,
   },
   {
-    p: 429, x: 28, card: 1, lamps: 1,
+    p: 429, x: 28, card: 1, lamps: 1, testFalse: 1,
     text: 'Suppose instead that the sentence is false. Then what it says isn’t the case, so the sentence is true.',
     dur: 4.0,
   },
@@ -78,7 +80,7 @@ export const BEATS: Logic27Beat[] = [
     dur: 4.8,
   },
   {
-    p: 348, x: 88, card: 1, loop: 1, lamps: 1,
+    p: 348, x: 88, card: 1, loop: 1, lamps: 1, elsewhere: 1,
     text: 'Bertrand Russell found a similar paradox in set theory. Kurt Gödel used self-reference to prove his incompleteness theorems.',
     dur: 5.0,
   },

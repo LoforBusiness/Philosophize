@@ -9,6 +9,7 @@ import { BEATS } from './ethics24Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A SLAB ON FOUR LEGS, AND THREE OF THEM TAKEN AWAY.
@@ -78,6 +80,9 @@ const SLAB = BEATS.map((b) => b.slab ?? 0);
 const NAMES = BEATS.map((b) => b.names ?? 0);
 const GONE = BEATS.map((b) => b.gone ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+const PAIR2 = BEATS.map((b) => b.pair2 ?? 0);
+const BEAR = BEATS.map((b) => b.bear ?? 0);
+const RAISE = BEATS.map((b) => b.raise ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -89,7 +94,13 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics24'));
 export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // Three one-shot marks: each struck on the beat that names it, gone by the next.
+  const pair2Fade = (cur.pair2 ?? 0) !== (prev?.pair2 ?? 0);
+  const bearFade = (cur.bear ?? 0) !== (prev?.bear ?? 0);
+  const raiseFade = (cur.raise ?? 0) !== (prev?.raise ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -98,6 +109,7 @@ export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick, pickPo
     // computes from moveTr — arriving after the figure had stopped.
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -113,6 +125,11 @@ export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick, pickPo
       // what punishment is for, and the test case knocks out whichever pillars that
       // account cannot hold up, so the reader watches the cost of each answer.
       gone: carry(cv, 3, n, GONE[p], reacting ? pickPos.value : GONE[n], tr),
+      // Three one-shot marks, each fading in AND out on a carried track (never an
+      // on/off ternary), so a tap mid-fade never cuts one between two frames (C20c).
+      pair2: carry(cv, 4, n, PAIR2[p], PAIR2[n], pair2Fade ? grow : 1),
+      bear: carry(cv, 5, n, BEAR[p], BEAR[n], bearFade ? grow : 1),
+      raise: carry(cv, 6, n, RAISE[p], RAISE[n], raiseFade ? grow : 1),
       t,
     };
   });
@@ -120,6 +137,10 @@ export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick, pickPo
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const answered = picked !== null;
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.cards && LIVE[i] === 1;
+
+  const pair2Style = useAnimatedStyle(() => ({ opacity: SCENE.value.pair2 }));
+  const bearStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.bear }));
+  const raiseStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.raise }));
 
   const slabStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.slab,
@@ -157,6 +178,19 @@ export default function Ethics24Scene({ clock, bt, bi, i, picked, onPick, pickPo
             {PIL_CAP[k]}
           </Text>
         ))}
+      </Animated.View>
+
+      {/* The pillar the sentence is naming right now — a rule under REFORM HIM
+          and DESERVED as those two are read out. */}
+      <Animated.View style={[styles.pair2, pair2Style]} pointerEvents="none" />
+
+      {/* The one pillar still bearing the slab: a small arrowhead lands on its
+          top, for "some other justification must support it." */}
+      <Animated.View style={[styles.bear, bearStyle]} pointerEvents="none" />
+
+      {/* A doubt raised specifically against the fallen deterrence pillar. */}
+      <Animated.View style={[styles.raiseWrap, raiseStyle]} pointerEvents="none">
+        <Text style={styles.raiseText}>?</Text>
       </Animated.View>
 
       {PIL_X.map((px, k) => (
@@ -239,7 +273,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: SLAB_X, top: 220, width: 200,
@@ -248,7 +282,7 @@ const styles = StyleSheet.create({
 
   slab: {
     position: 'absolute', left: SLAB_X, top: SLAB_Y, width: SLAB_W, height: SLAB_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   slabText: {
@@ -261,7 +295,7 @@ const styles = StyleSheet.create({
   },
   rubble: {
     position: 'absolute',
-    borderWidth: 2, borderColor: INK, borderRadius: 1.5, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 1.5, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   pilCap: {
     // DERIVED, like the pillars it labels. This was a hardcoded 344 while PIL_TOP
@@ -274,6 +308,28 @@ const styles = StyleSheet.create({
   hitBox: { width: PIL_W + 16, height: PIL_H + 20, borderRadius: 4 },
   right: { borderWidth: 3, borderColor: INK },
   wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
+
+  // The rule under the two pillars the sentence is naming right now, spanning
+  // REFORM HIM (222) to DESERVED's right edge (348). A boundary, not a fill.
+  pair2: {
+    position: 'absolute', left: PIL_X[2], top: PIL_TOP + PIL_H + 24, width: (PIL_X[3] + PIL_W) - PIL_X[2],
+    height: 0, borderTopWidth: 1.5, borderColor: SHADE, borderStyle: 'dashed',
+  },
+  // A small downward arrowhead — a CSS triangle, zero width and height, the
+  // border trick — marked on the face of the one pillar still bearing the
+  // slab's weight, just below where the slab sits on it.
+  bear: {
+    position: 'absolute', left: PIL_X[3] + PIL_W / 2 - 4, top: PIL_TOP + 4, width: 0, height: 0,
+    borderLeftWidth: 4, borderRightWidth: 4, borderTopWidth: 6,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: INK,
+  },
+  // The doubt raised against the fallen deterrence pillar, over its own rubble.
+  raiseWrap: {
+    position: 'absolute', left: PIL_X[1], top: 316, width: PIL_W, alignItems: 'center',
+  },
+  raiseText: {
+    fontFamily: 'Inter_700Bold', fontSize: 11, color: INK, includeFontPadding: false,
+  },
 });
 
 export function Ethics24Lesson({ lesson }: { lesson: Lesson }) {

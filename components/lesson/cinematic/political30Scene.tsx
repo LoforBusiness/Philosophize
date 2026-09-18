@@ -9,6 +9,7 @@ import { BEATS } from './political30Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A STACK OF REAL WRONGS, AND A PERFECT SOCIETY DRAWN IN DASHES BESIDE IT.
@@ -82,6 +84,10 @@ const STACK = BEATS.map((b) => (b.stack ? 1 : 0));
 const CLEARED = BEATS.map((b) => b.cleared ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// group AH — one-shot marks for the two still taps: a ring on the ideal box, and
+// a chevron bracing the dotted road toward the stack.
+const IDEALMARK = BEATS.map((b) => ((b.idealmark ?? 0) > 0 ? 1 : 0));
+const AIM = BEATS.map((b) => ((b.aim ?? 0) > 0 ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -106,13 +112,20 @@ function Block({ S, k }: { S: { value: { stack: number; cleared: number } }; k: 
 export default function Political30Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(6);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // A mark fades IN on the beat that asks for it and back OUT on the next, rather
+  // than cutting (see "AND FADE AN EVENT OUT, NOT OFF").
+  const idealmarkFade = (cur.idealmark ?? 0) !== (prev?.idealmark ?? 0);
+  const aimFade = (cur.aim ?? 0) !== (prev?.aim ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -127,6 +140,9 @@ export default function Political30Scene({ clock, bt, bi, i, picked, onPick, dra
       // HOW MUCH HAS COME OFF, which is what the drawn curve reports.
       cleared: carry(cv, 2, n, CLEARED[p], reacting ? dragPos.value : CLEARED[n], tr),
       plates: carry(cv, 3, n, PLATES[p], PLATES[n], tr),
+      // group AH — one-shot, fades in on its own beat and back out on the next.
+      idealmark: carry(cv, 4, n, IDEALMARK[p], IDEALMARK[n], idealmarkFade ? grow : 1),
+      aim: carry(cv, 5, n, AIM[p], AIM[n], aimFade ? grow : 1),
     };
   });
 
@@ -135,6 +151,11 @@ export default function Political30Scene({ clock, bt, bi, i, picked, onPick, dra
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.cards && LIVE[i] === 1;
 
   const stackStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.stack }));
+  // A ring on the ideal box: "Rawls begins there" — the narration names it.
+  const idealmarkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.idealmark }));
+  // A chevron on the dotted road, pointing at the stack: "non-ideal theory needs
+  // an ideal … an aim by which to judge reforms."
+  const aimStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.aim }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
 
   return (
@@ -146,6 +167,15 @@ export default function Political30Scene({ clock, bt, bi, i, picked, onPick, dra
         <View style={styles.ideal} />
         <Text style={styles.idealText}>PERFECT JUSTICE</Text>
         {ROAD_X.map((rx) => <View key={rx} style={[styles.road, { left: rx }]} />)}
+      </Animated.View>
+
+      {/* group AH — a ring on the ideal box, the beat that names it. */}
+      <Animated.View style={[styles.idealRing, idealmarkStyle]} pointerEvents="none" />
+
+      {/* group AH — a chevron bracing the road, pointing from the ideal at the stack. */}
+      <Animated.View style={aimStyle} pointerEvents="none">
+        <View style={styles.aimUpper} />
+        <View style={styles.aimLower} />
       </Animated.View>
 
       {BLK_Y.map((by, k) => <Block key={by} S={SCENE} k={k} />)}
@@ -183,7 +213,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   foot: { position: 'absolute', left: FOOT_X, top: FOOT_Y, width: FOOT_W, height: 6, backgroundColor: RULE },
   block: {
@@ -209,12 +239,24 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },
+
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // A ring 2 units proud of the ideal box — kept tight, since the box already
+  // sits close under the band's own top edge.
+  idealRing: {
+    position: 'absolute', left: IDEAL_X - 2, top: IDEAL_Y - 2, width: IDEAL_W + 4, height: IDEAL_H + 4,
+    borderWidth: 2, borderColor: INK,
+  },
+  // A chevron on the dotted road, pointing left at the stack — the aim a reform
+  // is judged against.
+  aimUpper: { position: 'absolute', left: 258, top: 316, width: 16, height: 2.5, backgroundColor: INK, borderRadius: 1, transform: [{ rotate: '28deg' }] },
+  aimLower: { position: 'absolute', left: 258, top: 322, width: 16, height: 2.5, backgroundColor: INK, borderRadius: 1, transform: [{ rotate: '-28deg' }] },
 });
 
 export function Political30Lesson({ lesson }: { lesson: Lesson }) {

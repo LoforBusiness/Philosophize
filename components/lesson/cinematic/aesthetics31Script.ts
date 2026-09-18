@@ -17,6 +17,7 @@ export interface Aes31Beat extends BaseBeat {
   /** 1 = the playhead is running. */ playing?: number;
   /** Height of the first ovation, 0…1. */ clapA?: number;
   /** Height of the second ovation, 0…1. */ clapB?: number;
+  /** 1 = a tick confirms the notes are unchanged, drawn on THE MUSIC plate. */ same?: number;
   /** 1 = the three parts of the picture are live targets (Q1). */ pick?: number;
 }
 
@@ -57,7 +58,7 @@ export const BEATS: Aes31Beat[] = [
     cite: 'The second performance',
   },
   {
-    g: 268, strings: 1, playing: 1, clapA: 1, clapB: 1,
+    g: 268, strings: 1, playing: 1, clapA: 1, clapB: 1, same: 1,
     dur: 1.8,
     text: 'Only the audience’s response has changed, so the extra applause must be for something other than the sound.',
   },

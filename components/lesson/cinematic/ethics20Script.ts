@@ -30,6 +30,10 @@ export interface Eth20Beat extends BaseBeat {
   /** How hard the future is discounted, 0…1. */ rate?: number;
   /** The true size drawn back over the shrunken blocks, 0…1. */ truth?: number;
   /** 1 = the rate is the reader's to set this beat. */ live_d?: number;
+  /**
+   * 1 = a one-shot "TIME ALONE" tag flashes beside the caption, isolating pure
+   * time preference from the risk-and-wealth reasons just set aside.
+   */ flag?: number;
 }
 
 export const BEATS: Eth20Beat[] = [
@@ -50,7 +54,7 @@ export const BEATS: Eth20Beat[] = [
     dur: 4.4,
   },
   {
-    p: 384, x: 132, blocks: 1, rate: 0.72,
+    p: 384, x: 132, blocks: 1, rate: 0.72, flag: 1,
     text: 'Set those reasons aside, and one further discount may remain. Pure time preference counts a harm for less only because it comes later.',
     cite: 'Pure time preference',
     dur: 4.0,

@@ -32,6 +32,16 @@ export interface Et10Beat extends BaseBeat {
   reach?: number;
   /** The far child, the dotted line and its label are on. */ far?: boolean;
   /** The three factors for the tap question. */ factors?: boolean;
+  /**
+   * 1 = a small mark of question appears over the pond, as the argument
+   * starts asking what principle explains the reaction. One beat only.
+   */
+  ask?: boolean;
+  /**
+   * 1 = a token travels the dotted line toward the distant child, once, as
+   * the duty is said to extend to him.
+   */
+  duty?: boolean;
 }
 
 export const BEATS: Et10Beat[] = [
@@ -47,7 +57,7 @@ export const BEATS: Et10Beat[] = [
     dur: 1.8,
   },
   {
-    p: 266, x: 168,
+    p: 266, x: 168, ask: true,
     text: 'Peter Singer’s argument begins from that shared judgement. It then asks what principle explains the reaction.',
     dur: 3,
   },
@@ -76,7 +86,7 @@ export const BEATS: Et10Beat[] = [
     dur: 2.1,
   },
   {
-    p: 467, x: 268, wading: true, far: true,
+    p: 467, x: 268, wading: true, far: true, duty: true,
     text: 'If distance makes no moral difference, the duty extends to the distant child. The argument helped inspire effective altruism.',
     dur: 3.1,
   },

@@ -23,6 +23,12 @@ export interface Political10Beat extends BaseBeat {
   /** The reading head on the tape: 0 = none · 1–4 = which mark it sits on. */ ptr?: number;
   /** 1 = Rawls's level has come down and settled on the shortest column. */ ruler?: number;
   /** 1 = the two answer plates are live, stage left (Q2). */ plates?: number;
+  /** 1 = each column states its own size, and the figures are ruled through. */ sizes?: number;
+  /** 1 = a dashed enclosure round the whole stack: it is held in common. */ common?: number;
+  /** 1 = the first holding fills, and says what filled it. */ labour?: number;
+  /** 1 = the four marks are read out in order, one underline at a time. */ story?: number;
+  /** 1 = the tallest column is stamped STILL JUST. */ just?: number;
+  /** 1 = the shortest column is asked to rise. */ rise?: number;
 }
 
 export const BEATS: Political10Beat[] = [
@@ -33,17 +39,20 @@ export const BEATS: Political10Beat[] = [
   },
   {
     p: 164, x: 44,
+    sizes: 1,
     text: 'The sizes of the piles alone don’t settle the question. Locke, Nozick and Rawls each look for something different.',
     dur: 2,
   },
   {
     p: 272, x: 44,
+    common: 1,
     text: 'John Locke begins before anything is owned. In his account, the earth is first given to humankind in common.',
     cite: 'Locke · labour',
     dur: 1.8,
   },
   {
     p: 272, x: 44,
+    labour: 1,
     text: 'You own your labour, so land you mix your labour with becomes yours. Locke adds a proviso: enough, and as good, must be left for others.',
     dur: 3.6,
   },
@@ -55,6 +64,7 @@ export const BEATS: Political10Beat[] = [
   },
   {
     p: 266, x: 108, tape: 1,
+    story: 1,
     text: 'This one was taken from common land, traded twice and then given as a gift.',
     dur: 1.8,
   },
@@ -66,6 +76,7 @@ export const BEATS: Political10Beat[] = [
   },
   {
     p: 168, x: 108, tape: 1, ptr: 4,
+    just: 1,
     text: 'If every step was just, Nozick holds, the final holding is just, however large.',
     dur: 1.8,
   },
@@ -90,6 +101,7 @@ export const BEATS: Political10Beat[] = [
   },
   {
     p: 267, x: 108, tape: 1, ptr: 4, ruler: 1,
+    rise: 1,
     text: 'Rawls permits inequality only if it improves the position of whoever is worst off.',
     dur: 2,
   },

@@ -13,6 +13,7 @@ import { BEATS } from './logic9Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A claim on a board, an arguer standing by it, and a dodger who walks on and never
 // once goes near it.
@@ -93,6 +95,8 @@ const STRAW = BEATS.map((b) => b.straw ?? 0);
 const CLAIM = BEATS.map((b) => (b.claim ? 1 : 0));
 const SMEAR = BEATS.map((b) => (b.smear ? 1 : 0));
 const STRAW_ON = STRAW.map((s) => (s > 0 ? 1 : 0));
+const SMEAR_X = BEATS.map((b) => (b.smearX ? 1 : 0));
+const STRAW_X = BEATS.map((b) => (b.strawX ? 1 : 0));
 const DIM = BEATS.map((b) => (b.untouched ? 1 : 0));
 // THE COPY STAYS DOWN. It is knocked over on the beat that builds it and is still on
 // the floor on the beats after — including the one it fades out on. The fall used to
@@ -132,10 +136,12 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick, pickPos 
   const heldAMix = useHeld();
   const heldDMix = useHeld();
   // One slot per scalar blended across a beat change (L5): the dodger's x, then the
-  // claim, the smear, the straw copy, its fall, and the recede.
-  const cv = useCarry(6);
+  // claim, the smear, the straw copy, its fall, the recede, and the two ✕ badges.
+  const cv = useCarry(8);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const smearXFade = !!cur.smearX !== !!prev?.smearX;
+  const strawXFade = !!cur.strawX !== !!prev?.strawX;
 
   const repliesOn = !!cur.replies;
   const repliesFade = repliesOn !== !!prev?.replies;
@@ -195,6 +201,10 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick, pickPos 
       // appears — the fall is DELAYED past the build so both are legible (C20d).
       tip: carry(cv, 4, n, DOWN[p], DOWN[n], FALLS[n] ? ease01(clamp01((bt.value - 1.15) / 0.7)) : arrive),
       dim: carry(cv, 5, n, DIM[p], DIM[n], ease01(clamp01(bt.value / 0.7))),
+      // group AH: an ✕ badge on each dodge once its own beat names what it fails
+      // to touch — the claim's own truth, and the opponent's own position.
+      smearX: carry(cv, 6, n, SMEAR_X[p], SMEAR_X[n], smearXFade ? arrive : 1),
+      strawX: carry(cv, 7, n, STRAW_X[p], STRAW_X[n], strawXFade ? arrive : 1),
       t,
     };
   });
@@ -222,6 +232,16 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick, pickPos 
   // reader as a smear in the shape of a word, so on the "untouched" beat only the stone
   // and its rule step back; the words are legible while the tag is on stage at all.
   const plateStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.dim * 0.45 }));
+  // group AH: the two ✕ badges, each a child of its own tag so it only ever
+  // shows while that tag is on stage.
+  const smearXStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.smearX,
+    transform: [{ scale: 0.5 + SCENE.value.smearX * 0.5 }],
+  }));
+  const strawXStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.strawX,
+    transform: [{ scale: 0.5 + SCENE.value.strawX * 0.5 }],
+  }));
   const replyStyle = useAnimatedStyle(() => ({
     opacity: repliesOn ? (repliesFade ? ease01(bt.value / 0.6) : 1) : 0,
   }));
@@ -240,12 +260,20 @@ export default function Logic9Scene({ clock, bt, bi, i, picked, onPick, pickPos 
       <Animated.View style={[styles.tag, styles.smear, smearStyle]} pointerEvents="none">
         <Animated.View style={[styles.tagPlate, plateStyle]} />
         <Text style={styles.tagText}>HE FAILED{'\n'}MATHS</Text>
+        {/* group AH: it never touches the claim. */}
+        <Animated.View style={[styles.xBadge, smearXStyle]} pointerEvents="none">
+          <Text style={styles.xMark}>✕</Text>
+        </Animated.View>
       </Animated.View>
 
       {/* dodge two: a flimsy copy, and then it is on the floor */}
       <Animated.View style={[styles.tag, styles.strawTag, strawStyle]} pointerEvents="none">
         <Animated.View style={[styles.tagPlate, plateStyle]} />
         <Text style={styles.tagText}>“NOBODY{'\n'}SHOULD PAY{'\n'}FOR ANYTHING”</Text>
+        {/* group AH: it is a position nobody held. */}
+        <Animated.View style={[styles.xBadge, strawXStyle]} pointerEvents="none">
+          <Text style={styles.xMark}>✕</Text>
+        </Animated.View>
       </Animated.View>
 
       {/* ── Q1: which reply goes at the man? ────────────────────────────────── */}
@@ -292,7 +320,7 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   board: {
     position: 'absolute', left: BOARD_L, top: BOARD_T, width: BOARD_W, height: BOARD_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: RULE,
     alignItems: 'center', justifyContent: 'center',
   },
   boardTag: {
@@ -332,9 +360,18 @@ const styles = StyleSheet.create({
     color: INK, textAlign: 'center', includeFontPadding: false,
   },
 
+  // group AH: the ✕ badge on a dodge — a small ring at the tag's own corner,
+  // never drawn until that beat says the dodge missed the point.
+  xBadge: {
+    position: 'absolute', top: -9, right: -9, width: 18, height: 18, borderRadius: 9,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  xMark: { fontFamily: 'Inter_700Bold', fontSize: 10, color: INK, includeFontPadding: false },
+
   replySlot: { position: 'absolute', left: REPLY_L, width: REPLY_W },
   reply: {
-    height: REPLY_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: REPLY_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   replyRight: { backgroundColor: INK, borderColor: INK },

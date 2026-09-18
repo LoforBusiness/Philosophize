@@ -9,6 +9,7 @@ import { BEATS } from './ethics29Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE ACTS STANDING STILL, AND ONE LINE THAT SAYS WHICH WERE OWED.
@@ -80,6 +82,10 @@ const SCALE = BEATS.map((b) => (b.scale ? 1 : 0));
 const LINE = BEATS.map((b) => b.line ?? 0.4);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const STAY = BEATS.map((b) => (b.stay ? 1 : 0));
+const SPAN = BEATS.map((b) => (b.span ? 1 : 0));
+const EARN = BEATS.map((b) => (b.earn ? 1 : 0));
+const WEIGH = BEATS.map((b) => (b.weigh ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -90,13 +96,21 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics29'));
 export default function Ethics29Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(8);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // Four one-shot marks: each struck on the beat that names it, gone by the next.
+  const stayFade = (cur.stay ?? 0) !== (prev?.stay ?? 0);
+  const spanFade = (cur.span ?? 0) !== (prev?.span ?? 0);
+  const earnFade = (cur.earn ?? 0) !== (prev?.earn ?? 0);
+  const weighFade = (cur.weigh ?? 0) !== (prev?.weigh ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -111,6 +125,13 @@ export default function Ethics29Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // WHERE DUTY ENDS, which is the only thing this lesson lets anybody move.
       line: carry(cv, 2, n, LINE[p], reacting ? dragPos.value : LINE[n], tr),
       plates: carry(cv, 3, n, PLATES[p], PLATES[n], tr),
+      // Four one-shot marks, fading in AND out on a carried track (never an
+      // on/off ternary), so a tap mid-fade never cuts one between two frames
+      // (C20c).
+      stay: carry(cv, 4, n, STAY[p], STAY[n], stayFade ? grow : 1),
+      span: carry(cv, 5, n, SPAN[p], SPAN[n], spanFade ? grow : 1),
+      earn: carry(cv, 6, n, EARN[p], EARN[n], earnFade ? grow : 1),
+      weigh: carry(cv, 7, n, WEIGH[p], WEIGH[n], weighFade ? grow : 1),
     };
   });
 
@@ -122,6 +143,19 @@ export default function Ethics29Scene({ clock, bt, bi, i, picked, onPick, dragPo
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
   const owedStyle = useAnimatedStyle(() => ({ width: RAIL_W * clamp01(SCENE.value.line) }));
   const lineStyle = useAnimatedStyle(() => ({ left: RAIL_X + RAIL_W * clamp01(SCENE.value.line) - 1.5 }));
+  const stayStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.stay }));
+  // The span's left edge and width track the same formula the line itself
+  // uses, so the measure never drifts from whatever the line is actually doing.
+  const spanWrapStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.span }));
+  const spanLineStyle = useAnimatedStyle(() => {
+    const lx = RAIL_X + RAIL_W * clamp01(SCENE.value.line);
+    return { left: lx, width: MARK_X[2] - lx };
+  });
+  const spanTickLStyle = useAnimatedStyle(() => ({
+    left: RAIL_X + RAIL_W * clamp01(SCENE.value.line) - 0.75,
+  }));
+  const earnStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.earn }));
+  const weighStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.weigh }));
 
   return (
     <View style={styles.scene}>
@@ -142,6 +176,32 @@ export default function Ethics29Scene({ clock, bt, bi, i, picked, onPick, dragPo
             <Text style={[styles.name, { left: mx + MARK_W / 2 - NAME_W / 2 }]}>{NAME[k]}</Text>
           </View>
         ))}
+
+        {/* The road not taken: a dashed, shorter echo beside the kidney mark,
+            for "would he have been blameworthy if he had stayed?" */}
+        <Animated.View style={[styles.stay, stayStyle]} pointerEvents="none" />
+
+        {/* The measured gap from the line to the kidney mark: how far beyond
+            duty the act sits. */}
+        <Animated.View style={[StyleSheet.absoluteFill, spanWrapStyle]} pointerEvents="none">
+          <Animated.View style={[styles.span, spanLineStyle]} />
+          <Animated.View style={[styles.spanTick, spanTickLStyle]} />
+          <View style={[styles.spanTick, { left: MARK_X[2] - 0.75 }]} />
+        </Animated.View>
+
+        {/* A small tick over the kidney mark: praiseworthy if done. */}
+        <Animated.View style={[styles.earnWrap, earnStyle, { left: MARK_X[2] + MARK_W / 2 - 4 }]} pointerEvents="none">
+          <View style={styles.earnA} />
+          <View style={styles.earnB} />
+        </Animated.View>
+
+        {/* How each act reads, common sense's own verdict: tall for the kidney,
+            middling for the fair share, an uncertain dash for walking past. */}
+        <Animated.View style={[StyleSheet.absoluteFill, weighStyle]} pointerEvents="none">
+          <View style={[styles.weighBarSoft, { left: MARK_X[0] + MARK_W / 2 - 1, top: 256, height: 6 }]} />
+          <View style={[styles.weighBar, { left: MARK_X[1] + MARK_W / 2 - 1, top: 252, height: 10 }]} />
+          <View style={[styles.weighBar, { left: MARK_X[2] + MARK_W / 2 - 1, top: 248, height: 14 }]} />
+        </Animated.View>
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
@@ -177,7 +237,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   end: {
     position: 'absolute', top: END_T, width: 60,
@@ -203,10 +263,34 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: SOFT, includeFontPadding: false,
   },
 
+  // THE ROAD NOT TAKEN: a dashed, shorter echo of a mark, standing in the gap
+  // beside the kidney act — an outline, never a fill, so it reads as the act
+  // that was NOT done rather than a fourth real mark (D31).
+  stay: {
+    position: 'absolute', left: 279, top: 300, width: 24, height: RAIL_Y - 300,
+    borderWidth: 1.5, borderColor: SHADE, borderStyle: 'dashed',
+    borderTopLeftRadius: 12, borderTopRightRadius: 12,
+  },
+
+  // THE MEASURE: a dashed span from wherever the line stands to the kidney
+  // mark, with a tick at each end — how far beyond duty the act sits.
+  span: { position: 'absolute', top: 256, height: 0, borderTopWidth: 1.5, borderColor: SHADE, borderStyle: 'dashed' },
+  spanTick: { position: 'absolute', top: 253, width: 1.5, height: 6, backgroundColor: SHADE },
+
+  // A small tick over the kidney mark: praiseworthy if done.
+  earnWrap: { position: 'absolute', top: 248, width: 8, height: 8 },
+  earnA: { position: 'absolute', left: 0, top: 4, width: 4, height: 1.5, backgroundColor: INK, transform: [{ rotate: '45deg' }] },
+  earnB: { position: 'absolute', left: 2, top: 1, width: 7, height: 1.5, backgroundColor: INK, transform: [{ rotate: '-45deg' }] },
+
+  // THE VERDICT ROW: a solid bar reads a settled judgement, a dashed one an
+  // unsettled one — height alone carries how strong the verdict is.
+  weighBar: { position: 'absolute', width: 1.5, backgroundColor: INK },
+  weighBarSoft: { position: 'absolute', width: 0, borderLeftWidth: 1.5, borderColor: SHADE, borderStyle: 'dashed' },
+
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,

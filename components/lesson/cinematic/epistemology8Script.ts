@@ -22,6 +22,15 @@ export interface Epi8Beat extends BaseBeat {
   /** 1 = the three escape cards are on stage. */ esc?: number;
   /** Highlight one escape after the question: 1 never-ends · 2 circle · 3 bedrock. */ land?: number;
   /** 1 = the escape cards are live targets (Q1). */ pick?: number;
+  /** 1 = a "?" waits in the row the tower hasn't built yet, above the timetable claim. */ ask1?: number;
+  /** 1 = a ring marks the whole pile — is there always one more reason waiting? */ pileRing?: number;
+  /** 1 = a "A BELIEF" tag lands by the pile, naming what a block stands for. */ beliefTag?: number;
+  /** 1 = a "?" waits in the row the tower hasn't built yet, above the city claim. */ ask2?: number;
+  /** 1 = a "THE CITY" tag lands by the pile, naming the next block's content. */ cityTag?: number;
+  /** 1 = "NEVER STOPS" lands under the second "?" — the regress has no floor. */ ask2Tail?: number;
+  /** 1 = a ring marks the "loops in a circle" escape, the one this beat names. */ circleRing?: number;
+  /** 1 = "AT LAST" lands under the bedrock escape — where the demand stops. */ restTag?: number;
+  /** 1 = a dashed bracket spans the two escapes just named together here: circle, bedrock. */ bothRing?: number;
 }
 
 export const BEATS: Epi8Beat[] = [
@@ -31,71 +40,71 @@ export const BEATS: Epi8Beat[] = [
     dur: 1.8,
   },
   {
-    p: 462, x: 196, tower: 1, pile: 3,
+    p: 462, x: 196, tower: 1, pile: 3, ask1: 1,
     text: 'Your friend gives a reason. You then ask what justifies that reason.',
     dur: 1.8,
   },
   {
-    p: 462, x: 196, tower: 1, pile: 3,
+    p: 462, x: 196, tower: 1, pile: 3, ask1: 1, pileRing: 1,
     text: 'Each reason can be questioned in the same way. The question is whether this process must ever stop.',
     dur: 1.8,
   },
   {
-    p: 271, x: 98, tower: 1, pile: 2, hold: 1,
+    p: 271, x: 98, tower: 1, pile: 2, hold: 1, ask1: 1, pileRing: 1,
     text: 'Each reason offered is itself a belief. A belief can justify another only if it is justified itself.',
     cite: 'Every reason needs a reason',
     dur: 3.3,
   },
   {
-    p: 271, x: 98, tower: 1, pile: 2, hold: 1,
+    p: 271, x: 98, tower: 1, pile: 2, hold: 1, ask1: 1, pileRing: 1, beliefTag: 1,
     text: 'Each block stands for a belief offered as a reason for the belief above it.',
     dur: 1.8,
   },
   {
-    p: 277, x: 196, tower: 2, pile: 2,
+    p: 277, x: 196, tower: 2, pile: 2, pileRing: 1,
     text: 'The first reason is that the timetable says so. Because a reason supports the belief above it, the chain grows downward.',
     cite: 'It grows downward',
     dur: 3.1,
   },
   {
-    p: 277, x: 196, tower: 2, pile: 2,
+    p: 277, x: 196, tower: 2, pile: 2, pileRing: 1, ask2: 1,
     text: 'But the belief that the timetable is correct needs justifying too.',
     dur: 1.9,
   },
   {
-    p: 273, x: 98, tower: 2, pile: 1, hold: 1,
+    p: 273, x: 98, tower: 2, pile: 1, hold: 1, pileRing: 1, ask2: 1,
     text: 'So a further question arises: why trust the timetable?',
     dur: 1.8,
   },
   {
-    p: 273, x: 98, tower: 2, pile: 1, hold: 1,
+    p: 273, x: 98, tower: 2, pile: 1, hold: 1, pileRing: 1, ask2: 1, cityTag: 1,
     text: 'The answer is that the city printed it. That raises the question of why the city should be trusted.',
     dur: 1.8,
   },
   {
-    p: 273, x: 98, tower: 2, pile: 1, hold: 1,
+    p: 273, x: 98, tower: 2, pile: 1, hold: 1, pileRing: 1, ask2: 1, cityTag: 1, ask2Tail: 1,
     text: 'If every reason needs a further reason, the questions never run out.',
     dur: 1.8,
   },
   {
-    p: 27, x: 196, tower: 4, pile: 1,
+    p: 27, x: 196, tower: 4, pile: 1, pileRing: 1,
     text: 'This is the regress problem, which goes back to Aristotle. If each justification needs another, no belief seems finally justified.',
     cite: 'The regress',
     dur: 5.0,
   },
   {
-    p: 47, x: 98, tower: 0, pile: 1, esc: 1,
+    p: 47, x: 98, tower: 0, pile: 1, esc: 1, pileRing: 1,
     text: 'The chain of reasons can end in only three ways. First, it may never end, and run on for ever.',
     cite: 'Agrippa’s trilemma',
     dur: 2.1,
   },
   {
-    p: 267, x: 98, tower: 0, pile: 1, esc: 1,
+    p: 267, x: 98, tower: 0, pile: 1, esc: 1, pileRing: 1, bothRing: 1,
     text: 'Second, the chain may loop back in a circle, with beliefs supporting one another. Third, the chain may end in beliefs needing no further support.',
     dur: 2.9,
   },
   {
-    p: 21, x: 98, esc: 1, pick: 1,
+    p: 21, x: 98, esc: 1, pick: 1, circleRing: 1,
     interact: {
       prompt: 'Which of the three endings would a view called foundationalism defend?',
       explain:
@@ -111,7 +120,7 @@ export const BEATS: Epi8Beat[] = [
     dur: 3.3,
   },
   {
-    p: 416, x: 176, esc: 1, land: 3,
+    p: 416, x: 176, esc: 1, land: 3, restTag: 1,
     text: 'On this view, the demand for further reasons finally ends at a basic belief.',
     dur: 1.8,
   },

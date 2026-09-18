@@ -29,6 +29,7 @@ export interface Ethics28Beat extends BaseBeat {
   /** The principle's share of the ground given, 0…1. */ give?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a ring clasps the seam: the two now cohere, nothing fixed either side. */ link?: number;
 };
 
 export const BEATS: Ethics28Beat[] = [
@@ -80,7 +81,7 @@ export const BEATS: Ethics28Beat[] = [
     dur: 5.0,
   },
   {
-    p: 452, x: 78, rail: 1, blocks: 1, give: 0.5,
+    p: 452, x: 78, rail: 1, blocks: 1, give: 0.5, link: 1,
     text: 'The goal is coherence between principles and judgements. No belief in the system is a fixed foundation beyond revision.',
     dur: 4.8,
   },

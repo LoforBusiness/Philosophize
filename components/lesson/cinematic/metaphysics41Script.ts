@@ -28,6 +28,7 @@ export interface Metaphysics41Beat extends BaseBeat {
   /** How far the whole arrangement has slid east, 0…1. */ shift?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = Newton's spinning vessel is drawn, water risen up its sides. */ spin?: number;
 }
 
 export const BEATS: Metaphysics41Beat[] = [
@@ -79,12 +80,12 @@ export const BEATS: Metaphysics41Beat[] = [
     dur: 5.0,
   },
   {
-    p: 447, x: 88, bodies: 1, scale: 1, shift: 1,
+    p: 447, x: 88, bodies: 1, scale: 1, shift: 1, spin: 1,
     text: 'Newton’s case for absolute space rested on rotation. Water in a spinning vessel rises up the sides, even when it’s still relative to the vessel.',
     dur: 4.8,
   },
   {
-    p: 176, x: 88, bodies: 1, scale: 1, shift: 1,
+    p: 176, x: 88, bodies: 1, scale: 1, shift: 1, spin: 1,
     interact: {
       prompt: 'On Leibniz’s view, what has really changed if the universe shifts three feet east?',
       sort: {
@@ -101,7 +102,7 @@ export const BEATS: Metaphysics41Beat[] = [
     dur: 1.0,
   },
   {
-    p: 320, x: 88, bodies: 1, scale: 1, shift: 1,
+    p: 320, x: 88, bodies: 1, scale: 1, shift: 1, spin: 1,
     summary: {
       title: 'Absolute and Relational Space',
       points: [

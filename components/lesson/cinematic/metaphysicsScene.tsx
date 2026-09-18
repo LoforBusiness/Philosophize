@@ -10,6 +10,7 @@ import {
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteAny, emoteAnyLive } from './moves';
@@ -17,8 +18,9 @@ import { emoteAny, emoteAnyLive } from './moves';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHY IS THERE SOMETHING RATHER THAN NOTHING?
@@ -405,11 +407,11 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   sky: {
     position: 'absolute', left: SKY_L, top: SKY_T, width: SKY_W, height: SKY_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   skyCap: {
     position: 'absolute', left: 10, top: 5,
@@ -421,7 +423,7 @@ const styles = StyleSheet.create({
   star: { position: 'absolute', backgroundColor: INK },
   stillPlate: {
     position: 'absolute', left: 92, top: 31, width: 168, height: 32,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   stillText: {
@@ -432,7 +434,7 @@ const styles = StyleSheet.create({
   // 101 of box, so the glyphs keep their 4dp from the rule (D31c).
   needsTag: {
     position: 'absolute', left: 240, top: 3, width: 104, height: 19,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   needsText: {
@@ -441,7 +443,7 @@ const styles = StyleSheet.create({
 
   ruleCard: {
     position: 'absolute', left: RULE_L, top: RULE_T, width: RULE_W, height: RULE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   ruleCap: {
     position: 'absolute', left: 12, top: 7,
@@ -465,7 +467,7 @@ const styles = StyleSheet.create({
 
   nothCard: {
     position: 'absolute', left: RULE_L, top: RULE_T, width: RULE_W, height: RULE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   nothCap: {
     position: 'absolute', left: 12, top: 7,
@@ -485,7 +487,7 @@ const styles = StyleSheet.create({
 
   qbox: {
     position: 'absolute', top: CH_T, width: 32, height: CH_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   qboxText: {
@@ -498,7 +500,7 @@ const styles = StyleSheet.create({
   qboxTextLit: { color: PAPER },
   chainBox: {
     position: 'absolute', top: CH_T, width: BOX_W, height: CH_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   chainText: {
@@ -515,7 +517,7 @@ const styles = StyleSheet.create({
 
   qPlate: {
     position: 'absolute', left: 24, top: 428, width: 252, height: 44,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   qPlateText: {

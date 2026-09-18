@@ -13,6 +13,7 @@ import { BEATS } from './political11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import { TargetRing } from './Target';
@@ -20,8 +21,9 @@ import { TargetRing } from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A three-notch DIAL over three empty plots of ground. Set the dial and that plot
 // builds: a tower, a small house, a ring. The plots accumulate, so by the question
@@ -74,6 +76,48 @@ const PLINTH_Y = 448;
 const PLATE_T = 452;
 const PLATE_H = 42;
 
+// ── the four tap events (group AH) ──────────────────────────────────────────
+//
+// ASK — before the dial exists, a "?" hangs where it will stand, then fades as
+// the instrument fades in over the same spot (beat 1).
+const ASK_CX = DIAL_L + DIAL_W / 2;
+const ASK_T = 310;
+
+// PRESS — the sovereign's weight, pressing down from the tower's cap onto the
+// crowd beneath it. Column 0 is the tower's own column (beat 4).
+const TOWER_COL_L = PLOT_L;
+const PRESS_X = TOWER_COL_L + 50;
+const PRESS_TOP = 318;
+const PRESS_H = 110;
+const PRESS_HEAD_TOP = PRESS_TOP + PRESS_H;
+
+// BOUND — the limited government's own boundary, drawn around Locke's house
+// alone (column 1), clear of the bystanders standing outside it (beat 7).
+const HOUSE_COL_L = PLOT_L + PLOT_PITCH;
+const BOUND_L = HOUSE_COL_L + 12;
+const BOUND_T = 388;
+const BOUND_W = 40;
+const BOUND_H = 60;
+
+// BIND / SELF — Rousseau's ring, column 2. The three spokes join the ring's own
+// three dots to the point at its centre (beat 9); a small open ring then marks
+// that centre (beat 10) — open, not solid, because they remain free.
+const RING_COL_L = PLOT_L + 2 * PLOT_PITCH;
+const RING_CX = RING_COL_L + 32;
+const RING_CY = PLINTH_Y - 142 + 102;
+const RING_DOTS = [
+  { x: RING_COL_L + 15.5, y: PLINTH_Y - 142 + 99.5 },
+  { x: RING_COL_L + 33.5, y: PLINTH_Y - 142 + 87.5 },
+  { x: RING_COL_L + 51.5, y: PLINTH_Y - 142 + 99.5 },
+];
+// Precomputed on the JS side, the aesthetics3Scene pattern: each spoke is one
+// rotated bar, so no worklet ever does trigonometry on the ring.
+const SPOKES = RING_DOTS.map((d) => {
+  const dx = RING_CX - d.x;
+  const dy = RING_CY - d.y;
+  return { x: d.x, y: d.y, len: Math.hypot(dx, dy), rot: `${(Math.atan2(dy, dx) * 180) / Math.PI}deg` };
+});
+
 const PLOTS = [
   { id: 'tower', label: 'ONE SOVEREIGN', correct: true },
   { id: 'house', label: 'LIMITED STATE', correct: false },
@@ -90,6 +134,14 @@ const DIR = dirsFrom(X, 1);
 const DIALV = BEATS.map((b) => b.dial ?? 0);
 const SETV = BEATS.map((b) => b.set ?? 0);
 const BUILT = BEATS.map((b) => b.built ?? 0);
+// The four tap events (group AH). ASK genuinely turns off (the dial replaces
+// it), so it is carried rather than switched; PRESS/BOUND/BIND/SELF only ever
+// turn on and then stay, like the plots themselves, so a plain fade suffices.
+const ASKV = BEATS.map((b) => ((b.ask ?? 0) > 0 ? 1 : 0));
+const PRESSV = BEATS.map((b) => b.press ?? 0);
+const BOUNDV = BEATS.map((b) => b.bound ?? 0);
+const BINDV = BEATS.map((b) => b.bind ?? 0);
+const SELFV = BEATS.map((b) => b.self ?? 0);
 
 // R7c — the stage follows the seam on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -112,7 +164,7 @@ const DIAL_FULL = (DIAL_GONE + (SPLIT?.zones[1]?.upto ?? 0.66)) / 2;
 export default function Political11Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -125,6 +177,17 @@ export default function Political11Scene({ clock, bt, bi, i, picked, onPick, dra
   const prevBuilt = prev?.built ?? 0;
   const answered = picked !== null;
   const platesOn = (cur.plates ?? 0) > 0 && !!cur.interact;
+
+  // ── the four tap events (group AH) ─────────────────────────────────────────
+  const askFade = ((cur.ask ?? 0) > 0) !== ((prev?.ask ?? 0) > 0);
+  const pressOn = (cur.press ?? 0) > 0;
+  const pressFade = pressOn !== ((prev?.press ?? 0) > 0);
+  const boundOn = (cur.bound ?? 0) > 0;
+  const boundFade = boundOn !== ((prev?.bound ?? 0) > 0);
+  const bindOn = (cur.bind ?? 0) > 0;
+  const bindFade = bindOn !== ((prev?.bind ?? 0) > 0);
+  const selfOn = (cur.self ?? 0) > 0;
+  const selfFade = selfOn !== ((prev?.self ?? 0) > 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -151,6 +214,13 @@ export default function Political11Scene({ clock, bt, bi, i, picked, onPick, dra
       ptr: lerp(from, to, ease01(bt.value / 0.62)),
       ptrOn: SETV[n] > 0 ? 1 : 0,
       grow,
+      // ASK genuinely turns off (the dial arrives in its place), so it is carried
+      // rather than switched (C20c, "fade an event out, not off").
+      ask: carry(cv, 2, n, ASKV[p], ASKV[n], askFade ? grow : 1),
+      press: pressOn ? (pressFade ? grow : 1) : 0,
+      bound: boundOn ? (boundFade ? grow : 1) : 0,
+      bind: bindOn ? (bindFade ? grow : 1) : 0,
+      self: selfOn ? (selfFade ? grow : 1) : 0,
       t,
     };
   });
@@ -160,6 +230,17 @@ export default function Political11Scene({ clock, bt, bi, i, picked, onPick, dra
   const ptrStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.dial * SCENE.value.ptrOn,
     transform: [{ translateX: SCENE.value.ptr - NOTCH_X[0] }],
+  }));
+  const askStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.ask,
+    transform: [{ scale: 0.85 + SCENE.value.ask * 0.15 }],
+  }));
+  const pressStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.press }));
+  const boundStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.bound }));
+  const bindStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.bind }));
+  const selfStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.self,
+    transform: [{ scale: 0.6 + SCENE.value.self * 0.4 }],
   }));
 
   return (
@@ -178,6 +259,11 @@ export default function Political11Scene({ clock, bt, bi, i, picked, onPick, dra
         </Animated.View>
       ))}
       <Animated.View style={[styles.ptr, { left: NOTCH_X[0] - 6 }, ptrStyle]} pointerEvents="none" />
+
+      {/* ASK — the open question, hanging where the dial will stand (beat 1). */}
+      <Animated.View style={[styles.askWrap, askStyle]} pointerEvents="none">
+        <Text style={styles.askText}>?</Text>
+      </Animated.View>
 
       {/* ── three plots of ground, built one at a time ───────────────────────── */}
       {PLOTS.map((pl, k) => {
@@ -202,6 +288,25 @@ export default function Political11Scene({ clock, bt, bi, i, picked, onPick, dra
           />
         );
       })}
+
+      {/* PRESS — the sovereign's weight, pressing down onto the crowd (beat 4). */}
+      <Animated.View style={[styles.pressBar, { left: PRESS_X - 1.5, top: PRESS_TOP, height: PRESS_H }, pressStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.pressHead, { left: PRESS_X - 5, top: PRESS_HEAD_TOP }, pressStyle]} pointerEvents="none" />
+
+      {/* BOUND — the limited government's own boundary, around the house alone (beat 7). */}
+      <Animated.View style={[styles.bound, { left: BOUND_L, top: BOUND_T, width: BOUND_W, height: BOUND_H }, boundStyle]} pointerEvents="none" />
+
+      {/* BIND — three spokes joining Rousseau's people to the general will (beat 9). */}
+      {SPOKES.map((s, k) => (
+        <Animated.View
+          key={`sp${k}`}
+          style={[styles.spoke, { left: s.x, top: s.y - 0.75, width: s.len, transform: [{ rotate: s.rot }] }, bindStyle]}
+          pointerEvents="none"
+        />
+      ))}
+
+      {/* SELF — the point everyone answers to, open rather than solid (beat 10). */}
+      <Animated.View style={[styles.selfRing, { left: RING_CX - 6, top: RING_CY - 6 }, selfStyle]} pointerEvents="none" />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
@@ -330,7 +435,7 @@ const styles = StyleSheet.create({
   // ── the label plate, which is also the answer target ────────────────────────
   plate: { position: 'absolute', top: PLATE_T, width: PLOT_W },
   plateInner: {
-    height: PLATE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: PLATE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   plateRight: { backgroundColor: INK, borderColor: INK },
@@ -348,6 +453,33 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   plateTextOn: { color: PAPER },
+
+  // ── the four tap events (group AH) ───────────────────────────────────────
+  //
+  // ASK — a bare "?", the size of a held thought rather than a caption, since it
+  // carries no word of its own (D34 does not apply to a mark).
+  askWrap: { position: 'absolute', left: DIAL_L, top: ASK_T, width: DIAL_W, alignItems: 'center' },
+  askText: { fontFamily: 'Inter_700Bold', fontSize: 24, color: INK, includeFontPadding: false },
+
+  // PRESS — a bar and a downward point, INK, the same weight as a held object.
+  pressBar: { position: 'absolute', width: 3, backgroundColor: INK },
+  pressHead: {
+    position: 'absolute', width: 0, height: 0,
+    borderLeftWidth: 5, borderRightWidth: 5, borderTopWidth: 7,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: INK,
+  },
+
+  // BOUND — a boundary is a dashed edge, never a fill (D31); no word rides on it.
+  bound: {
+    position: 'absolute', borderWidth: 1.5, borderColor: SHADE, borderStyle: 'dashed', borderRadius: 6,
+  },
+
+  // BIND — a spoke is a thin rotated bar, the aesthetics3Scene pattern.
+  spoke: { position: 'absolute', height: 1.5, backgroundColor: SHADE, transformOrigin: '0% 50%' },
+
+  // SELF — open, not solid: the same ink as the tower, drawn as a ring instead
+  // of a filled mass, because Rousseau's citizens remain free.
+  selfRing: { position: 'absolute', width: 12, height: 12, borderRadius: 6, borderWidth: 1.5, borderColor: INK },
 });
 
 // Art runs from the dial's tag at y 306 down to the ground line at 500, so the crop

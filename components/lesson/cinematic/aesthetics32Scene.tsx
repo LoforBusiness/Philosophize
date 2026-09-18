@@ -15,6 +15,7 @@ import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, 
   pickAt,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -22,8 +23,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // THREE CHARTS WITH THE SAME AREA UNDER THEM, and the answer targets are the charts —
 // the largest target in the app, because here the thing being chosen IS the argument
@@ -72,6 +74,12 @@ const FIG_X = 60;
 const G = BEATS.map((b) => b.g ?? 0);
 const ROWS = BEATS.map((b) => b.rows ?? 0);
 const MEANS = BEATS.map((b) => b.mean ?? 0);
+const TIE = BEATS.map((b) => b.tie ?? 0);
+// Where the bracket's ends sit: row0's mean height always, row1's while tying two,
+// row2's once it grows to tie all three.
+const TIE_TOP = ROW_T[0] + ROW_H - (BAR_FOOT + MEAN);
+const TIE_BOT1 = ROW_T[1] + ROW_H - (BAR_FOOT + MEAN);
+const TIE_BOT2 = ROW_T[2] + ROW_H - (BAR_FOOT + MEAN);
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -85,7 +93,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics32'));
 export default function Aesthetics32Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(3);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -100,10 +108,25 @@ export default function Aesthetics32Scene({ clock, bt, bi, i, picked, onPick, pi
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       rows: carry(cv, 0, n, ROWS[p], ROWS[n], grow),
       mean: carry(cv, 1, n, MEANS[p], MEANS[n], grow),
+      // A plain carry, not gated on grow: the value itself runs 0…2, so its own
+      // continuous interpolation is the fade, both growing in and shrinking away.
+      tie: carry(cv, 2, n, TIE[p], TIE[n], tr),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  // The tie bracket: it ties the rising and falling totals together once both are
+  // up, then grows to take in the level life's total too (H64 — the mean lines
+  // already prove the sum; this is what says so).
+  const tieOp = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.tie) }));
+  const tieStemStyle = useAnimatedStyle(() => {
+    const bottom = TIE_BOT1 + (TIE_BOT2 - TIE_BOT1) * clamp01(SCENE.value.tie - 1);
+    return { top: TIE_TOP, height: bottom - TIE_TOP, opacity: clamp01(SCENE.value.tie) };
+  });
+  const tieBotTickStyle = useAnimatedStyle(() => {
+    const bottom = TIE_BOT1 + (TIE_BOT2 - TIE_BOT1) * clamp01(SCENE.value.tie - 1);
+    return { top: bottom - 0.75, opacity: clamp01(SCENE.value.tie) };
+  });
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -136,6 +159,11 @@ export default function Aesthetics32Scene({ clock, bt, bi, i, picked, onPick, pi
       <Animated.View style={[styles.ptr, ptrStyle]} pointerEvents="none">
         <View style={styles.ptrTri} />
       </Animated.View>
+
+      {/* the tie: a bracket off the right edge, joining the lives' totals */}
+      <Animated.View style={[styles.tieStem, tieStemStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.tieTick, { top: TIE_TOP - 0.75 }, tieOp]} pointerEvents="none" />
+      <Animated.View style={[styles.tieTick, tieBotTickStyle]} pointerEvents="none" />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -219,7 +247,7 @@ const styles = StyleSheet.create({
 
   row: { position: 'absolute', left: ROW_L, width: ROW_W, height: ROW_H },
   rowInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   kicker: {
     position: 'absolute', left: 10, top: 4,
@@ -248,6 +276,13 @@ const styles = StyleSheet.create({
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT },
+
+  // The tie bracket: a vertical stem off the charts' right edge with a tick at
+  // each end, joining the totals it names (H64). Grows from two rows to three.
+  tieStem: { position: 'absolute', left: ROW_L + ROW_W + 4, width: 1.5, backgroundColor: SOFT },
+  tieTick: {
+    position: 'absolute', left: ROW_L + ROW_W, width: 9, height: 1.5, backgroundColor: SOFT,
+  },
 });
 
 // Ink runs from the badge (258) to the ground line (500). Band 252…512 = 260 (H59).

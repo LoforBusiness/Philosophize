@@ -21,6 +21,9 @@ export interface Pol18Beat extends BaseBeat {
   /** The identical bicycles at the start of each, 0…1. */ bikes?: number;
   /** How far each rider has actually travelled, 0…1 of their own reach. */ ride?: number;
   /** 1 = the three boards are live targets (Q1). */ pick?: number;
+  /** 1 = the second rider's lane says why the bicycle takes him nowhere. */ cannot?: number;
+  /** 1 = the two lanes are joined at the start, where the resource was the same. */ level?: number;
+  /** 1 = Sen's measure, said at the foot of both lanes. */ able?: number;
 }
 
 export const BEATS: Pol18Beat[] = [
@@ -38,11 +41,13 @@ export const BEATS: Pol18Beat[] = [
   {
     g: 159, lanes: 2, bikes: 1, ride: 1,
     dur: 2.9,
+    cannot: 1,
     text: 'The other rider cannot use his legs, so the bicycle takes him almost nowhere.',
   },
   {
     g: 412, lanes: 2, bikes: 1, ride: 1,
     dur: 4.8,
+    level: 1,
     text: 'The resource was equal at the start, yet it produced very different amounts of mobility.',
     cite: 'Equal resources',
   },
@@ -62,6 +67,7 @@ export const BEATS: Pol18Beat[] = [
   {
     g: 384, lanes: 2, bikes: 1, ride: 1,
     dur: 4.8,
+    able: 1,
     text: 'So Amartya Sen measures equality in a new way. He asks what people are able to do and be, and calls this their capabilities.',
     cite: 'Capabilities',
   },

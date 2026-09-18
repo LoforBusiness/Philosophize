@@ -30,6 +30,8 @@ export interface Aes23Beat extends BaseBeat {
   /** The arrow, 0…1. */ point?: number;
   /** Which plate the arrow is over: 0, 1 or 2. */ aim?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed boundary frames the tune's own notes — nothing outside itself. */ seal?: number;
+  /** 1 = a dark shape sits half behind the aimed plate — the will hidden behind it. */ hidden?: number;
 }
 
 export const BEATS: Aes23Beat[] = [
@@ -39,7 +41,7 @@ export const BEATS: Aes23Beat[] = [
     dur: 2.4,
   },
   {
-    p: 462, x: 200, stave: 1,
+    p: 462, x: 200, stave: 1, point: 1,
     text: 'What, then, is the melody about? Music might mean something in two different ways.',
     dur: 2,
   },
@@ -71,7 +73,7 @@ export const BEATS: Aes23Beat[] = [
     dur: 2.6,
   },
   {
-    p: 176, x: 132, stave: 1, plates: 1, point: 1, aim: 2,
+    p: 176, x: 132, stave: 1, plates: 1, point: 1, aim: 2, seal: 1,
     text: 'Such music has no subject beyond its own patterns of tones.',
     dur: 1.8,
   },
@@ -89,7 +91,7 @@ export const BEATS: Aes23Beat[] = [
     dur: 4.2,
   },
   {
-    p: 399, x: 268, stave: 1, plates: 1, point: 1, aim: 2,
+    p: 399, x: 268, stave: 1, plates: 1, point: 1, aim: 2, hidden: 1,
     text: 'Arthur Schopenhauer held that music does represent. It copies no visible thing, but the will hidden behind all things.',
     dur: 4.6,
   },

@@ -9,6 +9,7 @@ import { BEATS } from './aesthetics27Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOUR WORKS ON A WALL, AND A GAUGE OVER THEM.
@@ -88,6 +90,9 @@ const METER = BEATS.map((b) => b.meter ?? 0);
 const SHOCK = BEATS.map((b) => b.shock ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// GROUP AH — one still tap: a pin lands on the gauge at its own reading, marking
+// the 1874 case the sentence just cited (never on the wall, which stays identical).
+const MARK = BEATS.map((b) => (b.mark ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -98,7 +103,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics27'));
 export default function Aesthetics27Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -121,6 +126,7 @@ export default function Aesthetics27Scene({ clock, bt, bi, i, picked, onPick, dr
       // shock across four generations is exactly what it means here.
       shock: carry(cv, 3, n, SHOCK[p], reacting ? dragPos.value : SHOCK[n], tr),
       plates: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      mark: carry(cv, 5, n, MARK[p], MARK[n], tr),
     };
   });
 
@@ -139,6 +145,12 @@ export default function Aesthetics27Scene({ clock, bt, bi, i, picked, onPick, dr
   const gaugeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.meter }));
   const fillStyle = useAnimatedStyle(() => ({ width: GAU_W * clamp01(SCENE.value.shock) }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
+  // A PIN AT THE GAUGE'S CURRENT READING — the case just cited, tracked off the
+  // live shock value so it can never point at a stale number.
+  const flagStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.mark,
+    left: GAU_W * clamp01(SCENE.value.shock) - 1,
+  }));
 
   return (
     <View style={styles.scene}>
@@ -148,6 +160,8 @@ export default function Aesthetics27Scene({ clock, bt, bi, i, picked, onPick, dr
       <Animated.View style={[styles.gaugeWrap, gaugeStyle]} pointerEvents="none">
         <View style={styles.gauge} />
         <Animated.View style={[styles.gaugeFill, fillStyle]} />
+        <Animated.View style={[styles.flagPole, flagStyle]} pointerEvents="none" />
+        <Animated.View style={[styles.flagBall, flagStyle]} pointerEvents="none" />
       </Animated.View>
 
       <View style={styles.wall} pointerEvents="none" />
@@ -194,7 +208,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: GAU_X, top: CAP_T, width: GAU_W, textAlign: 'center',
@@ -207,6 +221,10 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
   },
   gaugeFill: { position: 'absolute', left: 0, top: 0, height: GAU_H, backgroundColor: INK },
+  // A PIN MARKING ONE READING ON THE GAUGE (beat 7) — the 1874 case, pinned to
+  // where its shock currently sits rather than named again in words.
+  flagPole: { position: 'absolute', top: -10, width: 2, height: 10, backgroundColor: INK },
+  flagBall: { position: 'absolute', top: -14, width: 6, height: 6, borderRadius: 3, backgroundColor: INK, marginLeft: -2 },
 
   wall: {
     position: 'absolute', left: WALL_X, top: WALL_Y, width: WALL_W, height: WALL_H,
@@ -230,7 +248,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

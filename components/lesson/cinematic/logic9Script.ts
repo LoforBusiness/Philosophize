@@ -23,6 +23,8 @@ export interface L9Beat extends BaseBeat {
   /** 0 no straw copy · 1 built · 2 knocked over. */ straw?: number;
   /** Dim both dodges and leave the claim lit — nothing has touched it. */ untouched?: boolean;
   /** The three replies for the tap question. */ replies?: boolean;
+  /** An ✕ badge on the smear tag: it says nothing about the claim. */ smearX?: boolean;
+  /** An ✕ badge on the fallen straw tag: it is a position nobody held. */ strawX?: boolean;
 }
 
 export const BEATS: L9Beat[] = [
@@ -38,7 +40,7 @@ export const BEATS: L9Beat[] = [
     dur: 2,
   },
   {
-    a: 266, d: 266, dx: 264, claim: true, smear: true,
+    a: 266, d: 266, dx: 264, claim: true, smear: true, smearX: true,
     text: 'However, a claim’s truth doesn’t depend on who asserts it. The insult says nothing about whether the figures add up.',
     dur: 3,
   },
@@ -49,7 +51,7 @@ export const BEATS: L9Beat[] = [
     dur: 3.8,
   },
   {
-    a: 403, d: 29, dx: 264, claim: true, straw: 2,
+    a: 403, d: 29, dx: 264, claim: true, straw: 2, strawX: true,
     text: 'In effect, you defeat a position you built yourself, not your opponent’s.',
     dur: 1.8,
   },

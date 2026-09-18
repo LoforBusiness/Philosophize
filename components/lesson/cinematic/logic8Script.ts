@@ -20,6 +20,11 @@ export interface Logic8Beat extends BaseBeat {
   /** 1 = the NO stamp lands on the tempting move. */ cross?: number;
   /** The garden: 0 there but unnoticed (ghosted) · 1 seen, sprinkler running. */ spr?: number;
   /** 1 = the three answer cards are live above the street (Q1). */ pick?: number;
+  /** 0/1 — a tentative "SO, IT RAINED?" thought, before the reasoning is laid out. */ hasty?: number;
+  /** 0/1 — a PREMISE 2 tag on the wet patch, naming it as the second premise. */ wetTag?: number;
+  /** 0/1 — a reversed arrow inside the tempting-move card, showing the inference runs backward. */ reversed?: number;
+  /** 0/1 — a dashed line from the sprinkler to the wet patch: an alternative cause. */ altCause?: number;
+  /** 0/1 — a caption on that line: not just this once, but whenever another cause exists. */ altGeneral?: number;
 }
 
 export const BEATS: Logic8Beat[] = [
@@ -29,7 +34,7 @@ export const BEATS: Logic8Beat[] = [
     dur: 4.1,
   },
   {
-    p: 165, x: 230, wet: 1,
+    p: 165, x: 230, wet: 1, hasty: 1,
     text: 'At once, you conclude that it must have rained.',
     dur: 1.8,
   },
@@ -40,7 +45,7 @@ export const BEATS: Logic8Beat[] = [
     dur: 3.4,
   },
   {
-    p: 266, x: 152, wet: 1, rule: 1,
+    p: 266, x: 152, wet: 1, rule: 1, wetTag: 1,
     text: 'Your second premise is that the streets are wet.',
     dur: 1.8,
   },
@@ -51,7 +56,7 @@ export const BEATS: Logic8Beat[] = [
     dur: 1.8,
   },
   {
-    p: 259, x: 152, wet: 1, rule: 1, trap: 1,
+    p: 259, x: 152, wet: 1, rule: 1, trap: 1, reversed: 1,
     text: 'The inference resembles modus ponens, but runs from the consequent back to the antecedent.',
     dur: 2.8,
   },
@@ -71,18 +76,18 @@ export const BEATS: Logic8Beat[] = [
     dur: 3.8,
   },
   {
-    p: 159, x: 248, wet: 1, rule: 1, trap: 1, spr: 1,
+    p: 159, x: 248, wet: 1, rule: 1, trap: 1, spr: 1, altCause: 1,
     text: 'The sprinkler alone could have made the street wet, whether or not it rained.',
     dur: 1.8,
   },
   {
-    p: 11, x: 248, wet: 1, rule: 1, trap: 1, cross: 1, spr: 1,
+    p: 11, x: 248, wet: 1, rule: 1, trap: 1, cross: 1, spr: 1, altCause: 1,
     text: 'This fallacy is called affirming the consequent. It treats a wet street, the consequent, as proof of rain, the antecedent.',
     cite: 'Affirming the consequent',
     dur: 3,
   },
   {
-    p: 257, x: 248, wet: 1, rule: 1, trap: 1, cross: 1, spr: 1,
+    p: 257, x: 248, wet: 1, rule: 1, trap: 1, cross: 1, spr: 1, altCause: 1, altGeneral: 1,
     text: 'The inference fails whenever something other than rain could leave the street wet.',
     dur: 2.2,
   },

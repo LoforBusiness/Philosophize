@@ -13,6 +13,7 @@ import { BEATS } from './logic32Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // TWO figures with the question between them, and the words of the question are
 // the answer targets.
@@ -98,10 +100,17 @@ const X = BEATS.map((b) => b.x ?? 191);
 const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic32'));
 
+const TRIEDV = BEATS.map((b) => ((b.tried ?? 0) > 0 ? 1 : 0));
+// group AH — the tried plate becomes official (beat 3) and the claim slot names the
+// term before the specific hidden claim is shown there (beat 5). Both carried tracks,
+// so each fades in on its own beat and fades back out rather than cutting.
+const RECORDV = BEATS.map((b) => ((b.record ?? 0) > 0 ? 1 : 0));
+const NAMEDV = BEATS.map((b) => ((b.named ?? 0) > 0 ? 1 : 0));
+
 export default function Logic32Scene({ clock, bt, bi, i, picked, onPick, pickPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldSb = useHeld();
-  const cv = useCarry(1);
+  const cv = useCarry(4);
   const heldSa = useHeld();
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
@@ -111,6 +120,8 @@ export default function Logic32Scene({ clock, bt, bi, i, picked, onPick, pickPos
   const hidFade = (cur.hidden ?? 0) !== (prev?.hidden ?? 0);
   const tried = cur.tried ?? 0;
   const triedFade = (cur.tried ?? 0) !== (prev?.tried ?? 0);
+  const recordFade = (cur.record ?? 0) !== (prev?.record ?? 0);
+  const namedFade = (cur.named ?? 0) !== (prev?.named ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -132,7 +143,13 @@ export default function Logic32Scene({ clock, bt, bi, i, picked, onPick, pickPos
       // line under the sentence surfaces as the lever travels to 'take the hidden claim
       // first' and sinks again at either answer that concedes it.
       hidden: (hidOn ? (hidFade ? grow : 1) : 0) * (reacting ? 1 - (1 - pickPos.value) * tr : 1),
-      tried: tried > 0 ? (triedFade ? grow : 1) : 0,
+      // CARRIED, so the answer being tried fades away rather than vanishing.
+      tried: carry(cv, 1, n, TRIEDV[p], TRIEDV[n], triedFade ? grow : 1),
+      // The tried plate stamped solid ink — "the accusation is now on the record" —
+      // an overlay cross-fading on top of the plain plate, never a new object.
+      record: carry(cv, 2, n, RECORDV[p], RECORDV[n], recordFade ? grow : 1),
+      // The claim slot naming the TERM, before beat 7 shows the specific claim there.
+      named: carry(cv, 3, n, NAMEDV[p], NAMEDV[n], namedFade ? grow : 1),
     };
   });
 
@@ -144,6 +161,8 @@ export default function Logic32Scene({ clock, bt, bi, i, picked, onPick, pickPos
     transform: [{ translateY: (1 - SCENE.value.hidden) * -6 }],
   }));
   const tryStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tried }));
+  const recordStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.record }));
+  const namedStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.named }));
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -190,6 +209,16 @@ export default function Logic32Scene({ clock, bt, bi, i, picked, onPick, pickPos
         <Text style={styles.triedText} numberOfLines={1}>{TRIED[tried]}</Text>
       </Animated.View>
 
+      {/* the same plate, stamped solid ink — the accusation entered on the record */}
+      <Animated.View style={[styles.triedRecord, recordStyle]} pointerEvents="none">
+        <Text style={styles.triedRecordText} numberOfLines={1}>{TRIED[tried]}</Text>
+      </Animated.View>
+
+      {/* the claim slot naming the term, before the specific claim is shown there */}
+      <Animated.View style={[styles.namedTag, namedStyle]} pointerEvents="none">
+        <Text style={styles.namedText} numberOfLines={1}>LOADED QUESTION</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman role="second" D={DA} k={K_FIG} />
       <Stickman D={DB} k={K_FIG} />
@@ -203,12 +232,12 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   layer: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
 
   word: { position: 'absolute', height: WORD_H },
   wordInner: {
-    height: WORD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: WORD_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   wordText: {
@@ -236,6 +265,34 @@ const styles = StyleSheet.create({
   },
   triedText: {
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
+
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  //
+  // The stamp: the same tried plate, filled solid ink with paper type, as if a
+  // rubber stamp had just come down on it. Same bounds as .tried, laid on top.
+  triedRecord: {
+    position: 'absolute', left: (STAGE_W - TRY_W) / 2, top: TRY_T, width: TRY_W, height: TRY_H,
+    borderLeftWidth: 3, borderLeftColor: INK, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  triedRecordText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.4, color: PAPER,
+    includeFontPadding: false,
+  },
+
+  // The term label: sits in the same slot the hidden claim will later occupy
+  // (never shown at once — named is 0 by the beat hidden turns on), a plain
+  // plate rather than the hidden claim's solid ink, since naming a term is
+  // not the dramatic reveal that showing the smuggled claim is.
+  namedTag: {
+    position: 'absolute', left: (STAGE_W - HID_W) / 2, top: HID_T, width: HID_W, height: HID_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  namedText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.6, color: INK,
     includeFontPadding: false,
   },
 });

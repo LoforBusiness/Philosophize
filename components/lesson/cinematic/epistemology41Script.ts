@@ -29,6 +29,9 @@ export interface Epistemology41Beat extends BaseBeat {
   /** 1 = the submerged half has been straightened — the oar lifted clear. */ lifted?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = the argument's three numbered steps stand empty, in the order it takes them. */ steps?: number;
+  /** 1 = the inference from the second step to the third is drawn. */ infer?: number;
+  /** 1 = Austin's reply, under the water: this is one of the ways it looks. */ oneWay?: number;
 }
 
 export const BEATS: Epistemology41Beat[] = [
@@ -44,11 +47,13 @@ export const BEATS: Epistemology41Beat[] = [
   },
   {
     p: 434, x: 28, water: 1, oar: 1,
+    steps: 1,
     text: 'The argument from illusion takes three steps. The oar looks bent, but the oar itself is straight.',
     dur: 4.4,
   },
   {
     p: 258, x: 28, water: 1, oar: 1,
+    steps: 1, infer: 1,
     text: 'Next, the argument infers that a bent thing is seen. The bent thing can’t be the straight oar, so you see something other than the oar.',
     dur: 4.6,
   },
@@ -81,6 +86,7 @@ export const BEATS: Epistemology41Beat[] = [
   },
   {
     p: 445, x: 88, water: 1, oar: 1,
+    oneWay: 1,
     text: 'J. L. Austin rejected the inference. Looking bent in water, he argued, is one of the ways a straight oar looks.',
     dur: 4.6,
   },

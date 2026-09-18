@@ -13,6 +13,7 @@ import { BEATS } from './ethics18Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A boundary line with two groups either side of it, stage right.
 //
@@ -103,6 +105,9 @@ export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick, pickPo
   const wideFade = (cur.wide ?? 0) !== (prev?.wide ?? 0);
   const testFade = (cur.test ?? 0) !== (prev?.test ?? 0);
   const testOn = (cur.test ?? 0) > 0;
+  // ANIMATE ONLY WHAT CHANGED (C20c) — a one-shot strike, so it fires only on
+  // the beat that draws it, never on a beat that merely holds it.
+  const strikeNow = (cur.strike ?? 0) > 0 && (cur.strike ?? 0) !== (prev?.strike ?? 0) ? (cur.strike ?? 0) : 0;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -131,6 +136,9 @@ export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick, pickPo
       wide,
       line: lerp(LINE_NARROW, LINE_WIDE, wide),
       test: testOn ? (testFade ? grow : 1) : 0,
+      // THE STRIKE'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to,
+      // flatly 0 on every other beat — one cross per tap, not a loop.
+      strike: strikeNow ? ease01(bt.value / 1.1) : 0,
     };
   });
 
@@ -138,6 +146,11 @@ export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick, pickPo
   const boardStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.board }));
   const lineStyle = useAnimatedStyle(() => ({ left: SCENE.value.line }));
   const testStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.test }));
+  // Fades in over the first fifth of its window and out over the last.
+  const strikeStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.strike;
+    return { opacity: u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2) };
+  });
   // The animals chip fills with ink exactly as the line passes it — one movement,
   // not two, so "the line took them in" is what the eye sees.
   const animalStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.wide }));
@@ -164,6 +177,10 @@ export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick, pickPo
           <Text style={styles.chipOnInk} numberOfLines={1}>ANIMALS</Text>
         </Animated.View>
 
+        {/* group AH, beat 2: "they count only as things" — a strike crosses the
+            still-outlined ANIMALS chip, corner to corner. */}
+        {strikeNow === 1 && <Animated.View style={[styles.strikeAnimals, strikeStyle]} pointerEvents="none" />}
+
         <Animated.View style={[styles.line, lineStyle]} />
       </Animated.View>
 
@@ -171,6 +188,10 @@ export default function Ethics18Scene({ clock, bt, bi, i, picked, onPick, pickPo
         <Text style={styles.testKicker} numberOfLines={1}>THE TEST</Text>
         <Text style={styles.testText} numberOfLines={1}>{TESTS[cur.test ?? 0]}</Text>
       </Animated.View>
+
+      {/* group AH, beat 4: "reason can't be the test" — the same strike crosses
+          the TEST card itself, corner to corner. */}
+      {strikeNow === 2 && <Animated.View style={[styles.strikeTest, strikeStyle]} pointerEvents="none" />}
 
       {showPick &&
         ANSWERS.map((a, k) => {
@@ -208,7 +229,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   board: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   head: {
@@ -223,7 +244,7 @@ const styles = StyleSheet.create({
   },
   chipOut: {
     position: 'absolute', top: CHIP_T, width: CHIP_W, height: CHIP_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   chipText: {
@@ -236,9 +257,21 @@ const styles = StyleSheet.create({
   },
   line: { position: 'absolute', top: LINE_T, width: 3, height: LINE_H, backgroundColor: INK },
 
+  // ── the two tap events (group AH) — one strike, drawn corner to corner over
+  // an element already on the stage rather than a new object, since the
+  // sentence names what is already there being rejected.
+  strikeAnimals: {
+    position: 'absolute', left: 300.7, top: 270.75, width: 80.6, height: 2.5, borderRadius: 1.25,
+    backgroundColor: INK, transform: [{ rotate: '29.7deg' }],
+  },
+  strikeTest: {
+    position: 'absolute', left: 214.2, top: 328.75, width: 179.6, height: 2.5, borderRadius: 1.25,
+    backgroundColor: INK, transform: [{ rotate: '11.6deg' }],
+  },
+
   test: {
     position: 'absolute', left: BD_L, top: TEST_T, width: BD_W, height: TEST_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   testKicker: {
@@ -252,7 +285,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', left: BD_L, width: BD_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {

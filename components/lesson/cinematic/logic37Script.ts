@@ -28,6 +28,8 @@ export interface Logic37Beat extends BaseBeat {
   /** 1 = the barber's own token is on the stage, refusing to settle. */ barber?: number;
   /** 1 = the set version is drawn beneath. */ sets?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a ring highlights the SHAVED BY HIM box — the case this beat names. */ showRight?: number;
+  /** 1 = a marker swings across the set panel's edge, exactly as unable to settle as the barber's own token. */ setSwing?: number;
 }
 
 export const BEATS: Logic37Beat[] = [
@@ -42,7 +44,7 @@ export const BEATS: Logic37Beat[] = [
     dur: 3,
   },
   {
-    p: 266, x: 56, boxes: 1, sorted: 1,
+    p: 266, x: 56, boxes: 1, sorted: 1, showRight: 1,
     text: 'A man who doesn’t shave himself is shaved by the barber.',
     dur: 1.8,
   },
@@ -66,7 +68,7 @@ export const BEATS: Logic37Beat[] = [
     dur: 3.8,
   },
   {
-    p: 266, x: 56, boxes: 1, sorted: 1, barber: 1, sets: 1,
+    p: 266, x: 56, boxes: 1, sorted: 1, barber: 1, sets: 1, setSwing: 1,
     text: 'If the set contains itself, it violates its own condition for membership. If the set doesn’t contain itself, it meets the condition and must be included.',
     dur: 1.8,
   },

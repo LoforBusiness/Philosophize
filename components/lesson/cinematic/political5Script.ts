@@ -12,6 +12,13 @@ export interface Pol5Beat extends BaseBeat {
   /** Plato's three-tier city 0..1. */ city?: number;
   /** The veil of ignorance drawn over the figure 0..1. */ veil?: number;
   /** The timeline that links the thinkers 0..1. */ link?: number;
+  /** 1 = the three tiers are named in turn, each caption struck as it is said. */ named?: number;
+  /** 1 = the rules-that-favour-me card is up and ruled through. */ mine?: number;
+  /**
+   * WHICH STOPS ON THE TIMELINE ARE LIT: 0 none · 1 Hobbes · 2 Locke and Mill,
+   * the two who ask about government · 3 Rawls, with a rule down to Plato's city.
+   */
+  lit?: number;
 }
 
 export const BEATS: Pol5Beat[] = [
@@ -28,6 +35,7 @@ export const BEATS: Pol5Beat[] = [
   },
   {
     p: 266, city: 1,
+    named: 1,
     text: 'Philosopher-kings rule, because Plato holds that only they know the good. Guardians defend the city, and producers supply it.',
     dur: 2,
   },
@@ -52,6 +60,7 @@ export const BEATS: Pol5Beat[] = [
   },
   {
     p: 399, city: 0, veil: 1,
+    mine: 1,
     text: 'Behind this veil of ignorance, you don’t know your class, talents, wealth or luck. So you can’t choose rules that favour yourself.',
     dur: 2.5,
   },
@@ -80,11 +89,13 @@ export const BEATS: Pol5Beat[] = [
   },
   {
     p: 259, veil: 0.3, city: 0.6, link: 1,
+    lit: 2,
     text: 'Locke and Jean-Jacques Rousseau ask what makes a government legitimate. John Stuart Mill asks how far its power over the individual may extend.',
     dur: 2.3,
   },
   {
     p: 259, veil: 0.3, city: 0.6, link: 1,
+    lit: 3,
     text: 'Plato and Rawls ask what justice itself requires of a whole society.',
     dur: 1.8,
   },

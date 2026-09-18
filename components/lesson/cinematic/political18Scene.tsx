@@ -10,6 +10,7 @@ import { BEATS } from './political18Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // TWO LANES, TWO IDENTICAL BICYCLES, TWO VERY DIFFERENT DISTANCES (H64). What is
 // equal is at the left-hand end of the picture and what matters is the length.
@@ -60,6 +62,9 @@ const BOARDS = [
   { id: 'effort', text: 'HOW HARD THEY TRY', correct: false },
 ];
 
+const CANNOT = BEATS.map((b) => b.cannot ?? 0);
+const LEVELV = BEATS.map((b) => b.level ?? 0);
+const ABLE = BEATS.map((b) => b.able ?? 0);
 const G = BEATS.map((b) => b.g ?? 0);
 const LANES = BEATS.map((b) => b.lanes ?? 0);
 const BIKES = BEATS.map((b) => b.bikes ?? 0);
@@ -77,7 +82,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political18'));
 export default function Political18Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
   const cur = BEATS[i];
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -105,10 +110,31 @@ export default function Political18Scene({ clock, bt, bi, i, picked, onPick, dra
       // own very different distances on identical machines.
       ride: carry(cv, 2, n, RIDE[p], reacting ? dragPos.value : RIDE[n], roll),
       boards: carry(cv, 3, n, PICKV[p], PICKV[n], grow),
+      // The three tap events, carried, so each fades out as well as in (group L).
+      cannot: carry(cv, 4, n, CANNOT[p], CANNOT[n], grow),
+      level: carry(cv, 5, n, LEVELV[p], LEVELV[n], grow),
+      able: carry(cv, 6, n, ABLE[p], ABLE[n], grow),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
+
+  // ── the three tap events ───────────────────────────────────────────────────
+  const cannotStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.cannot,
+    transform: [{ translateY: (1 - SCENE.value.cannot) * -6 }],
+  }));
+  // The join DRAWS DOWN between the two lanes: it is being taken from one start
+  // line to the other, which is the comparison the sentence makes.
+  const levelStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.level,
+    transform: [{ scaleY: SCENE.value.level }],
+  }));
+  const levelCapStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.level - 0.5) / 0.5) }));
+  const ableStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.able,
+    transform: [{ translateY: (1 - SCENE.value.able) * 10 }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -119,6 +145,20 @@ export default function Political18Scene({ clock, bt, bi, i, picked, onPick, dra
       ))}
 
       {LANE_MID.map((y, k) => <Lane key={k} k={k} SCENE={SCENE} />)}
+
+      {/* Why the same bicycle takes the second rider almost nowhere. */}
+      <Animated.View style={[styles.cannotTag, cannotStyle]} pointerEvents="none">
+        <Text style={styles.cannotText} numberOfLines={1}>CANNOT PEDAL</Text>
+      </Animated.View>
+
+      {/* The starts were the same, whatever the ends came to. */}
+      <Animated.View style={[styles.levelJoin, levelStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.levelCap, levelCapStyle]} pointerEvents="none">EQUAL HERE</Animated.Text>
+
+      {/* So this is what Sen measures instead. */}
+      <Animated.View style={[styles.ablePlate, ableStyle]} pointerEvents="none">
+        <Text style={styles.ableText} numberOfLines={1}>ABLE TO DO AND BE</Text>
+      </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -184,6 +224,41 @@ function Board({
 }
 
 const styles = StyleSheet.create({
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  // BETWEEN THE TWO LANES, whose centres are LANE_MID: a tag on either lane's own
+  // line would sit on the rule the riders travel along.
+  cannotTag: {
+    position: 'absolute', left: REACH[1] + 10, top: (LANE_MID[0] + LANE_MID[1]) / 2 - 12,
+    paddingHorizontal: 7, paddingVertical: 4,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 6,
+  },
+  cannotText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+  // Down the start line both lanes share, from the first lane's rule to the second.
+  levelJoin: {
+    position: 'absolute', left: LANE_L, top: LANE_MID[0], width: 2,
+    height: LANE_MID[1] - LANE_MID[0],
+    borderLeftWidth: 2, borderColor: INK, borderStyle: 'dashed',
+    transformOrigin: '50% 0%',
+  },
+  levelCap: {
+    position: 'absolute', left: LANE_L - 34, top: LANE_MID[0] - 22, width: 72, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+  // Under both lanes, clear of the lower rule at LANE_MID[1].
+  ablePlate: {
+    position: 'absolute', left: 110, top: LANE_MID[1] + 22, width: 200, height: 28,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  ableText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.8, color: PAPER,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
   fill: { flex: 1 },
@@ -196,7 +271,7 @@ const styles = StyleSheet.create({
 
   board: { position: 'absolute', top: BOARD_T, width: BOARD_W, height: BOARD_H },
   boardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   boardText: {

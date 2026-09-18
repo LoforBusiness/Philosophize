@@ -15,6 +15,7 @@ export interface Pol15Beat extends BaseBeat {
   /** How many stages of the stair are drawn: 0…4. */ stages?: number;
   /** 1 = the night-time protest is laid against the stair. */ night?: number;
   /** 1 = the four stages are live targets (Q2). */ pick?: number;
+  /** 1 = the lawful-routes stage is ruled through: the appeals have failed. */ failed?: number;
 }
 
 export const BEATS: Pol15Beat[] = [
@@ -31,6 +32,7 @@ export const BEATS: Pol15Beat[] = [
   },
   {
     p: 270, x: 168, stages: 2,
+    failed: 1,
     text: 'John Rawls treats civil disobedience as a last resort, justified only after lawful appeals have failed.',
     dur: 2.3,
   },

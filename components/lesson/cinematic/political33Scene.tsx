@@ -9,13 +9,16 @@ import { BEATS } from './political33Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE } = stageTone('political-philosophy');
+const TONE = stageTone('political-philosophy');
+const { RULE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a raised plate stands on (./stageSkin)
 
 // TWO DOORS IN A WALL, SWINGING UNDER THE READER'S THUMB.
 //
@@ -46,6 +49,8 @@ const CAP_T = 234;
 const FIG_X = 52;
 
 const OPEN = BEATS.map((b) => b.open ?? 0);
+const SHUTTER = BEATS.map((b) => b.shutter ?? 0);
+const VETTED = BEATS.map((b) => b.vetted ?? 0);
 const THREAT = BEATS.map((b) => b.threat ?? 0);
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
@@ -53,7 +58,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political33'));
 
 export default function Political33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(4);
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -68,6 +73,9 @@ export default function Political33Scene({ clock, bt, bi, i, dragPos, gazeX, gaz
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       open: live ? dragPos.value : carry(cv, 0, n, OPEN[p], OPEN[n], swing),
       threat: carry(cv, 1, n, THREAT[p], THREAT[n], tr),
+      // Carried, so each fades out as well as in (group L).
+      shutter: carry(cv, 2, n, SHUTTER[p], SHUTTER[n], tr),
+      vetted: carry(cv, 3, n, VETTED[p], VETTED[n], tr),
       t,
     };
   });
@@ -88,6 +96,22 @@ export default function Political33Scene({ clock, bt, bi, i, dragPos, gazeX, gaz
     opacity: SCENE.value.threat * SCENE.value.open,
   }));
 
+  // ── the two tap events ─────────────────────────────────────────────────────
+  //
+  // WHAT HE WILL DO WITH THE DOORS, drawn as the doors' own path: two arrows in
+  // from each leaf toward shut. It is the future of the thing already on stage,
+  // which is what the sentence claims and not a second object.
+  const shutterStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.shutter,
+    transform: [{ scaleX: SCENE.value.shutter }],
+  }));
+  // And the policy's own notice, at the foot of the gate. Below the wall, because
+  // the wall's face is the gate and the caption above it is taken.
+  const vettedStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.vetted,
+    transform: [{ translateY: (1 - SCENE.value.vetted) * 8 }],
+  }));
+
   return (
     <Animated.View style={styles.scene}>
       <Text style={styles.kicker} numberOfLines={1}>WHAT THE SOCIETY LETS IN</Text>
@@ -106,6 +130,19 @@ export default function Political33Scene({ clock, bt, bi, i, dragPos, gazeX, gaz
       <Animated.View style={[styles.leafR, rightStyle]} pointerEvents="none" />
 
       <View style={styles.gateFloor} pointerEvents="none" />
+      {/* Left unchecked, he closes them. */}
+      <Animated.View style={[styles.shutL, shutterStyle]} pointerEvents="none">
+        <View style={styles.shutHeadR} />
+      </Animated.View>
+      <Animated.View style={[styles.shutR, shutterStyle]} pointerEvents="none">
+        <View style={styles.shutHeadL} />
+      </Animated.View>
+
+      {/* And the alternative is a list, decided in advance. */}
+      <Animated.View style={[styles.vetted, vettedStyle]} pointerEvents="none">
+        <Text style={styles.vettedText} numberOfLines={1}>WHICH ARGUMENTS MAY BE HEARD</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
     </Animated.View>
@@ -113,6 +150,40 @@ export default function Political33Scene({ clock, bt, bi, i, dragPos, gazeX, gaz
 }
 
 const styles = StyleSheet.create({
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // In from each leaf toward the middle of the gateway, at the gate's upper third
+  // so the arrows sit clear of whoever is standing in it.
+  shutL: {
+    position: 'absolute', left: GATE_L, top: 298, width: 40, height: 3,
+    backgroundColor: INK, borderRadius: 1.5, transformOrigin: '0% 50%',
+  },
+  shutR: {
+    position: 'absolute', left: GATE_R - 40, top: 298, width: 40, height: 3,
+    backgroundColor: INK, borderRadius: 1.5, transformOrigin: '100% 50%',
+  },
+  shutHeadR: {
+    position: 'absolute', left: 40, top: -4, width: 9, height: 11,
+    borderTopWidth: 5.5, borderBottomWidth: 5.5, borderLeftWidth: 9,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
+    borderStyle: 'solid',
+  },
+  shutHeadL: {
+    position: 'absolute', left: -9, top: -4, width: 9, height: 11,
+    borderTopWidth: 5.5, borderBottomWidth: 5.5, borderRightWidth: 9,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+    borderStyle: 'solid',
+  },
+  // Between the wall's foot at WALL_B and the ground line.
+  vetted: {
+    position: 'absolute', left: WALL_L, top: WALL_B + 6, width: WALL_R - WALL_L, height: 22,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  vettedText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
 

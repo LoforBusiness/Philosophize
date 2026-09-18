@@ -9,6 +9,7 @@ import { BEATS } from './political29Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO IDENTICAL CRIBS, A LINE BETWEEN THEM, AND TWO COLUMNS OF LIFE CHANCES.
@@ -82,6 +84,8 @@ const WALL = BEATS.map((b) => (b.wall ? 1 : 0));
 const DECIDE = BEATS.map((b) => b.decide ?? 0.5);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const CREST = BEATS.map((b) => b.crest ?? 0);
+const CORE = BEATS.map((b) => b.core ?? 0);
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -93,6 +97,12 @@ export default function Political29Scene({ clock, bt, bi, i, picked, onPick, dra
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // ANIMATE ONLY WHAT CHANGED (C20c) — one-shot flashes, so each fires only on
+  // the beat that introduces its claim, never on a beat that merely holds it.
+  const crestNow = (cur.crest ?? 0) > 0 && (cur.crest ?? 0) !== (prev?.crest ?? 0);
+  const coreNow = (cur.core ?? 0) > 0 && (cur.core ?? 0) !== (prev?.core ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -115,6 +125,10 @@ export default function Political29Scene({ clock, bt, bi, i, picked, onPick, dra
       // a claim about the world the reader can check.
       decide: carry(cv, 3, n, DECIDE[p], reacting ? dragPos.value : DECIDE[n], tr),
       plates: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // THE FLASH'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to,
+      // flatly 0 on every other beat — one flash per tap, not a loop.
+      crest: crestNow ? ease01(bt.value / 1.1) : 0,
+      core: coreNow ? ease01(bt.value / 1.1) : 0,
     };
   });
 
@@ -125,6 +139,16 @@ export default function Political29Scene({ clock, bt, bi, i, picked, onPick, dra
   const cribsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.cribs }));
   const wallStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.wall }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
+  // Fades in over the first fifth of its window and out over the last, so each
+  // flash arrives and settles rather than snapping on, and is invisible at rest.
+  const crestStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.crest;
+    return { opacity: u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2) };
+  });
+  const coreStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.core;
+    return { opacity: u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2) };
+  });
 
   // ONE VALUE, TWO COLUMNS, PARTING IN OPPOSITE DIRECTIONS. At 0 they are level,
   // which is the reading the far-left zone actually states.
@@ -145,6 +169,11 @@ export default function Political29Scene({ clock, bt, bi, i, picked, onPick, dra
       <Animated.View style={[styles.col, { left: 260 }, outsideCol]} pointerEvents="none" />
 
       <Animated.View style={[styles.wall, wallStyle]} pointerEvents="none" />
+
+      {/* group AH — a heraldic mark on the line, naming citizenship an inherited rank. */}
+      {crestNow && <Animated.View style={[styles.crestMark, crestStyle]} pointerEvents="none" />}
+      {/* group AH — a disc at the line's centre, for "at the core of self-determination". */}
+      {coreNow && <Animated.View style={[styles.coreMark, coreStyle]} pointerEvents="none" />}
 
       <Animated.View style={[StyleSheet.absoluteFill, cribsStyle]} pointerEvents="none">
         {CRIB_X.map((cx, k) => (
@@ -189,11 +218,23 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   wall: {
     position: 'absolute', left: WALL_X, top: WALL_Y, width: WALL_W, height: CRIB_Y + CRIB_H - WALL_Y,
     backgroundColor: INK,
+  },
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // A diamond in PAPER, engraved on the line like a seal cut into the border —
+  // the mark of an inherited rank, never a fill (it reads against the solid ink).
+  crestMark: {
+    position: 'absolute', left: WALL_X + WALL_W / 2 - 7, top: 283, width: 14, height: 14,
+    borderWidth: 1.5, borderColor: PAPER, transform: [{ rotate: '45deg' }],
+  },
+  // A small paper disc at the line's own centre — "the CORE of self-determination".
+  coreMark: {
+    position: 'absolute', left: WALL_X + WALL_W / 2 - 6, top: 325, width: 12, height: 12, borderRadius: 6,
+    backgroundColor: PAPER, borderWidth: 1.5, borderColor: INK,
   },
   crib: {
     position: 'absolute', top: CRIB_Y, width: CRIB_W, height: CRIB_H,
@@ -209,7 +250,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,

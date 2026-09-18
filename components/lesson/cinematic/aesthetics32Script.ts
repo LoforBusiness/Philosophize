@@ -15,6 +15,8 @@ export interface Aes32Beat extends BaseBeat {
   /** Figure gesture (emote code). */ g?: number;
   /** How many charts have risen, 0…3. */ rows?: number;
   /** 1 = the mean line is drawn across all three. */ mean?: number;
+  /** 0 = no tie mark; 1 = a bracket on the right ties the rising and falling
+   *  totals together; 2 = the bracket grows to tie all three. */ tie?: number;
   /** 1 = the three charts are live targets (Q1). */ pick?: number;
 }
 
@@ -31,7 +33,7 @@ export const BEATS: Aes32Beat[] = [
     cite: 'The same years, reversed',
   },
   {
-    g: 266, rows: 2, mean: 0,
+    g: 266, rows: 2, mean: 0, tie: 1,
     dur: 1.8,
     text: 'The second life contains the same goods as the first, and only their order differs.',
   },
@@ -60,7 +62,7 @@ export const BEATS: Aes32Beat[] = [
     cite: 'Identical totals',
   },
   {
-    g: 167, rows: 3, mean: 1,
+    g: 167, rows: 3, mean: 1, tie: 2,
     dur: 1.8,
     text: 'The additive view holds that a life’s value is the sum of the well-being in its years. Yet the three lives don’t seem equally good.',
   },

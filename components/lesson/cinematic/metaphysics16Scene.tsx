@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics16Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // TWO PANELS DRAWN IDENTICALLY EXCEPT FOR ONE ARROW (H64). Everything inside them
 // is the same object at the same coordinates; only the second-order arrow differs,
@@ -57,6 +59,24 @@ const CRAVE = BEATS.map((b) => b.crave ?? 0);
 const SECOND = BEATS.map((b) => b.second ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
 
+// SPOT — one dashed rectangle that moves to whichever region the sentence is
+// about, rather than a new box per beat (H group Q / "move what changed").
+const ARROW_L = PANEL_W / 2 - 9 - 8;   // arrowWrap's left, padded
+const ARROW_W = 18 + 16;
+const SPOT = BEATS.map((b) => b.spot ?? 0);
+function spotRect(v: number): [number, number, number, number] {
+  if (v === 1) return [PANEL_L[1] + ARROW_L, PANEL_T + 34, ARROW_W, 122];        // unwilling: whole arrow column
+  if (v === 2) return [PANEL_L[0] + ARROW_L, PANEL_T + 34, PANEL_L[1] - PANEL_L[0] + ARROW_W, 58]; // both: second-order arrow
+  if (v === 3) return [PANEL_L[0] + ARROW_L, PANEL_T + 34, ARROW_W, 122];        // willing: whole arrow column
+  if (v === 4) return [PANEL_L[0] + ARROW_L, PANEL_T + 82, PANEL_L[1] - PANEL_L[0] + ARROW_W, 26]; // both: tag row
+  return [PANEL_L[0] + ARROW_L, PANEL_T + 34, ARROW_W, 122];
+}
+const SPOT_L = SPOT.map((v) => spotRect(v)[0]);
+const SPOT_T = SPOT.map((v) => spotRect(v)[1]);
+const SPOT_W = SPOT.map((v) => spotRect(v)[2]);
+const SPOT_H = SPOT.map((v) => spotRect(v)[3]);
+const SPOT_ON = SPOT.map((v) => (v > 0 ? 1 : 0));
+
 const X = BEATS.map((b) => b.x ?? FIG_X);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
@@ -68,7 +88,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics16'));
 export default function Metaphysics16Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(9);
   const cur = BEATS[i];
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -93,6 +113,11 @@ export default function Metaphysics16Scene({ clock, bt, bi, i, picked, onPick, p
       // arriving at it.
       second: carry(cv, 2, n, SECOND[p], reacting ? pickPos.value : SECOND[n], grow),
       pick: carry(cv, 3, n, PICKV[p], PICKV[n], grow),
+      spotL: carry(cv, 4, n, SPOT_L[p], SPOT_L[n], grow),
+      spotT: carry(cv, 5, n, SPOT_T[p], SPOT_T[n], grow),
+      spotW: carry(cv, 6, n, SPOT_W[p], SPOT_W[n], grow),
+      spotH: carry(cv, 7, n, SPOT_H[p], SPOT_H[n], grow),
+      spotOn: carry(cv, 8, n, SPOT_ON[p], SPOT_ON[n], grow),
     };
   });
 
@@ -106,6 +131,7 @@ export default function Metaphysics16Scene({ clock, bt, bi, i, picked, onPick, p
       {PANELS.map((p, k) => (
         <Panel key={p.id} k={k} SCENE={SCENE} live={live} answered={answered} picked={picked} onPick={onPick} />
       ))}
+      <SpotFrame SCENE={SCENE} />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -172,13 +198,24 @@ function Panel({
   );
 }
 
+// THE SPOTLIGHT — a dashed frame that travels to whichever arrows or tags the
+// sentence is naming, rather than a fresh box arriving each time (H group Q).
+function SpotFrame({ SCENE }: { SCENE: { value: { spotL: number; spotT: number; spotW: number; spotH: number; spotOn: number } } }) {
+  const st = useAnimatedStyle(() => ({
+    opacity: SCENE.value.spotOn,
+    left: SCENE.value.spotL, top: SCENE.value.spotT,
+    width: SCENE.value.spotW, height: SCENE.value.spotH,
+  }));
+  return <Animated.View pointerEvents="none" style={[styles.spot, st]} />;
+}
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   label: {
@@ -222,7 +259,7 @@ const styles = StyleSheet.create({
     // 56 WIDE, NOT 44: TAKES IT is 43.4dp and the content box was 40, so the label
     // on the control the reader is watching lost its last letters.
     position: 'absolute', left: PANEL_W / 2 - 28, top: 158, width: 56, height: 30,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   doseOn: { backgroundColor: INK, borderColor: PAPER },
@@ -234,6 +271,11 @@ const styles = StyleSheet.create({
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT },
+
+  // A dashed frame is a boundary, never a fill — it never covers the arrows or tags it rings.
+  spot: {
+    position: 'absolute', borderWidth: 1.5, borderStyle: 'dashed', borderColor: SOFT, borderRadius: 5,
+  },
 });
 
 // Ink runs from the label (228) to the panels' bottom (446). Band 222…512 = 290.

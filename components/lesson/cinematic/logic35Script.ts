@@ -27,6 +27,10 @@ export interface Logic35Beat extends BaseBeat {
   /** 1 = the third cause sits under both, with its two arrows up. */ under?: number;
   /** 1 = the false arrow is shown cut. */ cut?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed line levels the tops of the two columns — they move in lockstep. */ level?: number;
+  /** 1 = a second, dashed arrow appears alongside the first — the same data fits more than one causal story. */ alt?: number;
+  /** 1 = a mark stands where the causal arrow used to be — the link that never existed. */ gone?: number;
+  /** 1 = a second pair of names echoes under the third box — the same shape, elsewhere. */ again?: number;
 }
 
 export const BEATS: Logic35Beat[] = [
@@ -41,7 +45,7 @@ export const BEATS: Logic35Beat[] = [
     dur: 2.2,
   },
   {
-    p: 266, x: 62, rise: 1,
+    p: 266, x: 62, rise: 1, level: 1,
     text: 'The correlation is real, and it holds too consistently to be a coincidence.',
     dur: 2,
   },
@@ -51,7 +55,7 @@ export const BEATS: Logic35Beat[] = [
     dur: 2.1,
   },
   {
-    p: 266, x: 62, rise: 1, arrow: 1,
+    p: 266, x: 62, rise: 1, arrow: 1, alt: 1,
     text: 'No one believes this causal claim, but the correlation alone can’t refute it. The same data fit more than one causal explanation.',
     dur: 2.5,
   },
@@ -70,7 +74,7 @@ export const BEATS: Logic35Beat[] = [
     dur: 3.8,
   },
   {
-    p: 467, x: 62, rise: 1, picks: 1, under: 1,
+    p: 467, x: 62, rise: 1, picks: 1, under: 1, gone: 1,
     text: 'The correlation was real, but a causal link between the two never existed.',
     dur: 1.8,
   },
@@ -92,7 +96,7 @@ export const BEATS: Logic35Beat[] = [
     dur: 3.2,
   },
   {
-    p: 167, x: 130, rise: 1, under: 1, cut: 1,
+    p: 167, x: 130, rise: 1, under: 1, cut: 1, again: 1,
     text: 'Coffee was long linked with a higher risk of death, because coffee drinkers were more likely to smoke.',
     dur: 1.8,
   },

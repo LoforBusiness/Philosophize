@@ -9,14 +9,16 @@ import { BEATS } from './aesthetics36Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE SQUARE, DRAWN ONCE, AND A FRAME THAT MOVES OVER IT.
@@ -80,12 +82,26 @@ const SQUARE = BEATS.map((b) => (b.square ? 1 : 0));
 const CROP = BEATS.map((b) => b.crop ?? 0.5);
 const LIVE_D = BEATS.map((b) => (b.live_d ? 1 : 0));
 const PRINTS = BEATS.map((b) => (b.prints ? 1 : 0));
+const REAL = BEATS.map((b) => (b.real ? 1 : 0));
+const OPPOSE = BEATS.map((b) => (b.oppose ? 1 : 0));
+const LIGHT = BEATS.map((b) => (b.light ? 1 : 0));
+const THROUGH_ON = BEATS.map((b) => (b.through ? 1 : 0));
+const FORGET = BEATS.map((b) => (b.forget ? 1 : 0));
+
+// The through-line: one person in the square (x 108), straight to their own
+// mark inside the first print — Walton's "you see the square itself."
+const THROUGH_X0 = 110;
+const THROUGH_Y0 = 341;
+const THROUGH_X1 = 150 + 6 + (108 - 104) * 0.82 + 1.5;
+const THROUGH_Y1 = 410 + 26 + 8;
+const THROUGH_LEN = Math.hypot(THROUGH_X1 - THROUGH_X0, THROUGH_Y1 - THROUGH_Y0);
+const THROUGH_DEG = (Math.atan2(THROUGH_Y1 - THROUGH_Y0, THROUGH_X1 - THROUGH_X0) * 180) / Math.PI;
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics36'));
 
 export default function Aesthetics36Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(9);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -108,16 +124,40 @@ export default function Aesthetics36Scene({ clock, bt, bi, dragPos, gazeX, gazeY
       // The reader's thumb on the drag beat, the script's track everywhere else.
       crop: LIVE_D[n] === 1 ? clamp01(dragPos.value) : carry(cv, 2, n, CROP[p], CROP[n], tr),
       printsOn: carry(cv, 3, n, PRINTS[p], PRINTS[n], tr),
+      // Plain carries: each value is 0/1, so its own interpolation is the fade,
+      // both in and out (C20c).
+      real: carry(cv, 4, n, REAL[p], REAL[n], tr),
+      oppose: carry(cv, 5, n, OPPOSE[p], OPPOSE[n], tr),
+      light: carry(cv, 6, n, LIGHT[p], LIGHT[n], tr),
+      through: carry(cv, 7, n, THROUGH_ON[p], THROUGH_ON[n], tr),
+      forget: carry(cv, 8, n, FORGET[p], FORGET[n], tr),
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const squareStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.squareOn }));
   const findStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.squareOn,
+    // Dims once the reader is told viewers forget it was ever there — the
+    // finder itself is the thing the sentence names (H58).
+    opacity: SCENE.value.squareOn * (1 - 0.55 * SCENE.value.forget),
     transform: [{ translateX: FIND_LO + (FIND_HI - FIND_LO) * SCENE.value.crop }],
   }));
   const printsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.printsOn }));
+  // A tick confirms the square is unaltered.
+  const realStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.real,
+    transform: [{ scale: 0.6 + 0.4 * SCENE.value.real }],
+  }));
+  // Two arrows above the prints, pointing away from each other.
+  const opposeStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.oppose,
+    transform: [{ scale: 0.7 + 0.3 * SCENE.value.oppose }],
+  }));
+  const lightStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.light }));
+  const throughStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.through,
+    transform: [{ rotate: `${THROUGH_DEG}deg` }, { scaleX: SCENE.value.through }],
+  }));
 
   return (
     <View style={styles.scene}>
@@ -133,12 +173,32 @@ export default function Aesthetics36Scene({ clock, bt, bi, dragPos, gazeX, gazeY
         ))}
       </Animated.View>
 
+      {/* the tick: everything in the square, confirmed unaltered */}
+      <Animated.View style={[styles.realBadge, realStyle]} pointerEvents="none">
+        <View style={styles.realTickShort} />
+        <View style={styles.realTickLong} />
+      </Animated.View>
+
+      {/* the rays: where the photograph's light comes from */}
+      <Animated.View style={[styles.lightWrap, lightStyle]} pointerEvents="none">
+        {[0, 1, 2].map((k) => (
+          <View key={k} style={[styles.ray, { left: k * 7 }]} />
+        ))}
+      </Animated.View>
+
+      {/* the through-line: one person, straight through to their own print */}
+      <Animated.View style={[styles.through, throughStyle]} pointerEvents="none" />
+
       <Animated.View style={[styles.finder, findStyle]} pointerEvents="none">
         <View style={[styles.corner, styles.cTL]} />
         <View style={[styles.corner, styles.cTR]} />
         <View style={[styles.corner, styles.cBL]} />
         <View style={[styles.corner, styles.cBR]} />
       </Animated.View>
+
+      {/* the arrows: opposite accounts, pointing away from each other */}
+      <Animated.View style={[styles.opposeL, opposeStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.opposeR, opposeStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, printsStyle]} pointerEvents="none">
         {PRINT_X.map((qx, k) => (
@@ -170,7 +230,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 104, top: CAP_T, width: 288,
@@ -192,13 +252,53 @@ const styles = StyleSheet.create({
 
   print: {
     position: 'absolute', top: PRINT_Y, width: PRINT_W, height: PRINT_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   printPave: { position: 'absolute', top: PRINT_Y + 44, width: PRINT_W - 10, height: 1.5, backgroundColor: SOFT },
   markSmall: { width: 3, height: 16, borderRadius: 1.5, backgroundColor: INK },
   printCap: {
     position: 'absolute', top: PRINT_Y + PRINT_H + 4, width: PRINT_W + 12, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
+  },
+
+  // The tick: the square, confirmed unaltered.
+  realBadge: {
+    position: 'absolute', left: 372, top: 238, width: 16, height: 16, borderRadius: 8,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  realTickShort: {
+    position: 'absolute', left: 3.5, top: 7, width: 4.5, height: 2, borderRadius: 1,
+    backgroundColor: INK, transformOrigin: '0% 50%', transform: [{ rotate: '45deg' }],
+  },
+  realTickLong: {
+    position: 'absolute', left: 6.5, top: 9.5, width: 8, height: 2, borderRadius: 1,
+    backgroundColor: INK, transformOrigin: '0% 50%', transform: [{ rotate: '-50deg' }],
+  },
+
+  // Three short rays, top-left of the crowd — the light the photograph is made of.
+  lightWrap: { position: 'absolute', left: 88, top: 300, width: 30, height: 16 },
+  ray: {
+    position: 'absolute', top: 0, width: 12, height: 2, borderRadius: 1,
+    backgroundColor: SOFT, transform: [{ rotate: '40deg' }],
+  },
+
+  // The through-line: one person, tied straight to their own mark in the print.
+  through: {
+    position: 'absolute', left: THROUGH_X0, top: THROUGH_Y0, width: THROUGH_LEN, height: 0,
+    borderTopWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', transformOrigin: '0% 0%',
+  },
+
+  // Two arrows above the prints, pointing away from each other — opposite accounts.
+  opposeL: {
+    position: 'absolute', left: 188, top: 396, width: 0, height: 0,
+    borderTopWidth: 6, borderBottomWidth: 6, borderRightWidth: 10,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+  },
+  opposeR: {
+    position: 'absolute', left: 322, top: 396, width: 0, height: 0,
+    borderTopWidth: 6, borderBottomWidth: 6, borderLeftWidth: 10,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
   },
 });
 

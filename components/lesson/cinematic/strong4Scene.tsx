@@ -11,6 +11,7 @@ import { BEATS } from './strong4Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerSpent } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -18,8 +19,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // An instrument panel the presenter reads from.
 //
@@ -64,6 +66,14 @@ const CHIP_STEP = 43;              // 324 · 367 · 410 · 453 → ends at 493
 // valid") handed the answer straight to the reader; a bare verdict makes them read
 // the two ruler cards they were just shown, which is the point of the lesson. It
 // also buys the type room to sit at 16px instead of 10.
+// The link token's journey (group AH): from the lock's centre down to the
+// deductive card's VALID/INVALID line — read off the lock and card geometry
+// above rather than typed as fresh literals.
+const LINK_X0 = 382;
+const LINK_Y0 = 243;
+const LINK_X1 = COL_L + 10;
+const LINK_Y1 = COL_TOP + 23 + 17.5 + 8.75;
+
 const CHIPS = [
   { id: 'a', title: 'STRONG', correct: true },
   { id: 'b', title: 'SOUND', correct: false },
@@ -76,6 +86,7 @@ const FILL = BEATS.map((b) => b.fill ?? 0.5);
 const LOCK = BEATS.map((b) => b.lock ?? 0);
 const DICE = BEATS.map((b) => b.dice ?? 0);
 const VERD = BEATS.map((b) => b.verdict ?? 0);
+const DIVIDEV = BEATS.map((b) => ((b.divide ?? 0) > 0 ? 1 : 0));
 const LENS = BEATS.map((b) => b.lens ?? 0);
 const TR = 0.85;
 
@@ -93,10 +104,13 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('strong4'));
 
+const TICKV = BEATS.map((b) => ((b.tick ?? 0) > 0 ? 1 : 0));
+const STRIKEV = BEATS.map((b) => ((b.strike ?? 0) > 0 ? 1 : 0));
+
 export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(8);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
   const showPick = !!cur.interact;
@@ -104,6 +118,20 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, pickPos
   const answered = picked !== null;
   // The stage's own instruction, spent the moment the answer lands (S11).
   const spent = useAnswerSpent(picked);
+
+  // ── the four still-tap events (group AH) ─────────────────────────────────
+  // Each is a plain reveal that grows in on the beat that first sets it, then
+  // holds — same shape as `factOn`/`conclOn` above, no `carry()` needed because
+  // none of them interpolate between two non-zero values.
+  const divideOn = (cur.divide ?? 0) > 0;
+  const divideFade = (cur.divide ?? 0) !== (prev?.divide ?? 0);
+  const tickOn = (cur.tick ?? 0) > 0;
+  const tickFade = (cur.tick ?? 0) !== (prev?.tick ?? 0);
+  const strikeOn = (cur.strike ?? 0) > 0;
+  const strikeFade = (cur.strike ?? 0) !== (prev?.strike ?? 0);
+  // The link token runs once, on the beat that asks for it (C20c) — it never
+  // holds, so it is not carried, exactly like `flow` in logic7.
+  const linkNow = (cur.link ?? 0) > 0 && (cur.link ?? 0) !== (prev?.link ?? 0) ? 1 : 0;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -135,6 +163,21 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, pickPos
       // dice jitter only while they are out
       wob: Math.sin(t * 6.0) * 5 * dice,
       wob2: Math.sin(t * 5.1 + 1.3) * 5 * dice,
+      // "each has its own standard" — a dashed rule draws between the two cards.
+      // Carried rather than switched: the plain ternary yields 0 on the beat the
+      // rule goes out, which is a CUT (AH4).
+      divide: carry(cv, 7, n, DIVIDEV[p], DIVIDEV[n], divideFade ? grow : 1),
+      // "…so it's judged strong or weak. A strong one … is cogent" — a check
+      // lands on the inductive card's own COGENT line.
+      // CARRIED, so it fades out as well as in: `on ? (fade ? grow : 1) : 0` switches
+      // the thing off between two frames, which is a cut (group L).
+      tick: carry(cv, 5, n, TICKV[p], TICKV[n], tickFade ? grow : 1),
+      // "Judging such an argument by the standard of validity is a mistake" —
+      // a stroke crosses out the deductive card's VALID/INVALID line.
+      strike: carry(cv, 6, n, STRIKEV[p], STRIKEV[n], strikeFade ? grow : 1),
+      // "That certainty comes from the argument's form" — a token runs once
+      // from the lock down to the deductive card's VALID/INVALID line.
+      link: linkNow ? ease01(bt.value / 1.1) : 0,
     };
   });
 
@@ -154,6 +197,22 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, pickPos
     opacity: SCENE.value.ballot,
     transform: [{ translateY: (1 - SCENE.value.ballot) * 10 }],
   }));
+  const divideStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: Math.max(0.001, SCENE.value.divide) }] }));
+  const tickStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tick }));
+  const strikeStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: Math.max(0.001, SCENE.value.strike) }] }));
+  // The token fades in over its first fifth and out over its last, so it
+  // arrives rather than stopping dead, and is invisible at rest (as logic7).
+  const linkStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.link;
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2);
+    return {
+      opacity: on,
+      transform: [
+        { translateX: LINK_X0 + (LINK_X1 - LINK_X0) * u },
+        { translateY: LINK_Y0 + (LINK_Y1 - LINK_Y0) * u },
+      ],
+    };
+  });
 
   return (
     <Animated.View style={styles.scene}>
@@ -198,10 +257,17 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, pickPos
         <View style={[styles.pip, { bottom: 5, right: 5 }]} />
       </Animated.View>
 
+      {/* The link token: "certainty comes from the argument's form" — it runs
+          once from the lock down to the deductive card's VALID/INVALID line. */}
+      <Animated.View style={[styles.linkDot, linkStyle]} pointerEvents="none" />
+
       <Stickman D={DF} k={K} />
 
       {/* ── the two ruler cards ─────────────────────────────────────────────── */}
       <Animated.View style={[styles.cards, cardsStyle]} pointerEvents="none">
+        {/* "each has its own standard of assessment" — a dashed rule draws
+            between the two cards, marking the two as separate yardsticks. */}
+        <Animated.View style={[styles.divide, divideStyle]} />
         <View style={[styles.card, { top: COL_TOP }]}>
           {/* the active ruler's title strip inks SOLID, with the word reversed out —
               a RULE-grey wash was too quiet to say "this is the one in play" */}
@@ -213,6 +279,9 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, pickPos
           <Text style={styles.cardLine}>aims to  GUARANTEE</Text>
           <Text style={styles.cardLine}>graded  VALID / INVALID</Text>
           <Text style={styles.cardLine}>+ true premises → SOUND</Text>
+          {/* "Judging such an argument by the standard of validity is a
+              mistake" — a stroke crosses out the wrong standard's own line. */}
+          <Animated.View style={[styles.strike, strikeStyle]} />
         </View>
         <View style={[styles.card, { top: COL_TOP + CARD_H + 4 }]}>
           <View style={styles.cardHead}>
@@ -223,6 +292,11 @@ export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, pickPos
           <Text style={styles.cardLine}>aims to make  LIKELY</Text>
           <Text style={styles.cardLine}>graded  STRONG / WEAK</Text>
           <Text style={styles.cardLine}>+ true premises → COGENT</Text>
+          {/* "A strong one with true premises is cogent" — a check lands on
+              the fact just stated, right where it is already written. */}
+          <Animated.View style={[styles.cogentTick, tickStyle]}>
+            <Text style={styles.cogentTickT}>✓</Text>
+          </Animated.View>
         </View>
       </Animated.View>
 
@@ -259,14 +333,14 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   // ── gauge ─────────────────────────────────────────────────────────────────
   gaugeLab: { position: 'absolute', left: G_L, top: 210, width: G_W },
   gaugeLabT: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT, includeFontPadding: false },
   track: {
     position: 'absolute', left: G_L, top: G_Y, width: G_W, height: G_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   tick: { position: 'absolute', top: 0, bottom: 0, width: 1.5, backgroundColor: RULE },
   fill: {
@@ -286,7 +360,7 @@ const styles = StyleSheet.create({
 
   banner: {
     position: 'absolute', left: 36, top: 274, width: 140, height: 28,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   bannerT: {
@@ -296,7 +370,7 @@ const styles = StyleSheet.create({
 
   die: {
     position: 'absolute', top: 272, width: 32, height: 32, borderWidth: 2.5, borderColor: INK,
-    borderRadius: 5, backgroundColor: PAPER, transformOrigin: '50% 50%',
+    borderRadius: 8, backgroundColor: PAPER, transformOrigin: '50% 50%',
   },
   pip: { position: 'absolute', width: 5, height: 5, borderRadius: 2.5, backgroundColor: INK },
 
@@ -304,7 +378,7 @@ const styles = StyleSheet.create({
   cards: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   card: {
     position: 'absolute', left: COL_L, width: COL_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   cardHead: { height: 23, justifyContent: 'center', paddingHorizontal: 10, borderBottomWidth: 1.5, borderBottomColor: RULE },
   cardHeadOn: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: INK },
@@ -318,6 +392,37 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium', fontSize: 11.5, lineHeight: 17.5, color: INK, paddingHorizontal: 10, includeFontPadding: false,
   },
 
+  // ── the four still-tap events (group AH) ─────────────────────────────────
+  //
+  // A dashed rule between the two cards — a boundary, never a fill (D31) —
+  // marking that each argument family gets its own separate standard.
+  divide: {
+    position: 'absolute', left: COL_L, top: COL_TOP + CARD_H + 1, width: COL_W, height: 0,
+    borderTopWidth: 1.5, borderTopColor: SHADE, borderStyle: 'dashed', transformOrigin: '0% 50%',
+  },
+  // A stroke crossing out the deductive card's own VALID/INVALID line — the
+  // wrong standard for grading an inductive argument. Positioned relative to
+  // the card it is nested in: past the 23-tall head and the "aims to
+  // GUARANTEE" line, centred on the 17.5-tall "graded VALID/INVALID" line.
+  strike: {
+    position: 'absolute', left: 10, top: 23 + 17.5 + 17.5 / 2 - 1, width: 200, height: 2,
+    backgroundColor: INK, transformOrigin: '0% 50%',
+  },
+  // A check mark landing on the inductive card's own COGENT line — "a strong
+  // one with true premises is cogent" pointing at the fact already written.
+  cogentTick: {
+    position: 'absolute', left: COL_W - 28, top: 23 + 17.5 * 2, width: 20, height: 17.5,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  cogentTickT: { fontFamily: 'Inter_700Bold', fontSize: 15, color: INK, includeFontPadding: false },
+  // The token that runs once from the lock to the deductive card's own
+  // VALID/INVALID line — "certainty comes from the argument's form". INK, the
+  // size of a full stop, so it reads as the claim travelling, not an object.
+  linkDot: {
+    position: 'absolute', left: 0, top: 0, width: 7, height: 7, borderRadius: 3.5,
+    backgroundColor: INK,
+  },
+
   // ── ballot ────────────────────────────────────────────────────────────────
   ballot: { position: 'absolute', left: COL_L, top: 306, width: COL_W, height: 200 },
   ballotHdr: {
@@ -327,7 +432,7 @@ const styles = StyleSheet.create({
   // Tap target: 234 × 40 stage units carrying one 16px word — a verdict plate.
   chipSlot: { position: 'absolute', left: 0, width: COL_W, height: CHIP_H },
   chip: {
-    width: COL_W, height: CHIP_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
+    width: COL_W, height: CHIP_H, borderWidth: 2, borderColor: INK, borderRadius: 8,
     backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12,
   },
   chipRight: { backgroundColor: INK, borderColor: INK },

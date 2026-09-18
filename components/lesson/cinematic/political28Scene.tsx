@@ -9,6 +9,7 @@ import { BEATS } from './political28Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE CELL, TWO BOARDS OVER IT, AND AN EYE THAT ARRIVES LAST.
@@ -86,6 +88,14 @@ const FUTURE = BEATS.map((b) => b.future ?? 0);
 const WATCH = BEATS.map((b) => b.watch ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// group AH — one-shot marks for the two still taps: a ring on the cell, and a
+// row of lives beside the one man framed.
+const MARK = BEATS.map((b) => ((b.mark ?? 0) > 0 ? 1 : 0));
+const CROWD = BEATS.map((b) => ((b.crowd ?? 0) > 0 ? 1 : 0));
+// group AH — five "many lives" dots, and the one hollow dot set apart from them,
+// in the open band between the stems (264…300, clear of both at x 182 and 304).
+const CROWD_X = [230, 242, 254, 266, 278];
+const ONE_X = 206;
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -103,7 +113,13 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political28'));
 export default function Political28Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(6);
+  const cv = useCarry(8);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // A mark fades IN on the beat that asks for it and back OUT on the next, rather
+  // than cutting (see "AND FADE AN EVENT OUT, NOT OFF").
+  const markFade = (cur.mark ?? 0) !== (prev?.mark ?? 0);
+  const crowdFade = (cur.crowd ?? 0) !== (prev?.crowd ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -111,6 +127,7 @@ export default function Political28Scene({ clock, bt, bi, i, picked, onPick, pic
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
     const u = pickPos.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -126,6 +143,9 @@ export default function Political28Scene({ clock, bt, bi, i, picked, onPick, pic
       future: carry(cv, 3, n, FUTURE[p], reacting ? pickAt(FUTURE_AT, u) : FUTURE[n], tr),
       watch: carry(cv, 4, n, WATCH[p], reacting ? pickAt(WATCH_AT, u) : WATCH[n], tr),
       plates: carry(cv, 5, n, PLATES[p], PLATES[n], tr),
+      // group AH — one-shot, fades in on its own beat and back out on the next.
+      mark: carry(cv, 6, n, MARK[p], MARK[n], markFade ? grow : 1),
+      crowd: carry(cv, 7, n, CROWD[p], CROWD[n], crowdFade ? grow : 1),
     };
   });
 
@@ -134,6 +154,11 @@ export default function Political28Scene({ clock, bt, bi, i, picked, onPick, pic
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.cards && LIVE[i] === 1;
 
   const cellStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.cell }));
+  // A ring on the cell: "punishment does on purpose what the law forbids everyone
+  // else" — the exact act, marked.
+  const markStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.mark }));
+  // A row of lives beside the one man framed: the scapegoat case.
+  const crowdStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.crowd }));
   const pastStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.past) }));
   const futureStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.future) }));
   const watchStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.watch) }));
@@ -157,6 +182,15 @@ export default function Political28Scene({ clock, bt, bi, i, picked, onPick, pic
 
       <Animated.View style={[styles.lamp, { left: BOARD_X[0] }, pastStyle]} pointerEvents="none" />
       <Animated.View style={[styles.lamp, { left: BOARD_X[1] }, futureStyle]} pointerEvents="none" />
+
+      {/* group AH — a ring on the cell: the exact act that would be a crime. */}
+      <Animated.View style={[styles.markRing, markStyle]} pointerEvents="none" />
+
+      {/* group AH — the one man framed, set apart from the many lives at stake. */}
+      <Animated.View style={crowdStyle} pointerEvents="none">
+        <View style={[styles.oneDot, { left: ONE_X }]} />
+        {CROWD_X.map((dx) => <View key={dx} style={[styles.manyDot, { left: dx }]} />)}
+      </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, cellStyle]} pointerEvents="none">
         {BOARD_X.map((bx, k) => (
@@ -202,7 +236,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cell: {
     position: 'absolute', left: CELL_X, top: CELL_Y, width: CELL_W, height: CELL_H,
@@ -236,12 +270,25 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },
+
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // A ring 4 units proud of the cell — the exact act named as forbidden.
+  markRing: {
+    position: 'absolute', left: CELL_X - 4, top: CELL_Y - 4, width: CELL_W + 8, height: CELL_H + 8,
+    borderWidth: 2.5, borderColor: INK,
+  },
+  // The one man framed: hollow, set apart from the many filled lives beside him.
+  oneDot: {
+    position: 'absolute', top: 278, width: 8, height: 8, borderRadius: 4,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PAPER,
+  },
+  manyDot: { position: 'absolute', top: 278, width: 8, height: 8, borderRadius: 4, backgroundColor: INK },
 });
 
 export function Political28Lesson({ lesson }: { lesson: Lesson }) {

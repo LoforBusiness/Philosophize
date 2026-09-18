@@ -20,6 +20,15 @@ export interface KnowHowBeat extends BaseBeat {
   /** How many instruction cards are up: 0…3. */ steps?: number;
   /** 1 = the column has dimmed and the outcome box is filled. */ done?: number;
   /** 1 = the three answer cards are live (Q2). */ pick?: number;
+  /** 1 = the three instruction slots outline in, empty — the shape of "all that
+   *  reading" before any one instruction has been written into it. */
+  slots?: boolean;
+  /** 1 = an arrow drops from the one instruction so far down toward the box: it
+   *  serves an end beyond itself. */
+  lead?: boolean;
+  /** 1 = a bar gathers all three instructions and drops toward the box, which
+   *  still sits empty underneath them. */
+  gather?: boolean;
 }
 
 export const BEATS: KnowHowBeat[] = [
@@ -29,7 +38,7 @@ export const BEATS: KnowHowBeat[] = [
     dur: 3,
   },
   {
-    p: 164, x: 70,
+    p: 164, x: 70, slots: true,
     text: 'Does all that reading, on its own, make you able to swim?',
     dur: 1.8,
   },
@@ -40,7 +49,7 @@ export const BEATS: KnowHowBeat[] = [
     dur: 2.9,
   },
   {
-    p: 270, x: 168, steps: 1,
+    p: 270, x: 168, steps: 1, lead: true,
     text: 'Every instruction serves an end beyond itself. Here the end is the doing, the act of swimming.',
     dur: 1.8,
   },
@@ -51,7 +60,7 @@ export const BEATS: KnowHowBeat[] = [
     dur: 2.7,
   },
   {
-    p: 399, x: 168, steps: 3,
+    p: 399, x: 168, steps: 3, gather: true,
     text: 'Even so, the box underneath stays empty. The ability to swim, which Ryle calls knowing how, hasn’t arrived.',
     dur: 1.9,
   },

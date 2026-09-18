@@ -86,6 +86,9 @@ const KNOT = BEATS.map((b) => (b.knot ? 1 : 0));
 const SNAP = BEATS.map((b) => (b.snap ? 1 : 0));
 const BRANCH = BEATS.map((b) => (b.branch ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const MARK1925 = BEATS.map((b) => (b.mark1925 ? 1 : 0));
+const STRAIN = BEATS.map((b) => (b.strain ? 1 : 0));
+const FAILMARK = BEATS.map((b) => (b.failMark ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -96,10 +99,19 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics35'));
 export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(8);
+  // Group AH — each still tap gets exactly one new mark; a fade re-plays only
+  // on the beat that actually changes that channel's value (C20c).
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const markFade = (cur.mark1925 ?? 0) !== (prev?.mark1925 ?? 0);
+  const strainFade = (cur.strain ?? 0) !== (prev?.strain ?? 0);
+  const failFade = (cur.failMark ?? 0) !== (prev?.failMark ?? 0);
+
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
+    const grow = ease01(bt.value / 0.55);
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr). A fixed length
     // here sprinted every long journey and left the footfalls — which the player
     // computes from moveTr — arriving after the figure had stopped.
@@ -135,6 +147,11 @@ export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPic
       // one thing this beat is for.
       snap: SNAP[n] === 1 ? (n > 0 && SNAP[p] === 1 ? 1 : ease01((bt.value - 0.35) / 0.8)) : 0,
       branchOn: carry(cv, 4, n, BRANCH[p], BRANCH[n], tr),
+      // Three new marks, one per still tap — never a re-fade of one already
+      // settled (C20c).
+      mark1925: carry(cv, 5, n, MARK1925[p], MARK1925[n], markFade ? grow : 1),
+      strain: carry(cv, 6, n, STRAIN[p], STRAIN[n], strainFade ? grow : 1),
+      failMark: carry(cv, 7, n, FAILMARK[p], FAILMARK[n], failFade ? grow : 1),
       // On the graded beat the surviving link closes as the answer lands.
       seal: LIVE[n] === 1 ? ease01(q) : 0,
     };
@@ -150,6 +167,9 @@ export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPic
   const lineStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.lineOn }));
   const arcStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.arcOn }));
   const branchStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.branchOn }));
+  const mark1925Style = useAnimatedStyle(() => ({ opacity: SCENE.value.mark1925 }));
+  const strainStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.strain }));
+  const failMarkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.failMark }));
 
   return (
     <View style={styles.scene}>
@@ -163,6 +183,26 @@ export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPic
             <Text style={[styles.year, { left: mx - 22 }]}>{YEARS[k]}</Text>
           </View>
         ))}
+      </Animated.View>
+
+      {/* A dashed ring settles round 1925 — that point on the line holds
+          steady (group AH). */}
+      <Animated.View style={[styles.markRing, mark1925Style]} pointerEvents="none" />
+
+      {/* Two arrows press inward between the knot's two links — the paradox,
+          as a squeeze (group AH). */}
+      <Animated.View style={[styles.strainGroup, strainStyle]} pointerEvents="none">
+        <View style={styles.strainLineL} />
+        <View style={styles.strainHeadL} />
+        <View style={styles.strainLineR} />
+        <View style={styles.strainHeadR} />
+      </Animated.View>
+
+      {/* A cross lands on the branch run — the attempt that failed, in the
+          one consistent history (group AH). */}
+      <Animated.View style={[styles.failMark, failMarkStyle]} pointerEvents="none">
+        <View style={styles.failBarA} />
+        <View style={styles.failBarB} />
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, arcStyle]} pointerEvents="none">
@@ -288,6 +328,30 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 206, top: 350, width: 160,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
+
+  // GROUP AH — the three still-tap marks.
+  markRing: {
+    position: 'absolute', left: 94, top: 291, width: 52, height: 37,
+    borderRadius: 8, borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
+
+  strainGroup: { position: 'absolute', left: 150, top: 266, width: 100, height: 20 },
+  strainLineL: { position: 'absolute', left: 8, top: 9, width: 28, height: 2, backgroundColor: INK },
+  strainHeadL: {
+    position: 'absolute', left: 36, top: 4, width: 0, height: 0,
+    borderTopWidth: 6, borderBottomWidth: 6, borderLeftWidth: 9,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
+  },
+  strainLineR: { position: 'absolute', left: 64, top: 9, width: 28, height: 2, backgroundColor: INK },
+  strainHeadR: {
+    position: 'absolute', left: 55, top: 4, width: 0, height: 0,
+    borderTopWidth: 6, borderBottomWidth: 6, borderRightWidth: 9,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+  },
+
+  failMark: { position: 'absolute', left: 253, top: 331, width: 14, height: 14 },
+  failBarA: { position: 'absolute', left: -1, top: 6, width: 16, height: 2, backgroundColor: INK, transform: [{ rotate: '45deg' }] },
+  failBarB: { position: 'absolute', left: -1, top: 6, width: 16, height: 2, backgroundColor: INK, transform: [{ rotate: '-45deg' }] },
 });
 
 export function Metaphysics35Lesson({ lesson }: { lesson: Lesson }) {

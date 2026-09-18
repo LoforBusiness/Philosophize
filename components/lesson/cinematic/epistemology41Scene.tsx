@@ -3,12 +3,13 @@ import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'r
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { dirsFrom, ease01, lerp, moveTr, travelStance, WALK, type Bundle } from './rig';
+import { clamp01, dirsFrom, ease01, lerp, moveTr, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology41Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A SHAFT CROSSING A WATERLINE, AND THE ANGLE IT PICKS UP ON THE WAY DOWN.
@@ -84,6 +86,9 @@ const WATER = BEATS.map((b) => (b.water ? 1 : 0));
 const OAR = BEATS.map((b) => (b.oar ? 1 : 0));
 const LIFTED = BEATS.map((b) => (b.lifted ? 1 : 0));
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
+const STEPS = BEATS.map((b) => b.steps ?? 0);
+const INFER = BEATS.map((b) => b.infer ?? 0);
+const ONE_WAY = BEATS.map((b) => b.oneWay ?? 0);
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
@@ -104,7 +109,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology41'));
 export default function Epistemology41Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(7);
+  const cv = useCarry(10);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -128,6 +133,10 @@ export default function Epistemology41Scene({ clock, bt, bi, i, picked, onPick, 
       ghost: carry(cv, 4, n, 0, reacting ? pickAt(GHOST_AT, pickPos.value) : 0, tr),
       world: carry(cv, 5, n, 1, reacting ? pickAt(WORLD_AT, pickPos.value) : 1, tr),
       platesOn: carry(cv, 6, n, PLATES[p], PLATES[n], tr),
+      // The three tap events, carried, so each fades out as well as in (group L).
+      steps: carry(cv, 7, n, STEPS[p], STEPS[n], tr),
+      infer: carry(cv, 8, n, INFER[p], INFER[n], tr),
+      oneWay: carry(cv, 9, n, ONE_WAY[p], ONE_WAY[n], tr),
     };
   });
 
@@ -153,6 +162,31 @@ export default function Epistemology41Scene({ clock, bt, bi, i, picked, onPick, 
   const ghostLower = useAnimatedStyle(() => ({
     opacity: SCENE.value.ghost,
     transform: [{ rotate: `${REFRACTED}deg` }],
+  }));
+
+  // ── the three tap events ───────────────────────────────────────────────────
+  //
+  // THE STEPS ARRIVE EMPTY AND NUMBERED, in the argument's own order. They stand
+  // in the footprint the Q1 plates will later fill, which is the point: the beat
+  // says the argument HAS three steps, and the reader is told what is in them
+  // later. An empty socket cannot give the answer away (group O).
+  const stepAt = (u: number, k: number) => {
+    'worklet';
+    return (u <= 0 ? 0 : clamp01((u - k * 0.22) / 0.34));
+  };
+  const step0Style = useAnimatedStyle(() => ({ opacity: stepAt(SCENE.value.steps, 0) }));
+  const step1Style = useAnimatedStyle(() => ({ opacity: stepAt(SCENE.value.steps, 1) }));
+  const step2Style = useAnimatedStyle(() => ({ opacity: stepAt(SCENE.value.steps, 2) }));
+  const stepStyles = [step0Style, step1Style, step2Style];
+  // The inference itself: from the second step to the third, which is the one
+  // Austin later refuses.
+  const inferStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.infer,
+    transform: [{ scaleY: SCENE.value.infer }],
+  }));
+  const oneWayStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.oneWay,
+    transform: [{ translateY: (1 - SCENE.value.oneWay) * 8 }],
   }));
 
   return (
@@ -201,6 +235,23 @@ export default function Epistemology41Scene({ clock, bt, bi, i, picked, onPick, 
         ))}
       </Animated.View>
 
+      {/* The argument has three steps, and here they are, still empty. */}
+      {PLATE_Y.map((py, k) => (
+        <Animated.View key={`st${k}`} style={[styles.stepSocket, { top: py }, stepStyles[k]]} pointerEvents="none">
+          <Text style={styles.stepNum}>{k + 1}</Text>
+        </Animated.View>
+      ))}
+
+      {/* And the step it takes from the second to the third. */}
+      <Animated.View style={[styles.inferArm, inferStyle]} pointerEvents="none">
+        <View style={styles.inferHead} />
+      </Animated.View>
+
+      {/* Austin's reply. */}
+      <Animated.View style={[styles.oneWayPlate, oneWayStyle]} pointerEvents="none">
+        <Text style={styles.oneWayText} numberOfLines={1}>ONE OF THE WAYS IT LOOKS</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -219,11 +270,44 @@ function WaterMark({ S, y, k }: { S: SharedValue<any>; y: number; k: number }) {
 }
 
 const styles = StyleSheet.create({
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  // In the Q1 plates' own footprint, dashed and empty: a socket, not a claim.
+  stepSocket: {
+    position: 'absolute', left: PLATE_X, width: PLATE_W, height: PLATE_H,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 6,
+    alignItems: 'flex-start', justifyContent: 'center', paddingLeft: 8,
+  },
+  stepNum: {
+    fontFamily: 'Inter_700Bold', fontSize: 10, color: INK,
+    includeFontPadding: false,
+  },
+  // Down the sockets' left margin, from the second to the third.
+  inferArm: {
+    position: 'absolute', left: PLATE_X - 12, top: PLATE_Y[1] + PLATE_H / 2, width: 2,
+    height: PLATE_Y[2] - PLATE_Y[1], backgroundColor: INK, transformOrigin: '50% 0%',
+  },
+  inferHead: {
+    position: 'absolute', left: -3.5, top: PLATE_Y[2] - PLATE_Y[1] - 9, width: 10, height: 9,
+    borderLeftWidth: 5, borderRightWidth: 5, borderTopWidth: 9,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: INK,
+    borderStyle: 'solid',
+  },
+  // Under the water, which ends at WATER_Y + WATER_H.
+  oneWayPlate: {
+    position: 'absolute', left: 116, top: WATER_Y + WATER_H + 10, width: 182, height: 24,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  oneWayText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: WATER_X, top: CAP_T, width: 262,
@@ -260,7 +344,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', left: PLATE_X, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

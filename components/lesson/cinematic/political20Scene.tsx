@@ -9,6 +9,7 @@ import { BEATS } from './political20Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO FULL STACKS, THREE CANDIDATES, AND A SHELF WITH ROOM FOR ONE.
@@ -43,6 +45,10 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const SOUND = BEATS.map((b) => b.sound ?? 0);
+const ALWAYS = BEATS.map((b) => b.always ?? 0);
+const BINDS = BEATS.map((b) => b.binds ?? 0);
+const KEPT = BEATS.map((b) => b.kept ?? 0);
 const BASE_TR = 0.85;
 
 const STACK_X = [30, 274];
@@ -89,7 +95,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political20'));
 // the one the lesson says nobody has to give up.
 export default function Political20Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(9);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -111,6 +117,11 @@ export default function Political20Scene({ clock, bt, bi, i, picked, onPick, gaz
       cands: carry(cv, 2, n, CANDS[p], CANDS[n], tr),
       shelf: carry(cv, 3, n, SHELF[p], SHELF[n], tr),
       landed: carry(cv, 4, n, LANDED[p], LANDED[n], tr),
+      // The four tap events, carried, so each fades out as well as in (group L).
+      sound: carry(cv, 5, n, SOUND[p], SOUND[n], tr),
+      always: carry(cv, 6, n, ALWAYS[p], ALWAYS[n], tr),
+      binds: carry(cv, 7, n, BINDS[p], BINDS[n], tr),
+      kept: carry(cv, 8, n, KEPT[p], KEPT[n], tr),
       t,
     };
   });
@@ -128,6 +139,31 @@ export default function Political20Scene({ clock, bt, bi, i, picked, onPick, gaz
   }));
 
   const rows = [0, 1, 2, 3];
+
+  // ── the four tap events ────────────────────────────────────────────────────
+  //
+  // Both neighbours reasoned soundly, and the two badges arrive in turn: the
+  // sentence says it of one and then of the other (AH5).
+  const sound0Style = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.sound / 0.55) }));
+  const sound1Style = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.sound - 0.4) / 0.55) }));
+  const soundStyles = [sound0Style, sound1Style];
+  // The bracket DRAWS OUT from the middle across both stacks, because what it is
+  // claiming is that this holds of the pair.
+  const alwaysStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.always,
+    transform: [{ scaleX: SCENE.value.always }],
+  }));
+  const alwaysCapStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.always - 0.5) / 0.5) }));
+  const bindsStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.binds,
+    transform: [{ translateY: (1 - SCENE.value.binds) * 8 }],
+  }));
+  // DASHED, and only a boundary: a fill would hide the blocks it is drawn around,
+  // and what the beat says is that they stay exactly as they are (AH7).
+  const keptStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.kept,
+    transform: [{ scale: 0.97 + 0.03 * SCENE.value.kept }],
+  }));
 
   return (
     <View style={styles.scene}>
@@ -185,6 +221,29 @@ export default function Political20Scene({ clock, bt, bi, i, picked, onPick, gaz
         ))}
       </Animated.View>
 
+      {/* Neither of them reasoned badly. */}
+      {STACK_X.map((sx, k) => (
+        <Animated.View key={`snd${k}`} style={[styles.soundTag, { left: sx }, soundStyles[k]]} pointerEvents="none">
+          <Text style={styles.soundText} numberOfLines={1}>REASONED WELL</Text>
+        </Animated.View>
+      ))}
+
+      {/* And a free society will always hold both. */}
+      <Animated.View style={[styles.alwaysRule, alwaysStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.alwaysCap, alwaysCapStyle]} pointerEvents="none">
+        ALWAYS, IN A FREE SOCIETY
+      </Animated.Text>
+
+      {/* What a reason has to clear to go on the shelf. */}
+      <Animated.View style={[styles.bindsCap, bindsStyle]} pointerEvents="none">
+        <Text style={styles.bindsText} numberOfLines={1}>JUSTIFIABLE TO BOTH</Text>
+      </Animated.View>
+
+      {/* Neither is asked to give any of it up. */}
+      {STACK_X.map((sx, k) => (
+        <Animated.View key={`kp${k}`} style={[styles.keptBox, { left: sx - 4 }, keptStyle]} pointerEvents="none" />
+      ))}
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -192,12 +251,52 @@ export default function Political20Scene({ clock, bt, bi, i, picked, onPick, gaz
 }
 
 const styles = StyleSheet.create({
+  // ── the four tap events (group AH) ─────────────────────────────────────────
+  // Under each stack's own column, below its last block at STACK_TOP[3] + BLOCK_H.
+  soundTag: {
+    position: 'absolute', top: STACK_TOP[3] + BLOCK_H + 6, width: STACK_W, height: 24,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  soundText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.7, color: INK,
+    includeFontPadding: false,
+  },
+  // Across both stacks, a row below the badges, drawn from its own middle.
+  alwaysRule: {
+    position: 'absolute', left: STACK_X[0], top: STACK_TOP[3] + BLOCK_H + 38,
+    width: STACK_X[1] + STACK_W - STACK_X[0], height: 2,
+    borderTopWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
+    transformOrigin: '50% 50%',
+  },
+  alwaysCap: {
+    position: 'absolute', left: STACK_X[0], top: STACK_TOP[3] + BLOCK_H + 44,
+    width: STACK_X[1] + STACK_W - STACK_X[0], textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT,
+    includeFontPadding: false,
+  },
+  // Under the shelf, in the middle column the candidates and the shelf share.
+  bindsCap: {
+    position: 'absolute', left: MID_X, top: SHELF_Y + SHELF_H + 6, width: MID_W, height: 24,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  bindsText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
+  keptBox: {
+    position: 'absolute', top: STACK_TOP[0] - 6, width: STACK_W + 8,
+    height: STACK_TOP[3] + BLOCK_H - STACK_TOP[0] + 12,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 8,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   stackCap: {
     position: 'absolute', top: 232, width: STACK_W, textAlign: 'center',
@@ -225,8 +324,8 @@ const styles = StyleSheet.create({
 
   candHit: { position: 'absolute', left: MID_X, width: MID_W, height: CAND_H },
   cand: {
-    width: MID_W, height: CAND_H, borderWidth: 2, borderColor: INK, borderRadius: 3,
-    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+    width: MID_W, height: CAND_H, borderWidth: 2, borderColor: INK, borderRadius: 8,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   candRight: { backgroundColor: INK },
   candWrong: { borderColor: SOFT },

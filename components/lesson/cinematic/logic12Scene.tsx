@@ -4,7 +4,7 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  clamp01, ease01, lerp, mixStance, pose, walk as rigWalk, WALK,
+  clamp01, ease01, lerp, mixStance, pose, seg, walk as rigWalk, WALK,
   type Bundle,
 } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
@@ -15,6 +15,7 @@ import { BEATS } from './logic12Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -22,8 +23,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // FOUR DOORS IN ONE WALL, and the answer targets are the doors — the reader answers
 // by choosing a way out rather than a sentence (E33). A door here is a FRAME plus a
@@ -70,6 +72,9 @@ const DOORS = [
 
 const G = BEATS.map((b) => b.g ?? 0);
 const LIT = BEATS.map((b) => b.lit ?? 0);
+const AFFIRMV = BEATS.map((b) => b.affirm ?? 0);
+const CLAIMV = BEATS.map((b) => b.claim ?? 0);
+const BOUNDV = BEATS.map((b) => b.bound ?? 0);
 
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
@@ -91,7 +96,14 @@ export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick, pic
   const heldS = useHeld();
   const cv = useCarry(1);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
   const revealing = (cur.pick ?? 0) > 0;
+  // Three one-shot events (group AH): each runs once, entirely inside the beat
+  // that asks for it, off `bt` alone — nothing to carry, since all three are back
+  // at rest well before a patient reader taps again.
+  const affirmNow = (cur.affirm ?? 0) > 0 && (cur.affirm ?? 0) !== (prev?.affirm ?? 0);
+  const claimNow = (cur.claim ?? 0) > 0 && (cur.claim ?? 0) !== (prev?.claim ?? 0);
+  const boundNow = (cur.bound ?? 0) > 0 && (cur.bound ?? 0) !== (prev?.bound ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -130,6 +142,28 @@ export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick, pic
     }
 
     keepHeld(heldS, s);
+
+    // ── group AH: the three still-tap events ────────────────────────────────
+    // AFFIRM — "both options are genuine": a check mark flashes on each of the
+    // two offered doors together.
+    const affirmU = affirmNow ? ease01(bt.value / 1.6) : 0;
+    const affirmOp = affirmU <= 0 || affirmU >= 1 ? 0 : Math.min(1, Math.min(affirmU, 1 - affirmU) / 0.3);
+
+    // CLAIM — "the unargued claim that no other option exists": a stamped plate
+    // lands on the wall, naming it, then lifts away again.
+    const claimU = claimNow ? ease01(bt.value / 2.0) : 0;
+    const claimDrop = ease01(seg(claimU, 0, 0.3));
+    const claimGone = ease01(seg(claimU, 0.8, 1.0));
+    const claimOp = claimDrop * (1 - claimGone);
+
+    // BOUND — "presents the options on offer as if they were all the options":
+    // a dashed boundary draws itself around just the two offered doors, then
+    // fades, leaving the claim unmarked rather than resolved (the pick is later).
+    const boundU = boundNow ? ease01(bt.value / 1.5) : 0;
+    const boundGrow = ease01(seg(boundU, 0, 0.35));
+    const boundGone = ease01(seg(boundU, 0.78, 1.0));
+    const boundOp = boundGrow * (1 - boundGone);
+
     return {
       fig: lookPose(s, fx, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // R7b — the arm lights the doors nobody offered. At the first setting the two on
@@ -138,10 +172,22 @@ export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick, pic
       lit: carry(cv, 0, n, LIT[p], reacting ? pickPos.value : LIT[n], grow),
       // The leaf now waits for the hand: nothing moves until he has arrived.
       swing: act,
+      affirmOp, claimOp, claimDrop, boundOp, boundGrow,
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
+
+  // AH — the three still-tap events, styled off the values above.
+  const affirmStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.affirmOp }));
+  const claimStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.claimOp,
+    transform: [{ translateY: (1 - SCENE.value.claimDrop) * -8 }],
+  }));
+  const boundStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.boundOp,
+    transform: [{ scaleX: SCENE.value.boundGrow }],
+  }));
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -151,6 +197,23 @@ export default function Logic12Scene({ clock, bt, bi, qv, i, picked, onPick, pic
       <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.kicker} numberOfLines={1}>THE ROOM YOU WERE OFFERED</Text>
       <View style={styles.wall} pointerEvents="none" />
+
+      {/* AH — "both options are genuine": a check flashes on each offered door. */}
+      <Animated.View style={[styles.affirmMark, { left: DOOR_X[0] + DOOR_W / 2 - 7 }, affirmStyle]} pointerEvents="none">
+        <Text style={styles.affirmText}>✓</Text>
+      </Animated.View>
+      <Animated.View style={[styles.affirmMark, { left: DOOR_X[1] + DOOR_W / 2 - 7 }, affirmStyle]} pointerEvents="none">
+        <Text style={styles.affirmText}>✓</Text>
+      </Animated.View>
+
+      {/* AH — "the unargued claim that no other option exists": a stamp names it. */}
+      <Animated.View style={[styles.claimPlate, claimStyle]} pointerEvents="none">
+        <Text style={styles.claimText}>NO OTHERS?</Text>
+      </Animated.View>
+
+      {/* AH — "presents the options on offer as if they were all the options": a
+          dashed boundary draws itself around just the two offered doors. */}
+      <Animated.View style={[styles.boundBox, boundStyle]} pointerEvents="none" />
 
       {DOORS.map((d, k) => (
         <Door
@@ -222,7 +285,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   kicker: {
@@ -231,6 +294,31 @@ const styles = StyleSheet.create({
     textAlign: 'center', includeFontPadding: false,
   },
   wall: { position: 'absolute', left: WALL_L, top: WALL_T, width: WALL_R - WALL_L, height: 8, backgroundColor: STONE, boxShadow: LIP },
+
+  // ── the three tap events (group AH) ────────────────────────────────────
+  // A small check straddling each offered door's top edge, marking it genuine.
+  affirmMark: {
+    position: 'absolute', top: DOOR_T - 7, width: 14, height: 14,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  affirmText: { fontFamily: 'Inter_700Bold', fontSize: 11, color: INK, includeFontPadding: false },
+
+  // A stamped plate that lands on the wall between the two offered doors,
+  // naming the unargued claim — a tile that carries a word (rule 7).
+  claimPlate: {
+    position: 'absolute', left: WALL_L, top: WALL_T - 4, width: WALL_R - WALL_L,
+    alignItems: 'center', paddingVertical: 3, borderWidth: 1.5, borderColor: INK,
+    borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  claimText: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.8, color: INK, includeFontPadding: false },
+
+  // A dashed boundary drawn around only the two offered doors — a boundary is
+  // a dashed edge, never a fill (D31) — growing from its left edge.
+  boundBox: {
+    position: 'absolute', left: DOOR_X[0] - 6, top: DOOR_T - 6, width: DOOR_X[1] + DOOR_W - DOOR_X[0] + 12,
+    height: 500 - (DOOR_T - 6), borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed',
+    borderRadius: 6, transformOrigin: '0% 50%',
+  },
 
   door: { position: 'absolute', top: DOOR_T, width: DOOR_W, height: DOOR_H },
   frame: {

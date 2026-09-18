@@ -1,11 +1,11 @@
 import {
   View, Text, Pressable, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
@@ -13,6 +13,7 @@ import { BEATS } from './epistemology11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // Two clock dials side by side, high above the figure. The LEFT one is the hallway
 // clock: its hands are frozen at 3:00 and never move again. The RIGHT one is the
@@ -98,6 +100,13 @@ const LINK_BOX = 96;                  // its label's box — wider, so the word 
 const LINK_Y = 269;
 const LINK_CAP_T = 246;
 
+// The three JTB-condition chits, in the same gutter, below the tie-line's own
+// band (271) and well clear of the dial rims at 314 either side.
+const COND_W = 12;
+const COND_GAP = 6;
+const COND_Y = 280;
+const COND_L = LINK_CX - (3 * COND_W + 2 * COND_GAP) / 2;
+
 // SIZED FOR A FINGER (E37b-2). Author the PITCH first: 128 units centre-to-centre,
 // with a 116-wide card in it. The band is 312, so on a 360dp phone
 // fit = min(352/400, 296/312) = 0.88 — the card renders 102 × 44 dp on a 113 dp
@@ -136,6 +145,12 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology11'));
 const DIR = dirsFrom(X, 1);
 const REAL = BEATS.map((b) => b.real ?? 180);
 const LINKV = BEATS.map((b) => b.link ?? 0);
+// group AH — one still-tap event each, plain carried tracks
+const KNOW = BEATS.map((b) => b.knowMark ?? 0);
+const FROZEN_RING = BEATS.map((b) => b.frozenRing ?? 0);
+const COND = BEATS.map((b) => b.cond ?? 0);
+const NO_LINK = BEATS.map((b) => b.noLink ?? 0);
+const COND_THRESH = [2, 2, 3];
 
 // R7c — LEFT STILL ON PURPOSE: the only quantity this stage draws is whether the two clocks
 // agree, which speaks to one of the four bins (TRUTH) and to the answer (NONE OF THEM: they
@@ -143,7 +158,7 @@ const LINKV = BEATS.map((b) => b.link ?? 0);
 // change the stage for the answer and for one wrong bin alone.
 export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(7);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -188,6 +203,10 @@ export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick, 
       // goes 1 → 0, and multiplying a falling lerp by a rising `grow` would blink
       // it out on the first frame of the beat and then bulge back (C20c/H58).
       link: carry(cv, 2, n, LINKV[p], LINKV[n], tr),
+      knowMark: carry(cv, 3, n, KNOW[p], KNOW[n], tr),
+      frozenRing: carry(cv, 4, n, FROZEN_RING[p], FROZEN_RING[n], tr),
+      cond: carry(cv, 5, n, COND[p], COND[n], tr),
+      noLink: carry(cv, 6, n, NO_LINK[p], NO_LINK[n], tr),
       // This one only ever goes 0 → 1, so it takes the house grow — and holds at 1
       // on any later beat instead of re-revealing itself on every tap.
       pick: (pickOn ? 1 : 0) * (pickFade ? grow : 1),
@@ -201,6 +220,9 @@ export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick, 
   const secStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.sec}deg` }] }));
   const linkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.link }));
   const pickStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pick }));
+  const knowMarkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.knowMark }));
+  const frozenRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.frozenRing }));
+  const noLinkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.noLink }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -230,6 +252,12 @@ export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick, 
         <Text style={styles.readingText}>3:00</Text>
       </View>
       <View style={[styles.pin, { left: LEFT_CX - 3.5 }]} pointerEvents="none" />
+      {/* "twelve hours before you looked" — a dashed ring marks the stopped dial. */}
+      <Animated.View style={[styles.frozenRing, frozenRingStyle]} pointerEvents="none" />
+      {/* "but do you know the time?" — a "?" badge by the reading it names. */}
+      <Animated.View style={[styles.knowBadge, knowMarkStyle]} pointerEvents="none">
+        <Text style={styles.knowBadgeT}>?</Text>
+      </Animated.View>
 
       {/* ── the real time: the hands are driven by the beat ──────────────────── */}
       <View style={[styles.dial, styles.dialR]} pointerEvents="none" />
@@ -272,6 +300,19 @@ export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick, 
         <View style={styles.linkLine} />
       </Animated.View>
 
+      {/* "second... true... third... justified... all three conditions" — chits
+          light in the gutter as the beat names them (2 together, then the 3rd). */}
+      {COND_THRESH.map((th, k) => (
+        <CondChit key={`cond${k}`} S={SCENE} k={k} thresh={th} />
+      ))}
+
+      {/* "nothing connected your reason to the fact" — the gutter's tie breaks. */}
+      <Animated.View style={[styles.noLinkWrap, noLinkStyle]} pointerEvents="none">
+        <View style={styles.noLinkBar} />
+        <Text style={styles.noLinkX}>✕</Text>
+        <View style={styles.noLinkBar} />
+      </Animated.View>
+
       {/* ── Q2: which moment made the frozen reading true? ───────────────────── */}
       {pickOn &&
         MOMENTS.map((m, k) => {
@@ -308,13 +349,21 @@ export default function Epistemology11Scene({ clock, bt, bi, i, picked, onPick, 
   );
 }
 
+// One of the three JTB-condition chits in the gutter. `thresh` is the `cond`
+// value at which it lights (2 for the two this beat names together, 3 for the
+// one the next beat adds), so the same track drives all three without a switch.
+function CondChit({ S, k, thresh }: { S: SharedValue<any>; k: number; thresh: number }) {
+  const st = useAnimatedStyle(() => ({ opacity: clamp01(S.value.cond - thresh + 1) }));
+  return <Animated.View style={[styles.condChit, { left: COND_L + k * (COND_W + COND_GAP) }, st]} pointerEvents="none" />;
+}
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 24, right: 24, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', top: CAP_T, textAlign: 'center',
@@ -341,6 +390,20 @@ const styles = StyleSheet.create({
   // are never mistaken for each other at a glance.
   secHand: { top: DIAL_CY - SEC_LEN, width: SEC_W, height: SEC_LEN },
   pin: { position: 'absolute', top: DIAL_CY - 3.5, width: 7, height: 7, borderRadius: 3.5, backgroundColor: INK },
+
+  // "twelve hours before you looked" — a dashed ring round the stopped dial only.
+  frozenRing: {
+    position: 'absolute', left: LEFT_CX - DIAL_R - 6, top: DIAL_T - 6,
+    width: DIAL_D + 12, height: DIAL_D + 12, borderRadius: DIAL_R + 6,
+    borderWidth: 2, borderColor: INK, borderStyle: 'dashed',
+  },
+  // "but do you know the time?" — a small badge on the reading it questions.
+  knowBadge: {
+    position: 'absolute', left: 128, top: 282, width: 16, height: 16, borderRadius: 8,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  knowBadgeT: { fontFamily: 'Inter_700Bold', fontSize: 10, color: INK, includeFontPadding: false },
 
   // The frozen reading, printed inside the lower half of the hallway dial. The box
   // is 60 wide at x 86…146, and at 20–32 below the centre the circle is still 60.4
@@ -371,9 +434,22 @@ const styles = StyleSheet.create({
   },
   linkLine: { width: LINK_W, height: 2, backgroundColor: INK, marginTop: LINK_Y - LINK_CAP_T - 12 },
 
+  // "second... true... third... justified" — one filled chit per condition met.
+  condChit: {
+    position: 'absolute', top: COND_Y, width: COND_W, height: COND_W, borderRadius: 2.5,
+    backgroundColor: INK,
+  },
+  // "nothing connected your reason to the fact" — the tie's own place, broken.
+  noLinkWrap: {
+    position: 'absolute', left: LINK_CX - LINK_W / 2, top: LINK_Y - 5, width: LINK_W,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+  },
+  noLinkBar: { width: LINK_W / 2 - 10, height: 2, backgroundColor: INK },
+  noLinkX: { fontFamily: 'Inter_700Bold', fontSize: 10, color: INK, includeFontPadding: false },
+
   pickSlot: { position: 'absolute', top: PICK_T, width: PICK_W },
   pickInner: {
-    height: PICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: PICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },

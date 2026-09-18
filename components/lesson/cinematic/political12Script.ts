@@ -18,6 +18,9 @@ export interface Pol12Beat extends BaseBeat {
   /** The NO ONE BLOCKING lamp, 0..1. */ neg?: number;
   /** The MASTER OF MYSELF lamp, 0..1. */ posi?: number;
   /** 1 = the three answer cards are live (Q2). */ pick?: number;
+  /** 1 = a card reading "FORCED TO BE FREE?" — the paradox Berlin is about to untangle — before the doorway appears in its place. */ phrase?: number;
+  /** 1 = a dashed path marks the ground from where the figure stands toward the doorway, stopping short of the threshold — the definition says nothing about whether that walk is ever finished. */ path?: number;
+  /** 1 = a small padlock hangs beneath the lit self-mastery lamp — the choices the regime has quietly removed while still calling the result freedom. */ lock?: number;
 }
 
 export const BEATS: Pol12Beat[] = [
@@ -27,7 +30,7 @@ export const BEATS: Pol12Beat[] = [
     dur: 2.5,
   },
   {
-    p: 164, x: 70,
+    p: 164, x: 70, phrase: 1,
     text: 'In his 1958 lecture on liberty, Isaiah Berlin explains how the phrase can make sense, and why that’s dangerous.',
     dur: 2.5,
   },
@@ -44,7 +47,7 @@ export const BEATS: Pol12Beat[] = [
     dur: 2.2,
   },
   {
-    p: 266, x: 124, door: 1, open: 1, neg: 1,
+    p: 266, x: 124, door: 1, open: 1, neg: 1, path: 1,
     text: 'The definition says nothing about whether you can walk through the door.',
     dur: 2.6,
   },
@@ -68,12 +71,12 @@ export const BEATS: Pol12Beat[] = [
     dur: 2.4,
   },
   {
-    p: 258, x: 168, door: 1, open: 1, neg: 1, posi: 1,
+    p: 258, x: 168, door: 1, open: 1, neg: 1, posi: 1, lock: 1,
     text: 'The regime then removes your choices and calls the result freedom, because it serves your supposed real self.',
     dur: 2.8,
   },
   {
-    p: 4, x: 124, door: 1, open: 1, neg: 1, posi: 1,
+    p: 4, x: 124, door: 1, open: 1, neg: 1, posi: 1, lock: 1,
     interact: {
       prompt: 'An addict faces no interference but cannot stop. Which liberty does he lack?',
       sort: {
@@ -90,7 +93,7 @@ export const BEATS: Pol12Beat[] = [
     dur: 1.0,
   },
   {
-    p: 6, x: 124, door: 1, open: 1, neg: 1, posi: 1, pick: 1,
+    p: 6, x: 124, door: 1, open: 1, neg: 1, posi: 1, lock: 1, pick: 1,
     interact: {
       prompt: 'If the door is open but you can’t direct your own choices, which lamp gives a false reading?',
       explain: 'Master of myself. No one blocks the doorway, so the claim of negative liberty is true. But self-mastery can’t be supplied by someone else, which is the force of Berlin’s warning.',

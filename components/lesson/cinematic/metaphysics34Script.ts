@@ -18,6 +18,14 @@ export interface Metaphysics34Beat extends BaseBeat {
   /** Which level fills the frame, 0 table … 1 the unknown floor. */ depth?: number;
   /** 1 = the "WHAT HOLDS THIS UP?" arrow is drawn under the frame. */ ask?: number;
   /** 1 = the reader is driving the depth from the rail (Q1). */ live?: number;
+  /** 1 = a dashed link bridges the ruler's mark to the frame — the table's
+   * existence is tracked, not just looked at (group AH). */ link?: number;
+  /** 1 = a light strike cuts across the table's two legs — the answer isn't
+   * them (group AH). */ legsCross?: number;
+  /** 1 = a small arrow drops beside the frame — grounding runs underneath,
+   * not before (group AH). */ under?: number;
+  /** 1 = five tick marks light up the ruler — the levels already passed
+   * through, on the way to asking which depends on which (group AH). */ ticks?: number;
 }
 
 export const BEATS: Metaphysics34Beat[] = [
@@ -27,7 +35,7 @@ export const BEATS: Metaphysics34Beat[] = [
     dur: 1.9,
   },
   {
-    p: 462, x: 58, depth: 0,
+    p: 462, x: 58, depth: 0, link: 1,
     text: 'Even so, metaphysics asks what the table’s existence depends on.',
     dur: 1.8,
   },
@@ -38,7 +46,7 @@ export const BEATS: Metaphysics34Beat[] = [
     dur: 2.5,
   },
   {
-    p: 457, x: 58, depth: 0, ask: 1,
+    p: 457, x: 58, depth: 0, ask: 1, legsCross: 1,
     text: 'The answer isn’t the legs. What makes the object a table is something else.',
     dur: 1.8,
   },
@@ -49,7 +57,7 @@ export const BEATS: Metaphysics34Beat[] = [
     dur: 3.3,
   },
   {
-    p: 399, x: 58, depth: 0.25, ask: 1,
+    p: 399, x: 58, depth: 0.25, ask: 1, under: 1,
     text: 'Grounding isn’t causation: the wood doesn’t come before the table. It lies underneath, at a more basic level.',
     dur: 1.8,
   },
@@ -97,7 +105,7 @@ export const BEATS: Metaphysics34Beat[] = [
     dur: 3.7,
   },
   {
-    p: 167, x: 58, depth: 1,
+    p: 167, x: 58, depth: 1, ticks: 1,
     text: 'Fundamentality is about which things depend on which.',
     dur: 1.8,
   },

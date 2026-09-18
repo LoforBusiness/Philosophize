@@ -28,6 +28,8 @@ export interface Metaphysics25Beat extends BaseBeat {
   /** How many of the roads have left the node, 0…1. */ roads?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a ring marks the walked road's plate as the actual world (group AH). */ actualRing?: number;
+  /** 1 = a small dot lands on each unwalked road — Lewis's counterparts (group AH). */ counterparts?: number;
 }
 
 export const BEATS: Metaphysics25Beat[] = [
@@ -47,7 +49,7 @@ export const BEATS: Metaphysics25Beat[] = [
     dur: 4.6,
   },
   {
-    p: 160, x: 44, trunk: 1, roads: 1,
+    p: 160, x: 44, trunk: 1, roads: 1, actualRing: 1,
     text: 'The road you took represents the actual world. The other roads represent worlds that are merely possible.',
     dur: 3.8,
   },
@@ -84,7 +86,7 @@ export const BEATS: Metaphysics25Beat[] = [
     dur: 4.6,
   },
   {
-    p: 383, x: 100, trunk: 1, roads: 1,
+    p: 383, x: 100, trunk: 1, roads: 1, counterparts: 1,
     text: 'Lewis intended this as a literal claim. On his modal realism, other worlds are as concrete as the actual world and contain counterparts of you.',
     dur: 4.6,
   },

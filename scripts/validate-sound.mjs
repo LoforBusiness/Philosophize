@@ -316,8 +316,13 @@ ok('a planted foot stays put across every staged journey', worstSlide < 1e-9,
 // And the reason it holds: the rig must not re-ease a tr the scene already eased.
 const rigSrc = fs.readFileSync(path.join(ROOT, 'components/lesson/cinematic/rig.ts'), 'utf8');
 const footSrc = fs.readFileSync(path.join(ROOT, 'components/lesson/cinematic/footfalls.ts'), 'utf8');
+// `lead` (added for the movement layer, group AF) shifts the gait's PHASE without
+// moving the body, so it is part of `traveled` by construction and changes nothing
+// about this rule: what may never come back is an ease around `tr`, which would put
+// the feet on a different curve from the body. The foot-lock assertion above is the
+// measurement; this is the one line that guarantees it.
 ok('strideStance walks span·tr, not span·ease01(tr)',
-  /const traveled = span \* tr \+ seed \* 11;/.test(rigSrc),
+  /const traveled = span \* tr \+ seed \* 11 \+ lead;/.test(rigSrc),
   'the one expression that put the feet on a different curve from the body');
 // footfalls.ts hard-codes where the arrival blend starts. If the rig ever moves it,
 // the stride/settle split silently lands in the wrong place.

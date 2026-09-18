@@ -12,6 +12,7 @@ import { BEATS } from './political2Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -19,8 +20,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A ruler and a subject play out power vs authority, under two pieces of ink
 // information design:
@@ -394,7 +396,7 @@ const styles = StyleSheet.create({
   // hittable at the band's ~2.2× on-device scale.
   ledSlot: { position: 'absolute', left: 0, width: LG_W, height: LG_H },
   ledRow: {
-    width: LG_W, height: LG_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
+    width: LG_W, height: LG_H, borderWidth: 2, borderColor: INK, borderRadius: 8,
     backgroundColor: STONE, boxShadow: LIP, justifyContent: 'center', paddingHorizontal: 10,
   },
   ledRight: { backgroundColor: INK, borderColor: INK },

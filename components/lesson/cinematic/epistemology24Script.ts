@@ -30,6 +30,8 @@ export interface Epi24Beat extends BaseBeat {
   /** Moore's plain claim, off to the side, 0…1. */ hand?: number;
   /** The rung that has to give way, marked, 0…1. */ give?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = rings on the highest-rated rung and the lowest-rated conclusion. */ extremesRing?: number;
+  /** 1 = a "?" beside the hand's own bar, questioning what that bar measures. */ handQuestion?: number;
 }
 
 export const BEATS: Epi24Beat[] = [
@@ -45,7 +47,7 @@ export const BEATS: Epi24Beat[] = [
     dur: 3.7,
   },
   {
-    p: 266, x: 200, ladder: 1, sure: 1,
+    p: 266, x: 200, ladder: 1, sure: 1, extremesRing: 1,
     text: 'The bars rate the premise that you can’t rule out a dream highest. They rate the sceptic’s conclusion lowest.',
     dur: 1.8,
   },
@@ -83,7 +85,7 @@ export const BEATS: Epi24Beat[] = [
     dur: 4.8,
   },
   {
-    p: 168, x: 268, ladder: 1, sure: 1, hand: 1, give: 1,
+    p: 168, x: 268, ladder: 1, sure: 1, hand: 1, give: 1, handQuestion: 1,
     text: 'The sceptic can reply that the bar measures confidence, not knowledge. Whether Moore knows he has a hand is the very point in dispute.',
     dur: 4.8,
   },

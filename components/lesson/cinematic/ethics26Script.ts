@@ -28,6 +28,8 @@ export interface Ethics26Beat extends BaseBeat {
   /** 1 = the line is drawn, at the species setting. */ line?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = three faint ticks mark the rail's three candidate lines. */ guess?: number;
+  /** 1 = a small dot marks the fish and the chimp: what the other lines add. */ alt?: number;
 }
 
 export const BEATS: Ethics26Beat[] = [
@@ -42,7 +44,7 @@ export const BEATS: Ethics26Beat[] = [
     dur: 4.8,
   },
   {
-    p: 435, x: 28, rail: 1,
+    p: 435, x: 28, rail: 1, guess: 1,
     text: 'Three main criteria are defended. They’re the capacity to suffer, the capacity to plan a life, and being human.',
     dur: 5.0,
   },
@@ -79,7 +81,7 @@ export const BEATS: Ethics26Beat[] = [
     dur: 4.8,
   },
   {
-    p: 439, x: 88, rail: 1, line: 1,
+    p: 439, x: 88, rail: 1, line: 1, alt: 1,
     text: 'Each criterion puts the line in a different place. Suffering lets in the fish, while planning lets in few beings besides the person.',
     dur: 4.6,
   },

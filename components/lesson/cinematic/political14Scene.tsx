@@ -13,6 +13,7 @@ import { BEATS } from './political14Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // THE WILT CHAMBERLAIN CASE AS THREE STAGES, and the answer targets are the stages —
 // the reader answers by pointing at a MOMENT in a process rather than at a claim
@@ -62,6 +64,21 @@ const COIN_FADE = 14;
 
 const FIG_X = 46;
 
+// ── the two tap events (group AH) ───────────────────────────────────────────
+//
+// CONSENT — a bracket at each end of the trades row, marking the whole exchange
+// as chosen (beat 2): the spectator's payment on the left, the star's choice on
+// the right.
+const CONSENT_L = ROW_L + ART_L - 10;
+const CONSENT_R = ROW_L + ART_L + ART_W - 4;
+const CONSENT_T = ROW_T[1] + 6;
+const CONSENT_H = ROW_H - 12;
+
+// QUERY — the open question settling below the three rows (beat 5), favouring
+// none of them.
+const QUERY_CX = ROW_L + ROW_W / 2;
+const QUERY_T = ROW_T[2] + ROW_H + 8;
+
 const STAGES = [
   { id: 'start', label: 'THE START', correct: false },
   { id: 'trades', label: 'THE TRADES', correct: true },
@@ -70,6 +87,10 @@ const STAGES = [
 
 const G = BEATS.map((b) => b.g ?? 0);
 const ROWS = BEATS.map((b) => b.rows ?? 0);
+// The two tap events (group AH) — each turns on and off within the run, so
+// each is carried rather than switched (C20c).
+const CONSENTV = BEATS.map((b) => ((b.consent ?? 0) > 0 ? 1 : 0));
+const QUERYV = BEATS.map((b) => ((b.query ?? 0) > 0 ? 1 : 0));
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -105,8 +126,13 @@ const RESULT_AT = [1, 0, 0];
 export default function Political14Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(5);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  const consentFade = ((cur.consent ?? 0) > 0) !== ((prev?.consent ?? 0) > 0);
+  const queryFade = ((cur.query ?? 0) > 0) !== ((prev?.query ?? 0) > 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -126,10 +152,16 @@ export default function Political14Scene({ clock, bt, bi, i, picked, onPick, pic
         carry(cv, 1, n, 0, reacting ? pickAt(TRADES_AT, pickPos.value) : 0, tr),
         carry(cv, 2, n, 0, reacting ? pickAt(RESULT_AT, pickPos.value) : 0, tr),
       ],
+      // The two tap events (group AH) — each turns on and off within the run,
+      // so each is carried rather than switched (C20c).
+      consent: carry(cv, 3, n, CONSENTV[p], CONSENTV[n], consentFade ? grow : 1),
+      query: carry(cv, 4, n, QUERYV[p], QUERYV[n], queryFade ? grow : 1),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  const consentStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.consent }));
+  const queryStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.query }));
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -148,6 +180,20 @@ export default function Political14Scene({ clock, bt, bi, i, picked, onPick, pic
           onPick={onPick}
         />
       ))}
+
+      {/* CONSENT — a bracket at each end of the trades row: the payment and the choice to play, both freely made (beat 2). */}
+      <Animated.View style={[styles.consentMark, { left: CONSENT_L, top: CONSENT_T, height: CONSENT_H }, consentStyle]} pointerEvents="none">
+        <Text style={styles.consentText}>[</Text>
+      </Animated.View>
+      <Animated.View style={[styles.consentMark, { left: CONSENT_R, top: CONSENT_T, height: CONSENT_H }, consentStyle]} pointerEvents="none">
+        <Text style={styles.consentText}>]</Text>
+      </Animated.View>
+
+      {/* QUERY — the open question below the three rows, favouring none of them (beat 5). */}
+      <Animated.View style={[styles.queryWrap, { left: QUERY_CX - 20, top: QUERY_T }, queryStyle]} pointerEvents="none">
+        <Text style={styles.queryText}>?</Text>
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
     </Animated.View>
@@ -237,7 +283,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   row: { position: 'absolute', left: ROW_L, width: ROW_W, height: ROW_H },
@@ -258,6 +304,17 @@ const styles = StyleSheet.create({
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT },
+
+  // ── the two tap events (group AH) ────────────────────────────────────────
+  //
+  // CONSENT — a bracket at each end of the belt, marking the whole exchange as
+  // chosen. No fill: it is a mark, not an object.
+  consentMark: { position: 'absolute', width: 10, alignItems: 'center', justifyContent: 'center' },
+  consentText: { fontFamily: 'Inter_700Bold', fontSize: 20, color: INK, includeFontPadding: false },
+
+  // QUERY — the open question, a bare mark rather than a caption.
+  queryWrap: { position: 'absolute', width: 40, alignItems: 'center' },
+  queryText: { fontFamily: 'Inter_700Bold', fontSize: 20, color: INK, includeFontPadding: false },
 });
 
 // Ink runs from the first row (300) to the ground line (500). Band 294…512 = 218 (H59).

@@ -9,6 +9,7 @@ import { BEATS } from './epistemology25Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THREE RULERS, EACH CHECKED BY THE ONE BELOW, AND NOTHING UNDER THE LAST.
@@ -86,6 +88,7 @@ const NOTHING = BEATS.map((b) => (b.nothing ? 1 : 0));
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 const FLOW = BEATS.map((b) => b.flow ?? 0);
+const ASSUME_RING = BEATS.map((b) => (b.assumeRing ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
@@ -95,7 +98,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology25'));
 export default function Epistemology25Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(6);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -124,6 +127,7 @@ export default function Epistemology25Scene({ clock, bt, bi, i, picked, onPick, 
       // Down is 1, up is 2, and the bar is drawn whenever either is asked for.
       down: carry(cv, 4, n, FLOW[p] === 1 ? 1 : 0, reacting ? (pollFlow === 1 ? 1 : 0) : (FLOW[n] === 1 ? 1 : 0), tr),
       up: carry(cv, 5, n, FLOW[p] === 2 ? 1 : 0, reacting ? (pollFlow === 2 ? 1 : 0) : (FLOW[n] === 2 ? 1 : 0), tr),
+      assumeRing: carry(cv, 6, n, ASSUME_RING[p], ASSUME_RING[n], tr),
     };
   });
 
@@ -135,6 +139,7 @@ export default function Epistemology25Scene({ clock, bt, bi, i, picked, onPick, 
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
   const downStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.down }));
   const upStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.up }));
+  const assumeRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.assumeRing }));
 
   return (
     <View style={styles.scene}>
@@ -150,6 +155,9 @@ export default function Epistemology25Scene({ clock, bt, bi, i, picked, onPick, 
         <View style={styles.nothing} />
         <Text style={styles.nothingText}>NOTHING UNDER IT</Text>
       </Animated.View>
+
+      {/* ASSUME_RING — a dashed ring on the empty box: what either starting point ends up assuming. */}
+      <Animated.View style={[styles.assumeRing, assumeRingStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, downStyle]} pointerEvents="none">
         <View style={styles.flowBar} />
@@ -210,7 +218,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 148, top: CAP_T, width: 240,
@@ -238,6 +246,11 @@ const styles = StyleSheet.create({
     position: 'absolute', left: RULER_X, top: NOTHING_Y + 9, width: RULER_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
   },
+  // ASSUME_RING — a dashed ring on the empty box, singled out from its neighbours.
+  assumeRing: {
+    position: 'absolute', left: RULER_X - 4, top: NOTHING_Y - 4, width: RULER_W + 8, height: NOTHING_H + 8,
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
 
   flowBar: { position: 'absolute', left: FLOW_X, top: FLOW_Y, width: 5, height: FLOW_H, backgroundColor: INK },
   headDown: {
@@ -258,7 +271,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

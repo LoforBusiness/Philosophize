@@ -19,6 +19,7 @@ export interface Political34Beat extends BaseBeat {
   /** Which ring is making the decision, 0 (you) … 1 (everyone). */ level?: number;
   /** How far the effects reach, 0 … 1. Drawn as a fixed mark. */ reach?: number;
   /** 1 = the reader is driving the level from the rail (Q1). */ live?: number;
+  /** 1 = the effects are marked as running past the ring that is deciding. */ exceed?: number;
 }
 
 export const BEATS: Political34Beat[] = [
@@ -84,6 +85,7 @@ export const BEATS: Political34Beat[] = [
   },
   {
     p: 167, x: 50, level: 0.72, reach: 0.72,
+    exceed: 1,
     text: 'The second says a higher level should act when a problem’s effects exceed what a lower level can handle.',
     dur: 1.8,
   },

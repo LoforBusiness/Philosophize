@@ -24,6 +24,11 @@ export interface Political11Beat extends BaseBeat {
   /** Where the dial points: 0 unset · 1 FEARFUL · 2 RATIONAL · 3 INNOCENT. */ set?: number;
   /** How many plots have been built: 0 none · 1 tower · 2 +house · 3 +ring. */ built?: number;
   /** 1 = the three plots are live answer targets (Q2). */ plates?: number;
+  /** 1 = a question mark hangs where the dial will stand, holding the open question the reader has not yet answered. */ ask?: number;
+  /** 1 = a bar of weight presses down from the tower's cap onto the crowd beneath it, showing the sovereign's power asserted as absolute. */ press?: number;
+  /** 1 = a dashed boundary is drawn around Locke's house, marking the limit of the government's reach — the bystanders standing outside it keep the rights they held before it existed. */ bound?: number;
+  /** 1 = three spokes join the ring's three people to a single point at its centre, showing everybody bound to the common good. */ bind?: number;
+  /** 1 = a small open ring appears at that centre point — the point everyone answers to is themselves, and it stays open, not solid like Hobbes's tower, because they remain free. */ self?: number;
 }
 
 export const BEATS: Political11Beat[] = [
@@ -33,7 +38,7 @@ export const BEATS: Political11Beat[] = [
     dur: 2.5,
   },
   {
-    p: 462, x: 56,
+    p: 462, x: 56, ask: 1,
     text: 'Your answer largely determines which state you can justify.',
     dur: 1.8,
   },
@@ -50,12 +55,12 @@ export const BEATS: Political11Beat[] = [
     dur: 2.4,
   },
   {
-    p: 167, x: 120, dial: 1, set: 1, built: 1,
+    p: 167, x: 120, dial: 1, set: 1, built: 1, press: 1,
     text: 'Only a sovereign above every subject can end this war. Hobbes holds that the sovereign’s power must be absolute.',
     dur: 2.6,
   },
   {
-    p: 139, x: 120, dial: 1, set: 1, built: 1,
+    p: 139, x: 120, dial: 1, set: 1, built: 1, press: 1,
     quote: {
       id: 'lq-political-political-11',
       text: 'During the time men live without a common power to keep them all in awe, they are in that condition which is called war.',
@@ -68,34 +73,34 @@ export const BEATS: Political11Beat[] = [
     dur: 3.6,
   },
   {
-    p: 467, x: 120, dial: 1, set: 2, built: 2,
+    p: 467, x: 120, dial: 1, set: 2, built: 2, press: 1,
     text: 'John Locke reads human nature as rational. People already have duties under natural law, and what they lack is an impartial judge.',
     cite: 'Locke · a limited government',
     dur: 2.7,
   },
   {
-    p: 467, x: 120, dial: 1, set: 2, built: 2,
+    p: 467, x: 120, dial: 1, set: 2, built: 2, bound: 1, press: 1,
     text: 'So Locke’s government is limited, and the people keep the natural rights they held before it existed.',
     dur: 2.1,
   },
   {
-    p: 33, x: 120, dial: 1, set: 3, built: 3,
+    p: 33, x: 120, dial: 1, set: 3, built: 3, bound: 1, press: 1,
     text: 'Rousseau reads human nature as innocent. People lived at peace until property and rank made them compare themselves.',
     cite: 'Rousseau · the general will',
     dur: 2,
   },
   {
-    p: 260, x: 120, dial: 1, set: 3, built: 3,
+    p: 260, x: 120, dial: 1, set: 3, built: 3, bound: 1, bind: 1, press: 1,
     text: 'In Rousseau’s state, no ruler stands above the people. Everybody is bound to the common good, as expressed in the general will.',
     dur: 2,
   },
   {
-    p: 260, x: 120, dial: 1, set: 3, built: 3,
+    p: 260, x: 120, dial: 1, set: 3, built: 3, bound: 1, bind: 1, self: 1, press: 1,
     text: 'Rousseau argues that by obeying the general will, each person obeys only himself and remains free.',
     dur: 1.8,
   },
   {
-    p: 461, x: 120, dial: 1, set: 3, built: 3,
+    p: 461, x: 120, dial: 1, set: 3, built: 3, bound: 1, bind: 1, self: 1, press: 1,
     interact: {
       prompt: 'In these three theories, which comes first, the view of human nature or the state?',
       split: {
@@ -113,7 +118,7 @@ export const BEATS: Political11Beat[] = [
     dur: 1.0,
   },
   {
-    p: 384, x: 120, dial: 1, set: 1, built: 3, plates: 1,
+    p: 384, x: 120, dial: 1, set: 1, built: 3, plates: 1, bound: 1, bind: 1, self: 1, press: 1,
     interact: {
       prompt: 'If human nature is fearful, which state does that diagnosis require?',
       explain: 'One sovereign. If no one can trust anyone, only a power above everyone can keep the peace. So Hobbes gives the sovereign almost unlimited authority. The limited state looks more moderate, but it’s Locke’s, built on a more hopeful view of human nature.',
@@ -122,7 +127,7 @@ export const BEATS: Political11Beat[] = [
     dur: 1.0,
   },
   {
-    p: 9, x: 120, dial: 1, set: 1, built: 3,
+    p: 9, x: 120, dial: 1, set: 1, built: 3, bound: 1, bind: 1, self: 1, press: 1,
     summary: {
       title: 'From Human Nature to the State',
       points: [

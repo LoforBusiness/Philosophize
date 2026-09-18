@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics21Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE LINE, AND WHICH HALVES OF IT ARE FURNISHED.
@@ -45,6 +47,9 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const WHICH_PARTS = BEATS.map((b) => b.whichParts ?? 0);
+const NOWHERE = BEATS.map((b) => b.nowhere ?? 0);
+const TWO_NOWS = BEATS.map((b) => b.twoNows ?? 0);
 const BASE_TR = 0.85;
 
 const LINE_Y = 300;
@@ -88,7 +93,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics21'));
 export default function Metaphysics21Scene({
   clock, bt, bi, i, picked, onPick, dragPos, dragPos2, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
   const pulling = PULL[i] === 1;
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -113,6 +118,10 @@ export default function Metaphysics21Scene({
       // exist to stop and which no checker measures on a non-limb track.
       past: carry(cv, 2, n, PAST[p], pulling ? dragPos.value : PAST[n], tr),
       future: carry(cv, 3, n, FUT[p], pulling ? dragPos2.value : FUT[n], tr),
+      // The three tap events, carried, so each fades out as well as in (group L).
+      whichParts: carry(cv, 4, n, WHICH_PARTS[p], WHICH_PARTS[n], tr),
+      nowhere: carry(cv, 5, n, NOWHERE[p], NOWHERE[n], tr),
+      twoNows: carry(cv, 6, n, TWO_NOWS[p], TWO_NOWS[n], tr),
       t,
     };
   });
@@ -124,6 +133,31 @@ export default function Metaphysics21Scene({
   const lineStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.line }));
   const pastFill = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.past) }));
   const futFill = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.future) }));
+
+  // ── the three tap events ───────────────────────────────────────────────────
+  //
+  // THREE STRETCHES, QUESTIONED IN THE ORDER THE SENTENCE NAMES THEM: the past,
+  // the present, the future (AH5). A "?" over each, on the line's own boxes.
+  const partAt = (u: number, k: number) => {
+    'worklet';
+    return (u <= 0 ? 0 : clamp01((u - k * 0.2) / 0.34));
+  };
+  const part0 = useAnimatedStyle(() => ({ opacity: partAt(SCENE.value.whichParts, 0) }));
+  const part1 = useAnimatedStyle(() => ({ opacity: partAt(SCENE.value.whichParts, 1) }));
+  const part2 = useAnimatedStyle(() => ({ opacity: partAt(SCENE.value.whichParts, 2) }));
+  const partStyles = [part0, part1, part2];
+  // Nowhere at all: the box yesterday occupied is left as an empty outline with
+  // nothing in it, and the mark goes ON that box rather than beside it.
+  const nowhereStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.nowhere,
+    transform: [{ scale: 1.12 - 0.12 * SCENE.value.nowhere }],
+  }));
+  // Two observers, two NOWs: the second one stands somewhere else on the line and
+  // arrives from the first, which is the disagreement the sentence reports.
+  const twoNowsStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.twoNows,
+    transform: [{ translateX: (1 - SCENE.value.twoNows) * -46 }],
+  }));
 
   return (
     <View style={styles.scene}>
@@ -179,6 +213,19 @@ export default function Metaphysics21Scene({
         <View style={[styles.hitBox, { width: 144 }, answered && picked === 'future' && styles.wrong]} pointerEvents="none" />
       </Target>
 
+      {/* Which parts exist? Asked of the past, the present and the future in turn. */}
+      {[PAST_X[1], NOW_X - 3, FUT_X[2]].map((qx, k) => (
+        <Animated.View key={`wp${k}`} style={[styles.partAsk, { left: qx + 4 }, partStyles[k]]} pointerEvents="none">
+          <Text style={styles.partAskText}>?</Text>
+        </Animated.View>
+      ))}
+
+      {/* Yesterday is nowhere at all — the box it filled, and nothing in it. */}
+      <Animated.View style={[styles.nowhereBox, nowhereStyle]} pointerEvents="none" />
+
+      {/* And a second observer's NOW, which is not where the first one's is. */}
+      <Animated.View style={[styles.otherNow, twoNowsStyle]} pointerEvents="none" />
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -186,12 +233,34 @@ export default function Metaphysics21Scene({
 }
 
 const styles = StyleSheet.create({
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  // Above the line's own boxes, which top out at BOX_Y.
+  partAsk: {
+    position: 'absolute', top: BOX_Y - 26, width: BOX_W, height: 22,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  partAskText: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 16, color: INK,
+    includeFontPadding: false,
+  },
+  // Round the last box of the past — yesterday's own — as an empty outline.
+  nowhereBox: {
+    position: 'absolute', left: PAST_X[3] - 4, top: BOX_Y - 4, width: BOX_W + 8, height: BOX_H + 8,
+    borderWidth: 2, borderColor: INK, borderStyle: 'dashed', borderRadius: 6,
+  },
+  // A second NOW, standing in the future's second box: the same column drawn
+  // somewhere else on the same line.
+  otherNow: {
+    position: 'absolute', left: FUT_X[1], top: NOW_Y, width: NOW_W, height: BOX_H + 10 + (BOX_Y - NOW_Y),
+    borderWidth: 2, borderColor: INK, borderStyle: 'dashed', borderRadius: 4,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   rule: {
     position: 'absolute', left: LINE_L, top: LINE_Y, width: LINE_R - LINE_L, height: 1.5, backgroundColor: INK,
@@ -217,7 +286,7 @@ const styles = StyleSheet.create({
   // flush with its top — and the whole thing can then be lifted as one object.
   nowIn: {
     position: 'absolute', left: 2, top: 0, width: NOW_W, height: NOW_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   nowTextIn: {
     position: 'absolute', left: 2, top: 23, width: NOW_W, textAlign: 'center',

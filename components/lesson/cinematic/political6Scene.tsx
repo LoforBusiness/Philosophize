@@ -12,6 +12,7 @@ import { BEATS } from './political6Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -19,8 +20,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // Rawls's two principles, drawn as INFORMATION rather than illustration.
 //
@@ -68,6 +70,17 @@ const EQ_DASHES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
 const P_CODE = BEATS.map((b) => b.p ?? 0);
 const BARS = BEATS.map((b) => b.bars ?? 0);
+const PLACE = BEATS.map((b) => b.place ?? 0);
+const GAP = BEATS.map((b) => b.gap ?? 0);
+const JUDGE = BEATS.map((b) => b.judge ?? 0);
+
+// ── where the three tap events sit, off the chart's own geometry ─────────────
+/** The x centre of bar `k` inside a panel, and each bar's head. */
+const barCX = (left: number, k: number) => left + BAR_X0 + k * (BAR_W + BAR_GAP) + BAR_W / 2;
+const barTop = (bars: readonly number[], k: number) => BAR_BASE - bars[k];
+/** The unequal society's own bars: [worst, middle, best] — 64, 80, 96. */
+const UN = SOC.lift;
+const GAP_X = barCX(UN.left, 2) + BAR_W / 2 + 8;
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -86,7 +99,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political6'));
 export default function Political6Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(1);
+  const cv = useCarry(4);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
   const prinOn = (cur.prin ?? 0) > 0;
@@ -107,11 +120,37 @@ export default function Political6Scene({ clock, bt, bi, i, picked, onPick, drag
       // larger share and rung 1 stands up; trade it away and rung 2 is what is left.
       prinA: (prinOn ? (prinFade ? ease01(bt.value / 0.45) : 1) : 0) * (reacting ? 1 - (1 - dragPos.value) * tr : 1),
       prinB: (prinOn ? (prinFade ? ease01((bt.value - 0.32) / 0.45) : 1) : 0) * (reacting ? 1 - dragPos.value * tr : 1),
+      // Carried, so each of these fades out as well as in (group L).
+      place: carry(cv, 1, n, PLACE[p], PLACE[n], tr),
+      gap: carry(cv, 2, n, GAP[p], GAP[n], tr),
+      judge: carry(cv, 3, n, JUDGE[p], JUDGE[n], tr),
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const barStyle = useAnimatedStyle(() => ({ transform: [{ scaleY: SCENE.value.chart }] }));
+  // THE THREE "?" ARRIVE IN TURN, a third of the track apart, because the sentence
+  // is about not knowing WHICH of them you are — three at once would read as one
+  // fact about the whole society rather than as a question about your own place.
+  const askAt = (u: number, k: number) => {
+    'worklet';
+    return (u <= 0 ? 0 : clamp01((u - k * 0.22) / 0.4));
+  };
+  const place0Style = useAnimatedStyle(() => ({ opacity: askAt(SCENE.value.place, 0) }));
+  const place1Style = useAnimatedStyle(() => ({ opacity: askAt(SCENE.value.place, 1) }));
+  const place2Style = useAnimatedStyle(() => ({ opacity: askAt(SCENE.value.place, 2) }));
+  const placeStyles = [place0Style, place1Style, place2Style];
+  // The gap: the rule grows down from the best-paid bar's head to the worst-paid
+  // one's, so it is measuring the distance the sentence names.
+  const gapStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.gap }));
+  const gapBarStyle = useAnimatedStyle(() => ({ transform: [{ scaleY: SCENE.value.gap }] }));
+  // Judged by the worst off, not the best: a tick over the one, the ground laid
+  // back over the other at 0.55 so its own words keep their contrast (§17).
+  const judgeStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.judge,
+    transform: [{ translateY: (1 - SCENE.value.judge) * -5 }],
+  }));
+  const bestQuietStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.judge * 0.55 }));
   const chartStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.chart }));
   const prinAStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.prinA,
@@ -182,6 +221,27 @@ export default function Political6Scene({ clock, bt, bi, i, picked, onPick, drag
         <Text style={styles.chipSub}>ONLY IF IT LIFTS</Text>
       </Animated.View>
 
+      {/* Any of the three could be you: a "?" over each bar of the equal society. */}
+      {SOC.equal.bars.map((h, k) => (
+        <Animated.View key={`pl${k}`} style={[styles.place, { left: barCX(SOC.equal.left, k) - 9, top: barTop(SOC.equal.bars, k) - 22 }, placeStyles[k]]} pointerEvents="none">
+          <Text style={styles.placeText}>?</Text>
+        </Animated.View>
+      ))}
+
+      {/* The gap the difference principle asks about, measured in the unequal panel. */}
+      <Animated.View style={[styles.gapWrap, gapStyle]} pointerEvents="none">
+        <Animated.View style={[styles.gapBar, gapBarStyle]} />
+        <View style={[styles.gapCap, { top: barTop(UN.bars, 2) - 1 }]} />
+        <View style={[styles.gapCap, { top: barTop(UN.bars, 0) - 1 }]} />
+        <Text style={styles.gapText}>THE GAP</Text>
+      </Animated.View>
+
+      {/* Judged by the worst off, not the best: a tick on the one, a wash on the other. */}
+      <Animated.View style={[styles.judgeTick, { left: barCX(UN.left, 0) - 13, top: barTop(UN.bars, 0) - 17 }, judgeStyle]} pointerEvents="none">
+        <Text style={styles.judgeText}>JUDGED HERE</Text>
+      </Animated.View>
+      <Animated.View style={[styles.bestQuiet, { left: barCX(UN.left, 2) - BAR_W / 2 - 3, top: barTop(UN.bars, 2) - 3 }, bestQuietStyle]} pointerEvents="none" />
+
       {/* ── legend: what the dark bar and the dashed line mean ───────────────── */}
       <Animated.View style={[styles.legend, chartStyle]} pointerEvents="none">
         <View style={styles.legSwatch} />
@@ -222,7 +282,7 @@ const styles = StyleSheet.create({
   // ── the ranked principles ───────────────────────────────────────────────────
   chip: {
     position: 'absolute', top: PRIN_T, height: PRIN_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   chipA: { left: CH_L, width: 130 },
@@ -236,6 +296,46 @@ const styles = StyleSheet.create({
   arrow: { fontFamily: 'Inter_700Bold', fontSize: 15, color: INK, includeFontPadding: false },
 
   // ── legend ──────────────────────────────────────────────────────────────────
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  place: {
+    position: 'absolute', width: 18, height: 18, borderRadius: 9,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  placeText: {
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 13, color: INK,
+    includeFontPadding: false,
+  },
+  gapWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
+  // The rule runs from the best-paid bar's head down to the worst-paid one's, so it
+  // IS the distance the sentence names. It grows downward, which is the direction
+  // the question runs: does what the top earns reach the bottom?
+  gapBar: {
+    position: 'absolute', left: GAP_X, top: BAR_BASE - UN.bars[2], width: 2,
+    height: UN.bars[2] - UN.bars[0], backgroundColor: SOFT, transformOrigin: '50% 0%',
+  },
+  gapCap: { position: 'absolute', left: GAP_X - 4, width: 10, height: 2, backgroundColor: SOFT },
+  gapText: {
+    position: 'absolute', left: GAP_X + 7, top: BAR_BASE - UN.bars[2] + 6,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT,
+    includeFontPadding: false,
+  },
+  judgeTick: {
+    position: 'absolute', paddingHorizontal: 5, paddingVertical: 2,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE,
+    boxShadow: LIP,
+  },
+  judgeText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+  // A WASH OF THE GROUND, not a dim of the bar: the bar is still part of the chart
+  // and its own height is the fact. Laid over it, so nothing's contrast moves.
+  bestQuiet: {
+    position: 'absolute', width: BAR_W + 6, height: UN.bars[2] + 6,
+    backgroundColor: PAPER, borderRadius: 3,
+  },
+
   legend: {
     position: 'absolute', left: CH_L, top: LEG_T, width: CH_W, height: 14,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5,

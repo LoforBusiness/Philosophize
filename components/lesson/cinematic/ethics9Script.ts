@@ -19,6 +19,22 @@ export interface Ethics9Beat extends BaseBeat {
   /** Which claim he acts on: 0 neither yet · 2 the right-hand one, filled INK. */ taken?: number;
   /** 1 = the three answer targets are live (Q1). */ pick?: number;
   /** 1 = the STILL OWED tag has appeared under the claim he did not meet. */ owed?: number;
+  /**
+   * 1 = a forked crack opens in the ground where he stands, marking the
+   * two-way choice before either claim is named. A one-beat preview: it
+   * closes again once the real claims are pinned up.
+   */
+  fork?: number;
+  /**
+   * 1 = the pin over the claim to stay with her grows, marking that the
+   * claim now carries real weight.
+   */
+  weight?: number;
+  /**
+   * 1 = a small mark appears beside the claim to stay with her, showing it
+   * still stands untouched.
+   */
+  remains?: number;
 }
 
 export const BEATS: Ethics9Beat[] = [
@@ -28,7 +44,7 @@ export const BEATS: Ethics9Beat[] = [
     dur: 2.2,
   },
   {
-    p: 164, x: 70,
+    p: 164, x: 70, fork: 1,
     text: 'In a genuine dilemma, you ought to do each of two things. You can’t do both.',
     dur: 1.8,
   },
@@ -39,18 +55,18 @@ export const BEATS: Ethics9Beat[] = [
     dur: 3.1,
   },
   {
-    p: 270, x: 168, notes: 1,
+    p: 270, x: 168, notes: 1, weight: 1,
     text: 'The student’s mother, however, lived only for him, and his departure would plunge her into despair.',
     dur: 1.9,
   },
   {
-    p: 383, x: 124, notes: 1,
+    p: 383, x: 124, notes: 1, weight: 1,
     text: 'Neither claim overrides the other, so this is a genuine dilemma. No common scale can weigh one claim against the other.',
     cite: 'No common scale',
     dur: 4.4,
   },
   {
-    p: 139, x: 124, notes: 1,
+    p: 139, x: 124, notes: 1, weight: 1,
     quote: {
       id: 'lq-ethics-ethics-9-1',
       text: 'No rule of general morality can show you what you ought to do: no signs are vouchsafed in this world.',
@@ -63,18 +79,18 @@ export const BEATS: Ethics9Beat[] = [
     dur: 3.6,
   },
   {
-    p: 167, x: 168, notes: 1, taken: 2,
+    p: 167, x: 168, notes: 1, taken: 2, weight: 1,
     text: 'Suppose the student joins the Free French. Suppose, too, that his choice is justified.',
     cite: 'A justified choice',
     dur: 2.1,
   },
   {
-    p: 167, x: 168, notes: 1, taken: 2,
+    p: 167, x: 168, notes: 1, taken: 2, weight: 1, remains: 1,
     text: 'The claim to stay with his mother remains. Acting on the other claim did not cancel it.',
     dur: 2.7,
   },
   {
-    p: 6, x: 124, notes: 1, taken: 2, pick: 1,
+    p: 6, x: 124, notes: 1, taken: 2, weight: 1, remains: 1, pick: 1,
     interact: {
       prompt: 'If his choice was justified, which claim is still owed something?',
       explain: 'Stay with her. Joining the Free French didn’t cancel his duty to his mother, because that duty was never overridden. It still has a claim on him.',
@@ -83,7 +99,7 @@ export const BEATS: Ethics9Beat[] = [
     dur: 1.0,
   },
   {
-    p: 457, x: 124, notes: 1, taken: 2, owed: 1,
+    p: 457, x: 124, notes: 1, taken: 2, weight: 1, remains: 1, owed: 1,
     interact: {
       prompt: 'Does a justified choice in a genuine dilemma leave anything morally lost?',
       sort: {

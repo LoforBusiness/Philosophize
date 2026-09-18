@@ -13,6 +13,7 @@ import { BEATS } from './epistemology13Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A board of lottery tickets stage right, the figure working downstage left.
 //
@@ -83,6 +85,9 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology13'));
 const DIR = dirsFrom(X, 1);
 const GRIDV = BEATS.map((b) => b.grid ?? 0);
 const OFF = BEATS.map((b) => b.off ?? 0);
+// group AH — one still-tap event each, plain carried 0/1 tracks
+const MY_TICKET = BEATS.map((b) => b.myTicket ?? 0);
+const WIN_RING = BEATS.map((b) => b.winRing ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -95,7 +100,7 @@ function cellTop(k: number) { return GRID_T + Math.floor(k / COLS) * (CELL_H + C
 export default function Epistemology13Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -126,12 +131,16 @@ export default function Epistemology13Scene({ clock, bt, bi, i, picked, onPick, 
       // the shape of the paradox, and they watch the whole draw disappear under it.
       strike: carry(cv, 2, n, OFF[p], reacting ? dragPos.value * 2 : OFF[n], grow),
       winner: winOn ? (winFade ? grow : 1) : 0,
+      myTicket: carry(cv, 3, n, MY_TICKET[p], MY_TICKET[n], tr),
+      winRing: carry(cv, 4, n, WIN_RING[p], WIN_RING[n], tr),
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const gridStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.grid }));
   const winStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.winner }));
+  const myTicketStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.myTicket }));
+  const winRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.winRing }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -139,6 +148,12 @@ export default function Epistemology13Scene({ clock, bt, bi, i, picked, onPick, 
   return (
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
+
+      {/* "believing that your ticket will lose seems rational" — before the draw. */}
+      <Animated.View style={[styles.myTicket, myTicketStyle]} pointerEvents="none">
+        <Text style={styles.cellText}>40001</Text>
+      </Animated.View>
+
       {/* ── the draw ────────────────────────────────────────────────────────── */}
       <Animated.View style={[styles.grid, gridStyle]} pointerEvents="none">
         {TICKETS.map((num, k) => (
@@ -155,6 +170,8 @@ export default function Epistemology13Scene({ clock, bt, bi, i, picked, onPick, 
       <Animated.View style={[styles.winLine, winStyle]} pointerEvents="none">
         <Text style={styles.winText} numberOfLines={1}>…AND THIS DRAW HAS A WINNER</Text>
       </Animated.View>
+      {/* "yet you know one ticket will" — a ring marks the line that says so. */}
+      <Animated.View style={[styles.winRing, winRingStyle]} pointerEvents="none" />
 
       {/* ── Q2: point at the winner ─────────────────────────────────────────── */}
       {showPick &&
@@ -223,12 +240,20 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   grid: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+
+  // "believing that your ticket will lose seems rational" — one ticket, alone,
+  // above the figure, before the draw's grid arrives.
+  myTicket: {
+    position: 'absolute', left: 54, top: 234, width: CELL_W, height: CELL_H,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
   cell: {
     position: 'absolute', width: CELL_W, height: CELL_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   cellText: {
@@ -250,6 +275,11 @@ const styles = StyleSheet.create({
     // its own border, so the clamp ellipsised the last word of the payoff line.
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.3, color: PAPER,
     includeFontPadding: false,
+  },
+  // "yet you know one ticket will" — a dashed ring on the line that says so.
+  winRing: {
+    position: 'absolute', left: GRID_L - 2, top: WIN_T - 2, width: GRID_W + 4, height: WIN_H + 4,
+    borderWidth: 2, borderColor: INK, borderRadius: 6, borderStyle: 'dashed',
   },
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },

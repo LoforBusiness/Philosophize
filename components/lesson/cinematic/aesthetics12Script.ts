@@ -22,6 +22,8 @@ export interface Aes12Beat extends BaseBeat {
   /** Marks under the poem: how many readers have landed on the same word, 0..5. */ ticks?: number;
   /** 1 = the sealed box is up over the poet's head. */ box?: number;
   /** 1 = the two answer cards are live on the stage (Q2). */ pick?: number;
+  /** A ring closes round GRIEF — nothing in the text argues against this reading. */ settled?: boolean;
+  /** A small tag reading THE FALLACY appears near the sealed box. */ fallacyTag?: boolean;
 }
 
 export const BEATS: Aes12Beat[] = [
@@ -37,7 +39,7 @@ export const BEATS: Aes12Beat[] = [
     dur: 3.2,
   },
   {
-    p: 163, r: 1, rx: 224, ticks: 1, box: 0,
+    p: 163, r: 1, rx: 224, ticks: 1, box: 0, settled: true,
     text: 'Nothing in the text of the poem suggests irony or a joke.',
     dur: 1.8,
   },
@@ -66,7 +68,7 @@ export const BEATS: Aes12Beat[] = [
     dur: 3.5,
   },
   {
-    p: 276, r: 45, rx: 224, ticks: 5, box: 1,
+    p: 276, r: 45, rx: 224, ticks: 5, box: 1, fallacyTag: true,
     text: 'Wimsatt and Beardsley called appeals like this the intentional fallacy. It treats the author’s intention as the standard of a poem’s meaning.',
     dur: 1.8,
   },

@@ -13,6 +13,7 @@ import { BEATS } from './aesthetics10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A SCREEN upper right showing a masterfully-made film, and directly under it a
 // second panel reading WHAT IT ASKS YOU TO FEEL. A shutter runs on a track across
@@ -111,6 +113,7 @@ const FILM = BEATS.map((b) => b.film ?? 0);
 const PANELV = BEATS.map((b) => b.panel ?? 0);
 const SHUT = BEATS.map((b) => b.shut ?? 0);
 const LINKV = BEATS.map((b) => b.link ?? 0);
+const MARKV = BEATS.map((b) => (b.mark ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -120,7 +123,7 @@ const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -131,6 +134,9 @@ export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick, dr
   const linkFade = (cur.link ?? 0) !== (prev?.link ?? 0);
   const verdictFade = (cur.verdict ?? 0) !== (prev?.verdict ?? 0);
   const verdictOn = (cur.verdict ?? 0) > 0;
+  // The tap event (group AH) — a rule under GLORY IN CRUELTY, the feeling the
+  // skill on screen is spent on.
+  const markFade = !!cur.mark !== !!prev?.mark;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -156,6 +162,7 @@ export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick, dr
       shut: carry(cv, 3, n, SHUT[p], reacting ? dragPos.value : SHUT[n], ease01(seg(tr, 0.4, 1))),
       link: carry(cv, 4, n, LINKV[p], LINKV[n], tr, linkFade ? grow : 1),
       verdict: verdictOn ? (verdictFade ? grow : 1) : 0,
+      mark: carry(cv, 5, n, MARKV[p], MARKV[n], markFade ? grow : 1),
     };
   });
 
@@ -169,6 +176,10 @@ export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick, dr
   const linkStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.link,
     transform: [{ translateY: (1 - SCENE.value.link) * 8 }],
+  }));
+  const markStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.mark,
+    transform: [{ scaleX: 0.3 + SCENE.value.mark * 0.7 }],
   }));
 
   const answered = picked !== null;
@@ -202,6 +213,9 @@ export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick, dr
         <Text style={styles.panelLabel}>WHAT IT ASKS YOU TO FEEL</Text>
         <Text style={styles.panelLine}>GLORY IN CRUELTY</Text>
       </Animated.View>
+
+      {/* A rule underlines GLORY IN CRUELTY — the feeling all that craft is spent on. */}
+      <Animated.View style={[styles.markRule, markStyle]} pointerEvents="none" />
 
       <Animated.View style={[styles.shutClip, panelStyle]} pointerEvents="none">
         <Animated.View style={[styles.shutter, shutStyle]} pointerEvents="none">
@@ -254,7 +268,7 @@ const styles = StyleSheet.create({
     // stone tablet, and it is the reason that scene reads as objects rather than a
     // diagram. The cells stay PAPER — the contrast is the point, not the darkness.
     position: 'absolute', left: COL_L, top: SCR_T, width: COL_W, height: SCR_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: RULE,
   },
   screenLabel: {
     position: 'absolute', left: 0, right: 0, top: 9, textAlign: 'center',
@@ -266,14 +280,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
   },
   cell: {
-    width: 38, height: CELL_H, borderWidth: 1.5, borderColor: INK, borderRadius: 2,
+    width: 38, height: CELL_H, borderWidth: 1.5, borderColor: INK, borderRadius: 8,
     alignItems: 'center', justifyContent: 'center', backgroundColor: PAPER,
   },
   cellBar: { height: 4, borderRadius: 2, backgroundColor: INK },
 
   verdict: {
     position: 'absolute', left: VRD_L, top: VRD_T, width: VRD_W, height: VRD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   verdictText: {
@@ -294,7 +308,7 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   panel: {
     position: 'absolute', left: COL_L, top: PAN_T, width: COL_W, height: PAN_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: RULE,
   },
   panelLabel: {
     position: 'absolute', left: 0, right: 0, top: 8, textAlign: 'center',
@@ -335,6 +349,13 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   boardCapOn: { color: PAPER },
+
+  // The tap event (group AH) — the rule under the panel's own words, drawn from
+  // its own centre so it grows rather than sliding in.
+  markRule: {
+    position: 'absolute', left: COL_L + (COL_W - 160) / 2, top: PAN_T + 26 + 22, width: 160, height: 2,
+    backgroundColor: INK,
+  },
 });
 
 // The art runs from the screen's top edge (244) and the boards' top edge (246) down

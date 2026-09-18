@@ -28,6 +28,8 @@ export interface Met22Beat extends BaseBeat {
   /** The three replay tokens on the taken branch, 0…1. */ runs?: number;
   /** How faint the untaken branch has gone, 0…1. */ open?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = the three tokens slide together toward the taken branch's plate. */ travel?: number;
+  /** 1 = the third token peels off toward the OTHER branch instead. */ split?: number;
 }
 
 export const BEATS: Met22Beat[] = [
@@ -43,17 +45,17 @@ export const BEATS: Met22Beat[] = [
     dur: 2.5,
   },
   {
-    p: 266, x: 200, track: 1, runs: 1,
+    p: 266, x: 200, track: 1, runs: 1, travel: 1,
     text: 'Determinism holds that the past and the laws of nature fix a single future. So every replay takes the same branch.',
     dur: 2.3,
   },
   {
-    p: 447, x: 132, track: 1, runs: 1, open: 1,
+    p: 447, x: 132, track: 1, runs: 1, open: 1, travel: 1,
     text: 'Hard determinism accepts this and adds that freedom requires a real alternative. So no one is free, and no one deserves blame.',
     dur: 4.8,
   },
   {
-    p: 380, x: 132, track: 1, runs: 1, open: 1, live: 1,
+    p: 380, x: 132, track: 1, runs: 1, open: 1, travel: 1, live: 1,
     interact: {
       prompt: 'Under determinism, what would have to differ for the other branch to be taken?',
       explain: 'Everything before the junction. Given the same laws, a different outcome requires a different past. The junction marks where the branches divide, but under determinism any difference there needs an earlier cause.',
@@ -62,13 +64,13 @@ export const BEATS: Met22Beat[] = [
     dur: 1.0,
   },
   {
-    p: 418, x: 132, track: 1, runs: 1, open: 1,
+    p: 418, x: 132, track: 1, runs: 1, open: 1, travel: 1,
     text: 'Compatibilism holds that the phrase “could have done otherwise” means you’d have acted differently had you wanted to. On this reading, determinism leaves freedom intact.',
     cite: 'Compatibilism',
     dur: 4.8,
   },
   {
-    p: 144, x: 268, track: 1, runs: 1, open: 1,
+    p: 144, x: 268, track: 1, runs: 1, open: 1, travel: 1,
     quote: {
       id: 'lq-metaphysics-being-22-1',
       text: 'Man is condemned to be free; because once thrown into the world, he is responsible for everything he does.',
@@ -81,13 +83,13 @@ export const BEATS: Met22Beat[] = [
     dur: 4.2,
   },
   {
-    p: 383, x: 268, track: 1, runs: 1, open: 1,
+    p: 383, x: 268, track: 1, runs: 1, open: 1, travel: 1, split: 1,
     text: 'Libertarianism about free will holds that a choice could go either way on an exact replay. The luck objection replies that nothing about you then settles which branch is taken.',
     cite: 'The luck objection',
     dur: 4.8,
   },
   {
-    p: 41, x: 268, track: 1, runs: 1, open: 1,
+    p: 41, x: 268, track: 1, runs: 1, open: 1, travel: 1, split: 1,
     interact: {
       prompt: 'On the compatibilist reading, what does “could have done otherwise” mean?',
       sort: {

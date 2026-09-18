@@ -11,6 +11,7 @@ import { BEATS } from './epistemology7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 import { Shapes, Outlined, ell, bar, rect, tri, type Part } from './Silhouette';
@@ -18,7 +19,9 @@ import { Shapes, Outlined, ell, bar, rect, tri, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE } = stageTone('epistemology');
+const TONE = stageTone('epistemology');
+const { RULE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // THE CONFIDENCE CHART. Hume's problem drawn as the picture it actually is: a bar
 // chart of the chicken's confidence climbing one fed morning at a time, a trend line
@@ -62,6 +65,11 @@ const TREND_LEN = Math.hypot(MID[3] - MID[0], TIP[3] - TIP[0]);     // 151.4
 const PROJ_LEN = Math.hypot(42, 28);                                // 50.5
 const TREND_ANG = '-33.69deg';
 
+// group AH — the strike across the dashed TOMORROW column: two lines corner to
+// corner of the same box the "?" sits in, so the mark IS the guess it crosses out.
+const WRONGX_LEN = Math.hypot(FUT_W, FUT_H);
+const WRONGX_ANG = (Math.atan2(FUT_H, FUT_W) * 180) / Math.PI; // ≈ 76.9°, near-vertical
+
 const HEN_L = 120;
 const HEN_T = GROUND - 76;              // 424 — the hen stands on the ground line
 const FEED_X = [100, 108, 116];
@@ -95,6 +103,11 @@ const PECK_DEG = 45;
 const P_CODE = BEATS.map((b) => b.p ?? 0);
 const DAYS = BEATS.map((b) => b.days ?? 0);
 const TWIST = BEATS.map((b) => b.twist ?? 0);
+// group AH — one still-tap event each, plain carried 0/1 tracks
+const ASK = BEATS.map((b) => b.ask ?? 0);
+const ALSO = BEATS.map((b) => b.also ?? 0);
+const LOOP = BEATS.map((b) => b.loop ?? 0);
+const WRONGX = BEATS.map((b) => b.wrongX ?? 0);
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -123,7 +136,7 @@ const RELY_BAND = 0.08;
 
 export default function Epistemology7Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(6);
   const reacting = REACT[i] === 1;
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -141,6 +154,10 @@ export default function Epistemology7Scene({ clock, bt, bi, i, dragPos, gazeX, g
       // The rule draws itself along with the bars: 1 morning = nothing, 4 = full.
       trend: clamp01((days - 1) / 3),
       peck: Math.max(0, Math.sin(t * 3.2)),
+      ask: carry(cv, 2, n, ASK[p], ASK[n], tr),
+      also: carry(cv, 3, n, ALSO[p], ALSO[n], tr),
+      loop: carry(cv, 4, n, LOOP[p], LOOP[n], tr),
+      wrongX: carry(cv, 5, n, WRONGX[p], WRONGX[n], tr),
     };
   });
 
@@ -161,6 +178,14 @@ export default function Epistemology7Scene({ clock, bt, bi, i, dragPos, gazeX, g
   const peckStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${SCENE.value.peck * PECK_DEG}deg` }],
   }));
+  // group AH — one still-tap event each, stacked stage left where the chart leaves
+  // the figure's head clear (his crown rides to y ≈ 358).
+  const askStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ask }));
+  const alsoStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.also }));
+  const loopStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.loop }));
+  // The X only strikes what is actually drawn: it rides the same opacity as the
+  // dashed column, so it can never float over a box that has faded away.
+  const wrongXStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.wrongX * SCENE.value.twist }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -176,6 +201,18 @@ export default function Epistemology7Scene({ clock, bt, bi, i, dragPos, gazeX, g
         ))}
       </View>
 
+      {/* ── group AH: three still-tap tags, stacked in the clear air over the
+          farmer's head, and a strike across the wrong guess ─────────────────── */}
+      <Animated.View style={[styles.sideTag, { top: 246 }, askStyle]} pointerEvents="none">
+        <Text style={styles.sideTagT}>JUSTIFIED?</Text>
+      </Animated.View>
+      <Animated.View style={[styles.sideTag, { top: 270 }, alsoStyle]} pointerEvents="none">
+        <Text style={styles.sideTagT}>SCIENCE, TOO</Text>
+      </Animated.View>
+      <Animated.View style={[styles.sideTag, { top: 294 }, loopStyle]} pointerEvents="none">
+        <Text style={styles.sideTagT}>CIRCULAR</Text>
+      </Animated.View>
+
       {/* ── one bar per morning the farmer turned up ─────────────────────────── */}
       {BAR_X.map((_, k) => (
         <Bar key={k} S={SCENE} k={k} />
@@ -188,6 +225,11 @@ export default function Epistemology7Scene({ clock, bt, bi, i, dragPos, gazeX, g
       {/* ── the column the projection promises, and never delivers ───────────── */}
       <Animated.View style={[styles.future, futStyle]} pointerEvents="none">
         <Text style={styles.futureQ}>?</Text>
+      </Animated.View>
+      {/* "its conclusion was false" — the confident guess, struck through. */}
+      <Animated.View style={[styles.wrongXWrap, wrongXStyle]} pointerEvents="none">
+        <View style={styles.wrongXLineA} />
+        <View style={styles.wrongXLineB} />
       </Animated.View>
 
       {/* ── a ✓ badge riding the top of every confirmed morning ──────────────── */}
@@ -310,6 +352,27 @@ const styles = StyleSheet.create({
   futureQ: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 38, color: INK,
     includeFontPadding: false,
   },
+  // "its conclusion was false" — an X the size of the whole dashed box, corner to
+  // corner, so it reads as crossing out the guess rather than as a new mark beside it.
+  wrongXWrap: { position: 'absolute', left: FUT_L, top: FUT_T, width: FUT_W, height: FUT_H },
+  wrongXLineA: {
+    position: 'absolute', left: FUT_W / 2 - WRONGX_LEN / 2, top: FUT_H / 2 - 1.25,
+    width: WRONGX_LEN, height: 2.5, backgroundColor: INK, borderRadius: 1.25,
+    transform: [{ rotate: `${WRONGX_ANG}deg` }],
+  },
+  wrongXLineB: {
+    position: 'absolute', left: FUT_W / 2 - WRONGX_LEN / 2, top: FUT_H / 2 - 1.25,
+    width: WRONGX_LEN, height: 2.5, backgroundColor: INK, borderRadius: 1.25,
+    transform: [{ rotate: `${-WRONGX_ANG}deg` }],
+  },
+
+  // ── group AH: three still-tap tags stacked stage left, above the farmer's crown ──
+  sideTag: {
+    position: 'absolute', left: 14, width: 116, paddingVertical: 3,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center',
+  },
+  sideTagT: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false },
 
   // ── the yard ────────────────────────────────────────────────────────────────
   feed: { position: 'absolute', top: GROUND - 4, width: 4, height: 4, borderRadius: 2, backgroundColor: SOFT },

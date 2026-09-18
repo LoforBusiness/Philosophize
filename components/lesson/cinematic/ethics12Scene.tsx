@@ -13,6 +13,7 @@ import { BEATS } from './ethics12Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose, pickAt,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A copying press on the floor stage-right, and above it a board that fills with
 // identical cards. One card reads "I PROMISE". The figure walks over, strikes the
@@ -116,6 +118,9 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics12'));
 const DIR = dirsFrom(X, 1);
 const NV = BEATS.map((b) => b.n ?? 1);
 const WV = BEATS.map((b) => b.word ?? 0);
+// group AH — the two still-tap events.
+const SUPPOSEV = BEATS.map((b) => (b.suppose ? 1 : 0));
+const STRIKEV = BEATS.map((b) => (b.strike ? 1 : 0));
 // The three reveal groups, derived from the card count so the script only ever
 // states the number the reader can see on the board.
 const BV = NV.map((n) => (n >= 3 ? 1 : 0));
@@ -137,7 +142,7 @@ const LAW_AT = [0, 1, 0];
 
 export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
   const reacting = REACT[i] === 1;
@@ -152,6 +157,9 @@ export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick, pi
   const striking = (cur.p ?? 0) === 26;
   const pickOn = (cur.pick ?? 0) > 0;
   const pickFade = pickOn !== ((prev?.pick ?? 0) > 0);
+  // group AH — still-tap events (C20c).
+  const supposeFade = !!cur.suppose !== !!prev?.suppose;
+  const strikeFade = !!cur.strike !== !!prev?.strike;
 
   const answered = picked !== null;
   const showPick = pickOn && !!cur.interact;
@@ -161,6 +169,7 @@ export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick, pi
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / moveTr(X[p], X[n], 0.85));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const s = keepHeld(heldS, travelStance(
       X[p], X[n],
@@ -203,6 +212,12 @@ export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick, pi
       // qv only leaves zero once the reader has answered, so the losing maxims are
       // fully legible right up to the moment they are shown to fail.
       blank: ease01(qv.value),
+      // group AH — a one-beat pulse; it fades both ways since it must close
+      // again on the very next beat (L5 / "fade an event out, not off").
+      suppose: carry(cv, 5, n, SUPPOSEV[p], SUPPOSEV[n], supposeFade ? grow : 1),
+      // The strike lands once and stays, inside the same layer as the board
+      // it crosses, so it leaves with it once Q2 replaces the field.
+      strike: carry(cv, 6, n, STRIKEV[p], STRIKEV[n], tr, strikeFade ? grow : 1),
     };
   });
 
@@ -217,6 +232,9 @@ export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick, pi
   const handleStyle = useAnimatedStyle(() => ({ transform: [{ translateY: SCENE.value.handle }] }));
   const pickStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pick }));
   const blankStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.blank }));
+  // group AH — the two still-tap events.
+  const supposeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.suppose }));
+  const strikeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.strike }));
 
   // One card on the board. `main` is the original the copies are taken from.
   const cell = (l: number, t: number, main: boolean) => (
@@ -250,7 +268,16 @@ export default function Ethics12Scene({ clock, bt, bi, qv, i, picked, onPick, pi
         <Animated.View style={[styles.layer, c2Style]} pointerEvents="none">
           {CELLS_C2.map((c) => cell(c[0], c[1], false))}
         </Animated.View>
+
+        {/* A diagonal strike crosses the board, once, as the practice of
+            promising is said to be destroyed (group AH). It rides inside this
+            same fading layer, so it leaves with the board once Q2 replaces it. */}
+        <Animated.View style={[styles.strikeLine, strikeStyle]} pointerEvents="none" />
       </Animated.View>
+
+      {/* A dashed line brackets the field of copies, once, as the maxim is
+          supposed adopted "at once" by everyone (group AH). */}
+      <Animated.View style={[styles.supposeBracket, supposeStyle]} pointerEvents="none" />
 
       {/* ── Q2: the three candidate maxims, on the board's own marks ─────────── */}
       {showPick ? (
@@ -327,7 +354,7 @@ const styles = StyleSheet.create({
   // ── one card ────────────────────────────────────────────────────────────────
   cell: {
     position: 'absolute', width: CELL_W, height: CELL_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5,
   },
   cellMain: { backgroundColor: INK, borderWidth: 2 },
@@ -344,7 +371,7 @@ const styles = StyleSheet.create({
   // ── Q2 targets: the deck's option, on the stage (H61) ───────────────────────
   pickSlot: { position: 'absolute', left: PICK_L, width: PICK_W },
   pickInner: {
-    height: PICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: PICK_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },
@@ -375,12 +402,27 @@ const styles = StyleSheet.create({
   },
   base: {
     position: 'absolute', left: PRESS_L, top: 476, width: PRESS_W, height: 24,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   baseText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
     includeFontPadding: false,
+  },
+
+  // ── the two still-tap events (group AH) ────────────────────────────────────
+  // A dashed bracket around the row of three, for the one beat that supposes
+  // them all adopted at once — a boundary, never a fill (D31).
+  supposeBracket: {
+    position: 'absolute', left: FIELD_L - 6, top: FIELD_T - 6,
+    width: COL * 2 + CELL_W + 12, height: CELL_H + 12,
+    borderWidth: 1.5, borderColor: SHADE, borderRadius: 10, borderStyle: 'dashed',
+  },
+  // The single strike that crosses the full board once the practice it counts
+  // on is said to be destroyed. Corner to corner of the twelve-cell field.
+  strikeLine: {
+    position: 'absolute', left: 134, top: 300, width: 280, height: 3, borderRadius: 1.5,
+    backgroundColor: INK, transform: [{ rotate: '-35deg' }],
   },
 });
 

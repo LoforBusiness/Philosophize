@@ -29,6 +29,8 @@ export interface Political27Beat extends BaseBeat {
   /** How far the second gate stands open, 0…1. */ conduct?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed line divides the two gates — two separate sets of tests (group AH). */ divide?: number;
+  /** 1 = three ticks mark the first gate's lintel — the three named conditions (group AH). */ three?: number;
 }
 
 export const BEATS: Political27Beat[] = [
@@ -38,7 +40,7 @@ export const BEATS: Political27Beat[] = [
     dur: 4.8,
   },
   {
-    p: 173, x: 26, road: 1,
+    p: 173, x: 26, road: 1, divide: 1,
     text: 'Just war theory takes a middle position. It judges a war by two separate sets of tests.',
     dur: 4.4,
   },
@@ -79,7 +81,7 @@ export const BEATS: Political27Beat[] = [
     dur: 5.0,
   },
   {
-    p: 448, x: 82, road: 1, entry: 1, conduct: 1,
+    p: 448, x: 82, road: 1, entry: 1, conduct: 1, three: 1,
     text: 'Augustine argued that a war could be just. Aquinas later named three conditions: rightful authority, a just cause and right intention.',
     dur: 5.0,
   },

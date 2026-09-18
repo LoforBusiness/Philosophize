@@ -3,20 +3,22 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { ease01, lerp, mixStance, pose, type Bundle } from './rig';
+import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology33Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A COLUMN THAT NEVER MOVES, AND A BAR THAT DOES.
 //
@@ -52,6 +54,8 @@ const BAR_LOW = 462;
 const BAR_HIGH = 240;
 const FIG_X = 56;
 
+const DATUM = BEATS.map((b) => b.datum ?? 0);
+const SEEMS = BEATS.map((b) => b.seems ?? 0);
 const BAR = BEATS.map((b) => b.bar ?? 0);
 const EV = BEATS.map((b) => b.ev ?? 0);
 const P = BEATS.map((b) => b.p ?? 0);
@@ -60,7 +64,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology33'));
 
 export default function Epistemology33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(4);
   const live = (BEATS[i].live ?? 0) > 0;
 
   const SCENE = useDerivedValue(() => {
@@ -74,12 +78,30 @@ export default function Epistemology33Scene({ clock, bt, bi, i, dragPos, gazeX, 
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       bar: live ? dragPos.value : carry(cv, 0, n, BAR[p], BAR[n], rise),
       ev: carry(cv, 1, n, EV[p], EV[n], rise),
+      // Carried, so each fades out as well as in (group L).
+      datum: carry(cv, 2, n, DATUM[p], DATUM[n], rise),
+      seems: carry(cv, 3, n, SEEMS[p], SEEMS[n], rise),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const barStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: (BAR_LOW - BAR_HIGH) * (1 - SCENE.value.bar) }],
+  }));
+
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  //
+  // THE DATUM IS DRAWN AT THE COLUMN'S OWN TOP and runs OUT from it, so what the
+  // reader watches is a measurement being taken off the thing that has not moved.
+  const datumStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.datum,
+    transform: [{ scaleX: SCENE.value.datum }],
+  }));
+  const datumCapStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.datum - 0.5) / 0.5) }));
+  // And the verdict, in the clear column right of the bar's own span.
+  const seemsStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.seems,
+    transform: [{ scale: 0.94 + 0.06 * SCENE.value.seems }],
   }));
 
   return (
@@ -94,6 +116,15 @@ export default function Epistemology33Scene({ clock, bt, bi, i, dragPos, gazeX, 
       <Animated.View style={[styles.barWrap, barStyle]} pointerEvents="none">
         <Text style={styles.barLabel} numberOfLines={1}>WHAT IT HAS TO CLEAR</Text>
         <View style={styles.bar} />
+      </Animated.View>
+
+      {/* The evidence is exactly as tall as it was. */}
+      <Animated.View style={[styles.datumRule, datumStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.datumCap, datumCapStyle]} pointerEvents="none">UNCHANGED</Animated.Text>
+
+      {/* And yet. */}
+      <Animated.View style={[styles.seemsPlate, seemsStyle]} pointerEvents="none">
+        <Text style={styles.seemsText}>{'SEEMS\nWRONG NOW'}</Text>
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
@@ -116,12 +147,37 @@ function Brick({ k, SCENE }: { k: number; SCENE: { value: { ev: number } } }) {
 }
 
 const styles = StyleSheet.create({
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // At the full column's own top, drawn outward from its left edge.
+  datumRule: {
+    position: 'absolute', left: COL_L - 76, top: COL_TOP - 1, width: 76, height: 2,
+    borderTopWidth: 2, borderColor: INK, borderStyle: 'dashed',
+    transformOrigin: '100% 50%',
+  },
+  datumCap: {
+    position: 'absolute', left: COL_L - 150, top: COL_TOP - 18, width: 140, textAlign: 'right',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+  // RIGHT OF THE BAR'S OWN SPAN (it runs BAR_L … BAR_L + BAR_W), so it cannot be
+  // crossed by the bar at any height the reader drives it to.
+  seemsPlate: {
+    position: 'absolute', left: BAR_L + BAR_W + 12, top: 332, width: 88, height: 44,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  seemsText: {
+    textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.6, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   kicker: {
     position: 'absolute', left: COL_L - 30, top: COL_TOP - 16, width: COL_W + 60,

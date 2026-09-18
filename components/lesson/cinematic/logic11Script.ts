@@ -19,6 +19,8 @@ export interface Logic11Beat extends BaseBeat {
   /** 1 = the three connector stubs down the stack's left — the chain of support. */ spine?: number;
   /** 1 = the four step-cards are live tap targets (Q2 is answered in the scene). */ pick?: number;
   /** 1 = answering springs the return arrow and lifts the stack off its base line. */ arc?: number;
+  /** 1 = a dashed stub tries to link the two premise cards, then gets struck through — asserted side by side, supporting nothing but themselves. */ isolate?: number;
+  /** 1 = a check mark travels down all four steps in turn, landing on each the same way — showing why the flaw hides among the valid ones. */ verify?: number;
 }
 
 export const BEATS: Logic11Beat[] = [
@@ -34,7 +36,7 @@ export const BEATS: Logic11Beat[] = [
     dur: 2.6,
   },
   {
-    p: 176, x: 48, steps: 2,
+    p: 176, x: 48, steps: 2, isolate: 1,
     text: 'So far, each premise is asserted on its own, and neither is used to support the other.',
     dur: 1.8,
   },
@@ -64,7 +66,7 @@ export const BEATS: Logic11Beat[] = [
     dur: 2.9,
   },
   {
-    p: 163, x: 116, steps: 4, base: 1, spine: 1,
+    p: 163, x: 116, steps: 4, base: 1, spine: 1, verify: 1,
     text: 'That validity is what makes the flaw hard to detect.',
     dur: 2.1,
   },

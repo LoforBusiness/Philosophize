@@ -21,6 +21,9 @@ export interface E10Beat extends BaseBeat {
   /** Where the needle sits along the gauge, 0→1. */ needle?: number;
   /** The needle is being revised — it slides and the gauge ticks. */ revise?: boolean;
   /** The three flags for the tap question. */ flags?: boolean;
+  /** 1 = a "?" hangs where the gauge will be drawn — the open question, before it exists. */ openQ?: number;
+  /** 1 = a ring marks the needle — sitting inside the band, error and all. */ compatRing?: number;
+  /** 1 = small up/down arrows flank the needle — confidence rising or falling. */ riseFall?: number;
 }
 
 export const BEATS: E10Beat[] = [
@@ -30,7 +33,7 @@ export const BEATS: E10Beat[] = [
     dur: 2.7,
   },
   {
-    p: 462, x: 92, gauge: 0, needle: 0.62,
+    p: 462, x: 92, gauge: 0, needle: 0.62, openQ: 1,
     text: 'Can you know that the sun will rise without being certain of it?',
     dur: 1.8,
   },
@@ -47,7 +50,7 @@ export const BEATS: E10Beat[] = [
     dur: 3.1,
   },
   {
-    p: 260, x: 92, gauge: 1, band: 2, needle: 0.62,
+    p: 260, x: 92, gauge: 1, band: 2, needle: 0.62, compatRing: 1,
     text: 'On this view, knowledge is compatible with the possibility of error.',
     dur: 1.8,
   },
@@ -71,7 +74,7 @@ export const BEATS: E10Beat[] = [
     dur: 2.5,
   },
   {
-    p: 259, x: 160, gauge: 1, band: 2, needle: 0.78, revise: true,
+    p: 259, x: 160, gauge: 1, band: 2, needle: 0.78, revise: true, riseFall: 1,
     text: 'As new evidence arrives, confidence in a theory rises or falls. Such revision is part of scientific method, not a sign of its failure.',
     dur: 2.7,
   },

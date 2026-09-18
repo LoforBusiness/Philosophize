@@ -19,6 +19,9 @@ export interface Pol4Beat extends BaseBeat {
   /** Harm-principle boundary + the other person (0/1). */ harm?: number;
   /** Which comparison card is stamped: 0 none · 1 negative · 2 positive. */ panel?: number;
   /** Mill's-test tally — four acts, three yours and one that harms (0/1). */ test?: number;
+  /** 1 = the boundary of the area is drawn, before the person it protects. */ edge?: number;
+  /** 1 = only the harming act stays lit; the three that are your own call go quiet. */ only?: number;
+  /** 1 = the bar under the positive card, showing the role it backs for the state. */ role?: number;
 }
 
 export const BEATS: Pol4Beat[] = [
@@ -34,7 +37,7 @@ export const BEATS: Pol4Beat[] = [
     dur: 2.4,
   },
   {
-    p: 260, walls: 0.25, harm: 0, panel: 1,
+    p: 260, walls: 0.25, harm: 0, panel: 1, edge: 1,
     text: 'John Stuart Mill’s harm principle marks the boundary of that area. Power may be used against you only to prevent harm to others.',
     dur: 2.6,
   },
@@ -46,6 +49,7 @@ export const BEATS: Pol4Beat[] = [
   },
   {
     p: 266, walls: 0.25, harm: 1, panel: 1, test: 1,
+    only: 1,
     text: 'Poisoning a well, defrauding a buyer or throwing a punch harms other people. Mill allows coercion only against conduct of this kind.',
     dur: 3.2,
   },
@@ -70,6 +74,7 @@ export const BEATS: Pol4Beat[] = [
   },
   {
     p: 163, walls: 0, harm: 0, panel: 2,
+    role: 1,
     text: 'So positive liberty can back a bigger role for the state. It helps people act, not just leave them alone.',
     dur: 1.8,
   },

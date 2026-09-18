@@ -30,6 +30,7 @@ export interface Met19Beat extends BaseBeat {
   /** How strongly the peg itself is drawn, 0…1. */ peg?: number;
   /** The second, identical apple beside the first, 0…1. */ twin?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = the four properties the sentence names are marked off, one after another. */ named?: number;
 }
 
 export const BEATS: Met19Beat[] = [
@@ -46,6 +47,7 @@ export const BEATS: Met19Beat[] = [
   },
   {
     p: 266, x: 200, props: 1, peg: 0.16, strip: 0.4,
+    named: 1,
     text: 'Now remove the shape, the taste, the weight and the location as well.',
     dur: 1.8,
   },

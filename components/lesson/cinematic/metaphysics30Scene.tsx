@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics30Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A CAVERN, THE PASSAGES CHARTED SO FAR, AND A WALL NOBODY HAS REACHED.
@@ -80,6 +82,14 @@ const CAVE = BEATS.map((b) => (b.cave ? 1 : 0));
 const CHARTED = BEATS.map((b) => b.charted ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const WALL_BRACKET = BEATS.map((b) => (b.wallBracket ? 1 : 0));
+const DEAD_ENDS = BEATS.map((b) => (b.deadEnds ? 1 : 0));
+const WALL_QUERY = BEATS.map((b) => (b.wallQuery ? 1 : 0));
+/** Two dead ends, clear of the ten charted passages and clear of the wall. */
+const DEAD_END = [
+  [200, 26],
+  [210, 96],
+];
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -96,13 +106,19 @@ function Passage({ S, k, left, top }: { S: { value: { charted: number } }; k: nu
 export default function Metaphysics30Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const wallBracketFade = (cur.wallBracket ?? 0) !== (prev?.wallBracket ?? 0);
+  const deadEndsFade = (cur.deadEnds ?? 0) !== (prev?.deadEnds ?? 0);
+  const wallQueryFade = (cur.wallQuery ?? 0) !== (prev?.wallQuery ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -117,6 +133,12 @@ export default function Metaphysics30Scene({ clock, bt, bi, i, picked, onPick, d
       // HOW MUCH OF THE CAVE IS ON THE MAP, which is what the drawn curve reports.
       charted: carry(cv, 2, n, CHARTED[p], reacting ? dragPos.value : CHARTED[n], tr),
       plates: carry(cv, 3, n, PLATES[p], PLATES[n], tr),
+      // A bracket marks the far wall: the same boundary questioned since antiquity.
+      wallBracket: carry(cv, 4, n, WALL_BRACKET[p], WALL_BRACKET[n], wallBracketFade ? grow : 1),
+      // Two dead ends appear in the cavern — the false starts each expedition records.
+      deadEnds: carry(cv, 5, n, DEAD_ENDS[p], DEAD_ENDS[n], deadEndsFade ? grow : 1),
+      // A "?" hovers at the wall: what every passage's own tools take for granted.
+      wallQuery: carry(cv, 6, n, WALL_QUERY[p], WALL_QUERY[n], wallQueryFade ? grow : 1),
     };
   });
 
@@ -126,6 +148,9 @@ export default function Metaphysics30Scene({ clock, bt, bi, i, picked, onPick, d
 
   const caveStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.cave }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
+  const wallBracketStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.wallBracket }));
+  const deadEndsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.deadEnds }));
+  const wallQueryStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.wallQuery }));
 
   return (
     <View style={styles.scene}>
@@ -140,6 +165,25 @@ export default function Metaphysics30Scene({ clock, bt, bi, i, picked, onPick, d
       {PASS.map(([dx, dy], k) => (
         <Passage key={`${dx}-${dy}`} S={SCENE} k={k} left={CAVE_X + dx} top={CAVE_Y + dy} />
       ))}
+
+      {/* group AH — two dead-end stubs: the false starts each expedition records. */}
+      <Animated.View style={[StyleSheet.absoluteFill, deadEndsStyle]} pointerEvents="none">
+        {DEAD_END.map(([dx, dy]) => (
+          <View key={`${dx}-${dy}`} style={[styles.deadEnd, { left: CAVE_X + dx, top: CAVE_Y + dy }]}>
+            <View style={styles.deadEndStub} />
+            <View style={styles.deadEndCap} />
+          </View>
+        ))}
+      </Animated.View>
+
+      {/* group AH — a bracket on the far wall: the questions raised since antiquity. */}
+      <Animated.View style={[styles.wallBracketTop, wallBracketStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.wallBracketBot, wallBracketStyle]} pointerEvents="none" />
+
+      {/* group AH — a "?" at the wall: what physics itself takes for granted. */}
+      <Animated.View style={[styles.wallQuery, wallQueryStyle]} pointerEvents="none">
+        <Text style={styles.wallQueryText}>?</Text>
+      </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
         {PLATE_ID.map((id, k) => (
@@ -171,10 +215,27 @@ export default function Metaphysics30Scene({ clock, bt, bi, i, picked, onPick, d
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  // Two end-caps bracketing the far wall, just outside the cave: the same
+  // boundary questioned since antiquity, singled out from the whole cavern.
+  wallBracketTop: { position: 'absolute', left: WALL_X - 5, top: CAVE_Y - 6, width: 13, height: 2, backgroundColor: INK },
+  wallBracketBot: { position: 'absolute', left: WALL_X - 5, top: CAVE_Y + CAVE_H + 4, width: 13, height: 2, backgroundColor: INK },
+  // A "?" at the wall: what a passage's own tools take for granted rather than examine.
+  wallQuery: {
+    position: 'absolute', left: WALL_X - 7, top: CAVE_Y + CAVE_H / 2 - 7, width: 14, height: 14,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 7, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  wallQueryText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, color: INK, includeFontPadding: false },
+  // A dead end: a short passage stub capped by a stop, where the corpus's own
+  // charted passages run open.
+  deadEnd: { position: 'absolute', width: PASS_W / 2, height: PASS_H + 6 },
+  deadEndStub: { position: 'absolute', left: 0, top: 3, width: 10, height: PASS_H, backgroundColor: PAPER },
+  deadEndCap: { position: 'absolute', left: 9, top: 0, width: 1.5, height: PASS_H + 6, backgroundColor: PAPER },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: CAVE_X, top: CAP_T, width: CAVE_W, textAlign: 'center',
@@ -195,7 +256,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,

@@ -38,6 +38,7 @@ export interface Epi23Beat extends BaseBeat {
   /** How fine the mesh is, 0…1. */ mesh?: number;
   /** How far the claims have fallen through, 0…1. */ fall?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a brace in the margin joining THE MOUTH and THE MESH, both settings at once. */ bothBrace?: number;
 }
 
 export const BEATS: Epi23Beat[] = [
@@ -86,7 +87,7 @@ export const BEATS: Epi23Beat[] = [
     dur: 3.8,
   },
   {
-    p: 383, x: 268, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1,
+    p: 383, x: 268, sieve: 1, mouth: 0.9, mesh: 0.9, fall: 1, bothBrace: 1,
     text: 'So intellectual virtue needs both settings at once. Openness without rigour is credulity, and rigour without openness is dogmatism.',
     dur: 4.2,
   },

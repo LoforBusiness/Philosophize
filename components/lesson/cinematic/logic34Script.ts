@@ -19,6 +19,9 @@ export interface Logic34Beat extends BaseBeat {
   /** How large the sample is, 0 (a handful) … 1 (thousands). */ n?: number;
   /** 1 = the estimate is centred on the wrong value — a biased sample. */ biased?: number;
   /** 1 = the reader is driving the sample from the rail (Q1). */ live?: number;
+  /** 1 = the estimate mark strays from the truth and settles back — one small sample can land almost anywhere in a wide band. */ wander?: number;
+  /** 1 = a dashed ghost of the earlier, wider band appears behind the current one — the cost of each further gain, made visible by contrast. */ wide?: number;
+  /** 1 = a dashed bracket measures the distance between the narrow band and the truth it missed. */ miss?: number;
 }
 
 export const BEATS: Logic34Beat[] = [
@@ -34,7 +37,7 @@ export const BEATS: Logic34Beat[] = [
     dur: 3.6,
   },
   {
-    p: 267, x: 50, n: 0.08,
+    p: 267, x: 50, n: 0.08, wander: 1,
     text: 'A sample this small can give an estimate far from the true fraction.',
     dur: 1.8,
   },
@@ -51,7 +54,7 @@ export const BEATS: Logic34Beat[] = [
     dur: 2.2,
   },
   {
-    p: 160, x: 50, n: 1,
+    p: 160, x: 50, n: 1, wide: 1,
     text: 'Sampling error depends on the square root of the sample size, not on the size itself. So each gain in precision costs more than the last.',
     dur: 2.6,
   },
@@ -93,7 +96,7 @@ export const BEATS: Logic34Beat[] = [
     dur: 3.3,
   },
   {
-    p: 459, x: 50, n: 0.9, biased: 1,
+    p: 459, x: 50, n: 0.9, biased: 1, miss: 1,
     text: 'The error band is narrow, but it’s centred on the wrong value. The estimate is precise without being accurate.',
     dur: 1.8,
   },

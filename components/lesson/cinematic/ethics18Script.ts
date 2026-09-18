@@ -17,6 +17,11 @@ export interface Ethics18Beat extends BaseBeat {
   /** Which test is written under the line: 0 none · 1 reason · 2 suffer. */ test?: number;
   /** 0 = the line sits between the groups · 1 = it has moved past the animals. */ wide?: number;
   /** 1 = the three answer cards are live (Q1). */ pick?: number;
+  /**
+   * A one-shot strike: 1 = crosses the outlined ANIMALS chip, for "they count
+   * only as things" · 2 = crosses the TEST card, for "reason can't be the
+   * test" (the test just failed on a case the line still keeps inside).
+   */ strike?: number;
 }
 
 export const BEATS: Ethics18Beat[] = [
@@ -32,7 +37,7 @@ export const BEATS: Ethics18Beat[] = [
     dur: 2.4,
   },
   {
-    p: 270, x: 168, line: 1, test: 1,
+    p: 270, x: 168, line: 1, test: 1, strike: 1,
     text: 'Animals can’t argue, make promises or bear duties. So, on this view, they count only as things.',
     dur: 2.6,
   },
@@ -43,7 +48,7 @@ export const BEATS: Ethics18Beat[] = [
     dur: 1.8,
   },
   {
-    p: 266, x: 124, line: 1, test: 1,
+    p: 266, x: 124, line: 1, test: 1, strike: 2,
     text: 'Nor can some people with severe mental disabilities. Yet they still count morally, so reason can’t be the test.',
     dur: 3.4,
   },

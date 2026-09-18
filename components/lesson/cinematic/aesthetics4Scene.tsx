@@ -11,14 +11,16 @@ import { BEATS } from './aesthetics4Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A gallery that is also a scorecard.
 //
@@ -74,6 +76,13 @@ const TEST = BEATS.map((b) => b.test ?? 0);
 const VERD = BEATS.map((b) => b.verdict ?? 0);
 const SIGNED = BEATS.map((b) => b.signed ?? 0);
 const ART = BEATS.map((b) => b.art ?? 0);
+const OWN = BEATS.map((b) => b.own ?? 0);
+
+// ── the three tap events (group AH) ─────────────────────────────────────────
+// The ask card's own caption, once beat 1 restates the case as a question.
+const ASK_SUBS = ['NOT CARVED · NOT PAINTED · CHOSEN', 'A QUESTION OF DEFINITION'];
+// The plinth's status tag: the board's rejection, then the defence's new title.
+const STATUS_LABELS = ['', 'REFUSED', 'FOUNTAIN'];
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
@@ -99,13 +108,21 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics4'));
 export default function Aesthetics4Scene({ clock, bt, bi, pickPos, i }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldA = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const heldV = useHeld();
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // Three small labels that only re-fade on the beat that actually changes them
+  // (C20c) — the ask card's caption, the plinth's status tag, and the viewer's
+  // own-verdict prompt.
+  const askvFade = (cur.askv ?? 0) !== (prev?.askv ?? 0);
+  const statusFade = (cur.status ?? 0) !== (prev?.status ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / 0.85);
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const a = keepHeld(heldA, mixStance(carryFrom(heldA, n, emoteHold(A_CODE[p], t)), emoteLive(A_CODE[n], t, bt.value), tr));
     const v = keepHeld(heldV, mixStance(carryFrom(heldV, n, emoteHold(V_CODE[p], t)), emoteLive(V_CODE[n], t, bt.value), tr));
@@ -127,6 +144,14 @@ export default function Aesthetics4Scene({ clock, bt, bi, pickPos, i }: SceneApi
       art: carry(cv, 4, n, ART[p], reacting ? pickAt(ART_AT, pickPos.value) : ART[n], tr),
       askOn: ease01(clamp01((ask - 0.55) / 0.45)),
       testsOn: ease01(clamp01((1 - ask - 0.55) / 0.45)),
+      // The ask card's caption and the plinth's status tag both swap their WORD on
+      // the beat that changes them, so each dips through zero rather than cross-
+      // fading two overlapping strings (the same trick as `fact`/`concl` above).
+      askv: carry(cv, 6, n, 1, 1, askvFade ? grow : 1),
+      status: (cur.status ?? 0) > 0 ? (statusFade ? grow : 1) : 0,
+      // The viewer's own-verdict tag is a plain presence, so it carries smoothly
+      // in and back out rather than popping (R5) — there is no label to protect.
+      own: carry(cv, 5, n, OWN[p], OWN[n], tr),
     };
   });
 
@@ -145,6 +170,12 @@ export default function Aesthetics4Scene({ clock, bt, bi, pickPos, i }: SceneApi
     opacity: SCENE.value.art,
     transform: [{ scale: 0.8 + 0.2 * ease01(SCENE.value.art) }],
   }));
+  const askvStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.askv }));
+  const statusStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.status }));
+  const ownStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.own,
+    transform: [{ translateY: (1 - SCENE.value.own) * 6 }],
+  }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -154,7 +185,7 @@ export default function Aesthetics4Scene({ clock, bt, bi, pickPos, i }: SceneApi
         <View style={[styles.tack, { left: ASK_W - 55 }]} />
         <View style={styles.askCard}>
           <Text style={styles.askText} numberOfLines={1}>IS THIS ART?</Text>
-          <Text style={styles.askSub} numberOfLines={1}>NOT CARVED · NOT PAINTED · CHOSEN</Text>
+          <Animated.Text style={[styles.askSub, askvStyle]} numberOfLines={1}>{ASK_SUBS[cur.askv ?? 0]}</Animated.Text>
         </View>
       </Animated.View>
 
@@ -164,6 +195,11 @@ export default function Aesthetics4Scene({ clock, bt, bi, pickPos, i }: SceneApi
         <Card key={tst.id} S={SCENE} k={k} name={tst.name} sub={tst.sub} pass={tst.pass} />
       ))}
 
+      {/* the viewer's own-verdict prompt, under the ARTWORLD card, beat 9 only */}
+      <Animated.View style={[styles.ownWrap, ownStyle]} pointerEvents="none">
+        <Text style={styles.ownText}>YOUR VERDICT?</Text>
+      </Animated.View>
+
       {/* ── the readymade, its plinth and the status conferred on it ─────────── */}
       <View style={styles.readymade} pointerEvents="none">
         <View style={styles.rim} />
@@ -172,6 +208,10 @@ export default function Aesthetics4Scene({ clock, bt, bi, pickPos, i }: SceneApi
       <Animated.Text style={[styles.sig, sigStyle]}>R. Mutt 1917</Animated.Text>
       <View style={styles.plinthTop} pointerEvents="none" />
       <View style={styles.plinth} pointerEvents="none" />
+      {/* the board's rejection, then the defence's new title, on the plinth face */}
+      <Animated.View style={[styles.statusTag, statusStyle]} pointerEvents="none">
+        <Text style={styles.statusText}>{STATUS_LABELS[cur.status ?? 0]}</Text>
+      </Animated.View>
       <Animated.View style={[styles.placard, artStyle]} pointerEvents="none">
         <Text style={styles.placardT}>ART</Text>
         <Text style={styles.placardS}>CONFERRED</Text>
@@ -248,7 +288,7 @@ const styles = StyleSheet.create({
   askWrap: { position: 'absolute', left: ASK_L, top: CARD_T - TACK_H, width: ASK_W, height: CARD_H + TACK_H },
   askCard: {
     position: 'absolute', left: 0, top: TACK_H, width: ASK_W, height: CARD_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   askText: {
@@ -324,6 +364,32 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium', fontStyle: 'italic', fontSize: 11, lineHeight: 14, color: INK,
     includeFontPadding: false,
   },
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  //
+  // The prompt sits UNDER the ARTWORLD card, which is the one test the readymade
+  // passes, so the question arrives beside the answer it is about. A tile that
+  // carries a word takes the kit: white face, ink border, its own ledge.
+  ownWrap: {
+    position: 'absolute', left: CARD_L[2], top: CARD_T + CARD_H + 8, width: CARD_W,
+    height: 24, borderWidth: 1.5, borderColor: INK, borderRadius: 8,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  ownText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: INK,
+    includeFontPadding: false,
+  },
+  // The status the institution confers, printed ON the plinth face — REFUSED first,
+  // then FOUNTAIN — because the plinth is what does the conferring.
+  statusTag: {
+    position: 'absolute', left: PED_X - 40, top: 408, width: 80, height: 20,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  statusText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: INK,
+    includeFontPadding: false,
+  },
+
   plinthTop: {
     position: 'absolute', left: PED_X - 58, top: 388, width: 116, height: 13,
     borderWidth: 2.5, borderColor: INK, backgroundColor: RULE,

@@ -17,6 +17,14 @@ export interface Political7Beat extends BaseBeat {
   /** The pinned-up paper charter, 0..1. */ charter?: number;
   /** The charter ripped in two, 0..1. */ tear?: number;
   /** 1 = the two sources are tappable this beat (Q1). */ pick?: number;
+  /** 1 = a GOVERNMENT plate hands a right down to a card below it. */ claim?: number;
+  /** 1 = that card has travelled to the far side of a rule marked THE VOTE. */ before?: number;
+  /** 1 = an open bracket is laid over the stone: protected, not granted. */ protect?: number;
+  /** 1 = the stone is tagged ONLY A WISH, in the dashed hand of the other view. */ wish?: number;
+  /** 1 = the law of the thought experiment is up, and stamped ENACTED. */ law?: number;
+  /** 1 = a chip is struck out of the stone's edge: violated, still standing. */ chip?: number;
+  /** 1 = the stone is captioned CANNOT BE TAKEN AWAY, and ruled. */ stands?: number;
+  /** 1 = who the stone is for, on a leader into it: whoever reasons. */ reason?: number;
 }
 
 export const BEATS: Political7Beat[] = [
@@ -27,11 +35,13 @@ export const BEATS: Political7Beat[] = [
   },
   {
     p: 258, x: 264,
+    claim: 1,
     text: 'Does a government grant it, or a written constitution?',
     dur: 1.8,
   },
   {
     p: 258, x: 264,
+    before: 1,
     text: 'Or was the right yours before anyone voted on anything?',
     dur: 1.8,
   },
@@ -43,6 +53,7 @@ export const BEATS: Political7Beat[] = [
   },
   {
     p: 266, x: 190, stone: 1,
+    protect: 1,
     text: 'On this view, no one grants your rights. Government exists to protect rights you already have, not to create them.',
     dur: 2,
   },
@@ -54,6 +65,7 @@ export const BEATS: Political7Beat[] = [
   },
   {
     p: 270, x: 330, stone: 1, charter: 1,
+    wish: 1,
     text: 'On this view, a right that no law secures is only a wish that there were such a right.',
     dur: 1.8,
   },
@@ -78,6 +90,7 @@ export const BEATS: Political7Beat[] = [
   },
   {
     p: 467, x: 190, stone: 1, charter: 1,
+    law: 1,
     text: 'The law is properly enacted, and the state enforces it.',
     dur: 1.8,
   },
@@ -98,11 +111,13 @@ export const BEATS: Political7Beat[] = [
   },
   {
     p: 275, x: 330, stone: 1, charter: 1, tear: 1,
+    chip: 1,
     text: 'These are natural rights: rights you have just for being human. A government can violate one.',
     dur: 2.2,
   },
   {
     p: 275, x: 330, stone: 1, charter: 1, tear: 1,
+    stands: 1,
     text: 'What a government never granted, it cannot take away.',
     dur: 1.8,
   },
@@ -131,6 +146,7 @@ export const BEATS: Political7Beat[] = [
   },
   {
     p: 169, x: 190, stone: 1, charter: 1, tear: 1,
+    reason: 1,
     text: 'In 1792, Mary Wollstonecraft argued from reason. If reason grounds rights, women share them, because women reason too.',
     dur: 2.6,
   },

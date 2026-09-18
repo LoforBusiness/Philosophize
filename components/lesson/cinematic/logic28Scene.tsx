@@ -9,6 +9,7 @@ import { BEATS } from './logic28Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO PIERS A FIXED DISTANCE APART, AND A PLANK RUNNING OUT FROM THE FIRST.
@@ -75,6 +77,8 @@ const PIERS = BEATS.map((b) => (b.piers ? 1 : 0));
 const SPAN = BEATS.map((b) => b.span ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// group AH — the argument is named, over the gap the plank is crossing.
+const ASSERT_ON = BEATS.map((b) => ((b.assert ?? 0) > 0 ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -85,7 +89,10 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic28'));
 export default function Logic28Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(5);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const assertFade = (cur.assert ?? 0) !== (prev?.assert ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -106,6 +113,8 @@ export default function Logic28Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // HOW FAR THE ARGUMENT ACTUALLY ARRIVES, which is what the knob measures.
       span: carry(cv, 2, n, SPAN[p], reacting ? dragPos.value : SPAN[n], tr),
       plates: carry(cv, 3, n, PLATES[p], PLATES[n], tr),
+      // The argument named, over the gap the plank is crossing.
+      assert: carry(cv, 4, n, ASSERT_ON[p], ASSERT_ON[n], assertFade ? tr : 1),
     };
   });
 
@@ -116,6 +125,10 @@ export default function Logic28Scene({ clock, bt, bi, i, picked, onPick, dragPos
   const piersStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.piers }));
   const plankStyle = useAnimatedStyle(() => ({ width: GAP_W * clamp01(SCENE.value.span) }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
+  const assertStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.assert,
+    transform: [{ translateY: (1 - SCENE.value.assert) * -6 }],
+  }));
 
   return (
     <View style={styles.scene}>
@@ -132,6 +145,11 @@ export default function Logic28Scene({ clock, bt, bi, i, picked, onPick, dragPos
         ))}
         <View style={styles.stub} />
         <Animated.View style={[styles.plank, plankStyle]} />
+      </Animated.View>
+
+      {/* the argument named, over the gap the plank is crossing */}
+      <Animated.View style={[styles.assertTag, assertStyle]} pointerEvents="none">
+        <Text style={styles.assertText} numberOfLines={1}>THE ARGUMENT</Text>
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
@@ -167,7 +185,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: PIER_X[0], top: CAP_T, width: 258, textAlign: 'center',
@@ -197,11 +215,24 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false,
+  },
+
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // The argument named, in the empty paper directly over the gap the plank
+  // is crossing — a plate rather than a fill, so it reads as a label.
+  assertTag: {
+    position: 'absolute', left: GAP_X, top: 284, width: GAP_W, height: 20,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  assertText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK,
+    includeFontPadding: false,
   },
 });
 

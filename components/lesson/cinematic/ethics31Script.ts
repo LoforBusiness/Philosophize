@@ -19,6 +19,10 @@ export interface Ethics31Beat extends BaseBeat {
   /** How high the ladder reaches: 0 none · 1 short · 2 tall enough. */ ladder?: number;
   /** The DUTY lamp: 0 off · 1 lit. */ duty?: number;
   /** 1 = the shelf, the top rung and the lamp are live targets (Q1). */ pick?: number;
+  /** 1 = a flat "=" mark holds above the lamp, for "the duty is unchanged". */ flat?: number;
+  /** 1 = a small plate names the principle above the dark lamp: "OUGHT → CAN". */ named?: number;
+  /** 1 = a dashed bracket frames the lamp and the top rung together, showing the
+   *  duty is tied to reach rather than to the climber. */ wired?: number;
 }
 
 export const BEATS: Ethics31Beat[] = [
@@ -34,7 +38,7 @@ export const BEATS: Ethics31Beat[] = [
     cite: 'Climbing',
   },
   {
-    p: 462, rungs: 4, ladder: 1, duty: 1,
+    p: 462, rungs: 4, ladder: 1, duty: 1, flat: 1,
     dur: 2,
     text: 'The duty is unchanged, because the task is still possible for you. Being closer to the shelf doesn’t make the duty any stronger.',
   },
@@ -45,7 +49,7 @@ export const BEATS: Ethics31Beat[] = [
     cite: 'The ladder ends',
   },
   {
-    p: 167, rungs: 7, ladder: 1, duty: 0,
+    p: 167, rungs: 7, ladder: 1, duty: 0, named: 1,
     dur: 1.8,
     text: 'When a task becomes impossible, the duty to perform it lapses. This principle is called “ought implies can”.',
   },
@@ -69,7 +73,7 @@ export const BEATS: Ethics31Beat[] = [
     cite: 'Ability restored',
   },
   {
-    p: 460, rungs: 11, ladder: 2, duty: 1,
+    p: 460, rungs: 11, ladder: 2, duty: 1, wired: 1,
     dur: 1.8,
     text: 'So the duty depends on ability, not on merit. It holds while the task is within your power and lapses when it isn’t.',
   },

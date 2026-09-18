@@ -19,6 +19,16 @@ export interface Ethics12Beat extends BaseBeat {
   /** How many maxim cards are on the board: 1 the original · 3 · 12 the full field. */ n?: number;
   /** How much of the word PROMISE has gone from every card. 0 legible … 1 blank. */ word?: number;
   /** 1 = the three candidate maxims replace the field, for Q2. */ pick?: number;
+  /**
+   * 1 = a dashed line brackets the field of copies, showing the maxim
+   * adopted "at once" by everyone. One beat only.
+   */
+  suppose?: boolean;
+  /**
+   * 1 = a diagonal strike crosses the board of blank cards, showing the
+   * practice of promising has been destroyed. Stays once it lands.
+   */
+  strike?: boolean;
 }
 
 export const BEATS: Ethics12Beat[] = [
@@ -40,7 +50,7 @@ export const BEATS: Ethics12Beat[] = [
     dur: 3.1,
   },
   {
-    p: 276, x: 124, n: 3, word: 0.55,
+    p: 276, x: 124, n: 3, word: 0.55, suppose: true,
     text: 'So suppose everyone adopted the maxim of false promising at once.',
     dur: 1.8,
   },
@@ -64,12 +74,12 @@ export const BEATS: Ethics12Beat[] = [
     dur: 4,
   },
   {
-    p: 465, x: 124, n: 12, word: 1,
+    p: 465, x: 124, n: 12, word: 1, strike: true,
     text: 'The maxim therefore contradicts itself. As a universal law, it would destroy the practice of promising it relies on.',
     dur: 1.8,
   },
   {
-    p: 457, x: 124, n: 12, word: 1,
+    p: 457, x: 124, n: 12, word: 1, strike: true,
     interact: {
       prompt: 'Which of these principles could permit breaking the promise?',
       sort: {
@@ -86,7 +96,7 @@ export const BEATS: Ethics12Beat[] = [
     dur: 1.0,
   },
   {
-    p: 30, x: 124, n: 12, word: 1, pick: 1,
+    p: 30, x: 124, n: 12, word: 1, strike: true, pick: 1,
     interact: {
       prompt: 'Which of these three maxims could be willed as a universal law?',
       explain: 'Keep the promises you make. If everyone kept promises, promising would still work. But if everyone broke promises or lied when it suited them, no one would believe a promise or a statement. So those two maxims can’t be universal laws.',
@@ -95,7 +105,7 @@ export const BEATS: Ethics12Beat[] = [
     dur: 1.0,
   },
   {
-    p: 47, x: 124, n: 12, word: 1, pick: 1,
+    p: 47, x: 124, n: 12, word: 1, strike: true, pick: 1,
     summary: {
       title: 'The Categorical Imperative',
       points: [

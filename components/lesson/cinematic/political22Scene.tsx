@@ -3,12 +3,13 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { dirsFrom, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
+import { clamp01, dirsFrom, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './political22Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A SWITCH ON HIS WALL, AND A DAY THAT NOBODY INTERRUPTS.
@@ -92,6 +94,8 @@ const DIR = dirsFrom(X, 1);
 const P = BEATS.map((b) => b.p ?? 0);
 const SW = BEATS.map((b) => b.switchOn ?? 0);
 const TILES = BEATS.map((b) => b.tiles ?? 0);
+const BERLIN = BEATS.map((b) => b.berlin ?? 0);
+const CHECKED = BEATS.map((b) => b.checked ?? 0);
 const REACH = BEATS.map((b) => b.reach ?? 0);
 const FLIP = BEATS.map((b) => b.flip ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
@@ -107,7 +111,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political22'));
 export default function Political22Scene({
   clock, bt, bi, i, picked, onPick, dragPos, dragPos2, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const pulling = PULL[i] === 1;
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -132,6 +136,9 @@ export default function Political22Scene({
       tiles: carry(cv, 2, n, TILES[p], TILES[n], tr),
       reach: carry(cv, 3, n, REACH[p], pulling ? 1 - 0.82 * dragPos2.value : REACH[n], tr),
       flip: carry(cv, 4, n, FLIP[p], pulling ? 1 - dragPos.value : FLIP[n], tr),
+      // The two tap events, carried, so each fades out as well as in (group L).
+      berlin: carry(cv, 5, n, BERLIN[p], BERLIN[n], tr),
+      checked: carry(cv, 6, n, CHECKED[p], CHECKED[n], tr),
       t,
     };
   });
@@ -157,6 +164,23 @@ export default function Political22Scene({
   // what this wrapper holds (E39). The lever is a different answer and stays put.
   const swRise = useAnswerRise(picked, 'reach', true);
 
+  // ── the two tap events ─────────────────────────────────────────────────────
+  //
+  // Berlin's verdict goes under HER DAY, because it is a verdict on her day and
+  // not on the switch: on this test nobody is interfering, so she counts as free
+  // while the lever is still up.
+  const berlinStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.berlin,
+    transform: [{ translateY: (1 - SCENE.value.berlin) * 8 }],
+  }));
+  // A LATCH ACROSS THE SLOT: what Pettit asks for is not kindness but something
+  // that stops the lever being pulled at all, so it is drawn on the slot itself.
+  const checkedStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.checked,
+    transform: [{ scaleX: SCENE.value.checked }],
+  }));
+  const checkedCapStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.checked - 0.5) / 0.5) }));
+
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
@@ -179,6 +203,9 @@ export default function Political22Scene({
         {/* THE LEVER IS IN THE SWITCH, so it rises with it (E39). Drawn outside this
             wrapper it stayed behind while the housing lifted off it. */}
         <Animated.View style={[styles.lever, levStyle]} pointerEvents="none" />
+        {/* THE LATCH IS ON THE SLOT, so it is part of the switch and rises with it
+            too (E39) — drawn outside this wrapper it would stay behind. */}
+        <Animated.View style={[styles.checkBar, checkedStyle]} pointerEvents="none" />
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, capStyle]} pointerEvents="none">
@@ -212,6 +239,16 @@ export default function Political22Scene({
         <View style={[styles.hitBox, { width: 44, height: 34 }, answered && picked === 'lever' && styles.wrong]} pointerEvents="none" />
       </Target>
 
+      {/* By Berlin's test, nobody is interfering, so she is free. */}
+      <Animated.View style={[styles.berlinTag, berlinStyle]} pointerEvents="none">
+        <Text style={styles.berlinText} numberOfLines={1}>FREE, BY THAT TEST</Text>
+      </Animated.View>
+
+      {/* What checks the reach: not kindness, a latch (the bar is drawn in the switch). */}
+      <Animated.Text style={[styles.checkCap, checkedCapStyle]} pointerEvents="none">
+        LAWS · RIGHTS · COURTS
+      </Animated.Text>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -219,16 +256,39 @@ export default function Political22Scene({
 }
 
 const styles = StyleSheet.create({
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // Under her three tiles, which run x 24…212 at y 272…312 (the header states it).
+  berlinTag: {
+    position: 'absolute', left: 24, top: 324, width: 188, height: 26,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  berlinText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+  // Across the slot the lever travels in, at its own middle, drawn from the left.
+  checkBar: {
+    position: 'absolute', left: SL_X - 18, top: SL_Y + SL_H / 2 - 3, width: SL_W + 36, height: 6,
+    backgroundColor: INK, borderRadius: 3, transformOrigin: '0% 50%',
+  },
+  // Below the housing, which ends at H_Y + H_H.
+  checkCap: {
+    position: 'absolute', left: H_X, top: H_Y + H_H + 6, width: H_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   housing: {
     position: 'absolute', left: H_X, top: H_Y, width: H_W, height: H_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   slot: {
     position: 'absolute', left: SL_X, top: SL_Y, width: SL_W, height: SL_H,
@@ -253,7 +313,7 @@ const styles = StyleSheet.create({
 
   tile: {
     position: 'absolute', top: T_Y, width: T_W, height: T_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   tileText: {
     position: 'absolute', top: T_Y + 15, width: T_W, textAlign: 'center',

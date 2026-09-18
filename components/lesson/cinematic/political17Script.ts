@@ -22,6 +22,8 @@ export interface Pol17Beat extends BaseBeat {
   /** The newcomer's blank row, 0…1. */ blank?: number;
   /** How full his cup is — how much he has taken, 0…1. */ taken?: number;
   /** 1 = the three boards are live targets (Q1). */ pick?: number;
+  /** 1 = nobody else signed either: the blank is general, not his. */ nobody?: number;
+  /** 1 = the signature board is ruled through: what counts is the benefit. */ owe?: number;
 }
 
 export const BEATS: Pol17Beat[] = [
@@ -39,6 +41,7 @@ export const BEATS: Pol17Beat[] = [
   {
     g: 432, well: 1, turns: 4, blank: 1, taken: 1,
     dur: 4.8,
+    nobody: 1,
     text: 'The newcomer is right that he never consented. Almost no citizen has ever given express consent to the state either, which is a problem for consent theories.',
     cite: 'The problem for consent',
   },
@@ -58,6 +61,7 @@ export const BEATS: Pol17Beat[] = [
   {
     g: 433, well: 1, turns: 4, blank: 1, taken: 1,
     dur: 5.0,
+    owe: 1,
     text: 'So fair play stops asking about signatures. Hart argued that people who benefit from a shared scheme owe a share of the burdens.',
     cite: 'Fair play',
   },

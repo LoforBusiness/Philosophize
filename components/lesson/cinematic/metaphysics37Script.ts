@@ -31,6 +31,9 @@ export interface Metaphysics37Beat extends BaseBeat {
   /** 1 = the four candidate labels stand on the shelf. */ labels?: number;
   /** 1 = the reader's thumb is on the fragility rail. */ live_d?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a question mark hovers over the glass — what the claim is even about. */ wonder?: number;
+  /** 1 = a mark shows the hammer's head touching the glass's rim. */ touch?: number;
+  /** 1 = a struck-through tag names the analysis the argument has just rejected. */ fails?: number;
 }
 
 export const BEATS: Metaphysics37Beat[] = [
@@ -40,7 +43,7 @@ export const BEATS: Metaphysics37Beat[] = [
     dur: 3.6,
   },
   {
-    p: 419, x: 56, shelf: 1,
+    p: 419, x: 56, shelf: 1, wonder: 1,
     text: 'Was the glass fragile? Almost everyone would say yes, but it’s hard to say what that claim is about.',
     dur: 4.0,
   },
@@ -59,7 +62,7 @@ export const BEATS: Metaphysics37Beat[] = [
     dur: 3,
   },
   {
-    p: 176, x: 56, shelf: 1, hammer: 1, swing: 1,
+    p: 176, x: 56, shelf: 1, hammer: 1, swing: 1, touch: 1,
     text: 'Now suppose a hammer comes down on the glass.',
     dur: 1.8,
   },
@@ -70,7 +73,7 @@ export const BEATS: Metaphysics37Beat[] = [
     dur: 3.2,
   },
   {
-    p: 266, x: 56, shelf: 1, hammer: 1, swing: 1, ward: 1,
+    p: 266, x: 56, shelf: 1, hammer: 1, swing: 1, ward: 1, fails: 1,
     text: 'Yet until the blow, the glass is as fragile as ever. So the simple conditional analysis fails.',
     dur: 1.8,
   },

@@ -9,6 +9,7 @@ import { BEATS } from './epistemology22Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A ROAD AND A LINE OF STEPPING STONES, ARRIVING AT THE SAME DOOR.
@@ -74,6 +76,9 @@ const ROUTES = BEATS.map((b) => b.routes ?? 0);
 const RUN = BEATS.map((b) => b.run ?? 0);
 const GAPS = BEATS.map((b) => b.gaps ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+const ROAD_FOCUS = BEATS.map((b) => (b.laneFocus === 1 ? 1 : 0));
+const STONE_FOCUS = BEATS.map((b) => (b.laneFocus === 2 ? 1 : 0));
+const ROAD_AHEAD = BEATS.map((b) => (b.roadAhead ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -85,7 +90,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology22'));
 export default function Epistemology22Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -108,6 +113,9 @@ export default function Epistemology22Scene({ clock, bt, bi, i, picked, onPick, 
       // R7c — `pos` is the MEAN of the drawn curve, which is how often the guesser
       // arrives. Draw a high one and the gaps under the lucky route close.
       gaps: carry(cv, 3, n, GAPS[p], reacting ? 1 - dragPos.value : GAPS[n], tr),
+      roadFocus: carry(cv, 4, n, ROAD_FOCUS[p], ROAD_FOCUS[n], tr),
+      stoneFocus: carry(cv, 5, n, STONE_FOCUS[p], STONE_FOCUS[n], tr),
+      roadAhead: carry(cv, 6, n, ROAD_AHEAD[p], ROAD_AHEAD[n], tr),
       t,
     };
   });
@@ -124,6 +132,9 @@ export default function Epistemology22Scene({ clock, bt, bi, i, picked, onPick, 
   const stoneTok = useAnimatedStyle(() => ({
     transform: [{ translateX: (END_X - START_X - TOKEN) * SCENE.value.run }],
   }));
+  const roadFocusStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.roadFocus }));
+  const stoneFocusStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.stoneFocus }));
+  const roadAheadStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.roadAhead }));
 
   const stones: number[] = [];
   for (let k = 0; k < STONE_N; k += 1) stones.push(k);
@@ -147,7 +158,14 @@ export default function Epistemology22Scene({ clock, bt, bi, i, picked, onPick, 
         {stones.map((k) => (
           <View key={k} style={[styles.stone, { left: START_X + k * STONE_STEP }]} />
         ))}
+
+        {/* ROAD_AHEAD — the reliable route's own line, still going past the address. */}
+        <Animated.View style={[styles.roadAhead, roadAheadStyle]} pointerEvents="none" />
       </Animated.View>
+
+      {/* ROAD_FOCUS / STONE_FOCUS — a dashed ring on the lane the sentence names. */}
+      <Animated.View style={[styles.laneRing, { top: ROAD_Y - 24 }, roadFocusStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.laneRing, { top: STONE_Y - 24, height: 40 }, stoneFocusStyle]} pointerEvents="none" />
 
       {/* THE GAPS. The stones were always there; the spaces get named later. */}
       <Animated.View style={[StyleSheet.absoluteFill, gapStyle]} pointerEvents="none">
@@ -184,7 +202,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   destCap: {
     // WIDER THAN THE BOX IT NAMES, centred on it. THE ADDRESS measures 68.4 units
@@ -200,7 +218,7 @@ const styles = StyleSheet.create({
   },
   dest: {
     position: 'absolute', left: DEST_X, top: DEST_Y, width: DEST_W, height: DEST_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
 
   lane: {
@@ -216,6 +234,18 @@ const styles = StyleSheet.create({
     backgroundColor: INK, borderRadius: 2,
   },
   gap: { position: 'absolute', top: STONE_Y + 6, width: 12, height: 1, backgroundColor: SOFT },
+
+  // ROAD_FOCUS / STONE_FOCUS — a dashed ring on the lane the sentence names.
+  laneRing: {
+    position: 'absolute', left: START_X - 4, width: 248, height: 26,
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 8,
+  },
+  // ROAD_AHEAD — the road's own line, extended past the address: the trip that
+  // keeps working, where the stepping stones simply end.
+  roadAhead: {
+    position: 'absolute', left: DEST_X + DEST_W, top: ROAD_Y - 2, width: 30, height: 4,
+    backgroundColor: SOFT, borderRadius: 2,
+  },
 
   tok: {
     position: 'absolute', width: TOKEN, height: TOKEN, borderRadius: TOKEN / 2,

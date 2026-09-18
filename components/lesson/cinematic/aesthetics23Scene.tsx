@@ -9,6 +9,7 @@ import { BEATS } from './aesthetics23Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A TUNE, AND ONE ARROW WITH THREE PLACES TO AIM.
@@ -87,6 +89,11 @@ const PLATES = BEATS.map((b) => b.plates ?? 0);
 const POINT = BEATS.map((b) => b.point ?? 0);
 const AIM = BEATS.map((b) => PL_MID[b.aim ?? 0]);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+// GROUP AH — two still taps. A dashed frame seals the notes shut (beat 6, the
+// claim that they have no subject outside themselves); a dark mass sits offset
+// behind the aimed plate (beat 8, the will Schopenhauer says hides behind it).
+const SEAL = BEATS.map((b) => b.seal ?? 0);
+const HIDDEN = BEATS.map((b) => b.hidden ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -98,7 +105,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics23'));
 export default function Aesthetics23Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -123,6 +130,8 @@ export default function Aesthetics23Scene({ clock, bt, bi, i, picked, onPick, pi
       // whichever one the reader is standing on. `AIM` is already a stage x, not an
       // index, so the reaction interpolates between the outer two plate mid-points.
       aim: carry(cv, 4, n, AIM[p], reacting ? PL_MID[0] + (PL_MID[2] - PL_MID[0]) * pickPos.value : AIM[n], tr),
+      seal: carry(cv, 5, n, SEAL[p], SEAL[n], tr),
+      hidden: carry(cv, 6, n, HIDDEN[p], HIDDEN[n], tr),
       t,
     };
   });
@@ -138,6 +147,8 @@ export default function Aesthetics23Scene({ clock, bt, bi, i, picked, onPick, pi
     opacity: SCENE.value.point,
     transform: [{ translateX: SCENE.value.aim }],
   }));
+  const sealStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.seal }));
+  const hiddenStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.hidden }));
 
   const notes = [0, 1, 2, 3, 4, 5, 6];
 
@@ -154,8 +165,11 @@ export default function Aesthetics23Scene({ clock, bt, bi, i, picked, onPick, pi
         ))}
       </Animated.View>
 
+      <Animated.View style={[styles.seal, sealStyle]} pointerEvents="none" />
+
       <Animated.View style={[StyleSheet.absoluteFill, plStyle]} pointerEvents="none">
         <Text style={styles.caption}>IT POINTS AT</Text>
+        <Animated.View style={[styles.hidden, hiddenStyle]} pointerEvents="none" />
         {PL_X.map((px, k) => (
           <AnswerLift key={px} id={`p${k}`} picked={picked} correct={k === 2}>
             <View style={[styles.plate, { left: px }, k === 2 && styles.plateOpen]} />
@@ -203,7 +217,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   staveLine: { position: 'absolute', left: ST_L, width: ST_R - ST_L, height: 1.2, backgroundColor: SOFT },
   head: { position: 'absolute', width: NOTE_W, height: NOTE_H, borderRadius: 5, backgroundColor: INK },
@@ -215,13 +229,25 @@ const styles = StyleSheet.create({
   },
   plate: {
     position: 'absolute', top: PL_Y, width: PL_W, height: PL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   plateOpen: { borderStyle: 'dashed', borderWidth: 1.5, borderColor: SOFT },
   plateText: {
     position: 'absolute', top: PL_Y + 12, width: PL_W, textAlign: 'center', lineHeight: 11,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false },
 
+  // A DASHED FRAME ROUND THE TUNE'S OWN NOTES (beat 6) — "no subject beyond its
+  // own patterns of tones" drawn as a boundary with nothing crossing it.
+  seal: {
+    position: 'absolute', left: 38, top: 238, width: 300, height: 46, borderRadius: 6,
+    borderWidth: 1.5, borderStyle: 'dashed', borderColor: SOFT,
+  },
+  // A DARK MASS OFFSET BEHIND THE AIMED PLATE (beat 8) — the will Schopenhauer
+  // says hides behind what the plate shows.
+  hidden: {
+    position: 'absolute', left: PL_X[2] + 6, top: PL_Y + 6, width: PL_W, height: PL_H,
+    borderRadius: 8, backgroundColor: INK,
+  },
   arrow: { position: 'absolute', left: 0, top: AR_TOP, width: 0, height: 0 },
   riser: { position: 'absolute', left: -1.5, top: 0, width: 3, height: 18, backgroundColor: INK },
   headBar: { position: 'absolute', height: 3, backgroundColor: INK },

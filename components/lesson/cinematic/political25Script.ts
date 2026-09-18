@@ -27,6 +27,8 @@ export interface Political25Beat extends BaseBeat {
   /** How far the old reach ran, 0…1 across both rooms. */ reach?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = an emphasis ring marks the PRIVATE room (group AH). */ focus?: number;
+  /** 1 = a "?" tag hangs over the door — the veil of ignorance (group AH). */ veil?: number;
 }
 
 export const BEATS: Political25Beat[] = [
@@ -46,7 +48,7 @@ export const BEATS: Political25Beat[] = [
     dur: 4.0,
   },
   {
-    p: 160, x: 44, rooms: 1, reach: 0.46,
+    p: 160, x: 44, rooms: 1, reach: 0.46, focus: 1,
     text: 'Home life belonged to the private sphere. Its roles were treated as natural rather than as a matter of power.',
     dur: 4.6,
   },
@@ -83,7 +85,7 @@ export const BEATS: Political25Beat[] = [
     dur: 4.0,
   },
   {
-    p: 383, x: 100, rooms: 1, reach: 0.46,
+    p: 383, x: 100, rooms: 1, reach: 0.46, veil: 1,
     text: 'Susan Moller Okin turned John Rawls’s veil of ignorance on the family. If you didn’t know your sex, you’d want the household to be just.',
     dur: 5.0,
   },

@@ -39,6 +39,9 @@ const bad = (m, d) => { fails++; console.log(`  FAIL  ${m}${d ? `  ${d}` : ''}`)
 
 const lessons = corpus().filter((l) => l.key && reachesCatalogue(l.comp));
 
+/** Which beats are pieces of one sentence, frozen before group AH (make-splitruns). */
+const SPLIT_RUNS = JSON.parse(fs.readFileSync('scripts/lib/splitruns.json', 'utf8'));
+
 // ── the same run detection the codemod uses ──────────────────────────────────
 function runsOf(lesson) {
   const raw = readScript(lesson.file);
@@ -47,11 +50,33 @@ function runsOf(lesson) {
   const parts = m[1].split(/(\n\s{2}\},?\s*\n?)/);
   const chunks = [];
   for (let i = 0; i < parts.length; i += 2) if (/\S/.test(parts[i])) chunks.push(parts[i]);
+  // A TAP EVENT IS A PULSE, NOT STATE (group AH). J12 split a sentence into pieces
+  // and copied every channel, so a run used to be recognisable by identical
+  // channels. Group AH then gave each piece its OWN event — a channel non-zero on
+  // one beat, occasionally two — which is exactly what the split's pieces now
+  // differ by. So pulses are set aside before comparing: what remains is the
+  // scene's state, and a sentence whose state holds is still one movement (N7).
+  const sigs = chunks.map((c) => channels(decomment(c)).split(' ').filter(Boolean));
+  const lit = new Map();
+  for (const sig of sigs) for (const kv of sig) {
+    const [k, v] = kv.split('=');
+    if (+v !== 0) lit.set(k, (lit.get(k) || 0) + 1);
+  }
+  const PULSE = 2;
+  const state = (sig) => sig.filter((kv) => (lit.get(kv.split('=')[0]) || 0) > PULSE).join(' ');
+  // THE FROZEN TABLE WINS where it still describes this lesson (scripts/lib/
+  // splitruns.json, read once from before group AH — see make-splitruns.mjs). The
+  // pulse rule above is the fallback for a lesson re-cut since, and for new ones.
+  const frozen = SPLIT_RUNS[path.basename(lesson.file)];
   const cont = new Set();
-  for (let i = 1; i < chunks.length; i++) {
-    const a = channels(decomment(chunks[i - 1]));
-    const b = channels(decomment(chunks[i]));
-    if (a && a === b) cont.add(i);
+  if (frozen && frozen.beats === chunks.length) {
+    for (const i of frozen.cont) cont.add(i);
+  } else {
+    for (let i = 1; i < chunks.length; i++) {
+      const a = state(sigs[i - 1]);
+      const b = state(sigs[i]);
+      if (a && a === b) cont.add(i);
+    }
   }
   // THE HEAD OF A RUN IS IN THE RUN. `cont` holds continuations only, so a rule
   // written against it alone counts the head as a free-standing beat — which put

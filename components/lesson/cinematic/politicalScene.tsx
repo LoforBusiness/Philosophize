@@ -10,14 +10,16 @@ import {
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE WAR OF ALL AGAINST ALL, AND THE SOVEREIGN THEY RAISE.
@@ -427,7 +429,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   pedestal: {
     position: 'absolute', left: SOV_X - 28, top: GROUND - PED, width: 56, height: PED,
     backgroundColor: PAPER, borderWidth: 2, borderColor: INK,
@@ -455,7 +457,7 @@ const styles = StyleSheet.create({
 
   flowBox: { position: 'absolute', top: FLOW_T, width: FLOW_W, height: FLOW_H },
   flowFixed: {
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   flowOff: {
@@ -488,7 +490,7 @@ const styles = StyleSheet.create({
   },
   meterTrack: {
     position: 'absolute', top: MTR_T, width: MTR_W, height: MTR_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   meterFill: {
     position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
@@ -502,7 +504,7 @@ const styles = StyleSheet.create({
   // Right of the sovereign's crown and sword, left of the PEACE gauge's label (344).
   contract: {
     position: 'absolute', left: 266, top: 318, width: 72, height: 40,
-    backgroundColor: PAPER, borderWidth: 2, borderColor: INK, borderRadius: 2,
+    backgroundColor: PAPER, borderWidth: 2, borderColor: INK, borderRadius: 8,
     alignItems: 'center', paddingTop: 4, transformOrigin: '50% 0%',
   },
   contractTitle: {

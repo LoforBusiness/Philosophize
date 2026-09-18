@@ -29,6 +29,12 @@ export interface Eth17Beat extends BaseBeat {
   /** How far the copies have spread along the row, 0…1. */ copies?: number;
   /** How full the BEING BELIEVED bar is, 0…1. */ trust?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /**
+   * 1..3 = a one-shot flash in the gap above the trust bar, naming what the
+   * beat just said: 1 "NO EXCEPTIONS" (the duty holds even towards a
+   * murderer) · 2 "AN ARGUMENT, NOT A FEELING" (consistency, not revulsion) ·
+   * 3 "= THE MAXIM" (labelling the card already on stage).
+   */ note?: number;
 }
 
 export const BEATS: Eth17Beat[] = [
@@ -38,17 +44,17 @@ export const BEATS: Eth17Beat[] = [
     dur: 3.4,
   },
   {
-    p: 462, x: 200, maxim: 1, trust: 1,
+    p: 462, x: 200, maxim: 1, trust: 1, note: 1,
     text: 'Kant answers that you may not. The duty of truthfulness holds even towards a murderer.',
     dur: 1.8,
   },
   {
-    p: 463, x: 200, maxim: 1, trust: 1,
+    p: 463, x: 200, maxim: 1, trust: 1, note: 2,
     text: 'The verdict seems monstrous. Kant defends it with an argument about consistency, not with revulsion at lying.',
     dur: 2.7,
   },
   {
-    p: 463, x: 200, maxim: 1, trust: 1,
+    p: 463, x: 200, maxim: 1, trust: 1, note: 3,
     text: 'Kant calls the rule behind an action its maxim. You may act only on a maxim you could will to be a universal law.',
     dur: 2.1,
   },

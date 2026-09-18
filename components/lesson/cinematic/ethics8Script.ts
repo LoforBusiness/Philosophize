@@ -19,6 +19,16 @@ export interface Ethics8Beat extends BaseBeat {
   /** The slumped figure and their bed, 0..1. */ oth?: number;
   /** The thread of connection between the two, 0..1. */ thread?: number;
   /** 1 = the three question cards are live in the scene (Q1). */ pick?: number;
+  /**
+   * A one-shot flash in the neutral strip above the walk band, timed to this
+   * beat's own claim. 0 none · 1 "OR: SIT WITH THEM" (the neglected response) ·
+   * 2 a dashed empty circle + "NO ONE IN PARTICULAR" (the grid's own blankness) ·
+   * 3 a filled circle + "SOMEONE, NOT A NUMBER" (the counterpoint) · 4 a bent
+   * arrow + "SOMETHING ELSE" (guidance that isn't a rule) · 5 a speech-bubble
+   * outline + "A DIFFERENT VOICE" (Gilligan's own name for it) · 6 a small
+   * sprout + "GROWS FROM CARING" (Noddings' natural caring) · 7 "≡ + ●"
+   * (justice's rule beside care's person, working together).
+   */ note?: number;
 }
 
 export const BEATS: Ethics8Beat[] = [
@@ -28,7 +38,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 2.2,
   },
   {
-    p: 165, x: 80,
+    p: 165, x: 80, note: 1,
     text: 'Or you could go and sit with them. Care ethicists argue that moral theory long neglected the second response.',
     dur: 2.4,
   },
@@ -39,7 +49,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 3.3,
   },
   {
-    p: 267, x: 80, grid: 1,
+    p: 267, x: 80, grid: 1, note: 2,
     text: 'Their categories apply to anyone and name no particular person.',
     dur: 1.8,
   },
@@ -50,7 +60,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 2.8,
   },
   {
-    p: 159, x: 146, grid: 1, oth: 1,
+    p: 159, x: 146, grid: 1, oth: 1, note: 3,
     text: 'To you, this person isn’t a case or a number. This is someone with whom you have a relationship.',
     dur: 1.8,
   },
@@ -65,7 +75,7 @@ export const BEATS: Ethics8Beat[] = [
   {
     // 49 (down on one knee), not 43 (setting a load down while standing): the line
     // is "get down beside them", so the figure has to actually get down.
-    p: 280, x: 182, grid: 1, oth: 1,
+    p: 280, x: 182, grid: 1, oth: 1, note: 4,
     text: 'Something other than a principle is already guiding what you do.',
     dur: 1.8,
   },
@@ -88,7 +98,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 4,
   },
   {
-    p: 169, x: 182, grid: 0.5, oth: 1, thread: 1,
+    p: 169, x: 182, grid: 0.5, oth: 1, thread: 1, note: 5,
     text: 'Gilligan called this a different moral voice, centred on responsibility and relationships.',
     dur: 1.8,
   },
@@ -131,7 +141,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 3.3,
   },
   {
-    p: 266, x: 112, grid: 0.3, oth: 1, thread: 1,
+    p: 266, x: 112, grid: 0.3, oth: 1, thread: 1, note: 6,
     text: 'Noddings holds that ethical caring grows from natural caring, such as a parent’s care for a child.',
     dur: 1.8,
   },
@@ -142,7 +152,7 @@ export const BEATS: Ethics8Beat[] = [
     dur: 2.9,
   },
   {
-    p: 176, x: 172, grid: 0.28, oth: 1, thread: 1,
+    p: 176, x: 172, grid: 0.28, oth: 1, thread: 1, note: 7,
     text: 'Justice requires treating everyone equally. Care notices the person the rules never mention.',
     dur: 2,
   },

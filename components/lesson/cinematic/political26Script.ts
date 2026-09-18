@@ -29,6 +29,9 @@ export interface Political26Beat extends BaseBeat {
   /** 1 = the feeds run from both sources up into the decision. */ feeds?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = tally marks appear, counting preferences being added up (group AH). */ tally?: number;
+  /** 1 = small ticks appear, marking agreement reached in discussion (group AH). */ agree?: number;
+  /** 1 = an "=" mark appears, showing each vote weighed the same (group AH). */ weigh?: number;
 }
 
 export const BEATS: Political26Beat[] = [
@@ -38,7 +41,7 @@ export const BEATS: Political26Beat[] = [
     dur: 4.4,
   },
   {
-    p: 174, x: 28, decision: 1, box: 1,
+    p: 174, x: 28, decision: 1, box: 1, tally: 1,
     text: 'The aggregative model treats democracy as a procedure for adding up the preferences people already have.',
     dur: 4.8,
   },
@@ -48,7 +51,7 @@ export const BEATS: Political26Beat[] = [
     dur: 5.0,
   },
   {
-    p: 265, x: 28, decision: 1, box: 1, table: 1,
+    p: 265, x: 28, decision: 1, box: 1, table: 1, agree: 1,
     text: 'On Habermas’s view, a law is legitimate only if everyone it affects could agree to it in rational discussion.',
     dur: 4.8,
   },
@@ -79,7 +82,7 @@ export const BEATS: Political26Beat[] = [
     dur: 5.0,
   },
   {
-    p: 381, x: 88, decision: 1, box: 1, table: 1, feeds: 1,
+    p: 381, x: 88, decision: 1, box: 1, table: 1, feeds: 1, weigh: 1,
     text: 'Iris Marion Young objected that deliberation favours those who argue in a calm, formal style. By contrast, a vote gives each person the same weight.',
     dur: 5.0,
   },

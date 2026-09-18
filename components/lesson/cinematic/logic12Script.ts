@@ -14,6 +14,9 @@ export interface Logic12Beat extends BaseBeat {
   /** Figure gesture (emote code). */ g?: number;
   /** 1 = the two unoffered doors are lit as well. */ lit?: number;
   /** 1 = the doors are live targets (Q1). */ pick?: number;
+  /** 1 = a check mark flashes on each of the two offered doors together, marking both as genuine options. */ affirm?: number;
+  /** 1 = a stamped plate reads across the wall, naming the unargued claim that nothing else is on offer. */ claim?: number;
+  /** 1 = a dashed boundary draws itself around just the two offered doors, as if they were the whole of the choice. */ bound?: number;
 }
 
 export const BEATS: Logic12Beat[] = [
@@ -23,19 +26,19 @@ export const BEATS: Logic12Beat[] = [
     text: 'Suppose someone says “you’re either with us or against us”. The sentence offers two options and asks you to choose one.',
   },
   {
-    g: 457, lit: 0,
+    g: 457, lit: 0, affirm: 1,
     dur: 4.4,
     text: 'Both options are genuine, since some people are with you and some are against you.',
     cite: 'Both options are real',
   },
   {
-    g: 2, lit: 0,
+    g: 2, lit: 0, claim: 1,
     dur: 2.8,
     text: 'The fallacy lies in the unargued claim that no other option exists. This is called a false dilemma.',
     cite: 'An unargued premise',
   },
   {
-    g: 266, lit: 0,
+    g: 266, lit: 0, bound: 1,
     dur: 1.8,
     text: 'A false dilemma presents the options on offer as if they were all the options.',
   },

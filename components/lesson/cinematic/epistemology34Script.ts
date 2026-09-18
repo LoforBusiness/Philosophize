@@ -15,6 +15,11 @@ export interface Epistemology34Beat extends BaseBeat {
   /** What is being claimed, 0 (a coin flip) … 1 (certain). */ claim?: number;
   /** 1 = the reader is driving the claim from the rail (Q1). */ live?: number;
   /** 1 = the gap between the two bars is called out. */ gap?: number;
+  /** 1 = a dashed outline marks the still-empty right-hand column. */ holdSlot?: number;
+  /** 1 = a small dot marks the still-small gap between the bar tops. */ note?: number;
+  /** 1 = the gap between the bars is named: overconfidence. */ gapLbl?: number;
+  /** 1 = a dashed line at the claim bar's own height shows where the right bar would need to reach. */ target?: number;
+  /** 1 = two small matching bars illustrate a calibrated case: right half the time, claiming no more. */ example?: number;
 }
 
 export const BEATS: Epistemology34Beat[] = [
@@ -24,7 +29,7 @@ export const BEATS: Epistemology34Beat[] = [
     dur: 1.8,
   },
   {
-    p: 462, x: 54, claim: 0,
+    p: 462, x: 54, claim: 0, holdSlot: 1,
     text: 'The right bar shows how often claims made with that confidence turn out true.',
     dur: 2.2,
   },
@@ -35,7 +40,7 @@ export const BEATS: Epistemology34Beat[] = [
     dur: 3.5,
   },
   {
-    p: 267, x: 54, claim: 0.3,
+    p: 267, x: 54, claim: 0.3, note: 1,
     text: 'The mismatch between the two bars is usually small at this level.',
     dur: 1.8,
   },
@@ -46,18 +51,18 @@ export const BEATS: Epistemology34Beat[] = [
     dur: 2,
   },
   {
-    p: 169, x: 54, claim: 0.95, gap: 1,
+    p: 169, x: 54, claim: 0.95, gap: 1, gapLbl: 1,
     text: 'The right bar doesn’t rise as far. The difference between the bars is overconfidence.',
     dur: 2.6,
   },
   {
-    p: 467, x: 54, claim: 0.95, gap: 1,
+    p: 467, x: 54, claim: 0.95, gap: 1, gapLbl: 1, target: 1,
     text: 'Being well calibrated means those two bars match. Calibration is therefore different from being right often.',
     cite: 'Calibration',
     dur: 3,
   },
   {
-    p: 467, x: 54, claim: 0.95, gap: 1,
+    p: 467, x: 54, claim: 0.95, gap: 1, gapLbl: 1, target: 1, example: 1,
     text: 'Someone who is right half the time, and claims no more than that, is well calibrated.',
     dur: 1.8,
   },

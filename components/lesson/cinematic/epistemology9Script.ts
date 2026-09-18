@@ -20,6 +20,13 @@ export interface Epistemology9Beat extends BaseBeat {
   /** 1 = the two candidate maps are pinned up for Q1. */ cards?: number;
   /** 1 = the "how do you check?" arrows + ? badge sit between map and land. */ link?: number;
   /** Rival theories placarded on the right: 0 none · 1 coherence · 2 + pragmatism. */ theory?: number;
+  /** 1 = a "TRUE?" tag hangs in the clear air — the open question, before any prop. */ trueTag?: number;
+  /** 1 = a tag lands under the land — it's there "whether or not anyone observes". */ realTag?: number;
+  /** 1 = a "TRUE?" tag hangs over the board — the same question, now about the sketch. */ mapQTag?: number;
+  /** 1 = a "✓ FITS" tag lands over the board — the match this beat names. */ fitsTag?: number;
+  /** 1 = a ring marks the board — "what is the sketch compared against?" */ mapDoubtRing?: number;
+  /** 1 = a small web of dots lands by COHERENCE — the "web of belief" this beat names. */ webIcon?: number;
+  /** 1 = a dashed path runs from the easel toward the land — the map, put to use. */ pathTag?: number;
 }
 
 export const BEATS: Epistemology9Beat[] = [
@@ -29,7 +36,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 2.2,
   },
   {
-    p: 164, x: 208,
+    p: 164, x: 208, trueTag: 1,
     text: 'When you call a statement true, what are you claiming about it?',
     dur: 1.8,
   },
@@ -40,7 +47,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 2.7,
   },
   {
-    p: 262, x: 268, land: 1,
+    p: 262, x: 268, land: 1, realTag: 1,
     text: 'The hills and the tree are there whether or not anyone observes them.',
     dur: 1.8,
   },
@@ -51,7 +58,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 3.2,
   },
   {
-    p: 268, x: 148, land: 1, map: 1,
+    p: 268, x: 148, land: 1, map: 1, mapQTag: 1,
     text: 'The question is what makes such a claim true.',
     dur: 1.8,
   },
@@ -71,7 +78,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 2.7,
   },
   {
-    p: 266, x: 148, land: 1, map: 1,
+    p: 266, x: 148, land: 1, map: 1, fitsTag: 1,
     text: 'Truth, on this view, is a relation of fit between a belief and the world. The view is called the correspondence theory.',
     dur: 2.5,
   },
@@ -95,7 +102,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 2.5,
   },
   {
-    p: 404, x: 148, land: 1, map: 1, link: 1,
+    p: 404, x: 148, land: 1, map: 1, link: 1, mapDoubtRing: 1,
     text: 'This raises a difficulty for the correspondence theory: what is the sketch compared against?',
     dur: 2.3,
   },
@@ -123,7 +130,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 3.9,
   },
   {
-    p: 459, x: 268, land: 1, map: 1, theory: 1,
+    p: 459, x: 268, land: 1, map: 1, theory: 1, webIcon: 1,
     text: 'On this theory, truth is a matter of fitting into the whole web of belief.',
     dur: 1.8,
   },
@@ -134,7 +141,7 @@ export const BEATS: Epistemology9Beat[] = [
     dur: 1.8,
   },
   {
-    p: 266, x: 268, land: 1, map: 1, theory: 2,
+    p: 266, x: 268, land: 1, map: 1, theory: 2, pathTag: 1,
     text: 'A true map must guide you across the real hills reliably, over time. Being comforting is not enough: the belief must keep working in experience.',
     dur: 3.5,
   },

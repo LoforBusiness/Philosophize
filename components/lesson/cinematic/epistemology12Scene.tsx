@@ -13,6 +13,7 @@ import { BEATS } from './epistemology12Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // THREE PIPES FEEDING ONE TANK labelled WHAT YOU KNOW. The pipes are laid one per
 // beat and each fills its own band of the tank; the third — testimony, the one that
@@ -158,6 +160,10 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology12'));
 const DIR = dirsFrom(X, 1);
 const PIPES = BEATS.map((b) => b.pipes ?? 0);
 const TOK = BEATS.map((b) => b.token ?? 0);
+// group AH — one still-tap event each, plain carried 0/1 tracks
+const ASK_ROUTE = BEATS.map((b) => b.askRoute ?? 0);
+const MEM_RING = BEATS.map((b) => b.memRing ?? 0);
+const MOST_RING = BEATS.map((b) => b.mostRing ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -167,7 +173,7 @@ const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(6);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -204,6 +210,9 @@ export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick, 
       testDown: ease01(clamp01(test / TEST_SPLIT)),
       testRun: ease01(clamp01((test - TEST_SPLIT) / (1 - TEST_SPLIT))),
       token: carry(cv, 2, n, TOK[p], TOK[n], tr),
+      askRoute: carry(cv, 3, n, ASK_ROUTE[p], ASK_ROUTE[n], tr),
+      memRing: carry(cv, 4, n, MEM_RING[p], MEM_RING[n], tr),
+      mostRing: carry(cv, 5, n, MOST_RING[p], MOST_RING[n], tr),
       t,
     };
   });
@@ -230,6 +239,9 @@ export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick, 
     opacity: SCENE.value.token,
     transform: [{ translateY: (1 - SCENE.value.token) * -12 }],
   }));
+  const askRouteStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.askRoute }));
+  const memRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.memRing }));
+  const mostRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.mostRing }));
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -243,10 +255,20 @@ export default function Epistemology12Scene({ clock, bt, bi, i, picked, onPick, 
       <Animated.View style={[styles.pipe, styles.memRun, memRunS]} pointerEvents="none" />
       <Animated.View style={[styles.pipe, styles.percRun, percRunS]} pointerEvents="none" />
 
+      {/* "by what routes do beliefs like these reach you?" — before any pipe is laid. */}
+      <Animated.View style={[styles.askRoute, askRouteStyle]} pointerEvents="none">
+        <Text style={styles.askRouteT}>?</Text>
+      </Animated.View>
+
       {/* ── the tank ─────────────────────────────────────────────────────────── */}
       <Text style={styles.tankLabel} pointerEvents="none">WHAT YOU KNOW</Text>
       <View style={styles.tank} pointerEvents="none" />
       <View style={styles.plinth} pointerEvents="none" />
+
+      {/* "a remembered belief travels a longer route" — a ring round memory's bend. */}
+      <Animated.View style={[styles.memRing, memRingStyle]} pointerEvents="none" />
+      {/* "most of what you know reaches you by testimony" — a ring on that band. */}
+      <Animated.View style={[styles.mostRing, mostRingStyle]} pointerEvents="none" />
 
       {/* what has arrived so far, in three visible bands */}
       <Animated.View style={[styles.band, styles.bandTest, bandTestS]} pointerEvents="none" />
@@ -336,7 +358,7 @@ const styles = StyleSheet.create({
   tank: {
     position: 'absolute', left: TANK_L, top: TANK_T,
     width: TANK_R - TANK_L, height: TANK_B - TANK_T,
-    borderWidth: WALL, borderColor: INK, borderRadius: 5, backgroundColor: PAPER,
+    borderWidth: WALL, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plinth: {
     position: 'absolute', left: TANK_L - 8, top: TANK_B,
@@ -346,6 +368,23 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 236, top: 246, width: 116, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.5, color: SOFT,
     includeFontPadding: false,
+  },
+  // "by what routes do beliefs like these reach you?" — asked before any pipe.
+  askRoute: {
+    position: 'absolute', left: 284, top: 222, width: 20, height: 20, borderRadius: 10,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  askRouteT: { fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, includeFontPadding: false },
+  // "a remembered belief travels a longer route" — round memory's own bent path.
+  memRing: {
+    position: 'absolute', left: 150, top: 317, width: 102, height: 48,
+    borderRadius: 10, borderWidth: 2, borderColor: INK, borderStyle: 'dashed',
+  },
+  // "most of what you know reaches you by testimony" — round that band, on ink.
+  mostRing: {
+    position: 'absolute', left: 259, top: 321, width: 112, height: 106,
+    borderRadius: 6, borderWidth: 2, borderColor: PAPER, borderStyle: 'dashed',
   },
 
   // ── what has arrived, in three bands ────────────────────────────────────────
@@ -370,7 +409,7 @@ const styles = StyleSheet.create({
   // ── the belief that lands on Q2 ─────────────────────────────────────────────
   token: {
     position: 'absolute', left: 259, top: 276, width: 112, height: 36,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   tokenText: {
@@ -381,7 +420,7 @@ const styles = StyleSheet.create({
   // ── the plates ──────────────────────────────────────────────────────────────
   plateBox: { position: 'absolute', width: PLATE_W },
   plate: {
-    height: PLATE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: PLATE_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   plateRight: { backgroundColor: INK, borderColor: INK },

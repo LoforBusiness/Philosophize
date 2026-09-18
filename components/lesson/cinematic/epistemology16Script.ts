@@ -22,6 +22,8 @@ export interface Epi16Beat extends BaseBeat {
   /** How many theory bars are drawn, 0…3. */ bars?: number;
   /** The result the eclipse actually returned, ringed, 0…1. */ found?: number;
   /** 1 = the three bars are live targets (Q1). */ pick?: number;
+  /** 1 = a dashed ring marks the wide bar — the theory this beat names. */ wideRing?: number;
+  /** 1 = a small "WEAKNESS" tag lands over the wide bar. */ weakTag?: number;
 }
 
 export const BEATS: Epi16Beat[] = [
@@ -37,13 +39,13 @@ export const BEATS: Epi16Beat[] = [
     cite: 'What each one permits',
   },
   {
-    g: 13, results: 5, bars: 3,
+    g: 13, results: 5, bars: 3, wideRing: 1,
     dur: 2.9,
     text: 'The third permits every possible result, so any measurement would have fitted it.',
     cite: 'One that permits everything',
   },
   {
-    g: 266, results: 5, bars: 3,
+    g: 266, results: 5, bars: 3, weakTag: 1,
     dur: 1.9,
     text: 'Karl Popper argued that this apparent strength is in fact a weakness.',
   },

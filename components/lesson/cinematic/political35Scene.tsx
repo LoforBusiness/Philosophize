@@ -9,6 +9,7 @@ import { BEATS } from './political35Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWELVE CHAIRS, THREE OF THEM TAKEN, AND THE THREE MOVE.
@@ -80,12 +82,29 @@ const WEIGHT = BEATS.map((b) => b.weight ?? 0);
 const LIVE_W = BEATS.map((b) => (b.live_w ? 1 : 0));
 const SWAP = BEATS.map((b) => (b.swap ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// group AH — one still-tap event each, each set on exactly one beat and left to
+// fade out on the next (see cinematicKit's carry() and the house "fade an event
+// out, not off" recipe).
+const NOTE = BEATS.map((b) => (b.note ? 1 : 0));
+const PATH = BEATS.map((b) => (b.path ? 1 : 0));
+const FORK = BEATS.map((b) => (b.fork ? 1 : 0));
+const CLAIM = BEATS.map((b) => (b.claim ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political35'));
 
 export default function Political35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(8);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // Each fires only on the beat that sets it, so it fades in there. `grow` only
+  // ever multiplies the RISING edge — on the beat after, the value is simply
+  // absent and the plain carry() cross-fade (tr) already lands on 0 continuous
+  // with where the rising edge left it, so the exit needs no multiplier at all.
+  const noteFade = (cur.note ?? 0) > (prev?.note ?? 0);
+  const pathFade = (cur.path ?? 0) > (prev?.path ?? 0);
+  const forkFade = (cur.fork ?? 0) > (prev?.fork ?? 0);
+  const claimFade = (cur.claim ?? 0) > (prev?.claim ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -94,6 +113,7 @@ export default function Political35Scene({ clock, bt, bi, qv, i, picked, onPick,
     // computes from moveTr — arriving after the figure had stopped.
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -110,6 +130,12 @@ export default function Political35Scene({ clock, bt, bi, qv, i, picked, onPick,
       // The occupants cross-fade between the two policies rather than teleporting:
       // the same three chairs cannot be both taken and not on one frame.
       swap: carry(cv, 3, n, SWAP[p], SWAP[n], tr),
+      // group AH — a ring on the nine not-yet-born, then a ring on the three who
+      // exist only because of the policy that was chosen.
+      note: carry(cv, 4, n, NOTE[p], NOTE[n], tr, noteFade ? grow : 1),
+      claim: carry(cv, 5, n, CLAIM[p], CLAIM[n], tr, claimFade ? grow : 1),
+      pathOn: carry(cv, 6, n, PATH[p], PATH[n], tr, pathFade ? grow : 1),
+      forkOn: carry(cv, 7, n, FORK[p], FORK[n], tr, forkFade ? grow : 1),
     };
   });
 
@@ -117,6 +143,10 @@ export default function Political35Scene({ clock, bt, bi, qv, i, picked, onPick,
   const answered = picked !== null;
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.drag && LIVE[i] === 1;
   const chairsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.chairsOn }));
+  // group AH — the single course, then the fork a different policy sends it on.
+  // Drawn in the open floor under the row, well clear of every chair and plate.
+  const pathStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pathOn }));
+  const forkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.forkOn }));
 
   return (
     <View style={styles.scene}>
@@ -143,6 +173,10 @@ export default function Political35Scene({ clock, bt, bi, qv, i, picked, onPick,
         }))}
       </Animated.View>
 
+      <Animated.View style={[styles.pathLine, pathStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.forkBranch, styles.forkL, forkStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.forkBranch, styles.forkR, forkStyle]} pointerEvents="none" />
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -168,12 +202,25 @@ function Chair({
     const taken = (inA ? 1 - S.value.swap : 0) + (inB ? S.value.swap : 0);
     return { opacity: S.value.weight * (1 - taken) };
   });
+  // group AH — a dashed ring marks the chair, empty or taken, that the current
+  // beat is talking about. Never both at once: `note` and `claim` never overlap
+  // on the same beat.
+  const noteStyle = useAnimatedStyle(() => {
+    const taken = (inA ? 1 - S.value.swap : 0) + (inB ? S.value.swap : 0);
+    return { opacity: S.value.note * (1 - taken) };
+  });
+  const claimStyle = useAnimatedStyle(() => {
+    const taken = (inA ? 1 - S.value.swap : 0) + (inB ? S.value.swap : 0);
+    return { opacity: S.value.claim * taken };
+  });
   const wrong = answered && picked === `s${seat}`;
   return (
     <>
       <View style={[styles.chair, { left, top }]} pointerEvents="none">
         <View style={styles.back} />
         <Animated.View style={[styles.backFill, fillStyle]} />
+        <Animated.View style={[styles.noteRing, noteStyle]} />
+        <Animated.View style={[styles.claimRing, claimStyle]} />
         <View style={styles.seat} />
         <View style={[styles.leg, { left: 1 }]} />
         <View style={[styles.leg, { left: SEAT_W - 4 }]} />
@@ -199,7 +246,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   plate: {
     position: 'absolute', top: CAP_T, width: 200,
@@ -209,9 +256,19 @@ const styles = StyleSheet.create({
   chair: { position: 'absolute', width: SEAT_W, height: 46 },
   back: {
     position: 'absolute', left: 0, top: 0, width: SEAT_W, height: BACK_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   backFill: { position: 'absolute', left: 3, top: 3, width: SEAT_W - 6, height: BACK_H - 6, borderRadius: 2, backgroundColor: INK },
+  // group AH — a ring drawn just outside the chair back, dashed because it marks
+  // rather than fills (D31). SHADE for "notice these"; INK for "this one, exactly".
+  noteRing: {
+    position: 'absolute', left: -3, top: -3, width: SEAT_W + 6, height: BACK_H + 6,
+    borderWidth: 1.5, borderStyle: 'dashed', borderColor: SHADE, borderRadius: 6,
+  },
+  claimRing: {
+    position: 'absolute', left: -3, top: -3, width: SEAT_W + 6, height: BACK_H + 6,
+    borderWidth: 1.5, borderStyle: 'dashed', borderColor: INK, borderRadius: 6,
+  },
   seat: { position: 'absolute', left: 0, top: BACK_H + 4, width: SEAT_W, height: 3, backgroundColor: INK },
   leg: { position: 'absolute', top: BACK_H + 7, width: 3, height: 15, backgroundColor: SOFT },
   head: {
@@ -222,6 +279,17 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', width: SEAT_W + 6, height: 52 },
   hitBox: { position: 'absolute', left: 0, top: 0, width: SEAT_W + 6, height: 52, borderRadius: 4 },
   hitWrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
+
+  // group AH — the course lives are on, and the fork a different policy sends it
+  // down. Sits in the open floor between the chair row (bottom 384) and the
+  // ground line (500), so it never touches an existing element.
+  pathLine: { position: 'absolute', left: 151, top: 420, width: 200, height: 2, backgroundColor: SHADE },
+  forkBranch: {
+    position: 'absolute', left: 250, top: 420, width: 2, height: 34,
+    backgroundColor: SHADE, transformOrigin: '50% 0%',
+  },
+  forkL: { transform: [{ rotate: '-25deg' }] },
+  forkR: { transform: [{ rotate: '25deg' }] },
 });
 
 export function Political35Lesson({ lesson }: { lesson: Lesson }) {

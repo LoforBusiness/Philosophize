@@ -20,6 +20,8 @@ export interface Ethics34Beat extends BaseBeat {
   /** The trade, 0 (a few excellent lives) … 1 (a multitude of barely-good ones). */ pop?: number;
   /** 1 = the reader is driving the trade from the rail (Q1). */ live?: number;
   /** 1 = the average line is drawn across the crowd. */ avg?: number;
+  /** 1 = a small chevron holds beside TOTAL GOOD, for "the total still rises". */ climb?: number;
+  /** 1 = a small plate names the result beside the crowd: "REPUGNANT". */ named?: number;
 }
 
 export const BEATS: Ethics34Beat[] = [
@@ -35,7 +37,7 @@ export const BEATS: Ethics34Beat[] = [
     dur: 2.9,
   },
   {
-    p: 267, x: 46, pop: 0.45,
+    p: 267, x: 46, pop: 0.45, climb: 1,
     text: 'The total still rises, because the added lives more than offset the lost quality.',
     dur: 1.8,
   },
@@ -46,7 +48,7 @@ export const BEATS: Ethics34Beat[] = [
     dur: 4.2,
   },
   {
-    p: 380, x: 46, pop: 1,
+    p: 380, x: 46, pop: 1, named: 1,
     text: 'Derek Parfit named the result the Repugnant Conclusion in 1984. He rejected the conclusion, but didn’t succeed in finding a theory that avoids it.',
     cite: 'The Repugnant Conclusion',
     dur: 4.4,

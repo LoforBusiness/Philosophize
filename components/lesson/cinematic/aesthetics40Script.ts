@@ -29,6 +29,7 @@ export interface Aesthetics40Beat extends BaseBeat {
   /** How far the taste column has been raised toward the tall pair, 0…1. */ raise?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = five course dots sit over the taste column, the last one a ring. */ course?: number;
 }
 
 export const BEATS: Aesthetics40Beat[] = [
@@ -80,7 +81,7 @@ export const BEATS: Aesthetics40Beat[] = [
     dur: 4.8,
   },
   {
-    p: 445, x: 92, pillars: 1, line: 1,
+    p: 445, x: 92, pillars: 1, line: 1, course: 1,
     text: 'Diners argue about whether the fifth course earned its place. That’s following a form.',
     dur: 4.6,
   },

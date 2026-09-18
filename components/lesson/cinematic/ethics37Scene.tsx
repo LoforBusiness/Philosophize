@@ -9,6 +9,7 @@ import { BEATS } from './ethics37Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO POSTS, A CORD BETWEEN THEM, AND FOUR THINGS LEANING ON IT.
@@ -73,6 +75,11 @@ const CORD = BEATS.map((b) => (b.cord ? 1 : 0));
 const LEAN = BEATS.map((b) => b.lean ?? 0);
 const CUT = BEATS.map((b) => (b.cut ? 1 : 0));
 const UNSEEN = BEATS.map((b) => (b.unseen ? 1 : 0));
+const WHO = BEATS.map((b) => (b.who ? 1 : 0));
+const NOTHING = BEATS.map((b) => (b.nothing ? 1 : 0));
+const NAMED = BEATS.map((b) => (b.named ? 1 : 0));
+const THIS_PLAN = BEATS.map((b) => (b.thisPlan ? 1 : 0));
+const ANOTHER_PLAN = BEATS.map((b) => (b.anotherPlan ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
@@ -85,7 +92,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics37'));
 export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(6);
+  const cv = useCarry(11);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -117,6 +124,16 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
       lean: carry(cv, 3, n, LEAN[p], reacting ? dragPos.value : LEAN[n], tr),
       fall: carry(cv, 4, n, CUT[p], CUT[n], tr),
       unseenOn: carry(cv, 5, n, UNSEEN[p], UNSEEN[n], tr),
+      // "Binds the speaker to the other person" — labels find the two posts.
+      who: carry(cv, 6, n, WHO[p], WHO[n], tr),
+      // "Nothing else changes" — a circle-slash holds low between the posts.
+      nothing: carry(cv, 7, n, NOTHING[p], NOTHING[n], tr),
+      // "Only a human convention could explain the change" — a plate names it.
+      named: carry(cv, 8, n, NAMED[p], NAMED[n], tr),
+      // "Has cancelled a plan" — a dashed ring finds the first leaning plan.
+      thisPlan: carry(cv, 9, n, THIS_PLAN[p], THIS_PLAN[n], tr),
+      // "Told a friend and stopped looking" — a dashed ring finds the second.
+      anotherPlan: carry(cv, 10, n, ANOTHER_PLAN[p], ANOTHER_PLAN[n], tr),
     };
   });
 
@@ -125,6 +142,11 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.cards && LIVE[i] === 1;
 
   const postsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.postsOn }));
+  const whoStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.who }));
+  const nothingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.nothing }));
+  const namedStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.named }));
+  const thisPlanStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.thisPlan }));
+  const anotherPlanStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.anotherPlan }));
   const cordStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.cord > 0 ? 1 : 0,
     transform: [{ scaleX: SCENE.value.cord * (1 - SCENE.value.fall) }],
@@ -195,6 +217,27 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
         <Text style={styles.curtainLabel}>NOBODY{'\n'}LOOKING</Text>
       </Animated.View>
 
+      {/* "Binds the speaker to the other person" — labels find the two posts. */}
+      <Animated.Text style={[styles.whoTag, whoStyle, { left: POST_X[0] - 29 }]} numberOfLines={1}>SPEAKER</Animated.Text>
+      <Animated.Text style={[styles.whoTag, whoStyle, { left: POST_X[1] - 29 }]} numberOfLines={1}>PROMISED</Animated.Text>
+
+      {/* "Nothing else changes" — a circle-slash holds low between the posts. */}
+      <Animated.View style={[styles.nothingMark, nothingStyle]} pointerEvents="none">
+        <View style={styles.nothingRing} />
+        <View style={styles.nothingSlash} />
+      </Animated.View>
+
+      {/* "Only a human convention could explain the change" — named above the cord. */}
+      <Animated.View style={[styles.namedTag, namedStyle]} pointerEvents="none">
+        <Text style={styles.namedText} numberOfLines={1}>CONVENTION</Text>
+      </Animated.View>
+
+      {/* "Has cancelled a plan" — a dashed ring finds the first leaning plan. */}
+      <Animated.View style={[styles.planRing, thisPlanStyle, { left: PLAN_X[0] - 6 }]} pointerEvents="none" />
+
+      {/* "Told a friend and stopped looking" — a dashed ring finds the second. */}
+      <Animated.View style={[styles.planRing, anotherPlanStyle, { left: PLAN_X[1] - 6 }]} pointerEvents="none" />
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -217,7 +260,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 150, top: CAP_T, width: 240,
@@ -235,7 +278,7 @@ const styles = StyleSheet.create({
   // Pivots about its own bottom edge, which is where a leaning thing turns.
   plan: {
     position: 'absolute', top: BASE_Y - PLAN_H, width: PLAN_W, height: PLAN_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
     transformOrigin: '50% 100%',
   },
 
@@ -262,6 +305,35 @@ const styles = StyleSheet.create({
    */
   hitLive: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
   hitWrong: { borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed' },
+
+  // "BINDS THE SPEAKER TO THE OTHER PERSON" — labels under the two posts.
+  whoTag: {
+    position: 'absolute', top: 398, width: 58, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
+  },
+  // "NOTHING ELSE CHANGES" — a circle-slash held low between the posts.
+  nothingMark: { position: 'absolute', left: 240, top: 340, width: 22, height: 22 },
+  nothingRing: {
+    position: 'absolute', left: 0, top: 0, width: 22, height: 22, borderRadius: 11,
+    borderWidth: 2, borderColor: INK,
+  },
+  nothingSlash: {
+    position: 'absolute', left: 2, top: 10, width: 18, height: 2, backgroundColor: INK, transform: [{ rotate: '45deg' }],
+  },
+  // "ONLY A HUMAN CONVENTION COULD EXPLAIN THE CHANGE" — named above the cord.
+  namedTag: {
+    position: 'absolute', left: 198, top: 268, width: 108, height: 16,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  namedText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  },
+  // "HAS CANCELLED A PLAN" / "TOLD A FRIEND" — a dashed ring finds one plan.
+  planRing: {
+    position: 'absolute', top: 336, width: 46, height: 58,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 6,
+  },
 });
 
 export function Ethics37Lesson({ lesson }: { lesson: Lesson }) {

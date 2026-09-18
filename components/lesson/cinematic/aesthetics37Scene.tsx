@@ -76,12 +76,14 @@ const PLAYED = BEATS.map((b) => b.played ?? 0);
 const LIFTED = BEATS.map((b) => b.lift ?? 0);
 const LIVE_D = BEATS.map((b) => (b.live_d ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const REC = BEATS.map((b) => (b.rec ? 1 : 0));
+const TIE = BEATS.map((b) => (b.tie ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics37'));
 
 export default function Aesthetics37Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -110,6 +112,10 @@ export default function Aesthetics37Scene({ clock, bt, bi, i, picked, onPick, dr
       played: carry(cv, 3, n, PLAYED[p], PLAYED[n], arriving ? ease01((bt.value - 0.2) / 1.6) : tr),
       // Reader's thumb on the drag beat, the script's own track everywhere else.
       lift: LIVE_D[n] === 1 ? clamp01(dragPos.value) : carry(cv, 4, n, LIFTED[p], LIFTED[n], tr),
+      // Plain carries: each value is 0/1, so its own interpolation is the fade,
+      // both in and out (C20c).
+      rec: carry(cv, 5, n, REC[p], REC[n], tr),
+      tie: carry(cv, 6, n, TIE[p], TIE[n], tr),
     };
   });
 
@@ -119,11 +125,28 @@ export default function Aesthetics37Scene({ clock, bt, bi, i, picked, onPick, dr
 
   const stavesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.stavesOn }));
   const scoreStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.scoreOn }));
+  // The record mark: the solo has begun acquiring a fixed version.
+  const recStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.rec,
+    transform: [{ scale: 0.6 + 0.4 * SCENE.value.rec }],
+  }));
+  // The tie: the two staves' sound now matches, though what it is still differs.
+  const tieStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tie }));
 
   return (
     <View style={styles.scene}>
       <Text style={[styles.rowCap, { top: 250 }]}>WRITTEN FIRST</Text>
       <Text style={[styles.rowCap, { top: 352 }]}>MADE UP TONIGHT</Text>
+
+      {/* the record mark: this solo has begun acquiring a fixed version */}
+      <Animated.View style={[styles.recMark, recStyle]} pointerEvents="none">
+        <View style={styles.recDot} />
+      </Animated.View>
+
+      {/* the tie: the sound now matches, though what it is still differs */}
+      <Animated.View style={[styles.tieStem, tieStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.tieTick, { top: STAVE_Y[0] - 0.75 }, tieStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.tieTick, { top: STAVE_Y[1] - 0.75 }, tieStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, stavesStyle]}>
         {/* EACH STAVE RIDES WITH ITS OWN TARGET (E39). */}
@@ -214,6 +237,22 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', left: SYS_X - 6, width: SYS_W + 12, height: 82 },
   hitBox: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: 4 },
   hitWrong: { borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed' },
+
+  // The record mark: a filled dot in a thin ring, by the improvised row's caption.
+  recMark: {
+    position: 'absolute', left: 356, top: 350, width: 12, height: 12, borderRadius: 6,
+    borderWidth: 1.5, borderColor: SOFT, alignItems: 'center', justifyContent: 'center',
+  },
+  recDot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: INK },
+
+  // The tie: a bracket off the system's right edge, joining the two staves' sound.
+  tieStem: {
+    position: 'absolute', left: SYS_X + SYS_W + 6, top: STAVE_Y[0], width: 1.5,
+    height: STAVE_Y[1] - STAVE_Y[0], backgroundColor: SOFT,
+  },
+  tieTick: {
+    position: 'absolute', left: SYS_X + SYS_W, width: 9, height: 1.5, backgroundColor: SOFT,
+  },
 });
 
 export function Aesthetics37Lesson({ lesson }: { lesson: Lesson }) {

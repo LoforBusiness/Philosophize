@@ -9,6 +9,7 @@ import { BEATS } from './epistemology40Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOUR DEFENDANTS IN ONE DOCK, UNDER ONE BENCH, ROPED TOGETHER.
@@ -47,6 +49,7 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const TWICE = BEATS.map((b) => b.twice ?? 0);
 const BASE_TR = 0.85;
 
 const BENCH_X = 138;
@@ -105,7 +108,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology40'));
 export default function Epistemology40Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(7);
+  const cv = useCarry(8);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -130,6 +133,8 @@ export default function Epistemology40Scene({ clock, bt, bi, i, picked, onPick, 
       // and which plate it is narrowing onto.
       narrow: carry(cv, 5, n, 0, reacting ? 1 : 0, tr),
       aim: carry(cv, 6, n, DOCK_L, reacting ? pickAt(AIM_AT, pickPos.value) : DOCK_L, tr),
+      // Carried, so it fades out as well as in (group L).
+      twice: carry(cv, 7, n, TWICE[p], TWICE[n], tr),
     };
   });
 
@@ -147,6 +152,15 @@ export default function Epistemology40Scene({ clock, bt, bi, i, picked, onPick, 
       width: DOCK_SPAN + (DOCK_W - DOCK_SPAN) * k,
     };
   });
+
+  // ── the tap event ──────────────────────────────────────────────────────────
+  //
+  // THE SAME REASONING, TWICE, WITH OPPOSITE RESULTS — which is the beat's whole
+  // claim, so the two arrive in the order the sentence gives them rather than as
+  // a pair of facts about the dock.
+  const twice0Style = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.twice / 0.6) }));
+  const twice1Style = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.twice - 0.4) / 0.6) }));
+  const twiceStyles = [twice0Style, twice1Style];
 
   return (
     <View style={styles.scene}>
@@ -186,6 +200,13 @@ export default function Epistemology40Scene({ clock, bt, bi, i, picked, onPick, 
         ))}
       </Animated.View>
 
+      {/* It worked once and then it did not. */}
+      {['NEPTUNE — FOUND', 'MERCURY — NOTHING'].map((w, k) => (
+        <Animated.View key={w} style={[styles.twiceChip, { left: k === 0 ? DOCK_X[0] : DOCK_X[0] + 126 }, twiceStyles[k]]} pointerEvents="none">
+          <Text style={styles.twiceText} numberOfLines={1}>{w}</Text>
+        </Animated.View>
+      ))}
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -204,11 +225,23 @@ function Defendant({ S, left, index }: { S: SharedValue<any>; left: number; inde
 }
 
 const styles = StyleSheet.create({
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // Under the dock, which ends at DOCK_Y + DOCK_H, and above the figure's crown.
+  twiceChip: {
+    position: 'absolute', top: DOCK_Y + DOCK_H + 10, width: 120, height: 22,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  twiceText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: BENCH_X, top: CAP_T, width: BENCH_W,
@@ -244,7 +277,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

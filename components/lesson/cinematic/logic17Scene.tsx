@@ -9,6 +9,7 @@ import { BEATS } from './logic17Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO CLAIMS ON TWO PLINTHS, AND ONLY ONE OF THEM IS FURNITURE.
@@ -62,6 +64,16 @@ const CLAIM_TOP = ['THE BRIDGE WILL HOLD', 'THE BRIDGE WILL HOLD'];
 const CLAIM_SUB = ['load tested to 40 tonnes', 'I saw them test it'];
 const REASONS = ['steel rated 40t', 'load tested twice'];
 
+// THE THREE TAP EVENTS (group AH). BARE mirrors where the left column's
+// reasons sit, under the right column instead. HITS rings each plinth's
+// caption — the one thing the insult below actually reaches. SAFE sits beside
+// the reasons themselves, which stand above the insult, untouched by it.
+const BARE_T = 300;
+const BARE_H = 22;
+const HITS_T = 333;
+const HITS_H = 19;
+const HITS_INSET = 20;
+
 const FIG_X = 200;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
@@ -76,6 +88,9 @@ const SLUR = BEATS.map((b) => b.slur ?? 0);
 const LIFT = BEATS.map((b) => b.lift ?? 0);
 const FALLS = BEATS.map((b) => b.falls ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+const BARE = BEATS.map((b) => b.bare ?? 0);
+const HITS = BEATS.map((b) => b.hits ?? 0);
+const SAFE = BEATS.map((b) => b.safe ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -87,7 +102,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic17'));
 export default function Logic17Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(6);
+  const cv = useCarry(9);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -113,6 +128,13 @@ export default function Logic17Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // IS SPEAKING and it settles back onto the person, where bare testimony lives.
       lift: carry(cv, 4, n, LIFT[p], reacting ? 1 - dragPos.value : LIFT[n], tr),
       falls: carry(cv, 5, n, FALLS[p], FALLS[n], tr),
+      // "rests on nothing but the speaker's word" — a dashed, empty footing where
+      // the left column's printed reasons are and the right column has none.
+      bare: carry(cv, 6, n, BARE[p], BARE[n], tr),
+      // "it addresses only the speaker" — a dashed box marks the two labels.
+      hits: carry(cv, 7, n, HITS[p], HITS[n], tr),
+      // "only the reasons escape the insult" — a check beside the reasons list.
+      safe: carry(cv, 8, n, SAFE[p], SAFE[n], tr),
       t,
     };
   });
@@ -134,6 +156,14 @@ export default function Logic17Scene({ clock, bt, bi, i, picked, onPick, dragPos
     // fall. At 0.4 the subtitle reached the reader at 1.7:1 (D35).
     opacity: 1 - SCENE.value.falls * 0.45,
   }));
+  // Travels with the right card's own rise (not its fall/rotate — bare has
+  // faded out by the time that plays) and carries its own opacity.
+  const bareStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.bare,
+    transform: [{ translateY: -LIFT_BY * SCENE.value.lift }],
+  }));
+  const hitsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.hits }));
+  const safeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.safe }));
 
   return (
     <View style={styles.scene}>
@@ -147,6 +177,14 @@ export default function Logic17Scene({ clock, bt, bi, i, picked, onPick, dragPos
           </View>
         ))}
 
+        {/* HITS — a dashed box on each speaker's caption, the one thing the
+            insult below actually reaches. A boundary, never a fill (D31). */}
+        <Animated.View style={[StyleSheet.absoluteFill, hitsStyle]} pointerEvents="none">
+          {COL_X.map((cx) => (
+            <View key={`hit${cx}`} style={[styles.hitsBox, { left: cx + HITS_INSET }]} />
+          ))}
+        </Animated.View>
+
         {/* THE REASONS, under the left card only, and they travel with it. */}
         <Animated.View style={[StyleSheet.absoluteFill, marksStyle]} pointerEvents="none">
           <Animated.View style={leftCard}>
@@ -155,7 +193,15 @@ export default function Logic17Scene({ clock, bt, bi, i, picked, onPick, dragPos
                 · {r}
               </Text>
             ))}
+            {/* SAFE — a check beside the reasons: they stand above the insult
+                below, and only they escape it. */}
+            <Animated.View style={[styles.safe, safeStyle]}>
+              <Text style={styles.safeMark}>✓</Text>
+            </Animated.View>
           </Animated.View>
+          {/* BARE — an empty, dashed footing under the right card: the reasons
+              the left column has, and the right column lacks. */}
+          <Animated.View style={[styles.bare, { left: COL_X[1] + 10 }, bareStyle]} />
         </Animated.View>
 
         {/* THE CLAIMS. Identical words, different footings. */}
@@ -212,7 +258,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   plinth: {
     position: 'absolute', top: PLINTH_Y, width: COL_W, height: PLINTH_H,
@@ -228,8 +274,8 @@ const styles = StyleSheet.create({
 
   hit: { position: 'absolute', top: CARD_Y, width: COL_W, height: CARD_H },
   card: {
-    width: COL_W, height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
+    width: COL_W, height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 8,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   cardRight: { backgroundColor: INK },
   cardWrong: { borderColor: SOFT, opacity: 0.45 },
@@ -249,6 +295,21 @@ const styles = StyleSheet.create({
     position: 'absolute', width: COL_W - 12,
     fontFamily: 'Inter_400Regular', fontSize: 8.6, color: INK, includeFontPadding: false,
   },
+
+  // ── THE THREE TAP EVENTS (group AH) ──────────────────────────────────────
+  bare: {
+    position: 'absolute', top: BARE_T, width: COL_W - 20, height: BARE_H,
+    borderWidth: 1.5, borderColor: SHADE, borderRadius: 4, borderStyle: 'dashed',
+  },
+  hitsBox: {
+    position: 'absolute', top: HITS_T, width: COL_W - HITS_INSET * 2, height: HITS_H,
+    borderWidth: 1.5, borderColor: SHADE, borderRadius: 4, borderStyle: 'dashed',
+  },
+  safe: {
+    position: 'absolute', left: COL_X[0] + COL_W + 4, top: BARE_T, width: 16, height: 16,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  safeMark: { fontFamily: 'Inter_700Bold', fontSize: 11, color: INK, includeFontPadding: false },
 });
 
 export function Logic17Lesson({ lesson }: { lesson: Lesson }) {

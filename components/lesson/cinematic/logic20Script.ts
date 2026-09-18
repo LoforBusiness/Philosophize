@@ -30,6 +30,7 @@ export interface Log20Beat extends BaseBeat {
   /** The supports drawn under each one, 0…1. */ struts?: number;
   /** The blow landing on the flimsy one, 0…1. */ strike?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = the second and third boards are marked as repeating what the first said. */ echoed?: number;
 }
 
 export const BEATS: Log20Beat[] = [
@@ -46,6 +47,7 @@ export const BEATS: Log20Beat[] = [
   },
   {
     p: 266, x: 200, boards: 1, struts: 1,
+    echoed: 1,
     text: 'A second repeats some of them. The third repeats a single reason.',
     dur: 2.2,
   },

@@ -29,6 +29,8 @@ export interface Political40Beat extends BaseBeat {
   /** 1 = the good under discussion is on the shelves. */ token?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = the middle register is shown to change what passes through it. */ spoiled?: number;
+  /** 1 = the queue's own single criterion, written under the shelves. */ queue?: number;
 }
 
 export const BEATS: Political40Beat[] = [
@@ -49,6 +51,7 @@ export const BEATS: Political40Beat[] = [
   },
   {
     p: 258, x: 32, shelves: 1,
+    spoiled: 1,
     text: 'Some things are changed by being priced. A purchased vote no longer expresses a citizen’s own judgement.',
     dur: 4.6,
   },
@@ -80,6 +83,7 @@ export const BEATS: Political40Beat[] = [
   },
   {
     p: 381, x: 92, shelves: 1,
+    queue: 1,
     text: 'A queue distributes places by a single criterion: who arrived first, and who was willing to wait.',
     dur: 4.4,
   },

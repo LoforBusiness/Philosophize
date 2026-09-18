@@ -9,6 +9,7 @@ import { BEATS } from './logic35Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO COLUMNS, ONE WRONG ARROW, AND THE BOX UNDERNEATH.
@@ -86,6 +88,10 @@ const PICKS = BEATS.map((b) => (b.picks ? 1 : 0));
 const UNDER = BEATS.map((b) => (b.under ? 1 : 0));
 const CUT = BEATS.map((b) => (b.cut ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const LEVEL = BEATS.map((b) => (b.level ? 1 : 0));
+const ALT = BEATS.map((b) => (b.alt ? 1 : 0));
+const GONE = BEATS.map((b) => (b.gone ? 1 : 0));
+const AGAIN = BEATS.map((b) => (b.again ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -101,7 +107,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic35'));
 export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(9);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -133,6 +139,10 @@ export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dra
       cut: CUT[n] === 1 ? (n > 0 && CUT[p] === 1 ? 1 : ease01((bt.value - 0.25) / 0.5)) : 0,
       // The right candidate fills as the answer lands.
       lit: LIVE[n] === 1 ? ease01(q) : 0,
+      level: carry(cv, 5, n, LEVEL[p], LEVEL[n], tr),
+      alt: carry(cv, 6, n, ALT[p], ALT[n], tr),
+      gone: carry(cv, 7, n, GONE[p], GONE[n], tr),
+      again: carry(cv, 8, n, AGAIN[p], AGAIN[n], tr),
     };
   });
 
@@ -142,6 +152,12 @@ export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dra
 
   const arrowStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.arrowOn }));
   const underStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.underOn }));
+  // The level: a dashed line across both column tops, tracking the (shared) grow
+  // value so it can never disagree with where the bars actually are.
+  const levelStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.level, top: BASE_Y - COL_H * SCENE.value.grow }));
+  const altStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.alt }));
+  const goneStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.gone }));
+  const againStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.again }));
   // The cut stays made, but it is only SEEN while the arrow it cuts is: on the beats after
   // the arrow fades it hung alone under the caption, a stroke negating nothing (A1).
   const cutStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.cut * SCENE.value.arrowOn, transform: [{ scaleY: SCENE.value.cut }] }));
@@ -154,12 +170,16 @@ export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dra
       <View style={styles.baseLine} pointerEvents="none" />
       {COL_X.map((cx, k) => <Column key={cx} S={SCENE} left={cx} label={COL_LABEL[k]} />)}
 
+      <Animated.View style={[styles.levelLine, levelStyle]} pointerEvents="none" />
+
       <Animated.View style={[StyleSheet.absoluteFill, arrowStyle]} pointerEvents="none">
         <View style={styles.arrowBar} />
         <View style={styles.arrowHead} />
         <Text style={styles.arrowLabel}>CAUSES?</Text>
       </Animated.View>
+      <Animated.View style={[styles.altArrow, altStyle]} pointerEvents="none" />
       <Animated.View style={[styles.cutMark, cutStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.goneMark, goneStyle]} pointerEvents="none">✕</Animated.Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, underStyle]} pointerEvents="none">
         <View style={styles.thirdBox} />
@@ -167,6 +187,7 @@ export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dra
         <View style={[styles.feedArm, { left: THIRD_X + 6, transform: [{ rotate: '-38deg' }] }]} />
         <View style={[styles.feedArm, { left: THIRD_X + 86, transform: [{ rotate: '38deg' }] }]} />
       </Animated.View>
+      <Animated.Text style={[styles.againText, againStyle]} pointerEvents="none">COFFEE ↔ SMOKING</Animated.Text>
 
       <Candidates S={SCENE} picked={picked} onPick={onPick} answered={answered} live={live} />
 
@@ -224,7 +245,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 150, top: CAP_T, width: 240,
@@ -251,11 +272,22 @@ const styles = StyleSheet.create({
   // Short enough to cut the BAR and nothing else. At 26 units it reached from
   // 238 to 264 and crossed both labels on its way past the thing it negates.
   cutMark: { position: 'absolute', left: 231, top: ARROW_Y - 6, width: 3, height: 14, backgroundColor: INK, borderRadius: 2 },
+  // A level across the two column tops — they climb in exact lockstep.
+  levelLine: { position: 'absolute', left: COL_X[0] + COL_W, width: COL_X[1] - (COL_X[0] + COL_W), height: 4, borderTopWidth: 1.5, borderStyle: 'dashed', borderTopColor: SOFT },
+  // A second, fainter arrow under the first — an explanation that fits the same data.
+  altArrow: { position: 'absolute', left: 190, top: ARROW_Y + 16, width: 84, height: 4, borderTopWidth: 1.5, borderStyle: 'dashed', borderTopColor: SOFT },
+  // Where the causal arrow used to be: the link that never existed.
+  goneMark: { position: 'absolute', left: 224, top: ARROW_Y - 9, width: 16, textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, includeFontPadding: false },
+  // The second pair of names, echoing the shape under a fresh example.
+  againText: {
+    position: 'absolute', left: THIRD_X, top: THIRD_Y + 38, width: 96, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: SOFT, includeFontPadding: false,
+  },
 
   cand: { position: 'absolute', left: CAND_X, width: 100, height: 26 },
   candBox: {
     position: 'absolute', left: 0, top: 0, width: 100, height: 26,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   candLit: {
     position: 'absolute', left: 3, top: 3, width: 94, height: 20,
@@ -269,7 +301,7 @@ const styles = StyleSheet.create({
 
   thirdBox: {
     position: 'absolute', left: THIRD_X, top: THIRD_Y, width: 96, height: 32,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   thirdText: {
     position: 'absolute', left: THIRD_X, top: THIRD_Y + 11, width: 96, textAlign: 'center',

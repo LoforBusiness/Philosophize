@@ -9,6 +9,7 @@ import { BEATS } from './political24Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHERE A LANGUAGE IS ALLOWED TO APPEAR, AND HOW MANY STILL SPEAK IT.
@@ -72,6 +74,10 @@ const P = BEATS.map((b) => b.p ?? 0);
 const SIGNS = BEATS.map((b) => b.signs ?? 0);
 const PUB = BEATS.map((b) => b.pub ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+// group AH — one-shot marks for the two still taps: a bridge linking the public
+// plates, and a dashed split between the public pair and the private plate.
+const LINK = BEATS.map((b) => ((b.link ?? 0) > 0 ? 1 : 0));
+const CLASH = BEATS.map((b) => ((b.clash ?? 0) > 0 ? 1 : 0));
 
 // On its own lever beat the arm drives the whole stage (R7): the two public
 // plates light as it travels and the generations stand back up behind them.
@@ -84,8 +90,14 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political24'));
 export default function Political24Scene({
   clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(5);
   const pulling = PULL[i] === 1;
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // A mark fades IN on the beat that asks for it and back OUT on the next, rather
+  // than cutting (see "AND FADE AN EVENT OUT, NOT OFF").
+  const linkFade = (cur.link ?? 0) !== (prev?.link ?? 0);
+  const clashFade = (cur.clash ?? 0) !== (prev?.clash ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -94,6 +106,7 @@ export default function Political24Scene({
     // computes from moveTr — arriving after the figure had stopped.
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -107,6 +120,9 @@ export default function Political24Scene({
       // Through `carry` so the arm takes over across the transition rather than
       // on one frame — see metaphysics21Scene for why that matters.
       pub: carry(cv, 2, n, PUB[p], pulling ? dragPos.value : PUB[n], tr),
+      // group AH — one-shot, fades in on its own beat and back out on the next.
+      link: carry(cv, 3, n, LINK[p], LINK[n], linkFade ? grow : 1),
+      clash: carry(cv, 4, n, CLASH[p], CLASH[n], clashFade ? grow : 1),
       t,
     };
   });
@@ -116,6 +132,14 @@ export default function Political24Scene({
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.cards && LIVE[i] === 1;
 
   const signStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.signs }));
+  // A bridge in the gap between the two PUBLIC plates (Charles Taylor: identity
+  // formed in dialogue with others — the two public plates are where that
+  // dialogue plays out, and they will dim together).
+  const linkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.link }));
+  // A dashed split in the gap between the public pair and the private plate
+  // (Taylor: two demands in conflict — treat everyone alike, or recognise
+  // difference. The line marks the two plate-groups pulling apart.)
+  const clashStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.clash }));
 
   const plates = [0, 1, 2];
   const bars = [0, 1, 2, 3, 4];
@@ -131,6 +155,18 @@ export default function Political24Scene({
           </View>
         ))}
         <Text style={styles.caption}>SPEAKERS, BY GENERATION</Text>
+      </Animated.View>
+
+      {/* group AH — the bridge linking the two public plates. */}
+      <Animated.View style={[styles.linkWrap, linkStyle]} pointerEvents="none">
+        <View style={styles.linkBar} />
+        <View style={styles.linkCapL} />
+        <View style={styles.linkCapR} />
+      </Animated.View>
+
+      {/* group AH — the dashed split between the public pair and the private plate. */}
+      <Animated.View style={[styles.clashWrap, clashStyle]} pointerEvents="none">
+        <View style={styles.clashLine} />
       </Animated.View>
 
       {/* Each place rides with its own target (E39). */}
@@ -196,11 +232,11 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   plate: {
     position: 'absolute', top: PL_Y, width: PL_W, height: PL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   kicker: {
     position: 'absolute', top: PL_Y + 8, width: PL_W, textAlign: 'center',
@@ -218,6 +254,18 @@ const styles = StyleSheet.create({
   hitBox: { width: PL_W, height: PL_H, borderRadius: 4 },
   right: { borderWidth: 3, borderColor: INK },
   wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
+
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // A bridge: a short bar with two end-caps, sitting in the 20-unit gap between
+  // the IN COURT and IN SCHOOL plates — the two plates that dim together.
+  linkWrap: { position: 'absolute', left: 0, top: 0, width: PL_X[2] + PL_W, height: PL_Y + PL_H },
+  linkBar: { position: 'absolute', left: PL_X[0] + PL_W + 2, top: PL_Y + PL_H / 2 - 1, width: PL_X[1] - (PL_X[0] + PL_W) - 4, height: 2, backgroundColor: INK, borderRadius: 1 },
+  linkCapL: { position: 'absolute', left: PL_X[0] + PL_W + 1, top: PL_Y + PL_H / 2 - 8, width: 2, height: 16, backgroundColor: INK },
+  linkCapR: { position: 'absolute', left: PL_X[1] - 3, top: PL_Y + PL_H / 2 - 8, width: 2, height: 16, backgroundColor: INK },
+  // A dashed divider — never a fill (D31) — in the 20-unit gap between IN SCHOOL
+  // and IN PRIVATE, the boundary the two conflicting demands sit either side of.
+  clashWrap: { position: 'absolute', left: 0, top: 0, width: PL_X[2] + PL_W, height: PL_Y + PL_H },
+  clashLine: { position: 'absolute', left: PL_X[1] + PL_W + (PL_X[2] - (PL_X[1] + PL_W)) / 2, top: PL_Y, width: 0, height: PL_H, borderLeftWidth: 1.5, borderColor: SHADE, borderStyle: 'dashed' },
 });
 
 export function Political24Lesson({ lesson }: { lesson: Lesson }) {

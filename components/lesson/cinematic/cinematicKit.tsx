@@ -12,6 +12,9 @@ import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import { C, RADIUS, LIP } from '@/constants/design';
 import { ease01, pose, seg, type Bundle, type Stance } from './rig';
 import { gazeAt } from './moves';
+import {
+  gazeKeep, wanderDir, wanderRest, wanderStance, wanderState, type WanderState,
+} from './wander';
 import { EMBER_INK } from '@/components/shared/tone';
 import { VerdictSeal, XpCoin, useQuestionAccent } from './QuestionParts';
 
@@ -791,6 +794,126 @@ export function pickAt(table: readonly number[], u: number): number {
  */
 export const REACT = makeMutable(0);
 
+// ── AND WHETHER HE IS MOVING AROUND (wander.ts, group AF) ────────────────────
+//
+// The same seam as `REACT`, for the same reason, and it is the whole reason the
+// movement layer was affordable: a reader asked for the figure to *"look up and
+// down a lot, move back and forth, maybe sit on the ground for a little bit"*
+// instead of only moving his hands, and every scene in the app ends its figure
+// with one `lookPose` call — 244 of 244, exactly once each. A per-scene prop
+// would have been 244 edits to files whose every byte is inside `muststamp`,
+// which is a corpus-wide re-measure for a change that moves no prop.
+//
+// `plan` is the beat's plan from `data/lessonWander.ts`, `bt` the BEAT clock and
+// `now` the scene clock — both mirrored by the player's frame callback — and
+// `gen` a counter the player bumps on every beat change.
+//
+// THE PLAN IS READ AGAINST THE BEAT CLOCK, NOT THE SCENE CLOCK, and that is not a
+// convenience. `bt` is reset to 0 during the player's render, in the same
+// statement that swaps the plan, so the first frame of a new beat reads its plan
+// at zero. Timing it off the scene clock instead needs the start time recorded,
+// which can only be read across threads a frame late — and a plan read one frame
+// at the PREVIOUS beat's elapsed time is a plan jumped to its end state and back,
+// which is the one-frame cut group L exists to forbid. `bt` is also what freezes
+// while the camera travels (K1), so he waits for the shot rather than walking
+// through it.
+//
+// THE SIXTEEN AFTER IT ARE A MEMORY, and they are `carry`'s trick rather than a
+// new one: `d*` is what the last frame drew and `s*` is what this plan is being
+// read from. Separate mutables rather than one array because this is written every
+// frame on the UI thread, and an array would allocate on each of them.
+export const WANDER = {
+  plan: makeMutable<readonly number[]>([]),
+  bt: makeMutable(0),
+  gen: makeMutable(0),
+  now: makeMutable(0),
+  seen: makeMutable(-1),
+  ddx: makeMutable(0),
+  dlook: makeMutable(0),
+  dsit: makeMutable(0),
+  dcrouch: makeMutable(0),
+  dface: makeMutable(1),
+  dlean: makeMutable(0),
+  dlegFrom: makeMutable(0),
+  dlegTo: makeMutable(0),
+  dlegU: makeMutable(-1),
+  sdx: makeMutable(0),
+  slook: makeMutable(0),
+  ssit: makeMutable(0),
+  scrouch: makeMutable(0),
+  sface: makeMutable(1),
+  slean: makeMutable(0),
+  slegFrom: makeMutable(0),
+  slegTo: makeMutable(0),
+  slegU: makeMutable(-1),
+};
+
+/** Put the layer back where a lesson starts. The player calls it on its way out. */
+export function wanderReset() {
+  WANDER.plan.value = [];
+  WANDER.bt.value = 0;
+  WANDER.now.value = 0;
+  WANDER.gen.value = 0;
+  WANDER.seen.value = -1;
+  const rest = wanderRest();
+  WANDER.ddx.value = rest.dx; WANDER.sdx.value = rest.dx;
+  WANDER.dlook.value = rest.look; WANDER.slook.value = rest.look;
+  WANDER.dsit.value = rest.sit; WANDER.ssit.value = rest.sit;
+  WANDER.dcrouch.value = rest.crouch; WANDER.scrouch.value = rest.crouch;
+  WANDER.dface.value = rest.face; WANDER.sface.value = rest.face;
+  WANDER.dlean.value = rest.lean; WANDER.slean.value = rest.lean;
+  WANDER.dlegFrom.value = rest.legFrom; WANDER.slegFrom.value = rest.legFrom;
+  WANDER.dlegTo.value = rest.legTo; WANDER.slegTo.value = rest.legTo;
+  WANDER.dlegU.value = rest.legU; WANDER.slegU.value = rest.legU;
+}
+
+/**
+ * THE LAYER, THIS FRAME — and the snapshot that makes a tap continuous.
+ *
+ * On the first frame of a new plan the values the last frame DREW become the
+ * values the new plan is read from, which is `carryFrom` one system out: the
+ * frame before the tap and the frame after it are then the same picture whatever
+ * the reader's tap rate, rather than the new plan starting from a rest the figure
+ * was nowhere near (group L).
+ */
+function wanderNow(): WanderState {
+  'worklet';
+  if (WANDER.seen.value !== WANDER.gen.value) {
+    WANDER.seen.value = WANDER.gen.value;
+    WANDER.sdx.value = WANDER.ddx.value;
+    WANDER.slook.value = WANDER.dlook.value;
+    WANDER.ssit.value = WANDER.dsit.value;
+    WANDER.scrouch.value = WANDER.dcrouch.value;
+    WANDER.sface.value = WANDER.dface.value;
+    WANDER.slean.value = WANDER.dlean.value;
+    WANDER.slegFrom.value = WANDER.dlegFrom.value;
+    WANDER.slegTo.value = WANDER.dlegTo.value;
+    WANDER.slegU.value = WANDER.dlegU.value;
+  }
+  const st = wanderState(WANDER.plan.value, WANDER.bt.value, {
+    dx: WANDER.sdx.value,
+    look: WANDER.slook.value,
+    sit: WANDER.ssit.value,
+    crouch: WANDER.scrouch.value,
+    face: WANDER.sface.value,
+    lean: WANDER.slean.value,
+    legFrom: WANDER.slegFrom.value,
+    legTo: WANDER.slegTo.value,
+    legU: WANDER.slegU.value,
+    legPrior: 0,
+  });
+  WANDER.ddx.value = st.dx;
+  WANDER.dlook.value = st.look;
+  WANDER.dsit.value = st.sit;
+  WANDER.dcrouch.value = st.crouch;
+  WANDER.dface.value = st.face;
+  WANDER.dlean.value = st.lean;
+  WANDER.dlegFrom.value = st.legFrom;
+  WANDER.dlegTo.value = st.legTo;
+  WANDER.dlegU.value = st.legU;
+  return st;
+}
+
 /**
  * The reader's answer, written into the figure's own stance.
  *
@@ -831,8 +954,23 @@ export function lookPose(
 ): Bundle {
   'worklet';
   const r = REACT.value;
-  if (w <= 0) return pose(reacted(s, r), x, groundY, k, dir, opacity);
-  const g = gazeAt(s, x, groundY, k, dir, gx, gy, w);
+  // ── THE MOVEMENT LAYER GOES FIRST, BECAUSE IT DECIDES WHERE HE IS ─────────
+  //
+  // It moves him along the ground, sits him down and turns him round, so the
+  // gaze, the answer reaction and `pose` all have to be given the figure the
+  // layer produced rather than the one the scene handed in. It is inert — dx 0,
+  // face +1, no leg — for any beat with no plan, which is what the offline
+  // replays in `check:smooth` and `check:replay` continue to measure.
+  const wst = wanderNow();
+  const ws = wanderStance(s, wst, WANDER.now.value, k);
+  const wx = x + wst.dx;
+  const wdir = wanderDir(dir, wst);
+  // A DELIBERATE LOOK AND THE GENERATED GAZE ARE TWO OPINIONS ON ONE NECK, and
+  // the loser is whichever is applied first. `gazeKeep` hands the neck over while
+  // the layer is using it, on the layer's own eased values, so neither cuts.
+  const gw = w * gazeKeep(wst);
+  if (gw <= 0) return pose(reacted(ws, r), wx, groundY, k, wdir, opacity);
+  const g = gazeAt(ws, wx, groundY, k, wdir, gx, gy, gw);
   // ── AND THE LEAN, BECAUSE A HEAD MOVE IS NOT A MOVE (N12) ─────────────────
   //
   // The rule book already records this against the four "looking" actions in
@@ -847,8 +985,8 @@ export function lookPose(
   // actually turned keeps the two locked together and costs no second solve: the
   // total comes to about 0.6 of the gaze angle, so a figure craning up at a
   // machine above him moves his head some sixteen units rather than five.
-  const lean = (g.neck - s.neck) * 0.5;
-  return pose(reacted({ ...g, tilt: g.tilt + lean }, r), x, groundY, k, dir, opacity);
+  const lean = (g.neck - ws.neck) * 0.5;
+  return pose(reacted({ ...g, tilt: g.tilt + lean }, r), wx, groundY, k, wdir, opacity);
 }
 
 /**

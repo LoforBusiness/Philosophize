@@ -9,14 +9,16 @@ import { BEATS } from './ethics20Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SEVEN HARMS ON A HORIZON, AND A DIAL THAT ONLY CHANGES THE DRAWING.
@@ -71,9 +73,14 @@ const LIVE_D = BEATS.map((b) => (b.live_d ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics20'));
 
-export default function Ethics20Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics20Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // ANIMATE ONLY WHAT CHANGED (C20c) — a one-shot flash, so it fires only on
+  // the beat that raises its own point, never on a beat that merely holds it.
+  const flagNow = (cur.flag ?? 0) > 0 && (cur.flag ?? 0) !== (prev?.flag ?? 0) ? (cur.flag ?? 0) : 0;
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -98,17 +105,32 @@ export default function Ethics20Scene({ clock, bt, bi, dragPos, gazeX, gazeY, ga
       // everywhere else.
       rate: LIVE_D[n] === 1 ? clamp01(dragPos.value) : scripted,
       truth: carry(cv, 3, n, TRUTH[p], TRUTH[n], tr),
+      // THE FLAG'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to,
+      // flatly 0 on every other beat — one flash per tap, not a loop.
+      flag: flagNow ? ease01(bt.value / 1.1) : 0,
       t,
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const blocks = [0, 1, 2, 3, 4, 5, 6];
+  // Fades in over the first fifth of its window and out over the last.
+  const flagStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.flag;
+    return { opacity: u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2) };
+  });
 
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.cap} pointerEvents="none">THE SAME HARM, SEVEN TIMES</Text>
+      {/* group AH, beat 3: the reasons just set aside leave one thing behind —
+          the discount for lateness alone, named beside the title it modifies. */}
+      {flagNow === 1 && (
+        <Animated.View style={[styles.flagTag, flagStyle]} pointerEvents="none">
+          <Text style={styles.flagT}>TIME ALONE</Text>
+        </Animated.View>
+      )}
       <View style={styles.horizon} pointerEvents="none" />
       {blocks.map((k) => <Harm key={k} S={SCENE} index={k} />)}
       <View style={styles.ground} pointerEvents="none" />
@@ -145,13 +167,24 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 40, top: CAP_Y, width: 260,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
   horizon: { position: 'absolute', left: 30, top: HORIZON, width: 344, height: 1.5, backgroundColor: INK },
+
+  // ── the one tap event (group AH) — a small tag beside the caption, on the
+  // one line of clear paper above the tallest (NOW) block.
+  flagTag: {
+    position: 'absolute', left: 304, top: CAP_Y, width: 70,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    paddingVertical: 2, alignItems: 'center',
+  },
+  flagT: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,
+  },
 
   block: {
     position: 'absolute', width: BLOCK_W,

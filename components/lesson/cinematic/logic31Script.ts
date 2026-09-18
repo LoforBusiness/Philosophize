@@ -34,7 +34,7 @@ export const BEATS: Logic31Beat[] = [
     cite: 'Three in a row',
   },
   {
-    p: 1, flips: 3, scale: 1,
+    p: 1, flips: 3, scale: 1, stress: 1,
     dur: 3.4,
     text: 'The chance of heads on the next flip is still one half. The three earlier heads leave it unchanged.',
   },

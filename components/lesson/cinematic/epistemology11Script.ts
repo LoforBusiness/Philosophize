@@ -29,6 +29,14 @@ export interface Epistemology11Beat extends BaseBeat {
    *  between them. Only the hook beat sets it; it fades out and never returns. */ link?: number;
   /** 1 = the three moment cards are live (Q2), with their marks on the right
    *  dial's rim. */ pick?: number;
+  /** 1 = a small "?" badge appears by the frozen reading — seeing it isn't yet
+   *  knowing it. */ knowMark?: number;
+  /** 1 = a dashed ring marks the frozen dial — stopped twelve hours before you
+   *  looked. */ frozenRing?: number;
+  /** 0/2/3 = how many JTB conditions are lit as chits in the gutter (2 = true and
+   *  justified together, 3 = + belief). */ cond?: number;
+  /** 1 = the gutter's tie-line is broken and crossed — nothing connects the
+   *  reading to the fact that made it true. */ noLink?: number;
 }
 
 export const BEATS: Epistemology11Beat[] = [
@@ -38,7 +46,7 @@ export const BEATS: Epistemology11Beat[] = [
     dur: 2.4,
   },
   {
-    p: 164, x: 80, real: 180, link: 1,
+    p: 164, x: 80, real: 180, link: 1, knowMark: 1,
     text: 'Your belief that it’s three o’clock is true. But do you know the time?',
     dur: 1.8,
   },
@@ -49,7 +57,7 @@ export const BEATS: Epistemology11Beat[] = [
     dur: 3.2,
   },
   {
-    p: 465, x: 154, real: 195,
+    p: 465, x: 154, real: 195, frozenRing: 1,
     text: 'The hallway clock stopped at three o’clock, twelve hours before you looked. Bertrand Russell gave this example in 1948.',
     dur: 1.8,
   },
@@ -60,12 +68,12 @@ export const BEATS: Epistemology11Beat[] = [
     dur: 1.8,
   },
   {
-    p: 459, x: 154, real: 220,
+    p: 459, x: 154, real: 220, cond: 2,
     text: 'Second, the belief was true. Third, it was justified, since reading a clock is an ordinary way to learn the time.',
     dur: 2.7,
   },
   {
-    p: 459, x: 154, real: 220,
+    p: 459, x: 154, real: 220, cond: 3,
     text: 'Your belief therefore meets all three conditions: belief, truth and justification.',
     dur: 1.8,
   },
@@ -88,7 +96,7 @@ export const BEATS: Epistemology11Beat[] = [
     dur: 2.6,
   },
   {
-    p: 259, x: 226, real: 300,
+    p: 259, x: 226, real: 300, noLink: 1,
     text: 'Nothing connected your reason to the fact that made the belief true. A match of this kind is called epistemic luck.',
     dur: 2.4,
   },

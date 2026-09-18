@@ -22,6 +22,10 @@ export interface Aes14Beat extends BaseBeat {
   /** How full the cask is, 1 = to the brim · 0 = drained. */ level?: number;
   /** The key on its leather thong at the bottom, 0…1. */ key?: number;
   /** 1 = the three verdicts are live targets (Q1). */ pick?: number;
+  /** A small tick badges the room's card — a unanimous verdict. */ unanimousTick?: boolean;
+  /** A “≠” mark sits between the iron and sweet cards — two different kinds of complaint. */ diffType?: boolean;
+  /** A small plaque near the figure: HUME, 1757 — the essay just named. */ essayTag?: boolean;
+  /** A struck brace runs down the board — Hume denies the three are equally good. */ noEqual?: boolean;
 }
 
 export const BEATS: Aes14Beat[] = [
@@ -31,7 +35,7 @@ export const BEATS: Aes14Beat[] = [
     text: 'Suppose everyone in a room tastes the wine from one cask. Their verdict is unanimous.',
   },
   {
-    g: 462, board: 1, level: 1,
+    g: 462, board: 1, level: 1, unanimousTick: true,
     dur: 1.8,
     text: 'Every taster reports that there’s nothing wrong with the wine.',
   },
@@ -42,18 +46,18 @@ export const BEATS: Aes14Beat[] = [
     cite: 'Two dissenters',
   },
   {
-    g: 465, board: 3, level: 1,
+    g: 465, board: 3, level: 1, diffType: true,
     dur: 3,
     text: 'The other finds the wine too sweet for their liking, a complaint of a different type.',
   },
   {
-    g: 13, board: 3, level: 1,
+    g: 13, board: 3, level: 1, essayTag: true,
     dur: 1.9,
     text: 'In 1757, David Hume published an essay on the standard of taste. It begins by granting that tastes vary widely.',
     cite: 'The variety of taste',
   },
   {
-    g: 266, board: 3, level: 1,
+    g: 266, board: 3, level: 1, noEqual: true,
     dur: 2.9,
     text: 'Yet Hume denies that every verdict is equally good. The joint verdict of true judges, he argues, is the standard of taste.',
   },

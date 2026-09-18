@@ -9,6 +9,7 @@ import { BEATS } from './aesthetics40Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIVE COLUMNS OFF ONE FLOOR, AND A RULED LINE ONLY TWO OF THEM CLEAR.
@@ -88,6 +90,11 @@ const LINE = BEATS.map((b) => (b.line ? 1 : 0));
 const RAISE = BEATS.map((b) => b.raise ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+// group AH — beat 7: five course dots sit over the taste column, the last a
+// ring, since it's the one diners argue over.
+const COURSE = BEATS.map((b) => (b.course ? 1 : 0));
+const COURSE_DOT_X = [0, 1, 2, 3, 4].map((k) => PILL_X[TASTE] + k * 8);
+const COURSE_Y = 360;
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -98,13 +105,17 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics40'));
 export default function Aesthetics40Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const courseFade = (cur.course ?? 0) !== (prev?.course ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -121,6 +132,9 @@ export default function Aesthetics40Scene({ clock, bt, bi, i, picked, onPick, dr
       // to be mapped and the reader is moving the thing under discussion.
       raise: carry(cv, 3, n, RAISE[p], reacting ? dragPos.value : RAISE[n], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // beat 7 — "diners argue about whether the fifth course earned its
+      // place": five course dots settle over the taste column.
+      course: carry(cv, 5, n, COURSE[p], COURSE[n], courseFade ? grow : 1),
     };
   });
 
@@ -130,6 +144,7 @@ export default function Aesthetics40Scene({ clock, bt, bi, i, picked, onPick, dr
 
   const lineStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.lineOn }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
+  const courseStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.course }));
 
   return (
     <View style={styles.scene}>
@@ -143,6 +158,14 @@ export default function Aesthetics40Scene({ clock, bt, bi, i, picked, onPick, dr
       <Animated.View style={[StyleSheet.absoluteFill, lineStyle]} pointerEvents="none">
         <View style={styles.line} />
         <Text style={styles.lineCap}>WHERE ART BEGINS</Text>
+      </Animated.View>
+
+      {/* beat 7 — five course dots over the taste column; the fifth is a ring,
+          the one still being argued over. */}
+      <Animated.View style={[StyleSheet.absoluteFill, courseStyle]} pointerEvents="none">
+        {COURSE_DOT_X.map((cx, k) => (
+          <View key={cx} style={[styles.courseDot, { left: cx }, k === COURSE_DOT_X.length - 1 && styles.courseDotOpen]} />
+        ))}
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
@@ -194,7 +217,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 146, top: CAP_T, width: 240,
@@ -221,10 +244,18 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
 
+  // beat 7 — a course dot: filled for a settled course, ringed for the one
+  // still argued over.
+  courseDot: {
+    position: 'absolute', top: COURSE_Y, width: 6, height: 6, borderRadius: 3,
+    backgroundColor: INK,
+  },
+  courseDotOpen: { backgroundColor: PAPER, borderWidth: 1.5, borderColor: INK },
+
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

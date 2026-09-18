@@ -13,6 +13,9 @@ export interface Aes5Beat extends BaseBeat {
   /** The brooding self-cloud 0..1 (fades as attention shifts). */ ego?: number;
   /** Ruskin's single leaf 0..1. */ leaf?: number;
   /** Share of the ATTENTION meter taken by the self, 0..1. */ self?: number;
+  /** 1 = a tag reading THE OBSTACLE lands on the self-cloud, naming it in Murdoch's own words. */ obstacleTag?: number;
+  /** 1 = a tag reading UNSELFING lands above the kestrel, naming the moment Murdoch names it. */ unselfTag?: number;
+  /** 1 = a dashed sketch of a whole tree appears beneath the leaf, previewing what it eventually leads to. */ treeCue?: number;
 }
 
 export const BEATS: Aes5Beat[] = [
@@ -28,7 +31,7 @@ export const BEATS: Aes5Beat[] = [
     dur: 2.5,
   },
   {
-    p: 257, bird: 0, ego: 1, self: 0.88,
+    p: 257, bird: 0, ego: 1, self: 0.88, obstacleTag: 1,
     text: 'Murdoch calls the obstacle “the fat relentless ego”, a self absorbed in its own concerns. Attention draws the mind away from it.',
     dur: 2.7,
   },
@@ -39,7 +42,7 @@ export const BEATS: Aes5Beat[] = [
     dur: 3.8,
   },
   {
-    p: 415, bird: 1, ego: 0, self: 0.06,
+    p: 415, bird: 1, ego: 0, self: 0.06, unselfTag: 1,
     text: 'The brooding self is lost for a moment, and only the kestrel remains. Murdoch calls this unselfing.',
     dur: 1.8,
   },
@@ -81,7 +84,7 @@ export const BEATS: Aes5Beat[] = [
     dur: 3.8,
   },
   {
-    p: 266, bird: 0, ego: 0, leaf: 1, self: 0.12,
+    p: 266, bird: 0, ego: 0, leaf: 1, self: 0.12, treeCue: 1,
     text: 'Ruskin’s drawing exercises therefore begin with a single leaf, and only later reach a whole tree.',
     dur: 1.8,
   },

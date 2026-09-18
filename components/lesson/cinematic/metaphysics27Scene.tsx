@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics27Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO BAGS OF BLUE MARBLES, IDENTICAL, AND A MACHINE OVER ONE OF THEM.
@@ -84,6 +86,11 @@ const BAGS = BEATS.map((b) => b.bags ?? 0);
 const MACHINE = BEATS.map((b) => (b.machine ? 1 : 0));
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const PATTERN_LINK = BEATS.map((b) => (b.patternLink ? 1 : 0));
+const POWER_PREVIEW = BEATS.map((b) => (b.powerPreview ? 1 : 0));
+/** Where the dashed link runs: from one bag's label centre to the other's. */
+const LINK_L = BAG_X[0] + BAG_W / 2;
+const LINK_R = BAG_X[1] + BAG_W / 2;
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -103,13 +110,17 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics27'));
 export default function Metaphysics27Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const patternLinkFade = (cur.patternLink ?? 0) !== (prev?.patternLink ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -122,8 +133,13 @@ export default function Metaphysics27Scene({ clock, bt, bi, i, picked, onPick, p
       t,
       bags: carry(cv, 1, n, BAGS[p], BAGS[n], tr),
       machine: carry(cv, 2, n, MACHINE[p], reacting ? pickAt(MACH_AT, pickPos.value) : MACHINE[n], tr),
-      power: carry(cv, 3, n, 0, reacting ? pickAt(POWER_AT, pickPos.value) : 0, tr),
+      // R1 — dispositional essentialism gets a preview of its own mark before the
+      // poll exists to draw it, and the poll still owns it once the reader answers.
+      power: carry(cv, 3, n, POWER_PREVIEW[p], reacting ? pickAt(POWER_AT, pickPos.value) : POWER_PREVIEW[n], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // A dashed link joins the two bag labels — Hume's law is one pattern, and
+      // a pattern does not distinguish an accident from a machine.
+      patternLink: carry(cv, 5, n, PATTERN_LINK[p], PATTERN_LINK[n], patternLinkFade ? grow : 1),
     };
   });
 
@@ -133,6 +149,7 @@ export default function Metaphysics27Scene({ clock, bt, bi, i, picked, onPick, p
 
   const machStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.machine }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
+  const patternLinkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.patternLink }));
 
   return (
     <View style={styles.scene}>
@@ -146,6 +163,13 @@ export default function Metaphysics27Scene({ clock, bt, bi, i, picked, onPick, p
       <Animated.View style={[StyleSheet.absoluteFill, machStyle]} pointerEvents="none">
         <View style={styles.machine} />
         <View style={styles.spout} />
+      </Animated.View>
+
+      {/* group AH — a dashed link joining the two bag labels: one pattern, Hume's. */}
+      <Animated.View style={[styles.linkWrap, patternLinkStyle]} pointerEvents="none">
+        <View style={styles.linkTickL} />
+        <View style={styles.link} />
+        <View style={styles.linkTickR} />
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
@@ -196,10 +220,20 @@ function Bag({ S, left, index }: { S: SharedValue<any>; left: number; index: num
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // A dashed connector under both bag labels: Hume's law is one pattern across
+  // both, and a pattern alone cannot tell the accident from the machine.
+  linkWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  link: {
+    position: 'absolute', left: LINK_L, top: BAG_LABEL_Y + 14, width: LINK_R - LINK_L, height: 0,
+    borderTopWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
+  linkTickL: { position: 'absolute', left: LINK_L - 1.5, top: BAG_LABEL_Y + 10, width: 1.5, height: 8, backgroundColor: INK },
+  linkTickR: { position: 'absolute', left: LINK_R, top: BAG_LABEL_Y + 10, width: 1.5, height: 8, backgroundColor: INK },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 136, top: CAP_T, width: 250,
@@ -233,7 +267,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

@@ -1397,8 +1397,16 @@ export function settleStep(
   const arc = Math.sin(Math.PI * clamp01(a)) * Math.min(U.standH * 0.38, Math.max(gapL, gapR) * 0.55) * 2;
   const planted: Stance = {
     ...settled,
-    footL: { x: tgtL, y: settled.footL.y - (gapL >= gapR ? arc : 0) },
-    footR: { x: tgtR, y: settled.footR.y - (gapR > gapL ? arc : 0) },
+    // THE LIFT IS SHARED IN PROPORTION, NOT GIVEN TO A WINNER. This read
+    // `gapL >= gapR ? arc : 0`, which is a HARD SWITCH on a comparison that flips
+    // whenever the two gaps cross — and during a settle they do cross, because the
+    // walk cycle is still swinging while the arrival feet stand still. On the frame
+    // it flips, the whole arc moves from one foot to the other: measured through the
+    // movement layer, an ankle rose 8.5 units while the other fell 7.3 between two
+    // frames, which is group L's defect with both feet at once. Every walk in the
+    // app could reach it; a scene's walk simply crosses the comparison once at most.
+    footL: { x: tgtL, y: settled.footL.y - arc * (gapL / (gapL + gapR + 1e-4)) },
+    footR: { x: tgtR, y: settled.footR.y - arc * (gapR / (gapL + gapR + 1e-4)) },
   };
   return mixStance(moving, planted, a);
 }
@@ -1466,9 +1474,18 @@ export function gaitVary(g: Gait, seed: number): Gait {
  * crashes the UI runtime, so order matters here.
  */
 export function strideStance(
-  x0: number, x1: number, settled: Stance, tr: number, g: Gait, seed = 0
+  x0: number, x1: number, settled: Stance, tr: number, g: Gait, seed = 0, lead = 0
 ): Stance {
   'worklet';
+  // `lead` SHIFTS THE GAIT'S PHASE WITHOUT MOVING THE BODY, and it is what lets a
+  // walk begin from a standing figure rather than from mid-stance. At phase 0 the
+  // cycle has the feet a full stride apart and both planted — fine if the figure
+  // was already walking, a teleport if it was standing still: measured on the
+  // movement layer's first draft, the frame a step began on moved a foot 16.5
+  // units. `moves.strideMode` has had the answer since the branch road, where
+  // `fromStand` adds the distance at which both feet pass through zero; this is
+  // that offset made available to every caller, and `wander.stepStance` also uses
+  // it to CONTINUE a cycle a tap interrupted rather than restart it.
   // Every walk gets its own habit, dealt from where it starts and ends, so the
   // figure never paces the stage in one identical repeating motion. This lives
   // here rather than at the call sites so EVERY lesson gets it for free.
@@ -1508,7 +1525,7 @@ export function strideStance(
   //
   // If you ever call this with a RAW tr, ease it yourself before passing it — the
   // stride follows the body, and the body is the scene's business, not the rig's.
-  const traveled = span * tr + seed * 11;
+  const traveled = span * tr + seed * 11 + lead;
   const w = walk(traveled, vg);
   // A departure has a PRELOAD and an arrival has a LANDING. Without them the figure
   // simply switches on mid-stride, which is most of why a walk that also flips the

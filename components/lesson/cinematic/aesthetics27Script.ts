@@ -28,6 +28,7 @@ export interface Aesthetics27Beat extends BaseBeat {
   /** The average shock across the four works, 0…1. */ shock?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a pin marks the gauge's current reading — the 1874 record just cited. */ mark?: number;
 }
 
 export const BEATS: Aesthetics27Beat[] = [
@@ -78,7 +79,7 @@ export const BEATS: Aesthetics27Beat[] = [
     dur: 4.8,
   },
   {
-    p: 445, x: 88, wall: 1, meter: 1, shock: 0.85,
+    p: 445, x: 88, wall: 1, meter: 1, shock: 0.85, mark: 1,
     text: 'Critics in 1874 mocked Impressionist paintings as unfinished sketches. Today they’re among the most widely reproduced paintings.',
     dur: 5.0,
   },

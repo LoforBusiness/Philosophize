@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics23Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIVE PLANKS, LEAVING ONE HULL AND ARRIVING IN THE OTHER.
@@ -80,6 +82,18 @@ const SHIPS = BEATS.map((b) => b.ships ?? 0);
 const SWAP = BEATS.map((b) => b.swap ?? 0);
 const BUILT = BEATS.map((b) => b.built ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+const CRIT = BEATS.map((b) => b.crit ?? 0);
+const DEEP = BEATS.map((b) => b.deep ?? 0);
+const PILE = BEATS.map((b) => b.pile ?? 0);
+
+// The empty gap between the hulls (170…230) is where the puzzle's abstract
+// half is drawn — never a third ship, only a question and, once, a heap (A1).
+const GAP_CX = (L_HULL + HULL_W + R_HULL) / 2;
+const PILE_BARS = [
+  { dx: -14, dy: -3, rot: '-16deg' },
+  { dx: -3, dy: 5, rot: '9deg' },
+  { dx: 10, dy: 0, rot: '-6deg' },
+];
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics23'));
 
@@ -89,7 +103,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics23'));
 // other, which is this scene's first rule.
 export default function Metaphysics23Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -111,6 +125,9 @@ export default function Metaphysics23Scene({ clock, bt, bi, i, picked, onPick, g
       swap: carry(cv, 2, n, SWAP[p], SWAP[n], tr),
       built: carry(cv, 3, n, BUILT[p], BUILT[n], tr),
       t,
+      crit: carry(cv, 4, n, CRIT[p], CRIT[n], tr),
+      deep: carry(cv, 5, n, DEEP[p], DEEP[n], tr),
+      pile: carry(cv, 6, n, PILE[p], PILE[n], tr),
     };
   });
 
@@ -120,6 +137,9 @@ export default function Metaphysics23Scene({ clock, bt, bi, i, picked, onPick, g
 
   const shipStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ships }));
   const builtStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.built }));
+  const critStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.crit }));
+  const deepStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.deep }));
+  const pileStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pile }));
 
   const planks = [0, 1, 2, 3, 4];
 
@@ -149,6 +169,20 @@ export default function Metaphysics23Scene({ clock, bt, bi, i, picked, onPick, g
 
       {/* One number, two hulls: what empties on the left fills on the right. */}
       {planks.map((k) => <Plank key={`l${k}`} S={SCENE} k={k} left={L_HULL + 6} old />)}
+
+      {/* THE TWO TESTS, NAMED ON THE HULL EACH ONE FAVOURS (A1). */}
+      <Animated.Text style={[styles.critTag, { left: L_HULL }, critStyle]} numberOfLines={1}>CONTINUITY</Animated.Text>
+      <Animated.Text style={[styles.critTag, { left: R_HULL }, critStyle]} numberOfLines={1}>MATERIAL</Animated.Text>
+
+      {/* THE DEEPER QUESTION, HANGING OVER THE EMPTY GAP — never a third ship. */}
+      <Animated.Text style={[styles.deepTag, deepStyle]} numberOfLines={1}>A WHOLE?</Animated.Text>
+
+      {/* A HEAP OF THE SAME BARS, LOOSE RATHER THAN SHAPED INTO A HULL (A1). */}
+      <Animated.View style={[StyleSheet.absoluteFill, pileStyle]} pointerEvents="none">
+        {PILE_BARS.map((b, k) => (
+          <View key={k} style={[styles.pileBar, { left: GAP_CX + b.dx - 13, top: 378 + b.dy, transform: [{ rotate: b.rot }] }]} />
+        ))}
+      </Animated.View>
 
       <Target
         id="repaired" correct={false} picked={picked} onPick={onPick}
@@ -200,7 +234,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   hull: {
     position: 'absolute', top: HULL_Y, width: HULL_W, height: HULL_H,
@@ -219,6 +253,17 @@ const styles = StyleSheet.create({
     position: 'absolute', top: LABEL_Y, width: HULL_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
+
+  // The verdict each test hands to its own hull — under the hull's own label.
+  critTag: {
+    position: 'absolute', top: LABEL_Y + 11, width: HULL_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  },
+  deepTag: {
+    position: 'absolute', left: GAP_CX - 30, top: 254, width: 60, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+  },
+  pileBar: { position: 'absolute', width: 26, height: 3.5, backgroundColor: INK, borderRadius: 1.5 },
 
   hit: { position: 'absolute', top: HULL_Y, height: HULL_H },
   hitBox: { height: HULL_H, borderRadius: 6 },

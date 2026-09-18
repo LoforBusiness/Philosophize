@@ -30,6 +30,7 @@ export interface Aes24Beat extends BaseBeat {
   /** The four copies, 0…1. */ copies?: number;
   /** The three plates under the picture, 0…1. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a line grows from the panel past the last copy — the work's reach, freed from the room. */ reach?: number;
 }
 
 export const BEATS: Aes24Beat[] = [
@@ -78,7 +79,7 @@ export const BEATS: Aes24Beat[] = [
     dur: 4.2,
   },
   {
-    p: 13, x: 268, panel: 1, copies: 1, plates: 1,
+    p: 13, x: 268, panel: 1, copies: 1, plates: 1, reach: 1,
     text: 'Benjamin also saw a gain in this loss. Freed from ritual, a work can reach everybody and take on a political function.',
     dur: 4.8,
   },

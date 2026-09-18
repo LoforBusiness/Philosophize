@@ -13,6 +13,7 @@ import { BEATS } from './metaphysics13Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A track that forks, stage right; the figure downstage left.
 //
@@ -79,6 +81,12 @@ const DIR = dirsFrom(X, 1);
 const TRACK = BEATS.map((b) => b.track ?? 0);
 const FORK = BEATS.map((b) => b.fork ?? 0);
 const BOTH = BEATS.map((b) => b.both ?? 0);
+const CRACKV = BEATS.map((b) => b.crack ?? 0);
+
+// Where `arrive`'s token travels to — the foot of the Mars-side drop (the right
+// one, matching DEST_RX below) — and where `crack` marks the stem/bar junction.
+const ARRIVE_X = TR_L + TR_W - BAR_INSET - 2;
+const ARRIVE_Y = DROP_T + DROP_H;
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -88,7 +96,7 @@ const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
 export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(5);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -97,6 +105,10 @@ export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick, d
   const boFade = (cur.both ?? 0) !== (prev?.both ?? 0);
   const stuckOn = (cur.stuck ?? 0) > 0;
   const stuckFade = (cur.stuck ?? 0) !== (prev?.stuck ?? 0);
+  // THE TOKEN RUNS ONCE, ON THE BEAT THAT ASKS FOR IT (C20c, group AH) — "the
+  // replica walks out on Mars".
+  const arriveNow = (cur.arrive ?? 0) > 0 && (cur.arrive ?? 0) !== (prev?.arrive ?? 0);
+  const crFade = (cur.crack ?? 0) !== (prev?.crack ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -119,6 +131,12 @@ export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick, d
       // is halfway, which is the answer and also why the question is empty.
       both: carry(cv, 3, n, BOTH[p], reacting ? 1 - Math.abs(dragPos.value * 2 - 1) : BOTH[n], boFade ? grow : tr),
       stuck: stuckOn ? (stuckFade ? grow : 1) : 0,
+      // THE TOKEN'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to, and
+      // flatly 0 on every other beat — one journey per tap, not a loop.
+      arrive: arriveNow ? ease01(bt.value / 1.1) : 0,
+      // THE BREAK — identity's own path failing at the junction. Carried like
+      // track/fork so it fades in rather than snapping on.
+      crack: carry(cv, 4, n, CRACKV[p], CRACKV[n], crFade ? grow : tr),
     };
   });
 
@@ -132,6 +150,20 @@ export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick, d
     opacity: SCENE.value.stuck,
     transform: [{ scale: 0.9 + 0.1 * SCENE.value.stuck }],
   }));
+  // The token: fades in over the first fifth of its journey and out over the
+  // last, so it arrives rather than stopping dead, and is invisible at rest.
+  const arriveStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.arrive;
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2);
+    return {
+      opacity: on,
+      transform: [
+        { translateX: MID + (ARRIVE_X - MID) * u },
+        { translateY: BAR_T + (ARRIVE_Y - BAR_T) * u },
+      ],
+    };
+  });
+  const crackStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.crack }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -164,6 +196,17 @@ export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick, d
       {/* the label that could not choose */}
       <Animated.View style={[styles.stuckTag, stuckStyle]} pointerEvents="none">
         <Text style={styles.stuckText} numberOfLines={1}>THE REAL YOU  ·  ?</Text>
+      </Animated.View>
+
+      {/* the replica, walking out onto the Mars-side branch — "the replica walks
+          out on Mars" */}
+      <Animated.View style={[styles.arriveDot, arriveStyle]} pointerEvents="none" />
+
+      {/* the break where identity's own path fails at the junction — "identity
+          can't branch" */}
+      <Animated.View style={[styles.crackWrap, crackStyle]} pointerEvents="none">
+        <View style={styles.crackA} />
+        <View style={styles.crackB} />
       </Animated.View>
 
       {showPick &&
@@ -202,7 +245,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   layer: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
 
   tok: {
@@ -223,7 +266,7 @@ const styles = StyleSheet.create({
 
   dest: {
     position: 'absolute', top: DEST_T, width: DEST_W, height: DEST_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   destText: {
@@ -233,12 +276,33 @@ const styles = StyleSheet.create({
 
   stuckTag: {
     position: 'absolute', left: MID - 52, top: BAR_T - 26, width: 104, height: 20,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   stuckText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK,
     includeFontPadding: false,
+  },
+
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  //
+  // The arriving token is the replica itself, so it is INK and the size of a
+  // full stop — anything larger would read as a new object rather than as the
+  // figure the fork already names travelling down it.
+  arriveDot: {
+    position: 'absolute', left: 0, top: 0, width: 6, height: 6, borderRadius: 3,
+    backgroundColor: INK,
+  },
+  // A break where the single stem meets the fork — drawn as a small X astride
+  // the junction, because that is where a single identity fails to go on.
+  crackWrap: { position: 'absolute', left: MID - 7, top: BAR_T - 7, width: 14, height: 14 },
+  crackA: {
+    position: 'absolute', left: 6, top: 0, width: 2, height: 14, backgroundColor: INK,
+    transform: [{ rotate: '45deg' }],
+  },
+  crackB: {
+    position: 'absolute', left: 6, top: 0, width: 2, height: 14, backgroundColor: INK,
+    transform: [{ rotate: '-45deg' }],
   },
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },

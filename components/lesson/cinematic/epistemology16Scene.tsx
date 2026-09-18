@@ -9,6 +9,7 @@ import { BEATS } from './epistemology16Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // EVERY RESULT THE ECLIPSE COULD HAVE GIVEN, AND WHAT EACH THEORY PERMITS (H64).
 // A theory's bar is as wide as the results it allows, so "forbids something" is a
@@ -66,6 +68,9 @@ const RESN = BEATS.map((b) => b.results ?? 0);
 const BARN = BEATS.map((b) => b.bars ?? 0);
 const FOUND = BEATS.map((b) => b.found ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
+// group AH — one still-tap event each, plain carried 0/1 tracks
+const WIDE_RING = BEATS.map((b) => b.wideRing ?? 0);
+const WEAK_TAG = BEATS.map((b) => b.weakTag ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
 
@@ -78,7 +83,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology16'));
 export default function Epistemology16Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(5);
   const cur = BEATS[i];
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -103,11 +108,15 @@ export default function Epistemology16Scene({ clock, bt, bi, i, picked, onPick, 
       results: carry(cv, 0, n, RESN[p], reacting ? (1 - dragPos.value) * 5 : RESN[n], deal),
       bars: carry(cv, 1, n, BARN[p], BARN[n], deal),
       found: carry(cv, 2, n, FOUND[p], FOUND[n], grow),
+      wideRing: carry(cv, 3, n, WIDE_RING[p], WIDE_RING[n], tr),
+      weakTag: carry(cv, 4, n, WEAK_TAG[p], WEAK_TAG[n], tr),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const ring = useAnimatedStyle(() => ({ opacity: SCENE.value.found }));
+  const wideRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.wideRing }));
+  const weakTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.weakTag }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -120,6 +129,13 @@ export default function Epistemology16Scene({ clock, bt, bi, i, picked, onPick, 
       {BARS.map((b, k) => (
         <Bar key={b.id} k={k} SCENE={SCENE} live={live} answered={answered} picked={picked} onPick={onPick} />
       ))}
+      {/* "the third permits every possible result" — a ring on that bar, drawn
+          after the bars so it is not painted over by their own opaque face. */}
+      <Animated.View style={[styles.wideRing, wideRingStyle]} pointerEvents="none" />
+      {/* "this apparent strength is in fact a weakness" — a tag over the same bar. */}
+      <Animated.View style={[styles.weakTag, weakTagStyle]} pointerEvents="none">
+        <Text style={styles.weakTagT} numberOfLines={1}>WEAKNESS</Text>
+      </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -179,7 +195,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   label: {
@@ -203,8 +219,24 @@ const styles = StyleSheet.create({
   },
 
   bar: { position: 'absolute', height: BAR_H, transformOrigin: '0% 50%' },
+
+  // "the third permits every possible result" — a dashed ring on that bar.
+  wideRing: {
+    position: 'absolute', left: BARS[0].left - 5, top: BAR_T[0] - 5,
+    width: BARS[0].width + 10, height: BAR_H + 10,
+    borderRadius: 8, borderWidth: 2, borderColor: INK, borderStyle: 'dashed',
+  },
+  // "this apparent strength is in fact a weakness" — a tag over the same bar,
+  // in the gap between the result row and the bar it names.
+  weakTag: {
+    position: 'absolute', left: BARS[0].left + BARS[0].width / 2 - 32, top: 291,
+    width: 64, height: 14, borderRadius: 3,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  weakTagT: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.3, color: INK, includeFontPadding: false },
   barInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
   },
   barText: {

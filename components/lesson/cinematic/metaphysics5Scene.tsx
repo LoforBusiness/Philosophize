@@ -11,14 +11,16 @@ import { BEATS } from './metaphysics5Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // THE TWO PANELS. The lesson's question drawn as the comparison it literally is: two
 // frames of exactly the same size, side by side. On the left, NOTHING — a dashed,
@@ -66,6 +68,10 @@ const STARB = BEATS.map((b) => b.stars ?? 0);
 const QB = BEATS.map((b) => b.q ?? 0);
 const DAS = BEATS.map((b) => b.dasein ?? 0);
 const PSR = BEATS.map((b) => b.psr ?? 0);
+// group AH — still-tap events, each on for one beat only and carried both ways.
+const INCLUDED = BEATS.map((b) => b.included ?? 0);
+const PSRQ = BEATS.map((b) => b.psrQ ?? 0);
+const DNAME = BEATS.map((b) => b.dName ?? 0);
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -84,7 +90,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics5'));
 export default function Metaphysics5Scene({ clock, bt, bi, pickPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -100,6 +106,11 @@ export default function Metaphysics5Scene({ clock, bt, bi, pickPos, i, gazeX, ga
       q: carry(cv, 1, n, QB[p], reacting ? pickPos.value : QB[n], tr),
       dasein: carry(cv, 2, n, DAS[p], DAS[n], tr),
       psr: carry(cv, 3, n, PSR[p], PSR[n], tr),
+      // group AH — one still-tap event each, carried in and back out over the
+      // beats either side rather than switched, so none of them is a CUT.
+      included: carry(cv, 4, n, INCLUDED[p], INCLUDED[n], tr),
+      psrQ: carry(cv, 5, n, PSRQ[p], PSRQ[n], tr),
+      dName: carry(cv, 6, n, DNAME[p], DNAME[n], tr),
       t,
     };
   });
@@ -124,6 +135,10 @@ export default function Metaphysics5Scene({ clock, bt, bi, pickPos, i, gazeX, ga
     const pulse = 0.7 + 0.3 * Math.sin(SCENE.value.t * 2.6);
     return { opacity: SCENE.value.dasein * pulse, transform: [{ scale: 0.9 + 0.15 * pulse }] };
   });
+  // group AH — the three still-tap events.
+  const includedStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.included }));
+  const psrQStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.psrQ }));
+  const dNameStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.dName }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -173,14 +188,29 @@ export default function Metaphysics5Scene({ clock, bt, bi, pickPos, i, gazeX, ga
         <View style={styles.psrHead} />
       </Animated.View>
 
+      {/* group AH — "What could that reason be?": a question mark lands right at the
+          tip of Leibniz's own arrow, since the rule points at an answer nobody has
+          given yet. */}
+      <Animated.View style={[styles.psrQWrap, psrQStyle]} pointerEvents="none">
+        <Text style={styles.psrQGlyph}>?</Text>
+      </Animated.View>
+
       {/* ── the being for whom being is a question ───────────────────────────── */}
       <Animated.View style={[styles.tag, tagStyle]} pointerEvents="none">
         <Text style={styles.tagWord}>DASEIN</Text>
         <Text style={styles.tagSub}>BEING-THERE</Text>
       </Animated.View>
 
+      {/* group AH — "Heidegger calls such a being Dasein": a rule settles in under
+          the tag as the term is formally given, the way a name gets underlined the
+          moment it is written down. */}
+      <Animated.View style={[styles.dNameRule, dNameStyle]} pointerEvents="none" />
+
       <View style={styles.ground} pointerEvents="none" />
       <Animated.View style={[styles.aura, auraStyle]} pointerEvents="none" />
+      {/* group AH — "the questioner included": a loop settles loosely around the
+          figure, since he too is one of the beings the question is asking about. */}
+      <Animated.View style={[styles.includeRing, includedStyle]} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </Animated.View>
   );
@@ -215,7 +245,7 @@ const styles = StyleSheet.create({
 
   panelFull: {
     position: 'absolute', top: PAN_T, width: PAN_W, height: PAN_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8,
     backgroundColor: RULE, overflow: 'hidden',
   },
   star: { position: 'absolute', backgroundColor: INK },
@@ -253,15 +283,25 @@ const styles = StyleSheet.create({
     borderTopWidth: 7, borderBottomWidth: 7, borderLeftWidth: 12,
     borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
   },
+  // group AH — "what could that reason be?", right at the arrow's own tip.
+  psrQWrap: {
+    position: 'absolute', left: 384, top: 434, width: 14, height: 20,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  psrQGlyph: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, color: INK, includeFontPadding: false },
 
   // ── the Dasein tag ──────────────────────────────────────────────────────────
   tag: {
     position: 'absolute', left: 4, top: 296, width: 114, height: 44,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   tagWord: { fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 2, color: INK, includeFontPadding: false },
   tagSub: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1, color: INK, marginTop: 3, includeFontPadding: false },
+  // group AH — "Heidegger calls such a being Dasein": the name settles in.
+  dNameRule: {
+    position: 'absolute', left: 14, top: 342, width: 94, height: 2, backgroundColor: INK,
+  },
 
   // Derived from the figure, not hand-placed: the head's centre sits (standH 34 +
   // 49) rig units above the ground and its radius is 20, both scaled by K_FIG. The
@@ -274,6 +314,13 @@ const styles = StyleSheet.create({
     left: FIG_X - AURA_R, top: GROUND - 83 * K_FIG - AURA_R,
     width: AURA_R * 2, height: AURA_R * 2,
     borderRadius: AURA_R, borderWidth: 2, borderColor: INK,
+  },
+  // group AH — "the questioner included": a loose dashed loop, clear of the tag
+  // above (y 340) and resting on the ground line (500), the same dashed language
+  // the NOTHING panel already uses for "not filled in yet".
+  includeRing: {
+    position: 'absolute', left: FIG_X - 44, top: 344, width: 88, height: 156,
+    borderRadius: 44, borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
   },
 });
 

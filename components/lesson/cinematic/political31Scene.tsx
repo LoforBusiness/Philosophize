@@ -13,6 +13,7 @@ import { BEATS } from './political31Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -21,8 +22,9 @@ import { Shapes, Outlined, ell, bar, rect, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A FIELD THAT DIES WHILE YOU WATCH — twenty-one blades falling together, the first
 // mass animation in the app — with the arithmetic laid over it at the end. The answer
@@ -110,6 +112,13 @@ const G = BEATS.map((b) => b.g ?? 0);
 const GRASS = BEATS.map((b) => b.grass ?? 1);
 const HERD = BEATS.map((b) => b.herd ?? 0);
 const SUMS = BEATS.map((b) => b.sums ?? 0);
+const MINE = BEATS.map((b) => b.mine ?? 0);
+const QUARTER = BEATS.map((b) => b.quarter ?? 0);
+
+// ── where the two tap events sit ────────────────────────────────────────────
+// The first quarter of the damage, in STAGE space: the cost box is at COST and
+// its cells are laid out inside it, so this is read off both rather than typed.
+const Q0 = { left: COST.left + 5, top: COST.top + 20, width: CELL_W, height: 16 };
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -128,7 +137,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political31'));
 export default function Political31Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(5);
   const cur = BEATS[i];
 
   const SCENE = useDerivedValue(() => {
@@ -151,6 +160,9 @@ export default function Political31Scene({ clock, bt, bi, i, picked, onPick, pic
       sway: t,
       herd: carry(cv, 1, n, HERD[p], HERD[n], grow),
       sums: carry(cv, 2, n, SUMS[p], SUMS[n], grow),
+      // The two tap events, carried, so each fades out as well as in (group L).
+      mine: carry(cv, 3, n, MINE[p], MINE[n], grow),
+      quarter: carry(cv, 4, n, QUARTER[p], QUARTER[n], grow),
     };
   });
 
@@ -159,6 +171,24 @@ export default function Political31Scene({ clock, bt, bi, i, picked, onPick, pic
     opacity: SCENE.value.sums,
     transform: [{ translateY: (1 - SCENE.value.sums) * -8 }],
   }));
+
+  // ── the two tap events ─────────────────────────────────────────────────────
+  //
+  // The verdict arrives where the sum will later be laid out, on a beat where that
+  // sum is not up yet: it is the conclusion a herder reaches BEFORE anybody writes
+  // the arithmetic down, which is the trap the lesson is about.
+  const mineStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.mine,
+    transform: [{ translateY: (1 - SCENE.value.mine) * -8 }],
+  }));
+  // Your own quarter of the damage, struck over the first of the four cells and
+  // captioned under it. It is drawn in stage space rather than inside the cost box,
+  // because the box is a Target and its children ride the answer reaction.
+  const quarterStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.quarter,
+    transform: [{ scale: 0.9 + 0.1 * SCENE.value.quarter }],
+  }));
+  const quarterCapStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.quarter - 0.4) / 0.6) }));
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -199,6 +229,15 @@ export default function Political31Scene({ clock, bt, bi, i, picked, onPick, pic
           </View>
         </Target>
       </Animated.View>
+
+      {/* On these figures, for this herder, adding one more is the rational move. */}
+      <Animated.View style={[styles.mine, mineStyle]} pointerEvents="none">
+        <Text style={styles.mineText} numberOfLines={1}>RATIONAL, FOR YOU</Text>
+      </Animated.View>
+
+      {/* Which quarter of the cost is yours. */}
+      <Animated.View style={[styles.quarter, quarterStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.quarterCap, quarterCapStyle]} pointerEvents="none">YOURS</Animated.Text>
 
       {/* the culprit everybody reaches for first */}
       <Target id={'greed'} correct={false} picked={picked} onPick={onPick}
@@ -265,7 +304,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   blade: { position: 'absolute', width: GRASS_W, backgroundColor: INK, transformOrigin: '50% 100%' },
@@ -292,6 +331,27 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
   },
   cellOnInk: { borderColor: PAPER, backgroundColor: INK },
+
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  mine: {
+    position: 'absolute', left: 120, top: 318, width: 150, height: 30,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  mineText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+  quarter: {
+    position: 'absolute', ...Q0,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: INK,
+  },
+  quarterCap: {
+    position: 'absolute', left: Q0.left - 14, top: Q0.top + 22, width: Q0.width + 28,
+    textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
 
   plate: { position: 'absolute', ...PLATE },
   plateText: {

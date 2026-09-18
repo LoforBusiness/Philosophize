@@ -9,14 +9,16 @@ import { BEATS } from './epistemology34Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // TWO BARS, AND ONLY ONE OF THEM OBEYS THE READER.
 //
@@ -62,10 +64,26 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology34'));
 
+// group AH — one event per still tap.
+const HOLD_SLOT = BEATS.map((b) => ((b.holdSlot ?? 0) > 0 ? 1 : 0));
+const NOTE = BEATS.map((b) => ((b.note ?? 0) > 0 ? 1 : 0));
+const GAP_LBL = BEATS.map((b) => ((b.gapLbl ?? 0) > 0 ? 1 : 0));
+const TARGET = BEATS.map((b) => ((b.target ?? 0) > 0 ? 1 : 0));
+const EXAMPLE = BEATS.map((b) => ((b.example ?? 0) > 0 ? 1 : 0));
+
 export default function Epistemology34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(7);
   const live = (BEATS[i].live ?? 0) > 0;
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // group AH — each flag fires only on the beat that CHANGES its own channel
+  // (C20c), so a beat that merely holds a value re-draws nothing.
+  const holdSlotFade = (cur.holdSlot ?? 0) !== (prev?.holdSlot ?? 0);
+  const noteFade = (cur.note ?? 0) !== (prev?.note ?? 0);
+  const gapLblFade = (cur.gapLbl ?? 0) !== (prev?.gapLbl ?? 0);
+  const targetFade = (cur.target ?? 0) !== (prev?.target ?? 0);
+  const exampleFade = (cur.example ?? 0) !== (prev?.example ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -82,6 +100,17 @@ export default function Epistemology34Scene({ clock, bt, bi, i, dragPos, gazeX, 
       // halfway up it — the reader is watching the GAP, not the absolute rate.
       hold: (holds(c) - 0.5) * 2,
       gap: carry(cv, 1, n, GAP[p], GAP[n], tr),
+      // group AH — one event per still tap:
+      //  · holdSlot  a dashed outline marks the still-empty right column (beat 1)
+      //  · note      a small dot marks the still-small gap (beat 3)
+      //  · gapLbl    the gap is named: overconfidence (beat 5)
+      //  · target    a dashed line at claim's own height, where hold falls short (beat 6)
+      //  · example   two matching mini-bars: a calibrated case (beat 7)
+      holdSlotOn: carry(cv, 2, n, HOLD_SLOT[p], HOLD_SLOT[n], holdSlotFade ? grow : 1),
+      noteOn: carry(cv, 3, n, NOTE[p], NOTE[n], noteFade ? grow : 1),
+      gapLblOn: carry(cv, 4, n, GAP_LBL[p], GAP_LBL[n], gapLblFade ? grow : 1),
+      targetOn: carry(cv, 5, n, TARGET[p], TARGET[n], targetFade ? grow : 1),
+      exampleOn: carry(cv, 6, n, EXAMPLE[p], EXAMPLE[n], exampleFade ? grow : 1),
     };
   });
 
@@ -93,6 +122,11 @@ export default function Epistemology34Scene({ clock, bt, bi, i, dragPos, gazeX, 
     const bot = GROUND - BAR_H * SCENE.value.hold;
     return { opacity: SCENE.value.gap, top, height: bot - top < 0 ? 0 : bot - top };
   });
+  const holdSlotStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.holdSlotOn }));
+  const noteStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.noteOn }));
+  const gapLblStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.gapLblOn }));
+  const targetStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.targetOn }));
+  const exampleStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.exampleOn }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -102,6 +136,14 @@ export default function Epistemology34Scene({ clock, bt, bi, i, dragPos, gazeX, 
       <Animated.View style={[styles.claim, claimStyle]} pointerEvents="none" />
       <Animated.View style={[styles.hold, holdStyle]} pointerEvents="none" />
       <Animated.View style={[styles.gap, gapStyle]} pointerEvents="none" />
+
+      {/* group AH — one event per still tap (see the SCENE comment above). */}
+      <Animated.View style={[styles.holdSlot, holdSlotStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.note, noteStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.gapLbl, gapLblStyle]} pointerEvents="none">OVERCONFIDENCE</Animated.Text>
+      <Animated.View style={[styles.target, targetStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.exampleBar, styles.exampleBarA, exampleStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.exampleBar, styles.exampleBarB, exampleStyle]} pointerEvents="none" />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -115,7 +157,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   kicker: {
     position: 'absolute', left: 130, top: CAP_T, width: 200,
@@ -134,6 +176,35 @@ const styles = StyleSheet.create({
     position: 'absolute', left: CLAIM_L + BAR_W, width: HOLD_L - CLAIM_L - BAR_W,
     borderTopWidth: 2, borderBottomWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
   },
+
+  // ── group AH: one event per still tap ──────────────────────────────────────
+  //
+  // The dashed outline of the still-empty right column: this is where the hold
+  // bar will grow. A boundary, never a fill (D31).
+  holdSlot: {
+    position: 'absolute', left: HOLD_L, top: GROUND - BAR_H, width: BAR_W, height: BAR_H,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed',
+  },
+  // A small dot marking the still-small gap between the two bar tops at claim 0.3.
+  note: { position: 'absolute', left: 224, top: 439, width: 6, height: 6, borderRadius: 3, backgroundColor: SOFT },
+  // The gap's own name, set beside the columns rather than over them — there is
+  // no room above the bars without crossing the kicker (D34, D35).
+  gapLbl: {
+    position: 'absolute', left: 292, top: 258, width: 104, lineHeight: 11,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
+  // A dashed line at the claim bar's own height, run across the hold column: this
+  // is how far the hold bar would need to reach to match it.
+  target: {
+    position: 'absolute', left: HOLD_L, top: GROUND - BAR_H * 0.95, width: BAR_W,
+    height: 2, borderTopWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
+  },
+  // Two small bars of equal height: a calibrated case, drawn beside the figure
+  // rather than replacing the pair on stage (which stays at the certain claim).
+  exampleBar: { position: 'absolute', bottom: STAGE_H - GROUND, width: 14, height: 36, backgroundColor: INK },
+  exampleBarA: { left: 134 },
+  exampleBarB: { left: 150 },
 });
 
 export function Epistemology34Lesson({ lesson }: { lesson: Lesson }) {

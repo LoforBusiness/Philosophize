@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics29Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO PEAKS ON A STRIP OF LAND, AND ONE EYE ABOVE THEM.
@@ -90,6 +92,9 @@ const HAZE = BEATS.map((b) => b.haze ?? 0);
 const LID = BEATS.map((b) => b.lid ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const MIND_WALL = BEATS.map((b) => (b.mindWall ? 1 : 0));
+const MIND_LINK = BEATS.map((b) => (b.mindLink ? 1 : 0));
+const EYE_RING = BEATS.map((b) => (b.eyeRing ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -106,7 +111,12 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics29'));
 export default function Metaphysics29Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(6);
+  const cv = useCarry(9);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const mindWallFade = (cur.mindWall ?? 0) !== (prev?.mindWall ?? 0);
+  const mindLinkFade = (cur.mindLink ?? 0) !== (prev?.mindLink ?? 0);
+  const eyeRingFade = (cur.eyeRing ?? 0) !== (prev?.eyeRing ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -114,6 +124,7 @@ export default function Metaphysics29Scene({ clock, bt, bi, i, picked, onPick, p
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
     const u = pickPos.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -129,6 +140,15 @@ export default function Metaphysics29Scene({ clock, bt, bi, i, picked, onPick, p
       haze: carry(cv, 3, n, HAZE[p], reacting ? pickAt(HAZE_AT, u) : HAZE[n], tr),
       lid: carry(cv, 4, n, LID[p], LID[n], tr),
       plates: carry(cv, 5, n, PLATES[p], PLATES[n], tr),
+      // A dashed wall between the eye and the peaks — realism's claim that the
+      // mountains stand independent of any mind.
+      mindWall: carry(cv, 6, n, MIND_WALL[p], MIND_WALL[n], mindWallFade ? grow : 1),
+      // A short dashed link from the eye down to the peak — anti-realism's claim
+      // that what is real depends on the mind that meets it.
+      mindLink: carry(cv, 7, n, MIND_LINK[p], MIND_LINK[n], mindLinkFade ? grow : 1),
+      // A ring on the eye itself — Berkeley's point that even imagining the tree
+      // is a mind perceiving it.
+      eyeRing: carry(cv, 8, n, EYE_RING[p], EYE_RING[n], eyeRingFade ? grow : 1),
     };
   });
 
@@ -141,6 +161,9 @@ export default function Metaphysics29Scene({ clock, bt, bi, i, picked, onPick, p
   const hazeStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.haze) }));
   const lidStyle = useAnimatedStyle(() => ({ height: EYE_H * clamp01(SCENE.value.lid) }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.plates }));
+  const mindWallStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.mindWall }));
+  const mindLinkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.mindLink }));
+  const eyeRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.eyeRing }));
 
   return (
     <View style={styles.scene}>
@@ -150,6 +173,15 @@ export default function Metaphysics29Scene({ clock, bt, bi, i, picked, onPick, p
       <View style={styles.lens} pointerEvents="none" />
       <View style={styles.pupil} pointerEvents="none" />
       <Animated.View style={[styles.lid, lidStyle]} pointerEvents="none" />
+
+      {/* group AH — a ring on the eye: Berkeley's point that imagining still perceives. */}
+      <Animated.View style={[styles.eyeRing, eyeRingStyle]} pointerEvents="none" />
+
+      {/* group AH — a dashed wall between the eye and the peaks: realism's claim. */}
+      <Animated.View style={[styles.mindWall, mindWallStyle]} pointerEvents="none" />
+
+      {/* group AH — a short dashed link from the eye to a peak: anti-realism's claim. */}
+      <Animated.View style={[styles.mindLink, mindLinkStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, rockStyle]} pointerEvents="none">
         <View style={styles.peakA} />
@@ -191,11 +223,29 @@ export default function Metaphysics29Scene({ clock, bt, bi, i, picked, onPick, p
 }
 
 const styles = StyleSheet.create({
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  // A ring 4 units proud of the eye: even a thought about the tree perceives it.
+  eyeRing: {
+    position: 'absolute', left: EYE_MID - EYE_W / 2 - 4, top: EYE_Y - 4, width: EYE_W + 8, height: EYE_H + 8,
+    borderWidth: 2, borderColor: INK, borderRadius: 16,
+  },
+  // A dashed horizontal wall across both peaks, below the eye: they stand apart
+  // from it, on the realist's view.
+  mindWall: {
+    position: 'absolute', left: PEAK_A_X, top: 276, width: (PEAK_B_X + PEAK_B_HALF * 2) - PEAK_A_X, height: 0,
+    borderTopWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
+  // A short dashed link straight down from the eye to the peak it meets — the
+  // idealist's claim that the two are joined.
+  mindLink: {
+    position: 'absolute', left: EYE_MID, top: EYE_Y + EYE_H, width: 0, height: (LAND_Y - PEAK_A_H) - (EYE_Y + EYE_H),
+    borderLeftWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: LAND_X, top: 396, width: LAND_W, textAlign: 'center',
@@ -214,7 +264,7 @@ const styles = StyleSheet.create({
   // a missing one — an absence would read as a rendering fault.
   lid: {
     position: 'absolute', left: EYE_MID - EYE_W / 2, top: EYE_Y, width: EYE_W,
-    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK, borderRadius: 12,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, borderWidth: 2, borderColor: INK, borderRadius: 12,
   },
 
   land: {
@@ -238,7 +288,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 7, width: PLATE_W, textAlign: 'center', lineHeight: 10,

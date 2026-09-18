@@ -27,6 +27,9 @@ export interface Aes20Beat extends BaseBeat {
   /** How many substitutes have arrived beside them, 0…1. */ swaps?: number;
   /** How many rows have been struck through, 0…1. */ struck?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a ring lands on the decoration row — the one just named. */ spotDecor?: number;
+  /** 1 = a ring lands on the seeing row — the one named next. */ spotSeeing?: number;
+  /** 1 = a small tick lands on each of the first three claims — replaceable, and still worth having. */ worth?: number;
 }
 
 export const BEATS: Aes20Beat[] = [
@@ -52,12 +55,12 @@ export const BEATS: Aes20Beat[] = [
     dur: 2.5,
   },
   {
-    p: 266, x: 132, uses: 1, swaps: 1, struck: 1,
+    p: 266, x: 132, uses: 1, swaps: 1, struck: 1, spotDecor: 1,
     text: 'Third, wallpaper decorates a room more cheaply than art does.',
     dur: 1.9,
   },
   {
-    p: 383, x: 132, uses: 1, swaps: 1, struck: 1,
+    p: 383, x: 132, uses: 1, swaps: 1, struck: 1, spotSeeing: 1,
     text: 'Each of the first three reasons has a cheaper substitute. No substitute has been found for the fourth.',
     cite: 'The remaining reason',
     dur: 3.2,
@@ -85,7 +88,7 @@ export const BEATS: Aes20Beat[] = [
     dur: 4.0,
   },
   {
-    p: 380, x: 268, uses: 1, swaps: 1, struck: 1,
+    p: 380, x: 268, uses: 1, swaps: 1, struck: 1, worth: 1,
     text: 'This method of elimination has a limit. Something can be replaceable and still be worth having.',
     dur: 3.8,
   },

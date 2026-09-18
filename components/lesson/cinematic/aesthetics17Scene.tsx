@@ -3,12 +3,13 @@ import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanim
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { dirsFrom, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
+import { clamp01, dirsFrom, ease01, moveTr, pose, travelStance, WALK, type Bundle } from './rig';
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics17Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -17,8 +18,9 @@ import { Shapes, ell, bar, tri, type Part } from './Silhouette';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A TERROR, A METER, AND WHAT HAPPENS NEXT — and a frame that changes exactly one
 // of the three (H64). All three are the Q1 targets, so the question is whether the
@@ -53,6 +55,11 @@ const SHAPE_L = 274;
 const SHAPE_W = 102;
 const SHAPE_T = 316;
 
+// The gap between the fear panel (right edge 240) and the frame (left edge 254),
+// and the gap above the frame (consequence panel ends 276, frame starts 292).
+const BRIDGE_Y = FEAR_T + PANEL_H / 2;
+const ANSWER_T = 280;
+
 /**
  * THE SHAPE IN THE DARK, in its own 102 × 184 box.
  *
@@ -85,6 +92,9 @@ const DIR = dirsFrom(X, 1);
 const SHAPE = BEATS.map((b) => b.shape ?? 0);
 const FEAR = BEATS.map((b) => b.fear ?? 0);
 const FRAME = BEATS.map((b) => b.frame ?? 0);
+// GROUP AH — three still taps, each moving a new mass rather than a caption.
+const BRIDGE = BEATS.map((b) => ((b.bridge ?? 0) > 0 ? 1 : 0));
+const ANSWERN = BEATS.map((b) => b.answerN ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -96,8 +106,11 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics17'));
 export default function Aesthetics17Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(6);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const bridgeFade = (cur.bridge ?? 0) !== (prev?.bridge ?? 0);
+  const answerFade = (cur.answerN ?? 0) !== (prev?.answerN ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -121,6 +134,11 @@ export default function Aesthetics17Scene({ clock, bt, bi, i, picked, onPick, pi
       // the frame stays, and the reading climbs anyway.
       fear: carry(cv, 2, n, FEAR[p], reacting ? pickPos.value : FEAR[n], grow),
       frame: carry(cv, 3, n, FRAME[p], FRAME[n], grow),
+      // A dashed line, crossing unbroken from the meter into the frame's own edge —
+      // "as strong inside the frame as outside it" drawn rather than repeated.
+      bridge: carry(cv, 4, n, BRIDGE[p], BRIDGE[n], bridgeFade ? grow : 1),
+      // A mark for each philosopher's answer, in the order they're named.
+      answerN: carry(cv, 5, n, ANSWERN[p], ANSWERN[n], answerFade ? grow : 1),
     };
   });
 
@@ -138,6 +156,7 @@ export default function Aesthetics17Scene({ clock, bt, bi, i, picked, onPick, pi
     transform: [{ scale: 0.9 + 0.1 * SCENE.value.frame }],
   }));
   const fearFill = useAnimatedStyle(() => ({ transform: [{ scaleX: SCENE.value.fear }] }));
+  const bridgeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.bridge }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -158,6 +177,13 @@ export default function Aesthetics17Scene({ clock, bt, bi, i, picked, onPick, pi
           <Animated.View style={[styles.fearFill, fearFill]} pointerEvents="none" />
         </View>
       </Panel>
+
+      {/* the fear crossing the frame's edge unbroken — the same response, inside */}
+      <Animated.View style={[styles.bridge, bridgeStyle]} pointerEvents="none" />
+      {/* a mark for each of the three answers, named in order */}
+      {[0, 1, 2].map((k) => (
+        <AnswerTick key={k} k={k} SCENE={SCENE} />
+      ))}
 
       {/* ── THE FRAME AND THE SHAPE ──────────────────────────────────────── */}
       <Animated.View style={[styles.frame, frameStyle]} pointerEvents="none" />
@@ -211,18 +237,24 @@ function Panel({
   );
 }
 
+/** One of the three answers' own mark, lit as its philosopher is named. */
+function AnswerTick({ k, SCENE }: { k: number; SCENE: { value: { answerN: number } } }) {
+  const style = useAnimatedStyle(() => ({ opacity: 0.3 + 0.7 * clamp01(SCENE.value.answerN - k) }));
+  return <Animated.View style={[styles.answerTick, { left: FRAME_L + k * (10 + 4) }, style]} pointerEvents="none" />;
+}
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   panel: { position: 'absolute', left: PANEL_L, width: PANEL_W, height: PANEL_H },
   panelInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 9, gap: 8,
   },
   panelText: {
@@ -235,6 +267,17 @@ const styles = StyleSheet.create({
   fearFill: {
     position: 'absolute', left: 0, top: 0, bottom: 0, right: 0,
     backgroundColor: INK, borderRadius: 6, transformOrigin: '0% 50%',
+  },
+
+  // THE BRIDGE. A dashed line, not a fill — it crosses the boundary rather than
+  // decorating either side of it.
+  bridge: {
+    position: 'absolute', left: PANEL_L + PANEL_W, top: BRIDGE_Y, width: FRAME_L - (PANEL_L + PANEL_W),
+    height: 2, borderTopWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
+  },
+  answerTick: {
+    position: 'absolute', top: ANSWER_T, width: 10, height: 8,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: INK,
   },
 
   frame: {

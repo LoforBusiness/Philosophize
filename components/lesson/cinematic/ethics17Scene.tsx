@@ -9,6 +9,7 @@ import { BEATS } from './ethics17Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A CARD, EIGHT COPIES OF IT, AND A BAR THAT PAYS FOR THEM.
@@ -74,6 +76,7 @@ const MAXIM = BEATS.map((b) => b.maxim ?? 0);
 const COPIES = BEATS.map((b) => b.copies ?? 0);
 const TRUST = BEATS.map((b) => b.trust ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+const NOTE = BEATS.map((b) => b.note ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -86,6 +89,11 @@ export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPo
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // ANIMATE ONLY WHAT CHANGED (C20c) — a one-shot flash, so it fires only on the
+  // beat that raises its own point, never on a beat that merely holds it.
+  const noteNow = (cur.note ?? 0) > 0 && (cur.note ?? 0) !== (prev?.note ?? 0) ? (cur.note ?? 0) : 0;
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -109,6 +117,9 @@ export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // and telling the truth costs the stock nothing; slide the other way and the
       // bar drains, which is the price Kant refuses to pay.
       trust: carry(cv, 3, n, TRUST[p], reacting ? dragPos.value : TRUST[n], tr),
+      // THE NOTE'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to,
+      // flatly 0 on every other beat — one flash per tap, not a loop.
+      note: noteNow ? ease01(bt.value / 1.1) : 0,
       t,
     };
   });
@@ -119,6 +130,12 @@ export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPo
 
   const maximStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.maxim }));
   const fillStyle = useAnimatedStyle(() => ({ width: (BAR_W - 4) * SCENE.value.trust }));
+  // Fades in over the first fifth of its window and out over the last, so it
+  // arrives and leaves rather than cutting.
+  const noteStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.note;
+    return { opacity: u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2) };
+  });
 
   const copies = [0, 1, 2, 3, 4, 5, 6, 7];
 
@@ -161,6 +178,32 @@ export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPo
           pointerEvents="none"
         />
       </Target>
+
+      {/* ── group AH: one flash per still tap, in the clear gap between the
+          maxim card (bottom 272) and the bar's own caption (top 324) — empty
+          until the copies spread down into it at beat 4. ── */}
+      {/* Beat 1: Kant's answer — no exception, not even for this. */}
+      {noteNow === 1 && (
+        <Animated.View style={[styles.noteWrap, noteStyle]} pointerEvents="none">
+          <View style={styles.notePlate}>
+            <Text style={styles.noteWordT}>NO EXCEPTIONS</Text>
+          </View>
+        </Animated.View>
+      )}
+      {/* Beat 2: consistency is the argument; revulsion is set aside. */}
+      {noteNow === 2 && (
+        <Animated.View style={[styles.noteWrap, noteStyle]} pointerEvents="none">
+          <Text style={styles.noteBigT}>CONSISTENCY</Text>
+          <Text style={styles.noteStruckT}>not revulsion</Text>
+        </Animated.View>
+      )}
+      {/* Beat 3: naming the card already on stage as the maxim. */}
+      {noteNow === 3 && (
+        <Animated.View style={[styles.noteWrap, noteStyle]} pointerEvents="none">
+          <Text style={styles.noteArrowT}>▲</Text>
+          <Text style={styles.noteWordT}>THIS IS THE MAXIM</Text>
+        </Animated.View>
+      )}
 
       {/* THE STOCK. The bar and its caption are one target: it is a single thing
           on the stage and splitting the hit box would be a puzzle about tapping.
@@ -216,12 +259,12 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   maximHit: { position: 'absolute', left: MAXIM_X, top: MAXIM_Y, width: MAXIM_W, height: MAXIM_H },
   maxim: {
-    width: MAXIM_W, height: MAXIM_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+    width: MAXIM_W, height: MAXIM_H, borderWidth: 2, borderColor: INK, borderRadius: 8,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   maximText: {
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1, color: INK, includeFontPadding: false,
@@ -249,6 +292,32 @@ const styles = StyleSheet.create({
 
   rightBox: { borderColor: INK, borderWidth: 3 },
   wrong: { borderColor: SOFT },
+
+  // ── the three tap events (group AH), one flash each in the gap above the
+  // bar. A plain word for the plain answer (beat 1); a kept term beside a
+  // struck one for the contrast (beat 2); an arrow naming what is already
+  // drawn above it (beat 3).
+  noteWrap: {
+    position: 'absolute', left: 60, top: 280, width: 280, alignItems: 'center', justifyContent: 'center',
+  },
+  notePlate: {
+    width: 150, borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    paddingHorizontal: 10, paddingVertical: 5, alignItems: 'center',
+  },
+  noteWordT: {
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.8, color: INK, includeFontPadding: false,
+    textAlign: 'center',
+  },
+  noteBigT: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  },
+  noteStruckT: {
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, color: SOFT, includeFontPadding: false,
+    textDecorationLine: 'line-through', marginTop: 2,
+  },
+  noteArrowT: {
+    fontFamily: 'Inter_700Bold', fontSize: 12, color: SOFT, includeFontPadding: false,
+  },
 });
 
 export function Ethics17Lesson({ lesson }: { lesson: Lesson }) {

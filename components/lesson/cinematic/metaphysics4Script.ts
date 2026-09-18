@@ -19,6 +19,9 @@ export interface Meta4Beat extends BaseBeat {
   /** How many ledger rows (grabs at nothing) have been written (0..3). */ tokens?: number;
   /** The slash barring the second way, drawn across the void (0/1). */ barred?: number;
   /** "CHANGE IS REAL" struck out (0/1). */ frozen?: number;
+  /** 1 = a one-shot spark travels row 0's arrow, "nothing" turning into "a thought". */ catch1?: number;
+  /** 1 = a second ring locks around the void, sealing off the rejected way. */ sealed?: number;
+  /** 1 = a tag reading MANY WAYS appears beside the frozen claim — Aristotle's reply. */ manyWays?: number;
 }
 
 export const BEATS: Meta4Beat[] = [
@@ -34,7 +37,7 @@ export const BEATS: Meta4Beat[] = [
     dur: 3.8,
   },
   {
-    p: 275, tokens: 1,
+    p: 275, tokens: 1, catch1: 1,
     text: 'Each attempt to refer to nothing turns it into something, such as the object of a thought.',
     dur: 1.8,
   },
@@ -45,7 +48,7 @@ export const BEATS: Meta4Beat[] = [
     dur: 1.8,
   },
   {
-    p: 459, tokens: 2, barred: 1,
+    p: 459, tokens: 2, barred: 1, sealed: 1,
     text: 'Parmenides rejects the second way, because what is not can be neither known nor said. So only what is can be real.',
     dur: 3.5,
   },
@@ -69,7 +72,7 @@ export const BEATS: Meta4Beat[] = [
     dur: 3.4,
   },
   {
-    p: 258, tokens: 3, barred: 1, frozen: 1,
+    p: 258, tokens: 3, barred: 1, frozen: 1, manyWays: 1,
     text: 'So motion itself is false, a mere show put on by the senses. Aristotle later replied that “being” is said in more than one way, including potential and actual being.',
     dur: 1.8,
   },

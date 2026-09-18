@@ -14,6 +14,8 @@ export interface Logic6Beat extends BaseBeat {
   /** Rain demo — rain on the IF box, the THEN box fills 0..1. */ rain?: number;
   /** The promise table under the boxes 0..1. */ table?: number;
   /** The two boxes are tappable this beat (Q1). */ tapBoxes?: number;
+  /** 0/1 — a chevron points at the CONSEQUENT box (the "then" half just named). */ focusThen?: number;
+  /** 0/1 — a bar marks the table's two no-rain rows (where the promise still holds). */ focusKept?: number;
 }
 
 export const BEATS: Logic6Beat[] = [
@@ -33,7 +35,7 @@ export const BEATS: Logic6Beat[] = [
   {
     // The arrow and the promise table arrive together: the whole diagram assembles
     // on the beat that explains what a conditional actually claims.
-    p: 167, link: 1, table: 1,
+    p: 167, link: 1, table: 1, focusThen: 1,
     text: 'The result Q, introduced by the word “then”, is called the consequent. The conditional claims a link between the two, not that either is true.',
     dur: 2.8,
   },
@@ -44,7 +46,7 @@ export const BEATS: Logic6Beat[] = [
     dur: 2.2,
   },
   {
-    p: 266, link: 1, rain: 1, table: 1,
+    p: 266, link: 1, rain: 1, table: 1, focusKept: 1,
     text: 'Like a promise, the conditional is broken only if it rains and the streets stay dry. On a day without rain, the promise is kept.',
     dur: 2.8,
   },

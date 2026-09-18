@@ -9,6 +9,7 @@ import { BEATS } from './ethics41Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO OPEN DOORS, A FLOOR THAT LEANS, AND NOTHING TOUCHING THE BALL.
@@ -95,6 +97,7 @@ const FLOORV = BEATS.map((b) => (b.floorOn ? 1 : 0));
 const TILT = BEATS.map((b) => b.tilt ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const TICKV = BEATS.map((b) => ((b.tick ?? 0) > 0 ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -105,13 +108,19 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics41'));
 export default function Ethics41Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // THE CHECK STAMPS ONLY ON THE BEAT THAT ASKS FOR IT (C20c) — a hold re-draws
+  // nothing.
+  const tickFade = (cur.tick ?? 0) !== (prev?.tick ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -128,6 +137,8 @@ export default function Ethics41Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // reader is leaning the floor rather than moving a widget beside it.
       tilt: carry(cv, 3, n, TILT[p], reacting ? dragPos.value : TILT[n], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      // THE CHECK ON THE DECLINE DOOR — the same instant, either system.
+      tick: carry(cv, 5, n, TICKV[p], TICKV[n], tickFade ? grow : 1),
     };
   });
 
@@ -156,6 +167,9 @@ export default function Ethics41Scene({ clock, bt, bi, i, picked, onPick, dragPo
     const h = DOOR_H * clamp01((SCENE.value.tilt - SHUT_FROM) / (1 - SHUT_FROM));
     return { opacity: SCENE.value.doorsOn, height: h };
   });
+  // The check stamps onto the DECLINE door and holds — the act of opting out
+  // costs the same instant whichever door is the default.
+  const tickStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tick }));
 
   return (
     <View style={styles.scene}>
@@ -174,6 +188,11 @@ export default function Ethics41Scene({ clock, bt, bi, i, picked, onPick, dragPo
       {/* THE SHUTTER — the only thing in the scene that takes an option away, and
           it arrives only at the very top of the range. */}
       <Animated.View style={[styles.shutter, shutterStyle]} pointerEvents="none" />
+
+      {/* THE CHECK — declining stamped and done, in the same instant it always took. */}
+      <Animated.View style={[styles.tick, tickStyle]} pointerEvents="none">
+        <Text style={styles.tickMark}>✓</Text>
+      </Animated.View>
 
       <Animated.View style={[styles.plank, plankStyle]} pointerEvents="none" />
       <Animated.View style={[styles.ball, ballStyle]} pointerEvents="none" />
@@ -226,6 +245,14 @@ const styles = StyleSheet.create({
     position: 'absolute', left: DOOR_X[0], top: DOOR_Y, width: DOOR_W,
     backgroundColor: INK,
   },
+  // THE CHECK — a small stamp over the DECLINE door, ink on paper like the ball,
+  // never a colour of its own.
+  tick: {
+    position: 'absolute', left: DOOR_X[0] + DOOR_W / 2 - 11, top: DOOR_Y - 26,
+    width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: INK,
+    backgroundColor: PAPER, alignItems: 'center', justifyContent: 'center',
+  },
+  tickMark: { fontFamily: 'Inter_700Bold', fontSize: 13, color: INK, includeFontPadding: false },
 
   // PIVOTS AT ITS OWN MIDDLE, so tilting it raises one end and drops the other
   // rather than swinging the whole plank sideways.
@@ -241,7 +268,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

@@ -9,6 +9,7 @@ import { BEATS } from './epistemology23Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A HOPPER, A MOUTH THAT OPENS, A MESH THAT TIGHTENS, AND A TRAY.
@@ -138,6 +140,7 @@ const MOUTH = BEATS.map((b) => b.mouth ?? 0);
 const MESH = BEATS.map((b) => b.mesh ?? 0);
 const FALL = BEATS.map((b) => b.fall ?? 0);
 const LIVE = BEATS.map((b) => b.live ?? 0);
+const BOTH_BRACE = BEATS.map((b) => (b.bothBrace ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -169,7 +172,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology23'));
 export default function Epistemology23Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -194,6 +197,7 @@ export default function Epistemology23Scene({ clock, bt, bi, i, picked, onPick, 
       // the graded beat the reader moves both at once by naming a character.
       mesh: carry(cv, 3, n, MESH[p], reacting ? pickAt(POLL_MESH, pickPos.value) : MESH[n], tr),
       fall: carry(cv, 4, n, FALL[p], FALL[n], tr),
+      bothBrace: carry(cv, 5, n, BOTH_BRACE[p], BOTH_BRACE[n], tr),
       t,
     };
   });
@@ -221,6 +225,7 @@ export default function Epistemology23Scene({ clock, bt, bi, i, picked, onPick, 
 
   // THE MESH IS THE ANSWER, so the bars and their caption rise together (E39).
   const meshRise = useAnswerRise(picked, 'mesh', true);
+  const bothBraceStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.bothBrace }));
 
   return (
     <View style={styles.scene}>
@@ -274,6 +279,9 @@ export default function Epistemology23Scene({ clock, bt, bi, i, picked, onPick, 
           sits in the margin where nothing else is drawn, and a hairline leader
           runs from it to the part — so the reader can see what they are choosing
           between before they choose. */}
+      {/* BOTH_BRACE — a dashed margin brace joining THE MOUTH and THE MESH: both settings at once. */}
+      <Animated.View style={[styles.bothBrace, bothBraceStyle]} pointerEvents="none" />
+
       <PartTarget
         id="mouth" correct={false} picked={picked} live={live} answered={answered} onPick={onPick}
         top={MOUTH_Y - 11} height={26} label="THE MOUTH"
@@ -395,11 +403,11 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   chute: {
     position: 'absolute', left: CH_X, top: CH_Y, width: CH_W, height: CH_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   /** The shadow the lip throws inside the chute — one View, and it becomes a box. */
   chuteLip: {
@@ -434,7 +442,7 @@ const styles = StyleSheet.create({
 
   tray: {
     position: 'absolute', left: TRAY_X, top: TRAY_Y, width: TRAY_W, height: TRAY_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   /** What survived, standing in the tray — anchored to its floor so it grows UP. */
   pile: {
@@ -453,6 +461,11 @@ const styles = StyleSheet.create({
   // rail, covered by a shutter or landed on by a claim — all three of which
   // happened when these sat inside the machine.
   leader: { position: 'absolute', left: LAB_X + LAB_W + 3, width: SV_X - LAB_X - LAB_W - 3, height: 1, backgroundColor: RULE },
+  // BOTH_BRACE — a dashed margin brace joining THE MOUTH and THE MESH labels.
+  bothBrace: {
+    position: 'absolute', left: LAB_X - 4, top: MOUTH_Y - 11, width: 3, height: SLOT_Y - 3 + 30 - (MOUTH_Y - 11),
+    borderLeftWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
   hit: { position: 'absolute', left: LAB_X, width: LAB_W },
   hitBox: { width: LAB_W, borderRadius: 4, justifyContent: 'center', paddingHorizontal: 3 },
   partCap: {

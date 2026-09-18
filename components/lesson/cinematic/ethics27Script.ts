@@ -27,6 +27,7 @@ export interface Ethics27Beat extends BaseBeat {
   /** Which reading hangs under it: 0 none, 1 a fact, 2 a border, 3 a feeling. */ reading?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a crack breaks the stem: every reading pays a cost somewhere. */ cost?: number;
 }
 
 export const BEATS: Ethics27Beat[] = [
@@ -77,7 +78,7 @@ export const BEATS: Ethics27Beat[] = [
     dur: 4.0,
   },
   {
-    p: 447, x: 84, said: 1, reading: 3,
+    p: 447, x: 84, said: 1, reading: 3, cost: 1,
     text: 'Each reading has a cost, which appears when two cultures disagree. Realism must explain what moral facts are, while the other two can’t call either culture mistaken.',
     dur: 4.8,
   },

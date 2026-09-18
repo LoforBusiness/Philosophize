@@ -9,6 +9,7 @@ import { BEATS } from './epistemology26Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE RECEIPT, AND TWO COLUMNS THAT START AT EXACTLY THE SAME HEIGHT.
@@ -83,6 +85,9 @@ const PAIR = BEATS.map((b) => (b.pair ? 1 : 0));
 const HOLD = BEATS.map((b) => b.hold ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const PEER_TIE = BEATS.map((b) => (b.peerTie ? 1 : 0));
+const EQUAL_ODDS = BEATS.map((b) => (b.equalOdds ? 1 : 0));
+const STEADFAST_PEG = BEATS.map((b) => (b.steadfastPeg ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -93,7 +98,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology26'));
 export default function Epistemology26Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(8);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -116,6 +121,9 @@ export default function Epistemology26Scene({ clock, bt, bi, i, picked, onPick, 
       // two columns are the control's picture rather than a diagram beside it.
       hold: carry(cv, 3, n, HOLD[p], reacting ? dragPos.value : HOLD[n], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
+      peerTie: carry(cv, 5, n, PEER_TIE[p], PEER_TIE[n], tr),
+      equalOdds: carry(cv, 6, n, EQUAL_ODDS[p], EQUAL_ODDS[n], tr),
+      steadfastPeg: carry(cv, 7, n, STEADFAST_PEG[p], STEADFAST_PEG[n], tr),
     };
   });
 
@@ -126,6 +134,9 @@ export default function Epistemology26Scene({ clock, bt, bi, i, picked, onPick, 
   const billStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.billOn }));
   const pairStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pairOn }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
+  const peerTieStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.peerTie }));
+  const equalOddsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.equalOdds }));
+  const steadfastPegStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.steadfastPeg }));
   const mineStyle = useAnimatedStyle(() => {
     const h = COL_LEVEL + (COL_MINE_MAX - COL_LEVEL) * SCENE.value.hold;
     return { height: h, top: COL_FLOOR - h };
@@ -154,6 +165,16 @@ export default function Epistemology26Scene({ clock, bt, bi, i, picked, onPick, 
           <Text key={cx} style={[styles.columnText, { left: cx - 5 }]}>{COL_CAP[k]}</Text>
         ))}
       </Animated.View>
+
+      <Animated.View style={[styles.peerTie, peerTieStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.peerTag, peerTieStyle]} pointerEvents="none">PEER</Animated.Text>
+
+      <Animated.View style={[styles.equalOdds, equalOddsStyle]} pointerEvents="none">
+        <Text style={styles.equalOddsText} pointerEvents="none">EQUALLY LIKELY</Text>
+      </Animated.View>
+
+      <Animated.View style={[styles.pegCap, steadfastPegStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.pegShaft, steadfastPegStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
         {PLATE_ID.map((id, k) => (
@@ -184,7 +205,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: BILL_X, top: CAP_T, width: 250,
@@ -208,10 +229,36 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK, includeFontPadding: false,
   },
 
+  // PEER_TIE — a dashed tie under the bill, joining both columns: she is named a peer.
+  peerTie: {
+    position: 'absolute', left: COL_X[0] + COL_W / 2, top: 320, width: COL_X[1] + COL_W / 2 - (COL_X[0] + COL_W / 2),
+    height: 0, borderTopWidth: 1.5, borderColor: INK, borderStyle: 'dashed',
+  },
+  peerTag: {
+    position: 'absolute', left: COL_X[0] + COL_W / 2, top: 323, width: COL_X[1] + COL_W / 2 - (COL_X[0] + COL_W / 2),
+    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
+  },
+  // EQUAL_ODDS — a plate between the columns: neither is assumed to be the one who erred.
+  equalOdds: {
+    position: 'absolute', left: COL_X[0] - 6, top: 356, width: COL_X[1] + COL_W - COL_X[0] + 12, height: 22,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  equalOddsText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  },
+  // STEADFAST_PEG — a peg driven through the YOURS column's own foot into the floor:
+  // a well-reasoned belief may stand.
+  pegCap: {
+    position: 'absolute', left: COL_X[0] + COL_W / 2 - 5, top: COL_FLOOR - 6, width: 10, height: 3, backgroundColor: INK,
+  },
+  pegShaft: {
+    position: 'absolute', left: COL_X[0] + COL_W / 2 - 1.5, top: COL_FLOOR - 6, width: 3, height: 14, backgroundColor: INK,
+  },
   hit: { position: 'absolute', left: PLATE_X, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

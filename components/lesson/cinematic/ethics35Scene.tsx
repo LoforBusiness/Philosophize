@@ -9,6 +9,7 @@ import { BEATS } from './ethics35Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO PANELS, FOUR TAGS, AND A BEAM THE READER TIPS.
@@ -76,6 +78,8 @@ const DIR = dirsFrom(X, 1);
 const P = BEATS.map((b) => b.p ?? 0);
 const PAIR = BEATS.map((b) => (b.pair ? 1 : 0));
 const TAGS = BEATS.map((b) => b.tags ?? 0);
+const FOCUS2 = BEATS.map((b) => (b.focus2 ? 1 : 0));
+const STRESS = BEATS.map((b) => (b.stress ? 1 : 0));
 const BEAM = BEATS.map((b) => (b.beam ? 1 : 0));
 const TIP = BEATS.map((b) => (b.tip ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
@@ -84,7 +88,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics35'));
 
 export default function Ethics35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -114,6 +118,10 @@ export default function Ethics35Scene({ clock, bt, bi, qv, i, picked, onPick, dr
       tilt: (drag - 0.5) * 2 * BEAM_MAX,
       tags: carry(cv, 3, n, TAGS[p], TAGS[n], tr),
       lit: LIVE[n] === 1 ? ease01(q) : 0,
+      // "The second man... does nothing" — a dashed ring finds the STOOD BACK panel.
+      focus2: carry(cv, 4, n, FOCUS2[p], FOCUS2[n], tr),
+      // "The outcome is the same as well" — a check marks the SAME OUTCOME tag.
+      stress: carry(cv, 5, n, STRESS[p], STRESS[n], tr),
     };
   });
 
@@ -124,6 +132,8 @@ export default function Ethics35Scene({ clock, bt, bi, qv, i, picked, onPick, dr
   const pairStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pairOn }));
   const beamWrap = useAnimatedStyle(() => ({ opacity: SCENE.value.beamOn }));
   const beamBar = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.tilt}deg` }] }));
+  const focus2Style = useAnimatedStyle(() => ({ opacity: SCENE.value.focus2 }));
+  const stressStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.stress }));
 
   return (
     <View style={styles.scene}>
@@ -146,6 +156,12 @@ export default function Ethics35Scene({ clock, bt, bi, qv, i, picked, onPick, dr
       </Animated.View>
 
       <Tags S={SCENE} picked={picked} onPick={onPick} answered={answered} live={live} />
+
+      {/* "The second man... does nothing to save him" — a dashed ring finds him. */}
+      <Animated.View style={[styles.focus2, focus2Style]} pointerEvents="none" />
+
+      {/* "The outcome is the same as well" — a check marks that one tag. */}
+      <Animated.Text style={[styles.stress, stressStyle]} numberOfLines={1}>✓</Animated.Text>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
@@ -202,7 +218,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 178, top: CAP_T, width: 210,
@@ -218,7 +234,7 @@ const styles = StyleSheet.create({
 
   panel: {
     position: 'absolute', top: PANEL_Y, width: PANEL_W, height: PANEL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   torso: { position: 'absolute', left: PANEL_W / 2 - 3, top: 22, width: 6, height: 52, backgroundColor: INK, borderRadius: 3 },
   arm: { position: 'absolute', top: 34, width: 40, height: 5, backgroundColor: INK, borderRadius: 3, transformOrigin: '0% 50%' },
@@ -232,7 +248,7 @@ const styles = StyleSheet.create({
   tag: { position: 'absolute', left: TAG_X, width: 190, height: 18 },
   tagBox: {
     position: 'absolute', left: 0, top: 0, width: 190, height: 18,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   tagText: {
     position: 'absolute', left: 0, top: 5, width: 190, textAlign: 'center',
@@ -241,6 +257,17 @@ const styles = StyleSheet.create({
   tagHit: { position: 'absolute', left: TAG_X, width: 190, height: 18 },
   tagHitBox: { position: 'absolute', left: 0, top: 0, width: 190, height: 18, borderRadius: 3 },
   tagWrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
+
+  // "THE SECOND MAN... DOES NOTHING" — a dashed ring finds the STOOD BACK panel.
+  focus2: {
+    position: 'absolute', left: PANEL_X[1] - 4, top: PANEL_Y - 4, width: PANEL_W + 8, height: PANEL_H + 8,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 6,
+  },
+  // "THE OUTCOME IS THE SAME AS WELL" — a check beside that one tag.
+  stress: {
+    position: 'absolute', left: TAG_X + 194, top: TAG_Y[1] + 1, width: 16, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, includeFontPadding: false,
+  },
 });
 
 export function Ethics35Lesson({ lesson }: { lesson: Lesson }) {

@@ -29,6 +29,7 @@ export interface Epistemology25Beat extends BaseBeat {
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
   /** Which way the arrow of enquiry runs: 0 none, 1 downward, 2 upward. */ flow?: number;
+  /** 1 = a ring on the empty box: what either starting point ends up assuming. */ assumeRing?: number;
 }
 
 export const BEATS: Epistemology25Beat[] = [
@@ -85,7 +86,7 @@ export const BEATS: Epistemology25Beat[] = [
     dur: 4.2,
   },
   {
-    p: 383, x: 100, rungs: 1, nothing: 1,
+    p: 383, x: 100, rungs: 1, nothing: 1, assumeRing: 1,
     text: 'Neither starting point can be proved without assuming it. Chisholm conceded that every answer to the problem begs the question.',
     dur: 3.6,
   },

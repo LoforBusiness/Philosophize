@@ -9,6 +9,7 @@ import { BEATS } from './political19Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TWO PANELS OVER ONE AXIS. THE TOP LINE IS FLAT AND THE BOTTOM ONE IS NOT.
@@ -46,6 +48,7 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const ONWARD = BEATS.map((b) => b.onward ?? 0);
 const BASE_TR = 0.85;
 
 const PAN_X = 40;
@@ -85,7 +88,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political19'));
 // other variable's axis.
 export default function Political19Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(6);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -107,6 +110,8 @@ export default function Political19Scene({ clock, bt, bi, i, picked, onPick, gaz
       cost: carry(cv, 2, n, COSTV[p], COSTV[n], tr),
       pull: carry(cv, 3, n, PULLV[p], PULLV[n], tr),
       mark: carry(cv, 4, n, MARK[p], MARK[n], tr),
+      // Carried, so it fades out as well as in (group L).
+      onward: carry(cv, 5, n, ONWARD[p], ONWARD[n], tr),
       t,
     };
   });
@@ -117,6 +122,13 @@ export default function Political19Scene({ clock, bt, bi, i, picked, onPick, gaz
 
   const axisStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.axis }));
   const markStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.mark }));
+  // THE AXIS RUNS ON OFF THE PICTURE, which is the answer to "where does that
+  // principle stop". It draws outward from the plot's own right edge.
+  const onwardStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.onward,
+    transform: [{ scaleX: SCENE.value.onward }],
+  }));
+  const onwardCapStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.onward - 0.45) / 0.55) }));
 
   return (
     <View style={styles.scene}>
@@ -133,6 +145,11 @@ export default function Political19Scene({ clock, bt, bi, i, picked, onPick, gaz
         <Text style={[styles.axisLab, { left: PAN_X }]}>AT YOUR FEET</Text>
         <Text style={[styles.axisLab, { left: 260, textAlign: 'right', width: 100 }]}>8,000 MILES</Text>
       </Animated.View>
+
+      {/* Where the principle stops: it does not. */}
+      <Animated.View style={[styles.onwardRule, onwardStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.onwardHead, onwardCapStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.onwardCap, onwardCapStyle]} pointerEvents="none">NO STOP</Animated.Text>
 
       {/* THE LINE IS THE PANEL'S OWN DATA, so it rides with it (E39b). Wrapping
           the panel and leaving its plot behind is the exact leak E39b is about:
@@ -221,12 +238,32 @@ function Seg({
 }
 
 const styles = StyleSheet.create({
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // From the plot's own right edge outward, on the axis's own line.
+  onwardRule: {
+    position: 'absolute', left: PLOT_X + PLOT_W, top: AXIS_Y - 1, width: 40, height: 2,
+    borderTopWidth: 2, borderColor: INK, borderStyle: 'dashed',
+    transformOrigin: '0% 50%',
+  },
+  onwardHead: {
+    position: 'absolute', left: PLOT_X + PLOT_W + 40, top: AXIS_Y - 5, width: 9, height: 10,
+    borderTopWidth: 5, borderBottomWidth: 5, borderLeftWidth: 9,
+    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
+    borderStyle: 'solid',
+  },
+  onwardCap: {
+    position: 'absolute', left: PLOT_X + PLOT_W + 2, top: AXIS_Y - 20, width: 46,
+    textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: PAN_X, width: PAN_W,

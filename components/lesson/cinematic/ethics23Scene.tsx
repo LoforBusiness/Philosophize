@@ -13,6 +13,7 @@ import { BEATS } from './ethics23Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // Two obligation gauges side by side, stage right.
 //
@@ -72,6 +74,8 @@ const DIR = dirsFrom(X, 1);
 const GAUGES = BEATS.map((b) => b.gauges ?? 0);
 const NEAR = BEATS.map((b) => b.near ?? 0);
 const FAR = BEATS.map((b) => b.far ?? 0);
+const SHOE = BEATS.map((b) => b.shoe ?? 0);
+const MOOT = BEATS.map((b) => b.moot ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -81,13 +85,16 @@ const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 export default function Ethics23Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(6);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
   const gFade = (cur.gauges ?? 0) !== (prev?.gauges ?? 0);
   const nFade = (cur.near ?? 0) !== (prev?.near ?? 0);
   const fFade = (cur.far ?? 0) !== (prev?.far ?? 0);
+  // Both one-shot marks: struck on the beat that names them, gone by the next.
+  const shoeFade = (cur.shoe ?? 0) !== (prev?.shoe ?? 0);
+  const mootFade = (cur.moot ?? 0) !== (prev?.moot ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -109,6 +116,10 @@ export default function Ethics23Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // duty as the distance grows, and the mean of the line the reader draws is
       // exactly how full that far-away obligation reads.
       far: carry(cv, 3, n, FAR[p], reacting ? dragPos.value : FAR[n], fFade ? grow : tr),
+      // Both fade in AND out on a carried track (never an on/off ternary), so a
+      // tap mid-fade never cuts either mark between two frames (C20c).
+      shoe: carry(cv, 4, n, SHOE[p], SHOE[n], shoeFade ? grow : 1),
+      moot: carry(cv, 5, n, MOOT[p], MOOT[n], mootFade ? grow : 1),
     };
   });
 
@@ -116,6 +127,8 @@ export default function Ethics23Scene({ clock, bt, bi, i, picked, onPick, dragPo
   const boardStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.board }));
   const nearFill = useAnimatedStyle(() => ({ height: (COL_H - 6) * SCENE.value.near }));
   const farFill = useAnimatedStyle(() => ({ height: (COL_H - 6) * SCENE.value.far }));
+  const shoeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.shoe }));
+  const mootStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.moot }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -123,8 +136,23 @@ export default function Ethics23Scene({ clock, bt, bi, i, picked, onPick, dragPo
   return (
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
+
+      {/* The shoes, already struck through: ruined, and it doesn't count. */}
+      <Animated.View style={[styles.shoeWrap, shoeStyle]} pointerEvents="none">
+        <View style={styles.shoeL} />
+        <View style={styles.shoeR} />
+        <View style={styles.shoeStrike} />
+      </Animated.View>
+
       <Animated.View style={[styles.board, boardStyle]} pointerEvents="none">
         <Text style={styles.head} numberOfLines={1}>WHAT YOU OWE</Text>
+
+        {/* The span between the two obligations — the distance itself — struck
+            through: it is ruled out as a difference that could matter. */}
+        <Animated.View style={[styles.mootWrap, mootStyle]} pointerEvents="none">
+          <View style={styles.mootSpan} />
+          <View style={styles.mootStrike} />
+        </Animated.View>
 
         <View style={[styles.col, { left: COL_LX }]}>
           <Animated.View style={[styles.fill, nearFill]} />
@@ -177,7 +205,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   board: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   head: {
@@ -187,7 +215,7 @@ const styles = StyleSheet.create({
   },
   col: {
     position: 'absolute', top: COL_T, width: COL_W, height: COL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     justifyContent: 'flex-end', padding: 3,
   },
   fill: { width: '100%', backgroundColor: INK, borderRadius: 1 },
@@ -202,7 +230,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {
@@ -212,6 +240,35 @@ const styles = StyleSheet.create({
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT },
+
+  // The ruined shoes: two small soles at his feet (x=70), already crossed out —
+  // "insignificant" shown, not stated. Gone as soon as the argument moves on.
+  shoeWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  shoeL: {
+    position: 'absolute', left: 63, top: GROUND - 7, width: 7, height: 4, borderRadius: 2,
+    backgroundColor: SOFT,
+  },
+  shoeR: {
+    position: 'absolute', left: 72, top: GROUND - 7, width: 7, height: 4, borderRadius: 2,
+    backgroundColor: SOFT,
+  },
+  shoeStrike: {
+    position: 'absolute', left: 60, top: GROUND - 9, width: 22, height: 1.5,
+    backgroundColor: INK, transform: [{ rotate: '-24deg' }],
+  },
+
+  // The distance itself, drawn as the span between the two obligations and then
+  // struck through: ruled out as a difference that could matter (D31 — a
+  // boundary, never a fill, so it reads as a measure rather than another card).
+  mootWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  mootSpan: {
+    position: 'absolute', left: COL_LX, top: 244, width: (COL_RX + COL_W) - COL_LX, height: 0,
+    borderTopWidth: 1.5, borderColor: SHADE, borderStyle: 'dashed',
+  },
+  mootStrike: {
+    position: 'absolute', left: COL_LX + ((COL_RX + COL_W) - COL_LX) / 2 - 10, top: 240,
+    width: 20, height: 1.5, backgroundColor: INK, transform: [{ rotate: '-30deg' }],
+  },
 });
 
 // Ink runs from the header (226) to the ground line (500). Band 220…512 = 292 (H59).

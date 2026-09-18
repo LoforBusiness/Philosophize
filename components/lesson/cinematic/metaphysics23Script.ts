@@ -28,6 +28,9 @@ export interface Met23Beat extends BaseBeat {
   /** How much of the old wood has moved across, 0…1. */ swap?: number;
   /** The second hull, being built out of the cast-offs, 0…1. */ built?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = CONTINUITY tags the repaired hull, MATERIAL tags the reassembled one. */ crit?: number;
+  /** 1 = A WHOLE? hangs over the empty gap between the two hulls. */ deep?: number;
+  /** 1 = a loose pile of bars sits in the gap, not shaped like a hull. */ pile?: number;
 }
 
 export const BEATS: Met23Beat[] = [
@@ -63,7 +66,7 @@ export const BEATS: Met23Beat[] = [
     dur: 1.9,
   },
   {
-    p: 467, x: 132, ships: 1, swap: 1, built: 1,
+    p: 467, x: 132, ships: 1, swap: 1, built: 1, crit: 1,
     text: 'Sameness of material favours the reassembled ship. No further fact about the ships decides between the two tests.',
     dur: 2.5,
   },
@@ -80,12 +83,12 @@ export const BEATS: Met23Beat[] = [
     dur: 4.0,
   },
   {
-    p: 13, x: 268, ships: 1, swap: 1, built: 1,
+    p: 13, x: 268, ships: 1, swap: 1, built: 1, deep: 1,
     text: 'The puzzle rests on a deeper question, the special composition question. When do many parts compose one object?',
     dur: 2.9,
   },
   {
-    p: 266, x: 268, ships: 1, swap: 1, built: 1,
+    p: 266, x: 268, ships: 1, swap: 1, built: 1, pile: 1,
     text: 'A pile of planks is not a ship, although it contains the same material.',
     dur: 1.8,
   },

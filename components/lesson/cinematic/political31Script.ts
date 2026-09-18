@@ -17,6 +17,8 @@ export interface Pol31Beat extends BaseBeat {
   /** Animals on the field, 0…4. */ herd?: number;
   /** 1 = the arithmetic is laid over the field. */ sums?: number;
   /** 1 = the sum and the plate are live targets (Q1). */ pick?: number;
+  /** 1 = the verdict on your own sum: on these figures, adding one is rational. */ mine?: number;
+  /** 1 = one of the four shares of the cost is marked as yours. */ quarter?: number;
 }
 
 export const BEATS: Pol31Beat[] = [
@@ -34,6 +36,7 @@ export const BEATS: Pol31Beat[] = [
   {
     g: 266, grass: 0.66, herd: 2, sums: 0,
     dur: 1.8,
+    mine: 1,
     text: 'For you, the gain outweighs your share of the cost, so adding the animal is rational.',
   },
   {
@@ -64,6 +67,7 @@ export const BEATS: Pol31Beat[] = [
   {
     g: 459, grass: 0.22, herd: 4, sums: 1,
     dur: 2.1,
+    quarter: 1,
     text: 'The cost is also a whole unit. Four herders share it, so each bears only a quarter.',
   },
   {

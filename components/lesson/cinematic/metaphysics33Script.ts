@@ -23,6 +23,10 @@ export interface Metaphysics33Beat extends BaseBeat {
    */ fall?: number;
   /** 1 = the film is labelled as running backwards. */ rev?: number;
   /** 1 = the reader is driving the tower from the rail (Q1). */ live?: number;
+  /** 1 = a dashed box settles round the wreckage — the eye already knows this is wrong (group AH). */ wreck?: number;
+  /** 1 = a check mark ticks onto the box — every collision inside it is still lawful (group AH). */ lawful?: number;
+  /** 1 = a two-headed arrow appears above the tower — the laws run the same either way (group AH). */ symLaw?: number;
+  /** 1 = a one-way arrow appears above the tower — chance only drifts toward disorder (group AH). */ oneWay?: number;
 }
 
 export const BEATS: Metaphysics33Beat[] = [
@@ -44,18 +48,18 @@ export const BEATS: Metaphysics33Beat[] = [
     dur: 2.5,
   },
   {
-    p: 169, x: 62, fall: 1, rev: 1,
+    p: 169, x: 62, fall: 1, rev: 1, wreck: 1,
     text: 'Anyone can tell at once that the reversed film shows something that doesn’t happen.',
     dur: 1.9,
   },
   {
-    p: 467, x: 62, fall: 1, rev: 1,
+    p: 467, x: 62, fall: 1, rev: 1, wreck: 1, lawful: 1,
     text: 'Yet every collision in the reversed film obeys the laws of physics. This is the puzzle of time’s arrow.',
     cite: 'Nothing forbids it',
     dur: 2.4,
   },
   {
-    p: 467, x: 62, fall: 1, rev: 1,
+    p: 467, x: 62, fall: 1, rev: 1, wreck: 1, lawful: 1, symLaw: 1,
     text: 'The basic laws of motion are time-symmetric: any collision run in reverse is also permitted by them.',
     dur: 2.4,
   },
@@ -100,7 +104,7 @@ export const BEATS: Metaphysics33Beat[] = [
     dur: 2.1,
   },
   {
-    p: 167, x: 62, fall: 0.82,
+    p: 167, x: 62, fall: 0.82, oneWay: 1,
     text: 'A system moving at random therefore drifts into disorder and almost never returns to order.',
     dur: 2.5,
   },

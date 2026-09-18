@@ -10,6 +10,7 @@ import {
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteAny, emoteAnyLive } from './moves';
@@ -17,8 +18,9 @@ import { emoteAny, emoteAnyLive } from './moves';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // The conscience that steps out of a figure and weighs the deed on a balance.
 //
@@ -140,6 +142,8 @@ const PLANT = BEATS.map((b) => (b.plant ? 1 : 0));
 const SEED = BEATS.map((b) => (b.seed || b.plant ? 1 : 0));
 /** How grown the sprout is: a seedling before it has a name, full once it does. */
 const GROW = BEATS.map((b) => (b.plant ? 1 : b.seed ? 0.32 : 0));
+/** The flower at the sprout's tip: 0 closed, 1 open. */
+const BLOOM = BEATS.map((b) => (b.bloom ? 1 : 0));
 const OWN = BEATS.map((b) => (b.own ? 1 : 0));
 /** The weights land on the beat that names reasons and stay while the balance does. */
 const FIRST_REASONS = BEATS.findIndex((b) => b.reasons);
@@ -209,7 +213,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics'));
 export default function EthicsScene({ clock, bt, bi, qv, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldHumanS = useHeld();
-  const cv = useCarry(10);
+  const cv = useCarry(11);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -241,6 +245,8 @@ export default function EthicsScene({ clock, bt, bi, qv, i, dragPos, gazeX, gaze
     const askWrites = askHere === 1 && (n === 0 || askWas === 0);
     const origWrites = ORIGINS[n] === 1 && (n === 0 || ORIGINS[p] === 0);
     const plants = PLANT[n] === 1 && (n === 0 || PLANT[p] === 0);
+    // C20c — the flower opens once, on the beat that names it, and holds open after.
+    const blooms = BLOOM[n] === 1 && (n === 0 || BLOOM[p] === 0);
 
     return {
       cam: { s: lerp(prv.s, cur.s, tr), cx: lerp(prv.cx, cur.cx, tr), cy: lerp(prv.cy, cur.cy, tr) },
@@ -255,6 +261,7 @@ export default function EthicsScene({ clock, bt, bi, qv, i, dragPos, gazeX, gaze
       plant: carry(cv, 1, n, PLANT[p], PLANT[n], tr),
       seed: carry(cv, 2, n, SEED[p], SEED[n], tr),
       grow: carry(cv, 3, n, GROW[p], GROW[n], plants ? ease01(bt.value / 1.1) : tr),
+      bloom: carry(cv, 10, n, BLOOM[p], BLOOM[n], blooms ? ease01(bt.value / 1.0) : tr),
       own: carry(cv, 4, n, OWN[p], OWN[n], tr),
       reasons: carry(cv, 5, n, REASONS[p], REASONS[n], ease01(bt.value / 0.9)),
       disputed: DISPUTED[n] ? (DISPUTED[p] ? 1 : here) : DISPUTED[p] ? away : 0,
@@ -469,12 +476,19 @@ function Sprout({ S }: { S: SharedValue<any> }) {
   // the growth only, so at seedling size they are already solid ink.
   const leafL = useAnimatedStyle(() => ({ opacity: clamp01(S.value.grow * 3), transform: [{ rotate: '34deg' }, { scaleX: S.value.grow }] }));
   const leafR = useAnimatedStyle(() => ({ opacity: clamp01(S.value.grow * 3), transform: [{ rotate: '-34deg' }, { scaleX: S.value.grow }] }));
+  // The flower opening at the tip: "over a complete life" — the sprout's cycle
+  // finishing. It scales in from its own centre, never moving the stem or leaves.
+  const bloomStyle = useAnimatedStyle(() => ({
+    opacity: S.value.bloom,
+    transform: [{ scale: 0.2 + 0.8 * S.value.bloom }],
+  }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, wrap]} pointerEvents="none">
       <Animated.Text style={[styles.sproutLabel, label]}>FLOURISHING</Animated.Text>
       <Animated.View style={[styles.stem, stem]} />
       <Animated.View style={[styles.leaf, { left: 316, top: 470, transformOrigin: '100% 50%' }, leafL]} />
       <Animated.View style={[styles.leaf, { left: 336, top: 462, transformOrigin: '0% 50%' }, leafR]} />
+      <Animated.View style={[styles.bloom, bloomStyle]} />
     </Animated.View>
   );
 }
@@ -524,7 +538,7 @@ const styles = StyleSheet.create({
   },
   ledger: {
     position: 'absolute', left: LED_X, top: LED_T, width: LED_W, height: LED_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   vRule: { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: RULE },
   hRule: { position: 'absolute', left: 0, right: 0, top: LED_HEAD_H, height: 1, backgroundColor: RULE },
@@ -576,7 +590,7 @@ const styles = StyleSheet.create({
   // ── where conscience comes from ─────────────────────────────────────────────
   orig: {
     position: 'absolute', left: 298, top: 366, width: 92, height: 120,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   origHead: {
     position: 'absolute', left: 0, right: 0, top: 5, textAlign: 'center',
@@ -602,6 +616,12 @@ const styles = StyleSheet.create({
   },
   leaf: {
     position: 'absolute', width: 20, height: 9, borderRadius: 6,
+    backgroundColor: INK, transformOrigin: '50% 50%',
+  },
+  // The flower at the stem's tip — a filled disc, the same ink as the rest of
+  // the plant, opening once "flourishing" is named in full.
+  bloom: {
+    position: 'absolute', left: 328, top: 444, width: 16, height: 16, borderRadius: 8,
     backgroundColor: INK, transformOrigin: '50% 50%',
   },
   sproutLabel: {

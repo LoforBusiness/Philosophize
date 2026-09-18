@@ -18,6 +18,10 @@ export interface Epi13Beat extends BaseBeat {
   /** How many tickets are struck through: 0 none · 1 the first · 2 all of them. */ off?: number;
   /** 1 = the "this draw has a winner" line is showing. */ winner?: number;
   /** 1 = the three answer cards are live (Q2). */ pick?: number;
+  /** 1 = a single ticket, "40001," floats above the figure — the one this beat
+   *  is about, before the draw arrives. */ myTicket?: number;
+  /** 1 = a dashed ring marks the winner line — the thing the struck-out grid
+   *  now contradicts. */ winRing?: number;
 }
 
 export const BEATS: Epi13Beat[] = [
@@ -27,7 +31,7 @@ export const BEATS: Epi13Beat[] = [
     dur: 2.1,
   },
   {
-    p: 462, x: 70,
+    p: 462, x: 70, myTicket: 1,
     text: 'At odds of a million to one, believing that your ticket will lose seems rational.',
     dur: 2.3,
   },
@@ -63,7 +67,7 @@ export const BEATS: Epi13Beat[] = [
     dur: 2.4,
   },
   {
-    p: 258, x: 168, grid: 1, off: 2, winner: 1,
+    p: 258, x: 168, grid: 1, off: 2, winner: 1, winRing: 1,
     text: 'Together, the verdicts imply that no ticket wins, yet you know one ticket will. Henry Kyburg set out this lottery paradox in 1961.',
     dur: 2.6,
   },

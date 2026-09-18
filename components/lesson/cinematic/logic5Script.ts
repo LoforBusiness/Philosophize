@@ -23,6 +23,11 @@ export interface Logic5Beat extends BaseBeat {
   /** The ladder of steps on stage (0/1). */ ladder?: number;
   /** The staircase chart beside the ladder (0/1). */ steps?: number;
   /** The two output chutes on stage, tappable (0/1). */ chute?: number;
+  /**
+   * 0..3 — how many of the triangle's three equal sides the proof has confirmed
+   * so far, filling a row of three ticks under the conclusion box left to right
+   * (AB = AC, AB = BC, and the AC = BC the machine outputs).
+   */ equalCount?: number;
 }
 
 export const BEATS: Logic5Beat[] = [
@@ -38,23 +43,23 @@ export const BEATS: Logic5Beat[] = [
     dur: 3.2,
   },
   {
-    p: 281, machine: 1, run: 1,
+    p: 281, machine: 1, run: 1, equalCount: 1,
     text: 'An inference is valid when the premises, if true, guarantee that the conclusion is true.',
     dur: 1.8,
   },
   {
-    p: 459, machine: 1, run: 1,
+    p: 459, machine: 1, run: 1, equalCount: 2,
     text: 'In Euclid’s first proposition, circles centred on point A and point B meet at point C. Line AC and line BC each equal line AB, so they equal each other.',
     cite: 'Euclid, Elements, Proposition 1',
     dur: 4.1,
   },
   {
-    p: 459, machine: 1, run: 1,
+    p: 459, machine: 1, run: 1, equalCount: 3,
     text: 'The triangle on line AB therefore has three equal sides. Euclid builds this result from a short sequence of stated steps.',
     dur: 1.8,
   },
   {
-    p: 147, machine: 1,
+    p: 147, machine: 1, equalCount: 3,
     quote: {
       id: 'lq-logic-arguments-5',
       text: 'Divide each of the difficulties under examination into as many parts as possible, as might be necessary for its solution.',

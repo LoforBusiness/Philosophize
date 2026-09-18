@@ -14,6 +14,9 @@ export interface Epis32Beat extends BaseBeat {
   /** Figure gesture (emote code). */ g?: number;
   /** How many panels have filled in, 0…4. */ maps?: number;
   /** 1 = the four panels are live targets (Q1). */ pick?: number;
+  /** 1 = a dashed ring round the whole first panel — almost no information in it. */ sparseRing?: number;
+  /** 1 = a dashed ring round the whole third panel — too much detail to use at sea. */ slowRing?: number;
+  /** 1 = a dashed ring round the fourth panel's single bar — it fills the frame. */ frameRing?: number;
 }
 
 export const BEATS: Epis32Beat[] = [
@@ -29,7 +32,7 @@ export const BEATS: Epis32Beat[] = [
     cite: 'One line',
   },
   {
-    g: 459, maps: 1,
+    g: 459, maps: 1, sparseRing: 1,
     dur: 1.8,
     text: 'But it contains almost no information about the coast.',
   },
@@ -40,7 +43,7 @@ export const BEATS: Epis32Beat[] = [
     cite: 'More detail',
   },
   {
-    g: 168, maps: 3,
+    g: 168, maps: 3, slowRing: 1,
     dur: 2.6,
     text: 'But the third map holds so much detail that it’s too slow to use at sea.',
   },
@@ -63,7 +66,7 @@ export const BEATS: Epis32Beat[] = [
     cite: 'The perfect map',
   },
   {
-    g: 159, maps: 4,
+    g: 159, maps: 4, frameRing: 1,
     dur: 1.8,
     text: 'At that scale, a frame of the same size shows a single rock.',
   },

@@ -33,6 +33,9 @@ export interface Aes21Beat extends BaseBeat {
    */
   gone?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = an empty-set mark appears over the ash — no notation survives to remake it. */ noScore?: number;
+  /** 1 = the columns are bracketed and named by category — allographic, autographic. */ label?: number;
+  /** 1 = an unsorted "A PRINT?" plate appears — the new case, not yet in either column. */ photoTag?: number;
 }
 
 export const BEATS: Aes21Beat[] = [
@@ -53,13 +56,13 @@ export const BEATS: Aes21Beat[] = [
     dur: 4.2,
   },
   {
-    p: 13, x: 132, works: 1, burn: 1,
+    p: 13, x: 132, works: 1, burn: 1, noScore: 1,
     text: 'The painting cannot come back. A painting has no notation, such as a text or a score, from which to make another.',
     cite: 'A single object',
     dur: 3,
   },
   {
-    p: 266, x: 132, works: 1, burn: 1,
+    p: 266, x: 132, works: 1, burn: 1, label: 1,
     text: 'The painting was the physical object itself. Nelson Goodman called such works autographic, and works like the novel allographic.',
     dur: 1.8,
   },
@@ -86,7 +89,7 @@ export const BEATS: Aes21Beat[] = [
     dur: 3.8,
   },
   {
-    p: 380, x: 268, works: 1, burn: 1, gone: 1,
+    p: 380, x: 268, works: 1, burn: 1, gone: 1, photoTag: 1,
     text: 'Photography complicates the distinction. One negative can make many prints, yet collectors pay more for an early print.',
     dur: 4.8,
   },

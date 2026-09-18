@@ -28,6 +28,10 @@ export interface Aesthetics41Beat extends BaseBeat {
   /** 1 = the boundary ring is drawn at all. */ ring?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a WORK tag marks the canvas and a ROOM tag marks the wall, as settled. */ settle?: number;
+  /** 1 = a PARERGON tag pins onto the frame band itself. */ parergon?: number;
+  /** 1 = the frame band dims, as if lifted away, while the canvas stays as it is. */ ghost?: number;
+  /** 1 = a dashed line grows from the frame's edge outward across the wall. */ spread?: number;
 }
 
 export const BEATS: Aesthetics41Beat[] = [
@@ -37,22 +41,22 @@ export const BEATS: Aesthetics41Beat[] = [
     dur: 4.4,
   },
   {
-    p: 262, x: 28, wall: 1, art: 1,
+    p: 262, x: 28, wall: 1, art: 1, settle: 1,
     text: 'The canvas belongs to the work, and the wall belongs to the room. The frame is the difficult case.',
     dur: 4.2,
   },
   {
-    p: 425, x: 28, wall: 1, art: 1,
+    p: 425, x: 28, wall: 1, art: 1, settle: 1, parergon: 1,
     text: 'Immanuel Kant called such things parerga, things beside the work. Frames on pictures and the clothing on statues are his examples.',
     dur: 5.0,
   },
   {
-    p: 169, x: 28, wall: 1, art: 1,
+    p: 169, x: 28, wall: 1, art: 1, settle: 1, parergon: 1, ghost: 1,
     text: 'A frame is not part of the painting. The painting would be the same painting without one.',
     dur: 4.4,
   },
   {
-    p: 161, x: 28, wall: 1, art: 1, plates: 1, live: 1,
+    p: 161, x: 28, wall: 1, art: 1, plates: 1, live: 1, settle: 1, parergon: 1,
     interact: {
       prompt: 'Which of the three is Kant’s example of a parergon?',
       explain: 'The frame. The canvas is the work and the wall is part of the room, so neither is puzzling. A parergon sits at the border between the work and its surroundings, and a frame is Kant’s own example.',
@@ -61,12 +65,12 @@ export const BEATS: Aesthetics41Beat[] = [
     dur: 1.0,
   },
   {
-    p: 441, x: 88, wall: 1, art: 1,
+    p: 441, x: 88, wall: 1, art: 1, settle: 1, parergon: 1,
     text: 'The frame is not outside the work either. A gilt frame and a steel frame change how the same canvas is seen.',
     dur: 5.0,
   },
   {
-    p: 430, x: 88, wall: 1, art: 1,
+    p: 430, x: 88, wall: 1, art: 1, settle: 1, parergon: 1,
     quote: {
       id: 'lq-aesthetics-aesthetics-41-1',
       text: 'Even what is called ornamentation does not belong internally to the complete representation of the object, but only externally, as a complement.',
@@ -79,12 +83,12 @@ export const BEATS: Aesthetics41Beat[] = [
     dur: 5.0,
   },
   {
-    p: 444, x: 88, wall: 1, art: 1,
+    p: 444, x: 88, wall: 1, art: 1, settle: 1, parergon: 1, spread: 1,
     text: 'The boundary problem extends outward, to the title, the wall label, the hanging height and the museum itself.',
     dur: 4.8,
   },
   {
-    p: 267, x: 88, wall: 1, art: 1, ring: 1,
+    p: 267, x: 88, wall: 1, art: 1, ring: 1, settle: 1, parergon: 1, spread: 1,
     interact: {
       prompt: 'Does the frame belong to the work, to the room, or to neither?',
       sort: {
@@ -101,7 +105,7 @@ export const BEATS: Aesthetics41Beat[] = [
     dur: 1.0,
   },
   {
-    p: 437, x: 88, wall: 1, art: 1,
+    p: 437, x: 88, wall: 1, art: 1, settle: 1, parergon: 1, spread: 1,
     summary: {
       title: 'Where the Work Ends',
       points: [

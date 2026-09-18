@@ -9,6 +9,7 @@ import { BEATS } from './ethics16Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // THE SAME HANDOVER TWICE, UNDER THE SAME CHAIN OF CAUSES (H64). One thing differs
 // between them and it is at his back.
@@ -72,6 +74,21 @@ const KNIFE = BEATS.map((b) => b.knife ?? 0);
 const MONEY = BEATS.map((b) => b.money ?? 0);
 const REPAID = BEATS.map((b) => b.repaid ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
+// Group AH — two still taps, each an event drawn from that beat's own words.
+const BOUND = BEATS.map((b) => ((b.bound ?? 0) > 0 ? 1 : 0));
+const FREEV = BEATS.map((b) => ((b.free ?? 0) > 0 ? 1 : 0));
+
+// BOUND: "every event, including every choice, is fixed by earlier causes" —
+// a dashed line drops from the rail's 8th link, straight down to the box, so
+// the chain visibly reaches this act too.
+const BOUND_X = RAIL_L + 7 * LINK_PITCH + LINK_W / 2;
+const BOUND_T = RAIL_T + 16;
+const BOUND_H = BOX_T - BOUND_T;
+
+// FREE: "you act freely when you do as you will and nothing forces you" — a
+// tag naming the verdict, in the clear gap to the right of the box.
+const FREE_L = BOX_L + BOX_W + 4;
+const FREE_T = 420;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
 
@@ -84,13 +101,18 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics16'));
 export default function Ethics16Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(6);
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
   const answered = picked !== null;
   // The box's word is a JS read, not a track: it is text, and text does not tween.
   const repaid = (cur.repaid ?? 0) > 0;
+
+  // Group AH — each fires only on the beat that asks for it (C20c).
+  const boundFade = (cur.bound ?? 0) !== (prev?.bound ?? 0);
+  const freeFade = (cur.free ?? 0) !== (prev?.free ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -111,6 +133,8 @@ export default function Ethics16Scene({ clock, bt, bi, i, picked, onPick, dragPo
       knife: carry(cv, 1, n, KNIFE[p], reacting ? 1 - dragPos.value : KNIFE[n], grow),
       money: carry(cv, 2, n, MONEY[p], MONEY[n], tr),
       boards: carry(cv, 3, n, PICKV[p], PICKV[n], grow),
+      bound: carry(cv, 4, n, BOUND[p], BOUND[n], boundFade ? grow : 1),
+      free: carry(cv, 5, n, FREEV[p], FREEV[n], freeFade ? grow : 1),
     };
   });
 
@@ -121,6 +145,14 @@ export default function Ethics16Scene({ clock, bt, bi, i, picked, onPick, dragPo
   const money = useAnimatedStyle(() => ({
     opacity: SCENE.value.money > 0 ? 1 : 0,
     transform: [{ translateX: lerp(0, MONEY_TO - MONEY_FROM, SCENE.value.money) }],
+  }));
+  const boundStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.bound,
+    transform: [{ scaleY: SCENE.value.bound }],
+  }));
+  const freeStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.free,
+    transform: [{ translateX: (1 - SCENE.value.free) * -6 }],
   }));
 
   return (
@@ -145,11 +177,22 @@ export default function Ethics16Scene({ clock, bt, bi, i, picked, onPick, dragPo
         <View style={styles.blade} />
       </Animated.View>
 
+      {/* BOUND — "every event, including every choice, is fixed by earlier
+          causes": a dashed line drops from the rail to the box, showing the
+          chain reaching this act too. */}
+      <Animated.View style={[styles.bound, boundStyle]} pointerEvents="none" />
+
       {/* ── THE MONEY AND WHERE IT GOES ──────────────────────────────────── */}
       <Animated.View style={[styles.money, money]} pointerEvents="none" />
       <View style={styles.box} pointerEvents="none">
         <Text style={styles.boxText} numberOfLines={1}>{repaid ? 'REPAID' : 'TAKEN'}</Text>
       </View>
+
+      {/* FREE — "you act freely when you do as you will and nothing forces
+          you": a tag naming the verdict beside the box. */}
+      <Animated.View style={[styles.freeTag, freeStyle]} pointerEvents="none">
+        <Text style={styles.freeText}>FREE</Text>
+      </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -196,7 +239,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   label: {
@@ -207,7 +250,7 @@ const styles = StyleSheet.create({
 
   board: { position: 'absolute', top: BOARD_T, width: BOARD_W, height: BOARD_H },
   boardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   boardText: {
@@ -231,11 +274,26 @@ const styles = StyleSheet.create({
   },
   box: {
     position: 'absolute', left: BOX_L, top: BOX_T, width: BOX_W, height: 500 - BOX_T,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   boxText: {
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1, color: INK,
+    includeFontPadding: false,
+  },
+
+  // ── the two still-tap events (group AH) ──────────────────────────────────
+  // BOUND: a dashed drop, never a fill (D31) — the chain's own reach, not a
+  // new claim.
+  bound: {
+    position: 'absolute', left: BOUND_X, top: BOUND_T, width: 0, height: BOUND_H,
+    borderLeftWidth: 2, borderColor: SHADE, borderStyle: 'dashed', transformOrigin: '50% 0%',
+  },
+  freeTag: {
+    position: 'absolute', left: FREE_L, top: FREE_T, paddingHorizontal: 6, paddingVertical: 2,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  freeText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: INK,
     includeFontPadding: false,
   },
 

@@ -13,6 +13,7 @@ import { BEATS } from './metaphysics8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A thirteen-domino run standing on a long rail, sweeping right to left: the far
 // end is everything that happened before you were born, and domino 3 is labelled
@@ -82,11 +84,32 @@ const CHAINV = BEATS.map((b) => b.chain ?? 0);
 const FRONTV = BEATS.map((b) => b.front ?? DOM_N);
 const TAGSV = BEATS.map((b) => b.tags ?? 0);
 const MARKV = BEATS.map((b) => b.mark ?? 0);
+// group AH — still-tap events, each on for one beat only and carried both ways.
+const FIXED_TAG = BEATS.map((b) => b.fixedTag ?? 0);
+const NO_OTHER_TAG = BEATS.map((b) => b.noOtherTag ?? 0);
+const LONG_BEFORE_TAG = BEATS.map((b) => b.longBeforeTag ?? 0);
+const NEW_CHAIN_TAG = BEATS.map((b) => b.newChainTag ?? 0);
+const NOT_POLITICS_TAG = BEATS.map((b) => b.notPoliticsTag ?? 0);
+const FREE_Q_TAG = BEATS.map((b) => b.freeQTag ?? 0);
+const OWN_WILL_TAG = BEATS.map((b) => b.ownWillTag ?? 0);
+// The travelling cause-token is a one-shot per its own beat, riding `bt` directly
+// like logic7's `flow` — not carried, since it is a single journey, not a state.
+const CAUSE_FLOW = BEATS.map((b) => b.causeFlow ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
+
+// group AH — "leads, step by step, to the choice you made": the token's own path,
+// read off the wave's own front position on the one beat that plays it, so moving
+// the front table moves this with it.
+const CAUSE_PATH = BEATS.map((b) => {
+  if (!(b.causeFlow ?? 0)) return [0, 0, 0, 0];
+  const front = b.front ?? DOM_N;
+  const y = DOM_T + DOM_H / 2;
+  return [DOM_X0 + front * DOM_GAP, y, MARK_X, y];
+});
 
 // WHAT THE MACHINE READS AT EACH OPTION, in the order the BALLOT DECLARES them
 // (never the shuffled row order — see SceneApi.pickPos). This question used to
@@ -125,7 +148,7 @@ function Domino({
 export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(12);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -133,6 +156,8 @@ export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick, pi
   // re-animate every time the reader taps forward. The captions cross-fade on a
   // plain lerp instead, because they go both ways (they duck out while Q1 is up).
   const chainFade = (cur.chain ?? 0) !== (prev?.chain ?? 0);
+  // group AH — the token plays once, on the beat that asks for it (C20c).
+  const causeFlowNow = (cur.causeFlow ?? 0) > 0 && (cur.causeFlow ?? 0) !== (prev?.causeFlow ?? 0) ? 1 : 0;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -162,6 +187,18 @@ export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick, pi
       // toward people are free. The reader can put the tag on a chain that is
       // complete, which is the compatibilist corner and the whole lesson.
       mark: carry(cv, 4, n, MARKV[p], reacting ? pickAt(POLL_MARK, pickPos.value) : MARKV[n], tr),
+      // group AH — one still-tap event each, carried in and back out over the
+      // beats either side rather than switched, so none of them is a CUT.
+      fixedTag: carry(cv, 5, n, FIXED_TAG[p], FIXED_TAG[n], tr),
+      noOtherTag: carry(cv, 6, n, NO_OTHER_TAG[p], NO_OTHER_TAG[n], tr),
+      longBeforeTag: carry(cv, 7, n, LONG_BEFORE_TAG[p], LONG_BEFORE_TAG[n], tr),
+      newChainTag: carry(cv, 8, n, NEW_CHAIN_TAG[p], NEW_CHAIN_TAG[n], tr),
+      notPoliticsTag: carry(cv, 9, n, NOT_POLITICS_TAG[p], NOT_POLITICS_TAG[n], tr),
+      freeQTag: carry(cv, 10, n, FREE_Q_TAG[p], FREE_Q_TAG[n], tr),
+      ownWillTag: carry(cv, 11, n, OWN_WILL_TAG[p], OWN_WILL_TAG[n], tr),
+      // THE TOKEN'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to, and
+      // flatly 0 on every other beat — one journey per tap, not a loop (L1).
+      causeFlow: causeFlowNow ? ease01(bt.value / 1.1) : 0,
     };
   });
 
@@ -179,6 +216,28 @@ export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick, pi
     opacity: clamp01(SCENE.value.mark * 3),
     transform: [{ translateY: (1 - SCENE.value.mark) * -8 }],
   }));
+  // group AH — the eight still-tap events.
+  const fixedTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.fixedTag }));
+  const noOtherTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.noOtherTag }));
+  const longBeforeTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.longBeforeTag }));
+  const newChainTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.newChainTag }));
+  const notPoliticsTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.notPoliticsTag }));
+  const freeQTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.freeQTag }));
+  const ownWillTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ownWillTag }));
+  // The token: fades in over the first fifth of its journey and out over the last,
+  // so it arrives rather than stopping dead, and is invisible at rest.
+  const causeFlowStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.causeFlow;
+    const P0 = CAUSE_PATH[i] ?? [0, 0, 0, 0];
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2);
+    return {
+      opacity: on,
+      transform: [
+        { translateX: P0[0] + (P0[2] - P0[0]) * u },
+        { translateY: P0[1] + (P0[3] - P0[1]) * u },
+      ],
+    };
+  });
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -206,6 +265,34 @@ export default function Metaphysics8Scene({ clock, bt, bi, i, picked, onPick, pi
         <Text style={styles.markLabel}>YOUR CHOICE</Text>
         <View style={styles.markTick} />
       </Animated.View>
+
+      {/* group AH — one word from each still beat, in the open band above the
+          captions (y ≈ 150), where nothing else is ever drawn. */}
+      <Animated.View style={[styles.hintTag, { left: 170, width: 60 }, fixedTagStyle]} pointerEvents="none">
+        <Text style={styles.hintTagT}>FIXED</Text>
+      </Animated.View>
+      <Animated.View style={[styles.hintTag, { left: 140, width: 120 }, noOtherTagStyle]} pointerEvents="none">
+        <Text style={styles.hintTagT}>NO OTHER WAY</Text>
+      </Animated.View>
+      <Animated.View style={[styles.hintTag, { left: 125, width: 150 }, longBeforeTagStyle]} pointerEvents="none">
+        <Text style={styles.hintTagT}>LONG BEFORE YOU</Text>
+      </Animated.View>
+      <Animated.View style={[styles.hintTag, { left: 150, width: 100 }, newChainTagStyle]} pointerEvents="none">
+        <Text style={styles.hintTagT}>A NEW CHAIN</Text>
+      </Animated.View>
+      <Animated.View style={[styles.hintTag, { left: 145, width: 110 }, notPoliticsTagStyle]} pointerEvents="none">
+        <Text style={styles.hintTagT}>NOT POLITICS</Text>
+      </Animated.View>
+      <Animated.View style={[styles.hintTag, { left: 110, width: 180 }, freeQTagStyle]} pointerEvents="none">
+        <Text style={styles.hintTagT}>WHAT MAKES IT FREE?</Text>
+      </Animated.View>
+      <Animated.View style={[styles.hintTag, { left: 145, width: 110 }, ownWillTagStyle]} pointerEvents="none">
+        <Text style={styles.hintTagT}>YOUR OWN WILL</Text>
+      </Animated.View>
+
+      {/* group AH — "leads, step by step, to the choice you made": a token runs
+          from the wave's own edge toward the YOUR CHOICE domino. */}
+      <Animated.View style={[styles.causeToken, causeFlowStyle]} pointerEvents="none" />
 
       {/* ── Q1: three big cards, high above the walk band ───────────────────── */}
       {showPick ? (
@@ -256,7 +343,7 @@ const styles = StyleSheet.create({
   // ── a domino: a thin tall card pivoting on its own bottom edge ──────────────
   dom: {
     position: 'absolute', top: DOM_T, width: DOM_W, height: DOM_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: PLATE_FACE, boxShadow: LIP,
     transformOrigin: '50% 100%',
   },
   domMark: { backgroundColor: INK },
@@ -291,7 +378,7 @@ const styles = StyleSheet.create({
   },
   pickCard: { position: 'absolute', left: CARD_L, width: CARD_W },
   pickInner: {
-    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    height: CARD_H, borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   pickRight: { backgroundColor: INK, borderColor: INK },
@@ -300,6 +387,25 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   pickTextOn: { color: PAPER },
+
+  // group AH — one word per still beat, in the band above the captions (which
+  // start at y 252), well clear of the domino tops (308) and the walking figure
+  // (crown at y 361).
+  hintTag: {
+    position: 'absolute', top: 150, height: 20,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
+  },
+  hintTagT: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.8, color: INK,
+    includeFontPadding: false,
+  },
+
+  // group AH — the inference riding the chain: small, ink, the size of a full
+  // stop, the way logic7's own token reads the claim rather than an object.
+  causeToken: {
+    position: 'absolute', left: 0, top: 0, width: 7, height: 7, borderRadius: 3.5,
+    backgroundColor: INK,
+  },
 });
 
 export function Metaphysics8Lesson({ lesson }: { lesson: Lesson }) {

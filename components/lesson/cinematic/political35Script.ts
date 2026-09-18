@@ -29,6 +29,10 @@ export interface Political35Beat extends BaseBeat {
   /** 1 = the reader's thumb drives the weight. */ live_w?: number;
   /** 1 = the policy has switched, so a different three are seated. */ swap?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed ring appears around every chair that is still empty — the nine not yet born. */ note?: number;
+  /** 1 = a single line is drawn under the row, standing for the one course lives are on. */ path?: number;
+  /** 1 = that line forks in two beneath the row, standing for how a different policy sends lives a different way. */ fork?: number;
+  /** 1 = a dashed ring appears around the chairs that are currently taken — the particular people the claim names. */ claim?: number;
 }
 
 export const BEATS: Political35Beat[] = [
@@ -38,7 +42,7 @@ export const BEATS: Political35Beat[] = [
     dur: 2.1,
   },
   {
-    p: 462, x: 52, chairs: 1,
+    p: 462, x: 52, chairs: 1, note: 1,
     text: 'Nine of the chairs belong to people who are not born yet. They’ll bear its effects without voting.',
     dur: 2.1,
   },
@@ -67,12 +71,12 @@ export const BEATS: Political35Beat[] = [
     dur: 3.0,
   },
   {
-    p: 2, x: 52, chairs: 1, weight: 0.5,
+    p: 2, x: 52, chairs: 1, weight: 0.5, path: 1,
     text: 'A different policy changes how people live: where they work, whom they meet, and when to have children.',
     dur: 4.1,
   },
   {
-    p: 266, x: 52, chairs: 1, weight: 0.5,
+    p: 266, x: 52, chairs: 1, weight: 0.5, fork: 1,
     text: 'Different children are therefore conceived. Which people exist in the future depends on the policy chosen.',
     dur: 1.8,
   },
@@ -82,7 +86,7 @@ export const BEATS: Political35Beat[] = [
     dur: 2.2,
   },
   {
-    p: 467, x: 52, chairs: 1, weight: 0.5, swap: 1,
+    p: 467, x: 52, chairs: 1, weight: 0.5, swap: 1, claim: 1,
     text: 'Had the careful policy been chosen instead, none of these particular people would ever have existed.',
     dur: 2.2,
   },

@@ -11,6 +11,7 @@ import { BEATS } from './ethics4Script';
 import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -18,8 +19,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A TWO-LAYER DIAGRAM with the argument happening inside it.
@@ -71,6 +73,18 @@ const A_CODE = BEATS.map((b) => b.a ?? 0);
 const B_CODE = BEATS.map((b) => b.b ?? 0);
 const FLOOR = BEATS.map((b) => b.floor ?? 0);
 const ROWS = BEATS.map((b) => b.rows ?? 0);
+const NOTE = BEATS.map((b) => b.note ?? 0);
+
+// ── group AH: one still-tap annotation per beat that names a new claim ──────
+// A one-shot flash in the gutter between the two arguers (or, for 6/7, beside
+// the floor chart), timed to the beat's OWN sentence — never carried across
+// beats, so it costs no cross-beat interpolation. Text for the four claim tags.
+const NOTE_TEXT: Record<number, string> = {
+  1: 'A STRONGER CLAIM?',
+  2: 'MORAL RELATIVISM',
+  3: 'DOESN’T FOLLOW',
+  4: 'WRONG EVERYWHERE',
+};
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
@@ -92,8 +106,12 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick, dragPos
   const cv = useCarry(2);
   const heldB = useHeld();
   const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
   const answered = picked !== null;
   const asking = !!cur.interact;
+  // ANIMATE ONLY WHAT CHANGED (C20c) — a one-shot, so it fires only on the beat
+  // that introduces it, never on a beat that merely holds the same claim.
+  const noteNow = (cur.note ?? 0) > 0 && (cur.note ?? 0) !== (prev?.note ?? 0) ? (cur.note ?? 0) : 0;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -112,6 +130,9 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // the far end of the rail is the end with no floor left.
       floor: carry(cv, 0, n, FLOOR[p], reacting ? 1 - dragPos.value : FLOOR[n], tr),
       rows: carry(cv, 1, n, ROWS[p], ROWS[n], tr),
+      // THE ANNOTATION'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs
+      // to, flatly 0 on every other beat — one flash per tap, not a loop.
+      note: noteNow ? ease01(bt.value / 1.1) : 0,
       t,
     };
   });
@@ -119,6 +140,12 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick, dragPos
   const DA = useDerivedValue<Bundle>(() => SCENE.value.a);
   const DB = useDerivedValue<Bundle>(() => SCENE.value.b);
   const chartStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.floor }));
+  // Fades in over the first fifth of its window and out over the last, so it
+  // arrives and settles rather than snapping on, and is invisible at rest.
+  const noteStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.note;
+    return { opacity: u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2) };
+  });
 
   return (
     <Animated.View style={styles.scene}>
@@ -155,6 +182,53 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick, dragPos
           <Text key={`v${tr}`} style={[styles.valT, { top: CHART_T + k * PITCH }]}>ALL</Text>
         ))}
       </Animated.View>
+
+      {/* ── group AH: one flash per still tap, naming this beat's own claim ── */}
+      {(noteNow === 1 || noteNow === 2 || noteNow === 3 || noteNow === 4) && (
+        <Animated.View style={[styles.noteRow, noteStyle]} pointerEvents="none">
+          <View
+            style={[
+              styles.noteTagLine,
+              noteNow === 1 && styles.noteTagDashed,
+              noteNow === 4 && styles.noteTagBoxed,
+            ]}
+          >
+            <Text style={[styles.noteText, noteNow === 3 && styles.noteTextStruck]}>
+              {NOTE_TEXT[noteNow]}
+            </Text>
+            {noteNow === 3 && <View style={styles.noteStrike} />}
+          </View>
+        </Animated.View>
+      )}
+
+      {/* Beat 8's analogy: two guesses about the Earth's shape, only one true —
+          FLAT struck through, ROUND left standing, the same way the argument
+          treats a culture's code. */}
+      {noteNow === 5 && (
+        <Animated.View style={[styles.noteRow, noteStyle]} pointerEvents="none">
+          <View style={styles.earthPair}>
+            <Text style={styles.earthWord}>FLAT</Text>
+            <View style={styles.earthStrike} />
+          </View>
+          <Text style={[styles.earthWord, styles.earthWordOn]}>ROUND</Text>
+        </Animated.View>
+      )}
+
+      {/* Beat 10: a bracket beside the three universals this sentence actually
+          names (reciprocity, murder, incest) — not fairness, the fourth bar. */}
+      {noteNow === 6 && (
+        <Animated.View style={[styles.bracket, noteStyle]} pointerEvents="none">
+          <View style={styles.bracketSpine} />
+          <View style={[styles.bracketTick, { top: 0 }]} />
+          <View style={[styles.bracketTick, { bottom: 0 }]} />
+        </Animated.View>
+      )}
+
+      {/* Beat 11: the floor is BENEATH the surface's differences, literally —
+          a line dropping from where the arguers stand toward the chart below. */}
+      {noteNow === 7 && (
+        <Animated.View style={[styles.bridge, noteStyle]} pointerEvents="none" />
+      )}
 
       {/* ── Q2 answered in the scene: two verdict stamps ──────────────────── */}
       {asking && (
@@ -238,7 +312,7 @@ const styles = StyleSheet.create({
   // values rather than everything a shade darker. See cinematicKit's ramp.
   tablet: {
     position: 'absolute', top: TAB_T, width: TAB_W, height: TAB_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   tabHead: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 10, paddingTop: 6 },
   tabName: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: INK,
@@ -287,6 +361,45 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
 
+  // ── group AH: the seven still-tap flashes, one per beat, in the free strip
+  // of paper between the ground line (434) and the (still-hidden) floor
+  // header (444) — real estate no other element occupies before beat 9.
+  noteRow: {
+    position: 'absolute', left: 60, right: 60, top: 436,
+    flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 14,
+  },
+  noteTagLine: {
+    position: 'relative', paddingHorizontal: 6, paddingBottom: 2,
+    borderBottomWidth: 2, borderBottomColor: INK,
+  },
+  noteTagDashed: { borderBottomColor: SOFT, borderStyle: 'dashed' },
+  noteTagBoxed: {
+    borderWidth: 1.5, borderColor: INK, borderRadius: 4, paddingVertical: 3,
+    backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  noteText: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.6, color: INK,
+    includeFontPadding: false,
+  },
+  noteTextStruck: { color: SOFT },
+  noteStrike: { position: 'absolute', left: 0, right: 0, top: '50%', height: 1.5, marginTop: -0.75, backgroundColor: SOFT },
+
+  earthPair: { position: 'relative' },
+  earthWord: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.6, color: SOFT,
+    includeFontPadding: false,
+  },
+  earthWordOn: { color: INK },
+  earthStrike: { position: 'absolute', left: 0, right: 0, top: '50%', height: 1.5, marginTop: -0.75, backgroundColor: SOFT },
+
+  // The bracket beside the floor chart's own three named rows, clear of the
+  // trait labels (which start at x = 20).
+  bracket: { position: 'absolute', left: 8, top: CHART_T + PITCH, width: 6, height: PITCH * 2 + BAR_H },
+  bracketSpine: { position: 'absolute', left: 2, top: 0, bottom: 0, width: 2, backgroundColor: INK },
+  bracketTick: { position: 'absolute', left: 0, width: 6, height: 2, backgroundColor: INK },
+
+  // The floor sits BENEATH the surface's differences — a line dropping from
+  // where the arguers stand toward the chart, stopping short of its header.
+  bridge: { position: 'absolute', left: 199, top: 282, width: 2, height: 160, backgroundColor: SHADE },
+
   askLabel: {
     position: 'absolute', left: 0, right: 0, top: 200, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
@@ -294,7 +407,7 @@ const styles = StyleSheet.create({
   },
   vHit: { position: 'absolute', width: TAB_W },
   vBox: {
-    height: 48, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    height: 48, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   vRight: { backgroundColor: INK, borderColor: INK },

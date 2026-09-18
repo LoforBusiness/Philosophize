@@ -20,6 +20,9 @@ export interface Metaphysics11Beat extends BaseBeat {
   /** The MEMORIES plate: 0 = over the prince · 1 = over the cobbler. */ tok?: number;
   /** 1 = the two name plates have crossed the floor and traded stands. */ swap?: number;
   /** 1 = the two stands are live answer targets (Q2). */ pick?: number;
+  /** 1 = a "?" hovers in the gap between the stands, before the case names anyone. */ query?: boolean;
+  /** 1 = a small "≠" appears under the MEMORIES badge — body and memory now disagree. */ disagree?: boolean;
+  /** 1 = "= PERSON" appears under the MEMORIES badge, glossing consciousness as the person. */ person?: boolean;
 }
 
 export const BEATS: Metaphysics11Beat[] = [
@@ -29,7 +32,7 @@ export const BEATS: Metaphysics11Beat[] = [
     dur: 2.8,
   },
   {
-    p: 458, c: 42, cx: 440, tok: 0,
+    p: 458, c: 42, cx: 440, tok: 0, query: true,
     text: 'What, then, makes someone the same person over time?',
     dur: 1.8,
   },
@@ -52,7 +55,7 @@ export const BEATS: Metaphysics11Beat[] = [
     dur: 3.4,
   },
   {
-    p: 173, c: 15, tok: 1,
+    p: 173, c: 15, tok: 1, disagree: true,
     text: 'The case pulls apart two things that usually stay together: having the same body, and having the same memory.',
     dur: 1.8,
   },
@@ -103,7 +106,7 @@ export const BEATS: Metaphysics11Beat[] = [
     dur: 3,
   },
   {
-    p: 260, c: 167, tok: 1, swap: 1,
+    p: 260, c: 167, tok: 1, swap: 1, person: true,
     text: 'Locke distinguishes the same man, one continuing living body, from the same person, one continuing consciousness.',
     dur: 1.8,
   },

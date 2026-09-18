@@ -43,7 +43,7 @@ export const LIP_DECL = "const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip
 const NAMED_GROUND = /^(floor|ground|bed|band|earth|soil|backdrop)/i;
 
 /** Top-level `name: { … }` entries of the file's StyleSheet.create, with offsets. */
-function entriesOf(src) {
+export function entriesOf(src) {
   const at = src.indexOf('StyleSheet.create(');
   if (at < 0) return [];
   const open = src.indexOf('{', at);
@@ -66,7 +66,7 @@ function entriesOf(src) {
 }
 
 /** Numeric constants the file declares, resolved through each other. */
-function constsOf(src) {
+export function constsOf(src) {
   const t = new Map();
   for (let pass = 0; pass < 5; pass++) {
     for (const m of src.matchAll(/const\s+([A-Za-z_]\w*)\s*=\s*([\w .+\-*/()]+);/g)) {
@@ -79,7 +79,7 @@ function constsOf(src) {
   return t;
 }
 
-function valueOf(body, key, t) {
+export function valueOf(body, key, t) {
   const m = body.match(new RegExp(`(?:^|[\\s,{])${key}:\\s*([^,\\n}]+)`));
   if (!m) return undefined;
   const e = m[1].trim().replace(/[A-Za-z_]\w*/g, (n) => (t.has(n) ? String(t.get(n)) : 'NaN'));

@@ -13,6 +13,7 @@ import { BEATS } from './logic26Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A four-link chain of reasoning, stage right; the figure downstage left.
 //
@@ -65,6 +67,11 @@ const X = BEATS.map((b) => b.x ?? 124);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic26'));
 const DIR = dirsFrom(X, 1);
 const NLINKS = BEATS.map((b) => b.links ?? 0);
+// group AH — four still-beat events, each derived from its own beat's sentence.
+const PREVIEWV = BEATS.map((b) => ((b.preview ?? 0) > 0 ? 1 : 0));
+const SUPPOSEDV = BEATS.map((b) => ((b.supposed ?? 0) > 0 ? 1 : 0));
+const IMPLICATEV = BEATS.map((b) => ((b.implicate ?? 0) > 0 ? 1 : 0));
+const QEDV = BEATS.map((b) => ((b.qed ?? 0) > 0 ? 1 : 0));
 
 // R7c — LEFT STILL ON PURPOSE: where the chain breaks IS the lesson's claim (the assumption,
 // never a middle step; see the break's own note below). A sort's chip rests on the middle
@@ -72,7 +79,7 @@ const NLINKS = BEATS.map((b) => b.links ?? 0);
 // had touched anything, and NOTHING has no picture at all.
 export default function Logic26Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(2);
+  const cv = useCarry(6);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -80,6 +87,10 @@ export default function Logic26Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
   const prevShown = prev?.links ?? 0;
   const snapOn = (cur.snap ?? 0) > 0;
   const snapFade = (cur.snap ?? 0) !== (prev?.snap ?? 0);
+  const previewFade = (cur.preview ?? 0) !== (prev?.preview ?? 0);
+  const supposedFade = (cur.supposed ?? 0) !== (prev?.supposed ?? 0);
+  const implicateFade = (cur.implicate ?? 0) !== (prev?.implicate ?? 0);
+  const qedFade = (cur.qed ?? 0) !== (prev?.qed ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -97,6 +108,15 @@ export default function Logic26Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
       fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       fill: carry(cv, 1, n, NLINKS[p], NLINKS[n], grow),
       snap: snapOn ? (snapFade ? grow : 1) : 0,
+      // The four slots traced empty, before the chain is written (beat 1).
+      preview: carry(cv, 2, n, PREVIEWV[p], PREVIEWV[n], previewFade ? grow : 1),
+      // "Not asserted" beside the assumption — supposing isn't claiming (beat 3).
+      supposed: carry(cv, 3, n, SUPPOSEDV[p], SUPPOSEDV[n], supposedFade ? grow : 1),
+      // A ring on the assumption — the thing this new step is said to contradict (beat 5).
+      implicate: carry(cv, 4, n, IMPLICATEV[p], IMPLICATEV[n], implicateFade ? grow : 1),
+      // The plate stating what the proof has established (beat 8).
+      qed: carry(cv, 5, n, QEDV[p], QEDV[n], qedFade ? grow : 1),
+      t,
     };
   });
 
@@ -105,6 +125,19 @@ export default function Logic26Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
   // this file that can mark a middle link, which is the claim the lesson makes.
   const snapStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: SCENE.value.snap }] }));
   const falseTag = useAnimatedStyle(() => ({ opacity: SCENE.value.snap }));
+  const previewStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.preview }));
+  const supposedStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.supposed,
+    transform: [{ translateY: (1 - SCENE.value.supposed) * -6 }],
+  }));
+  // A breathing ring, like the one that marks a row elsewhere in this branch.
+  const implicateStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.implicate * (0.55 + 0.45 * Math.sin(SCENE.value.t * 3.2)),
+  }));
+  const qedStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.qed,
+    transform: [{ translateY: (1 - SCENE.value.qed) * 8 }],
+  }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -112,15 +145,36 @@ export default function Logic26Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
   return (
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
+
+      {/* the four slots traced empty, before the chain is written */}
+      <Animated.View style={previewStyle} pointerEvents="none">
+        {LINKS.map((_, k) => (
+          <View key={`pv${k}`} style={[styles.previewSlot, { top: LINK_T + k * LINK_PITCH }]} />
+        ))}
+      </Animated.View>
+
       {LINKS.map((l, k) => (
         <Link key={l} index={k} label={l} shown={shown} prevShown={prevShown} SCENE={SCENE} />
       ))}
+
+      {/* "not asserted" — supposing a claim isn't claiming it */}
+      <Animated.View style={[styles.supposed, supposedStyle]} pointerEvents="none">
+        <Text style={styles.supposedText} numberOfLines={1}>NOT ASSERTED</Text>
+      </Animated.View>
+
+      {/* a ring on the assumption — the thing the new step is said to contradict */}
+      <Animated.View style={[styles.implicateRing, implicateStyle]} pointerEvents="none" />
 
       {/* the break, on the top link */}
       <Animated.View style={[styles.snap, snapStyle]} pointerEvents="none" />
       <Animated.Text style={[styles.falseTag, falseTag]} numberOfLines={1} pointerEvents="none">
         FALSE
       </Animated.Text>
+
+      {/* the plate stating what the proof has established */}
+      <Animated.View style={[styles.qed, qedStyle]} pointerEvents="none">
+        <Text style={styles.qedText} numberOfLines={1}>NO LARGEST NUMBER</Text>
+      </Animated.View>
 
       {showPick &&
         ANSWERS.map((a, k) => {
@@ -184,14 +238,48 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   link: {
     position: 'absolute', left: CH_L, width: CH_W, height: LINK_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   linkLast: { backgroundColor: INK, borderColor: INK },
+
+  // ── the four tap events (group AH) ─────────────────────────────────────────
+  // The four slots, traced empty before the chain is written — an outline only,
+  // never a fill (D31), so it reads as a place waiting rather than a fifth link.
+  previewSlot: {
+    position: 'absolute', left: CH_L, width: CH_W, height: LINK_H,
+    borderWidth: 1.5, borderColor: SHADE, borderRadius: 8, borderStyle: 'dashed',
+  },
+  // "Not asserted", beside the assumption — supposing a claim isn't claiming it.
+  supposed: {
+    position: 'absolute', left: CH_L + CH_W - 100, top: LINK_T - 14, width: 100,
+    paddingVertical: 1.5, borderWidth: 1.5, borderColor: INK, borderRadius: 5,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center',
+  },
+  supposedText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: INK,
+    includeFontPadding: false,
+  },
+  // A breathing ring on the assumption link — the thing a later step contradicts.
+  implicateRing: {
+    position: 'absolute', left: CH_L - 5, top: LINK_T - 5, width: CH_W + 10, height: LINK_H + 10,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 11,
+  },
+  // The plate stating what the proof has established, below the chain.
+  qed: {
+    position: 'absolute', left: CH_L, top: ANS_T, width: CH_W, height: ANS_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: INK,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  qedText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.3, color: PAPER,
+    includeFontPadding: false,
+  },
+
   linkText: {
     fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
@@ -210,7 +298,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', left: CH_L, width: CH_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {

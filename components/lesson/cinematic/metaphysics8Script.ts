@@ -25,6 +25,14 @@ export interface Metaphysics8Beat extends BaseBeat {
   /** The two end captions on the rail, 0..1. Dropped to 0 while Q1 is up. */ tags?: number;
   /** The YOUR CHOICE tag over domino 3, 0..1. Dropped to 0 while Q1 is up. */ mark?: number;
   /** 1 = the three answer cards are live in the scene (Q1). */ pick?: number;
+  /** A "FIXED" tag appears — every event fixed by earlier ones (group AH). 0..1. */ fixedTag?: number;
+  /** A token runs from the wave's edge toward YOUR CHOICE, one journey per tap (group AH). 0..1. */ causeFlow?: number;
+  /** A "NO OTHER WAY" tag appears — no choice could have gone differently (group AH). 0..1. */ noOtherTag?: number;
+  /** A "LONG BEFORE YOU" tag appears — causes reaching back before your birth (group AH). 0..1. */ longBeforeTag?: number;
+  /** A "A NEW CHAIN" tag appears — the libertarian's uncaused beginning (group AH). 0..1. */ newChainTag?: number;
+  /** A "NOT POLITICS" tag appears — distinct from political libertarianism (group AH). 0..1. */ notPoliticsTag?: number;
+  /** A "WHAT MAKES IT FREE?" tag appears — the question before the name (group AH). 0..1. */ freeQTag?: number;
+  /** A "YOUR OWN WILL" tag appears — Hume's own condition for freedom (group AH). 0..1. */ ownWillTag?: number;
 }
 
 export const BEATS: Metaphysics8Beat[] = [
@@ -34,7 +42,7 @@ export const BEATS: Metaphysics8Beat[] = [
     dur: 3,
   },
   {
-    p: 164, x: 300, chain: 1, front: 13,
+    p: 164, x: 300, chain: 1, front: 13, fixedTag: 1,
     text: 'Determinism holds that every event is fixed by earlier events and the laws of nature.',
     dur: 1.8,
   },
@@ -45,7 +53,7 @@ export const BEATS: Metaphysics8Beat[] = [
     dur: 4.3,
   },
   {
-    p: 159, x: 232, chain: 1, front: 9, tags: 1, mark: 1,
+    p: 159, x: 232, chain: 1, front: 9, tags: 1, mark: 1, causeFlow: 1,
     text: 'That chain of causes leads, step by step, to the choice you made.',
     dur: 1.8,
   },
@@ -56,7 +64,7 @@ export const BEATS: Metaphysics8Beat[] = [
     dur: 3.6,
   },
   {
-    p: 173, x: 232, chain: 1, front: 5, tags: 1, mark: 1,
+    p: 173, x: 232, chain: 1, front: 5, tags: 1, mark: 1, noOtherTag: 1,
     text: 'On this view, no choice you’ve ever made could have gone differently.',
     dur: 1.8,
   },
@@ -67,18 +75,18 @@ export const BEATS: Metaphysics8Beat[] = [
     dur: 2.8,
   },
   {
-    p: 258, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
+    p: 258, x: 140, chain: 1, front: 3, tags: 1, mark: 1, longBeforeTag: 1,
     text: 'Even your proudest choices were settled by causes that began long before your birth.',
     dur: 2.2,
   },
   {
-    p: 33, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
+    p: 33, x: 140, chain: 1, front: 3, tags: 1, mark: 1, newChainTag: 1,
     text: 'A second position denies that choices are determined. A free choice, it holds, begins a new chain that no earlier cause fixed.',
     cite: 'Breaking the chain',
     dur: 4,
   },
   {
-    p: 260, x: 140, chain: 1, front: 3, tags: 1, mark: 1,
+    p: 260, x: 140, chain: 1, front: 3, tags: 1, mark: 1, notPoliticsTag: 1,
     text: 'This is libertarian free will, which is distinct from political libertarianism.',
     dur: 1.8,
   },
@@ -91,7 +99,7 @@ export const BEATS: Metaphysics8Beat[] = [
   },
   {
     // 8 (shrug), not 4 (think): the line opens "A third camp shrugs".
-    p: 416, x: 200, chain: 1, front: 3, tags: 1, mark: 1,
+    p: 416, x: 200, chain: 1, front: 3, tags: 1, mark: 1, freeQTag: 1,
     text: 'On this view, being caused is compatible with being free. What, then, makes a choice free?',
     dur: 2.2,
   },
@@ -128,7 +136,7 @@ export const BEATS: Metaphysics8Beat[] = [
     dur: 2.7,
   },
   {
-    p: 258, x: 140, chain: 1, front: 2, tags: 1, mark: 1,
+    p: 258, x: 140, chain: 1, front: 2, tags: 1, mark: 1, ownWillTag: 1,
     text: 'For Hume, you act freely when your action comes from your own will, not from external constraint.',
     dur: 2.7,
   },

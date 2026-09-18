@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics20Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A FRAME WITH A GRID OF FRAMES IN IT, AND A CENSUS AT THE FOOT.
@@ -44,6 +46,9 @@ const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Crossfade for a beat that does NOT walk. 0.85 is the base `footfalls` assumes. */
+const MANY_RUNS = BEATS.map((b) => b.manyRuns ?? 0);
+const INDIFFERENT = BEATS.map((b) => b.indifferent ?? 0);
+const FALLS = BEATS.map((b) => b.falls ?? 0);
 const BASE_TR = 0.85;
 
 const OUT_X = 40;
@@ -89,7 +94,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics20'));
 export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(8);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -114,6 +119,10 @@ export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick, d
       nest: carry(cv, 2, n, NEST[p], reacting ? dragPos.value : NEST[n], tr),
       tally: carry(cv, 3, n, TALLY[p], TALLY[n], tr),
       token: carry(cv, 4, n, TOKEN[p], TOKEN[n], tr),
+      // The three tap events, carried, so each fades out as well as in (group L).
+      manyRuns: carry(cv, 5, n, MANY_RUNS[p], MANY_RUNS[n], tr),
+      indifferent: carry(cv, 6, n, INDIFFERENT[p], INDIFFERENT[n], tr),
+      falls: carry(cv, 7, n, FALLS[p], FALLS[n], tr),
       t,
     };
   });
@@ -133,6 +142,27 @@ export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick, d
   for (let c = 0; c < COLS * ROWS; c++) cells.push(c);
 
   const simRise = useAnswerRise(picked, 'sim', true);
+
+  // ── the three tap events ───────────────────────────────────────────────────
+  //
+  // ONE CIVILISATION, MANY RUNS: a brace under the whole grid, drawn out from its
+  // own middle, saying that everything inside it is one civilisation's doing.
+  const manyRunsStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.manyRuns,
+    transform: [{ scaleX: SCENE.value.manyRuns }],
+  }));
+  // Indifference is EQUAL WEIGHT, so it is drawn as one: a single level laid
+  // across every row of cells at once. A mark per cell would be twenty-four
+  // claims where the principle makes one.
+  const indifferentStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.indifferent,
+    transform: [{ scaleY: SCENE.value.indifferent }],
+  }));
+  // And the count falls: an arrow down the tally's own column.
+  const fallsStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.falls,
+    transform: [{ translateY: (1 - SCENE.value.falls) * -10 }],
+  }));
 
   return (
     <View style={styles.scene}>
@@ -178,6 +208,17 @@ export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick, d
 
       <Animated.View style={[styles.token, tokenStyle]} pointerEvents="none" />
 
+      {/* Thousands of runs, all of them one civilisation's. */}
+      <Animated.View style={[styles.runsBrace, manyRunsStyle]} pointerEvents="none" />
+
+      {/* Every cell weighed the same — one level, not one mark per cell. */}
+      <Animated.View style={[styles.evenLevel, indifferentStyle]} pointerEvents="none" />
+
+      {/* Either way, the number of simulated minds comes down. */}
+      <Animated.View style={[styles.fallsArm, fallsStyle]} pointerEvents="none">
+        <View style={styles.fallsHead} />
+      </Animated.View>
+
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
@@ -195,16 +236,41 @@ function Cell({ S, index }: { S: { value: { nest: number } }; index: number }) {
 }
 
 const styles = StyleSheet.create({
+  // ── the three tap events (group AH) ────────────────────────────────────────
+  // Under the outer frame, which is the civilisation itself (OUT_Y + OUT_H).
+  runsBrace: {
+    position: 'absolute', left: OUT_X + 8, top: OUT_Y + OUT_H + 6, width: OUT_W - 16, height: 2,
+    borderTopWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
+    transformOrigin: '50% 50%',
+  },
+  // Down the grid's own left margin, level with every row: one weight for all.
+  evenLevel: {
+    position: 'absolute', left: GRID_X - 12, top: GRID_Y, width: 3,
+    height: ROWS * (CELL_H + CELL_GAP) - CELL_GAP,
+    backgroundColor: INK, borderRadius: 1.5, transformOrigin: '50% 0%',
+  },
+  // Down the right-hand margin, where the running count is kept.
+  fallsArm: {
+    position: 'absolute', left: OUT_X + OUT_W + 10, top: OUT_Y + 24, width: 3, height: 44,
+    backgroundColor: INK, borderRadius: 1.5,
+  },
+  fallsHead: {
+    position: 'absolute', left: -3.5, top: 44, width: 10, height: 9,
+    borderLeftWidth: 5, borderRightWidth: 5, borderTopWidth: 9,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: INK,
+    borderStyle: 'solid',
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   outer: {
     position: 'absolute', left: OUT_X, top: OUT_Y, width: OUT_W, height: OUT_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   outCap: {
     position: 'absolute', left: OUT_X + 6, top: OUT_Y - 12, width: 140,

@@ -13,6 +13,7 @@ import { BEATS } from './aesthetics16Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('aesthetics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('aesthetics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // One canvas on a wall, stage right, with a rail of biographical cards filling in
 // underneath it.
@@ -88,19 +90,23 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics16'));
 const DIR = dirsFrom(X, 1);
 const CANV = BEATS.map((b) => b.canvas ?? 0);
 const NFACTS = BEATS.map((b) => b.facts ?? 0);
+// GROUP AH — one still tap: the canvas stays untouched (R7c), so what changes is
+// the empty rail below it — the "you", not the work.
+const SLOT = BEATS.map((b) => ((b.slot ?? 0) > 0 ? 1 : 0));
 
 // R7c — LEFT STILL ON PURPOSE: the answer is that learning the biography leaves the PAINTING
 // exactly as it was and changes only your response. A canvas that changed with the knob
 // would draw a wrong answer as a fact, so the picture holds still.
 export default function Aesthetics16Scene({ clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(4);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
   const canvFade = (cur.canvas ?? 0) !== (prev?.canvas ?? 0);
   const shownFacts = cur.facts ?? 0;
   const prevFacts = prev?.facts ?? 0;
+  const slotFade = (cur.slot ?? 0) !== (prev?.slot ?? 0);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -119,11 +125,15 @@ export default function Aesthetics16Scene({ clock, bt, bi, i, picked, onPick, ga
       canvas: carry(cv, 1, n, CANV[p], CANV[n], tr, canvFade ? grow : 1),
       // How far the rail has filled, as a card count that can be fractional mid-blend.
       fill: carry(cv, 2, n, NFACTS[p], NFACTS[n], grow),
+      // The empty slot where the first fact is about to land — gone the instant
+      // the fact itself arrives, so the two are never on screen making the same claim.
+      slot: carry(cv, 3, n, SLOT[p], SLOT[n], slotFade ? grow : 1),
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const canvasStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.canvas }));
+  const slotStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.slot }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -137,6 +147,9 @@ export default function Aesthetics16Scene({ clock, bt, bi, i, picked, onPick, ga
           <View key={k} style={[styles.bar, { width: (CANVAS_W - 30) * w }]} />
         ))}
       </Animated.View>
+
+      {/* the empty slot — what is about to change is on the rail, not the work */}
+      <Animated.View style={[styles.slot, slotStyle]} pointerEvents="none" />
 
       {/* ── the rail: everything that DOES change ───────────────────────────── */}
       {FACTS.map((f, k) => (
@@ -204,11 +217,18 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule alone leaves the figure
   // standing on bare page; a filled band under it is what the two lessons
   // the reader holds up both do, and it costs one View.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
+
+  // THE EMPTY SLOT. A dashed border, never a fill — the canvas above it is a
+  // solid plate; this is deliberately not one, because nothing has landed yet.
+  slot: {
+    position: 'absolute', left: RAIL_L, top: FACT_T, width: RAIL_W, height: FACT_H,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 3,
+  },
 
   canvas: {
     position: 'absolute', left: CANVAS_L, top: CANVAS_T, width: CANVAS_W, height: CANVAS_H,
-    borderWidth: 3, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 3, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', gap: 10,
   },
   bar: { height: 8, backgroundColor: INK, borderRadius: 1 },
@@ -225,7 +245,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   // 9/0 rather than 9.5/0.3: these chips are ~52 units of inner width on ONE line,

@@ -10,14 +10,16 @@ import {
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE GATE OF KNOWING, held by three locks: TRUE · BELIEF · REASONS.
@@ -382,7 +384,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   halo: {
     position: 'absolute', left: GATE_L - 14, top: GATE_T - 14,
@@ -401,7 +403,7 @@ const styles = StyleSheet.create({
   },
   gateDoor: {
     position: 'absolute', left: DOOR_X, top: DOOR_T, width: DOOR_W, height: DOOR_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
   },
   gateKnob: {
     position: 'absolute', left: 5, top: 78, width: 8, height: 8, borderRadius: 4,
@@ -411,7 +413,7 @@ const styles = StyleSheet.create({
 
   bolt: {
     position: 'absolute', left: BOLT_X, width: BOLT_W, height: BOLT_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP, overflow: 'hidden',
   },
   boltFill: { backgroundColor: INK },
   stud: {
@@ -457,7 +459,7 @@ const styles = StyleSheet.create({
 
   vp: {
     position: 'absolute', left: VP_L, top: VP_T, width: VP_W, height: VP_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   vpCap: {
     position: 'absolute', top: 8, left: 0, right: 0, textAlign: 'center',
@@ -478,7 +480,7 @@ const styles = StyleSheet.create({
   },
   pip: {
     width: 16, height: 16, borderRadius: 3, borderWidth: 2, borderColor: INK,
-    backgroundColor: STONE, boxShadow: LIP, marginLeft: 7,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, marginLeft: 7,
   },
   pipFill: { backgroundColor: INK, borderRadius: 1 },
 

@@ -28,6 +28,9 @@ export interface Met20Beat extends BaseBeat {
   /** The running count at the foot, 0…1. */ tally?: number;
   /** The reader's token, dropped, 0…1. */ token?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = the grid is bracketed as ONE civilisation's own run of pasts. */ manyRuns?: number;
+  /** 1 = every cell is weighed the same, the reader's own among them. */ indifferent?: number;
+  /** 1 = the count of simulated minds is marked as falling. */ falls?: number;
 }
 
 export const BEATS: Met20Beat[] = [
@@ -43,6 +46,7 @@ export const BEATS: Met20Beat[] = [
   },
   {
     p: 266, x: 200, outer: 1, nest: 0.3, tally: 1,
+    manyRuns: 1,
     text: 'Such an advanced civilisation might run many thousands of simulations of its own past history.',
     dur: 1.8,
   },
@@ -59,6 +63,7 @@ export const BEATS: Met20Beat[] = [
   },
   {
     p: 266, x: 132, outer: 1, nest: 1, tally: 1, token: 1,
+    indifferent: 1,
     text: 'By Bostrom’s principle of indifference, your mind is then most likely a simulated one.',
     dur: 1.9,
   },
@@ -90,6 +95,7 @@ export const BEATS: Met20Beat[] = [
   },
   {
     p: 176, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
+    falls: 1,
     text: 'In either case, the number of simulated minds falls.',
     dur: 1.8,
   },

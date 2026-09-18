@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics25Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,7 +17,8 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE } = stageTone('metaphysics');
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE TRUNK, A NODE, AND FOUR ROADS OF WHICH ONE WAS WALKED.
@@ -92,6 +94,12 @@ const TRUNK = BEATS.map((b) => (b.trunk ? 1 : 0));
 const ROADS = BEATS.map((b) => b.roads ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const ACTUAL_RING = BEATS.map((b) => (b.actualRing ? 1 : 0));
+const COUNTERPARTS = BEATS.map((b) => (b.counterparts ? 1 : 0));
+/** The walked road's plate, so the ring wraps exactly what Road() draws. */
+const WALKED_HEAD_L = ROAD_X[WALKED] + ROAD_W / 2 - HEAD_W / 2;
+/** Where a counterpart dot sits on each of the three unwalked roads. */
+const COUNTERPART_X = ROAD_X.filter((_, k) => k !== WALKED).map((x) => x + ROAD_W / 2);
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
@@ -107,13 +115,18 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics25'));
 export default function Metaphysics25Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(7);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  const actualRingFade = (cur.actualRing ?? 0) !== (prev?.actualRing ?? 0);
+  const counterpartsFade = (cur.counterparts ?? 0) !== (prev?.counterparts ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -130,6 +143,12 @@ export default function Metaphysics25Scene({ clock, bt, bi, i, picked, onPick, p
       // R7c — how solid an unwalked road is, under the reader's own thumb. At rest
       // it is 0.45, which is the dashed state the lesson has been drawing all along.
       solid: carry(cv, 4, n, 0.45, reacting ? pickAt(SOLIDITY, pickPos.value) : 0.45, tr),
+      // A ring settles round the walked road's plate — it represents the actual
+      // world, named for the first time on this beat.
+      actualRing: carry(cv, 5, n, ACTUAL_RING[p], ACTUAL_RING[n], actualRingFade ? grow : 1),
+      // A dot lands on each unwalked road — Lewis's counterparts, as concrete as
+      // the actual world and as unnoticed here until this beat names them.
+      counterparts: carry(cv, 6, n, COUNTERPARTS[p], COUNTERPARTS[n], counterpartsFade ? grow : 1),
     };
   });
 
@@ -139,6 +158,8 @@ export default function Metaphysics25Scene({ clock, bt, bi, i, picked, onPick, p
 
   const trunkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.trunkOn }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
+  const actualRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.actualRing }));
+  const counterpartsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.counterparts }));
 
   return (
     <View style={styles.scene}>
@@ -157,6 +178,14 @@ export default function Metaphysics25Scene({ clock, bt, bi, i, picked, onPick, p
           <Road key={rx} S={SCENE} left={rx} index={k} walked={k === WALKED} label={HEAD_CAP[k]} />
         ))}
       </View>
+
+      {/* group AH — a ring on the walked road's plate: this is the actual world. */}
+      <Animated.View style={[styles.actualRing, actualRingStyle]} pointerEvents="none" />
+
+      {/* group AH — a counterpart dot on each unwalked road (Lewis's modal realism). */}
+      {COUNTERPART_X.map((cx) => (
+        <Animated.View key={cx} style={[styles.counterpart, { left: cx - 4 }, counterpartsStyle]} pointerEvents="none" />
+      ))}
 
       <Animated.View style={[StyleSheet.absoluteFill, platesStyle]}>
         {PLATE_ID.map((id, k) => (
@@ -225,9 +254,19 @@ function Road({ S, left, index, walked, label }: {
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
+  // ── the two tap events (group AH) ──────────────────────────────────────────
+  // A ring 4 units proud of the walked road's own plate — it is the actual world.
+  actualRing: {
+    position: 'absolute', left: WALKED_HEAD_L - 4, top: HEAD_Y - 4, width: HEAD_W + 8, height: HEAD_H + 8,
+    borderWidth: 2.5, borderColor: INK, borderRadius: 6,
+  },
+  // A small filled dot on each unwalked road: a counterpart of you, on Lewis's view.
+  counterpart: {
+    position: 'absolute', top: 339, width: 8, height: 8, borderRadius: 4, backgroundColor: INK,
+  },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — the subject stands on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: 132, top: CAP_T, width: 250,
@@ -275,7 +314,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

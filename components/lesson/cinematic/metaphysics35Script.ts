@@ -31,6 +31,12 @@ export interface Metaphysics35Beat extends BaseBeat {
   /** 1 = the knot is shown SNAPPED — the contradiction, made visible. */ snap?: number;
   /** 1 = the second history branches off below the line. */ branch?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
+  /** 1 = a dashed ring settles round the 1925 mark — that point on the line
+   * holds steady (group AH). */ mark1925?: number;
+  /** 1 = two small arrows press inward between the knot's two links — the
+   * paradox, as a squeeze (group AH). */ strain?: number;
+  /** 1 = a cross lands on the branch run — the attempt that failed there
+   * (group AH). */ failMark?: number;
 }
 
 export const BEATS: Metaphysics35Beat[] = [
@@ -45,7 +51,7 @@ export const BEATS: Metaphysics35Beat[] = [
     dur: 2.6,
   },
   {
-    p: 266, x: 322, line: 1, arc: 1,
+    p: 266, x: 322, line: 1, arc: 1, mark1925: 1,
     text: 'Being present in 1925 need not change any event that happened there.',
     dur: 1.8,
   },
@@ -55,7 +61,7 @@ export const BEATS: Metaphysics35Beat[] = [
     dur: 2.5,
   },
   {
-    p: 457, x: 120, line: 1, arc: 1, knot: 1,
+    p: 457, x: 120, line: 1, arc: 1, knot: 1, strain: 1,
     text: 'But then no one travels back to fire the shot, so you’re born after all. This is the grandfather paradox.',
     dur: 2.3,
   },
@@ -99,7 +105,7 @@ export const BEATS: Metaphysics35Beat[] = [
     dur: 3.6,
   },
   {
-    p: 267, x: 120, line: 1, branch: 1,
+    p: 267, x: 120, line: 1, branch: 1, failMark: 1,
     text: 'Your attempt fails for an ordinary reason, such as a jammed gun. In the only consistent history, it never succeeded.',
     dur: 1.8,
   },

@@ -20,6 +20,15 @@ export interface Ethics7Beat extends BaseBeat {
   /** 1 = the phone-glance badge sits above BOTH cars. */ glance?: number;
   /** Car B's left edge in stage x — beat-driven, so it meets the child on cue. */ carB?: number;
   /** 1 = the three verdict cards are live on the stage (Q1). */ pick?: number;
+  /**
+   * A one-shot flash in the clear gap between the two roads, timed to this
+   * beat's own claim. 0 none · 1 "2s = 2s" (the identical choice, before either
+   * road is drawn) · 2 a check beside "CLEAR" (road A, confirmed empty again) ·
+   * 3 a dashed ring around the child (the one outside difference) · 4 two
+   * identical heads across an "=" (nothing inside the drivers differs) · 5
+   * "NEVER KNOWS" (the first driver's half of the outcome) · 6 a cracked ring
+   * labelled CONTROL (the principle the judgement seems to violate).
+   */ note?: number;
 }
 
 export const BEATS: Ethics7Beat[] = [
@@ -29,7 +38,7 @@ export const BEATS: Ethics7Beat[] = [
     dur: 2.7,
   },
   {
-    p: 463, x: 90, carB: -70,
+    p: 463, x: 90, carB: -70, note: 1,
     text: 'The other soon stands trial in court. Both made the same two-second choice.',
     dur: 1.8,
   },
@@ -40,7 +49,7 @@ export const BEATS: Ethics7Beat[] = [
     dur: 1.8,
   },
   {
-    p: 266, x: 170, laneA: 1, carB: -70,
+    p: 266, x: 170, laneA: 1, carB: -70, note: 2,
     text: 'The first driver looks away and back, and the road is still clear. She never thinks about it again.',
     dur: 3.3,
   },
@@ -51,7 +60,7 @@ export const BEATS: Ethics7Beat[] = [
     dur: 2,
   },
   {
-    p: 274, x: 300, laneA: 1, laneB: 1, kid: 1, carB: 60,
+    p: 274, x: 300, laneA: 1, laneB: 1, kid: 1, carB: 60, note: 3,
     text: 'The only difference lies outside the driver’s control: a child is already stepping into the road.',
     dur: 2.4,
   },
@@ -62,7 +71,7 @@ export const BEATS: Ethics7Beat[] = [
     dur: 2.8,
   },
   {
-    p: 267, x: 300, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 150,
+    p: 267, x: 300, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 150, note: 4,
     text: 'Nothing inside the drivers is different at all. Only their circumstances on the road differ.',
     dur: 2,
   },
@@ -82,7 +91,7 @@ export const BEATS: Ethics7Beat[] = [
     dur: 1.8,
   },
   {
-    p: 258, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
+    p: 258, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1, note: 5,
     text: 'The second driver faces trial for causing a death. The first goes home, never learning what might have happened.',
     dur: 3,
   },
@@ -110,7 +119,7 @@ export const BEATS: Ethics7Beat[] = [
     dur: 4.1,
   },
   {
-    p: 167, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1,
+    p: 167, x: 170, laneA: 1, laneB: 1, kid: 1, glance: 1, carB: 246, hit: 1, note: 6,
     text: 'Nagel stated the principle of control that such judgements seem to violate.',
     dur: 1.8,
   },

@@ -10,9 +10,10 @@ import {
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './epistemology32Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, lookPose,
+import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, lookPose, useCarry, carry,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -20,8 +21,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('epistemology');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('epistemology');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // FOUR MAPS OF ONE COAST, and the answer targets are the four panels — you answer by
 // picking a SCALE (E33). The four profiles come out of a single `coast()` function
@@ -71,6 +73,9 @@ const MAPS = [
 ];
 
 const G = BEATS.map((b) => b.g ?? 0);
+const SPARSE_RING = BEATS.map((b) => (b.sparseRing ? 1 : 0));
+const SLOW_RING = BEATS.map((b) => (b.slowRing ? 1 : 0));
+const FRAME_RING = BEATS.map((b) => (b.frameRing ? 1 : 0));
 
 // THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
 // shot: it FOLLOWS him when a beat moves him far enough to be worth following,
@@ -89,6 +94,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology32'));
 export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
+  const cv = useCarry(3);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -109,6 +115,9 @@ export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick, 
       // under the reader's thumb: almost nothing at one end, the thing itself at the
       // other.
       maps: lerp(prevMaps, reacting ? dragPos.value * 4 : shownMaps, draw),
+      sparseRing: carry(cv, 0, n, SPARSE_RING[p], SPARSE_RING[n], tr),
+      slowRing: carry(cv, 1, n, SLOW_RING[p], SLOW_RING[n], tr),
+      frameRing: carry(cv, 2, n, FRAME_RING[p], FRAME_RING[n], tr),
     };
   });
 
@@ -117,10 +126,18 @@ export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick, 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
 
+  const sparseRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.sparseRing }));
+  const slowRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.slowRing }));
+  const frameRingStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.frameRing }));
+
   return (
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.kicker} numberOfLines={1}>THE SAME COAST, FOUR TIMES</Text>
+
+      <Animated.View style={[styles.sparseRing, sparseRingStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.slowRing, slowRingStyle]} pointerEvents="none" />
+      <Animated.View style={[styles.frameRing, frameRingStyle]} pointerEvents="none" />
 
       {MAPS.map((m, k) => (
         <Panel
@@ -225,8 +242,26 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
+  // SPARSE_RING — a dashed ring round the whole first panel: almost no
+  // information about the coast is in it.
+  sparseRing: {
+    position: 'absolute', left: COL[0] - 4, top: ROW[0] - 4, width: PAN_W + 8, height: PAN_H + 8,
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 8,
+  },
+  // SLOW_RING — a dashed ring round the whole third panel: too much detail to
+  // read quickly at sea.
+  slowRing: {
+    position: 'absolute', left: COL[0] - 4, top: ROW[1] - 4, width: PAN_W + 8, height: ROW[1] + PAN_H - (ROW[1] - 4),
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 8,
+  },
+  // FRAME_RING — a dashed ring round the fourth panel's single bar: at scale
+  // one to one, the rock fills the whole frame.
+  frameRing: {
+    position: 'absolute', left: COL[1] + PAD - 4, top: ROW[1] + PAD + ART_H - 50 - 4, width: ART_W + 8, height: 50 + 8,
+    borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 4,
+  },
   kicker: {
     position: 'absolute', left: COL[0], top: KICK_T, width: COL[1] + PAN_W - COL[0],
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,

@@ -29,6 +29,8 @@ export interface Epi18Beat extends BaseBeat {
   /** The grip on each marker, drawn as what is holding it, 0…1. */ grip?: number;
   /** How hard the evidence is pushing, 0…1. */ ev?: number;
   /** 1 = the push is the reader's this beat. */ live_d?: number;
+  /** 1 = ring the keys claim's own caption, naming which belief is meant. */ weakRing?: number;
+  /** 1 = a brace across both tethers, showing one report meeting two different grips. */ gripBrace?: number;
 }
 
 export const BEATS: Epi18Beat[] = [
@@ -43,7 +45,7 @@ export const BEATS: Epi18Beat[] = [
     dur: 3.1,
   },
   {
-    p: 266, x: 200, rails: 1, grip: 1, ev: 0,
+    p: 266, x: 200, rails: 1, grip: 1, ev: 0, weakRing: 1,
     text: 'The claim about your keys rests on a single memory of putting them there.',
     dur: 1.9,
   },
@@ -54,7 +56,7 @@ export const BEATS: Epi18Beat[] = [
     dur: 4.4,
   },
   {
-    p: 383, x: 132, rails: 1, grip: 1, ev: 0.3,
+    p: 383, x: 132, rails: 1, grip: 1, ev: 0.3, gripBrace: 1,
     text: 'The same report shouldn’t move both beliefs the same distance. How far a belief moves depends on more than the report.',
     dur: 3.8,
   },

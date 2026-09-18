@@ -25,6 +25,9 @@ export interface Aes4Beat extends BaseBeat {
   /** The cross/cross/tick marks are struck onto the cards (0/1). */ verdict?: number;
   /** Signature on the readymade (0/1). */ signed?: number;
   /** The artworld's ART placard (0/1). */ art?: number;
+  /** The ask card's caption: 0 the clue that opens the case · 1 the question it raises, once beat 1 names it in so many words. */ askv?: number;
+  /** The plinth's own status tag: 0 none · 1 the board's REFUSED stamp · 2 the work's new title, replacing it once the defence is made. */ status?: number;
+  /** 1 = a small tag by the viewer asks the reader for the verdict they privately hold. */ own?: number;
 }
 
 export const BEATS: Aes4Beat[] = [
@@ -34,12 +37,12 @@ export const BEATS: Aes4Beat[] = [
     dur: 2.8,
   },
   {
-    a: 266, v: 158, ask: 1, test: 0, verdict: 0, signed: 0, art: 0,
+    a: 266, v: 158, ask: 1, test: 0, verdict: 0, signed: 0, art: 0, askv: 1,
     text: 'The case raises a question of definition. What makes any object a work of art?',
     dur: 1.8,
   },
   {
-    a: 167, v: 10, test: 2,
+    a: 167, v: 10, test: 1,
     text: 'Two older theories answer it. The first, from Plato and Aristotle, holds that art is skilled imitation, or mimesis.',
     cite: 'Two older theories',
     dur: 2.6,
@@ -56,17 +59,17 @@ export const BEATS: Aes4Beat[] = [
     dur: 2.2,
   },
   {
-    a: 269, v: 15, test: 2, signed: 1,
+    a: 269, v: 15, test: 2, signed: 1, status: 1,
     text: 'The exhibition’s board refused to display the work. An unsigned defence argued that whether Mutt made it with his own hands had no importance.',
     dur: 1.9,
   },
   {
-    a: 269, v: 15, test: 2, signed: 1,
+    a: 269, v: 15, test: 2, signed: 1, status: 2,
     text: 'The defence held that choosing was the artistic act. Placed under a new title, the object lost its everyday use.',
     dur: 1.8,
   },
   {
-    a: 158, v: 4, test: 2, signed: 1,
+    a: 158, v: 4, test: 2, signed: 1, status: 2,
     quote: {
       id: 'lq-aesthetics-aesthetics-4-1',
       text: 'To see something as art requires something the eye cannot descry — an atmosphere of artistic theory, a knowledge of the history of art: an artworld.',
@@ -78,18 +81,18 @@ export const BEATS: Aes4Beat[] = [
     dur: 3.6,
   },
   {
-    a: 383, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
+    a: 383, v: 4, test: 3, verdict: 1, signed: 1, art: 1, status: 2,
     text: 'Fountain copies nothing and expresses no feeling, so neither theory fits. For George Dickie, the institutions of the artworld make it art.',
     cite: 'The artworld confers',
     dur: 2.4,
   },
   {
-    a: 400, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
+    a: 400, v: 4, test: 3, verdict: 1, signed: 1, art: 1, status: 2, own: 1,
     text: 'Asking whether something is art is philosophical. It forces you to state the definition you privately hold.',
     dur: 2.6,
   },
   {
-    a: 380, v: 4, test: 3, verdict: 1, signed: 1, art: 1,
+    a: 380, v: 4, test: 3, verdict: 1, signed: 1, art: 1, status: 2,
     interact: {
       prompt: 'If an identical urinal in a shop isn’t art, what makes Fountain art?',
       cards: [
@@ -102,7 +105,7 @@ export const BEATS: Aes4Beat[] = [
     dur: 1.0,
   },
   {
-    a: 462, v: 8, test: 3, verdict: 1, signed: 1, art: 1,
+    a: 462, v: 8, test: 3, verdict: 1, signed: 1, art: 1, status: 2,
     interact: {
       prompt: 'What turns a chosen object into art?',
       sort: {

@@ -26,6 +26,7 @@ export interface Logic28Beat extends BaseBeat {
   /** 1 = the two piers and their names are drawn. */ piers?: number;
   /** How far the plank reaches across the gap, 0…1. */ span?: number;
   /** 1 = the three plates the reader chooses between are up. */ plates?: number;
+  /** 1 = a tag over the gap names the plank as the argument being voiced. */ assert?: number;
   /** 1 = the reader is answering on the stage this beat. */ live?: number;
 };
 
@@ -77,7 +78,7 @@ export const BEATS: Logic28Beat[] = [
     dur: 5.0,
   },
   {
-    p: 451, x: 80, piers: 1, span: 0.9,
+    p: 451, x: 80, piers: 1, span: 0.9, assert: 1,
     text: 'Suppose someone argues that banning hate speech is justified because falsely shouting fire in a theatre is banned.',
     dur: 5.0,
   },

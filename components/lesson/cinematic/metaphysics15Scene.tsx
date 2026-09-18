@@ -13,6 +13,7 @@ import { BEATS } from './metaphysics15Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // Two balls, the gap between them, and a search running over it. Stage right.
 //
@@ -74,6 +76,9 @@ const DIR = dirsFrom(X, 1);
 const BALLS = BEATS.map((b) => b.balls ?? 0);
 const GAPV = BEATS.map((b) => b.gap ?? 0);
 const FOUND = BEATS.map((b) => b.found ?? 0);
+const FRAME = BEATS.map((b) => b.frame ?? 0);
+const HIT = BEATS.map((b) => b.hit ?? 0);
+const HIT_SLIDE = 8;   // the second ball rolls this far right on contact
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -83,7 +88,7 @@ const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(6);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -116,6 +121,8 @@ export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick, d
       // that same number, so the card cannot be somewhere its verdict does not match.
       show: Math.min(1, f),
       x: lerp(VER_OUT, VER_IN, Math.max(0, Math.min(1, f - 1))),
+      frame: carry(cv, 4, n, FRAME[p], FRAME[n], grow),
+      hit: carry(cv, 5, n, HIT[p], HIT[n], grow),
     };
   });
 
@@ -123,6 +130,8 @@ export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick, d
   const ballStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.balls }));
   const gapStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.gap }));
   const verStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.show, left: SCENE.value.x }));
+  const frameStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.frame }));
+  const rballStyle = useAnimatedStyle(() => ({ left: BALL_RX + SCENE.value.hit * HIT_SLIDE }));
 
   const answered = picked !== null;
   const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -130,10 +139,11 @@ export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick, d
   return (
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
+      <Animated.View style={[styles.frame, frameStyle]} pointerEvents="none" />
       <Animated.View style={[styles.layer, ballStyle]} pointerEvents="none">
         <Text style={styles.head} numberOfLines={1}>WHAT YOU ACTUALLY SEE</Text>
         <View style={[styles.ball, { left: BALL_LX }]} />
-        <View style={[styles.ball, { left: BALL_RX }]} />
+        <Animated.View style={[styles.ball, rballStyle]} />
       </Animated.View>
 
       <Animated.View style={[styles.gapMark, gapStyle]} pointerEvents="none">
@@ -182,7 +192,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   layer: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
 
   head: {
@@ -193,6 +203,12 @@ const styles = StyleSheet.create({
   ball: {
     position: 'absolute', top: BALL_T, width: BALL, height: BALL, borderRadius: BALL / 2,
     borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
+  },
+  // The empty field about to be observed — a boundary, not a fill, so the balls
+  // read as arriving INTO it rather than a second box stacking on top of them.
+  frame: {
+    position: 'absolute', left: BD_L, top: BALL_T - 6, width: BD_W, height: BALL + 12,
+    borderWidth: 1.5, borderStyle: 'dashed', borderColor: SOFT, borderRadius: 6,
   },
   gapMark: {
     position: 'absolute', left: BALL_LX + BALL + 6, top: BALL_T,
@@ -207,7 +223,7 @@ const styles = StyleSheet.create({
 
   verdict: {
     position: 'absolute', top: VER_T, width: VER_W, height: VER_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   verdictText: {
@@ -217,7 +233,7 @@ const styles = StyleSheet.create({
 
   ans: { position: 'absolute', top: ANS_T, width: ANS_W },
   ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
   ansText: {

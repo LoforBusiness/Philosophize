@@ -9,6 +9,7 @@ import { BEATS } from './ethics40Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A SEALED PROMISE ABOVE AN EMPTY SEAT, AND ONE TIE LOOKING FOR SOMETHING.
@@ -93,6 +95,8 @@ const SEAT = BEATS.map((b) => (b.seat ? 1 : 0));
 const TIE = BEATS.map((b) => (b.tie ? 1 : 0));
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const PINGV = BEATS.map((b) => (b.ping ? 1 : 0));
+const REACHV = BEATS.map((b) => (b.reach ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -113,6 +117,11 @@ export default function Ethics40Scene({ clock, bt, bi, i, picked, onPick, pickPo
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(6);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // BOTH RUN ONCE, ON THE BEAT THAT ASKS FOR THEM (C20c) — a hold re-draws nothing.
+  const pingNow = (cur.ping ?? 0) > 0 && (cur.ping ?? 0) !== (prev?.ping ?? 0);
+  const reachNow = (cur.reach ?? 0) > 0 && (cur.reach ?? 0) !== (prev?.reach ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -136,6 +145,12 @@ export default function Ethics40Scene({ clock, bt, bi, i, picked, onPick, pickPo
       tieOn: carry(cv, 3, n, TIE[p], reacting ? TIE[n] * pickAt(HELD_AT, pickPos.value) : TIE[n], tr),
       anchor: carry(cv, 4, n, SEAT_MID, reacting ? pickAt(ANCHOR_AT, pickPos.value) : SEAT_MID, tr),
       platesOn: carry(cv, 5, n, PLATES[p], PLATES[n], tr),
+      // THE PING — a probe reaching the empty seat and finding nothing there.
+      // Rides `bt` directly: one pulse per tap, not a loop (C20c).
+      ping: pingNow ? ease01(bt.value / 1.2) : 0,
+      // THE REACH — a mark arriving at the promise from outside the frame, an
+      // event the dead man never lives to see landing on his surviving interest.
+      reach: reachNow ? ease01(bt.value / 1.0) : 0,
     };
   });
 
@@ -152,6 +167,22 @@ export default function Ethics40Scene({ clock, bt, bi, i, picked, onPick, pickPo
     width: Math.abs(TIE_X - SCENE.value.anchor),
   }));
   const riseStyle = useAnimatedStyle(() => ({ left: SCENE.value.anchor - 1.5 }));
+  // The ping: a dashed ring that grows out from the seat and fades — nothing
+  // pushes back.
+  const pingStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.ping;
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, u / 0.3) * (1 - u);
+    return { opacity: on * 0.85, transform: [{ scale: 0.5 + 0.9 * u }] };
+  });
+  // The reach: a small mark travelling in from off the page and landing on the
+  // promise, then gone.
+  const reachStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.reach;
+    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.22);
+    const startX = STAGE_W - 18;
+    const endX = CARD_X + CARD_W - 8;
+    return { opacity: on, transform: [{ translateX: startX + (endX - startX) * u }] };
+  });
 
   return (
     <View style={styles.scene}>
@@ -171,6 +202,13 @@ export default function Ethics40Scene({ clock, bt, bi, i, picked, onPick, pickPo
         <View style={[styles.leg, { left: 176 }]} />
         <View style={[styles.leg, { left: 240 }]} />
       </Animated.View>
+
+      {/* THE PING — a probe out to the empty seat, finding nothing there to feel it. */}
+      <Animated.View style={[styles.pingRing, pingStyle]} pointerEvents="none" />
+
+      {/* THE REACH — an event arriving from outside the frame, touching the
+          interest its owner never lives to see. */}
+      <Animated.View style={[styles.reachMark, reachStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, tieStyle]} pointerEvents="none">
         <View style={styles.drop} />
@@ -207,7 +245,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: SHELF_X, top: CAP_T, width: SHELF_W,
@@ -240,6 +278,20 @@ const styles = StyleSheet.create({
   },
   leg: { position: 'absolute', top: LEG_Y, width: 6, height: LEG_H, backgroundColor: INK },
 
+  // THE PING — a dashed ring centred on the seat, ink so faint a probe that finds
+  // no one there. Never a fill (D31): a boundary that comes back empty.
+  pingRing: {
+    position: 'absolute', left: SEAT_MID - 30, top: 399 - 30, width: 60, height: 60,
+    borderRadius: 30, borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
+    transformOrigin: '50% 50%',
+  },
+  // THE REACH — a small ink mark, the size of the flow token elsewhere in this
+  // corpus, travelling once from outside the frame to the promise.
+  reachMark: {
+    position: 'absolute', left: 0, top: CARD_Y + CARD_H / 2 - 3, width: 6, height: 6,
+    borderRadius: 3, backgroundColor: INK,
+  },
+
   // THE TIE IS ONE LINE IN THREE ORTHOGONAL PIECES, so its far end can travel
   // without anything rotating and without crossing a word.
   drop: { position: 'absolute', left: TIE_X - 1.5, top: SHELF_Y + 8, width: 3, height: TIE_Y - SHELF_Y - 8, backgroundColor: INK },
@@ -249,7 +301,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

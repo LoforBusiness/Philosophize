@@ -103,8 +103,14 @@ const DETACH_BUDGET = 0;
 // or moves in one frame instead of in a transition. 304 in 42 lessons on the day this
 // was written, every one of them what group L forbids; each wants a person to choose
 // the transition, so it is a high-water mark and not a fix list. 302 since
-// political-15's night was carried rather than multiplied in (S13).
-const CUT_BUDGET = 302;
+// political-15's night was carried rather than multiplied in (S13). 301 since the
+// first tap events (group AH) carried their own values both ways: the house idiom
+// `on ? (fade ? grow : 1) : 0` fades a thing IN and switches it OFF between two
+// frames, four new events inherited it, and replacing it with `carry` took one of
+// the pre-existing cuts with it. 299 once every still tap had its event: two of
+// those were first written with the ramp as `carry`'s multiplier, which starts it
+// from zero on the first frame, and passing it as the progress took two more cuts.
+const CUT_BUDGET = 299;
 const UNREAD_BUDGET = 0;
 const STYLE_ERROR_BUDGET = 0;
 

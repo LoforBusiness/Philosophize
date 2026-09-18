@@ -9,6 +9,7 @@ import { BEATS } from './ethics27Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE SENTENCE ON A STAND, AND THE OBJECT HANGING UNDER IT.
@@ -74,6 +76,7 @@ const SAID = BEATS.map((b) => (b.said ? 1 : 0));
 const READING = BEATS.map((b) => b.reading ?? 0);
 const PLATES = BEATS.map((b) => (b.plates ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
+const COST = BEATS.map((b) => (b.cost ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
@@ -89,13 +92,18 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics27'));
 export default function Ethics27Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(5);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // One one-shot mark: struck on the beat that names it, gone by the next.
+  const costFade = (cur.cost ?? 0) !== (prev?.cost ?? 0);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     // A WALKING BEAT TAKES AS LONG AS THE WALK NEEDS (rig.moveTr).
     const tr = ease01(bt.value / moveTr(X[p], X[n], BASE_TR));
     const t = clock.value;
+    const grow = ease01(bt.value / 0.55);
 
     const figS = keepHeld(heldFig, travelStance(
       X[p], X[n],
@@ -109,6 +117,9 @@ export default function Ethics27Scene({ clock, bt, bi, i, picked, onPick, pickPo
       saidOn: carry(cv, 1, n, SAID[p], SAID[n], tr),
       reading: carry(cv, 2, n, READING[p], reacting ? pickAt(READ_AT, pickPos.value) : READING[n], tr),
       platesOn: carry(cv, 3, n, PLATES[p], PLATES[n], tr),
+      // One one-shot mark, fading in AND out on a carried track (never an on/off
+      // ternary), so a tap mid-fade never cuts it between two frames (C20c).
+      cost: carry(cv, 4, n, COST[p], COST[n], costFade ? grow : 1),
     };
   });
 
@@ -118,6 +129,7 @@ export default function Ethics27Scene({ clock, bt, bi, i, picked, onPick, pickPo
 
   const saidStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.saidOn }));
   const platesStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.platesOn }));
+  const costStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.cost }));
   // A READING IS SHOWN ONLY WHILE THE VALUE IS ON IT, so two words never share
   // the slot at readable strength (D35).
   const factStyle = useAnimatedStyle(() => ({ opacity: clamp01(1 - Math.abs(SCENE.value.reading - 1) * 1.6) }));
@@ -135,6 +147,12 @@ export default function Ethics27Scene({ clock, bt, bi, i, picked, onPick, pickPo
         <Text style={styles.saidText}>CRUELTY IS WRONG</Text>
       </Animated.View>
       <Animated.View style={[styles.stem, stemStyle]} pointerEvents="none" />
+      {/* Every reading pays a cost somewhere: a crack breaks the stem that
+          carries the sentence down to whichever one is hanging. */}
+      <Animated.View style={[StyleSheet.absoluteFill, costStyle]} pointerEvents="none">
+        <View style={styles.crackA} />
+        <View style={styles.crackB} />
+      </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, factStyle]} pointerEvents="none">
         <View style={styles.slotSolid} />
@@ -181,7 +199,7 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON — a subject standing on a filled mass
   // rather than on bare page.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   cap: {
     position: 'absolute', left: SAID_X, top: CAP_T, width: SAID_W + 26,
@@ -197,6 +215,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: INK, includeFontPadding: false,
   },
   stem: { position: 'absolute', left: 253, top: SAID_Y + SAID_H, width: 4, height: SLOT_Y - SAID_Y - SAID_H, backgroundColor: INK },
+  // A fault breaking the stem — every reading pays a cost somewhere, drawn as a
+  // weakness in the one thing that connects the sentence to its reading.
+  crackA: { position: 'absolute', left: 249, top: 333, width: 8, height: 1.5, backgroundColor: PAPER, transform: [{ rotate: '25deg' }] },
+  crackB: { position: 'absolute', left: 249, top: 339, width: 8, height: 1.5, backgroundColor: PAPER, transform: [{ rotate: '-25deg' }] },
 
   slotSolid: {
     position: 'absolute', left: SLOT_X, top: SLOT_Y, width: SLOT_W, height: SLOT_H,
@@ -216,7 +238,7 @@ const styles = StyleSheet.create({
   hit: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
   plate: {
     position: 'absolute', left: 0, top: 0, width: PLATE_W, height: PLATE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PAPER,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
   },
   plateText: {
     position: 'absolute', left: 0, top: 8, width: PLATE_W, textAlign: 'center',

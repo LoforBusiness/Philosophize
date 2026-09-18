@@ -13,6 +13,7 @@ import { BEATS } from './metaphysics10Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A wall shelf holding three particular red things — a rose, a ruby, a flag — and
 // one card reading REDNESS that has to live somewhere. The card is the only thing
@@ -129,6 +131,11 @@ const CARD_TOP = (() => {
 })();
 const CARD_ON = CARDV.map((v) => (v > 0 ? 1 : 0));
 const TAGS = BEATS.map((b) => ((b.tags ?? 0) > 0 ? 1 : 0));
+// ── group AH: give the still taps their own events ─────────────────────────
+const QUERY = BEATS.map((b) => (b.query ? 1 : 0));
+const UNSETTLED = BEATS.map((b) => (b.unsettled ? 1 : 0));
+const ABSENT = BEATS.map((b) => (b.absent ? 1 : 0));
+const NEGATE = BEATS.map((b) => (b.negate ? 1 : 0));
 
 // R7c — the card follows the drag on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -151,7 +158,7 @@ const HOME_ON_STRINGS = 0;
 
 export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(9);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
   const reacting = REACT[i] === 1;
@@ -165,6 +172,11 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, d
   const slotsOn = (cur.slots ?? 0) > 0 && !!cur.interact;
   const slotsFade = slotsOn !== ((prev?.slots ?? 0) > 0);
   const answered = picked !== null;
+  // group AH — each still tap's own event.
+  const queryFade = !!cur.query !== !!prev?.query;
+  const unsettledFade = !!cur.unsettled !== !!prev?.unsettled;
+  const absentFade = !!cur.absent !== !!prev?.absent;
+  const negateFade = !!cur.negate !== !!prev?.negate;
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -206,6 +218,16 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, d
       // A beat with no card HOLDS it where it was (mix 0), so a fade-out happens in
       // place — including the one after the drag, wherever the reader left it.
       cardT: carry(cv, 1, n, CARD_TOP[p], reacting ? homeY : CARD_TOP[n], reacting ? 1 : on ? (was ? tr : 1) : 0),
+      // "where does it exist?" — the open question, before the card has a home.
+      query: carry(cv, 5, n, QUERY[p], QUERY[n], queryFade ? grow : 1),
+      // "differ over where... if it exists at all" — the card's address wavers.
+      unsettled: carry(cv, 6, n, UNSETTLED[p], UNSETTLED[n], unsettledFade ? grow : 1),
+      // "if no red objects existed, redness wouldn't exist either" — the objects
+      // and their tags dim together, picturing the counterfactual.
+      absent: carry(cv, 7, n, ABSENT[p], ABSENT[n], absentFade ? grow : 1),
+      // "no further item... in the red things or above them" — both alternatives
+      // struck out at once.
+      negate: carry(cv, 8, n, NEGATE[p], NEGATE[n], negateFade ? grow : 1),
     };
   });
 
@@ -222,8 +244,10 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, d
     };
   });
   const frameStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.frame }));
+  // The tags dim WITH the objects when `absent` is up — the tag depends on the
+  // thing it is pinned to, exactly as Aristotle's view says it must.
   const tagStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.tags,
+    opacity: SCENE.value.tags * (1 - 0.55 * SCENE.value.absent),
     transform: [{ translateY: (1 - SCENE.value.tags) * -6 }],
   }));
   const strStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.str }));
@@ -232,6 +256,17 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, d
     opacity: SCENE.value.cardV,
     transform: [{ translateY: SCENE.value.cardT - CARD_Y0 }],
   }));
+  // ── group AH: the still taps' own events ───────────────────────────────────
+  const queryStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.query }));
+  // A dashed halo, the same grammar as Plato's reserved frame — it tracks the
+  // card's own position, never the card's fill or shape.
+  const unsettledStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.unsettled,
+    transform: [{ translateY: SCENE.value.cardT - CARD_Y0 }],
+  }));
+  // The particulars themselves dim, picturing them not existing.
+  const objStyle = useAnimatedStyle(() => ({ opacity: 1 - 0.55 * SCENE.value.absent }));
+  const negateStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.negate }));
 
   return (
     <Animated.View style={styles.scene}>
@@ -248,23 +283,42 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, d
         </Text>
       ))}
 
-      {/* the rose: five petals round a paper eye, on a stem, with two leaves */}
-      {ROSE_PETALS.map(([dx, dy], k) => (
-        <View
-          key={`petal${k}`}
-          style={[styles.rosePetal, { left: OBJ_X[0] + dx - 5, top: OBJ_T + 12 + dy - 5 }]}
-          pointerEvents="none"
-        />
-      ))}
-      <View style={styles.roseEye} pointerEvents="none" />
-      <View style={styles.roseStem} pointerEvents="none" />
-      <View style={[styles.leaf, styles.leafL]} pointerEvents="none" />
-      <View style={[styles.leaf, styles.leafR]} pointerEvents="none" />
-      {/* the ruby: a filled square stood on its corner */}
-      <View style={styles.ruby} pointerEvents="none" />
-      {/* the flag: a pole and a filled panel */}
-      <View style={styles.pole} pointerEvents="none" />
-      <Animated.View style={[styles.flag, flagFly]} pointerEvents="none" />
+      {/* the particulars — dim together under `absent`, picturing them not existing */}
+      <Animated.View style={objStyle} pointerEvents="none">
+        {/* the rose: five petals round a paper eye, on a stem, with two leaves */}
+        {ROSE_PETALS.map(([dx, dy], k) => (
+          <View
+            key={`petal${k}`}
+            style={[styles.rosePetal, { left: OBJ_X[0] + dx - 5, top: OBJ_T + 12 + dy - 5 }]}
+            pointerEvents="none"
+          />
+        ))}
+        <View style={styles.roseEye} pointerEvents="none" />
+        <View style={styles.roseStem} pointerEvents="none" />
+        <View style={[styles.leaf, styles.leafL]} pointerEvents="none" />
+        <View style={[styles.leaf, styles.leafR]} pointerEvents="none" />
+        {/* the ruby: a filled square stood on its corner */}
+        <View style={styles.ruby} pointerEvents="none" />
+        {/* the flag: a pole and a filled panel */}
+        <View style={styles.pole} pointerEvents="none" />
+        <Animated.View style={[styles.flag, flagFly]} pointerEvents="none" />
+      </Animated.View>
+
+      {/* the open question, before REDNESS has a card at all */}
+      <Animated.View style={[styles.queryWrap, queryStyle]} pointerEvents="none">
+        <Text style={styles.query}>?</Text>
+      </Animated.View>
+
+      {/* the card's address wavers — a dashed halo, the frame's own grammar */}
+      <Animated.View style={[styles.unsettled, unsettledStyle]} pointerEvents="none" />
+
+      {/* both alternatives struck out at once: not above, not in the things */}
+      <Animated.View style={[styles.negateMark, styles.negateAbove, negateStyle]} pointerEvents="none">
+        <Text style={styles.negateText}>✕</Text>
+      </Animated.View>
+      <Animated.View style={[styles.negateMark, styles.negateThings, negateStyle]} pointerEvents="none">
+        <Text style={styles.negateText}>✕</Text>
+      </Animated.View>
 
       {/* ── Aristotle: the card split into three tags, pinned onto the things ─ */}
       {OBJ_X.map((cx, k) => (
@@ -328,7 +382,7 @@ const styles = StyleSheet.create({
 
   plank: {
     position: 'absolute', left: SLOT_L, top: PLANK_T, width: SLOT_W, height: PLANK_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   bracket: { position: 'absolute', top: PLANK_T + PLANK_H, width: 12, height: 14, backgroundColor: SOFT, borderRadius: 2 },
   bracketL: { left: SLOT_L + 8 },
@@ -371,7 +425,7 @@ const styles = StyleSheet.create({
   tagWrap: { position: 'absolute', top: TAG_T, width: TAG_W, alignItems: 'center' },
   tag: {
     width: TAG_W, height: TAG_H, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
-    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
   tagText: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.6, color: INK, includeFontPadding: false },
   /** The pin that fixes the tag to the thing under it — 6 units down to the object. */
@@ -388,9 +442,28 @@ const styles = StyleSheet.create({
   },
   cardText: { fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 1.2, color: PAPER, includeFontPadding: false },
 
+  // ── group AH: the still taps' own events ───────────────────────────────────
+  // "where does it exist?" — hovers in the dead strip between Plato's future
+  // frame and the shelf, asked before the card exists to be asked about.
+  queryWrap: { position: 'absolute', left: 267, top: 268, width: 40, alignItems: 'center' },
+  query: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: INK, includeFontPadding: false },
+  // A dashed halo round the card — Plato's own "a place reserved" grammar, borrowed
+  // to say the opposite: this one is NOT settled yet. Its base rect matches the
+  // card's rest position; the SAME translateY as `cardStyle` keeps it locked on.
+  unsettled: {
+    position: 'absolute', left: CARD_X - 4, top: CARD_Y0 - 4, width: CARD_W + 8, height: CARD_H + 8,
+    borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 6,
+  },
+  // Two strikes, ruling out "above them" (Plato's realm, at the frame's own
+  // centre) and "in the red things" (at the tags' own row).
+  negateMark: { position: 'absolute', width: 20, alignItems: 'center' },
+  negateAbove: { left: 277, top: 226 },
+  negateThings: { left: 277, top: 335 },
+  negateText: { fontFamily: 'Inter_700Bold', fontSize: 18, color: SOFT, includeFontPadding: false },
+
   slotWrap: { position: 'absolute', left: SLOT_L, width: SLOT_W },
   slot: {
-    height: SLOT_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    height: SLOT_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
   },
   slotRight: { backgroundColor: INK, borderColor: INK },

@@ -16,6 +16,10 @@ export interface Meta12Beat extends BaseBeat {
   /** 1 = the box drawn for the owner is on stage. */ owner?: number;
   /** 1 = the "nothing at all" answer is on the table. */ none?: number;
   /** 1 = the three answers are live targets (Q1). */ pick?: number;
+  /** 1 = a "?" hovers where the owner's box will appear — the question, before the box exists. */ ask?: boolean;
+  /** 1 = a rule underlines THE OWNER label — the substance that persists while the stream changes. */ anchor?: boolean;
+  /** 1 = a dashed arrow drops from the stream toward the box — Hume searching, and finding nothing. */ search?: boolean;
+  /** 1 = a dashed ring flashes round the owner's box — the emptiness stated outright. */ stayEmpty?: boolean;
 }
 
 export const BEATS: Meta12Beat[] = [
@@ -25,7 +29,7 @@ export const BEATS: Meta12Beat[] = [
     text: 'Introspection means attending to your own mind. It finds a stream of experiences, such as a warmth, a sound or a passing thought.',
   },
   {
-    g: 467, owner: 0, none: 0,
+    g: 467, owner: 0, none: 0, ask: true,
     dur: 1.8,
     text: 'The question is whether a self exists apart from this stream, as the one who has the experiences.',
   },
@@ -36,18 +40,18 @@ export const BEATS: Meta12Beat[] = [
     cite: 'Descartes’ thinking thing',
   },
   {
-    g: 266, owner: 1, none: 0,
+    g: 266, owner: 1, none: 0, anchor: true,
     dur: 1.8,
     text: 'On this view, the self is a thinking substance that persists while its particular thoughts come and go.',
   },
   {
-    g: 177, owner: 1, none: 0,
+    g: 177, owner: 1, none: 0, search: true,
     dur: 3.9,
     text: 'David Hume searched his own mind for a self. Each time, Hume found only a particular perception, never a self that has it.',
     cite: 'Hume’s search',
   },
   {
-    g: 415, owner: 1, none: 0,
+    g: 415, owner: 1, none: 0, stayEmpty: true,
     dur: 1.8,
     text: 'Hume concluded that a self is nothing but a bundle of perceptions. The place for an owner stays empty.',
   },

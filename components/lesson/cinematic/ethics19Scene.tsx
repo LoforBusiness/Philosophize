@@ -9,6 +9,7 @@ import { BEATS } from './ethics19Script';
 import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('ethics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('ethics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A FORM WITH FOUR LINES ON IT, AND THE WRONG NAME IN THREE OF THE SLOTS.
@@ -89,6 +91,11 @@ export default function Ethics19Scene({ clock, bt, bi, i, picked, onPick, dragPo
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
+  const cur = BEATS[i];
+  const prev = i > 0 ? BEATS[i - 1] : undefined;
+  // ANIMATE ONLY WHAT CHANGED (C20c) — a one-shot flash, so it fires only on
+  // the beat that raises its own point, never on a beat that merely holds it.
+  const spotNow = (cur.spot ?? 0) > 0 && (cur.spot ?? 0) !== (prev?.spot ?? 0) ? (cur.spot ?? 0) : 0;
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -113,6 +120,9 @@ export default function Ethics19Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // another hand fills the slots on a form about one person, which is what
       // overriding a competent refusal actually looks like.
       taken: carry(cv, 4, n, TAKEN[p], reacting ? dragPos.value : TAKEN[n], tr),
+      // THE SPOT'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to,
+      // flatly 0 on every other beat — one flash per tap, not a loop.
+      spot: spotNow ? ease01(bt.value / 1.1) : 0,
       t,
     };
   });
@@ -122,6 +132,11 @@ export default function Ethics19Scene({ clock, bt, bi, i, picked, onPick, dragPo
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.cards && LIVE[i] === 1;
 
   const docStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.doc }));
+  // Fades in over the first fifth of its window and out over the last.
+  const spotStyle = useAnimatedStyle(() => {
+    const u = SCENE.value.spot;
+    return { opacity: u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2) };
+  });
 
   return (
     <View style={styles.scene}>
@@ -131,6 +146,19 @@ export default function Ethics19Scene({ clock, bt, bi, i, picked, onPick, dragPo
         <Text style={[styles.head, { left: COL_DEC, width: 150 }]}>DECISION</Text>
         <Text style={[styles.head, { left: COL_AFF, width: 48, textAlign: 'center' }]}>AFFECTS</Text>
         <Text style={[styles.head, { left: COL_SIG, width: 58, textAlign: 'center' }]}>SIGNED BY</Text>
+
+        {/* group AH, beat 3: Mill's test named — a mark under the column that
+            already runs it, rather than a new object. */}
+        {spotNow === 1 && <Animated.View style={[styles.spotUnder, spotStyle]} pointerEvents="none" />}
+
+        {/* group AH, beat 5: "three rows … one by you" — the count the line
+            states, tallied beside the column that carries the signatures. */}
+        {spotNow === 2 && (
+          <Animated.View style={[styles.spotTally, spotStyle]} pointerEvents="none">
+            <Text style={styles.spotTallyT}>STATE  3</Text>
+            <Text style={styles.spotTallyT}>YOU  1</Text>
+          </Animated.View>
+        )}
 
         {/* Each row rides with its own target (E39). */}
         {ROWS.map((r, k) => (
@@ -202,7 +230,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   headRule: { position: 'absolute', left: FORM_X, top: FORM_Y + 20, width: FORM_W, height: 2, backgroundColor: INK },
   head: {
@@ -233,6 +261,20 @@ const styles = StyleSheet.create({
   hitBox: { width: FORM_W, height: ROW_H, borderRadius: 3 },
   hitRight: { borderWidth: 2.5, borderColor: INK },
   hitWrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
+
+  // ── the two tap events (group AH) — a mark on the AFFECTS column as Mill's
+  // test is named, and a tally beside SIGNED BY counting the split it states.
+  spotUnder: {
+    position: 'absolute', left: COL_AFF + 4, top: FORM_Y + 17, width: 40, height: 2, borderRadius: 1,
+    backgroundColor: INK,
+  },
+  spotTally: {
+    position: 'absolute', left: FORM_X + FORM_W + 4, top: 276, width: 40,
+  },
+  spotTallyT: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.4, color: INK, includeFontPadding: false,
+    marginBottom: 2,
+  },
 });
 
 export function Ethics19Lesson({ lesson }: { lesson: Lesson }) {

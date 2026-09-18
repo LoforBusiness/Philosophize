@@ -13,6 +13,7 @@ import { BEATS } from './logic11Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('logic');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('logic');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A four-step proof standing as a stack of cards on a base line, stage right, with
 // the narrator downstage left. The stack builds top-down, the base line slides in
@@ -106,6 +108,8 @@ const STEPS = BEATS.map((b) => b.steps ?? 0);
 const BASEV = BEATS.map((b) => b.base ?? 0);
 const SPINEV = BEATS.map((b) => b.spine ?? 0);
 const ARCV = BEATS.map((b) => b.arc ?? 0);
+const ISOLATEV = BEATS.map((b) => b.isolate ?? 0);
+const VERIFYV = BEATS.map((b) => b.verify ?? 0);
 
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
@@ -134,6 +138,11 @@ export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick, dra
   // Only the beat that CHANGES a prop animates it; otherwise it holds (H58, C20c).
   const baseFade = (cur.base ?? 0) !== (prev?.base ?? 0);
   const spineFade = (cur.spine ?? 0) !== (prev?.spine ?? 0);
+  // Both one-shot events (group AH): they run once, entirely inside the beat that
+  // asks for them, off `bt` alone — like `flow` in logic7 — and are already back at
+  // rest well before a patient reader taps again, so there is nothing to carry.
+  const isolateNow = (cur.isolate ?? 0) > 0 && (cur.isolate ?? 0) !== (prev?.isolate ?? 0);
+  const verifyNow = (cur.verify ?? 0) > 0 && (cur.verify ?? 0) !== (prev?.verify ?? 0);
 
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact && !answered;
@@ -164,6 +173,28 @@ export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick, dra
     const drawC = a * ease01(seg(qv.value, 0.40, 0.62));
     const lift = a * ease01(seg(qv.value, 0.58, 1.0));
 
+    // ── group AH: the two still-tap events ──────────────────────────────────
+    // ISOLATE — "neither is used to support the other": a dashed stub reaches
+    // for a link between the two premise cards, then gets struck through, then
+    // both dissolve together. One journey, entirely inside this beat.
+    const isolateU = isolateNow ? ease01(bt.value / 1.3) : 0;
+    const linkU = ease01(seg(isolateU, 0.0, 0.4));
+    const strikeU = ease01(seg(isolateU, 0.45, 0.75));
+    const goneU = ease01(seg(isolateU, 0.8, 1.0));
+    const isolateLink = linkU * (1 - goneU);
+    const isolateStrike = strikeU * (1 - goneU);
+
+    // VERIFY — "that validity is what makes the flaw hard to detect": a check
+    // mark descends the four steps in turn, pulsing the same way on each —
+    // nothing singles out the one that begs the question.
+    const verifyU = verifyNow ? ease01(bt.value / 1.9) : 0;
+    const scanSeg = verifyU * 4;
+    const scanIdx = Math.min(3, Math.floor(scanSeg));
+    const scanFrac = scanSeg - scanIdx;
+    const scanPulse = Math.min(1, Math.min(scanFrac, 1 - scanFrac) / 0.3);
+    const scanOp = verifyU > 0 && verifyU < 1 ? scanPulse : 0;
+    const scanY = BOX_T + scanIdx * PITCH + BOX_H / 2;
+
     return {
       fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       base: carry(cv, 1, n, BASEV[p], BASEV[n], tr, baseFade ? grow : 1),
@@ -176,6 +207,7 @@ export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick, dra
       s2: stepOp(2, p, n, grow) * (wrongIdx === 2 ? 0.45 : 1),
       s3: stepOp(3, p, n, grow) * (wrongIdx === 3 ? 0.45 : 1),
       drawA, drawB, drawC, lift,
+      isolateLink, isolateStrike, scanOp, scanY,
     };
   });
 
@@ -191,6 +223,13 @@ export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick, dra
   }));
   const capOffStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.base * ease01(seg(SCENE.value.lift, 0.6, 1)),
+  }));
+
+  const isolateLinkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.isolateLink }));
+  const isolateStrikeStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.isolateStrike }));
+  const scanStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.scanOp,
+    transform: [{ translateY: SCENE.value.scanY - (BOX_T + BOX_H / 2) }],
   }));
 
   const armLowStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.drawA }));
@@ -223,6 +262,11 @@ export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick, dra
           box-none so the container itself never eats a tap while its Pressables
           still get one — it spans the stage so hitSlop is not clipped (E35, H62). ── */}
       <Animated.View style={[styles.stack, stackStyle]} pointerEvents="box-none">
+        {/* AH — "neither is used to support the other": a dashed reach for a link
+            between the two premise cards, struck through, then gone. */}
+        <Animated.View style={[styles.isolateStub, isolateLinkStyle]} pointerEvents="none" />
+        <Animated.View style={[styles.isolateStrike, isolateStrikeStyle]} pointerEvents="none" />
+
         {/* the chain of support: one stub in each gutter between consecutive steps */}
         <Animated.View style={[styles.link, { top: BOX_T + BOX_H }, spineStyle]} pointerEvents="none" />
         <Animated.View style={[styles.link, { top: BOX_T + PITCH + BOX_H }, spineStyle]} pointerEvents="none" />
@@ -254,6 +298,12 @@ export default function Logic11Scene({ clock, bt, bi, qv, i, picked, onPick, dra
         <Animated.View style={[styles.armTop, headStyle]} pointerEvents="none" />
         <Animated.View style={[styles.barbU, headStyle]} pointerEvents="none" />
         <Animated.View style={[styles.barbD, headStyle]} pointerEvents="none" />
+
+        {/* AH — "that validity is what makes the flaw hard to detect": a check
+            mark descends the four steps in turn, landing on each the same way. */}
+        <Animated.View style={[styles.scanMark, scanStyle]} pointerEvents="none">
+          <Text style={styles.scanMarkText}>✓</Text>
+        </Animated.View>
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
@@ -278,6 +328,25 @@ const styles = StyleSheet.create({
   },
 
   link: { position: 'absolute', left: STACK_L + 8, width: 3, height: PITCH - BOX_H, backgroundColor: INK },
+
+  // ── the two tap events (group AH) ──────────────────────────────────────
+  // A dashed reach for a link between the first two cards — a boundary attempt,
+  // never a fill (D31) — struck through by one diagonal bar.
+  isolateStub: {
+    position: 'absolute', left: STACK_L + 5, top: BOX_T + BOX_H, width: 8, height: PITCH - BOX_H,
+    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 4,
+  },
+  isolateStrike: {
+    position: 'absolute', left: STACK_L + 3, top: BOX_T + BOX_H + (PITCH - BOX_H) / 2 - 1.5,
+    width: 12, height: 3, backgroundColor: INK, transformOrigin: '50% 50%', transform: [{ rotate: '45deg' }],
+  },
+  // The check mark that scans down the stack, one card at a time, inside the
+  // right-hand gutter every step card already reserves (paddingRight: 24).
+  scanMark: {
+    position: 'absolute', left: STACK_L + STACK_W - 20, top: BOX_T + BOX_H / 2 - 7, width: 16, height: 14,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  scanMarkText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: INK, includeFontPadding: false },
 
   step: { position: 'absolute', left: STACK_L, width: STACK_W },
   stepInner: {

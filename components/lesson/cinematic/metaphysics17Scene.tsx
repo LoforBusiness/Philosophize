@@ -9,6 +9,7 @@ import { BEATS } from './metaphysics17Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
@@ -16,8 +17,9 @@ import { followMoves, kindOf, seedOf } from './camera';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('metaphysics');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('metaphysics');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A COMPLETE WALL, A DOOR, AND ONE CARD ON THE OTHER SIDE OF IT (H64). The wall
 // never gains or loses a tick: it is finished before the lesson opens, and the
@@ -73,6 +75,9 @@ const WALL = BEATS.map((b) => b.wall ?? 0);
 const DOOR = BEATS.map((b) => b.door ?? 0);
 const CARD = BEATS.map((b) => b.card ?? 0);
 const PICKV = BEATS.map((b) => b.pick ?? 0);
+const SEAL = BEATS.map((b) => b.seal ?? 0);
+const ROOM = BEATS.map((b) => b.room ?? 0);
+const TAG = BEATS.map((b) => b.tag ?? 0);
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
 
@@ -85,7 +90,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics17'));
 export default function Metaphysics17Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(4);
+  const cv = useCarry(7);
   const cur = BEATS[i];
 
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
@@ -111,12 +116,18 @@ export default function Metaphysics17Scene({ clock, bt, bi, i, picked, onPick, d
       door: carry(cv, 1, n, DOOR[p], reacting ? 1 - dragPos.value : DOOR[n], swing),
       card: carry(cv, 2, n, CARD[p], CARD[n], grow),
       boards: carry(cv, 3, n, PICKV[p], PICKV[n], grow),
+      seal: carry(cv, 4, n, SEAL[p], SEAL[n], grow),
+      room: carry(cv, 5, n, ROOM[p], ROOM[n], grow),
+      tag: carry(cv, 6, n, TAG[p], TAG[n], grow),
     };
   });
 
   const D = useDerivedValue<Bundle>(() => SCENE.value.fig);
 
   const wall = useAnimatedStyle(() => ({ opacity: SCENE.value.wall }));
+  const seal = useAnimatedStyle(() => ({ opacity: SCENE.value.seal }));
+  const room = useAnimatedStyle(() => ({ opacity: SCENE.value.room }));
+  const tag = useAnimatedStyle(() => ({ opacity: SCENE.value.tag }));
   // The leaf swings inward on its own left edge, so the opening it leaves is real
   // and the leaf never crosses the wall beside it.
   const door = useAnimatedStyle(() => ({
@@ -144,6 +155,10 @@ export default function Metaphysics17Scene({ clock, bt, bi, i, picked, onPick, d
           ))
         ))}
       </Animated.View>
+      {/* Every tick is already up — this names the wall's own status, once (H64). */}
+      <Animated.Text style={[styles.aboveWall, seal]} numberOfLines={1} pointerEvents="none">COMPLETE</Animated.Text>
+      <Animated.Text style={[styles.aboveWall, tag]} numberOfLines={1} pointerEvents="none">EASY</Animated.Text>
+      <Animated.Text style={[styles.aboveCard, tag]} numberOfLines={1} pointerEvents="none">HARD</Animated.Text>
 
       {/* ── THE DOOR ─────────────────────────────────────────────────────── */}
       <View style={styles.jamb} pointerEvents="none" />
@@ -155,6 +170,9 @@ export default function Metaphysics17Scene({ clock, bt, bi, i, picked, onPick, d
       <Animated.View style={[styles.card, card]} pointerEvents="none">
         <Text style={styles.cardText} numberOfLines={3}>WHAT RED IS LIKE</Text>
       </Animated.View>
+
+      {/* Mary's own room, holding her to it until she steps through the door. */}
+      <Animated.View style={[styles.room, room]} pointerEvents="none" />
 
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={D} k={K_FIG} />
@@ -201,7 +219,7 @@ const styles = StyleSheet.create({
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
   label: {
@@ -212,7 +230,7 @@ const styles = StyleSheet.create({
 
   board: { position: 'absolute', top: BOARD_T, width: BOARD_W, height: BOARD_H },
   boardInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
   },
   boardText: {
@@ -222,9 +240,22 @@ const styles = StyleSheet.create({
 
   wall: {
     position: 'absolute', left: WALL_L, top: WALL_T, width: WALL_W, height: WALL_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
   },
   tick: { position: 'absolute', width: 18, height: 8, borderRadius: 2, backgroundColor: SOFT },
+  aboveWall: {
+    position: 'absolute', left: WALL_L, top: WALL_T - 14, width: WALL_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: INK, includeFontPadding: false,
+  },
+  aboveCard: {
+    position: 'absolute', left: CARD_L, top: CARD_T - 14, width: CARD_W, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: INK, includeFontPadding: false,
+  },
+  // A dashed frame is a boundary, never a fill — the room she has not yet left.
+  room: {
+    position: 'absolute', left: FIG_X - 34, top: 388, width: 74, height: GROUND - 388,
+    borderWidth: 1.5, borderStyle: 'dashed', borderColor: SOFT, borderRadius: 5,
+  },
 
   jamb: {
     position: 'absolute', left: DOOR_L - 3, top: DOOR_T - 3, width: DOOR_W + 6, height: 500 - DOOR_T + 3,

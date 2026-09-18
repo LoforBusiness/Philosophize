@@ -13,6 +13,7 @@ import { BEATS } from './political15Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, pickAt, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
@@ -20,8 +21,9 @@ import Target from './Target';
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
 // measured against the old greys still holds and nothing on the stage moved.
-const { RULE, STONE, SHADE } = stageTone('political-philosophy');
-const LIP = `0px 3px 0px ${SHADE}`;   // the shaded lip a toned plate stands on (scripts/lip-stage.mjs)
+const TONE = stageTone('political-philosophy');
+const { RULE, STONE, SHADE } = TONE;
+const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
 
 // A four-stage stair, stage right. The stages are the tap targets.
 //
@@ -57,6 +59,9 @@ const STAGES = [
   { id: 'penalty', label: '4 · ACCEPT THE PENALTY', correct: true },
 ];
 
+const FAILED = BEATS.map((b) => b.failed ?? 0);
+// Stage 2 of the stair — TRY LAWFUL ROUTES — read off the stair's own layout.
+const ST2_T = STG_T + STG_PITCH;
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? 124);
 // The camera, from the staging: it follows the figure this track describes,
@@ -82,7 +87,7 @@ const NIGHT = BEATS.map((b) => b.night ?? 0);
 export default function Political15Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
-  const cv = useCarry(3);
+  const cv = useCarry(4);
   const cur = BEATS[i];
   const prev = i > 0 ? BEATS[i - 1] : undefined;
 
@@ -112,6 +117,8 @@ export default function Political15Scene({ clock, bt, bi, i, picked, onPick, pic
       // full to the resting option's value in one frame (group L). Carried, the night
       // eases from wherever it was drawn to the reading, and back out again after.
       night: carry(cv, 2, n, NIGHT[p], reacting ? pickAt(POLL_NIGHT, pickPos.value) : NIGHT[n], nightFade ? grow : tr),
+      // Carried, so it fades out as well as in (group L).
+      failed: carry(cv, 3, n, FAILED[p], FAILED[n], grow),
     };
   });
 
@@ -129,6 +136,14 @@ export default function Political15Scene({ clock, bt, bi, i, picked, onPick, pic
   // the way in and is gone below that.
   const nightLabStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.night - 0.6) / 0.3) }));
 
+  // A LAWFUL APPEAL THAT FAILED: the second stage is ruled through, and the rule
+  // DRAWS ACROSS it rather than fading in, because a strike is a stroke.
+  const failedStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.failed,
+    transform: [{ scaleX: SCENE.value.failed }],
+  }));
+  const failedTagStyle = useAnimatedStyle(() => ({ opacity: clamp01((SCENE.value.failed - 0.5) / 0.5) }));
+
   const answered = picked !== null;
   const live = (cur.pick ?? 0) > 0 && !!cur.interact;
 
@@ -136,6 +151,11 @@ export default function Political15Scene({ clock, bt, bi, i, picked, onPick, pic
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <Text style={styles.head} numberOfLines={1} pointerEvents="none">THE FOUR STAGES</Text>
+
+      {/* The lawful route was tried and it failed, which is what licenses the rest
+          of the stair. */}
+      <Animated.View style={[styles.failedRule, failedStyle]} pointerEvents="none" />
+      <Animated.Text style={[styles.failedTag, failedTagStyle]} pointerEvents="none">FAILED</Animated.Text>
 
       {/* what the night-time protest actually did: three stages and out */}
       <Animated.View style={[styles.night, nightStyle]} pointerEvents="none" />
@@ -213,12 +233,27 @@ function Stage({
 }
 
 const styles = StyleSheet.create({
+  // ── the tap event (group AH) ───────────────────────────────────────────────
+  // Across the second stage of the stair, at its own middle, read off the stair's
+  // layout rather than typed.
+  failedRule: {
+    position: 'absolute', left: ST_L + INDENT, top: ST2_T + STG_H / 2 - 1,
+    width: ST_W - INDENT - 8, height: 2, backgroundColor: INK, borderRadius: 1,
+    transformOrigin: '0% 50%',
+  },
+  // Left of the stair, in the corridor the figure's own reach tops out below.
+  failedTag: {
+    position: 'absolute', left: 150, top: ST2_T + 8, width: 62, textAlign: 'right',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
+    includeFontPadding: false,
+  },
+
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 24, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
   // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
   // figure and everything it is looking at standing on bare page;
   // political7 and political8 both stand their subject on a filled mass.
-  floor: { position: 'absolute', left: 0, right: 0, top: GROUND, bottom: 0, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
 
   head: {
     position: 'absolute', left: ST_L, top: HEAD_T, width: ST_W, textAlign: 'center',
