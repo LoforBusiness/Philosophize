@@ -9790,6 +9790,99 @@ the run structure is read once from before the pass (`scripts/make-splitruns.mjs
 `scripts/lib/splitruns.json`) and used wherever a lesson's beat count still
 matches; the pulse rule is the fallback for a lesson re-cut since.
 
+## Group AJ · A lesson ends with an encounter
+
+> *"at the very end of every lesson … the stickman starts to walk and has an
+> encounter with another stickman, maybe a problem, or maybe an ethical dilemma or
+> something funny, but it's something you have to solve … I want everything else to
+> fade out, so it's just the stickman … a really clever way to answer. Not just, like,
+> click what you think, but something clever, very interactive … something to make the
+> user feel good about themselves … like they learned something in that lesson."*
+
+Four lessons end with one, each asking its question a different way, so the four can
+be compared against each other rather than against nothing. `components/lesson/
+cinematic/coda/` is the whole of it; `npm run check:coda` holds the seam and
+`node scripts/countertest-coda.mjs` stages each way it can go wrong.
+
+### AJ1 · It is a PHASE, not a beat
+
+Every structural rule in this book is written about beats: H's house shape wants 7–11
+of them with exactly two graded questions and the summary LAST, a beat carries
+narration rendered through the paid voice ledger, a beat's stage is inside
+`muststamp`, and group Q compares neighbours on their channels. A coda that was a
+beat would have to satisfy all of it and would be a worse coda for it.
+
+So it runs between the last tap and the reward. The script does not know it exists,
+`check:cinematic` still sees the summary as the last thing in the lesson, and adding
+one costs no re-measure, no re-render and no regenerated table.
+
+### AJ2 · The encounter is the lesson's own idea, acted out
+
+The mechanic is chosen for the CLAIM, the way R1 chooses a control:
+
+| lesson | mechanic | why that one |
+|---|---|---|
+| `ethics-ethics-23` | you drag the FIGURE | Singer's argument is a thing you cannot refuse once you are standing next to it; carrying him past the pond is the argument, and a button marked "walk on" is a survey |
+| `logic-arguments-16` | you TIME a tap | a post hoc is a right sentence with one word too many, and WHERE it turns is the skill — every other way of asking hands the reader the boundary they are meant to find |
+| `aesthetics-aesthetics-13` | you GIVE him one of two objects | the difference is not in the paint, so the wrong answer has to FAIL visibly: he looks as hard as anyone could and there is nothing there |
+| `political-political-4` | you DRAW the line | the harm principle IS a line, and drawing it is the only version where the reader decides how much rather than which side |
+
+### AJ3 · Nothing can be failed, and the consequence always plays
+
+Whatever the reader does is drawn: the stranger goes under, the dealer grins, one of
+the two is squeezed against the wall. If it went badly he turns and looks at the
+reader and the question simply reopens — no cross, no score, nothing to dismiss. That
+is what makes it a problem to solve rather than a third question, and it is why the
+wrong answer is worth animating in full.
+
+It is NOT scored. XP stays `lessonXP(correct, asked)` off the two real questions, so
+the model §7 holds and the Pass screens derived from it do not move.
+
+### AJ4 · Everything else fades out, including the header
+
+The coda is an opaque full-bleed sheet that fades IN over the player, which is what
+"everything else fades out" looks like from the other side and costs the tree below
+it no layout change on the last tap of every lesson. It also takes the touches, so
+the body cannot advance underneath it.
+
+**It needs a `zIndex` above the header's own.** An absolutely-positioned last child
+covers its siblings by paint order, but not one that has raised itself — and the
+header carries `zIndex: 5` so the Aa button's label can hang below it (AI). The close
+button, the progress bar and the XP pill were still sitting on top of the encounter.
+Only the real player shows it; a preview route has no header.
+
+### AJ5 · A gesture is read OUTSIDE the transform, in 0…1
+
+`react-native-gesture-handler` reports a view's own untransformed space on native and
+`clientX − rect.left` — scaled CSS pixels — on web. A control calibrated inside the
+scaled stage is therefore calibrated for the wrong units on the phone, and the browser
+is the only place this project can look at itself (§21), so nothing would say so.
+
+`CodaTouch` is a full-bleed sibling with no transform above it, reporting `u` and `v`
+in 0…1 of its own measured box, and the coda converts with `codaX` through its own
+window. Shared values in, `runOnJS` out — never a plain callback, which is §17 rule 6
+and fatal in release.
+
+### AJ6 · A band alone cannot zoom
+
+`fit` is `min(w / spanX, h / spanY)` and every phone is far taller than a two-figure
+encounter is, so the fit is always decided by the WIDTH: tightening the band only
+trims empty sky and the figure comes out exactly the size it is in a lesson. A coda
+has the whole screen and should not look like a lesson with the words taken off, so
+`CodaStage` takes a WINDOW and crops the sides as well — and the compositions are
+staged narrow enough to afford it.
+
+### AJ7 · The harnesses must not see it
+
+`tourFlag.setCodaOff` is the switch and every harness that already sets
+`setWanderOff` sets it too. A harness that walks a lesson to the last tap would record
+the encounter's figures and props as stage art — a scene that only exists after the
+lesson is over — and the camera, the gaze, the thoughts and the movement layer are all
+derived from those boxes. `check:coda` fails any harness that forgets, so the tenth
+one is a build error rather than something to remember.
+
+---
+
 ## Group AI · A lesson is read in both directions
 
 > *"On the right side of the screen, if they tap it, it goes to the next one; on the

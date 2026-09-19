@@ -1086,7 +1086,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **sixty-three** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **sixty-four** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1097,7 +1097,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-wander` · `check-skin` · `check-thoughts` · `check-marks` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-coda` · `check-wander` · `check-skin` · `check-thoughts` · `check-marks` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
 > replays the figure, and a prop's animation was invisible to every check unless it
@@ -4640,6 +4640,57 @@ Lessons to bring it back (NN/g: help must be easy to dismiss and easy to bring b
 - **The web never speaks, so a lesson there has no Aa button**, and the guide shows no
   callout rather than one pointing at nothing. Verifying the ring needed the preview to
   claim narration support; the phone has it for real.
+
+### And a lesson ends with something to solve (group AJ)
+
+> *"at the very end of every lesson … the stickman starts to walk and has an
+> encounter with another stickman, maybe a problem, or maybe an ethical dilemma or
+> something funny, but it's something you have to solve … I want everything else to
+> fade out, so it's just the stickman … a really clever way to answer. Not just, like,
+> click what you think … something to make the user feel good about themselves."*
+
+**FOUR LESSONS, FOUR MECHANICS, so they can be compared against each other rather
+than against nothing** — the owner asked for one and then for all four. `ethics-23`
+you DRAG THE FIGURE into Singer's pond, or past it; `logic-16` you TIME a tap and
+stop an argument on the word that turns it; `aesthetics-13` you GIVE him a magnifying
+glass or a provenance; `political-4` you DRAW the line two people have to live either
+side of. The mechanic is chosen for the CLAIM, the way R1 chooses a control.
+
+**IT IS A PHASE AND NOT A BEAT, which is where all of its safety comes from.** Every
+structural rule in the book is written about beats — H's 7–11 with the summary last, a
+voice rendered through the paid ledger, a stage inside `muststamp`, group Q's
+neighbours — so a coda that was a beat would have to satisfy all of it and would be a
+worse coda for it. It runs between the last tap and the reward, the script does not
+know it exists, and adding one costs no re-measure, no re-render and no regenerated
+table. `check:cinematic` still sees the summary as the last thing in the lesson.
+
+**NOTHING CAN BE FAILED.** Whatever the reader does is drawn — the stranger goes
+under, the dealer grins, one of the two is squeezed against the wall — and if it went
+badly he turns and looks at the reader and the question reopens. No cross, no score,
+nothing to dismiss. It is deliberately NOT scored: XP stays `lessonXP(correct, asked)`
+off the two real questions, so §7's model and the Pass screens derived from it do not
+move. The words are on screen rather than spoken, because a voice is a ledger spend.
+
+Three things it cost, each now a rule (AJ4–AJ7):
+
+- **The header outranked it.** An absolutely-positioned last child covers its siblings
+  by paint order, but not one that has raised itself — and the header carries
+  `zIndex: 5` so the Aa label can hang below it (AI). The close button, the progress
+  bar and the XP pill sat on top of the encounter, which is the opposite of what was
+  asked for. Only the real player shows it; a preview route has no header.
+- **A gesture inside the scaled stage reads different units on the two platforms** —
+  the view's own untransformed space on native, `clientX − rect.left` on web. The
+  browser is the only place this project can look at itself, so a control calibrated
+  there would have been calibrated for the wrong units on the phone with nothing
+  saying so. The touch surface is a full-bleed sibling reporting 0…1 of its own box.
+- **A band alone cannot zoom.** `fit` is width-decided on every phone, so tightening
+  the band only trims sky and the figure comes out lesson-sized. `CodaStage` takes a
+  window and crops the sides.
+
+`npm run check:coda` holds the seam — every coda names a wired lesson, every measuring
+harness switches it off (`tourFlag.setCodaOff`, or the boxes record a scene that only
+exists after the lesson is over), and no scene reaches into `coda/`.
+`node scripts/countertest-coda.mjs` stages all of it.
 
 ### The stage is coloured now, at exactly the grey's luminance
 

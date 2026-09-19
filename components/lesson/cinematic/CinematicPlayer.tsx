@@ -24,7 +24,8 @@ import { GAZE } from './gazeTargets';
 import { WardrobeProvider } from './wardrobeContext';
 import Visitor from './Visitor';
 import { VISITOR } from '../../../data/lessonVisitor';
-import { thoughtsOff, toursOff, wanderOff } from './tourFlag';
+import { codaOff, thoughtsOff, toursOff, wanderOff } from './tourFlag';
+import CodaHost, { hasCoda } from './coda/CodaHost';
 import { cue, touch, heard } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import ChoiceCards, { seedFor } from './ChoiceCards';
@@ -283,6 +284,15 @@ export default function CinematicPlayer({
   // return below, like every other hook here — see the note on that return.
   const [targetCount, setTargetCount] = useState(0);
   const [done, setDone] = useState(false);
+  // ── THE CLOSING ENCOUNTER (group AJ) ──────────────────────────────────────
+  //
+  // Between the last tap and the reward, four lessons play a scene the reader has to
+  // solve. It is a PHASE and not a beat: the script does not know it exists, so no
+  // rule about beat counts, narration, must-boxes or neighbours has anything to say
+  // about it. Never under a harness — a coda drawn while `measure-must` is recording
+  // becomes stage art in the boxes every table in the app is derived from.
+  const coda = hasCoda(lesson.id) && !codaOff();
+  const [inCoda, setInCoda] = useState(false);
   const [boxSize, setBoxSize] = useState({ w: 0, h: 0 });
   // Which beat's content the DECK is currently showing. It lags `i` by the fade-out,
   // because the deck keeps the outgoing beat on screen until it has faded to nothing
@@ -334,9 +344,9 @@ export default function CinematicPlayer({
   useEffect(() => {
     if (!narrated) return;
     const line = narrated[shown];
-    if (narrationOn && !done && !guideOpen && line && beats[shown]?.text === line.text) narration.play(lesson.id, shown);
+    if (narrationOn && !done && !inCoda && !guideOpen && line && beats[shown]?.text === line.text) narration.play(lesson.id, shown);
     else narration.stop();
-  }, [narrated, narrationOn, shown, done, guideOpen, lesson.id, beats]);
+  }, [narrated, narrationOn, shown, done, inCoda, guideOpen, lesson.id, beats]);
 
   const clock = useSharedValue(0);
   // TWO BEAT CLOCKS, AND WHICH IS WHICH IS THE WHOLE OF K1.
@@ -1181,9 +1191,9 @@ export default function CinematicPlayer({
     // times a lesson, which is the single most frequent thing in a reading — and
     // "I don't want a sound every time a user clicks to the next section" is the
     // right call. Tapping forward is not an event, it is the medium.
-    if (last) { setDone(true); return; }
+    if (last) { if (coda) setInCoda(true); else setDone(true); return; }
     goTo(i + 1);
-  }, [locked, last, sounded, tourSkip, i, rt]);
+  }, [locked, last, coda, sounded, tourSkip, i, rt]);
 
   // ── ONE BEAT BACK (tapNav.ts) ─────────────────────────────────────────────
   // The previous beat plays again from its start: every scene derives its "previous"
@@ -1669,6 +1679,14 @@ export default function CinematicPlayer({
         {/* Which way the tap went — above everything in the body, taking no touch. */}
         <EdgeFlash back={flashBack} fwd={flashFwd} />
       </Pressable>
+
+      {/* THE CLOSING ENCOUNTER, LAID OVER THE WHOLE LESSON (group AJ).
+          It is an opaque full-bleed sheet that fades IN, which is what "everything
+          else fades out" looks like from the other side — and it costs the tree
+          below it no layout change at all, where dimming the player itself would
+          have re-flowed the deck on the last tap of every lesson. It also takes the
+          touches, so the body Pressable underneath cannot advance anything. */}
+      {inCoda ? <CodaHost lessonId={lesson.id} onDone={() => setDone(true)} /> : null}
     </SafeAreaView>
   );
 }
