@@ -133,12 +133,35 @@ if (FACE) {
   }
 }
 
+// ── 5 · A REVIEW COSTS A FREE READER NOTHING ─────────────────────────────────
+//
+// The owner: *"I dont want the review to take up a user's free day. If the user does
+// the review they can still do a lesson."* That is already true, and only by accident:
+// a review never calls `bumpDailyLessons`, and the free-tier gate lives in the lesson
+// route, which a review does not go through. Both halves are facts about where the
+// code happens to sit, and either could be undone by a tidy-up that noticed a review
+// looks a lot like a lesson. So both are rules now.
+const REVIEW_SRC = [
+  'app/(app)/branches/[branchSlug]/[pathSlug]/review.tsx',
+  'components/lesson/cinematic/review/UnitReview.tsx',
+  'components/lesson/cinematic/review/UnitStamp.tsx',
+].filter((f) => fs.existsSync(f)).map((f) => [f, fs.readFileSync(f, 'utf8')]);
+if (!REVIEW_SRC.length) note('SOURCE', 'the review screens are missing');
+for (const [f, src] of REVIEW_SRC) {
+  for (const banned of ['bumpDailyLessons', 'FREE_DAILY_LESSON_LIMIT', 'recordLessonComplete']) {
+    if (src.includes(banned)) {
+      note('FREEDAY', `${f} uses ${banned} — a review must cost a free reader neither a lesson nor the gate`);
+    }
+  }
+}
+
 console.log('THE UNIT REVIEWS (group AK)\n');
 console.log(`  ${Object.keys(UNIT_REVIEWS).length} of ${units.size} units have a review · ${asked} questions · widest plate word ${widest.toFixed(1)} of ${PLATE_W}\n`);
 if (!bad.length) {
   console.log('  ok    every unit in the app has a review, and every review is for a real unit');
   console.log(`  ok    every review asks ${QUESTIONS} questions, each with one control and one answer`);
   console.log('  ok    every plate word fits the slot the shared stage draws it in');
+  console.log('  ok    no review screen spends a free reader’s daily lesson or reads the gate');
   console.log('\nevery unit ends with a review that can be finished.');
   process.exit(0);
 }

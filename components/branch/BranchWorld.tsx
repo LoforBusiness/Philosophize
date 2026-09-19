@@ -77,6 +77,15 @@ export interface WorldLesson {
   id: string; title: string;
   unitId: string; unitSlug: string; unitTitle: string;
   done: boolean; accessible: boolean;
+  /**
+   * This stop is the unit's REVIEW rather than a lesson (data/unitReviews.ts).
+   *
+   * The road does not draw it differently — a stop is a stop, and the figure walks
+   * to it the way it walks to anything else. The flag is here so the screen above can
+   * route the tap to the review instead of to a lesson, and so nothing has to infer
+   * it from an id.
+   */
+  review?: boolean;
   /** Not openable, but the Pass would fix it — so the tap can offer the Pass
    *  rather than doing nothing. A lesson simply not reached yet is NOT this. */
   needsPass?: boolean;

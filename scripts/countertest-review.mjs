@@ -62,6 +62,22 @@ try {
     "        ask: {\n          prompt: 'How many of the three lenses",
     "        text: {\n          prompt: 'How many of the three lenses");
 
+  // THE FREE DAY. Staged in the component rather than the table, so this one damages
+  // its own file and restores it.
+  {
+    const F = 'components/lesson/cinematic/review/UnitReview.tsx';
+    const before = fs.readFileSync(F);
+    try {
+      fs.writeFileSync(F, `${before.toString('utf8')}
+// bumpDailyLessons
+`);
+      const res = run();
+      if (res.red && res.out.includes('FREEDAY')) { pass += 1; console.log('  ok   a review that spends a free day'); } else {
+        fail += 1; console.log(`  ✗    a review that spends a free day — ${res.red ? 'red, but not for FREEDAY' : 'stayed silent'}`);
+      }
+    } finally { fs.writeFileSync(F, before); }
+  }
+
   // …and the direction that must stay SILENT.
   const clean = run();
   if (!clean.red) { pass += 1; console.log('  ok   the table as it stands (silent, as it should be)'); } else {

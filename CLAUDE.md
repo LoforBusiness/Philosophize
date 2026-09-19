@@ -4691,10 +4691,40 @@ Three things it cost, each now a rule (AK4–AK6):
 - **`check:routes` flagged the new route**, correctly: git is its oracle, and an
   untracked file in `app/` is a harness throwaway until it is added.
 
+**AND THEN IT BECAME A STOP ON THE ROAD, WHICH IS WHERE IT SHOULD HAVE BEEN (AK7).**
+Its first home was a row pinned under a finished unit in the Learn drawer — outside the
+unit it belongs to, and the one thing in a branch the figure never walked to. The owner
+asked for both halves: *"I want the unit review to only show up when you open a unit, not
+to have it on the outside, also I want it so when a user finishes the lesson right before
+the review the stickman walks to the unit's review, then afterwards the stickman walks to
+the next unit to the next lesson."* It is a `WorldLesson` on `BranchWorld` now, inserted
+after its unit's last lesson, so finishing that lesson walks the figure to the review and
+finishing the review walks it on into the next unit. The drawer keeps its row and only
+inside an OPEN unit. It is never locked, only not-yet-reached — nothing there consults the
+Pass.
+
+**EVERY INDEX INTO THE ROAD IS SEARCHED NOW, NEVER COUNTED (AK8), and that is what made
+it possible at all.** Every position used to be arithmetic over `u.total`, which silently
+means *lessons* and is wrong by one for every unit behind a review, so the entry marker,
+the drawer jump and the post-finish walk would each have landed one stop early.
+`flatIndexOf`/`entryIndexOf` ask the array where something is. An index derived from the
+array it indexes cannot drift from what that array contains.
+
+**A REVIEW COSTS A FREE READER NOTHING, AND THAT WAS AN ACCIDENT UNTIL IT WAS A RULE
+(AK9).** *"I dont want the review to take up a user's free day."* Already true: a review
+never calls `bumpDailyLessons`, and the gate lives in the LESSON route, which a review
+does not go through. Both halves are facts about where the code happens to sit, and
+either could be undone by a tidy-up that noticed a review looks a lot like a lesson —
+so `check:review` §5 fails on `bumpDailyLessons`, `FREE_DAILY_LESSON_LIMIT` or
+`recordLessonComplete` appearing in any review source.
+
+**AND THE MARK IS A RELOAD RATHER THAN A STAR (AK10)**, because a star means premium, a
+favourite or a rating in every app a reader has ever used, and a review is none of those.
+
 `npm run check:review` holds the content — four questions a review, one control and
 one answer each, and every plate word measured against the real `.ttf` for the 68-unit
 slot it is drawn in, which caught three on its first run.
-`node scripts/countertest-review.mjs` stages seven defects.
+`node scripts/countertest-review.mjs` stages eight defects, the free day among them.
 
 ### The stage is coloured now, at exactly the grey's luminance
 

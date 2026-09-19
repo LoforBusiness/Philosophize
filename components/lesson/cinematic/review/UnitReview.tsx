@@ -25,6 +25,7 @@ import type { Lesson } from '@/data/types';
 import { UNIT_REVIEWS, type ReviewStep } from '@/data/unitReviews';
 import { XP_PER_CORRECT_ANSWER, XP_PER_PATH_MASTERY } from '@/constants/xp';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
 import { track } from '@/lib/posthog';
 import CinematicPlayer, { type SceneApi } from '../CinematicPlayer';
 import type { BaseBeat } from '../cinematicKit';
@@ -64,6 +65,7 @@ export default function UnitReview({
   lessons: number;
   onLeave: () => void;
 }) {
+  const armWalk = useUIStore((st) => st.markLessonFinished);
   const review = UNIT_REVIEWS[unitId];
   const [done, setDone] = useState(false);
   // WHAT THE READER EARNED, CAPTURED BEFORE IT IS BANKED. `first` is read from the
@@ -123,7 +125,14 @@ export default function UnitReview({
           branch={branchSlug}
           lessons={lessons}
           xp={earned}
-          onDone={onLeave}
+          onDone={() => {
+            // THE FIGURE WALKS ON. The branch road treats a review as the stop after
+            // its unit's last lesson, so arming the same finish event the reward
+            // screen arms sends him from the review into the next unit — with the id
+            // the road gave the stop, which is what the walk looks itself up by.
+            armWalk({ lessonId: `review:${unitId}`, unitId, branchSlug });
+            onLeave();
+          }}
         />
       ) : null}
     </>

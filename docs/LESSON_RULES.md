@@ -9864,6 +9864,54 @@ unknown prop and is silently ignored. Every plate therefore rendered at its defa
 and the whole table arrived on beat 0 — no error, no warning, just a scene that did
 not animate.
 
+### AK7 · The review is a STOP ON THE ROAD, not a drawer entry
+
+> *"I want the unit review to only show up when you open a unit, not to have it on the
+> outside, also I want it so when a user finishes the lesson right before the review the
+> stickman walks to the unit's review, then afterwards the stickman walks to the next
+> unit to the next lesson."*
+
+The review's first home was a row pinned under a finished unit in the Learn drawer,
+which put it OUTSIDE the unit it belongs to and left it as the one thing in a branch the
+figure never walked to. It is a `WorldLesson` on `BranchWorld` now, inserted after its
+unit's last lesson, so finishing that lesson walks the figure to the review and finishing
+the review walks it on into the next unit — the walk the road was already doing between
+lessons, applied to the stop that used to be unreachable from it. The drawer keeps a row,
+but only inside an OPEN unit (`expanded && hasReview(…) && …`).
+
+A review is never LOCKED, only not-yet-reached: `accessible` is `u.done >= u.total` and
+nothing consults the Pass. A reader who has finished a unit has earned the right to look
+back over it.
+
+### AK8 · Every index into the road is SEARCHED, never counted
+
+This is what made AK7 possible at all, and it is the rule to keep. Every position on the
+road used to be arithmetic over `u.total` — which silently means *lessons* and is wrong
+by one for every unit behind a review — so the entry marker, the drawer jump and the
+post-finish walk would each have landed one stop early. `flatIndexOf(id)` and
+`entryIndexOf(unitId)` ask the array where something is, and the walk after a finish is
+`worldLessons.findIndex(l => l.id === justFinished.lessonId)`. An index derived from the
+same array it indexes cannot drift from what that array contains.
+
+### AK9 · A review costs a free reader nothing
+
+> *"I don't want the review to take up a user's free day. If the user does the review
+> they can still do a lesson."*
+
+Already true, and only by accident: a review never calls `bumpDailyLessons`, and the
+free-tier gate lives in the LESSON route, which a review does not go through. Both halves
+are facts about where the code happens to sit, and either could be undone by a tidy-up
+that noticed a review looks a lot like a lesson. So `check:review` §5 reads the three
+review sources and fails on `bumpDailyLessons`, `FREE_DAILY_LESSON_LIMIT` or
+`recordLessonComplete` appearing in any of them — an accident converted into a rule
+rather than left as one.
+
+### AK10 · The mark is a RELOAD, not a star
+
+A star means premium, a favourite or a rating in every app a reader has ever used, and a
+review is none of those — it is going round again. `SketchIcon name="reload"` says that
+and nothing else. (`TabIcon` makes the same call for the Pass, for the same reason.)
+
 ---
 
 ## Group AI · A lesson is read in both directions

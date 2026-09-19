@@ -137,6 +137,68 @@ export default function BranchDetailScreen() {
   // branch is complete" and nothing else.
   const drawerUnits = units;
 
+  // Built here rather than further down, ABOVE the `if (!branch)` early return,
+  // because the finish effect below closes over `worldLessons`: declared after a
+  // return the effect can outlive, a `const` is in its temporal dead zone and the
+  // walk throws instead of running. It is unreachable today only because an unknown
+  // slug also empties `allUnits`, which is a second fact holding up the first.
+  const reviewed = useUserDataStore((st) => st.unitsReviewed);
+
+  // THE ROAD, WITH EACH UNIT'S REVIEW AS THE STOP AFTER ITS LAST LESSON.
+  //
+  // So finishing the last lesson of a unit walks the figure to the review, and
+  // finishing the review walks it on into the next unit — which is what the road was
+  // always doing between lessons, applied to the one thing that used to be reachable
+  // only from the drawer.
+  //
+  // It is never LOCKED, only not-yet-reached: a reader who has finished a unit has
+  // earned the right to look back over it whether or not they hold the Pass.
+  const worldLessons: WorldLesson[] = [];
+  for (const u of units) {
+    for (const lm of u.lessons) {
+      worldLessons.push({
+        id: lm.lesson.id,
+        title: lm.lesson.title,
+        unitId: u.unit.id,
+        unitSlug: u.unit.slug,
+        unitTitle: u.unit.name,
+        done: lm.state === 'done',
+        accessible: lm.open,
+        needsPass: lm.needsPass,
+      });
+    }
+    if (hasReview(u.unit.id)) {
+      worldLessons.push({
+        id: `review:${u.unit.id}`,
+        title: 'Unit review',
+        unitId: u.unit.id,
+        unitSlug: u.unit.slug,
+        unitTitle: u.unit.name,
+        done: reviewed.includes(u.unit.id),
+        accessible: u.done >= u.total,
+        review: true,
+      });
+    }
+  }
+
+  /**
+   * Where a stop sits on the road.
+   *
+   * SEARCHED RATHER THAN COUNTED, and that is the whole reason the review could be
+   * added at all: every index here used to be arithmetic over `u.total`, which
+   * silently means "lessons" and is wrong by one for every unit behind a review.
+   * Asking the array where something is cannot drift from what the array contains.
+   */
+  const flatIndexOf = (id: string) => worldLessons.findIndex((l) => l.id === id);
+
+  /** The flat index of a unit's next unplayed stop. */
+  const entryIndexOf = (unitId: string) => {
+    const mine = worldLessons.filter((l) => l.unitId === unitId);
+    const next = mine.find((l) => !l.done) ?? mine[mine.length - 1];
+    return next ? flatIndexOf(next.id) : -1;
+  };
+
+
   // ── the advance ────────────────────────────────────────────────────────────
   //
   // `justFinished` is set by the reward screen the moment the reader presses
@@ -175,9 +237,8 @@ export default function BranchDetailScreen() {
     // exactly the requirement: the walk begins when there is someone to see it.
     if (!focused || rewardUp || paywallUp) return;
     const u = allUnits.find((x) => x.id === justFinished.unitId);
-    const idx = u ? u.lessons.findIndex((l) => l.id === justFinished.lessonId) : -1;
     clearLessonFinished();
-    if (!u || idx < 0) return;
+    if (!u) return;
 
     // A lesson was just finished, so wherever the reader had parked the road with
     // the drawer, they are HERE now. Leaving the focus set would arm the walk
@@ -196,13 +257,11 @@ export default function BranchDetailScreen() {
     // finished on the very first frame. The pause before it sets off belongs to
     // the world, not to here — armed late, the figure would be standing at its
     // DESTINATION for half a second and then snap backwards to start.
-    let flat = 0;
-    for (const uu of allUnits) {
-      if (uu.id === u.id) { flat += idx; break; }
-      flat += uu.lessons.length;
-    }
+    // Counted out of the road itself, so a unit's review is simply the next stop and
+    // the walk needs to know nothing about it (see `flatIndexOf`).
+    const flat = worldLessons.findIndex((l) => l.id === justFinished.lessonId);
     const next = flat + 1;
-    if (next < allUnits.reduce((n, x) => n + x.lessons.length, 0)) {
+    if (flat >= 0 && next < worldLessons.length) {
       setWalkTo({ from: flat, to: next, done: () => setWalkTo(null) });
     }
 
@@ -219,33 +278,6 @@ export default function BranchDetailScreen() {
     );
   }
 
-  const worldLessons: WorldLesson[] = [];
-  for (const u of units) {
-    for (const lm of u.lessons) {
-      worldLessons.push({
-        id: lm.lesson.id,
-        title: lm.lesson.title,
-        unitId: u.unit.id,
-        unitSlug: u.unit.slug,
-        unitTitle: u.unit.name,
-        done: lm.state === 'done',
-        accessible: lm.open,
-        needsPass: lm.needsPass,
-      });
-    }
-  }
-
-  /** The flat index of a unit's next unplayed lesson. */
-  const entryIndexOf = (unitId: string) => {
-    let flat = 0;
-    for (const u of units) {
-      if (u.unit.id === unitId) {
-        return flat + Math.min(u.done, Math.max(0, u.total - 1));
-      }
-      flat += u.total;
-    }
-    return -1;
-  };
 
   // Where the figure stands: normally the first lesson not yet finished, or the
   // end of the road if the branch is complete — but a unit chosen in the drawer
@@ -258,7 +290,6 @@ export default function BranchDetailScreen() {
     if (i >= 0) worldAt = i;
   }
 
-  const reviewed = useUserDataStore((st) => st.unitsReviewed);
   const pres = PRES[branch.slug] ?? { desc: branch.description, glyph: 'book' as GlyphName, pills: [] };
   const roman = ROMAN[Math.max(0, ORDER.indexOf(branch.slug))];
 
@@ -407,6 +438,7 @@ export default function BranchDetailScreen() {
             // photograph above it is of. See sceneArt.
             place={branch.slug}
             onOpen={(l) => {
+              if (l.review) { openReview(branch.slug, l.unitSlug); return; }
               const u = allUnits.find((x) => x.id === l.unitId);
               const les = u?.lessons.find((x) => x.id === l.id);
               if (u && les) openLesson(u, les);
@@ -535,12 +567,16 @@ export default function BranchDetailScreen() {
                           `lessonsByUnit`, so it cannot be numbered among them — and it
                           is never locked: a reader who has finished a unit has earned
                           the right to look back over it, Pass or no Pass. */}
-                      {hasReview(u.unit.id) && u.done >= u.unit.lessons.length ? (
+                      {expanded && hasReview(u.unit.id) && u.done >= u.unit.lessons.length ? (
                         <Pressable
                           onPress={() => { setDrawerOpen(false); openReview(branch.slug, u.unit.slug); }}
                           style={({ pressed }) => [styles.lessonRow, styles.reviewRow, pressed && { opacity: 0.55 }]}
                         >
-                          <SketchIcon name="star" size={13} color={C.ink} />
+                          {/* NOT A STAR. A star is what every app uses for premium, a
+                              favourite or a rating, and this is none of those — it is
+                              going round again. `reload` says that and nothing else.
+                              (`TabIcon`'s own note makes the same call for the Pass.) */}
+                          <SketchIcon name="reload" size={13} color={C.ink} />
                           <Text style={[styles.lessonName, styles.reviewName]} numberOfLines={1}>
                             Unit review
                           </Text>
