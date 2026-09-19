@@ -4433,7 +4433,7 @@ in-place moves only, because the bubble is placed against his resting head.
 including a tap at every tenth of a second: the worst one-frame move inside a plan is
 4.05 units, at a tap it is **0.00**, and the planted-foot slide is 3.06 — the shipped
 settle's own residue. `node scripts/sheet-wander.mjs` draws every pattern as a
-filmstrip in plain Node, and `node scripts/countertest-wander.mjs` puts all twelve
+filmstrip in plain Node, and `node scripts/countertest-wander.mjs` puts all seventeen
 defects back.
 
 > **AND THE LAYER WAS SWITCHED OFF A FRAME AFTER IT WAS SWITCHED ON.** Every number
@@ -4446,6 +4446,57 @@ defects back.
 > is exactly why it was affordable. **The probe's own first draft read the figure's
 > ROOT**, which `Stickman`'s comment already says is a zero-size box, and reported the
 > same dead figure for a second, entirely different reason.
+
+### And then he moonwalked, in 120 lessons (AF9–AF13)
+
+> *"it seems the stickman glitches, or moves all of the sudden, sometimes will be
+> walking one way but moving in the other direction. Also in other lessons he will
+> glitch and move suddenly without any smooth movement, I've seen this with his head
+> and body in other lessons too."*
+
+Four defects, all in the layer above, all measured before anything was changed — and
+**every number in the paragraph above was green through all four**, which is the part
+worth reading.
+
+| | measured | scope |
+|---|---|---|
+| a step travels against the facing | 182 of 464 steps | 120 lessons |
+| the gaze cut off between two frames when a step starts | 17.05 units of head | 206 plans, 129 lessons |
+| the carried offset clamped at a beat change | 44.0 units sideways in one frame | 730 taps, 24 lessons |
+| a tap strands him mirrored | 2.3% of taps | — |
+
+**THE MOONWALK IS C18 ONE SYSTEM OUT, AND THE GENERATOR ONLY EVER REASONED ABOUT THE
+LEG OUT.** `make-wander` asked `Math.sign(span) !== facing` once, at the top of a
+round trip, and hung both turns on the answer — correct for the outbound leg and
+silent about the return, whose direction is the opposite. So every stroll that
+already matched his facing walked out correctly and came home backwards.
+`aesthetics-aesthetics-13` — the lesson the reader named — walks him 46 units right
+on beat 0 and moonwalked all 46 back. The fix is a turn before every leg and the
+staged facing restored after the last; the table regenerated with no plans lost
+(862, and two new patterns in the mix).
+
+**THE OTHER THREE ARE THE BEAT CHANGE, AND THE CLAMP WAS THE TELEPORT IT PROMISED TO
+PREVENT.** `wanderState` clamped the carried `dx` into the new beat's room under a
+comment saying "walking back in is a step like any other; appearing back in would be
+a teleport". It is four continuous phases now — finish the interrupted step, turn,
+walk home, turn back — and it walks him back to where the SCENE puts him rather than
+to the nearest legal spot, because a plan's step targets are absolute offsets
+authored for a figure standing at 0.
+
+**AND THE CHECKER WAS EXACT ABOUT THE WRONG THING, TWICE.** `check:wander` replayed
+`wanderStance` alone — the app never calls it, `lookPose` runs the layer and then
+hands the neck to the generated gaze — so the entire handover was outside the
+measurement. And its tap restarted the SAME plan, which has the same room and the
+same turns, so the one handover it exists to measure was the one it never made. It
+replays `lookPose`'s whole composition now and taps into the NEXT beat, with the gaze
+target and the scene's own facing held across the tap (both are eased by the app, and
+flipping either measured 70 units of the instrument's own cut).
+
+Every continuity number is exact after it: the worst frame inside a plan 5.19 of 6.0,
+at a tap **0.00**, at a tap into the next beat **0.00**, sideways at a beat change
+**0.00**, and 0 of 438 steps travelling against the facing. `countertest-wander`
+stages seventeen defects now — and the rig stage it already had **had never fired**,
+because it named a local that lives in `wander.ts` and not in `rig.ts`.
 
 ### Four brawlers froze after the first tap (L9)
 

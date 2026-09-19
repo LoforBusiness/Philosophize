@@ -39,7 +39,7 @@ import { LESSONS, beatsOf, parseManifest } from './lib/narration.mjs';
 import { markBox } from './lib/marks.mjs';
 import {
   W, GROUND_Y, SIT_REACH, PLAY_SECONDS, poseTier, freeFloor, roomFor, stepSeconds, pausesOf,
-  hash01,
+  hash01, facingOf,
 } from './lib/wanderrule.mjs';
 
 const DRY = process.argv.includes('--dry');
@@ -94,21 +94,6 @@ function soloFigure(id) {
 }
 
 /** +1 facing right, −1 facing left, held while he stands still — `rig.dirsFrom`. */
-function facingOf(walk) {
-  if (!walk) return null;
-  const out = [];
-  let d = 1;
-  for (let i = 0; i < walk.length; i += 1) {
-    if (i > 0) {
-      const delta = walk[i] - walk[i - 1];
-      if (delta > 1) d = 1;
-      else if (delta < -1) d = -1;
-    }
-    out.push(d);
-  }
-  return out;
-}
-
 /**
  * The lead figure's box on a beat: `{ x, y, w, h, items }`, or null for a crowd.
  *
@@ -271,16 +256,43 @@ function choose({ seed, dur, pauses, room, still, facing, lastKind, after, sitOk
   const out = [];
 
   // ── A WALK AND BACK, which is the move the reader asked for by name ───────
+  //
+  // THE FACING FOLLOWS EVERY LEG, AND FOR A LONG TIME IT FOLLOWED ONLY THE FIRST.
+  // This read `const turn = Math.sign(span) !== facing` once, at the top, and hung
+  // both TURN moves on it — which is correct for the leg OUT and says nothing at
+  // all about the leg BACK, whose direction is the opposite. So every round trip
+  // whose outbound leg was already in his facing direction walked out correctly
+  // and then moonwalked home: `strideStance` drives the feet off the DISTANCE
+  // covered, in the figure's own frame, so a body sliding against its own facing
+  // is a figure striding forwards while travelling backwards. Counted against the
+  // shipped table, 182 of 464 steps did it, in 120 lessons — and a reader found it
+  // in `aesthetics-aesthetics-13`, whose beat 0 walks him 46 units right and then
+  // moonwalks all 46 back.
+  //
+  // `turnTo` is the fix and it is the whole of it: before every leg, face the way
+  // that leg travels; after the last one, go back to the way the scene staged him,
+  // so the beat hands on the facing it was given. `check:wander` §3 now re-derives
+  // this from the table, so a pattern added later cannot reintroduce it.
   if (!still) {
     const away = room[1] >= 22 && (room[1] >= -room[0] || seed > 0.5) ? 1 : (-room[0] >= 22 ? -1 : 0);
     if (away !== 0) {
       const far = away > 0 ? room[1] : room[0];
       const span = Math.sign(far) * Math.min(Math.abs(far), 24 + Math.round(seed * 22));
-      const turn = Math.sign(span) !== facing;
+      const st = stepSeconds(span);
+      // `to` is a MULTIPLIER on the scene's own facing, so the multiplier that
+      // makes him face stage-direction `d` is `d * facing` (both are ±1).
+      const walkTurns = (list, t, d, mult) => {
+        const want = d * facing;
+        if (want === mult) return [t, mult];
+        list.push({ kind: W.TURN, at: t, dur: 0.3, to: want });
+        return [t + 0.36, want];
+      };
+      const out1 = Math.sign(span);
+
       const list = [];
       let t = first;
-      if (turn) { list.push({ kind: W.TURN, at: t, dur: 0.3, to: -1 }); t += 0.36; }
-      const st = stepSeconds(span);
+      let m = 1;
+      [t, m] = walkTurns(list, t, out1, m);
       list.push({ kind: W.STEP, at: t, dur: st, to: span });
       t += st + 0.25;
       // He looks at what he walked away from — or up at it, which is where most of
@@ -289,17 +301,23 @@ function choose({ seed, dur, pauses, room, still, facing, lastKind, after, sitOk
       t += 0.5 + 0.5 + Math.round(seed * 60) / 100;
       list.push({ kind: W.LOOK, at: t, dur: 0.45, to: 0 });
       t += 0.5;
-      if (turn) { list.push({ kind: W.TURN, at: t, dur: 0.3, to: 1 }); t += 0.36; }
+      [t, m] = walkTurns(list, t, -out1, m);
       list.push({ kind: W.STEP, at: t, dur: st, to: 0 });
+      t += st + 0.2;
+      [t, m] = walkTurns(list, t, facing, m);
       if (fits(list)) out.push({ kind: 'stroll', list });
+
       // The same walk without the look, for a shorter line.
       const brief = [];
       let u = first;
-      if (turn) { brief.push({ kind: W.TURN, at: u, dur: 0.3, to: -1 }); u += 0.36; }
+      let bm = 1;
+      [u, bm] = walkTurns(brief, u, out1, bm);
       brief.push({ kind: W.STEP, at: u, dur: st, to: span });
       u += st + 0.4;
-      if (turn) { brief.push({ kind: W.TURN, at: u, dur: 0.3, to: 1 }); u += 0.36; }
+      [u, bm] = walkTurns(brief, u, -out1, bm);
       brief.push({ kind: W.STEP, at: u, dur: st, to: 0 });
+      u += st + 0.2;
+      [u, bm] = walkTurns(brief, u, facing, bm);
       if (fits(brief)) out.push({ kind: 'there-and-back', list: brief });
     }
   }

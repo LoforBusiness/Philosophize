@@ -242,6 +242,31 @@ export function hash01(s) {
 }
 
 /** Every move in a plan, as objects, for a checker or a report to read. */
+/**
+ * WHICH WAY THE SCENE STANDS HIM ON EACH BEAT, off its own `x` track.
+ *
+ * SHARED, because both readers of it have to agree. `make:wander` decides which
+ * turns a plan needs from this and `check:wander` re-derives whether it got them
+ * right, and two copies of one rule is the fault CLAUDE.md records three separate
+ * times — the last of them a generator and a validator disagreeing about a camera
+ * scale nobody could reconcile. A scene with no track faces right, which is what
+ * `pose(..., 1)` does.
+ */
+export function facingOf(walk) {
+  if (!walk) return null;
+  const out = [];
+  let d = 1;
+  for (let i = 0; i < walk.length; i += 1) {
+    if (i > 0) {
+      const delta = walk[i] - walk[i - 1];
+      if (delta > 1) d = 1;
+      else if (delta < -1) d = -1;
+    }
+    out.push(d);
+  }
+  return out;
+}
+
 export function movesOf(plan) {
   const out = [];
   for (let j = 2; j + 3 < plan.length; j += 4) {

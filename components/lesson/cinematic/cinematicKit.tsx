@@ -876,7 +876,7 @@ export function wanderReset() {
  * the reader's tap rate, rather than the new plan starting from a rest the figure
  * was nowhere near (group L).
  */
-function wanderNow(): WanderState {
+function wanderNow(dir: number): WanderState {
   'worklet';
   if (WANDER.seen.value !== WANDER.gen.value) {
     WANDER.seen.value = WANDER.gen.value;
@@ -901,7 +901,9 @@ function wanderNow(): WanderState {
     legTo: WANDER.slegTo.value,
     legU: WANDER.slegU.value,
     legPrior: 0,
-  });
+    homeDir: 0,
+    turnU: 0,
+  }, dir);
   WANDER.ddx.value = st.dx;
   WANDER.dlook.value = st.look;
   WANDER.dsit.value = st.sit;
@@ -961,7 +963,7 @@ export function lookPose(
   // layer produced rather than the one the scene handed in. It is inert — dx 0,
   // face +1, no leg — for any beat with no plan, which is what the offline
   // replays in `check:smooth` and `check:replay` continue to measure.
-  const wst = wanderNow();
+  const wst = wanderNow(dir);
   const ws = wanderStance(s, wst, WANDER.now.value, k);
   const wx = x + wst.dx;
   const wdir = wanderDir(dir, wst);

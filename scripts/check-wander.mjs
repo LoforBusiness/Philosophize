@@ -31,7 +31,7 @@ import { windowOf } from './lib/tourrule.mjs';
 import { LESSONS, beatsOf, parseManifest } from './lib/narration.mjs';
 import { markBox } from './lib/marks.mjs';
 import {
-  W, KIND_NAME, GROUND_Y, SIT_REACH, poseTier, freeFloor, roomFor, movesOf, endState,
+  W, KIND_NAME, GROUND_Y, SIT_REACH, poseTier, freeFloor, roomFor, movesOf, endState, facingOf,
 } from './lib/wanderrule.mjs';
 
 const DIR = 'components/lesson/cinematic';
@@ -47,9 +47,17 @@ const NARRATION = Object.fromEntries(
   [...parseManifest(fs.readFileSync('lib/narration/manifest.ts', 'utf8')).lessons]
     .map(([id, m]) => [id, Object.fromEntries(m)]),
 );
-const { RIG, WANDER } = await loadRig();
+const { RIG, MOVES, WANDER } = await loadRig();
+const { GAZE } = await loadTs(`${DIR}/gazeTargets.ts`);
 
 const rows = corpus();
+// WHICH WAY EACH SCENE STANDS HIM, per beat, built once. Both halves need it: §3f
+// reads it off the table and §2 replays with it. Replaying every lesson as if it
+// faced right reported 1,389 perfectly good walks as backwards — 108 of the 244
+// scenes walk him left at some point (`check:turn`).
+const FACE = new Map();
+for (const id of Object.keys(WANDER_PLANS)) FACE.set(id, facingOf(await walkOf(id)));
+const faceAt = (id, i) => (FACE.get(id) ? (FACE.get(id)[i] ?? 1) : 1);
 const CODES = new Map(rows.map((r) => [r.id, r.beats.map((b) => b.code)]));
 const GRADED = new Map(rows.map((r) => [r.id, r.beats.map((b) => b.graded)]));
 
@@ -186,7 +194,32 @@ for (const [id, list] of Object.entries(WANDER_PLANS)) {
     if (nb && Math.abs(end.sit) > 0.01) note(id, 'SEATED', `beat ${i} leaves him seated`);
     if (nb && Math.abs(end.crouch) > 0.01) note(id, 'CROUCHED', `beat ${i} leaves him crouched`);
     if (Math.abs(end.face - 1) > 0.01) note(id, 'TURNED', `beat ${i} leaves him facing the other way`);
-    // f · AND IT IS NOT WHAT THE LAST BEAT DID
+    // f · AND EVERY STEP TRAVELS THE WAY HE IS FACING (C18, one system out)
+    //
+    // `strideStance` drives the feet off the DISTANCE covered, in the figure's own
+    // frame, and `pose` mirrors that frame off `dir` — so a leg whose travel
+    // disagrees with the facing is a figure striding forwards while sliding
+    // backwards. C18 is the same defect in the SCENES, where 55 of them handed
+    // `pose` a literal 1 and moonwalked every beat whose x went down; `check:turn`
+    // has held that since. Nothing held it here, and the generator only ever
+    // reasoned about the leg OUT: 182 of 464 steps in the shipped table travelled
+    // against the facing, in 120 lessons, every one of them a leg BACK.
+    {
+      const base = faceAt(id, i);
+      let dx = 0;
+      let mult = 1;
+      for (const m of moves) {
+        if (m.kind === W.TURN) { mult = m.to; continue; }
+        if (m.kind !== W.STEP) continue;
+        const span = m.to - dx;
+        dx = m.to;
+        if (Math.abs(span) < 0.5) continue;
+        if (Math.sign(span) !== Math.sign(base * mult)) {
+          note(id, 'MOONWALK', `beat ${i} steps ${span.toFixed(0)} units while facing ${base * mult > 0 ? 'right' : 'left'}`);
+        }
+      }
+    }
+    // g · AND IT IS NOT WHAT THE LAST BEAT DID
     const kind = moves.map((m) => KIND_NAME[m.kind]).join('+');
     kinds.set(kind, (kinds.get(kind) || 0) + 1);
     if (lastKind && kind === lastKind) note(id, 'ECHO', `beat ${i} repeats the previous planned beat's pattern (${kind})`);
@@ -200,6 +233,8 @@ for (const [id, list] of Object.entries(WANDER_PLANS)) {
 // the frame drew becomes the state the next plan is read from, which is exactly
 // what `lookPose` does with `WANDER_MEM`. The three numbers are the ones that were
 // wrong in the first draft.
+const mid = (st) => st.legU > 0 && st.legU < 1;
+const inRoom = (plan, dx) => plan.length < 2 || (dx >= plan[0] - 0.01 && dx <= plan[1] + 0.01);
 const pts = (B) => [B.head[0].translateX, B.head[1].translateY, B.wrL[0].translateX, B.wrL[1].translateY,
   B.wrR[0].translateX, B.wrR[1].translateY, B.ankL[0].translateX, B.ankL[1].translateY,
   B.ankR[0].translateX, B.ankR[1].translateY, B.pel[0].translateX, B.pel[1].translateY];
@@ -210,12 +245,27 @@ const gap = (a, b) => Math.max(...a.map((v, i) => Math.abs(v - b[i])));
 // happened to land late in a line — the figure's own breath measured a second and a
 // half apart, and nothing to do with the layer. An instrument that models the two
 // clocks as one cannot check a system whose whole subject is that they differ.
-const frame = (plan, t, start, clock) => {
-  const st = WANDER.wanderState(plan, t, start ?? WANDER.wanderRest());
+//
+// AND IT IS `lookPose`'s WHOLE COMPOSITION, not `wanderStance` alone. The app never
+// calls `wanderStance` by itself: `lookPose` runs the layer, then hands the neck
+// over to the generated gaze by `gazeKeep`, then carries the lean off it. Replaying
+// only the first of those three made everything the other two do invisible — and
+// what they were doing was switching the gaze off between two frames on the frame a
+// step began, worth 17 units of head across 206 plans in 129 lessons, while this
+// file printed 4.16. A checker that models less than the screen cannot see the
+// screen's defects, however exactly it measures what it does model.
+const frame = (plan, t, start, clock, gaze, dir = 1) => {
+  const st = WANDER.wanderState(plan, t, start ?? WANDER.wanderRest(), dir);
   const now = 3 + (clock === undefined ? t : clock);
   const base = RIG.emoteHold(0, now);
-  const s = WANDER.wanderStance(base, st, now, 1);
-  return { st, B: RIG.pose(s, 200 + st.dx, GROUND_Y, 1, WANDER.wanderDir(1, st), 1) };
+  const ws = WANDER.wanderStance(base, st, now, 1);
+  const wx = 200 + st.dx;
+  const wdir = WANDER.wanderDir(dir, st);
+  const gw = gaze ? WANDER.gazeKeep(st) : 0;
+  if (gw <= 0) return { st, B: RIG.pose(ws, wx, GROUND_Y, 1, wdir, 1) };
+  const g = MOVES.gazeAt(ws, wx, GROUND_Y, 1, wdir, gaze[0], gaze[1], gw);
+  const lean = (g.neck - ws.neck) * 0.5;
+  return { st, B: RIG.pose({ ...g, tilt: g.tilt + lean }, wx, GROUND_Y, 1, wdir, 1) };
 };
 
 // The bare breath, which is what "does it read" is measured against — `check:idle`'s
@@ -238,22 +288,32 @@ let breath = 0;
 //          world-pinned by an expression whose two halves (the shrinking remainder
 //          and the rising blend) are not synchronous. Every walk in the app has it;
 //          tightening it is a rig change, not a table change.
-const BUDGET = { jump: 6.0, tap: 0.05, slide: 3.2, reads: breath * 1.4 };
-const worst = { jump: 0, tap: 0, slide: 0, quiet: Infinity };
-const where = { jump: '', tap: '', slide: '', quiet: '' };
+const BUDGET = { jump: 6.0, tap: 0.05, over: 6.0, warp: 0.05, slide: 3.2, home: 3.0, reads: breath * 1.4 };
+const worst = { jump: 0, tap: 0, over: 0, warp: 0, slide: 0, home: 0, quiet: Infinity };
+const where = { jump: '', tap: '', over: '', warp: '', slide: '', home: '', quiet: '' };
 let replayed = 0;
 for (const [id, list] of Object.entries(WANDER_PLANS)) {
   for (const [i, plan] of list.entries()) {
     if (!plan) continue;
     replayed += 1;
+    // The beat's own gaze target, because `lookPose` is given one on 224 lessons and
+    // the handover to it is half of what this replay is for.
+    const gz = GAZE[id]?.[i] ?? null;
+    const dirOf = faceAt(id, i);
     const total = movesOf(plan).reduce((mx, m) => Math.max(mx, m.at + m.dur), 1) + 0.6;
-    const a0 = pts(frame(plan, 0).B);
-    let prev = a0;
+    // "DOES THE PLAN READ" IS MEASURED WITHOUT THE GAZE, and the continuity numbers
+    // below are measured with it. They are different questions: the first asks what
+    // the PLAN adds, and is calibrated against a bare breath that has no gaze
+    // either; the second asks whether the COMPOSITION cuts. Measuring travel through
+    // the gaze reported four plans as too quiet purely because a held gaze damps the
+    // head it is pulling — a fact about the instrument, not about the plan.
+    const a0 = pts(frame(plan, 0, undefined, undefined, null, dirOf).B);
+    let prev = pts(frame(plan, 0, undefined, undefined, gz, dirOf).B);
     let travel = 0;
     for (let t = 1 / 60; t <= total; t += 1 / 60) {
-      const f = frame(plan, t);
+      const f = frame(plan, t, undefined, undefined, gz, dirOf);
       const p = pts(f.B);
-      travel = Math.max(travel, gap(p, a0));
+      travel = Math.max(travel, gap(pts(frame(plan, t, undefined, undefined, null, dirOf).B), a0));
       const j = gap(p, prev);
       if (j > worst.jump) { worst.jump = j; where.jump = `${id} beat ${i} at ${t.toFixed(2)}s`; }
       for (const [ax, ay] of [[6, 7], [8, 9]]) {
@@ -269,11 +329,78 @@ for (const [id, list] of Object.entries(WANDER_PLANS)) {
       note(id, 'QUIET', `beat ${i} travels ${travel.toFixed(2)} units, and standing still travels ${breath.toFixed(2)}`);
     }
     // THE TAP, at every tenth of a second: the frame after must be the frame before.
+    //
+    // AND THE TAP GOES TO THE NEXT BEAT'S PLAN, which for the life of this file it
+    // did not — it restarted the SAME plan, and the same plan has the same room and
+    // the same turns, so the one handover this test exists to measure was the one it
+    // never made. Measured properly it was never exact: the carried offset was
+    // CLAMPED into the next beat's room, which teleported him up to 44 units
+    // sideways in a single frame on 730 of the taps in the corpus, while this line
+    // printed 0.00.
+    const next = list[i + 1] ?? [];
     for (let cut = 0.1; cut <= total; cut += 0.1) {
-      const a = frame(plan, cut);
-      const b = frame(plan, 0, a.st, cut);
+      const a = frame(plan, cut, undefined, undefined, gz, dirOf);
+      const b = frame(plan, 0, a.st, cut, gz, dirOf);
       const d = gap(pts(a.B), pts(b.B));
       if (d > worst.tap) { worst.tap = d; where.tap = `${id} beat ${i}, tapped ${cut.toFixed(1)}s in`; }
+      // The same tap, carried into the beat the reader actually lands on — and the
+      // gaze is held at the beat he is LEAVING, because that is where his eyes are
+      // at the instant of the tap: the player eases the target over 560ms
+      // (`CinematicPlayer`, gazeX/gazeY), so swapping it here would measure the
+      // instrument's own cut rather than the layer's.
+      // …at the facing the beat he is LEAVING has, for the same reason as the gaze:
+      // a scene that turns him between beats eases that turn itself, so flipping it
+      // here would measure the instrument rather than the layer (70 units of it).
+      const c = frame(next, 0, a.st, cut, gz, dirOf);
+      const dn = gap(pts(a.B), pts(c.B));
+      if (dn > worst.over) { worst.over = dn; where.over = `${id} beat ${i}→${i + 1}, tapped ${cut.toFixed(1)}s in`; }
+      const dxJump = Math.abs(c.st.dx - a.st.dx);
+      if (dxJump > worst.warp) { worst.warp = dxJump; where.warp = `${id} beat ${i}→${i + 1}, tapped ${cut.toFixed(1)}s in`; }
+      // AND HE ALWAYS COMES BACK ROUND. A tap can land between a stroll's turn out
+      // and its turn back, so the beat he arrives on inherits a mirrored figure —
+      // legitimately, and eased, but it must not be permanent. `homeFace` brings
+      // him home wherever the new plan says nothing about the facing, and a plan
+      // that does say something ends facing forward (the TURNED rule above). What
+      // is left is how LONG a carried turn can last, which is bounded by the walk
+      // back in delaying the plan's own restoring turn: no cut, but a figure facing
+      // away from the lesson, so it is a number rather than a silence.
+      //
+      // ONLY WHERE THE TAP CHANGED ANYTHING. With `face` already home and no walk
+      // back in owed, the beat runs exactly as it would untapped, which the TURNED
+      // rule above already covers — and sweeping all of them anyway cost this file
+      // 32 million extra evaluations and several minutes.
+      if (Math.abs(a.st.face - 1) < 0.02 && !mid(a.st) && inRoom(next, a.st.dx)
+) continue;
+      // AND THE LEG THE LAYER GENERATES FOR ITSELF OBEYS §3f TOO. The MOONWALK rule
+      // above reads the TABLE, so it cannot see a walk the layer invents to bring
+      // him back into a beat's room — and that leg is walked at exactly the moment
+      // a reader has just tapped, which is when they are looking.
+      // At the facing the beat he LEAVES has — a scene that turns him between beats
+      // eases that itself, so judging the walk back in by the next beat's facing
+      // reported 271 correct walks as backwards.
+      const dirNext = dirOf;
+      let home = -1;
+      let prevDx = a.st.dx;
+      for (let u = 0; u <= 14; u += 1 / 20) {
+        const st = WANDER.wanderState(next, u, a.st, dirNext);
+        // THE FIRST TIME HE IS UPRIGHT AGAIN, not the last. Asking when he is home
+        // FOR GOOD measures when the new plan finishes its own turns, which is near
+        // the end of any stroll and has nothing to do with a carried one.
+        if (home < 0 && Math.abs(st.face - 1) < 0.02) home = u;
+        const moved = st.dx - prevDx;
+        prevDx = st.dx;
+        // A figure drawn in profile has no facing to disagree with — `pose` mirrors
+        // off the sign of `dir`, so a `dir` passing through 0 IS the turn.
+        const drawn = WANDER.wanderDir(dirNext, st);
+        if (Math.abs(moved) > 0.2 && Math.abs(drawn) > 0.2 && Math.sign(moved) !== Math.sign(drawn)) {
+          note(id, 'BACKWARDS', `a tap ${cut.toFixed(1)}s into beat ${i} walks him back in facing the other way`);
+          break;
+        }
+      }
+      if (home < 0) note(id, 'MIRRORED', `a tap ${cut.toFixed(1)}s into beat ${i} never turns him back`);
+      else if (Math.abs(a.st.face - 1) > 0.02 && home > worst.home) {
+        worst.home = home; where.home = `${id} beat ${i}→${i + 1}, tapped ${cut.toFixed(1)}s in`;
+      }
     }
   }
 }
@@ -291,7 +418,10 @@ const budget = (name, val, cap, msg) => {
 };
 budget('jump', worst.jump, BUDGET.jump, 'the worst one-frame move inside a plan');
 budget('tap', worst.tap, BUDGET.tap, 'the worst one-frame move at a tap');
+budget('over', worst.over, BUDGET.over, 'the worst one-frame move at a tap into the NEXT beat');
+budget('warp', worst.warp, BUDGET.warp, 'the furthest he is moved sideways by a beat change');
 budget('slide', worst.slide, BUDGET.slide, 'the worst slide by a planted foot');
+budget('home', worst.home, BUDGET.home, 'the longest a carried turn lasts before he is upright again, in seconds');
 console.log(`  ok  the quietest plan travels ${worst.quiet === Infinity ? 0 : worst.quiet.toFixed(2)} units  ${where.quiet}`);
 
 // A FLOOR ON THE VOCABULARY, for the reason group N had to learn twice: a corpus can

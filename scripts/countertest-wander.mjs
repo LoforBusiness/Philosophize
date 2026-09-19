@@ -134,6 +134,25 @@ console.log('PUTTING THE DEFECTS BACK\n');
   }
 }
 
+{
+  // §3f — A STEP THAT TRAVELS AGAINST THE FACING. Staged by cancelling the turn that
+  // precedes it rather than by moving the step, so the room is untouched and the
+  // rule that fires can only be the one this stage is about.
+  const hasBoth = (n) => {
+    let step = false;
+    let turn = false;
+    for (let j = 2; j + 3 < n.length; j += 4) {
+      if (n[j] === 1) step = true;
+      if (n[j] === 5 && n[j + 3] === -1) turn = true;
+    }
+    return step && turn;
+  };
+  const p = firstPlan(hasBoth);
+  const nums = [...p.nums];
+  for (let j = 2; j + 3 < nums.length; j += 4) if (nums[j] === 5 && nums[j + 3] === -1) { nums[j + 3] = 1; break; }
+  stage('a step with the turn before it cancelled', 'MOONWALK', table(rebuild(p, nums)));
+}
+
 // ── the maths ───────────────────────────────────────────────────────────────
 let restored = false;
 try {
@@ -156,6 +175,23 @@ try {
     '  if (st.legU >= 0 && st.legU <= 1 && Math.abs(st.legTo - st.legFrom) + st.legPrior > 0.5) {',
     '  if (st.legU >= 0 && st.legU <= 1 && Math.abs(st.legTo - st.legFrom) > 0.5) {');
 
+  // ── AND THE FOUR A READER FOUND ON THE SHIPPED TABLE ──────────────────────
+  patch('the gaze switched off in one frame when a step starts', null,
+    '  return clamp01(u / 0.2) * clamp01((1 - u) / 0.2);',
+    '  return u > 0 && u < 1 ? 1 : 0;');
+
+  patch('the walk back into a room done as a clamp', 'moved sideways',
+    '  const back = finish - stepEnd;',
+    '  const back = 0;');
+
+  patch('an unplanned leg that does not turn to face its own travel', 'BACKWARDS',
+    '  const tB = rest && homeDir !== faced ? TURN_S : 0;',
+    '  const tB = 0;');
+
+  patch('a carried turn nothing brings home', 'MIRRORED',
+    '  const homed = homeFace(start.face, t - homeAt);',
+    '  const homed = start.face;');
+
   // AND THE ONE THAT LIVES IN THE RIG. The arc a settling walk gives its feet used
   // to go to whichever had further to travel, which is a hard switch on a comparison
   // that flips mid-settle: an ankle rose 8.5 units and the other fell 7.3 between two
@@ -163,7 +199,7 @@ try {
   // it is staged here — this check is the one that measures a frame.
   const RIG_FILE = path.join(REPO, 'components/lesson/cinematic/rig.ts');
   const RIG_SRC = fs.readFileSync(RIG_FILE, 'utf8').replace(/\r\n/g, '\n');
-  const from = 'y: settled.footL.y - arc * (gapL / tot) }';
+  const from = 'y: settled.footL.y - arc * (gapL / (gapL + gapR + 1e-4)) }';
   const to = 'y: settled.footL.y - (gapL >= gapR ? arc : 0) }';
   if (!RIG_SRC.includes(from)) { fail += 1; console.log('  ✗    the settling arc handed to one foot — the text to damage is not in rig.ts'); } else {
     try {

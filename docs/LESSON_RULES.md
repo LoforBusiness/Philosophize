@@ -9400,8 +9400,115 @@ mount effect, which runs after the render that installs the first plan — and i
 first draft measured the figure's ROOT, which `Stickman` states is a zero-size box,
 and reported the same dead figure for a different reason.
 
-`node scripts/countertest-wander.mjs` stages all twelve defects going red, the
+`node scripts/countertest-wander.mjs` stages all seventeen defects going red, the
 shipped table silent, and a single beat with no plan silent.
+
+### AF9 · Every leg travels the way he is facing — the planned ones and the invented one
+
+C18 is this rule for the SCENES: `strideStance` drives the feet off the DISTANCE
+covered, in the figure's own frame, and `pose` mirrors that frame off `dir`, so a
+body sliding against its own facing is a figure striding forwards and travelling
+backwards. 55 scenes did it by handing `pose` a literal `1`, and `check:turn` has
+held them since.
+
+**Nothing held the movement layer, and 182 of its 464 steps did the same thing, in
+120 lessons.** A reader found it in `aesthetics-aesthetics-13`: *"it seems the
+stickman glitches, or moves all of the sudden, sometimes will be walking one way but
+moving in the other direction."* Its beat 0 walks him 46 units right and moonwalks
+all 46 back.
+
+The cause is one line of `make-wander`'s own reasoning. It asked `Math.sign(span) !==
+facing` ONCE, at the top of the round trip, and hung both turns on the answer — which
+is right for the leg OUT and says nothing about the leg BACK, whose direction is the
+opposite. Every stroll whose outbound leg already matched his facing came home
+backwards.
+
+- **Before every leg, face the way that leg travels; after the last one, go back to
+  the way the scene staged him.** The multiplier that faces stage-direction `d` is
+  `d * facing`, both being ±1. Restoring at the end is what lets a beat hand on the
+  facing it was given.
+- **`check:wander` §3f re-derives it from the table**, walking each plan's step and
+  turn moves in order against the scene's own per-beat facing (`facingOf`, now shared
+  by the generator and the checker rather than copied into both).
+- **AND THE LEG THE LAYER INVENTS IS HELD TO IT TOO.** The walk back into a beat's
+  room is generated at runtime, because the generator cannot know where a tap left
+  him, so its facing is derived rather than planned: a turn out before it and a turn
+  back after it, both eased, both skipped when he already faces that way. The table
+  rule cannot see that leg, so §2 replays every tap and fails on BACKWARDS.
+
+### AF10 · A beat change is a walk, and it used to be a clamp
+
+The layer carries `dx` across a beat, and the new beat's room may not contain it.
+`wanderState` clamped it — under a comment promising that "walking back in is a step
+like any other; appearing back in would be a teleport". The clamp WAS the teleport:
+730 taps moved him more than a unit sideways in a single frame and the worst moved
+him 44, because a beat with no room at all reports `[0, 0]` and 343 beats have none.
+
+Four phases, each continuous with the last, and a tap can land in any of them:
+
+1. **the rest of the interrupted step**, at its own gait phase — a man mid-stride
+   cannot turn on the spot, and making him do it swapped a walking stance for a
+   standing one between two frames (21.7 units);
+2. **a turn**, if the way home is not the way he is already facing;
+3. **the walk home**, to where the SCENE puts him rather than to the nearest legal
+   spot — a plan's step targets are absolute offsets authored for a figure at 0, so
+   from −31 a plan whose first step goes to −27 walks him RIGHT while its own turn
+   faces him LEFT;
+4. **the turn back**, so the beat hands on the facing it was given.
+
+A CONTINUATION IS ONLY A CONTINUATION IF IT GOES THE SAME WAY. Read as one, a
+reversed clamp was given `1 − legU` of a step's time to cover the whole distance, and
+walked 42 units in two milliseconds.
+
+### AF11 · The gaze is handed over on a ramp, never on a switch
+
+`gazeKeep` hands the neck to the layer while the layer is using it. Its walking term
+was a hard `legU >= 0 && legU <= 1 ? 1 : 0`, and `wanderStance` dropped the look and
+lean offsets outright for the same reason — so on the frame a step began, up to 0.6
+of the gaze angle across the neck AND the spine was switched off between two frames
+while the body had moved no distance at all. **17 units of head in one frame, on 206
+plans across 129 lessons.**
+
+`stepBusy` is one ramp, read by both: it reaches 1 in the first fifth of the step and
+leaves it in the last, so it is 0 on the frames either side of the leg. Its fraction
+is of the WHOLE JOURNEY — `(prior + span·legU) / (prior + span)`, the arithmetic
+`stepStance` already uses — because a tap re-parameterises the remainder of a step
+from zero, and reading the ramp off `legU` alone brought the gaze back for one frame
+in the middle of a stride.
+
+### AF12 · A carried turn comes home, and not while he is walking
+
+`face` carries across a beat, so a tap between a stroll's turn out and its turn back
+hands the next beat a mirrored figure. A plan that says nothing about the facing used
+to hold him that way for the rest of the lesson.
+
+- A plan with no TURN of its own eases him home; a plan that has one reads its track
+  FROM the value coming home, so the two are one expression.
+- **It waits until his feet have stopped.** Read off the beat clock, the ease ran
+  during the walk back in and turned him to face forward while he was still walking
+  left — C18 again, produced by the fix for it. It starts at the turn back (phase 4),
+  which is the same 0.32s of turning, so a reader who taps exactly mid-turn — carrying
+  a `face` of 0, a figure with no width at all — un-flattens as part of a turn rather
+  than after one.
+- `check:wander` holds that he ALWAYS comes back (0 of 77,580 taps fail) and how long
+  a carried turn lasts before he is upright again (2.65s of a 3.0s budget).
+
+### AF13 · The checker must replay what the app runs, and tap where the reader lands
+
+Both halves of `check:wander` were exact about the wrong thing, and every number
+above was green while the app had all four defects.
+
+- **It replayed `wanderStance` alone.** The app never calls it: `lookPose` runs the
+  layer, hands the neck over by `gazeKeep`, then carries the lean off the gaze. Two
+  thirds of the composition were outside the measurement, which is where AF11 lived.
+- **Its tap restarted the SAME plan.** The same plan has the same room and the same
+  turns, so the one handover the test exists to measure was the one it never made.
+  It reported 0.00 while a real beat change moved him 44 units.
+- Two things it must hold CONSTANT across that tap, or it measures itself: the gaze
+  TARGET (the player eases it over 560ms) and the scene's own facing (a scene that
+  turns him between beats eases that itself). Flipping either reported 70 units of
+  the instrument's own cut, and judging a walk by the next beat's facing reported 271
+  correct walks as backwards.
 
 ---
 

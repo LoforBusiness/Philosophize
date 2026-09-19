@@ -99,11 +99,50 @@ export interface WanderState {
    * is what keeps the gait's phase continuous across a tap (`stepStance`).
    */
   legPrior: number;
+  /**
+   * THE LEG THE LAYER GENERATED FOR ITSELF, rather than one `make:wander` planned.
+   *
+   * A tap can leave him standing where this beat's art does not allow, and the
+   * generator cannot know where. Walking him back in is a leg like any other — but
+   * it is not in the plan, so its facing is not in the plan either, and a leg
+   * walked against the facing is the moonwalk C18 is about. `homeDir` is the stage
+   * direction that leg travels (+1 right, −1 left, 0 for no such leg) and `turnU`
+   * is how much of the way round he has turned to face it, eased out before the
+   * walk and back after it so `wanderDir` never flips between two frames.
+   */
+  homeDir: number;
+  turnU: number;
 }
 
 const REST: WanderState = {
   dx: 0, look: 0, sit: 0, crouch: 0, face: 1, lean: 0, legFrom: 0, legTo: 0, legU: -1, legPrior: 0,
+  homeDir: 0, turnU: 0,
 };
+
+/**
+ * How long the figure takes to turn on the spot, and the window an unplanned turn
+ * is given. `make:wander` writes 0.30–0.34 for the turns it schedules; this is the
+ * same move, so it takes the same time.
+ */
+export const TURN_S = 0.32;
+
+/**
+ * THE FACING COMES HOME WHEN THE PLAN STOPS TALKING ABOUT IT.
+ *
+ * `face` carries across a beat, so a reader who taps in the middle of a stroll —
+ * between the turn out and the turn back — used to hand the next beat a figure
+ * that was mirrored, and a plan with no TURN move of its own held him that way for
+ * the rest of the lesson. Measured across every beat boundary at every tenth of a
+ * second, 2.3% of taps did it. A plan that says nothing about the facing means "as
+ * the scene staged him", so the layer turns him back rather than holding a
+ * mirrored mascot; eased, because a flip between two frames swaps the man for a
+ * mirrored copy (group L, and `facing` in cinematicKit).
+ */
+function homeFace(face: number, t: number): number {
+  'worklet';
+  if (face > 0.999) return 1;
+  return lerp(face, 1, ease01(clamp01(t / TURN_S)));
+}
 
 /** The layer at rest — what a beat with no plan draws, and what a lesson starts at. */
 export function wanderRest(): WanderState {
@@ -140,6 +179,13 @@ function trackAt(plan: readonly number[], kind: number, t: number, from: number)
   return [cur, legFrom, legTo, legU];
 }
 
+/** Whether a plan schedules any move of a kind at all. */
+function hasKind(plan: readonly number[], kind: number): boolean {
+  'worklet';
+  for (let j = W_HEAD; j + 3 < plan.length; j += W_STRIDE) if (plan[j] === kind) return true;
+  return false;
+}
+
 /**
  * THE WHOLE LAYER AT ONE INSTANT.
  *
@@ -156,35 +202,108 @@ function trackAt(plan: readonly number[], kind: number, t: number, from: number)
  * picture.
  */
 export function wanderState(
-  plan: readonly number[], t: number, start: WanderState,
+  plan: readonly number[], t: number, start: WanderState, dir = 1,
 ): WanderState {
   'worklet';
-  if (plan.length < W_HEAD) return { ...start, legU: -1, legPrior: 0 };
-  const lo = plan[0];
-  const hi = plan[1];
+  // A BEAT WITH NO PLAN OF ITS OWN IS A PLAN WITH NO MOVES AND NO WALLS, which is
+  // not the same thing as a full stop. This used to return early with `legU: -1`,
+  // under a docstring promising it "holds whatever he was doing" — and abandoning a
+  // step in mid-stride is the one thing it cannot hold: a tap onto a planless beat
+  // swapped a walking stance for a standing one and switched the gaze back on
+  // between two frames, measured at 21.7 units. Given the whole stage as its room
+  // it falls through the same machinery as any other plan, so the step he is in the
+  // middle of is walked out and every track simply holds.
+  const empty = plan.length < W_HEAD;
+  const lo = empty ? -1e4 : plan[0];
+  const hi = empty ? 1e4 : plan[1];
 
-  // THE CARRIED OFFSET IS CLAMPED TO THIS BEAT'S OWN ROOM. He may have been
-  // standing somewhere the previous beat's art left clear and this one does not,
-  // and the generator cannot know when a reader taps. Walking back in is a step
-  // like any other; appearing back in would be a teleport.
-  const held = start.dx < lo ? lo : start.dx > hi ? hi : start.dx;
-  const finish = start.legU > 0 && start.legU < 1
-    ? (start.legTo < lo ? lo : start.legTo > hi ? hi : start.legTo)
-    : held;
-  const rest = finish !== held;
-  const fin = rest ? stepSeconds(finish - held) * (1 - start.legU) : 0;
+  // ── COMING BACK INTO THIS BEAT'S ROOM IS A WALK, AND IT USED TO BE A CLAMP ──
+  //
+  // He may have been standing somewhere the previous beat's art left clear and
+  // this one does not, and the generator cannot know when a reader taps. This read
+  // `held = clamp(start.dx, lo, hi)` and then walked only the REMAINDER of a step a
+  // tap had cut into — so the clamp itself was a teleport, and it is the one the
+  // paragraph it was written under promises cannot happen. A beat with no room at
+  // all reports `[0, 0]` (`roomFor` returns null for 343 of them), so a tap during
+  // the stroll before one snapped him home from wherever he had walked to:
+  // measured at every beat boundary at every tenth of a second, 730 taps moved him
+  // more than a unit sideways in a single frame and the worst moved him 44.
+  //
+  // So the walk in is a LEG, prepended to the plan exactly as the finish of an
+  // interrupted step already was, and the two are now one expression: `was` is
+  // where the previous frame drew him, and `finish` is wherever he is headed — the
+  // step he was in the middle of, or the nearest point of this beat's own room.
+  const was = start.dx;
+  const mid = start.legU > 0 && start.legU < 1;
+  // He finishes the step he is in the middle of FIRST, wherever this beat's room
+  // is: a man mid-stride cannot turn on the spot, and making him do it swapped a
+  // walking stance for a standing one between two frames (21.7 units, measured).
+  // So the walk in is up to four phases, and each one is continuous with the last:
+  //
+  //   A  the rest of the interrupted step, at its own gait phase
+  //   B  a turn, if the way home is not the way he is already facing
+  //   C  the walk home, into the nearest point of this beat's room
+  //   D  the turn back, so the beat hands on the facing it was given
+  //
+  // A tap can land inside any of them, and all four are pure functions of `t`, so
+  // the next beat reads them the same way this one did.
+  const stepEnd = mid ? start.legTo : was;
+  const tA = mid && Math.abs(stepEnd - was) > 0.01
+    ? stepSeconds(stepEnd - was) * (1 - start.legU)
+    : 0;
+  // AND HE WALKS BACK TO WHERE THE SCENE PUTS HIM, not merely to the nearest legal
+  // spot. A plan's STEP targets are ABSOLUTE offsets authored for a figure standing
+  // at 0 — and every plan ends at 0, so a carried offset only ever exists because a
+  // reader tapped mid-stroll. Left standing at −31, a plan whose first step goes to
+  // −27 walks him RIGHT while its own turn faces him LEFT: 70 taps moonwalked that
+  // way, and the table rule cannot see it because the table is written for a figure
+  // starting at 0. Putting him back is what makes the plan mean what it says.
+  const finish = 0 < lo ? lo : 0 > hi ? hi : 0;
+  const back = finish - stepEnd;
+  const rest = back > 0.01 || back < -0.01;
+  const homeDir = rest ? (back > 0 ? 1 : -1) : 0;
+  // His facing at the instant of the tap. `make:wander` gives every step it
+  // schedules its own turn (`check:wander` §3 holds that); this leg is generated
+  // here, because the generator cannot know where a tap left him, so its turn is
+  // derived instead — and skipped when he already faces that way.
+  const faced = (dir < 0 ? -1 : 1) * (start.face < 0 ? -1 : 1);
+  const tB = rest && homeDir !== faced ? TURN_S : 0;
+  const tC = rest ? stepSeconds(back) : 0;
+  const homeAt = tA + tB + tC;
+  const fin = homeAt + tB;
 
-  let dx = held;
+  let dx = was;
   let legFrom = 0;
   let legTo = 0;
   let legU = -1;
   let legPrior = 0;
-  if (rest && t < fin) {
-    legFrom = held;
-    legTo = finish;
-    legU = ease01(t / Math.max(fin, 0.01));
-    legPrior = Math.abs(start.dx - start.legFrom);
-    dx = lerp(legFrom, legTo, legU);
+  let turnU = 0;
+  if (t < fin) {
+    if (t < tA) {
+      // A — and `legPrior` is what keeps the gait's phase running through the tap
+      // rather than restarting it (`stepStance`).
+      legFrom = was;
+      legTo = stepEnd;
+      legU = ease01(t / Math.max(tA, 0.01));
+      legPrior = Math.abs(start.dx - start.legFrom);
+      dx = lerp(legFrom, legTo, legU);
+    } else if (t < tA + tB) {
+      // B — `turnU` is how far round toward `homeDir` he is, and it must be 0 on
+      // the frames either side of the window or `wanderDir` flips him between two
+      // of them (37 units, measured, before it was eased).
+      dx = stepEnd;
+      turnU = ease01((t - tA) / tB);
+    } else if (t < tA + tB + tC) {
+      legFrom = stepEnd;
+      legTo = finish;
+      legU = ease01((t - tA - tB) / Math.max(tC, 0.01));
+      dx = lerp(legFrom, legTo, legU);
+      turnU = tB > 0 ? 1 : 0;
+    } else {
+      // D
+      dx = finish;
+      turnU = tB > 0 ? 1 - ease01((t - tA - tB - tC) / tB) : 0;
+    }
   } else {
     const walked = trackAt(plan, W_STEP, t - fin, finish);
     dx = walked[0] < lo ? lo : walked[0] > hi ? hi : walked[0];
@@ -197,8 +316,32 @@ export function wanderState(
   const sit = clamp01(trackAt(plan, W_SIT, t - fin, start.sit)[0]);
   const crouch = clamp01(trackAt(plan, W_CROUCH, t - fin, start.crouch)[0]);
   const lean = clamp01(trackAt(plan, W_LEAN, t - fin, start.lean)[0]);
-  const face = trackAt(plan, W_TURN, t - fin, start.face)[0];
-  return { dx, look, sit, crouch, face, lean, legFrom, legTo, legU, legPrior };
+  // A PLAN WITH NO TURN OF ITS OWN BRINGS HIM HOME rather than holding a mirrored
+  // figure for the rest of the lesson — see `homeFace`. AND SO DOES THE WINDOW
+  // BEFORE A PLAN THAT HAS ONE: the turn track is read from `t − fin`, so a walk
+  // back in that outlasts the beat left the track before its first move and held
+  // the carried facing for the whole of it. 94 taps did that; the plan picks up
+  // from wherever the ease has got to by `fin`, which is the same value on both
+  // sides of the boundary.
+  // The turn track is READ FROM the value coming home, not from the carried one, so
+  // the two cases are one expression: before the plan's first turn he is already
+  // turning back, and from the first turn on the plan's own absolute targets govern.
+  //
+  // AND IT WAITS UNTIL HIS FEET HAVE STOPPED. Read off `t`, the ease ran while the
+  // walk back in was still going — so a tap taken just after a stroll's turn, with
+  // the return leg under way, turned him to face forward while he was still walking
+  // left. That is C18 again, produced by the fix for it.
+  //
+  // It starts at PHASE D, the turn back, rather than at the end of the window: those
+  // are the same 0.32s of turning, and a reader who taps exactly mid-turn carries a
+  // `face` of 0 — a figure with no width at all — which held frozen for the whole
+  // walk and then had to un-flatten afterwards. Eased across phase D it comes home
+  // as the same turn `turnU` is already unwinding.
+  const homed = homeFace(start.face, t - homeAt);
+  const face = hasKind(plan, W_TURN)
+    ? trackAt(plan, W_TURN, t - fin, homed)[0]
+    : homed;
+  return { dx, look, sit, crouch, face, lean, legFrom, legTo, legU, legPrior, homeDir, turnU };
 }
 
 /**
@@ -393,6 +536,37 @@ function stepStance(
  * `k` is the figure's scale: the plan is in STAGE units, because that is what the
  * boxes it was measured against are in, and the rig works in its own.
  */
+export function stepBusy(st: WanderState): number {
+  'worklet';
+  if (!(st.legU >= 0 && st.legU <= 1)) return 0;
+  if (Math.abs(st.legTo - st.legFrom) + st.legPrior <= 0.5) return 0;
+  // A RAMP, NOT A SWITCH, AND THAT IS THE WHOLE POINT OF THE FUNCTION.
+  //
+  // This used to be read straight off `legU >= 0 && legU <= 1` at both call sites,
+  // as a hard 1 or 0 — so on the frame a step began, the gaze (up to 0.6 of the
+  // gaze angle, across the neck AND the spine) and any look or lean offset were
+  // switched off between two frames while the body had moved no distance at all.
+  // Measured through `lookPose`'s real composition, that is 17 units of head in one
+  // frame, on 206 plans across 129 lessons — and it was invisible to `check:wander`,
+  // which replays `wanderStance` and never calls `lookPose`.
+  //
+  // It reaches 1 in the first fifth of the step and leaves it in the last, so it is
+  // 0 on the frames either side of the leg and the handover is continuous at both
+  // ends. A fraction rather than a fixed time because the step's duration is not
+  // in the state; measured after, the worst frame is well inside budget.
+  //
+  // AND THE FRACTION IS OF THE WHOLE JOURNEY, NOT OF THE LEG — the same arithmetic
+  // `stepStance` uses, for the same reason. A tap re-parameterises the REMAINDER of
+  // a step from zero, so reading the ramp off `legU` alone made a step that was
+  // half walked read as one just beginning: the gaze came back on for one frame in
+  // the middle of a stride, measured at 15.7 units. `legPrior` is the distance
+  // already covered, so `walked / total` is continuous straight through the tap.
+  const span = Math.abs(st.legTo - st.legFrom);
+  const total = Math.abs(st.legPrior) + span;
+  const u = total > 0.01 ? (Math.abs(st.legPrior) + span * st.legU) / total : 1;
+  return clamp01(u / 0.2) * clamp01((1 - u) / 0.2);
+}
+
 export function wanderStance(base: Stance, st: WanderState, t: number, k: number): Stance {
   'worklet';
   let s = base;
@@ -411,10 +585,12 @@ export function wanderStance(base: Stance, st: WanderState, t: number, k: number
   }
   // Looking up while sitting is most of what sitting is FOR — he is on the floor
   // taking the thing in — so the head offsets are applied on top of the seat
-  // rather than instead of it. They are not applied to a walk: a head craned back
-  // while the feet are running is the one combination that reads as a fault.
-  if (st.legU >= 0 && st.legU <= 1) return s;
-  return leaned(looked(s, st.look), st.lean);
+  // rather than instead of it. They are FADED OUT of a walk rather than dropped
+  // from one: a head craned back while the feet are running is the one combination
+  // that reads as a fault, and taking it away in a single frame is the other one.
+  const rest = 1 - stepBusy(st);
+  if (rest <= 0) return s;
+  return leaned(looked(s, st.look * rest), st.lean * rest);
 }
 
 /**
@@ -428,11 +604,12 @@ export function wanderStance(base: Stance, st: WanderState, t: number, k: number
  */
 export function gazeKeep(st: WanderState): number {
   'worklet';
+  const walking = stepBusy(st);
   const busy = Math.max(
-    Math.abs(st.look),
+    Math.abs(st.look) * (1 - walking),
     st.sit,
     st.crouch,
-    st.legU >= 0 && st.legU <= 1 ? 1 : 0,
+    walking,
   );
   return 1 - clamp01(busy);
 }
@@ -448,7 +625,13 @@ export function gazeKeep(st: WanderState): number {
  */
 export function wanderDir(dir: number, st: WanderState): number {
   'worklet';
-  return dir * st.face;
+  const d = dir * st.face;
+  // AND A LEG THE LAYER GENERATED FOR ITSELF IS TURNED INTO the same way. `homeDir`
+  // is a STAGE direction rather than a multiplier, so it needs no second opinion
+  // about which way the scene stands him; `turnU` eases out and back inside the
+  // window `wanderState` set aside for it, and is 0 on the frames either side.
+  if (!st.homeDir || st.turnU <= 0) return d;
+  return d + (st.homeDir - d) * st.turnU;
 }
 
 /** Feet-to-crown, for the checker: how tall he stands once the layer is applied. */
