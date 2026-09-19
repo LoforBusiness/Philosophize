@@ -18,6 +18,8 @@ import { BRANCH_ART, MAST_SCRIM, ArtCream, ArtSoft, ArtGold } from '@/constants/
 import { C, TYPE, SPACE, RADIUS, LIP, BRANCH, type TypeKey } from '@/constants/design';
 import { TINT, TINT_EDGE } from '@/components/shared/tone';
 import BranchWorld, { type WorldLesson } from '@/components/branch/BranchWorld';
+import { openReview } from '@/components/lesson/lessonNav';
+import { hasReview } from '@/components/lesson/cinematic/review/UnitReview';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 
@@ -256,6 +258,7 @@ export default function BranchDetailScreen() {
     if (i >= 0) worldAt = i;
   }
 
+  const reviewed = useUserDataStore((st) => st.unitsReviewed);
   const pres = PRES[branch.slug] ?? { desc: branch.description, glyph: 'book' as GlyphName, pills: [] };
   const roman = ROMAN[Math.max(0, ORDER.indexOf(branch.slug))];
 
@@ -527,6 +530,25 @@ export default function BranchDetailScreen() {
                           </Pressable>
                         );
                       })}
+                      {/* THE UNIT REVIEW, AFTER THE LAST LESSON AND ONLY ONCE THEY
+                          ARE ALL DONE. It is not a lesson — it never moves
+                          `lessonsByUnit`, so it cannot be numbered among them — and it
+                          is never locked: a reader who has finished a unit has earned
+                          the right to look back over it, Pass or no Pass. */}
+                      {hasReview(u.unit.id) && u.done >= u.unit.lessons.length ? (
+                        <Pressable
+                          onPress={() => { setDrawerOpen(false); openReview(branch.slug, u.unit.slug); }}
+                          style={({ pressed }) => [styles.lessonRow, styles.reviewRow, pressed && { opacity: 0.55 }]}
+                        >
+                          <SketchIcon name="star" size={13} color={C.ink} />
+                          <Text style={[styles.lessonName, styles.reviewName]} numberOfLines={1}>
+                            Unit review
+                          </Text>
+                          {reviewed.includes(u.unit.id) ? (
+                            <SketchIcon name="check" size={11} color={C.inkSoft} />
+                          ) : null}
+                        </Pressable>
+                      ) : null}
                     </View>
                   );
                 })}
@@ -659,6 +681,8 @@ const styles = StyleSheet.create({
   unitKicker: { ...role('micro'), fontFamily: 'Inter_700Bold', color: C.inkSoft, letterSpacing: 1.4 },
   unitName: { ...role('body'), fontFamily: PLAYFAIR_HEAD, color: C.ink, marginTop: SPACE[0] },
   unitCount: { ...role('micro'), color: C.inkSoft, letterSpacing: 0 },
+  reviewRow: { gap: SPACE[2] },
+  reviewName: { fontFamily: 'Inter_700Bold' },
   lessonRow: {
     flexDirection: 'row',
     alignItems: 'center',

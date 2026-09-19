@@ -61,6 +61,18 @@ export function openLesson(branchSlug: string, unitSlug: string, lessonId: strin
 }
 
 /**
+ * The unit review (`data/unitReviews.ts`), which is a sibling of the lesson route.
+ *
+ * Anchored for openLesson's own reason: entered from Home or from a deep link, the
+ * Learn stack has nothing beneath this screen, and `router.back()` would hand the
+ * press to the tab navigator and land the reader on Home with the tab still holding
+ * the screen they left (§11, check:nav).
+ */
+export function openReview(branchSlug: string, unitSlug: string) {
+  router.push(`/(app)/branches/${branchSlug}/${unitSlug}/review` as never, { withAnchor: true });
+}
+
+/**
  * After a lesson, put its branch in front of the reader with the list under it.
  *
  * `path` is where the stack is NOW (the caller's `usePathname()`). On an ordinary

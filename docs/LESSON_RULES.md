@@ -9790,6 +9790,82 @@ the run structure is read once from before the pass (`scripts/make-splitruns.mjs
 `scripts/lib/splitruns.json`) and used wherever a lesson's beat count still
 matches; the pulse rule is the fallback for a lesson re-cut since.
 
+## Group AK · A unit ends with a review
+
+> *"At the end of each unit there is a lesson review … it goes through some of the
+> information that was talked about or questions or different kinds of questions that
+> are asked inside the unit that the user just completed. This operates just like
+> another lesson but it's strictly for a lesson review. I want all the animations, all
+> the things a lesson has into this review. And at the end … a certificate or a
+> celebration."*
+
+All 28 units have one. `data/unitReviews.ts` is the content, `components/lesson/
+cinematic/review/` the machinery, `npm run check:review` the ratchet and
+`node scripts/countertest-review.mjs` the counter-test.
+
+### AK1 · It is a PHASE played by the lesson player, not a lesson
+
+`UnitReview` builds a synthetic `Lesson` and hands it to `CinematicPlayer`, so the
+deck, the camera, the six answer controls, the verdict seal, the XP coin, the rising
+letters, tap-left-to-go-back and its guide are the same code paths rather than
+lookalikes — which is the only way to be sure of *"all the animations, all the things
+a lesson has"*. The player gained ONE optional prop, `finish`, which replaces the
+reward overlay; without it all 246 lessons end exactly as they always have.
+
+It is in no branch, so it never moves `lessonsByUnit`, never touches the free-tier
+gate and appears in no generated table. `check:cinematic`'s house shape does not apply
+and a review is free to be four questions and no quote.
+
+### AK2 · The questions are new; the stage is shared
+
+Both were the owner's choice and they pull opposite ways on cost. A review that
+re-asked the lesson's own question would be a lesson played twice, and the
+interesting question at the end of a unit is the one that only makes sense once all
+of it has been read. A hand-drawn scene per unit is the same build as twenty-eight
+new lessons, so the stage is one data-driven scene: up to four labelled plates that
+arrive as the review builds its table, the figure walking to whichever is being
+discussed, and the question handed to the player's own controls.
+
+`check:review` holds four questions per review, two to four plates, one control and
+one correct answer per question, and — offline, against the real `.ttf` — that every
+plate word fits the 68-unit slot the stage draws it in. Its first run caught three
+that did not.
+
+### AK3 · The celebration is the app's own struck seal
+
+Researched before it was drawn. Duolingo's lesson celebration is the MASCOT doing
+something, with staggered stat cards counting afterwards; the completion-certificate
+literature splits on whether the certificate is substantive and keepable. This app
+already had the answer written down in §7: a seal is a DIE COMING DOWN, so it falls
+ACCELERATING (`Easing.in`; `Easing.out` decelerates into the paper, which is what made
+the streak stamp read as a pop), squashes, recoils, and leaves a PRESS RING on the
+frame it lands. `UnitStamp` is that, with the stickman bringing it down.
+
+### AK4 · Every figure it prints, it pays
+
+The review runs on the lesson player, so it shows a +10 beside each question and a
+running XP pill in its header. Those are awarded, along with `XP_PER_PATH_MASTERY` —
+defined and unused since the constant file was written — the FIRST time only, in the
+same store statement that records the unit, so "once" cannot come apart from the
+record of it. A screen that displays a figure it does not award is §14's fault one
+surface over.
+
+### AK5 · Design coordinates need the stage's crop
+
+`UnitStamp` draws in the 400×560 design space the rig works in, and a raw box does not
+scale it: the plate at y 300 and the figure at y 500 were simply clipped away, and the
+celebration was an empty page with a Done button on it. Anything using rig
+coordinates outside `CinematicPlayer` needs the same window-and-scale the stage uses.
+
+### AK6 · A style comes from `useAnimatedStyle`, never `useDerivedValue`
+
+A derived value is an object carrying a `.value`; handed to a view as a style it is an
+unknown prop and is silently ignored. Every plate therefore rendered at its default
+and the whole table arrived on beat 0 — no error, no warning, just a scene that did
+not animate.
+
+---
+
 ## Group AI · A lesson is read in both directions
 
 > *"On the right side of the screen, if they tap it, it goes to the next one; on the

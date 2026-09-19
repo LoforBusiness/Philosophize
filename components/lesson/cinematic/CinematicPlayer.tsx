@@ -171,9 +171,17 @@ export type SceneComponent = ComponentType<SceneApi>;
 
 export default function CinematicPlayer({
   lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk, gesture, shots,
-  camera, ground = GROUND,
+  camera, ground = GROUND, finish,
 }: {
   lesson: Lesson;
+  /**
+   * WHAT HAPPENS INSTEAD OF THE REWARD SCREEN, for the one caller that is not a
+   * lesson: a unit review (`data/unitReviews.ts`) is played by this component so it
+   * gets every animation a lesson has, and then ends on its own celebration rather
+   * than on the XP overlay and a pop back to the branch. Absent — which it is for all
+   * 246 lessons — the ending is exactly what it has always been.
+   */
+  finish?: (r: { xp: number; correct: number; total: number }) => void;
   beats: BaseBeat[];
   Scene: SceneComponent;
   /** Hide the animated stage on some beats (default: the summary). */
@@ -1128,6 +1136,7 @@ export default function CinematicPlayer({
   // screen off the tab stack, so it never lingers and re-shows the reward.
   useEffect(() => {
     if (!done) return;
+    if (finish) { finish({ xp: lessonXP(correct, asked), correct, total: asked }); return; }
     const found = getLessonById(lesson.id);
     showReward({
       xp: lessonXP(correct, asked),

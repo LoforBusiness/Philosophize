@@ -88,6 +88,16 @@ export const EVENTS = {
   },
 
   // ── the core loop ─────────────────────────────────────────────────────────
+  unit_review_started: {
+    note: 'A unit review opened (data/unitReviews.ts). Not a lesson: it never moves lessonsByUnit.',
+    props: ['unit_id', 'branch_slug'],
+    where: 'app/(app)/branches/[branchSlug]/[pathSlug]/review.tsx',
+  },
+  unit_review_completed: {
+    note: 'A unit review finished. `first` is false on a replay, which pays no mastery XP.',
+    props: ['unit_id', 'branch_slug', 'correct', 'total', 'first'],
+    where: 'components/lesson/cinematic/review/UnitReview.tsx',
+  },
   lesson_started: {
     note: 'A lesson opened. `format` is the cinematic takeover: cards are the old runner.',
     props: ['lesson_id', 'branch_slug', 'unit_id', 'format', 'total_cards'],

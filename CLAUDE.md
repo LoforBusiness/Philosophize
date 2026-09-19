@@ -1086,7 +1086,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **sixty-three** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **sixty-four** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1097,7 +1097,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-wander` · `check-skin` · `check-thoughts` · `check-marks` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-wander` · `check-skin` · `check-thoughts` · `check-marks` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
 > replays the figure, and a prop's animation was invisible to every check unless it
@@ -4640,6 +4640,61 @@ Lessons to bring it back (NN/g: help must be easy to dismiss and easy to bring b
 - **The web never speaks, so a lesson there has no Aa button**, and the guide shows no
   callout rather than one pointing at nothing. Verifying the ring needed the preview to
   claim narration support; the phone has it for real.
+
+### And a unit ends with a review, and a stamp (group AK)
+
+> *"At the end of each unit there is a lesson review … it goes through some of the
+> information that was talked about or questions … This operates just like another
+> lesson but it's strictly for a lesson review. I want all the animations, all the
+> things a lesson has into this review. And at the end … a certificate or a
+> celebration … some kind of animation that makes user happy."*
+
+**ALL 28 UNITS HAVE ONE: 112 new questions, four each.** `data/unitReviews.ts` is the
+content and `components/lesson/cinematic/review/` the machinery. Two decisions were
+the owner's and they pull opposite ways on cost — the QUESTIONS are written per unit
+(a review that re-asked the lesson's own question is a lesson played twice, and the
+interesting question at the end of a unit is the one that only makes sense once all of
+it has been read), and the STAGE is shared (a hand-drawn scene per unit is the same
+build as twenty-eight new lessons).
+
+**IT IS A PHASE PLAYED BY THE LESSON PLAYER, WHICH IS THE WHOLE TRICK.** `UnitReview`
+builds a synthetic `Lesson` and hands it to `CinematicPlayer`, so the deck, the camera,
+the six controls, the verdict seal, the XP coin, the rising letters, the back-and-
+forward navigation and its guide are the same code paths rather than lookalikes — the
+only way to be sure of "all the animations, all the things a lesson has". The player
+gained ONE optional prop, `finish`; without it all 246 lessons end as they always have.
+A review is in no branch, so it never moves `lessonsByUnit`, never touches the
+free-tier gate and appears in no generated table, and `check:cinematic`'s house shape
+does not apply to it.
+
+**THE CELEBRATION IS THIS APP'S OWN SEAL, AND THE RESEARCH AGREED.** Duolingo's
+celebration is the MASCOT doing something with the stats counting afterwards, and the
+certificate literature splits on whether the certificate is keepable. §7 already had
+the physics: a die falls ACCELERATING, squashes, recoils and leaves a press ring. The
+stickman brings it down on the unit's name.
+
+**AND `XP_PER_PATH_MASTERY` HAS A HOME AT LAST** — defined and unused since the
+constants file was written. 100 the first time, plus the per-question XP the header
+has been counting all the way through, because a screen that prints a figure it does
+not award is §14's fault one surface over.
+
+Three things it cost, each now a rule (AK4–AK6):
+
+- **The stamp drew in design coordinates inside an unscaled box**, so the plate at
+  y 300 and the figure at y 500 were clipped away and the celebration was an empty
+  page with a Done button on it. Rig coordinates outside the player need the same
+  window-and-scale the stage uses.
+- **A style came from `useDerivedValue` rather than `useAnimatedStyle`.** A derived
+  value handed to a view as a style is an unknown prop and is silently ignored — no
+  error, no warning, and every plate rendered at its default, so the whole table
+  arrived on beat 0 instead of building.
+- **`check:routes` flagged the new route**, correctly: git is its oracle, and an
+  untracked file in `app/` is a harness throwaway until it is added.
+
+`npm run check:review` holds the content — four questions a review, one control and
+one answer each, and every plate word measured against the real `.ttf` for the 68-unit
+slot it is drawn in, which caught three on its first run.
+`node scripts/countertest-review.mjs` stages seven defects.
 
 ### The stage is coloured now, at exactly the grey's luminance
 

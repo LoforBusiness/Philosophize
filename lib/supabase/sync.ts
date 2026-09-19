@@ -30,6 +30,7 @@ export interface CloudState {
   onboardingVersion: number;
   joinedAt: number | null;
   earnedBadges: string[];
+  unitsReviewed: string[];
   badgesInitialized: boolean;
   displayName: string;
   email: string;
@@ -42,7 +43,7 @@ export interface CloudState {
 
 const SYNC_FIELDS: (keyof CloudState)[] = [
   'savedQuotes', 'profileQuote', 'philosopherViews', 'philosopherLessons', 'lessonsByUnit', 'lessonsByBranch', 'beliefResultId',
-  'streak', 'totalXP', 'xpEvents', 'rankIndex', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'badgesInitialized',
+  'streak', 'totalXP', 'xpEvents', 'rankIndex', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'unitsReviewed', 'badgesInitialized',
   'displayName', 'email', 'bio', 'portrait', 'profileBackground', 'nameFont', 'settings',
   'restDaysEarned', 'restDaysUsed', 'startingBranch', 'onboardingVersion',
   // The daily history behind the streak calendar. Merged as a UNION below, the
@@ -227,6 +228,11 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
   // Max, not sum: the counter is monotonic per device, so the higher number is the
   // truer one and adding them would double-count a lesson synced from both.
   const philosopherLessons = mergeMax(local.philosopherLessons, remote.philosopherLessons);
+  // A UNION, for earnedBadges' own reason: two devices that reviewed different units
+  // must keep both, and a unit reviewed on one is reviewed for the account.
+  const unitsReviewed = Array.from(
+    new Set([...(local.unitsReviewed ?? []), ...(remote.unitsReviewed ?? [])]),
+  );
   const earnedBadges = Array.from(
     new Set([...(local.earnedBadges ?? []), ...(remote.earnedBadges ?? [])])
   );
@@ -330,6 +336,7 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
     lastLessonDate,
     joinedAt,
     earnedBadges,
+    unitsReviewed,
     badgesInitialized,
     displayName,
     email,

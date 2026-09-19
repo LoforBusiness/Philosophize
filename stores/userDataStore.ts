@@ -12,7 +12,9 @@ import {
 import { awardedRank, rankForXP } from '@/data/ranks';
 import { DEFAULT_BACKGROUND_ID } from '@/data/profileBackgrounds';
 import { DEFAULT_PROFILE_FONT } from '@/data/profileFonts';
-import { XP_PER_PHILOSOPHER_MET, XP_PER_QUIZ, XP_PER_QUIZ_PERFECT, XP_PER_SAVED_QUOTE } from '@/constants/xp';
+import {
+  XP_PER_PATH_MASTERY, XP_PER_PHILOSOPHER_MET, XP_PER_QUIZ, XP_PER_QUIZ_PERFECT, XP_PER_SAVED_QUOTE,
+} from '@/constants/xp';
 import { restCap, restDaysHeld, restEarnEvery } from '@/constants/streak';
 import { mentionsFor } from '@/data/lessonMentions';
 import { restDaysToSpend } from '@/lib/utils/streak';
@@ -382,6 +384,14 @@ interface UserDataState {
   joinedAt: number | null;                    // epoch ms of first app open
   earnedBadges: string[];
   /**
+   * Unit ids whose REVIEW has been finished (data/unitReviews.ts).
+   *
+   * A list rather than a count, for the same reason `earnedBadges` is one: the cloud
+   * merges it as a union, so two devices that reviewed different units keep both, and
+   * a review finished twice can never pay its mastery XP twice.
+   */
+  unitsReviewed: string[];
+  /**
    * THE THREE BADGES THE READER CHOSE TO SHOW, in the order they chose them.
    *
    * Ids, not indexes, because the badge case is re-ordered whenever it is
@@ -488,6 +498,15 @@ interface UserDataState {
   resetProgress: () => void;
   clearSavedQuotes: () => void;
   revokeBadges: () => void;
+  /**
+   * A unit's review is finished. Pays `XP_PER_PATH_MASTERY` the FIRST time only.
+   *
+   * The constant has been defined and unused since this file was written, and a
+   * review is what it was always for. Paying it here rather than in the component
+   * keeps the "once" in the same statement as the record of it, so the two cannot
+   * disagree — which is how a replayable thing comes to be farmable.
+   */
+  markUnitReviewed: (unitId: string, answerXP: number) => void;
   deleteAccount: () => void;
   resetForSignOut: () => void;
   /** Mark the climb chart as seen at the current total. */
@@ -772,6 +791,7 @@ export const useUserDataStore = create<UserDataState>()(
       installReported: false,
       joinedAt: null,
       earnedBadges: [],
+      unitsReviewed: [],
       showcaseBadges: [],
       badgesInitialized: false,
       displayName: 'Philosopher',
@@ -1094,6 +1114,19 @@ export const useUserDataStore = create<UserDataState>()(
 
       revokeBadges: () => set({ earnedBadges: [] }),
 
+      // THE ANSWERS PAY EVERY TIME AND THE MASTERY PAYS ONCE, and both are paid
+      // because both are PRINTED: the review runs on the lesson player, so it shows
+      // a +10 beside each question and a running XP pill in its header. A screen
+      // that displays a figure it does not award is the fault §14 exists to prevent,
+      // one surface over.
+      markUnitReviewed: (unitId, answerXP) => set((state) => {
+        const first = !state.unitsReviewed.includes(unitId);
+        return {
+          unitsReviewed: first ? [...state.unitsReviewed, unitId] : state.unitsReviewed,
+          totalXP: state.totalXP + answerXP + (first ? XP_PER_PATH_MASTERY : 0),
+        };
+      }),
+
       deleteAccount: () => {
         if (get().pinnedQuoteId) writePinnedQuote(null);
         set({
@@ -1130,6 +1163,7 @@ export const useUserDataStore = create<UserDataState>()(
           installReported: true,
           joinedAt: null,
           earnedBadges: [],
+          unitsReviewed: [],
           badgesInitialized: true,
           displayName: 'Philosopher',
           email: '',
@@ -1261,6 +1295,7 @@ export const useUserDataStore = create<UserDataState>()(
         installReported: state.installReported,
         joinedAt: state.joinedAt,
         earnedBadges: state.earnedBadges,
+        unitsReviewed: state.unitsReviewed,
         showcaseBadges: state.showcaseBadges,
         badgesInitialized: state.badgesInitialized,
         displayName: state.displayName,
