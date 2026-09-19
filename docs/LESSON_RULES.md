@@ -9682,3 +9682,61 @@ arrive on the second piece and stay, which no count can tell from a new beat. So
 the run structure is read once from before the pass (`scripts/make-splitruns.mjs`,
 `scripts/lib/splitruns.json`) and used wherever a lesson's beat count still
 matches; the pulse rule is the fallback for a lesson re-cut since.
+
+## Group AI · A lesson is read in both directions
+
+> *"On the right side of the screen, if they tap it, it goes to the next one; on the
+> left side of the screen, if they tap it, it reverses to the last … and that runs
+> through the narration and animation again."*
+
+A reader can go BACK now. The left third of the screen goes back a beat and the rest
+goes forward (`tapNav.ts`); the previous beat plays again from its start, voice and
+all. Nothing in any scene was edited for it, and that is only true while the rules
+below hold. `npm run check:guide` holds the countable half, and `node
+scripts/countertest-guide.mjs` puts each defect back.
+
+### AI1 · The left third goes back; a press with no position goes forward
+
+Imprint's split, measured at 33% in two recorded lessons: forward is the common
+action and gets the larger target. A press that carries no position — every browser
+harness's synthetic `click()`, and a keyboard press on the web — reads as x = 0, the
+left edge, and would send every sweep in `scripts/` walking lessons BACKWARDS while
+reporting that it measured them. So no position, and x ≤ 0, mean forward.
+
+### AI2 · A beat must arrive correctly from the beat AFTER it
+
+Every scene derives "previous" as `n − 1` from `bi`, so going from beat 5 to beat 4
+replays 4's own arrival from 3. That is correct only because every track is CARRIED
+(group L): a carried value glides from whatever is on screen — beat 5's state — to
+beat 4's. A track that starts from `T[p]` instead would jump to beat 3's value for one
+frame and play forward from there, which reads as a glitch in both directions and is
+twice as visible going back. L1–L9 already forbid it; going back is the second reason.
+
+### AI3 · An answered question comes back answered, and scores once
+
+The owner's choice over re-asking it. Each graded beat's answer is kept by beat
+(`kept` in the player) with the position of its control, and restored in the SAME
+render-time block that rewinds the beat clock — so neither the control nor a scene
+reacting to it (R7c) draws one frame at the question's starting position first.
+`choose` refuses a beat that already has a pick, so going back can never change a
+score. An unanswered question still refuses forward; back always works, which is why
+the body is never `disabled` while a question is open.
+
+### AI4 · The guide lives in the ROUTE, and no harness may mount it
+
+The see-through guide at the start of every lesson holds the beat clock and the voice
+until it is closed (`lessonGuideState.ts`). Mounted inside a player, it would stand
+in front of every browser sweep and freeze its beat clock at frame one — a sweep that
+measures nothing and reports a clean run. So `LessonGuideHost` wraps the lesson in the
+lesson route, which no harness renders, and `check:guide` fails any harness that
+mentions it.
+
+### AI5 · The guide's words sit on their own glass
+
+Drawn bare on the scrim, "back" and "forward" landed on the lesson's opening
+paragraph showing through underneath. Every word of the guide sits on a darker plate
+of its own, and the hierarchy is SIZE and WEIGHT, never opacity: 60% ink over a white
+stage composites to about #747474, where solid white is 4.7:1 and white at 60% would be
+2.9:1. The tap-anywhere layer carries no button role, because react-native-web renders
+a role="button" Pressable as a real `<button>` and "Got it" inside it would be a button
+inside a button.

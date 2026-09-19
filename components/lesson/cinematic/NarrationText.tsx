@@ -160,8 +160,12 @@ function useSpokenClock(lessonId: string, beat: number | undefined, text: string
     narrates && s.lessonId === lessonId && s.beat === beat && s.at >= mountedAt - 250 ? s.phase : null);
   const at = useNarrationStore((s) => (narrates && s.lessonId === lessonId && s.beat === beat ? s.at : 0));
 
+  // The reader can ask for the words whole (the header's Aa button, Settings ›
+  // Lessons). The voice is untouched — this only stops the letters WAITING for it.
+  const rise = useUserDataStore((s) => s.settings.riseWords);
+
   // What the rising reveal needs is where the voice is, never a time.
-  const mode: RiseMode = !narrates || phase === 'failed' ? 'show'
+  const mode: RiseMode = !rise || !narrates || phase === 'failed' ? 'show'
     : phase === 'playing' ? 'play'
     : phase === 'stopped' ? 'freeze'
     : 'wait';

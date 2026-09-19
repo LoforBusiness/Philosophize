@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  View, Text, Pressable, StyleSheet, type LayoutChangeEvent,
+  View, Text, Pressable, StyleSheet, useWindowDimensions, type LayoutChangeEvent, type GestureResponderEvent,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -17,6 +17,10 @@ import { useUIStore } from '@/stores/uiStore';
 import { narration } from '@/lib/narration';
 import { NARRATION } from '@/lib/narration/manifest';
 import NarrationText from './NarrationText';
+import { tapSide } from './tapNav';
+import EdgeFlash, { useEdgeFlash } from './EdgeFlash';
+import WordsToggle from './WordsToggle';
+import { useGuideStore, GUIDE_HOLD } from './lessonGuideState';
 import Stickman from './Stickman';
 import BrickStructure, {
   BASE_LX, BASE_RX, BASE_Y, CENTER_X, KEY_X, KEY_Y, type StructState,
@@ -182,6 +186,9 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
 
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
+  // Every pick, by beat: going back onto an answered question shows it answered and
+  // locked, scored once (see CinematicPlayer's `kept`).
+  const kept = useRef<Record<number, string>>({});
   const [correct, setCorrect] = useState(0);
   const [asked, setAsked] = useState(0);
   const [done, setDone] = useState(false);
@@ -211,7 +218,8 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
     let dt = (f.timeSincePreviousFrame ?? 16) / 1000;
     if (dt > 0.05) dt = 0.05;
     clock.value += dt;
-    bt.value += dt;
+    // Held while the lesson guide is up; `clock` runs on (lessonGuideState.ts).
+    if (!GUIDE_HOLD.value) bt.value += dt;
   }, true);
 
   // Progress bar eases toward the next mark instead of jumping on each tap.
@@ -378,16 +386,36 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
   const locked = gates(beat) && picked === null;
   const last = i === BEATS.length - 1;
 
+  // Either direction: an answered beat comes back answered.
+  const goTo = (k: number) => {
+    setPicked(kept.current[k] ?? null);
+    setI(k);
+  };
   const advance = useCallback(() => {
     if (locked) return;
     if (last) { setDone(true); return; }
-    setPicked(null);
-    setI((n) => n + 1);
-  }, [locked, last]);
+    goTo(i + 1);
+  }, [locked, last, i]);
+
+  // Back a beat, and the tap rule (tapNav.ts): the left third goes back.
+  const { flash, back: flashBack, fwd: flashFwd } = useEdgeFlash();
+  const back = useCallback(() => {
+    if (i === 0) { flash('back', true); return; }
+    flash('back');
+    goTo(i - 1);
+  }, [i, flash]);
+  const { width: winW } = useWindowDimensions();
+  const onBody = useCallback((e: GestureResponderEvent) => {
+    if (tapSide(e?.nativeEvent as never, winW) === 'back') { back(); return; }
+    if (locked) return;
+    flash('forward');
+    advance();
+  }, [winW, back, locked, flash, advance]);
 
   const choose = useCallback((id: string, isCorrect: boolean, graded: boolean) => {
     if (picked !== null) return;
     setPicked(id);
+    kept.current[i] = id;
     if (graded) {
       setAsked((n) => n + 1);
       if (isCorrect) setCorrect((n) => n + 1);
@@ -399,7 +427,7 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
       withTiming(isCorrect ? 1 : -1, { duration: 220, easing: Easing.out(Easing.quad) }),
       withDelay(260, withTiming(0, { duration: 420, easing: Easing.inOut(Easing.quad) })),
     );
-  }, [picked]);
+  }, [picked, i]);
 
   const onStage = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -426,6 +454,8 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
   // per spoken beat, following `shown` (the paragraph on screen), cut by a tap.
   const narrated = narration.isSupported() ? NARRATION[lesson.id] : undefined;
   const narrationOn = useUserDataStore((s) => s.settings.narration);
+  // Held while the lesson guide is up, as the shared player does.
+  const guideOpen = useGuideStore((s) => s.open);
   const setUserSetting = useUserDataStore((s) => s.setSetting);
   useEffect(() => {
     if (!narrated) return;
@@ -438,9 +468,9 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
   useEffect(() => {
     if (!narrated) return;
     const line = narrated[shown];
-    if (narrationOn && !done && line && BEATS[shown]?.text === line.text) narration.play(lesson.id, shown);
+    if (narrationOn && !done && !guideOpen && line && BEATS[shown]?.text === line.text) narration.play(lesson.id, shown);
     else narration.stop();
-  }, [narrated, narrationOn, shown, done, lesson.id]);
+  }, [narrated, narrationOn, shown, done, guideOpen, lesson.id]);
 
   // EVERY HOOK MUST BE ABOVE THIS LINE — see the same note in CinematicPlayer.
   // `done` flips on the last tap; hooks below here get skipped on that render,
@@ -458,13 +488,14 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <View style={styles.header}>
+      <View style={[styles.header, { zIndex: 5 }]}>
         <Pressable onPress={() => router.back()} hitSlop={12} style={styles.close}>
           <SketchIcon name="close" size={20} color={INK} />
         </Pressable>
         <View style={styles.track}>
           <Animated.View nativeID="beat-progress" style={[styles.fill, fillStyle]} />
         </View>
+        {narrated ? <WordsToggle /> : null}
         {narrated ? (
           <Pressable
             onPress={() => setUserSetting('narration', !narrationOn)}
@@ -480,7 +511,12 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
 
       {/* Tap anywhere to advance (an ancestor of the content, so scene taps bubble
           up while the choice buttons and bookmark handle their own). */}
-      <Pressable style={styles.body} onPress={advance} disabled={locked}>
+      <Pressable
+        style={styles.body}
+        onPress={onBody}
+        accessibilityActions={[{ name: 'next', label: 'Next' }, { name: 'previous', label: 'Previous' }]}
+        onAccessibilityAction={(e) => { if (e.nativeEvent.actionName === 'previous') back(); else advance(); }}
+      >
         <Animated.View style={[styles.stageWrap, stageGone && styles.stageGone, stageStyle]} onLayout={onStage}>
           {fit > 0 && !stageGone ? (
             <View nativeID="stage-clip" style={{ width: STAGE_W * fit, height: BAND_H * fit, overflow: 'hidden' }}>
@@ -597,6 +633,7 @@ export default function PremisesBuilderLesson({ lesson }: { lesson: Lesson }) {
             {locked ? 'Choose an answer' : last ? 'Finish' : 'Tap to continue'}
           </Text>
         </View>
+        <EdgeFlash back={flashBack} fwd={flashFwd} />
       </Pressable>
     </SafeAreaView>
   );

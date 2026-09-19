@@ -10,6 +10,7 @@ import { exitLesson } from '@/components/lesson/exitLesson';
 import { track } from '@/lib/posthog';
 import ArgumentFightLesson from '@/components/lesson/cinematic/ArgumentFightLesson';
 import PremisesBuilderLesson from '@/components/lesson/cinematic/PremisesBuilderLesson';
+import { LessonGuideHost } from '@/components/lesson/cinematic/LessonGuide';
 import { EthicsLesson } from '@/components/lesson/cinematic/ethicsScene';
 import { EpistemologyLesson } from '@/components/lesson/cinematic/epistemologyScene';
 import { MetaphysicsLesson } from '@/components/lesson/cinematic/metaphysicsScene';
@@ -687,13 +688,26 @@ export default function LessonScreen() {
     <ScreenTransition bg="#FAFAF7">
       {loading ? (
         <LessonLoader onDone={() => setLoading(false)} />
+      ) : cinematic ? (
+        // THE LESSON GUIDE is mounted HERE, around the lesson, rather than inside a
+        // player: the browser harnesses render lesson components directly, so they
+        // can never meet it (components/lesson/cinematic/LessonGuide.tsx).
+        <LessonGuideHost>
+          <StartedRunner
+            Runner={Runner}
+            lesson={result.lesson}
+            branchSlug={result.branch.slug}
+            unitId={result.path.id}
+            format="cinematic"
+          />
+        </LessonGuideHost>
       ) : (
         <StartedRunner
           Runner={Runner}
           lesson={result.lesson}
           branchSlug={result.branch.slug}
           unitId={result.path.id}
-          format={cinematic ? 'cinematic' : 'cards'}
+          format="cards"
         />
       )}
     </ScreenTransition>

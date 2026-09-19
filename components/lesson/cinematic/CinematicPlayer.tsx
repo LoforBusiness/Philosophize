@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
-import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
+import { View, Text, Pressable, StyleSheet, useWindowDimensions, type LayoutChangeEvent, type GestureResponderEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue, useFrameCallback, useAnimatedStyle, useAnimatedReaction, useDerivedValue, runOnJS,
@@ -53,6 +53,13 @@ import { THOUGHTS } from '@/data/lessonThoughts';
 import { MARKS } from '@/data/lessonMarks';
 import { WANDER_PLANS } from '@/data/lessonWander';
 import StageMark from './StageMark';
+import { tapSide } from './tapNav';
+import EdgeFlash, { useEdgeFlash } from './EdgeFlash';
+import WordsToggle from './WordsToggle';
+import { useGuideStore, GUIDE_HOLD } from './lessonGuideState';
+
+/** A graded beat's answer, kept so going back onto it shows it as it was left. */
+interface Kept { id: string; ok: boolean; pos: number; pos2: number; sem: number }
 
 /** One array, shared by every beat with no movement plan: a new `[]` per beat would
  *  make the layer's plan a different object each time for no change in content. */
@@ -263,6 +270,11 @@ export default function CinematicPlayer({
   const visitorCue = VISITOR[lesson.id];
   const focus = lessonFocus && lessonFocus.beat === i ? lessonFocus.phrase : undefined;
   const [pickedOk, setPickedOk] = useState(false);
+  // EVERY ANSWER, BY BEAT. The reader can go back now (tapNav.ts), and a question they
+  // have answered comes back exactly as they left it — their pick, its verdict, the
+  // control where they set it — and locked, so it is scored once and going back can
+  // never be used to change a score. The owner's choice over re-asking it.
+  const kept = useRef<Record<number, Kept>>({});
   const [correct, setCorrect] = useState(0);
   const [asked, setAsked] = useState(0);
   // How many outlined things the scene is currently offering, counted by the
@@ -316,12 +328,15 @@ export default function CinematicPlayer({
   useEffect(() => {
     if (narrated) narration.stop();
   }, [i, narrated]);
+  // The lesson guide holds the voice as well as the clock: the first line is not
+  // spoken to a reader still reading the guide (lessonGuideState.ts).
+  const guideOpen = useGuideStore((s) => s.open);
   useEffect(() => {
     if (!narrated) return;
     const line = narrated[shown];
-    if (narrationOn && !done && line && beats[shown]?.text === line.text) narration.play(lesson.id, shown);
+    if (narrationOn && !done && !guideOpen && line && beats[shown]?.text === line.text) narration.play(lesson.id, shown);
     else narration.stop();
-  }, [narrated, narrationOn, shown, done, lesson.id, beats]);
+  }, [narrated, narrationOn, shown, done, guideOpen, lesson.id, beats]);
 
   const clock = useSharedValue(0);
   // TWO BEAT CLOCKS, AND WHICH IS WHICH IS THE WHOLE OF K1.
@@ -914,6 +929,15 @@ export default function CinematicPlayer({
     WANDER.plan.value = (wanderOff() ? null : WANDER_PLANS[lesson.id]?.[i]) ?? EMPTY_PLAN;
     WANDER.bt.value = 0;
     WANDER.gen.value += 1;
+    // AN ANSWERED BEAT RETURNS WITH ITS CONTROL WHERE THE READER LEFT IT — in the
+    // same statement that rewinds the clock, so the control and the scene that reads
+    // it (R7c) never draw one frame at the question's starting position first.
+    const was = kept.current[i];
+    if (was) {
+      dragPos.value = was.pos;
+      dragPos2.value = was.pos2;
+      pickPos.value = was.sem;
+    }
   }
 
   useFrameCallback((f) => {
@@ -921,7 +945,10 @@ export default function CinematicPlayer({
     let dt = (f.timeSincePreviousFrame ?? 16) / 1000;
     if (dt > 0.05) dt = 0.05;
     clock.value += dt;
-    rt.value += dt;
+    // THE BEAT WAITS BEHIND THE LESSON GUIDE: its clock holds at the first frame
+    // while `clock` runs on, so the figure still breathes behind the glass and the
+    // opening plays from its start once the guide lifts (lessonGuideState.ts).
+    if (!GUIDE_HOLD.value) rt.value += dt;
     // K1 — THE SCENE'S CLOCK IS DERIVED, NOT ACCUMULATED. `bt` used to be `+= dt`
     // like the other two; it is now a function of the raw clock and the beat's tour,
     // which is what freezes it while the camera travels. Derived rather than
@@ -1093,7 +1120,8 @@ export default function CinematicPlayer({
 
   useEffect(() => {
     const d = beat.interact?.drag;
-    if (d) dragPos.value = d.start;
+    // Not on a beat already answered: its knob was put back where the reader left it.
+    if (d && !kept.current[i]) dragPos.value = d.start;
   }, [i, beat.interact?.drag, dragPos]);
 
   // On completion, hand the result to the GLOBAL reward overlay and pop this
@@ -1117,6 +1145,18 @@ export default function CinematicPlayer({
   // asked below the picture takes no pick from the scene and shows no ring on it.
   const stageLive = stageAnswered(beat);
   const last = i === beats.length - 1;
+
+  // Move to beat k in either direction. A beat already answered comes back answered
+  // (its control's position is restored in the render-time block above, where the
+  // clock is rewound); any other comes back open. Touches only setters and a ref, so
+  // the callbacks below can call it without listing it.
+  const goTo = (k: number) => {
+    const was = kept.current[k];
+    setPicked(was ? was.id : null);
+    setPickedOk(was ? was.ok : false);
+    setPeek(null);
+    setI(k);
+  };
 
   const advance = useCallback(() => {
     if (locked) return;
@@ -1142,16 +1182,37 @@ export default function CinematicPlayer({
     // "I don't want a sound every time a user clicks to the next section" is the
     // right call. Tapping forward is not an event, it is the medium.
     if (last) { setDone(true); return; }
-    setPicked(null);
-    setPickedOk(false);
-    setPeek(null);
-    setI((n) => n + 1);
+    goTo(i + 1);
   }, [locked, last, sounded, tourSkip, i, rt]);
+
+  // ── ONE BEAT BACK (tapNav.ts) ─────────────────────────────────────────────
+  // The previous beat plays again from its start: every scene derives its "previous"
+  // as n − 1 from `bi`, so stepping from 5 to 4 replays 4's own arrival while each
+  // carried track glides from what is on screen, and the voice reads 4's line again
+  // because it follows `shown`. No scene knows a reader can go back, and none needed
+  // to. Never a tour warp: that is how forward keeps up with an impatient reader,
+  // and back has nothing to catch up with.
+  const { flash, back: flashBack, fwd: flashFwd } = useEdgeFlash();
+  const back = useCallback(() => {
+    if (i === 0) { flash('back', true); return; }
+    flash('back');
+    goTo(i - 1);
+  }, [i, flash]);
+
+  // Where a tap on the lesson goes: the left third back, the rest forward.
+  const { width: winW } = useWindowDimensions();
+  const onBody = useCallback((e: GestureResponderEvent) => {
+    if (tapSide(e?.nativeEvent as never, winW) === 'back') { back(); return; }
+    if (locked) return;
+    flash('forward');
+    advance();
+  }, [winW, back, locked, flash, advance]);
 
   const choose = useCallback((id: string, isCorrect: boolean, graded: boolean) => {
     if (picked !== null) return;
     setPicked(id);
     setPickedOk(isCorrect);
+    kept.current[i] = { id, ok: isCorrect, pos: dragPos.value, pos2: dragPos2.value, sem: pickPos.value };
     if (graded) {
       setAsked((n) => n + 1);
       if (isCorrect) setCorrect((n) => n + 1);
@@ -1262,7 +1323,9 @@ export default function CinematicPlayer({
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <View style={styles.header}>
+      {/* Raised above the body, which is drawn after it: the Aa button's mode label
+          hangs below the header and would otherwise be painted over by the stage. */}
+      <View style={[styles.header, { zIndex: 5 }]}>
         <Pressable onPress={exitLesson} hitSlop={12} style={styles.close}>
           <SketchIcon name="close" size={20} color={INK} />
         </Pressable>
@@ -1282,6 +1345,8 @@ export default function CinematicPlayer({
         {/* THE VOICE'S ONE CONTROL, and only in a lesson that has a voice. On by
             default; the reader's choice is kept in settings, so muting one lesson
             mutes the next. */}
+        {/* THE WORDS' ONE CONTROL — rising with the voice, or all at once. */}
+        {narrated ? <WordsToggle /> : null}
         {narrated ? (
           <Pressable
             onPress={() => setUserSetting('narration', !narrationOn)}
@@ -1295,7 +1360,17 @@ export default function CinematicPlayer({
         ) : null}
       </View>
 
-      <Pressable style={styles.body} onPress={advance} disabled={locked}>
+      {/* THE LESSON TAKES A TAP ANYWHERE: the left third goes back a beat, the rest
+          goes forward (tapNav.ts). Never `disabled` while a question is open — back
+          must still work there; forward is refused inside onBody instead. Screen
+          readers get the two moves as named actions, because a tap zone is a
+          gesture VoiceOver and TalkBack cannot make. */}
+      <Pressable
+        style={styles.body}
+        onPress={onBody}
+        accessibilityActions={[{ name: 'next', label: 'Next' }, { name: 'previous', label: 'Previous' }]}
+        onAccessibilityAction={(e) => { if (e.nativeEvent.actionName === 'previous') back(); else advance(); }}
+      >
         <Animated.View style={[styles.stageWrap, gone && styles.stageGone, stageStyle]} onLayout={onStage}>
           {/* The View below is THE CROP — the rectangle the band is cut to, and so the
               rectangle a camera push can hide art outside of. It carries a nativeID for
@@ -1580,12 +1655,19 @@ export default function CinematicPlayer({
           </QuestionAccentProvider>
         </View>
 
-        <View style={styles.tapLayer}>
-          <TapNudge
-            label={locked ? 'Choose an answer' : last ? 'Finish' : 'Tap to continue'}
-            resting={locked}
-          />
-        </View>
+        {/* Not while the lesson guide is up: it says the same thing, and the
+            nudge read straight through the guide's glass under its buttons. */}
+        {!guideOpen ? (
+          <View style={styles.tapLayer}>
+            <TapNudge
+              label={locked ? 'Choose an answer' : last ? 'Finish' : 'Tap to continue'}
+              resting={locked}
+            />
+          </View>
+        ) : null}
+
+        {/* Which way the tap went — above everything in the body, taking no touch. */}
+        <EdgeFlash back={flashBack} fwd={flashFwd} />
       </Pressable>
     </SafeAreaView>
   );

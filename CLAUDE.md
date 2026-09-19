@@ -1086,7 +1086,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **sixty-two** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **sixty-three** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1097,7 +1097,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-wander` · `check-skin` · `check-thoughts` · `check-marks` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-wander` · `check-skin` · `check-thoughts` · `check-marks` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
 > replays the figure, and a prop's animation was invisible to every check unless it
@@ -4533,6 +4533,62 @@ beat before, setting aside prose, the pose track and beats that are their own ev
 The cut count went DOWN, 301 → 299: two of the new events were first written with
 the ramp passed as `carry`'s multiplier, which starts it from zero on the first frame
 — a pop — where the same ramp passed as its progress starts from where it was.
+
+### Back as well as forward, and the guide that says so (group AI)
+
+> *"On the right side of the screen, if they tap it, it goes to the next one; on the
+> left side … it reverses to the last … and that runs through the narration and
+> animation again."* — and a way to show every word at once while the narration
+> still plays, and a see-through guide at the start of every lesson explaining both,
+> with "Don't show again" and a switch in Settings to bring it back.
+
+**The left third goes back and the rest goes forward** (`tapNav.ts`), which is
+Imprint's split, measured at 33% from two recorded lessons, and the owner's pick over
+halves. Going back costs no scene a line: every one of the 244 derives "previous" as
+`n − 1` from `bi`, so stepping from 5 to 4 replays 4's own arrival while each
+carried track glides from what is on screen, and the voice reads 4's line again
+because it follows `shown`. **An answered question comes back answered** — pick,
+verdict, explanation and the control where it was set — restored in the same
+render-time block that rewinds the clock, and scored once. A soft ink glow breathes
+in from the edge you tapped (`EdgeFlash.tsx`), because a paragraph you have read
+coming back reads as a glitch unless something says you went back.
+
+**The Aa button** (`WordsToggle.tsx`) writes `settings.riseWords`; NarrationText reads
+it and gives RisingText its existing `show` mode, so the paragraph is whole from the
+first frame and the voice is untouched. It names the mode it just entered in a pill
+under the header, which is why every player's header now carries `zIndex: 5` — the
+body is drawn after it and painted straight over the pill.
+
+**The guide is dark glass over the lesson, not Imprint's white screen** (`LessonGuide.tsx`).
+Imprint's construction is kept whole — one line that grows from the middle and slides
+to the one-third mark, "back" small, "forward" large — but theirs hides the lesson and
+has no way to switch it off. This one is 60% ink with every word on its own darker
+plate, a ring on the real Aa button, **Got it** and **Don't show again**, and Settings ›
+Lessons to bring it back (NN/g: help must be easy to dismiss and easy to bring back).
+
+- **The first render put two layers of words in one place.** Drawn bare on the scrim,
+  "back" and "forward" landed on the lesson's opening paragraph showing through. The
+  plates fixed it, and they are also what let the scrim stay light: bare white type
+  needs about 54% ink over a white stage to clear 4.5:1, and white at partial opacity
+  never does.
+- **It lives in the lesson ROUTE, not a player** (`LessonGuideHost`), and that is the
+  load-bearing decision. It holds the beat clock and the voice until it is closed; in
+  front of a browser sweep it would freeze beat 0 and the sweep would report a clean
+  run having measured nothing. Harnesses render lesson components directly and never
+  mount the route. `check:guide` fails any that mentions it.
+- **A press with no position goes FORWARD.** Every harness advances with a synthetic
+  `click()`, whose pageX is 0 — the left edge. Read literally, all of `scripts/` would
+  have started walking lessons backwards. Measured in the real app: right tap forward,
+  left tap back, left tap on beat 0 stays, a bare `click()` at the left forward.
+- **The counter-test caught its own checker twice.** Its first run "caught" all five
+  staged defects because the harness scan was matching the counter-test file itself,
+  so every case failed for one shared reason. Fixed, it showed the button-role rule
+  had never worked: `[^>]*` stops at the `>` of `() => close(false)` and never reaches
+  a role written after it. **A counter-test must see each defect caught by its own
+  rule, with the clean tree passing** — `countertest-guide.mjs` now asserts both.
+- **The web never speaks, so a lesson there has no Aa button**, and the guide shows no
+  callout rather than one pointing at nothing. Verifying the ring needed the preview to
+  claim narration support; the phone has it for real.
 
 ### The stage is coloured now, at exactly the grey's luminance
 

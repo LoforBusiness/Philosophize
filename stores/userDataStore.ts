@@ -86,6 +86,14 @@ export interface AppSettings {
   // default, decided 11 Sep 2026. The lesson's speaker button writes it, and
   // CinematicPlayer and NarrationText read it, which is the rule above.
   narration: boolean;
+  // Whether the spoken paragraph RISES letter by letter with the voice (true) or
+  // arrives whole the moment the beat opens (false). The voice plays either way. The
+  // lesson header's Aa button and Settings › Lessons write it; NarrationText reads it.
+  riseWords: boolean;
+  // Whether the see-through guide (tap left to go back, right to go forward, and the
+  // Aa button) opens at the start of every lesson. "Don't show again" writes false and
+  // Settings › Lessons turns it back on; the lesson route reads it (LessonGuide).
+  lessonGuide: boolean;
   // Privacy
   usageAnalytics: boolean;
   // Narration: `voiceId` was here — a hand-picked TTS voice, written by a picker in
@@ -117,6 +125,10 @@ const DEFAULT_SETTINGS: AppSettings = {
   // On by default, decided 11 Sep 2026: a narrated lesson reads itself aloud unless
   // the reader mutes it with the speaker button in the lesson.
   narration: true,
+  // Both on: a new reader meets the words rising with the voice, and the guide that
+  // tells them how to turn that off and how to go back.
+  riseWords: true,
+  lessonGuide: true,
   // ON by default, disclosed on the welcome screen, one switch away in
   // Settings → Usage Analytics.
   //

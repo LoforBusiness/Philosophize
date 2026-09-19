@@ -74,7 +74,7 @@ const TIMES = ['06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '12:00 PM', '06:0
 // Where user feedback is sent (opens the user's mail app pre-addressed here).
 const FEEDBACK_EMAIL = 'philosophizelearn@gmail.com';
 
-type SectionKey = 'profile' | 'account' | 'notifications' | 'sound' | 'display' | 'privacy' | 'feedback' | 'subscription' | 'danger';
+type SectionKey = 'profile' | 'account' | 'notifications' | 'sound' | 'lessons' | 'display' | 'privacy' | 'feedback' | 'subscription' | 'danger';
 
 /**
  * The Notifications entry is present only in a binary that can actually schedule
@@ -96,6 +96,9 @@ const SECTIONS: { key: SectionKey; label: string; icon: SketchIconName }[] = [
   // lib/feedback.ts, outside this screen. Spoken narration used to head this
   // section and was removed entirely — see SoundSection.
   { key: 'sound', label: 'Sound', icon: 'mic' },
+  // Lessons earns its entry under the same rule: both of its keys are read inside
+  // a lesson — `riseWords` by NarrationText, `lessonGuide` by the lesson route.
+  { key: 'lessons', label: 'Lessons', icon: 'grad' },
   { key: 'display', label: 'Display', icon: 'book' },
   { key: 'privacy', label: 'Privacy', icon: 'lock' },
   { key: 'feedback', label: 'Feedback', icon: 'pencil' },
@@ -279,6 +282,8 @@ function Section({ section }: { section: SectionKey }) {
       return <NotificationsSection />;
     case 'sound':
       return <SoundSection />;
+    case 'lessons':
+      return <LessonsSection />;
     case 'display':
       return <DisplaySection />;
     case 'privacy':
@@ -784,6 +789,43 @@ function DisplaySection() {
  * dormant story scenes (§12) still import it — deleting it would break files this
  * change has no business touching.
  */
+/* ---------------- Lessons ---------------- */
+
+/**
+ * THE TWO THINGS A READER CAN CHANGE ABOUT HOW A LESSON RUNS, and the way back to
+ * the guide.
+ *
+ * "Don't show again" on the guide at the start of a lesson writes `lessonGuide`
+ * false; this is the only place that turns it back on, which is the half of NN/g's
+ * rule ("easy to dismiss and easy to bring back") that a one-way button would miss.
+ * `riseWords` is the same switch as the Aa button in every lesson's header, so a
+ * reader who never notices the button can still find it here.
+ */
+function LessonsSection() {
+  const settingsAll = useUserDataStore((s) => s.settings);
+  const setSettingAll = useUserDataStore((s) => s.setSetting);
+
+  return (
+    <Card>
+      <Header title="Lessons" sub="How a lesson runs while you read it." icon="grad" />
+      <View style={styles.hr} />
+      <Row
+        title="Show the lesson guide"
+        sub="At the start of every lesson: tap the left third of the screen to go back, anywhere else to go forward, and Aa to show every word at once."
+      >
+        <Toggle value={settingsAll.lessonGuide} onChange={(v) => setSettingAll('lessonGuide', v)} />
+      </Row>
+      <Row
+        title="Words rise as they’re read"
+        sub="Off, the whole paragraph appears at once. The narration still reads it aloud. The Aa button in a lesson switches this too."
+        last
+      >
+        <Toggle value={settingsAll.riseWords} onChange={(v) => setSettingAll('riseWords', v)} />
+      </Row>
+    </Card>
+  );
+}
+
 function SoundSection() {
   const settingsAll = useUserDataStore((s) => s.settings);
   const setSettingAll = useUserDataStore((s) => s.setSetting);
