@@ -898,7 +898,7 @@ import { getLessonById } from '@/data/index';
 import { CINEMATIC } from './(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId]';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { setCodaOff, setWanderOff } from '@/components/lesson/cinematic/tourFlag';
+import { setWanderOff } from '@/components/lesson/cinematic/tourFlag';
 
 export default function PreviewRead() {
   const [go, setGo] = useState(false);
@@ -911,11 +911,6 @@ export default function PreviewRead() {
   // him about, sits him down and turns him round, so a reading taken while he is
   // mid-step is a reading of one arbitrary frame of it. See tourFlag.ts.
   setWanderOff(true);
-  // AND NEVER WITH THE CLOSING ENCOUNTER UP (group AJ). A harness that walks a lesson
-  // to its last tap would mount the coda and record its figures and props as stage
-  // art — a scene that only exists after the lesson is over, steering every table
-  // derived from these boxes. See tourFlag.ts.
-  setCodaOff(true);
   const q = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const id = q?.get('id') ?? '';
   const found = getLessonById(id);

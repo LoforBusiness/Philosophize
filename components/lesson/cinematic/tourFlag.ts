@@ -75,23 +75,3 @@ export function setWanderOff(v: boolean) {
 export function wanderOff(): boolean {
   return rooted;
 }
-
-// AND A FOURTH SWITCH, FOR THE CLOSING ENCOUNTER (coda/), FOR THE SAME HARNESS.
-//
-// The coda is a scene the PLAYER draws after the summary, inside the same design
-// space, with its own figures and its own props. A harness that walks a lesson to
-// the end would record all of it as stage art — and every table in group K, AB and
-// AF is derived from those boxes, so the camera would frame a thing that only exists
-// after the lesson is over. It is the bubbles' feedback loop with a bigger object.
-//
-// It is also what keeps a sweep honest about what a lesson IS: `measure-must` counts
-// beats, and the coda is not one.
-let closed = false;
-
-export function setCodaOff(v: boolean) {
-  closed = v;
-}
-
-export function codaOff(): boolean {
-  return closed;
-}
