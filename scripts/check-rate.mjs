@@ -142,5 +142,35 @@ ok(!/\bconferral\b/.test(src) && !/\btrial\b/i.test(src),
   'the rating sheet reads nothing belonging to the trial',
   'so it can be published on its own');
 
+// ── THE THREE WAYS IT STOPS FOR GOOD ────────────────────────────────────────
+//
+// No app can see a Play rating -- Google's In-App Review API never reports one,
+// and this sheet only links to the listing -- so every one of these is a PROXY,
+// and losing one silently means a reader who did the thing being asked for goes
+// on being asked. That is the complaint this answers, so it is held rather than
+// remembered. The owner chose all three.
+const settles = src.match(/onSettled\(\)/g) ?? [];
+ok(settles.length === 3,
+  'three paths close the question for good',
+  `stars, the Play listing, and "already rated" — found ${settles.length} call(s)`);
+
+ok(/const toStore = \(\)[\s\S]*?onSettled\(\)[\s\S]*?Linking\.openURL/.test(src),
+  'going to the Play listing settles it',
+  'the last signal that exists — it must be taken before the reader leaves');
+
+ok(/const alreadyRated = \(\)[\s\S]*?onSettled\(\)/.test(src)
+  && /onPress=\{alreadyRated\}/.test(src),
+  'and a reader who already rated can say so, from the first card',
+  'the only path that reaches somebody who rated on Play without us');
+
+// AND THE X IS STILL "NOT NOW". Dismissing is the one interaction that must NOT
+// be permanent: it is how a reader says "ask me tomorrow", which the whole daily
+// cadence above exists to honour. If `leave` ever settles, the sheet answers its
+// own question the first time anybody swipes it away.
+const leaveFn = src.match(/const leave = [\s\S]*?\n {2}const /);
+ok(!!leaveFn && !/onSettled/.test(leaveFn[0]),
+  'dismissing it does not settle anything',
+  'the X and the scrim mean tomorrow, not never');
+
 console.log(bad === 0 ? '\none a day, and it lands on the first open.\n' : `\nFAILED — ${bad} problem(s).\n`);
 process.exit(bad === 0 ? 0 : 1);

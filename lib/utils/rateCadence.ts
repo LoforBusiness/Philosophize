@@ -26,8 +26,13 @@
 // Sixty days between asks, at most three a year, and five more finished lessons
 // each time -- Apple's published ceiling with a wide margin laid on top. That
 // whole policy is gone by instruction. The two rules left are the two that were
-// never about frequency: somebody who SUBMITTED a rating is never asked again,
-// and nobody is asked before onboarding has finished.
+// never about frequency: somebody who has ANSWERED is never asked again, and
+// nobody is asked before onboarding has finished.
+//
+// "Answered" is three things, and `RatePrompt.tsx` argues out why there are
+// three: submitting stars, tapping through to the Play listing, or saying they
+// have already rated. A real Play rating is invisible to every app there is, so
+// all three are proxies for it rather than detections of it.
 //
 // == WHY A DAILY CUSTOM SHEET IS A UX DECISION AND NOT A POLICY ONE ==========
 //
@@ -58,7 +63,10 @@
 export const ASKS_PER_DAY = 1;
 
 export interface RateHistory {
-  /** They submitted a rating. The question is answered; never ask again. */
+  /**
+   * They answered — by submitting stars, by going to the Play listing, or by
+   * saying they had already rated. The question is closed; never ask again.
+   */
   settled: boolean;
   /** When the sheet was last raised. Epoch ms; 0 for never. */
   askedAt: number;

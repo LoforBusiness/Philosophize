@@ -62,8 +62,29 @@ import { touch } from '@/lib/feedback';
 // calendar day over a rolling twenty-four hours, and where this leaves the two
 // stores are all in lib/utils/rateCadence.ts.
 //
-// Somebody who actually submits a rating is never asked again. There is no
-// counter for them: they answered the question.
+// == THE THREE WAYS IT STOPS FOR GOOD, AND WHY THERE ARE THREE ================
+//
+//   "it keeps showing up even after rating the app, is there a way to make it if
+//    a user rates the app it will no longer show up"
+//
+// NO APP CAN SEE A PLAY RATING. Google's In-App Review API deliberately never
+// reports whether a review was left, and this is not even that API -- it is a
+// link to the listing. So "they rated" cannot be detected and every stop rule
+// here is a PROXY for it. Which proxies to accept was the owner's call, and they
+// took all of them:
+//
+//   1. submitting stars in the sheet     -- they answered the question we asked
+//   2. tapping through to the Play listing -- the last signal that exists
+//   3. saying they have already rated     -- the only thing that helps somebody
+//                                            who rated on Play without us
+//
+// Only the third reaches a reader who rated from the Play Store app itself,
+// which is the case that prompted this, and it is why a bare "don't ask again"
+// was not enough on its own. All three write the same latch, `rateSettled`, and
+// `mayAsk` refuses for ever once it is set.
+//
+// The X and the scrim stay what they were: NOT NOW. They mean ask me tomorrow,
+// and nothing about them is permanent.
 // -----------------------------------------------------------------------------
 
 /** How far the sheet travels. Larger than the sheet, so it starts fully clear. */
@@ -117,7 +138,23 @@ export default function RatePrompt({
 
   const toStore = () => {
     track('rate_prompt_answered', { stars, went_to_store: true, ask_number: askNumber });
+    // GOING TO THE LISTING IS THE LAST SIGNAL THERE IS, so it settles. Today this
+    // is a no-op, because the store button only exists on the thank-you card and
+    // `submit` has already settled by then — it is written anyway so that stays
+    // true if the flow ever offers the listing before the stars.
+    onSettled();
     leave(() => { void Linking.openURL(storeUrl()); });
+  };
+
+  // THE ONE THAT REACHES SOMEBODY WHO RATED WITHOUT US. Nothing can verify it and
+  // nothing should try: a reader who says they have rated has answered the
+  // question either way, and the alternative is nagging the people most likely to
+  // have done the thing being asked for.
+  const alreadyRated = () => {
+    touch();
+    track('rate_prompt_already_rated', { ask_number: askNumber });
+    onSettled();
+    leave();
   };
 
   const sheetStyle = useAnimatedStyle(() => ({ transform: [{ translateY: y.value }] }));
@@ -169,6 +206,7 @@ export default function RatePrompt({
               </View>
 
               <Button label="Submit" onPress={submit} size="lg" disabled={!stars} />
+              <Button label="I’ve already rated" onPress={alreadyRated} variant="ghost" />
             </>
           ) : (
             <>

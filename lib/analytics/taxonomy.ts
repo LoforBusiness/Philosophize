@@ -193,6 +193,11 @@ export const EVENTS = {
     props: ['stars', 'went_to_store', 'ask_number'],
     where: 'components/shared/RatePrompt.tsx',
   },
+  rate_prompt_already_rated: {
+    note: 'They said they had already rated, which settles the ask for ever exactly as submitting stars does. It exists because NO app can see a Play rating -- Google\'s In-App Review API never reports one and this sheet only links to the listing -- so somebody who rated from the Play Store itself had no way to stop being asked. A high count against `ask_number` 1 or 2 means the sheet is reaching people who rated long ago; a high count at a large `ask_number` means it took them that many days to find the way out.',
+    props: ['ask_number'],
+    where: 'components/shared/RatePrompt.tsx',
+  },
   trial_offered: {
     note: 'Google Play\'s free trial was put in front of a free reader it is on offer to: after a lesson and before the ad (`post_lesson`), or as the door on the Pass tab or in Settings (`pass_tab`, `settings`). Paired with `trial_started` by `source` it is the only conversion rate this offer has -- there is no separate decline event, because offered-minus-started IS the decline.',
     props: ['source', 'lessons_left'],
