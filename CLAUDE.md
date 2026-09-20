@@ -4868,6 +4868,7 @@ share one:
 
 | Build | Runtime version | Can its users still open the app? |
 |---|---|---|
+| 22 — BUILT 2026-09-20, **NOT YET UPLOADED TO PLAY** | `cbdfca0b1a073ede6ff3edbc6ca36cb40bafc2a9` | not yet — nobody can install it until it is on the store |
 | **21 (current)** | `8c32d9181fa168c587b1109a48d0d89108cfe32b` | **yes** |
 | 20 | `b6f745e0007d2de75837eff60dc50fd3dd5b38c5` | no — below `MIN_VERSION_CODE` (raised 2026-08-19) |
 | 19 | `29eb709aad3b70740f0c92239b1a350820c81247` | no — below `MIN_VERSION_CODE` |
@@ -4878,6 +4879,46 @@ share one:
 So today there is again exactly **one** runtime worth publishing to, and the third
 column is why: with the gate at 21, every older binary is held behind the update
 wall and an OTA to its runtime lands on people who are already stopped.
+
+> **BUILD 22 IS BUILT AND NOT LIVE, WHICH IS WHY THAT "ONE" STILL MEANS 21.** The
+> AAB is on EAS (build `9d1d1470-725c-40b9-a12e-792b72b64a45`, runtime
+> `cbdfca0b…`) and **no device is on it**, so an OTA published to that runtime
+> today reaches nobody — this section's own headline failure wearing the newest
+> hash. Until Play reports it rolled out, publish to `8c32d918…` alone.
+>
+> **What it carries is the first open.** A fresh install of 21 had to fetch the
+> whole current bundle before it could show the right first screen, and since 21
+> predates narration that is 87.8MB of `lesson.mp3` — so a new reader sat on
+> expo-updates' default white reload screen while it downloaded (§19). 22 embeds
+> all 364 assets, so there is nothing to fetch and nothing to restart into. It
+> also repaints the compiled splash white and carries the guard that stops a late
+> download restarting the app under somebody.
+>
+> **The sequence from here is §20's and has not changed:** upload the AAB by hand
+> (there is no `eas submit` service account), let it reach 100%, raise
+> `MIN_VERSION_CODE` to 22, and publish that raise to build 21's runtime FIRST.
+> Between the upload and the raise BOTH rows are live and every OTA goes to both,
+> oldest first — the two-runtime window this section warns about, open for the
+> whole rollout.
+>
+> **The download roughly triples, and that is the price of the fix.** The AAB is
+> 178.7MB across four ABIs and every density; an export measures 129MB (16MB of
+> Hermes bytecode, 111.4MB across 364 assets), and a device gets the assets
+> unsplit. Play's app-bundle limit is 200MB of per-device download, so it fits.
+> The 493.8MB of WAV masters are NOT in it — verified, zero `.wav` in the export.
+>
+> **And the splash was verified in the BINARY, not in app.json**, the same way an
+> icon has to be (below): `base/resources.pb` has `splashscreen_background`
+> encoding `ffffffff`, and the old `#E4E4DF` appears nowhere in the resource
+> table. A colour cannot be read out of an AAB as XML — values are compiled into
+> the protobuf — so the test that carries the weight is the ABSENCE of the old
+> one, since white is a common value and its presence proves little.
+>
+> **The upload archive is 1005MB, and it should not be.** There is no
+> `.easignore`, so every build ships the 493.8MB of WAV masters and everything
+> else EAS does not need. Worth fixing — but `.easignore` REPLACES `.gitignore`
+> for EAS rather than adding to it, so a naive one starts uploading
+> `node_modules`. Write it as a superset or not at all.
 
 > **It was two for the length of one afternoon, and that window is the lesson.**
 > Build 21 shipped on 2026-08-19 with the gate deliberately left at 20 (§20), so
