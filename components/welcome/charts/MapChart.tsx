@@ -1,5 +1,4 @@
-// MapChart — the six branches of philosophy, which is the first genuinely useful
-// thing this screen has ever put on a board.
+// MapChart — the six branches, drawn the way the rest of the app draws them.
 //
 // It replaces a decorative exponential curve labelled "day 1 → day 7". That curve
 // was drawn beautifully and asserted nothing: no reader learned a single true fact
@@ -12,178 +11,153 @@
 // which reads them off the same beat table the speech bubble uses, so the picture
 // cannot drift from the line — see the `cues` field in rig.ts.
 //
-// Per the rule in ../ease.ts, every geometry value here is a module-scope constant
-// and never changes. All motion is opacity / strokeOpacity / strokeDashoffset.
+// ── WHY THIS IS VIEWS AND NO LONGER SVG ─────────────────────────────────────
+//
+// It was `<G>`/`<SvgText>`/`<Path>` inside a board-sized <Svg>, under ../ease.ts's
+// rule that SVG geometry cannot animate on this stack so every coordinate must be
+// a module constant. That rule is real and it is the reason this board could never
+// carry a single piece of the app's own furniture: a hue chip, an icon, a Meter,
+// anything measured by a layout engine rather than typed as a number.
+//
+// So the board is Views. Three things follow, and all three were the complaint:
+//
+// · THE SIX BRANCHES HAVE SIX COLOURS and this screen was drawing them in ink.
+//   `BRANCH` in constants/design.ts has carried six measured hues since the
+//   redesign, used on the tab bar, the Learn cards, every lesson's controls and
+//   Profile's reading rows. The first screen a reader ever saw ignored all six.
+// · "POLITICAL PHILOSOPHY" WAS TWO LINES, tight enough to break the column it sat
+//   in — and `components/shared/branchMarks.ts` has held the answer all along:
+//   BRANCH_SHORT is 'POLITICS', under a comment saying "Fits a mastery row.
+//   'Political Philosophy' does not". That file exists because "the paywall
+//   drawing its own copy is precisely how 'Politics' becomes 'Political
+//   Philosophy' on one screen and not the other", which is exactly what this
+//   board was doing. Reading the shared table fixes the layout and the drift at
+//   once.
+// · SIX ROWS, NOT A 2×3 GRID. "That was one of six" is a list, and a list of six
+//   full-width rows cannot have a column out of alignment. The grid only existed
+//   because a 232-unit board had no room for a row; the board is 372 wide now.
+//
+// Rows are ordered by ALL_BRANCHES so the board cannot claim a seventh branch or
+// leave one out, and the glosses are the host's own words — A1: what the text
+// says, the picture must do.
 
-import Animated, { useAnimatedProps, type SharedValue } from 'react-native-reanimated';
-import { G, Path, Text as SvgText } from 'react-native-svg';
-import { INK, SOFT, clamp01, easeOutCubic, seg } from '@/components/welcome/ease';
+import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import SketchIcon from '@/components/shared/SketchIcon';
+import { C, BRANCH, type BranchKey } from '@/constants/design';
+import { ramp } from '@/components/shared/tone';
+import { BRANCH_SHORT, BRANCH_ICON } from '@/components/shared/branchMarks';
+import { ALL_BRANCHES } from '@/data';
+import { clamp01, easeOutCubic } from '@/components/welcome/ease';
 import { cueTimes } from '@/components/welcome/rig';
 
-const APath = Animated.createAnimatedComponent(Path);
-const AG = Animated.createAnimatedComponent(G);
-
-// Chart space is 300 × 225 (see BOARDS in rig.ts). Two columns of three.
-//
-// ── THE MIDDLE ROW USED TO READ "EPISTEMOLOGYAESTHETICS" ───────────────────
-//
-// A reader: "when it shows the 6 different branches I noticed the metaphysics
-// word was glitching." It was not glitching; it was TOUCHING. The columns sat
-// 130 units apart and at fontSize 17 the two widest neighbours measure 142 and
-// 118 — half-widths of 71 and 59, which is 130 exactly. Zero clearance, so the
-// two names met in the middle and read as one string. Nothing was out of the
-// viewBox and nothing threw, which is why it survived: a collision is invisible
-// to every check that measures a box against its frame rather than against its
-// neighbour.
-//
-// Wider columns AND a smaller name — both, because either alone is marginal.
-// The gap is measured in a browser now (scripts/check-intro.mjs) rather than
-// estimated from a character count, since the widths depend on the actual font
-// and the estimate is what put them at exactly zero.
-const COL = [80, 222];
-const ROW = [36, 106, 178];
-const NAME_SIZE = 16;
-const GLOSS_SIZE = 13.5;
-/** Leading between the two lines of a name that does not fit on one. */
-const LINE_H = 17;
-
-interface Cell {
-  /** Split only where a name does not fit one line at this size. */
-  lines: string[];
-  gloss: string;
-  col: number;
-  row: number;
-}
+/** What each branch asks, in the host's own words. Keyed on slug, not position. */
+const GLOSS: Record<string, string> = {
+  metaphysics: 'what is real',
+  epistemology: 'how you know',
+  logic: 'what follows',
+  ethics: 'how to live',
+  aesthetics: 'what is beautiful',
+  'political-philosophy': 'who rules',
+};
 
 /**
- * The names and one-line senses. The names are the app's own six branches and the
- * glosses are what the host says out loud, word for word — the board is not
- * allowed to claim a seventh branch or rename one of the six.
+ * The board's reading order, which is the order the host names them in — and NOT
+ * the order `ALL_BRANCHES` happens to be declared in. The script says "What is
+ * real. How you know. What follows." then "How to live. What is beautiful. Who
+ * rules.", and `cueTimes('map')` returns the six word-times in that order, so a
+ * row drawn out of order would light on the wrong word.
  */
-const CELLS: Cell[] = [
-  { lines: ['METAPHYSICS'], gloss: 'what is real', col: 0, row: 0 },
-  { lines: ['EPISTEMOLOGY'], gloss: 'how you know', col: 0, row: 1 },
-  { lines: ['LOGIC'], gloss: 'what follows', col: 0, row: 2 },
-  { lines: ['ETHICS'], gloss: 'how to live', col: 1, row: 0 },
-  { lines: ['AESTHETICS'], gloss: 'what is beautiful', col: 1, row: 1 },
-  { lines: ['POLITICAL', 'PHILOSOPHY'], gloss: 'who rules', col: 1, row: 2 },
-];
+const ORDER = ['metaphysics', 'epistemology', 'logic', 'ethics', 'aesthetics', 'political-philosophy'];
+
+const ROWS = ORDER.map((slug) => {
+  const b = ALL_BRANCHES.find((x) => x.slug === slug);
+  return {
+    slug,
+    name: BRANCH_SHORT[slug] ?? (b?.name ?? slug).toUpperCase(),
+    gloss: GLOSS[slug] ?? '',
+    hue: BRANCH[slug as BranchKey] ?? C.ink,
+    icon: BRANCH_ICON[slug] ?? 'frame',
+  };
+});
 
 /** Absolute times the six names land on, read off the script itself. */
 const CUES = cueTimes('map');
 
-// A rule under each name, drawn on left-to-right with the name.
-const RULE_W = 108;
-const ruleD = (c: number, r: number) =>
-  `M${COL[c] - RULE_W / 2} ${ROW[r] + 10} L${COL[c] + RULE_W / 2} ${ROW[r] + 10}`;
-
-function Branch({
-  clock,
-  cell,
-  at,
-}: {
+function Row({ clock, row, at }: {
   clock: SharedValue<number>;
-  cell: Cell;
-  /** When this one lands. NaN if the script has no cue for it. */
+  row: (typeof ROWS)[number];
+  /** When this one lands. Negative if the script has no cue for it. */
   at: number;
 }) {
-  // A TWO-LINE NAME GROWS UPWARD, so its LAST line always sits on the row and
-  // the rule and the gloss below it never have to move.
-  //
-  // It used to be centred on the row instead — `ROW - 7`, with the second line
-  // 18 below that — which put POLITICAL PHILOSOPHY's second baseline at 187 and
-  // its rule at 186. The rule was drawn straight through the word, and since it
-  // is the same ink at the same weight the word simply looked struck out. D31:
-  // nothing painted over a word, including the board's own furniture.
-  const baseY = ROW[cell.row] - (cell.lines.length - 1) * LINE_H;
-
-  const nameProps = useAnimatedProps(() => {
+  const r = ramp(row.hue);
+  // Opacity AND transform only — the one thing the SVG version got right and the
+  // reason it is safe to keep: these are the two properties that repaint without
+  // re-rasterising anything (../ease.ts).
+  const style = useAnimatedStyle(() => {
     const a = easeOutCubic(clamp01((clock.value - at) / 0.34));
-    return { opacity: a, transform: [{ translateY: 5 * (1 - a) }] };
+    return { opacity: a, transform: [{ translateX: -10 * (1 - a) }] };
   });
-  const ruleProps = useAnimatedProps(() => ({
-    strokeDashoffset: RULE_W * (1 - easeOutCubic(clamp01((clock.value - at - 0.1) / 0.4))),
-    strokeOpacity: 0.55 * clamp01((clock.value - at - 0.1) / 0.2),
-  }));
-  const glossProps = useAnimatedProps(() => ({
-    opacity: 0.92 * easeOutCubic(clamp01((clock.value - at - 0.24) / 0.36)),
-  }));
 
   return (
-    <G>
-      <AG animatedProps={nameProps}>
-        {cell.lines.map((line, i) => (
-          <SvgText
-            key={line}
-            x={COL[cell.col]}
-            y={baseY + i * LINE_H}
-            fill={INK}
-            fontFamily="Inter_700Bold"
-            fontSize={NAME_SIZE}
-            letterSpacing={0.4}
-            textAnchor="middle"
-          >
-            {line}
-          </SvgText>
-        ))}
-      </AG>
-      <APath
-        d={ruleD(cell.col, cell.row)}
-        stroke={INK}
-        strokeWidth={1.1}
-        strokeLinecap="round"
-        fill="none"
-        strokeDasharray={RULE_W}
-        animatedProps={ruleProps}
-      />
-      <AG animatedProps={glossProps}>
-        <SvgText
-          x={COL[cell.col]}
-          y={ROW[cell.row] + 27}
-          fill={SOFT}
-          fontFamily="EBGaramond_400Regular_Italic"
-          fontSize={GLOSS_SIZE}
-          textAnchor="middle"
-        >
-          {cell.gloss}
-        </SvgText>
-      </AG>
-    </G>
+    <Animated.View style={[s.row, style]}>
+      <View style={[s.chip, { backgroundColor: r.track, borderColor: r.base }]}>
+        <SketchIcon name={row.icon} size={13} color={r.shade} />
+      </View>
+      <Text style={s.name}>{row.name}</Text>
+      {/* The gloss is pushed to the far RIGHT rather than sitting next to the
+          name, so the row spans the board instead of huddling in its left third
+          — a definition list, which is what six names and six senses are. The
+          rule between them is what carries the eye across the gap. */}
+      <View style={s.lead} />
+      <Text style={s.gloss}>{row.gloss}</Text>
+    </Animated.View>
   );
 }
 
-export default function MapChart({
-  p,
-  clock,
-}: {
+export default function MapChart({ p, clock }: {
   /** The board's own 0→1 draw progress; only the heading rides it. */
   p: SharedValue<number>;
   /** The absolute clock, because the six names are cued off the SPOKEN words. */
   clock: SharedValue<number>;
 }) {
-  const headProps = useAnimatedProps(() => ({
-    opacity: easeOutCubic(seg(p.value, 0, 0.09)),
+  const headStyle = useAnimatedStyle(() => ({
+    opacity: easeOutCubic(clamp01(p.value / 0.09)),
   }));
 
   return (
-    <G>
-      <AG animatedProps={headProps}>
-        <SvgText
-          x={150}
-          y={14}
-          fill={SOFT}
-          fontFamily="Inter_500Medium"
-          fontSize={11}
-          letterSpacing={2.2}
-          textAnchor="middle"
-        >
-          THE SIX BRANCHES
-        </SvgText>
-      </AG>
-
-      {CELLS.map((cell, i) => (
-        <Branch key={cell.gloss} clock={clock} cell={cell} at={CUES[i] ?? -1} />
+    <View style={s.board}>
+      <Animated.Text style={[s.head, headStyle]}>THE SIX BRANCHES</Animated.Text>
+      {ROWS.map((row, i) => (
+        <Row key={row.slug} clock={clock} row={row} at={CUES[i] ?? -1} />
       ))}
-    </G>
+    </View>
   );
 }
+
+// The board is 372 × 200 stage units and lays out in them directly (see BOARD_BOX
+// in rig.ts), so every number here is the number on the stage: a heading, then six
+// rows of 29, which is 192 of the 200 available.
+const s = StyleSheet.create({
+  board: { width: 372, height: 200 },
+  head: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 11,
+    letterSpacing: 2.2,
+    color: C.dim,
+    marginBottom: 6,
+  },
+  row: { flexDirection: 'row', alignItems: 'center', height: 29 },
+  chip: {
+    width: 22,
+    height: 22,
+    borderRadius: 7,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  name: { fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.4, color: C.ink },
+  lead: { flex: 1, height: 1, backgroundColor: C.edge, marginHorizontal: 10 },
+  gloss: { fontFamily: 'EBGaramond_400Regular_Italic', fontSize: 14, color: C.dim },
+});

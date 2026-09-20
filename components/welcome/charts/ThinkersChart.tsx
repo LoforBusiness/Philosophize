@@ -1,209 +1,166 @@
-// ThinkersChart — six real philosophers on a real timeline.
+// ThinkersChart — five real thinkers on a real timeline, and the roll behind them.
 //
 // It replaces an abstract tree of branches spreading from the word "you", which
-// was the prettiest thing on this screen and said the least: no name, no date, no
-// claim a reader could carry away. This says who they will actually meet and when
-// they lived, and its best fact is one nobody puts on a slide on purpose — the
-// enormous EMPTY STRETCH between Aristotle and Descartes. Two thousand years in
-// which the argument did not stop is worth more, and is more intriguing, than any
-// number of branching curves.
+// said nothing a beginner could check. Five names, their dates, and two thousand
+// years between the first and the last: the point of the board is that the
+// argument is OLD and that the app has the whole of it.
 //
-// Every lifespan here is copied from data/philosophers.ts, including its BCE
-// spelling, so the board cannot contradict the Thinkers tab it is advertising.
+// ── THE ERA IS A COLOUR, AND THIS BOARD WAS THE ONE PLACE IT WAS NOT ────────
 //
-// Per the rule in ../ease.ts, every geometry value is a module-scope constant.
-// Motion is opacity / strokeOpacity / strokeDashoffset only.
+// `ERA` in constants/design.ts is the app's licensed "one place a hue means
+// something", keyed on the five groups `data/philosophers.ts` already sorts every
+// thinker by. Every quote plate in the app is struck in its author's era colour —
+// §19 argues it out at length: "Five recognisable colours is what makes a list of
+// twenty quotes scannable; one tone is what made it a pile." This board drew five
+// thinkers spanning four eras in one ink.
+//
+// So each name sits on its era's plate. Nothing else about the board's claim
+// changes, and the reader who later meets Socrates on a quote plate meets him in
+// the same colour he was introduced in.
+//
+// ── AND THE "MORE" IS COUNTED ───────────────────────────────────────────────
+//
+// `AND {n} MORE` is derived from ALL_PHILOSOPHERS, as it already was — this board
+// got that right, and `check-thinkers` holds it. It is the one figure on any of
+// the four boards that never rotted, which is worth saying next to the lesson
+// count on the growth board, which was typed and did.
 
-import Animated, { useAnimatedProps, type SharedValue } from 'react-native-reanimated';
-import { Circle, G, Path, Text as SvgText } from 'react-native-svg';
-import { INK, SOFT, clamp01, easeOutBack, easeOutCubic, seg } from '@/components/welcome/ease';
+import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import { C, ERA, type EraKey } from '@/constants/design';
+import { ramp } from '@/components/shared/tone';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
-
-const APath = Animated.createAnimatedComponent(Path);
-const ACircle = Animated.createAnimatedComponent(Circle);
-const AG = Animated.createAnimatedComponent(G);
-
-// Chart space is 300 × 202 (see BOARDS in rig.ts).
-const AXIS_Y = 104;
-const AXIS_X0 = 16;
-const AXIS_X1 = 288;
-const AXIS_D = `M${AXIS_X0} ${AXIS_Y} L${AXIS_X1} ${AXIS_Y}`;
-const AXIS_LEN = AXIS_X1 - AXIS_X0;
+import { clamp01, easeOutCubic } from '@/components/welcome/ease';
 
 interface Thinker {
   name: string;
   dates: string;
-  x: number;
-  /** true = label sits above the line. Alternating is what keeps them legible. */
-  up: boolean;
-  /** Where in the board's 0→1 draw it appears. */
+  era: EraKey;
+  /** 0→1 across the two thousand years, so the spacing is the real spacing. */
   at: number;
 }
 
 /**
- * FIVE, not six, and that is a measured limit rather than a preference. Six names
- * at this size do not fit 300 units even alternating above and below the line:
- * DESCARTES ran into NIETZSCHE and KANT into BEAUVOIR, which is worse than showing
- * one fewer thinker. Aristotle went because Socrates already stands for ancient
- * Greece, and because the other four are the ones the host says out loud.
- *
- * Placed by ERA rather than to a linear scale — 2,400 years spread evenly would
- * pile the moderns on top of one another. The empty stretch is still honest, and
- * it is labelled, because it is the most interesting thing on the chart.
- *
- * "BEAUVOIR" rather than "DE BEAUVOIR": the full form is 11 characters and
- * overruns the board. The SPOKEN line says "Beauvoir." too now — it used to say
- * the name in full, which put a third line in the speech bubble holding nothing
- * but the surname, and meant the board and the host were saying different words
- * at the same moment. See the note on that beat in ../rig.ts.
+ * "BEAUVOIR" rather than "DE BEAUVOIR": the full form overruns the plate, and the
+ * SPOKEN line says "Beauvoir." too — A1 read the right way round, the board and
+ * the host naming her the same way.
  */
-// The five drawn here are subtracted from the real roll for the footer, so the
-// board cannot disagree with the app about how many thinkers there are. It said
-// "AND 218 MORE" — which encodes a total of 223, the figure the spoken line was
-// also stuck on.
 const THINKERS: Thinker[] = [
-  { name: 'SOCRATES', dates: '470–399 BCE', x: 34, up: true, at: 0.1 },
-  { name: 'DESCARTES', dates: '1596–1650', x: 140, up: false, at: 0.34 },
-  { name: 'KANT', dates: '1724–1804', x: 186, up: true, at: 0.5 },
-  { name: 'NIETZSCHE', dates: '1844–1900', x: 232, up: false, at: 0.64 },
-  { name: 'BEAUVOIR', dates: '1908–1986', x: 276, up: true, at: 0.78 },
+  { name: 'SOCRATES', dates: '470–399 BCE', era: 'ANCIENT', at: 0.0 },
+  { name: 'DESCARTES', dates: '1596–1650', era: 'MODERN', at: 0.46 },
+  { name: 'KANT', dates: '1724–1804', era: 'MODERN', at: 0.62 },
+  { name: 'NIETZSCHE', dates: '1844–1900', era: 'MODERN', at: 0.78 },
+  { name: 'BEAUVOIR', dates: '1908–1986', era: 'CONTEMPORARY', at: 1.0 },
 ];
 
-const STEM = 26;
-const stemD = (t: Thinker) =>
-  `M${t.x} ${AXIS_Y} L${t.x} ${AXIS_Y + (t.up ? -STEM : STEM)}`;
+const MORE = ALL_PHILOSOPHERS.length - THINKERS.length;
 
-function Mark({ p, t }: { p: SharedValue<number>; t: Thinker }) {
-  const dotProps = useAnimatedProps(() => {
-    const u = clamp01((p.value - t.at) / 0.05);
-    // Scaled about its own centre the long way round, not with originX/originY:
-    // an animated transform ARRAY is what repaints on this stack, and it replaces
-    // the static origin props rather than composing with them. GrowthChart's dots
-    // do exactly this.
-    return {
-      opacity: u > 0 ? 1 : 0,
-      transform: [
-        { translateX: t.x },
-        { translateY: AXIS_Y },
-        { scale: Math.min(easeOutBack(u), 1.3) },
-        { translateX: -t.x },
-        { translateY: -AXIS_Y },
-      ],
-    };
-  });
-  const stemProps = useAnimatedProps(() => ({
-    strokeDashoffset: STEM * (1 - easeOutCubic(seg(p.value, t.at, t.at + 0.06))),
-    strokeOpacity: 0.5 * clamp01((p.value - t.at) / 0.03),
-  }));
-  const textProps = useAnimatedProps(() => {
-    const a = easeOutCubic(seg(p.value, t.at + 0.03, t.at + 0.11));
-    return { opacity: a, transform: [{ translateY: (t.up ? 4 : -4) * (1 - a) }] };
-  });
+// ── ALTERNATING, AND EVENLY SPACED, AND THE SECOND HALF IS A CORRECTION ─────
+//
+// Five plates side by side across 372 units is 74 each including gaps, which put
+// "470–399 BCE" at ten points and left the board's whole height unused. A timeline
+// has an axis and things hanging off BOTH sides of it — which the SVG version knew
+// (it carried an `up` flag per thinker) and which a flex row cannot express. So
+// each plate hangs above or below the axis in turn, on a stem.
+//
+// THE FIRST DRAFT PLACED THEM BY DATE AND THEY COLLIDED, which is not a spacing
+// bug — it is what the real dates do. Socrates is 400 BCE and the other four are
+// inside four centuries, so a true scale bunches them into the right-hand third
+// and 104-wide plates overlap by sixty units. It rendered as a pile.
+//
+// It also went unreported, and that is the more useful half: `sheet:intro`
+// measures WORD boxes, and a plate can be half under its neighbour while the
+// centred names inside them stay clear of each other. A checker that measures
+// type cannot see furniture collide.
+//
+// So the axis is a SEQUENCE, not a scale: five even slots, and the truth about
+// the span is carried by the dates on the plates and by the "2,000 YEARS" label
+// over them — which is what those were always for. Even slots also make the
+// no-collision claim structural rather than lucky: same-side plates are two
+// slots apart, and 2 × 74.4 is wider than any plate.
+const SLOTS = 5;
+const SLOT_W = 372 / SLOTS;
+// 88 wide with 12 of padding leaves 76 for the name, and the widest of the five
+// is DESCARTES at 69.0 units of Inter_700Bold 11 — measured against the real .ttf
+// in plain Node (`scripts/lib/ttfwidth.mjs`), not estimated. The first draft used
+// size 12, where the same name measures 75.1 against 72 of usable plate, and both
+// DESCARTES and NIETZSCHE shipped as "DESCAR…" and "NIETZSC…": a word the reader
+// does not get, which is the SPILL class §21 names. MapChart's own header records
+// the identical mistake being made by character count.
+const PLATE_W = 88;
+const STEM = 16;
+const AXIS_Y = 86;
 
-  // Names sit clear of the stem end; the dates tuck under the name.
-  const nameY = t.up ? AXIS_Y - STEM - 16 : AXIS_Y + STEM + 15;
-  const dateY = t.up ? nameY - 13 : nameY + 13;
-  // Only the outermost two would overrun the board if centred on their own mark.
-  const anchor = t.x < 46 ? 'start' : t.x > 262 ? 'end' : 'middle';
-  const tx = t.x < 46 ? AXIS_X0 : t.x > 262 ? AXIS_X1 : t.x;
+function Plate({ p, t, i }: { p: SharedValue<number>; t: Thinker; i: number }) {
+  const r = ramp(ERA[t.era]);
+  const up = i % 2 === 0;
+  const style = useAnimatedStyle(() => {
+    const a = easeOutCubic(clamp01((p.value - 0.12 - i * 0.1) / 0.3));
+    return { opacity: a, transform: [{ translateY: (up ? -8 : 8) * (1 - a) }] };
+  });
+  // Centred in its own slot, then clamped to the board so the first and last
+  // plates cannot hang off the edges — the ends are the two the eye goes to first.
+  const cx = Math.max(0, Math.min(372 - PLATE_W,
+    (i + 0.5) * SLOT_W - PLATE_W / 2));
 
   return (
-    <G>
-      <APath
-        d={stemD(t)}
-        stroke={INK}
-        strokeWidth={1}
-        strokeLinecap="round"
-        fill="none"
-        strokeDasharray={STEM}
-        animatedProps={stemProps}
-      />
-      <ACircle cx={t.x} cy={AXIS_Y} r={3.4} fill={INK} animatedProps={dotProps} />
-      <AG animatedProps={textProps}>
-        <SvgText
-          x={tx}
-          y={nameY}
-          fill={INK}
-          fontFamily="Inter_700Bold"
-          fontSize={13}
-          letterSpacing={0.3}
-          textAnchor={anchor}
-        >
-          {t.name}
-        </SvgText>
-        <SvgText
-          x={tx}
-          y={dateY}
-          fill={SOFT}
-          fontFamily="EBGaramond_400Regular_Italic"
-          fontSize={11.5}
-          textAnchor={anchor}
-        >
-          {t.dates}
-        </SvgText>
-      </AG>
-    </G>
+    <Animated.View style={[s.slot, { left: cx, [up ? 'bottom' : 'top']: AXIS_Y + STEM }, style]}>
+      <View style={[s.plate, { backgroundColor: r.track, borderColor: r.base }]}>
+        <Text style={[s.name, { color: r.shade }]} numberOfLines={1}>{t.name}</Text>
+        <Text style={s.dates} numberOfLines={1}>{t.dates}</Text>
+      </View>
+      <View style={[s.stem, { backgroundColor: r.base, [up ? 'bottom' : 'top']: -STEM }]} />
+    </Animated.View>
   );
 }
 
 export default function ThinkersChart({ p }: { p: SharedValue<number> }) {
-  const axisProps = useAnimatedProps(() => ({
-    strokeDashoffset: AXIS_LEN * (1 - easeOutCubic(seg(p.value, 0, 0.12))),
+  // The axis draws itself across before the plates land on it, so the two
+  // thousand years arrive as a span rather than as five separate facts.
+  const axis = useAnimatedStyle(() => ({
+    transform: [{ scaleX: easeOutCubic(clamp01(p.value / 0.22)) }],
   }));
-  // The empty stretch, called out on the line itself between Socrates and
-  // Descartes — the one label on this board that teaches something the names alone
-  // do not. Kept short and centred BETWEEN their two stems: the arrowed version
-  // was wide enough to cross Descartes' stem.
-  const gapProps = useAnimatedProps(() => ({
-    opacity: 0.85 * easeOutCubic(seg(p.value, 0.22, 0.36)),
+  const span = useAnimatedStyle(() => ({
+    opacity: easeOutCubic(clamp01((p.value - 0.2) / 0.2)),
   }));
-  const footProps = useAnimatedProps(() => ({
-    opacity: easeOutCubic(seg(p.value, 0.88, 1)),
+  const more = useAnimatedStyle(() => ({
+    opacity: easeOutCubic(clamp01((p.value - 0.7) / 0.25)),
   }));
 
   return (
-    <G>
-      <APath
-        d={AXIS_D}
-        stroke={INK}
-        strokeWidth={1.4}
-        strokeOpacity={0.85}
-        strokeLinecap="round"
-        fill="none"
-        strokeDasharray={AXIS_LEN}
-        animatedProps={axisProps}
-      />
-
-      {THINKERS.map((t) => (
-        <Mark key={t.name} p={p} t={t} />
-      ))}
-
-      <AG animatedProps={gapProps}>
-        <SvgText
-          x={87}
-          y={AXIS_Y - 7}
-          fill={SOFT}
-          fontFamily="EBGaramond_400Regular_Italic"
-          fontSize={12}
-          textAnchor="middle"
-        >
-          — 2,000 years —
-        </SvgText>
-      </AG>
-
-      <AG animatedProps={footProps}>
-        <SvgText
-          x={150}
-          y={194}
-          fill={SOFT}
-          fontFamily="Inter_500Medium"
-          fontSize={11}
-          letterSpacing={1.6}
-          textAnchor="middle"
-        >
-          AND {ALL_PHILOSOPHERS.length - THINKERS.length} MORE
-        </SvgText>
-      </AG>
-    </G>
+    <View style={s.board}>
+      <Animated.Text style={[s.span, span]}>— 2,000 YEARS —</Animated.Text>
+      <Animated.View style={[s.axis, axis]} />
+      {THINKERS.map((t, i) => <Plate key={t.name} p={p} t={t} i={i} />)}
+      <Animated.Text style={[s.more, more]}>AND {MORE} MORE</Animated.Text>
+    </View>
   );
 }
+
+const s = StyleSheet.create({
+  board: { width: 372, height: 200 },
+  span: {
+    fontFamily: 'Inter_500Medium', fontSize: 10.5, letterSpacing: 2,
+    color: C.dim, textAlign: 'center', marginTop: 2,
+  },
+  // scaleX from the left, so it draws ACROSS rather than growing from the middle.
+  axis: {
+    position: 'absolute', left: 0, right: 0, top: AXIS_Y,
+    height: 2, backgroundColor: C.edge, transformOrigin: 'left',
+  },
+  slot: { position: 'absolute', width: PLATE_W, alignItems: 'center' },
+  plate: {
+    width: PLATE_W, borderWidth: 1, borderRadius: 8,
+    paddingVertical: 7, paddingHorizontal: 6, alignItems: 'center',
+  },
+  stem: { position: 'absolute', width: 1.5, height: STEM },
+  name: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.3 },
+  dates: {
+    fontFamily: 'EBGaramond_400Regular_Italic', fontSize: 11, color: C.dim, marginTop: 1,
+  },
+  more: {
+    position: 'absolute', left: 0, right: 0, bottom: 0,
+    fontFamily: 'Inter_500Medium', fontSize: 10.5, letterSpacing: 2,
+    color: C.dim, textAlign: 'center',
+  },
+});

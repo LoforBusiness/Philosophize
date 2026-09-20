@@ -169,7 +169,7 @@ Philosophize/
 │   ├── index.ts                 # ALL_BRANCHES + getLessonById, lessonAccessibility,
 │   │                            #   branchCountsFromUnits, getLessonUnitInfo
 │   ├── branches/                # 6 branches · 28 units · 246 lessons (§5)
-│   ├── philosophers.ts          # BASE + composes ALL_PHILOSOPHERS (322)
+│   ├── philosophers.ts          # BASE + composes ALL_PHILOSOPHERS (341)
 │   ├── extra-philosophers/      # ancient/eastern/medieval/modern/contemporary/
 │   │                            #   expansion, expansion2a/2b/3/4 (+ *-facts)
 │   ├── philosopherFacts.ts      # "Did you know?" facts, 3 per philosopher
@@ -464,7 +464,7 @@ Index on (user_id, lesson_id).
 
 > **21,400 IS A FIRST PASS, NOT A CEILING — and this file said otherwise for a
 > long time.** Counted out of the tree: 234 lessons at a perfect 60 each is
-> 14,040, all 28 units mastered 2,800, all 132 saveable quotes 396, all 322
+> 14,040, all 28 units mastered 2,800, all 132 saveable quotes 396, all 341
 > thinkers met 644, every one of their quizzes aced 6,440 — **21,400 XP for doing
 > everything in the app, perfectly, once**. That number was then used to argue a
 > 52,000-XP ladder was unreachable and to cut it to 16,000.
@@ -1221,8 +1221,8 @@ they belong to, so the rule book has them and this file did not:
 
 **Phase 5 — shipped and iterating in public.** Live on Google Play, versionCode 21, as Ashmere.
 
-- **Content:** 6 branches · **28 units** · **246 lessons**. **322 philosophers**
-  with bios, eras and **1,780 quotes** between them — and all 322 have exactly
+- **Content:** 6 branches · **28 units** · **246 lessons**. **341 philosophers**
+  with bios, eras and **1,856 quotations** between them — and all 341 have exactly
   three "Did you know?" facts, with nothing missing.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
   gating; **246 cinematic lessons — every lesson in the app** (animated stickman
@@ -2335,12 +2335,12 @@ and fails on any digit left in literal text.
 > still does not: it is already one tap from every screen that shows the count.
 
 **Free tier** — enough to fall in love: a lesson a day, every branch's first unit
-in order, the full streak, XP, rank and badge systems, and all 322 thinkers.
+in order, the full streak, XP, rank and badge systems, and all 341 thinkers.
 
 **Why someone pays (the thesis — the aspiration, not the current feature list):**
 1. They actually **retain** what they learn (spaced review), not just tap through it.
 2. The **cinematic, narrated** lessons feel like nothing else in the category.
-3. **Breadth** — 6 branches, 246 lessons, 322 thinkers — is a genuine library.
+3. **Breadth** — 6 branches, 246 lessons, 341 thinkers — is a genuine library.
 4. **Credential & mastery** — ranks + path-mastery give visible proof of progress.
 5. The **daily habit** (streak + review) makes the subscription part of a routine.
 
@@ -3266,7 +3266,7 @@ the same weight, including the two kinds that carry more than the rest.
   colour — `ERA` in `constants/design.ts`, the app's licensed "one place a hue
   means something", already used on every quote plate — with a rule under it, and
   it opens `ThinkerPeek`: name, dates and the `oneLiner` the roster already keeps
-  for all 322. **Nothing new had to be written for any thinker**, which is the
+  for all 341. **Nothing new had to be written for any thinker**, which is the
   whole reason this was cheap.
 - **A MAXIM.** One phrase per lesson, struck on a band. 204 of 246 lessons carry
   one and **42 deliberately carry none** — the floor in `make-focus` exists
@@ -5155,9 +5155,9 @@ all now. After both fixes, on the same instrument:
 >
 > Every section is wrapped in `useMemo` now, so React gets the SAME ELEMENT back
 > where that section's own inputs have not moved, and an unchanged element is a
-> subtree it skips. The derivations went the same way: `philScores` maps all 322
+> subtree it skips. The derivations went the same way: `philScores` maps all 341
 > thinkers and filters the saved quotes for each, `branchInterest` does six passes
-> over the same 322, and both ran on every render including the ones that produced
+> over the same 341, and both ran on every render including the ones that produced
 > an identical page. `chartInk` was four constants rebuilt per render and handed
 > to three charts as a fresh object, which is enough on its own to defeat any memo
 > those charts might be given.
@@ -5304,7 +5304,7 @@ still drawn as an outline while every button, card and rank pin sat on a lip.
 
 - **The colour is a LABEL and it already existed.** `ERA` in `constants/design.ts`
   is the licensed "one place a hue means something", keyed on the five groups
-  `data/philosophers.ts` already sorts 322 thinkers by. Five recognisable colours
+  `data/philosophers.ts` already sorts 341 thinkers by. Five recognisable colours
   is what makes a list of twenty quotes scannable; one tone is what made it a
   pile.
 - **The identity does not bend.** The rim is ink and the quotation is ink. The
@@ -6327,6 +6327,88 @@ wrap somewhere sensible to fall.
 > apart still graze. Compare baselines, not edges. The tightest real pair on any
 > board is DESCARTES/NIETZSCHE at **9.4px**.
 
+
+### The first screen was drawn in the palette the app threw out
+
+> *"look at the very beginning screen that the user sees only once … based on the
+> color palette, based on the animations, based on the gamification that has been
+> implemented into the app and lessons … create a more gamified look and more
+> smooth look … make sure all the animations are very smooth, and that words
+> aren't going over each other."*
+
+**`npm run sheet:intro` IS THE FINDING, AND IT DID NOT EXIST.** `check-intro`
+measures one frame at a time and answers countable questions of it well — does a
+line break into three rows, is a lit word clipped, do two names on a board touch.
+Every one of those is a property of a SINGLE frame. "Is it entertaining", "is it
+smooth" and "does it look like the rest of the app" are properties of the
+SEQUENCE, and nothing in the repo could look at forty-one seconds of it at once.
+The strip is one page load, eighteen frames at stated intro-times, stitched, with
+a word-box reading per frame — and every finding below came out of the first one.
+
+**IT WAS THE PRE-SEPTEMBER PALETTE, LITERALLY.** `ease.ts` held `INK`, `PAPER`
+and `SOFT` as the literals `#1a1714`, `#f7f4ee` and `#8a8177` under the comment
+"matches the approved preview exactly", and `WelcomeAnimation` pinned
+`HUE = '#1B3B3C'` — the structural accent that moved to `#2A4343` when the owner's
+six swatches landed on 2026-09-15. The ground was a three-stop gradient from
+`#efece4` to `#e6e2d8`: a beige wash, which is the exact thing removed from every
+other surface the following day ("the background for some shading has a gold
+look"). Every other screen moved with both changes because every other screen
+reads `constants/design.ts`. **A literal cannot be repainted**, so the first
+screen a new reader ever sees kept a palette the app had abandoned twice, and
+nothing failed. `check:intro` now bans a hex literal anywhere in
+`components/welcome/`, comments stripped — that rule, not the colours, is the fix.
+It caught one on its first run that the sweep by hand had missed.
+
+**THE TOP 45% WAS EMPTY ON EVERY BOARD BEAT.** The boards sat at x 14…246, y
+384…616 — beside the host — under a sound reason that had stopped applying ("the
+host occupies x 256…376 and nothing may cross 248"; true only while a board shares
+his band). So the only genuinely informative thing in the intro was crammed into a
+232-unit column at about eight points of type, for forty seconds, above nothing.
+One `BOARD_BOX` at 372 × 200 in the room that was already empty: 1.5× the area,
+the app's own reading order (a lesson is a stage on top and a deck below, L6), and
+**nothing about the host moved** — `CX`, `GROUND`, `X_MARK` and `check:host`'s five
+high-water marks all still describe what runs. His point needed no work either:
+`handTargets` already aims at `boardCentreAt(t)`, so it re-aimed upward for free.
+
+**AND THE BOARDS ARE VIEWS NOW, WHICH IS WHAT LET THEM CARRY THE APP.** Each was a
+board-sized `<Svg>`, and `ease.ts`'s rule is real — SVG geometry cannot animate on
+this stack, so a chart could only ever be typed-in coordinates. That is the whole
+reason four boards could not hold a single piece of the app's own furniture. They
+draw real objects now: the six branches as `SketchIcon`s on `ramp(hue)` chips in
+their six measured `BRANCH` hues (they were all ink), five thinkers on their `ERA`
+plates, the lesson card struck in the ethics olive with a real verdict tick, and
+the growth board ending on a real `RankSeal`. It also removes a full-screen `<Svg>`
+that was painting one rectangle, which is §19's own GPU rule.
+
+**TWO NUMBERS WERE WRONG, AND ONE OF THEM WAS ON THE SCREEN.** The growth board's
+footer read `222 lessons · 48 ranks` as a literal — against a library of 246 —
+under a comment noting that "check-thinkers already guards the sibling claim" on
+the thinker count. The author knew the class of bug, guarded the figure next to it,
+and typed this one. It is counted out of the tree now. Separately, **this file said
+322 philosophers and 1,780 quotes; the roll is 341 and 1,856**, which `check-thinkers`
+has been reporting correctly all along.
+
+**WHAT THE READER CALLED WORDS GOING OVER EACH OTHER WAS NOT A COLLISION.**
+Measured across the whole run there are zero overlapping word pairs, and the first
+draft of the strip that said otherwise was reproducing a false positive
+`check-intro` already knew about: an SVG text's rect is its em box, so two lines a
+comfortable distance apart graze. What IS real is OPACITY — a line handed off to
+the next one faded over 0.30s while the BUBBLE stayed fully opaque, so a whole
+spoken sentence sat at about a quarter strength on a solid white card. That is
+D35's smear in the shape of a word, and the lessons' own answer is the one applied
+here: legible or absent. The window is 0.15s and the line RISES as it leaves, so
+motion carries the exit rather than dimming.
+
+**Two rules were repointed rather than deleted, and that is the part worth
+keeping.** `check-intro`'s "no two names on a board are touching" walked
+`querySelectorAll('svg')` for `<text>`; the moment the boards became Views it
+reported "no boards measured" and went on passing — a rule that stops protecting
+anything without failing. The board carries `nativeID="intro-board"` now. And
+`check-thinkers` asserted the "and n more" derivation by matching the inline
+expression, so moving the identical subtraction into a named constant read as a
+regression; it tests the property now. **Its first rewrite then passed on this
+file's own comment about the label**, which is L8 arriving in the friendly
+direction — comments are stripped before matching.
 
 **The welcome end card** (`assets/images/welcome/sky.jpg`) is the one background
 that is a *drawing* rather than a photograph, and it follows the same rule for the

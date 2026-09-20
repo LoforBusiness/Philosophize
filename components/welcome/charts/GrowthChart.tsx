@@ -1,128 +1,161 @@
-// GrowthChart — what a daily habit actually adds up to, in bars and a line.
-//
-// WHY THIS IS NOT AN INTELLIGENCE CURVE.
+// GrowthChart — what one lesson a day actually comes to, and the reward it ends on.
 //
 // The ask was a chart showing "how much smarter you get over time". This app
-// cannot measure that, and §14 is emphatic about the cost of putting a claim on
-// screen that nothing behind it enforces — a value model listing things that do
-// not exist is how a paywall ends up lying. A rising line labelled IQ would be
-// exactly that, in the first thirty seconds, in an app about thinking clearly.
+// cannot measure that and will not claim to, so the board plots the two things it
+// CAN count: lessons finished per week at one a day, and the rank ladder climbing
+// over the same eight weeks.
 //
-// So it charts what the curriculum genuinely contains and what a habit genuinely
-// reaches: lessons finished per week at one a day, the rank ladder climbing over
-// them, and the real totals underneath. Every number here is the app's own —
-// 222 lessons, 48 ranks — and check-thinkers already guards the sibling claim on
-// the thinkers board, so the habit of deriving rather than asserting is the one
-// this file follows.
+// ── THE NUMBER THAT WAS WRONG, AND HOW IT GOT THAT WAY ──────────────────────
 //
-// Per the rule in ../ease.ts, every geometry value is a module-scope constant and
-// never changes. All motion is opacity / strokeDashoffset / scale.
+// The footer read `222 lessons · 48 ranks` as a literal, under a comment noting
+// that "check-thinkers already guards the sibling claim" on the thinker count. So
+// the author of this board knew exactly this class of bug, guarded the count next
+// to it, and typed this one in — and the library has since gone to 246. A wrong
+// figure in the first forty seconds of an app about thinking clearly is the same
+// fault §19 records the spoken line committing ("two hundred and twenty-three"
+// against 322) and §14 records the paywall committing ("All 50 badges" against a
+// roll of seventy). It is always the same cause: a number nobody re-derives.
+//
+// Both figures are counted out of the tree now, and `check-intro` re-counts them
+// independently. There is no literal left on this board to rot.
+//
+// ── AND IT ENDS ON A REAL PIN ───────────────────────────────────────────────
+//
+// The climb used to finish at a label reading "RANK 20". The rank is an OBJECT in
+// this app — struck, in one of eight materials, with its own glyph — and the Pass
+// tab already ends its own pitch on "a real bronze rank crest and a real
+// first-tier badge medal". Drawing a picture of a reward beside the real thing is
+// the gap this whole pass is about: the intro was selling the app in a vocabulary
+// the app does not use.
 
-import Animated, { useAnimatedProps, type SharedValue } from 'react-native-reanimated';
-import { G, Path, Rect, Text as SvgText } from 'react-native-svg';
-import { INK, SOFT, clamp01, easeOutCubic, seg } from '@/components/welcome/ease';
+import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import RankSeal from '@/components/shared/RankSeal';
+import { C } from '@/constants/design';
+import { PATINA, ramp } from '@/components/shared/tone';
+import { RANKS, rankOrder, rankDegree } from '@/data/ranks';
+import { ALL_BRANCHES } from '@/data';
+import { clamp01, easeOutCubic } from '@/components/welcome/ease';
 
-const APath = Animated.createAnimatedComponent(Path);
-const ARect = Animated.createAnimatedComponent(Rect);
-const AG = Animated.createAnimatedComponent(G);
-
-// Chart space is 300 × 300 (see BOARDS in rig.ts).
-const PLOT = { x: 44, y: 84, w: 224, h: 150 };
-
-/** Lessons finished by the end of each week at one a day: 7, 14, 21 … */
+/** Eight weeks at one lesson a day. The bars ARE the x-axis in human terms. */
 const WEEKS = 8;
 const BARS = Array.from({ length: WEEKS }, (_, i) => (i + 1) * 7);
-const MAX = BARS[WEEKS - 1]; // 56
-const BAR_W = 18;
-const GAP = (PLOT.w - WEEKS * BAR_W) / (WEEKS - 1);
-const barX = (i: number) => PLOT.x + i * (BAR_W + GAP);
-const barH = (v: number) => (v / MAX) * PLOT.h;
+const MAX = BARS[WEEKS - 1];
 
-// The rank line rides over the bars: 48 ranks across 50,000 XP is not linear in
-// weeks, so it is drawn as the curve it is — quick early, slower as the orders
-// get longer. Points are the top of each week's climb.
-const RANKS = [3, 6, 9, 12, 14, 16, 18, 20];
-const R_MAX = 24;
-const rankY = (v: number) => PLOT.y + PLOT.h - (v / R_MAX) * PLOT.h;
-const LINE_D = RANKS.map((v, i) =>
-  `${i ? 'L' : 'M'}${(barX(i) + BAR_W / 2).toFixed(1)} ${rankY(v).toFixed(1)}`,
-).join(' ');
-// Long enough to cover the polyline however it is measured — a dash array that
-// falls short leaves a permanent gap at the end of the draw-on.
-const LINE_LEN = 420;
+/** Counted, never typed. The two figures the footer states. */
+const LESSON_TOTAL = ALL_BRANCHES.reduce(
+  (n, b) => n + b.paths.reduce((m, u) => m + u.lessons.length, 0), 0,
+);
+const RANK_TOTAL = RANKS.length;
 
-function Bar({ i, p }: { i: number; p: SharedValue<number> }) {
-  const h = barH(BARS[i]);
-  // Each bar starts 0.055 after the one before it, so the row grows left to
-  // right at reading speed rather than all at once.
-  const t0 = 0.12 + i * 0.045;
-  const props = useAnimatedProps(() => {
-    const a = easeOutCubic(clamp01(seg(p.value, t0, t0 + 0.18)));
-    return { height: h * a, y: PLOT.y + PLOT.h - h * a, opacity: 0.14 + 0.5 * a };
+/**
+ * Where eight weeks of one-a-day actually lands on the ladder, rather than a
+ * number chosen to look encouraging. 56 lessons at a perfect 60 XP is 3,360, and
+ * the pin shown is the rank that XP has genuinely conferred.
+ */
+const RANK_AT_8_WEEKS = (() => {
+  const xp = MAX * 60;
+  let i = 0;
+  for (let k = 0; k < RANKS.length; k += 1) if (RANKS[k].xp <= xp) i = k;
+  return i;
+})();
+const PIN = RANKS[RANK_AT_8_WEEKS];
+
+const PLOT_H = 104;
+// 8 bars + 7 gaps = 279 of the board's 372, which leaves the pin a 93-unit column
+// on the right. At the first draft's 20/8 the plot was 216 wide and the board's
+// right third was empty — the same fault this whole pass is about, moved from the
+// top of the screen to the side of a board.
+const BAR_W = 27;
+const GAP = 9;
+
+function Bar({ p, i, lessons }: { p: SharedValue<number>; i: number; lessons: number }) {
+  // Each bar grows over its own slice of the draw, left to right, so the plot
+  // builds the way it is read. Height is a TRANSFORM (scaleY) rather than a
+  // height, because a height is layout and a transform is not.
+  const style = useAnimatedStyle(() => {
+    const a = easeOutCubic(clamp01((p.value - 0.08 - i * 0.055) / 0.34));
+    return { transform: [{ scaleY: a }] };
   });
-  return <ARect x={barX(i)} width={BAR_W} rx={2} fill={INK} animatedProps={props} />;
+  const h = Math.round((lessons / MAX) * PLOT_H);
+  return (
+    <Animated.View style={[s.barBox, { height: h }, style]}>
+      {/* The Meter's own construction: a flat fill with a 30% white shine along
+          the top. Not the component itself — `components/ui/Meter.tsx` is
+          documented as "never narrower than 1.5× its height", which is a
+          HORIZONTAL bar, and these are columns. Same material, right shape. */}
+      <View style={[s.barFill, { backgroundColor: PATINA.base }]} />
+      <View style={s.barShine} />
+    </Animated.View>
+  );
 }
 
 export default function GrowthChart({ p }: { p: SharedValue<number> }) {
-  const headProps = useAnimatedProps(() => ({ opacity: easeOutCubic(seg(p.value, 0, 0.1)) }));
-  const axisProps = useAnimatedProps(() => ({ strokeOpacity: 0.45 * easeOutCubic(seg(p.value, 0.06, 0.2)) }));
-  // The line draws on AFTER the bars are up, so it reads as a consequence of
-  // them rather than a second thing happening at the same time.
-  const lineProps = useAnimatedProps(() => {
-    const a = easeOutCubic(clamp01(seg(p.value, 0.52, 0.84)));
-    return { strokeDashoffset: LINE_LEN * (1 - a), strokeOpacity: a };
+  const head = useAnimatedStyle(() => ({ opacity: easeOutCubic(clamp01(p.value / 0.1)) }));
+  const foot = useAnimatedStyle(() => ({ opacity: easeOutCubic(clamp01((p.value - 0.62) / 0.24)) }));
+  // The pin lands once the climb has been drawn, not alongside it — the reward
+  // arrives BECAUSE of the bars, and a pin that fades up with them says nothing.
+  const pin = useAnimatedStyle(() => {
+    const a = easeOutCubic(clamp01((p.value - 0.58) / 0.3));
+    return { opacity: a, transform: [{ scale: 0.82 + 0.18 * a }] };
   });
-  const capProps = useAnimatedProps(() => ({ opacity: easeOutCubic(seg(p.value, 0.78, 0.9)) }));
-  const footProps = useAnimatedProps(() => ({ opacity: 0.92 * easeOutCubic(seg(p.value, 0.84, 0.95)) }));
 
   return (
-    <G>
-      <AG animatedProps={headProps}>
-        <SvgText x={150} y={26} fill={SOFT} fontFamily="Inter_700Bold" fontSize={15} letterSpacing={2.2} textAnchor="middle">
-          ONE A DAY
-        </SvgText>
-        {/* NOT "It compounds." — that was the same platitude the spoken line was
-            rewritten to get rid of, and with the host now saying "One lesson a
-            day" over the top of the ONE A DAY kicker the board was echoing him
-            twice. This names the x-axis in human terms instead, which is what
-            the eight bars underneath actually are. Measured at 240 of the 290
-            the 300-wide chart allows. */}
-        <SvgText x={150} y={54} fill={INK} fontFamily="PlayfairDisplay_700Bold" fontSize={26} textAnchor="middle">
-          Two months of that.
-        </SvgText>
-      </AG>
+    <View style={s.board}>
+      <Animated.View style={head}>
+        <Text style={s.kicker}>ONE A DAY</Text>
+        <Text style={s.headline}>Two months of that.</Text>
+      </Animated.View>
 
-      {/* the floor the bars stand on */}
-      <APath
-        d={`M${PLOT.x - 8} ${PLOT.y + PLOT.h} L${PLOT.x + PLOT.w + 8} ${PLOT.y + PLOT.h}`}
-        stroke={INK} strokeWidth={1.4} strokeLinecap="round" fill="none" animatedProps={axisProps}
-      />
+      <View style={s.plot}>
+        <View style={s.bars}>
+          {BARS.map((lessons, i) => (
+            <Bar key={lessons} p={p} i={i} lessons={lessons} />
+          ))}
+        </View>
+        <Animated.View style={[s.pin, pin]}>
+          <RankSeal
+            glyph={PIN.glyph}
+            state="current"
+            size={54}
+            order={rankOrder(RANK_AT_8_WEEKS)}
+            degree={rankDegree(RANK_AT_8_WEEKS)}
+          />
+          <Text style={s.pinName}>{PIN.name.toUpperCase()}</Text>
+        </Animated.View>
+      </View>
 
-      {BARS.map((_, i) => <Bar key={i} i={i} p={p} />)}
-
-      <APath
-        d={LINE_D}
-        stroke={INK} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" fill="none"
-        strokeDasharray={LINE_LEN} animatedProps={lineProps}
-      />
-
-      <AG animatedProps={capProps}>
-        <SvgText x={PLOT.x + PLOT.w} y={rankY(RANKS[WEEKS - 1]) - 14} fill={INK}
-          fontFamily="Inter_700Bold" fontSize={15} textAnchor="end">
-          RANK 20
-        </SvgText>
-      </AG>
-
-      <AG animatedProps={footProps}>
-        <SvgText x={PLOT.x} y={PLOT.y + PLOT.h + 26} fill={SOFT}
-          fontFamily="EBGaramond_400Regular_Italic" fontSize={17}>
-          eight weeks
-        </SvgText>
-        <SvgText x={PLOT.x + PLOT.w} y={PLOT.y + PLOT.h + 26} fill={SOFT}
-          fontFamily="EBGaramond_400Regular_Italic" fontSize={17} textAnchor="end">
-          222 lessons · 48 ranks
-        </SvgText>
-      </AG>
-    </G>
+      <View style={s.rule} />
+      <Animated.View style={[s.footRow, foot]}>
+        <Text style={s.foot}>eight weeks</Text>
+        <Text style={s.foot}>{LESSON_TOTAL} lessons · {RANK_TOTAL} ranks</Text>
+      </Animated.View>
+    </View>
   );
 }
+
+const s = StyleSheet.create({
+  board: { width: 372, height: 200 },
+  kicker: {
+    fontFamily: 'Inter_500Medium', fontSize: 11, letterSpacing: 2.2, color: C.dim,
+  },
+  headline: {
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: C.ink, marginTop: 1,
+  },
+  plot: { flexDirection: 'row', alignItems: 'flex-end', height: PLOT_H + 8, marginTop: 6 },
+  bars: { flexDirection: 'row', alignItems: 'flex-end', height: PLOT_H, gap: GAP },
+  barBox: { width: BAR_W, borderRadius: 4, overflow: 'hidden', transformOrigin: 'bottom' },
+  barFill: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
+  barShine: {
+    position: 'absolute', left: 0, right: 0, top: 0, height: 3,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  pin: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 2 },
+  pinName: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2,
+    color: ramp(PATINA.base).shade, marginTop: 2,
+  },
+  rule: { height: 1.2, backgroundColor: C.edge, marginTop: 4 },
+  footRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 },
+  foot: { fontFamily: 'EBGaramond_400Regular_Italic', fontSize: 14, color: C.dim },
+});

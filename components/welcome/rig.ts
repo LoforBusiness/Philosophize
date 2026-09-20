@@ -296,25 +296,51 @@ export interface Chapter {
 }
 
 /**
- * A board per chapter rather than one shared box, because the three now hold very
- * different amounts. The lesson card keeps the exact geometry it was approved at;
- * the two boards that replaced the decorative curve and tree have real words on
- * them and need the room — a six-branch map at the old 224×112 put its type at
- * about 8px on a phone, which is a picture of information rather than information.
+ * ── ONE BOARD BOX, AT THE TOP, AND THE TOP IS WHY ───────────────────────────
  *
- * The right edge is the constraint: the host stands at CX with a 60-unit head, so
- * he occupies x 256…376 and nothing may cross 248.
+ * The boards used to sit at x 14…246, y ~384…616 — the left half of the lower
+ * middle, squeezed beside the host. The reason was sound and is quoted here
+ * because it no longer applies: "the right edge is the constraint: the host
+ * stands at CX with a 60-unit head, so he occupies x 256…376 and nothing may
+ * cross 248." True while a board shares his band. Nothing said it had to.
+ *
+ * Rendered as a filmstrip (`npm run sheet:intro`, which is the instrument this
+ * change is owed to), every one of the eighteen frames had the same fault: the
+ * top 45% of the screen was bare paper, on every board beat, for forty seconds
+ * — and the boards that carry the only actual information in the intro were
+ * crammed into a 232-unit column at about eight points of type.
+ *
+ * So the board moves into the room that was already empty, and takes the WHOLE
+ * width with it: 372 × 200 against 232 × 232. That is 1.5× the area and 1.6× the
+ * width, and the reading order becomes the one the app already uses everywhere
+ * else — a lesson is a stage on top and a deck below (L6's 42/50/8 split). What
+ * he is showing, then what he is saying, then him.
+ *
+ * ── THREE THINGS THIS DELIBERATELY DOES NOT MOVE ────────────────────────────
+ *
+ * · THE HOST. `CX`, `GROUND`, `X_MARK` and every constant in hostFigure are
+ *   untouched, so the walk-on, the settle, the footfalls and `check:host`'s five
+ *   high-water marks all still describe what runs.
+ * · `BUB.bottom`, which is fixed at 374 so the tail root never moves. The board
+ *   stops at y 254 and a two-line bubble tops out at 276, which leaves 22 units
+ *   of paper between them. `check:intro` holds the bubble to two rows and never
+ *   three, so 276 is the real ceiling rather than a hopeful one.
+ * · HIS POINT, which needed no work at all: `handTargets` aims the arm at
+ *   `boardCentreAt(t)` — the live board centre, "a fixed spot would have him
+ *   gesturing below the tall ones" — so moving the board up re-aimed it for free.
+ *
+ * ONE BOX for all four, where there were four. The old comment already wanted
+ * this ("only brings it up to the same width as the two beside it so the three do
+ * not read as three sizes") and got there by hand-matching widths; a single box
+ * cannot drift. Each chart lays out in the box's own units, so cw/ch ARE w/h and
+ * the scale is 1 — see the Board component, which no longer needs a viewBox.
  */
+const BOARD_BOX: Box = { x: 14, y: 54, w: 372, h: 200 };
 const BOARDS: Record<Visual, { box: Box; cw: number; ch: number }> = {
-  // 232×116 keeps the card's approved 2:1 aspect exactly, and only brings it up to
-  // the same width as the two beside it so the three do not read as three sizes.
-  lesson: { box: { x: 14, y: 392, w: 232, h: 116 }, cw: 300, ch: 150 },
-  map: { box: { x: 14, y: 386, w: 232, h: 174 }, cw: 300, ch: 225 },
-  thinkers: { box: { x: 14, y: 396, w: 232, h: 156 }, cw: 300, ch: 202 },
-  // Tall, because it is the only board with a plot in it: bars need height to be
-  // a shape rather than a row of ticks, and x 14…246 is the width the layout
-  // reserves for boards (see X_MARK in hostFigure).
-  growth: { box: { x: 14, y: 384, w: 232, h: 232 }, cw: 300, ch: 300 },
+  lesson: { box: BOARD_BOX, cw: BOARD_BOX.w, ch: BOARD_BOX.h },
+  map: { box: BOARD_BOX, cw: BOARD_BOX.w, ch: BOARD_BOX.h },
+  thinkers: { box: BOARD_BOX, cw: BOARD_BOX.w, ch: BOARD_BOX.h },
+  growth: { box: BOARD_BOX, cw: BOARD_BOX.w, ch: BOARD_BOX.h },
 };
 
 export const CHAPTERS: Chapter[] = (() => {

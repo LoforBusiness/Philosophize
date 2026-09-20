@@ -24,7 +24,9 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { C } from '@/constants/design';
 import { clamp01, lerp, easeOutCubic, easeOutBack, INK, PAPER, SOFT } from './ease';
+import { FLAT_FACE, FLAT_EDGE } from '@/components/shared/tone';
 
 /**
  * Bump this whenever the intro changes enough to be worth showing again, and every
@@ -123,8 +125,15 @@ const TAIL_BOX = { x: 30, y: 356, w: 340, h: 188 };
 // covered where they meet and the two read as one shape.
 /** How far the Begin button drops onto its own ledge. Matches LIP.button. */
 const BEGIN_LIP = 4;
-/** The accent the ledge is cut from — the app's one structural colour. */
-const HUE = '#1B3B3C';
+/**
+ * The accent the ledge is cut from — the app's one structural colour.
+ *
+ * It was the literal `#1B3B3C` until 2026-09-20, which is what that colour WAS
+ * until the owner's six swatches landed on 2026-09-15 and moved it to `#2A4343`.
+ * Every button lip in the app moved; this one could not, because a literal does
+ * not get repainted. Read it.
+ */
+const HUE = C.HUE;
 
 const TW = BUB.tailW;
 const TL = BUB.tailLen0;
@@ -491,25 +500,21 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
 
   return (
     <Animated.View style={[styles.root, rootStyle]}>
-      {/* Paper — its own STATIC surface (no animated children), so it rasterizes
-          once and never re-uploads with the animation. */}
-      <Svg
-        pointerEvents="none"
-        style={StyleSheet.absoluteFill}
-        width={W}
-        height={H}
-        viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <Defs>
-          <LinearGradient id="wa-paper" x1="0" y1="0" x2="0" y2={STAGE_H} gradientUnits="userSpaceOnUse">
-            <Stop offset="0" stopColor="#efece4" />
-            <Stop offset="0.62" stopColor="#f7f4ee" />
-            <Stop offset="1" stopColor="#e6e2d8" />
-          </LinearGradient>
-        </Defs>
-        <Rect x={0} y={0} width={STAGE_W} height={STAGE_H} fill="url(#wa-paper)" />
-      </Svg>
+      {/* ── THE GROUND: ONE FLAT FILL, AND NOT AN <Svg> ────────────────────────
+          This was a full-stage <Svg> painting a three-stop gradient from #efece4
+          through #f7f4ee to #e6e2d8 — a beige wash, lit from nowhere in
+          particular, under a comment about how efficiently it rasterized.
+
+          Both halves were wrong by the app's own rules. §7: "a gradient ending in
+          beige, lit from nowhere in particular, is the first tell design writers
+          list for an AI-made screen", which is why every surface in the app went
+          flat on 2026-09-16 with its light moved into the edges. And §19: "an
+          <Svg> costs its whole box in GPU memory for as long as its tab is
+          built" — Home's full-screen ruled-paper <Svg> was 9.6MB for sixty
+          hairlines and became Views for exactly this reason. A full-screen
+          surface for ONE rectangle of one colour is the most expensive way there
+          is to draw it. */}
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: C.paper }]} />
 
       {/* ── THE SKY, and only for the end card ──────────────────────────────────
           It fades in on the SAME T_BEGIN ramp as the wordmark, so it belongs to the
@@ -603,7 +608,7 @@ export default function WelcomeAnimation({ start = true, onDone }: Props) {
         preserveAspectRatio="xMidYMid meet"
       >
         <AG animatedProps={tailProps}>
-          <Path d={TAIL_FILL_D} fill="#fdfbf6" />
+          <Path d={TAIL_FILL_D} fill={FLAT_FACE} />
           <Path
             d={TAIL_EDGE_D}
             fill="none"
@@ -685,6 +690,14 @@ const Board = memo(function Board({
   return (
     <Animated.View
       pointerEvents="none"
+      // THE BOARD IS FINDABLE. `check-intro`'s "no two names on a board are
+      // touching" rule walked `document.querySelectorAll('svg')` for <text>,
+      // which was exactly right while the boards were SVG and reported "no
+      // boards measured" the moment they became Views — a rule that stops
+      // protecting anything without failing, which is the shape §21 records over
+      // and over. One nativeID, the same way `beat-progress`, `stage-clip` and
+      // `drag-strip` make the lessons measurable.
+      nativeID="intro-board"
       style={[
         {
           position: 'absolute',
@@ -696,13 +709,25 @@ const Board = memo(function Board({
         wrapStyle,
       ]}
     >
-      {/* The chart draws in its OWN space (cw × ch) and the viewBox scales that to
-          fill the board, so a chart never has to know how big its board is. */}
-      <Svg
-        width="100%"
-        height="100%"
-        viewBox={`0 0 ${chapter.cw} ${chapter.ch}`}
-        preserveAspectRatio="xMidYMid meet"
+      {/* ── THE CHART IS VIEWS, IN STAGE UNITS, SCALED ONCE ──────────────────
+          It used to be an <Svg> with a viewBox mapping the chart's own cw × ch
+          into the board, "so a chart never has to know how big its board is".
+          Neat, and it is what kept every board a diagram: SVG geometry cannot
+          animate on this stack (../ease.ts), so a chart could only ever be
+          typed-in coordinates — never a hue chip, an icon, a Meter, or anything
+          else the app already owns and lays out.
+
+          So charts are Views laid out in the BOARD'S OWN UNITS (cw === box.w and
+          ch === box.h, one box for all four — see BOARD_BOX in rig.ts) and the
+          whole thing is scaled by the one stage `scale`. A chart still never has
+          to know how big its board is, because its board is always 372 × 200. */}
+      <View
+        style={{
+          width: chapter.cw,
+          height: chapter.ch,
+          transform: [{ scale }],
+          transformOrigin: 'top left',
+        }}
       >
         {chapter.visual === 'lesson' ? (
           <LessonChart p={p} />
@@ -713,7 +738,7 @@ const Board = memo(function Board({
         ) : (
           <GrowthChart p={p} />
         )}
-      </Svg>
+      </View>
     </Animated.View>
   );
 });
@@ -795,10 +820,30 @@ function Word({
     const s1 = s0 + speak;
     const at = s0 + (s1 - s0) * (i / Math.max(1, n));
     const a = easeOutCubic(clamp01((age - at) / 0.16));
-    // hand the words off to the next line — except on the last one, where they
-    // must dissolve with the bubble or a blank balloon lingers on screen
-    const out = last ? 1 : 1 - easeOutCubic(clamp01((clock.value - (nextT - 0.3)) / 0.3));
-    return { opacity: a * out, transform: [{ translateY: (1 - a) * 3 }] };
+    // ── THE HAND-OFF LEAVES; IT DOES NOT DIM ────────────────────────────────
+    //
+    // Except on the last line, where the words must dissolve with the bubble or a
+    // blank balloon lingers on screen.
+    //
+    // This used to fade out over 0.30s while the BUBBLE stayed fully opaque, so
+    // for a third of a second every word passed through every opacity between 1
+    // and 0 on a solid white card. Photographed mid-way — which `sheet:intro`
+    // does, because it samples moments rather than watching — a whole spoken line
+    // sits there at about a quarter strength: a smear in the shape of a sentence,
+    // which is D35's class exactly ("a word ghosted with its layer reaches the eye
+    // at 1.3:1"), and the reason the lessons' own captions were made "legible or
+    // absent rather than dim".
+    //
+    // So the window is 0.15s and the line RISES as it goes. Motion carries the
+    // exit instead of opacity alone, which is the app's own construction —
+    // ThinkerPeek's "the exit is the entrance read backwards" — and it halves the
+    // time any word spends being unreadable. It also lengthens the time the line
+    // stands COMPLETE, which is the direction `check-thinkers` wants.
+    const out = last ? 1 : 1 - easeOutCubic(clamp01((clock.value - (nextT - 0.15)) / 0.15));
+    return {
+      opacity: a * out,
+      transform: [{ translateY: (1 - a) * 3 - 5 * (1 - out) }],
+    };
   });
   return (
     <Animated.Text style={[styles.word, style]} onLayout={(e) => onMeasure(i, e.nativeEvent.layout.y)}>
@@ -893,10 +938,19 @@ const styles = StyleSheet.create({
     maxWidth: BUB.maxTextW + 2 * BUB.padX,
     paddingHorizontal: BUB.padX,
     paddingVertical: BUB.padY,
-    backgroundColor: '#fdfbf6',
+    // The card FACE, not a warm off-white of its own (was `#fdfbf6`).
+    backgroundColor: FLAT_FACE,
+    // The heavy ink outline STAYS. It is the hand-drawn identity, and a cinematic
+    // scene is ink outlines on paper — swapping it for the depth kit's hairline
+    // would make the intro quieter than the product it introduces.
     borderWidth: 2.2,
     borderColor: INK,
     borderRadius: BUB.radius,
+    // …but it now sits ON the paper rather than being a hole cut in it. One
+    // boxShadow, which RN 0.85's New Architecture renders on both platforms and
+    // which moves no layout — the same tool `lip-stage.mjs` used to put a lip
+    // under 455 lesson plates.
+    boxShadow: `0px 3px 0px ${FLAT_EDGE}`,
     overflow: 'hidden',
   },
   words: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', flexShrink: 0 },
@@ -932,8 +986,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     fontSize: 11.5,
     lineHeight: 17,
-    color: '#4A4640',
-    textShadowColor: 'rgba(247,244,238,0.9)',
+    // Both were literals, and the shadow's was the OLD paper (247,244,238) — so
+    // the halo that carries this line across the sky drawing was keyed to a
+    // colour the app stopped using. §19: on a photograph the type's contrast
+    // comes from its own shadow, never from the crop.
+    color: C.ink,
+    textShadowColor: C.paper,
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },

@@ -174,6 +174,7 @@
     "sheet:events": "node scripts/check-events.mjs --sheet",
     "check:thinkers": "node scripts/check-thinkers.mjs",
     "check:intro": "node scripts/check-intro.mjs",
+    "sheet:intro": "node scripts/sheet-intro.mjs",
     "check:voice": "node scripts/check-voice.mjs",
     "check:ear": "node scripts/check-ear.mjs",
     "check:narration": "node scripts/check-narration.mjs",

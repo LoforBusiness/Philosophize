@@ -1,185 +1,116 @@
-// LessonChart — port of `drawLesson` from the approved canvas preview.
+// LessonChart — the question the host asks, drawn as the control that asks it.
 //
-// A mock lesson card answering "Is it ever right to lie?": the card outline fades
-// in, the question follows, two answer pills appear in turn, the second is chosen
-// (faint fill + tick), then the footer teases Kant.
+// A mock lesson card answering "Is it ever right to lie?": the card arrives, the
+// two answers arrive, one is chosen, the verdict strikes. It is the only board
+// that shows the PRODUCT rather than a fact about the product, which is why it
+// goes first and why the host's next line is "You answer first. Then Kant argues
+// back."
 //
-// Per the rule in ./ease.ts, EVERY geometry value here is a module-scope constant
-// and never changes. All motion is opacity / strokeOpacity / fillOpacity only —
-// which is exactly what the canvas did (it animated globalAlpha and nothing else).
+// ── IT IS DRAWN IN THE BRANCH'S OWN COLOUR NOW ──────────────────────────────
+//
+// R18 has struck every control in every lesson in its lesson's branch hue since
+// the controls were gamified: "colour in the edges, one hue a lesson". This board
+// is a picture of one of those controls and was drawn in ink, so the first answer
+// control a reader ever sees looked like nothing they will meet again. "Is it ever
+// right to lie?" is an ETHICS question, so the card is struck in the olive.
+//
+// The verdict keeps the app's own two states: the chosen answer re-strikes in
+// `correct` with a tick, the other stays quiet. Nothing here invents a look — the
+// tick, the lip and the plate are the vocabulary of `QuestionParts`.
 
-import React from 'react';
-import Animated, { useAnimatedProps, type SharedValue } from 'react-native-reanimated';
-import { G, Path, Rect, Text as SvgText } from 'react-native-svg';
-import { INK, SOFT, easeOutCubic, seg } from '@/components/welcome/ease';
+import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import SketchIcon from '@/components/shared/SketchIcon';
+import { C, BRANCH } from '@/constants/design';
+import { ramp } from '@/components/shared/tone';
+import { clamp01, easeOutCubic } from '@/components/welcome/ease';
 
-const AG = Animated.createAnimatedComponent(G);
-const ARect = Animated.createAnimatedComponent(Rect);
-const APath = Animated.createAnimatedComponent(Path);
+/** Ethics, because the question is an ethics question. */
+const HUE = BRANCH.ethics;
+const R = ramp(HUE);
+const OK = ramp(C.correct);
 
-// ---- static geometry (canvas coordinates, unchanged) ----
-const CARD = { x: 16, y: 10, w: 268, h: 128, r: 8 } as const;
-const PILL = { x: 30, w: 180, h: 24, r: 12 } as const;
+const ANSWERS = [
+  { label: 'Never', at: 0.26, chosen: false },
+  { label: 'To save a life', at: 0.36, chosen: true },
+];
 
-// Canvas: roundRect(30, 52 + i*30, 180, 24, 12)
-const PILLS = [
-  { label: 'Never', start: 0.26, y: 52, chosen: false },
-  { label: 'To save a life', start: 0.36, y: 82, chosen: true },
-] as const;
+/** When the reader's choice lands, and when the verdict strikes on it. */
+const PICK = 0.58;
 
-// Canvas: moveTo(222, y+12) lineTo(228, y+18) lineTo(240, y+5), for the chosen pill (y = 82).
-const TICK_D = 'M222 94 L228 100 L240 87';
-
-// The chosen pill's fill + tick share this window.
-const PICK_FROM = 0.58;
-const PICK_TO = 0.72;
-
-type PillProps = {
-  p: SharedValue<number>;
-  label: string;
-  /** Start of the pill's 0.14-long fade-in window. */
-  start: number;
-  y: number;
-  chosen: boolean;
-};
-
-function Pill({ p, label, start, y, chosen }: PillProps) {
-  // Canvas: q = easeOutCubic(seg(p, st, st + 0.14)) — gates the pill stroke, its
-  // label, and (multiplicatively) the chosen fill + tick. Nesting them in this
-  // group reproduces the canvas's q*pick products exactly.
-  const groupProps = useAnimatedProps(() => ({
-    opacity: easeOutCubic(seg(p.value, start, start + 0.14)),
-  }));
-
-  // Canvas: globalAlpha = q * pick * 0.12 → inside the q group, fillOpacity = pick * 0.12.
-  const fillProps = useAnimatedProps(() => ({
-    fillOpacity: 0.12 * easeOutCubic(seg(p.value, PICK_FROM, PICK_TO)),
-  }));
-
-  // Canvas: globalAlpha = q * pick → inside the q group, strokeOpacity = pick.
-  const tickProps = useAnimatedProps(() => ({
-    strokeOpacity: easeOutCubic(seg(p.value, PICK_FROM, PICK_TO)),
+function Answer({ p, a }: { p: SharedValue<number>; a: (typeof ANSWERS)[number] }) {
+  const style = useAnimatedStyle(() => {
+    const inA = easeOutCubic(clamp01((p.value - a.at) / 0.26));
+    // The loser is not dimmed into unreadability — §17's own rule from the
+    // answer controls: "Emphasis goes on the live one; it is never taken from
+    // the others." 0.7, which is what `Target` settles an unpicked card at.
+    const spent = a.chosen ? 1 : 1 - 0.3 * easeOutCubic(clamp01((p.value - PICK) / 0.3));
+    return { opacity: inA * spent };
+  });
+  const face = useAnimatedStyle(() => {
+    const v = a.chosen ? easeOutCubic(clamp01((p.value - PICK) / 0.3)) : 0;
+    return {
+      backgroundColor: v > 0.5 ? OK.track : C.paper,
+      borderColor: v > 0.5 ? OK.base : R.base,
+    };
+  });
+  const tick = useAnimatedStyle(() => ({
+    opacity: a.chosen ? easeOutCubic(clamp01((p.value - PICK - 0.1) / 0.25)) : 0,
   }));
 
   return (
-    <AG animatedProps={groupProps}>
-      <Rect
-        x={PILL.x}
-        y={y}
-        width={PILL.w}
-        height={PILL.h}
-        rx={PILL.r}
-        ry={PILL.r}
-        fill="none"
-        stroke={INK}
-        strokeWidth={1.1}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {chosen ? (
-        <ARect
-          x={PILL.x}
-          y={y}
-          width={PILL.w}
-          height={PILL.h}
-          rx={PILL.r}
-          ry={PILL.r}
-          fill={INK}
-          animatedProps={fillProps}
-        />
-      ) : null}
-      <SvgText
-        x={42}
-        y={y + 16}
-        fill={INK}
-        fontFamily="Inter_400Regular"
-        fontSize={12}
-        textAnchor="start"
-      >
-        {label}
-      </SvgText>
-      {chosen ? (
-        <APath
-          d={TICK_D}
-          fill="none"
-          stroke={INK}
-          strokeWidth={1.8}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          animatedProps={tickProps}
-        />
-      ) : null}
-    </AG>
+    <Animated.View style={[s.answerWrap, style]}>
+      <Animated.View style={[s.answer, face]}>
+        <Text style={s.answerText}>{a.label}</Text>
+        <Animated.View style={tick}>
+          <SketchIcon name="check" size={14} color={OK.shade} />
+        </Animated.View>
+      </Animated.View>
+    </Animated.View>
   );
 }
 
 export default function LessonChart({ p }: { p: SharedValue<number> }) {
-  // Canvas: globalAlpha = 0.9 * easeOutCubic(seg(p, 0, 0.12)) on a stroke-only rect.
-  const cardProps = useAnimatedProps(() => ({
-    strokeOpacity: 0.9 * easeOutCubic(seg(p.value, 0, 0.12)),
-  }));
-
-  const questionProps = useAnimatedProps(() => ({
-    opacity: easeOutCubic(seg(p.value, 0.1, 0.26)),
-  }));
-
-  const footerProps = useAnimatedProps(() => ({
-    opacity: easeOutCubic(seg(p.value, 0.74, 0.94)),
-  }));
+  const card = useAnimatedStyle(() => {
+    const a = easeOutCubic(clamp01(p.value / 0.2));
+    return { opacity: a, transform: [{ scale: 0.97 + 0.03 * a }] };
+  });
 
   return (
-    <G>
-      <ARect
-        x={CARD.x}
-        y={CARD.y}
-        width={CARD.w}
-        height={CARD.h}
-        rx={CARD.r}
-        ry={CARD.r}
-        fill="none"
-        stroke={INK}
-        strokeWidth={1.4}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        animatedProps={cardProps}
-      />
-
-      <AG animatedProps={questionProps}>
-        <SvgText
-          x={30}
-          y={36}
-          fill={INK}
-          fontFamily="Inter_500Medium"
-          fontSize={13}
-          textAnchor="start"
-        >
-          Is it ever right to lie?
-        </SvgText>
-      </AG>
-
-      {PILLS.map((pill) => (
-        <Pill
-          key={pill.label}
-          p={p}
-          label={pill.label}
-          start={pill.start}
-          y={pill.y}
-          chosen={pill.chosen}
-        />
-      ))}
-
-      <AG animatedProps={footerProps}>
-        <SvgText
-          x={30}
-          y={126}
-          fill={SOFT}
-          fontFamily="EBGaramond_400Regular_Italic"
-          fontSize={11.5}
-          textAnchor="start"
-        >
-          Kant disagrees. Here’s why →
-        </SvgText>
-      </AG>
-    </G>
+    <View style={s.board}>
+      <Animated.View style={[s.card, card]}>
+        <Text style={s.kicker}>ETHICS · LESSON 1</Text>
+        <Text style={s.question}>Is it ever right to lie?</Text>
+        <View style={s.answers}>
+          {ANSWERS.map((a) => <Answer key={a.label} p={p} a={a} />)}
+        </View>
+      </Animated.View>
+    </View>
   );
 }
+
+const s = StyleSheet.create({
+  board: { width: 372, height: 200, justifyContent: 'center' },
+  // A raised face on a lip of the branch's hue — `LipPlate`'s construction, which
+  // is how every answer control in every lesson is built.
+  card: {
+    backgroundColor: C.paper,
+    borderWidth: 2,
+    borderColor: R.base,
+    borderRadius: 14,
+    padding: 14,
+    boxShadow: `0px 4px 0px ${R.shade}`,
+  },
+  kicker: {
+    fontFamily: 'Inter_500Medium', fontSize: 10, letterSpacing: 2,
+    color: R.shade, marginBottom: 4,
+  },
+  question: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 20, color: C.ink },
+  answers: { marginTop: 12, gap: 8 },
+  answerWrap: { width: '100%' },
+  answer: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    borderWidth: 1.4, borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12,
+  },
+  answerText: { fontFamily: 'Inter_500Medium', fontSize: 14, color: C.ink },
+});

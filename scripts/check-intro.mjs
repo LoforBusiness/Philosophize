@@ -54,6 +54,7 @@ import { claimRoute } from './lib/previewroute.mjs';
 const WEB = +(process.env.WEB_PORT || 8856);
 const CDP = +(process.env.CDP_PORT || 9396);
 const ROUTE = process.env.INTRO_ROUTE || 'previewintro';
+const REPO = process.cwd();
 
 /** Milliseconds between spoken words, below which the line reads as a flicker. */
 const MIN_PER_WORD = 230;
@@ -202,12 +203,21 @@ try {
       // sampling mid-flight reported them 103px through each other while the
       // finished board has them cleanly stacked. Only a frame identical to the
       // one before it is a frame worth measuring.
+      //
+      // AND IT READS THE BOARD BY ID, NOT BY <svg>. This walked
+      // querySelectorAll('svg') for <text> elements, which was right for as
+      // long as the boards were SVG — and on the day they became Views (so they
+      // could carry the app's own hue chips, icons and rank pins) it reported "no
+      // boards measured" and went on passing. A rule that stops protecting
+      // anything without ever failing is the failure §21 records most often, so
+      // the board carries nativeID="intro-board" and this finds it there.
       const boxes = [];
-      for (const svg of document.querySelectorAll('svg')) {
-        const texts = [...svg.querySelectorAll('text')].filter((t) => {
+      for (const board of document.querySelectorAll('#intro-board')) {
+        const texts = [...board.querySelectorAll('*')].filter((t) => {
+          if (t.children.length) return false;
           if (!(t.textContent || '').trim()) return false;
           let e = t;
-          while (e && e !== svg) {
+          while (e && e !== board) {
             if (Number(getComputedStyle(e).opacity) < 0.9) return false;
             e = e.parentElement;
           }
@@ -325,6 +335,34 @@ try {
 } finally {
   release();
   if (ws) ws.close();
+}
+
+// ── THE PALETTE IS THE APP'S, AND THIS IS THE RULE THAT KEEPS IT THAT WAY ────
+//
+// The intro spent five days drawn in a palette the app had thrown out — warm
+// cream paper, a brown-black ink, and `#1B3B3C` for the accent that moved to
+// `#2A4343` on 2026-09-15 — because every one of those was a LITERAL. A literal
+// cannot be repainted, so this screen simply did not receive two palette changes
+// that reached every other surface, and nothing failed.
+//
+// The colours are fixed; this is the part that matters. Comments are stripped
+// first, for the reason §17's L8 gives at length: a detector that reads prose
+// finds the rule being described and reports it as the rule being broken — and
+// the files below now EXPLAIN in their headers which literals they used to hold.
+{
+  const files = fs.readdirSync(path.join(REPO, 'components/welcome'), { recursive: true })
+    .filter((f) => /\.tsx?$/.test(String(f)))
+    .map((f) => path.join('components/welcome', String(f)));
+  const offenders = [];
+  for (const rel of files) {
+    const src = fs.readFileSync(path.join(REPO, rel), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/(^|[^:])\/\/.*$/gm, '$1');
+    for (const m of src.matchAll(/#[0-9a-fA-F]{3,8}\b/g)) offenders.push(`${rel}: ${m[0]}`);
+  }
+  ok(offenders.length === 0,
+    'the first screen takes every colour from the app, never a literal',
+    offenders.length ? offenders.slice(0, 4).join(' · ') : 'no hex literal in components/welcome');
 }
 
 console.log(fails ? `\n${fails} problem(s).\n` : '\nintro: all clear.\n');

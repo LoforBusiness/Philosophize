@@ -70,8 +70,37 @@ ok(md.includes(`at ${m[6]} cinematic`), 'S11 per-branch cinematic invariant matc
   `check says ${m[5]}/${m[6]} a branch`);
 ok(!md.includes('at 16 cinematic'), 'and the old 16 is gone');
 
-// philosophers, from the composed array
-ok(md.includes('**322 philosophers**'), 'S12 philosopher count is the composed one');
+// ── PHILOSOPHERS, FROM THE COMPOSED ARRAY — AND IT USED TO SAY 322 ──────────
+//
+// This line was `ok(md.includes('**322 philosophers**'), …)`. The one check whose
+// whole job is to stop CLAUDE.md quoting a number the repo has moved past was
+// PINNED TO THE NUMBER, so the moment the roll grew the guard did not catch the
+// rot — it required it. §12 said 322 philosophers and 1,780 quotes against a real
+// 341 and 1,856 for as long as it took somebody to read the intro's spoken line,
+// and `check-thinkers` had been printing "roll is 341" in the same suite run all
+// along.
+//
+// A checker that restates the value it is checking is not a checker, it is a
+// second copy. The roll is counted here — the array is composed from a dozen
+// files, so counting it is the only honest way to know — and §12 has to agree
+// with the count rather than with a literal in this file.
+const roll = Number(execSync(
+  'node --import ./scripts/lib/register.mjs -e '
+  + '"const m = await import(\'./data/philosophers.ts\'); console.log(m.ALL_PHILOSOPHERS.length);"',
+  { encoding: 'utf8' },
+).trim().split('\n').pop());
+ok(Number.isFinite(roll) && roll > 0, 'S12 the roll can be counted at all', `${roll}`);
+ok(md.includes(`**${roll} philosophers**`), 'S12 philosopher count is the composed one',
+  `the roll is ${roll}`);
+const quotes = Number(execSync(
+  'node --import ./scripts/lib/register.mjs -e '
+  + '"const m = await import(\'./data/philosophers.ts\'); '
+  + 'console.log(m.ALL_PHILOSOPHERS.reduce((n, p) => n + (p.quotes ? p.quotes.length : 0), 0));"',
+  { encoding: 'utf8' },
+).trim().split('\n').pop());
+ok(md.includes(`**${quotes.toLocaleString('en-US')} quotations**`),
+  'S12 and the quotation count is counted too',
+  `${quotes.toLocaleString('en-US')} across the roll`);
 // A SUPERSEDED NUMBER MAY STILL APPEAR — this file keeps "it used to say X, it is
 // now Y" notes deliberately, and they are worth more than the correction alone.
 // So the rule is not "never mention 223", it is "never mention it ALONE": every

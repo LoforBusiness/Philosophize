@@ -277,9 +277,40 @@ ok(noBranch.length === 0, 'and at least one branch to chart',
   ok(n === ALL.length, 'the intro says how many thinkers there actually are',
     `says ${n} ("${spoken}"), roll is ${ALL.length}`);
 
-  const chart = readFileSync(path.join(REPO, 'components/welcome/charts/ThinkersChart.tsx'), 'utf8');
-  ok(/AND \{ALL_PHILOSOPHERS\.length - THINKERS\.length\} MORE/.test(chart),
-    'the intro board derives its "and n more" rather than typing it');
+  // ── THE PROPERTY, NOT THE SPELLING ────────────────────────────────────────
+  //
+  // This used to match the derivation INLINE in the JSX:
+  //
+  //   /AND \{ALL_PHILOSOPHERS\.length - THINKERS\.length\} MORE/
+  //
+  // which is the right thing to care about written as the wrong kind of test. The
+  // board was rebuilt in Views and the identical subtraction moved three lines up
+  // into a named `MORE` constant — no less derived, no more able to rot — and the
+  // rule went red. A checker that pins the shape of an expression rather than the
+  // fact it establishes makes every honest refactor look like a regression, and
+  // the cost is that the next person deletes the rule instead of the defect.
+  //
+  // So: the label must be interpolated rather than typed, and the file must
+  // derive its figure from the roll. Both halves matter — the first alone would
+  // pass on `AND {42} MORE`, and the second alone would pass on a file that
+  // imports the roster and then hard-codes the number anyway.
+  // COMMENTS STRIPPED FIRST, and the first run of the rewritten rule is why: the
+  // chart's own header explains the rule in prose ("`AND {n} MORE` is derived
+  // from ALL_PHILOSOPHERS"), so the match landed on the SENTENCE ABOUT the label
+  // and reported `AND {n} MORE` as the code. It passed, on a comment. That is
+  // §17's L8 exactly — "a detector that reads prose finds the rule being
+  // described and calls it the rule being broken" — arriving in the friendlier
+  // direction, where it passes something it never looked at.
+  const chart = readFileSync(path.join(REPO, 'components/welcome/charts/ThinkersChart.tsx'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/.*$/gm, '$1');
+  const label = chart.match(/AND \{([^}]+)\} MORE/);
+  ok(label != null && !/^\s*\d/.test(label[1]),
+    'the intro board\'s "and n more" is interpolated, not typed',
+    label ? `AND {${label[1]}} MORE` : '(label not found)');
+  ok(/ALL_PHILOSOPHERS\.length\s*-\s*THINKERS\.length/.test(chart),
+    'and the figure is the roll minus the five it names',
+    'however the subtraction is spelled');
 }
 
 // ── HOW LONG A LINE OF THE INTRO IS ACTUALLY READABLE ───────────────────────
