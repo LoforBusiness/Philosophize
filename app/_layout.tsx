@@ -214,7 +214,10 @@ export default function RootLayout() {
   // …and if we DID restart into one, do not play the launch animation a second
   // time on the same cold start. Without this the reader's first ever launch
   // shows the ink scene, blinks, and shows it again, which reads as a crash.
-  const [skipLaunchAnim, setSkipLaunchAnim] = useState(false);
+  // `null` until the read comes back: the launch screen holds its drawing until
+  // it knows, because a child's effects run before this one's and a boolean
+  // starting at `false` can only ever arrive too late. See LaunchScreen.
+  const [skipLaunchAnim, setSkipLaunchAnim] = useState<boolean | null>(null);
   // Local, not in the store: nothing outside this file needs to know the launch
   // screen is still fading — what everything else wants is `launchDone`, which
   // now means "the app underneath may start", and that is true a second earlier.
@@ -234,9 +237,19 @@ export default function RootLayout() {
     if (launchReleased && !liftedHere.current) setLaunchGone(true);
   }, [launchReleased]);
   useEffect(() => {
-    consumeReloadedFlag().then((did) => {
-      if (did) setSkipLaunchAnim(true);
-    });
+    // Both answers are set, not just the true one — `false` is what releases the
+    // drawing for everybody who did NOT just restart, which is almost everybody.
+    let done = false;
+    consumeReloadedFlag().then((did) => { done = true; setSkipLaunchAnim(did); });
+    // AND A DEAD MAN'S HANDLE, because this now GATES the launch animation.
+    // `consumeReloadedFlag` catches its own errors and always resolves, so this
+    // should never fire — but "should never" is not good enough for the one code
+    // path every cold start goes through, where the failure mode is an app that
+    // sits on the splash colour and never opens. If the answer has not arrived in
+    // 400ms, play the animation: replaying it once is a blemish, not opening is
+    // not repairable over the air.
+    const valve = setTimeout(() => { if (!done) setSkipLaunchAnim(false); }, 400);
+    return () => clearTimeout(valve);
   }, []);
 
   // Gate analytics on the user's saved preference, but only once the store has

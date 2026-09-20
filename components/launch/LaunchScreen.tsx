@@ -155,7 +155,15 @@ interface Props {
    * is a bad first impression for the one launch that is actually somebody's
    * first. So it stands down to a plain hold and lifts as soon as boot is ready.
    */
-  skipAnimation?: boolean;
+  /**
+   * Has this process just restarted into a newer bundle (so the animation has
+   * already been performed once on this cold start)?
+   *
+   * `null` means NOT YET KNOWN, and the drawing waits for it. A plain boolean
+   * defaulting to false is what made this prop dead for the whole of its life —
+   * see the effect below.
+   */
+  skipAnimation?: boolean | null;
   /**
    * THE SCREEN UNDERNEATH MAY START NOW — fired when the lift BEGINS, not when
    * it ends, and the two are a second apart on purpose.
@@ -197,9 +205,30 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
     return p * LETTERS.length;
   });
 
-  // The drawing is made over DRAW_MS and then waits for `ready` — normally
-  // already true, so the finish chains straight on.
+  // ── THE DRAWING STARTS ONLY ONCE THE SKIP IS KNOWN ──────────────────────────
+  //
+  // This effect used to carry `[]`, and that made `skipAnimation` DEAD — not
+  // racy, dead. The flag it is fed comes from `consumeReloadedFlag()`, an
+  // AsyncStorage read in the root layout, and React runs a child's effects
+  // BEFORE its parent's. So the order on every single boot was: this effect
+  // fires with `skipAnimation` still false and starts the full drawing; the
+  // parent's read resolves a moment later; the prop flips; `[]` means nothing
+  // re-reads it. There is no timing under which it could ever have worked.
+  //
+  // What that cost is the thing a reader reported: uninstall, reinstall, and the
+  // first launch plays the OLD embedded launch screen, restarts into the current
+  // bundle — and plays the launch animation AGAIN instead of skipping it, which
+  // is the exact "shows the ink scene, blinks, and shows it again" the skip was
+  // written to prevent.
+  //
+  // So the prop is now tri-state and this waits for an answer. `null` means the
+  // root layout has not finished asking; it always answers, because
+  // `consumeReloadedFlag` catches its own errors and resolves either way.
+  // `started` is what keeps a second answer from starting a second performance.
+  const started = useRef(false);
   useEffect(() => {
+    if (skipAnimation === null || started.current) return;
+    started.current = true;
     if (skipAnimation) {
       // Straight to held: no drawing, no counting, no second performance. The
       // `ready` effect below still governs the lift, so boot order is unchanged.
@@ -222,7 +251,7 @@ export default function LaunchScreen({ ready, skipAnimation = false, onLift, onD
       }
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [skipAnimation]);
 
   // THE OUTRO, and its three durations are a budget rather than a taste.
   //

@@ -1114,6 +1114,36 @@ function stripJs(src) {
   ok(total > 0 && settle > total,
     'and starts only after the last frame of that screen has been painted',
     `SETTLE_MS ${settle} against an outro of ${total}ms`);
+
+  // ── THE SKIP MUST BE ABLE TO ARRIVE IN TIME ────────────────────────────────
+  //
+  // `skipAnimation` exists so that a first-run reader who restarts into a newer
+  // bundle is not shown the launch animation twice. It was DEAD for the whole of
+  // its life — not flaky, dead — because the effect that starts the drawing
+  // carried `[]` while the flag comes from an AsyncStorage read in the root
+  // layout, and React runs a child's effects before its parent's. The prop could
+  // only ever flip after the drawing had already begun, and nothing re-read it.
+  // A reader found it by reinstalling: the old embedded screen played, the app
+  // restarted, and the new screen played its whole drawing instead of skipping.
+  //
+  // Two halves, because either alone puts it back. The effect has to DEPEND on
+  // the flag, and the layout has to be able to say "I do not know yet" — a
+  // boolean starting at false is indistinguishable from a settled answer, which
+  // is exactly how this failed.
+  // NOTE the file: `lay` above is app/(app)/_layout.tsx, the TAB layout. The skip
+  // lives in the ROOT layout, and reading the wrong one is how the first version
+  // of this rule failed on a change that was sitting right there.
+  const root = stripJs(fs.readFileSync(path.join(REPO, 'app/_layout.tsx'), 'utf8'));
+  const startDeps = launch.match(/if \(skipAnimation === null[\s\S]*?\}, \[([^\]]*)\]\)/);
+  ok(startDeps != null && /skipAnimation/.test(startDeps[1]),
+    'the launch drawing waits for the skip decision rather than reading it once',
+    startDeps ? `deps [${startDeps[1].trim()}]` : 'the guarded start effect is gone');
+  ok(/useState<boolean \| null>\(null\)/.test(root),
+    'and the layout can say it does not know yet',
+    'skipLaunchAnim is tri-state, so `false` means answered rather than unasked');
+  ok(/setSkipLaunchAnim\(false\)/.test(root) && /setTimeout/.test(root),
+    'with a valve, because this gates every cold start',
+    'a flag that never resolves must not be able to hold the app on the splash');
 }
 
 // -- 11 . the solid ramp: `disc()`, and the depth it has to keep ------------
