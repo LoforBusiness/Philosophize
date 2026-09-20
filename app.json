@@ -41,7 +41,7 @@
         {
           "image": "./assets/images/splash-blank.png",
           "resizeMode": "contain",
-          "backgroundColor": "#E4E4DF"
+          "backgroundColor": "#FFFFFF"
         }
       ],
       "expo-localization",

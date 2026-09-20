@@ -97,14 +97,22 @@ let GROUND = '#FFFFFF';
   ok(/interpolateColor\(introFade\.value, \[0, 1\], \[SPLASH_BG, GROUND\]\)/.test(screen),
     'and it starts on the splash colour, settling on the intro curve');
 
-  // THE PAGE IS PURE WHITE AND THE SPLASH CANNOT BE, so this step is wider than
-  // it was for paper. The splash is compiled into the binary and no OTA can
-  // touch it, so the honest budget is "imperceptible", not "identical" — and
-  // the number that matters is the one the old scenes had: 10.7:1.
+  // THE SPLASH CAN BE THE PAGE NOW, so the budget is "identical" rather than
+  // "imperceptible". It could not be before: the splash is compiled into the
+  // binary and no OTA can touch it, so while the page was pure white and the
+  // splash was #E4E4DF the honest rule was a 1.35 ceiling, measured against the
+  // 10.7:1 the old near-black scenes opened with. Build 22 repainted the
+  // compiled half white, and the step went to nothing.
+  //
+  // EXACT, because the asymmetry has not gone away. An update can move GROUND
+  // and can never move the splash, so a step reintroduced from this side is one
+  // no OTA could take back out — it would be a flash on the first frame of the
+  // app until somebody shipped a binary. This is the only place that can say so
+  // before it ships.
   const step = ratio(SPLASH, GROUND);
-  ok(step < 1.35,
-    'splash → page is a mild step, not a flash',
-    `${step.toFixed(2)}:1 (the old near-black scenes were 10.7:1 at their mildest)`);
+  ok(SPLASH.toLowerCase() === GROUND.toLowerCase(),
+    'splash → page is no step at all: the pen draws on the page already there',
+    `splash ${SPLASH} · page ${GROUND} · ${step.toFixed(2)}:1`);
 }
 
 // ── 2 · the wordmark says what app.json says ─────────────────────────────────

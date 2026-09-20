@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Updates from 'expo-updates';
+import { INK, SPLASH_BG } from '@/components/launch/launchArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE ONE THING AN OVER-THE-AIR UPDATE CANNOT REACH, AND HOW TO CLOSE IT.
@@ -46,8 +47,43 @@ import * as Updates from 'expo-updates';
  * reader nothing they were not already spending. Past it the launch screen would
  * be sitting on a finished animation waiting for a network, which is worse than
  * an intro one version behind.
+ *
+ * IT IS A DEADLINE FOR THE RESTART TOO, AND FOR ITS FIRST YEAR IT WAS NOT.
+ *
+ * Releasing the launch screen used to be all the timeout did: the fetch carried
+ * on and called `reload()` whenever it finally landed. On a fresh install of
+ * build 21 that fetch had to pull 87.8MB of narration the binary predates, so
+ * the restart arrived tens of seconds after the screen had lifted — on top of
+ * the welcome, or on top of a lesson. A reader reported the symptom as "a white
+ * screen for a long time" before the intro, which is precisely what a restart
+ * looks like: expo-updates paints its reload screen over the whole teardown.
+ *
+ * So past the budget the update is still FETCHED — it is on disk, and
+ * expo-updates launches the newest ready bundle on the next cold start anyway —
+ * but it is never used to restart the app under somebody. Late means next time.
  */
 export const BUDGET_MS = 4500;
+
+/**
+ * What the reader looks at while the app restarts, on the one launch that does.
+ *
+ * `Updates.reloadAsync()` takes this and nothing ever passed it, so every
+ * restart this app has ever performed used expo-updates' defaults — which are
+ * `#ffffff`, an iOS-blue `#007aff` spinner and no fade, read out of
+ * `ReloadScreenConfiguration.kt`. A stock white page with a blue spinner is not
+ * this app, and it is shown at the worst possible moment: somebody's first open.
+ *
+ * The colours are the app's OWN, taken from the one place that already holds
+ * them rather than retyped — so whatever the app starts up on, the restart
+ * matches it and there is no third constant to drift. The native screen is held
+ * until `RUN_JS_BUNDLE_END`, so a fade is what stops it cutting to a page that
+ * is the same colour underneath.
+ */
+export const RELOAD_SCREEN = {
+  backgroundColor: SPLASH_BG,
+  fade: true,
+  spinner: { enabled: true, color: INK, size: 'small' as const },
+};
 
 /** Survives the restart, so the second pass knows not to replay the animation. */
 export const RELOADED_KEY = 'philosophize-launch-reloaded';
@@ -74,6 +110,7 @@ export type Outcome =
   | 'not-first-run' // they have met the app before; nothing to be current about
   | 'already-tried' // the loop guard
   | 'no-update' // we are the newest there is
+  | 'too-late' // it landed past the budget; it is on disk for the next cold start
   | 'reloading' // restarting into a newer bundle; nothing after this runs
   | 'error'; // offline, refused, malformed — run what we have
 
@@ -87,6 +124,14 @@ export interface UpdateEnv {
   checkForUpdate(): Promise<{ isAvailable: boolean }>;
   fetchUpdate(): Promise<{ isNew: boolean }>;
   reload(): Promise<void>;
+  /**
+   * Is the launch screen still waiting for us — i.e. may we still restart?
+   *
+   * Injected as a FUNCTION rather than passed as a flag because it is asked
+   * after two awaits, and the answer changes during them. That is the whole
+   * point: the download is what takes the time.
+   */
+  mayRestart(): boolean;
 }
 
 /**
@@ -106,8 +151,21 @@ export async function runFirstRunUpdate(env: UpdateEnv): Promise<Outcome> {
 
     const check = await env.checkForUpdate();
     if (!check.isAvailable) return 'no-update';
+    // FETCH EVEN IF WE ARE ALREADY LATE. The bytes are worth having either way:
+    // expo-updates launches the newest ready bundle on the next cold start, so a
+    // download that misses the budget still buys the reader a current app. It
+    // just does not get to interrupt them for it.
     const fetched = await env.fetchUpdate();
     if (!fetched.isNew) return 'no-update';
+    // THE DEADLINE IS READ HERE, AFTER THE DOWNLOAD, BECAUSE HERE IS WHERE THE
+    // TIME WENT. The launch screen stopped covering for us at BUDGET_MS, so a
+    // restart from this point lands on top of whatever the reader moved on to.
+    //
+    // And it must come before the RELOADED_KEY write rather than only before the
+    // reload. That key means "this process is the second boot of one cold
+    // start"; writing it without restarting would make the NEXT launch skip its
+    // animation to hide a restart that never happened.
+    if (!env.mayRestart()) return 'too-late';
     // Marked and awaited before restarting — after reload there is no "after".
     await env.setItem(RELOADED_KEY, '1');
     await env.reload();
@@ -165,6 +223,12 @@ export function useFirstRunUpdate(enabled: boolean, isFirstRun: boolean): boolea
       }
     };
     const timer = setTimeout(finish, BUDGET_MS);
+    // THE DEADLINE IS A TIMESTAMP, NOT `!done`, and the difference is the
+    // cleanup below. Clearing the timer on unmount would leave `done` false for
+    // ever, so a download landing minutes later would still read as "inside the
+    // budget" and restart the app. A wall-clock deadline cannot be disarmed by
+    // anything, which is what this particular guard has to be.
+    const deadline = Date.now() + BUDGET_MS;
 
     runFirstRunUpdate({
       isEnabled: Updates.isEnabled,
@@ -174,7 +238,8 @@ export function useFirstRunUpdate(enabled: boolean, isFirstRun: boolean): boolea
       setItem: (k, v) => AsyncStorage.setItem(k, v),
       checkForUpdate: () => Updates.checkForUpdateAsync(),
       fetchUpdate: () => Updates.fetchUpdateAsync(),
-      reload: () => Updates.reloadAsync(),
+      reload: () => Updates.reloadAsync({ reloadScreenOptions: RELOAD_SCREEN }),
+      mayRestart: () => Date.now() < deadline,
     })
       // 'reloading' resolves only if the restart somehow did not happen, so
       // settling here is the correct fallback rather than a contradiction.

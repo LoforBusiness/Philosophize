@@ -1086,7 +1086,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **sixty-four** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **sixty-five** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1096,7 +1096,7 @@ followed:
 `check-plainwords` · `check-voice` · `check-ear` · `check-narration` · `check-streak` · `check-quips` ·
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
-`check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` ·
+`check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` · `check-firstrun` ·
 `check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-wander` · `check-skin` · `check-thoughts` · `check-marks` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
@@ -6149,6 +6149,72 @@ counter-tested from both sides.
 > shell — loses one 48ms frame. Neither is the stutter; both would have been
 > plausible places to go looking.
 
+
+### And the fourth thing in those seconds was a screen nobody had ever chosen
+
+> *"when I very first open the app after downloading it, it says that a white
+> screen for a long time. And then eventually, shows the scribble and light
+> bulb … I do not want the user sitting at a white screen for a while, not
+> knowing what's going on. And this just happens the very first time the user
+> opens the app."*
+
+**THE LAST SENTENCE IS THE DIAGNOSIS.** The only thing that happens exactly once
+per install is `lib/updates/firstRun.ts` restarting into a newer bundle —
+`TRIED_KEY` allows the attempt once — and **a restart is not free, it is a
+screen.**
+
+**THE PRICE OF THE RESTART IS THE WHOLE UPDATE, AND IT IS MEASURED.** `Loader.kt`
+sets `assetTotal = assetList.size` and does not finish until the last asset has
+landed, so taking a bundle means downloading every asset in it. Build 21 predates
+narration, so a fresh install has to pull **246 `lesson.mp3` files, 87.8MB**,
+against 4.8MB for everything else in `assets/`. That is what "a long time" is.
+
+**AND THE SCREEN OVER IT WAS EXPO'S DEFAULT, BECAUSE NOTHING HAD EVER CHOSEN
+ONE.** `reloadAsync()` takes `reloadScreenOptions` and no call site here ever
+passed any, so every restart this app has performed used
+`ReloadScreenConfiguration.fromOptions(null)`: `#ffffff`, a `#007aff` spinner,
+`fade = false`, held until `RUN_JS_BUNDLE_END` — which is before React has
+mounted or a font has loaded. A stock white page with an iOS-blue spinner, at
+somebody's first open. It takes the app's own ground and an ink spinner now.
+
+**THE BUDGET WAS RELEASING THE LAUNCH SCREEN AND NOTHING ELSE, and that is the
+real bug.** `finish()` set `settled`; the fetch carried on and called `reload()`
+whenever it landed — tens of seconds after the screen had lifted, so the restart
+arrived **on top of the welcome, or on top of a lesson**. Past the budget the
+update is still FETCHED, because expo-updates launches the newest ready bundle on
+the next cold start anyway; it just never restarts the app under anybody. Late
+means next time. The deadline is a wall clock rather than the timeout's own flag,
+because the effect's cleanup clears that timeout and a flag a cleanup can disarm
+is not a deadline.
+
+**AND THE SPLASH IS THE PAGE NOW.** `splash-blank.png` sat on `#E4E4DF` while the
+drawing's page is pure white — a 1.28:1 step this file recorded as deliberate and
+unfixable from the JS side, because the splash is a COMPILED resource (§18). A
+binary can repaint it, and does: both halves are `#FFFFFF`, so the native splash
+hands over to a page that is already there and the pen simply starts drawing on
+it. `check-launch` §1 holds them IDENTICAL rather than close, because an update
+can move `SPLASH_BG` and can never move the other half, so any drift is a flash
+on the app's first frame that no OTA could take back out.
+
+**THE CURE FOR THE FIRST OPEN IS THE BINARY, NOT ANY OF THAT.** A build embeds
+the current bundle and all of its assets, so a fresh install has nothing to fetch
+and nothing to restart into: splash, scribble, welcome. Everything above is what
+makes the restart safe the next time there is one — which is every new install
+after the next OTA.
+
+**`npm run check:firstrun` RUNS the decision tree, and it is the first thing that
+ever did.** That file's header has always said the tree takes its effects as
+arguments "so the whole decision tree can be exercised in plain Node rather than
+hoped about", and for a year nothing exercised it: a claim of testability with no
+test, on the one path where a mistake is an app that does not open. It scripts an
+env, calls the real exported function and reads the transcript — which outcome,
+what was written, whether it restarted, and in what order, which is one assertion
+for every sequencing rule in the file. It has to execute rather than grep,
+because there is no expo-updates on the web: §21's browser is structurally blind
+here and the only other instrument is uninstalling the app.
+`node scripts/countertest-firstrun.mjs` stages nine defects **on a copy** — the
+checker reads `FIRSTRUN_SRC` — so the working tree is never edited, plus the
+splash pair and the direction that must stay silent.
 
 ### And then it was clunky, and every word of that was measurable
 
