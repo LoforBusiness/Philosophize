@@ -64,6 +64,7 @@ scripts/.dial-shots/
 scripts/.board-shots/
 scripts/.reveal-shots/
 scripts/.lesson-shots/
+scripts/.gate-shots/
 
 # the reveal harness writes a scratch measurement here
 scripts/.reveal.json

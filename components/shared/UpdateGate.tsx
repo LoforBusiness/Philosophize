@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Modal, View, Text, Pressable, StyleSheet, Linking, Platform } from 'react-native';
+import { Modal, View, Text, StyleSheet, Image, Linking, Platform } from 'react-native';
+import { MotiView } from 'moti';
+import { Easing } from 'react-native-reanimated';
 import * as Application from 'expo-application';
 import { track } from '@/lib/posthog';
 import SketchIcon from '@/components/shared/SketchIcon';
+import StatSticker from '@/components/shared/StatSticker';
+import Button from '@/components/ui/Button';
+import { C, TYPE, SPACE, RADIUS, LIP } from '@/constants/design';
+import { FLOOR, FLOOR_CUT, EMBER, PAPER_LIT } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The oldest build allowed to keep running.
@@ -83,9 +89,46 @@ import SketchIcon from '@/components/shared/SketchIcon';
 export const MIN_VERSION_CODE = 22;
 
 const PACKAGE = 'com.philosophize.app';
-const Ink = '#1A1A1A';
-const Paper = '#FAFAF7';
-const InkSoft = '#6B6B6B';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WHAT THIS SCREEN IS, AND WHY IT IS BUILT OUT OF THE APP'S OWN PARTS (2026-09-20)
+//
+// It was a paper box with a 1.5px ink rule, a thin ring with a line icon in it,
+// an italic Playfair sentence and a flat ink button at radius 5 — the pre-depth
+// app, preserved under glass. Every other surface moved on (§19's depth kit),
+// and this one did not, because nobody with a current build can ever see it.
+//
+// It is the LAST screen a lapsed reader sees, which is the argument for it
+// mattering: they are being stopped, and what they are looking at while they
+// decide whether to bother is a picture of how much care the thing they are
+// being asked to download is made with.
+//
+// So it is the kit, unmodified:
+//   · a flat white panel on the 2px `C.edge` — flat, because a ledge in this app
+//     means a thing you can press, and the panel is not one (Card's own rule);
+//   · the app's real ICON on a teal ledge, wearing the ember update badge — an
+//     app tile is the one object a reader already associates with an update, and
+//     it is the store's own vocabulary rather than an abstract mark;
+//   · the reassurance as THREE STICKERS in a cut-in strip, because "your streak
+//     is safe" is what the reader actually wants to know and a sentence about it
+//     reads as boilerplate where their own streak, lessons and quotes drawn in
+//     the tab bar's hand do not;
+//   · and the shared `Button`, so the one thing to press here is the same object
+//     they press everywhere else in the app.
+//
+// No new colour: ink, paper, the app's teal and one ember spark, which is the
+// palette rule (§7 — the five tame colours take the area, the spark is small).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** C.ink at 72%. A scrim, so it is stated as an alpha rather than a palette entry. */
+const SCRIM = 'rgba(26,26,26,0.72)';
+
+/** What survives the update, in the reader's own terms. */
+const KEPT = [
+  { icon: 'days', label: 'STREAK' },
+  { icon: 'lessons', label: 'PROGRESS' },
+  { icon: 'quotes', label: 'QUOTES' },
+] as const;
 
 /**
  * The installed build number, or null when it can't be established.
@@ -121,6 +164,76 @@ function openStore() {
 }
 
 /**
+ * THE WALL ITSELF, exported so it can be LOOKED AT.
+ *
+ * The gate below renders nothing unless the app is running on an out-of-date
+ * Android binary, which is a state no browser can ever be in and no current
+ * reader will ever see again — so for the whole life of this screen the only
+ * way to check it was to reason about the source. Splitting the panel out is
+ * what lets `npm run sheet:gate` draw the real thing (§21).
+ */
+export function UpdateWall() {
+  return (
+    <Modal visible transparent animationType="fade" statusBarTranslucent onRequestClose={() => {}}>
+      <View style={styles.scrim}>
+        {/* The panel arrives rather than appearing: the modal's own fade carries
+            the scrim, and the card rises the last few points under it. */}
+        <MotiView
+          from={{ opacity: 0, translateY: 18 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 300, easing: Easing.out(Easing.cubic) }}
+          style={styles.panel}
+        >
+          {/* THE APP TILE. The icon on the teal ledge every raised thing in the
+              app stands on, with the ember badge a store puts on an app that has
+              an update waiting. */}
+          <View style={styles.tileBox}>
+            <View style={styles.tileLedge} />
+            <View style={styles.tile}>
+              <Image
+                source={require('@/assets/images/icon.png')}
+                style={styles.tileArt}
+                accessibilityIgnoresInvertColors
+              />
+            </View>
+            <View style={styles.badge}>
+              <SketchIcon name="chevron-down" size={13} color={C.paper} />
+            </View>
+          </View>
+
+          <Text style={styles.title}>Time to update</Text>
+          <Text style={styles.body}>
+            This version is out of date. The newest one is waiting on Google Play.
+          </Text>
+
+          {/* CUT INTO THE PAGE, not raised: a dark hairline where the light
+              cannot reach into the cut and a white foot where it catches the far
+              wall — StruckNiche's construction, which is how this app says
+              "recess" without a gradient. */}
+          <View style={styles.keep}>
+            <View style={styles.keepCut} />
+            <View style={styles.keepFoot} />
+            <Text style={styles.keepKicker}>KEPT WHEN YOU UPDATE</Text>
+            <View style={styles.keepRow}>
+              {KEPT.map((k) => (
+                <View key={k.label} style={styles.keepCell}>
+                  <StatSticker name={k.icon} size={24} />
+                  <Text style={styles.keepLabel}>{k.label}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <Button label="Update now" onPress={openStore} size="lg" style={styles.cta} />
+
+          <Text style={styles.foot}>ASHMERE · GOOGLE PLAY</Text>
+        </MotiView>
+      </View>
+    </Modal>
+  );
+}
+
+/**
  * Blocks the app when it's running a build older than MIN_VERSION_CODE.
  *
  * Deliberately fails OPEN: if the build number can't be read — web, Expo Go, a
@@ -146,93 +259,125 @@ export default function UpdateGate() {
 
   if (!stale) return null;
 
-  return (
-    <Modal visible transparent animationType="fade" statusBarTranslucent onRequestClose={() => {}}>
-      <View style={styles.backdrop}>
-        <View style={styles.box}>
-          <View style={styles.iconRing}>
-            <SketchIcon name="reload" size={26} color={Ink} />
-          </View>
-
-          <Text style={styles.title}>Time to update</Text>
-          <Text style={styles.body}>
-            This version of Ashmere is out of date. Update to keep your streak, your
-            progress and your saved quotes working properly.
-          </Text>
-
-          <Pressable
-            onPress={openStore}
-            style={({ pressed }) => [styles.cta, pressed && { opacity: 0.85 }]}
-          >
-            <Text style={styles.ctaText}>UPDATE NOW</Text>
-          </Pressable>
-
-          <Text style={styles.foot}>Ashmere · Google Play</Text>
-        </View>
-      </View>
-    </Modal>
-  );
+  return <UpdateWall />;
 }
 
+const TILE = 76;
+const BADGE = 26;
+
 const styles = StyleSheet.create({
-  backdrop: {
+  scrim: {
     flex: 1,
-    backgroundColor: 'rgba(18,17,15,0.72)',
+    backgroundColor: SCRIM,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 32,
+    padding: SPACE[4],
   },
-  box: {
+  panel: {
     width: '100%',
-    maxWidth: 340,
-    backgroundColor: Paper,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 8,
-    paddingHorizontal: 24,
-    paddingTop: 26,
-    paddingBottom: 22,
+    maxWidth: 344,
+    backgroundColor: C.surface,
+    borderWidth: 2,
+    borderColor: C.edge,
+    borderRadius: RADIUS.card,
+    paddingHorizontal: SPACE[4],
+    paddingTop: SPACE[4],
+    paddingBottom: SPACE[3],
     alignItems: 'center',
   },
-  iconRing: {
-    width: 54,
-    height: 54,
-    borderWidth: 1.5,
-    borderColor: Ink,
-    borderRadius: 27,
+
+  // The badge hangs off the tile's corner, so the box it sits in is the tile
+  // plus its ledge and nothing else — the overhang is allowed to show.
+  tileBox: { width: TILE, height: TILE + LIP.button },
+  tileLedge: {
+    position: 'absolute',
+    left: 0, right: 0, top: LIP.button, bottom: 0,
+    borderRadius: 20,
+    backgroundColor: C.HUE,
+  },
+  tile: {
+    width: TILE, height: TILE,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: C.HUE,
+    overflow: 'hidden',
+    backgroundColor: C.surface,
+  },
+  tileArt: { width: '100%', height: '100%' },
+  badge: {
+    position: 'absolute',
+    top: -4, right: -6,
+    width: BADGE, height: BADGE, borderRadius: BADGE / 2,
+    backgroundColor: EMBER,
+    borderWidth: 2.5,
+    borderColor: C.surface,
     alignItems: 'center',
     justifyContent: 'center',
+    // A chevron pointing UP: the store's own "there is something newer" arrow,
+    // and the one glyph in the set that can make it without a new drawing.
+    transform: [{ rotate: '180deg' }],
   },
+
   title: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 23,
-    color: Ink,
-    marginTop: 16,
+    fontFamily: TYPE.display.family,
+    fontSize: TYPE.display.fontSize,
+    lineHeight: TYPE.display.lineHeight,
+    color: C.ink,
+    marginTop: SPACE[3],
     textAlign: 'center',
   },
   body: {
-    fontFamily: 'PlayfairDisplay_400Regular',
-    fontStyle: 'italic',
-    fontSize: 13.5,
-    lineHeight: 20,
-    color: InkSoft,
-    marginTop: 10,
+    fontFamily: TYPE.body.family,
+    fontSize: 15,
+    lineHeight: 22,
+    color: C.inkSoft,
+    marginTop: SPACE[1],
     textAlign: 'center',
   },
-  cta: {
+
+  keep: {
     alignSelf: 'stretch',
-    backgroundColor: Ink,
-    borderRadius: 5,
-    paddingVertical: 14,
+    marginTop: SPACE[3],
+    paddingTop: SPACE[2],
+    paddingBottom: SPACE[2] + 2,
+    borderRadius: RADIUS.button,
+    backgroundColor: FLOOR,
+    overflow: 'hidden',
     alignItems: 'center',
-    marginTop: 20,
   },
-  ctaText: { fontFamily: 'Inter_700Bold', fontSize: 12.5, color: Paper, letterSpacing: 1.5 },
+  keepCut: {
+    position: 'absolute', left: 0, right: 0, top: 0, height: 2,
+    backgroundColor: FLOOR_CUT,
+  },
+  keepFoot: {
+    position: 'absolute', left: 0, right: 0, bottom: 0, height: 1.5,
+    backgroundColor: PAPER_LIT,
+  },
+  // INK-SOFT, NOT DIM, and measured rather than chosen: C.dim is 2.0:1 on this
+  // strip and 2.2:1 on paper — the "a tone fitted for METAL is invisible on
+  // PAPER" rule (§19) arriving on a caption. A kicker nobody can read is a
+  // decoration, and this screen has exactly one job.
+  keepKicker: {
+    fontFamily: TYPE.micro.family,
+    fontSize: 9.5,
+    letterSpacing: 1.6,
+    color: C.inkSoft,
+  },
+  keepRow: { flexDirection: 'row', alignSelf: 'stretch', marginTop: SPACE[1] },
+  keepCell: { flex: 1, alignItems: 'center', gap: 3 },
+  keepLabel: {
+    fontFamily: TYPE.micro.family,
+    fontSize: 9.5,
+    letterSpacing: 1.2,
+    color: C.inkSoft,
+  },
+
+  cta: { alignSelf: 'stretch', marginTop: SPACE[3] },
   foot: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: TYPE.micro.family,
     fontSize: 9,
-    color: '#9A968C',
     letterSpacing: 1.5,
-    marginTop: 14,
+    color: C.inkSoft,
+    marginTop: SPACE[2],
   },
 });

@@ -6618,6 +6618,39 @@ first and erased the drawing, which defeated the point of having it.
 `components/shared/UpdateGate.tsx`, mounted last in the root layout so it covers
 everything. `MIN_VERSION_CODE` is a constant in that file.
 
+### And the wall itself is the app's own kit now (2026-09-20)
+
+> *"it just doesn't look very gamified … redesign it to follow the gamification,
+> the color palette."*
+
+**IT WAS THE PRE-DEPTH APP, PRESERVED UNDER GLASS** — a paper box with a 1.5px
+ink rule at radius 8, a thin ring with a line icon in it, an italic Playfair
+sentence and a flat ink button at radius 5. Every other surface moved to the
+depth kit (§19) and this one did not, for the reason it is easy to leave: **no
+reader on a current build can ever see it**, so nothing ever put it on a screen.
+It is also the LAST thing a lapsed reader sees, and it is arguing for a
+download.
+
+It is the kit, unmodified: a flat white panel on the 2px `C.edge` (flat, because
+a ledge here means a thing you can press and the panel is not one), the app's
+real ICON on a `C.HUE` ledge wearing an ember update badge, the shared `Button`,
+and the reassurance as **three stickers in a cut-in strip** — STREAK · PROGRESS ·
+QUOTES — because "will I lose my streak" is the question a forced update
+actually raises, and `StatSticker` already draws all three in the tab bar's hand.
+
+- **`npm run sheet:gate` is the instrument, and the panel is exported as
+  `UpdateWall` so that it can exist.** A screen that only draws on an
+  out-of-date Android binary is one no browser can reach, so for its whole life
+  the only check was reading the source. The harness loads the real component,
+  measures it and writes a PNG; `DEVICE_W=320` renders the narrow phone.
+- **It found the two things the source could not.** `C.dim` measures **2.0:1**
+  on the strip and 2.2:1 on paper — §19's "a tone fitted for METAL is invisible
+  on PAPER" arriving on a caption, so the kicker and the footer are `C.inkSoft`.
+  And its own first draft reported **0px of art** on a tile that was drawing
+  perfectly: react-native-web paints an `Image` as a div carrying a
+  `background-image` with a transparent `<img>` over it, which every
+  opacity-gated probe in this repo skips. **Measure the background, not the img.**
+
 It compares against **`Application.nativeBuildVersion`** — the versionCode
 compiled into the APK — and *not* the version in `app.json`, because that one
 travels with OTA updates: an old binary carrying new JS would report the new

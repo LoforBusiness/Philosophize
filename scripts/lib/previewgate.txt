@@ -1,0 +1,50 @@
+// TEMPORARY — DELETE BEFORE COMMITTING. Any file in app/ is a real route (§21).
+// Written and removed by scripts/sheet-gate.mjs; check-routes.mjs blocks a build
+// if one is left behind.
+import { useEffect, useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { UpdateWall } from '@/components/shared/UpdateGate';
+import { useUIStore } from '@/stores/uiStore';
+import { C, TYPE, SPACE, RADIUS } from '@/constants/design';
+
+/**
+ * THE UPDATE WALL, over something.
+ *
+ * The scrim is most of this screen, so photographing it against nothing would
+ * report a dark rectangle as a pass. The strip behind it is a stand-in for the
+ * app it covers — enough for the scrim to be doing its job in the picture.
+ */
+export default function PreviewGate() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    // The launch animation sits over everything until this is released, and a
+    // harness that does not release it photographs a blank page (§21).
+    useUIStore.setState({ launchDone: true } as never);
+    setReady(true);
+  }, []);
+
+  if (!ready) return <View style={{ flex: 1 }} nativeID="gate-boot" />;
+
+  return (
+    <View nativeID="gate-root" style={s.page}>
+      <Text style={s.kicker}>THE APP BEHIND THE WALL</Text>
+      {[0, 1, 2, 3].map((i) => (
+        <View key={i} style={s.card} />
+      ))}
+      <UpdateWall />
+    </View>
+  );
+}
+
+const s = StyleSheet.create({
+  page: { flex: 1, backgroundColor: C.paper, padding: SPACE[4], gap: SPACE[3] },
+  kicker: {
+    fontFamily: TYPE.micro.family, fontSize: TYPE.micro.fontSize,
+    letterSpacing: 1.5, color: C.inkSoft,
+  },
+  card: {
+    height: 96, borderRadius: RADIUS.card, borderWidth: 2,
+    borderColor: C.edge, backgroundColor: C.surface,
+  },
+});

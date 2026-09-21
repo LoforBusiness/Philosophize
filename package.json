@@ -141,6 +141,7 @@
     "check:access": "node scripts/check-access.mjs",
     "check:pass": "node --import ./scripts/lib/register.mjs scripts/check-pass.mjs",
     "check:trial-email": "node scripts/check-trial-email.mjs",
+    "sheet:gate": "node scripts/sheet-gate.mjs",
     "sheet:pass": "node scripts/sheet-pass.mjs",
     "sheet:controls": "node scripts/sheet-controls.mjs",
     "sheet:deck": "node scripts/sheet-deck.mjs",
