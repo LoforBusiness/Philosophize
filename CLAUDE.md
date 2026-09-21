@@ -29,8 +29,12 @@
 > nobody — four days after the binary carrying them shipped.
 
 **Live: SHIPPED on Google Play**, full public rollout, package `com.philosophize.app`.
-Current binary is **versionCode 21** (2026-08-19), carrying the Ashmere name and
-the reader icon. 17 and 18 exist in `eas build:list` but both ERRORED, so 19 is
+Current binary is **versionCode 22** (2026-09-20), which carries THE FIRST OPEN —
+all 364 assets embedded, so a fresh install fetches nothing and restarts into
+nothing (§19) — and a compiled splash repainted white. **21 is still reachable**,
+because the gate lags the build (§20), so there are TWO live runtimes today and
+every OTA goes to both, oldest first. 21 carried the Ashmere name and the reader
+icon. 17 and 18 exist in `eas build:list` but both ERRORED, so 19 is
 the successor to 16. Content and JS ship over the air between binaries (see §18)
 — a new build is only needed for native changes, app icons, splash, or anything
 else baked into the APK.
@@ -4868,23 +4872,26 @@ share one:
 
 | Build | Runtime version | Can its users still open the app? |
 |---|---|---|
-| 22 — BUILT 2026-09-20, **NOT YET UPLOADED TO PLAY** | `cbdfca0b1a073ede6ff3edbc6ca36cb40bafc2a9` | not yet — nobody can install it until it is on the store |
-| **21 (current)** | `8c32d9181fa168c587b1109a48d0d89108cfe32b` | **yes** |
+| **22 (current)** | `cbdfca0b1a073ede6ff3edbc6ca36cb40bafc2a9` | **yes** — live on Play 2026-09-20 |
+| **21** | `8c32d9181fa168c587b1109a48d0d89108cfe32b` | **yes** — the gate is still 21, so every one of these readers is still playing |
 | 20 | `b6f745e0007d2de75837eff60dc50fd3dd5b38c5` | no — below `MIN_VERSION_CODE` (raised 2026-08-19) |
 | 19 | `29eb709aad3b70740f0c92239b1a350820c81247` | no — below `MIN_VERSION_CODE` |
 | 18, 17 | — | never finished; both ERRORED |
 | 16 | `bd0c0637f7e636eef9e8ddbbe61db9c9c9ae513c` | no — below `MIN_VERSION_CODE` |
 | 15, 14 | `7655f410f4b7050d121f65fcfb33bb7c2da56b5a` | no — below `MIN_VERSION_CODE` |
 
-So today there is again exactly **one** runtime worth publishing to, and the third
-column is why: with the gate at 21, every older binary is held behind the update
-wall and an OTA to its runtime lands on people who are already stopped.
+So today there are **TWO** runtimes worth publishing to, and the third column is
+why: the gate is 21, so build 21 and build 22 readers are both playing, while
+every binary below 21 is held behind the update wall, where an OTA lands on people
+who are already stopped. **Publish to `8c32d918…` FIRST, then `cbdfca0b…`** —
+oldest first, so the older binary is never the one left a version behind.
 
-> **BUILD 22 IS BUILT AND NOT LIVE, WHICH IS WHY THAT "ONE" STILL MEANS 21.** The
-> AAB is on EAS (build `9d1d1470-725c-40b9-a12e-792b72b64a45`, runtime
-> `cbdfca0b…`) and **no device is on it**, so an OTA published to that runtime
-> today reaches nobody — this section's own headline failure wearing the newest
-> hash. Until Play reports it rolled out, publish to `8c32d918…` alone.
+> **BUILD 22 WENT LIVE ON 2026-09-20, AND THAT OPENED THE WINDOW RATHER THAN
+> CLOSING IT.** The AAB is EAS build `9d1d1470-725c-40b9-a12e-792b72b64a45`. The
+> gate is still 21 — it lags the build, by §20's rule — so build 21 readers can
+> still open the app and still need every update. An OTA sent only to
+> `cbdfca0b…` reaches only the people who have already updated, which is this
+> section's headline failure wearing the newest hash, and nothing reports it.
 >
 > **What it carries is the first open.** A fresh install of 21 had to fetch the
 > whole current bundle before it could show the right first screen, and since 21
@@ -4894,12 +4901,29 @@ wall and an OTA to its runtime lands on people who are already stopped.
 > also repaints the compiled splash white and carries the guard that stops a late
 > download restarting the app under somebody.
 >
-> **The sequence from here is §20's and has not changed:** upload the AAB by hand
-> (there is no `eas submit` service account), let it reach 100%, raise
-> `MIN_VERSION_CODE` to 22, and publish that raise to build 21's runtime FIRST.
-> Between the upload and the raise BOTH rows are live and every OTA goes to both,
-> oldest first — the two-runtime window this section warns about, open for the
-> whole rollout.
+> **WHAT IS LEFT IS THE GATE, AND IT IS NOT AUTOMATIC.** §20's sequence says to
+> raise `MIN_VERSION_CODE` to 22 once Play reports 100%, and to publish that raise
+> to build 21's runtime FIRST. But "once it is at 100%" is a PRECONDITION, not an
+> instruction. Raising the gate FORCES every build-21 reader to download the new
+> binary, and now that the narration is embedded that is **~150MB demanded of
+> people who already have every one of those bytes over the air**. What build 22
+> fixes is the FIRST OPEN, and nobody already running the app is ever going to
+> have another one.
+>
+> So the honest default here is to **leave the gate at 21** and publish to both
+> runtimes, raising it when a future build carries something its readers actually
+> need. Play's own auto-update will move most of them across within days anyway,
+> without anyone being walled. The price of waiting is one extra publish target,
+> and the splash pair below.
+>
+> **THE SPLASH PAIR IS THE ONE THING NOW WRONG ON BUILD 21**, and it is exactly
+> the asymmetry this file keeps describing. `SPLASH_BG` is `#FFFFFF` in the JS
+> while build 21's COMPILED splash is still `#E4E4DF`, so a build-21 reader taking
+> this bundle gets a 1.28:1 hard step at the hand-off where they used to get a
+> smooth settle. That is the same magnitude the file already calls imperceptible —
+> it has MOVED rather than grown — so it is recorded rather than worked around. If
+> it ever does matter, the fix is to pick the constant off
+> `Application.nativeBuildVersion` rather than to un-repaint the binary.
 >
 > **The download roughly triples, and that is the price of the fix.** The AAB is
 > 178.7MB across four ABIs and every density; an export measures 129MB (16MB of
