@@ -4,11 +4,12 @@ import { router } from 'expo-router';
 import Button from '@/components/ui/Button';
 import { MetalPlate } from '@/components/profile/Struck';
 import { INK, MID, PATINA } from '@/components/shared/tone';
-import { C, SPACE } from '@/constants/design';
+import { C, RADIUS, SPACE } from '@/constants/design';
 import { FALLBACK_PRICE, BILLING_PERIOD_LABEL } from '@/constants/subscription';
 import { trialLengthPhrase } from '@/lib/utils/trial';
 import {
-  conversionTerms, REMINDER_PROMISE, startNotice, startTrialLabel,
+  conversionTerms, REMINDER_PROMISE, SKIP_TRIAL_HEADING, skipTrialLabel, skipTrialTerms,
+  startNotice, startTrialLabel,
 } from '@/lib/utils/trialTerms';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { track } from '@/lib/posthog';
@@ -27,6 +28,18 @@ import { track } from '@/lib/posthog';
 //     day before it ends. Under that, small, every term Google's policy asks for,
 //     the automatic Scholar's Pass among them. All of it comes from
 //     `lib/utils/trialTerms.ts`.
+//
+//     AND UNDER ALL OF THAT, A SMALLER BOX: pay today, no free days.
+//
+//       "below this I also want in a smaller box the option to just straight
+//        subscribe for the 6.99 a month and skipping the free trial"
+//
+//     It is a second PURCHASE, not a second label. `purchasePackage` buys
+//     RevenueCat's `defaultOption`, and Google hands a trial-eligible reader the
+//     trial offer as their default — so a button pointed at the same call would
+//     start the very trial it claims to skip. It goes through `subscribeNow`,
+//     which buys the base plan by option (see lib/purchases/basePlan.ts), and it
+//     is drawn only while the store has named such an option.
 //   · NO TRIAL ON OFFER (they have had one, or it is not configured): the price
 //     and the button. Promising free days the store will not give is the one thing
 //     this door may never do.
@@ -55,8 +68,19 @@ export default function PassDoor({ source, compact = false }: {
   const trial = useSubscriptionStore((s) => s.monthly?.trial ?? null);
   const monthly = useSubscriptionStore((s) => s.monthly);
   const startTrial = useSubscriptionStore((s) => s.startTrial);
+  // THE STORE DECIDES WHETHER THE SECOND DOOR EXISTS, exactly as it decides
+  // whether the first one does. Null here means Google named no option that
+  // charges today, and the box is not drawn — a charge-now button that fell back
+  // to starting a trial would be the §14 lie in its most expensive form.
+  const basePlan = useSubscriptionStore((s) => s.monthly?.basePlan ?? null);
+  const subscribeNow = useSubscriptionStore((s) => s.subscribeNow);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  // Its OWN busy flag and its own notice. Sharing them would grey out the trial
+  // button while this sheet is open and print this sheet's failure under that
+  // one, which is the wrong button to blame.
+  const [paying, setPaying] = useState(false);
+  const [payNotice, setPayNotice] = useState<string | null>(null);
 
   // Offered once per mount, and only while there is a trial to offer.
   const offered = useRef(false);
@@ -89,6 +113,20 @@ export default function PassDoor({ source, compact = false }: {
     setNotice(startNotice(outcome));
   };
 
+  // PAY TODAY. The conferral is raised by the store, like every other purchase
+  // in this app, so this handler owns only the sheet's busy state and its notice.
+  const payNow = async () => {
+    if (paying) return;
+    setPayNotice(null);
+    track('subscribe_clicked', {
+      plan: 'monthly', billing: 'monthly', source, skipped_trial: true,
+    });
+    setPaying(true);
+    const outcome = await subscribeNow(source);
+    setPaying(false);
+    setPayNotice(startNotice(outcome));
+  };
+
   if (isPro) return null;
 
   if (canTrial && trial) {
@@ -108,6 +146,24 @@ export default function PassDoor({ source, compact = false }: {
         <Text style={st.promise}>{REMINDER_PROMISE}</Text>
         <Text style={st.fine}>{conversionTerms(trial, price, period)}</Text>
         {notice ? <Text style={st.notice}>{notice}</Text> : null}
+        {/* THE OTHER DOOR, and only when the store has one to offer. A flat
+            panel with an edge rather than a raised face: the depth kit's rule is
+            that a ledge means "press me", and there is already one thing to
+            press above this. It must not compete with the trial. */}
+        {basePlan ? (
+          <View style={st.skip}>
+            <Text style={st.skipHead}>{SKIP_TRIAL_HEADING}</Text>
+            <Text style={st.fine}>{skipTrialTerms(basePlan.priceString, period)}</Text>
+            <Button
+              label={paying ? 'One moment…' : skipTrialLabel(compact)}
+              size="md"
+              variant="secondary"
+              disabled={paying}
+              onPress={() => void payNow()}
+            />
+            {payNotice ? <Text style={st.notice}>{payNotice}</Text> : null}
+          </View>
+        ) : null}
       </View>
     );
   }
@@ -137,6 +193,20 @@ const st = StyleSheet.create({
   },
   notice: {
     fontFamily: 'Inter_500Medium', fontSize: 13, lineHeight: 19, color: C.ink, textAlign: 'center',
+  },
+  // A CUT-IN PANEL, not a raised one. `SPACE[3]` of air above it so it reads as
+  // a separate offer rather than more fine print belonging to the trial.
+  skip: {
+    marginTop: SPACE[3],
+    padding: SPACE[3],
+    gap: SPACE[2],
+    borderWidth: 1.5,
+    borderColor: C.edge,
+    borderRadius: RADIUS.card,
+    backgroundColor: C.paper,
+  },
+  skipHead: {
+    fontFamily: 'Inter_700Bold', fontSize: 13.5, color: INK, textAlign: 'center',
   },
   priceLine: { fontFamily: 'Inter_400Regular', fontSize: 13.5, color: MID, textAlign: 'center' },
   price: { fontFamily: 'Inter_700Bold', fontSize: 15, color: INK },

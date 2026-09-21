@@ -7,6 +7,7 @@ import Purchases, {
 } from 'react-native-purchases';
 import type { PurchasesProvider, SubPackage, SubStatus, TrialPeriod } from './types';
 import { NO_SUB, PurchasesCancelledError } from './types';
+import { basePlanPrice, pickBasePlan } from './basePlan';
 import { ENTITLEMENT_ID, OFFERING_ID } from '@/constants/subscription';
 
 // Real RevenueCat-backed provider. Only ever loaded in a native build that has
@@ -46,6 +47,18 @@ function trialOf(pkg: PurchasesPackage): TrialPeriod | null {
   return p && unit && p.value > 0 ? { value: p.value, unit } : null;
 }
 
+/**
+ * The option that charges today, off the same product.
+ *
+ * GOOGLE ONLY, like `trialOf` and for the same reason — `subscriptionOptions` is
+ * a Play concept and the App Store has no equivalent, so on iOS there is nothing
+ * to offer and the button stays hidden. The app ships on Google Play.
+ */
+function basePlanOf(pkg: PurchasesPackage) {
+  if (Platform.OS !== 'android') return null;
+  return pickBasePlan(pkg.product.subscriptionOptions ?? null);
+}
+
 function normalize(pkg: PurchasesPackage): SubPackage {
   return {
     identifier: pkg.identifier,
@@ -55,6 +68,7 @@ function normalize(pkg: PurchasesPackage): SubPackage {
     currency: pkg.product.currencyCode,
     period: periodOf(pkg),
     trial: trialOf(pkg),
+    basePlan: basePlanPrice(basePlanOf(pkg)),
     raw: pkg,
   };
 }
@@ -106,6 +120,25 @@ export const realProvider: PurchasesProvider = {
   async purchase(pkg) {
     try {
       const { customerInfo } = await Purchases.purchasePackage(pkg.raw as PurchasesPackage);
+      return statusOf(customerInfo);
+    } catch (e) {
+      if (e && typeof e === 'object' && (e as { userCancelled?: boolean }).userCancelled) {
+        throw new PurchasesCancelledError();
+      }
+      throw e;
+    }
+  },
+
+  // THE SAME PASS, CHARGED TODAY. `purchasePackage` cannot do this: it buys
+  // `defaultOption`, and Google gives a trial-eligible reader the trial offer as
+  // their default, so the button above and this one would do the same thing.
+  // Re-derived from `raw` rather than carried on the SubPackage, because the
+  // option object has to be the live one the SDK handed us.
+  async purchaseWithoutTrial(pkg) {
+    const option = basePlanOf(pkg.raw as PurchasesPackage);
+    if (!option) throw new Error('No base plan on this product to buy without a trial.');
+    try {
+      const { customerInfo } = await Purchases.purchaseSubscriptionOption(option);
       return statusOf(customerInfo);
     } catch (e) {
       if (e && typeof e === 'object' && (e as { userCancelled?: boolean }).userCancelled) {

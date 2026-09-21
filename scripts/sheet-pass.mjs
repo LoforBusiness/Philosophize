@@ -168,9 +168,21 @@ const SCREENS = [
            'Lessons a day', 'Unlimited', 'Replay lessons', 'In order',
            'EVERY PLAN INCLUDES', 'badges', 'DAYS FREE', 'Start your',
            'We’ll remind you a day before your free trial ends.',
-           'it automatically becomes a Scholar’s Pass', 'Cancel any time before then'],
+           'it automatically becomes a Scholar’s Pass', 'Cancel any time before then',
+           // THE SECOND DOOR, under the trial: pay today, no free days. Asserted
+           // here because the harness seeds `basePlan` itself — without a rule
+           // naming these words, removing the box would photograph a clean screen
+           // and this sweep would say nothing.
+           'Don’t want the free days?', 'Subscribe now instead', 'today and'],
     // The on-device trial's old words, which Google's trial would make untrue.
     notWant: ['Get the Scholar’s Pass', 'No card and no charge', 'Or subscribe now for'] },
+  // AND THE OTHER HALF OF THAT DECISION: the store named no option that charges
+  // today, so the box must not be drawn at all. A charge-now button that fell
+  // back to starting a trial is the §14 lie in its most expensive form, so the
+  // absence is worth a case of its own rather than trusting the render.
+  { key: 'pass-tab-nobase', q: 's=tab&base=none',
+    want: ['DAYS FREE', 'Start your', 'We’ll remind you a day before your free trial ends.'],
+    notWant: ['Don’t want the free days?', 'Subscribe now instead'] },
   { key: 'pass-tab-new', q: 's=tab&seed=new',
     want: ['Benefits', 'EVERY PLAN INCLUDES', 'Start your', 'We’ll remind you'] },
   // GOOGLE'S TRIAL RUNNING: the end, what it becomes and Cancel, above the chart.
@@ -256,7 +268,12 @@ const SCREENS = [
   { key: 'settings-sub', q: 's=settings', click: 'Subscription',
     want: ['You are on the Free plan', 'Benefits', 'Replay lessons', 'Streak rest days',
            'DAYS FREE', 'Start the free trial', 'We’ll remind you a day before your free trial ends.',
-           'it automatically becomes a Scholar’s Pass', 'See everything it includes'],
+           'it automatically becomes a Scholar’s Pass', 'See everything it includes',
+           // The charge-today door reaches Settings from the same component, so
+           // the owner's "I also want this in settings too" is satisfied by
+           // construction rather than by a second implementation — and this is
+           // what proves it arrived. The label is the COMPACT one here.
+           'Don’t want the free days?', 'Subscribe now'],
     // "All 50 badges" was the old card's own claim against a case of seventy.
     // The PRICE is not tested here and must not be: `$6.99` is FALLBACK_PRICE,
     // which is correct on web and before RevenueCat answers. Whether a price is

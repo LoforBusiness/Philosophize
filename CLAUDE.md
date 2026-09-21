@@ -2211,9 +2211,52 @@ and Settings draws it `size="compact"` and still, picking smaller columns from
 the card's measured width, because that card sits beside a rail and is about
 225pt wide at 390dp and 160pt at 320dp. `components/paywall/PassDoor.tsx` is the
 action under it on the tab and in Settings: while `canStartTrial()`, the trial is
-the button and the price is a quiet link under it; during the trial it shows the
-days left and offers to keep the Pass; after it, the price and the button.
-`startTrial(source)` records where the trial was taken.
+the button, with **a smaller box under it that charges today**; during the trial
+it shows the days left and offers to keep the Pass; after it, the price and the
+button. `startTrial(source)` records where the trial was taken.
+
+> **THE SECOND DOOR IS A SECOND PURCHASE, NOT A SECOND LABEL, and that is the
+> whole finding.** The owner asked for it plainly — *"below this I also want in a
+> smaller box the option to just straight subscribe for the 6.99 a month and
+> skipping the free trial"* — and the obvious implementation does not work:
+> `purchasePackage` buys RevenueCat's `defaultOption`, and Google Play hands a
+> trial-eligible reader the TRIAL OFFER as their default. So a button pointed at
+> the existing call would start the very trial it claims to skip, and the screen
+> would be lying in the most expensive place it can.
+>
+> It buys the BASE PLAN by option instead — `Purchases.purchaseSubscriptionOption`
+> — and `lib/purchases/basePlan.ts` chooses it. **A free phase disqualifies an
+> option whatever its `isBasePlan` flag says**, because Google attaches offers to
+> a base plan and the free phase is the thing being avoided; a discounted intro
+> phase disqualifies it too, since "charged $6.99 today" must not open a sheet
+> that charges less and renews higher. Anything ambiguous returns null and the box
+> is not drawn — §14's rule that a screen may never promise what the store will
+> not give, one layer down, where the promise is a price.
+>
+> **`basePlan` is the mirror of `trial`**: both are read off the store and both
+> mean "do not offer this if it is null". One purchase path serves both buttons —
+> `purchaseMonthly(source, { skipTrial })` — because two near-copies of the code
+> that charges people is the drift this file has recorded more often than any
+> other defect. `skipped_trial` rides `subscribe_clicked` and
+> `subscribe_succeeded`, without which a purchase made INSTEAD of a trial and one
+> made AFTER a trial land identically and the box cannot be judged at all.
+>
+> **IT CANNOT BE EXERCISED ANYWHERE THIS PROJECT CAN LOOK.** An in-app purchase
+> does not run on the web or in Expo Go, so §21's browser — the instrument behind
+> almost every other check here — is structurally blind to it, and the only other
+> way to see it is a real store account on a real device. So the choosing is
+> zero-import arithmetic over plain data and `check:pass` §11 RUNS it against real
+> option shapes: the ordinary Google pair, a flagged trial, an intro price, two
+> flagged base plans, a monthly beside a yearly, and a price whose number is
+> missing. Whether Play actually returns a usable base plan depends on the Play
+> Console configuration and is provable only on a device — if it does not, the box
+> stays hidden rather than showing a button that lies.
+>
+> **And the harness had to be taught the field**, or it would have photographed
+> the screen without the box and called it clean (§21's oldest lesson). `sheet:pass`
+> seeds `basePlan` and names the box's words; `?base=none` renders the other half
+> of the decision, where the box must be absent. Measured at 390dp and 320dp,
+> nothing clipped and nothing overflowing on either.
 
 - **The trial is Google Play's, and it converts.** For its first life it was
   granted by the app, with no card and nothing to cancel. Then the reader found

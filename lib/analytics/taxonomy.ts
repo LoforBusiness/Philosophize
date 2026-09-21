@@ -214,13 +214,13 @@ export const EVENTS = {
     where: 'stores/subscriptionStore.ts',
   },
   subscribe_clicked: {
-    note: 'The purchase sheet was opened.',
-    props: ['plan', 'billing', 'source'],
+    note: 'The purchase sheet was opened. `skipped_trial` is true for the charge-today button under the trial door -- the reader was offered free days and asked to pay instead, which is the only place that intent is visible.',
+    props: ['plan', 'billing', 'source', 'skipped_trial'],
     where: 'components/shared/PaywallContent.tsx, components/paywall/PassDoor.tsx',
   },
   subscribe_succeeded: {
-    note: 'The entitlement went live. `$revenue` is the property PostHog revenue views read.',
-    props: ['plan', 'product_id', '$revenue', 'revenue', 'currency', 'price_string', 'period'],
+    note: 'The entitlement went live. `$revenue` is the property PostHog revenue views read. `skipped_trial` separates a purchase made instead of a trial from one that followed a trial -- without it both land here identically and the trial-skip button cannot be judged at all.',
+    props: ['plan', 'product_id', '$revenue', 'revenue', 'currency', 'price_string', 'period', 'skipped_trial'],
     where: 'stores/subscriptionStore.ts',
   },
   subscription_manage_opened: {

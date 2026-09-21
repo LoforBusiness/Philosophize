@@ -1,3 +1,7 @@
+import type { BasePlanPrice } from './basePlan';
+
+export type { BasePlanPrice };
+
 // Platform-agnostic contract for in-app purchases. The real implementation
 // (lib/purchases/real.ts) wraps `react-native-purchases`; the stub
 // (lib/purchases/stub.ts) is used on web and inside Expo Go, where the native
@@ -37,6 +41,23 @@ export interface SubPackage {
    * exists to prevent.
    */
   trial: TrialPeriod | null;
+  /**
+   * THE SAME PASS, BOUGHT WITHOUT THE FREE DAYS, or null if the store does not
+   * offer that.
+   *
+   * The mirror of `trial` above, and it exists for the same reason: a reader who
+   * wants the Pass now rather than three days from now cannot get it through
+   * `purchase()`, because that buys `defaultOption` and Google hands a trial
+   * offer to everyone still eligible for one. This is the base plan — the
+   * subscription with no introductory phase — and `purchaseWithoutTrial()` is
+   * the only way to it.
+   *
+   * NULL MEANS DO NOT OFFER IT. `pickBasePlan` declines whenever there is not
+   * exactly one obvious answer, and a screen may not show a charge-now button on
+   * a guess: §14's rule is that a screen may never promise what the store will
+   * not give, and a price is the most expensive kind of promise to get wrong.
+   */
+  basePlan: BasePlanPrice | null;
   raw?: unknown; // underlying PurchasesPackage (native only)
 }
 
@@ -90,7 +111,21 @@ export interface PurchasesProvider {
   // Buy a package. Resolves to the resulting status. Throws
   // PurchasesCancelledError if the user backs out, PurchasesUnavailableError on
   // web/Expo Go.
+  //
+  // THIS BUYS WHATEVER THE STORE OFFERS, which for a trial-eligible reader is
+  // the trial. That is correct for the main button and wrong for the one below
+  // it — see `purchaseWithoutTrial`.
   purchase(pkg: SubPackage): Promise<SubStatus>;
+
+  /**
+   * Buy the same Pass, charging today, with no free trial.
+   *
+   * Only callable when `pkg.basePlan` is set — the store has to have told us
+   * which option charges immediately. Same errors as `purchase`, plus a plain
+   * Error when no base plan was found, because reaching here without one is a
+   * bug in the caller rather than a condition a reader can be in.
+   */
+  purchaseWithoutTrial(pkg: SubPackage): Promise<SubStatus>;
 
   // Restore prior purchases (App Store requirement). Resolves to the status.
   restore(): Promise<SubStatus>;

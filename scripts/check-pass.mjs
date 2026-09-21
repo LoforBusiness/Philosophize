@@ -1099,6 +1099,98 @@ head('10 · THE MOTTO IS A WHOLE SENTENCE, AND IT BREAKS LIKE ONE');
 }
 
 
+// ── 11 · the door that charges today ────────────────────────────────────────
+//
+// The Pass has one price and two ways to start paying it, and `purchasePackage`
+// can only reach one of them: Google gives a trial-eligible reader the trial
+// offer as their `defaultOption`, so the trial button and a "subscribe now"
+// button pointed at the same call would do the SAME THING. The second one has to
+// buy the base plan through `purchaseSubscriptionOption`.
+//
+// THIS SECTION RUNS THE CHOOSING, because nothing else can. An in-app purchase
+// does not execute on the web or in Expo Go, so §21's browser — the instrument
+// behind almost every other check in this repo — is structurally blind to it,
+// and the only other way to see it is a real store account on a real device.
+// Getting it wrong does not misplace a box; it charges somebody the wrong
+// amount. `lib/purchases/basePlan.ts` is therefore zero-import arithmetic over
+// plain data, and these are real option shapes put through the real function.
+{
+  const { pickBasePlan, basePlanPrice } = await import('@/lib/purchases/basePlan');
+
+  const money = (formatted) => ({
+    fullPricePhase: { price: { formatted, amountMicros: 6_990_000, currencyCode: 'USD' } },
+  });
+  const BASE = { isBasePlan: true, freePhase: null, introPhase: null, ...money('$6.99') };
+  const TRIAL = { isBasePlan: false, freePhase: { billingPeriod: { value: 3, unit: 'DAY' } }, introPhase: null, ...money('$6.99') };
+  const INTRO = { isBasePlan: false, freePhase: null, introPhase: { x: 1 }, ...money('$2.99') };
+
+  // The ordinary Google shape: the base plan plus the offer this reader is
+  // eligible for. The one that charges today must be the base plan.
+  ok(pickBasePlan([TRIAL, BASE]) === BASE,
+    'the base plan is picked out from beside a trial offer');
+  ok(pickBasePlan([BASE]) === BASE, 'and on its own');
+
+  // A FREE PHASE DISQUALIFIES, whatever the flag says. Google attaches offers to
+  // a base plan, so `isBasePlan` alone is not the question — the free phase is
+  // the thing being avoided, so the free phase is what is tested.
+  ok(pickBasePlan([{ ...TRIAL, isBasePlan: true }]) === null,
+    'an option carrying a free phase is refused even when it claims to be the base plan');
+
+  // AND SO DOES A DISCOUNTED ONE. "Charged $6.99 today" must not open a sheet
+  // that charges $2.99 for a month and then renews higher.
+  ok(pickBasePlan([INTRO]) === null, 'an intro-priced option is refused too');
+
+  // THE DECLINES, which are the safety. Anything ambiguous returns null and the
+  // caller hides the button rather than guessing at what somebody pays.
+  ok(pickBasePlan([]) === null && pickBasePlan(null) === null && pickBasePlan(undefined) === null,
+    'nothing to choose from is a refusal, not a crash');
+  ok(pickBasePlan([TRIAL]) === null, 'a trial-only product offers no charge-today door');
+  ok(pickBasePlan([BASE, { ...BASE }]) === null,
+    'two options both claiming to be the base plan is a refusal',
+    'guessing between them is guessing at a charge');
+  ok(pickBasePlan([{ freePhase: null, introPhase: null, ...money('$6.99') },
+                   { freePhase: null, introPhase: null, ...money('$59.99') }]) === null,
+    'two unflagged paying options — a monthly and a yearly — is a refusal');
+  // …but exactly one unflagged paying option IS the base plan, for an SDK that
+  // did not set the flag.
+  const lone = { freePhase: null, introPhase: null, ...money('$6.99') };
+  ok(pickBasePlan([TRIAL, lone]) === lone,
+    'one unflagged paying option is taken, since there is nothing to confuse it with');
+
+  // THE PRICE MUST COME FROM THE STORE OR NOT AT ALL. A button that charges has
+  // to be able to say what it charges, and §14 is the record of what a typed
+  // figure costs on a screen that ships to every currency Play sells in.
+  const p = basePlanPrice(BASE);
+  ok(p?.priceString === '$6.99' && p?.price === 6.99 && p?.currency === 'USD',
+    'the price is read off the option, micros converted', JSON.stringify(p));
+  ok(basePlanPrice(null) === null, 'no option, no price');
+  ok(basePlanPrice({ fullPricePhase: null }) === null, 'no phase, no price');
+  ok(basePlanPrice({ fullPricePhase: { price: { formatted: '$6.99' } } }) === null,
+    'a formatted string without its number is refused',
+    'analytics cannot add labels up, so a half-known price is no price');
+
+  // ── and the door only exists when the store says it can ───────────────────
+  const door = read('components/paywall/PassDoor.tsx');
+  ok(/basePlan \? \(/.test(door),
+    'the charge-today box is drawn only when the store named an option',
+    'a fallback to the trial here would be the most expensive lie on the screen');
+  ok(/subscribeNow\(/.test(door) && !/purchaseMonthly\(/.test(door),
+    'and it goes through subscribeNow, never the default purchase');
+  ok(/skipTrialTerms\(/.test(door) && /skipTrialLabel\(/.test(door),
+    'its wording comes from trialTerms like every other door');
+
+  const store = read('stores/subscriptionStore.ts');
+  ok(/if \(skipTrial && !target\.basePlan\) return 'error';/.test(store),
+    'the store refuses a charge-today purchase with no base plan',
+    'the render can be stale by the time the button is pressed');
+  ok(/purchaseWithoutTrial\(target\)/.test(store),
+    'and buys the option rather than the package');
+  // ONE PURCHASE PATH. Two near-copies of the code that charges people is the
+  // drift this repo has recorded more often than any other defect.
+  ok((store.match(/track\('subscribe_succeeded'/g) || []).length === 1,
+    'there is still exactly one place that reports a sale');
+}
+
 console.log(bad === 0 ? '\nPASS — the paywall says only what the code enforces.\n'
                       : `\nFAILED — ${bad} problem(s).\n`);
 process.exit(bad === 0 ? 0 : 1);

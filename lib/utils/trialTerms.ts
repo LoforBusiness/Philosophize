@@ -37,6 +37,28 @@ export function conversionTerms(t: TrialPeriod, price: string, period: string): 
   return `After ${trialLengthPhrase(t)} it automatically becomes a Scholar’s Pass at ${price} a ${period}, unless you cancel. Cancel any time before then, in ${STORE} or from Settings in the app, and you won’t be charged.`;
 }
 
+/**
+ * THE SMALLER DOOR UNDER THE TRIAL: pay now, no free days.
+ *
+ * It sits beneath the trial button on the Pass tab and in Settings, for a reader
+ * who does not want three days of free first. Its two jobs are to name the price
+ * and to be unmistakably the OTHER option — hence "instead", which is the word
+ * that stops this reading as a second way to start the same trial.
+ *
+ * The price is the store's own localized string, never a typed figure. §14 is
+ * the record of what typed money costs: a price written twice in dollars on a
+ * screen that ships to every currency Google Play sells in.
+ */
+export const SKIP_TRIAL_HEADING = 'Don’t want the free days?';
+
+export function skipTrialLabel(compact = false): string {
+  return compact ? 'Subscribe now' : 'Subscribe now instead';
+}
+
+export function skipTrialTerms(price: string, period: string): string {
+  return `You’ll be charged ${price} today and ${price} a ${period} after that, with no free trial. Cancel any time in ${STORE}.`;
+}
+
 /** What a running trial turns into. Said on every screen that shows one. */
 export function autoConvertLine(price: string, period: string): string {
   return `If you do nothing, it automatically becomes a Scholar’s Pass at ${price} a ${period}.`;

@@ -86,6 +86,20 @@ interface SubscriptionState {
    * that charges today.
    */
   startTrial: (source: string) => Promise<PurchaseOutcome>;
+  /**
+   * BUY THE PASS TODAY, SKIPPING THE FREE TRIAL.
+   *
+   * The button under the trial button, for a reader who does not want three free
+   * days first. It cannot be `purchaseMonthly` with a different label: that buys
+   * RevenueCat's `defaultOption`, and Google hands a trial-eligible reader the
+   * trial as their default — so both buttons would do the same thing and the
+   * second one would be a lie.
+   *
+   * REFUSES rather than falling back when the store offers no base plan, for the
+   * same reason `startTrial` refuses when the trial has gone: a button that says
+   * it charges today must never open a sheet that starts a trial instead.
+   */
+  subscribeNow: (source: string) => Promise<PurchaseOutcome>;
   /** Close the retired on-device trial when its clock runs out. Cheap, and a no-op unless the answer moved. */
   syncTrial: () => void;
   /** Open Google Play on this subscription, where it is cancelled or restarted. */
@@ -95,7 +109,14 @@ interface SubscriptionState {
   /** Re-read the store. `fresh` skips RevenueCat's cached copy. */
   refresh: (fresh?: boolean) => Promise<void>;
   setUser: (appUserId: string | null, email?: string | null) => Promise<void>;
-  purchaseMonthly: (source?: string) => Promise<PurchaseOutcome>;
+  /**
+   * The one purchase path. `skipTrial` selects the base plan instead of whatever
+   * the store offers by default — ONE path with a switch rather than two near
+   * copies, because two implementations of one rule drifting apart is the defect
+   * this repo has recorded more times than any other, and here the two copies
+   * would be the code that charges people money.
+   */
+  purchaseMonthly: (source?: string, opts?: { skipTrial?: boolean }) => Promise<PurchaseOutcome>;
   restore: () => Promise<RestoreOutcome>;
 }
 
@@ -219,6 +240,14 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         return get().purchaseMonthly(source);
       },
 
+      subscribeNow: async (source) => {
+        // The mirror of startTrial's guard. The button is drawn from
+        // `monthly.basePlan`, and the store can answer differently by the time it
+        // is pressed, so the refusal is here rather than only in the render.
+        if (get().isPro || !get().monthly?.basePlan) return 'error';
+        return get().purchaseMonthly(source, { skipTrial: true });
+      },
+
       syncTrial: () => {
         const s = get();
         // Nothing to do unless a live trial has just stopped being live. Guarded
@@ -322,7 +351,8 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         await get().refresh();
       },
 
-      purchaseMonthly: async (source) => {
+      purchaseMonthly: async (source, opts) => {
+        const skipTrial = opts?.skipTrial === true;
         const pkg = get().monthly;
         if (!pkg) {
           // Try a late fetch in case the offering loaded after init.
@@ -336,6 +366,17 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         }
         const target = get().monthly;
         if (!target) return purchases.available ? 'error' : 'unavailable';
+        // A charge-now purchase needs the store to have named the option that
+        // charges. Without one there is nothing honest to buy here, and falling
+        // back to `purchase()` would start the trial the reader just declined.
+        if (skipTrial && !target.basePlan) return 'error';
+        // WHAT THIS PURCHASE ACTUALLY COSTS. The base plan's own price when we
+        // are skipping the trial, the package's otherwise — so the attribute
+        // below, the revenue event and the reminder email all quote the figure
+        // the reader is really being charged rather than the headline one.
+        const money = skipTrial && target.basePlan
+          ? target.basePlan
+          : { priceString: target.priceString, price: target.price, currency: target.currency };
         try {
           // THE PRICE THE TRIAL WILL BECOME, handed to RevenueCat before the sheet
           // opens, so the reminder email -- sent by a server that never sees this
@@ -343,9 +384,11 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           // email without the number is still true, and a purchase must never wait
           // on it.
           try {
-            await purchases.setAttributes({ pass_price: target.priceString });
+            await purchases.setAttributes({ pass_price: money.priceString });
           } catch {}
-          const st = await purchases.purchase(target);
+          const st = skipTrial
+            ? await purchases.purchaseWithoutTrial(target)
+            : await purchases.purchase(target);
           applyStatus(set, get, st);
           if (!st.active) return 'error';
           // THE CEREMONY, RAISED HERE AND NOWHERE ELSE. Four screens can start a
@@ -367,11 +410,12 @@ export const useSubscriptionStore = create<SubscriptionState>()(
             track('subscribe_succeeded', {
               plan: 'scholars_pass',
               product_id: target.productId,
-              $revenue: target.price,
-              revenue: target.price,
-              currency: target.currency,
-              price_string: target.priceString,
+              $revenue: money.price,
+              revenue: money.price,
+              currency: money.currency,
+              price_string: money.priceString,
               period: target.period,
+              skipped_trial: skipTrial,
             });
             useUIStore.getState().showConferral('purchase');
           }

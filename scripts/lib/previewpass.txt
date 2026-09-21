@@ -33,6 +33,12 @@ const PKG = {
   currency: 'USD',
   period: 'month',
   trial: { value: 3, unit: 'day' },
+  // THE CHARGE-TODAY OPTION, seeded for the same reason the trial is: it is read
+  // off the store, never assumed, so without it the door under the trial button
+  // would not be drawn and this harness would photograph the screen without the
+  // thing it is supposed to be measuring — and report it clean. `?base=none`
+  // renders the other half of that decision, where Google named no such option.
+  basePlan: { priceString: '$6.99', price: 6.99, currency: 'USD' },
 };
 
 export default function PreviewPass() {
@@ -127,7 +133,12 @@ export default function PreviewPass() {
           : NONE,
       trialEndsAt: trial === 'device' ? now + 36 * HOUR : null,
       isPro: pro || google || trial === 'device',
-      monthly: trial === 'used' ? { ...PKG, trial: null } : PKG,
+      monthly: (() => {
+        const base = trial === 'used' ? { ...PKG, trial: null } : PKG;
+        // `?base=none`: Google named no option that charges today, so the door
+        // under the trial button must not be drawn at all.
+        return q('base') === 'none' ? { ...base, basePlan: null } : base;
+      })(),
       refresh: async () => {},
     } as never);
 

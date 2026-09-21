@@ -18,6 +18,9 @@ export const stubProvider: PurchasesProvider = {
   async purchase() {
     throw new PurchasesUnavailableError();
   },
+  async purchaseWithoutTrial() {
+    throw new PurchasesUnavailableError();
+  },
   async restore() {
     throw new PurchasesUnavailableError();
   },
