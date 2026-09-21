@@ -72,6 +72,26 @@ export interface Shot {
    * read as thrown rather than driven.
    */
   e?: 'smooth' | 'back';
+  /**
+   * PIN THE GROUND LINE: keep `s · (groundY − cy)` equal to this, at every instant
+   * of the travel, instead of interpolating `cy`.
+   *
+   * Optional and normally absent — no shot in the corpus carried one before
+   * logic-arguments-1, so every existing camera is bit-identical without it.
+   *
+   * It exists because interpolating `cy` linearly while `s` interpolates
+   * GEOMETRICALLY does not hold their product constant, so a lesson that frames
+   * every shot off one ground line watches that line sag mid-transition and snap
+   * back — the floor moving on every tap. logic-arguments-1 was written with its
+   * own player and solved it by deriving `cy = ground − pin/s` rather than storing
+   * it; porting it onto the shared camera without this would have reintroduced the
+   * exact ~5-unit sag its author measured and removed.
+   *
+   * Set it once per shot to the same value across a lesson's whole table. Where
+   * two consecutive shots agree on `pin`, the line is pinned through the move; a
+   * shot without one behaves exactly as it always has.
+   */
+  pin?: number;
 }
 
 // ── THE MOVE VOCABULARY ──────────────────────────────────────────────────────
@@ -161,11 +181,21 @@ export function shotAt(from: Shot, to: Shot, t: number): { cx: number; cy: numbe
     kx = amp * decay * Math.sin(t * 46);
     ky = amp * 0.62 * decay * Math.sin(t * 37 + 1.1);
   }
-  return {
-    cx: from.cx + (to.cx - from.cx) * u + kx,
-    cy: from.cy + (to.cy - from.cy) * u + ky,
-    s: from.s * Math.pow(to.s / from.s, u),
-  };
+  const s = from.s * Math.pow(to.s / from.s, u);
+  // THE GROUND PIN, and it needs NO ground constant of its own — each shot implies
+  // one. A pinned shot satisfies `cy = ground − pin/s`, so `ground = cy + pin/s`
+  // can be read back off either end, and deriving `cy` from the interpolated `s`
+  // through that ground is EXACT at both endpoints (at u=0 it returns from.cy, at
+  // u=1 to.cy) while holding `s·(ground−cy)` constant in between. Interpolating cy
+  // linearly cannot: `s` moves geometrically, so the product bulges mid-travel and
+  // the floor sags. Both ends must agree on the pin — a move into or out of an
+  // unpinned shot (the opening shot from NEUTRAL) falls back to the lerp rather
+  // than jumping, because an implied ground from only one end is not continuous.
+  const pinned = from.pin != null && to.pin != null && from.pin === to.pin;
+  const cy = pinned
+    ? (to.cy + (to.pin as number) / to.s) - (to.pin as number) / s + ky
+    : from.cy + (to.cy - from.cy) * u + ky;
+  return { cx: from.cx + (to.cx - from.cx) * u + kx, cy, s };
 }
 
 /**

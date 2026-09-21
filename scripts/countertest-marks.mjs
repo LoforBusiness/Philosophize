@@ -61,6 +61,17 @@ function stage(name, row, replacement, rule) {
   console.log(`  ${ok ? 'ok  ' : 'FAIL'}  ${name}${ok ? '' : `\n          wanted ${rule ? `"${rule}"` : 'silence'}, got ${fails.length ? fails.join(' · ') : 'silence'}`}`);
 }
 
+let skipped = 0;
+/**
+ * A case the CURRENT table cannot express, said out loud.
+ *
+ * §21's rule is that an under-measuring sweep must never read as a clean one, and
+ * these two cases need rows the roll no longer has: one needs two marks of
+ * different styles inside ONE lesson, and one needs a ninth row. Printing the skip
+ * is the difference between "this defect is caught" and "this defect was not tried".
+ */
+const skip = (name, why) => { skipped += 1; console.log(`  skip  ${name}\n          ${why}`); };
+
 console.log('\nCOUNTER-TESTING check:marks\n');
 stage('the table as shipped stays silent', null, null, null);
 
@@ -77,15 +88,21 @@ stage('the table as shipped stays silent', null, null, null);
 }
 
 // A label the stage no longer draws on that beat.
+//
+// THE TABLE IS THREE ROWS LONG NOW, so a fixed index is not a row. Group AH gave
+// every still tap its own scene event, which left the pen almost nowhere to go and
+// took the roll from 69 marks to 3 — and these two cases read ALL[3] and ALL[5],
+// so this file crashed on a table that is perfectly valid. A counter-test that
+// cannot run is not a weaker check, it is no check (§11).
 {
-  const r = ALL[3];
+  const r = ALL[3] ?? ALL[ALL.length - 1];
   const moved = r.line.replace(/label: ".*"/, 'label: "A LABEL NOBODY DRAWS"');
   stage('a mark on a label that has gone', r, moved, 'every mark is on a label the voice names');
 }
 
 // The table's box left behind by a re-measure that moved the label.
 {
-  const r = ALL[5];
+  const r = ALL[5] ?? ALL[0];
   const b = boxOf(r);
   stage('a box the label has moved out of', r, lineOf(r, { box: [b[0] + 6, b[1], b[2], b[3]] }), 'every mark is clear of every word');
 }
@@ -99,15 +116,22 @@ stage('the table as shipped stays silent', null, null, null);
     const lab = (side.words[b.id]?.[b.beat] || []).find((it) => it.k === 'text' && it.t === b.label);
     if (lab) pair = { a, b, lab };
   }
-  const box = markBox(pair.a.style, pair.lab.b).map((v) => Math.round(v * 10) / 10);
-  stage('the same style twice running', pair.b, lineOf(pair.b, { style: pair.a.style, box }), 'no lesson draws the same style twice running');
+  if (!pair) {
+    skip('the same style twice running',
+      `needs two marks of different styles in one lesson; the roll is ${ALL.length} mark(s) in `
+      + `${new Set(ALL.map((r) => r.id)).size} lesson(s)`);
+  } else {
+    const box = markBox(pair.a.style, pair.lab.b).map((v) => Math.round(v * 10) / 10);
+    stage('the same style twice running', pair.b, lineOf(pair.b, { style: pair.a.style, box }), 'no lesson draws the same style twice running');
+  }
 }
 
 // A style the component has no drawing for.
 {
-  const r = ALL[8];
+  const r = ALL[8] ?? ALL[ALL.length - 1];
   if (STYLES.includes('squiggle')) throw new Error('pick another unknown style');
-  stage('a style the pen cannot draw', r, lineOf(r, { style: 'squiggle', box: boxOf(r) }), 'every mark belongs to a lesson');
+  if (!r) skip('a style the pen cannot draw', 'the roll is empty');
+  else stage('a style the pen cannot draw', r, lineOf(r, { style: 'squiggle', box: boxOf(r) }), 'every mark belongs to a lesson');
 }
 
 // A plate border running through a mark, and a lesson re-measured since its audit.
@@ -126,7 +150,7 @@ stage('the table as shipped stays silent', null, null, null);
     if (!ok) failed += 1;
     console.log(`  ${ok ? 'ok  ' : 'FAIL'}  ${name}${ok ? '' : `\n          wanted "${rule}", got ${fails.join(' · ') || 'silence'}`}`);
   };
-  const r = ALL[2];
+  const r = ALL[2] ?? ALL[ALL.length - 1];
   const b = boxOf(r);
   const crossed = JSON.parse(edgesSrc);
   // A rule across the middle of the mark: in the box, not containing it, not inside it.

@@ -1,3 +1,5 @@
+import type { BaseBeat } from './cinematicKit';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Script for the cinematic version of logic-arguments-1, "Arguments Are Not
 // Fights".
@@ -26,13 +28,31 @@ export type Who = 'red' | 'blue';
 
 export interface Choice { id: string; text: string; correct: boolean }
 
-export interface Beat {
+// ─────────────────────────────────────────────────────────────────────────────
+// THE BEAT EXTENDS THE SHARED `BaseBeat` NOW, AND THAT IS THE WHOLE POINT.
+//
+// This lesson and logic-arguments-2 predate `CinematicPlayer` and carried their
+// own copies of it, so for their whole life they were the only two lessons in the
+// app that no corpus-wide pass could reach: 9 of the validators discover lessons
+// by globbing `*Scene.tsx`, and a bespoke `*Lesson.tsx` is invisible to every one
+// of them. The palette repaint, the depth kit, the gamified controls, the gaze,
+// the wander, the thoughts, the pen and the tappable names all went to 244
+// lessons and skipped these two — which a reader spotted from the outside, on the
+// FIRST lesson in Logic.
+//
+// `text`, `cite`, `say`, `quote`, `tap`, `mc`, `summary` and `dur` were already
+// declared here under the same names and compatible shapes, so conforming to the
+// base type deletes them rather than rewriting them. What stays below is only
+// what is genuinely this lesson's: its acts and its four stage channels.
+//
+// NOT ONE WORD OF ANY BEAT MAY CHANGE (AH8), and here it is stricter than usual:
+// 20 of the 25 beats are VOICED, keyed by beat index, and `assets/narration/
+// renders.json` records the words each WAV was rendered from. A merged or
+// reordered beat is a failed `check:narration` and a bill at the TTS ledger.
+// ─────────────────────────────────────────────────────────────────────────────
+export interface Beat extends BaseBeat {
   act: 1 | 2 | 3 | 4 | 5;
-  /** Narration under the scene. */
-  text?: string;
-  /** Attribution shown small above the narration, e.g. a source. */
-  cite?: string;
-  /** Speech bubbles over the boxers. */
+  /** Speech bubbles over the boxers. Narrower than the base `Say['who']`. */
   say?: { who: Who; text: string }[];
   /** Which illustration is on the board this beat. */
   board?: BoardKey;
@@ -54,16 +74,6 @@ export interface Beat {
    * CONTRADICTION stamp across the exchange.
    */
   stack?: number;
-  /** A saveable quote card. */
-  quote?: { id: string; text: string; author: string; work: string; era: string; philosopherId?: string };
-  /** Teaching tap — no XP, immediate feedback. */
-  tap?: { prompt: string; options: Choice[]; explain: string };
-  /** Graded question — awards XP, exactly as the card runner does. */
-  mc?: { prompt: string; options: Choice[]; explain: string; xp: number };
-  /** Closing payoff. */
-  summary?: { title: string; points: string[]; closing: string };
-  /** Seconds of animation before the tap prompt appears. */
-  dur: number;
 }
 
 export const BEATS: Beat[] = [
@@ -258,14 +268,20 @@ export const BEATS: Beat[] = [
   },
   {
     act: 4,
-    vol: 3, reasons: 2,
+    // AH1 — the third reason is on the table, so the meter that counts them moves.
+    // Beat 20 left it at 2 and this beat held there, which made the tap change
+    // nothing but the words: "let's compare the cities" is an offered test, and an
+    // offered test is a reason. The count is cumulative, so it only ever grows.
+    vol: 3, reasons: 3,
     say: [{ who: 'red', text: 'Fair. Let\'s compare the cities.' }],
     text: 'The people and the disagreement are unchanged. Because each side now gives reasons, the exchange can make progress.',
     dur: 3.4,
   },
   {
     act: 4,
-    vol: 2, reasons: 2,
+    // Three reasons are on the table by now and the volume is what comes down,
+    // which is this beat's own event.
+    vol: 2, reasons: 3,
     text: 'John Stuart Mill argued further that you understand your own view only once you understand the opposing one.',
     cite: 'J.S. Mill, On Liberty, 1859',
     dur: 3.4,

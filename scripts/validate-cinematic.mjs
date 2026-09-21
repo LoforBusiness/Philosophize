@@ -20,9 +20,20 @@ import { mustStamp } from './lib/muststamp.mjs';
 
 const DIR = path.join(process.cwd(), 'components', 'lesson', 'cinematic');
 
-// The two lessons that predate the shared player carry their own copy of it, so they
-// are exempt from the beat-shape rules (they are 26 and 14 beats of hand-built acts).
-const LEGACY = new Set(['argument', 'builder']);
+// THE TWO HAND-BUILT LESSONS, AND THE REASON THE EXEMPTION SURVIVED THEIR PORT.
+//
+// It used to read `['argument', 'builder']` and was justified by those two lessons
+// carrying their own copy of the player. They do not any more — both are ordinary
+// `*Scene.tsx` lessons on `CinematicPlayer` — so that reason is gone and this is the
+// one that replaces it: they are five-ACT pieces of 25 and 15 beats, and every
+// teaching beat is a rendered WAV keyed by its own INDEX
+// (`assets/narration/renders.json`). Merging two beats to reach H52's ceiling is
+// therefore a re-render of the lesson's voice, not an edit to its script, and
+// `check:narration` would fail the whole build until it happened.
+//
+// Everything else in H52 still applies to them — one quote, one summary and it is
+// last, exactly two graded questions — because none of those is pinned by the voice.
+const LEGACY = new Set(['logic1', 'logic2']);
 
 const problems = [];
 const warnings = [];
@@ -413,7 +424,7 @@ const SOLID_FLOOR = 246;
 // here. At 0 the deck can be deleted along with `Choices` and `QBlock.options`.
 //
 // FOUR LEFT, AND THEY ARE THE TWO LESSONS §17 WARNS ABOUT. 118 of the 122 are
-// converted. The remaining four live in `argumentScript` and `builderScript` —
+// converted. The remaining four live in `logic1Script` and `logic2Script` —
 // logic-arguments-1 and the premises builder — which predate the shared player
 // and carry their OWN copies of it, their own `Beat` interface and their own
 // local `Choices`. Converting them is not a script edit: it needs `interact` on

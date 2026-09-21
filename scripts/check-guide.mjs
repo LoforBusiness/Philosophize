@@ -67,7 +67,11 @@ const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`])\/\/
 }
 
 // ── 2. EVERY PLAYER ──────────────────────────────────────────────────────────
-const PLAYERS = ['CinematicPlayer', 'ArgumentFightLesson', 'PremisesBuilderLesson'];
+// ONE PLAYER. It was three until logic-arguments-1 and -2 were ported onto the
+// shared one: `ArgumentFightLesson.tsx` and `PremisesBuilderLesson.tsx` are gone,
+// and this list threw ENOENT on the first of them rather than noticing. A player
+// added here must satisfy every rule below.
+const PLAYERS = ['CinematicPlayer'];
 const NEEDS = [
   ['routes the body press through tapSide', (s) => /onPress=\{onBody\}/.test(s) && /tapSide\(/.test(s)],
   ['never disables the body while a question is open', (s) => !/<Pressable\s+style=\{styles\.body\}[^>]*disabled=/.test(s)],

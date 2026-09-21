@@ -3086,8 +3086,9 @@ before the first — "it doesn't look right" came before "I could see the answer
 Every reveal hangs off `picked !== null` — passed down as `answered` — and nothing
 else. Not a timer, not a beat index, not "the animation has started". There are five
 places that own this and they all already do it: `Choices` and `InteractPanel` in
-`cinematicKit`, `Reveal` inside them, `ChoiceCards`, `DragScale`, and the two
-bespoke players (`ArgumentFightLesson`, `PremisesBuilderLesson`).
+`cinematicKit`, `Reveal` inside them, `ChoiceCards` and `DragScale`. (It was five
+and two bespoke players until logic lessons 1 and 2 were ported onto
+`CinematicPlayer` and those two files were deleted — CLAUDE.md §17.)
 
 A scene that draws its own answer state does the same, through its own helper:
 
@@ -4696,9 +4697,10 @@ it, so a locked wide shot spends most of the frame on empty paper and renders ev
 lesson at the same distance — which is why they read as one long shot of a small man.
 
 > **The count in this paragraph used to be "55 of the 100 lessons have none at all".
-> It is now 2 of 102**, and both are the lessons that predate the shared player and
-> carry their own copy of it: `logic-arguments-1` has a hand-rolled camera of its
-> own, `logic-arguments-2` has none. Every one of the 100 scene lessons moves.
+> It is now 0**: the last two were `logic-arguments-1` and `logic-arguments-2`, and
+> both carry an authored `shots` table since they were ported onto the shared
+> player (CLAUDE.md §17). Each shot pins the ground line through its own scale,
+> which is what their hand-rolled cameras did and what `Shot.pin` now expresses.
 >
 > The last three to get one — ethics-ethics-2, ethics-ethics-5, political-political-1
 > — are worth reading as a set, because all three had a *stated* reason for having no

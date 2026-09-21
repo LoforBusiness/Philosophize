@@ -40,8 +40,8 @@ const SCRIPTS = path.join(ROOT, 'components', 'lesson', 'cinematic');
  * that is missing from this table.
  */
 export const LESSONS = {
-  'logic-arguments-1': 'argumentScript.ts',
-  'logic-arguments-2': 'builderScript.ts',
+  'logic-arguments-1': 'logic1Script.ts',
+  'logic-arguments-2': 'logic2Script.ts',
   'logic-arguments-3': 'valid3Script.ts',
   'logic-arguments-4': 'strong4Script.ts',
   'logic-arguments-5': 'logic5Script.ts',

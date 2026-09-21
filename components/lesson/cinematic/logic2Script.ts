@@ -17,6 +17,19 @@
 // Both graded questions are lifted verbatim from data/branches/logic/.../
 // premises-and-conclusions.ts so scoring stays identical to every other lesson.
 //
+// ON THE SHARED PLAYER SINCE THE PORT (see logic2Scene.tsx). This file is now an
+// ordinary script: `Beat extends BaseBeat`, so the deck, the quote card, the two
+// question shapes, the summary and the narration are the player's, and what is
+// declared below is only what makes THIS lesson different from the other 245.
+//
+// EVERY TAP MOVES THE BUILD (group AH). Four taps used to change nothing but the
+// words — the build state, the tags and the gesture were identical to the beat
+// before — and each now carries an event read out of its own sentence: the two
+// SUPPORTS ink in on "claims below that support a claim above", the two role
+// plaques arrive one at a time with the line that names each, the legend's second
+// row waits for the line that lists its words, and the therefore-mark is struck on
+// the keystone when the conclusion is said to follow of necessity.
+//
 // Structure — five acts:
 //   1  THE BUILD    the master lays two bricks and sets a keystone; it stands.
 //   2  NAME PARTS   he points out the premises (base) and the conclusion (top).
@@ -25,9 +38,9 @@
 //   5  PAYOFF       the saveable Aristotle quote and what you now know.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type Who = 'master' | 'app';
+import type { BaseBeat } from './cinematicKit';
 
-export interface Choice { id: string; text: string; correct: boolean }
+export type Who = 'master' | 'app';
 
 /**
  * How the brick structure looks this beat. A brick is PRESENT when its label is a
@@ -43,35 +56,50 @@ export interface BuildState {
   key?: string | null;
   /** Draw an empty dashed keystone SLOT (used by the fly-up question). */
   slot?: boolean;
-  /** Show the PREMISES / CONCLUSION role tags beside the structure. */
-  tags?: boolean;
+  /**
+   * Which role plaques are up: the PREMISES one on the plinth, then the
+   * CONCLUSION one over the keystone. They arrive on the two different lines that
+   * name them rather than together, which is what makes the second of those taps
+   * an event (AH1) as well as the better teaching order.
+   */
+  tags?: 'base' | 'both';
+  /**
+   * THE FORM: a dashed boundary traced around the whole three-stone silhouette.
+   *
+   * "This shape is the basic form of an argument" is the sentence, and the shape is
+   * what it names — so the tap draws it. A strut from each base stone up to the
+   * keystone was the first idea and the geometry refuses it: the keystone RESTS on
+   * the base (beat 2 says so out loud), which leaves 3 units between the courses,
+   * and a 3-unit strut is not a support, it is a joint line. Dashed, because a
+   * dashed outline in this app is a BOUNDARY rather than a mass.
+   */
+  form?: boolean;
+  /**
+   * The therefore-mark (\u2234) struck at the keystone's shoulder — logic's own sign
+   * for the claim that follows. It lands on the line about following of necessity.
+   */
+  mark?: boolean;
   /** This beat's graded answer drives the collapse or the fly-up. */
   q?: 'collapse' | 'flyup';
 }
 
-export interface Beat {
+export interface Beat extends BaseBeat {
   act: 1 | 2 | 3 | 4 | 5;
-  /** Narration under the scene. */
-  text?: string;
-  /** Small attribution above the narration. */
-  cite?: string;
-  /** Speech bubbles over a figure. */
+  /** Speech bubbles over a figure. Narrower than the base `Say['who']`. */
   say?: { who: Who; text: string }[];
   /** The brick structure this beat. */
   build?: BuildState;
   /** Master gesture code (rig): 0 open · 1 emphatic · 2 present · 3 count · 4 chin
    *  · 5 sweep · 6 point-up · 7 LAY A BRICK. Matched to the line. */
   gest?: number;
-  /** Saveable quote card. */
-  quote?: { id: string; text: string; author: string; work: string; era: string; philosopherId?: string };
-  /** Teaching tap — no XP, immediate feedback. */
-  tap?: { prompt: string; options: Choice[]; explain: string };
-  /** Graded question — awards XP exactly as the card runner does. */
-  mc?: { prompt: string; options: Choice[]; explain: string; xp: number };
-  /** Closing payoff. */
-  summary?: { title: string; points: string[]; closing: string };
-  /** Seconds of animation before the tap prompt appears. */
-  dur: number;
+  /**
+   * Which rows of the signpost card are up (0 none · 1 the premise words · 2 both).
+   *
+   * Authored per beat rather than derived from `act`, because the rows belong to
+   * the two lines that actually list their words — and a channel the script
+   * declares is one `check:still` can see.
+   */
+  leg?: 0 | 1 | 2;
 }
 
 // Socrates' syllogism, on the bricks.
@@ -107,7 +135,9 @@ export const BEATS: Beat[] = [
   // ── ACT 2 — NAME THE PARTS ───────────────────────────────────────────────────
   {
     act: 1,
-    build: { p1: '', p2: '', key: '' },
+    // AH1 — the sentence says the stones below SUPPORT the one above, so that is
+    // what the tap draws: a strut from each base stone up to the keystone.
+    build: { p1: '', p2: '', key: '', form: true },
     gest: 5,                                        // sweep the keystone into place
     say: [{ who: 'master', text: 'There. It stands.' }],
     text: 'This shape is the basic form of an argument: claims below that support a claim above.',
@@ -117,14 +147,16 @@ export const BEATS: Beat[] = [
   // ── ACT 2 — NAME THE PARTS ───────────────────────────────────────────────────
   {
     act: 2,
-    build: { p1: '', p2: '', key: '', tags: true },
+    build: { p1: '', p2: '', key: '', form: true, tags: 'base' },
+    leg: 1,                                         // BECAUSE · SINCE · AS
     gest: 3,                                        // count off the base
     text: 'The stones at the base are the premises, the reasons offered for a claim. The words “because” and “since” often introduce a premise.',
     dur: 4.2,
   },
   {
     act: 2,
-    build: { p1: '', p2: '', key: '', tags: true },
+    build: { p1: '', p2: '', key: '', form: true, tags: 'both' },
+    leg: 1,
     gest: 6,                                        // point up at the keystone
     text: 'The stone on top is the conclusion, the claim the premises support. In a deduction, Aristotle held, the conclusion follows of necessity.',
     cite: 'Aristotle, Prior Analytics',
@@ -132,14 +164,16 @@ export const BEATS: Beat[] = [
   },
   {
     act: 2,
-    build: { p1: '', p2: '', key: '', tags: true },
+    build: { p1: '', p2: '', key: '', form: true, tags: 'both' },
+    leg: 2,                                         // … and THEREFORE · SO · THUS
     gest: 3,                                        // count them off: therefore, so, thus
     text: 'The words “therefore”, “so” and “thus” often introduce a conclusion.',
     dur: 1.8,
   },
   {
     act: 2,
-    build: { p1: '', p2: '', key: '', tags: true },
+    build: { p1: '', p2: '', key: '', form: true, tags: 'both' },
+    leg: 2,
     tap: {
       prompt: 'Which of these words usually introduces a conclusion?',
       options: [
@@ -155,14 +189,16 @@ export const BEATS: Beat[] = [
   // ── ACT 3 — THE FAMOUS STRUCTURE ─────────────────────────────────────────────
   {
     act: 3,
-    build: { p1: S_P1, p2: S_P2, key: S_K },
+    build: { p1: S_P1, p2: S_P2, key: S_K, form: true },
     gest: 2,                                        // present the finished structure
     text: 'This is the standard example of a syllogism, the form of argument Aristotle first analysed.',
     dur: 4.0,
   },
   {
     act: 3,
-    build: { p1: S_P1, p2: S_P2, key: S_K },
+    // AH1 — "the conclusion can't be false": logic's own sign for the claim that
+    // follows is struck at the keystone's shoulder.
+    build: { p1: S_P1, p2: S_P2, key: S_K, form: true, mark: true },
     gest: 1,                                        // emphatic — "forced into place"
     text: 'If both premises are true, the conclusion can’t be false. That’s what Aristotle meant by a conclusion that follows of necessity.',
     cite: 'Aristotle, Prior Analytics',
@@ -172,7 +208,7 @@ export const BEATS: Beat[] = [
   // ── ACT 4 — THE TEST ─────────────────────────────────────────────────────────
   {
     act: 4,
-    build: { p1: S_P1, p2: S_P2, key: S_K, q: 'collapse' },
+    build: { p1: S_P1, p2: S_P2, key: S_K, form: true, q: 'collapse' },
     gest: 4,                                        // hand near the base, about to pull
     say: [{ who: 'master', text: 'Pull a premise. Does it still stand?' }],
     mc: {
@@ -189,7 +225,7 @@ export const BEATS: Beat[] = [
   },
   {
     act: 4,
-    build: { p1: S_P1, p2: S_P2, key: S_K },
+    build: { p1: S_P1, p2: S_P2, key: S_K, form: true },
     gest: 0,                                        // open hand — the plain point
     text: 'Remove the premises and nothing supports the conclusion. The premises are what give anyone a reason to accept it.',
     dur: 3.8,
@@ -221,7 +257,7 @@ export const BEATS: Beat[] = [
     // the conclusion (taxes) as the keystone — the exact shape the fly-up just built,
     // so it carries over seamlessly. No second base brick (that duplicated the
     // conclusion onto the base).
-    build: { p1: 'The deficit is growing', key: 'Taxes should rise', tags: true },
+    build: { p1: 'The deficit is growing', key: 'Taxes should rise', form: true, tags: 'both' },
     quote: {
       id: 'lq-logic-arguments-2',
       text: 'A deduction is a discourse in which, certain things being stated, something other than what is stated follows of necessity.',
@@ -247,11 +283,3 @@ export const BEATS: Beat[] = [
     dur: 2.8,
   },
 ];
-
-/** Beats that hold the reader until they answer, rather than until they tap. */
-export function gates(b: Beat) {
-  return Boolean(b.tap || b.mc);
-}
-
-/** Total graded questions, so the reward screen can match the card runner. */
-export const TOTAL_MC = BEATS.filter((b) => b.mc).length;

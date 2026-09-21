@@ -532,6 +532,13 @@ head('every walker sounds, and nothing else does');
 {
   const dir = path.join(ROOT, 'components/lesson/cinematic');
   const scenes = fs.readdirSync(dir).filter((f) => /Scene\.tsx$/.test(f));
+  // A COMMENT IS NOT A CLAIM, and §6 below has said so since it was written
+  // ("Comments quote the very expressions this matches on") while both sections went
+  // on testing the RAW file. The two ported lessons explain in their own headers why
+  // they do not pass the prop — quoting `walk={X}` to do it — and were duly reported
+  // as claiming a walk they do not have. That is the L8 lesson for the third time in
+  // this repo: strip comments before matching on code.
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
   /** Null if this scene may sound footfalls; otherwise why it may not. */
   const disqualify = (src) => {
@@ -556,7 +563,7 @@ head('every walker sounds, and nothing else does');
   const missing = [], lying = [];
   let sounding = 0, silent = 0;
   for (const f of scenes) {
-    const src = fs.readFileSync(path.join(dir, f), 'utf8');
+    const src = strip(fs.readFileSync(path.join(dir, f), 'utf8'));
     const why = disqualify(src);
     const claims = /\bwalk=\{/.test(src);
     if (!why && !claims) missing.push(f.replace('Scene.tsx', ''));
@@ -613,9 +620,8 @@ head('a walk lasts as long as the footfalls assume');
   let judged = 0, worstFactor = 1, worstLate = 0, worstName = '';
 
   for (const f of scenes) {
-    const raw = fs.readFileSync(path.join(dir, f), 'utf8');
-    if (!/\bwalk=\{/.test(raw)) continue;          // section 5 owns who qualifies
-    const src = strip(raw);
+    const src = strip(fs.readFileSync(path.join(dir, f), 'utf8'));
+    if (!/\bwalk=\{/.test(src)) continue;          // section 5 owns who qualifies
 
     // The transition length the scene divides its beat clock by.
     const tr = /const\s+tr\s*=\s*ease01\(\s*bt\.value\s*\/\s*([^)]*\)?[^;]*)\);/.exec(src);

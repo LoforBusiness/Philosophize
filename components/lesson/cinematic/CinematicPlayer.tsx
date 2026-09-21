@@ -171,7 +171,7 @@ export type SceneComponent = ComponentType<SceneApi>;
 
 export default function CinematicPlayer({
   lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk, gesture, shots,
-  camera, ground = GROUND, finish,
+  camera, ground = GROUND, finish, Chrome,
 }: {
   lesson: Lesson;
   /**
@@ -255,6 +255,33 @@ export default function CinematicPlayer({
    * callers already assume is not a default, it is a missing one.
    */
   ground?: number;
+  /**
+   * A second scene layer drawn in stage coordinates but OUTSIDE the camera.
+   *
+   * Optional, and no lesson passed one before logic-arguments-1 — so every other
+   * lesson mounts exactly as it always did, with no extra element in the tree.
+   *
+   * It exists because the shared player could not express a composition the
+   * bespoke players could, and that gap is what kept those two lessons on their
+   * own 1,474- and 945-line copies of this file (and therefore outside every
+   * corpus-wide pass and 9 of the validators). logic-arguments-1 teaches from a
+   * framed easel, a scoreboard and a Socratic exchange that hold ONE size on
+   * screen while the camera pushes from 1.21× to 1.58× on the figures below them:
+   * diagrams a reader keeps reading while the shot moves. Inside the camera they
+   * would zoom and clip; the only way to keep them still is to draw them where
+   * the camera is not.
+   *
+   * It is clipped by the band and scaled by `fit` like everything else, so its
+   * coordinates are the same stage coordinates the scene uses — which is what
+   * makes a band measured across both layers (see that lesson's THE BAND note)
+   * still the right band.
+   *
+   * WHAT IT MUST NOT DO is register tap targets: it sits outside
+   * `TargetCountProvider` on purpose, because a target's box is reported in
+   * camera space to frame the shot, and a fixed-screen target has no such box.
+   * Answers belong in the scene.
+   */
+  Chrome?: SceneComponent;
 }) {
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
@@ -1416,6 +1443,19 @@ export default function CinematicPlayer({
                       <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} pickedOk={pickedOk} sound={sounded} onPick={(id, ok) => { if (stageLive) choose(id, ok, true); }} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubbles.map((B) => <Thought key={B.key} text={B.text} kind={B.kind} x={B.at[0]} anchorY={B.at[1]} discs={B.at[2]} headX={B.at[3]} show={B.show} figX={B.refX === undefined ? undefined : figX} refX={B.refX ?? 0} settle={B.refX === undefined ? undefined : figTr} probeId={`${B.key[0] === 'v' ? 'thought-vis' : 'thought-lead'}${B.show ? '' : '-out'}`} />)}{stageMarks}</WardrobeProvider>
                     </TargetCountProvider>
                   )}
+                  {/* CHROME: stage coordinates, band-clipped, fit-scaled — and no
+                      camera. A sibling of the camera layer rather than a child, so
+                      what it draws holds one size on screen while the shot moves.
+                      See the `Chrome` prop. */}
+                  {Chrome ? (
+                    <Chrome
+                      clock={clock} bt={bt} bi={bi} si={si} qv={qv}
+                      dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos}
+                      gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn}
+                      i={i} beat={beat} picked={picked} pickedOk={pickedOk} sound={sounded}
+                      onPick={() => {}}
+                    />
+                  ) : null}
                 </View>
               </View>
             </View>

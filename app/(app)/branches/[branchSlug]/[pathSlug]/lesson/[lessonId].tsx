@@ -8,8 +8,8 @@ import LessonRunner from '@/components/lesson/LessonRunner';
 import LessonLoader from '@/components/lesson/LessonLoader';
 import { exitLesson } from '@/components/lesson/exitLesson';
 import { track } from '@/lib/posthog';
-import ArgumentFightLesson from '@/components/lesson/cinematic/ArgumentFightLesson';
-import PremisesBuilderLesson from '@/components/lesson/cinematic/PremisesBuilderLesson';
+import { Logic1Lesson } from '@/components/lesson/cinematic/logic1Scene';
+import { Logic2Lesson } from '@/components/lesson/cinematic/logic2Scene';
 import { LessonGuideHost } from '@/components/lesson/cinematic/LessonGuide';
 import { EthicsLesson } from '@/components/lesson/cinematic/ethicsScene';
 import { EpistemologyLesson } from '@/components/lesson/cinematic/epistemologyScene';
@@ -275,8 +275,8 @@ const Page = '#FAFAF7';
 // EXPORTED so the lesson audit can mount any scene without duplicating the map.
 // A named export in a route file is inert — Expo Router only reads the default.
 export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
-  'logic-arguments-1': ArgumentFightLesson,
-  'logic-arguments-2': PremisesBuilderLesson,
+  'logic-arguments-1': Logic1Lesson,
+  'logic-arguments-2': Logic2Lesson,
   'ethics-ethics-1': EthicsLesson,
   'epistemology-knowledge-1': EpistemologyLesson,
   'metaphysics-being-1': MetaphysicsLesson,

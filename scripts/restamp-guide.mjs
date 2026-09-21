@@ -37,7 +37,12 @@ const SIDE = `${DIR}/mustBoxes.ts.json`;
 const GEN = `${DIR}/mustBoxes.ts`;
 const TOURS = `${DIR}/tours.ts`;
 const EDGES = 'scripts/lib/markEdges.json';
-const LESSONS = { 'logic-arguments-1': 'ArgumentFightLesson', 'logic-arguments-2': 'PremisesBuilderLesson' };
+// SPENT, AND KEPT FOR THE RECORD. The two components it re-stamped
+// (ArgumentFightLesson / PremisesBuilderLesson) were deleted when both lessons
+// were ported onto CinematicPlayer, so the migration this file performed can
+// never be needed again; their boxes are stamped like every other lesson's now.
+// Run it and it will find neither component and write nothing.
+const LESSONS = { 'logic-arguments-1': 'Logic1Lesson', 'logic-arguments-2': 'Logic2Lesson' };
 const FILES = Object.values(LESSONS).map((c) => `${DIR}/${c}.tsx`);
 
 /** The stamps with the committed player files on disk; the working tree put back after. */

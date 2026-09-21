@@ -522,12 +522,12 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'Not resemblance, then.', 'Eleven plates, fewer lines.', 'Still unmistakably a bull.', null, null, 'I was taught how one goes.', null, null],
   },
   'logic-arguments-2': {
-    at: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    say: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    at: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    say: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   },
   'logic-arguments-1': {
-    at: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    say: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    at: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    say: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   },
   'political-political-35': {
     at: [null, [76, 388, 2, 52], [76, 388, 2, 52], null, [76, 388, 2, 52], null, null, null, [76, 388, 2, 52], null, null, null],

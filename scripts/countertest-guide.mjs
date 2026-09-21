@@ -20,10 +20,13 @@ const CASES = [
     to: '        style={styles.body}\n        disabled={locked}\n        onPress={onBody}',
   },
   {
-    name: 'an older player that forgot to keep its answers',
-    file: 'components/lesson/cinematic/PremisesBuilderLesson.tsx',
-    from: '    kept.current[i] = id;',
-    to: '',
+    // It used to stage this in PremisesBuilderLesson.tsx, which no longer exists:
+    // both hand-built players are on CinematicPlayer now, so the one player is
+    // where every rule has to be staged.
+    name: 'a player that forgot to keep its answers by beat',
+    file: 'components/lesson/cinematic/CinematicPlayer.tsx',
+    from: '    kept.current[i] = { id, ok: isCorrect,',
+    to: '    const dropped = { id, ok: isCorrect,',
   },
   {
     name: 'a button role on the guide\'s tap-anywhere layer',

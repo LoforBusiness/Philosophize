@@ -89,6 +89,8 @@ export const LESSON_NAMES: Record<string, readonly LessonName[]> = {
   'ethics-ethics-7': [['Bernard Williams', 'bernard-williams'], ['Thomas Nagel', 'thomas-nagel'], ['Williams', 'bernard-williams'], ['Nagel', 'thomas-nagel']],
   'ethics-ethics-8': [['Carol Gilligan', 'carol-gilligan'], ['Nel Noddings', 'nel-noddings'], ['Gilligan', 'carol-gilligan'], ['Noddings', 'nel-noddings']],
   'ethics-ethics-9': [['Sartre', 'jean-paul-sartre']],
+  'logic-arguments-1': [['Arthur Schopenhauer', 'arthur-schopenhauer'], ['John Stuart Mill', 'john-stuart-mill'], ['Schopenhauer', 'arthur-schopenhauer'], ['Aristotle', 'aristotle'], ['Socrates', 'socrates'], ['Mill', 'john-stuart-mill']],
+  'logic-arguments-2': [['Aristotle', 'aristotle']],
   'logic-arguments-22': [['Aristotle', 'aristotle']],
   'logic-arguments-27': [['Bertrand Russell', 'bertrand-russell'], ['Kurt Gödel', 'kurt-godel'], ['Miletus', 'thales'], ['Russell', 'bertrand-russell'], ['Gödel', 'kurt-godel']],
   'logic-arguments-28': [['Judith Jarvis Thomson', 'judith-jarvis-thomson'], ['Thomson', 'judith-jarvis-thomson']],

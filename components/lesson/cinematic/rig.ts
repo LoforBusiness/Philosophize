@@ -1519,7 +1519,7 @@ export function strideStance(
   // skate this file's own docstring promises cannot happen.
   //
   // All 52 walking call sites were checked: 50 position the body at exactly
-  // `lerp(<the same two endpoints>, tr)`, ArgumentFightLesson's local `L(a, b)` IS
+  // `lerp(<the same two endpoints>, tr)`, logic1Scene's own local `L(a, b)` IS
   // `lerp(a, b, tr)`, and ethics5's extra `dx` is answer-driven and zero for the
   // whole of any walk. So the invariant holds everywhere.
   //

@@ -460,9 +460,11 @@ Index on (user_id, lesson_id).
 | Philosopher quiz · perfect | 5 · 15 |
 
 > The old discrepancy (constants said one thing, `LessonRunner`'s local
-> `COMPLETION_XP = 5` did another) is closed by `lessonXP()`. All four runners —
-> `LessonRunner`, `CinematicPlayer`, `ArgumentFightLesson`, `PremisesBuilderLesson`
-> — import it. **If you add a runner, call `lessonXP()`; never re-derive XP.**
+> `COMPLETION_XP = 5` did another) is closed by `lessonXP()`. **There are two
+> runners now, not four** — `CinematicPlayer` and the unreachable `LessonRunner`;
+> `ArgumentFightLesson` and `PremisesBuilderLesson` were deleted when logic
+> lessons 1 and 2 were ported onto the shared player (§17). Both import it.
+> **If you add a runner, call `lessonXP()`; never re-derive XP.**
 
 **Level formula:** Level N requires `Math.floor(50 * N * Math.sqrt(N))` total XP (`getXPForLevel`).
 
@@ -2457,8 +2459,76 @@ normal `LessonRunner`. **Removing an entry is a complete, safe rollback** for on
 lesson.
 
 A cinematic lesson = a **script** (beats) + a **scene** component, played by
-`CinematicPlayer`. Two lessons predate the shared player and carry their own
-copies of it: `ArgumentFightLesson` and `PremisesBuilderLesson`.
+`CinematicPlayer`. **Every one of the 246 is, since 2026-09-21.**
+
+> **TWO LESSONS USED TO CARRY THEIR OWN COPY OF THE PLAYER, AND THAT IS WHY THEY
+> LOOKED WRONG.** A reader opened the first lesson in Logic — *"the arguments are
+> not fights, and it seems that this lesson has not been created with the new
+> color palette or the gamified design"* — and they were right about both, for a
+> reason that has nothing to do with either: **nine validators and every
+> corpus-wide pass find lessons by globbing `*Scene.tsx`**, so
+> `ArgumentFightLesson.tsx` (1,474 lines) and `PremisesBuilderLesson.tsx` (945)
+> were invisible to all of them. The six-swatch palette, the depth kit, the
+> gamified answer panels, the tappable philosopher names, the gaze, the wander,
+> the thoughts and the pen reached 244 lessons and skipped these two.
+>
+> **THE PORT ADDED TWO THINGS TO THE SHARED PLAYER AND NOTHING ELSE**, because a
+> lesson can only move onto it once it is a superset of what the lesson had:
+> `Shot.pin` (derive `cy` from the scale so the ground line holds still through a
+> zoom, which is what both lessons' hand-rolled cameras did) and `Chrome` (a
+> layer drawn inside the band but OUTSIDE the camera, for a diagram the reader
+> keeps reading while the shot pushes). Both are opt-in; the other 244 lessons
+> render byte-identically.
+>
+> **AND THE PAIRING IS BY STEM, WHICH IS THE PART THAT WILL CATCH SOMEBODY AGAIN.**
+> `check:still`, `check:idle`, `check:react`, `check:turn`, `check:smooth`,
+> `check:marks`, `check:space`, `check:tour` and `check:legible` look for
+> `<stem>Scene.tsx` beside `<stem>Script.ts`, and `muststamp` looks for
+> `<lower(component)>Script.ts`. So `logic1Scene.tsx` beside `argumentScript.ts`
+> passed every one of them by being SKIPPED, and the script sat outside the box
+> stamp — a scene could have been edited with no re-measure and nothing would have
+> gone red. The scripts are `logic1Script.ts` and `logic2Script.ts` now: **one stem
+> for the component, the scene and the script, or the checks go quiet without
+> failing.** Renaming them also took both lessons out of `validate-cinematic`'s
+> `LEGACY` set, whose stated reason (they carry their own player) had evaporated;
+> it is re-keyed on the reason that is still true — they are five-act pieces of
+> 25 and 15 beats, and every teaching beat is a rendered WAV keyed by its index,
+> so merging two beats to reach H52's ceiling is a re-render of the voice.
+>
+> **WHAT THE RENDER FOUND THAT NO CHECK DID.** A shout in `logic-arguments-1` was
+> cut mid-word — measured, #stage-clip ran x 16…374 and *"NO — YOU'RE WRONG!"*
+> ran 120…383. `Bubble` clamps a long line so it cannot walk off the stage, in
+> the coordinates it is DRAWN in; inside a camera that is pushed and panned,
+> scene 0…400 is not what the reader can see. Both lessons draw their bubbles in
+> the `Chrome` now, where the clamp is against the width the reader has, and the
+> scene publishes each head's band-space x through a module-level `makeMutable`
+> (the `REACT` pattern). `check:frame` calls the camera clean and is right about
+> what it measures: it compares the art against the crop, and this was a box the
+> crop never contained.
+>
+> Two smaller things the same render settled. `logic-arguments-2`'s collapse
+> tumbled its keystone to y 549 — 49 units BELOW the ground line — which was
+> invisible while the floor was 1.5pt of rule and is a stone falling through a
+> filled floor now that group AG has drawn one; the fall is solved against the
+> ground instead. And the pulled premise was dragged 82 units, which puts a
+> 114-wide stone a third of the way outside a frame pushed to 1.22× — three
+> stones 114 wide need 342 units and that frame is 328, so at this scale there is
+> no arrangement of three in which none covers another's words. It FADES as it is
+> dragged, which is what the beat's own explanation says happens to it.
+>
+> **AND BOTH SCENES WERE DRESSING THE WRONG FIGURE.** `Stickman` takes a wardrobe
+> `role` and neither scene passed one, so every figure wore the LEAD's costume:
+> two boxers in matching top hats, and a master builder and his apprentice as
+> identical dandies — which `wardrobeContext`'s own header calls worse than two
+> plain figures, because it draws the eye to a coincidence. The mascot is the
+> figure a scene poses with `lookPose` (that is how `scenefig` identifies him),
+> so the narrator and the apprentice are `lead` and everyone else is `second` or
+> `crowd`.
+
+Two lessons still have **authored `shots` tables** rather than generated camera
+verbs — `logic-arguments-1` and `logic-arguments-2`, which is what their own
+cameras were — and `ethics8Scene` is the third. `check:camera` holds one shot per
+beat for all three.
 
 ### Six ways to answer, and five of them can move the picture
 
@@ -3444,7 +3514,7 @@ minute.
 
 **Rules that keep biting, in rough order of how often:**
 
-1. **Every hook must sit above `if (done) return null`.** All three players carry
+1. **Every hook must sit above `if (done) return null`.** The player carries
    that early return near the bottom. Hooks were once added below it; `done`
    flips on the final tap, React counted fewer hooks than the previous render and
    threw, which took down the whole tree **including the reward modal that had
@@ -6880,7 +6950,7 @@ browser at it; the first transform can take longer than a navigation timeout.
   **`check:spoiler` exists because reading the source said the app was clean and
   the reader could see that it was not.** Every shared component gates its reveal
   on `answered` — `Choices`, `InteractPanel`, `Reveal`, `ChoiceCards`,
-  `DragScale`, both bespoke players — and so does every scene's own
+  `DragScale` — and so does every scene's own
   `wrong(id)` helper. A grep therefore proves nothing here; only the rendered
   page does.
 
