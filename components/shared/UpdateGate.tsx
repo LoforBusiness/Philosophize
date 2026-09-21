@@ -57,8 +57,30 @@ import SketchIcon from '@/components/shared/SketchIcon';
 //      the only people the wall is for and an update they never receive is a
 //      wall that does not exist. After that publish there is one reachable
 //      runtime again (§18).
+//
+// 22 = THE FIRST OPEN, and the first raise that is a POLICY rather than a repair.
+//
+//      What 22 fixes only a new reader ever meets: a fresh install of 21 had to
+//      download 87.8MB of narration and restart into it before it could show the
+//      right first screen, and the restart is a white page (§19). Nobody already
+//      running the app will ever have another first open, so by the reasoning
+//      used for 19, 20 and 21 this raise buys its readers nothing, and it costs
+//      them the ~150MB the embedded narration now weighs.
+//
+//      The owner overruled that, and the reason is worth keeping because it is
+//      about the SHIPPING MODEL rather than this release: "I want every old
+//      version to force the user if they still have that old version to update."
+//      Every binary below the newest gets walled, so there is exactly one
+//      reachable runtime at all times and a publish can never be sent to a
+//      runtime somebody was forgotten on — which is the silent failure §18 is
+//      almost entirely about. The cost is a forced download; the purchase is
+//      that the whole fleet is one version and the publish step has one target.
+//
+//      DONE, 2026-09-20. 22 reached 100% on Play, this went to 22, and the
+//      commit was published to build 21's runtime FIRST — those are the only
+//      people the wall is for, and a wall they never receive is not a wall.
 // ─────────────────────────────────────────────────────────────────────────────
-export const MIN_VERSION_CODE = 21;
+export const MIN_VERSION_CODE = 22;
 
 const PACKAGE = 'com.philosophize.app';
 const Ink = '#1A1A1A';

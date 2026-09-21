@@ -31,10 +31,10 @@
 **Live: SHIPPED on Google Play**, full public rollout, package `com.philosophize.app`.
 Current binary is **versionCode 22** (2026-09-20), which carries THE FIRST OPEN —
 all 364 assets embedded, so a fresh install fetches nothing and restarts into
-nothing (§19) — and a compiled splash repainted white. **21 is still reachable**,
-because the gate lags the build (§20), so there are TWO live runtimes today and
-every OTA goes to both, oldest first. 21 carried the Ashmere name and the reader
-icon. 17 and 18 exist in `eas build:list` but both ERRORED, so 19 is
+nothing (§19) — and a compiled splash repainted white. **The gate went to 22 the
+same day it reached 100%**, so 21 is behind the update wall and there is one
+reachable runtime again; from here every old binary is forced forward by policy
+(§20). 21 carried the Ashmere name and the reader icon. 17 and 18 exist in `eas build:list` but both ERRORED, so 19 is
 the successor to 16. Content and JS ship over the air between binaries (see §18)
 — a new build is only needed for native changes, app icons, splash, or anything
 else baked into the APK.
@@ -4873,25 +4873,30 @@ share one:
 | Build | Runtime version | Can its users still open the app? |
 |---|---|---|
 | **22 (current)** | `cbdfca0b1a073ede6ff3edbc6ca36cb40bafc2a9` | **yes** — live on Play 2026-09-20 |
-| **21** | `8c32d9181fa168c587b1109a48d0d89108cfe32b` | **yes** — the gate is still 21, so every one of these readers is still playing |
+| 21 | `8c32d9181fa168c587b1109a48d0d89108cfe32b` | no — below `MIN_VERSION_CODE` (raised 2026-09-20) |
 | 20 | `b6f745e0007d2de75837eff60dc50fd3dd5b38c5` | no — below `MIN_VERSION_CODE` (raised 2026-08-19) |
 | 19 | `29eb709aad3b70740f0c92239b1a350820c81247` | no — below `MIN_VERSION_CODE` |
 | 18, 17 | — | never finished; both ERRORED |
 | 16 | `bd0c0637f7e636eef9e8ddbbe61db9c9c9ae513c` | no — below `MIN_VERSION_CODE` |
 | 15, 14 | `7655f410f4b7050d121f65fcfb33bb7c2da56b5a` | no — below `MIN_VERSION_CODE` |
 
-So today there are **TWO** runtimes worth publishing to, and the third column is
-why: the gate is 21, so build 21 and build 22 readers are both playing, while
-every binary below 21 is held behind the update wall, where an OTA lands on people
-who are already stopped. **Publish to `8c32d918…` FIRST, then `cbdfca0b…`** —
-oldest first, so the older binary is never the one left a version behind.
+So today there is again exactly **one** runtime worth publishing to, and the third
+column is why: with the gate at 22, every older binary is held behind the update
+wall and an OTA to its runtime lands on people who are already stopped.
 
-> **BUILD 22 WENT LIVE ON 2026-09-20, AND THAT OPENED THE WINDOW RATHER THAN
-> CLOSING IT.** The AAB is EAS build `9d1d1470-725c-40b9-a12e-792b72b64a45`. The
-> gate is still 21 — it lags the build, by §20's rule — so build 21 readers can
-> still open the app and still need every update. An OTA sent only to
-> `cbdfca0b…` reaches only the people who have already updated, which is this
-> section's headline failure wearing the newest hash, and nothing reports it.
+> **AND FROM 22 THAT IS A POLICY, NOT AN OUTCOME.** The owner's rule: *"I want
+> every old version to force the user if they still have that old version to
+> update."* So every raise follows its build as soon as Play reports 100%, and
+> this table should never again have two rows saying yes for longer than that
+> takes. It is bought with a forced download, and what it buys is the failure
+> this whole section is about: with one reachable runtime there is no second
+> target to forget, and no publish can quietly reach nobody.
+
+> **BUILD 22 WENT LIVE ON 2026-09-20, AND THE WINDOW OPENED AND SHUT THE SAME
+> DAY.** The AAB is EAS build `9d1d1470-725c-40b9-a12e-792b72b64a45`. It reached
+> 100% on Play, the gate went to 22, and that raise was published to build 21's
+> runtime **FIRST** — those are the only people the wall is for, and a wall they
+> never receive is not a wall. One reachable runtime again.
 >
 > **What it carries is the first open.** A fresh install of 21 had to fetch the
 > whole current bundle before it could show the right first screen, and since 21
@@ -4901,29 +4906,28 @@ oldest first, so the older binary is never the one left a version behind.
 > also repaints the compiled splash white and carries the guard that stops a late
 > download restarting the app under somebody.
 >
-> **WHAT IS LEFT IS THE GATE, AND IT IS NOT AUTOMATIC.** §20's sequence says to
-> raise `MIN_VERSION_CODE` to 22 once Play reports 100%, and to publish that raise
-> to build 21's runtime FIRST. But "once it is at 100%" is a PRECONDITION, not an
-> instruction. Raising the gate FORCES every build-21 reader to download the new
-> binary, and now that the narration is embedded that is **~150MB demanded of
-> people who already have every one of those bytes over the air**. What build 22
-> fixes is the FIRST OPEN, and nobody already running the app is ever going to
-> have another one.
+> **THE ARGUMENT AGAINST RAISING THE GATE IS KEPT, BECAUSE IT LOST ON PURPOSE.**
+> Raising it forces every build-21 reader to download the new binary, and now that
+> the narration is embedded that is **~150MB demanded of people who already hold
+> every one of those bytes over the air**. What 22 fixes is the FIRST OPEN, which
+> nobody already running the app will ever have again — so on the same reasoning
+> used for 19, 20 and 21, this raise buys its readers nothing.
 >
-> So the honest default here is to **leave the gate at 21** and publish to both
-> runtimes, raising it when a future build carries something its readers actually
-> need. Play's own auto-update will move most of them across within days anyway,
-> without anyone being walled. The price of waiting is one extra publish target,
-> and the splash pair below.
+> The owner overruled it, and on the SHIPPING MODEL rather than on this release:
+> *"I want every old version to force the user if they still have that old version
+> to update."* That is worth more than it first looks. §18 is almost entirely
+> about updates that reach nobody, and **every single instance of that needed a
+> second runtime to exist**. One reachable runtime means there is no second target
+> to forget. The forced download is the price of never being able to forget one.
 >
-> **THE SPLASH PAIR IS THE ONE THING NOW WRONG ON BUILD 21**, and it is exactly
-> the asymmetry this file keeps describing. `SPLASH_BG` is `#FFFFFF` in the JS
-> while build 21's COMPILED splash is still `#E4E4DF`, so a build-21 reader taking
-> this bundle gets a 1.28:1 hard step at the hand-off where they used to get a
-> smooth settle. That is the same magnitude the file already calls imperceptible —
-> it has MOVED rather than grown — so it is recorded rather than worked around. If
-> it ever does matter, the fix is to pick the constant off
-> `Application.nativeBuildVersion` rather than to un-repaint the binary.
+> **AND THE SPLASH PAIR STOPPED MATTERING THE MOMENT THE GATE MOVED.** `SPLASH_BG`
+> is `#FFFFFF` in the JS while build 21's COMPILED splash is `#E4E4DF`, so a
+> build-21 reader taking this bundle would get a 1.28:1 hard step at the hand-off
+> instead of a smooth settle. With the gate at 22 that reader is looking at the
+> update wall instead, so it is moot — but the asymmetry is the part to remember:
+> an update can move `SPLASH_BG` and can never move the other half. If the pair
+> ever has to hold across two binaries again, pick the constant off
+> `Application.nativeBuildVersion` rather than un-repainting the binary.
 >
 > **The download roughly triples, and that is the price of the fix.** The AAB is
 > 178.7MB across four ABIs and every density; an export measures 129MB (16MB of
@@ -6576,8 +6580,8 @@ compiled into the APK — and *not* the version in `app.json`, because that one
 travels with OTA updates: an old binary carrying new JS would report the new
 number and walk straight past the gate.
 
-**It fails open, deliberately.** `MIN_VERSION_CODE` is **21**, matching the current
-binary. On a current Android binary `nativeBuildVersion` reads `"21"`, but `parseInt`
+**It fails open, deliberately.** `MIN_VERSION_CODE` is **22**, matching the current
+binary. On a current Android binary `nativeBuildVersion` reads `"22"`, but `parseInt`
 would turn an unexpected `"1.0.0"` into `1`, and against that minimum that
 locks out *every user on earth including up-to-date ones*, with no way back. So
 only whole digits count; anything else, and anything null (web, Expo Go, dev
@@ -6603,6 +6607,28 @@ slowest about. While it is pending, §18's table has two live rows, not one.
 **21 ran that sequence in full on 2026-08-19** and it is the worked example: built
 on the 19th with the gate at 20, left alone through review and rollout, raised to
 21 only once Play reported 100%, then published to build 20's runtime before 21's.
+**22 ran it again on 2026-09-20**, inside a day rather than over one.
+
+**AND FROM 22 THE RAISE IS A STANDING POLICY, NOT A JUDGEMENT.** Until now each
+one was argued on its merits — a native module, a rename — and 22 would have
+failed that test, because what it fixes is the first open and nobody already
+running the app will ever have another one. The owner's rule replaces the
+argument: *"I want every old version to force the user if they still have that old
+version to update."*
+
+So the question at each build is no longer WHETHER to raise the gate, only WHEN,
+and the answer is: as soon as Play reports 100%. **The two conditions above still
+bind** — they are what stops the wall pointing at a release nobody can download —
+and the raise still goes to the older runtime first. What changes is that §18's
+table should never again carry two rows saying yes for longer than a rollout
+takes, so a publish always has exactly one target and can never quietly reach
+nobody.
+
+**What it costs is a forced download, and that is a real cost worth stating
+plainly.** Since 22 embeds the narration the binary is ~150MB, so every raise
+demands that of people who may already hold the bytes over the air. That is the
+trade the policy makes on purpose: the fleet is one version, and the publish step
+has one target.
 
 ---
 
