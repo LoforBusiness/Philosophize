@@ -8,7 +8,7 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer, { type SceneApi } from './CinematicPlayer';
 import {
-  BLANK, MOVE_ADV, WALK, boxMove, clamp01, dirsFrom, ease01, easeOutBack, headAt, life2, lerp,
+  BLANK, MOVE_ADV, WALK, boxMove, clamp01, dirsFrom, ease01, easeOutBack, life2, lerp,
   mixStance, moveTr, narratorHold, narratorLive, pose, stand, travelStance,
   type Bundle, type Stance,
 } from './rig';
@@ -138,7 +138,7 @@ const POST_T = 420;
 // crown is the gap the bespoke player used.
 const BUBBLE_TOP = 340;
 
-// BAND-SPACE x OF EACH BOXER'S HEAD, published by the scene for the chrome.
+// BAND-SPACE x OF EACH SPEAKER'S MARK, published by the scene for the chrome.
 //
 // THE SHOUTS USED TO BE DRAWN INSIDE THE CAMERA, AND THEY WERE CUT. `Bubble`
 // clamps a long line so it cannot walk off the stage — against STAGE_W, in the
@@ -151,10 +151,26 @@ const BUBBLE_TOP = 340;
 // never contained in the first place.
 //
 // So the chrome draws them, where the clamp is against the width the reader
-// actually has, and the scene — the only place the stances exist — hands over
-// where each head is. The conversion is `200 + s·(x − cx)`, from the authored
+// actually has, and the scene — the only place the staging exists — hands over
+// where each speaker STANDS. The conversion is `200 + s·(x − cx)`, from the authored
 // shot: `containShot` may pull a scale in a little, which moves a tail by a few
 // units and can no longer put a word off the stage.
+//
+// THE MARK, AND NOT THE HEAD, AND THAT IS THE OTHER HALF OF A READER'S COMPLAINT:
+// *"the boxes above where the fighting stickman talk seem to do this glitch when I
+// press the next tab, I need it to be a smooth transition from one text to
+// another."* Recorded frame by frame in the real app, a shout slid 13px sideways
+// while it faded out and the one replacing it drifted 16px more as it arrived, with
+// a worst single frame of 8px. Nothing was broken: the box was tethered to
+// `headAt(stance)` of a boxer who is LUNGING — `fightAt` closes the pair by tens of
+// units at the start of every exchange and a punch carries the head further — so
+// the box inherited the punch. A word being read has to hold still.
+//
+// So the published x is the beat's own MARK (`STAGE[n].rx`), carried between beats
+// like every other track, and the TAIL does the pointing: `Bubble` already leans it
+// toward the speaker by up to half the box, which covers the twenty-odd units the
+// live head strays from the mark. Both shouting acts hold one pair of marks for
+// every beat, so the box is perfectly still for as long as its words are up.
 const SAY_R = makeMutable(200);
 const SAY_B = makeMutable(200);
 
@@ -257,12 +273,41 @@ function fightAt(t: number): { red: Stance; blue: Stance; gap: number } {
 // planted. TURNING is why it is monotonic — `dir` is ±1 and flips in one frame, so
 // a figure that walks left then right snaps between mirrored copies of itself.
 const NARR_X: number[] = [
-  -50, -50, -50, -50,                          // act 1 — off-stage left, waiting
-  46, 128, 146, 146, 168,                      // act 2 — walks on, then to the easel
-  168, 168, 186, 186, 196, 196, 196, 206, 206, // act 3 — a few steps, never back
-  206, 206, 206, 206, 206,                     // act 4 — gone, but parked where he left
-  206, 206,                                    // act 5
+  46, 46, 46, 46,                              // act 1 — waiting just off the FRAME
+  88, 200, 200, 200, 200,                       // act 2 — emerges, then walks to the centre
+  200, 200, 200, 200, 200, 200, 200, 200, 200, // act 3 — centred under the diagrams
+  200, 200, 200, 200, 200,                     // act 4 — gone, parked where he left
+  200, 200,                                    // act 5
 ];
+
+// THE CAMERA CAN NEVER SHOW HIM ARRIVING FROM OFF-STAGE, WHICH IS WHY HE NO LONGER
+// STARTS THERE.
+//
+// A reader: *"I cannot see the stickman when he arrives on screen and then after he
+// just appears in the middle."* Both halves were true and the cause is geometry
+// rather than timing. He used to wait at x −50 — fifty units OUTSIDE a 400-wide
+// stage — and `fit`/`checkShots` hold every window inside that stage, so no legal
+// shot can contain a negative x: at s = 1 the window is exactly 0…400 and any push
+// narrows it. Worse, a beat's camera STARTS at the previous beat's framing, and the
+// beat before his entrance is the fight at s 1.54, whose window is 70…330. So the
+// first 1.5s of a 2.2s walk happened behind the left edge of the picture and he
+// crossed into view at x 12 with half a second left.
+//
+// So he waits just outside the FRAME instead of outside the STAGE: his box is
+// 26…66 against that window's left edge at 70.1, four units clear, which is why 46
+// and not 50. He is invisible on the frame his fade begins (nMode 3 finishes it in
+// the first fifth) and emerges from the left edge as the camera pulls back — the
+// reader watches him walk in.
+//
+// AND HE WALKS TO THE CENTRE WHEN THE FIGHT GOES, which is the other half of what
+// was asked. Act 2's first beat is still ABOUT the shouting match (its own
+// narration says so, and `narr: 0` is an open hand with his back to it), so the
+// boxers are still standing and he stops at 88 — his reaching hand clears red's box
+// at 126 by seven units. They leave on the next beat and he takes the middle of the
+// stage, and every later mark is 200: the old track shuffled him 128→146→168→186
+// →196→206 in eighteen-unit steps that read as drift rather than as walking, and
+// nothing above him needs the room — the board's frame ends at screen 320 and his
+// crown lands at 325 or lower.
 /** All +1 while the track is monotonic — kept honest in case it ever isn't. */
 const NARR_DIR = dirsFrom(NARR_X, 1);
 
@@ -313,10 +358,11 @@ const STAGE: Stage[] = BEATS.map((b, i) => {
     return {
       ...base,
       s: first ? S_WALK : b.board ? S_BOARD : S_SOLO,
-      // Tied to the SCREEN distance, not the stage one: he covers 96 stage units
-      // while the camera pulls back 1.54 → 1.22, which is 226 units of screen
-      // travel, and 2.2s puts that at a walk's own pace.
-      tr: first ? 2.2 : 0.75,
+      // 2.2s bought 96 stage units of walking when he entered from −50. The
+      // emergence is 42 units now, and 2.2s would draw it at 19 units a second
+      // against WALK_SPEED's 56 — slow motion. It goes through `moveTr` with
+      // every other beat instead (see the loop below).
+      tr: first ? 0.85 : 0.75,
       // The camera sits LEFT of centre for the entrance purely to buy paper
       // between him and the fight — 80 units of clear air instead of 52.
       cx: first ? 176 : 200,
@@ -345,8 +391,11 @@ const STAGE: Stage[] = BEATS.map((b, i) => {
 // A beat that MOVES the narrator needs a transition as long as the walk actually
 // takes. Left flat, the same strides get crammed into whatever the cross-fade
 // happens to be — the documented reason a walk reads as a sprint (rig `moveTr`).
+// THE ENTRANCE IS NO LONGER EXEMPT. It used to set its own 2.2s because it covered
+// 96 units from off-stage; it covers 42 from just outside the frame, and the rule
+// every other beat obeys — a walk lasts as long as its distance needs — is the
+// right one for it too.
 for (let i = 1; i < STAGE.length; i++) {
-  if (STAGE[i].nMode === 3) continue;          // the entrance sets its own
   STAGE[i].tr = moveTr(STAGE[i - 1].nx, STAGE[i].nx, STAGE[i].tr);
 }
 
@@ -407,7 +456,7 @@ export default function Logic1Scene({
   // beat's TARGET starts from where that beat was heading rather than from what is
   // on screen, so a tap mid-transition covers the whole remaining distance in one
   // frame. `carry` is lerp with a memory and takes the same numbers.
-  const cv = useCarry(9);
+  const cv = useCarry(11);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -463,8 +512,15 @@ export default function Logic1Scene({
       ? 200 + fightGap / 2 - blueS.adv
       : carry(cv, 1, n, prv.bx, cur.bx, tr) - blueS.adv;
     const nx = carry(cv, 2, n, prv.nx, cur.nx, tr);
-    const rOn = carry(cv, 3, n, prv.rOn, cur.rOn, tr);
-    const bOn = carry(cv, 4, n, prv.bOn, cur.bOn, tr);
+    // THEY LEAVE QUICKLY AND ARRIVE AT THE BEAT'S OWN PACE. He now walks to the
+    // centre on the beat the fight ends, straight through where the two of them
+    // were standing — and a carry over the whole beat had them at half opacity as
+    // he passed, so he waded through two ghosts. Fading them over the first third
+    // empties the floor before he reaches it. An entrance keeps the full beat: the
+    // rematch in act 4 should arrive, not snap on.
+    const gone = (a: number, b: number) => { 'worklet'; return b < a ? clamp01(tr * 3) : tr; };
+    const rOn = carry(cv, 3, n, prv.rOn, cur.rOn, gone(prv.rOn, cur.rOn));
+    const bOn = carry(cv, 4, n, prv.bOn, cur.bOn, gone(prv.bOn, cur.bOn));
     // He is SOLID before he is visible. Fading him up across the whole entrance
     // made him materialise out of the paper two-thirds of the way in — a ghost
     // condensing beside the fight rather than someone walking on from the wing. He
@@ -478,15 +534,17 @@ export default function Logic1Scene({
       // CARRIED like the rest (L5): the ring fades at an act boundary, and a plain
       // lerp from the previous beat's target jumps if the reader taps mid-fade.
       ring: carry(cv, 8, n, prv.ring, cur.ring, tr),
-      // The camera's live framing, so the chrome can put a shout over the head of
-      // whoever is speaking (see SAY_R). Carried for the same reason.
+      // The camera's live framing, and each speaker's MARK, so the chrome can put a
+      // shout over whoever is speaking (see SAY_R). All carried for the same reason.
       cs: carry(cv, 6, n, SHOTS[p].s, SHOTS[n].s, tr),
       ccx: carry(cv, 7, n, SHOTS[p].cx, SHOTS[n].cx, tr),
-      // Where each speaker's HEAD is, so a shout can sit over it. Pointing at the
-      // spot between the feet put every tail a head's width wide, because a boxer
-      // leans in and his head is six units ahead of his stance.
-      rxs: rx + headAt(redS.tilt, redS.neck).x,
-      bxs: bx - headAt(blueS.tilt, blueS.neck).x,
+      rxm: carry(cv, 9, n, STAGE[p].rx, STAGE[n].rx, tr),
+      bxm: carry(cv, 10, n, STAGE[p].bx, STAGE[n].bx, tr),
+      // The HEAD is no longer published. A tail pointing at the spot between the
+      // feet was the original complaint — "every tail a head's width wide, because
+      // a boxer leans in" — and the answer was to follow the head, which then
+      // followed the punch (see SAY_R). The mark is the compromise that holds
+      // still: six units of lean on a tail that can lean fifty.
       red: rOn > 0.002 ? pose(redS, rx, GROUND, K_FIG, 1, rOn) : BLANK,
       blue: bOn > 0.002 ? pose(blueS, bx, GROUND, K_FIG, -1, bOn) : BLANK,
       // THE NARRATOR IS THE MASCOT HERE — the two boxers are the argument — so he
@@ -506,8 +564,8 @@ export default function Logic1Scene({
   // starts from where the last beat was heading rather than from what is on screen.
   useDerivedValue(() => {
     const v = SCENE.value;
-    SAY_R.value = 200 + v.cs * (v.rxs - v.ccx);
-    SAY_B.value = 200 + v.cs * (v.bxs - v.ccx);
+    SAY_R.value = 200 + v.cs * (v.rxm - v.ccx);
+    SAY_B.value = 200 + v.cs * (v.bxm - v.ccx);
     return 0;
   });
 

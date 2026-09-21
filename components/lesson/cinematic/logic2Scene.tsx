@@ -4,7 +4,7 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer, { type SceneApi } from './CinematicPlayer';
 import {
-  clamp01, ease01, easeOutBack, easeOutCubic, headAt, lerp, masterHold, masterLive,
+  clamp01, ease01, easeOutBack, easeOutCubic, lerp, masterHold, masterLive,
   mixStance, narratorHold, narratorLive, pose, seg, stand, type Bundle,
 } from './rig';
 import {
@@ -224,8 +224,10 @@ const SHOTS: Shot[] = BEATS.map((b) => {
 // have been clamped to a frame 36 units wider than the one the reader can see. So
 // the chrome draws them and the scene, which is the only place the stances exist,
 // hands over where each head is. It has to be the head and not the mark they stand
-// on: the master leans into his work, and the apprentice is drawn at APP_K, so both
-// offsets scale with their own figure.
+// on: a box tethered to `headAt(stance)` inherits whatever the pose is doing, and
+// logic1Scene records what that cost there — a shout sliding 13px sideways while it
+// faded out, because its speaker was mid-punch. These two only gesture, so the
+// stray is smaller, but the rule is the same one: a word being read holds still.
 const SAY_M = makeMutable(200);
 const SAY_A = makeMutable(200);
 
@@ -249,8 +251,8 @@ export function Logic2Scene({ clock, bt, bi, qv, gazeX, gazeY, gazeOn, i }: Scen
       tr,
     );
     const s = carry(cv, 19, n, SHOTS[p].s, SHOTS[n].s, tr);
-    SAY_M.value = 200 + s * (MASTER_X - headAt(masterS.tilt, masterS.neck).x * K_FIG - 200);
-    SAY_A.value = 200 + s * (APP_X + headAt(appS.tilt, appS.neck).x * APP_K - 200);
+    SAY_M.value = 200 + s * (MASTER_X - 200);
+    SAY_A.value = 200 + s * (APP_X - 200);
 
     return {
       master: pose(masterS, MASTER_X, GROUND, K_FIG, -1, 1),

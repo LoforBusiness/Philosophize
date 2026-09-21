@@ -2530,6 +2530,69 @@ verbs — `logic-arguments-1` and `logic-arguments-2`, which is what their own
 cameras were — and `ethics8Scene` is the third. `check:camera` holds one shot per
 beat for all three.
 
+> **AND EVERY ONE OF THOSE SHOTS WAS INERT. THE CAMERA HELD BEAT 0'S FRAMING FOR
+> THE WHOLE LESSON.** A reader, the day after the port shipped: *"I cannot see the
+> stickman when he arrives on screen and then after he just appears in the
+> middle."* Both halves of that sentence are one cause.
+>
+> `CinematicPlayer` carries a rule worth keeping — **a beat with nothing to go to
+> keeps the shot it has** — because the GENERATED camera says "hold" by leaving a
+> beat out of the tour table, and a player that pulled back out instead would fight
+> its own generator. But the branch tested only `!parks(n) && carried.has`, so it
+> also swallowed every beat of a lesson that had written its own shot. Measured
+> beat by beat with a probe reading `#stage-cam`'s live transform, the window was
+> **69…331 on all nine beats** of a lesson whose table asks for five different
+> framings. The fix is one condition: a lesson that hands over a `shots` array
+> means all of them.
+>
+> This is the fourth time this file has recorded the same shape — generated,
+> validated, written to a table, and then not used (the 197 stations whose travel
+> time never reached `shotAt`, the 300 one-station tours discarded by a stale
+> `length < 2`, the `floor:` entry 87 scenes declared and never rendered).
+> `check:camera` reads the authored table and is right about every number in it;
+> nothing asked whether the numbers arrive. **A checker that reads a table cannot
+> tell you the table is being ignored.**
+>
+> **AND UN-FREEZING IT EXPOSED THE SECOND HALF: `containShot` WAS BREAKING THE PIN
+> IT WAS HANDED.** `Shot.pin` means `s·(ground − cy)`, so the ground line lands at
+> one screen place at any scale — and `containShot` changed `s` to fit a box while
+> keeping `cy`, which breaks that by construction. With the camera finally moving,
+> the floor rose and fell on the taps where a box happened to clamp the scale:
+> measured in band units it sat at 358, 360, **346**, 360, **352**. A pinned shot
+> gives up SCALE instead now — containment becomes two upper bounds on `s` rather
+> than a nudge to `cy`, and the pin is abandoned only if even s = 1 cannot hold the
+> box, which is the precedence the rest of that function already states. The ground
+> measures **360.0 on every beat** of logic1 and 236.0 on every beat of logic2, and
+> those two are the only lessons that use `pin`, so that is the whole blast radius.
+>
+> **THE CAMERA CANNOT SHOW A FIGURE ARRIVING FROM OFF-STAGE, AND NO AMOUNT OF
+> CAMERA WORK FIXES IT.** `fit` and `checkShots` hold every window inside the
+> 400-wide design space, so at s = 1 the window is exactly 0…400 and any push
+> narrows it: a figure parked at x −50 is unshowable. The other half is that a
+> beat's camera STARTS at the previous beat's framing, so the first frames of an
+> entrance are seen through the OLD shot — here the fight at s 1.54, window
+> 70…330. He waits just outside the FRAME now rather than outside the STAGE (x 46,
+> his box 26…66 against that edge at 70.1) and walks in as the camera pulls back.
+> Measured through the beat: **first visible at 83ms, fully visible at 385ms**, where
+> before he never appeared on that beat at all.
+>
+> **AND A SPEECH BOX SITS OVER THE SPEAKER'S MARK, NOT OVER HIS HEAD.** No rule
+> number, deliberately: whether a bubble may follow a head depends on what that
+> figure is DOING, and a corpus-wide ban would be wrong for the 240 lessons whose
+> speakers stand still. The
+> same reader: *"the boxes above where the fighting stickman talk seem to do this
+> glitch when I press the next tab, I need it to be a smooth transition from one
+> text to another."* Recorded frame by frame, a shout **slid 13px sideways while it
+> faded out** and the one replacing it drifted 16px more as it arrived, worst single
+> frame 8px. Nothing was broken: the box was tethered to `headAt(stance)` of a
+> boxer who is LUNGING, so it inherited the punch — and `Bubble`'s own header
+> promises the opposite for a leaving box ("holds still and fades out"), a promise
+> only its CALLER can keep. It is handed the beat's own mark now, carried between
+> beats like any other track, and the TAIL does the pointing — it already leans by
+> up to half the box, which covers the twenty-odd units the live head strays.
+> Measured after: the outgoing box moves **0.0px per frame**, and the 13px left on
+> the incoming one is its own 0.86→1 scale-in.
+
 ### Six ways to answer, and five of them can move the picture
 
 A graded beat carries `interact`, and that block now has six shapes. **Scene
@@ -3322,6 +3385,12 @@ worst frame 10.9 → 8.6 units.
 > was pushing past its own labels, and holding wide is the correct answer."* The
 > shot list is repaired and one-per-beat, but what a reader sees in that lesson is
 > the tour, and the arc is decoration until the scene draws something smaller.
+>
+> **AND IT WAS PINNED TWICE OVER, WHICH ONLY SHOWED WHEN A SECOND LESSON WANTED
+> THE SAME FEATURE.** `containShot` is one reason and this paragraph had it right;
+> the other is that **an authored `shots` table never reached the camera at all**
+> — see the next section. Measured after that fix, ethics8 still holds ∼1.00 on
+> every beat, so the diagnosis above stands on its own for this lesson.
 
 > **FIXED 16 SEP 2026 (K18): the generator now asks the camera.** `lessonTours` takes a
 > `followOk` predicate and make-tours passes one that runs `checkTour` on the candidate
@@ -7247,6 +7316,16 @@ answer, not against the screen.
 > whole session.** So "seen" quietly meant "seen once, ever" — one look disqualified
 > every look after it. `useInView` re-arms on the way out now. Any latch on a
 > mounted-forever screen wants that question asked of it.
+
+> **AND A PROBE IS A TEMPLATE LITERAL, WHICH EATS TWO DIFFERENT THINGS.** §21
+> already records the regex half — `/matrix\(([-\d.]+)/` written inline reaches the
+> page as `/matrix(([-d.]+)/`, an unbalanced pattern that throws, so the reading
+> comes back `undefined` rather than wrong (LESSON_RULES S13). The sibling is
+> cheaper and just as confusing: **a BACKTICK inside the probe closes the string**.
+> A one-line comment reading "the pin promises this never moves" turned a working
+> probe into a module that would not load, three lines from where the measurement
+> was. Write a probe's patterns with `new RegExp('\\(')` or no regex at all, and
+> keep backticks out of its comments.
 
 > **A CHECKER CAN BE BLINDED BY A LINE ENDING, AND IT LOOKS LIKE PROGRESS.**
 > `validate-cinematic` splits a script into beats on the literal string

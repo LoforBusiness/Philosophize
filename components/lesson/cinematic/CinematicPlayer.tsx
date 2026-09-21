@@ -622,6 +622,14 @@ export default function CinematicPlayer({
     () => (shots && shots.length ? shots : camera && camera.length ? resolveMoves(camera, band, ground) : null),
     [shots, camera, band, ground],
   );
+  /**
+   * WHETHER THIS LESSON WROTE ITS OWN SHOTS, WHICH DECIDES WHETHER A BEAT MAY HOLD.
+   *
+   * See the hold branch below. A generated camera says "hold" by leaving a beat out
+   * of the tour table; an authored one has a shot on every beat and means every one
+   * of them.
+   */
+  const authored = !!(shots && shots.length);
 
   // ── WHATEVER THE READER HAS TO TAP MUST BE IN THE SHOT ─────────────────────
   //
@@ -878,9 +886,28 @@ export default function CinematicPlayer({
       camHold.value = { cx: out.cx, cy: out.cy, s: out.s, has: 1 };
       return out;
     }
-    if (!parks(n) && carried.has) {
+    if (!authored && !parks(n) && carried.has) {
       // HOLD. Not a travel of zero length — no interpolation at all, so there is
       // nothing for a rounding error or a clock reset to shake loose.
+      //
+      // AND IT MUST NOT APPLY TO AN AUTHORED SHOT LIST, WHICH IS HOW EVERY SHOT IN
+      // logic-arguments-1 AND -2 CAME TO BE INERT. The rule below is about the
+      // GENERATED camera, where a beat left out of the tour table means "the next
+      // thing to see is already in front of you" — there is genuinely nothing to
+      // travel to. A lesson that hands over a `shots` array has written one shot per
+      // beat and means all of them, so holding here threw every one away and pinned
+      // the camera to beat 0's framing for the whole lesson.
+      //
+      // A reader found it from the outside, on the first lesson in Logic: *"I cannot
+      // see the stickman when he arrives on screen and then after he just appears in
+      // the middle."* His entrance depends on the camera pulling back from the fight
+      // (1.54 → 1.22) while he walks in, and the pull-back never happened — measured
+      // beat by beat, the window was 69…331 on all nine beats of a lesson whose
+      // table asks for five different framings. `check:camera` reads that table and
+      // is right about every number in it; nothing checked that the numbers arrive.
+      // This is the same class as the 197 stations whose travel time never reached
+      // `shotAt`, and the fourth time §17 has recorded it: generated, validated,
+      // written to a table, and then not used.
       const h = { cx: carried.cx, cy: carried.cy, s: carried.s };
       camHold.value = { ...h, has: 1 };
       return h;

@@ -504,7 +504,43 @@ export function containShot(shot: Shot, box: Box | null, band: [number, number])
   if (!box || box.w <= 0 || box.h <= 0) return shot;
   const bandH = band[1] - band[0];
   const fitS = Math.min(STAGE_W / box.w, bandH / box.h);
-  const s = Math.max(1, Math.min(shot.s, fitS));
+  let s = Math.max(1, Math.min(shot.s, fitS));
+
+  // ── A PINNED SHOT GIVES UP SCALE RATHER THAN ITS GROUND LINE ──────────────
+  //
+  // `pin` means `s·(ground − cy)`, so the ground lands at one screen place whatever
+  // the scale is — and this function used to change `s` while keeping `cy`, which
+  // breaks that invariant by construction: reducing 1.58 to 1.43 to fit a box left
+  // the ground 14 band units high. Measured beat by beat in logic-arguments-1 the
+  // floor sat at 358, 360, 346, 360 — it rose and fell on the taps where the box
+  // happened to clamp the scale. `shotAt` honours the pin when it interpolates, so
+  // the whole chain was correct except for the shot it was handed.
+  //
+  // So the scale absorbs it. With the pin honoured, the visible scene y range is
+  // `g + k0/s … g + k1/s`, and asking it to contain the box is two upper bounds on
+  // `s` rather than a nudge to `cy`. If even s = 1 cannot hold the box the pin is
+  // abandoned below and the box wins, which is the same order of precedence the
+  // rest of this function states: a sliver of blank paper is cheaper than a subject
+  // the reader cannot see.
+  if (shot.pin != null) {
+    const g = shot.cy + shot.pin / shot.s;          // the ground this shot pins
+    const k0 = band[0] - STAGE_H / 2 - shot.pin;
+    const k1 = band[1] - STAGE_H / 2 - shot.pin;
+    if (k0 < 0 && g - box.y > 0) s = Math.min(s, -k0 / (g - box.y));
+    if (k1 > 0 && box.y + box.h - g > 0) s = Math.min(s, k1 / (box.y + box.h - g));
+    s = Math.max(1, s);
+    const pinnedCy = g - shot.pin / s;
+    const halfWp = STAGE_W / (2 * s);
+    const topP = pinnedCy + (band[0] - STAGE_H / 2) / s;
+    const botP = pinnedCy + (band[1] - STAGE_H / 2) / s;
+    if (topP <= box.y + 0.01 && botP >= box.y + box.h - 0.01) {
+      let cxp = Math.max(halfWp, Math.min(STAGE_W - halfWp, shot.cx));
+      cxp = Math.min(cxp, box.x + halfWp);
+      cxp = Math.max(cxp, box.x + box.w - halfWp);
+      return { ...shot, cx: cxp, cy: pinnedCy, s };
+    }
+  }
+
   const halfW = STAGE_W / (2 * s);
   const topOff = (band[0] - STAGE_H / 2) / s;
   const botOff = (band[1] - STAGE_H / 2) / s;
