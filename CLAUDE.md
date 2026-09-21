@@ -5027,6 +5027,20 @@ already stopped. Once the gate was raised past 16, runtime `7655f410…` (builds
 15/14) stopped needing updates entirely, and several were published to it anyway
 before anyone noticed.
 
+> **THERE IS EXACTLY ONE EXCEPTION, AND IT IS THE UPDATE WALL ITSELF.** A walled
+> reader cannot open a lesson, so almost nothing is worth sending them — but they
+> can still receive updates, and they are still rendering one screen: `UpdateGate`.
+> So a change to that screen has to be published to the runtimes BELOW the gate,
+> because they are the only readers who will ever see it. Send it only to the
+> current runtime and it reaches precisely the people it cannot appear for, which
+> is this section's headline failure inverted: not an update that reaches nobody,
+> but a screen delivered exclusively to those who can never see it.
+>
+> It came up the day it was written: the wall was redesigned (§19) hours after the
+> gate went to 22, so every reader who could see the new wall was on build 21's
+> `8c32d918…` and not one of them was on `cbdfca0b…`. **Ask which readers a change
+> is FOR, not merely which ones can open the app.**
+
 So the rule has two halves that must be read together: **publish to every runtime
 whose users can still reach the app, and check `MIN_VERSION_CODE` to know which
 those are.** They come apart again the moment the gate is raised: the release that
