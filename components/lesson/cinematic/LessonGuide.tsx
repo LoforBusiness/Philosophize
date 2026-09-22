@@ -143,32 +143,62 @@ export default function LessonGuide({ onRelease, onGone, onNever }: {
   }, [enter, loop, reduce]);
 
   // ── RING THE REAL Aa BUTTON ───────────────────────────────────────────────
-  // Both boxes are measured in the WINDOW and subtracted, so the ring lands on the
-  // button wherever the lesson's container sits. `measureInWindow` answers (0, 0) for
-  // a view that is not attached yet (CLAUDE.md §21), so a reading at the origin is
-  // taken as "not yet" and asked again, a few times, before the ring is left out.
+  //
+  // ONE MEASUREMENT, IN THE ROOT'S OWN SPACE. This used to take two: the root's box
+  // in the window, and then, INSIDE THAT CALLBACK, the button's box in the window,
+  // subtracted. Both readings were right and they were readings of two different
+  // MOMENTS — `measureInWindow` is an async round trip to the native UI thread, so
+  // anything that moves the header between them lands in the answer as an offset.
+  // On a device the header moves exactly once, early and by a status bar's height,
+  // when react-native-safe-area-context reports real insets: measure the root after
+  // that and the button before it and the ring is drawn a status bar ABOVE the
+  // button it is pointing at, which is what a reader reported.
+  //
+  // And it could not be seen from here. react-native-web resolves both calls out of
+  // one layout pass with an inset of zero, so the browser answers 0.0px of offset
+  // however many times it is asked — §21's own class of defect, where the platform's
+  // answer is the thing that differs.
+  //
+  // `measureLayout` is the API for this question: where is this view inside that
+  // ancestor. One call, one moment, no window and no subtraction, so there is
+  // nothing left to be stale against. It FAILS rather than answering the origin for
+  // a view that is not attached yet, which is the other half of what the old guard
+  // was for — and the retry is kept, because the player registers the button in an
+  // effect that can land after this overlay's first layout.
   const root = useRef<View>(null);
   const [ring, setRing] = useState<Ring | null>(null);
   const measure = useCallback((tries = 0) => {
     const btn = wordsRef?.current;
     const me = root.current;
     if (!btn || !me) return;
-    me.measureInWindow((ox, oy) => {
-      btn.measureInWindow((x, y, w, h) => {
-        const unattached = w === 0 || (x === 0 && y === 0);
-        if (unattached) {
-          if (tries < 8) setTimeout(() => measure(tries + 1), 90);
-          return;
-        }
+    const again = () => { if (tries < 8) setTimeout(() => measure(tries + 1), 90); };
+    btn.measureLayout(
+      me as never,
+      (x, y, w, h) => {
+        if (w === 0 || h === 0) { again(); return; }
         const d = Math.max(w, h) + 14;
-        setRing({ x: x - ox + w / 2, y: y - oy + h / 2, d });
-      });
-    });
+        setRing({ x: x + w / 2, y: y + h / 2, d });
+      },
+      again,
+    );
   }, [wordsRef]);
   const onLayout = useCallback((_e: LayoutChangeEvent) => measure(0), [measure]);
   // The player registers the button in an effect, which can land after this
   // overlay's first layout — so a button arriving is itself a reason to measure.
   useEffect(() => { measure(0); }, [measure]);
+  // AND WHENEVER THE SAFE AREA MOVES, which is the event itself rather than a guess
+  // at when it happens. `onLayout` only catches something that resizes the guide's
+  // OWN root, and an inset landing late moves the header inside a root whose box
+  // never changes — so nothing would tell this component to look again. Android
+  // reports real insets a frame or two after the first render, and that is the one
+  // thing on a device that moves this header.
+  useEffect(() => { measure(0); }, [measure, insets.top, insets.left, insets.right]);
+  // Plus one reading once the entrance has played, for anything that settles late
+  // and is not an inset — a font, a pill, a header that reflows. One native call.
+  useEffect(() => {
+    const h = setTimeout(() => measure(0), ENTER_MS + 120);
+    return () => clearTimeout(h);
+  }, [measure]);
 
   const close = useCallback((never: boolean) => {
     if (closing.current) return;

@@ -9964,6 +9964,36 @@ measures nothing and reports a clean run. So `LessonGuideHost` wraps the lesson 
 lesson route, which no harness renders, and `check:guide` fails any harness that
 mentions it.
 
+### AI6 · The ring is measured in ONE call, in the root's own space
+
+The guide rings the real Aa button, and for its first life it found it by measuring
+two boxes in the WINDOW and subtracting: the guide's root, and then, inside that
+callback, the button. Both readings were right. They were readings of two different
+MOMENTS — `measureInWindow` is an async round trip to the native UI thread — so
+anything that moved the header between them landed in the answer as a straight
+offset. A device moves it exactly once, early and by a status bar's height, when
+`react-native-safe-area-context` reports real insets; measure the root after that and
+the button before it, and the ring is drawn a status bar ABOVE the thing it is
+pointing at. A reader reported exactly that.
+
+`measureLayout(root)` is the API for the question being asked — where is this view
+inside that ancestor — and it answers in one call, from one moment, with no window
+and no subtraction. It also FAILS for a view that is not attached rather than
+answering the window origin, which is the other half of what the old guard was for.
+
+**And the browser could never have shown it.** react-native-web resolves both calls
+out of one layout pass with an inset of zero, so it answers 0.0px of offset however
+many times it is asked. Reproducing it needs the header moved INSIDE a guide root
+whose own box does not change — `onLayout` fires on the root, so a shift that resizes
+the root is caught either way, and only a shift within it is the real case. Measured
+that way: the old code puts the ring **44.0px above** the button and the new code
+0.0px, with the no-shift reading 0.0px in both.
+
+**A re-measure is hung on the EVENT, not on a timer.** The insets are already in
+scope, so a change to them re-measures; a single reading after the entrance covers
+anything else that settles late. `Aa` carries `testID="words-toggle"` so the two
+boxes can be compared at all.
+
 ### AI5 · The guide's words sit on their own glass
 
 Drawn bare on the scrim, "back" and "forward" landed on the lesson's opening

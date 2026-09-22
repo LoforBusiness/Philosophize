@@ -67,6 +67,11 @@ export default function WordsToggle() {
         ref={ref}
         onPress={flip}
         hitSlop={12}
+        // testID so a probe can find the button the guide is RINGING and compare the
+        // two boxes. Without it the only handle is an accessibility role shared with
+        // the speaker beside it, and "the ring is in the wrong place" is a question
+        // about two rectangles that has to be answered by measuring both.
+        testID="words-toggle"
         style={styles.btn}
         accessibilityRole="switch"
         accessibilityState={{ checked: rise }}

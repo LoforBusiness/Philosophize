@@ -7417,6 +7417,47 @@ answer, not against the screen.
 > every look after it. `useInView` re-arms on the way out now. Any latch on a
 > mounted-forever screen wants that question asked of it.
 
+> **AND TWO MEASUREMENTS ARE TWO MOMENTS, WHICH IS THE SAME TRAP WITHOUT THE NULL.**
+> The lesson guide rings the real Aa button, and it used to find it by measuring the
+> guide's root in the window and then, INSIDE THAT CALLBACK, the button, and
+> subtracting. Neither reading was ever wrong. `measureInWindow` is an async round
+> trip to the native UI thread, so the two answers come from different instants, and
+> anything that moves the header between them lands in the result as a straight
+> offset. **A device moves it exactly once, early and by a status bar's height**,
+> when `react-native-safe-area-context` reports real insets — so measure the root
+> after that and the button before it and the ring is drawn a status bar ABOVE the
+> thing it points at. A reader reported exactly that: *"the circle showing where to
+> press the button is too far above the actual thing."*
+>
+> The old guard could not see it, and that is worth separating from the null case
+> above: it rejected a reading of `(0, 0)` or a zero width, and a reading taken one
+> frame early is a perfectly ordinary box at a perfectly ordinary place.
+>
+> **`measureLayout(root)` is the API for the question being asked** — where is this
+> view inside that ancestor — and it answers in ONE call, from one moment, with no
+> window and no subtraction, so there is nothing left to be stale against. It also
+> FAILS for an unattached view rather than handing back the origin, which is the
+> other half of what the guard was for. The re-measure is then hung on the EVENT
+> rather than on a timer: the insets are already in scope, so a change to them
+> re-measures, with one reading after the entrance for anything else that settles
+> late.
+>
+> **AND THE BROWSER ANSWERED 0.0px EVERY TIME IT WAS ASKED.** react-native-web
+> resolves both calls out of one layout pass with an inset of zero, so §21's whole
+> method is blind here in the way this section is about. Reproducing it needed the
+> header moved INSIDE a guide root whose own box does not change — `onLayout` fires
+> on the root, so a shift that RESIZES it is caught either way and only a shift
+> within it is the real case — and the two versions mounted side by side in one
+> preview. Measured that way the old code puts the ring **44.0px above** the button
+> and the new one 0.0px, with the no-shift reading 0.0px in both, which is why no
+> amount of looking at the shipped screen would have found it. **Build the
+> before-and-after into the same page**: a fix for a defect you cannot reproduce is
+> a guess, and a copy of the old component under a throwaway name costs minutes.
+>
+> No downward nudge was added, deliberately. On every device where the insets land
+> before the guide measures, the ring was already exact — a fudge factor fixes the
+> reporter's phone and breaks everyone else's. LESSON_RULES AI6.
+
 > **AND A PROBE IS A TEMPLATE LITERAL, WHICH EATS TWO DIFFERENT THINGS.** §21
 > already records the regex half — `/matrix\(([-\d.]+)/` written inline reaches the
 > page as `/matrix(([-d.]+)/`, an unbalanced pattern that throws, so the reading
