@@ -13,6 +13,8 @@ import { stageTone } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { ship } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -58,6 +60,12 @@ const HULL_X = 150;
 const HULL_Y = 322;
 const HULL_W = 176;
 const HULL_H = 62;
+// THE SHIP IS A DRAWING NOW (group AM). Its masthead was at 292 and its hull foot at
+// HULL_Y + HULL_H; `objects.ship` puts those at 8% and 90% of its own box, which
+// fixes the box without choosing anything.
+const E37_MAST_TOP = 292;
+const E37_SHIP_H = (HULL_Y + HULL_H - E37_MAST_TOP) / 0.82;
+const E37_SHIP_CY = E37_MAST_TOP - 0.08 * E37_SHIP_H + E37_SHIP_H / 2;
 const WATER_Y = 384;
 
 const CRACK_X = [166, 194, 222, 250, 278];
@@ -179,9 +187,8 @@ export default function Epistemology37Scene({ clock, bt, bi, dragPos, gazeX, gaz
       <Animated.View style={[StyleSheet.absoluteFill, hullStyle]} pointerEvents="none">
         <View style={styles.water} />
         <Animated.View style={[styles.ship, shipStyle]}>
-          <View style={styles.hull} />
+          <ObjectArt parts={ship(HULL_X + HULL_W / 2, E37_SHIP_CY, HULL_W / 0.88, E37_SHIP_H)} tone={TONE} />
           <View style={styles.deck} />
-          <View style={styles.mast} />
           {CRACK_X.map((cx, k) => <Crack key={cx} S={SCENE} left={cx} index={k} />)}
         </Animated.View>
       </Animated.View>
@@ -273,13 +280,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H,
     transformOrigin: `${HULL_X + HULL_W / 2}px ${WATER_Y}px`,
   },
-  hull: {
-    position: 'absolute', left: HULL_X, top: HULL_Y, width: HULL_W, height: HULL_H,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
-    borderBottomLeftRadius: 26, borderBottomRightRadius: 26,
-  },
   deck: { position: 'absolute', left: HULL_X + 6, top: HULL_Y + 10, width: HULL_W - 12, height: 1.5, backgroundColor: SOFT },
-  mast: { position: 'absolute', left: 236, top: 292, width: 3, height: 30, backgroundColor: INK },
   crack: {
     position: 'absolute', top: HULL_Y + 22, width: 2, height: 22,
     backgroundColor: INK, transform: [{ rotate: '62deg' }],

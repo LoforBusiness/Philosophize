@@ -13,6 +13,8 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { shelf } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -57,6 +59,8 @@ const CARD_H = 44;
 const SHELF_X = 150;
 const SHELF_Y = CARD_Y + CARD_H;
 const SHELF_W = 236;
+// The board keeps its line; the books stand on it, which is the half that reads.
+const SHELF_H = 56;
 
 const SEAT_X = 170;
 const SEAT_W = 82;
@@ -190,7 +194,7 @@ export default function Ethics40Scene({ clock, bt, bi, i, picked, onPick, pickPo
       <Text style={styles.cap} pointerEvents="none">NOBODY LEFT TO HOLD YOU TO IT</Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, promiseStyle]} pointerEvents="none">
-        <View style={styles.shelf} />
+        <ObjectArt parts={shelf(SHELF_X + SHELF_W / 2, SHELF_Y + 8 - SHELF_H / 2 + 2, SHELF_W, SHELF_H)} tone={TONE} />
         <View style={styles.card} />
         <Text style={styles.cardText}>THE PROMISE</Text>
         <View style={styles.seal} />
@@ -252,7 +256,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
 
-  shelf: { position: 'absolute', left: SHELF_X, top: SHELF_Y, width: SHELF_W, height: 8, backgroundColor: INK },
+  // (the shelf is drawn from ./objects now — group AM)
   card: {
     position: 'absolute', left: CARD_X, top: CARD_Y, width: CARD_W, height: CARD_H,
     borderWidth: 2, borderColor: INK, backgroundColor: PAPER,

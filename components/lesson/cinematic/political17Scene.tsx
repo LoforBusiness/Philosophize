@@ -13,6 +13,8 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { cup as cupArt } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -163,7 +165,9 @@ export default function Political17Scene({ clock, bt, bi, i, picked, onPick, pic
         <View style={styles.rim} />
         <View style={styles.mouth} />
       </Animated.View>
-      <Animated.View style={[styles.cup, cup]} pointerEvents="none" />
+      <Animated.View style={[styles.cupBox, cup]} pointerEvents="none">
+        <ObjectArt parts={cupArt(CUP_W / 2, CUP_H / 2, CUP_W, CUP_H)} tone={TONE} />
+      </Animated.View>
 
       {/* ── THE ROTA ─────────────────────────────────────────────────────── */}
       {NAMES.map((nm, k) => <Row key={nm} k={k} SCENE={SCENE} />)}
@@ -223,6 +227,10 @@ function Board({
     </Animated.View>
   );
 }
+
+// The cup keeps its place; a drawn one needs room for a rim and a handle.
+const CUP_W = 30;
+const CUP_H = 28;
 
 const styles = StyleSheet.create({
   // ── the two tap events (group AH) ──────────────────────────────────────────
@@ -301,11 +309,7 @@ const styles = StyleSheet.create({
     borderRadius: 5, backgroundColor: SOFT,
   },
   // The bucket hangs on the rope, between the posts — not off to one side of them.
-  cup: {
-    position: 'absolute', left: 162, top: 360, width: 26, height: 22,
-    borderWidth: 2, borderColor: INK, borderBottomLeftRadius: 4, borderBottomRightRadius: 4,
-    backgroundColor: INK,
-  },
+  cupBox: { position: 'absolute', left: 162, top: 356, width: CUP_W, height: CUP_H },
 
   row: { position: 'absolute', left: ROTA_L, width: ROTA_W, height: ROW_H, flexDirection: 'row', alignItems: 'center' },
   rowName: {

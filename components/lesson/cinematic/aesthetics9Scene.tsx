@@ -15,6 +15,8 @@ import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, 
 import { stageTone } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { plinth } from './objects';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 
@@ -206,7 +208,7 @@ export default function Aesthetics9Scene({ clock, bt, bi, i, picked, onPick, pic
         <View style={[styles.shelfLeg, { left: SHELF_X + BOX_W - 8 }]} />
         <Text style={[styles.standTag, { left: SHELF_X - 12, width: BOX_W + 24 }]}>SUPERMARKET</Text>
 
-        <View style={[styles.plinth, { left: PLINTH_X + 10 }]} />
+        <ObjectArt parts={plinth(PLINTH_X + 10 + (BOX_W - 20) / 2, (BOX_T + BOX_H + STAND_B) / 2, BOX_W - 20, STAND_B - (BOX_T + BOX_H))} tone={TONE} />
         <Text style={[styles.standTag, { left: PLINTH_X - 12, width: BOX_W + 24 }]}>GALLERY</Text>
       </Animated.View>
 
@@ -283,10 +285,6 @@ const styles = StyleSheet.create({
   // The structural mass takes STONE, a secondary surface takes RULE, and what
   // carries the message stays PAPER, so the picture has things at different
   // values rather than everything a shade darker. See cinematicKit's ramp.
-  plinth: {
-    position: 'absolute', top: BOX_T + BOX_H, width: BOX_W - 20, height: STAND_B - (BOX_T + BOX_H),
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
-  },
   // ABOVE the box, not under the stand — under the stand is where the figure's head
   // goes, and a caption there would be the D31 collision wearing a name badge.
   standTag: {

@@ -14,6 +14,8 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { bench as benchArt } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -61,6 +63,8 @@ const TICK_W = (SC_W - (TICK_N - 1) * TICK_GAP) / TICK_N;
 const BENCH_L = 52;
 const BENCH_W = 96;
 const BENCH_T = GROUND - SEAT_H;
+// The seat line is where it was; the back grows up into the room above it.
+const L31_BENCH_H = 40;
 
 // The needle never moves off centre. Its position is a CONSTANT, not a channel the
 // script can set — the lesson's whole claim is that seven heads change nothing, so
@@ -207,7 +211,7 @@ export default function Logic31Scene({ clock, bt, bi, i, picked, onPick, gazeX, 
         })}
 
       {/* the table the figure is sitting at */}
-      <View style={styles.bench} pointerEvents="none" />
+      <ObjectArt parts={benchArt(BENCH_L + BENCH_W / 2, BENCH_T + 6 - L31_BENCH_H / 2 + 3, BENCH_W, L31_BENCH_H)} tone={TONE} />
       <View style={[styles.benchLeg, { left: BENCH_L + 6 }]} pointerEvents="none" />
       <View style={[styles.benchLeg, { left: BENCH_L + BENCH_W - 10 }]} pointerEvents="none" />
 
@@ -296,10 +300,7 @@ const styles = StyleSheet.create({
   pickRight: { backgroundColor: INK, borderColor: INK },
   pickWrong: { borderColor: SOFT },
 
-  bench: {
-    position: 'absolute', left: BENCH_L, top: BENCH_T, width: BENCH_W, height: 6,
-    backgroundColor: INK, borderRadius: 2,
-  },
+  // (the bench is drawn from ./objects now — group AM)
   benchLeg: {
     position: 'absolute', top: BENCH_T + 6, width: 4, height: GROUND - BENCH_T - 6,
     backgroundColor: SOFT,

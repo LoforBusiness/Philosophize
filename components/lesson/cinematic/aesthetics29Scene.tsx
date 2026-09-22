@@ -13,6 +13,8 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { book } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -154,7 +156,7 @@ export default function Aesthetics29Scene({ clock, bt, bi, i, picked, onPick, dr
 
       <Animated.View style={[StyleSheet.absoluteFill, bookStyle]} pointerEvents="none">
         <View style={styles.stem} />
-        <View style={styles.book} />
+        <ObjectArt parts={book(BOOK_X + BOOK_W / 2, BOOK_Y + BOOK_H / 2, BOOK_W, BOOK_H)} tone={TONE} />
         <View style={styles.spine} />
         {[16, 30, 44].map((dy) => (
           <View key={dy} style={[styles.page, { top: BOOK_Y + dy }]} />
@@ -218,10 +220,6 @@ const styles = StyleSheet.create({
   },
 
   stem: { position: 'absolute', left: BOOK_X + BOOK_W / 2 - 1.5, top: TRAY_Y[1] + TRAY_H, width: 3, height: BOOK_Y - TRAY_Y[1] - TRAY_H, backgroundColor: INK },
-  book: {
-    position: 'absolute', left: BOOK_X, top: BOOK_Y, width: BOOK_W, height: BOOK_H,
-    backgroundColor: STONE, boxShadow: LIP, borderWidth: 2, borderColor: INK,
-  },
   spine: { position: 'absolute', left: BOOK_X, top: BOOK_Y, width: 5, height: BOOK_H, backgroundColor: INK },
   page: { position: 'absolute', left: BOOK_X + 16, width: BOOK_W - 28, height: 2, backgroundColor: RULE },
 

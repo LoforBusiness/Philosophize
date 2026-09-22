@@ -13,6 +13,8 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { ship } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -95,6 +97,11 @@ const WATER_Y = 430;
 const HULL_W = 34;
 const HULL_H = 12;
 const MAST_H = 22;
+// THE SHIP IS A DRAWING NOW (group AM). Its masthead sat at WATER_Y - HULL_H - MAST_H
+// and its hull foot at the waterline; `objects.ship` draws those at 8% and 90% of its
+// own box, which fixes the box without choosing anything.
+const M40_SHIP_H = (HULL_H + MAST_H) / 0.82;
+const M40_SHIP_CY = (WATER_Y - HULL_H - MAST_H) - 0.08 * M40_SHIP_H + M40_SHIP_H / 2;
 
 const X = BEATS.map((b) => b.x ?? FIG_X);
 // WHICH WAY HE IS POINTING, read off the same x track he walks along.
@@ -176,9 +183,7 @@ export default function Metaphysics40Scene({ clock, bt, bi, i, picked, onPick, p
       {/* ARISTOTLE'S SEA BATTLE (group AH) — the event the example predicts. */}
       <Animated.View style={[StyleSheet.absoluteFill, shipStyle]} pointerEvents="none">
         <View style={styles.waterline} />
-        <View style={styles.hull} />
-        <View style={styles.mast} />
-        <View style={styles.flag} />
+        <ObjectArt parts={ship(SHIP_X + SHIP_W / 2, M40_SHIP_CY, HULL_W / 0.88, M40_SHIP_H)} tone={TONE} />
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, pageStyle]} pointerEvents="none">
@@ -248,19 +253,6 @@ const styles = StyleSheet.create({
   // flag, in the gap between the figure and the ledger. ──
   waterline: {
     position: 'absolute', left: SHIP_X, top: WATER_Y, width: SHIP_W, height: 2, backgroundColor: SHADE,
-  },
-  hull: {
-    position: 'absolute', left: SHIP_X + (SHIP_W - HULL_W) / 2, top: WATER_Y - HULL_H, width: HULL_W, height: HULL_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE,
-    borderBottomLeftRadius: 9, borderBottomRightRadius: 9,
-  },
-  mast: {
-    position: 'absolute', left: SHIP_X + SHIP_W / 2 - 1, top: WATER_Y - HULL_H - MAST_H, width: 2, height: MAST_H,
-    backgroundColor: INK,
-  },
-  flag: {
-    position: 'absolute', left: SHIP_X + SHIP_W / 2, top: WATER_Y - HULL_H - MAST_H, width: 8, height: 6,
-    backgroundColor: INK,
   },
 
   page: {

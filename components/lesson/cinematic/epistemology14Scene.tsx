@@ -16,6 +16,8 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { tree } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -141,8 +143,7 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, 
         <View style={styles.box}>
           <View style={styles.horizon} pointerEvents="none" />
           <View style={styles.sun} pointerEvents="none" />
-          <View style={styles.trunk} pointerEvents="none" />
-          <View style={styles.canopy} pointerEvents="none" />
+          <ObjectArt parts={tree(28, 68, 34, 58)} tone={TONE} />
         </View>
       </Target>
       {/* "every check happens on this side of the screen" — a ring round its frame. */}
@@ -225,8 +226,6 @@ const styles = StyleSheet.create({
 
   horizon: { position: 'absolute', left: 0, right: 0, top: 96, height: 1.5, backgroundColor: SOFT },
   sun: { position: 'absolute', left: 68, top: 22, width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: INK },
-  trunk: { position: 'absolute', left: 26, top: 62, width: 4, height: 34, backgroundColor: INK },
-  canopy: { position: 'absolute', left: 12, top: 40, width: 32, height: 28, borderRadius: 14, borderWidth: 2, borderColor: INK },
   hill: { position: 'absolute', bottom: 40, borderTopLeftRadius: 26, borderTopRightRadius: 26, borderWidth: 2, borderColor: INK },
 
   tank: { position: 'absolute', left: 24, top: 34, width: 60, height: 66, borderWidth: 2, borderColor: INK, borderRadius: 8 },

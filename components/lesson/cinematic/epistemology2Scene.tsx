@@ -15,6 +15,8 @@ import { stageTone } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { plinth } from './objects';
 import { Shapes, bar, tri, type Part } from './Silhouette';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
@@ -261,7 +263,7 @@ export default function Epistemology2Scene({ clock, bt, bi, qv, pickPos, i }: Sc
         ))}
       </Animated.View>
       <View style={styles.plinthCap} />
-      <View style={styles.plinth} />
+      <ObjectArt parts={plinth(176 + 19, 458 + 21, 38, 42)} tone={TONE} />
       <Animated.View style={[styles.plinthOn, inscribed]}>
         <Text style={styles.plinthText}>I AM</Text>
       </Animated.View>
@@ -408,10 +410,6 @@ const styles = StyleSheet.create({
   plinthCap: {
     position: 'absolute', left: 172, top: 452, width: 46, height: 6, borderRadius: 1.5,
     borderWidth: 1.5, borderColor: INK, backgroundColor: PAPER,
-  },
-  plinth: {
-    position: 'absolute', left: 176, top: 458, width: 38, height: 42,
-    borderWidth: 2, borderColor: INK, backgroundColor: PAPER,
   },
   plinthOn: {
     position: 'absolute', left: 176, top: 458, width: 38, height: 42,

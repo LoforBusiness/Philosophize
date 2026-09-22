@@ -99,6 +99,25 @@ export function massFills(src) {
     used.set('RULE', (used.get('RULE') ?? 0) + 1);
     used.set('SHADE', (used.get('SHADE') ?? 0) + 1);
   }
+  // ── AND A DRAWN OBJECT IS A MASS, FOR THE SAME REASON ─────────────────────
+  //
+  // `<ObjectArt>` paints its parts from `objects.paint()` at run time, so a scene
+  // that draws a ship no longer contains the text `backgroundColor: STONE` — and by
+  // a source-text count it has just gone flatter while putting MORE tone on the
+  // stage than the rectangle it replaced. That is the floor's own lesson arriving
+  // in a second place, and it is why this is counted here rather than rediscovered
+  // by a scene falling under the floor with nothing wrong with it.
+  //
+  // Two, and no more than two, whatever the object is made of: every drawing has a
+  // lit body and, by `check:objects`' own rules, at most a handful of shaded planes
+  // on it. Counting its real part list would make a ship worth eight masses and let
+  // one object carry a whole scene, which is not what the ratchet is for.
+  for (const m of body.matchAll(/<ObjectArt\b/g)) {
+    void m;
+    used.set('STONE', (used.get('STONE') ?? 0) + 1);
+    used.set('SHADE', (used.get('SHADE') ?? 0) + 1);
+    break;                                   // one object's worth, however many it draws
+  }
   return { fills: [...used.values()].reduce((a, b) => a + b, 0), used, dead };
 }
 

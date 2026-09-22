@@ -59,7 +59,7 @@ import crypto from 'node:crypto';
  * draws the animals from part lists, so a change to how a part is sized resizes the
  * animal in every scene that imports it. It has no StyleSheet, so it hashes whole.
  */
-const SHARED = ['Target.tsx', 'Silhouette.tsx'];
+const SHARED = ['Target.tsx', 'Silhouette.tsx', 'ObjectArt.tsx'];
 
 /**
  * ONLY THE PART OF A SHARED COMPONENT THAT DECIDES LAYOUT.

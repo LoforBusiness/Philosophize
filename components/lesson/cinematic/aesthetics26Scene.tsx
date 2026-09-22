@@ -13,6 +13,8 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { plinth } from './objects';
 import { Shapes, Outlined, ell, bar, type Part } from './Silhouette';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
@@ -170,7 +172,7 @@ export default function Aesthetics26Scene({ clock, bt, bi, i, picked, onPick, dr
       <Animated.View style={[styles.grin, pairStyle]} pointerEvents="none" />
 
       <Animated.View style={[StyleSheet.absoluteFill, birdStyle]} pointerEvents="none">
-        <View style={styles.plinth} />
+        <ObjectArt parts={plinth(PLINTH_X + PLINTH_W / 2, PLINTH_Y + PLINTH_H / 2, PLINTH_W, PLINTH_H)} tone={TONE} />
         <Shapes parts={FLAMINGO_RODS} />
         <Outlined parts={FLAMINGO} width={2} line={INK} />
         {/* THE DOWNTURNED BILL — the one mark that makes it a flamingo and not a
@@ -222,10 +224,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
 
-  plinth: {
-    position: 'absolute', left: PLINTH_X, top: PLINTH_Y, width: PLINTH_W, height: PLINTH_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
-  },
 
   // THE ONE THING THE READER MOVES. Clipped, so a closing lid stays in its lens.
   lens: {

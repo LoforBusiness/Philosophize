@@ -155,6 +155,34 @@ for (const [f, src] of REVIEW_SRC) {
   }
 }
 
+// ── 6 · A REVIEW OPENS ON THE SAME LOADER A LESSON OPENS ON (AK11) ───────────
+//
+// The owner: *"I want that loading screen when you click on the unit review, like it
+// has for all the other lessons."* `LessonLoader` is mounted by the lesson ROUTE and
+// by no runner, so a review played by the same player was never going to inherit it —
+// which is exactly the shape that loses it again. Both halves are read: the import,
+// and the mount, ahead of the review itself.
+{
+  const f = 'app/(app)/branches/[branchSlug]/[pathSlug]/review.tsx';
+  // Comments are stripped first, or the header paragraph explaining all of this would
+  // answer the order rule for the file (L8 — a detector that reads its own commentary).
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const src = strip(REVIEW_SRC.find(([n]) => n === f)?.[1] ?? '');
+  if (src && !/import\s+LessonLoader\s+from/.test(src)) {
+    note('LOADER', `${f} does not import LessonLoader — a review opens on the same moment every lesson opens on (AK11)`);
+  }
+  if (src && !/<LessonLoader\b[^>]*onDone=/.test(src)) {
+    note('LOADER', `${f} never mounts <LessonLoader onDone=…> — importing it is not showing it (AK11)`);
+  }
+  // And it comes BEFORE the review: a loader mounted after the player has started is
+  // a lesson interrupted rather than a moment given.
+  const iLoad = src.indexOf('<LessonLoader');
+  const iPlay = src.indexOf('<UnitReview');
+  if (src && iLoad >= 0 && iPlay >= 0 && iLoad > iPlay) {
+    note('LOADER', `${f} mounts the loader after the review — the moment comes first (AK11)`);
+  }
+}
+
 console.log('THE UNIT REVIEWS (group AK)\n');
 console.log(`  ${Object.keys(UNIT_REVIEWS).length} of ${units.size} units have a review · ${asked} questions · widest plate word ${widest.toFixed(1)} of ${PLATE_W}\n`);
 if (!bad.length) {
@@ -162,6 +190,7 @@ if (!bad.length) {
   console.log(`  ok    every review asks ${QUESTIONS} questions, each with one control and one answer`);
   console.log('  ok    every plate word fits the slot the shared stage draws it in');
   console.log('  ok    no review screen spends a free reader’s daily lesson or reads the gate');
+  console.log('  ok    the review route opens on LessonLoader, ahead of the review itself');
   console.log('\nevery unit ends with a review that can be finished.');
   process.exit(0);
 }

@@ -11,12 +11,20 @@
 // review is played by `CinematicPlayer`, so it has the same tap-left-to-go-back
 // navigation, and the guide that explains it belongs in the ROUTE rather than in the
 // player (group AI — a harness renders players directly and would freeze on beat 0).
+//
+// AND IT OPENS ON THE SAME LOADER EVERY LESSON OPENS ON. `LessonLoader` — the block
+// tumbling down the staircase — is mounted by the lesson ROUTE, not by any runner, so
+// a review being played by the same player was never going to inherit it. A review is
+// entered the same way a lesson is, from the same road, and arriving straight into a
+// beat where every lesson gives a moment first reads as the review being a different
+// kind of thing. It is not.
 // ─────────────────────────────────────────────────────────────────────────────
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ALL_BRANCHES } from '@/data';
+import LessonLoader from '@/components/lesson/LessonLoader';
 import { LessonGuideHost } from '@/components/lesson/cinematic/LessonGuide';
 import UnitReview, { hasReview } from '@/components/lesson/cinematic/review/UnitReview';
 import { exitLesson } from '@/components/lesson/exitLesson';
@@ -27,6 +35,7 @@ export default function UnitReviewScreen() {
   const branch = ALL_BRANCHES.find((b) => b.slug === branchSlug) ?? null;
   const unit = branch?.paths.find((p) => p.slug === pathSlug) ?? null;
   const ok = !!branch && !!unit && hasReview(unit.id);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (ok && unit) track('unit_review_started', { unit_id: unit.id, branch_slug: branchSlug });
@@ -39,6 +48,17 @@ export default function UnitReviewScreen() {
           This unit has no review yet.
         </Text>
       </SafeAreaView>
+    );
+  }
+
+  // It sits BELOW the not-found return, exactly as the lesson route puts it below its
+  // own gates: a unit with no review is an error state, and a moment's pause in front
+  // of one is a moment spent on nothing.
+  if (loading) {
+    return (
+      <View style={{ flex: 1 }}>
+        <LessonLoader onDone={() => setLoading(false)} />
+      </View>
     );
   }
 

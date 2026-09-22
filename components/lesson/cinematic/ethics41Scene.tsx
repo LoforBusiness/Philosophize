@@ -13,6 +13,8 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { door } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -179,7 +181,9 @@ export default function Ethics41Scene({ clock, bt, bi, i, picked, onPick, dragPo
       <Animated.View style={[StyleSheet.absoluteFill, doorsStyle]} pointerEvents="none">
         {DOOR_X.map((dx, k) => (
           <View key={dx}>
-            <View style={[styles.door, { left: dx }]} />
+            <View style={[styles.door, { left: dx }]} pointerEvents="none">
+              <ObjectArt parts={door(DOOR_W / 2, DOOR_H / 2, DOOR_W, DOOR_H)} tone={TONE} />
+            </View>
             <Text style={[styles.doorText, { left: dx }]}>{DOOR_CAP[k]}</Text>
           </View>
         ))}
@@ -233,10 +237,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
 
-  door: {
-    position: 'absolute', top: DOOR_Y, width: DOOR_W, height: DOOR_H,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
-  },
+  // THE DOOR IS A DRAWN OBJECT NOW (group AM): a leaf with two recessed panels in a
+  // frame, with the handle on its opening edge. It was a plain stone rectangle.
+  door: { position: 'absolute', top: DOOR_Y, width: DOOR_W, height: DOOR_H },
   doorText: {
     position: 'absolute', top: DOOR_LABEL_Y, width: DOOR_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,

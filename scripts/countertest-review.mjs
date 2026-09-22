@@ -78,6 +78,55 @@ try {
     } finally { fs.writeFileSync(F, before); }
   }
 
+  // THE LOADING SCREEN (AK11). Three ways to lose it, all staged in the route itself:
+  // never import it, import it and never mount it, and mount it after the review has
+  // already started. The third is the one the order rule exists for.
+  {
+    const F = 'app/(app)/branches/[branchSlug]/[pathSlug]/review.tsx';
+    const before = fs.readFileSync(F);
+    const text = before.toString('utf8');
+    const LOADER_BLOCK = `  if (loading) {
+    return (
+      <View style={{ flex: 1 }}>
+        <LessonLoader onDone={() => setLoading(false)} />
+      </View>
+    );
+  }
+
+`;
+    const loaderStage = (name, damaged) => {
+      if (damaged === text) { fail += 1; console.log(`  ✗    ${name} — the damage changed nothing`); return; }
+      try {
+        fs.writeFileSync(F, damaged);
+        const res = run();
+        if (res.red && res.out.includes('LOADER')) { pass += 1; console.log(`  ok   ${name}`); } else {
+          fail += 1; console.log(`  ✗    ${name} — ${res.red ? 'red, but not for LOADER' : 'stayed silent'}`);
+        }
+      } finally { fs.writeFileSync(F, before); }
+    };
+    try {
+      loaderStage('a review route that never imports the loader',
+        text.replace(/^import LessonLoader from .*$\n/m, ''));
+      loaderStage('a loader imported and never mounted',
+        text.replace(LOADER_BLOCK, ''));
+      // The order: take the block out from in front of the review and put the same
+      // mount behind it, so the moment would arrive after the lesson had begun. The
+      // anchor is the review's own last prop and NOT its wrapper's closing tag, so
+      // that this file never spells the guide host — `check:guide` fails any script
+      // that does, and it is right to (a harness that mounts it measures nothing).
+      const TAIL = '          onLeave={exitLesson}\n        />\n';
+      if (!text.includes(LOADER_BLOCK) || !text.includes(TAIL)) {
+        fail += 1; console.log('  ✗    a loader mounted after the review — the block to move is not in the route');
+      } else {
+        loaderStage('a loader mounted after the review',
+          text.replace(LOADER_BLOCK, '').replace(
+            TAIL,
+            `${TAIL}        <LessonLoader onDone={() => setLoading(false)} />\n`,
+          ));
+      }
+    } finally { fs.writeFileSync(F, before); }
+  }
+
   // …and the direction that must stay SILENT.
   const clean = run();
   if (!clean.red) { pass += 1; console.log('  ok   the table as it stands (silent, as it should be)'); } else {

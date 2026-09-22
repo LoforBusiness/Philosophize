@@ -18,6 +18,8 @@ import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, 
 import { stageTone } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { crate } from './objects';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 
@@ -372,16 +374,16 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick, pick
 
       {/* ── the crates that end up under their feet ─────────────────────────── */}
       <Animated.View style={[styles.crate, { left: 252, top: SLOT_TOPS[0] }, crateT]} pointerEvents="none">
-        <View style={styles.brace} />
+        <ObjectArt parts={crate(BOX_W / 2, BOX_H / 2, BOX_W, BOX_H)} tone={TONE} />
       </Animated.View>
       <Animated.View style={[styles.crate, { left: 300, top: SLOT_TOPS[0] }, crateM]} pointerEvents="none">
-        <View style={styles.brace} />
+        <ObjectArt parts={crate(BOX_W / 2, BOX_H / 2, BOX_W, BOX_H)} tone={TONE} />
       </Animated.View>
       <Animated.View style={[styles.crate, { left: 346, top: SLOT_TOPS[0] }, crateS0]} pointerEvents="none">
-        <View style={styles.brace} />
+        <ObjectArt parts={crate(BOX_W / 2, BOX_H / 2, BOX_W, BOX_H)} tone={TONE} />
       </Animated.View>
       <Animated.View style={[styles.crate, { left: 346, top: SLOT_TOPS[1] }, crateS1]} pointerEvents="none">
-        <View style={styles.brace} />
+        <ObjectArt parts={crate(BOX_W / 2, BOX_H / 2, BOX_W, BOX_H)} tone={TONE} />
       </Animated.View>
 
       {/* ── the three onlookers: capsule bodies, not full rigs (cheap on purpose) */}
@@ -479,7 +481,7 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick, pick
             the stack the moment he lifted it. */}
         {SLOT_TOPS.slice(0, 2).map((py) => (
           <View key={py} style={[styles.crate, { left: PILE_L, top: py }]}>
-            <View style={styles.brace} />
+            <ObjectArt parts={crate(BOX_W / 2, BOX_H / 2, BOX_W, BOX_H)} tone={TONE} />
           </View>
         ))}
       </Animated.View>
@@ -526,7 +528,7 @@ export default function Political8Scene({ clock, bt, bi, i, picked, onPick, pick
           he carries it. It is always on stage: on the pile, in his hands, or on
           the ground where he put it. */}
       <Animated.View style={[styles.carried, carryStyle]} pointerEvents="none">
-        <View style={styles.brace} />
+        <ObjectArt parts={crate(BOX_W / 2, BOX_H / 2, BOX_W, BOX_H)} tone={TONE} />
       </Animated.View>
     </Animated.View>
   );
@@ -570,22 +572,18 @@ const styles = StyleSheet.create({
   },
 
   // ── crates ──────────────────────────────────────────────────────────────────
-  crate: {
-    position: 'absolute', width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
-  },
-  brace: { position: 'absolute', left: 5, top: 8, width: 26, height: 1.5, backgroundColor: SOFT },
+  // THE CRATE IS A DRAWN OBJECT NOW (group AM) — a lit top over a shaded front with
+  // its brace corner to corner, where it was a rounded stone rectangle with one
+  // diagonal laid on it. The wrapper keeps its place, its size and its animation.
+  crate: { position: 'absolute', width: BOX_W, height: BOX_H },
+
   // Centred on x = 0 so a plain translateX puts it at his hands.
   // THE SAME OBJECT AS THE ONES ON THE PILE, and it has to be: it IS one of them.
-  // It was 34x20 against their 40x22, so the crate that arrived at the fence was
-  // not the crate that left the stack.
   //
   // Anchored so that (translateX, translateY) puts its BOTTOM EDGE on the point
-  // given — a box rests ON the hands, it is not skewered by them.
-  carried: {
-    position: 'absolute', left: -BOX_W / 2, top: -BOX_H, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 2, backgroundColor: PAPER,
-  },
+  // given — a box rests ON the hands, it is not skewered by them. It carries the
+  // same drawn crate as the stack (group AM), which is what that promise now means.
+  carried: { position: 'absolute', left: -BOX_W / 2, top: -BOX_H, width: BOX_W, height: BOX_H },
 
   // ── the three onlookers ─────────────────────────────────────────────────────
   folk: { position: 'absolute', width: 60 },

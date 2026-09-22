@@ -13,6 +13,8 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { AnswerLift } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { bench } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -173,7 +175,7 @@ export default function Aesthetics28Scene({ clock, bt, bi, i, picked, onPick, pi
         <Animated.View style={[styles.art, artStyle]} />
 
         <View style={styles.cup} />
-        <View style={styles.bench} />
+        <ObjectArt parts={bench(318 + 44 / 2, 352 + 7 - BENCH_H / 2 + 3, 44, BENCH_H)} tone={TONE} />
         <View style={styles.ball} />
         <Animated.View style={[styles.passDot, styles.passDotA, passStyle]} pointerEvents="none" />
         <Animated.View style={[styles.passDot, styles.passDotB, passStyle]} pointerEvents="none" />
@@ -212,6 +214,11 @@ export default function Aesthetics28Scene({ clock, bt, bi, i, picked, onPick, pi
   );
 }
 
+// A SLATTED BENCH NEEDS HEIGHT. The old one was a 7-unit plank; this keeps its
+// seat line and its width and grows upward for a back, which is the room the
+// scene has above it.
+const BENCH_H = 34;
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
@@ -242,7 +249,7 @@ const styles = StyleSheet.create({
   art: { position: 'absolute', borderWidth: 3, borderColor: INK, backgroundColor: STONE, boxShadow: LIP },
 
   cup: { position: 'absolute', left: 292, top: 348, width: 20, height: 18, borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 },
-  bench: { position: 'absolute', left: 318, top: 352, width: 44, height: 7, backgroundColor: INK },
+  // (the bench is drawn from ./objects now — group AM)
   ball: { position: 'absolute', left: 294, top: 306, width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP },
   // A TRAIL ABOVE THE BALL (beat 1) — the unexpected pass the sentence names,
   // never a relocation of the ball itself.

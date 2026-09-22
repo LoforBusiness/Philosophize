@@ -13,6 +13,8 @@ import { stageTone } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { tree } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -103,8 +105,7 @@ export default function Aesthetics33Scene({ clock, bt, bi, i, dragPos, gazeX, ga
             What changes is only how much of it the grime is still covering. */}
         <View style={styles.hill} />
         <View style={styles.sun} />
-        <View style={styles.treeTrunk} />
-        <View style={styles.treeTop} />
+        <ObjectArt parts={tree(FR_W - 4 - 42, 44 - 4 + 48 / 2, 30, 48)} tone={TONE} />
         <View style={styles.horizon} />
 
         {/* THE GRIME — hatching, because there is no second colour to dirty with. */}
@@ -159,11 +160,6 @@ const styles = StyleSheet.create({
   sun: {
     position: 'absolute', right: 22, top: 18, width: 26, height: 26, borderRadius: 13,
     borderWidth: 2, borderColor: INK,
-  },
-  treeTrunk: { position: 'absolute', right: 40, top: 62, width: 4, height: 30, backgroundColor: INK },
-  treeTop: {
-    position: 'absolute', right: 30, top: 44, width: 24, height: 24, borderRadius: 12,
-    backgroundColor: INK,
   },
 
   grime: {

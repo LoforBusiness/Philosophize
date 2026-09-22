@@ -9914,6 +9914,28 @@ A star means premium, a favourite or a rating in every app a reader has ever use
 review is none of those — it is going round again. `SketchIcon name="reload"` says that
 and nothing else. (`TabIcon` makes the same call for the Pass, for the same reason.)
 
+### AK11 · A review opens on the loader a lesson opens on
+
+> *"I want to have that loading screen when you click on the unit review, like it has
+> for all the other lessons. It's that block that goes down those stairs."*
+
+`LessonLoader` is mounted by the lesson ROUTE and by no runner — which is the right place
+for it, and is exactly why a review played by the same player did not inherit it. AK1
+buys the deck, the camera, the six controls, the seal, the coin, the rising letters, the
+back-and-forward navigation and the guide by handing the review to `CinematicPlayer`; a
+loader mounted OUTSIDE the player is the one thing that seam cannot carry, and nothing
+went red when it was missing.
+
+It matters because a review is entered the same way a lesson is, from the same road, by
+a reader who has just finished eight lessons that each gave them a moment first. Arriving
+straight into beat 0 reads as the review being a different kind of thing, which is the
+opposite of what AK1 is for.
+
+The route mounts it ahead of `UnitReview`, below the not-found return — a moment spent in
+front of an error state is a moment spent on nothing. `check:review` §6 reads the import,
+the mount and the ORDER, with comments stripped first (L8), and
+`countertest-review.mjs` stages all three.
+
 ---
 
 ## Group AI · A lesson is read in both directions
@@ -10111,3 +10133,149 @@ reads an arm while the body holds at 0.1px. `Stickman` carries
 `testID="head"` for this. Measured through it, a still beat now reads **0.01–0.15px**
 of vertical head movement, against 1.5px on a beat where he walks — which is the
 control that proves the probe can still see motion at all.
+
+---
+
+## Group AM · An object is a drawing, not a box
+
+> *"a table that doesn't really look like a table, like a tree that doesn't really
+> look like a tree, a platform that is pretty boring … I can recognize what they are.
+> But if you go on Pinterest or if you go online and find really clean animated
+> designs of these different objects and then implement them into lessons, that is
+> what I'd much rather have."* — and, on the first attempt: *"the objects making up
+> the object doesnt fit and work."*
+
+Counted rather than argued: **312 named objects across 154 scenes, 94 of them one
+square-cornered rectangle.** Theseus's ship was a rounded box, a three-unit rule and a
+second rounded box. The tree was a 4×30 stick under a 24-unit circle. The table was a
+92×7 bar on two legs — a capital Π.
+
+`components/lesson/cinematic/objects.ts` is the library, `ObjectArt.tsx` puts one on a
+stage, `npm run sheet:objects` draws any of them in plain Node, and
+`npm run check:objects` holds what a number can hold. `node
+scripts/countertest-objects.mjs` stages every defect below on a copy.
+
+### AM1 · Three parts, round a body
+
+One rectangle wearing a caption is the defect the whole group exists for. Three parts
+is the floor — a body, something that makes it the thing it is, and a plane the lamp
+does not reach — and at least one of them is a `mass`, or there is nothing for the
+outline to go round.
+
+### AM2 · A part carries a ROLE, never a colour
+
+`mass` is the lit body, `face` a body plane in shade, `dark` a recess cut into an
+already-outlined mass, `line` an ink detail, `lit` paper. `paint()` turns those into
+the lesson's own branch tones, so one drawing is struck in ethics olive and in logic
+blue with no hex literal in any scene — the trap §19 records the welcome screen
+falling into, where a palette the app had twice replaced survived in one file as
+literals.
+
+**`face` AND `dark` ARE NOT THE SAME THING, and the checker found that out.** A face is
+part of the SILHOUETTE and is outlined with the body; a recess is painted on top of
+one. Drawn as a recess, the crate's front face had no outline along its own bottom and
+sides. And a recess may sit anywhere — a door's upper panel is shaded because it is
+sunk — while a face must obey the lamp.
+
+### AM3 · A plane TOUCHES; a recess SITS ON
+
+A face is not contained by the rest of the body — a box's front is entirely below its
+top — so the rule is that it shares an edge with something else in the silhouette. A
+recess has to sit on the mass it is cut into. The first version of this rule tested
+containment for both, which called the crate's own front face a fault while the first
+draft's side face, flying thirty units clear of its own box, would have passed.
+
+### AM4 · Nothing leaves the box the scene gave it
+
+A scene sizes an object to the room it has, and the must-box the camera frames is
+measured from what is DRAWN. Art the scene never budgeted for is art that gets cropped
+or pushes a caption.
+
+### AM5 · One drawing, any size
+
+Every object is authored in a 100-unit square and laid into whatever box it is asked
+for, so one drawing serves a 40-unit thumbnail and a 160-unit subject. Cheap to assert
+and impossible to notice otherwise.
+
+### AM6 · The lamp is top-left and never moves
+
+§19's rule for every struck thing in this app. A shaded plane belongs on the side
+turned away from the lamp. The crate shipped its first draft with the top face darker
+than the front under it, which is a box lit from underneath; `check:objects` says so
+out loud.
+
+### AM7 · And the corpus may not grow new bare rectangles
+
+A high-water mark like `CARD_BUDGET`: the count of named objects still drawn as one
+square-cornered un-rotated rectangle. 94 when the reader complained.
+
+### AM8 · A NAME IS NOT AN OBJECT — read the scene before redrawing it
+
+The shortlist that started this work was built from style NAMES, and names lie. Of the
+twelve lessons picked off it, **five were false positives**, every one of them caught
+by reading the source or the render rather than by any rule:
+
+| named | what it actually is |
+|---|---|
+| `ethics5` · `flute` | a COLUMN's flute — a groove, correctly a 1.5-unit rule |
+| `logic23` · `lamp` | a truth-table indicator light, correctly a small disc |
+| `political17` · `drum` | the drum of a WELL, not an instrument |
+| `logic12` · `leaf` | a leaf that TURNS — a page, with its hinge at `0% 50%` |
+| `ethics36` · `book` | a background panel that three rows of type sit on |
+
+The last is the one that got furthest: it was wired, rendered, and only then
+obviously wrong — an open book with page lines showing under three plates. **The
+render is what settles this, not the source and not the name.** Redrawing a thing that
+was already right is a regression that every check in the suite will pass.
+
+### AM8b · A RECTANGLE THAT OTHER THINGS ARE POSITIONED AGAINST IS A COORDINATE FRAME
+
+The commonest false positive of all, and the one that gets furthest, because the style
+really is a bare rectangle and really is named after an object. What makes it not a
+drawing is that **something else in the scene is laid out against its edges**:
+
+| | what sits on it |
+|---|---|
+| `ethics36` · `book` | three rows of type |
+| `political40` · `shelf` | its own caption, inside it |
+| `epistemology40` · `bench` | a caption the drawn slats struck through |
+| `metaphysics30` · `cave` | ten `Passage` elements at offsets from its corner |
+
+Give one of these a shape and the things laid out against it are left on bare paper or
+ruled through. All four were caught by RENDERING, three of them after being wired.
+
+**The tell is in the source and takes ten seconds to look for:** a sibling positioned
+at `X + dx`, a caption inside the same wrapper, a `.map()` over offsets. When the box
+is a frame, either leave it alone or re-lay everything it carries — and the second is
+a composition job, not a swap.
+
+`objects.cave` exists and is drawn for exactly this reason: the drawing is right and
+`metaphysics30` cannot take it until its ten passages are placed against the rock
+instead of against a rectangle.
+
+### AM9 · The box is DERIVED from the scene, not chosen
+
+Where an object replaces hand-built shapes, its box comes from the constants the scene
+already states. `metaphysics23` says its masthead is at 244 and its hull foot at 356;
+`objects.ship` draws those at 8% and 90% of its own box, which fixes the box without
+anybody picking a number. Landed that way the new hull's left edge measures 41.6
+against the old one's 40.
+
+**And what belonged to the old shape belongs to the new one.** That lesson's five
+planks were absolute numbers fitted to a rectangular hull; the drawn hull TAPERS, so
+each plank now takes the hull's width at its own height. One width for all five put
+the lowest course out through the planking on both sides.
+
+### AM10 · A drawn object is a tonal mass, and the counter has to know
+
+`<ObjectArt>` paints from `objects.paint()` at run time, so a scene that draws a ship
+no longer contains the text `backgroundColor: STONE`. By a source-text count it has
+just gone FLATTER while putting more tone on the stage than the rectangle it replaced.
+`scripts/lib/masscount.mjs` counts an object as two, which is the floor's own lesson
+(§17's `floorStyle`) arriving in a second place.
+
+### AM11 · `ObjectArt.tsx` is apparatus, and apparatus goes in the hash
+
+It decides how big a scene's art is, so it is in `muststamp`'s SHARED list beside
+`Target.tsx` and `Silhouette.tsx`. A change to how objects are drawn resizes them in
+every scene that draws one, and those scenes' must-boxes go stale with it.

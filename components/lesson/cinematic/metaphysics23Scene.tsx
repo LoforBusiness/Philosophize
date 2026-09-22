@@ -13,6 +13,8 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target, { useAnswerRise } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { ship } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -57,16 +59,44 @@ const HULL_W = 130;
 const L_HULL = 40;
 const R_HULL = 230;
 
-const PLANK_Y = [324, 330, 336, 342, 348];
-const PLANK_W = HULL_W - 12;
 const PLANK_H = 4.5;
 
 const MAST_TOP = 244;
-const L_MAST = 102;
-const R_MAST = 292;
-const SAIL_W = 52;
-const SAIL_H = 50;
-const SAIL_Y = 250;
+
+// THE SHIP IS A DRAWING NOW, not a box with a rule and a stamp on it (group AM).
+// `objects.ship` is built to a boat plan's own construction — a shallow hull whose
+// sides fall inward, a rig taller than the hull is long, two sails with the mast
+// between them. What it replaced was a rounded rectangle, a 3-unit vertical line and
+// a second rounded rectangle.
+//
+// The box below is derived from the constants above rather than picked, so the new
+// drawing lands where the old one stood: the drawing's mast head is at 8% of its box
+// and its hull foot at 90%, and the hull's widest course spans 6%…94%.
+const SHIP_H = (HULL_Y + HULL_H - MAST_TOP) / 0.82;
+const SHIP_W = HULL_W / 0.88;
+const SHIP_CY = MAST_TOP - 0.08 * SHIP_H + SHIP_H / 2;
+const shipAt = (hullLeft: number) => ship(hullLeft + HULL_W / 2, SHIP_CY, SHIP_W, SHIP_H);
+
+// WHERE THE HULL ACTUALLY IS, read off the same drawing. `objects.ship` puts the
+// hull's deck at 68% of its box and its foot at 90%, and the hull's courses run from
+// 88% of the box's width at the deck to 58% at the keel.
+const SHIP_TOP = SHIP_CY - SHIP_H / 2;
+const HULL_TOP = SHIP_TOP + 0.68 * SHIP_H;
+const HULL_FOOT = SHIP_TOP + 0.90 * SHIP_H;
+const PLANK_N = 5;
+/** Five courses of planking, evenly inside the hull rather than over its edges. */
+const PLANK_Y = Array.from({ length: PLANK_N }, (_, k) => (
+  HULL_TOP + 4 + ((HULL_FOOT - HULL_TOP - 8 - PLANK_H) * k) / (PLANK_N - 1)
+));
+/**
+ * A PLANK IS AS WIDE AS THE HULL IS AT ITS OWN HEIGHT. The drawn hull's sides fall
+ * inward — that taper is what separates a boat from a bucket — so one width for all
+ * five put the lowest course out through the planking on both sides.
+ */
+const plankW = (k: number) => {
+  const t = (PLANK_Y[k] + PLANK_H / 2 - HULL_TOP) / (HULL_FOOT - HULL_TOP);
+  return (0.88 + (0.58 - 0.88) * t) * SHIP_W - 10;
+};
 
 const LABEL_Y = 360;
 
@@ -150,16 +180,12 @@ export default function Metaphysics23Scene({ clock, bt, bi, i, picked, onPick, g
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <Animated.View style={[StyleSheet.absoluteFill, shipStyle]} pointerEvents="none">
-        <View style={[styles.mast, { left: L_MAST }]} />
-        <View style={[styles.sail, { left: L_MAST + 5 }]} />
-        <View style={[styles.hull, { left: L_HULL }]} />
+        <ObjectArt parts={shipAt(L_HULL)} tone={TONE} />
         <Text style={[styles.label, { left: L_HULL }]}>REPAIRED</Text>
       </Animated.View>
 
       <Animated.View style={[StyleSheet.absoluteFill, builtStyle, builtRise]} pointerEvents="none">
-        <View style={[styles.mast, { left: R_MAST }]} />
-        <View style={[styles.sail, { left: R_MAST - SAIL_W - 5 }]} />
-        <View style={[styles.hull, { left: R_HULL }]} />
+        <ObjectArt parts={shipAt(R_HULL)} tone={TONE} />
         <Text style={[styles.label, { left: R_HULL }]}>REASSEMBLED</Text>
         {/* THE PLANKS RIDE WITH THE HULL THEY ARE IN (E39). They were drawn outside
             this wrapper, so answering lifted the hull off its own cargo — measured
@@ -225,7 +251,8 @@ function Plank({
     const on = old ? (1 - moved) * S.value.ships : moved * S.value.built;
     return { opacity: on };
   });
-  return <Animated.View pointerEvents="none" style={[styles.plank, { top: PLANK_Y[k], left }, st]} />;
+  const w = plankW(k);
+  return <Animated.View pointerEvents="none" style={[styles.plank, { top: PLANK_Y[k], left: left + (HULL_W - w) / 2 - 6, width: w }, st]} />;
 }
 
 const styles = StyleSheet.create({
@@ -236,18 +263,8 @@ const styles = StyleSheet.create({
   // political7 and political8 both stand their subject on a filled mass.
   floor: floorStyle(TONE, GROUND),
 
-  hull: {
-    position: 'absolute', top: HULL_Y, width: HULL_W, height: HULL_H,
-    borderWidth: 2.5, borderColor: INK, borderBottomLeftRadius: 12, borderBottomRightRadius: 12,
-    backgroundColor: STONE, boxShadow: LIP,
-  },
   plank: {
-    position: 'absolute', width: PLANK_W, height: PLANK_H, backgroundColor: INK, borderRadius: 1.5,
-  },
-  mast: { position: 'absolute', top: MAST_TOP, width: 3, height: HULL_Y - MAST_TOP, backgroundColor: INK },
-  sail: {
-    position: 'absolute', top: SAIL_Y, width: SAIL_W, height: SAIL_H,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP,
+    position: 'absolute', height: PLANK_H, backgroundColor: INK, borderRadius: 1.5,
   },
   label: {
     position: 'absolute', top: LABEL_Y, width: HULL_W, textAlign: 'center',

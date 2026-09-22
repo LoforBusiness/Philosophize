@@ -13,6 +13,8 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { door as doorArt } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -163,6 +165,7 @@ export default function Metaphysics17Scene({ clock, bt, bi, i, picked, onPick, d
       {/* ── THE DOOR ─────────────────────────────────────────────────────── */}
       <View style={styles.jamb} pointerEvents="none" />
       <Animated.View style={[styles.door, door]} pointerEvents="none">
+        <ObjectArt parts={doorArt(DOOR_W / 2, (500 - DOOR_T) / 2, DOOR_W, 500 - DOOR_T)} tone={TONE} />
         <View style={styles.knob} />
       </Animated.View>
 
@@ -263,7 +266,6 @@ const styles = StyleSheet.create({
   },
   door: {
     position: 'absolute', left: DOOR_L, top: DOOR_T, width: DOOR_W, height: 500 - DOOR_T,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
     transformOrigin: '0% 50%',
   },
   knob: {

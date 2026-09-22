@@ -17,6 +17,8 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { window as windowArt } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -164,7 +166,7 @@ export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick, pi
               ]}
             >
               <View style={styles.jug} pointerEvents="none" />
-              <View style={styles.window} pointerEvents="none" />
+              <ObjectArt parts={windowArt(12 + 17, 12 + 20, 34, 40)} tone={TONE} />
               <View style={styles.sill} pointerEvents="none" />
               <View style={styles.figureBlob} pointerEvents="none" />
             </View>
@@ -236,7 +238,6 @@ const styles = StyleSheet.create({
     flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
   },
   // The same four shapes in both canvases, at the same coordinates.
-  window: { position: 'absolute', left: 12, top: 12, width: 34, height: 40, borderWidth: 2, borderColor: INK },
   sill: { position: 'absolute', left: 8, top: 54, width: 42, height: 2, backgroundColor: INK },
   jug: { position: 'absolute', left: 62, top: 30, width: 22, height: 28, borderRadius: 8, borderWidth: 2, borderColor: INK },
   figureBlob: { position: 'absolute', left: 88, top: 44, width: 20, height: 40, borderTopLeftRadius: 10, borderTopRightRadius: 10, backgroundColor: SOFT },

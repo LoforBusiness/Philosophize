@@ -13,6 +13,8 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { column } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -166,7 +168,7 @@ export default function Ethics38Scene({ clock, bt, bi, i, picked, onPick, dragPo
       <Text style={styles.cap} pointerEvents="none">ONE LIFE IN EACH PAN</Text>
 
       <Animated.View style={[StyleSheet.absoluteFill, beamOnStyle]} pointerEvents="none">
-        <View style={styles.column} />
+        <ObjectArt parts={column(COL_X + COL_W / 2, (COL_Y + GROUND) / 2, COL_W, GROUND - COL_Y)} tone={TONE} />
 
         <Animated.View style={[styles.beamBox, beamStyle]}>
           <View style={styles.beam} />
@@ -235,10 +237,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
   },
 
-  column: {
-    position: 'absolute', left: COL_X, top: COL_Y, width: COL_W, bottom: STAGE_H - GROUND,
-    borderWidth: 1.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
-  },
 
   // The rotating group is exactly the beam's own box, so the pivot is its centre.
   beamBox: {

@@ -12,6 +12,8 @@ import { stageTone } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
+import ObjectArt from './ObjectArt';
+import { table } from './objects';
 
 // THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
 // Same three tones, same luminance to the third decimal — so every contrast
@@ -45,6 +47,8 @@ const FRAME_T = 240;
 const FRAME_W = 150;
 const FRAME_H = 234;
 const PAD = 8;
+const TABLE_W = 92;
+const TABLE_H = 37;
 const RULER_X = 148;
 const RULER_T = 244;
 const RULER_H = 226;
@@ -168,9 +172,8 @@ function Layer({ k, SCENE }: { k: number; SCENE: { value: { depth: number; legsC
   return (
     <Animated.View style={[styles.layer, style]} pointerEvents="none">
       {k === 0 ? (
-        <View style={styles.tableTop}>
-          <View style={styles.tableLegL} />
-          <View style={styles.tableLegR} />
+        <View style={styles.tableBox}>
+          <ObjectArt parts={table(TABLE_W / 2, TABLE_H / 2, TABLE_W, TABLE_H)} tone={TONE} />
           {/* The answer isn't the legs — a light strike cuts across both
               (group AH). */}
           <Animated.View style={[styles.legStrikeL, legStrike]} pointerEvents="none" />
@@ -233,9 +236,10 @@ const styles = StyleSheet.create({
     textAlign: 'center', includeFontPadding: false,
   },
 
-  tableTop: { width: 92, height: 7, backgroundColor: INK, marginBottom: 26 },
-  tableLegL: { position: 'absolute', left: 8, top: 7, width: 5, height: 30, backgroundColor: INK },
-  tableLegR: { position: 'absolute', right: 8, top: 7, width: 5, height: 30, backgroundColor: INK },
+  // THE TABLE IS A DRAWING NOW (group AM). It was a 92×7 bar on two 5-wide legs,
+  // which is a capital Π; the box below is the same 92 across and the same 37 down
+  // that the bar and its legs occupied together, so nothing in the layer moved.
+  tableBox: { width: TABLE_W, height: TABLE_H, marginBottom: 26 },
 
   // GROUP AH — the four still-tap marks.
   link: {

@@ -1103,7 +1103,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` · `check-firstrun` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-wander` · `check-skin` · `check-thoughts` · `check-marks` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-wander` · `check-skin` · `check-thoughts` · `check-marks` · `check-objects` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
 > replays the figure, and a prop's animation was invisible to every check unless it
@@ -4784,6 +4784,86 @@ Counts held: 268 thoughts across 246 lessons, 862 wander plans.
 > never duck are not boxers. If it ever reads as the same defect, the fight's
 > `bob` terms are the thing to damp, not the rule.
 
+### And the objects are drawings now, against real references (group AM)
+
+> *"a table that doesn't really look like a table, like a tree that doesn't really look
+> like a tree, a platform that is pretty boring … if you go online and find really
+> clean animated designs of these different objects and then implement them into
+> lessons, that is what I'd much rather have."*
+
+**COUNTED: 312 named objects across 154 scenes, 94 of them ONE SQUARE-CORNERED
+RECTANGLE.** Theseus's ship was a rounded box, a three-unit rule and a second rounded
+box. The tree was a 4×30 stick under a 24-unit circle. The table was a 92×7 bar on two
+legs, which is a capital Π. Every one satisfied A1 — the caption said ship and a thing
+labelled ship was on the stage — and none of them was a drawing of the thing.
+
+**AND THE FIRST ATTEMPT WAS DRAWN FROM MEMORY, WHICH THE READER SAW AT ONCE:** *"the
+objects making up the object doesnt fit and work … I want you to find a way to be able
+to see pictures online so you actually have a reference to follow."*
+
+**`npm run ref` IS THAT WAY, AND IT IS THE FINDING.** Wikimedia Commons has a search
+API that returns direct thumbnail URLs for freely-licensed files, so a picture can be
+pulled to disk and then actually LOOKED AT rather than described from memory. Every
+object drawn before it existed had something structurally wrong that one glance
+settled:
+
+| | drawn blind | what the reference says |
+|---|---|---|
+| tree | five equal lobes — BROCCOLI | ONE mass with a scalloped edge, over a trunk a quarter of the height, not half |
+| boat | two short triangles on a deep hull | the rig is TALLER THAN THE HULL IS LONG; the hull is a shallow sliver |
+| table | flat side-on | THREE-QUARTER view, four legs, the back pair shorter and higher |
+| book | closed and flat-on — a card | OPEN: two leaves falling from a V at the gutter |
+| plinth | one box | a photograph LABELS its three parts — base, die, cap |
+
+Two ways the search misleads, both recorded in the script's own header: Commons ranks
+SCANNED BOOKS highly for any text query, so the first run returned .pdf files whose
+first page was a title page; and a bare noun pulls diagrams — *"plinth"* returned a
+neural-network figure and *"column"* a bacterial flagellum. Search for the object in
+its own world.
+
+**`objects.ts` HAS ZERO IMPORTS, like `rig.ts` and `critters.ts`**, so
+`npm run sheet:objects` draws any of the 21 in plain Node in about two seconds. That
+loop is the whole reason this was affordable, and it is the only instrument that has
+ever caught one: a hull came back a SOUP BOWL (twice — the reference says "the bottom
+is a smooth U" and taking that literally draws a bathtub), a lamp a ROAD SIGN, a coin a
+CRUCIFIX, a column UPSIDE-DOWN and a drum wearing a large letter W. Every one of those
+passed every rule in `check:objects`.
+
+**A PART CARRIES A ROLE, NOT A COLOUR**, so one drawing is struck in all six branches
+with no hex literal in any scene. The fourth role was found by the checker rather than
+by eye: `face` is a body plane in shade and is OUTLINED with the body, where `dark` is
+a recess painted on top of one. Drawn as a recess, the crate's front face had no
+outline along its own bottom and sides.
+
+**FIVE OF THE TWELVE LESSONS PICKED FOR THE FIRST BATCH WERE FALSE POSITIVES** — the
+shortlist was built from style NAMES, and names lie. `ethics5`'s "flute" is a COLUMN's
+flute, correctly a 1.5-unit rule; `logic23`'s "lamp" is a truth-table indicator light;
+`political17`'s "drum" is the drum of a WELL; `logic12`'s "leaf" is a page, with its
+hinge at `0% 50%`. The fifth got furthest: `ethics36`'s "book" is a background panel
+that three rows of type sit on, and it was wired, rendered, and only then obviously
+wrong — an open book with page lines showing under three plates. **Redrawing a thing
+that was already right is a regression every check in the suite will pass.**
+
+**ELEVEN SCENES ARE WIRED**, and each object's box is DERIVED from the constants the
+scene already states rather than chosen: `metaphysics23` says its masthead is at 244
+and its hull foot at 356, and `objects.ship` draws those at 8% and 90% of its own box.
+Landed that way the new hull's left edge measures 41.6 against the old one's 40. What
+belonged to the old shape belongs to the new one too — that lesson's five planks were
+fitted to a rectangular hull, and the drawn hull TAPERS, so each plank now takes the
+hull's width at its own height.
+
+**TWO CHECKERS HAD TO LEARN ABOUT IT, AND ONE IS THE RECURRING SHAPE.**
+`masscount.mjs` counts tonal masses from SOURCE TEXT, and `<ObjectArt>` paints at run
+time — so a scene that draws a ship no longer contains `backgroundColor: STONE` and by
+that count had just gone FLATTER while putting more tone on the stage. That is
+`floorStyle`'s own lesson arriving in a second place. And `ObjectArt.tsx` is in
+`muststamp`'s SHARED list beside `Target.tsx` and `Silhouette.tsx`, because it decides
+how big a scene's art is.
+
+`npm run check:objects` holds the library and the corpus ratchet;
+`node scripts/countertest-objects.mjs` stages every defect on a COPY, so the working
+tree is never edited (group AL's rule).
+
 ### Four brawlers froze after the first tap (L9)
 
 `politicalScene`'s citizens shared ONE `useHeld()` and blended `carryFrom` by `auth`:
@@ -5007,10 +5087,26 @@ so `check:review` §5 fails on `bumpDailyLessons`, `FREE_DAILY_LESSON_LIMIT` or
 **AND THE MARK IS A RELOAD RATHER THAN A STAR (AK10)**, because a star means premium, a
 favourite or a rating in every app a reader has ever used, and a review is none of those.
 
+**AND IT OPENS ON THE LESSON LOADER NOW (AK11)** — the block tumbling down the stairs,
+which the owner asked for by name: *"I want that loading screen when you click on the
+unit review, like it has for all the other lessons."* It was missing for a reason worth
+keeping in view: **`LessonLoader` is mounted by the lesson ROUTE and by no runner**, which
+is the right place for it and is exactly why AK1's seam could not carry it. Handing the
+review to `CinematicPlayer` buys the deck, the camera, the six controls, the seal, the
+coin, the rising letters, the back-and-forward navigation and the guide; anything drawn
+OUTSIDE the player is bought separately, and nothing went red while this one was not. A
+reader reaches a review from the same road, having just finished eight lessons that each
+gave them a moment first, so arriving straight into beat 0 read as the review being a
+different kind of thing. Measured on the real route: the loader from the first frame to
+2.4s, the review's stage from 2.5s.
+
 `npm run check:review` holds the content — four questions a review, one control and
 one answer each, and every plate word measured against the real `.ttf` for the 68-unit
-slot it is drawn in, which caught three on its first run.
-`node scripts/countertest-review.mjs` stages eight defects, the free day among them.
+slot it is drawn in, which caught three on its first run — plus the loader's import, its
+mount and its ORDER, with comments stripped first (L8), since the header paragraph
+explaining all of this names both components and would otherwise answer the order rule
+for the file. `node scripts/countertest-review.mjs` stages eleven defects, the free day
+and all three ways to lose the loader among them.
 
 ### The stage is coloured now, at exactly the grey's luminance
 
