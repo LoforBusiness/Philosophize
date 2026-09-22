@@ -1452,8 +1452,10 @@ they belong to, so the rule book has them and this file did not:
 > than current through it. Y is about the figure's relationship to everything outside
 > it, which had a thousand-line library and three call sites. Z is about whether a
 > drawing IS the thing it names, which no checker can answer and which therefore
-> needs a shortlist and a person. This section is the *why*; that file is the *how*,
-> with the numbers.
+> needs a shortlist and a person. **AL is the newest and it is the only group that
+> takes something AWAY**: the figure's pelvis may not move on a clock, because a
+> vertical wobble is the one motion with no cause on the stage to explain it. This
+> section is the *why*; that file is the *how*, with the numbers.
 >
 > Three rules were added the day a reader said the lessons were unreadable, and
 > all three are arithmetic rather than taste: **D34** no word on the stage may
@@ -4683,6 +4685,104 @@ at a tap **0.00**, at a tap into the next beat **0.00**, sideways at a beat chan
 **0.00**, and 0 of 438 steps travelling against the facing. `countertest-wander`
 stages seventeen defects now — and the rig stage it already had **had never fired**,
 because it named a local that lives in `wander.ts` and not in `rig.ts`.
+
+### And nothing moves him up and down any more (group AL)
+
+> *"sometimes the stickman will be moving up and down while standing or in general
+> the stickman will be moving up and down very slightly. I absolutly dislike this,
+> it looks really cheep, ai looking, and just really bad, I want none of that
+> moving up and down of stickman in lessons."*
+
+**IT WAS ON EVERY BEAT OF EVERY LESSON, AND IT WAS IN `stand()`.** That function
+layered "a visible breath" onto the pelvis — 1.02 units on two beating cosines —
+and because every pose in the app is built on `stand`, every pose inherited it:
+`emoteHold`, `emoteLive`, `narratorHold`, `narratorLive`, `masterLive`,
+`postureHold` and all 200 acts came back at **exactly 1.017 units** of vertical
+swing when measured. On top of that, 48 acts added 1.3 to 5.0 of their own, the
+boxers' `guard` bounced **2.98** through the whole of `logic-arguments-1`, the
+wander's weight shift sank 2.2 on 218 lessons, and `ethics3Scene` and
+`ethics6Scene` each drew five bound figures off `bob: v * 0.9`. Across 2,585 posed
+beats the mean vertical swing of his head was **1.61 units** — one to four pixels
+at lesson scale, for ever, on a figure drawn in 2pt ink.
+
+**A WOBBLE IS THE ONE MOTION THAT CANNOT READ AS LIFE, and that is the finding
+rather than the removal.** Everything else this figure does is CAUSED on the
+stage: an arm swings because he is gesturing, the weight goes across because his
+feet moved, the head turns because it is looking at something. A pelvis rising and
+falling on a sine has nothing in the drawing to explain it, so the eye reads it as
+the rendering being loose rather than as a man breathing — and at about a pixel it
+is exactly the amplitude of a rounding error, which is why *"cheap"* and *"AI
+looking"* are the accurate words for it and not an overstatement. So `bob` is
+written by causes now: a walk (driven by DISTANCE, never by `t`), a crouch or a
+seat he goes down into, a staged one-shot the lesson plays, and the wander's own
+look down, which bends the body with the feet. Group **AL** of the rule book.
+
+**WHAT IT COST, AND WHAT IT BOUGHT.** Flattening keeps every constant and drops
+only the swing (AL2) — act 74 still sits 2.2 low and 180 still cowers at −14 — so
+the figure's resting height moves by at most 2.6 units anywhere in the corpus,
+inside `mustrule`'s own 4-unit pad. **That is why it cost no re-measure**, and why
+the two scene stamps could be renewed by `scripts/restamp-flat.mjs` on
+`restamp-skin`'s two-part proof rather than by hours of browser time.
+
+**AND THREE LIVING HOLDS TURNED OUT TO BE MOSTLY A BREATH.** With the vertical
+gone, **65 GAZING UP, 161 WAITING FOR THE ANSWER and 178 CROUCHED BY IT** dropped
+under the 1.5× a still beat needs. Lowering the bar would have been the wrong
+answer twice over: a pose whose whole content was the wobble has no content. Each
+was given the motion its own name promises in the axes that are still allowed — the
+gaze travelling across what he is looking at, the weight going foot to foot, the
+looking moving across the thing he is crouched beside — and living holds that READ
+went **39 → 42**, with median travel 6.02 → 6.08. The corpus came out of this with
+more visible motion than it went in with.
+
+**`npm run check:idle` HOLDS IT, BY EVALUATION RATHER THAN BY READING THE SOURCE**,
+and act 30 is why. Its own `bob` was `s.bob - |a| * 1.2`, which happened to CANCEL
+most of the inherited breath — so measured while the breath was still there it came
+back at 1.015 against a floor of 1.017 and read as clean. **It was the one site a
+hand-built list missed**, and a net reading taken before the cause is removed is
+worth nothing. The sweep runs `stand`, `guard`, the default `seated`, every
+gesture, every posture, all 200 acts, `interact`'s carrying family and the wander's
+LEAN over 18 seconds at 27Hz, and reads the scenes for a Stance of their own that
+drives `bob` off the clock. `npm run countertest:idle` puts all seven wobbles back
+and stages the two shapes that must stay SILENT — a deeper constant crouch, and a
+bigger one-shot dip — because a checker that cannot tell the design from the defect
+is the boxiness metric again.
+
+- **`loadRig` takes `RIG_SRC` now**, so a counter-test copies the four files
+  elsewhere, stages the defect in the copy and points the checker at it. The
+  existing counter-tests mutate the working tree and revert in a `finally`, which
+  is correct as far as it goes and still leaves a window in which another session's
+  build takes the defect — and another session is usually working in this repo.
+- **A SHARED PRIMITIVE IS SWEPT IN ITS LESSON FORM (AL3).** `rig.seated` breathes on
+  the launch screen, where the figure is 70px tall and `check:launch` reads its
+  range of motion. The breath is a fourth argument defaulting to OFF, the launch
+  screen asks for it back at both of its seated poses, and the sweep measures the
+  default — because the default is what a lesson gets.
+- **A RAISED HAND IS NOT THE BODY (AL5).** The offline sweep proves the maths and
+  only the render proves the app draws it, and the probe for that has one trap in
+  it worth twenty pixels: the figure's root is a zero-size box, so its extent is the
+  union of its descendants — and the top of that union is a glove. `Stickman` carries
+  `testID="head"` for this. Measured through it in the real app, a still beat now
+  reads **0.01–0.15px** of vertical head movement, against 1.5px on a beat where he
+  walks, which is the control that proves the probe can still see motion at all.
+
+**AND THE TWO TABLES THAT MEASURE HIS HEAD HAD TO BE REGENERATED — THE BOXES DID
+NOT.** That split is the useful part. `mustBoxes` records what the PROBE saw and
+nothing about the figure got bigger, so no re-measure was owed. But
+`data/lessonThoughts.ts` places every bubble against his head as the rig models it
+(AB10), and a head that no longer rises is a head in a different place: 4 bubbles
+ended up more than 20 units clear of it and 14 closer than 10, which
+`check:thoughts` failed on. `make:thoughts` then `make:wander` settles it, in that
+order — the wander blocks on the bubble, so a moved bubble moves what room he has.
+Counts held: 268 thoughts across 246 lessons, 862 wander plans.
+
+> **THE ONE FIGURE STILL MOVING VERTICALLY IS THE BOXER, AND IT IS THE
+> CHOREOGRAPHY.** `logic1Scene` loops a fight on the monotonic clock, so its ducks,
+> rolls and uppercuts play for ever — measured, 18.5px of head on beat 3. That is
+> `u`-driven and staged, every unit of it is a punch being thrown or avoided, and it
+> is the one place `check:idle`'s sweep cannot see (it holds `u` fixed on purpose,
+> because a jump has to stay legal). Recorded rather than flattened: two boxers who
+> never duck are not boxers. If it ever reads as the same defect, the fight's
+> `bob` terms are the thing to damp, not the rule.
 
 ### Four brawlers froze after the first tap (L9)
 

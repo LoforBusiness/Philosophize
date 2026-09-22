@@ -119,7 +119,7 @@ const SEAT_H = 12;
  */
 export function readingStance(t: number): Stance {
   'worklet';
-  const base = seated(SEAT_H, t, 15);
+  const base = seated(SEAT_H, t, 15, 1);   // breath ON: launch scale, and check:launch reads it
   const turn = cycle(t, ACTIVITY_PERIOD.read, 0.8, 4.4);
   // sin(pi*x) is 0 at both ends and 1 in the middle: the loop closes by
   // construction rather than by anyone remembering to bring the hand back.
@@ -153,7 +153,7 @@ export function readingStance(t: number): Stance {
  */
 export function ponderStance(t: number): Stance {
   'worklet';
-  const base = seated(SEAT_H, t, 16);
+  const base = seated(SEAT_H, t, 16, 1);   // breath ON: launch scale, and check:launch reads it
   const p = cycle(t, ACTIVITY_PERIOD.thinker, 1.0, 7.6);
   // Up, hold, out, back: a tent through the window with a dwell in the middle,
   // so it is a considered gesture rather than a twitch.

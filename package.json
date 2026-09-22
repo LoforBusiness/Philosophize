@@ -200,7 +200,8 @@
     "say": "node scripts/say.mjs",
     "check:splits": "node scripts/check-splits.mjs",
     "check:rules": "node scripts/check-rules.mjs",
-    "countertest:rules": "node scripts/countertest-rules.mjs"
+    "countertest:rules": "node scripts/countertest-rules.mjs",
+    "countertest:idle": "node scripts/countertest-idle.mjs"
   },
   "overrides": {
     "@expo/require-utils": "56.1.6"

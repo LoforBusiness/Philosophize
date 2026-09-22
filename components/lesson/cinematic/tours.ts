@@ -225,7 +225,7 @@ export const TOUR_STAMP: Record<string, string> = {
   'ethics-ethics-34': 'f2d879e702cd',
   'ethics-ethics-38': '38d269796542',
   'ethics-ethics-39': '841d42542ef0',
-  'ethics-ethics-6': '966988460f96',
+  'ethics-ethics-6': 'a9344f53a751',
   'ethics-ethics-7': 'd570d599c384',
   'ethics-ethics-8': '29d2594d5077',
   'ethics-ethics-9': '22b591cfd32a',

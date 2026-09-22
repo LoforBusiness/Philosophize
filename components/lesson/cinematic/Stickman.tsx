@@ -301,7 +301,12 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
       <Animated.View style={[S.joint, a.kneeR]} />
       <Animated.View testID="ankle-r" style={[S.joint, a.ankR]} />
 
-      <Animated.View style={[S.head, a.head]} />
+      {/* testID for the same reason the ankles and the fists have one, and it is
+          AL1's: "does he move up and down" is a question about the HEAD, and the
+          union of his descendants cannot answer it — a punch or a raised hand is
+          the top of that union and swamps the body by an order of magnitude
+          (measured: 20px of glove against 0.1px of skull on the same beat). */}
+      <Animated.View testID="head" style={[S.head, a.head]} />
 
       <Animated.View style={[S.limbBone, a.uarmR]} />
       <Animated.View style={[S.limbBone, a.farmR]} />

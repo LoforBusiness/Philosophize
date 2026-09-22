@@ -1372,7 +1372,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     const tr = Math.sin(t * 23) * 1.0 + Math.sin(t * 31 + 1.1) * 0.6;
     return {
       ...s, tilt: s.tilt + e * 0.10, neck: s.neck + e * 0.12,
-      bob: s.bob - e * 2 + tr * 0.25,
+      bob: s.bob - e * 2,
       footL: { x: -4, y: 0 }, footR: { x: 4, y: 0 },
       fistL: { x: lerp(-5, 6, e) + tr * 0.5, y: lerp(6, -18, e) },
       fistR: { x: lerp(5, 14, e) + tr * 0.5, y: lerp(6, -22, e) },
@@ -1436,7 +1436,7 @@ export function actStance(code: number, t: number, u: number): Stance {
   if (code === 30) {                             // ARMS FLOWING — slow wide arcs, like water
     const a = Math.sin(t * 0.8), b = Math.sin(t * 1.17 + 1.1);
     return {
-      ...s, tilt: s.tilt + a * 0.05, neck: s.neck - b * 0.06, bob: s.bob - Math.abs(a) * 1.2,
+      ...s, tilt: s.tilt + a * 0.05, neck: s.neck - b * 0.06, bob: s.bob,
       // Out to 26 at the widest so the hands stay clear of the head disc.
       fistL: { x: -6 + a * 20, y: -6 + b * 14 },
       fistR: { x: 8 + b * 20, y: -4 - a * 14 },
@@ -1446,7 +1446,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     const sw = Math.sin(t * 2.0);
     return {
       ...s, tilt: s.tilt + sw * 0.06, neck: s.neck - Math.sin(t * 2.0 - 1.2) * 0.05,
-      bob: s.bob - Math.abs(sw) * 1.4,
+      bob: s.bob,
       // The feet stay planted and the WEIGHT moves — the pelvis leans over each
       // one in turn. Sliding the feet instead is the single most common way a
       // sway comes out looking like skating.
@@ -1463,7 +1463,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     const liftR = Math.max(0, sw) ** 1.5 * 5;
     return {
       ...s, tilt: s.tilt + sw * 0.05, neck: s.neck - Math.sin(ph2 - 1.0) * 0.06,
-      bob: s.bob - Math.abs(sw) * 1.8,
+      bob: s.bob,
       footL: { x: -6 + sw * 3, y: -liftL },
       footR: { x: 7 + sw * 3, y: -liftR },
       fistL: { x: -9 + sw * 11, y: -2 - Math.abs(sw) * 5 },
@@ -1475,7 +1475,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     const drop = Math.max(0, -beat) * 2.6;       // knees give on the downbeat
     return {
       ...s, tilt: s.tilt - beat * 0.04, neck: s.neck - Math.sin(t * 3.2 - 0.9) * 0.07,
-      bob: s.bob + drop,
+      bob: s.bob,
       footL: { x: -7, y: 0 }, footR: { x: 8, y: 0 },
       fistL: { x: -12 - beat * 5, y: -8 + beat * 6 },
       fistR: { x: 13 - beat * 5, y: -8 - beat * 6 },
@@ -1495,7 +1495,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     const a = Math.sin(t * 2.6), b = Math.sin(t * 2.6 + 1.9);
     return {
       ...s, tilt: s.tilt + a * 0.05, neck: s.neck - 0.16,
-      bob: s.bob - Math.abs(a) * 1.6,
+      bob: s.bob,
       fistL: { x: 21 + a * 5, y: -36 + b * 7 },
       fistR: { x: 29 + b * 5, y: -40 + a * 7 },
     };
@@ -1536,7 +1536,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     const beat = Math.sin(t * 2.8);
     return {
       ...s, neck: s.neck + 0.10 + beat * 0.10, tilt: s.tilt + beat * 0.02,
-      bob: s.bob - Math.max(0, beat) * 0.8,
+      bob: s.bob,
       fistL: { x: -5 + beat * 2, y: 7 }, fistR: { x: 6 - beat * 2, y: 7 },
     };
   }
@@ -1561,7 +1561,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     const side = Math.sin(a), dip = Math.max(0, -Math.cos(a));
     return {
       ...s, tilt: s.tilt + side * 0.06, neck: s.neck + dip * 0.10,
-      bob: s.bob - dip * 3.4,
+      bob: s.bob,
       footL: { x: -8, y: 0 }, footR: { x: 9, y: 0 },
       fistL: { x: 12 + side * 4, y: -16 - dip * 3 },
       fistR: { x: 19 - side * 4, y: -18 - dip * 3 },
@@ -1598,7 +1598,7 @@ export function actStance(code: number, t: number, u: number): Stance {
   if (code === 45) {                             // ROCK ON HEELS — back on the heels, then forward
     const a = Math.sin(t * 1.5);
     return {
-      ...s, tilt: s.tilt + a * 0.10, bob: s.bob - Math.abs(a) * 0.8,
+      ...s, tilt: s.tilt + a * 0.10, bob: s.bob,
       neck: s.neck - a * 0.05,
       footL: { x: -6, y: 0 }, footR: { x: 7, y: 0 },
       fistL: { x: -7 - a * 3, y: 7 }, fistR: { x: 8 - a * 3, y: 7 },
@@ -1620,7 +1620,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     const lift = Math.max(0, Math.cos(a)) ** 2 * 4;
     return {
       ...s, tilt: s.tilt + out * 0.04, neck: s.neck - Math.sin(a - 0.8) * 0.05,
-      bob: s.bob - Math.abs(out) * 1.2,
+      bob: s.bob,
       footL: { x: -7 + out * 5, y: -lift * (out < 0 ? 1 : 0) },
       footR: { x: 8 + out * 5, y: -lift * (out > 0 ? 1 : 0) },
       fistL: { x: -10 + out * 8, y: 2 }, fistR: { x: 11 + out * 8, y: 2 },
@@ -1703,7 +1703,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     const h = Math.sin(t * 6.5);
     return {
       ...s, neck: s.neck - 0.26 - h * 0.05, tilt: s.tilt + 0.06 + h * 0.03,
-      bob: s.bob - Math.abs(h) * 1.0,
+      bob: s.bob,
       fistL: { x: 6 + h * 2, y: 2 }, fistR: { x: 13 - h * 2, y: 0 },
     };
   }
@@ -1788,7 +1788,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt + w * 0.042,
       neck: s.neck + w * 0.055,
-      bob: s.bob - load * 2.6,
+      bob: s.bob,
       footL: { x: -5 - w * 3.0, y: 0 }, footR: { x: 5 - w * 3.0, y: 0 },
       // RULE 1b. The hands used to hang at x ±5.5, inside a trunk 12 thick drawn
       // in the same ink, so the forearms showed about five units of themselves —
@@ -1844,7 +1844,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt + 0.03 + w * 0.045,
       neck: s.neck + 0.03 + w * 0.03,
-      bob: s.bob - Math.abs(w) * 2.1 - adj * 0.8,
+      bob: s.bob,
       footL: { x: -6 - w * 2.9, y: 0 }, footR: { x: 6 - w * 2.9, y: 0 },
       // (18, −22) and (13, −17) are rig's own arms-crossed targets and they are
       // not a preference. At (8, −19) / (−7, −22) — which is where this pose was
@@ -1868,7 +1868,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - r * 0.09,
       neck: s.neck - up * 0.09,
-      bob: s.bob + up * 4.4,
+      bob: s.bob,
       footL: { x: -5, y: -up * 4.0 }, footR: { x: 5, y: -up * 4.0 },
       fistL: { x: -12 - r * 2.6, y: 1 }, fistR: { x: -13 - r * 2.6, y: 3 },
     };
@@ -1883,7 +1883,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.04 + w * 0.05,
       neck: s.neck - 0.05 + w * 0.11,
-      bob: s.bob - Math.abs(w) * 2.0,
+      bob: s.bob,
       footL: { x: -8 - w * 2.6, y: 0 }, footR: { x: 8 - w * 2.6, y: 0 },
       // FURTHER BACK, not further out — the comment above is why the hands are
       // behind rather than in front, and rule 1b is why −9 was not far enough:
@@ -1895,15 +1895,21 @@ export function actStance(code: number, t: number, u: number): Stance {
   }
   if (code === 65) {                             // GAZING UP — head back, arms forgotten
     const d = life2(t, 0.36, 0.23, 0.3);
+    const scan = life2(t, 0.23, 0.14, 1.7);      // the gaze travelling across what he sees
     return {
       ...s,
-      tilt: s.tilt - 0.05 + d * 0.07, neck: -0.30 + d * 0.13,
-      bob: s.bob + 0.5 - Math.abs(d) * 2.4,
+      // THE LOOK IS THE MOVEMENT, now that the bob is not (AL1). This act was the
+      // second-commonest code in the app and most of what it moved was a 2.4-unit
+      // rise and fall; a head thrown back that then holds perfectly still is a
+      // statue, so the gaze wanders over whatever is up there instead. On the SPINE
+      // as well as the neck (N12), and the weight drifts under it.
+      tilt: s.tilt - 0.05 + d * 0.10 + scan * 0.04, neck: -0.30 + d * 0.20 + scan * 0.07,
+      bob: s.bob + 0.5,
       // FORGOTTEN, NOT ABSENT (rule 1b). The name is the intent — the arms are
       // doing nothing while he looks up — but at ±5.5 they were not hanging, they
       // were gone, and this was the second-commonest code in the app.
-      fistL: { x: -14 + d * 2.4, y: 7 }, fistR: { x: 14 + d * 2.2, y: 7 },
-      footL: { x: -5 - d * 2.2, y: 0 }, footR: { x: 5 - d * 2.2, y: 0 },
+      fistL: { x: -14 + d * 3.4 - scan * 1.6, y: 7 }, fistR: { x: 14 + d * 3.2 - scan * 1.6, y: 7 },
+      footL: { x: -5 - d * 3.6, y: 0 }, footR: { x: 5 - d * 3.6, y: 0 },
     };
   }
   if (code === 66) {                             // FIDGETING — nothing is ever quite still
@@ -1917,7 +1923,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     return {
       ...s,
       tilt: s.tilt + w * 0.02, neck: s.neck + b * 0.008 - sc * 0.04,
-      bob: s.bob - Math.abs(w) * 0.9,
+      bob: s.bob,
       footL: { x: -5 - w * 1.5, y: 0 }, footR: { x: 6 - w * 1.5, y: 0 },
       // Both hands out at 14 (rule 1b) and fidgeting from there. At −4 the left
       // one lay along the trunk, so two of the three clocks this act runs were
@@ -1937,7 +1943,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     return {
       ...s,
       tilt: s.tilt + 0.04 + w * 0.035, neck: s.neck + 0.02 + w * 0.085,
-      bob: s.bob - 0.4 - tap * 0.5,
+      bob: s.bob - 0.4,
       footL: { x: -6 - w * 1.6, y: 0 }, footR: { x: 7 - w * 1.6, y: -tap * 4.6 },
       fistL: { x: 18, y: -22 }, fistR: { x: 13, y: -17 },   // the fold, forward — see 62
     };
@@ -1954,7 +1960,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.03 + sw * 0.02,
       neck: s.neck - 0.02 + ha * 0.02,
-      bob: s.bob - Math.abs(sw) * 0.7,
+      bob: s.bob,
       footL: { x: -5, y: 0 }, footR: { x: 6, y: 0 },
       fistL: { x: 19 + ha * 7, y: -12 + hb * 6 },
       fistR: { x: 25 + hb * 7, y: -17 + ha * 6 },
@@ -1989,7 +1995,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     return {
       ...s,
       tilt: s.tilt + 0.04 + w * 0.035, neck: s.neck + 0.07 + w * 0.03,
-      bob: s.bob - Math.abs(w) * 2.2,
+      bob: s.bob,
       footL: { x: -5 - w * 2.9, y: 0 }, footR: { x: 5 - w * 2.9, y: 0 },
       fistL: { x: 12 + th * 1.1, y: -3 }, fistR: { x: 13 - th * 1.1, y: -2 },
     };
@@ -2002,7 +2008,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     return {
       ...s,
       tilt: s.tilt - c * 0.07, neck: s.neck - c * 0.10,
-      bob: s.bob + c * 2.0,
+      bob: s.bob,
       footL: { x: -5, y: -c * 1.4 }, footR: { x: 5, y: -c * 1.4 },
       // Rule 1b: the chest opening is the point, and at ±6.5 the arms it opens
       // against were inside the body.
@@ -2019,7 +2025,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     return {
       ...s,
       tilt: s.tilt + 0.02,
-      bob: s.bob - 0.8 + (fl + fr) * 0.5,
+      bob: s.bob - 0.8,
       footL: { x: -5, y: -fl * 5.5 }, footR: { x: 6, y: -fr * 5.5 },
       // Rule 1b — and the counter-swing is what marks time as walking rather than
       // bobbing, so it has to be visible.
@@ -2031,7 +2037,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     return {
       ...s,
       tilt: s.tilt - 0.03, neck: s.neck - 0.03,
-      bob: s.bob + b * 3.0,
+      bob: s.bob,
       footL: { x: -5, y: -b * 3.2 }, footR: { x: 5, y: -b * 3.2 },
       // Rule 1b. Light and springy needs arms to be light with.
       fistL: { x: -14, y: 6 - b * 2 }, fistR: { x: 15, y: 6 - b * 2 },
@@ -2044,7 +2050,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     return {
       ...s,
       tilt: s.tilt + 0.06 + d * 0.055, neck: s.neck + 0.10 + d * 0.09,
-      bob: s.bob - 2.2 - Math.abs(d) * 2.0,
+      bob: s.bob - 2.2,
       footL: { x: -9, y: 0 }, footR: { x: 3, y: 0 },
       // The crossing hand goes to 15, not 4: on the sternum the forearm is ink on
       // ink and the arm vanishes, which turns a slouch into a figure with one arm.
@@ -2073,7 +2079,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     return {
       ...s,
       tilt: s.tilt + 0.05 + sh * 0.03, neck: s.neck + 0.09 + sh * 0.05,
-      bob: s.bob - 1.4 + Math.abs(r) * 0.8,
+      bob: s.bob - 1.4,
       fistL: { x: 13 + r * 3.4, y: -8 }, fistR: { x: 14 - r * 3.4, y: -7 + sh * 1.3 },
     };
   }
@@ -2098,7 +2104,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     return {
       ...s,
       tilt: s.tilt - 0.18 + d * 0.035, neck: s.neck + 0.14 + d * 0.05 + nod * 0.09,
-      bob: s.bob - 1.6 - Math.abs(d) * 1.0,
+      bob: s.bob - 1.6,
       footL: { x: -11 - d * 1.8, y: 0 }, footR: { x: 7 - d * 1.8, y: 0 },
       fistL: { x: -13, y: 4 + d * 0.9 },
       fistR: { x: 14 + d * 1.4, y: -38 },
@@ -3527,7 +3533,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt + shift * 0.07,
       neck: s.neck + 0.10 + shift * 0.055 + settle * 0.03,
-      bob: s.bob - Math.abs(shift) * 1.4,
+      bob: s.bob,
       footL: { x: -5 - shift * 2.4, y: 0 }, footR: { x: 5 - shift * 2.4, y: 0 },
       // BOTH HANDS FORWARD OF THE TRUNK, and a reader named the pose that taught
       // it: *"I don't like that movement of the hands, it doesn't seem quite
@@ -3559,7 +3565,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt + 0.03 + rock * 0.065,
       neck: s.neck - 0.20 + rock * 0.09,
-      bob: s.bob - Math.abs(rock) * 1.9,
+      bob: s.bob,
       footL: { x: -5 - rock * 2.8, y: 0 }, footR: { x: 5 - rock * 2.8, y: 0 },
       fistL: { x: -14 - rock * 1.6, y: -2 },
       fistR: { x: 14 + rock * 1.4, y: -2 + rock * 2.2 },
@@ -3580,15 +3586,19 @@ export function actStance(code: number, t: number, u: number): Stance {
     };
   }
   if (code === 161) {                            // WAITING FOR THE ANSWER — open, patient, watching
+    // ONE SINE AND A BOB WAS ALL THIS HELD (AL1), and the bob was most of it. The
+    // wait is a weight going from one foot to the other and hands that open on it,
+    // with a second slower channel so a four-second beat does not catch the loop.
     const breathe = Math.sin(t * 0.8);
+    const shift = life2(t, 0.29, 0.18, 2.1);
     return {
       ...s,
-      tilt: s.tilt - 0.03 + breathe * 0.04,
-      neck: s.neck + 0.06 + breathe * 0.06,
-      bob: s.bob + breathe * 1.2,
-      footL: { x: -5 - breathe * 1.4, y: -breathe * 0.9 }, footR: { x: 5 - breathe * 1.4, y: -breathe * 0.9 },
-      fistL: { x: -16 - breathe * 1.4, y: -2 + breathe * 2.4 },
-      fistR: { x: 16 + breathe * 1.4, y: -2 + breathe * 2.4 },
+      tilt: s.tilt - 0.03 + breathe * 0.04 + shift * 0.05,
+      neck: s.neck + 0.06 + breathe * 0.06 + shift * 0.08,
+      bob: s.bob,
+      footL: { x: -5 - breathe * 1.4 - shift * 2.6, y: 0 }, footR: { x: 5 - breathe * 1.4 - shift * 2.6, y: 0 },
+      fistL: { x: -16 - breathe * 2.8 - shift * 2.2, y: -2 + breathe * 2.4 },
+      fistR: { x: 16 + breathe * 2.8 - shift * 2.2, y: -2 + breathe * 2.4 },
     };
   }
   if (code === 162) {                            // PACING ON THE SPOT — turning it over on the feet
@@ -3597,7 +3607,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt + step * 0.065,
       neck: s.neck + 0.08 + step * 0.05,
-      bob: s.bob - Math.abs(step) * 1.4,
+      bob: s.bob,
       footL: { x: -5 - step * 2.4, y: Math.max(0, step) * -5.2 },
       footR: { x: 5 - step * 2.4, y: Math.max(0, -step) * -5.2 },
       // 13 rather than 6, for the reason act 163 states: at 6 the forearm is
@@ -3623,7 +3633,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.04 + drift * 0.09,
       neck: s.neck - 0.24 + drift * 0.10 + back * 0.05,
-      bob: s.bob - Math.abs(drift) * 0.8,
+      bob: s.bob,
       fistL: { x: -14 - drift * 2.4, y: 2 + drift * 1.4 },
       fistR: { x: 15 - drift * 2.4, y: 2 - drift * 1.4 },
     };
@@ -3635,7 +3645,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt + slow * 0.05 + Math.max(0, nod) * 0.03,
       neck: s.neck + 0.08 + Math.max(0, nod) * 0.20,
-      bob: s.bob - Math.max(0, nod) * 1.4,
+      bob: s.bob,
       footL: { x: -5 - slow * 2.2, y: 0 }, footR: { x: 5 - slow * 2.2, y: 0 },
       fistL: { x: -14 - slow * 2.4, y: 2 },
       fistR: { x: 15 - slow * 2.4, y: 2 + slow * 2.8 },
@@ -3649,7 +3659,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt + 0.02 + sway * 0.04,
       neck: s.neck + 0.04 + sway * 0.045 + settle * 0.02,
-      bob: s.bob - Math.abs(sway) * 2.0,
+      bob: s.bob,
       footL: { x: -5 - sway * 3.2, y: 0 }, footR: { x: 5 - sway * 3.2, y: 0 },
       fistL: { x: -11 - sway * 1.2, y: -12 },
       fistR: { x: 11 - sway * 1.2, y: -12 - tap * 2.6 },
@@ -3665,7 +3675,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       // gesture: somebody reading who keeps being interrupted by their own
       // thought.
       neck: s.neck + 0.24 + lift * 0.055 - look * 0.20,
-      bob: s.bob - Math.abs(lift) * 1.2,
+      bob: s.bob,
       fistL: { x: 14 + lift * 2.0, y: -13 + lift * 2.8 },
       fistR: { x: 25 + lift * 2.0, y: -17 + lift * 3.0 },
     };
@@ -3676,7 +3686,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.03 + breathe * 0.04,
       neck: s.neck + 0.05 + breathe * 0.06,
-      bob: s.bob + breathe * 1.3,
+      bob: s.bob,
       footL: { x: -5 - breathe * 2.0, y: 0 }, footR: { x: 5 - breathe * 2.0, y: 0 },
       fistL: { x: -13 - breathe * 1.2, y: 6 + breathe * 1.4 },
       fistR: { x: 21 + breathe * 3.6, y: -6 + breathe * 3.2 },
@@ -3718,7 +3728,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.05 + lean * 0.035,
       neck: -0.10 + lean * 0.05,
-      bob: s.bob - Math.abs(along) * 1.2,
+      bob: s.bob,
       footL: { x: -5 - along * 2.2, y: 0 }, footR: { x: 5 - along * 2.2, y: 0 },
       fistL: { x: -13 - along * 1.2, y: 6 + along * 1.4 },
       // Along the line to the RIGHT of where rig 40 writes, never back past it: the
@@ -3733,7 +3743,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.06 + along * 0.03,
       neck: 0.10 + Math.sin(t * 0.61) * 0.05,
-      bob: s.bob - Math.abs(along) * 1.3,
+      bob: s.bob,
       footL: { x: -5 - along * 2.4, y: 0 }, footR: { x: 5 - along * 2.4, y: 0 },
       fistL: { x: -13 - along * 1.0, y: 6 + along * 1.6 },
       fistR: { x: 26 + along * 3.4, y: -2 + pen * 1.6 },
@@ -3748,7 +3758,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.05 + weight * 0.04 + tap * 0.02,
       neck: -0.18 + tap * 0.06 + weight * 0.03,
-      bob: s.bob - Math.abs(weight) * 1.4,
+      bob: s.bob,
       footL: { x: -5 - weight * 2.6, y: 0 }, footR: { x: 5 - weight * 2.6, y: 0 },
       fistL: { x: -13 - weight * 1.4, y: 6 + weight * 1.8 },
       fistR: { x: 32 + tap * 5, y: -44 + weight * 1.0 },
@@ -3760,7 +3770,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     return {
       ...s,
       tilt: s.tilt + 0.04 + shift * 0.04,
-      bob: s.bob - 2 - Math.abs(shift) * 2.0 + heft * 0.6,
+      bob: s.bob - 2,
       neck: s.neck + 0.06 + shift * 0.05,
       footL: { x: -5 - shift * 3.0, y: 0 }, footR: { x: 5 - shift * 3.0, y: 0 },
       fistL: { x: 18 + shift * 1.2, y: 2 + Math.abs(shift) * 2.0 - heft },
@@ -3775,7 +3785,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.04 + rock * 0.05,
       neck: s.neck + 0.12 + Math.sin(t * 0.53) * 0.06,
-      bob: s.bob - Math.abs(rock) * 1.6,
+      bob: s.bob,
       footL: { x: -5 - rock * 2.6, y: 0 }, footR: { x: 5 - rock * 2.6, y: 0 },
       fistL: { x: -7 - rock * 1.2, y: 5 + rock * 2.2 },
       fistR: { x: 13 + rock * 1.0, y: -14 + rock * 1.8 },
@@ -3788,7 +3798,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.03 + lift * 0.04,
       neck: 0.04 + 0.08 + look * 0.06,
-      bob: s.bob - Math.abs(lift) * 1.5,
+      bob: s.bob,
       footL: { x: -5 - lift * 2.4, y: 0 }, footR: { x: 5 - lift * 2.4, y: 0 },
       fistL: { x: 14 + lift * 0.9, y: -2 - lift * 2.4 },
       fistR: { x: 24 + lift * 0.9, y: -6 - lift * 2.4 },
@@ -3803,7 +3813,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt + weight * 0.05,
       neck: -0.08 + weight * 0.05 - beat * 0.04,
-      bob: s.bob - Math.abs(weight) * 1.5,
+      bob: s.bob,
       footL: { x: -5 - weight * 2.6, y: 0 }, footR: { x: 5 - weight * 2.6, y: 0 },
       fistL: { x: -13 - weight * 1.4, y: 4 + weight * 2.0 },
       fistR: { x: 22.5 + weight * 1.0, y: -28 - beat * 3.4 },
@@ -3816,7 +3826,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.02 + shift * 0.05,
       neck: -0.06 - 0.10 + drift * 0.08,
-      bob: s.bob - Math.abs(shift) * 1.5,
+      bob: s.bob,
       footL: { x: -5 - shift * 2.5, y: 0 }, footR: { x: 5 - shift * 2.5, y: 0 },
       fistL: { x: -16 - shift * 1.2, y: -4 + shift * 2.0 },
       fistR: { x: 16 - shift * 1.2, y: -6 + drift * 2.2 },
@@ -3829,23 +3839,27 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.03 + weight * 0.05,
       neck: -0.04 + weight * 0.05,
-      bob: s.bob - Math.abs(weight) * 1.5,
+      bob: s.bob,
       footL: { x: -5 - weight * 2.5, y: 0 }, footR: { x: 5 - weight * 2.5, y: 0 },
       fistL: { x: -13 - weight * 1.2, y: 6 + weight * 1.8 },
       fistR: { x: 24 + heft * 1.2, y: -12 + heft * 2.6 },
     };
   }
   if (code === 178) {                            // CROUCHED BY IT — twin of rig 43
+    // The crouch held its height with a breath (AL1) and looked around by 1.8
+    // units. Crouched beside a thing, what moves is the LOOKING — across it, and
+    // the weight rocking on the balls of the feet with it.
     const breathe = Math.sin(t * 0.9);
     const check = Math.sin(t * 0.41);
+    const over = life2(t, 0.26, 0.16, 3.4);
     return {
       ...s,
-      tilt: s.tilt - 0.14 + breathe * 0.03,
-      neck: 0.14 + check * 0.08,
-      bob: s.bob - 9 + breathe * 1.4,
-      footL: { x: -6 - check * 1.8, y: 0 }, footR: { x: 6 - check * 1.8, y: 0 },
-      fistL: { x: 16 + check * 1.6, y: 10 + breathe * 1.2 },
-      fistR: { x: 24 + check * 1.6, y: 12 + breathe * 1.2 - Math.max(0, Math.sin(t * 1.7)) * 2.2 },
+      tilt: s.tilt - 0.14 + breathe * 0.03 + over * 0.06,
+      neck: 0.14 + check * 0.14 + over * 0.09,
+      bob: s.bob - 9,
+      footL: { x: -6 - check * 2.8 - over * 1.6, y: 0 }, footR: { x: 6 - check * 2.8 - over * 1.6, y: 0 },
+      fistL: { x: 16 + check * 3.4 - over * 1.8, y: 10 + breathe * 1.2 },
+      fistR: { x: 24 + check * 3.4 - over * 1.8, y: 12 + breathe * 1.2 - Math.max(0, Math.sin(t * 1.7)) * 2.2 },
     };
   }
   if (code === 179) {                            // STILL HOLDING IT UP — twin of rig 20
@@ -3854,7 +3868,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.02 + lift * 0.04,
       neck: s.neck - 0.06 + Math.sin(t * 0.47) * 0.07,
-      bob: s.bob - Math.abs(lift) * 1.5,
+      bob: s.bob,
       footL: { x: -5 - lift * 2.5, y: 0 }, footR: { x: 5 - lift * 2.5, y: 0 },
       fistL: { x: -13 - lift * 1.2, y: 6 + lift * 1.8 },
       fistR: { x: 20 + lift * 1.0, y: -18 - lift * 2.6 },
@@ -3869,7 +3883,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: 0.12 + breath * 0.03 + glance * 0.04,
       neck: 0.10 + glance * 0.10,
-      bob: -14 + breath * 2.0,
+      bob: -14,
       footL: { x: -11 - glance * 2.6, y: 0 }, footR: { x: 11 - glance * 2.6, y: 0 },
       fistL: { x: -12 + shake * 0.8 - glance * 1.2, y: -16 + breath * 2.4 },
       fistR: { x: 12 + shake * 0.8 - glance * 1.2, y: -16 + breath * 2.4 },
@@ -3883,7 +3897,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       tilt: -0.02 + reach * 0.07,
       neck: 0.12 + Math.sin(t * 0.37) * 0.09,
       // The breath only LIFTS the kneel: rig 49 already has the knee on the floor.
-      bob: -18 + (breath + 1) * 1.1,
+      bob: -18,
       footL: { x: 15, y: 0 }, footR: { x: -11, y: 0 },
       fistL: { x: 20 + reach * 3.4, y: 4 + breath * 2.2 },
       fistR: { x: 27 + reach * 3.4, y: 0 + breath * 2.2 },
@@ -3898,7 +3912,7 @@ export function actStance(code: number, t: number, u: number): Stance {
       ...s,
       tilt: s.tilt - 0.10 + lean * 0.05,
       neck: 0.06 + lean * 0.06,
-      bob: s.bob - Math.abs(lean) * 1.8 - strain * 1.2,
+      bob: s.bob,
       footL: { x: -5 - lean * 3.0, y: 0 }, footR: { x: 5 - lean * 3.0, y: 0 },
       fistL: { x: 18 + lean * 1.5, y: 4 + strain * 2.2 },
       fistR: { x: 26 + lean * 1.5, y: 8 + strain * 2.2 },

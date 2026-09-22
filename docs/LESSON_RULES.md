@@ -9973,3 +9973,111 @@ stage composites to about #747474, where solid white is 4.7:1 and white at 60% w
 2.9:1. The tap-anywhere layer carries no button role, because react-native-web renders
 a role="button" Pressable as a real `<button>` and "Got it" inside it would be a button
 inside a button.
+
+---
+
+## Group AL · Nothing moves him up and down on a clock
+
+> *"sometimes the stickman will be moving up and down while standing or in general
+> the stickman will be moving up and down very slightly. I absolutly dislike this,
+> it looks really cheep, ai looking, and just really bad, I want none of that
+> moving up and down of stickman in lessons."*
+
+Every other group here is about giving the figure MORE to do. This one takes one
+thing away, and it is the only motion in the app that a reader has ever called
+cheap in so many words.
+
+**It was on every beat of every lesson.** `stand()` raised the pelvis 1.02 units
+on two beating cosines under a docstring calling it "a visible breath", and
+because every pose is built on `stand`, every pose inherited it: `emoteHold`,
+`emoteLive`, `narratorHold`, `narratorLive`, `masterLive`, `postureHold` and all
+200 acts measured at **exactly 1.017 units** of vertical swing. On top of that 48
+acts added 1.3 to 5.0 of their own, the boxers' `guard` bounced 2.98 through the
+whole of `logic-arguments-1`, the wander's weight shift sank 2.2 on 218 lessons,
+and two scenes drew five bound figures each off `bob: v * 0.9`. Across 2,585 posed
+beats the mean vertical swing of his head was **1.61 units**, which at lesson
+scale is between one and four pixels, for ever, on a figure drawn in 2pt ink.
+
+### AL1 · `bob` is written by CAUSES, never by a clock
+
+`bob` is the pelvis height and everything above it rides it, so it is the one
+channel that moves the whole man. It may only be moved by something the reader can
+see the reason for:
+
+| allowed | because |
+|---|---|
+| a walk | the legs are lifting — and it is driven by DISTANCE, not by `t` |
+| a crouch, a kneel, a seat | he is going down, and stays down |
+| a staged one-shot | he jumps, falls, picks something up — driven by `u` |
+| the wander's own LOOK | a look down bends the body with the feet (AF) |
+
+Anything else is flat. A term in `bob` that is a function of the monotonic clock is
+a build failure, held by **`npm run check:idle`** — which sweeps `stand`, `guard`,
+the default `seated`, every gesture, every posture, all 200 acts, `interact`'s
+carrying and hauling family and the wander's LEAN over 18 seconds at 27Hz, and
+reads the scenes for a Stance of their own that drives `bob` off the clock.
+`node scripts/countertest-idle.mjs` puts all seven wobbles back, and stages the two
+shapes that must stay SILENT.
+
+**Why a wobble cannot read as life, stated once so it is not re-litigated.**
+Everything else the figure does is CAUSED on the stage — an arm swings because he
+is gesturing, the weight goes across because his feet moved, the head turns because
+it is looking at something. A pelvis rising and falling on a sine has nothing in
+the drawing to explain it, so the eye reads it as the rendering being loose rather
+than as a man breathing. At about a pixel it is exactly the amplitude of a
+rounding error, which is why "cheap" and "AI looking" are the accurate words for
+it and not an overstatement.
+
+### AL2 · A constant offset is the POSE; only the swing is the defect
+
+Flattening means dropping the terms that vary and **keeping the constants**. Act 74
+sits 2.2 units low, 178 crouches 9, 180 cowers at −14: those are what the pose IS,
+and a rule that flagged them would ban crouching. So `bob: s.bob - 2.2 - |d| * 2.0`
+becomes `bob: s.bob - 2.2`, and `bob: -14 + breath * 2.0` becomes `bob: -14`. The
+figure's resting height moves by at most 2.6 units anywhere in the corpus, which is
+inside `mustrule`'s own 4-unit pad — which is why this cost no re-measure, and why
+`scripts/restamp-flat.mjs` can renew the two scene stamps on a proof instead.
+
+### AL3 · Sweep the DEFAULT, and sweep it by EVALUATION
+
+Two traps, both of which caught the first pass.
+
+**A net reading is not the measurement.** Act 30's own `bob` was
+`s.bob - |a| * 1.2`, which happened to CANCEL most of the inherited breath — so
+measured while the breath was still there it came back at 1.015 against a floor of
+1.017 and looked clean. It was the one site a hand-built list missed, and it is
+why `check:idle` evaluates every entry point rather than reading the source for a
+pattern.
+
+**And a shared primitive is swept in its lesson form.** `rig.seated` breathes on
+the launch screen, where the figure is 70px tall, the swing is well under a pixel
+and `check:launch`'s range-of-motion rule reads it. So the breath is a fourth
+argument that defaults to OFF — a lesson calls `seated(h, t)` and gets a still
+seat, the launch screen asks for it back — and the sweep measures the default,
+because the default is what a lesson gets.
+
+### AL4 · A hold that was mostly a breath has to earn its keep again
+
+Taking the vertical out dropped three living holds under the 1.5× a still beat
+needs (`check:idle`'s READS tier): **65 GAZING UP, 161 WAITING FOR THE ANSWER and
+178 CROUCHED BY IT**. The answer is never to lower the bar — it is that those three
+were mostly a rise and fall, and a pose whose whole content was the wobble has no
+content. Each was given the motion its own name promises, in the axes that are
+still allowed: the gaze travelling across what he is looking at (on the SPINE as
+well as the neck, N12), the weight going from one foot to the other, the looking
+moving across the thing he is crouched beside. Living holds that read went **39 →
+42** and the median travel 6.02 → 6.08, so the corpus came out of this with MORE
+visible motion than it went in with.
+
+### AL5 · A raised hand is not the body — measure the HEAD
+
+The offline sweep proves the maths; only the render proves the app draws it. The
+probe for that has one trap in it, and it is worth 20 pixels: the figure's root is
+a zero-size box, so its extent is the union of its descendants — and the top of
+that union is a raised glove, not a skull. Measured on the same beat of
+`logic-arguments-1`, the union reported **19.5px** of movement where the head
+reported **18.5px** of a genuine boxing duck, and on an ordinary lesson the union
+reads an arm while the body holds at 0.1px. `Stickman` carries
+`testID="head"` for this. Measured through it, a still beat now reads **0.01–0.15px**
+of vertical head movement, against 1.5px on a beat where he walks — which is the
+control that proves the probe can still see motion at all.

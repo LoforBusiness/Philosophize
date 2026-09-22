@@ -31,7 +31,7 @@
 import { loadRig } from './lib/loadrig.mjs';
 import { CLOCK_ACTS, STILL_TWIN } from './lib/liveliness.mjs';
 
-const { RIG, MOVES } = await loadRig();
+const { RIG, MOVES, INTERACT, WANDER } = await loadRig();
 
 /**
  * Acts that break one of these rules ON PURPOSE, with the reason from their own
@@ -174,6 +174,137 @@ if (weak.length) {
   console.log(`  ✗   ${weak.length} STILL_TWIN target(s) do not read: ${weak.join(', ')}`);
 } else {
   console.log(`  ok  all ${new Set(Object.values(STILL_TWIN)).size} STILL_TWIN targets read (${Object.keys(STILL_TWIN).length} frozen poses mapped)`);
+}
+
+// ── AL1 · NOTHING MOVES THE MAN UP AND DOWN ON A CLOCK ───────────────────────
+//
+// A reader, after the whole-body wander had shipped:
+//
+//   *"sometimes the stickman will be moving up and down while standing or in
+//    general the stickman will be moving up and down very slightly. I absolutely
+//    dislike this, it looks really cheep, ai looking, and just really bad, I want
+//    none of that moving up and down of stickman in lessons."*
+//
+// They named the one motion that cannot read as life. Everything else this figure
+// does has a cause the reader can see — an arm swings because he is gesturing, the
+// weight goes across because he is shifting his feet, the head turns because it is
+// looking at something. A pelvis that rises and falls on a sine has nothing on the
+// stage explaining it, so it reads as the drawing being loose rather than as a man
+// breathing — and at lesson scale it is about a pixel, which is exactly the size
+// that reads as a rendering fault rather than as a decision.
+//
+// Measured before it was removed: `stand()` raised the pelvis 1.02 units on two
+// beating cosines, and EVERY pose in the app inherited it — emoteHold, emoteLive,
+// narratorHold, narratorLive, masterLive, postureHold and every act's floor all
+// came back at exactly 1.017. On top of that, 48 acts added 1.3 to 5.0 of their
+// own, the boxers' guard bounced 2.98 through the whole of logic-arguments-1, and
+// the wander's weight shift sank 2.2 on 218 lessons. Across 2,585 posed beats the
+// mean vertical swing of his head was 1.61 units.
+//
+// So `bob` is written by CAUSES now, and never by a clock:
+//
+//   ALLOWED    a walk (the legs are lifting, and it is driven by distance rather
+//              than by t), a crouch or a seat he goes down into, a staged one-shot
+//              the lesson plays (jump, fall, pick something up — driven by `u`),
+//              and the wander's own LOOK, which bends the body with the feet.
+//   FORBIDDEN  any term in `bob` that is a function of the monotonic clock.
+//
+// It is held by EVALUATION rather than by reading the source, because the
+// expression is the least of it: act 30's bob happened to CANCEL most of the
+// breath, so a net measurement taken while the breath was still there reported it
+// inside the floor — and it was the one site a hand-built list missed.
+const FLAT_TS = Array.from({ length: 481 }, (_, i) => i * 0.0375);   // 18s at ~27Hz
+const wobble = (f) => {
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (const t of FLAT_TS) {
+    let b;
+    try { b = f(t); } catch { return 0; }
+    if (!Number.isFinite(b)) return 0;
+    if (b < lo) lo = b;
+    if (b > hi) hi = b;
+  }
+  return hi - lo;
+};
+const wob = [];
+const bobs = (label, f) => { const w = wobble(f); if (w > 0.001) wob.push({ label, w: +w.toFixed(3) }); };
+
+bobs('rig.stand', (t) => RIG.stand(t).bob);
+bobs('rig.guard', (t) => RIG.guard(t, 0, 0).bob);
+// `seated`'s breath is OFF by default, so a lesson gets a still seat; the launch
+// screen asks for it back with a fourth argument, at 70px, where `check:launch`
+// reads its range of motion. Sweeping the DEFAULT is sweeping the lesson's call.
+bobs('rig.seated', (t) => RIG.seated(21, t).bob);
+for (let c = 0; c <= 25; c += 1) bobs(`rig.boxMove ${c}`, (t) => RIG.boxMove(c, t, 0.5, 1).bob);
+for (let c = 0; c <= 6; c += 1) {
+  bobs(`rig.narratorHold ${c}`, (t) => RIG.narratorHold(c, t).bob);
+  bobs(`rig.narratorLive ${c}`, (t) => RIG.narratorLive(c, t, 3).bob);
+}
+for (let c = 0; c <= 58; c += 1) {
+  bobs(`rig.emoteHold ${c}`, (t) => RIG.emoteHold(c, t).bob);
+  bobs(`rig.emoteLive ${c}`, (t) => RIG.emoteLive(c, t, 3).bob);
+}
+for (let c = 0; c <= 12; c += 1) {
+  bobs(`rig.masterHold ${c}`, (t) => RIG.masterHold(c, t).bob);
+  bobs(`rig.masterLive ${c}`, (t) => RIG.masterLive(c, t, 3).bob);
+  bobs(`moves.postureHold ${c}`, (t) => MOVES.postureHold(c, t).bob);
+}
+for (let n = 1; n <= 200; n += 1) {
+  bobs(`moves.actStance ${n} held`, (t) => MOVES.actStance(n, t, 1).bob);
+  bobs(`moves.actStance ${n} mid`, (t) => MOVES.actStance(n, t, 0.5).bob);
+}
+for (let c = 0; c <= 40; c += 1) bobs(`interact.propAct ${c}`, (t) => INTERACT.propAct(c, t, 1).bob);
+for (let m = 0; m <= 6; m += 1) bobs(`interact.carryMode ${m}`, (t) => INTERACT.carryMode(m, 0.5, 0.5).bob);
+for (let c = 0; c <= 8; c += 1) {
+  bobs(`interact.pairPosture ${c} a`, (t) => INTERACT.pairPosture(c, t).a.bob);
+  bobs(`interact.pairPosture ${c} b`, (t) => INTERACT.pairPosture(c, t).b.bob);
+}
+
+// AND THE WANDER LAYER, which is the one that actually runs on 218 lessons. Its
+// LEAN is an ambient weight shift with nothing on the stage behind it, so it is
+// held here; its LOOK, SIT and CROUCH bend the body on purpose and are not swept,
+// because a look down that does not lower the head is not a look down (group AF).
+// The plan format is `[lo, hi, kind, at, dur, target, …]`, and W_LEAN is 6.
+const LEAN_PLAN = [-30, 30, WANDER.W_LEAN, 0.2, 2.4, 1, WANDER.W_LEAN, 3.0, 2.4, 0];
+bobs('wander LEAN', (t) => {
+  const st = WANDER.wanderState(LEAN_PLAN, t % 6, WANDER.wanderRest(), 1);
+  return WANDER.wanderStance(RIG.stand(t), st, t, 1).bob;
+});
+
+if (wob.length) {
+  bad += 1;
+  console.log(`\n  ✗   ${wob.length} pose(s) still move the pelvis on the clock (AL1):`);
+  for (const x of wob.slice(0, 14)) console.log(`        ${x.label} — ${x.w} units of vertical swing`);
+} else {
+  console.log(`\n  ok  no pose moves the pelvis on the clock  ${FLAT_TS.length} samples over 18s (AL1)`);
+}
+
+// AND A SCENE CAN DECLARE ITS OWN STANCE, which is how two of them kept a breath
+// the rig had lost: `ethics3Scene` and `ethics6Scene` each draw five bound figures
+// off `bob: v * 0.9`. A Stance is recognisable — it is the object literal that also
+// carries `tilt` and `fistL` — and that is what separates it from a prop's own bob,
+// since `epistemology37Scene`'s hull rolls on the water and must stay silent.
+const fsmod = (await import('node:fs')).default;
+const pthmod = (await import('node:path')).default;
+const SCN = 'components/lesson/cinematic';
+const CLOCKED = /\b(?:Math\.(?:sin|cos)|life2|cycle)\s*\(\s*[^)]*\bt\b/;
+const scened = [];
+for (const f of fsmod.readdirSync(SCN).filter((n) => /Scene\.tsx$/.test(n))) {
+  const src = fsmod.readFileSync(pthmod.join(SCN, f), 'utf8').split('\n');
+  for (let i = 0; i < src.length; i += 1) {
+    const m = /^\s*(?:\.\.\.[A-Za-z0-9_]+, )?(?:[A-Za-z]+: [^,]+, )*bob: ([^,]+),\s*$/.exec(src[i]);
+    if (!m) continue;
+    const near = src.slice(Math.max(0, i - 14), i + 14).join('\n');
+    if (!/\bfistL\s*:/.test(near) || !/\btilt\s*:/.test(near)) continue;   // not a Stance
+    if (CLOCKED.test(m[1])) scened.push(`${f}:${i + 1}  bob: ${m[1].trim()}`);
+  }
+}
+if (scened.length) {
+  bad += 1;
+  console.log(`  ✗   ${scened.length} scene stance(s) drive bob off the clock (AL1):`);
+  for (const x of scened) console.log(`        ${x}`);
+} else {
+  console.log("  ok  no scene drives a figure's bob off the clock (AL1)");
 }
 
 if (process.argv.includes('--table')) {

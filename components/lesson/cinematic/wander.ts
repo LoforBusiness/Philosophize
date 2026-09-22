@@ -433,10 +433,15 @@ function looked(s: Stance, look: number): Stance {
 /**
  * A weight shift, and it has to beat the breath to be worth having.
  *
- * `check:idle`'s calibration is the bar: `stand()` travels 2.6 units on its own,
- * and 20 of the 32 living holds once travelled no further than that — "not adding
- * a movement, adding a name for one". So the hips go over one foot, the shoulder
- * line drops and the hands answer, which measures about twice the breath.
+ * `check:idle`'s calibration is the bar: `stand()` travels on its own, and 20 of
+ * the 32 living holds once travelled no further than that — "not adding a
+ * movement, adding a name for one". So the hips go over one foot, the shoulder
+ * line leans and the hands answer.
+ *
+ * WHAT IT NO LONGER DOES IS SINK (AL1). It used to drop the pelvis 2.2 units as
+ * the weight went across, which is the wobble a reader named — an ambient move on
+ * 218 lessons, going up and down with nothing on the stage to explain it. The
+ * shift is the lean, the feet and the hands; the height does not move.
  */
 function leaned(s: Stance, p: number): Stance {
   'worklet';
@@ -444,7 +449,6 @@ function leaned(s: Stance, p: number): Stance {
   return {
     ...s,
     tilt: s.tilt + 0.09 * p,
-    bob: s.bob - 2.2 * p,
     footL: { x: s.footL.x - 4 * p, y: s.footL.y },
     footR: { x: s.footR.x + 2.5 * p, y: s.footR.y },
     fistL: { x: s.fistL.x - 3 * p, y: s.fistL.y + 2 * p },

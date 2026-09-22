@@ -18,7 +18,16 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname).replace(/^\//, ''), '..', '..');
-const SRC = 'components/lesson/cinematic';
+// OVERRIDABLE, so a counter-test never edits the working tree. `countertest-idle`
+// copies the four files elsewhere, stages a defect in the copy and points `RIG_SRC`
+// at it — the pattern `countertest-firstrun` already uses, and the reason is not
+// tidiness: another session is usually working in this repo, and a
+// mutate-then-revert counter-test is a window in which their build takes the defect.
+const SRC = process.env.RIG_SRC || 'components/lesson/cinematic';
+
+/** One temp dir per SOURCE, so a staged copy cannot be served to the real check. */
+const TMP_NAME = process.env.RIG_SRC
+  ? `philosophize-rig-${path.basename(process.env.RIG_SRC)}` : 'philosophize-rig';
 
 let loaded = null;
 
@@ -28,10 +37,11 @@ export async function loadRig() {
   const { transform } = await import(
     pathToFileURL(path.join(REPO, 'node_modules/sucrase/dist/index.js')).href
   );
-  const tmp = path.join(os.tmpdir(), 'philosophize-rig');
+  const tmp = path.join(os.tmpdir(), TMP_NAME);
   fs.mkdirSync(tmp, { recursive: true });
   const emit = (rel, name) => {
-    const js = transform(fs.readFileSync(path.join(REPO, rel), 'utf8'), { transforms: ['typescript'] }).code
+    const from = path.isAbsolute(rel) ? rel : path.join(REPO, rel);
+    const js = transform(fs.readFileSync(from, 'utf8'), { transforms: ['typescript'] }).code
       // A data: URL has no base path, so a relative import has nowhere to resolve;
       // one temp directory plus a rewritten specifier gives it somewhere, and keeps
       // generated .mjs out of components/ where Metro would find it.
@@ -45,7 +55,12 @@ export async function loadRig() {
   // — so the movement layer replays here too, which is what lets `check:wander`
   // measure a foot skate and a tap without Metro or a browser.
   const WANDER = await import(emit(`${SRC}/wander.ts`, 'wander.mjs'));
-  loaded = { RIG, MOVES, WANDER };
+  // And `interact.ts` — the figure's relationship to what is outside it — imports
+  // only those two as well, so the whole pose vocabulary of the app is loadable
+  // here. `check:idle` sweeps it for AL1, because a clock-driven `bob` in a
+  // carry or a haul would be the same wobble arriving through a different door.
+  const INTERACT = await import(emit(`${SRC}/interact.ts`, 'interact.mjs'));
+  loaded = { RIG, MOVES, WANDER, INTERACT };
   return loaded;
 }
 
@@ -90,7 +105,7 @@ export async function loadHats() {
   const { transform } = await import(
     pathToFileURL(path.join(REPO, 'node_modules/sucrase/dist/index.js')).href
   );
-  const tmp = path.join(os.tmpdir(), 'philosophize-rig');
+  const tmp = path.join(os.tmpdir(), TMP_NAME);
   fs.mkdirSync(tmp, { recursive: true });
   const file = path.join(tmp, 'wardrobe.mjs');
   fs.writeFileSync(file, transform(fs.readFileSync(path.join(REPO, `${SRC}/wardrobe.ts`), 'utf8'), { transforms: ['typescript'] }).code);

@@ -295,7 +295,10 @@ function boundStance(t: number, seed: number): Stance {
   return {
     tilt: 0.03 + w * 0.06,
     neck: -0.03 + v * 0.16,
-    bob: v * 0.9,
+    // FLAT (AL1). `v` used to ride the pelvis too, so every bound figure drifted
+    // 1.8 units up and down on a clock. The strain is the lean, the feet and the
+    // hands; a body rising with nothing lifting it is the wobble a reader named.
+    bob: 0,
     footL: { x: -3.4 + w * 0.5, y: 0 },
     footR: { x: 3.4 + w * 0.5, y: 0 },
     fistL: { x: -11 - v * 0.8, y: 5 + w * 1.4 },

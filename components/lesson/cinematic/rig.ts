@@ -419,7 +419,11 @@ export function guard(t: number, load = 0, seed = 0): Stance {
   return {
     // Only a slight lean — a deep one closes the gap faster than the spacing can
     // hold, and the pair reads as one blob.
-    tilt: -0.10, neck: -0.05, bob: b - 2,
+    // FLAT (AL1). `b` used to ride the pelvis as well, which bounced both
+    // fighters 2.98 units up and down for the whole lesson — the largest clock
+    // wobble in the app, in the first lesson in Logic. It still floats the gloves,
+    // which is a hand moving rather than the man.
+    tilt: -0.10, neck: -0.05, bob: -2,
     footL: { x: -15 + w - 1 + sway * 0.3, y: 0 },
     footR: { x: 13 + w + sway * 0.3, y: 0 },
     // HANDS AT THE JAW, NOT OUT IN FRONT OF IT. They used to sit at x 27 and 33 —
@@ -893,14 +897,31 @@ export function boxMove(code: number, t: number, u: number, seed = 0): Stance {
 
 /**
  * Relaxed standing, but never a scarecrow. Real people at rest are in constant
- * small motion, so this layers four non-periodic channels: a visible breath, a
- * slow weight rock that shifts the stance and leans the torso, a head that drifts
- * and glances, and hands that never sit perfectly still. All on `life2`, so none
- * of it repeats.
+ * small motion, so this layers non-periodic channels: a slow weight rock that
+ * shifts the stance and leans the torso, a head that drifts and glances, and hands
+ * that never sit perfectly still. All on `life2`, so none of it repeats.
+ *
+ * THE BREATH IS GONE, AND IT IS THE ONE CHANNEL THAT MAY NEVER COME BACK (AL1).
+ * It used to raise the pelvis by 1.02 units on two beating cosines, which at
+ * lesson scale is about a pixel of the whole man sliding up and down for ever.
+ * Every pose in the app inherited it — `emoteHold`, `emoteLive`, `narratorHold`,
+ * `narratorLive`, `masterLive`, `postureHold` and every act's floor all measured
+ * at exactly 1.017 — so it was on the screen on every beat of every lesson, and a
+ * reader named it from the outside: *"the stickman will be moving up and down very
+ * slightly. I absolutely dislike this, it looks really cheap, ai looking."*
+ *
+ * They are right about what it is. A vertical wobble with no cause the reader can
+ * see is the one motion that cannot read as life — nothing in the drawing explains
+ * it, so it reads as the rendering being loose. `bob` is now WRITTEN BY CAUSES: a
+ * walk (the legs are lifting), a crouch or a seat (he is going down), a staged
+ * one-shot (he jumps, falls, picks something up). Never by a clock.
+ *
+ * The life is all still here, and it is all HORIZONTAL or angular — the weight
+ * rock, the head drift, the hand drift, the foot re-plant. `check:idle` measures
+ * it, and `npm run check:still` measures the beats.
  */
 export function stand(t: number): Stance {
   'worklet';
-  const breath = 0.7 * (0.5 - 0.5 * Math.cos(t * 1.6)) + 0.4 * (0.5 - 0.5 * Math.cos(t * 1.02));
   const ws = life2(t, 0.33, 0.19, 0.7);         // slow weight rock, in the torso only
   const hd = life2(t, 0.5, 0.31, 1.1);          // head drift / glance
   // WEIGHT TRANSFER. Nobody stands evenly on both legs for long — they settle onto
@@ -919,7 +940,9 @@ export function stand(t: number): Stance {
   return {
     tilt: 0.05 + ws * 0.02 + wt * 0.012,
     neck: -0.02 + hd * 0.05,
-    bob: breath - Math.abs(wt) * 0.5,
+    // FLAT, and the weight transfer sinks nothing (AL1). The rock is in the torso
+    // and the feet; taking it into the pelvis as well is the wobble.
+    bob: 0,
     // Feet PLANTED and close, so the legs are near-vertical and read as two solid
     // bars. The wide, sliding stance made the near-straight legs look segmented and
     // opened a paper gap between them; the boxing stance only hid it by being deep
@@ -1844,7 +1867,7 @@ export function seatBob(seatH: number) {
  * Base seated pose: pelvis dropped to `seatH`, feet planted forward, hands
  * resting on the lap. Breathes and shifts weight like `stand` does.
  */
-export function seated(seatH: number, t: number, reach = 18): Stance {
+export function seated(seatH: number, t: number, reach = 18, breathe = 0): Stance {
   'worklet';
   const breath = 0.55 * (0.5 - 0.5 * Math.cos(t * 1.5)) + 0.3 * (0.5 - 0.5 * Math.cos(t * 0.97));
   const ws = life2(t, 0.29, 0.17, 0.9);
@@ -1852,7 +1875,11 @@ export function seated(seatH: number, t: number, reach = 18): Stance {
   return {
     tilt: 0.06 + ws * 0.02,
     neck: -0.03 + hd * 0.04,
-    bob: seatBob(seatH) + breath,
+    // OFF BY DEFAULT (AL1): a lesson calls `seated(h, t)` and gets a still seat.
+    // The launch screen passes `breathe = 1` at both of its seated poses, where the
+    // figure is 70px tall, the breath is well under a pixel, and `check:launch`'s
+    // range-of-motion rule reads it.
+    bob: seatBob(seatH) + breath * breathe,
     // Slight left/right asymmetry so the legs never read as one mirrored bar.
     footL: { x: reach - 2, y: 0 },
     footR: { x: reach + 4, y: 0 },
