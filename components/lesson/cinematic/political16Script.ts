@@ -88,17 +88,17 @@ export const BEATS: Pol16Beat[] = [
     g: 383, cords: 4, cut: 4,
     dur: 1.0,
     interact: {
-      prompt: 'How much of alienation comes from ownership and control rather than the size of the wage?',
-      split: {
-        left: 'OWNERSHIP AND CONTROL', right: 'THE SIZE OF THE WAGE',
-        start: 0.04,
-        zones: [
-          { id: 'pay', upto: 0.3, reads: 'mainly a problem of low pay' },
-          { id: 'both', upto: 0.66, reads: 'equally pay and ownership' },
-          { id: 'own', upto: 1, reads: 'ownership and control, not pay', correct: true },
+      prompt: 'Which of these would a bigger wage not fix?',
+      odd: {
+        axis: 'MORE PAY FIXES THREE',
+        tiles: [
+          { id: 'rent', reads: 'THE RENT' },
+          { id: 'food', reads: 'THE FOOD' },
+          { id: 'hours', reads: 'THE HOURS' },
+          { id: 'own', reads: 'WHO DECIDES THE WORK', correct: true },
         ],
       },
-      explain: 'Ownership and control, not pay. A better-paid worker still doesn’t own the car or set the pace, and still competes with fellow workers. Treating alienation as low pay reduces four separations to one.',
+      explain: 'Who decides the work. For Marx the loss is in the worker\'s tie to what they make, and in who settles how it\'s made. A raise leaves both where they were. That\'s why better pay doesn\'t answer the complaint.',
       xp: 5,
     },
   },

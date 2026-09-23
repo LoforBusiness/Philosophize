@@ -95,17 +95,17 @@ export const BEATS: Meta3Beat[] = [
   {
     p: 165, shadow: 0.15, form: 1, apple: 1, divide: 1, becoming: 1, outside: 1, legend: 1,
     interact: {
-      prompt: 'What does the theory of Forms imply about the apple’s reality, compared with its Form?',
-      split: {
-        left: 'THE FORM', right: 'THE APPLE',
-        start: 0.5,
-        zones: [
-          { id: 'apple', upto: 0.34, reads: 'the apple you can hold is fully real' },
-          { id: 'even', upto: 0.62, reads: 'equally real, each in its own way' },
-          { id: 'form', upto: 1, reads: 'the Form is fully real, the apple only partly', correct: true },
+      prompt: 'Which of these is not a copy of something else?',
+      odd: {
+        axis: 'THREE ARE COPIES',
+        tiles: [
+          { id: 'apple', reads: 'THE APPLE' },
+          { id: 'shadow', reads: 'ITS SHADOW' },
+          { id: 'picture', reads: 'A PAINTING' },
+          { id: 'form', reads: 'THE FORM ITSELF', correct: true },
         ],
       },
-      explain: 'The Form is fully real, the apple only partly. It seems natural to count the touchable apple as most real, but Plato reverses that ranking. The apple changes and decays, so it has less being than the unchanging Form it copies.',
+      explain: 'The Form itself. The apple, its shadow and the painting each depend on something further back, and the Form depends on nothing. That\'s what a grade of reality means here: not that the apple is an illusion, but that it borrows.',
       xp: 5,
     },
     dur: 1.0,

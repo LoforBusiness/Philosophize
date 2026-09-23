@@ -114,18 +114,16 @@ export const BEATS: Aes3Beat[] = [
   {
     p: 168, modes: 1, cut: 1, will: 1, early: 1,
     interact: {
-      prompt: 'If music shapes character before reason develops, how should Plato’s ideal city treat music?',
-      drag: {
-        lo: 'NO REGULATION',
-        hi: 'ALL MUSIC BANNED',
-        start: 1,
-        zones: [
-          { id: 'free', upto: 0.28, reads: 'leave music entirely unregulated' },
-          { id: 'modes', upto: 0.74, reads: 'keep the steadfast modes and remove the soft ones', correct: true },
-          { id: 'ban', upto: 1, reads: 'banish all music from the city' },
+      prompt: 'Put these in order, from lightest hand to heaviest.',
+      order: {
+        axis: 'LIGHTEST FIRST',
+        items: [
+          { id: 'free', reads: 'LEAVE MUSIC ALONE' },
+          { id: 'modes', reads: 'KEEP THE STEADFAST MODES' },
+          { id: 'ban', reads: 'BANISH MUSIC ENTIRELY' },
         ],
       },
-      explain: 'Keep the steadfast modes and remove the soft ones. In the Republic, Plato regulates music rather than banning it. Rhythm and harmony shape a child’s character before the child can reason. So the city keeps modes that imitate courage and self-control, and bans modes that soften character.',
+      explain: 'Plato takes the middle one. If music forms character before reason can judge it, leaving it alone hands that formation to chance; banishing it gives up a training he thinks indispensable. What he regulates is which modes, not whether.',
       xp: 5,
     },
     dur: 1.0,

@@ -76,18 +76,17 @@ export const BEATS: Eth16Beat[] = [
     g: 442, causes: 1, knife: 0, money: 1, repaid: 1,
     dur: 1.0,
     interact: {
-      prompt: 'If every choice is fixed by earlier causes, how much blame survives for a compatibilist?',
-      drag: {
-        lo: 'NO BLAME LEFT',
-        hi: 'BLAME STILL HOLDS',
-        start: 0,
-        zones: [
-          { id: 'none', upto: 0.3, reads: 'no one deserves blame for anything' },
-          { id: 'weak', upto: 0.62, reads: 'blame is useful but never deserved' },
-          { id: 'keep', upto: 1, reads: 'people are caused and still blameworthy', correct: true },
+      prompt: 'Which of these does a compatibilist deny?',
+      odd: {
+        axis: 'THREE THEY ACCEPT',
+        tiles: [
+          { id: 'caused', reads: 'EVERY CHOICE HAS CAUSES' },
+          { id: 'wants', reads: 'ACTING FREELY IS ACTING ON YOUR WANTS' },
+          { id: 'blame', reads: 'BLAME CAN BE DESERVED' },
+          { id: 'nobody', reads: 'NOBODY EVER DESERVES BLAME', correct: true },
         ],
       },
-      explain: 'People are caused and still blameworthy. Compatibilists take free to mean unforced rather than uncaused: no knife, and no one holding your arm. Kant dismissed this view as a “wretched subterfuge”.',
+      explain: 'That nobody deserves blame. A compatibilist grants determinism outright and then denies that freedom ever required an uncaused choice: what it requires is acting on your own wants without compulsion, and that survives having causes.',
       xp: 5,
     },
   },

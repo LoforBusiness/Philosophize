@@ -83,11 +83,11 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics19'));
 
-export default function Ethics19Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics19Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -119,7 +119,7 @@ export default function Ethics19Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // R7b — the knob signs somebody else's name. Drag toward SAVE THEM ANYWAY and
       // another hand fills the slots on a form about one person, which is what
       // overriding a competent refusal actually looks like.
-      taken: carry(cv, 4, n, TAKEN[p], reacting ? dragPos.value : TAKEN[n], tr),
+      taken: carry(cv, 4, n, TAKEN[p], reacting ? pickPos.value : TAKEN[n], tr),
       // THE SPOT'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to,
       // flatly 0 on every other beat — one flash per tap, not a loop.
       spot: spotNow ? ease01(bt.value / 1.1) : 0,

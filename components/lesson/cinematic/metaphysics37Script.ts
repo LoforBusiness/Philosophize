@@ -80,18 +80,16 @@ export const BEATS: Metaphysics37Beat[] = [
   {
     p: 457, x: 56, shelf: 1, live_d: 1, live: 1,
     interact: {
-      prompt: 'With the sorcerer gone and the glass untouched, how fragile is it now?',
-      drag: {
-        lo: 'NOT AT ALL',
-        hi: 'COMPLETELY',
-        start: 0,
-        zones: [
-          { id: 'none', upto: 0.28, reads: 'not fragile until it breaks' },
-          { id: 'some', upto: 0.62, reads: 'fragile only as a way of speaking' },
-          { id: 'full', upto: 1, reads: 'as fragile as it ever was', correct: true },
-        ],
+      prompt: 'The sorcerer is gone and the glass is untouched. Is it fragile?',
+      sort: {
+        chip: 'THE GLASS',
+        bins: [
+          { id: 'until', label: 'NOT YET', reads: 'not fragile until it actually breaks' },
+          { id: 'talk', label: 'A WAY OF SPEAKING', reads: 'fragile only as a manner of speaking' },
+          { id: 'full', label: 'FRAGILE NOW', reads: 'as fragile as it ever was', correct: true },
+          ],
       },
-      explain: 'As fragile as it ever was. Nothing about the glass changed when the sorcerer left, or in ninety years on the shelf. So the glass has its fragility now, without any event to show it.',
+      explain: 'As fragile as it ever was. A disposition is a fact about what would happen, so it holds of a glass that\'s never struck and outlives whatever was propping the story up. Waiting for the break confuses the disposition with its display.',
       xp: 5,
     },
     dur: 1.0,

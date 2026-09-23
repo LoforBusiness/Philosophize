@@ -108,18 +108,18 @@ export const BEATS: Political10Beat[] = [
   {
     p: 177, x: 108, tape: 1, ptr: 4, ruler: 1,
     interact: {
-      prompt: 'Under Locke’s proviso, how much of the common land may one person take?',
-      drag: {
-        lo: 'NOTHING AT ALL',
-        hi: 'ALL YOU CAN REACH',
-        start: 1,
-        zones: [
-          { id: 'none', upto: 0.26, reads: 'nothing, the land stays common' },
-          { id: 'enough', upto: 0.74, reads: 'as much as leaves enough for others', correct: true },
-          { id: 'all', upto: 1, reads: 'all you can take, whatever is left for others' },
+      prompt: 'As one person takes more of the common, which shape does the proviso allow?',
+      plot: {
+        cols: ['A LITTLE', 'A GREAT DEAL', 'ALL OF IT'],
+        axis: 'LEFT FOR OTHERS',
+        start: [0.9, 0.9, 0.9],
+        shapes: [
+          { id: 'enough', profile: [1, 0.92, 0.8, 0.68, 0.6], reads: 'enough is always left', correct: true },
+          { id: 'all', profile: [1, 0.7, 0.4, 0.15, 0], reads: 'take it all, whatever is left' },
+          { id: 'none', profile: [1, 1, 1, 1, 1], reads: 'nothing may be taken at all' },
         ],
       },
-      explain: 'As much as leaves enough for others. A labour theory of property can seem to permit unlimited taking. Locke allows it only while enough, and as good, remains for others.',
+      explain: 'Enough is always left. Locke lets mixing your labour with the common make it yours, and then caps it: as much and as good must remain for others. Without the proviso the first comer could take everything, which isn\'t an account of legitimate property.',
       xp: 5,
     },
     dur: 1.0,

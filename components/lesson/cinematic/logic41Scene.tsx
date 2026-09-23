@@ -100,11 +100,11 @@ const MEMBER_Y1 = 396;
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic41'));
 
-export default function Logic41Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic41Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -134,7 +134,7 @@ export default function Logic41Scene({ clock, bt, bi, i, picked, onPick, dragPos
       innerOn: carry(cv, 2, n, INNER[p], INNER[n], tr),
       // R7c — the knob's own 0…1 IS the inner group's share, so nothing has to be
       // mapped, and the wall the drag runs into is the conjunction rule.
-      fill: carry(cv, 3, n, FILL[p], reacting ? dragPos.value : FILL[n], tr),
+      fill: carry(cv, 3, n, FILL[p], reacting ? pickPos.value : FILL[n], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
       // ONE-SHOT, driven by `bt` alone — see the comment above MEMBER_X.
       member: memberNow ? ease01(bt.value / 1.6) : 0,

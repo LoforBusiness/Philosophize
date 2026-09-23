@@ -87,11 +87,11 @@ const LINK = BEATS.map((b) => (b.link ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics28'));
 
-export default function Ethics28Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics28Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(6);
@@ -120,7 +120,7 @@ export default function Ethics28Scene({ clock, bt, bi, i, picked, onPick, dragPo
       blocks: carry(cv, 2, n, BLOCKS[p], BLOCKS[n], tr),
       // R7b — a split's seam is the LEFT side's share, and the left side here is
       // the principle, so a high seam means the RULE did the bending.
-      give: carry(cv, 3, n, GIVE[p], reacting ? dragPos.value : GIVE[n], tr),
+      give: carry(cv, 3, n, GIVE[p], reacting ? pickPos.value : GIVE[n], tr),
       plates: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
       // One one-shot mark, fading in AND out on a carried track (never an on/off
       // ternary), so a tap mid-fade never cuts it between two frames (C20c).

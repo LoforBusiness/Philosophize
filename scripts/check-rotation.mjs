@@ -25,11 +25,26 @@ import path from 'node:path';
 const DIR = 'components/lesson/cinematic';
 
 /** Below the figure: the deck and the five analogue controls. */
-// `lever` and `field` are retired (R10) and no lesson declares one. They stay in
-// the list so a revert or an old branch is still counted rather than silently
-// dropping out of the rotation -- a control that stops being counted looks like
-// variety improving.
-const BELOW = ['cards', 'drag', 'sort', 'poll', 'plot', 'split', 'lever', 'field'];
+// `lever`, `field`, `drag` and `split` are retired (R10, R20) and no lesson
+// declares one. They stay in the list so a revert or an old branch is still
+// counted rather than silently dropping out of the rotation -- a control that
+// stops being counted looks like variety improving.
+const BELOW = ['cards', 'sort', 'poll', 'plot', 'order', 'odd', 'drag', 'split', 'lever', 'field'];
+
+/**
+ * THE RETIRED CONTROLS, WHICH MAY NOT COME BACK (R20).
+ *
+ * `drag` and `split` were the two the owner removed by name -- "two sliding ones
+ * ... I want those removed" -- and `lever` and `field` went before them for the
+ * same reason one layer down: all four asked HOW MUCH and answered it by making
+ * the reader hold a finger on a line and hunt for a boundary they could not see.
+ *
+ * The budget is ZERO rather than a high-water mark, because unlike every other
+ * ratchet here there is no honest reason for the number to be anything else. The
+ * block types survive in cinematicKit so an old branch still compiles; what is
+ * gone is any lesson that uses one.
+ */
+const RETIRED = ['drag', 'split', 'lever', 'field'];
 
 /**
  * The deck is right sometimes and not most of the time.
@@ -54,8 +69,17 @@ const DECK_CEIL = 0.14;
  * carried "Aristotle" pasted on all four. It is now the sort R1 prescribes for a
  * category, and that pairs it with strong4. Which control a claim wants (R1) comes
  * before variety between neighbours (R9).
+ *
+ * 26 → 23 on 22 Sep 2026. Retiring the two sliders (R20) moved 123 questions onto
+ * the controls that were left, and `sort` took most of them — 35 neighbour pairs,
+ * nine over budget, which is the rotation slipping as a side effect of a change
+ * that was not about the rotation at all. Ten lessons were re-pointed onto `odd`,
+ * and the ones worth knowing are the HINGES: converting the middle lesson of a
+ * run of three breaks two pairs at once, so metaphysics38 and logic13 did the work
+ * of four conversions. Converting BOTH ends of such a run is the trap — two
+ * neighbours both moved to `odd` are a pair again.
  */
-const SAME_BUDGET = 26;
+const SAME_BUDGET = 23;
 /** Lessons asking both questions below the figure. High-water mark; may only go DOWN. */
 const STAGELESS_BUDGET = 36;
 
@@ -101,7 +125,7 @@ const say = (ok, label, detail) => { if (!ok) bad += 1; console.log(`  ${ok ? 'o
 
 console.log('\nHOW THE THUMB IS ASKED TO MOVE\n');
 console.log(`  ${rows.length} lessons · ${total} graded questions`);
-const order = ['stage', 'cards', 'drag', 'sort', 'poll', 'plot', 'split', 'lever', 'field'];
+const order = ['stage', 'cards', 'sort', 'poll', 'plot', 'order', 'odd', 'drag', 'split', 'lever', 'field'];
 console.log('  ' + order.map((k) => `${k} ${tally.get(k) ?? 0}`).join(' · ') + '\n');
 
 const deck = (tally.get('cards') ?? 0) / total;
@@ -125,6 +149,9 @@ for (const [, list] of byBranch) {
 }
 say(same.length <= SAME_BUDGET, `no more than ${SAME_BUDGET} neighbour pairs answer the same way`, `${same.length} do`);
 if (same.length < SAME_BUDGET) console.log(`        ${same.length} now — lower SAME_BUDGET to ${same.length} to lock it in`);
+// NAMING THEM IS THE DIFFERENCE BETWEEN A NUMBER AND A WORKLIST. The count
+// alone says the rotation slipped; the pairs say which lesson to re-point.
+if (same.length) console.log(same.slice(0, 12).map((s) => `        ${s}`).join('\n') + (same.length > 12 ? '\n        …' : ''));
 
 // H65 says one question in the deck and one on the stage. Thirty-six lessons ask
 // both of theirs below the figure, and every one of them is an EARLY lesson —
@@ -136,6 +163,17 @@ const noStage = rows.filter((r) => !r.kinds.includes('stage'));
 say(noStage.length <= STAGELESS_BUDGET, `no more than ${STAGELESS_BUDGET} lessons ask nothing on the stage (H65)`, `${noStage.length} ask nothing`);
 if (noStage.length < STAGELESS_BUDGET) console.log(`        ${noStage.length} now — lower STAGELESS_BUDGET to ${noStage.length} to lock it in`);
 console.log(`        ${noStage.slice(0, 10).map((r) => r.id).join(', ')}${noStage.length > 10 ? ', …' : ''}`);
+
+// R20 — A RETIRED CONTROL MAY NOT COME BACK, and this is the only budget here
+// that is a flat zero. Every other number in this file is a high-water mark
+// because the thing it counts is a debt being worked down; a retired control is
+// not a debt, it is a decision, and the owner made it in one sentence.
+{
+  const back = [];
+  for (const r of rows) for (const k of r.kinds) if (RETIRED.includes(k)) back.push(`${r.id} (${k})`);
+  say(back.length === 0, 'no lesson uses a retired control (R20)',
+    `${back.length} do: ${back.slice(0, 6).join(', ')}`);
+}
 
 console.log(bad ? '\nthe rotation is not doing its job.\n' : '\nthe rotation holds.\n');
 process.exit(bad ? 1 : 0);

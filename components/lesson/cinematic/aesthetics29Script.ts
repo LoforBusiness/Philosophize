@@ -87,18 +87,16 @@ export const BEATS: Aesthetics29Beat[] = [
   {
     p: 174, x: 80, trays: 1, book: 1,
     interact: {
-      prompt: 'How much knowledge can a novel about invented events provide?',
-      drag: {
-        lo: 'NOTHING',
-        hi: 'PLAIN FACTS',
-        start: 0.95,
-        zones: [
-          { id: 'lie', upto: 0.25, reads: 'a pleasing falsehood that teaches nothing' },
-          { id: 'grasp', upto: 0.7, reads: 'a deeper grasp rather than new facts', correct: true },
-          { id: 'text', upto: 1, reads: 'factual knowledge, as a textbook gives' },
+      prompt: 'Put these in order, from least a novel gives to most.',
+      order: {
+        axis: 'LEAST FIRST',
+        items: [
+          { id: 'none', reads: 'A PLEASING FALSEHOOD' },
+          { id: 'grasp', reads: 'A DEEPER GRASP' },
+          { id: 'facts', reads: 'FACTS, AS A TEXTBOOK GIVES' },
         ],
       },
-      explain: 'A deeper grasp rather than new facts. An invented story gives no historical facts, yet it can show what people of a kind would do. Aristotle held that poetry expresses such universals.',
+      explain: 'The middle one. A novel about people who never lived reports no facts, so the far end is out. But working through an invented case can leave you better at spotting jealousy or self-deception. That\'s knowledge of a different kind.',
       xp: 5,
     },
     dur: 1.0,

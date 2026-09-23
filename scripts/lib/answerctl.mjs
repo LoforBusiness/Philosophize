@@ -37,12 +37,13 @@
  * the lesson stuck on that beat forever. Analogue first, buttons after.
  */
 export const CONTROL_IDS = [
-  'drag-strip', 'split-bar', 'trend-pick', 'sort-bins', 'poll-ballot',
-  // RETIRED, and listed anyway. `lever-arc` and `field-pad` no longer appear in
-  // any lesson, but a harness that stops knowing how to drive them cannot audit
-  // an older branch or a revert -- and the cost of keeping two ids in a list is
-  // nothing against a sweep that silently measures less (21).
-  'lever-arc', 'field-pad',
+  'order-tiles', 'odd-one-out', 'trend-pick', 'sort-bins', 'poll-ballot',
+  // RETIRED, and listed anyway. None of these appears in a lesson any more, but a
+  // harness that stops knowing how to drive them cannot audit an older branch or a
+  // revert -- and the cost of keeping four ids in a list is nothing against a
+  // sweep that silently measures less (21). `drag-strip` and `split-bar` joined
+  // them when the owner removed the two sliding controls.
+  'lever-arc', 'field-pad', 'drag-strip', 'split-bar',
 ];
 
 /**
@@ -68,12 +69,54 @@ export const ANSWER_CONTROL = `(() => {
     // that is deliberately not the answer, and a harness that always took row 0
     // would answer correctly by luck in exactly the lessons where it opens there.
     // THE TREND PICK IS TAPPED TOO: its tiles are buttons, one per drawn shape.
-    if (id === 'poll-ballot' || id === 'trend-pick') {
+    if (id === 'poll-ballot' || id === 'trend-pick' || id === 'odd-one-out') {
       try {
         const rows = el.querySelectorAll('[role="button"]');
         if (!rows.length) continue;
         const row = rows[rows.length > 1 ? 1 : 0];
         row.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
+        return id;
+      } catch (e) { return ''; }
+    }
+
+    // AN ORDER IS EVERY TILE, ONCE EACH, AND THE "ONCE" IS LOAD-BEARING.
+    //
+    // The control commits on the LAST tap, so a harness that presses one tile
+    // leaves the lesson parked on that beat and calls the short run clean -- the
+    // failure 21 records for the drag rail, one control along. And tapping a tile
+    // that already carries a numeral CLEARS the sequence (it is the way back), so
+    // pressing the same tile twice would undo the run rather than finish it.
+    // Every tile in DOM order is therefore exactly right: distinct, complete, and
+    // making no attempt to be correct.
+    if (id === 'order-tiles') {
+      try {
+        const tiles = [...el.querySelectorAll('[role="button"]')];
+        if (!tiles.length) continue;
+        // TWO ORDERED PASSES, AND THE SECOND ONE IS NOT BELT AND BRACES.
+        //
+        // The control commits on the LAST tap, and tapping a tile that already
+        // carries a numeral CLEARS the run — that is its way back. One pass is
+        // therefore correct only from a CLEAN control, and a sweep routinely meets
+        // a partly answered one: measure-must tries its generic deck click first,
+        // and an order tile is a wide role=button below the stage, so one tile is
+        // already placed by the time this runs. The pass then clears at that tile
+        // and ends short, the question is never answered, and four lessons stopped
+        // one beat later with nothing in the log but a short beat count.
+        //
+        // Asking which tiles are placed is not available: react-native-web renders
+        // no aria-selected on a button, and the DOM does not update between two
+        // clicks in one tick anyway (measured — a tile still reads unplaced
+        // immediately after its own click, and correct 400ms later). What DOES
+        // hold is the arithmetic: a pass that meets a placed tile at index i clears
+        // and leaves exactly the tiles after i, so the next pass starts with index
+        // 0 free and runs clean to the end. Two passes converge from any state, and
+        // once the sequence is complete the control disables itself, so the second
+        // pass costs nothing.
+        for (let pass = 0; pass < 2; pass++) {
+          for (const t of tiles) {
+            t.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
+          }
+        }
         return id;
       } catch (e) { return ''; }
     }

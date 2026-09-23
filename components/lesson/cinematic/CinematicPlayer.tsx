@@ -32,10 +32,14 @@ import DragScale from './DragScale';
 import LeverPick from './LeverPick';
 import TrendPick from './TrendPick';
 import { QuestionAccentProvider } from './QuestionParts';
+import { branchOfLesson } from './questionTone';
+import { stageTone } from './stageTones';
 import SplitBar from './SplitBar';
 import FieldPick from './FieldPick';
 import PollBallot from './PollBallot';
 import SortBins from './SortBins';
+import OrderTiles from './OrderTiles';
+import OddOneOut from './OddOneOut';
 import NarrationText from './NarrationText';
 import ThinkerPeek from './ThinkerPeek';
 import { LESSON_FOCUS } from '@/data/lessonFocus';
@@ -283,6 +287,10 @@ export default function CinematicPlayer({
    */
   Chrome?: SceneComponent;
 }) {
+  // THE LESSON'S OWN STAGE PALETTE, for the two controls that draw objects
+  // (`order` and `odd`). It is the same tone every scene in this branch is struck
+  // in, derived here rather than passed, so a control cannot declare a colour.
+  const questionTone = stageTone(branchOfLesson(lesson.id));
   const toggleQuote = useUserDataStore((s) => s.toggleQuote);
   const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const showReward = useUIStore((s) => s.showReward);
@@ -1613,6 +1621,34 @@ export default function CinematicPlayer({
               pos={dragPos}
               sem={pickPos}
               seed={seedFor(lesson.id, [{ text: beat.interact.sort.chip }])}
+            />
+          ) : null}
+
+          {/* THE TWO THAT REPLACED THE SLIDERS. Both are taps and nothing else,
+              and both are handed the lesson's own stage tone so a drawn tile is
+              struck in the branch hue rather than declaring a colour of its own
+              (H: no scene-declared colours). */}
+          {beat.interact?.order && !gone ? (
+            <OrderTiles
+              order={beat.interact.order}
+              picked={picked}
+              onPick={(id, ok) => choose(id, ok, true)}
+              pos={dragPos}
+              sem={pickPos}
+              seed={seedFor(lesson.id, [{ text: beat.interact.order.items[0]?.reads ?? '' }])}
+              tone={questionTone}
+            />
+          ) : null}
+
+          {beat.interact?.odd && !gone ? (
+            <OddOneOut
+              odd={beat.interact.odd}
+              picked={picked}
+              onPick={(id, ok) => choose(id, ok, true)}
+              pos={dragPos}
+              sem={pickPos}
+              seed={seedFor(lesson.id, [{ text: beat.interact.odd.tiles[0]?.reads ?? '' }])}
+              tone={questionTone}
             />
           ) : null}
 

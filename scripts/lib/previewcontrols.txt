@@ -11,10 +11,14 @@ import SortBins from '@/components/lesson/cinematic/SortBins';
 import PollBallot from '@/components/lesson/cinematic/PollBallot';
 import SplitBar from '@/components/lesson/cinematic/SplitBar';
 import TrendPick from '@/components/lesson/cinematic/TrendPick';
+import OrderTiles from '@/components/lesson/cinematic/OrderTiles';
+import OddOneOut from '@/components/lesson/cinematic/OddOneOut';
+import { stageTone } from '@/components/lesson/cinematic/stageTones';
+import { branchOfLesson } from '@/components/lesson/cinematic/questionTone';
 import { QuestionAccentProvider } from '@/components/lesson/cinematic/QuestionParts';
 import { InteractPanel } from '@/components/lesson/cinematic/cinematicKit';
 import type {
-  ChoiceCard, DragBlock, PlotBlock, PollBlock, SortBlock, SplitBlock,
+  ChoiceCard, DragBlock, OddBlock, OrderBlock, PlotBlock, PollBlock, SortBlock, SplitBlock,
 } from '@/components/lesson/cinematic/cinematicKit';
 import { useUIStore } from '@/stores/uiStore';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -123,9 +127,35 @@ const PLOT3: { prompt: string; explain: string; plot: PlotBlock } = {
   } as PlotBlock,
 };
 
-type Kind = 'cards' | 'drag' | 'sort' | 'poll' | 'polltell' | 'split' | 'trend' | 'trend3';
+const ORDER: { prompt: string; explain: string; order: OrderBlock } = {
+  prompt: 'What overturns a paradigm, in order?',
+  explain: 'Anomalies, crisis, replacement. One odd result never topples a paradigm; the field takes it on the chin and works on.',
+  order: {
+    axis: 'FIRST TO LAST',
+    items: [
+      { id: 'anom', reads: 'ODD RESULTS PILE UP' },
+      { id: 'crisis', reads: 'CONFIDENCE GOES' },
+      { id: 'swap', reads: 'A RIVAL TAKES OVER' },
+    ],
+  },
+};
+const ODD: { prompt: string; explain: string; odd: OddBlock } = {
+  prompt: 'Which of these is not a disposition?',
+  explain: 'Broken, which reports what has happened. The other three say what would happen under some condition.',
+  odd: {
+    axis: 'THREE SAY WHAT WOULD HAPPEN',
+    tiles: [
+      { id: 'fragile', reads: 'FRAGILE' },
+      { id: 'soluble', reads: 'SOLUBLE' },
+      { id: 'flammable', reads: 'FLAMMABLE' },
+      { id: 'broken', reads: 'BROKEN', correct: true },
+    ],
+  },
+};
+
+type Kind = 'cards' | 'drag' | 'sort' | 'poll' | 'polltell' | 'split' | 'trend' | 'trend3' | 'order' | 'odd';
 type State = 'open' | 'right' | 'wrong';
-const KINDS: Kind[] = ['cards', 'drag', 'sort', 'poll', 'polltell', 'split', 'trend', 'trend3'];
+const KINDS: Kind[] = ['cards', 'drag', 'sort', 'poll', 'polltell', 'split', 'trend', 'trend3', 'order', 'odd'];
 const STATES: State[] = ['open', 'right', 'wrong'];
 
 /** The middle of a zone list's correct (or first wrong) zone. */
@@ -137,6 +167,9 @@ function zoneMid(zones: { upto: number; correct?: boolean }[], want: boolean) {
 
 function Case({ kind, state }: { kind: Kind; state: State }) {
   const answered = state !== 'open';
+  // The two tile controls take the branch tone directly rather than through the
+  // accent provider, so a Case works out its own — `lessonId` belongs to the page.
+  const caseTone = stageTone(branchOfLesson(`${q('branch') ?? 'ethics'}-preview-0`));
   const right = state === 'right';
   const noop = () => {};
 
@@ -145,7 +178,7 @@ function Case({ kind, state }: { kind: Kind; state: State }) {
   let init = 0.5;
   let semInit = 0.5;
   let picked: string | null = null;
-  let body: 'cards' | 'drag' | 'sort' | 'poll' | 'split' | 'trend' = 'cards';
+  let body: 'cards' | 'drag' | 'sort' | 'poll' | 'split' | 'trend' | 'order' | 'odd' = 'cards';
 
   if (kind === 'cards') {
     prompt = CARDS.prompt; explain = CARDS.explain; body = 'cards';
@@ -177,6 +210,24 @@ function Case({ kind, state }: { kind: Kind; state: State }) {
     prompt = P.prompt; explain = P.explain; body = 'poll';
     const o = P.poll.options.find((x) => Boolean(x.correct) === right) ?? P.poll.options[0];
     picked = answered ? o.id : null;
+  } else if (kind === 'order') {
+    prompt = ORDER.prompt; explain = ORDER.explain; body = 'order';
+    // An order is answered by placing EVERY tile, so the answered state is a full
+    // sequence: the authored one when it is right, and the last two swapped when
+    // it is not, which is the commonest way a reader gets one wrong.
+    const n = ORDER.order.items.length;
+    init = answered ? 1 : 0;
+    semInit = answered ? 1 : 0.5;
+    const asAuthored = [...ORDER.order.items.keys()];
+    if (!right) { const t = asAuthored[n - 1]; asAuthored[n - 1] = asAuthored[n - 2]; asAuthored[n - 2] = t; }
+    picked = answered ? asAuthored.join('>') : null;
+  } else if (kind === 'odd') {
+    prompt = ODD.prompt; explain = ODD.explain; body = 'odd';
+    const tiles = ODD.odd.tiles;
+    const t = tiles.find((x) => Boolean(x.correct) === right) ?? tiles[0];
+    init = answered ? (right ? 1 : 0.35) : 0;
+    semInit = answered ? tiles.indexOf(t) / (tiles.length - 1) : 0.5;
+    picked = answered ? t.id : null;
   } else {
     const T = kind === 'trend' ? PLOT : PLOT3;
     prompt = T.prompt; explain = T.explain; body = 'trend';
@@ -207,6 +258,8 @@ function Case({ kind, state }: { kind: Kind; state: State }) {
         {body === 'sort' ? <SortBins sort={SORT.sort} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(LESSON, [{ text: SORT.sort.chip }])} /> : null}
         {body === 'poll' ? <PollBallot poll={P.poll} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(LESSON, [{ text: P.poll.options[0].reads }])} /> : null}
         {body === 'trend' ? <TrendPick plot={T.plot} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(LESSON, [{ text: T.plot.shapes[0].reads }])} /> : null}
+        {body === 'order' ? <OrderTiles order={ORDER.order} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(LESSON, [{ text: ORDER.order.items[0].reads }])} tone={caseTone} /> : null}
+        {body === 'odd' ? <OddOneOut odd={ODD.odd} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(LESSON, [{ text: ODD.odd.tiles[0].reads }])} tone={caseTone} /> : null}
       </View>
       <View nativeID={`panel-${kind}-${state}`} style={{ paddingHorizontal: 24 }}>
         <InteractPanel prompt={prompt} explain={explain} answered={answered} correct={right} inScene={false} index={1} total={2} />

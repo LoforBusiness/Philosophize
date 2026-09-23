@@ -103,11 +103,11 @@ const HOLLOW = BEATS.map((b) => (b.hollow ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic29'));
 
-export default function Logic29Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic29Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(6);
@@ -138,7 +138,7 @@ export default function Logic29Scene({ clock, bt, bi, i, picked, onPick, dragPos
       load: carry(cv, 2, n, LOAD[p], LOAD[n], tr),
       // R7b — a split's seam is the LEFT side's share, and the left side here is
       // the claimant, so a high seam means the person asserting carries it.
-      side: carry(cv, 3, n, SIDE[p], reacting ? dragPos.value : SIDE[n], tr),
+      side: carry(cv, 3, n, SIDE[p], reacting ? pickPos.value : SIDE[n], tr),
       plates: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
       // A push tried against the beam, and nothing to show for it: it decays back
       // to level rather than settling anywhere new (A1 — no test moves it).

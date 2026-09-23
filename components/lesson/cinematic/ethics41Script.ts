@@ -88,18 +88,16 @@ export const BEATS: Ethics41Beat[] = [
   {
     p: 168, x: 88, doors: 1, floorOn: 1,
     interact: {
-      prompt: 'Where along this range does influence stop treating you as a rational chooser?',
-      drag: {
-        lo: 'GIVING REASONS',
-        hi: 'LEAVING NO CHOICE',
-        start: 0.03,
-        zones: [
-          { id: 'reasons', upto: 0.3, reads: 'persuasion, which you can assess and refuse' },
-          { id: 'nudge', upto: 0.68, reads: 'a nudge, which works whether or not you notice', correct: true },
-          { id: 'force', upto: 1, reads: 'force, which closes the other option' },
+      prompt: 'Put these in order, by how far each goes round your reason.',
+      order: {
+        axis: 'LEAST ROUND IT FIRST',
+        items: [
+          { id: 'argue', reads: 'PERSUASION YOU CAN REFUSE' },
+          { id: 'nudge', reads: 'A NUDGE YOU NEED NOT NOTICE' },
+          { id: 'force', reads: 'FORCE THAT CLOSES THE OPTION' },
         ],
       },
-      explain: 'A nudge, which works whether or not you notice. Force overrides your judgement, but you know what happened. A nudge bypasses your judgement and leaves you believing you decided, so it’s harder to consent to.',
+      explain: 'The nudge is where it starts. Persuasion works through reasons you can weigh and reject; force leaves nothing to weigh. What makes a nudge awkward is that it changes what you do without ever going through your judgement at all.',
       xp: 5,
     },
     dur: 1.0,

@@ -156,10 +156,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics3'));
 
-export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldD = useHeld();
   const cv = useCarry(7);
@@ -185,7 +185,7 @@ export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // points switch: a consequentialist acts on the outcome, and the reader is the
       // one acting. Handed over THROUGH carry so it eases in rather than swapping on
       // the frame the beat opens (R7).
-      pull: carry(cv, 2, n, PULL[p], reacting ? dragPos.value : PULL[n], tr),
+      pull: carry(cv, 2, n, PULL[p], reacting ? pickPos.value : PULL[n], tr),
       wheel: (t * 200) % 360,
       // The verdict board and the plates cross-fade, so neither ever pops.
       board: carry(cv, 3, n, BOARD_ON[p], BOARD_ON[n], grow),

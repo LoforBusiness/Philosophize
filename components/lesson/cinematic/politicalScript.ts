@@ -124,18 +124,16 @@ export const BEATS: PoliticalBeat[] = [
     bow: 1,
     reveal: 4,
     interact: {
-      prompt: 'On Hobbes’s view, when may subjects rebel against their sovereign?',
-      drag: {
-        lo: 'NEVER',
-        hi: 'WHENEVER HE RULES BADLY',
-        start: 1,
-        zones: [
-          { id: 'never', upto: 0.3, reads: 'never, since a harsh sovereign is better than war', correct: true },
-          { id: 'life', upto: 0.66, reads: 'only when the sovereign threatens their lives' },
-          { id: 'bad', upto: 1, reads: 'whenever the sovereign governs badly' },
+      prompt: 'Put these in order, from least right to rebel to most.',
+      order: {
+        axis: 'LEAST RIGHT FIRST',
+        items: [
+          { id: 'never', reads: 'NEVER, WHATEVER HE DOES' },
+          { id: 'life', reads: 'WHEN HE THREATENS YOUR LIFE' },
+          { id: 'bad', reads: 'WHENEVER HE GOVERNS BADLY' },
         ],
       },
-      explain: 'Never, since a harsh sovereign is better than war. Hobbes does let a subject resist being killed, because no covenant can surrender the right to self-defence. But that right isn’t a right to overthrow the sovereign. Locke, by contrast, let a people resist rulers who violate their rights.',
+      explain: 'Hobbes allows only the second, and barely. The covenant is made to escape violent death. A sovereign who threatens your life is no longer doing the one job he was given. Short of that, a harsh ruler beats the war that removing him invites.',
       xp: 5,
     },
     dur: 1.0,

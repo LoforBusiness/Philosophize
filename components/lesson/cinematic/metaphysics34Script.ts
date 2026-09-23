@@ -82,18 +82,16 @@ export const BEATS: Metaphysics34Beat[] = [
   {
     p: 461, x: 58, depth: 0, live: 1,
     interact: {
-      prompt: 'Which level has been shown to rest on nothing below it?',
-      drag: {
-        lo: 'THE TABLE',
-        hi: 'DEEPER',
-        start: 0,
-        zones: [
-          { id: 'stuff', upto: 0.34, reads: 'the grain, which holds up the table' },
-          { id: 'chem', upto: 0.68, reads: 'the atoms, which hold up the grain' },
-          { id: 'floor', upto: 1, reads: 'no level found so far', correct: true },
+      prompt: 'Put these in order, from what rests on what.',
+      order: {
+        axis: 'HELD UP BY THE NEXT',
+        items: [
+          { id: 'table', reads: 'THE TABLE' },
+          { id: 'grain', reads: 'THE GRAIN' },
+          { id: 'atoms', reads: 'THE ATOMS' },
         ],
       },
-      explain: 'No level found so far. Atoms were named as uncuttable, yet they turned out to have parts. Each proposed bottom level has so far had a level beneath it.',
+      explain: 'The table rests on the grain, and the grain on the atoms. What the order can\'t show is a bottom: every level found so far rests on another, which is why grounding is asked as a question about whether the series ends rather than where it ends.',
       xp: 5,
     },
     dur: 1.0,

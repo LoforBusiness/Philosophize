@@ -64,17 +64,16 @@ export const BEATS: Ethics37Beat[] = [
   {
     p: 461, x: 54, posts: 1, cord: 1, lean: 1,
     interact: {
-      prompt: 'How is the wrong of a broken promise divided between the person and the practice?',
-      split: {
-        left: 'ON THE PERSON PROMISED', right: 'ON THE PRACTICE',
-        start: 0.04,
-        zones: [
-          { id: 'practice', upto: 0.3, reads: 'on the practice of promising' },
-          { id: 'both', upto: 0.66, reads: 'equally on the person and the practice' },
-          { id: 'friend', upto: 1, reads: 'on the person you gave your word to', correct: true },
+      prompt: 'You broke a promise. Who is wronged?',
+      sort: {
+        chip: 'THE WRONG',
+        bins: [
+          { id: 'practice', label: 'THE PRACTICE', reads: 'the practice of promising, which you weakened' },
+          { id: 'both', label: 'BOTH EQUALLY', reads: 'the practice and the person alike' },
+          { id: 'friend', label: 'THE PERSON', reads: 'the person you gave your word to', correct: true },
         ],
       },
-      explain: 'On the person you gave your word to. Hume grounds the duty in the practice of promising. Scanlon argues that breaking a promise wrongs the person you assured.',
+      explain: 'The person you gave your word to. They relied on an assurance you offered, and the complaint is theirs to make: an account that locates the wrong in a weakened institution can\'t say why they in particular are owed an apology.',
       xp: 5,
     },
     dur: 1.0,

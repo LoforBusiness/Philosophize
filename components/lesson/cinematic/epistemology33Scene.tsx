@@ -62,7 +62,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology33'));
 
-export default function Epistemology33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology33Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(4);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -76,7 +76,7 @@ export default function Epistemology33Scene({ clock, bt, bi, i, dragPos, gazeX, 
     const rise = ease01(bt.value / 1.0);
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
-      bar: live ? dragPos.value : carry(cv, 0, n, BAR[p], BAR[n], rise),
+      bar: live ? pickPos.value : carry(cv, 0, n, BAR[p], BAR[n], rise),
       ev: carry(cv, 1, n, EV[p], EV[n], rise),
       // Carried, so each fades out as well as in (group L).
       datum: carry(cv, 2, n, DATUM[p], DATUM[n], rise),

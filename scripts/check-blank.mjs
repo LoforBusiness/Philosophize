@@ -666,7 +666,7 @@ function allIds() {
       const set = new Set();
       body[1].split(BEAT_SPLIT).filter((c) => /\S/.test(c)).forEach((chunk, k) => {
         if (!/\binteract\s*:/.test(chunk)) return;
-        if (/\b(cards|drag|lever|plot|split|field)\s*:/.test(chunk)) return;
+        if (/\n\s{6}(cards|sort|poll|plot|order|odd|drag|split|lever|field)\s*:/.test(chunk)) return;
         set.add(k);
       });
       out.set(id, set);

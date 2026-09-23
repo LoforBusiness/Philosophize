@@ -87,18 +87,16 @@ export const BEATS: Meta12Beat[] = [
     g: 165, owner: 1, none: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Without an unchanging owner, what is left to call the self?',
-      drag: {
-        lo: 'NOTHING AT ALL',
-        hi: 'ONE UNCHANGING SOUL',
-        start: 1,
-        zones: [
-          { id: 'none', upto: 0.28, reads: 'nothing, the word “self” refers to nothing' },
-          { id: 'stream', upto: 0.74, reads: 'a real stream of experience, with no owner', correct: true },
-          { id: 'soul', upto: 1, reads: 'one unchanging owner behind every experience' },
+      prompt: 'With no unchanging owner, what is the self?',
+      sort: {
+        chip: 'THE SELF',
+        bins: [
+          { id: 'none', label: 'NOTHING', reads: 'nothing: the word names nothing' },
+          { id: 'stream', label: 'A STREAM', reads: 'a real stream, with no owner', correct: true },
+          { id: 'owner', label: 'AN OWNER', reads: 'one owner behind every experience' },
         ],
       },
-      explain: 'A real stream of experience, with no owner. Hume keeps a bundle of perceptions, and the doctrine of anatta keeps a flow of changing processes. The tempting error reads “no permanent self” as “no self at all”.',
+      explain: 'A real stream with no owner. Looking inward finds perceptions and never the thing having them, so the bundle view keeps the experiences and drops the owner. It doesn\'t say there\'s nothing there, which is the reading it\'s most often given.',
       xp: 5,
     },
   },

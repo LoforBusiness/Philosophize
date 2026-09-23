@@ -78,10 +78,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology17'));
 
-export default function Epistemology17Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology17Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(8);
@@ -108,7 +108,7 @@ export default function Epistemology17Scene({ clock, bt, bi, i, picked, onPick, 
       // R7b — the knob piles up the anomalies. Drag from one decisive result toward
       // years of them and the awkward facts collect outside the old frame, which is
       // what Kuhn says actually ends a paradigm.
-      odd: carry(cv, 2, n, ODD[p], reacting ? dragPos.value * 3 : ODD[n], slow),
+      odd: carry(cv, 2, n, ODD[p], reacting ? pickPos.value * 3 : ODD[n], slow),
       shift: carry(cv, 3, n, SHIFT[p], SHIFT[n], slow),
       boards: carry(cv, 4, n, PICKV[p], PICKV[n], grow),
       patch: carry(cv, 5, n, PATCH[p], PATCH[n], tr),

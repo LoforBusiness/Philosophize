@@ -78,7 +78,7 @@ const GHOST_L = SCL_L + (TRUE_AT - GHOST_HW) * SCL_W;
 const GHOST_W = GHOST_HW * 2 * SCL_W;
 const MISS_Y = BAND_T + 90;
 
-export default function Logic34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic34Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(4);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -95,7 +95,7 @@ export default function Logic34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, 
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P[p], t)), emoteLive(P[n], t, bt.value), tr));
     const grow = ease01(bt.value / 1.0);
-    const u = live ? dragPos.value : carry(cv, 0, n, N[p], N[n], grow);
+    const u = live ? pickPos.value : carry(cv, 0, n, N[p], N[n], grow);
     const bias = carry(cv, 1, n, BIAS[p], BIAS[n], tr);
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),

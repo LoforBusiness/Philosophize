@@ -104,17 +104,17 @@ export const BEATS: Aes15Beat[] = [
     g: 442, rose: 1, tags: 5, cut: 1,
     dur: 1.0,
     interact: {
-      prompt: 'When a judgement is disinterested, what happens to the delight and to your stake?',
-      split: {
-        left: 'THE DELIGHT', right: 'YOUR STAKE IN IT',
-        start: 0.04,
-        zones: [
-          { id: 'none', upto: 0.3, reads: 'both go, and beauty gives no pleasure' },
-          { id: 'half', upto: 0.66, reads: 'part of the pleasure survives' },
-          { id: 'keep', upto: 1, reads: 'the delight stays, your stake goes', correct: true },
+      prompt: 'In a disinterested judgement, which of these goes?',
+      odd: {
+        axis: 'THREE SURVIVE',
+        tiles: [
+          { id: 'delight', reads: 'THE DELIGHT' },
+          { id: 'looking', reads: 'THE LOOKING' },
+          { id: 'verdict', reads: 'THE JUDGEMENT' },
+          { id: 'stake', reads: 'YOUR STAKE IN IT', correct: true },
         ],
       },
-      explain: 'The delight stays, your stake goes. “Disinterested” doesn’t mean “uninterested”, and confusing the two makes Kant sound cold. He removes your stake and keeps the pleasure, which is no longer about you.',
+      explain: 'Your stake in it. Disinterest isn\'t indifference: the pleasure stays, and so does the verdict it supports. What drops out is any interest in the thing existing, being owned, or being useful to you.',
       xp: 5,
     },
   },

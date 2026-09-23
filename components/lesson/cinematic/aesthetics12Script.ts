@@ -75,17 +75,17 @@ export const BEATS: Aes12Beat[] = [
   {
     p: 384, r: 4, rx: 224, ticks: 5, box: 1,
     interact: {
-      prompt: 'How far is a poem’s meaning fixed by the poem, and how far by the poet?',
-      split: {
-        left: 'IN THE POEM', right: 'IN THE POET',
-        start: 0.04,
-        zones: [
-          { id: 'poet', upto: 0.3, reads: 'in the poet, whose intention decides' },
-          { id: 'both', upto: 0.66, reads: 'shared between the poem and the poet' },
-          { id: 'poem', upto: 1, reads: 'in the poem, which every reader can examine', correct: true },
+      prompt: 'Which of these is not on the page?',
+      odd: {
+        axis: 'THREE ARE ON THE PAGE',
+        tiles: [
+          { id: 'meant', reads: 'WHAT THE POET MEANT', correct: true },
+          { id: 'words', reads: 'THE WORDS' },
+          { id: 'rhythm', reads: 'THE RHYTHM' },
+          { id: 'images', reads: 'THE IMAGES' },
         ],
       },
-      explain: 'In the poem, which every reader can examine. Wimsatt and Beardsley argue that what a poet meant is private, so it can’t be a public test. Letting it decide meaning is the intentional fallacy. An equal share still gives half the say to something no one can check.',
+      explain: 'What the poet meant. The words, the rhythm and the images are public, and any reader can argue about them. The intention is neither available nor decisive, since what someone set out to write isn\'t evidence about what the words do.',
       xp: 5,
     },
     dur: 1.0,

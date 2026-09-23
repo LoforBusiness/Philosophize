@@ -84,13 +84,19 @@ const LINES = BEATS.map((b) => (b.lines ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
-const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 
-// THE THREE BINS AS THREE LIVES, in the SORT'S OWN ORDER — `pickPos` is 0..1
-// across the bins as the author wrote them, and that is the only order a picture
-// may follow, because the rows the reader sees are shuffled.
-//                    the clay itself · a second thing · no thing at all
-const SPAN_AT = [1, NAT, 0];
+// THE FOUR TILES AS FOUR LIVES, in the QUESTION'S OWN ORDER — `pickPos` is 0..1
+// across the tiles as the author wrote them, and that is the only order a picture
+// may follow, because the tiles the reader sees are shuffled.
+//
+// The question names four properties and asks which the vase does NOT share with
+// the clay. Weight, clay and shape are shared, so choosing one of them says the
+// two are one thing and the vase's bar runs the clay's whole length. The day it
+// began is not shared, so choosing it separates them and the bar falls back to
+// the vase's own natural span.
+//                    its weight · its clay · its shape · the day it began
+const SPAN_AT = [1, 1, 1, NAT];
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics38'));
 

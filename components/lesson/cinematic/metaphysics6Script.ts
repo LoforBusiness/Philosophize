@@ -99,17 +99,16 @@ export const BEATS: Meta6Beat[] = [
   {
     p: 384, swap: 0.4, two: 1, orig: 0,
     interact: {
-      prompt: 'When the old planks are rebuilt into a second ship, which ship is the original?',
-      split: {
-        left: 'UNBROKEN USE', right: 'THE ORIGINAL PLANKS',
-        start: 0.04,
-        zones: [
-          { id: 'wood', upto: 0.3, reads: 'the rebuilt ship, made of the original planks' },
-          { id: 'both', upto: 0.7, reads: 'each has a claim, depending on the criterion', correct: true },
-          { id: 'use', upto: 1, reads: 'the ship in continuous use' },
+      prompt: 'With the planks rebuilt into a second ship, which one is the original?',
+      sort: {
+        chip: 'THE ORIGINAL',
+        bins: [
+          { id: 'use', label: 'STILL IN USE', reads: 'the ship that stayed in service' },
+          { id: 'planks', label: 'THE OLD PLANKS', reads: 'the ship built from the old planks' },
+          { id: 'both', label: 'EACH HAS A CLAIM', reads: 'each has a claim, by a different test', correct: true },
         ],
       },
-      explain: 'Each has a claim, depending on the criterion. The ship in continuous use has unbroken continuity, and the rebuilt ship has the original planks. Thomas Hobbes, who added the rebuilt ship, held that identity depends on the name under which a thing is considered.',
+      explain: 'Each has a claim. One ship keeps continuous use and repair, the other keeps the original matter, and the puzzle is that both are ordinary tests for being the same thing. Adding the second ship is what forces the two tests apart.',
       xp: 5,
     },
     dur: 1.0,

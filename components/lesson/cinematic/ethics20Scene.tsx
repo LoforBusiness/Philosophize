@@ -73,7 +73,7 @@ const LIVE_D = BEATS.map((b) => (b.live_d ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics20'));
 
-export default function Ethics20Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics20Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(4);
   const cur = BEATS[i];

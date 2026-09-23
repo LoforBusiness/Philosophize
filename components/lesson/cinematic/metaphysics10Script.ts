@@ -96,18 +96,16 @@ export const BEATS: Metaphysics10Beat[] = [
   {
     p: 457, x: 124, frame: 1, str: 1,
     interact: {
-      prompt: 'If redness can’t exist apart from red things, where does it exist?',
-      drag: {
-        lo: 'ONLY A WORD',
-        hi: 'IN ITS OWN REALM',
-        start: 1,
-        zones: [
-          { id: 'word', upto: 0.28, reads: 'nothing shared, only a name' },
-          { id: 'things', upto: 0.72, reads: 'real yet only in red things', correct: true },
-          { id: 'realm', upto: 1, reads: 'in its own realm, apart from red things' },
+      prompt: 'If redness cannot exist apart from red things, where is it?',
+      sort: {
+        chip: 'REDNESS',
+        bins: [
+          { id: 'name', label: 'ONLY A NAME', reads: 'nowhere: it is only a shared name' },
+          { id: 'things', label: 'IN RED THINGS', reads: 'in the red things themselves', correct: true },
+          { id: 'realm', label: 'ITS OWN REALM', reads: 'in a realm of its own' },
         ],
       },
-      explain: 'Real yet only in red things. Denying redness a place of its own doesn’t make redness a mere name. Aristotle holds that universals are real, yet exist only in the particulars that have them.',
+      explain: 'In the red things themselves. This keeps universals real, which a shared name alone doesn\'t, while refusing them a world of their own. What it owes is an account of how one thing is wholly present in many places at once.',
       xp: 5,
     },
     dur: 1.0,

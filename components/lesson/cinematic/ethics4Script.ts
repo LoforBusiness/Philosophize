@@ -106,18 +106,16 @@ export const BEATS: Ethics4Beat[] = [
   {
     a: 177, b: 0, floor: 1, rows: 3,
     interact: {
-      prompt: 'What does moral relativism claim about right and wrong?',
-      drag: {
-        lo: 'CULTURES DIFFER IN BELIEF',
-        hi: 'NOTHING IS RIGHT OR WRONG',
-        start: 0,
-        zones: [
-          { id: 'differ', upto: 0.3, reads: 'cultures disagree, yet one may be correct' },
-          { id: 'relative', upto: 0.74, reads: 'right relative to a group, with no higher standard', correct: true },
-          { id: 'none', upto: 1, reads: 'nothing is right or wrong, even inside a group' },
+      prompt: 'Put these in order, from the weakest claim to the strongest.',
+      order: {
+        axis: 'WEAKEST CLAIM FIRST',
+        items: [
+          { id: 'differ', reads: 'CULTURES DISAGREE' },
+          { id: 'relative', reads: 'RIGHT DEPENDS ON THE GROUP' },
+          { id: 'nothing', reads: 'NOTHING IS EVER WRONG' },
         ],
       },
-      explain: 'Moral relativism holds that right is relative to a group, with no higher standard. That cultures differ is only descriptive relativism, which an objectivist can accept. The claim that nothing is right or wrong is nihilism. Relativism still allows right answers within each group.',
+      explain: 'Relativism is the middle one. That cultures disagree is an observation anyone can accept, and that nothing is ever wrong is a further claim relativism doesn\'t make: inside a group there are still right answers. Sliding between the three is how the position gets refuted cheaply.',
       xp: 5,
     },
     dur: 1.0,

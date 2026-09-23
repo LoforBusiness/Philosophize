@@ -95,18 +95,17 @@ export const BEATS: Logic23Beat[] = [
   {
     p: 21, x: 100, rows: 1, ifCol: 1,
     interact: {
-      prompt: 'In how many of the four rows is “if P, then Q” true?',
-      split: {
-        left: 'TRUE',
-        right: 'FALSE',
-        start: 0.5,
-        zones: [
-          { id: 'half', upto: 0.38, reads: 'true in at most one row' },
-          { id: 'most', upto: 0.62, reads: 'true in two rows, false in two' },
-          { id: 'three', upto: 1, reads: 'true in three rows, false in one', correct: true },
+      prompt: 'Which row makes “if P, then Q” false?',
+      odd: {
+        axis: 'THREE MAKE IT TRUE',
+        tiles: [
+          { id: 'tt', reads: 'P TRUE, Q TRUE' },
+          { id: 'tf', reads: 'P TRUE, Q FALSE', correct: true },
+          { id: 'ft', reads: 'P FALSE, Q TRUE' },
+          { id: 'ff', reads: 'P FALSE, Q FALSE' },
         ],
       },
-      explain: 'True in three rows, false in one. Only P true with Q false makes the conditional false. So the claim “if Paris is in Spain, then snow is black” counts as true. Reading “if” as “and” gives one row, and as “if and only if” gives two.',
+      explain: 'Only P true with Q false. A conditional claims that you never get the antecedent without the consequent, so the single row where that happens is the only one it rules out. The two rows with P false don\'t test it at all, which is why they count as true.',
       xp: 5,
     },
     dur: 1.0,

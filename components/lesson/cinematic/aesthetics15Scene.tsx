@@ -100,10 +100,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics15'));
 
-export default function Aesthetics15Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Aesthetics15Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(8);
@@ -135,7 +135,7 @@ export default function Aesthetics15Scene({ clock, bt, bi, i, picked, onPick, dr
       // R7b — the seam cuts the tags. Give the bar to THE DELIGHT and the four
       // interested tags — I could sell it, it would suit my room — fall away, leaving
       // the pleasure with nothing of yours tied to it.
-      cut: carry(cv, 2, n, CUT[p], reacting ? dragPos.value : CUT[n], fall),
+      cut: carry(cv, 2, n, CUT[p], reacting ? pickPos.value : CUT[n], fall),
       // A boundary round the five, naming which group the test currently applies
       // to — the tags together, then (once the term is named) the rose alone.
       zoneTags: carry(cv, 3, n, ZONE_TAGS[p], ZONE_TAGS[n], zoneTagsFade ? grow : 1),

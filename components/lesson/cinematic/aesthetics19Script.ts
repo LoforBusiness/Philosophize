@@ -78,18 +78,21 @@ export const BEATS: Aes19Beat[] = [
   {
     p: 4, x: 124, row: 1, frame: 3, verdict: 2, know: 1,
     interact: {
-      prompt: 'What must a viewer bring to appreciate a marsh appropriately?',
-      drag: {
-        lo: 'A PRETTY GLANCE',
-        hi: 'KNOWING WHAT IT IS',
-        start: 0,
-        zones: [
-          { id: 'glance', upto: 0.3, reads: 'a pleasing glance and nothing more' },
-          { id: 'some', upto: 0.62, reads: 'a glance, aided by a few names' },
-          { id: 'know', upto: 1, reads: 'knowing what you’re looking at', correct: true },
+      prompt: 'Which of these had no maker?',
+      // THE PREMISE CARLSON'S ARGUMENT TURNS ON, asked as a glance. Three of
+      // these were designed by somebody, so a viewer can ask what the maker
+      // intended; the fourth was not, which is exactly why the landscape model
+      // fails for it and why natural history has to do the work art history does.
+      odd: {
+        axis: 'THREE WERE MADE',
+        tiles: [
+          { id: 'bench', reads: 'A BENCH', draw: 'bench' },
+          { id: 'bridge', reads: 'A BRIDGE', draw: 'bridge' },
+          { id: 'column', reads: 'A COLUMN', draw: 'column' },
+          { id: 'tree', reads: 'A TREE', draw: 'tree', correct: true },
         ],
       },
-      explain: 'Knowing what you’re looking at. Carlson rejects the landscape model, which lets a glance be enough. A marsh looks like a wasteland until you learn what it does. Natural history does for nature what art history does for art.',
+      explain: 'The tree, which nobody designed. Nature has no maker, so Carlson swaps the landscape model for natural history: a marsh is waste ground until you know what it does.',
       xp: 5,
     },
     dur: 1.0,

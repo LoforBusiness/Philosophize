@@ -86,7 +86,7 @@ const MATHCHECKV = BEATS.map((b) => ((b.mathCheck ?? 0) > 0 ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics36'));
 
-export default function Metaphysics36Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics36Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(8);
   // Group AH — each still tap gets exactly one new mark; a fade re-plays only

@@ -95,18 +95,16 @@ export const BEATS: Eth19Beat[] = [
   {
     p: 383, x: 268, doc: 1, rows: 1, affects: 1,
     interact: {
-      prompt: 'If a competent adult refuses life-saving treatment, what does the harm principle permit?',
-      drag: {
-        lo: 'THE REFUSAL STANDS',
-        hi: 'SAVE THEM ANYWAY',
-        start: 1,
-        zones: [
-          { id: 'stands', upto: 0.3, reads: 'their refusal stands, however bad the choice looks', correct: true },
-          { id: 'delay', upto: 0.66, reads: 'treat them now, ask again later' },
-          { id: 'save', upto: 1, reads: 'save them whatever they say' },
+      prompt: 'Put these in order, from least override to most.',
+      order: {
+        axis: 'LEAST OVERRIDE FIRST',
+        items: [
+          { id: 'stands', reads: 'THE REFUSAL STANDS' },
+          { id: 'later', reads: 'TREAT NOW, ASK AGAIN' },
+          { id: 'save', reads: 'SAVE THEM REGARDLESS' },
         ],
       },
-      explain: 'Their refusal stands, however bad the choice looks. This is the hardest case for the harm principle, yet Mill’s test still applies. A competent adult’s choice that harms no one else is theirs to make.',
+      explain: 'The harm principle stops at the first. Where an adult harms only themselves, dislike isn\'t grounds to step in, however bad the choice looks. The principle guards the choice, not the wisdom of it.',
       xp: 5,
     },
     dur: 1.0,

@@ -115,18 +115,18 @@ export const BEATS: Metaphysics7Beat[] = [
   {
     p: 12, x: 200, line: 1, solid: 1,
     interact: {
-      prompt: 'How much change is real in a block universe?',
-      drag: {
-        lo: 'NOTHING CHANGES',
-        hi: 'A MOVING PRESENT',
-        start: 0,
-        zones: [
-          { id: 'frozen', upto: 0.3, reads: 'no change at all, a frozen world' },
-          { id: 'differ', upto: 0.74, reads: 'change is difference between earlier and later moments', correct: true },
-          { id: 'flow', upto: 1, reads: 'a real present moves along the line' },
+      prompt: 'Which shape shows what exists, moment by moment?',
+      plot: {
+        cols: ['PAST', 'NOW', 'FUTURE'],
+        axis: 'HOW MUCH EXISTS',
+        start: [0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'block', profile: [1, 1, 1, 1, 1], reads: 'all of it, equally', correct: true },
+          { id: 'present', profile: [0, 0, 1, 0, 0], reads: 'only the present moment' },
+          { id: 'growing', profile: [1, 1, 1, 0, 0], reads: 'the past and now, growing' },
         ],
       },
-      explain: 'Change is difference between earlier and later moments. The block isn’t frozen, because its moments differ from one another, and that difference is change. What the block denies is a moving present that passes along the line.',
+      explain: 'All of it, equally. On the block view every moment is as real as every other, so change is the difference between earlier and later parts rather than a present that moves. The flat line is what makes a frozen world and a changing one hard to tell apart.',
       xp: 5,
     },
     dur: 1.0,

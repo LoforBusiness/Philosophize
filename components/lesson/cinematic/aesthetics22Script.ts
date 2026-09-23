@@ -97,17 +97,18 @@ export const BEATS: Aes22Beat[] = [
   {
     p: 41, x: 268, screen: 1, slime: 1, meters: 1, heart: 1,
     interact: {
-      prompt: 'On Walton’s view, how is Charles’s response divided between make-believe and real fear?',
-      split: {
-        left: 'MAKE-BELIEVE', right: 'REAL FEAR',
-        start: 0.16,
-        zones: [
-          { id: 'real', upto: 0.34, reads: 'mostly real fear of the slime' },
-          { id: 'mix', upto: 0.66, reads: 'partly make-believe, partly real fear' },
-          { id: 'game', upto: 1, reads: 'wholly make-believe, with no real fear', correct: true },
+      prompt: 'As the film takes hold, which shape does real fear take?',
+      plot: {
+        cols: ['LIGHTS DOWN', 'THE SLIME APPEARS', 'IT COMES CLOSER'],
+        axis: 'REAL FEAR',
+        start: [0.3, 0.3, 0.3],
+        shapes: [
+          { id: 'none', profile: [0.05, 0.06, 0.06, 0.07, 0.07], reads: 'it never arrives at all', correct: true },
+          { id: 'rise', profile: [0.1, 0.35, 0.6, 0.85, 1], reads: 'it climbs as the slime nears' },
+          { id: 'some', profile: [0.1, 0.3, 0.45, 0.5, 0.52], reads: 'some of it is real throughout' },
         ],
       },
-      explain: 'Wholly make-believe, with no real fear. Walton points to behaviour: real fear of the slime would make Charles flee, yet he stays in his seat. The thought theory replies that he has no reason to flee, though his feeling is real.',
+      explain: 'It never arrives. Walton\'s evidence is behaviour: Charles has a racing heart and stays in his seat, and nobody who believed a slime was coming would. What he\'s in is a game of make-believe in which it\'s true that he\'s afraid.',
       xp: 5,
     },
     dur: 1.0,

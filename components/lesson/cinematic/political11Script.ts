@@ -102,17 +102,16 @@ export const BEATS: Political11Beat[] = [
   {
     p: 461, x: 120, dial: 1, set: 3, built: 3, bound: 1, bind: 1, self: 1, press: 1,
     interact: {
-      prompt: 'In these three theories, which comes first, the view of human nature or the state?',
-      split: {
-        left: 'THE READING OF HUMAN NATURE', right: 'THE GOVERNMENT WANTED',
-        start: 0.04,
-        zones: [
-          { id: 'gov', upto: 0.3, reads: 'each chose a state, then argued back to nature' },
-          { id: 'both', upto: 0.66, reads: 'each view shaped the other' },
-          { id: 'nature', upto: 1, reads: 'the view of human nature determines the state', correct: true },
+      prompt: 'Put the argument in the order these theorists build it.',
+      order: {
+        axis: 'FIRST STEP FIRST',
+        items: [
+          { id: 'nature', reads: 'A VIEW OF HUMAN NATURE' },
+          { id: 'without', reads: 'WHAT LIFE WITHOUT A STATE IS LIKE' },
+          { id: 'state', reads: 'THE STATE THAT WOULD FIX IT' },
         ],
       },
-      explain: 'The view of human nature determines the state. Each theory starts from what people are like without government, and derives the state that condition requires. Reversing this treats each conclusion as chosen first, with a premise invented to fit.',
+      explain: 'The view of human nature comes first and carries the rest. Hobbes, Locke and Rousseau all run the same three steps and reach different states because they start from different pictures of what people are like when nothing restrains them.',
       xp: 5,
     },
     dur: 1.0,

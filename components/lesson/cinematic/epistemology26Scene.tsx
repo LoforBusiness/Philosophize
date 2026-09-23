@@ -91,11 +91,11 @@ const STEADFAST_PEG = BEATS.map((b) => (b.steadfastPeg ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology26'));
 
-export default function Epistemology26Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology26Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(8);
@@ -119,7 +119,7 @@ export default function Epistemology26Scene({ clock, bt, bi, i, picked, onPick, 
       pairOn: carry(cv, 2, n, PAIR[p], PAIR[n], tr),
       // R7c — the knob's own 0…1 IS how far the reader holds their ground, so the
       // two columns are the control's picture rather than a diagram beside it.
-      hold: carry(cv, 3, n, HOLD[p], reacting ? dragPos.value : HOLD[n], tr),
+      hold: carry(cv, 3, n, HOLD[p], reacting ? pickPos.value : HOLD[n], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
       peerTie: carry(cv, 5, n, PEER_TIE[p], PEER_TIE[n], tr),
       equalOdds: carry(cv, 6, n, EQUAL_ODDS[p], EQUAL_ODDS[n], tr),

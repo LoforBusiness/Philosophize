@@ -88,18 +88,18 @@ export const BEATS: Epistemology28Beat[] = [
   {
     p: 174, x: 82, track: 1, bars: 1,
     interact: {
-      prompt: 'How should scrutiny be divided between welcome and unwelcome studies?',
-      split: {
-        left: 'NEWS YOU LIKE',
-        right: 'NEWS YOU DO NOT',
-        start: 0.12,
-        zones: [
-          { id: 'lawyer', upto: 0.35, reads: 'welcome news passes with little scrutiny' },
-          { id: 'even', upto: 0.65, reads: 'one standard, applied equally to both studies', correct: true },
-          { id: 'contrarian', upto: 1, reads: 'unwelcome news passes with little scrutiny' },
+      prompt: 'As the news gets more welcome, which shape should scrutiny take?',
+      plot: {
+        cols: ['UNWELCOME', 'NEITHER', 'WELCOME'],
+        axis: 'HOW HARD YOU LOOK',
+        start: [0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'even', profile: [0.75, 0.75, 0.75, 0.75, 0.75], reads: 'one standard, whatever it says', correct: true },
+          { id: 'soft', profile: [0.95, 0.8, 0.6, 0.4, 0.2], reads: 'easier on news you like' },
+          { id: 'hard', profile: [0.2, 0.4, 0.6, 0.8, 0.95], reads: 'harder on news you like' },
         ],
       },
-      explain: 'One standard, applied equally to both studies. Motivated reasoning tests news you dislike harder than news you like. The fix is one test for both. Testing only the news you like is the same fault reversed.',
+      explain: 'One standard, whatever it says. The flat line is the whole demand: a study doesn\'t become better evidence by agreeing with you. Asking whether welcome news may be believed, and whether unwelcome news must be, is the same failure twice.',
       xp: 5,
     },
     dur: 1.0,

@@ -87,18 +87,16 @@ export const BEATS: Ethics29Beat[] = [
   {
     p: 177, x: 80, scale: 1,
     interact: {
-      prompt: 'Where does duty end and supererogation begin?',
-      drag: {
-        lo: 'NOTHING OWED',
-        hi: 'EVERYTHING OWED',
-        start: 0.95,
-        zones: [
-          { id: 'none', upto: 0.2, reads: 'no one is required to give anything' },
-          { id: 'fair', upto: 0.65, reads: 'a fair share is owed, and more is optional', correct: true },
-          { id: 'all', upto: 1, reads: 'all the good you can do is owed' },
+      prompt: 'Put these in order, from least owed to most.',
+      order: {
+        axis: 'LEAST OWED FIRST',
+        items: [
+          { id: 'none', reads: 'NOTHING IS REQUIRED' },
+          { id: 'fair', reads: 'A FAIR SHARE IS OWED' },
+          { id: 'all', reads: 'EVERY GOOD YOU COULD DO' },
         ],
       },
-      explain: 'A fair share is owed, and more is optional. On this view, a fair share is a duty and a kidney is supererogatory. If all the good you could do were owed, nearly every life would fall short.',
+      explain: 'Duty ends at the fair share. Past that lies supererogation: good to do, and not required. A theory with no such rung has to call every kindness you skip a wrong.',
       xp: 5,
     },
     dur: 1.0,

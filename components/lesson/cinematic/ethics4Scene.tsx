@@ -97,10 +97,10 @@ const X = BEATS.map((b) => b.x ?? 200);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics4'));
 
-export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldA = useHeld();
   const cv = useCarry(2);
@@ -128,7 +128,7 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // WRONG and the common ground under both cultures fades, so the reader watches
       // the claim cost something rather than being told it does. Inverted on purpose:
       // the far end of the rail is the end with no floor left.
-      floor: carry(cv, 0, n, FLOOR[p], reacting ? 1 - dragPos.value : FLOOR[n], tr),
+      floor: carry(cv, 0, n, FLOOR[p], reacting ? 1 - pickPos.value : FLOOR[n], tr),
       rows: carry(cv, 1, n, ROWS[p], ROWS[n], tr),
       // THE ANNOTATION'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs
       // to, flatly 0 on every other beat — one flash per tap, not a loop.

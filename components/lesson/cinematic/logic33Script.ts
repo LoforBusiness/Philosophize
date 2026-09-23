@@ -71,18 +71,18 @@ export const BEATS: Logic33Beat[] = [
   {
     p: 461, x: 52, bend: 0, live: 1,
     interact: {
-      prompt: 'How complex should the curve be to fit the pattern but not the errors?',
-      drag: {
-        lo: 'A STRAIGHT LINE',
-        hi: 'THROUGH EVERY POINT',
-        start: 0,
-        zones: [
-          { id: 'under', upto: 0.28, reads: 'underfits, and misses the real pattern' },
-          { id: 'right', upto: 0.66, reads: 'fits the pattern, not the errors', correct: true },
-          { id: 'over', upto: 1, reads: 'overfits, and fits the measurement errors' },
+      prompt: 'As the curve gets more complex, which shape does its accuracy take?',
+      plot: {
+        cols: ['A STRAIGHT LINE', 'A GENTLE CURVE', 'EVERY POINT'],
+        axis: 'RIGHT ON NEW DATA',
+        start: [0.3, 0.3, 0.3],
+        shapes: [
+          { id: 'hump', profile: [0.2, 0.62, 0.95, 0.55, 0.12], reads: 'best in the middle, worse either side', correct: true },
+          { id: 'rise', profile: [0.1, 0.35, 0.6, 0.82, 1], reads: 'the closer the fit the better' },
+          { id: 'flat', profile: [0.6, 0.6, 0.6, 0.6, 0.6], reads: 'complexity makes no difference' },
         ],
       },
-      explain: 'Fits the pattern, not the errors. A straight line underfits, because it misses a pattern present in the data. A curve through every point overfits, because it treats measurement error as pattern.',
+      explain: 'Best in the middle. Too simple and the curve misses the pattern; complex enough to pass through every point and it has fitted the measurement errors too, which are different next time. The aim is the pattern without the noise.',
       xp: 5,
     },
     dur: 1.0,

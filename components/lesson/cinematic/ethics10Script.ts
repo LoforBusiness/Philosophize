@@ -102,18 +102,16 @@ export const BEATS: Et10Beat[] = [
   {
     p: 378, x: 268, wading: true, far: true,
     interact: {
-      prompt: 'How much moral theory must you accept for Singer’s argument to succeed?',
-      drag: {
-        lo: 'ONE MODEST PREMISE',
-        hi: 'ALL OF SINGER’S ETHICS',
-        start: 1,
-        zones: [
-          { id: 'modest', upto: 0.3, reads: 'a duty to prevent grave harm at small cost', correct: true },
-          { id: 'mid', upto: 0.66, reads: 'consequences are all that matter morally' },
-          { id: 'all', upto: 1, reads: 'always maximise total happiness' },
+      prompt: 'Put these in order, from the least you must accept to the most.',
+      order: {
+        axis: 'ASKS LEAST FIRST',
+        items: [
+          { id: 'modest', reads: 'PREVENT GRAVE HARM AT SMALL COST' },
+          { id: 'cons', reads: 'ONLY CONSEQUENCES MATTER' },
+          { id: 'max', reads: 'ALWAYS MAXIMISE HAPPINESS' },
         ],
       },
-      explain: 'A duty to prevent grave harm at small cost. Singer is a utilitarian, so the argument is often assumed to be utilitarian too. Yet the argument needs only the modest premise, which few people will deny.',
+      explain: 'Singer needs only the first. That\'s what makes the argument hard to escape. You can reject his whole moral theory and still be caught, because almost nobody denies a duty to stop something terrible at little cost to yourself.',
     },
     dur: 4.8,
   },

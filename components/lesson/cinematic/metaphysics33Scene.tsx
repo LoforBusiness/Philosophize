@@ -63,7 +63,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics33'));
 
-export default function Metaphysics33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics33Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(6);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -91,7 +91,7 @@ export default function Metaphysics33Scene({ clock, bt, bi, i, dragPos, gazeX, g
       // ON THE DRAG BEAT THE READER IS THE ANIMATION. Everywhere else the script
       // drives it. One value, two sources, and the picture never disagrees with
       // whichever is in charge.
-      fall: live ? dragPos.value : carry(cv, 0, n, FALL[p], FALL[n], drop),
+      fall: live ? pickPos.value : carry(cv, 0, n, FALL[p], FALL[n], drop),
       rev: carry(cv, 1, n, REV[p], REV[n], tr),
       // A dashed box settles round the wreckage; a check ticks onto it; a
       // two-headed arrow, then later a one-way arrow, appear in the clear

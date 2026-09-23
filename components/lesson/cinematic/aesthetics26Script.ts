@@ -87,18 +87,17 @@ export const BEATS: Aesthetics26Beat[] = [
   {
     p: 177, x: 88, bird: 1, eye: 1,
     interact: {
-      prompt: 'What decides whether the flamingo is kitsch or camp?',
-      drag: {
-        lo: 'THE OBJECT',
-        hi: 'THE BEHOLDER',
-        start: 0.04,
-        zones: [
-          { id: 'object', upto: 0.3, reads: 'the object: its features settle the matter' },
-          { id: 'both', upto: 0.62, reads: 'partly the object, partly the beholder' },
-          { id: 'eye', upto: 1, reads: 'the beholder’s attitude, since the object is unchanged', correct: true },
+      prompt: 'The flamingo became camp. Which of these changed?',
+      odd: {
+        axis: 'THREE STAYED THE SAME',
+        tiles: [
+          { id: 'colour', reads: 'ITS COLOUR' },
+          { id: 'shape', reads: 'ITS SHAPE' },
+          { id: 'place', reads: 'WHERE IT STANDS' },
+          { id: 'eye', reads: 'HOW IT IS SEEN', correct: true },
         ],
       },
-      explain: 'The beholder’s attitude, since the object is unchanged. Tackiness is a real feature, but both attitudes respond to it. So tackiness can’t be what distinguishes kitsch from camp, and the difference lies in how the beholder takes it.',
+      explain: 'How it\'s seen. Nothing about the plastic differs between the garden that means it sincerely and the garden that means it as a joke, so whatever separates kitsch from camp is brought by the beholder rather than found in the object.',
       xp: 5,
     },
     dur: 1.0,

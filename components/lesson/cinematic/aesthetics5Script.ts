@@ -62,17 +62,17 @@ export const BEATS: Aes5Beat[] = [
   {
     p: 384, bird: 1, ego: 0, self: 0.06,
     interact: {
-      prompt: 'Is unselfing something you do, or something that happens to you?',
-      split: {
-        left: 'IT HAPPENS TO YOU', right: 'YOU DO IT',
-        start: 0.04,
-        zones: [
-          { id: 'do', upto: 0.3, reads: 'a technique you practise and then perform' },
-          { id: 'both', upto: 0.66, reads: 'partly effort, partly something that takes hold' },
-          { id: 'happens', upto: 1, reads: 'something outside you absorbs your attention', correct: true },
+      prompt: 'Which of these is not something you do?',
+      odd: {
+        axis: 'THREE YOU DO',
+        tiles: [
+          { id: 'turn', reads: 'TURN YOUR ATTENTION' },
+          { id: 'stay', reads: 'LOOK FOR LONGER' },
+          { id: 'learn', reads: 'LEARN WHAT IT IS' },
+          { id: 'taken', reads: 'BEING TAKEN OUT OF YOURSELF', correct: true },
         ],
       },
-      explain: 'Something outside you absorbs your attention. For Murdoch, unselfing isn’t a technique you perform. It occurs when a kestrel or a painting holds your attention and the brooding self falls away. You can seek out such occasions, but unselfing itself happens to you.',
+      explain: 'Being taken out of yourself. You can stand where it might happen, and Murdoch calls attention a discipline. But the moment the kestrel empties you arrives; it\'s not reached by trying.',
       xp: 5,
     },
     dur: 1.0,

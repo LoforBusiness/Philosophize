@@ -1092,7 +1092,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **sixty-five** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **sixty-six** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1233,8 +1233,8 @@ they belong to, so the rule book has them and this file did not:
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
   gating; **246 cinematic lessons — every lesson in the app** (animated stickman
   scenes, §17), answered six
-  ways — scene targets, two cards, and the analogue family of `drag` · `sort` ·
-  `poll` · `split` · `plot` (§17, group R). **The analogue family is the
+  ways — scene targets, two cards, and the analogue family of `sort` · `poll` ·
+  `plot` · `order` · `odd` (§17, group R). **The analogue family is the
   majority**: 240 graded beats against 210 on the stage and 38 left in the deck,
   and every lesson but two has one (the two ask both their questions on the stage
   instead). **224 of the 240 lessons with one move the picture as the reader moves the control**
@@ -2598,13 +2598,29 @@ beat for all three.
 ### Six ways to answer, and five of them can move the picture
 
 A graded beat carries `interact`, and that block now has six shapes. **Scene
-targets** (the original 82): the scene draws its own tap targets and calls
+targets** (210 questions): the scene draws its own tap targets and calls
 `onPick`. **`cards`**: two short `ChoiceCards` under the art, which replaced the
-A/B/C/D deck, and still the right answer for 155 lessons. And then the **analogue
-family** — `drag`, `sort`, `poll`, `split` and `plot` — where the answer is a
-quantity, a category, a position, a division or a shape rather than a pick.
-(`lever` and `field` were the first two of those five and are retired; the block
-types still exist in `cinematicKit` and no script has shipped one since.)
+A/B/C/D deck and is still the right answer for a genuine either/or, at 8% of all
+questions. And then the **analogue family** — `sort`, `poll`, `plot`, `order` and
+`odd` — where the answer is a category, a position, a shape, a sequence or the
+one that does not belong, rather than a pick.
+
+**FOUR CONTROLS HAVE BEEN RETIRED, AND THE LAST TWO WERE RETIRED BY NAME.**
+`lever` and `field` went first (§17 below). Then, on 2026-09-22, the owner:
+*"two that I want you to change are two sliding ones. One where you slide a line
+across, and the other one is the box that is above. And you also slide back and
+forth … I want those removed."* That is `drag` (78 questions) and `split` (45).
+Reading all 123 of their questions before converting them found the same thing
+the lever's retirement found: **almost none of them was a quantity.** They were
+named positions wearing a slider, and not one `reads` string had to change when
+they became a `sort`, a `poll`, an `order` or an `odd` — which is the test for
+whether the CONTROL was wrong rather than the question.
+
+The block types and the components stay (an old branch still compiles, and
+`LeverPick`/`FieldPick` have sat there unreachable since the first retirement at
+no cost); what enforces a retirement is **`check:rotation`'s R20, a flat ZERO**
+rather than a high-water mark, because a retired control is a decision rather
+than a debt.
 
 The family exists because "which of these" is the wrong shape for a large part of
 philosophy, and because the product owner asked for the rest of it in as many
@@ -2614,11 +2630,102 @@ skins, and **group R of the rule book is how to tell which one a claim wants**:
 
 | The claim is… | Control | It reads |
 |---|---|---|
-| one quantity on a scale | `drag` | a knob on a rail (`DragScale`) |
 | what CATEGORY a named thing belongs to | `sort` | a chip and labelled bins (`SortBins`) |
 | which POSITION you would defend | `poll` | a ballot, then who held each (`PollBallot`) |
 | what happens to a thing AS another changes | `plot` | three or four drawn curves, one tap (`TrendPick`) |
-| how one thing DIVIDES between two | `split` | a seam in one bar (`SplitBar`) |
+| what ORDER things come in | `order` | three or four tiles tapped into a sequence (`OrderTiles`) |
+| which of four does NOT belong | `odd` | four tiles, one tap (`OddOneOut`) |
+
+> **THE TWO NEW ONES WERE ASKED FOR IN THE SAME SENTENCE AS THE REMOVAL, and the
+> brief was legibility rather than novelty:** *"I want it to take as little
+> reading and as little mental effort as possible … short and especially visually
+> pleasing. With depth, gamification. I do not want it to look AI."*
+>
+> **PUT IT IN ORDER** (`OrderTiles`) shuffles three or four tiles and asks for a
+> sequence. `items[0]` is what comes FIRST, so the answer is never an id or an
+> index and a scene reading `pickPos` gets a meaning the shuffle cannot move. Each
+> tap strikes a numeral onto the tile with the streak seal's own physics — the die
+> falls ACCELERATING, squashes to 0.94, recoils, and leaves a press ring on the
+> frame it lands. **The numeral shown is the TRUE place, not the reader's**: giving
+> back the order they tapped is showing somebody their own wrong answer in the
+> shape of a result.
+>
+> **THE ODD ONE OUT** (`OddOneOut`) is four tiles and one tap, and it is the least
+> reading of anything in the app: a prompt of about five words over four drawings.
+> The stranger CRACKS — two offset hairlines in INK, because drawn in the verdict
+> green at a hairline they read as marks ON the drawing rather than as a break —
+> and the three that belong lift as a group on one value, so they close ranks
+> instead of playing three animations. It earns its place beside `plot`, which is
+> also four tiles and one tap, on the QUESTION SHAPE rather than the gesture:
+> philosophy asks *which of these is not* constantly, and asked as a four-option
+> list it is four sentences where as four pictures it is a glance.
+>
+> **TWO THINGS THAT COST A RENDER EACH.** `objects.fit` scales x and y
+> INDEPENDENTLY off a 100×100 design box, so a drawing handed a 158-by-38 tile is
+> not merely small, it is stretched four to one — the owner saw it in one look
+> (*"the boxes that have the four object they seem to be squished"*), and
+> `squareIn()` lays every drawing into the largest SQUARE the tile holds, which is
+> the only shape that cannot distort. And **the tiles in one set either all draw
+> or none do**: three drawings and one bare word hands the reader the answer before
+> they have read anything, which is group O arriving through the art instead of
+> through the words.
+>
+> **THE SEQUENCE LIVES IN A REF AS WELL AS IN STATE**, and that is not belt and
+> braces. Two taps inside one React commit both read the same `taken` out of their
+> own closure, so the second overwrites the first and a reader tapping quickly gets
+> "1 OF 3" after three taps.
+>
+> **AND RETIRING A CONTROL MOVES RATCHETS THAT ARE NOTHING TO DO WITH IT.**
+> Rewriting 123 prompts and explanations put 148 new spelled-out forms and 18 new
+> intensifiers into `check:ear`, 24 explanations under `check:plain`'s reading-ease
+> floor, nine readouts past `check:clear`, and nine neighbour pairs past
+> `check:rotation`'s own budget — none of which is a prose change anybody set out
+> to make. Budget all of it into the work, and fix **only the pieces the change
+> introduced**: the committed ones are somebody's decisions, and a sweep would
+> quietly overrule every one of them. `scratchpad/earsplit.mjs` is that split —
+> run the checker's own `--list` and filter it against `git show HEAD:`.
+>
+> **AND A NEW CONTROL BREAKS THE HARNESS IN A WAY THAT READS AS TWELVE BROKEN
+> LESSONS.** `measure-must` came back short on twelve of them — deterministically,
+> the same counts on a busy machine and a quiet one — and every one stopped on its
+> `order` beat. The cause is the order the sweep tries its answers in: its generic
+> DECK click runs before `ANSWER_CONTROL`, and an order tile is a wide
+> `role=button` below the stage, so one tile was already placed when the control
+> snippet ran. The snippet then clicked all three tiles in DOM order, and
+> **clicking an already-numbered tile CLEARS the run** — that is the control's way
+> back. Two of three placed, never answered, and the sweep gave up with nothing in
+> the log but a short beat count.
+>
+> **Two obvious fixes are both unavailable, and the render said so.**
+> `accessibilityState={{ selected }}` renders NOTHING on a button in
+> react-native-web — measured, a tile carries `aria-label, role, tabindex, class,
+> type` and, once answered, `aria-disabled` — so the snippet cannot ask which tiles
+> are placed. And the DOM does not update between two clicks in one tick: a tile
+> still reads unplaced immediately after its own click and correct 400ms later, so
+> no read-between-clicks loop works either. What holds is the arithmetic: a pass
+> that meets a placed tile at index *i* clears and leaves exactly the tiles after
+> *i*, so the next pass starts with index 0 free and runs clean. **Two ordered
+> passes converge from any state**, and the control disables itself once complete,
+> so the second costs nothing. `aesthetics-aesthetics-36` 4 → 12 beats,
+> `epistemology-knowledge-37` 3 → 10, `metaphysics-being-36` 3 → 10.
+>
+> **AND THE TREND PICK'S HEAD HAD A LABEL NOBODY MEASURED.** Its axis and its
+> `first → last` range share one space-between row, and only the AXIS shrinks — so
+> a long range pushes both off. `check:controls` listed the axis against a flat
+> 78pt allowance for a range it had never read, and reported every label fitting
+> while `sheet:deck`'s real render found the pair CUT in four lessons at 360, 384
+> and 390. Five heads were over, the worst by 64pt. The range is a slot now, and
+> the PAIR is its own rule, because neither number alone is the constraint.
+>
+> **AND A RE-MEASURE RESTORES THE REACH RECORDS FOR EVERY LESSON, INCLUDING THE
+> ONES JUST MEASURED** — which is the opposite of what it looks like. The record
+> does not mean "growth this script applied", it means "this box already accounts
+> for that much reach", and a freshly measured box does account for it, because
+> `measure-must` renders through the player and the player DRESSES the figure.
+> Keep it and `make:wardrobe` takes X off and puts X back: no change. Clear it and
+> it adds X to a box that already holds it. Cleared for the 125 re-measured,
+> `check:wardrobe` reported 69 lessons whose boxes "do not hold the costume";
+> restored for all 246 it is green, with no box touched either way.
 
 > **THE LEVER AND THE PAD ARE GONE, AND THE READER WAS RIGHT ABOUT BOTH.** The
 > four-box pad was *"always really difficult … it makes a long time to understand
@@ -2757,9 +2864,10 @@ Three things make the whole family teach rather than merely slide:
   while every life in it shrinks. One gesture, on the UI thread, with no React
   render in between.
 
-**240 graded beats are on the analogue family now** — 78 `drag`, 65 `sort`, 45
-`split`, 34 `poll` and 18 `plot`, counted by `sheet:deck` — against 38 left in the
-two-card deck, which is 8% of all questions and is meant to stay a minority rather than reach zero
+**240 graded beats are on the analogue family now** — 93 `sort`, 45 `plot`, 38
+`order`, 33 `poll` and 31 `odd`, counted by `check:rotation` — against 38 left in
+the two-card deck, which is 8% of all questions and is meant to stay a minority
+rather than reach zero
 (*"I still want a couple every now and then for the old way"*). It got there by
 conversion rather than by writing new lessons: **127 lessons had no analogue
 control at all and 2 do now**, and both of those ask both their questions on the
@@ -2768,6 +2876,32 @@ control the beat declares — so it costs a control block, a rewritten `prompt` 
 a rewritten `explain` (an explanation that says "the other card" names nothing
 once the cards are gone, which is J9). `node scripts/rotation-worklist.mjs`
 prints what is left, with each claim, in reading order.
+
+> **AND A CONVERSION IS A SCENE EDIT AS WELL, WHICH IS THE HALF THAT GOES WRONG
+> IN SILENCE.** 92 scenes derive their reaction flag as
+> `BEATS.map((b) => (b.interact?.drag ? 1 : 0))`, so changing the block type and
+> leaving that line makes the flag permanently false: the stage then holds
+> perfectly still under the reader's thumb, and every source-level question about
+> it still answers yes. That is the 51-dead-flags failure this file already
+> records, and doing it by hand 123 times is how it happens again — so the
+> retirement was applied by a tool that replaced the block, the prompt, the
+> explanation AND the flag in one pass, and refused anything it could not match
+> exactly rather than guessing.
+>
+> **`dragPos` MEANS SOMETHING DIFFERENT IN EACH CONTROL, so re-pointing a flag is
+> not the whole of it.** A rail's `dragPos` was the quantity being asked about;
+> `order` reports how much of the sequence is PLACED and `odd` reports simply
+> whether the stranger was found (1 or 0.35). So a scene that emptied a vacuum as
+> a knob travelled would now empty it as the reader taps tiles, which is a picture
+> of nothing. `pickPos` — the option just taken, in the AUTHOR's order — is what
+> most of those scenes were really tracking, and it is what they read now.
+>
+> **AND THE AUTHOR'S ORDER IS FREE, WHICH IS THE CHEAP WAY TO KEEP A1.** Both new
+> controls shuffle for display, so the order the tiles are WRITTEN in is invisible
+> to the reader and can be chosen to make the scene's existing reaction true:
+> `metaphysics18`'s arrow hangs in the air when the reader picks the number and
+> lands on its plinth for the other three, purely because THE NUMBER 3 is written
+> first.
 
 **THE SCENE FOLLOWING THE CONTROL IS NO LONGER OPTIONAL (R7c).** It used to be:
 30 scenes of 186 moved and the other 150 held still while the reader dragged a
@@ -2810,9 +2944,11 @@ timeline off the pad's two axes, `political22` makes the pad BE the switch,
 five generations of speakers back up as the chip crosses its bins. A scene reads the
 control's value **only on its own graded beat** and the script's own track everywhere
 else — one value, two sources, and the picture never disagrees with whichever is in
-charge. Which value depends on the control: `dragPos` for `drag`, `split` and
-`plot`, whose position IS the answer, and `pickPos` for `sort` and `poll`, whose
-rows are shuffled (see SceneApi, and the note below).
+charge. Which value depends on the control: `dragPos` for `plot`, whose position
+IS the answer, and for `order` and `odd`, where it reports how much of the
+sequence is placed and whether the stranger was found; `pickPos` for `sort`,
+`poll`, `order` and `odd`, whose rows and tiles are shuffled (see SceneApi, and
+the note below).
 The flag is derived from the beat itself (`b.interact?.sort ? 1 : 0`) rather than
 declared as a channel, so it cannot fall out of step with the control and it costs
 `check:echo` nothing.
@@ -3132,13 +3268,24 @@ declared as a channel, so it cannot fall out of step with the control and it cos
 **AND THE ROTATION IS ITS OWN RULE (R9).** Which control a CLAIM wants is R1;
 what a reader's thumb is asked to do lesson after lesson is R9, and only the
 second one is felt by somebody working through a branch. `npm run check:rotation`
-holds three high-water marks: the two-card deck is at most 14% of all questions
-(it is 10% now, and the floor came down from 55% as the analogue family took
-over), neighbouring lessons do not both use the same control (133 pairs did, now
-27), and **36 lessons ask both of their questions BELOW the
+holds three high-water marks plus a flat zero: the two-card deck is at most 14% of
+all questions (it is 8% now, and the floor came down from 55% as the analogue
+family took over), neighbouring lessons do not both use the same control (133
+pairs did, now 23), **36 lessons ask both of their questions BELOW the
 figure** — every one an early lesson, which is exactly where the picture most
-needs to be the thing being answered. That last budget is the "above the
-stickman" half of the work, and converting one is a self-contained job.
+needs to be the thing being answered — and **no lesson uses a retired control
+(R20)**, which is a zero rather than a mark because it is a decision rather than
+a debt. That third budget is the "above the stickman" half of the work, and
+converting one is a self-contained job.
+
+> **RETIRING TWO CONTROLS PUT THE NEIGHBOUR BUDGET NINE OVER, which is a rotation
+> failure caused by a change that was not about the rotation.** 123 questions had
+> to go somewhere and `sort` took most of them: 35 pairs against a budget of 26.
+> The move that fixes it cheaply is the HINGE — converting the MIDDLE lesson of a
+> run of three breaks two pairs at once, so `metaphysics38` and `logic13` did the
+> work of four conversions. The trap is the other half of the same arithmetic:
+> converting BOTH ends of such a run puts two neighbours on the same new control
+> and they are a pair again.
 
 **They all have the same shape, and `npm run check:cinematic` enforces it**: 7–11
 beats (8 is the mode), **exactly two graded questions**, one saveable quote on a rest
@@ -3955,13 +4102,17 @@ from the lead's neighbours, which is all it can know. It cannot know the BAND.
 top hat pokes seven units above that lesson's band, and nothing in the component
 could have seen it.
 
-**AND A SECOND FIGURE WALKS IN, IN 36 LESSONS (AA8).** He arrives on the beat
-before a `poll` or a `split` and is standing there when the question is asked —
+**AND A SECOND FIGURE WALKS IN (AA8).** He arrives on the beat
+before a `poll` or a `cards` and is standing there when the question is asked —
 the person who holds the OTHER position, which is what keeps A1 true and makes him
 an argument rather than a cameo. **Which lessons is taken from STRUCTURE, never
-from the prose**: a `poll` lists named positions and a `split` divides one thing
-between two, so the control IS the evidence, and group Z's warning about scoring
-prose never applies. **Whether there is room is measured** — the widest clear floor
+from the prose**: a `poll` lists named positions and a `cards` prints two of them
+side by side, so the control IS the evidence, and group Z's warning about scoring
+prose never applies. **`split` was the second trigger and retiring it (R20) would
+have dropped the visitor from sixteen of the twenty-eight lessons that had one**,
+silently, because the generator would have reported a perfectly good number for a
+smaller corpus; `sort`, `order` and `odd` are not triggers, because a category, a
+sequence and a family of three give a second figure nothing to hold. **Whether there is room is measured** — the widest clear floor
 that exists on BOTH the entrance beat and the question beat, out of `mustBoxes`;
 18 lessons are refused for having nowhere to put him.
 
@@ -4051,7 +4202,7 @@ from three discs to one, and minimising the gap to his crown (median **4 units**
 **AND THE SECOND FIGURE SPEAKS.** The 24 lessons where a visitor walks in (AA8)
 had two stickmen facing each other in silence; he now says one line as he arrives,
 timed to his walk. His line is POOLED where the mascot's thoughts could not be,
-and that is structural: a `poll` or a `split` fixes his meaning — he holds the
+and that is structural: a `poll` or a `cards` fixes his meaning — he holds the
 other position — whatever the lesson is about.
 
 `npm run check:thoughts` holds all of it offline against the real `.ttf`: every

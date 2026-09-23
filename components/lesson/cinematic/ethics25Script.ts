@@ -96,18 +96,16 @@ export const BEATS: Ethics25Beat[] = [
   {
     p: 21, x: 96, bridge: 1, sign: 1,
     interact: {
-      prompt: 'If a product harms only its user, how far does Mill’s principle let the state go?',
-      drag: {
-        lo: 'WARN THEM',
-        hi: 'BAN IT',
-        start: 0.5,
-        zones: [
-          { id: 'warn', upto: 0.34, reads: 'require a warning, and let adults choose', correct: true },
-          { id: 'nudge', upto: 0.68, reads: 'tax it heavily to discourage its use' },
-          { id: 'ban', upto: 1, reads: 'forbid its sale to everyone' },
+      prompt: 'Put these in order, from lightest hand to heaviest.',
+      order: {
+        axis: 'LIGHTEST FIRST',
+        items: [
+          { id: 'warn', reads: 'REQUIRE A WARNING' },
+          { id: 'tax', reads: 'TAX IT HEAVILY' },
+          { id: 'ban', reads: 'FORBID THE SALE' },
         ],
       },
-      explain: 'Require a warning, and let adults choose. Mill allows labelling, because a warning informs a choice without overriding it. A tax meant to discourage use differs from a ban only in degree, he argues, so he rejects it too.',
+      explain: 'Mill\'s principle reaches the first and stops. Where a product harms only the person who chooses it, the state may make sure they know what they are choosing; taxing and banning are attempts to make the choice for them.',
       xp: 5,
     },
     dur: 1.0,

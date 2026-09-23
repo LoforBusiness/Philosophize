@@ -86,18 +86,17 @@ export const BEATS: Aes10Beat[] = [
   {
     p: 445, x: 110, film: 1, panel: 1, shut: 0, verdict: 2, link: 1,
     interact: {
-      prompt: 'When beauty conflicts with the good of the city, which does Plato put first?',
-      drag: {
-        lo: 'BEAUTY ABOVE ALL',
-        hi: 'THE CITY ABOVE ALL',
-        start: 0,
-        zones: [
-          { id: 'beauty', upto: 0.3, reads: 'beauty first, whatever it costs' },
-          { id: 'even', upto: 0.62, reads: 'the two weighed against each other' },
-          { id: 'city', upto: 1, reads: 'the city first, and beautiful art is most dangerous', correct: true },
+      prompt: 'Which of these would Plato refuse?',
+      odd: {
+        axis: 'HE ACCEPTS THREE',
+        tiles: [
+          { id: 'shape', reads: 'ART SHAPES CHARACTER' },
+          { id: 'city', reads: 'THE CITY COMES FIRST' },
+          { id: 'some', reads: 'SOME ART MUST GO' },
+          { id: 'beauty', reads: 'BEAUTY OUTWEIGHS THE CITY', correct: true },
         ],
       },
-      explain: 'The city first, and beautiful art is most dangerous. Plato ranked the good of the city above beauty, so the Republic proposes censoring poetry. He feared skilful art most, because its charm makes a harmful lesson persuasive.',
+      explain: 'That beauty outweighs the city. The other three are why he\'s so severe: art works on character, the city\'s good is the measure, so the most beautiful art is the most dangerous rather than the most protected.',
       xp: 5,
     },
     dur: 1.0,

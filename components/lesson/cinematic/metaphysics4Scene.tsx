@@ -92,10 +92,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics4'));
 
-export default function Metaphysics4Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics4Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -122,7 +122,7 @@ export default function Metaphysics4Scene({ clock, bt, bi, i, dragPos, gazeX, ga
       // R7b — the knob draws the bar across the void. The further the reader drags
       // toward ABSOLUTELY NOTHING, the more firmly Parmenides' prohibition is struck
       // over the second way: the end of the rail is the end he says cannot be gone to.
-      barred: carry(cv, 1, n, BAR[p], reacting ? dragPos.value : BAR[n], tr),
+      barred: carry(cv, 1, n, BAR[p], reacting ? pickPos.value : BAR[n], tr),
       frozen: carry(cv, 2, n, FRZ[p], FRZ[n], tr),
       // A one-shot spark: it rides the tap's own clock rather than being carried,
       // since it is a single journey along row 0's arrow, not a value that holds.

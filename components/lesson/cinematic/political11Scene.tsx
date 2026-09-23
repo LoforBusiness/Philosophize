@@ -146,7 +146,7 @@ const SELFV = BEATS.map((b) => b.self ?? 0);
 // R7c — the stage follows the seam on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
 // THE SEAM IS THE LEFT SIDE'S SHARE (R7b), and the left side is THE READING OF
 // HUMAN NATURE — the very words on the dial. So the dial is as present as the
@@ -161,7 +161,7 @@ const SPLIT = BEATS.find((b) => b.interact?.split)?.interact?.split;
 const DIAL_GONE = SPLIT?.zones[0]?.upto ?? 0.3;
 const DIAL_FULL = (DIAL_GONE + (SPLIT?.zones[1]?.upto ?? 0.66)) / 2;
 
-export default function Political11Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Political11Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -210,7 +210,7 @@ export default function Political11Scene({ clock, bt, bi, i, picked, onPick, dra
     return {
       fig: lookPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       // R7c — on the split beat the dial rides the seam (DIAL_GONE…DIAL_FULL).
-      dial: carry(cv, 1, n, DIALV[p], reacting ? clamp01((dragPos.value - DIAL_GONE) / (DIAL_FULL - DIAL_GONE)) : DIALV[n], tr, dialFade ? grow : 1),
+      dial: carry(cv, 1, n, DIALV[p], reacting ? clamp01((pickPos.value - DIAL_GONE) / (DIAL_FULL - DIAL_GONE)) : DIALV[n], tr, dialFade ? grow : 1),
       ptr: lerp(from, to, ease01(bt.value / 0.62)),
       ptrOn: SETV[n] > 0 ? 1 : 0,
       grow,

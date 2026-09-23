@@ -97,10 +97,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic6'));
 
-export default function Logic6Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic6Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -121,7 +121,7 @@ export default function Logic6Scene({ clock, bt, bi, i, picked, onPick, dragPos,
       // R7b — the seam makes it rain. Give the bar to THE IF AS WELL and the rain
       // actually falls on the first box; keep it on THE LINK ONLY and the arrow stands
       // with nothing happening under it, which is all a conditional ever claimed.
-      rain: carry(cv, 1, n, RAIN[p], reacting ? 1 - dragPos.value : RAIN[n], tr),
+      rain: carry(cv, 1, n, RAIN[p], reacting ? 1 - pickPos.value : RAIN[n], tr),
       table: carry(cv, 2, n, TABLE[p], TABLE[n], tr),
       // The two group-AH markers, each fading fully in and fully out on its own
       // (never a hard cut), so neither ever sits half-lit at rest.

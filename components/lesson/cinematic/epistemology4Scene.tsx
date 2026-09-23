@@ -106,10 +106,10 @@ const X = BEATS.map((b) => b.x ?? 196);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology4'));
 
-export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldE = useHeld();
   const cv = useCarry(7);
@@ -139,7 +139,7 @@ export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick, d
       // R7b — the knob raises the innate glow. The rail runs from none of it comes
       // before experience to all of it, and the rationalist's light on the slate rises
       // with it, so the reader sees the claim they are settling on.
-      glow: carry(cv, 1, n, GLOW[p], reacting ? dragPos.value : GLOW[n], tr),
+      glow: carry(cv, 1, n, GLOW[p], reacting ? pickPos.value : GLOW[n], tr),
       bridge: carry(cv, 2, n, BRIDGE[p], BRIDGE[n], tr),
       school: carry(cv, 3, n, SCHOOL[p], SCHOOL[n], ease01((bt.value - 0.2) / 0.6)),
       apriori: carry(cv, 4, n, APRIORI[p], APRIORI[n], ease01((bt.value - 0.9) / 0.6)),

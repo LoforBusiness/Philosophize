@@ -82,16 +82,17 @@ export const BEATS: Metaphysics38Beat[] = [
   {
     p: 177, x: 98, days: 1, objects: 1, lines: 1,
     interact: {
-      prompt: 'Given that clay and vase differ in how long they last, what is the vase?',
-      sort: {
-        chip: 'the vase',
-        bins: [
-          { id: 'same', label: 'the clay itself', reads: 'one thing under two names, so both bars match' },
-          { id: 'other', label: 'a second thing', reads: 'made of the clay, and not the clay', correct: true },
-          { id: 'none', label: 'not a thing', reads: 'only a shape, so nothing was made on Tuesday' },
+      prompt: 'Which of these does the vase not share with the clay?',
+      odd: {
+        axis: 'THREE ARE SHARED',
+        tiles: [
+          { id: 'weight', reads: 'ITS WEIGHT' },
+          { id: 'clay', reads: 'ITS CLAY' },
+          { id: 'shape', reads: 'ITS SHAPE' },
+          { id: 'day', reads: 'THE DAY IT BEGAN', correct: true },
         ],
       },
-      explain: 'A second thing is the answer: the vase is made of the clay without being the clay. Two objects then occupy one place at once, the cost of this view. Calling the vase the clay breaks Kripke’s test, and calling it no thing denies that a vase was ever made.',
+      explain: 'The day it began. The clay was there on Monday and the vase wasn\'t, so one of them has a property the other lacks and they can\'t be one thing. The cost of saying so is two objects in one place at once.',
       xp: 5,
     },
     dur: 1.0,

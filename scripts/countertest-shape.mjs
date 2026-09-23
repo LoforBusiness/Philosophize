@@ -57,16 +57,65 @@ const CASES = [
   {
     name: 'stageAnswered forgets a control',
     file: 'cinematicKit.tsx',
-    from: ' && !q.sort);',
+    from: ' && !q.odd);',
     to: ');',
-    expect: 'does not exclude: sort',
+    expect: 'does not exclude: odd',
   },
   {
     name: 'a new control arrives without its key in stageAnswered',
     file: 'cinematicKit.tsx',
-    from: '  sort?: SortBlock;\n}',
-    to: '  sort?: SortBlock;\n  newcontrol?: SortBlock;\n}',
+    from: '  odd?: OddBlock;\n}',
+    to: '  odd?: OddBlock;\n  newcontrol?: SortBlock;\n}',
     expect: 'does not exclude: newcontrol',
+  },
+
+  // ── THE TWO TILE CONTROLS (R21, R22) ───────────────────────────────────────
+  //
+  // The first of these is the one worth having. Three drawings and one bare word
+  // is a set that hands over its own answer, and NOTHING else in the suite can
+  // see it: the spoiler sweep reads words, the readable sweep reads type, and
+  // both are looking at a tile that is drawn perfectly.
+  {
+    name: 'an odd one out where one tile draws and three do not',
+    file: 'metaphysics18Script.ts',
+    from: "{ id: 'tree', reads: 'A TREE' }",
+    to: "{ id: 'tree', reads: 'A TREE', draw: 'tree' }",
+    expect: 'every tile set is the shape',
+  },
+  {
+    name: 'an odd one out with five tiles',
+    file: 'metaphysics18Script.ts',
+    from: "{ id: 'wheel', reads: 'A WHEEL' },",
+    to: "{ id: 'wheel', reads: 'A WHEEL' },\n          { id: 'spare', reads: 'A SPARE' },",
+    expect: 'every tile set is the shape',
+  },
+  {
+    name: 'an odd one out with two strangers',
+    file: 'metaphysics18Script.ts',
+    from: "{ id: 'tree', reads: 'A TREE' }",
+    to: "{ id: 'tree', reads: 'A TREE', correct: true }",
+    expect: 'every tile set is the shape',
+  },
+  {
+    name: 'an odd one out with no stranger at all',
+    file: 'metaphysics18Script.ts',
+    from: "reads: 'THE NUMBER 3', correct: true",
+    to: "reads: 'THE NUMBER 3'",
+    expect: 'every tile set is the shape',
+  },
+  {
+    name: 'an axis too long for the row it shares with the hint',
+    file: 'metaphysics18Script.ts',
+    from: "axis: 'THREE HAVE A PLACE'",
+    to: "axis: 'THREE OF THESE HAVE A PLACE IN THE WORLD'",
+    expect: 'every tile set is the shape',
+  },
+  {
+    name: 'two tiles sharing an id',
+    file: 'metaphysics18Script.ts',
+    from: "{ id: 'cup', reads: 'A CUP' }",
+    to: "{ id: 'tree', reads: 'A CUP' }",
+    expect: 'every tile set is the shape',
   },
 ];
 

@@ -48,18 +48,16 @@ export const BEATS: Metaphysics36Beat[] = [
   {
     p: 461, x: 54, hotel: 1, live_d: 1, live: 1,
     interact: {
-      prompt: 'How many new guests can the full hotel still accommodate?',
-      drag: {
-        lo: 'NOT ONE',
-        hi: 'INFINITELY MANY',
-        start: 0,
-        zones: [
-          { id: 'none', upto: 0.26, reads: 'none, since every room is taken' },
-          { id: 'one', upto: 0.6, reads: 'one, if every guest moves along' },
-          { id: 'all', upto: 1, reads: 'infinitely many new guests', correct: true },
+      prompt: 'Put the hotel\'s moves in order.',
+      order: {
+        axis: 'FIRST MOVE FIRST',
+        items: [
+          { id: 'shift', reads: 'EVERY GUEST MOVES UP ONE' },
+          { id: 'empty', reads: 'ROOM 1 FALLS EMPTY' },
+          { id: 'take', reads: 'THE NEW GUEST TAKES IT' },
         ],
       },
-      explain: 'Infinitely many new guests. Each guest moves to the next room, which frees room one. If every guest doubles their room number instead, every odd-numbered room is freed. So a full infinite hotel can take in infinitely many more.',
+      explain: 'Every guest moves up one, room 1 falls empty, the new guest takes it. Nobody is turned out and no room is shared, so a hotel with every room full still has space. That\'s what it\'s for a collection to be infinite rather than merely very large.',
       xp: 5,
     },
     dur: 1.0,

@@ -102,17 +102,15 @@ export const BEATS: Epi15Beat[] = [
     g: 383, cells: 4, dealt: 3, sum: 1,
     dur: 1.0,
     interact: {
-      prompt: 'On Kant’s view, is twelve already contained in seven and five, or is it something new?',
-      split: {
-        left: 'CONTAINED IN SEVEN AND FIVE', right: 'SOMETHING GENUINELY NEW',
-        start: 1,
-        zones: [
-          { id: 'new', upto: 0.32, reads: 'twelve isn’t contained in seven and five', correct: true },
-          { id: 'half', upto: 0.66, reads: 'partly contained, partly added' },
-          { id: 'inside', upto: 1, reads: 'twelve is contained in seven and five' },
+      prompt: 'Is twelve already inside seven and five?',
+      sort: {
+        chip: 'TWELVE',
+        bins: [
+          { id: 'in', label: 'ALREADY IN THEM', reads: 'contained in the concepts of seven and five' },
+          { id: 'new', label: 'SOMETHING NEW', reads: 'not contained: it has to be added', correct: true },
         ],
       },
-      explain: 'Twelve isn’t contained in seven and five, on Kant’s view. No analysis of seven, five and plus yields twelve, yet no experiment is needed. So the sum is synthetic a priori. Gottlob Frege later argued that arithmetic is analytic.',
+      explain: 'Something new. Kant\'s point is that unpacking the concepts of seven and of five never yields twelve, so the judgement adds something; and yet it holds without any particular experience. That pairing is what he calls synthetic a priori.',
       xp: 5,
     },
   },

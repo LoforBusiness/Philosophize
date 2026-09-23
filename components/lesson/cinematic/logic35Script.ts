@@ -103,18 +103,17 @@ export const BEATS: Logic35Beat[] = [
   {
     p: 447, x: 130, rise: 1, under: 1, cut: 1,
     interact: {
-      prompt: 'Which method removes the influence of hidden confounders?',
-      drag: {
-        lo: 'A LARGER STUDY',
-        hi: 'ASSIGN GROUPS BY COIN',
-        start: 0,
-        zones: [
-          { id: 'big', upto: 0.3, reads: 'a larger sample, with the same confounders' },
-          { id: 'list', upto: 0.66, reads: 'adjusting only for confounders already suspected' },
-          { id: 'coin', upto: 1, reads: 'groups assigned by coin, not by any confounder', correct: true },
+      prompt: 'Which of these removes the hidden confounders?',
+      odd: {
+        axis: 'THREE LEAVE THEM IN',
+        tiles: [
+          { id: 'big', reads: 'A LARGER SAMPLE' },
+          { id: 'known', reads: 'ADJUST FOR KNOWN ONES' },
+          { id: 'match', reads: 'MATCH THE GROUPS ON AGE' },
+          { id: 'coin', reads: 'ASSIGN BY COIN', correct: true },
         ],
       },
-      explain: 'Groups assigned by coin, not by any confounder. A larger study keeps the same bias with less random error. Statistical adjustment covers only the confounders someone thought to measure. When a coin decides who is in each group, no other cause, named or unnamed, can decide it.',
+      explain: 'Assigning by coin. The other three deal only with causes somebody has thought of. A bigger sample just measures the same bias more finely. A coin toss spreads every factor evenly, named or not.',
       xp: 5,
     },
     dur: 1.0,

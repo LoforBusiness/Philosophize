@@ -86,14 +86,14 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics18'));
 
 /** y of value v inside a panel. */
 const rowY = (v: number) => PAN_Y + 9 + (1 - v) * (PAN_H - 26);
 
-export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -117,7 +117,7 @@ export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick, dr
       curve: carry(cv, 1, n, CURVE[p], CURVE[n], tr),
       // R7c — the seam is the LISTENER's share, and the posture panel is the listener.
       // Slide it their way and the shoulder that does the feeling is drawn in.
-      body: carry(cv, 2, n, BODY[p], reacting ? dragPos.value : BODY[n], tr),
+      body: carry(cv, 2, n, BODY[p], reacting ? pickPos.value : BODY[n], tr),
       match: carry(cv, 3, n, MATCH[p], MATCH[n], tr),
       empty: carry(cv, 4, n, EMPTY[p], EMPTY[n], tr),
       t,

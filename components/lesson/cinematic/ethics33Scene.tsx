@@ -57,7 +57,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics33'));
 
-export default function Ethics33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics33Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(4);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -71,7 +71,7 @@ export default function Ethics33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY,
     const slide = ease01(bt.value / 1.1);
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
-      give: live ? dragPos.value : carry(cv, 0, n, GIVE[p], GIVE[n], slide),
+      give: live ? pickPos.value : carry(cv, 0, n, GIVE[p], GIVE[n], slide),
       more: carry(cv, 1, n, MORE[p], MORE[n], tr),
       // "What permits you to stop giving" — a "?" holds in the gap between columns.
       ask: carry(cv, 2, n, ASK[p], ASK[n], tr),

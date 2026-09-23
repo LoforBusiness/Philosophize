@@ -79,18 +79,16 @@ export const BEATS: Aesthetics37Beat[] = [
   {
     p: 457, x: 54, staves: 1, score: 1, played: 1, live_d: 1, live: 1,
     interact: {
-      prompt: 'Once a solo is transcribed and learned note for note, what has it become?',
-      drag: {
-        lo: 'MADE UP TONIGHT',
-        hi: 'WRITTEN DOWN',
-        start: 0,
-        zones: [
-          { id: 'live', upto: 0.3, reads: 'an event with nothing to get wrong' },
-          { id: 'mid', upto: 0.66, reads: 'a familiar tune, loosely remembered' },
-          { id: 'text', upto: 1, reads: 'a composition that can be played wrongly', correct: true },
+      prompt: 'The solo is transcribed and learned note for note. What is it now?',
+      sort: {
+        chip: 'THE SOLO',
+        bins: [
+          { id: 'event', label: 'AN EVENT', reads: 'an event, with nothing in it to get wrong' },
+          { id: 'tune', label: 'A REMEMBERED TUNE', reads: 'a familiar tune, held loosely' },
+          { id: 'text', label: 'A COMPOSITION', reads: 'a composition, which can now be played wrongly', correct: true },
         ],
       },
-      explain: 'A composition that can be played wrongly. The notes survived transcription, but the improvising didn’t. What sits on the stave is now a composition with an unusual history. It began as a series of decisions and is now a text to follow.',
+      explain: 'A composition. Once there\'s a score, there\'s a difference between playing it and playing it wrong, and that difference is what a work of music has and an improvisation doesn\'t. Writing it down changed what kind of thing it\'s.',
       xp: 5,
     },
     dur: 1.0,

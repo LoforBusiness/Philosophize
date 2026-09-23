@@ -49,18 +49,16 @@ export const BEATS: Aesthetics36Beat[] = [
   {
     p: 457, x: 54, square: 1, live_d: 1,
     interact: {
-      prompt: 'Which crop of the square supports the least misleading caption?',
-      drag: {
-        lo: 'FRAME THE CROWD',
-        hi: 'FRAME THE MAN',
-        start: 0.5,
-        zones: [
-          { id: 'packed', upto: 0.3, reads: 'THOUSANDS TURN OUT' },
-          { id: 'mid', upto: 0.68, reads: 'A MODEST TURNOUT', correct: true },
-          { id: 'alone', upto: 1, reads: 'NOBODY CAME' },
+      prompt: 'Put these captions in order, from most to least people.',
+      order: {
+        axis: 'MOST PEOPLE FIRST',
+        items: [
+          { id: 'thousands', reads: 'THOUSANDS TURN OUT' },
+          { id: 'modest', reads: 'A MODEST TURNOUT' },
+          { id: 'nobody', reads: 'NOBODY CAME' },
         ],
       },
-      explain: 'A modest turnout. None of the three photographs is faked, yet the two ends support opposite headlines. The middle frame favours neither end. Even so, it’s a choice, and the photograph doesn’t show that it was made.',
+      explain: 'All three can be photographed truthfully in the same square, by choosing where to point the camera. The middle caption is the one the whole scene supports, which is why the crop does the lying while every individual photograph stays honest.',
       xp: 5,
     },
     dur: 1.0,

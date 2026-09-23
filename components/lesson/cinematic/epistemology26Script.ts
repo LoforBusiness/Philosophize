@@ -87,18 +87,18 @@ export const BEATS: Epistemology26Beat[] = [
   {
     p: 176, x: 88, bill: 1, pair: 1,
     interact: {
-      prompt: 'How far should you move toward your peer’s answer?',
-      drag: {
-        lo: 'MEET IN THE MIDDLE',
-        hi: 'HOLD YOUR VIEW',
-        start: 0.95,
-        zones: [
-          { id: 'split', upto: 0.38, reads: 'split the difference, in every case' },
-          { id: 'some', upto: 0.72, reads: 'become much less confident, and recheck', correct: true },
-          { id: 'hold', upto: 1, reads: 'hold firm, and assume she made the error' },
+      prompt: 'As your peer\'s disagreement becomes plain, which shape should confidence take?',
+      plot: {
+        cols: ['BEFORE', 'SHE DISAGREES', 'AFTER'],
+        axis: 'HOW SURE YOU STAY',
+        start: [0.9, 0.9, 0.9],
+        shapes: [
+          { id: 'hold', profile: [0.9, 0.9, 0.88, 0.88, 0.87], reads: 'hold firm and assume she erred' },
+          { id: 'some', profile: [0.9, 0.82, 0.6, 0.45, 0.4], reads: 'drop a long way, and go back over it', correct: true },
+          { id: 'half', profile: [0.9, 0.75, 0.5, 0.5, 0.5], reads: 'split the difference, every time' },
         ],
       },
-      explain: 'Become much less confident, and recheck. Holding firm treats your own confidence as proof that she erred. Always splitting the difference gives a veto to anyone who disagrees. It also ignores whether the two of you are peers.',
+      explain: 'Drop a long way and recheck. If she\'s your equal on this question, her getting a different answer is evidence you made the error, so confidence should fall sharply. Splitting the difference as a rule ignores whether either of you has grounds.',
       xp: 5,
     },
     dur: 1.0,

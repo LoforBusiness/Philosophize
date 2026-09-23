@@ -76,12 +76,12 @@ const RISE_FALL = BEATS.map((b) => b.riseFall ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
 // Where the shaded band starts, per state: nothing · the last sliver · most of it.
 const BAND_L = [0.98, 0.93, 0.34];
 
-export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(6);
@@ -123,7 +123,7 @@ export default function Epistemology10Scene({ clock, bt, bi, i, picked, onPick, 
       // returns, multiplier and all, so a width passed in as its multiplier was
       // multiplied in again on every beat: the needle's first frame landed tens of
       // thousands of units off the stage and slid back over 1.4s (C20c).
-      needle: SC_L + SC_W * carry(cv, 2, n, NEEDLE[p], reacting ? dragPos.value : NEEDLE[n], ease01(clamp01(bt.value / 1.4))),
+      needle: SC_L + SC_W * carry(cv, 2, n, NEEDLE[p], reacting ? pickPos.value : NEEDLE[n], ease01(clamp01(bt.value / 1.4))),
       openQ: carry(cv, 3, n, OPEN_Q[p], OPEN_Q[n], tr),
       compatRing: carry(cv, 4, n, COMPAT_RING[p], COMPAT_RING[n], tr),
       riseFall: carry(cv, 5, n, RISE_FALL[p], RISE_FALL[n], tr),

@@ -93,10 +93,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political6'));
 
-export default function Political6Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Political6Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -118,8 +118,8 @@ export default function Political6Scene({ clock, bt, bi, i, picked, onPick, drag
       chart: carry(cv, 0, n, BARS[p], BARS[n], tr, intro),
       // R7c — the ranked ladder is the answer, so the seam draws it. Give liberty the
       // larger share and rung 1 stands up; trade it away and rung 2 is what is left.
-      prinA: (prinOn ? (prinFade ? ease01(bt.value / 0.45) : 1) : 0) * (reacting ? 1 - (1 - dragPos.value) * tr : 1),
-      prinB: (prinOn ? (prinFade ? ease01((bt.value - 0.32) / 0.45) : 1) : 0) * (reacting ? 1 - dragPos.value * tr : 1),
+      prinA: (prinOn ? (prinFade ? ease01(bt.value / 0.45) : 1) : 0) * (reacting ? 1 - (1 - pickPos.value) * tr : 1),
+      prinB: (prinOn ? (prinFade ? ease01((bt.value - 0.32) / 0.45) : 1) : 0) * (reacting ? 1 - pickPos.value * tr : 1),
       // Carried, so each of these fades out as well as in (group L).
       place: carry(cv, 1, n, PLACE[p], PLACE[n], tr),
       gap: carry(cv, 2, n, GAP[p], GAP[n], tr),

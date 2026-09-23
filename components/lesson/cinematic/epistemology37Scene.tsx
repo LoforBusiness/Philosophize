@@ -91,7 +91,7 @@ const SAFE = BEATS.map((b) => (b.safe ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology37'));
 
-export default function Epistemology37Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology37Scene({ clock, bt, bi, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(9);
   const SCENE = useDerivedValue(() => {

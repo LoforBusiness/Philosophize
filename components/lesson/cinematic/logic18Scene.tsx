@@ -111,7 +111,7 @@ const BROKEN = BEATS.map((b) => b.broken ?? 0);
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic18'));
 
-export default function Logic18Scene({ clock, bt, bi, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic18Scene({ clock, bt, bi, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(7);
   const SCENE = useDerivedValue(() => {

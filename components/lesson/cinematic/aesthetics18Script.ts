@@ -83,17 +83,17 @@ export const BEATS: Aes18Beat[] = [
   {
     p: 383, x: 268, curve: 1, body: 1, empty: 1,
     interact: {
-      prompt: 'When sad music moves you, where is the sadness located?',
-      split: {
-        left: 'IN THE LISTENER', right: 'IN THE NOTES',
-        start: 0.5,
-        zones: [
-          { id: 'notes', upto: 0.34, reads: 'the sadness is a feature of the sound' },
-          { id: 'both', upto: 0.66, reads: 'shared equally between the sound and you' },
-          { id: 'you', upto: 1, reads: 'the notes have a shape, the feeling is yours', correct: true },
+      prompt: 'Which of these is not in the notes?',
+      odd: {
+        axis: 'THREE ARE IN THE NOTES',
+        tiles: [
+          { id: 'fall', reads: 'A FALLING LINE' },
+          { id: 'slow', reads: 'A SLOW PACE' },
+          { id: 'minor', reads: 'A MINOR KEY' },
+          { id: 'grief', reads: 'GRIEF', correct: true },
         ],
       },
-      explain: 'The notes have a shape, and the feeling is yours. The sad contour is in the music, but only a listener can feel sad. Since nothing has gone wrong in your life, you hear the shape of grief without any loss.',
+      explain: 'Grief. The first three are written down and anyone can point to them; the sorrow isn\'t a fourth thing on the page. The music has the shape of grief, and the feeling belongs to the listener.',
       xp: 5,
     },
     dur: 1.0,

@@ -102,11 +102,11 @@ const PERSON = BEATS.map((b) => (b.person ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics30'));
 
-export default function Aesthetics30Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Aesthetics30Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(7);
@@ -129,7 +129,7 @@ export default function Aesthetics30Scene({ clock, bt, bi, i, picked, onPick, dr
       window: carry(cv, 1, n, WINDOW[p], WINDOW[n], tr),
       // R7b — a split's seam is the LEFT side's share, and the left side here is
       // the self, so a high seam slides the mirror right across the bird.
-      self: carry(cv, 2, n, SELF[p], reacting ? dragPos.value : SELF[n], tr),
+      self: carry(cv, 2, n, SELF[p], reacting ? pickPos.value : SELF[n], tr),
       plates: carry(cv, 3, n, PLATES[p], PLATES[n], tr),
       deco: carry(cv, 4, n, DECO[p], DECO[n], tr),
       named: carry(cv, 5, n, NAMED[p], NAMED[n], tr),

@@ -83,18 +83,17 @@ export const BEATS: Ethics38Beat[] = [
   {
     p: 21, x: 90, beam: 1, tilt: 0.35,
     interact: {
-      prompt: 'How much weight may the fact that a child is yours carry?',
-      drag: {
-        lo: 'nothing', hi: 'everything',
-        start: 0.05,
-        zones: [
-          { id: 'none', upto: 0.22, reads: 'none, so saving your child needs impartial permission' },
-          { id: 'some', upto: 0.52, reads: 'a little, and only with further justification' },
-          { id: 'lots', upto: 0.84, reads: 'a great deal, with no further reason needed', correct: true },
-          { id: 'all', upto: 1, reads: 'everything, so a stranger counts for nothing' },
+      prompt: 'Put these in order, from least weight to most.',
+      order: {
+        axis: 'LEAST WEIGHT FIRST',
+        items: [
+          { id: 'none', reads: 'NO WEIGHT AT ALL' },
+          { id: 'little', reads: 'A LITTLE, IF JUSTIFIED' },
+          { id: 'lots', reads: 'ENOUGH, WITH NO FURTHER REASON' },
+          { id: 'all', reads: 'ALL OF IT, STRANGERS COUNT FOR NOTHING' },
         ],
       },
-      explain: 'A great deal, with no further reason needed. At nothing, saving your own child would first need an impartial licence. At everything, a stranger’s life would count for nothing, which no defender of partiality claims.',
+      explain: 'The third. A parent who stops to justify saving their own child has, as Williams put it, one thought too many; but partiality that wipes strangers out altogether isn\'t a relationship, it\'s a licence. What\'s asked for is weight, not permission.',
       xp: 5,
     },
     dur: 1.0,

@@ -70,18 +70,20 @@ export const BEATS: Ethics13Beat[] = [
     g: 381, pos: 2, habit: 1,
     dur: 1.0,
     interact: {
-      prompt: 'What makes a person courageous, on Aristotle’s account?',
-      drag: {
-        lo: 'FEAR OF EVERYTHING',
-        hi: 'NO FEAR AT ALL',
-        start: 0,
-        zones: [
-          { id: 'timid', upto: 0.3, reads: 'timid: afraid of what can’t hurt you' },
-          { id: 'brave', upto: 0.7, reads: 'brave: fears the right things, by habit', correct: true },
-          { id: 'rash', upto: 1, reads: 'rash: too bold before real dangers' },
+      prompt: 'Put these in order, from most afraid to least.',
+      // THE MEAN IS AN ORDER, so it is asked as one. Slid along a rail this was
+      // "how much fear is right", which hands the reader the answer's shape and
+      // asks only for a number. Placed in order, the reader has to put bravery
+      // BETWEEN the two vices, which is the doctrine itself.
+      order: {
+        axis: 'MOST AFRAID FIRST',
+        items: [
+          { id: 'timid', reads: 'AFRAID OF EVERYTHING' },
+          { id: 'brave', reads: 'FEARS THE RIGHT THINGS' },
+          { id: 'rash', reads: 'AFRAID OF NOTHING' },
         ],
       },
-      explain: 'Brave means fearing the right things, by settled habit. Feeling no fear at all is a vice, not courage. Aristotle holds that people become brave by doing brave acts, until the disposition is settled.',
+      explain: 'Courage sits in the middle. Aristotle puts the virtue between two vices. Fear everything and you\'re a coward. Fear nothing and you\'re rash. Brave is fearing the right things, and doing it out of habit.',
       xp: 5,
     },
   },

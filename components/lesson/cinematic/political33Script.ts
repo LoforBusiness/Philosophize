@@ -75,18 +75,16 @@ export const BEATS: Political33Beat[] = [
   {
     p: 380, x: 52, open: 0, live: 1,
     interact: {
-      prompt: 'How far should a free society extend tolerance, on Popper’s view?',
-      drag: {
-        lo: 'SHUT',
-        hi: 'OPEN TO EVERYTHING',
-        start: 0,
-        zones: [
-          { id: 'closed', upto: 0.3, reads: 'no tolerance for opposing views' },
-          { id: 'popper', upto: 0.66, reads: 'tolerance until a movement refuses to argue', correct: true },
-          { id: 'all', upto: 1, reads: 'tolerance even for people who would end tolerance', correct: false },
+      prompt: 'Put these in order, from least tolerant to most.',
+      order: {
+        axis: 'LEAST TOLERANT FIRST',
+        items: [
+          { id: 'none', reads: 'NO TOLERANCE FOR OPPONENTS' },
+          { id: 'until', reads: 'UNTIL THEY REFUSE TO ARGUE' },
+          { id: 'all', reads: 'EVEN FOR THOSE WHO WOULD END IT' },
         ],
       },
-      explain: 'Tolerance until a movement refuses to argue. Popper doesn’t say the intolerant should be silenced. While argument and public opinion can check them, suppression would be unwise. He claims a right to use force only against those who reject argument.',
+      explain: 'Popper stops at the middle. His claim is narrow: tolerance is owed to anyone willing to meet you in argument, and forfeited by movements that answer with fists instead. Unlimited tolerance ends in the tolerant being swept away, which is the paradox.',
       xp: 5,
     },
     dur: 1.0,

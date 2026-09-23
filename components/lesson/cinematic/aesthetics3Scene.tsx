@@ -160,10 +160,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics3'));
 
-export default function Aesthetics3Scene({ clock, bt, bi, i, qv, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Aesthetics3Scene({ clock, bt, bi, i, qv, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(10);
@@ -181,7 +181,7 @@ export default function Aesthetics3Scene({ clock, bt, bi, i, qv, dragPos, gazeX,
       // R7b — the knob takes the modes away. Drag from left it alone toward banned
       // every note and the soft modes fall off the meter one by one, so the reader
       // performs the regulation instead of reading about it.
-      cut: carry(cv, 1, n, CUTB[p], reacting ? dragPos.value : CUTB[n], tr),
+      cut: carry(cv, 1, n, CUTB[p], reacting ? pickPos.value : CUTB[n], tr),
       // The staggered slot gates: out by 45%, in from 55%, never both at once.
       arcOn: ease01(clamp01((carry(cv, 2, n, ARC_ON[p], ARC_ON[n], tr) - 0.55) / 0.45)),
       maskOn: ease01(clamp01((carry(cv, 3, n, MASK_ON[p], MASK_ON[n], tr) - 0.55) / 0.45)),

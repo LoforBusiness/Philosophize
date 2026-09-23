@@ -75,17 +75,18 @@ export const BEATS: Metaphysics11Beat[] = [
   {
     p: 378, c: 31, tok: 1,
     interact: {
-      prompt: 'What does Locke hold that personal identity consists in?',
-      split: {
-        left: 'MEMORY REACHING BACK', right: 'THE SAME BODY',
-        start: 0.04,
-        zones: [
-          { id: 'body', upto: 0.32, reads: 'the same living body' },
-          { id: 'both', upto: 0.64, reads: 'body and memory together, neither one alone' },
-          { id: 'mind', upto: 1, reads: 'consciousness of the past, in whatever body', correct: true },
+      prompt: 'As the memories go, which shape does the person take?',
+      plot: {
+        cols: ['ALL RECALLED', 'SOME', 'NONE'],
+        axis: 'HOW MUCH OF THE PERSON',
+        start: [0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'body', profile: [1, 1, 1, 1, 1], reads: 'all of them while the body lives' },
+          { id: 'mind', profile: [1, 0.78, 0.5, 0.22, 0], reads: 'it goes as the memories go', correct: true },
+          { id: 'half', profile: [1, 0.9, 0.8, 0.72, 0.65], reads: 'most of it survives either way' },
         ],
       },
-      explain: 'Consciousness of the past, in whatever body. For Locke, a person extends as far back as consciousness of past actions reaches. The same body secures only the same man, a living organism, which Locke distinguishes from the same person.',
+      explain: 'It goes as the memories go. Locke puts personal identity in consciousness of the past rather than in the living body, so on his account what makes you the same person thins out as the memories do. That\'s why the prince who wakes in the cobbler\'s body is the prince.',
       xp: 5,
     },
     dur: 1.0,

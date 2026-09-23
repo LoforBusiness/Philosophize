@@ -100,17 +100,16 @@ export const BEATS: Log17Beat[] = [
   {
     p: 383, x: 268, pair: 1, marks: 1, lift: 1, falls: 1,
     interact: {
-      prompt: 'When you accept a claim given without reasons, what are you relying on?',
-      split: {
-        left: 'WHO IS SPEAKING', right: 'THE REASONS GIVEN',
-        start: 0.04,
-        zones: [
-          { id: 'reasons', upto: 0.3, reads: 'the reasons, which you could check yourself' },
-          { id: 'both', upto: 0.66, reads: 'the reasons and the speaker equally' },
-          { id: 'who', upto: 1, reads: 'the speaker, since no reasons were given', correct: true },
+      prompt: 'No reasons were given. What are you relying on?',
+      sort: {
+        chip: 'WHAT CARRIES IT',
+        bins: [
+          { id: 'reasons', label: 'THE REASONS', reads: 'the reasons, which you could check yourself' },
+          { id: 'both', label: 'BOTH', reads: 'the reasons and the speaker together' },
+          { id: 'who', label: 'THE SPEAKER', reads: 'the speaker, since no reasons were offered', correct: true },
         ],
       },
-      explain: 'Accepting a claim with no reasons relies wholly on the speaker’s word. For bare testimony, weighing the speaker makes sense. The mistake is weighing the speaker when reasons are there to weigh instead.',
+      explain: 'The speaker. Where no reasons are given there\'s nothing else in the room to carry the claim, so accepting it\'s a judgement about them rather than about the evidence. That\'s not a failing; it\'s most of what anyone knows.',
       xp: 5,
     },
     dur: 1.0,

@@ -128,9 +128,9 @@ const ALT_GENERAL = BEATS.map((b) => b.altGeneral ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 
-export default function Logic8Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic8Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(9);
@@ -168,7 +168,7 @@ export default function Logic8Scene({ clock, bt, bi, i, picked, onPick, dragPos,
       // R7b — the knob wets the pavement. The rail runs from they must be dry to they
       // must be wet and the patch on the street follows it exactly, so the reader can
       // put the street in either state and see that the rule permits both.
-      wet: carry(cv, 1, n, WETV[p], reacting ? dragPos.value : WETV[n], tr, wetFade ? grow : 1),
+      wet: carry(cv, 1, n, WETV[p], reacting ? pickPos.value : WETV[n], tr, wetFade ? grow : 1),
       rule: carry(cv, 2, n, RULEV[p], RULEV[n], tr, ruleFade ? grow : 1),
       spr: carry(cv, 3, n, SPRV[p], SPRV[n], tr),
       trap: trapOn ? (trapFade ? grow : 1) : 0,

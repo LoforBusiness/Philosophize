@@ -110,17 +110,17 @@ export const BEATS: Ethics3Beat[] = [
   {
     d: 380, tx: 176, lens: 0,
     interact: {
-      prompt: 'What does a consequentialist weigh in judging whether an act is right?',
-      split: {
-        left: 'THE OUTCOME', right: 'THE RULE FOLLOWED',
-        start: 0.04,
-        zones: [
-          { id: 'rule', upto: 0.3, reads: 'only the rule followed, not the outcome' },
-          { id: 'both', upto: 0.66, reads: 'both the rule and the outcome' },
-          { id: 'out', upto: 1, reads: 'the outcome alone', correct: true },
+      prompt: 'Which of these does a consequentialist not weigh?',
+      odd: {
+        axis: 'THREE GO ON THE SCALES',
+        tiles: [
+          { id: 'good', reads: 'HOW MUCH GOOD IT DOES' },
+          { id: 'harm', reads: 'HOW MUCH HARM IT DOES' },
+          { id: 'who', reads: 'HOW MANY IT REACHES' },
+          { id: 'rule', reads: 'WHICH RULE IT FOLLOWED', correct: true },
         ],
       },
-      explain: 'The outcome alone. Consequentialism judges an act only by what it brings about, and utilitarianism measures that in happiness. A rule matters only through its effects. Kant’s view sits at the opposite end: an act is judged by the principle behind it.',
+      explain: 'The rule it followed. A consequentialist reads everything off the outcome. Keeping a promise and breaking one count only through what each brings about. That\'s the whole quarrel with a theory of duties.',
       xp: 5,
     },
     dur: 1.0,

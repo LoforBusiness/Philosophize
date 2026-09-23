@@ -99,18 +99,18 @@ export const BEATS: Logic41Beat[] = [
   {
     p: 257, x: 88, outer: 1, inner: 1,
     interact: {
-      prompt: 'Compared with all bank tellers, how large is the group of activist tellers likely to be?',
-      drag: {
-        lo: 'A FEW',
-        hi: 'ALL OF THEM',
-        start: 0.95,
-        zones: [
-          { id: 'slice', upto: 0.45, reads: 'a small part of the tellers', correct: true },
-          { id: 'most', upto: 0.8, reads: 'most tellers, which nothing in the evidence suggests' },
-          { id: 'all', upto: 1, reads: 'all tellers, only if every teller is an activist' },
+      prompt: 'As conditions are added, which shape does the group take?',
+      plot: {
+        cols: ['TELLERS', 'AND SHY', 'AND ACTIVIST'],
+        axis: 'HOW MANY FIT',
+        start: [0.9, 0.9, 0.9],
+        shapes: [
+          { id: 'slice', profile: [1, 0.72, 0.45, 0.25, 0.12], reads: 'it can only shrink', correct: true },
+          { id: 'flat', profile: [0.8, 0.8, 0.8, 0.8, 0.8], reads: 'it stays about the same' },
+          { id: 'grow', profile: [0.3, 0.45, 0.6, 0.8, 1], reads: 'a fuller description fits more people' },
         ],
       },
-      explain: 'A small part of the tellers. The group could equal all tellers only if every teller were an activist, which is unlikely. Linda’s description can’t make the group bigger. It says nothing about how many tellers are activists.',
+      explain: 'It can only shrink. Activist tellers are a part of the tellers, so they can never be more numerous, whatever the description makes you picture. The conjunction fallacy is judging by how well the story fits rather than by how many people it leaves in.',
       xp: 5,
     },
     dur: 1.0,

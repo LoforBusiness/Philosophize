@@ -63,18 +63,18 @@ export const BEATS: Aesthetics34Beat[] = [
   {
     p: 467, x: 50, strip: 0, live: 1,
     interact: {
-      prompt: 'As strokes are removed, where does the picture stop depicting a bull?',
-      drag: {
-        lo: 'ELEVEN STROKES',
-        hi: 'THREE STROKES',
-        start: 0,
-        zones: [
-          { id: 'full', upto: 0.34, reads: 'clearly a picture of a bull' },
-          { id: 'thin', upto: 0.68, reads: 'still a picture of a bull' },
-          { id: 'end', upto: 1, reads: 'a bull, even with three strokes', correct: true },
+      prompt: 'As strokes come away, which shape does the bull take?',
+      plot: {
+        cols: ['ALL OF THEM', 'HALF', 'THREE STROKES'],
+        axis: 'STILL A BULL',
+        start: [0.9, 0.9, 0.9],
+        shapes: [
+          { id: 'hold', profile: [1, 0.98, 0.95, 0.9, 0.85], reads: 'it holds almost to the end', correct: true },
+          { id: 'drop', profile: [1, 0.72, 0.42, 0.18, 0.05], reads: 'it fades as the strokes go' },
+          { id: 'cliff', profile: [1, 1, 1, 0.5, 0], reads: 'it holds, then vanishes at once' },
         ],
       },
-      explain: 'A bull, even with three strokes. Removing one more stroke never marks a clear point where depiction ends. The boundary is vague, like the boundary of a heap in the sorites paradox.',
+      explain: 'It holds almost to the end. Picasso\'s series keeps the back, the horn and the head while everything else goes, and the last plates are still unmistakably a bull. What depicting needs turns out to be far less than what was there to begin with.',
       xp: 5,
     },
     dur: 1.0,

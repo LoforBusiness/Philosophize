@@ -283,5 +283,66 @@ else {
   }
 }
 
+
+// ── 3 · THE TWO TILE CONTROLS, AND THE SET THAT GIVES ITSELF AWAY ───────────
+//
+// `order` and `odd` (R21, R22) are the other two things a reader taps, and the
+// rules are about the SET rather than about any one tile.
+//
+// EVERY TILE DRAWS, OR NONE DOES. Three drawings and one bare word hands the
+// reader the answer before they have read anything — group O arriving through
+// the art instead of through the words, which no spoiler check would catch
+// because nothing about the reveal is visible. Where the claim has no drawable
+// thing all four are words, and that is a set too.
+//
+// AND THE SHAPE IS COUNTED, because both controls lay their tiles out from the
+// count: four go two by two and three go in one row, so a fifth tile is a layout
+// nobody drew. An `odd` has exactly one stranger — two is an unanswerable
+// question and none is one the control cannot score. An `order` has no
+// `correct` at all, because the ORDER of the authored array is the answer, and a
+// stray `correct: true` on an item means somebody has written it as a pick.
+function tilesIn(body) {
+  return [...body.matchAll(/\{[^{}]*?reads: '((?:[^'\\]|\\.)*)'[^{}]*\}/g)];
+}
+
+{
+  const faults = [];
+  let orders = 0; let odds = 0;
+  for (const f of fs.readdirSync(CIN).filter((n) => n.endsWith('Script.ts')).sort()) {
+    const src = fs.readFileSync(path.join(CIN, f), 'utf8');
+    const id = f.replace('Script.ts', '');
+    const check = (kind, body) => {
+      const tiles = tilesIn(body);
+      const axis = (/axis: '((?:[^'\\]|\\.)*)'/.exec(body) || [, ''])[1];
+      const drawn = tiles.filter((x) => /\bdraw:/.test(x[0])).length;
+      if (drawn !== 0 && drawn !== tiles.length) faults.push(`${id} ${kind}: ${drawn} of ${tiles.length} tiles draw — all or none (group O)`);
+      if (!axis) faults.push(`${id} ${kind}: no axis`);
+      else if (axis.length > 24) faults.push(`${id} ${kind}: axis is ${axis.length} characters — "${axis}"`);
+      const ids = [...body.matchAll(/\bid: '([^']*)'/g)].map((x) => x[1]);
+      if (new Set(ids).size !== ids.length) faults.push(`${id} ${kind}: two tiles share an id`);
+      return tiles;
+    };
+    for (const m of src.matchAll(/\n\s{6}order: \{([\s\S]*?)\n\s{6}\},/g)) {
+      orders += 1;
+      const tiles = check('order', m[1]);
+      if (tiles.length < 3 || tiles.length > 4) faults.push(`${id} order: ${tiles.length} items — three or four (R21)`);
+      if (/correct:\s*true/.test(m[1])) faults.push(`${id} order: an item is marked correct — the ORDER is the answer (R21)`);
+    }
+    for (const m of src.matchAll(/\n\s{6}odd: \{([\s\S]*?)\n\s{6}\},/g)) {
+      odds += 1;
+      const tiles = check('odd', m[1]);
+      if (tiles.length !== 4) faults.push(`${id} odd: ${tiles.length} tiles — four (R22)`);
+      const right = tiles.filter((x) => /correct:\s*true/.test(x[0])).length;
+      if (right !== 1) faults.push(`${id} odd: ${right} strangers — exactly one (R22)`);
+    }
+  }
+  if (faults.length) {
+    no('every tile set is the shape its control draws (R21, R22)', `${faults.length} fault(s)`);
+    for (const x of faults.slice(0, ALL ? faults.length : 8)) console.log(`        ${x}`);
+  } else {
+    ok('every tile set is the shape its control draws (R21, R22)', `${orders} order · ${odds} odd`);
+  }
+}
+
 console.log(bad ? `\n${bad} failing.\n` : '\nall clear.\n');
 process.exit(bad ? 1 : 0);

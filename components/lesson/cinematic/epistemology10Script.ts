@@ -90,18 +90,16 @@ export const BEATS: E10Beat[] = [
   {
     p: 177, x: 228, gauge: 1, band: 2, needle: 0.78,
     interact: {
-      prompt: 'How firmly can a fallibilist hold a belief they admit might be wrong?',
-      drag: {
-        lo: 'BARELY AT ALL',
-        hi: 'BEYOND ANY QUESTION',
-        start: 0,
-        zones: [
-          { id: 'hedge', upto: 0.28, reads: 'barely: a hedge rather than a belief' },
-          { id: 'firm', upto: 0.74, reads: 'fully, yet open to being shown wrong', correct: true },
-          { id: 'closed', upto: 1, reads: 'so firmly that no evidence could shake it' },
+      prompt: 'Put these in order, from least firmly held to most.',
+      order: {
+        axis: 'LEAST FIRM FIRST',
+        items: [
+          { id: 'hedge', reads: 'BARELY HELD AT ALL' },
+          { id: 'firm', reads: 'HELD FULLY, OPEN TO REVISION' },
+          { id: 'closed', reads: 'BEYOND ANY SHAKING' },
         ],
       },
-      explain: 'Fully, while remaining open to being shown wrong. Admitting that you might be wrong isn’t hedging. A fallibilist can believe firmly and act on the belief. What a fallibilist rejects is a belief that no evidence could change.',
+      explain: 'The middle one is the fallibilist\'s. Admitting you might be wrong isn\'t a hedge and doesn\'t weaken the belief: it\'s a standing willingness to give it up for good enough reason, which the belief at the far end has renounced.',
     },
     dur: 4.4,
   },

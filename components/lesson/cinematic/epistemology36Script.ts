@@ -109,17 +109,16 @@ export const BEATS: Epistemology36Beat[] = [
   {
     p: 45, x: 128, shelf: 1, clash: 1,
     interact: {
-      prompt: 'How does the study’s doubt divide between knowing why you act and knowing what you feel?',
-      split: {
-        left: 'WHY YOU DID IT', right: 'WHAT YOU FEEL',
-        start: 0.04,
-        zones: [
-          { id: 'feel', upto: 0.3, reads: 'the doubt falls on feelings, not on reasons' },
-          { id: 'both', upto: 0.66, reads: 'the doubt falls on both about equally' },
-          { id: 'why', upto: 1, reads: 'the doubt falls on reasons, not on feelings', correct: true },
+      prompt: 'Where does the study\'s doubt fall?',
+      sort: {
+        chip: 'THE DOUBT',
+        bins: [
+          { id: 'feel', label: 'ON FEELINGS', reads: 'on what you feel, not on why you act' },
+          { id: 'both', label: 'ON BOTH', reads: 'on both about equally' },
+          { id: 'why', label: 'ON REASONS', reads: 'on why you act, not on what you feel', correct: true },
         ],
       },
-      explain: 'In the stocking study, the doubt falls on reasons, not on feelings. Nisbett and Wilson grant that people know their own feelings and judgements. What people can’t report is the process that produced them.',
+      explain: 'On why you act. Subjects reported reasons confidently for choices the experimenters had steered, so the account of the cause was invented after the fact. That you feel uneasy isn\'t what the study puts in doubt; it\'s your story about the cause.',
       xp: 5,
     },
     dur: 1.0,

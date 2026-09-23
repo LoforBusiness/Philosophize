@@ -117,10 +117,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics31'));
 
-export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -144,7 +144,7 @@ export default function Metaphysics31Scene({ clock, bt, bi, qv, i, picked, onPic
       // R7b — the knob opens the holes. The further the reader drags toward NEVER,
       // NOT ONCE, the more plainly the absences are there to be counted, which is the
       // thing paraphrase keeps failing to talk away.
-      holes: carry(cv, 0, n, HOLES[p], reacting ? dragPos.value : HOLES[n], grow),
+      holes: carry(cv, 0, n, HOLES[p], reacting ? pickPos.value : HOLES[n], grow),
       ticks: carry(cv, 1, n, TICKS[p], TICKS[n], grow),
       chips: carry(cv, 2, n, CHIPS[p], CHIPS[n], grow),
       // The reveal rides the ANSWER, not the beat: the cheese dissolves as the

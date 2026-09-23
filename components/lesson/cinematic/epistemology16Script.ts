@@ -81,18 +81,18 @@ export const BEATS: Epi16Beat[] = [
     g: 442, results: 5, bars: 3, found: 1,
     dur: 1.0,
     interact: {
-      prompt: 'On Popper’s view, how much should a scientific theory rule out?',
-      drag: {
-        lo: 'FORBIDS NOTHING',
-        hi: 'FORBIDS ALMOST ALL',
-        start: 0,
-        zones: [
-          { id: 'safe', upto: 0.3, reads: 'fits every outcome, so it risks nothing' },
-          { id: 'good', upto: 0.72, reads: 'rules out a great deal, and could be refuted', correct: true },
-          { id: 'wild', upto: 1, reads: 'rules out so much that it’s already refuted' },
+      prompt: 'As a theory rules out more, which shape does its standing take?',
+      plot: {
+        cols: ['FORBIDS NOTHING', 'A GREAT DEAL', 'EVERYTHING'],
+        axis: 'GOOD AS SCIENCE',
+        start: [0.3, 0.3, 0.3],
+        shapes: [
+          { id: 'hump', profile: [0.05, 0.5, 0.95, 0.6, 0.08], reads: 'best in the middle, and falls either side', correct: true },
+          { id: 'rise', profile: [0.05, 0.3, 0.55, 0.8, 1], reads: 'better the more it rules out' },
+          { id: 'fall', profile: [1, 0.75, 0.5, 0.25, 0.05], reads: 'worse the more it rules out' },
         ],
       },
-      explain: 'Rules out a great deal, and could be refuted. A theory that forbids nothing can’t be refuted, but it tells you nothing about what to expect. One that forbids the result that occurs is already refuted.',
+      explain: 'Best in the middle. A theory that fits every outcome forbids nothing and risks nothing, which is Popper\'s complaint; a theory that forbids what happens is already refuted. Science lives where a theory sticks its neck out and survives.',
       xp: 5,
     },
   },

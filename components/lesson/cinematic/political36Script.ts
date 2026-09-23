@@ -42,18 +42,18 @@ export const BEATS: Political36Beat[] = [
   {
     p: 461, x: 52, street: 1, lamp: 1, live_d: 1, live: 1,
     interact: {
-      prompt: 'How much surveillance does it take to make law-abiding people more cautious?',
-      drag: {
-        lo: 'NOBODY WATCHING',
-        hi: 'ALWAYS WATCHED',
-        start: 0,
-        zones: [
-          { id: 'off', upto: 0.24, reads: 'too little to change behaviour' },
-          { id: 'some', upto: 0.62, reads: 'enough to make people more careful', correct: true },
-          { id: 'all', upto: 1, reads: 'only constant watching changes behaviour' },
+      prompt: 'As watching increases, which shape does caution take?',
+      plot: {
+        cols: ['NONE', 'SOME CAMERAS', 'CONSTANT'],
+        axis: 'HOW GUARDED PEOPLE ARE',
+        start: [0.2, 0.2, 0.2],
+        shapes: [
+          { id: 'some', profile: [0.05, 0.45, 0.75, 0.85, 0.9], reads: 'it rises early, then levels off', correct: true },
+          { id: 'none', profile: [0.1, 0.1, 0.1, 0.1, 0.1], reads: 'the innocent never change' },
+          { id: 'late', profile: [0.05, 0.06, 0.1, 0.4, 0.95], reads: 'only constant watching changes anything' },
         ],
       },
-      explain: 'Enough to make people more careful. Nothing is banned and nobody is charged. Yet people drop lawful acts that would be awkward to explain.',
+      explain: 'It rises early and then levels off. People with nothing to hide still search less, read less and say less once they might be watched, and the effect appears well before surveillance is total. Nothing has to be used against anyone for the chilling to happen.',
       xp: 5,
     },
     dur: 1.0,

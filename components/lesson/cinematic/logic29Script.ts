@@ -88,18 +88,18 @@ export const BEATS: Logic29Beat[] = [
   {
     p: 175, x: 80, beam: 1, load: 1,
     interact: {
-      prompt: 'How should the burden of proof divide between claimant and doubter?',
-      split: {
-        left: 'THE CLAIMANT',
-        right: 'THE DOUBTER',
-        start: 0.1,
-        zones: [
-          { id: 'doubter', upto: 0.35, reads: 'the doubter has to disprove the dragon' },
-          { id: 'shared', upto: 0.7, reads: 'both sides bear an equal burden' },
-          { id: 'claimant', upto: 1, reads: 'whoever makes the claim brings the evidence', correct: true },
+      prompt: 'As a claim gets more extraordinary, which shape does the burden take?',
+      plot: {
+        cols: ['ORDINARY', 'SURPRISING', 'EXTRAORDINARY'],
+        axis: 'EVIDENCE OWED',
+        start: [0.3, 0.3, 0.3],
+        shapes: [
+          { id: 'rise', profile: [0.12, 0.3, 0.55, 0.8, 1], reads: 'it rises with the claim', correct: true },
+          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5, 0.5], reads: 'the same either way' },
+          { id: 'fall', profile: [1, 0.75, 0.5, 0.25, 0.08], reads: 'the bolder the claim, the less is owed' },
         ],
       },
-      explain: 'Whoever makes the claim brings the evidence. The assertion creates the obligation, and doubt creates none. An equal division would treat every unsupported claim as half established.',
+      explain: 'It rises with the claim. The burden sits with whoever asserts something, and it grows with how much the claim asks you to give up. A dragon that leaves no trace asks a great deal and offers nothing, which is why the doubter owes no disproof.',
       xp: 5,
     },
     dur: 1.0,

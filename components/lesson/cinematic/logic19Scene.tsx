@@ -82,11 +82,11 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 // R7c — the stage follows the split on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic19'));
 
-export default function Logic19Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic19Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   // The beat the seven turns on. Its back is the REVEAL, so it is not mounted
   // before then — an opacity-0 <Text> is invisible and still readable, which is
@@ -120,7 +120,7 @@ export default function Logic19Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // cases that COULD CONFIRM, and the four is the card that can only confirm.
       // The vowel's ring stays on the script (it could refute), and the seven stays
       // turned, because a search plan does not un-find a counterexample.
-      reachFour: carry(cv, 5, n, REACH[p], reacting ? dragPos.value : REACH[n], tr),
+      reachFour: carry(cv, 5, n, REACH[p], reacting ? pickPos.value : REACH[n], tr),
       t,
     };
   });

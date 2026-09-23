@@ -49,8 +49,15 @@ const DIR = process.env.EAR_DIR || 'components/lesson/cinematic';
 // next one has to be too.
 // LOWERED ON 13 SEP 2026 to what the lecture rewrite (group V) left: 407 → 147
 // spelled-out forms, 38 → 0 dashes, 57 → 9 intensifiers. Unframed quotations stayed at 9.
+// LOWERED AGAIN ON 22 SEP 2026, 147 → 144, and the interesting part is that it
+// first went UP. Retiring the two sliders (R20) rewrote 123 prompts and their
+// explanations, and 148 new spelled-out forms and 18 new intensifiers came in with
+// them — a ratchet nobody was aiming at, moved by a change that was not about
+// prose. Contracting only the NEW pieces is what kept it honest: the 137 already
+// committed are somebody's decisions, and sweeping the file would have quietly
+// overruled every one of them.
 /** AC4 — spelled-out forms left where the "not" or the "is" is the point. May only go DOWN. */
-const EXPANDED_BUDGET = 147;
+const EXPANDED_BUDGET = 144;
 /** AC5 — quoted phrases with no spoken frame. May only go DOWN. */
 const UNFRAMED_BUDGET = 9;
 /** AC7 — dashes in narration, each one a real interruption. May only go DOWN. */

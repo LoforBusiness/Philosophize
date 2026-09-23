@@ -110,11 +110,11 @@ const WEIGH = BEATS.map((b) => ((b.weigh ?? 0) > 0 ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political26'));
 
-export default function Political26Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Political26Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(10);
@@ -148,7 +148,7 @@ export default function Political26Scene({ clock, bt, bi, i, picked, onPick, dra
       feedsOn: carry(cv, 4, n, FEEDS[p], FEEDS[n], tr),
       // R7b — the seam's position is the LEFT side's share, and LEFT is the
       // counting. The stamp fills from what is left over, which is the reasoning.
-      counted: carry(cv, 5, n, 0.5, reacting ? dragPos.value : 0.5, tr),
+      counted: carry(cv, 5, n, 0.5, reacting ? pickPos.value : 0.5, tr),
       platesOn: carry(cv, 6, n, PLATES[p], PLATES[n], tr),
       // group AH — one-shot, fades in on its own beat and back out on the next.
       tally: carry(cv, 7, n, TALLY[p], TALLY[n], tallyFade ? grow : 1),

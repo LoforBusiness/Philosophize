@@ -63,18 +63,16 @@ export const BEATS: Epi18Beat[] = [
   {
     p: 165, x: 132, rails: 1, grip: 1, ev: 0.3, live_d: 1,
     interact: {
-      prompt: 'When a careful witness contradicts both beliefs, how far does each one move?',
-      drag: {
-        lo: 'A PASSING REMARK',
-        hi: 'A CAREFUL WITNESS',
-        start: 0.12,
-        zones: [
-          { id: 'weak', upto: 0.3, reads: 'the keys belief shifts a little' },
-          { id: 'mid', upto: 0.65, reads: 'the keys belief moves, the round earth doesn’t' },
-          { id: 'strong', upto: 1, reads: 'the keys belief flips, the round earth holds', correct: true },
+      prompt: 'A careful witness contradicts both. What happens to the round earth?',
+      sort: {
+        chip: 'THE ROUND EARTH',
+        bins: [
+          { id: 'little', label: 'SHIFTS A LITTLE', reads: 'it gives a little, as the keys belief does' },
+          { id: 'holds', label: 'DOES NOT MOVE', reads: 'the keys belief takes the strain instead', correct: true },
+          { id: 'flips', label: 'FLIPS', reads: 'it goes, along with the keys belief' },
         ],
       },
-      explain: 'The keys belief flips, the round earth holds. The same report moves the two beliefs different distances, because one began far more probable than the other. Almost everything else you know supports the round earth.',
+      explain: 'It doesn\'t move. Beliefs aren\'t all equally exposed: a claim held up by everything else you believe absorbs a contradiction by making a peripheral belief give way instead. That\'s why one witness moves the keys and not the shape of the earth.',
       xp: 5,
     },
     dur: 1.0,

@@ -86,18 +86,17 @@ export const BEATS: Aesthetics30Beat[] = [
   {
     p: 160, x: 80, window: 1,
     interact: {
-      prompt: 'When beauty unselfs a person, how is attention divided between self and world?',
-      split: {
-        left: 'THE SELF',
-        right: 'THE WORLD',
-        start: 0.92,
-        zones: [
-          { id: 'out', upto: 0.35, reads: 'attention rests on the kestrel, not the self', correct: true },
-          { id: 'half', upto: 0.7, reads: 'divided between the kestrel and oneself' },
-          { id: 'in', upto: 1, reads: 'on the self, using the kestrel as a mirror' },
+      prompt: 'Which of these is not the kestrel?',
+      odd: {
+        axis: 'THREE ARE THE BIRD',
+        tiles: [
+          { id: 'hover', reads: 'ITS HOVER' },
+          { id: 'tail', reads: 'ITS FANNED TAIL' },
+          { id: 'wings', reads: 'ITS POINTED WINGS' },
+          { id: 'you', reads: 'HOW IT MAKES YOU LOOK', correct: true },
         ],
       },
-      explain: 'Attention rests on the kestrel, not the self. Murdoch calls the appreciation of beauty a checking of selfishness. So a person still watching their own reactions hasn’t been unselfed. The kestrel checks selfishness only while it holds attention.',
+      explain: 'How it makes you look. The first three are the bird, and attending to them is what empties the self; the moment you turn to how you\'re appearing, the kestrel has become a mirror and the unselfing has stopped.',
       xp: 5,
     },
     dur: 1.0,

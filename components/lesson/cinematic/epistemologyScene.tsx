@@ -145,10 +145,10 @@ const X = BEATS.map((b) => b.x ?? SEEKER_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology'));
 
-export default function EpistemologyScene({ clock, bt, bi, qv, i, picked, pickedOk, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function EpistemologyScene({ clock, bt, bi, qv, i, picked, pickedOk, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldSeekerS = useHeld();
   const cv = useCarry(9);
@@ -211,7 +211,7 @@ export default function EpistemologyScene({ clock, bt, bi, qv, i, picked, picked
       // R7b — the knob reaches for the key. The gate has three locks and the third
       // one takes reasons, so dragging along the rail brings the hand to it: the
       // reader turns the lock they are being asked about.
-      keyed: carry(cv, 0, n, KEYED[p], reacting ? dragPos.value : KEYED[n], tr),
+      keyed: carry(cv, 0, n, KEYED[p], reacting ? pickPos.value : KEYED[n], tr),
       field: carry(cv, 4, n, FIELD[p], FIELD[n], ease01((bt.value - 0.2) / 0.6)),
       // The rod is only a link while there is a REASONS lock turned for it to link.
       tie: carry(cv, 6, n, TIE[p], TIE[n], ease01((bt.value - 0.3) / 0.8)) * k3,

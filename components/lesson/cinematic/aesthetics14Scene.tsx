@@ -82,10 +82,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics14'));
 
-export default function Aesthetics14Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Aesthetics14Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(7);
@@ -117,7 +117,7 @@ export default function Aesthetics14Scene({ clock, bt, bi, i, picked, onPick, dr
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // R7c — how many verdicts still stand IS the question. Every verdict equal and
       // all three stay pinned; one right answer and two come down.
-      board: carry(cv, 0, n, BOARD[p], reacting ? 3 - dragPos.value * 2 : BOARD[n], grow),
+      board: carry(cv, 0, n, BOARD[p], reacting ? 3 - pickPos.value * 2 : BOARD[n], grow),
       level: carry(cv, 1, n, LEVEL[p], LEVEL[n], drain),
       key: carry(cv, 2, n, KEY[p], KEY[n], tr, keyFade ? grow : 1),
       // The four tap events (group AH) — each carried so it fades OUT as well as in.

@@ -138,9 +138,9 @@ const CHV = BEATS.map((b) => (b.summary ? 0 : (b.capt ?? 0) <= 1 ? 1 : 0));
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 
-export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(10);
@@ -190,7 +190,7 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dra
       // R7b — the seam trains the critic. Give the bar to IN THE RESPONSE and Hume's
       // four marks appear: if beauty lives in the response then the response is the
       // thing that can be practised, and the reader watches that follow.
-      marks: carry(cv, 2, n, MKV[p], reacting ? dragPos.value : MKV[n], tr, marksFade ? grow : 1),
+      marks: carry(cv, 2, n, MKV[p], reacting ? pickPos.value : MKV[n], tr, marksFade ? grow : 1),
       chart: carry(cv, 3, n, CHV[p], CHV[n], tr, chartFade ? grow : 1),
       // group AH — named the beat the sentence names it, gone the beat it moves on.
       grounds: carry(cv, 4, n, GROUNDSV[p], GROUNDSV[n], groundsFade ? grow : 1),

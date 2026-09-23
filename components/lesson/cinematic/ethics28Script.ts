@@ -88,18 +88,16 @@ export const BEATS: Ethics28Beat[] = [
   {
     p: 173, x: 78, rail: 1, blocks: 1,
     interact: {
-      prompt: 'To reach reflective equilibrium, which side should be revised?',
-      split: {
-        left: 'THE PRINCIPLE',
-        right: 'YOUR GUT',
-        start: 0.06,
-        zones: [
-          { id: 'rule', upto: 0.3, reads: 'only the intuition is revised, never the principle' },
-          { id: 'both', upto: 0.7, reads: 'both are revised until they cohere', correct: true },
-          { id: 'gut', upto: 1, reads: 'only the principle is revised, never the intuition' },
+      prompt: 'In reflective equilibrium, which side gives way?',
+      sort: {
+        chip: 'WHAT IS REVISED',
+        bins: [
+          { id: 'intuit', label: 'THE INTUITION', reads: 'the intuition, never the principle' },
+          { id: 'both', label: 'EITHER ONE', reads: 'either one, until the two agree', correct: true },
+          { id: 'princ', label: 'THE PRINCIPLE', reads: 'the principle, never the intuition' },
         ],
       },
-      explain: 'Both are revised until they cohere. Rawls checks the rule against your judgements about cases, and those judgements against the rule. If one side could never change, it would be a fixed base, not an equilibrium.',
+      explain: 'Either one. Neither side is fixed: a principle that condemns something you\'re certain about is suspect, and an intuition that survives nothing else you believe is suspect too. The method is to keep adjusting until they hold together.',
       xp: 5,
     },
     dur: 1.0,

@@ -93,18 +93,16 @@ export const BEATS: Logic40Beat[] = [
   {
     p: 266, x: 96, tray: 1, checked: 0.67, rules: 1, links: 1,
     interact: {
-      prompt: 'How should the support of the checked stones be divided between the two rules?',
-      split: {
-        left: 'GREEN',
-        right: 'GRUE',
-        start: 0.94,
-        zones: [
-          { id: 'grue', upto: 0.34, reads: 'the evidence favours grue, since green is artificial' },
-          { id: 'even', upto: 0.66, reads: 'the evidence supports both rules equally', correct: true },
-          { id: 'green', upto: 1, reads: 'the evidence favours green, since grue is artificial' },
+      prompt: 'The stones checked so far fit both rules. Which does the evidence favour?',
+      sort: {
+        chip: 'THE EVIDENCE',
+        bins: [
+          { id: 'grue', label: 'FAVOURS GRUE', reads: 'grue, since green is the artificial one' },
+          { id: 'even', label: 'NEITHER', reads: 'both equally: every checked stone fits each', correct: true },
+          { id: 'green', label: 'FAVOURS GREEN', reads: 'green, since grue is the artificial one' },
         ],
       },
-      explain: 'The evidence supports both rules equally. Every checked stone is both green and grue. To a speaker who began with grue, green would be the predicate that mentions a time. Goodman held that green is preferred because it has a longer history of use in predictions.',
+      explain: 'Both equally, and that\'s the puzzle. Every stone examined so far is green and also grue, so the record can\'t separate them, and the two rules disagree about the next stone. Calling grue artificial only works if green isn\'t artificial in the same way.',
       xp: 5,
     },
     dur: 1.0,

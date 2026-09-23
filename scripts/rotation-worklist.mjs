@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const DIR = 'components/lesson/cinematic';
-const BELOW = ['cards', 'drag', 'lever', 'plot', 'split', 'field'];
+const BELOW = ['cards', 'sort', 'poll', 'plot', 'order', 'odd', 'drag', 'split', 'lever', 'field'];
 
 const route = fs.readFileSync('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx', 'utf8');
 const wired = [...route.matchAll(/^\s*'([a-z0-9-]+)':\s*(\w+),/gm)].map((m) => ({ id: m[1], comp: m[2] }));
@@ -53,7 +53,7 @@ for (const r of rows) {
 for (const [, l] of byBranch) l.sort((a, b) => a.n - b.n);
 
 const arg = process.argv[2] ?? '';
-const ANALOGUE = ['drag', 'lever', 'plot', 'split', 'field'];
+const ANALOGUE = ['sort', 'poll', 'plot', 'order', 'odd', 'drag', 'lever', 'split', 'field'];
 
 // The list that matters for "implemented into ALL the lessons": a lesson with no
 // analogue control anywhere in it, and the deck question that could become one.

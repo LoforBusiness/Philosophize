@@ -100,11 +100,11 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 const EQUALV = BEATS.map((b) => (b.equal ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics38'));
 
-export default function Ethics38Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics38Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
@@ -133,7 +133,7 @@ export default function Ethics38Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // R7c — the rail IS the beam. On the graded beat the lean and the block on
       // the near pan are the reader's own thumb; everywhere else it is the
       // script's own track, and the two never disagree because it is one number.
-      tilt: carry(cv, 3, n, TILT[p], reacting ? dragPos.value : TILT[n], tr),
+      tilt: carry(cv, 3, n, TILT[p], reacting ? pickPos.value : TILT[n], tr),
       // THE EQUAL PULSE — both discs flash together, one weight and the other
       // never distinguished. Rides `bt` directly: one pulse per tap.
       equal: equalNow ? ease01(bt.value / 1.2) : 0,

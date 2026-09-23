@@ -132,18 +132,16 @@ export const BEATS: Pol3Beat[] = [
   {
     sub: 165, r: 0, scroll: 1, pair: 2, flow: 1, seal: 1, rights: 1,
     interact: {
-      prompt: 'For Rousseau, how reliably does a majority vote express the general will?',
-      drag: {
-        lo: 'ALWAYS EXPRESSES IT',
-        hi: 'NEVER EXPRESSES IT',
-        start: 0,
-        zones: [
-          { id: 'same', upto: 0.3, reads: 'a majority vote simply is the general will' },
-          { id: 'often', upto: 0.74, reads: 'often, yet a majority can still be mistaken', correct: true },
-          { id: 'never', upto: 1, reads: 'a vote can never express it' },
+      prompt: 'Put these in order, from least to most trust in a vote.',
+      order: {
+        axis: 'LEAST TRUST FIRST',
+        items: [
+          { id: 'never', reads: 'A VOTE NEVER SHOWS IT' },
+          { id: 'often', reads: 'OFTEN, AND SOMETIMES WRONG' },
+          { id: 'is', reads: 'THE VOTE SIMPLY IS IT' },
         ],
       },
-      explain: 'Often, yet a majority can still be mistaken. Rousseau distinguishes the general will, which aims at the common good, from the will of all. The will of all is a sum of private interests. When factions form, a majority can express the will of all instead.',
+      explain: 'Rousseau takes the middle one. The general will is what the people would want for the common good. A majority is the best sign of it, not the thing itself. That\'s why he allows that a majority can be wrong about it.',
       xp: 5,
     },
     dur: 1.0,

@@ -100,11 +100,11 @@ const RESP_Y = CAR_Y + CAR_H / 2;
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics26'));
 
-export default function Metaphysics26Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics26Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(7);
@@ -140,7 +140,7 @@ export default function Metaphysics26Scene({ clock, bt, bi, i, picked, onPick, d
       drift,
       // R7b — the seam's position is the LEFT side's share, and LEFT is THE CARS.
       // So a seam at 1 puts the whole jam in the cars and the ghost band goes.
-      inCars: carry(cv, 3, n, 1, reacting ? dragPos.value : 1, tr),
+      inCars: carry(cv, 3, n, 1, reacting ? pickPos.value : 1, tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
       // A "WET" tag settles over the road once — the whole has a property no
       // single gas does.

@@ -89,18 +89,18 @@ export const BEATS: Metaphysics26Beat[] = [
   {
     p: 176, x: 88, road: 1, jam: 1,
     interact: {
-      prompt: 'How should the traffic jam be divided between the cars and anything beyond them?',
-      split: {
-        left: 'THE CARS',
-        right: 'SOMETHING MORE',
-        start: 0.05,
-        zones: [
-          { id: 'more', upto: 0.35, reads: 'mostly something beyond the cars' },
-          { id: 'half', upto: 0.7, reads: 'partly the cars, partly something beyond them' },
-          { id: 'cars', upto: 1, reads: 'nothing but the cars and their braking', correct: true },
+      prompt: 'As every car is accounted for, what is left over?',
+      plot: {
+        cols: ['ONE CAR', 'SOME', 'EVERY CAR'],
+        axis: 'LEFT UNEXPLAINED',
+        start: [0.6, 0.6, 0.6],
+        shapes: [
+          { id: 'gone', profile: [1, 0.7, 0.42, 0.18, 0], reads: 'nothing is left over', correct: true },
+          { id: 'some', profile: [1, 0.85, 0.7, 0.62, 0.58], reads: 'something is always left over' },
+          { id: 'flat', profile: [1, 1, 1, 1, 1], reads: 'the cars explain none of it' },
         ],
       },
-      explain: 'Nothing but the cars and their braking. The jam’s speed and direction follow from how each driver responds to the car ahead. So the jam is weakly emergent, and nothing beyond the cars is needed.',
+      explain: 'Nothing is left over. A jam is the cars and their braking and nothing besides, which is what it\'s for a thing to be nothing over and above its parts. The interesting part is that this can be true while the word jam still earns its place.',
       xp: 5,
     },
     dur: 1.0,

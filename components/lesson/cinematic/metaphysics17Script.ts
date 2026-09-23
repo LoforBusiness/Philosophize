@@ -83,17 +83,18 @@ export const BEATS: Met17Beat[] = [
     g: 41, wall: 1, door: 1, card: 1,
     dur: 1.0,
     interact: {
-      prompt: 'If Jackson’s argument succeeds, how much of what can be known about red is physical?',
-      split: {
-        left: 'THE PHYSICAL FACTS', right: 'WHAT IT IS LIKE',
-        start: 1,
-        zones: [
-          { id: 'mind', upto: 0.3, reads: 'little of it is physical' },
-          { id: 'most', upto: 0.74, reads: 'everything except what seeing red is like', correct: true },
-          { id: 'all', upto: 1, reads: 'every fact about red is physical' },
+      prompt: 'As Mary learns every physical fact, which shape does her knowledge take?',
+      plot: {
+        cols: ['NONE', 'SOME', 'EVERY FACT'],
+        axis: 'HOW MUCH SHE KNOWS OF RED',
+        start: [0.3, 0.3, 0.3],
+        shapes: [
+          { id: 'all', profile: [0, 0.3, 0.6, 0.85, 1], reads: 'it reaches everything about red' },
+          { id: 'short', profile: [0, 0.3, 0.58, 0.78, 0.86], reads: 'it stops just short of everything', correct: true },
+          { id: 'little', profile: [0, 0.1, 0.2, 0.28, 0.34], reads: 'it barely reaches any of it' },
         ],
       },
-      explain: 'Everything except what seeing red is like. Mary had every physical fact, yet on Jackson’s argument she still learns something on seeing red. So the physical facts can’t be all the facts.',
+      explain: 'It stops just short. If Mary learns something new on first seeing red, then everything except what seeing red is like was already in the physical facts, and one thing wasn\'t. The gap is small and the whole argument turns on it.',
       xp: 5,
     },
   },

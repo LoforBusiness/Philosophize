@@ -87,18 +87,17 @@ export const BEATS: Meta31Beat[] = [
     g: 173, holes: 1, ticks: 3, chips: 1,
     dur: 1.0,
     interact: {
-      prompt: 'How often can a sentence about holes be reworded to mention only the cheese?',
-      drag: {
-        lo: 'ALWAYS',
-        hi: 'NEVER',
-        start: 0,
-        zones: [
-          { id: 'easy', upto: 0.3, reads: 'every such sentence can be reworded' },
-          { id: 'mostly', upto: 0.74, reads: 'most can, except sentences that count holes', correct: true },
-          { id: 'never', upto: 1, reads: 'no such sentence can be reworded' },
+      prompt: 'Which of these is not made of cheese?',
+      odd: {
+        axis: 'THREE ARE THE CHEESE',
+        tiles: [
+          { id: 'rind', reads: 'THE RIND' },
+          { id: 'face', reads: 'THE CUT FACE' },
+          { id: 'block', reads: 'THE BLOCK' },
+          { id: 'hole', reads: 'A HOLE', correct: true },
         ],
       },
-      explain: 'Most sentences about holes can be reworded, but not sentences that count holes. “The cheese has a hole” becomes “the cheese is perforated”. But “there are as many holes as crackers” resists rewording, which is why Argle turns to linings.',
+      explain: 'The hole, which is where the cheese isn\'t. That\'s what makes it awkward: holes get counted, compared and called bigger, and all of that treats an absence as a thing. Rewording usually works, and stops working the moment they\'re counted.',
       xp: 5,
     },
   },

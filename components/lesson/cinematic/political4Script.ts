@@ -95,17 +95,17 @@ export const BEATS: Pol4Beat[] = [
   {
     p: 165, walls: 0, harm: 0, panel: 2,
     interact: {
-      prompt: 'How does Berlin weigh a core of negative liberty against positive liberty?',
-      split: {
-        left: 'A CORE OF NEGATIVE LIBERTY', right: 'POSITIVE LIBERTY',
-        start: 0.04,
-        zones: [
-          { id: 'pos', upto: 0.3, reads: 'positive liberty first: the state frees your true self' },
-          { id: 'both', upto: 0.66, reads: 'both weighed equally, with no protected core' },
-          { id: 'neg', upto: 1, reads: 'a minimum core of negative liberty is protected', correct: true },
+      prompt: 'Which of these is not a freedom from interference?',
+      odd: {
+        axis: 'THREE ARE FREEDOM FROM',
+        tiles: [
+          { id: 'jail', reads: 'NOT BEING IMPRISONED' },
+          { id: 'censor', reads: 'NOT BEING CENSORED' },
+          { id: 'search', reads: 'NOT BEING SEARCHED' },
+          { id: 'read', reads: 'BEING TAUGHT TO READ', correct: true },
         ],
       },
-      explain: 'A minimum core of negative liberty is protected. Berlin valued positive liberty but warned that it can be used to justify coercion. Rulers can coerce people in the name of their true selves. So Berlin insists on a minimum area of freedom that no authority may invade.',
+      explain: 'Being taught to read, which is a freedom to rather than a freedom from. Berlin\'s worry is that once liberty means becoming your true self, somebody else can decide what that\'s and coerce you toward it, which is why he keeps a core of the first kind protected.',
       xp: 5,
     },
     dur: 1.0,

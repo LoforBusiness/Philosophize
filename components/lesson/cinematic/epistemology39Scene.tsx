@@ -91,11 +91,11 @@ const TALLY = BEATS.map((b) => b.tally ?? 0);
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology39'));
 
-export default function Epistemology39Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology39Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -121,7 +121,7 @@ export default function Epistemology39Scene({ clock, bt, bi, i, picked, onPick, 
       // R7c — the rail turns the bottom row over. `dragPos` runs from counting the
       // verdict to following the reasons, and the verdict cell reads NO at one end
       // and YES at the other, which is the repair and its bill in one cell.
-      flip: carry(cv, 4, n, 0, reacting ? dragPos.value : 0, tr),
+      flip: carry(cv, 4, n, 0, reacting ? pickPos.value : 0, tr),
     };
   });
 

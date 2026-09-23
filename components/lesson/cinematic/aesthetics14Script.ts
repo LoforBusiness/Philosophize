@@ -93,18 +93,16 @@ export const BEATS: Aes14Beat[] = [
     g: 383, board: 3, level: 0, key: 1,
     dur: 1.0,
     interact: {
-      prompt: 'If tastes differ, does it follow that every verdict is equally good?',
-      drag: {
-        lo: 'EVERY VERDICT EQUAL',
-        hi: 'ONE RIGHT ANSWER',
-        start: 0,
-        zones: [
-          { id: 'flat', upto: 0.3, reads: 'every verdict is worth the same' },
-          { id: 'placed', upto: 0.7, reads: 'some judges are better placed than others', correct: true },
-          { id: 'fixed', upto: 1, reads: 'one verdict is simply correct' },
+      prompt: 'Put these in order, from weakest claim to strongest.',
+      order: {
+        axis: 'WEAKEST FIRST',
+        items: [
+          { id: 'equal', reads: 'EVERY VERDICT IS EQUAL' },
+          { id: 'placed', reads: 'SOME JUDGES ARE BETTER PLACED' },
+          { id: 'one', reads: 'ONE VERDICT IS SIMPLY CORRECT' },
         ],
       },
-      explain: 'Some judges are better placed than others. Hume grants that tastes differ but denies that all are equal. Practised, delicate judges detect what others miss. Yet he allows blameless differences of preference, which no standard settles.',
+      explain: 'The middle one is Hume\'s. That tastes differ doesn\'t make every verdict equal. Practice, comparison and a mind free of bias put some people in a better position. That still falls well short of one answer written into the work.',
       xp: 5,
     },
   },

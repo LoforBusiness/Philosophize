@@ -82,17 +82,16 @@ export const BEATS: Metaphysics39Beat[] = [
   {
     p: 21, x: 98, plant: 1, wilt: 1, folk: 1, arrows: 1,
     interact: {
-      prompt: 'What distinguishes the gardener from the other three candidates?',
-      split: {
-        left: 'THE PHYSICS', right: 'WHAT WAS EXPECTED',
-        start: 0.92,
-        zones: [
-          { id: 'norms', upto: 0.3, reads: 'the expectation picks it out, and physics cannot', correct: true },
-          { id: 'both', upto: 0.62, reads: 'half a fact, half a judgement about duty' },
-          { id: 'physics', upto: 1, reads: 'the physics alone, so the king counts too' },
+      prompt: 'Of everything the fire needed, why name the gardener?',
+      sort: {
+        chip: 'THE GARDENER',
+        bins: [
+          { id: 'phys', label: 'PHYSICS PICKS IT', reads: 'the physics alone picks it out' },
+          { id: 'half', label: 'HALF AND HALF', reads: 'half a fact, half a judgement' },
+          { id: 'norms', label: 'WHAT WAS EXPECTED', reads: 'the duty they had picks the cause', correct: true },
         ],
       },
-      explain: 'What was expected is the answer. Physics alone cannot single out the gardener. It would count the king and the stranger too. The plant still dies of thirst either way. Naming one absence as the cause is a further step, guided by duty.',
+      explain: 'What was expected of them. The oxygen was as necessary as the missed watering, and physics can\'t separate the two. What singles out the gardener is a duty they had and didn\'t discharge, which is why causal selection looks like a question about norms.',
       xp: 5,
     },
     dur: 1.0,

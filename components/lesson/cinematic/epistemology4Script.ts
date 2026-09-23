@@ -110,18 +110,16 @@ export const BEATS: Epi4Beat[] = [
   {
     e: 460, r: 4, glow: 1, bridge: 1, school: 1, apriori: 1, forms: 1,
     interact: {
-      prompt: 'How much of human knowledge do rationalists claim is independent of experience?',
-      drag: {
-        lo: 'NONE OF IT',
-        hi: 'ALL OF IT',
-        start: 1,
-        zones: [
-          { id: 'none', upto: 0.28, reads: 'none: all knowledge comes from experience' },
-          { id: 'some', upto: 0.72, reads: 'some of it: the rest comes from experience', correct: true },
-          { id: 'all', upto: 1, reads: 'all of it: experience teaches nothing' },
+      prompt: 'How much does reason alone give, on the rationalist view?',
+      sort: {
+        chip: 'KNOWN WITHOUT EXPERIENCE',
+        bins: [
+          { id: 'none', label: 'NONE OF IT', reads: 'none: every bit of it comes from experience' },
+          { id: 'some', label: 'SOME OF IT', reads: 'some of it, and experience supplies the rest', correct: true },
+          { id: 'all', label: 'ALL OF IT', reads: 'all of it: experience teaches nothing' },
         ],
       },
-      explain: 'Some of it: the rest comes from experience. Rationalists hold that some truths, such as those of mathematics and logic, are known by reason alone. Rationalism doesn’t deny experience a role. Leibniz, for example, held that truths of fact are known through experience.',
+      explain: 'Some of it. Rationalism is the claim that certain truths are reachable by reason without experience, not that experience is idle. Reading it as the stronger claim makes it easy to refute and isn\'t what anyone defended.',
       xp: 5,
     },
     dur: 1.0,

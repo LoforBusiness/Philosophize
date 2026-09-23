@@ -64,7 +64,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics33'));
 
-export default function Aesthetics33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Aesthetics33Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(3);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -78,7 +78,7 @@ export default function Aesthetics33Scene({ clock, bt, bi, i, dragPos, gazeX, ga
     const wipe = ease01(bt.value / 1.2);
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
-      clean: live ? dragPos.value : carry(cv, 0, n, CLEAN[p], CLEAN[n], wipe),
+      clean: live ? pickPos.value : carry(cv, 0, n, CLEAN[p], CLEAN[n], wipe),
       layers: carry(cv, 1, n, LAYERED[p], LAYERED[n], tr),
       // A plain carry: the value is 0/1, so its own interpolation is the fade
       // both in and out — no separate envelope needed.

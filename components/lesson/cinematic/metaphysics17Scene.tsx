@@ -86,10 +86,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics17'));
 
-export default function Metaphysics17Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics17Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(7);
@@ -115,7 +115,7 @@ export default function Metaphysics17Scene({ clock, bt, bi, i, picked, onPick, d
       // R7b — the seam swings the door. The more of the bar the reader gives to WHAT
       // IT IS LIKE, the wider the door opens on the far side of the wall of physical
       // facts: the sliver is the thing that comes through it.
-      door: carry(cv, 1, n, DOOR[p], reacting ? 1 - dragPos.value : DOOR[n], swing),
+      door: carry(cv, 1, n, DOOR[p], reacting ? 1 - pickPos.value : DOOR[n], swing),
       card: carry(cv, 2, n, CARD[p], CARD[n], grow),
       boards: carry(cv, 3, n, PICKV[p], PICKV[n], grow),
       seal: carry(cv, 4, n, SEAL[p], SEAL[n], grow),

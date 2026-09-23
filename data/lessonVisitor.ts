@@ -4,7 +4,7 @@
 // stands, which edge he comes from, and which way he turns once he is there.
 //
 // Only lessons whose graded beat has two sides (a `poll` of named positions, or
-// a `split` between two) and which have measured floor space for him on BOTH the
+// a `cards` deck of two) and which have measured floor space for him on BOTH the
 // entrance beat and the question beat. See scripts/make-visitor.mjs, and group AA
 // of docs/LESSON_RULES.md.
 
@@ -20,32 +20,35 @@ export interface VisitorCue {
 }
 
 export const VISITOR: Record<string, VisitorCue> = {
-  'political-political-4': { enter: 8, x: 278, from: 460, dir: -1 },
+  'ethics-ethics-1': { enter: 10, x: 200, from: -60, dir: 1 },
+  'epistemology-knowledge-1': { enter: 9, x: 362, from: 460, dir: -1 },
+  'political-political-1': { enter: 6, x: 362, from: 460, dir: -1 },
+  'aesthetics-aesthetics-3': { enter: 5, x: 54, from: -60, dir: 1 },
+  'political-political-4': { enter: 7, x: 86, from: -60, dir: 1 },
   'ethics-ethics-7': { enter: 10, x: 234, from: 460, dir: -1 },
   'ethics-ethics-31': { enter: 8, x: 282, from: 460, dir: -1 },
-  'metaphysics-being-39': { enter: 6, x: 257, from: 460, dir: -1 },
+  'political-political-33': { enter: 8, x: 117, from: 460, dir: -1 },
   'logic-arguments-16': { enter: 8, x: 367, from: 460, dir: -1 },
-  'logic-arguments-17': { enter: 8, x: 352, from: 460, dir: -1 },
-  'ethics-ethics-17': { enter: 8, x: 52, from: -60, dir: 1 },
+  'logic-arguments-18': { enter: 7, x: 349, from: 460, dir: -1 },
+  'ethics-ethics-20': { enter: 6, x: 55, from: -60, dir: 1 },
+  'epistemology-knowledge-18': { enter: 7, x: 359, from: 460, dir: -1 },
   'epistemology-knowledge-20': { enter: 8, x: 354, from: 460, dir: -1 },
-  'aesthetics-aesthetics-18': { enter: 6, x: 116, from: -60, dir: 1 },
-  'aesthetics-aesthetics-21': { enter: 7, x: 123, from: -60, dir: 1 },
-  'logic-arguments-19': { enter: 6, x: 52, from: -60, dir: 1 },
   'logic-arguments-21': { enter: 7, x: 49, from: -60, dir: 1 },
-  'ethics-ethics-21': { enter: 7, x: 48, from: -60, dir: 1 },
   'epistemology-knowledge-23': { enter: 6, x: 349, from: 460, dir: -1 },
   'metaphysics-being-21': { enter: 8, x: 122, from: -60, dir: 1 },
-  'aesthetics-aesthetics-22': { enter: 8, x: 164, from: -60, dir: 1 },
   'political-political-22': { enter: 7, x: 118, from: -60, dir: 1 },
-  'political-political-23': { enter: 7, x: 53, from: -60, dir: 1 },
-  'metaphysics-being-13': { enter: 6, x: 304, from: 460, dir: -1 },
+  'aesthetics-aesthetics-33': { enter: 7, x: 349, from: 460, dir: -1 },
+  'ethics-ethics-33': { enter: 8, x: 352, from: 460, dir: -1 },
+  'logic-arguments-33': { enter: 9, x: 117, from: 460, dir: -1 },
+  'logic-arguments-34': { enter: 9, x: 343, from: 460, dir: -1 },
+  'epistemology-knowledge-33': { enter: 7, x: 333, from: 460, dir: -1 },
+  'epistemology-knowledge-34': { enter: 10, x: 345, from: 460, dir: -1 },
+  'metaphysics-being-33': { enter: 9, x: 368, from: 460, dir: -1 },
+  'metaphysics-being-34': { enter: 10, x: 346, from: 460, dir: -1 },
   'political-political-15': { enter: 5, x: 176, from: 460, dir: -1 },
-  'epistemology-knowledge-2': { enter: 7, x: 46, from: -60, dir: 1 },
   'metaphysics-being-8': { enter: 12, x: 301, from: 460, dir: -1 },
-  'ethics-ethics-11': { enter: 6, x: 49, from: -60, dir: 1 },
-  'logic-arguments-40': { enter: 7, x: 37, from: -60, dir: 1 },
   'ethics-ethics-40': { enter: 7, x: 35, from: -60, dir: 1 },
-  'metaphysics-being-26': { enter: 7, x: 33, from: -60, dir: 1 },
-  'political-political-26': { enter: 7, x: 29, from: -60, dir: 1 },
   'ethics-ethics-27': { enter: 7, x: 30, from: -60, dir: 1 },
+  'logic-arguments-30': { enter: 7, x: 29, from: -60, dir: 1 },
+  'ethics-ethics-30': { enter: 7, x: 29, from: -60, dir: 1 },
 };

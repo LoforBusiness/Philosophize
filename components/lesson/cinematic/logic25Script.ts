@@ -75,17 +75,16 @@ export const BEATS: Logic25Beat[] = [
   {
     p: 165, x: 124, result: 1, real: 1, fake: 1,
     interact: {
-      prompt: 'Among shy, tidy men who are farmers or librarians, how do the two jobs divide?',
-      split: {
-        left: 'FARMERS', right: 'LIBRARIANS',
-        start: 0.04,
-        zones: [
-          { id: 'lib', upto: 0.34, reads: 'mostly librarians, since they fit the type' },
-          { id: 'even', upto: 0.62, reads: 'about evenly split between the two' },
-          { id: 'farm', upto: 1, reads: 'mostly farmers, since farmers are far more numerous', correct: true },
+      prompt: 'Shy and tidy. Farmer or librarian?',
+      sort: {
+        chip: 'MORE LIKELY A',
+        bins: [
+          { id: 'lib', label: 'LIBRARIAN', reads: 'a librarian, since the description fits' },
+          { id: 'even', label: 'EITHER', reads: 'about as likely to be either' },
+          { id: 'farm', label: 'FARMER', reads: 'a farmer because farmers are far commoner', correct: true },
         ],
       },
-      explain: 'Mostly farmers, since farmers are far more numerous. Kahneman and Tversky used this case to show that people judge by resemblance and neglect base rates. Farmers so outnumber librarians that even a small share of them can exceed all the shy, tidy librarians.',
+      explain: 'A farmer. The description fits the librarian better, but there are many times more farmers, so even a small share of shy and tidy farmers outnumbers the librarians. Judging by how well a case fits the type ignores how many there are of each.',
       xp: 5,
     },
     dur: 1.0,

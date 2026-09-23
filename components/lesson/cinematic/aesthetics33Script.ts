@@ -66,18 +66,16 @@ export const BEATS: Aesthetics33Beat[] = [
   {
     p: 380, x: 52, clean: 0, live: 1,
     interact: {
-      prompt: 'How far down through the layers should a restorer clean?',
-      drag: {
-        lo: 'AS IT HANGS',
-        hi: 'BARE CANVAS',
-        start: 0,
-        zones: [
-          { id: 'dirt', upto: 0.34, reads: 'removing only the dirt' },
-          { id: 'edge', upto: 0.68, reads: 'to the point where conjecture begins', correct: true },
-          { id: 'gone', upto: 1, reads: 'removing the painter’s own layers' },
+      prompt: 'Put these in order, from shallowest clean to deepest.',
+      order: {
+        axis: 'SHALLOWEST FIRST',
+        items: [
+          { id: 'dirt', reads: 'ONLY THE DIRT' },
+          { id: 'edge', reads: 'TO WHERE GUESSWORK BEGINS' },
+          { id: 'paint', reads: 'INTO THE PAINTER\u2019S OWN LAYERS' },
         ],
       },
-      explain: 'To the point where conjecture begins. No one defends leaving the soot or removing the paint, so the dispute concerns the layers between. The reason to stop is not taste. A removed layer can’t be put back.',
+      explain: 'A restorer stops at the middle. Below it lies the work; above it, later hands. The line isn\'t drawn on the painting, so restoring is a judgement rather than a routine.',
       xp: 5,
     },
     dur: 1.0,

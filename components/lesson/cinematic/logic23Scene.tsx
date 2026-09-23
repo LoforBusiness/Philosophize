@@ -90,11 +90,11 @@ const BOTH_ON = BEATS.map((b) => ((b.bothRow ?? 0) > 0 ? 1 : 0));
 const PFALSE_ON = BEATS.map((b) => ((b.pFalse ?? 0) > 0 ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic23'));
 
-export default function Logic23Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic23Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(7);
@@ -123,7 +123,7 @@ export default function Logic23Scene({ clock, bt, bi, i, picked, onPick, dragPos
       ifOn: carry(cv, 3, n, IF_ON[p], IF_ON[n], tr),
       // R7c — the seam IS the reader's answer. `split` reads dragPos, whose 0…1 is
       // the left side's share, so nothing has to be mapped.
-      seam: carry(cv, 4, n, 0, reacting ? dragPos.value : 0, tr),
+      seam: carry(cv, 4, n, 0, reacting ? pickPos.value : 0, tr),
       // The two rings: each marks the row(s) its own beat's sentence names.
       bothRow: carry(cv, 5, n, BOTH_ON[p], BOTH_ON[n], bothFade ? tr : 1),
       pFalse: carry(cv, 6, n, PFALSE_ON[p], PFALSE_ON[n], pFalseFade ? tr : 1),

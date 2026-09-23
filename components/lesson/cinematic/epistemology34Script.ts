@@ -82,18 +82,18 @@ export const BEATS: Epistemology34Beat[] = [
   {
     p: 461, x: 54, claim: 0, live: 1,
     interact: {
-      prompt: 'At what level of claimed confidence does accuracy fall furthest behind?',
-      drag: {
-        lo: 'A COIN FLIP',
-        hi: 'CERTAIN',
-        start: 0,
-        zones: [
-          { id: 'level', upto: 0.38, reads: 'the bars agree' },
-          { id: 'lean', upto: 0.7, reads: 'accuracy lags a little' },
-          { id: 'gap', upto: 1, reads: 'the largest gap, at certainty', correct: true },
+      prompt: 'As claimed confidence rises, which shape does accuracy take?',
+      plot: {
+        cols: ['50% SURE', '80% SURE', 'CERTAIN'],
+        axis: 'HOW OFTEN RIGHT',
+        start: [0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'gap', profile: [0.5, 0.62, 0.7, 0.75, 0.78], reads: 'it trails further behind the higher you go', correct: true },
+          { id: 'match', profile: [0.5, 0.65, 0.8, 0.9, 1], reads: 'it keeps pace all the way' },
+          { id: 'over', profile: [0.6, 0.75, 0.88, 0.96, 1], reads: 'it runs ahead of what you claim' },
         ],
       },
-      explain: 'The largest gap, at certainty. Confidence keeps rising after accuracy stops rising. So at the top, the left bar has nothing behind it. This is called the overconfidence effect.',
+      explain: 'It trails further behind. People are roughly calibrated at middling confidence and worst at the top, so the widest gap sits where certainty is claimed. That\'s why being sure is poor evidence that you\'re right.',
       xp: 5,
     },
     dur: 1.0,

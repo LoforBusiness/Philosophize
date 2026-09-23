@@ -91,9 +91,9 @@ const HERE_FLAG = BEATS.map((b) => b.hereFlag ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
-export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(11);
@@ -127,7 +127,7 @@ export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dr
       // R7b — the knob lights the moving now. Drag toward A SPOTLIGHT SWEEPS THE LINE
       // and the travelling YOUR NOW ring appears on the timeline: the reader turns on
       // the very thing the block universe says is not there.
-      spot: carry(cv, 3, n, SPOT[p], reacting ? dragPos.value : SPOT[n], tr),
+      spot: carry(cv, 3, n, SPOT[p], reacting ? pickPos.value : SPOT[n], tr),
       // group AH — one still-tap event each, carried in and back out over the
       // beats either side rather than switched, so none of them is a CUT.
       qMark: carry(cv, 4, n, QMARK[p], QMARK[n], tr),

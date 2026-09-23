@@ -84,18 +84,17 @@ export const BEATS: Pol18Beat[] = [
     g: 41, lanes: 2, bikes: 1, ride: 1,
     dur: 1.0,
     interact: {
-      prompt: 'If two people receive the same income, how equal are their real freedoms?',
-      drag: {
-        lo: 'THEY ARE NOW EQUAL',
-        hi: 'INCOME IS IRRELEVANT',
-        start: 0,
-        zones: [
-          { id: 'equal', upto: 0.3, reads: 'fully equal, since income is what counts' },
-          { id: 'means', upto: 0.74, reads: 'equal means, and freedom still deeply unequal', correct: true },
-          { id: 'nothing', upto: 1, reads: 'income is irrelevant to freedom' },
+      prompt: 'Same income. Which of these is still unequal?',
+      odd: {
+        axis: 'THREE ARE NOW EQUAL',
+        tiles: [
+          { id: 'money', reads: 'THE MONEY' },
+          { id: 'prices', reads: 'THE PRICES' },
+          { id: 'tax', reads: 'THE TAX' },
+          { id: 'able', reads: 'WHAT THEY CAN DO', correct: true },
         ],
       },
-      explain: 'Equal means, and freedom still unequal. Income is a means, not the end. What it buys depends on health, surroundings and what a body can do. So equal income can leave freedoms far apart.',
+      explain: 'What they can do. Health, disability, safety and what a society allows all change how far the same income carries. So equal means buy very unequal freedoms. Income is the input; what you can do with it\'s the thing to measure.',
       xp: 5,
     },
   },

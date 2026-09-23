@@ -64,18 +64,16 @@ export const BEATS: Aes16Beat[] = [
   {
     p: 165, x: 124, canvas: 1, facts: 3,
     interact: {
-      prompt: 'What does learning the painter’s biography change?',
-      drag: {
-        lo: 'THE PAINTING IS RUINED',
-        hi: 'IT CHANGES NOTHING AT ALL',
-        start: 0,
-        zones: [
-          { id: 'ruin', upto: 0.3, reads: 'the painting is spoiled as art' },
-          { id: 'you', upto: 0.74, reads: 'the painting stays, your response changes', correct: true },
-          { id: 'none', upto: 1, reads: 'nothing, neither the painting nor your response' },
+      prompt: 'You learn what the painter did. What changed?',
+      sort: {
+        chip: 'WHAT CHANGED',
+        bins: [
+          { id: 'work', label: 'THE PAINTING', reads: 'the painting itself is spoiled as art' },
+          { id: 'you', label: 'YOUR RESPONSE', reads: 'the same painting and a different viewer', correct: true },
+          { id: 'none', label: 'NOTHING', reads: 'neither the painting nor your response' },
         ],
       },
-      explain: 'The painting is unchanged, but your response changes. No mark has moved since yesterday. What differs is the viewer, who now knows something about the painter. Calling the work ruined treats facts about the painter as facts about the painting.',
+      explain: 'Your response. Not one mark on the canvas moved, and yet what you\'re able to feel in front of it has, which is why the question of whether the life should bear on the work is hard rather than settled either way.',
       xp: 5,
     },
     dur: 1.0,

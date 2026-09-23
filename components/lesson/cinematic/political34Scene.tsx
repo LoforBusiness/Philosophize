@@ -59,7 +59,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political34'));
 
-export default function Political34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Political34Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(3);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -73,7 +73,7 @@ export default function Political34Scene({ clock, bt, bi, i, dragPos, gazeX, gaz
     const widen = ease01(bt.value / 1.1);
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
-      level: live ? dragPos.value : carry(cv, 0, n, LEVEL[p], LEVEL[n], widen),
+      level: live ? pickPos.value : carry(cv, 0, n, LEVEL[p], LEVEL[n], widen),
       reach: carry(cv, 1, n, REACH[p], REACH[n], widen),
       // Carried, so it fades out as well as in (group L).
       exceed: carry(cv, 2, n, EXCEED[p], EXCEED[n], widen),

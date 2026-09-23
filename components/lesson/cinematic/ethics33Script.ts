@@ -71,18 +71,16 @@ export const BEATS: Ethics33Beat[] = [
   {
     p: 455, x: 48, give: 0, live: 1,
     interact: {
-      prompt: 'At what level of giving does duty end and generosity beyond duty begin?',
-      drag: {
-        lo: 'KEEP IT ALL',
-        hi: 'GIVE UNTIL EQUAL',
-        start: 0,
-        zones: [
-          { id: 'token', upto: 0.22, reads: 'a small gift that costs you little' },
-          { id: 'real', upto: 0.58, reads: 'a significant sacrifice of your own', correct: true },
-          { id: 'saint', upto: 1, reads: 'nothing left for a life of your own' },
+      prompt: 'Put these in order, from smallest cost to largest.',
+      order: {
+        axis: 'SMALLEST COST FIRST',
+        items: [
+          { id: 'small', reads: 'A GIFT YOU HARDLY FEEL' },
+          { id: 'real', reads: 'A SACRIFICE YOU FEEL' },
+          { id: 'all', reads: 'NOTHING LEFT FOR YOURSELF' },
         ],
       },
-      explain: 'A significant sacrifice of your own. The pond argument requires at least giving that costs you something. Singer holds that its premises go further, to the far end, so where duty stops is contested.',
+      explain: 'Duty runs out somewhere in the middle. Below it the giving costs you nothing worth counting; past the far end a morality has consumed the life that was supposed to be lived by its lights, which is an argument against the demand rather than for it.',
       xp: 5,
     },
     dur: 1.0,

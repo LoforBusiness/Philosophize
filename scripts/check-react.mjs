@@ -41,7 +41,13 @@ const DIR = 'components/lesson/cinematic';
 // invisible. `sort` and `poll` are the controls that replaced them, and leaving
 // them out meant every lesson carrying one was passed over by this whole file:
 // the reader works them with a thumb exactly like the others.
-const ANALOGUE = ['drag', 'lever', 'plot', 'split', 'field', 'sort', 'poll'];
+// AND `order` AND `odd` ARE THE THIRD ROUND OF THE SAME OMISSION, so the list is
+// now every key in InteractBlock but `cards`. Both drive the stage the way the
+// others do — `order` writes how much of the sequence is placed and `odd` writes
+// whether the stranger was found — so a lesson carrying one has a stage that can
+// be wired or left still, and leaving them out would have passed 69 questions
+// over in silence.
+const ANALOGUE = ['drag', 'lever', 'plot', 'split', 'field', 'sort', 'poll', 'order', 'odd'];
 
 /**
  * Lessons whose analogue beat leaves the stage still. DOWN ONLY.

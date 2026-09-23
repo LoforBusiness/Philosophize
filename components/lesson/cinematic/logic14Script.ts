@@ -83,17 +83,16 @@ export const BEATS: Log14Beat[] = [
     g: 383, lines: 3, mark: 1, gloss: 1,
     dur: 1.0,
     interact: {
-      prompt: 'How should the blame for the absurd conclusion divide between form and words?',
-      split: {
-        left: 'THE FORM', right: 'THE WORDS',
-        start: 1,
-        zones: [
-          { id: 'words', upto: 0.3, reads: 'the words, since a key word shifts meaning', correct: true },
-          { id: 'both', upto: 0.66, reads: 'the form and the words equally' },
-          { id: 'form', upto: 1, reads: 'the form, which was invalid from the start' },
+      prompt: 'Where does the fault in the argument lie?',
+      sort: {
+        chip: 'THE FAULT',
+        bins: [
+          { id: 'words', label: 'IN A WORD', reads: 'in a word that changes meaning between the premises', correct: true },
+          { id: 'both', label: 'BOTH EQUALLY', reads: 'half in the words and half in the form' },
+          { id: 'form', label: 'IN THE FORM', reads: 'in a form that was invalid from the start' },
         ],
       },
-      explain: 'The blame falls on the words: the word “nothing” shifts meaning. The form is valid, but an argument only has that form if its terms keep one meaning.',
+      explain: 'In a word. Laid out as a form the argument is impeccable; what fails is that a key term carries one sense in the first premise and another in the second, so the two never join up. That\'s equivocation, and it survives every check on structure.',
       xp: 5,
     },
   },

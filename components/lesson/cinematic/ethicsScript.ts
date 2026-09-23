@@ -149,18 +149,16 @@ export const BEATS: EthicsBeat[] = [
     judge: true,
     weigh: 'q2',
     interact: {
-      prompt: 'How much of a human conscience do the great apes already share?',
-      drag: {
-        lo: 'NONE OF IT',
-        hi: 'ALL OF IT',
-        start: 1,
-        zones: [
-          { id: 'none', upto: 0.26, reads: 'no part of a conscience' },
-          { id: 'parts', upto: 0.72, reads: 'the moral feelings, not reflective judgement', correct: true },
-          { id: 'all', upto: 1, reads: 'all of it, reflective judgement included' },
+      prompt: 'Put these in order, from least to most of a conscience.',
+      order: {
+        axis: 'LEAST FIRST',
+        items: [
+          { id: 'none', reads: 'NO PART OF ONE' },
+          { id: 'feel', reads: 'THE MORAL FEELINGS' },
+          { id: 'judge', reads: 'JUDGING YOUR OWN CONDUCT' },
         ],
       },
-      explain: 'The moral emotions, but not reflective judgement. Great apes show empathy, fairness and distress at another’s suffering. They appear to lack the step of asking, in words, whether an act was right. Feeling those emotions isn’t the same as judging one’s own conduct.',
+      explain: 'The apes reach the middle. Sympathy, fairness and something like resentment are all observed; what hasn\'t been shown is the reflective step of weighing your own past conduct against a standard and finding it wanting.',
       xp: 5,
     },
     dur: 1.0,

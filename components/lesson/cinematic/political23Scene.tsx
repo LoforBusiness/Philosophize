@@ -82,11 +82,11 @@ const LIVE = BEATS.map((b) => b.live ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political23'));
 
-export default function Political23Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Political23Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(7);
@@ -112,7 +112,7 @@ export default function Political23Scene({ clock, bt, bi, i, picked, onPick, dra
       box: carry(cv, 3, n, BOX[p], BOX[n], tr),
       // R7c — the seam is how much was HANDED to you, so the chooser said to be left
       // in the box thins out as it travels right. The reader empties the box themselves.
-      left: carry(cv, 4, n, LEFT[p], reacting ? 1 - dragPos.value : LEFT[n], tr),
+      left: carry(cv, 4, n, LEFT[p], reacting ? 1 - pickPos.value : LEFT[n], tr),
       // The two tap events, carried, so each fades out as well as in (group L).
       given: carry(cv, 5, n, GIVEN[p], GIVEN[n], tr),
       nojudge: carry(cv, 6, n, NOJUDGE[p], NOJUDGE[n], tr),

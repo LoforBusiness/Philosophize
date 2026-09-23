@@ -66,18 +66,16 @@ export const BEATS: Epistemology33Beat[] = [
   {
     p: 467, x: 56, ev: 1, live: 1,
     interact: {
-      prompt: 'At what level of stakes does your evidence stop being enough to know?',
-      drag: {
-        lo: 'NOTHING AT STAKE',
-        hi: 'THE HOUSE',
-        start: 0,
-        zones: [
-          { id: 'know', upto: 0.36, reads: 'you know it' },
-          { id: 'hedge', upto: 0.68, reads: 'you should check first' },
-          { id: 'no', upto: 1, reads: 'you do not know it', correct: true },
+      prompt: 'Put these in order, from lowest stakes to highest.',
+      order: {
+        axis: 'LOWEST STAKES FIRST',
+        items: [
+          { id: 'know', reads: 'YOU KNOW IT' },
+          { id: 'check', reads: 'YOU HAD BETTER CHECK' },
+          { id: 'no', reads: 'YOU DO NOT KNOW IT' },
         ],
       },
-      explain: 'You do not know it, once the house is at stake. The evidence stayed the same, but the standard rose. Contextualism holds that the word “know” takes its standard from what depends on the answer.',
+      explain: 'The same evidence carries you further when less rides on it. Nothing about the bank changed between the low-stakes and the high-stakes version of the case, only what turns on being right, and yet what you\'re willing to call knowing moved.',
       xp: 5,
     },
     dur: 1.0,

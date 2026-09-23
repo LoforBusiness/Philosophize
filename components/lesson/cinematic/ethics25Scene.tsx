@@ -97,11 +97,11 @@ const CHOICE = BEATS.map((b) => (b.choice ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics25'));
 
-export default function Ethics25Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics25Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(8);
@@ -133,7 +133,7 @@ export default function Ethics25Scene({ clock, bt, bi, i, picked, onPick, dragPo
       platesOn: carry(cv, 3, n, PLATES[p], PLATES[n], tr),
       // R7c — the gate IS the reader's position. `drag` reads dragPos, whose own
       // 0…1 is the answer, so nothing has to be mapped.
-      gate: carry(cv, 4, n, 0, reacting ? dragPos.value : 0, tr),
+      gate: carry(cv, 4, n, 0, reacting ? pickPos.value : 0, tr),
       // Three one-shot marks, fading in AND out on a carried track (never an
       // on/off ternary), so a tap mid-fade never cuts one between two frames (C20c).
       limit: carry(cv, 5, n, LIMIT[p], LIMIT[n], limitFade ? grow : 1),

@@ -101,17 +101,18 @@ export const BEATS: Epi5Beat[] = [
   {
     p: 172, star: 1, rungs: 5,
     interact: {
-      prompt: 'On Aristotle’s view, how far is the desire to know innate rather than taught?',
-      split: {
-        left: 'BORN WITH IT', right: 'TAUGHT IT',
-        start: 0.04,
-        zones: [
-          { id: 'taught', upto: 0.32, reads: 'instilled by education and habit' },
-          { id: 'both', upto: 0.66, reads: 'partly innate, partly instilled by teaching' },
-          { id: 'born', upto: 1, reads: 'part of human nature from birth', correct: true },
+      prompt: 'As a person grows, which shape does the desire to know take?',
+      plot: {
+        cols: ['INFANT', 'CHILD', 'ADULT'],
+        axis: 'THE DESIRE TO KNOW',
+        start: [0.3, 0.3, 0.3],
+        shapes: [
+          { id: 'born', profile: [0.85, 0.88, 0.86, 0.89, 0.87], reads: 'there from the start', correct: true },
+          { id: 'taught', profile: [0.05, 0.25, 0.5, 0.75, 0.95], reads: 'put there by teaching' },
+          { id: 'mixed', profile: [0.4, 0.5, 0.6, 0.7, 0.8], reads: 'a little innate, mostly taught' },
         ],
       },
-      explain: 'Part of human nature from birth. Aristotle opens the Metaphysics with “all men by nature desire to know”. Teaching develops knowledge, but on his view the desire to know isn’t taught.',
+      explain: 'There from the start. Aristotle opens the Metaphysics with the claim that all human beings by nature desire to know, and offers the delight taken in the senses for its own sake as evidence. Teaching shapes it; it doesn\'t install it.',
       xp: 5,
     },
     dur: 1.0,

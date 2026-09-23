@@ -149,10 +149,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics'));
 
-export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, pickPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFigS = useHeld();
   const cv = useCarry(7);
@@ -177,7 +177,7 @@ export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, i, gazeX,
       // R7b — the knob runs the chain back. Drag from last Tuesday toward why
       // anything at all and the chain of explanation extends behind the reader, until
       // it reaches the end of what it can reach.
-      chainOn: carry(cv, 1, n, CHAIN[p], reacting ? dragPos.value : CHAIN[n], tr),
+      chainOn: carry(cv, 1, n, CHAIN[p], reacting ? pickPos.value : CHAIN[n], tr),
       // The ghosts recede as the narration says the chain cannot reach its own
       // start, and a considered answer sends them further still. Carried, so the
       // second question starts from where the first one left them.

@@ -61,18 +61,18 @@ export const BEATS: Political34Beat[] = [
   {
     p: 455, x: 50, level: 0, reach: 0.72, live: 1,
     interact: {
-      prompt: 'At what level should a decision be taken, given how far its effects reach?',
-      drag: {
-        lo: 'YOU',
-        hi: 'EVERYONE',
-        start: 0,
-        zones: [
-          { id: 'small', upto: 0.4, reads: 'too local, so outsiders have no say' },
-          { id: 'match', upto: 0.82, reads: 'the level matches the reach of the effects', correct: true },
-          { id: 'big', upto: 1, reads: 'too distant from local knowledge' },
+      prompt: 'As the decision is taken further away, which shape does it take?',
+      plot: {
+        cols: ['ONE STREET', 'THE REGION', 'FAR OFF'],
+        axis: 'HOW WELL IT DECIDES',
+        start: [0.3, 0.3, 0.3],
+        shapes: [
+          { id: 'match', profile: [0.25, 0.65, 0.95, 0.55, 0.2], reads: 'best where it matches the reach', correct: true },
+          { id: 'local', profile: [1, 0.78, 0.55, 0.3, 0.1], reads: 'the more local the better' },
+          { id: 'far', profile: [0.1, 0.3, 0.55, 0.8, 1], reads: 'the higher up the better' },
         ],
       },
-      explain: 'The level matches the reach of the effects. A decision taken too locally binds outsiders who had no vote. One taken too high is made without local knowledge.',
+      explain: 'Best where the level matches the reach. Decided too locally and the people downstream have no say; decided too far off and nobody involved knows the ground. Subsidiarity is that match rather than a general preference for the local.',
       xp: 5,
     },
     dur: 1.0,

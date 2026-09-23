@@ -89,11 +89,11 @@ const WEIGH = BEATS.map((b) => (b.weigh ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics29'));
 
-export default function Ethics29Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics29Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(8);
@@ -123,7 +123,7 @@ export default function Ethics29Scene({ clock, bt, bi, i, picked, onPick, dragPo
       t,
       scale: carry(cv, 1, n, SCALE[p], SCALE[n], tr),
       // WHERE DUTY ENDS, which is the only thing this lesson lets anybody move.
-      line: carry(cv, 2, n, LINE[p], reacting ? dragPos.value : LINE[n], tr),
+      line: carry(cv, 2, n, LINE[p], reacting ? pickPos.value : LINE[n], tr),
       plates: carry(cv, 3, n, PLATES[p], PLATES[n], tr),
       // Four one-shot marks, fading in AND out on a carried track (never an
       // on/off ternary), so a tap mid-fade never cuts one between two frames

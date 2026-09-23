@@ -162,12 +162,15 @@ if (!orderSrc) {
   // A PLOT HAS SLOTS NOW TOO. Drawn freehand its shapes had no positions to guess
   // at; offered as tiles (R16) they do, and the correct shape was authored FIRST in
   // 15 of 18 plot questions.
-  const slotted = { poll: [], sort: [], plot: [] };
+  // AND AN ODD ONE OUT (R22), which is four tiles and therefore four slots. `order`
+  // is deliberately absent: its answer is the ORDER of the authored array and every
+  // tile has to be tapped, so there is no one slot to guess at.
+  const slotted = { poll: [], sort: [], plot: [], odd: [] };
   for (const [id, comp] of comps) {
     const found = beatsOf(comp);
     if (!found) continue;
     for (const ch of found.chunks) {
-      for (const kind of ['poll', 'sort', 'plot']) {
+      for (const kind of ['poll', 'sort', 'plot', 'odd']) {
         if (!new RegExp(`\\n\\s{6}${kind}:`).test(ch)) continue;
         const its = [...ch.matchAll(/\{[^{}]*?reads:[^{}]*?\}/g)].map((x) => x[0]);
         const authored = its.findIndex((x) => /correct:\s*true/.test(x));
@@ -176,16 +179,16 @@ if (!orderSrc) {
         // which for a poll is its first position and for a sort is its chip.
         const firstRe = /reads:\s*'((?:[^'\\]|\\.)*)'/;
         const chipRe = /chip:\s*'((?:[^'\\]|\\.)*)'/;
-        // A plot is seeded like a poll, on its first shape's words (TrendPick).
-        const first = kind === 'poll' || kind === 'plot'
-          ? (its[0].match(firstRe) || [, ''])[1]
-          : (ch.match(chipRe) || [, ''])[1];
+        // A plot and an odd are seeded like a poll, on the first option's words.
+        const first = kind === 'sort'
+          ? (ch.match(chipRe) || [, ''])[1]
+          : (its[0].match(firstRe) || [, ''])[1];
         const shown = orderFor(seedFor(id, [{ text: first }]), its.length);
         slotted[kind].push(shown.indexOf(authored) / (its.length - 1));
       }
     }
   }
-  for (const kind of ['poll', 'sort', 'plot']) {
+  for (const kind of ['poll', 'sort', 'plot', 'odd']) {
     const xs = slotted[kind];
     if (!xs.length) continue;
     const mean = xs.reduce((a, b) => a + b, 0) / xs.length;

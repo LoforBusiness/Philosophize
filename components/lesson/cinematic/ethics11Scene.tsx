@@ -145,9 +145,9 @@ const GUIDEV = BEATS.map((b) => (b.guide ? 1 : 0));
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
-export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(7);
@@ -186,7 +186,7 @@ export default function Ethics11Scene({ clock, bt, bi, qv, i, picked, onPick, dr
       // R7b — the seam lifts the symphony. Slide toward WHAT KIND and the token
       // climbs to the higher shelf; slide back to HOW MUCH and it drops among the
       // cheap thrills to be counted with them. Mill's whole claim, under a thumb.
-      rise: riseNow ? ease01(qv.value) : carry(cv, 4, n, UPV[p], reacting ? dragPos.value : UPV[n], tr),
+      rise: riseNow ? ease01(qv.value) : carry(cv, 4, n, UPV[p], reacting ? pickPos.value : UPV[n], tr),
       // group AH — one-beat pulses; each fades both ways since it must close
       // again on the very next beat.
       level: carry(cv, 5, n, LEVELV[p], LEVELV[n], levelFade ? grow : 1),

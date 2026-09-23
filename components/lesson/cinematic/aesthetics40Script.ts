@@ -88,18 +88,16 @@ export const BEATS: Aesthetics40Beat[] = [
   {
     p: 177, x: 92, pillars: 1, line: 1,
     interact: {
-      prompt: 'How far does a great meal actually reach?',
-      drag: {
-        lo: 'A PLEASURE',
-        hi: 'A WORK',
-        start: 0.06,
-        zones: [
-          { id: 'pleasure', upto: 0.3, reads: 'a pleasure, and it ends with the plate' },
-          { id: 'craft', upto: 0.62, reads: 'skilled work, made about nothing' },
-          { id: 'work', upto: 1, reads: 'about something, and it repays attention', correct: true },
+      prompt: 'Put these in order, from least reach to most.',
+      order: {
+        axis: 'LEAST REACH FIRST',
+        items: [
+          { id: 'plate', reads: 'A PLEASURE THAT ENDS' },
+          { id: 'skill', reads: 'SKILLED WORK ABOUT NOTHING' },
+          { id: 'about', reads: 'ABOUT SOMETHING, AND REPAYS ATTENTION' },
         ],
       },
-      explain: 'All the way, or the exclusion needs a better reason. A composed menu has structure, reference and a view. People argue about it the way they argue about a film. Mere craft is the interesting objection — and craft is what was once said about the novel.',
+      explain: 'A meal reaches the third or it doesn\'t count as art on this view. Skill alone isn\'t enough, since a well-made thing can be about nothing; what the far end asks is that it bear thinking about after the plate is cleared.',
       xp: 5,
     },
     dur: 1.0,

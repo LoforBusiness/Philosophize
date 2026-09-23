@@ -73,10 +73,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology15'));
 
-export default function Epistemology15Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology15Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(8);
@@ -103,7 +103,7 @@ export default function Epistemology15Scene({ clock, bt, bi, i, picked, onPick, 
       // R7b — the seam puts twelve in the fourth cell. Slide toward SOMETHING
       // GENUINELY NEW and the sum arrives from outside the row; slide back and it
       // sinks into what was already there.
-      sum: carry(cv, 2, n, SUM[p], reacting ? 1 - dragPos.value : SUM[n], grow),
+      sum: carry(cv, 2, n, SUM[p], reacting ? 1 - pickPos.value : SUM[n], grow),
       colRing: carry(cv, 3, n, COL_RING[p], COL_RING[n], tr),
       chairRing: carry(cv, 4, n, CHAIR_RING[p], CHAIR_RING[n], tr),
       emptyRing: carry(cv, 5, n, EMPTY_RING[p], EMPTY_RING[n], tr),

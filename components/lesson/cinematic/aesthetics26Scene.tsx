@@ -114,11 +114,11 @@ const PAIR = BEATS.map((b) => (b.pair ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics26'));
 
-export default function Aesthetics26Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Aesthetics26Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(7);
@@ -142,7 +142,7 @@ export default function Aesthetics26Scene({ clock, bt, bi, i, picked, onPick, dr
       eyeOn: carry(cv, 2, n, EYE[p], EYE[n], tr),
       // R7c — the knob's own 0…1 IS how far the difference has been handed to the
       // beholder, and the only thing in the picture that answers to it is the eye.
-      wink: carry(cv, 3, n, WINK[p], reacting ? dragPos.value : WINK[n], tr),
+      wink: carry(cv, 3, n, WINK[p], reacting ? pickPos.value : WINK[n], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
       tearsV: carry(cv, 5, n, TEARS[p], TEARS[n], tr),
       pairOn: carry(cv, 6, n, PAIR[p], PAIR[n], tr),

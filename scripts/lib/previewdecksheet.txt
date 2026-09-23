@@ -11,6 +11,10 @@ import SortBins from '@/components/lesson/cinematic/SortBins';
 import PollBallot from '@/components/lesson/cinematic/PollBallot';
 import SplitBar from '@/components/lesson/cinematic/SplitBar';
 import TrendPick from '@/components/lesson/cinematic/TrendPick';
+import OrderTiles from '@/components/lesson/cinematic/OrderTiles';
+import OddOneOut from '@/components/lesson/cinematic/OddOneOut';
+import { stageTone } from '@/components/lesson/cinematic/stageTones';
+import { branchOfLesson } from '@/components/lesson/cinematic/questionTone';
 import { QuestionAccentProvider } from '@/components/lesson/cinematic/QuestionParts';
 import { InteractPanel, styles as kit } from '@/components/lesson/cinematic/cinematicKit';
 import { useUIStore } from '@/stores/uiStore';
@@ -22,8 +26,11 @@ const MODS: [string, Record<string, unknown>][] = [/*MODS*/];
 const q = (k: string) =>
   typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(k);
 
-type Kind = 'cards' | 'drag' | 'sort' | 'poll' | 'split' | 'plot';
-const KINDS: Kind[] = ['cards', 'drag', 'sort', 'poll', 'split', 'plot'];
+// EVERY key of InteractBlock, including the retired ones, because a control left
+// out of this list is a control the sheet stops measuring while still reporting
+// that every question fits (R6).
+type Kind = 'cards' | 'drag' | 'sort' | 'poll' | 'split' | 'plot' | 'order' | 'odd';
+const KINDS: Kind[] = ['cards', 'drag', 'sort', 'poll', 'split', 'plot', 'order', 'odd'];
 type Case = { key: string; file: string; kind: Kind; it: any };
 
 // EVERY BEAT ANSWERED BELOW THE FIGURE, read out of the scripts themselves rather
@@ -77,6 +84,18 @@ function DeckCase({ c, n }: { c: Case; n: number }) {
     picked = bins[a].id;
   } else if (c.kind === 'poll') {
     picked = (it.poll.options.find((o: any) => o.correct) ?? it.poll.options[0]).id;
+  } else if (c.kind === 'order') {
+    // An order is answered by tapping every tile, so the answered state is the one
+    // where all of them are placed: `pos` is 1 and the last item is the pick.
+    init = 1;
+    semInit = 1;
+    picked = it.order.items[it.order.items.length - 1].id;
+  } else if (c.kind === 'odd') {
+    const tiles = it.odd.tiles;
+    const a = Math.max(0, tiles.findIndex((t: any) => t.correct));
+    init = 1;
+    semInit = tiles.length > 1 ? a / (tiles.length - 1) : 0;
+    picked = tiles[a].id;
   } else {
     picked = (it.plot.shapes.find((s: any) => s.correct) ?? it.plot.shapes[0]).id;
   }
@@ -98,6 +117,8 @@ function DeckCase({ c, n }: { c: Case; n: number }) {
           {c.kind === 'sort' ? <SortBins sort={it.sort} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(seed, [{ text: it.sort.chip }])} /> : null}
           {c.kind === 'poll' ? <PollBallot poll={it.poll} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(seed, [{ text: it.poll.options[0].reads }])} /> : null}
           {c.kind === 'plot' ? <TrendPick plot={it.plot} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(seed, [{ text: it.plot.shapes[0]?.reads ?? '' }])} /> : null}
+          {c.kind === 'order' ? <OrderTiles order={it.order} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(seed, [{ text: it.order.items[0]?.reads ?? '' }])} tone={stageTone(branchOfLesson(lessonId))} /> : null}
+          {c.kind === 'odd' ? <OddOneOut odd={it.odd} picked={picked} onPick={noop} pos={pos} sem={sem} seed={seedFor(seed, [{ text: it.odd.tiles[0]?.reads ?? '' }])} tone={stageTone(branchOfLesson(lessonId))} /> : null}
         </View>
         <View nativeID={`panel-${n}`} style={{ paddingHorizontal: DECK_PAD }}>
           <InteractPanel prompt={it.prompt} explain={it.explain} answered correct inScene={false} index={1} total={2} />

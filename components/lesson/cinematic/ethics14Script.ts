@@ -86,17 +86,17 @@ export const BEATS: Eth14Beat[] = [
     g: 383, built: 5, door: 1,
     dur: 1.0,
     interact: {
-      prompt: 'On what question do Hobbes and Locke disagree?',
-      split: {
-        left: 'MAY YOU EVER RESIST IT', right: 'SHOULD IT EXIST AT ALL',
-        start: 0.04,
-        zones: [
-          { id: 'build', upto: 0.3, reads: 'whether there should be a state at all' },
-          { id: 'both', upto: 0.66, reads: 'partly whether to have a state, partly resistance' },
-          { id: 'resist', upto: 1, reads: 'whether citizens may ever resist the state', correct: true },
+      prompt: 'Which of these do Hobbes and Locke disagree about?',
+      odd: {
+        axis: 'THEY AGREE ON THREE',
+        tiles: [
+          { id: 'state', reads: 'THAT THERE SHOULD BE A STATE' },
+          { id: 'worse', reads: 'THAT LIFE WITHOUT ONE IS WORSE' },
+          { id: 'consent', reads: 'THAT IT RESTS ON CONSENT' },
+          { id: 'resist', reads: 'WHETHER YOU MAY RESIST IT', correct: true },
         ],
       },
-      explain: 'Whether citizens may ever resist the state. Hobbes and Locke both think a state is needed. Locke says a government that violates rights forfeits obedience. Hobbes holds that rebellion risks a return to the state of nature, which is worse than any government.',
+      explain: 'Whether you may resist it. Both start from a state of nature and reach a deal to be ruled. They split on what comes next. Hobbes leaves almost no room to resist; Locke says a state that breaks its trust may be resisted.',
       xp: 5,
     },
   },

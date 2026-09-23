@@ -92,18 +92,17 @@ export const BEATS: Political25Beat[] = [
   {
     p: 21, x: 100, rooms: 1,
     interact: {
-      prompt: 'How far into social life should principles of justice apply?',
-      drag: {
-        lo: 'LAW ALONE',
-        hi: 'THE HOUSEHOLD TOO',
-        start: 0.2,
-        zones: [
-          { id: 'law', upto: 0.32, reads: 'equal legal rights, with the family left alone' },
-          { id: 'work', upto: 0.64, reads: 'law and the workplace, yet not the home' },
-          { id: 'home', upto: 1, reads: 'into the family, including who does the care', correct: true },
+      prompt: 'Which of these did the older theories leave alone?',
+      odd: {
+        axis: 'JUSTICE REACHED THREE',
+        tiles: [
+          { id: 'court', reads: 'THE COURTS' },
+          { id: 'work', reads: 'THE WORKPLACE' },
+          { id: 'vote', reads: 'THE VOTE' },
+          { id: 'home', reads: 'THE HOME', correct: true },
         ],
       },
-      explain: 'Into the family, including who does the care. Equal legal rights leave care, money and decision-making in the home unchanged. Yet those determine who can use rights outside it.',
+      explain: 'The home. Treat the family as outside politics and the split of care goes unexamined. That split shapes who can take up anything outside the home. The feminist claim is that a theory of justice which stops at the front door hasn\'t finished.',
       xp: 5,
     },
     dur: 1.0,

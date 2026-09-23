@@ -87,11 +87,11 @@ const NAMES = BEATS.map((b) => (b.names ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology38'));
 
-export default function Epistemology38Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology38Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(6);
@@ -117,7 +117,7 @@ export default function Epistemology38Scene({ clock, bt, bi, i, picked, onPick, 
       // R7c — THE SCATTER IS THE SEAM. `dragPos` is the LEFT side's share (R7b)
       // and the left side is THE SHOOTER, so handing the bar to the shooter must
       // CLOSE the near shots: the wider they sit, the less of the hit was aim.
-      wide: carry(cv, 4, n, WIDE[p], reacting ? 1 - dragPos.value : WIDE[n], tr),
+      wide: carry(cv, 4, n, WIDE[p], reacting ? 1 - pickPos.value : WIDE[n], tr),
       // Carried, so it fades out as well as in (group L).
       trueTwo: carry(cv, 5, n, TRUE_TWO[p], TRUE_TWO[n], tr),
     };

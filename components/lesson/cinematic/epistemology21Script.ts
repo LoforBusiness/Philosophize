@@ -91,18 +91,16 @@ export const BEATS: Epi21Beat[] = [
   {
     p: 165, x: 124, dial: 1, will: 1, ev: 1, willTicks: 3,
     interact: {
-      prompt: 'How much of what you believe is up to you?',
-      drag: {
-        lo: 'NONE OF IT',
-        hi: 'YOU DECIDE DIRECTLY',
-        start: 0,
-        zones: [
-          { id: 'none', upto: 0.28, reads: 'no control over belief, direct or indirect' },
-          { id: 'inputs', upto: 0.74, reads: 'indirect control, through habits and the evidence you seek', correct: true },
-          { id: 'will', upto: 1, reads: 'direct control, by deciding what to believe' },
+      prompt: 'How much control do you have over what you believe?',
+      sort: {
+        chip: 'YOUR BELIEFS',
+        bins: [
+          { id: 'none', label: 'NONE', reads: 'none at all, direct or otherwise' },
+          { id: 'indirect', label: 'INDIRECT', reads: 'indirect through habits and reading', correct: true },
+          { id: 'direct', label: 'DIRECT', reads: 'direct: you can simply decide to believe' },
         ],
       },
-      explain: 'Indirect control, through habits and the evidence you seek. Deciding to believe doesn’t produce belief. But Pascal advised unbelievers to act as believers do until habit brought belief. What you read and whom you listen to also shape what you believe.',
+      explain: 'Indirect. You can\'t believe it\'s raining at will, but you can choose whom to read, what to check and which habits of attention to keep, and belief follows from those. That\'s enough to make what you believe something you answer for.',
       xp: 5,
     },
     dur: 1.0,

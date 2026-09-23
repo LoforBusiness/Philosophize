@@ -85,17 +85,18 @@ export const BEATS: Epistemology38Beat[] = [
   {
     p: 176, x: 98, roundels: 1, shots: 1, names: 1,
     interact: {
-      prompt: 'This belief is true but unsafe. How much credit belongs to skill, and how much to luck?',
-      split: {
-        left: 'THE SHOOTER', right: 'THE LUCK',
-        start: 0.9,
-        zones: [
-          { id: 'luck', upto: 0.32, reads: 'almost all luck, and the hit is not knowing', correct: true },
-          { id: 'half', upto: 0.62, reads: 'half and half, and it is still not knowledge' },
-          { id: 'skill', upto: 1, reads: 'the shooter earned it, and nearby cases also land' },
+      prompt: 'As luck takes over from skill, which shape does knowing take?',
+      plot: {
+        cols: ['ALL SKILL', 'HALF', 'ALL LUCK'],
+        axis: 'HOW MUCH IT IS KNOWING',
+        start: [0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'drop', profile: [1, 0.72, 0.3, 0.06, 0], reads: 'it falls away as luck takes over', correct: true },
+          { id: 'flat', profile: [0.9, 0.9, 0.9, 0.9, 0.9], reads: 'a true belief is knowledge either way' },
+          { id: 'half', profile: [1, 0.85, 0.6, 0.55, 0.5], reads: 'half of it survives whatever happens' },
         ],
       },
-      explain: 'Almost all luck. The belief is true, but the same method would have missed a minute earlier or later. That’s the mark of the stopped clock, true only by chance. A true belief produced mostly by chance is not knowledge, however confident it feels.',
+      explain: 'It falls away. A belief is safe when it would still have been true in the nearby cases, and a lucky hit fails that: a gust either way and the shot misses. Being true isn\'t enough when so little separates this case from the ones that go wrong.',
       xp: 5,
     },
     dur: 1.0,

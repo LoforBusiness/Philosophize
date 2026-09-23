@@ -95,11 +95,11 @@ const REASONS_FOLLOW = BEATS.map((b) => (b.reasonsFollow ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology28'));
 
-export default function Epistemology28Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology28Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(7);
@@ -123,7 +123,7 @@ export default function Epistemology28Scene({ clock, bt, bi, i, picked, onPick, 
       bars: carry(cv, 2, n, BARS[p], BARS[n], tr),
       // R7b — a split's seam is the LEFT side's share, and the left side here is
       // the study you were hoping to believe.
-      lean: carry(cv, 3, n, LEAN[p], reacting ? dragPos.value : LEAN[n], tr),
+      lean: carry(cv, 3, n, LEAN[p], reacting ? pickPos.value : LEAN[n], tr),
       plates: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
       fairLine: carry(cv, 5, n, FAIR_LINE[p], FAIR_LINE[n], tr),
       reasonsFollow: carry(cv, 6, n, REASONS_FOLLOW[p], REASONS_FOLLOW[n], tr),

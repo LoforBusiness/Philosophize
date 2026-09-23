@@ -96,17 +96,16 @@ export const BEATS: Aes21Beat[] = [
   {
     p: 41, x: 268, works: 1, burn: 1, gone: 1,
     interact: {
-      prompt: 'How far is a photograph like a novel, and how far like a painting?',
-      split: {
-        left: 'LIKE A NOVEL', right: 'LIKE A PAINTING',
-        start: 0.04,
-        zones: [
-          { id: 'paint', upto: 0.3, reads: 'like a painting: the print itself is the work' },
-          { id: 'both', upto: 0.66, reads: 'both at once, so it fits neither category', correct: true },
-          { id: 'novel', upto: 1, reads: 'like a novel: any print carries the work' },
+      prompt: 'Is a photograph more like a novel or a painting?',
+      sort: {
+        chip: 'A PHOTOGRAPH',
+        bins: [
+          { id: 'paint', label: 'LIKE A PAINTING', reads: 'like a painting: this print is the work' },
+          { id: 'both', label: 'NEITHER, QUITE', reads: 'both at once, so it fits neither category', correct: true },
+          { id: 'novel', label: 'LIKE A NOVEL', reads: 'like a novel: any print carries the work' },
         ],
       },
-      explain: 'Both at once, so it fits neither category. Any print from the negative carries the image, as any copy carries a novel. Yet collectors treat an early signed print as an original, as they treat a painting.',
+      explain: 'It sits across the line. A photograph has a negative, so any print carries the work as any copy carries a novel; and the vintage print signed by the photographer is treated as the painting is. The distinction wasn\'t drawn with this case in mind.',
       xp: 5,
     },
     dur: 1.0,

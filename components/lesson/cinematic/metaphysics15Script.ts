@@ -71,18 +71,16 @@ export const BEATS: Meta15Beat[] = [
   {
     p: 165, x: 124, balls: 1, gap: 1, found: 2, hit: 1,
     interact: {
-      prompt: 'If no link between events is ever observed, what does a claim about cause contain?',
-      drag: {
-        lo: 'SUCCESSION ALONE',
-        hi: 'AN OBSERVED FORCE',
-        start: 1,
-        zones: [
-          { id: 'events', upto: 0.3, reads: 'one event followed by another, and nothing more' },
-          { id: 'habit', upto: 0.74, reads: 'both events, plus a learned habit of expectation', correct: true },
-          { id: 'force', upto: 1, reads: 'an observed force passing from one to the other' },
+      prompt: 'Put these in order, first met to last.',
+      order: {
+        axis: 'WHAT YOU MEET FIRST',
+        items: [
+          { id: 'one', reads: 'ONE EVENT HAPPENS' },
+          { id: 'two', reads: 'THE OTHER FOLLOWS' },
+          { id: 'habit', reads: 'YOU COME TO EXPECT IT' },
         ],
       },
-      explain: 'Both events, plus a learned habit of expectation. After seeing the pair many times, the mind comes to expect the second event. Hume traces the idea of necessary connection to that habit. No force between the balls is ever seen.',
+      explain: 'The expectation comes last, and it comes from you. Hume says nothing in the order links the two events. You see one, then the other, again and again. The habit of expecting the second is what the idea of a necessary link is made of.',
       xp: 5,
     },
     dur: 1.0,

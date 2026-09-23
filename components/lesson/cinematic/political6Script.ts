@@ -71,17 +71,16 @@ export const BEATS: Pol6Beat[] = [
   {
     p: 165, bars: 1, prin: 1,
     interact: {
-      prompt: 'How does Rawls rank the basic liberties against gains in wealth for the poorest?',
-      split: {
-        left: 'LIBERTIES SETTLED FIRST', right: 'TRADED FOR WEALTH',
-        start: 0.04,
-        zones: [
-          { id: 'cash', upto: 0.3, reads: 'give up liberties whenever the poorest gain wealth' },
-          { id: 'both', upto: 0.66, reads: 'weigh liberty against wealth case by case' },
-          { id: 'first', upto: 1, reads: 'secure liberties first, then distribute wealth', correct: true },
+      prompt: 'Put Rawls\'s principles in the order he ranks them.',
+      order: {
+        axis: 'SETTLED FIRST',
+        items: [
+          { id: 'liberty', reads: 'THE BASIC LIBERTIES' },
+          { id: 'chance', reads: 'FAIR EQUALITY OF OPPORTUNITY' },
+          { id: 'wealth', reads: 'GAINS FOR THE WORST OFF' },
         ],
       },
-      explain: 'Liberties settled first. Rawls gives the basic liberties strict priority. They can’t be traded for wealth, even to help the poorest. Only once they’re secure for everyone does the difference principle apply to wealth.',
+      explain: 'The order is the argument. Rawls makes the ranking lexical: the liberties are settled before any question of wealth arises, so no gain for the poorest can buy them away. A view that traded them off case by case would be a different theory.',
       xp: 5,
     },
     dur: 1.0,

@@ -506,7 +506,7 @@ function allIds() {
         if (b) { b.dispatchEvent(new MouseEvent('click', {bubbles:true})); return 1; }
         return 0; })()`,
     );
-    // Every analogue control — drag, lever, plot, split, field — has no button
+    // Every control below the figure has no <button> of its own on the web
     // anywhere on its beat, so a sweep without this stops there and reports the
     // beats it never reached as clean (§21). Shared, because four harnesses need
     // the same sequence and four copies is four places to forget.

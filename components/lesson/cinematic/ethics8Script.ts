@@ -118,18 +118,17 @@ export const BEATS: Ethics8Beat[] = [
   {
     p: 380, x: 112, grid: 0.34, oth: 1, thread: 1,
     interact: {
-      prompt: 'In care ethics, is caring a feeling or a practice with standards?',
-      drag: {
-        lo: 'A WARM FEELING',
-        hi: 'A PRACTICE WITH STANDARDS',
-        start: 0,
-        zones: [
-          { id: 'mood', upto: 0.3, reads: 'a pleasant mood that no one can fail at' },
-          { id: 'some', upto: 0.6, reads: 'a feeling that sometimes prompts helpful action' },
-          { id: 'method', upto: 1, reads: 'a practice with standards that can be failed', correct: true },
+      prompt: 'Which of these cannot be done badly?',
+      odd: {
+        axis: 'THREE CAN BE DONE BADLY',
+        tiles: [
+          { id: 'notice', reads: 'NOTICING A NEED' },
+          { id: 'listen', reads: 'LISTENING PROPERLY' },
+          { id: 'follow', reads: 'FOLLOWING THROUGH' },
+          { id: 'feel', reads: 'FEELING WARMLY', correct: true },
         ],
       },
-      explain: 'A practice with standards that can be failed. Care is often dismissed as a mood rather than a form of moral reasoning. Yet care demands attention to the person, acceptance of responsibility, and a fitting response. Each of these can be done badly.',
+      explain: 'Feeling warmly. The other three are things you can attempt and get wrong, which is what makes care a practice with standards rather than a mood. A carer who feels a great deal and notices nothing has failed at it.',
       xp: 5,
     },
     dur: 1.0,

@@ -83,17 +83,16 @@ export const BEATS: Logic38Beat[] = [
   {
     p: 177, x: 100, mill: 1, runA: 1, twin: 1, runB: 1,
     interact: {
-      prompt: 'How much of the fault lies in the argument’s form rather than its concept?',
-      split: {
-        left: 'IN THE FORM', right: 'IN THE CONCEPT',
-        start: 0.06,
-        zones: [
-          { id: 'word', upto: 0.3, reads: 'mostly in the concept, with no step identified' },
-          { id: 'both', upto: 0.62, reads: 'split evenly, leaving the objection unanswered' },
-          { id: 'shape', upto: 1, reads: 'mostly in the form, apart from one excluded step', correct: true },
+      prompt: 'Where does the fault in the objection lie?',
+      sort: {
+        chip: 'THE FAULT',
+        bins: [
+          { id: 'concept', label: 'IN THE CONCEPT', reads: 'in the concept, with no faulty step named' },
+          { id: 'even', label: 'HALF EACH', reads: 'split evenly, leaving the objection standing' },
+          { id: 'shape', label: 'IN THE FORM', reads: 'in the form, apart from one step it excludes', correct: true },
         ],
       },
-      explain: 'Mostly in the form, apart from one excluded step. The arguments differ only in concept, so the fault lies in the steps. Anselm replied that his reasoning applies only to God. Alvin Plantinga argued that a greatest island is incoherent. Whether either reply succeeds is disputed.',
+      explain: 'In the form. An objection that names no faulty step is a complaint about the conclusion rather than about the reasoning, and it can\'t be answered or pressed. Pointing to the step that doesn\'t follow is what makes it an objection at all.',
       xp: 5,
     },
     dur: 1.0,

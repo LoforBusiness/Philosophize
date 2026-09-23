@@ -83,9 +83,9 @@ const HIT_SLIDE = 8;   // the second ball rolls this far right on contact
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
-export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(6);
@@ -116,7 +116,7 @@ export default function Metaphysics15Scene({ clock, bt, bi, i, picked, onPick, d
       // R7b — the knob searches the gap. Drag toward THE PUSH ITSELF, PLAINLY and the
       // space between the two balls is marked and hunted through — and nothing is ever
       // found there, which is Hume's entire finding.
-      gap: carry(cv, 3, n, GAPV[p], reacting ? dragPos.value : GAPV[n], gFade ? grow : tr),
+      gap: carry(cv, 3, n, GAPV[p], reacting ? pickPos.value : GAPV[n], gFade ? grow : tr),
       // 0 → hidden, 1 → over the gap, 2 → over the observer. The x is a function of
       // that same number, so the card cannot be somewhere its verdict does not match.
       show: Math.min(1, f),

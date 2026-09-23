@@ -92,18 +92,16 @@ export const BEATS: Meta4Beat[] = [
   {
     p: 383, tokens: 3, barred: 1, frozen: 1,
     interact: {
-      prompt: 'How close to absolute nothingness is a physical vacuum?',
-      drag: {
-        lo: 'FULL OF MATTER',
-        hi: 'ABSOLUTE NOTHINGNESS',
-        start: 0,
-        zones: [
-          { id: 'air', upto: 0.3, reads: 'air, dust and light' },
-          { id: 'vacuum', upto: 0.74, reads: 'space and fields, with no matter', correct: true },
-          { id: 'none', upto: 1, reads: 'nothing at all, not even space or fields' },
+      prompt: 'Put these in order, from most in it to least.',
+      order: {
+        axis: 'MOST IN IT FIRST',
+        items: [
+          { id: 'air', reads: 'AIR, DUST AND LIGHT' },
+          { id: 'vacuum', reads: 'SPACE AND FIELDS' },
+          { id: 'nothing', reads: 'NO SPACE, NO FIELDS' },
         ],
       },
-      explain: 'Space and fields, with no matter. A physical vacuum still has spatial dimensions and quantum fields, so it’s something with very little in it. Parmenides’ non-being would lack even space and fields, and no experiment can produce that.',
+      explain: 'A vacuum still has space and fields in it. Pump out the air and the region is empty of matter, not of everything. So it falls short of the sheer nothing the question is asking after.',
       xp: 5,
     },
     dur: 1.0,

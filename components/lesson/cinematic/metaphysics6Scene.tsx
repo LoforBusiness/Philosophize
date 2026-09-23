@@ -86,10 +86,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics6'));
 
-export default function Metaphysics6Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics6Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(8);
@@ -110,7 +110,7 @@ export default function Metaphysics6Scene({ clock, bt, bi, i, dragPos, gazeX, ga
       // R7b — the seam builds the second ship. Slide toward THE ORIGINAL PLANKS and
       // the rival hull assembles out of the discarded wood; slide the other way and it
       // goes, leaving only the one that never stopped sailing.
-      two: carry(cv, 2, n, TWO[p], reacting ? 1 - dragPos.value : TWO[n], tr),
+      two: carry(cv, 2, n, TWO[p], reacting ? 1 - pickPos.value : TWO[n], tr),
       you: carry(cv, 3, n, YOU[p], YOU[n], tr),
       worked: clamp01((1 - remaining) * 3),
       // group AH — one still-tap event each, carried in and back out over the

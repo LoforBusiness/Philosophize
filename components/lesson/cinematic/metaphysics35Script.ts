@@ -112,18 +112,16 @@ export const BEATS: Metaphysics35Beat[] = [
   {
     p: 35, x: 210, line: 1, branch: 1,
     interact: {
-      prompt: 'On this view, what prevents you from changing the past?',
-      drag: {
-        lo: 'NO FORCE AT ALL',
-        hi: 'A FORCE THAT INTERVENES',
-        start: 1,
-        zones: [
-          { id: 'never', upto: 0.32, reads: 'no force, since it never happened', correct: true },
-          { id: 'luck', upto: 0.72, reads: 'a reliable run of bad luck' },
-          { id: 'guard', upto: 1, reads: 'a law of time that intervenes' },
+      prompt: 'What stops you changing the past?',
+      sort: {
+        chip: 'WHAT STOPS YOU',
+        bins: [
+          { id: 'law', label: 'A LAW OF TIME', reads: 'a law of time steps in to prevent it' },
+          { id: 'luck', label: 'BAD LUCK', reads: 'a long run of accidents, every time' },
+          { id: 'never', label: 'IT NEVER HAPPENED', reads: 'nothing: it simply never happened', correct: true },
         ],
       },
-      explain: 'No force, since it never happened. The past already went one way, so every attempt to change it fails. Each failure has an ordinary local cause, and no special force is needed.',
+      explain: 'Nothing steps in, because it never happened. On this view the past already includes whatever you do when you travel to it, so there\'s no second version of events for you to overwrite. You\'re not prevented from changing it; there\'s no changing it to be prevented.',
       xp: 5,
     },
     dur: 1.0,

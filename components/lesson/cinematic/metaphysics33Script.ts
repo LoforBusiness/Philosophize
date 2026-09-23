@@ -78,21 +78,18 @@ export const BEATS: Metaphysics33Beat[] = [
   {
     p: 461, x: 62, fall: 0, live: 1,
     interact: {
-      prompt: 'How many arrangements look like a tower that has only just come apart?',
-      drag: {
-        lo: 'STACKED',
-        hi: 'SCATTERED',
-        start: 0,
-        // The readout is the lesson. It counts ARRANGEMENTS, not time — so the
-        // reader feels the number run away from them as the tower comes apart,
-        // which is the whole of Boltzmann in one gesture.
-        zones: [
-          { id: 'few', upto: 0.3, reads: 'a handful of ways' },
-          { id: 'many', upto: 0.62, reads: 'thousands of ways', correct: true },
-          { id: 'vast', upto: 1, reads: 'more ways than there are atoms' },
+      prompt: 'As the tower comes apart, how many arrangements look like it?',
+      plot: {
+        cols: ['STACKED', 'TOPPLING', 'SCATTERED'],
+        axis: 'ARRANGEMENTS THAT FIT',
+        start: [0.2, 0.2, 0.2],
+        shapes: [
+          { id: 'many', profile: [0.02, 0.15, 0.45, 0.78, 1], reads: 'more than there are atoms', correct: true },
+          { id: 'few', profile: [0.1, 0.12, 0.14, 0.16, 0.18], reads: 'a handful either way' },
+          { id: 'fall', profile: [1, 0.7, 0.45, 0.2, 0.05], reads: 'fewer as it falls' },
         ],
       },
-      explain: 'Thousands of ways. A standing tower can be arranged in very few ways, and a slightly fallen one in thousands. Nine blocks can never have more arrangements than there are atoms.',
+      explain: 'More than there are atoms. There\'s essentially one way to be a standing tower and an enormous number of ways to be a heap, which is why the change runs one way. Nothing in the laws forbids the rubble reassembling; the counting does the work.',
       xp: 5,
     },
     dur: 1.0,

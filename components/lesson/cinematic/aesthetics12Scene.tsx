@@ -134,10 +134,10 @@ const X = BEATS.map((b) => b.x ?? POET_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics12'));
 
-export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick, dragPos }: SceneApi) {
+export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldRMix = useHeld();
   const cv = useCarry(5);
@@ -197,7 +197,7 @@ export default function Aesthetics12Scene({ clock, bt, bi, i, picked, onPick, dr
       // R7b — the seam seals the poet's box. Give the bar to IN THE POET and a closed
       // box appears over his head with the meaning inside it, where nobody can check;
       // give it to the poem and the box goes and the text is all there is.
-      box: carry(cv, 2, n, BOXV[p], reacting ? 1 - dragPos.value : BOXV[n], tr, boxFade ? grow : 1),
+      box: carry(cv, 2, n, BOXV[p], reacting ? 1 - pickPos.value : BOXV[n], tr, boxFade ? grow : 1),
       tally,
       // The verdict only exists once somebody has read the thing.
       verdict: clamp01(tally),

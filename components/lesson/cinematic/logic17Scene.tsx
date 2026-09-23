@@ -95,11 +95,11 @@ const SAFE = BEATS.map((b) => b.safe ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic17'));
 
-export default function Logic17Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic17Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(9);
@@ -126,7 +126,7 @@ export default function Logic17Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // R7b — the seam lifts the claim off its speaker. Give the bar to THE REASONS
       // GIVEN and the claim floats free, standing on its own argument; give it to WHO
       // IS SPEAKING and it settles back onto the person, where bare testimony lives.
-      lift: carry(cv, 4, n, LIFT[p], reacting ? 1 - dragPos.value : LIFT[n], tr),
+      lift: carry(cv, 4, n, LIFT[p], reacting ? 1 - pickPos.value : LIFT[n], tr),
       falls: carry(cv, 5, n, FALLS[p], FALLS[n], tr),
       // "rests on nothing but the speaker's word" — a dashed, empty footing where
       // the left column's printed reasons are and the right column has none.

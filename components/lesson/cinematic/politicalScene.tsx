@@ -111,7 +111,7 @@ const Q1 = BEATS.map((b) => (b.weigh === 'q1' ? 1 : 0));
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
 // Each citizen runs an out-of-phase loop of blows — no two in sync, the brawl.
 // Each also runs a DIFFERENT loop and carries its own `seed`, so their idle bounce
@@ -153,7 +153,7 @@ function sovereignPose(t: number): Stance {
   return { ...s, tilt: s.tilt - 0.02, fistR: { x: 16, y: -42 }, fistL: { x: -9, y: -4 } };
 }
 
-export default function PoliticalScene({ clock, bt, bi, qv, dragPos, i }: SceneApi) {
+export default function PoliticalScene({ clock, bt, bi, qv, dragPos, pickPos, i }: SceneApi) {
   const reacting = REACT[i] === 1;
   const held0 = useHeld();
   const held1 = useHeld();
@@ -170,7 +170,7 @@ export default function PoliticalScene({ clock, bt, bi, qv, dragPos, i }: SceneA
     // R7c — `auth` is the whole picture: the sovereign's height, his pedestal, and
     // whether the citizens are still lunging at each other. The drag asks how much
     // right to resist there is, so it is the same quantity read from the other end.
-    const auth = Q1[n] === 1 ? ease01(q) : carry(cv, 0, n, AUTH[p], reacting ? 1 - dragPos.value : AUTH[n], tr);
+    const auth = Q1[n] === 1 ? ease01(q) : carry(cv, 0, n, AUTH[p], reacting ? 1 - pickPos.value : AUTH[n], tr);
 
     // How hard they fight: the state of nature, less whatever the sovereign settles.
     const nature = carry(cv, 1, n, NATURE[p], NATURE[n], tr);

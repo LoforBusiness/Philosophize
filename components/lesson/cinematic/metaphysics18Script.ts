@@ -92,18 +92,17 @@ export const BEATS: Met18Beat[] = [
   {
     p: 41, x: 268, shelf: 1, aim: 1, hang: 1, beyond: 1,
     interact: {
-      prompt: 'How much causal contact can an object outside space and time have with you?',
-      drag: {
-        lo: 'NONE AT ALL',
-        hi: 'AS MUCH AS A STONE',
-        start: 1,
-        zones: [
-          { id: 'none', upto: 0.3, reads: 'an abstract object causes nothing in you', correct: true },
-          { id: 'faint', upto: 0.72, reads: 'contact through a special mathematical intuition' },
-          { id: 'full', upto: 1, reads: 'as much as a stone does' },
+      prompt: 'Which of these is nowhere in particular?',
+      odd: {
+        axis: 'THREE HAVE A PLACE',
+        tiles: [
+          { id: 'three', reads: 'THE NUMBER 3', correct: true },
+          { id: 'tree', reads: 'A TREE' },
+          { id: 'cup', reads: 'A CUP' },
+          { id: 'wheel', reads: 'A WHEEL' },
         ],
       },
-      explain: 'An abstract object causes nothing in you. It emits no light and exerts no force. Paul Benacerraf argued that, on a causal theory of knowledge, this makes mathematical knowledge hard to explain.',
+      explain: 'The number. The other three sit somewhere and last for a while, which is what lets them push things and be pushed. An object outside space and time can do neither, and that\'s the difficulty: it\'s hard to say how anyone comes to know about it.',
       xp: 5,
     },
     dur: 1.0,

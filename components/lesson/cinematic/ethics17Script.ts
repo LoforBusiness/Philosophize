@@ -100,17 +100,16 @@ export const BEATS: Eth17Beat[] = [
   {
     p: 442, x: 268, maxim: 1, copies: 1, trust: 0.06,
     interact: {
-      prompt: 'If you answer truthfully and the murderer kills, where does Kant place the responsibility?',
-      split: {
-        left: 'ON THE MURDERER', right: 'ON YOU, FOR ANSWERING',
-        start: 0.04,
-        zones: [
-          { id: 'you', upto: 0.3, reads: 'on you, for revealing where your friend is' },
-          { id: 'both', upto: 0.66, reads: 'shared between you and the murderer' },
-          { id: 'him', upto: 1, reads: 'on the murderer, who alone does the killing', correct: true },
+      prompt: 'You told the truth and the murderer killed. Who is responsible?',
+      sort: {
+        chip: 'THE RESPONSIBILITY',
+        bins: [
+          { id: 'you', label: 'ON YOU', reads: 'on you, for saying where your friend was' },
+          { id: 'both', label: 'SHARED', reads: 'shared between the two of you' },
+          { id: 'him', label: 'ON THE MURDERER', reads: 'on the murderer, who alone does the killing', correct: true },
         ],
       },
-      explain: 'On the murderer, who alone does the killing. Kant doesn’t deny that the death is terrible. He denies that it’s imputable to a truthful speaker. In his view, only a lie would make you answerable for what follows.',
+      explain: 'On the murderer. Kant doesn\'t deny the death is terrible; he denies it\'s imputable to a truthful speaker. A lie would make the outcome yours, because you would have taken the course of events into your own hands.',
       xp: 5,
     },
     dur: 1.0,

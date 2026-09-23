@@ -121,7 +121,7 @@ const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology7'));
 // R7c — the chart follows the drag on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 // DOES THE READER STILL PROJECT PAST TODAY? `twist` draws the dashed projection
 // past the TOMORROW rule and the column it predicts. The drag's first zone, STOP
@@ -134,7 +134,7 @@ const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
 const RELY_FROM = 0.28;
 const RELY_BAND = 0.08;
 
-export default function Epistemology7Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology7Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(6);
   const reacting = REACT[i] === 1;

@@ -3378,16 +3378,17 @@ the wrong one is the mistake this group exists to stop.
 
 | The claim is… | Control | It reads |
 |---|---|---|
-| one quantity on a scale | `drag` | `DragScale` — a knob on a rail |
 | what CATEGORY a named thing belongs to | `sort` | `SortBins` — a chip, and labelled bins |
 | which POSITION you would defend | `poll` | `PollBallot` — a ballot, then who held each |
 | what happens to a thing AS another changes | `plot` | `TrendPick` — drawn curves, chosen in one tap (R16) |
-| how one thing DIVIDES between two | `split` | `SplitBar` — a seam in one bar |
-| anything else, including most of them | `cards` | two `ChoiceCards` |
+| what ORDER things come in | `order` | `OrderTiles` — tap three tiles into a sequence (R21) |
+| which of four does NOT belong | `odd` | `OddOneOut` — four tiles, one tap (R22) |
+| anything else | `cards` | two `ChoiceCards` |
 
-`lever` and `field` used to be the second and fifth rows. Both are **retired** —
-see R10, which is the most useful rule in this group because it is the one that
-was got wrong for fifty and twenty-two lessons respectively.
+`lever`, `field`, `drag` and `split` used to be rows here. All four are
+**retired** (R10, R20). R10 is the most useful rule in this group, because it is
+the one that was got wrong for fifty and twenty-two lessons respectively — and
+then for seventy-eight and forty-five more, which is what R20 is about.
 
 Read the middle column as a set of tests, not a menu:
 
@@ -3395,14 +3396,21 @@ Read the middle column as a set of tests, not a menu:
   if you had wanted to · could, full stop. Cards throw the order away, and the
   order was half the content; a row of bins keeps it. (This test used to say
   `lever`, and the control changed under it — the test did not.)
-- **`plot`, not `drag`,** when the reader believes something about a SHAPE. "How
+- **`plot`, not `cards`,** when the reader believes something about a SHAPE. "How
   much aura is left" is a number; "how the aura goes as the copies multiply" is a
-  curve, and a rail cannot hold one. Four cards describing four curves make the
-  reader choose between four sentences; four drawn curves let them choose the shape
-  itself (R16).
-- **`split`, not `drag`,** when giving one side more has to visibly take it off the
-  other. A rail with a label at each end says "more this way" and says nothing
-  about what you gave up.
+  curve, and no rail could ever hold one. Four cards describing four curves make
+  the reader choose between four sentences; four drawn curves let them choose the
+  shape itself (R16).
+- **`order`, not `sort`,** when the claim is about SEQUENCE rather than category.
+  Bins ask where a thing belongs; a sequence asks what follows what, and bins
+  cannot say it. Anomalies, crisis, replacement is an order; scanned, destroyed,
+  rebuilt is an order. If the three could be re-shuffled without changing the
+  claim, it was never one (R21).
+- **`odd`, not `poll`,** when three of the four are a FAMILY. A poll asks the
+  reader to hold four positions in their head and compare them; an odd one out
+  asks them to notice, which is a cheaper faculty and a faster one. Philosophy
+  asks it constantly: which of these is not a disposition, not a copy, not on the
+  page (R22).
 - **`poll`, not two questions,** when the whole lesson is that the two questions
   come apart. Presentism, the growing block and eternalism are three of four
   corners; non-domination is the corner where "left alone" and "nobody holds that
@@ -3412,9 +3420,11 @@ Read the middle column as a set of tests, not a menu:
   then shows who actually held each. The scene is what keeps the two axes visibly
   independent (R7c).
 
-**`cards` is still the right answer most of the time — 155 lessons to 44.** An
-analogue control on a claim that genuinely has two sides is a worse question with
-more moving parts.
+**`cards` is still the right answer for a genuine either/or, and it is now 8% of
+all questions.** It is a ceiling rather than a target (R9): forcing a control onto
+a two-sided claim is a worse question with more moving parts, and the owner asked
+for the deck to survive — *"I still want a couple every now and then for the old
+way"*. `npm run check:rotation` prints the share.
 
 ### R2 · The readout is lesson copy, not scoring furniture
 
@@ -3436,11 +3446,15 @@ open-mindedness, named, and a reader who never lands on them has been taught les
 
 None of the five compares a float to a target.
 
-- `drag`, `split` — the value falls in a **zone** or on a **detent**.
 - `sort` — the chip is over a **bin**.
 - `plot` — the reader taps one **drawn shape**. It used to be a curve drawn by hand
   and scored to the nearest profile by RMS; that control is retired (R16).
 - `poll` — the reader has pressed one **row**.
+- `order` — the sequence of taps matches the authored array (R21).
+- `odd` — the tile pressed is the one marked `correct` (R22).
+- `drag`, `split` — the value fell in a **zone** or on a **detent**. Both are
+  retired (R20), and they are the reason this rule is worth keeping: a control
+  whose answer is a POSITION is one tap away from being graded by a tolerance.
 
 A tolerance dressed up as precision is a worse question, not a stricter one. The
 thing being tested is whether they think the value collapses, not whether they can
@@ -3500,9 +3514,10 @@ in it shrinks. One gesture, on the UI thread, with no React render in between.
 
 The condition is the beat: the scene reads the control's value **only on its own
 graded beat** and the script's own track everywhere else. WHICH value depends on
-the control — `dragPos` for `drag` and `split`, whose position IS the answer, and
-for `plot`, where it is the chosen shape's mean height; `pickPos` for `sort`, `poll`
-and `plot`, whose options are shuffled (X3). One value, two sources, and the picture
+the control — `dragPos` for `plot`, where it is the chosen shape's mean height, and
+for `order` and `odd`, where it is how much of the sequence is placed and whether
+the stranger was found; `pickPos` for `sort`, `poll`, `plot`, `order` and `odd`,
+whose options are shuffled (X3). One value, two sources, and the picture
 never disagrees with whichever is in charge. Derive that flag from the beat rather
 than declaring a channel for it —
 
@@ -4140,11 +4155,12 @@ to get wrong and impossible to see in the source:
       lesson X does Y" (H64). If it won't fit in a sentence, the scene isn't found yet.
 - [ ] One question in the deck, one answered on the stage (H65); the distractors are
       real rival positions, not filler (H66).
-- [ ] **The control matches the shape of the claim** (R1): a scale is `drag`, an
-      ordered set of named settings is `sort`, a curve is `plot`, a division of one
-      thing is `split`, a position you would defend is `poll`, and everything
-      else is `cards` — which is still most of them. The two graded beats do not use
-      the same control, and neither does either neighbour (R8).
+- [ ] **The control matches the shape of the claim** (R1): a category is `sort`, a
+      curve is `plot`, a position you would defend is `poll`, a sequence is `order`,
+      a family of three with a stranger in it is `odd`, and a genuine either/or is
+      `cards`. The two graded beats do not use the same control, and neither does
+      either neighbour (R8). `drag`, `split`, `lever` and `field` are retired and
+      may not come back (R20).
 - [ ] **Nothing is drawn where no shot can reach it** (D36): every word inside
       x 0…400 and inside the declared band. `npm run check:space` — offline, and it
       prints the overhang in units.
@@ -5129,6 +5145,91 @@ the gap matter. Rendered for all 278 questions answered below the figure, 4 clip
   reader's own phone leaves. `npm run sheet:deck` renders every answered question in
   the corpus on one page, one width at a time, works out each phone height from the
   player's flex weights, and exits non-zero on any question cut off at the gate.
+
+### R20 · A retired control does not come back
+
+> *"two that I want you to change are two sliding ones. One where you slide a line
+> across, and the other one is the box that is above. And you also slide back and
+> forth … I want those removed."*
+
+`drag` and `split` are retired, and they join `lever` and `field` (R10) for the same
+reason one layer down: **all four asked HOW MUCH, and answered it by making the
+reader hold a finger on a line and hunt for a boundary they could not see.** That is
+the most reading and the most effort of any control here, which is the opposite of
+what a question in this app is for.
+
+Reading all 123 of their questions before converting them is what settled it, and it
+is the same finding R10 records about the lever: **almost none of them was a
+quantity.** They were named positions wearing a slider, or two sides of a claim
+wearing a seam. Not one `reads` string had to change when they became `sort`, `poll`,
+`order` or `odd` — which is the test for whether the CONTROL was wrong rather than
+the question.
+
+- **`npm run check:rotation` holds it at a flat ZERO**, not a high-water mark. Every
+  other budget in that file counts a debt being worked down; a retired control is a
+  decision, and the number has no honest reason to be anything else.
+- **The block types stay in `cinematicKit`, and the components stay mounted in the
+  player.** `LeverPick` and `FieldPick` have sat there unreachable since R10 and cost
+  nothing — a branch nothing routes to. What enforces a retirement is the ratchet on
+  the SCRIPTS, not the absence of a file, and deleting the component would only mean
+  an old branch no longer compiles.
+- **Retiring a control moves ratchets that are nothing to do with it.** Rewriting 123
+  prompts and explanations put 148 new spelled-out forms and 18 new intensifiers into
+  `check:ear`, 24 explanations under `check:plain`'s reading-ease floor, nine readouts
+  past `check:clear`, and nine neighbour pairs past `check:rotation`'s own budget.
+  Budget every one of those into the work, and fix only the pieces the change
+  introduced — the committed ones are somebody's decisions.
+
+### R21 · PUT IT IN ORDER — the items are written in the correct order
+
+`order` is three or four tiles, shuffled for display, tapped into a sequence
+(`OrderTiles`). It suits a claim about what FOLLOWS what, which bins cannot say.
+
+- **`items[0]` is what comes first.** The answer is never authored as an id or an
+  index; it is the order of the array, and the control shuffles for the screen. So a
+  scene may read `pickPos` — the tile just taken, in the AUTHOR's order — and get a
+  meaning that does not depend on what the shuffle did (R7c).
+- **The numeral struck on a tile is the TRUE place, not the reader's.** Showing back
+  the order they tapped is showing them their own wrong answer in the shape of a
+  result. The plate's colour carries right and wrong; the numeral carries the answer.
+- **The sequence lives in a ref as well as in state.** Two taps inside one React
+  commit both read the same `taken` from their own closure, so the second overwrites
+  the first and a reader tapping quickly sees "1 OF 3" after three taps. This is not
+  a style choice; it is the only reason the control works at speed.
+- **`axis` names what the order IS** — EARLIEST FIRST, CAUSE TO EFFECT — in at most
+  24 characters, because the reader has to know which way round before they can start.
+
+`npm run check:shape` holds the countable half — three or four items, an axis that
+fits, no item marked `correct`, no two ids the same, and every tile drawing or none
+of them — and `npm run countertest:shape` puts each defect back.
+
+### R22 · THE ODD ONE OUT — three of the four are a family
+
+`odd` is four tiles and one tap (`OddOneOut`): the least reading of anything in this
+app, and a prompt of about five words. The stranger CRACKS; the three that belong
+close ranks on one value, so they read as a group rather than as three animations.
+
+- **Every tile draws, or none does.** A set of three drawings and one bare word
+  hands the reader the answer before they have read anything — group O, arriving
+  through the art instead of through the words. Where the claim has no drawable
+  thing (FRAGILE · SOLUBLE · FLAMMABLE · BROKEN) all four are words, and that is a
+  set too.
+- **The art box is SQUARE.** `objects.fit` scales x and y independently off a
+  100×100 design box, so a drawing handed a 158-by-38 tile is not merely small, it
+  is stretched four to one. The owner saw it in one look — *"the boxes that have
+  the four object they seem to be squished"* — and `squareIn()` is the fix: the
+  largest square that fits the box, which is the only shape that cannot distort.
+- **The crack is INK, at 2.2 units.** Drawn in the verdict green at a hairline it
+  reads as two faint marks on the drawing rather than as a break, and the plate
+  underneath is already green. A fracture is dark.
+- **`axis` names what the three SHARE** — THREE ARE COPIES, THREE HAVE A PLACE — so
+  the question is answerable by looking rather than by re-reading the prompt.
+
+`npm run check:shape` holds four tiles, exactly one stranger, an axis that fits the
+row it shares with ONE DOES NOT BELONG, and the all-or-none drawing rule; `npm run
+check:controls` measures every caption against the real `.ttf` in the box it lands
+in; `npm run check:answers` measures where the stranger falls after the shuffle, so
+it cannot drift to one end the way the lever's answer did.
 
 ---
 
@@ -8188,16 +8289,27 @@ so the exemption stands and the mascot still answers back.
 
 > *"have a second stickman walk in … dressed funny or dressed differently."*
 
-**33 lessons** get one. He arrives on the beat BEFORE a `poll` or a `split` and is
-standing there when the question is asked — which is what makes him an argument
-rather than a cameo.
+He arrives on the beat BEFORE a `poll` or a `cards`, and is standing there when
+the question is asked — which is what makes him an argument rather than a cameo.
 
 **WHICH LESSONS IS TAKEN FROM STRUCTURE, NEVER FROM THE PROSE.** Group Z's finding
 is that a keyword score disagrees with the examples whose answer you already know,
 and "does this lesson have two sides?" is exactly the kind of question that
 tempts one. It does not need one: a `poll` literally lists named positions
-("which would you defend"), and a `split` divides one thing between two. Both are
-two-sided by construction, so the control IS the evidence.
+("which would you defend"), and a `cards` prints two of them side by side. Both
+are two-sided by construction, so the control IS the evidence.
+
+**`split` WAS THE SECOND TRIGGER, AND RETIRING IT (R20) NEARLY TOOK THE VISITOR
+WITH IT.** Sixteen of the twenty-eight lessons that had one would have lost him on
+the next `make:visitor` — a feature removed as collateral damage from a change
+about something else, silently, because the generator would have reported a
+perfectly good number for a smaller corpus. `cards` is the honest replacement
+rather than a patch: the reason a split qualified was never the seam, it was that
+the claim had two named sides, and a two-card deck is the most two-sided question
+in the app. `sort`, `order` and `odd` are deliberately NOT triggers — a sort's
+bins are categories rather than positions somebody holds, an order is a sequence,
+and an odd one out has three tiles that agree, so none of the three gives a second
+figure anything to hold.
 
 **AND WHETHER THERE IS ROOM IS MEASURED.** A figure is ~48 wide standing on the
 ground. `mustBoxes` records every item every beat draws, so `make:visitor` finds

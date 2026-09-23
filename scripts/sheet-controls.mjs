@@ -34,7 +34,7 @@ const OUT = process.env.OUT_DIR || 'scripts/.lesson-shots/controls';
 const DEVICE_W = +(process.env.DEVICE_W || 390);
 const MOUNT_TRIES = +(process.env.MOUNT_TRIES || 480);
 const SETTLE_MS = +(process.env.SETTLE_MS || 2600);
-const KINDS = ['cards', 'drag', 'sort', 'poll', 'polltell', 'split', 'trend', 'trend3'];
+const KINDS = ['cards', 'drag', 'sort', 'poll', 'polltell', 'split', 'trend', 'trend3', 'order', 'odd'];
 // ?branch= strikes the sheet in that branch's colour; ethics by default.
 const BRANCH = process.env.BRANCH || 'ethics';
 

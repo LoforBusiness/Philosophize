@@ -73,18 +73,17 @@ export const BEATS: Logic11Beat[] = [
   {
     p: 380, x: 116, steps: 4, base: 1, spine: 1,
     interact: {
-      prompt: 'How much support does a circular argument give its conclusion?',
-      drag: {
-        lo: 'NONE AT ALL',
-        hi: 'IT PROVES THE CONCLUSION',
-        start: 1,
-        zones: [
-          { id: 'none', upto: 0.3, reads: 'none, since it assumes its conclusion', correct: true },
-          { id: 'some', upto: 0.7, reads: 'a little, by making the claim explicit' },
-          { id: 'proof', upto: 1, reads: 'it proves the conclusion outright' },
+      prompt: 'Which of these gives no reason at all?',
+      odd: {
+        axis: 'THREE GIVE A REASON',
+        tiles: [
+          { id: 'seen', reads: 'THREE PEOPLE SAW IT' },
+          { id: 'law', reads: 'IT FOLLOWS FROM THE LAW' },
+          { id: 'test', reads: 'THE TEST CAME BACK POSITIVE' },
+          { id: 'circle', reads: 'IT IS TRUE BECAUSE IT IS TRUE', correct: true },
         ],
       },
-      explain: 'A circular argument gives its conclusion no support at all. Validity promises only that true premises can’t yield a false conclusion. A circle meets this standard by including the conclusion among the premises, and so establishes nothing.',
+      explain: 'The last one. A circular argument is valid, and that\'s what makes it useless: the conclusion is already sitting in the premise, so anyone who doubts the conclusion has just as much reason to doubt what\'s offered in support of it.',
       xp: 5,
     },
     dur: 1.0,

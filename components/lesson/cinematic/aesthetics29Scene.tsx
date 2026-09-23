@@ -91,11 +91,11 @@ const DOUBT = BEATS.map((b) => (b.doubt ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics29'));
 
-export default function Aesthetics29Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Aesthetics29Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(6);
@@ -118,7 +118,7 @@ export default function Aesthetics29Scene({ clock, bt, bi, i, picked, onPick, dr
       trays: carry(cv, 1, n, TRAYS[p], TRAYS[n], tr),
       book: carry(cv, 2, n, BOOK[p], BOOK[n], tr),
       // HOW MUCH THE NOVEL HANDS OVER, which is the only thing the knob measures.
-      gives: carry(cv, 3, n, GIVES[p], reacting ? dragPos.value : GIVES[n], tr),
+      gives: carry(cv, 3, n, GIVES[p], reacting ? pickPos.value : GIVES[n], tr),
       plates: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
       doubt: carry(cv, 5, n, DOUBT[p], DOUBT[n], tr),
     };

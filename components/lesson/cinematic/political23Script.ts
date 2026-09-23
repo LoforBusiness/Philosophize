@@ -94,17 +94,17 @@ export const BEATS: Pol23Beat[] = [
   {
     p: 442, x: 268, tags: 1, strip: 1, box: 1,
     interact: {
-      prompt: 'How does the communitarian view divide your identity between what was given and what was chosen?',
-      split: {
-        left: 'HANDED TO YOU', right: 'CHOSEN BY YOU',
-        start: 0.18,
-        zones: [
-          { id: 'made', upto: 0.34, reads: 'mostly chosen by you' },
-          { id: 'half', upto: 0.66, reads: 'about half given and half chosen' },
-          { id: 'found', upto: 1, reads: 'mostly given before any choice', correct: true },
+      prompt: 'Which of these did you choose?',
+      odd: {
+        axis: 'THREE WERE GIVEN',
+        tiles: [
+          { id: 'lang', reads: 'YOUR FIRST LANGUAGE' },
+          { id: 'fam', reads: 'YOUR FAMILY' },
+          { id: 'town', reads: 'WHERE YOU WERE BORN' },
+          { id: 'work', reads: 'YOUR LINE OF WORK', correct: true },
         ],
       },
-      explain: 'Mostly given before any choice. Communitarians hold that your language, family and community shape who chooses. Liberals reply that you can revise such ties.',
+      explain: 'Only the last, and even that was chosen by a self the first three had built. The communitarian point isn\'t that nothing is chosen. It\'s that the chooser turns up already formed, so a self stripped of every tie is nobody at all.',
       xp: 5,
     },
     dur: 1.0,

@@ -103,11 +103,11 @@ const TICKV = BEATS.map((b) => ((b.tick ?? 0) > 0 ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics41'));
 
-export default function Ethics41Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics41Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(6);
@@ -137,7 +137,7 @@ export default function Ethics41Scene({ clock, bt, bi, i, picked, onPick, dragPo
       floorOn: carry(cv, 2, n, FLOORV[p], FLOORV[n], tr),
       // R7c — the knob's own 0…1 IS the slope, so nothing has to be mapped and the
       // reader is leaning the floor rather than moving a widget beside it.
-      tilt: carry(cv, 3, n, TILT[p], reacting ? dragPos.value : TILT[n], tr),
+      tilt: carry(cv, 3, n, TILT[p], reacting ? pickPos.value : TILT[n], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
       // THE CHECK ON THE DECLINE DOOR — the same instant, either system.
       tick: carry(cv, 5, n, TICKV[p], TICKV[n], tickFade ? grow : 1),

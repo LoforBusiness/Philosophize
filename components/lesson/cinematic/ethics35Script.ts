@@ -68,18 +68,17 @@ export const BEATS: Ethics35Beat[] = [
   {
     p: 380, x: 54, pair: 1, tags: 4, beam: 1, tip: 1, live: 1,
     interact: {
-      prompt: 'With motive, outcome, relation and certainty matched, how much worse is the killing?',
-      drag: {
-        lo: 'THE SAME',
-        hi: 'FAR WORSE',
-        start: 0.5,
-        zones: [
-          { id: 'same', upto: 0.28, reads: 'no difference at all' },
-          { id: 'some', upto: 0.66, reads: 'a little worse', correct: true },
-          { id: 'far', upto: 1, reads: 'as different as a killer and a bystander' },
+      prompt: 'Motive, outcome, relation and certainty all match. What is left?',
+      odd: {
+        axis: 'THREE ARE HELD FIXED',
+        tiles: [
+          { id: 'motive', reads: 'THE MOTIVE' },
+          { id: 'outcome', reads: 'THE OUTCOME' },
+          { id: 'relation', reads: 'THE RELATION' },
+          { id: 'doing', reads: 'DOING IT, OR LETTING IT HAPPEN', correct: true },
         ],
       },
-      explain: 'A little worse. Matched, the cases no longer look like a killer and a bystander, and most of the gap disappears. Rachels argues that the remainder is not a moral difference at all.',
+      explain: 'Only the doing. Rachels matches the two cases on everything anyone usually appeals to, so if a difference in wrongness survives, it has to come from killing rather than letting die on its own. Many people report that almost none does.',
       xp: 5,
     },
     dur: 1.0,

@@ -92,11 +92,11 @@ const FOCUS = BEATS.map((b) => ((b.focus ?? 0) > 0 ? 1 : 0));
 const VEIL = BEATS.map((b) => ((b.veil ?? 0) > 0 ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political25'));
 
-export default function Political25Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Political25Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(6);
@@ -128,7 +128,7 @@ export default function Political25Scene({ clock, bt, bi, i, picked, onPick, dra
       // R7c — the reach IS the reader's thumb on the last question, and the
       // script's own track everywhere else. One value, two sources, and the
       // picture never disagrees with whichever is in charge.
-      reach: carry(cv, 3, n, REACH[p], reacting ? dragPos.value : REACH[n], tr),
+      reach: carry(cv, 3, n, REACH[p], reacting ? pickPos.value : REACH[n], tr),
       // group AH — one-shot, fades in on its own beat and back out on the next.
       focus: carry(cv, 4, n, FOCUS[p], FOCUS[n], focusFade ? grow : 1),
       veil: carry(cv, 5, n, VEIL[p], VEIL[n], veilFade ? grow : 1),

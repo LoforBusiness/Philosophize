@@ -86,17 +86,17 @@ export const BEATS: KnowHowBeat[] = [
   {
     p: 4, x: 124, steps: 3, done: 1,
     interact: {
-      prompt: 'What does memorising every instruction give you: the facts, the skill, or some of each?',
-      split: {
-        left: 'THE FACTS', right: 'THE SKILL',
-        start: 0.04,
-        zones: [
-          { id: 'skill', upto: 0.32, reads: 'the skill of swimming itself' },
-          { id: 'both', upto: 0.66, reads: 'some of the facts and some of the skill' },
-          { id: 'facts', upto: 1, reads: 'the facts, yet none of the skill', correct: true },
+      prompt: 'Which of these does memorising the manual not give you?',
+      odd: {
+        axis: 'IT GIVES YOU THREE',
+        tiles: [
+          { id: 'rules', reads: 'THE RULES' },
+          { id: 'words', reads: 'THE TERMS' },
+          { id: 'order', reads: 'WHAT TO DO FIRST' },
+          { id: 'skill', reads: 'BEING ABLE TO DO IT', correct: true },
         ],
       },
-      explain: 'The facts, but none of the skill. For Ryle, memorised rules add to knowing that and leave knowing how untouched. His example is the wit, who makes good jokes but can’t state rules for making them. Intellectualists reply that knowing how is itself a form of knowing that.',
+      explain: 'Being able to do it. Every fact about swimming can be recited by someone who sinks, which is Ryle\'s point: knowing how is a capacity displayed in the doing, not a longer list of things known that.',
       xp: 5,
     },
     dur: 1.0,

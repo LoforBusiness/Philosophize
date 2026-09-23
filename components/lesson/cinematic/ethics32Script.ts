@@ -69,18 +69,16 @@ export const BEATS: Ethics32Beat[] = [
     a: 35, b: 24, reasons: 3, card: 2, fresh: 1,
     dur: 1.0,
     interact: {
-      prompt: 'How much should another person’s moral verdict count in your own judgement?',
-      drag: {
-        lo: 'DISREGARD THEIR VERDICT',
-        hi: 'ADOPT THEIR VERDICT',
-        start: 0,
-        zones: [
-          { id: 'never', upto: 0.3, reads: 'no evidence at all' },
-          { id: 'signal', upto: 0.74, reads: 'evidence that you should re-examine your reasons', correct: true },
-          { id: 'take', upto: 1, reads: 'a verdict to adopt as your own' },
+      prompt: 'Someone you trust reaches a different moral verdict. What is that?',
+      sort: {
+        chip: 'THEIR VERDICT',
+        bins: [
+          { id: 'none', label: 'NOT EVIDENCE', reads: 'no evidence at all about the question' },
+          { id: 'signal', label: 'A REASON TO LOOK AGAIN', reads: 'a reason to go back over your own grounds', correct: true },
+          { id: 'adopt', label: 'ADOPT IT', reads: 'a verdict to take on as your own' },
         ],
       },
-      explain: 'Evidence that you should re-examine your reasons. A careful verdict that differs from yours suggests you’ve missed something. Adopting it gives you the answer, but not the understanding a new case needs.',
+      explain: 'A reason to look again. Taking a moral verdict on trust leaves you holding a conclusion you can\'t defend, which isn\'t the same as having reached it; ignoring a careful disagreement wastes real evidence that you have gone wrong somewhere.',
       xp: 5,
     },
   },

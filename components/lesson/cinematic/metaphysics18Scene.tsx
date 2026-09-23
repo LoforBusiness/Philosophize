@@ -87,11 +87,11 @@ const PRIME = BEATS.map((b) => b.prime ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics18'));
 
-export default function Metaphysics18Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics18Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(7);
@@ -117,7 +117,7 @@ export default function Metaphysics18Scene({ clock, bt, bi, i, picked, onPick, d
       // R7b — the knob closes the fourth arrow's gap. Drag toward AS MUCH AS A STONE
       // DOES and the arrow reaches its plinth; drag back to none and it hangs in the
       // air, wavering, with nothing to land on.
-      hang: carry(cv, 3, n, HANG[p], reacting ? 1 - dragPos.value : HANG[n], tr),
+      hang: carry(cv, 3, n, HANG[p], reacting ? 1 - pickPos.value : HANG[n], tr),
       beyond: carry(cv, 4, n, BEYOND[p], BEYOND[n], tr),
       // The wall clock, so the unlanded arrow keeps hunting while the reader
       // reads. A waver that finished would be a picture of it arriving.

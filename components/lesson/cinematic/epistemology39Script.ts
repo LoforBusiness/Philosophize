@@ -81,17 +81,16 @@ export const BEATS: Epistemology39Beat[] = [
   {
     p: 21, x: 98, grid: 1, votes: 1, tally: 1,
     interact: {
-      prompt: 'Should a court count votes on the verdict itself, or on the reasons behind it?',
-      drag: {
-        lo: 'count the verdict', hi: 'follow the reasons',
-        start: 0.06,
-        zones: [
-          { id: 'count', upto: 0.25, reads: 'vote on the verdict, leaving the court inconsistent' },
-          { id: 'mix', upto: 0.55, reads: 'choose a procedure case by case, as convenient' },
-          { id: 'reasons', upto: 1, reads: 'settle the reasons, and let the verdict follow', correct: true },
+      prompt: 'Should the court vote on the verdict or on the reasons?',
+      sort: {
+        chip: 'WHAT THEY VOTE ON',
+        bins: [
+          { id: 'verdict', label: 'THE VERDICT', reads: 'the verdict, leaving the court contradicting itself' },
+          { id: 'either', label: 'CASE BY CASE', reads: 'whichever suits the case in front of them' },
+          { id: 'reasons', label: 'THE REASONS', reads: 'the reasons, and let the verdict follow', correct: true },
         ],
       },
-      explain: 'Settle the reasons, and let the verdict follow. This keeps the court consistent, but at a cost. The court then rules liable although two of its three judges voted not liable, and it must justify that.',
+      explain: 'The reasons, and let the verdict follow. A majority can back each premise while a majority rejects the conclusion they lead to. A court that votes on the verdict alone can hand down a ruling that no one\'s own view supports.',
       xp: 5,
     },
     dur: 1.0,

@@ -127,7 +127,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics34'));
 
-export default function Aesthetics34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Aesthetics34Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(2);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -141,7 +141,7 @@ export default function Aesthetics34Scene({ clock, bt, bi, i, dragPos, gazeX, ga
     const wipe = ease01(bt.value / 1.1);
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
-      strip: live ? dragPos.value : carry(cv, 0, n, STRIP[p], STRIP[n], wipe),
+      strip: live ? pickPos.value : carry(cv, 0, n, STRIP[p], STRIP[n], wipe),
       arrows: carry(cv, 1, n, ARROWS[p], ARROWS[n], tr),
     };
   });

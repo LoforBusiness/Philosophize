@@ -146,10 +146,10 @@ const X = BEATS.map((b) => b.x ?? 200);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political3'));
 
-export default function Political3Scene({ clock, bt, bi, i, dragPos }: SceneApi) {
+export default function Political3Scene({ clock, bt, bi, i, dragPos, pickPos }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldSub = useHeld();
   const cv = useCarry(10);
@@ -176,7 +176,7 @@ export default function Political3Scene({ clock, bt, bi, i, dragPos }: SceneApi)
       // R7c — the HELD IN TRUST stamp is exactly what the drag is about: at 'they are
       // the same thing' it is struck across the circuit, and it lifts as the reader
       // says a vote reaches less and less of the general will.
-      seal: carry(cv, 1, n, SEAL[p], reacting ? 1 - dragPos.value : SEAL[n], tr),
+      seal: carry(cv, 1, n, SEAL[p], reacting ? 1 - pickPos.value : SEAL[n], tr),
       // The panels share their corridor with the Declaration, so they take the same
       // staggered gate as the two diagrams below: off by 45%, on from 55%.
       pair: ease01(clamp01((carry(cv, 2, n, PAIR_ON[p], PAIR_ON[n], tr) - 0.55) / 0.45)),

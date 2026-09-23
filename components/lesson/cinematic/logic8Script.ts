@@ -100,18 +100,17 @@ export const BEATS: Logic8Beat[] = [
   {
     p: 467, x: 152, wet: 1, rule: 1, trap: 2, spr: 1,
     interact: {
-      prompt: 'On a day without rainfall, what can be concluded about the street?',
-      drag: {
-        lo: 'STREETS MUST BE DRY',
-        hi: 'STREETS MUST BE WET',
-        start: 0,
-        zones: [
-          { id: 'dry', upto: 0.28, reads: 'the streets must be dry' },
-          { id: 'open', upto: 0.74, reads: 'the streets could be wet or dry', correct: true },
-          { id: 'wet', upto: 1, reads: 'the streets must be wet' },
+      prompt: 'It did not rain. Which of these is now certain?',
+      odd: {
+        axis: 'THREE ARE NOT SETTLED',
+        tiles: [
+          { id: 'dry', reads: 'THE STREETS ARE DRY' },
+          { id: 'sun', reads: 'THE SUN IS OUT' },
+          { id: 'open', reads: 'NOTHING FOLLOWS', correct: true },
+          { id: 'wet', reads: 'THE STREETS ARE WET' },
         ],
       },
-      explain: 'On a day without rain, the streets could be wet or dry. The rule “if it rains, the streets get wet” says nothing about days without rain. A sprinkler can still wet the streets.',
+      explain: 'Nothing follows, and that\'s the only certainty on offer. Rain wets the streets, and so does a burst main or a street cleaner, so ruling out the rain leaves the streets open. Reading a conditional as though it ran both ways is denying the antecedent.',
       xp: 5,
     },
     dur: 1.0,

@@ -119,17 +119,17 @@ export const BEATS: Aesthetics7Beat[] = [
   {
     p: 165, x: 160, q: 39, art: 1, capt: 3, marks: 1,
     interact: {
-      prompt: 'Where does Hume’s theory locate beauty?',
-      split: {
-        left: 'IN THE RESPONSE', right: 'IN THE PAINT',
-        start: 0.04,
-        zones: [
-          { id: 'paint', upto: 0.3, reads: 'in the painting itself' },
-          { id: 'both', upto: 0.66, reads: 'partly in the painting, partly in the viewer' },
-          { id: 'resp', upto: 1, reads: 'in the response, which can still be trained', correct: true },
+      prompt: 'Which of these does not make a better critic?',
+      odd: {
+        axis: 'THREE MAKE A CRITIC',
+        tiles: [
+          { id: 'loud', reads: 'A LOUD OPINION', correct: true },
+          { id: 'practice', reads: 'PRACTICE' },
+          { id: 'compare', reads: 'COMPARISON' },
+          { id: 'clear', reads: 'NO PREJUDICE' },
         ],
       },
-      explain: 'In the response, which can still be trained. A standard of taste might suggest beauty is back in the object, but Hume never places it there. He holds instead that responses differ in quality, because practice, comparison and freedom from prejudice improve them.',
+      explain: 'A loud opinion. Hume denies that beauty sits in the object and then refuses to make every verdict equal: practice, comparison and a mind free of prejudice put a critic in a better position to feel what\'s there. Confidence isn\'t one of them.',
       xp: 5,
     },
     dur: 1.0,

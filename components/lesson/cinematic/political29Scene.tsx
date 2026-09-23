@@ -89,11 +89,11 @@ const CORE = BEATS.map((b) => b.core ?? 0);
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political29'));
 
-export default function Political29Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Political29Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -123,7 +123,7 @@ export default function Political29Scene({ clock, bt, bi, i, picked, onPick, dra
       wall: carry(cv, 2, n, WALL[p], WALL[n], tr),
       // HOW MUCH THE LINE DECIDES. At 0 the two columns come out level, which is
       // a claim about the world the reader can check.
-      decide: carry(cv, 3, n, DECIDE[p], reacting ? dragPos.value : DECIDE[n], tr),
+      decide: carry(cv, 3, n, DECIDE[p], reacting ? pickPos.value : DECIDE[n], tr),
       plates: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
       // THE FLASH'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to,
       // flatly 0 on every other beat — one flash per tap, not a loop.

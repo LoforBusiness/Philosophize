@@ -89,18 +89,16 @@ export const BEATS: Epi7Beat[] = [
   {
     p: 8, days: 4, twist: 1, ask: 1, also: 1, loop: 1, wrongX: 1,
     interact: {
-      prompt: 'Once induction is shown to lack a rational proof, what attitude to it does Hume take?',
-      drag: {
-        lo: 'STOP USING IT',
-        hi: 'CALL IT PROVED',
-        start: 0,
-        zones: [
-          { id: 'stop', upto: 0.28, reads: 'abandon it, since reason can’t justify it' },
-          { id: 'habit', upto: 0.74, reads: 'rely on induction, since custom compels belief', correct: true },
-          { id: 'proved', upto: 1, reads: 'rely on induction, and call it rationally proved' },
+      prompt: 'Reason cannot prove induction. What does Hume then do?',
+      sort: {
+        chip: 'HUME',
+        bins: [
+          { id: 'drop', label: 'ABANDONS IT', reads: 'abandons induction, since reason cannot back it' },
+          { id: 'habit', label: 'RELIES ON IT', reads: 'relies on induction anyway out of custom', correct: true },
+          { id: 'proved', label: 'CALLS IT PROVED', reads: 'relies on induction and calls it proved' },
         ],
       },
-      explain: 'Rely on induction, since custom compels belief. Hume finds no rational proof of induction. But he holds that expectations come from custom, not reasoning, so sceptical arguments can’t stop them.',
+      explain: 'He relies on it anyway. Hume separates the question of what reason can justify from the question of what nobody can help believing, and induction fails the first while passing the second. Custom, not argument, is what carries a mind to tomorrow.',
       xp: 5,
     },
     dur: 1.0,

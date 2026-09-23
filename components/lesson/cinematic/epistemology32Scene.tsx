@@ -88,10 +88,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology32'));
 
-export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -114,7 +114,7 @@ export default function Epistemology32Scene({ clock, bt, bi, i, picked, onPick, 
       // R7c — the four panels ARE the detail the drag is about, so they fill and empty
       // under the reader's thumb: almost nothing at one end, the thing itself at the
       // other.
-      maps: lerp(prevMaps, reacting ? dragPos.value * 4 : shownMaps, draw),
+      maps: lerp(prevMaps, reacting ? pickPos.value * 4 : shownMaps, draw),
       sparseRing: carry(cv, 0, n, SPARSE_RING[p], SPARSE_RING[n], tr),
       slowRing: carry(cv, 1, n, SLOW_RING[p], SLOW_RING[n], tr),
       frameRing: carry(cv, 2, n, FRAME_RING[p], FRAME_RING[n], tr),

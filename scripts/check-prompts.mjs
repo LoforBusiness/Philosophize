@@ -41,10 +41,11 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Script.ts')).sort(
     const re = new RegExp(`\\b${kind}:\\s*\\{\\s*[\\r\\n]+\\s*prompt:\\s*(['"])((?:(?!\\1)[\\s\\S])*)\\1`, 'g');
     for (const m of src.matchAll(re)) {
       // Does this block print its own answers? See the note on `vague` below.
-      // ANY of the six controls counts, not just the deck: `drag`, `lever`,
-      // `plot`, `split` and `field` all draw their labels and their live readout
-      // directly under the art, which is the whole basis of the exemption.
-      const cards = /\n\s{6}(?:cards|drag|sort|poll|plot|split|lever|field):\s*[[{]/.test(src.slice(m.index, m.index + 1400));
+      // EVERY control counts, not just the deck: each one draws its own labels
+      // directly under the art, which is the whole basis of the exemption. The
+      // retired ones stay so that an old branch is still exempted rather than
+      // reported.
+      const cards = /\n\s{6}(?:cards|sort|poll|plot|order|odd|drag|split|lever|field):\s*[[{]/.test(src.slice(m.index, m.index + 1400));
       rows.push({ name, kind, prompt: m[2], cards });
     }
   }
@@ -83,6 +84,15 @@ const long = rows.filter((r) => words(r.prompt) > MAX_WORDS);
 // the list left unchanged, "Which case breaks the idea that laughter needs a
 // victim?" was reported as pointing at nothing while its three cases sat on the
 // screen underneath it. The list is the thing to update, not the prompt.
+//
+// AND A THIRD TIME, WITH THE PARAGRAPH ABOVE ALREADY ON THE PAGE. `order` and
+// `odd` arrived when the two sliders were retired (R20), and `odd` in particular
+// prints four tiles — often four DRAWINGS — directly under the prompt, which is
+// the most a reader has ever been shown at the moment of answering. logic15's
+// "Which of these would actually support the claim?" was duly reported as
+// pointing at nothing. The list is not a thing to remember to update; it is the
+// thing that goes stale every single time, so it now names every key in
+// InteractBlock rather than the ones that happened to exist that week.
 const vague = rows.filter(
   (r) => r.kind === 'interact' && !r.cards && VAGUE.test(r.prompt) && !CONCRETE.test(r.prompt),
 );

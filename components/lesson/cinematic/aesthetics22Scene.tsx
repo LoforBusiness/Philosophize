@@ -94,12 +94,12 @@ const THOUGHT_TAG = BEATS.map((b) => ((b.thoughtTag ?? 0) > 0 ? 1 : 0));
 // side more empties the heart meter, so a reader who says it was all a game is
 // watching themselves erase the reading the lesson opened with — which is the
 // price of that answer, and a sentence could only assert it.
-const PULL = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const PULL = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics22'));
 
 export default function Aesthetics22Scene({
-  clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+  clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldFig = useHeld();
   const cv = useCarry(8);
   const pulling = PULL[i] === 1;
@@ -133,7 +133,7 @@ export default function Aesthetics22Scene({
       // reading is a reading and not a filled bar somebody printed.
       // Through `carry` so the seam takes over across the transition rather than
       // on one frame — see metaphysics21Scene for why that matters.
-      heart: carry(cv, 4, n, HEART[p], pulling ? 1 - dragPos.value : HEART[n], tr)
+      heart: carry(cv, 4, n, HEART[p], pulling ? 1 - pickPos.value : HEART[n], tr)
         * (0.86 + 0.07 * Math.sin(t * 3.1)),
       // A ring on the belief track — drawing attention to the zero, never filling it.
       emptyRing: carry(cv, 5, n, EMPTY_RING[p], EMPTY_RING[n], emptyRingFade ? grow : 1),

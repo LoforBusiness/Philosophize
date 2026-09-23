@@ -43,18 +43,16 @@ export const BEATS: Epistemology37Beat[] = [
   {
     p: 4, x: 54, hull: 1, live_d: 1,
     interact: {
-      prompt: 'How much evidence would the owner need before he may believe her seaworthy?',
-      drag: {
-        lo: 'A FEELING OF CONFIDENCE',
-        hi: 'SURVEY EVERY PLANK',
-        start: 0.1,
-        zones: [
-          { id: 'lax', upto: 0.3, reads: 'whatever settles his mind' },
-          { id: 'fair', upto: 0.72, reads: 'an independent survey of the hull', correct: true },
-          { id: 'mad', upto: 1, reads: 'so much that no ship ever sails', correct: false },
+      prompt: 'Put these in order, from least evidence to most.',
+      order: {
+        axis: 'LEAST EVIDENCE FIRST',
+        items: [
+          { id: 'mind', reads: 'WHATEVER SETTLES HIS MIND' },
+          { id: 'survey', reads: 'AN INDEPENDENT SURVEY' },
+          { id: 'never', reads: 'SO MUCH NO SHIP SAILS' },
         ],
       },
-      explain: 'An independent survey of the hull. The owner only wanted a feeling of certainty, and silenced his doubts instead of checking them. Clifford condemns this: a sincere belief that was never earned.',
+      explain: 'The survey is the standard. Clifford\'s shipowner reaches sincere belief by stifling his doubts, which is what the first of these allows; demanding certainty would stop every sailing. What\'s owed is evidence proportioned to what rides on it.',
       xp: 5,
     },
     dur: 1.0,

@@ -103,7 +103,7 @@ export const BEATS: Log16Beat[] = [
       poll: {
         options: [
           { id: 'pattern', reads: 'night precedes day but doesn’t cause it', holders: ['Thomas Reid'], correct: true },
-          { id: 'once', reads: 'we never observe a necessary connection', holders: ['David Hume'] },
+          { id: 'once', reads: 'the necessary connection is never observed', holders: ['David Hume'] },
           { id: 'cause5', reads: 'every event follows another by a rule', holders: ['Immanuel Kant'] },
           { id: 'cause1', reads: 'the course of nature is uniform', holders: ['John Stuart Mill'] },
         ],

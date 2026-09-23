@@ -75,17 +75,16 @@ export const BEATS: Logic6Beat[] = [
   {
     p: 165, link: 1, table: 1,
     interact: {
-      prompt: 'What does accepting a conditional commit you to?',
-      split: {
-        left: 'THE LINK ONLY', right: 'THE ANTECEDENT TOO',
-        start: 0.04,
-        zones: [
-          { id: 'both', upto: 0.32, reads: 'the truth of both antecedent and consequent' },
-          { id: 'half', upto: 0.66, reads: 'the link, and that the antecedent is likely' },
-          { id: 'link', upto: 1, reads: 'the link, and nothing about the antecedent', correct: true },
+      prompt: 'What does accepting “if P, then Q” commit you to?',
+      sort: {
+        chip: 'ACCEPTING THE IF',
+        bins: [
+          { id: 'both', label: 'BOTH ARE TRUE', reads: 'that P holds and that Q holds' },
+          { id: 'likely', label: 'AND P IS LIKELY', reads: 'the link, and that P is probably true' },
+          { id: 'link', label: 'ONLY THE LINK', reads: 'the link alone, and nothing about P', correct: true },
         ],
       },
-      explain: 'Accepting a conditional commits you to the link, and to nothing about the antecedent. You can accept “if it rains, the streets get wet” on a dry day, without believing rain is likely.',
+      explain: 'The link alone. A conditional says what follows if P holds; it doesn\'t assert P, and doesn\'t suggest it\'s likely. That\'s why you can accept one whose antecedent you think false without contradicting yourself.',
       xp: 5,
     },
     dur: 1.0,

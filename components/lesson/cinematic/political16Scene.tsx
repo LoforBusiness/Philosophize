@@ -71,10 +71,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political16'));
 
-export default function Political16Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Political16Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(6);
@@ -102,7 +102,7 @@ export default function Political16Scene({ clock, bt, bi, i, picked, onPick, dra
       // R7b — the seam cuts the cords. Give the bar to OWNERSHIP AND CONTROL and the
       // four severings open one after another; give it to the wage and they close, and
       // the reader can see how little a raise actually reconnects.
-      cut: carry(cv, 1, n, CUT[p], reacting ? dragPos.value * 4 : CUT[n], part),
+      cut: carry(cv, 1, n, CUT[p], reacting ? pickPos.value * 4 : CUT[n], part),
       pick: carry(cv, 2, n, PICKV[p], PICKV[n], grow),
       // The three tap events, carried, so each fades out as well as in (group L).
       counted: carry(cv, 3, n, COUNTED[p], COUNTED[n], grow),

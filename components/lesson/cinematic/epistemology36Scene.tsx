@@ -83,11 +83,11 @@ const BLIND = BEATS.map((b) => ((b.blind ?? 0) > 0 ? 1 : 0));
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology36'));
 
-export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(10);
@@ -128,7 +128,7 @@ export default function Epistemology36Scene({ clock, bt, bi, i, picked, onPick, 
       // R7b — the seam opens the clash. Slide toward WHY YOU DID IT and the gap
       // between the reason given and the cause actually at work is drawn; the feeling
       // side of the bar leaves it untouched, which is the finding.
-      clashOn: carry(cv, 4, n, CLASH[p], reacting ? dragPos.value : CLASH[n], tr),
+      clashOn: carry(cv, 4, n, CLASH[p], reacting ? pickPos.value : CLASH[n], tr),
       // group AH — one event per still tap:
       //  · ask      a question mark rises over the row (beat 1: they were asked)
       //  · tally    reasons pile up beside the given-reason card (beats 4, 5)

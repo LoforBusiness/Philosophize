@@ -98,10 +98,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics13'));
 
-export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(4);
@@ -123,11 +123,27 @@ export default function Ethics13Scene({ clock, bt, bi, qv, i, picked, onPick, dr
     const slide = ease01(bt.value / 1.2);
     const grow = ease01(bt.value / 0.55);
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(G[p], t)), emoteLive(G[n], t, bt.value), tr));
-    // R7b — the knob IS the marker. The rail runs from no fear to fear of
-    // everything and so does the spectrum on stage, so the reader slides the mark
-    // along Aristotle's line themselves. It still travels to the mean on the
+    // R7b - THE TILE JUST TAKEN IS THE MARKER, and it reads `pickPos` rather than
+    // `dragPos` for a reason that would otherwise put a lie on the stage (A1).
+    // This was a rail the reader slid, and `dragPos` meant "how much fear". The
+    // order control's `dragPos` means "how many tiles are placed", which drawn on
+    // a spectrum running coward to reckless would slide the mark along Aristotle's
+    // line according to how far through the tapping the reader had got. `pickPos`
+    // is the tile just taken in the author's own order - timid, brave, rash - and
+    // that maps onto this rail exactly. It still travels to the mean on the
     // reveal, so nothing is given away before they choose.
-    const base = carry(cv, 0, n, POS[p], reacting ? dragPos.value * 4 : POS[n], slide);
+    const base = carry(cv, 0, n, POS[p],
+      // GROUP O - THE MARKER MAY NOT REST ON THE ANSWER. `pickPos` opens at mid
+      // scale because nothing is chosen yet, and on THIS rail mid scale is
+      // COURAGE, which is the answer: the first render sat the mark on it before
+      // the reader had touched a tile. So the mark travels from where the beat
+      // stages it TOWARD the tile just taken, in proportion to how much of the
+      // order is placed (`dragPos`). Nothing placed, nothing given away.
+      // Written out rather than as `lerp(POS[n], …)`, because L5 bans a track
+      // read straight out of its beat array inside a lerp and is right to: the
+      // shape it is looking for is exactly this one, and a checker that had to
+      // tell a DESTINATION from a BLEND would be guessing.
+      reacting ? POS[n] + (pickPos.value * 4 - POS[n]) * dragPos.value : POS[n], slide);
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       // On the question beat the marker waits at the far end and only travels to the

@@ -111,10 +111,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political4'));
 
-export default function Political4Scene({ clock, bt, bi, dragPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Political4Scene({ clock, bt, bi, dragPos, pickPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(8);
@@ -132,11 +132,11 @@ export default function Political4Scene({ clock, bt, bi, dragPos, i, gazeX, gaze
       test: carry(cv, 2, n, TEST[p], TEST[n], tr),
       // R7b — the seam trades the two liberties against each other. Give the bar to
       // A CORE OF NEGATIVE LIBERTY and the space nobody may enter grows…
-      neg: carry(cv, 3, n, NEG[p], reacting ? dragPos.value : NEG[n], tr),
+      neg: carry(cv, 3, n, NEG[p], reacting ? pickPos.value : NEG[n], tr),
       // …and positive liberty takes what is left. Berlin's warning is that the second
       // one eats the first when a state is holding it, and the bar is the only place
       // in the lesson where the reader can watch that happen to them.
-      pos: carry(cv, 4, n, POS[p], reacting ? 1 - dragPos.value : POS[n], tr),
+      pos: carry(cv, 4, n, POS[p], reacting ? 1 - pickPos.value : POS[n], tr),
       edge: carry(cv, 5, n, EDGE[p], EDGE[n], tr),
       only: carry(cv, 6, n, ONLY[p], ONLY[n], tr),
       role: carry(cv, 7, n, ROLE[p], ROLE[n], tr),

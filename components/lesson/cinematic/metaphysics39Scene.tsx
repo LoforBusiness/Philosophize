@@ -88,11 +88,11 @@ const ARROWS = BEATS.map((b) => (b.arrows ? 1 : 0));
 const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 
 // R7b — the stage follows the control on its own graded beat, and only there.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics39'));
 
-export default function Metaphysics39Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics39Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(6);
@@ -118,7 +118,7 @@ export default function Metaphysics39Scene({ clock, bt, bi, i, picked, onPick, d
       arrowsOn: carry(cv, 4, n, ARROWS[p], ARROWS[n], tr),
       // R7c — how far the picture has narrowed to one absence. 1 leaves only the
       // gardener's run; 0 shows all four, which is what the physics alone can say.
-      focus: carry(cv, 5, n, 0, reacting ? 1 - dragPos.value : 0, tr),
+      focus: carry(cv, 5, n, 0, reacting ? 1 - pickPos.value : 0, tr),
     };
   });
 

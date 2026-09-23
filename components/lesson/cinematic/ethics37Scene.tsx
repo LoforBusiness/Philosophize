@@ -85,11 +85,11 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics37'));
 
-export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(11);
@@ -121,7 +121,7 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // R7b — the seam leans the week on the promise. Slide toward ON YOUR FRIEND and
       // the four plans tip onto the cord; slide to the practice and they stand up on
       // their own, with nobody in particular relying on you.
-      lean: carry(cv, 3, n, LEAN[p], reacting ? dragPos.value : LEAN[n], tr),
+      lean: carry(cv, 3, n, LEAN[p], reacting ? pickPos.value : LEAN[n], tr),
       fall: carry(cv, 4, n, CUT[p], CUT[n], tr),
       unseenOn: carry(cv, 5, n, UNSEEN[p], UNSEEN[n], tr),
       // "Binds the speaker to the other person" — labels find the two posts.

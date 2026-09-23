@@ -77,10 +77,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.plot ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology16'));
 
-export default function Epistemology16Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology16Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -105,7 +105,7 @@ export default function Epistemology16Scene({ clock, bt, bi, i, picked, onPick, 
       // R7b — the knob rules the results out. A theory that forbids more leaves fewer
       // possible outcomes standing, so dragging toward FORBIDS ALMOST ALL clears the
       // row: the reader watches a claim become risky.
-      results: carry(cv, 0, n, RESN[p], reacting ? (1 - dragPos.value) * 5 : RESN[n], deal),
+      results: carry(cv, 0, n, RESN[p], reacting ? (1 - pickPos.value) * 5 : RESN[n], deal),
       bars: carry(cv, 1, n, BARN[p], BARN[n], deal),
       found: carry(cv, 2, n, FOUND[p], FOUND[n], grow),
       wideRing: carry(cv, 3, n, WIDE_RING[p], WIDE_RING[n], tr),

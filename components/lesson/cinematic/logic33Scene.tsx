@@ -96,7 +96,7 @@ const BASE_Y1 = gridY(fit(1, 0));
 const BASE_LEN = Math.sqrt((GRID_R - GRID_L) ** 2 + (BASE_Y1 - BASE_Y0) ** 2);
 const BASE_ANGLE = Math.atan2(BASE_Y1 - BASE_Y0, GRID_R - GRID_L);
 
-export default function Logic33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic33Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(5);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -110,7 +110,7 @@ export default function Logic33Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, 
     const grow = ease01(bt.value / 1.0);
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
-      bend: live ? dragPos.value : carry(cv, 0, n, BEND[p], BEND[n], grow),
+      bend: live ? pickPos.value : carry(cv, 0, n, BEND[p], BEND[n], grow),
       next: carry(cv, 1, n, NEXTD[p], NEXTD[n], tr),
       matched: carry(cv, 2, n, MATCHED[p], MATCHED[n], tr),
       gap: carry(cv, 3, n, GAP[p], GAP[n], tr),

@@ -89,18 +89,16 @@ export const BEATS: Political26Beat[] = [
   {
     p: 264, x: 88, decision: 1, box: 1, table: 1, feeds: 1,
     interact: {
-      prompt: 'On Habermas’s view, how should a legitimate decision divide between counting and reasoning?',
-      split: {
-        left: 'THE COUNTING',
-        right: 'THE REASONING',
-        start: 0.95,
-        zones: [
-          { id: 'tally', upto: 0.3, reads: 'the vote count alone decides' },
-          { id: 'both', upto: 0.7, reads: 'public reasoning first, then a binding vote', correct: true },
-          { id: 'talk', upto: 1, reads: 'reasoning decides, and the vote is a formality' },
+      prompt: 'Put a legitimate decision in order.',
+      order: {
+        axis: 'FIRST STEP FIRST',
+        items: [
+          { id: 'give', reads: 'REASONS ARE GIVEN' },
+          { id: 'test', reads: 'THEY ARE TESTED IN PUBLIC' },
+          { id: 'vote', reads: 'A BINDING VOTE IS TAKEN' },
         ],
       },
-      explain: 'Public reasoning first, then a binding vote. A count alone tests no reasons. Talk alone rarely ends in full agreement, so a vote must still settle the matter. For Habermas, debate shapes the options, and a majority vote then decides.',
+      explain: 'Reasons first, then the vote that settles it. A count with no debate records wants that nobody had to defend. Debate with no vote never decides. Habermas needs both, in that order, if the result is to bind the losers.',
       xp: 5,
     },
     dur: 1.0,

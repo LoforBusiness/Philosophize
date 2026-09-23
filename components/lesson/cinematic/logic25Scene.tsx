@@ -85,9 +85,9 @@ const FAKE = BEATS.map((b) => b.fake ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
-export default function Logic25Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic25Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -121,7 +121,7 @@ export default function Logic25Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // R7b — the seam grows the false-positive bar. The more of the population the
       // reader gives to the larger group, the taller the pile of people who fit the
       // description and are not what it suggests. Base rates, drawn.
-      fake: carry(cv, 3, n, FAKE[p], reacting ? dragPos.value : FAKE[n], fakeFade ? grow : tr),
+      fake: carry(cv, 3, n, FAKE[p], reacting ? pickPos.value : FAKE[n], fakeFade ? grow : tr),
       // Carried, so it fades out as well as in (group L).
       rare: carry(cv, 4, n, RARE[p], RARE[n], tr),
     };

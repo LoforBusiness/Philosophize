@@ -82,11 +82,11 @@ const ASSERT_ON = BEATS.map((b) => ((b.assert ?? 0) > 0 ? 1 : 0));
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic28'));
 
-export default function Logic28Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic28Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(5);
@@ -111,7 +111,7 @@ export default function Logic28Scene({ clock, bt, bi, i, picked, onPick, dragPos
       t,
       piers: carry(cv, 1, n, PIERS[p], PIERS[n], tr),
       // HOW FAR THE ARGUMENT ACTUALLY ARRIVES, which is what the knob measures.
-      span: carry(cv, 2, n, SPAN[p], reacting ? dragPos.value : SPAN[n], tr),
+      span: carry(cv, 2, n, SPAN[p], reacting ? pickPos.value : SPAN[n], tr),
       plates: carry(cv, 3, n, PLATES[p], PLATES[n], tr),
       // The argument named, over the gap the plank is crossing.
       assert: carry(cv, 4, n, ASSERT_ON[p], ASSERT_ON[n], assertFade ? tr : 1),

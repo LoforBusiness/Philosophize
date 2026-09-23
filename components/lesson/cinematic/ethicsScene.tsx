@@ -156,7 +156,7 @@ const Q1_AT = BEATS.findIndex((b) => b.weigh === 'q1');
 // R7c — on the drag, the reader fills in the ledger's ANIMAL column themselves:
 // NONE OF IT empties the column, the middle zone ticks the two feelings, and ALL OF IT
 // ticks JUDGES ITSELF as well. The edges are the script's own zone boundaries.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 const FEELINGS_FROM = 0.26;
 const JUDGING_FROM = 0.72;
 /** 0 below the edge, 1 above it, over a short ramp so the dot fills as the knob crosses. */
@@ -210,7 +210,7 @@ function hLive(code: number, t: number, bt: number): Stance {
 const X = BEATS.map((b) => b.x ?? HUMAN_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics'));
 
-export default function EthicsScene({ clock, bt, bi, qv, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function EthicsScene({ clock, bt, bi, qv, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldHumanS = useHeld();
   const cv = useCarry(11);
@@ -253,9 +253,9 @@ export default function EthicsScene({ clock, bt, bi, qv, i, dragPos, gazeX, gaze
       human: lookPose(humanS, HUMAN_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
       scaleOn: conOn,
       tip: Math.sin(t * 1.2) * 4 * conOn * (1 - (n === Q1_AT ? q : 0)),  // settles level on a considered Q1
-      a0: carry(cv, 7, n, 1, reacting ? past(dragPos.value, FEELINGS_FROM) : 1, tr),
-      a1: carry(cv, 8, n, 1, reacting ? past(dragPos.value, FEELINGS_FROM) : 1, tr),
-      a2: carry(cv, 9, n, 0, reacting ? past(dragPos.value, JUDGING_FROM) : 0, tr),
+      a0: carry(cv, 7, n, 1, reacting ? past(pickPos.value, FEELINGS_FROM) : 1, tr),
+      a1: carry(cv, 8, n, 1, reacting ? past(pickPos.value, FEELINGS_FROM) : 1, tr),
+      a2: carry(cv, 9, n, 0, reacting ? past(pickPos.value, JUDGING_FROM) : 0, tr),
       ledOn: cnt > 0 ? (was > 0 ? 1 : write) : 0,
       r0: row(0), r1: row(1), r2: row(2),
       plant: carry(cv, 1, n, PLANT[p], PLANT[n], tr),

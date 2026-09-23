@@ -17,6 +17,7 @@ import {
 } from './wander';
 import { EMBER_INK } from '@/components/shared/tone';
 import { VerdictSeal, XpCoin, useQuestionAccent } from './QuestionParts';
+import type { ObjectName } from './objects';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared kit for cinematic lessons — the parts that are identical across every
@@ -430,6 +431,58 @@ export interface SortBlock {
   /** Two or three bins, left to right. */ bins: SortBin[];
 }
 
+/** One tile of an `order`, written in the position it actually belongs in. */
+export interface OrderItem {
+  id: string;
+  /** Two to four words. It sits under the drawing, or alone if there is none. */ reads: string;
+  /** A drawing from `objects.ts`, struck in the lesson's own branch tone. */ draw?: ObjectName;
+}
+
+/**
+ * A graded question answered by tapping tiles into a SEQUENCE (see ./OrderTiles).
+ *
+ * ── THE ITEMS ARE WRITTEN IN THE CORRECT ORDER ──────────────────────────────
+ *
+ * `items[0]` is what comes first, and the control shuffles them for display. So
+ * the answer is never authored as an id or an index: it is the order of this
+ * array, which means it cannot fall out of step with itself the way a `correct`
+ * flag on a shuffled list can.
+ *
+ * THREE IS THE DEFAULT AND FOUR IS THE CEILING. With three tiles only the first
+ * two taps are real decisions and the third is forced, which is the whole reason
+ * this asks so little of a reader. Four is two extra decisions and is worth it
+ * only when the fourth genuinely belongs in the chain.
+ */
+export interface OrderBlock {
+  /** What the order IS, named above the tiles: "EARLIEST FIRST", "CAUSE TO EFFECT". At most 24 characters. */
+  axis: string;
+  /** Three or four items, in the order they belong. */ items: OrderItem[];
+}
+
+/** One tile of an `odd`. Exactly one in the set carries `correct`. */
+export interface OddTile {
+  id: string;
+  /** One to three words. Under the drawing where there is one, inside the tile where there is not. */ reads: string;
+  /** A drawing from `objects.ts`. A set whose tiles are ALL words is a poll wearing tiles. */ draw?: ObjectName;
+  /** The stranger. Exactly one tile may set it. */ correct?: boolean;
+}
+
+/**
+ * A graded question answered by finding the one that does not belong
+ * (see ./OddOneOut).
+ *
+ * The least reading of any control here: four tiles and a prompt of about five
+ * words. It suits the question philosophy asks constantly — which of these is
+ * NOT a necessary truth, not a primary quality, not a case of what was just
+ * defined — which as a four-option list is four sentences and as four pictures
+ * is a glance.
+ */
+export interface OddBlock {
+  /** What the three that belong have in common, named above the tiles. At most 24 characters. */
+  axis: string;
+  /** Four tiles, exactly one of them the stranger. */ tiles: OddTile[];
+}
+
 /** One quadrant of a `field`, named by which half of each axis it occupies. */
 export interface FieldQuad {
   id: string;
@@ -461,8 +514,15 @@ export interface InteractBlock {
    */
   cards?: [ChoiceCard, ChoiceCard];
   /**
-   * A line the reader drags a knob along (see ./DragScale). Mutually exclusive with
-   * `cards` in practice — a question is either "which of these" or "how much".
+   * A line the reader drags a knob along (see ./DragScale).
+   *
+   * RETIRED, with `split`, on the owner's word: "two sliding ones ... I want
+   * those removed." Both asked HOW MUCH and both answered it by making the
+   * reader hold a finger down and hunt along a line for a boundary they could
+   * not see, which is the most reading and the most effort of anything here.
+   * What survives of the class is the TREND, which `plot` draws; the rest became
+   * `order` (a sequence of taps) and `odd` (a stranger in a set). The type stays
+   * so an old branch still compiles; `check:rotation` fails on a new one.
    */
   drag?: DragBlock;
   /**
@@ -477,7 +537,14 @@ export interface InteractBlock {
   lever?: LeverBlock;
   /** The shape of a relationship, chosen from drawn graphs in one tap (see ./TrendPick). */
   plot?: PlotBlock;
-  /** One bar divided between two sides (see ./SplitBar). */
+  /**
+   * One bar divided between two sides (see ./SplitBar).
+   *
+   * RETIRED with `drag`, for the same reason and on the same word. Use `plot`
+   * where the claim is a trend, `order` where it is a sequence, `odd` where it
+   * is a set with a stranger in it, and `poll` where the two sides were really
+   * two named positions all along.
+   */
   split?: SplitBlock;
   /**
    * A token placed on a two-axis pad (see ./FieldPick).
@@ -490,6 +557,10 @@ export interface InteractBlock {
   poll?: PollBlock;
   /** One named thing dropped into a labelled bin (see ./SortBins). */
   sort?: SortBlock;
+  /** Tiles tapped into a sequence (see ./OrderTiles). */
+  order?: OrderBlock;
+  /** Four tiles, one of which does not belong (see ./OddOneOut). */
+  odd?: OddBlock;
 }
 
 /** Every lesson's Beat extends this; the shell reads only these common fields. */
@@ -558,7 +629,8 @@ export function gates(b: BaseBeat) { return Boolean(b.tap || b.mc || b.interact)
  */
 export function stageAnswered(b: BaseBeat) {
   const q = b.interact;
-  return Boolean(q && !q.cards && !q.drag && !q.lever && !q.plot && !q.split && !q.field && !q.poll && !q.sort);
+  return Boolean(q && !q.cards && !q.drag && !q.lever && !q.plot && !q.split && !q.field && !q.poll && !q.sort
+    && !q.order && !q.odd);
 }
 
 // ── NOTHING MAY TELEPORT (group L) ────────────────────────────────────────────

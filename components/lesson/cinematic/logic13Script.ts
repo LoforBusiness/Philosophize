@@ -78,16 +78,17 @@ export const BEATS: Log13Beat[] = [
     g: 41, steps: 4, joins: 1, honest: 1,
     dur: 1.0,
     interact: {
-      prompt: 'Where does a fallacious slippery-slope argument go wrong?',
-      sort: {
-        chip: 'the slippery slope',
-        bins: [
-          { id: 'ending', label: 'an extreme conclusion', reads: 'the conclusion is too extreme to be credible' },
-          { id: 'length', label: 'too many steps', reads: 'the chain contains too many steps' },
-          { id: 'joins', label: 'unsupported step', reads: 'a step is asserted with no reason given', correct: true },
+      prompt: 'Which of these is what makes a slippery slope fail?',
+      odd: {
+        axis: 'THREE ARE NOT THE FAULT',
+        tiles: [
+          { id: 'ending', reads: 'AN EXTREME ENDING' },
+          { id: 'length', reads: 'MANY STEPS' },
+          { id: 'alarm', reads: 'AN ALARMING CLAIM' },
+          { id: 'joins', reads: 'A STEP WITH NO REASON', correct: true },
         ],
       },
-      explain: 'An unsupported step. An extreme conclusion can be justified if each step leading there is supported. A modest conclusion is still fallacious if a step is only asserted. The number of steps isn’t the fault either. The fault lies in the links between the steps.',
+      explain: 'A step with no reason. An extreme conclusion can be earned if every step to it\'s supported, and a modest conclusion is still fallacious if one step is merely asserted. The number of steps isn\'t the fault either. The fault lies in the links between them.',
       xp: 5,
     },
   },

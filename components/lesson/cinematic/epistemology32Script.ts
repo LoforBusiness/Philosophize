@@ -83,18 +83,18 @@ export const BEATS: Epis32Beat[] = [
     g: 10, maps: 4,
     dur: 1.0,
     interact: {
-      prompt: 'How much detail does a good model keep?',
-      drag: {
-        lo: 'ALMOST NONE',
-        hi: 'ALL OF IT',
-        start: 1,
-        zones: [
-          { id: 'bare', upto: 0.24, reads: 'almost nothing, so it explains almost nothing' },
-          { id: 'chosen', upto: 0.72, reads: 'the few things the question needs, and no more', correct: true },
-          { id: 'all', upto: 1, reads: 'everything, so it becomes the thing itself' },
+      prompt: 'As a model keeps more detail, which shape does its usefulness take?',
+      plot: {
+        cols: ['ALMOST NOTHING', 'WHAT IS NEEDED', 'EVERYTHING'],
+        axis: 'WHAT IT EXPLAINS',
+        start: [0.3, 0.3, 0.3],
+        shapes: [
+          { id: 'hump', profile: [0.08, 0.55, 0.95, 0.55, 0.1], reads: 'best in the middle, and falls either side', correct: true },
+          { id: 'rise', profile: [0.05, 0.3, 0.55, 0.8, 1], reads: 'the more detail the better' },
+          { id: 'flat', profile: [0.6, 0.6, 0.6, 0.6, 0.6], reads: 'detail makes no difference' },
         ],
       },
-      explain: 'The few things the question needs, and no more. Adding detail without limit reproduces the coastline at its own size, as the fourth map showed. A model is useful because it leaves things out.',
+      explain: 'Best in the middle. A model that keeps almost nothing explains almost nothing, and one that keeps everything has become the thing it was meant to explain. What a good model keeps is whatever the question needs and no more.',
       xp: 5,
     },
   },

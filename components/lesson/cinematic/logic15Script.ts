@@ -83,18 +83,17 @@ export const BEATS: Log15Beat[] = [
     g: 442, crowd: 1, sample: 1, leap: 1, claim: 1, verify: 1, vivid: 1, weak: 1,
     dur: 1.0,
     interact: {
-      prompt: 'What evidence would support a generalisation about the whole country?',
-      drag: {
-        lo: 'BE SURER ABOUT THE TWO',
-        hi: 'ASK MANY CHOSEN FAIRLY',
-        start: 0,
-        zones: [
-          { id: 'sure', upto: 0.3, reads: 'greater certainty about the two you met' },
-          { id: 'more', upto: 0.66, reads: 'a few more people met the same way' },
-          { id: 'fair', upto: 1, reads: 'a large sample chosen without bias', correct: true },
+      prompt: 'Which of these would actually support the claim?',
+      odd: {
+        axis: 'THREE ARE TOO NARROW',
+        tiles: [
+          { id: 'two', reads: 'THE TWO YOU MET' },
+          { id: 'more', reads: 'A FEW MORE, THE SAME WAY' },
+          { id: 'street', reads: 'EVERYONE ON YOUR STREET' },
+          { id: 'fair', reads: 'A LARGE, UNBIASED SAMPLE', correct: true },
         ],
       },
-      explain: 'A large sample chosen without bias would support the claim. Being surer about the two tourists wouldn’t help, since the sample is still too small and not fairly chosen.',
+      explain: 'The large, unbiased sample. The other three all sample the same narrow corner, and meeting more people the same way multiplies the reach of the bias rather than correcting it. What a generalisation needs isn\'t more cases but less selection.',
       xp: 5,
     },
   },

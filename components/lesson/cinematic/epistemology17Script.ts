@@ -90,18 +90,16 @@ export const BEATS: Epi17Beat[] = [
     g: 41, facts: 1, frame: 1, odd: 3, shift: 1,
     dur: 1.0,
     interact: {
-      prompt: 'On Kuhn’s account, what does it take to overturn a paradigm?',
-      drag: {
-        lo: 'ONE DECISIVE RESULT',
-        hi: 'MANY ANOMALIES OVER YEARS',
-        start: 0,
-        zones: [
-          { id: 'one', upto: 0.3, reads: 'a single anomaly refutes the theory' },
-          { id: 'few', upto: 0.6, reads: 'a few anomalies, each explained away' },
-          { id: 'crisis', upto: 1, reads: 'enough anomalies to produce a crisis', correct: true },
+      prompt: 'Put Kuhn\'s stages in order.',
+      order: {
+        axis: 'EARLIEST STAGE FIRST',
+        items: [
+          { id: 'few', reads: 'ODD RESULTS, EXPLAINED AWAY' },
+          { id: 'pile', reads: 'THEY PILE UP INTO A CRISIS' },
+          { id: 'new', reads: 'A NEW PARADIGM TAKES OVER' },
         ],
       },
-      explain: 'Enough anomalies to produce a crisis. Kuhn denied that one result is enough to overturn a theory. In normal science, odd results get set aside. A paradigm falls only when unsolved problems build into a crisis and a rival is ready.',
+      explain: 'Anomalies, crisis, replacement. Kuhn says one odd result never topples a paradigm. The field takes it on the chin and works on. What topples one is a pile of odd results big enough to shake trust, plus a rival already waiting.',
       xp: 5,
     },
   },

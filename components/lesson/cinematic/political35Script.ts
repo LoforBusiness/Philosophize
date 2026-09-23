@@ -49,18 +49,16 @@ export const BEATS: Political35Beat[] = [
   {
     p: 461, x: 52, chairs: 1, live_w: 1, live: 1,
     interact: {
-      prompt: 'How much weight should the interests of future people carry in this decision?',
-      drag: {
-        lo: 'NO SAY AT ALL',
-        hi: 'A FULL VOTE EACH',
-        start: 0.1,
-        zones: [
-          { id: 'none', upto: 0.22, reads: 'none, since they don’t exist yet' },
-          { id: 'some', upto: 0.7, reads: 'real weight, yet no veto', correct: true },
-          { id: 'full', upto: 1, reads: 'full votes, outnumbering the living for ever' },
+      prompt: 'Put these in order, from least weight to most.',
+      order: {
+        axis: 'LEAST WEIGHT FIRST',
+        items: [
+          { id: 'none', reads: 'NONE: THEY DO NOT EXIST YET' },
+          { id: 'some', reads: 'REAL WEIGHT WITHOUT A VETO' },
+          { id: 'all', reads: 'FULL VOTES, FOR EVER' },
         ],
       },
-      explain: 'Real weight, yet no veto. Full votes for all future people would outvote the living for ever. No weight at all would permit any harm to them, however severe.',
+      explain: 'The middle. Not existing yet is no reason to count for nothing. They\'ll exist, and they\'ll live with what\'s decided now. But those to come outnumber the living without limit, so full votes would hand every choice to people who can\'t cast one.',
       xp: 5,
     },
     dur: 1.0,

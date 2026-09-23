@@ -95,7 +95,7 @@ const DONE = BEATS.map((b) => b.done ?? 0);
 // skill. So the skill's share is `1 − dragPos`, read straight into `done`: toward
 // "the skill of swimming itself" the box fills and the column dims, toward "the
 // facts, yet none of the skill" the box empties and the column comes back up.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 
 // ── the three still-tap events (group AH) ───────────────────────────────────
 const SLOTS = BEATS.map((b) => (b.slots ? 1 : 0));
@@ -109,7 +109,7 @@ const CARD3_B = STEP_T + 2 * STEP_PITCH + STEP_H;    // bottom of the third card
 const LEAD_T = CARD1_B + (BOX_T - CARD1_B) / 2 - 7;  // centred in the wider gap after one card
 const GATHER_Y = CARD3_B + 4;                        // just under the third card
 
-export default function KnowHowScene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function KnowHowScene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(6);
@@ -135,7 +135,7 @@ export default function KnowHowScene({ clock, bt, bi, i, picked, onPick, dragPos
       carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
       tr, WALK,
     ));
-    const done = carry(cv, 0, n, DONE[p], reacting ? 1 - dragPos.value : DONE[n], doneFade ? grow : tr);
+    const done = carry(cv, 0, n, DONE[p], reacting ? 1 - pickPos.value : DONE[n], doneFade ? grow : tr);
     return {
       fig: lookPose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
       fill: carry(cv, 2, n, NSTEPS[p], NSTEPS[n], grow),

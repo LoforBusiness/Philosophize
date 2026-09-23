@@ -102,18 +102,18 @@ export const BEATS: Met20Beat[] = [
   {
     p: 383, x: 268, outer: 1, nest: 0.3, tally: 1, token: 1,
     interact: {
-      prompt: 'For which count of simulations is your mind probably not simulated?',
-      drag: {
-        lo: 'NONE ARE EVER BUILT',
-        hi: 'BILLIONS OF THEM RUN',
-        start: 1,
-        zones: [
-          { id: 'none', upto: 0.3, reads: 'too few to outnumber the real minds', correct: true },
-          { id: 'few', upto: 0.72, reads: 'enough to outnumber the real minds' },
-          { id: 'many', upto: 1, reads: 'billions, so you are almost certainly simulated' },
+      prompt: 'As simulations multiply, which shape does the chance take?',
+      plot: {
+        cols: ['FEW', 'MANY', 'BILLIONS'],
+        axis: 'CHANCE YOU ARE SIMULATED',
+        start: [0.2, 0.2, 0.2],
+        shapes: [
+          { id: 'rise', profile: [0.05, 0.3, 0.7, 0.9, 0.97], reads: 'it climbs toward certainty', correct: true },
+          { id: 'flat', profile: [0.5, 0.5, 0.5, 0.5, 0.5], reads: 'it never moves' },
+          { id: 'fall', profile: [0.95, 0.7, 0.4, 0.15, 0.05], reads: 'it falls as they multiply' },
         ],
       },
-      explain: 'Too few to outnumber the real minds. The argument depends on the proportion. If simulated minds are a minority, a randomly chosen mind is probably real. How real the world feels is no evidence, since a simulated world would feel the same.',
+      explain: 'It climbs toward certainty. The argument is a counting one: if simulated minds vastly outnumber real ones and you can\'t tell which you\'re, the odds follow the count. Only too few simulations to outnumber real minds keeps the chance low.',
       xp: 5,
     },
     dur: 1.0,

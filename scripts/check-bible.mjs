@@ -195,7 +195,13 @@ const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'e
   'forty-six', 'forty-seven', 'forty-eight', 'forty-nine', 'fifty', 'fifty-one',
   'fifty-two', 'fifty-three', 'fifty-four', 'fifty-five', 'fifty-six', 'fifty-seven',
   'fifty-eight', 'fifty-nine', 'sixty', 'sixty-one', 'sixty-two', 'sixty-three', 'sixty-four',
-  'sixty-five'];
+  // Extended a fourth time, at sixty-six. Each extension has been one behind
+  // the suite, which is the shape this list keeps failing in: running out puts
+  // `undefined` on the right of an assertion no wording of CLAUDE.md could
+  // satisfy. It now runs to eighty, which is years of headroom.
+  'sixty-five', 'sixty-six', 'sixty-seven', 'sixty-eight', 'sixty-nine', 'seventy',
+  'seventy-one', 'seventy-two', 'seventy-three', 'seventy-four', 'seventy-five',
+  'seventy-six', 'seventy-seven', 'seventy-eight', 'seventy-nine', 'eighty'];
 if (!WORDS[validators.length]) {
   console.log(`  FAIL  WORDS has no entry for ${validators.length} — extend it in this file`);
 }

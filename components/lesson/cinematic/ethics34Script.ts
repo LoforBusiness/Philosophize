@@ -69,18 +69,18 @@ export const BEATS: Ethics34Beat[] = [
   {
     p: 467, x: 46, pop: 0, live: 1,
     interact: {
-      prompt: 'Where along this trade does the total view’s verdict become repugnant?',
-      drag: {
-        lo: 'A FEW FLOURISHING',
-        hi: 'MANY LIVES BARELY WORTH LIVING',
-        start: 0,
-        zones: [
-          { id: 'fine', upto: 0.34, reads: 'more lives, still very good: plausibly better' },
-          { id: 'uneasy', upto: 0.66, reads: 'more lives, less good: better only by the total' },
-          { id: 'repugnant', upto: 1, reads: 'lives barely worth living, ranked best by the total', correct: true },
+      prompt: 'As the population grows and lives get thinner, which shape does the total take?',
+      plot: {
+        cols: ['A FEW, VERY GOOD', 'MANY, GOOD', 'VAST, BARELY'],
+        axis: 'TOTAL GOOD',
+        start: [0.4, 0.4, 0.4],
+        shapes: [
+          { id: 'up', profile: [0.3, 0.5, 0.68, 0.85, 1], reads: 'it keeps climbing to the end', correct: true },
+          { id: 'hump', profile: [0.4, 0.75, 1, 0.6, 0.2], reads: 'it peaks and then falls away' },
+          { id: 'flat', profile: [0.7, 0.7, 0.7, 0.7, 0.7], reads: 'it does not move' },
         ],
       },
-      explain: 'Lives barely worth living, ranked best by the total. Each step raises total wellbeing, so the total view endorses every one. The endpoint is Parfit’s Repugnant Conclusion, even though no life in it is bad.',
+      explain: 'It keeps climbing, and that\'s the repugnant conclusion. Enough lives barely worth living add up to a greater total than a small population living very well, so the total view has to rank the vast thin world best. Nothing in the arithmetic goes wrong; the verdict is what people refuse.',
       xp: 5,
     },
     dur: 1.0,

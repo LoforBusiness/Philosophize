@@ -144,18 +144,16 @@ export const BEATS: MetaBeat[] = [
     needs: true,
     qregress: 'q2',
     interact: {
-      prompt: 'How far back does the Big Bang theory’s explanation reach?',
-      drag: {
-        lo: 'THE RECENT PAST',
-        hi: 'WHY ANYTHING AT ALL',
-        start: 0,
-        zones: [
-          { id: 'stars', upto: 0.32, reads: 'how the galaxies and the stars formed' },
-          { id: 'early', upto: 0.72, reads: 'back to an early hot, dense state', correct: true },
-          { id: 'why', upto: 1, reads: 'why anything exists at all' },
+      prompt: 'Put these in order, by how far back the explanation reaches.',
+      order: {
+        axis: 'LEAST FAR BACK FIRST',
+        items: [
+          { id: 'stars', reads: 'HOW GALAXIES FORMED' },
+          { id: 'early', reads: 'AN EARLY HOT, DENSE STATE' },
+          { id: 'why', reads: 'WHY ANYTHING EXISTS' },
         ],
       },
-      explain: 'Back to an early hot, dense state. The Big Bang theory describes how the universe expanded and cooled from that state. It doesn’t explain why that state existed. So the explanation stops one step short of the question.',
+      explain: 'The theory reaches the second and stops. It describes how an early hot, dense state expanded and cooled into galaxies and stars, and says nothing about why there\'s anything for the laws to apply to. That last question isn\'t a gap the theory will later fill.',
       xp: 5,
     },
     dur: 1.0,

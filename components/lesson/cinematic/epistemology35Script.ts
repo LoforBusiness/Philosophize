@@ -45,18 +45,16 @@ export const BEATS: Epistemology35Beat[] = [
   {
     p: 467, x: 58, pens: 1, plaques: 1, scan: 1, live: 1,
     interact: {
-      prompt: 'How far-fetched must an alternative be before you needn’t rule it out?',
-      drag: {
-        lo: 'RULE OUT NOTHING',
-        hi: 'RULE OUT EVERYTHING',
-        start: 0.2,
-        zones: [
-          { id: 'lax', upto: 0.3, reads: 'a painted mule needn’t be ruled out' },
-          { id: 'ok', upto: 0.72, reads: 'rule out only the likely alternatives', correct: true },
-          { id: 'mad', upto: 1, reads: 'rule out holograms and dreams too' },
+      prompt: 'Put these in order, from nearest possibility to wildest.',
+      order: {
+        axis: 'NEAREST FIRST',
+        items: [
+          { id: 'likely', reads: 'AN ORDINARY MISTAKE' },
+          { id: 'mule', reads: 'A CLEVERLY PAINTED MULE' },
+          { id: 'dream', reads: 'A HOLOGRAM, OR A DREAM' },
         ],
       },
-      explain: 'Rule out only the likely alternatives. Requiring every alternative to be ruled out would leave no knowledge at all. Requiring none would make knowledge too easy. The hard part is saying where the line falls.',
+      explain: 'You have to rule out the near ones, and you don\'t have to rule out the far ones. The trouble is that the line moves: raise the painted mule out loud and it stops being far-fetched, which is how mentioning a possibility can cost you knowledge.',
       xp: 5,
     },
     dur: 1.0,

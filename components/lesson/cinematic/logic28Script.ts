@@ -85,18 +85,16 @@ export const BEATS: Logic28Beat[] = [
   {
     p: 170, x: 80, piers: 1,
     interact: {
-      prompt: 'How far does the ban on falsely shouting fire support a ban on hate speech?',
-      drag: {
-        lo: 'NO SUPPORT',
-        hi: 'FULL SUPPORT',
-        start: 0.9,
-        zones: [
-          { id: 'none', upto: 0.35, reads: 'a relevant difference stops the argument', correct: true },
-          { id: 'some', upto: 0.7, reads: 'similar enough to give some support' },
-          { id: 'all', upto: 1, reads: 'the two cases are relevantly the same' },
+      prompt: 'How far does the fire case carry over to hate speech?',
+      sort: {
+        chip: 'THE ANALOGY',
+        bins: [
+          { id: 'none', label: 'IT BREAKS', reads: 'a relevant difference stops it carrying over', correct: true },
+          { id: 'some', label: 'SOME SUPPORT', reads: 'similar enough to lend some support' },
+          { id: 'same', label: 'THE SAME CASE', reads: 'relevantly the same, so it carries over whole' },
         ],
       },
-      explain: 'A relevant difference stops the argument. Oliver Wendell Holmes’s example is a false alarm that causes immediate panic. Hate speech needn’t be false or cause immediate harm, so the feature that justified that ban is missing. A ban on hate speech needs a separate argument.',
+      explain: 'A relevant difference stops it. Shouting fire works through panic before anyone can think, which is what makes the case easy; speech that\'s heard, understood and rejected doesn\'t work that way. An analogy is only as strong as the feature the two cases share.',
       xp: 5,
     },
     dur: 1.0,

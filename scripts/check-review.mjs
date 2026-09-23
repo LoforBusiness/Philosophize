@@ -76,7 +76,7 @@ for (const [id, r] of Object.entries(UNIT_REVIEWS)) {
     const a = s.ask;
     if (!a.prompt) note('PROMPT', `${where} step ${k}: no prompt`);
     if (!a.explain) note('EXPLAIN', `${where} step ${k}: no explanation`);
-    const kinds = ['cards', 'sort', 'poll', 'drag', 'split', 'plot'].filter((n) => a[n]);
+    const kinds = ['cards', 'sort', 'poll', 'plot', 'order', 'odd', 'drag', 'split', 'lever', 'field'].filter((n) => a[n]);
     if (kinds.length !== 1) note('CONTROL', `${where} step ${k}: ${kinds.length} controls, and a question has one`);
     const opts = a.cards ?? a.sort?.bins ?? a.drag?.zones ?? null;
     if (opts && !opts.some((o) => o.correct)) {

@@ -86,17 +86,17 @@ export const BEATS: Ethics6Beat[] = [
   {
     d: 165, str: 0, tx: 180, card: 2, stamp: 1,
     interact: {
-      prompt: 'What differs morally between the lever case and the footbridge case?',
-      split: {
-        left: 'USED AS A MEANS', right: 'THE NUMBER WHO DIE',
-        start: 0.04,
-        zones: [
-          { id: 'count', upto: 0.3, reads: 'a different number of people die' },
-          { id: 'both', upto: 0.66, reads: 'partly the numbers, partly the using' },
-          { id: 'tool', upto: 1, reads: 'same numbers, yet one is used as a means', correct: true },
+      prompt: 'Which of these differs between the two cases?',
+      odd: {
+        axis: 'THREE ARE THE SAME',
+        tiles: [
+          { id: 'dead', reads: 'HOW MANY DIE' },
+          { id: 'saved', reads: 'HOW MANY ARE SAVED' },
+          { id: 'want', reads: 'WHAT YOU ARE TRYING TO DO' },
+          { id: 'tool', reads: 'A MAN USED AS THE MEANS', correct: true },
         ],
       },
-      explain: 'Same numbers, but one is used as a means. One life is traded for five in both cases. What differs is that the man on the bridge is used to stop the trolley. The doctrine of double effect treats that difference as morally significant.',
+      explain: 'One man is used as the means. The numbers and the aim are identical in both cases, so a view that weighs only outcomes has to call them alike. What changes on the footbridge is that the man\'s body is the instrument, and without him the plan fails.',
       xp: 5,
     },
     dur: 1.0,

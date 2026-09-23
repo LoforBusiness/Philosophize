@@ -91,9 +91,9 @@ const ARRIVE_Y = DROP_T + DROP_H;
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
-export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(5);
@@ -129,7 +129,7 @@ export default function Metaphysics13Scene({ clock, bt, bi, i, picked, onPick, d
       // R7b — the seam fills the two branches, and it peaks in the MIDDLE. Push it to
       // either end and one destination empties; the only place both are equally there
       // is halfway, which is the answer and also why the question is empty.
-      both: carry(cv, 3, n, BOTH[p], reacting ? 1 - Math.abs(dragPos.value * 2 - 1) : BOTH[n], boFade ? grow : tr),
+      both: carry(cv, 3, n, BOTH[p], reacting ? 1 - Math.abs(pickPos.value * 2 - 1) : BOTH[n], boFade ? grow : tr),
       stuck: stuckOn ? (stuckFade ? grow : 1) : 0,
       // THE TOKEN'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to, and
       // flatly 0 on every other beat — one journey per tap, not a loop.

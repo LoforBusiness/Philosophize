@@ -83,17 +83,18 @@ export const BEATS: Ethics11Beat[] = [
   {
     p: 457, x: 126, tok: 1, led: 1, shelf: 1,
     interact: {
-      prompt: 'If lower pleasures add up to more pleasure than a symphony, does Mill say they outweigh it?',
-      split: {
-        left: 'QUALITY', right: 'QUANTITY',
-        start: 0.5,
-        zones: [
-          { id: 'amount', upto: 0.34, reads: 'only the total quantity of pleasure counts' },
-          { id: 'both', upto: 0.66, reads: 'quality counts, yet enough quantity can win' },
-          { id: 'kind', upto: 1, reads: 'higher quality outweighs any quantity of lower', correct: true },
+      prompt: 'As the lower pleasures pile up, which shape does Mill\'s verdict take?',
+      plot: {
+        cols: ['A LITTLE', 'A GREAT DEAL', 'ENDLESS'],
+        axis: 'DO THEY OUTWEIGH IT',
+        start: [0.3, 0.3, 0.3],
+        shapes: [
+          { id: 'never', profile: [0.06, 0.07, 0.08, 0.08, 0.09], reads: 'they never overtake it', correct: true },
+          { id: 'sum', profile: [0.1, 0.35, 0.6, 0.85, 1], reads: 'enough of them wins' },
+          { id: 'late', profile: [0.1, 0.12, 0.18, 0.6, 1], reads: 'they win once there are enough' },
         ],
       },
-      explain: 'Higher quality outweighs any quantity of lower. Mill says competent judges wouldn’t give up a higher pleasure for any quantity of a lower one. He counts quantity too, but beside a difference in quality it’s “of small account”.',
+      explain: 'They never overtake it. Mill\'s higher pleasures differ in kind, not merely in amount, so no quantity of the lower converts into the higher. That\'s why he appeals to those who have known both rather than to a sum.',
       xp: 5,
     },
     dur: 1.0,

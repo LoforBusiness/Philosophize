@@ -102,7 +102,7 @@ const BAL_TILT = 12;
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 /** A feed's width at no share and at all of it. */
 const FEED_THIN = 3;
@@ -110,7 +110,7 @@ const FEED_FAT = 12;
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic40'));
 
-export default function Logic40Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic40Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(6);
@@ -140,7 +140,7 @@ export default function Logic40Scene({ clock, bt, bi, i, picked, onPick, dragPos
       checked: carry(cv, 4, n, CHECKED[p], CHECKED[n], tr),
       // R7b — the seam's position is the LEFT side's share, so `share` is GREEN's.
       // Off the split beat it rests at an even half and the seam is not drawn.
-      share: carry(cv, 5, n, 0.5, reacting ? dragPos.value : 0.5, tr),
+      share: carry(cv, 5, n, 0.5, reacting ? pickPos.value : 0.5, tr),
       seamOn: reacting ? 1 : 0,
       // ONE-SHOT, driven by `bt` alone — see the comment above BAL_CX.
       balance: balanceNow ? ease01(bt.value / 2.2) : 0,

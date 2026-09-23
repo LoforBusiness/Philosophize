@@ -73,18 +73,16 @@ export const BEATS: Logic34Beat[] = [
   {
     p: 461, x: 50, n: 0, live: 1,
     interact: {
-      prompt: 'At what sample size do further draws add little precision?',
-      drag: {
-        lo: 'A HANDFUL',
-        hi: 'THOUSANDS',
-        start: 0,
-        zones: [
-          { id: 'few', upto: 0.24, reads: 'too small to estimate reliably' },
-          { id: 'enough', upto: 0.58, reads: 'precise enough for most purposes', correct: true },
-          { id: 'waste', upto: 1, reads: 'more draws add little precision' },
+      prompt: 'Put these in order, from smallest sample to largest.',
+      order: {
+        axis: 'SMALLEST FIRST',
+        items: [
+          { id: 'tiny', reads: 'TOO FEW TO ESTIMATE' },
+          { id: 'enough', reads: 'PRECISE ENOUGH TO USE' },
+          { id: 'more', reads: 'FURTHER DRAWS ADD LITTLE' },
         ],
       },
-      explain: 'Precise enough for most purposes. Because error depends on the square root of the sample size, the band narrows mostly at the start. Later draws cost as much but add little. So national polls often sample about a thousand people, not a million.',
+      explain: 'Precision improves with the square root of the sample, so the gains come early and then flatten. Quadrupling a sample halves the error once; doing it again halves what\'s left, which is why past a point more draws buy almost nothing.',
       xp: 5,
     },
     dur: 1.0,

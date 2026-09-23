@@ -85,11 +85,11 @@ const NOTE = BEATS.map((b) => b.note ?? 0);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics17'));
 
-export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(4);
@@ -120,7 +120,7 @@ export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // R7b — the seam fills the BEING BELIEVED bar. Slide toward ON THE MURDERER
       // and telling the truth costs the stock nothing; slide the other way and the
       // bar drains, which is the price Kant refuses to pay.
-      trust: carry(cv, 3, n, TRUST[p], reacting ? dragPos.value : TRUST[n], tr),
+      trust: carry(cv, 3, n, TRUST[p], reacting ? pickPos.value : TRUST[n], tr),
       // THE NOTE'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs to,
       // flatly 0 on every other beat — one flash per tap, not a loop.
       note: noteNow ? ease01(bt.value / 1.1) : 0,

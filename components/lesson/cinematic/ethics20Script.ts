@@ -62,18 +62,18 @@ export const BEATS: Eth20Beat[] = [
   {
     p: 165, x: 132, blocks: 1, rate: 0.72, live_d: 1,
     interact: {
-      prompt: 'How much less should a harm count only because it happens later?',
-      drag: {
-        lo: 'A LIFE IS A LIFE',
-        hi: 'NOBODY LATER COUNTS',
-        start: 0.72,
-        zones: [
-          { id: 'none', upto: 0.22, reads: 'no less: a later harm counts the same', correct: true },
-          { id: 'some', upto: 0.6, reads: 'distant harms count for somewhat less' },
-          { id: 'hard', upto: 1, reads: 'distant harms count for almost nothing' },
+      prompt: 'As a harm moves further off, which shape should its weight take?',
+      plot: {
+        cols: ['THIS YEAR', 'IN TEN YEARS', 'IN A CENTURY'],
+        axis: 'HOW MUCH IT COUNTS',
+        start: [0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'none', profile: [0.9, 0.9, 0.9, 0.9, 0.9], reads: 'the same, however far off', correct: true },
+          { id: 'some', profile: [0.9, 0.72, 0.55, 0.4, 0.3], reads: 'somewhat less as it recedes' },
+          { id: 'gone', profile: [0.9, 0.5, 0.2, 0.07, 0.02], reads: 'almost nothing once it is distant' },
         ],
       },
-      explain: 'No less: a later harm counts the same. Pure time preference makes a harm matter less only because of when it happens. Frank Ramsey called that practice “ethically indefensible”.',
+      explain: 'The same, however far off. A person harmed in a century is harmed as much as one harmed now, and being born later isn\'t a reason to matter less. Discounting money over time is a different matter and doesn\'t carry over to suffering.',
       xp: 5,
     },
     dur: 1.0,

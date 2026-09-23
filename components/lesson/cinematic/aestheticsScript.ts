@@ -208,16 +208,15 @@ export const BEATS: AestheticsBeat[] = [
     weigh: 'q2',
     interact: {
       prompt: 'Who does a judgement of taste speak for?',
-      split: {
-        left: 'EVERYBODY', right: 'ONLY YOURSELF',
-        start: 0.04,
-        zones: [
-          { id: 'you', upto: 0.3, reads: 'it speaks for you alone' },
-          { id: 'both', upto: 0.66, reads: 'half about you, half about everyone' },
-          { id: 'all', upto: 1, reads: 'felt by you, yet claiming everyone’s agreement', correct: true },
+      sort: {
+        chip: 'THIS IS BEAUTIFUL',
+        bins: [
+          { id: 'me', label: 'FOR YOU', reads: 'for you alone, like a preference' },
+          { id: 'half', label: 'HALF AND HALF', reads: 'half about you, half about everyone' },
+          { id: 'all', label: 'FOR EVERYONE', reads: 'felt by you, and claiming everyone\u2019s agreement', correct: true },
         ],
       },
-      explain: 'Felt by you, yet claiming everyone’s agreement. A judgement of taste rests on your own feeling. Yet unlike “I like it”, “it is beautiful” demands that everyone agree.',
+      explain: 'It\'s felt by you and claims everyone. Kant\'s puzzle is that the judgement rests on nothing but your own pleasure and yet doesn\'t behave like a preference: saying this is beautiful invites agreement in a way that saying you like the taste of something doesn\'t.',
       xp: 5,
     },
     dur: 1.0,

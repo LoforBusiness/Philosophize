@@ -95,10 +95,10 @@ const X = BEATS.map((b) => b.x ?? FIG_X);
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics16'));
 
-export default function Ethics16Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics16Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldS = useHeld();
   const cv = useCarry(6);
@@ -130,7 +130,7 @@ export default function Ethics16Scene({ clock, bt, bi, i, picked, onPick, dragPo
       // R7b — the knob takes the knife away. Drag toward BLAME IS UNTOUCHED and the
       // coercion at his back withdraws, which is the compatibilist move made visible:
       // the causes overhead never move, and only the forcing does.
-      knife: carry(cv, 1, n, KNIFE[p], reacting ? 1 - dragPos.value : KNIFE[n], grow),
+      knife: carry(cv, 1, n, KNIFE[p], reacting ? 1 - pickPos.value : KNIFE[n], grow),
       money: carry(cv, 2, n, MONEY[p], MONEY[n], tr),
       boards: carry(cv, 3, n, PICKV[p], PICKV[n], grow),
       bound: carry(cv, 4, n, BOUND[p], BOUND[n], boundFade ? grow : 1),

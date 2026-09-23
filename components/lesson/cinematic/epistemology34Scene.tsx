@@ -71,7 +71,7 @@ const GAP_LBL = BEATS.map((b) => ((b.gapLbl ?? 0) > 0 ? 1 : 0));
 const TARGET = BEATS.map((b) => ((b.target ?? 0) > 0 ? 1 : 0));
 const EXAMPLE = BEATS.map((b) => ((b.example ?? 0) > 0 ? 1 : 0));
 
-export default function Epistemology34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Epistemology34Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(7);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -92,7 +92,7 @@ export default function Epistemology34Scene({ clock, bt, bi, i, dragPos, gazeX, 
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P[p], t)), emoteLive(P[n], t, bt.value), tr));
     const grow = ease01(bt.value / 1.0);
-    const c = live ? dragPos.value : carry(cv, 0, n, CLAIM[p], CLAIM[n], grow);
+    const c = live ? pickPos.value : carry(cv, 0, n, CLAIM[p], CLAIM[n], grow);
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       claim: c,

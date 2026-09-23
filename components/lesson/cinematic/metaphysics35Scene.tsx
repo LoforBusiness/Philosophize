@@ -93,10 +93,10 @@ const FAILMARK = BEATS.map((b) => (b.failMark ? 1 : 0));
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics35'));
 
-export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(8);
@@ -141,7 +141,7 @@ export default function Metaphysics35Scene({ clock, bt, bi, qv, i, picked, onPic
       // R7b — the knob ties the knot. Drag toward SOMETHING PUSHES BACK and a knot
       // appears in the line the reader is walking; drag back and the line runs
       // straight, with the failures having no cause in common at all.
-      knotOn: carry(cv, 3, n, KNOT[p], reacting ? dragPos.value : KNOT[n], tr),
+      knotOn: carry(cv, 3, n, KNOT[p], reacting ? pickPos.value : KNOT[n], tr),
       // The tie parts on the beat that snaps, and STAYS parted — a contradiction
       // that re-knots itself while the reader is still looking at it would undo the
       // one thing this beat is for.

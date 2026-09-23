@@ -140,7 +140,7 @@ const NEGATE = BEATS.map((b) => (b.negate ? 1 : 0));
 // R7c — the card follows the drag on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 // THE DRAG IS THE CARD'S ADDRESS. Its three zones are the three homes this lesson
 // has already staged, so the knob sends the card to the one its zone names:
@@ -156,7 +156,7 @@ const HOME_EDGE = 0.22;     // its half-width: the zone runs 0.28 … 0.72
 const HOME_CORE = 0.14;     // the part of it where the tags are wholly on
 const HOME_ON_STRINGS = 0;
 
-export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(9);
   const cur = BEATS[i];
@@ -197,7 +197,7 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, d
     const was = CARDV[p] > 0;
 
     // Where the reader has the card, on the drag's own 0…1, eased in from the strings.
-    const home = carry(cv, 2, n, HOME_ON_STRINGS, reacting ? dragPos.value : HOME_ON_STRINGS, tr);
+    const home = carry(cv, 2, n, HOME_ON_STRINGS, reacting ? pickPos.value : HOME_ON_STRINGS, tr);
     const inThings = clamp01((HOME_EDGE - Math.abs(home - HOME_MID)) / (HOME_EDGE - HOME_CORE));
     const homeY = lerp(CARD_Y[3], CARD_Y[2], clamp01((home - (HOME_MID - HOME_CORE)) / (2 * HOME_CORE)));
 

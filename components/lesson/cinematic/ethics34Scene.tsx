@@ -62,7 +62,7 @@ const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? FIG_X);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics34'));
 
-export default function Ethics34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Ethics34Scene({ clock, bt, bi, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(4);
   const live = (BEATS[i].live ?? 0) > 0;
@@ -74,7 +74,7 @@ export default function Ethics34Scene({ clock, bt, bi, i, dragPos, gazeX, gazeY,
     const t = clock.value;
     const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P[p], t)), emoteLive(P[n], t, bt.value), tr));
     const grow = ease01(bt.value / 1.1);
-    const u = live ? dragPos.value : carry(cv, 0, n, POP[p], POP[n], grow);
+    const u = live ? pickPos.value : carry(cv, 0, n, POP[p], POP[n], grow);
     return {
       fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
       pop: u,

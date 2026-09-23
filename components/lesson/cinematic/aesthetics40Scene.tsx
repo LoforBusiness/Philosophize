@@ -98,11 +98,11 @@ const COURSE_Y = 360;
 
 // R7c — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat so it cannot fall out of step with the control.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics40'));
 
-export default function Aesthetics40Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Aesthetics40Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(6);
@@ -130,7 +130,7 @@ export default function Aesthetics40Scene({ clock, bt, bi, i, picked, onPick, dr
       lineOn: carry(cv, 2, n, LINE[p], LINE[n], tr),
       // R7c — the knob's own 0…1 IS how far the column comes up, so nothing has
       // to be mapped and the reader is moving the thing under discussion.
-      raise: carry(cv, 3, n, RAISE[p], reacting ? dragPos.value : RAISE[n], tr),
+      raise: carry(cv, 3, n, RAISE[p], reacting ? pickPos.value : RAISE[n], tr),
       platesOn: carry(cv, 4, n, PLATES[p], PLATES[n], tr),
       // beat 7 — "diners argue about whether the fifth course earned its
       // place": five course dots settle over the taste column.

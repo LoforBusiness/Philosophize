@@ -72,17 +72,16 @@ export const BEATS: Meta13Beat[] = [
   {
     p: 4, x: 124, track: 1, fork: 1, both: 1, stuck: 1,
     interact: {
-      prompt: 'On a psychological account, how do the two people’s claims to be you compare?',
-      split: {
-        left: 'THE REPLICA ON MARS', right: 'THE ONE ON EARTH',
-        start: 0.04,
-        zones: [
-          { id: 'earth', upto: 0.3, reads: 'all to the one on Earth' },
-          { id: 'both', upto: 0.7, reads: 'equal claims, so no fact settles which is you', correct: true },
-          { id: 'copy', upto: 1, reads: 'all to the replica on Mars' },
+      prompt: 'Put the teleport in order, first step to last.',
+      order: {
+        axis: 'FIRST STEP FIRST',
+        items: [
+          { id: 'scan', reads: 'YOU ARE SCANNED' },
+          { id: 'gone', reads: 'THE BODY IS DESTROYED' },
+          { id: 'built', reads: 'A COPY IS BUILT ON MARS' },
         ],
       },
-      explain: 'Equal claims, so no fact settles which is you. Picking the one on Earth relies on the body, which this account sets aside. Your memories and aims survive twice while identity fails, so Parfit says identity isn’t what matters.',
+      explain: 'Scanned, destroyed, rebuilt. Parfit\'s point is that nothing in this order settles which one is you. A memory account gives the copy every memory you had. And if the first body lives through the scan, both have the same claim.',
       xp: 5,
     },
     dur: 1.0,

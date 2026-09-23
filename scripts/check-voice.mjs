@@ -82,7 +82,7 @@ const DIR = 'components/lesson/cinematic';
  * AC): what is left is a philosopher's own reported first person and quoted speech.
  * 4 → 1 on 13 Sep 2026, after the lecture rewrite (group V, V1).
  */
-const VOICE_BUDGET = 1;
+const VOICE_BUDGET = 0;
 
 /**
  * EVERY FIELD THE READER READS, AND NOT ONE MORE.

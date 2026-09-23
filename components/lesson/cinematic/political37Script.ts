@@ -54,18 +54,16 @@ export const BEATS: Political37Beat[] = [
   {
     p: 457, x: 54, pair: 1, horns: 1, labels: 1, live_d: 1, live: 1,
     interact: {
-      prompt: 'How far should the law cap what can be spent on political campaigns?',
-      drag: {
-        lo: 'NO LIMIT',
-        hi: 'STRICT EQUALITY',
-        start: 0,
-        zones: [
-          { id: 'none', upto: 0.28, reads: 'wealth decides who is heard' },
-          { id: 'some', upto: 0.68, reads: 'a ceiling that still allows real campaigning', correct: true },
-          { id: 'hard', upto: 1, reads: 'no one may spend to amplify a message' },
+      prompt: 'Put these in order, from no limit to the tightest.',
+      order: {
+        axis: 'LOOSEST FIRST',
+        items: [
+          { id: 'open', reads: 'SPEND WHAT YOU LIKE' },
+          { id: 'cap', reads: 'A CEILING THAT STILL ALLOWS A CAMPAIGN' },
+          { id: 'ban', reads: 'NOBODY MAY SPEND AT ALL' },
         ],
       },
-      explain: 'A ceiling that still allows real campaigning. With no limit, wealth decides who’s heard. Strict equality would stop anyone amplifying a message. Even a moderate cap works by reducing the louder voice, not by raising the quieter one.',
+      explain: 'The middle one is what the argument supports. With no limit, how loudly a view is heard tracks who funds it rather than who holds it; with no spending at all there\'s no way to reach anyone. A cap tries to keep the reaching without the buying.',
       xp: 5,
     },
     dur: 1.0,

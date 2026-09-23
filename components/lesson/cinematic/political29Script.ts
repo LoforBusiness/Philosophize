@@ -87,18 +87,18 @@ export const BEATS: Political29Beat[] = [
   {
     p: 171, x: 80, cribs: 1, wall: 1,
     interact: {
-      prompt: 'How much does the side of the border decide about the two lives?',
-      drag: {
-        lo: 'NOTHING',
-        hi: 'ALMOST EVERYTHING',
-        start: 0.05,
-        zones: [
-          { id: 'none', upto: 0.3, reads: 'the two lives will turn out much alike' },
-          { id: 'some', upto: 0.65, reads: 'a small effect, then their own choices decide' },
-          { id: 'most', upto: 1, reads: 'education, safety and income, largely settled at birth', correct: true },
+      prompt: 'As you cross the border, which shape does a life take?',
+      plot: {
+        cols: ['ONE SIDE', 'THE LINE', 'THE OTHER'],
+        axis: 'SETTLED AT BIRTH',
+        start: [0.5, 0.5, 0.5],
+        shapes: [
+          { id: 'most', profile: [0.9, 0.88, 0.5, 0.15, 0.12], reads: 'most of it changes at the line', correct: true },
+          { id: 'same', profile: [0.55, 0.55, 0.55, 0.55, 0.55], reads: 'the two lives come out much alike' },
+          { id: 'small', profile: [0.62, 0.6, 0.55, 0.5, 0.48], reads: 'a small nudge, then their own choices' },
         ],
       },
-      explain: 'Education, safety and income, largely settled at birth. Neither baby chose a side, yet the border shapes both lives more than most later choices. Carens builds his case for open borders on this. Walzer still holds that a community may decide who joins.',
+      explain: 'Most of it changes at the line. Schooling, safety, healthcare and expected income shift sharply across a border that neither child chose, and none of it answers to anything either of them has done. That\'s why the place of birth is called a lottery.',
       xp: 5,
     },
     dur: 1.0,

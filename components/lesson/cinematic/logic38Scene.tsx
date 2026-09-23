@@ -109,11 +109,11 @@ const LIVE = BEATS.map((b) => (b.live ? 1 : 0));
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about, and so `check:echo` is never charged for
 // a channel that is really a fact about the question.
-const REACT = BEATS.map((b) => (b.interact?.split ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic38'));
 
-export default function Logic38Scene({ clock, bt, bi, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic38Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(8);
@@ -147,7 +147,7 @@ export default function Logic38Scene({ clock, bt, bi, i, picked, onPick, dragPos
       // R7c — the seam IS the mark's position. `dragPos` is the LEFT side's share
       // (R7b), the left side is IN THE SHAPE, so dragging right moves the bracket
       // off the hopper and onto the three steps.
-      shapeShare: carry(cv, 7, n, 0, reacting ? dragPos.value : 0, tr),
+      shapeShare: carry(cv, 7, n, 0, reacting ? pickPos.value : 0, tr),
     };
   });
 

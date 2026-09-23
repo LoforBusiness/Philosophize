@@ -93,18 +93,16 @@ export const BEATS: Eth21Beat[] = [
   {
     p: 41, x: 268, act: 1, arms: 1, means: 1,
     interact: {
-      prompt: 'How does the morphine case divide between what is intended and what is foreseen?',
-      split: {
-        left: 'INTENDED',
-        right: 'MERELY FORESEEN',
-        start: 0.5,
-        zones: [
-          { id: 'foreseen', upto: 0.35, reads: 'the relief was only a side effect' },
-          { id: 'both', upto: 0.62, reads: 'the doctor intended both effects equally' },
-          { id: 'intended', upto: 1, reads: 'the relief intended, the shortened life foreseen', correct: true },
+      prompt: 'Put the morphine case in order.',
+      order: {
+        axis: 'FIRST STEP FIRST',
+        items: [
+          { id: 'dose', reads: 'THE DOSE IS GIVEN' },
+          { id: 'relief', reads: 'THE PAIN LIFTS' },
+          { id: 'short', reads: 'THE LIFE IS SHORTENED' },
         ],
       },
-      explain: 'The relief intended, the shortened life foreseen. Relieving pain is the aim of the act. The shortened life is a cost the doctor accepts without aiming at it. An even split would mean the doctor half intended the death.',
+      explain: 'The relief is what\'s aimed at; the shortening is foreseen and not intended. The doctrine of double effect turns on that difference, and on the shortening not being the means by which the pain is relieved.',
       xp: 5,
     },
     dur: 1.0,

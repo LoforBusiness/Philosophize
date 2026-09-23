@@ -53,6 +53,14 @@ const SLOTS = {
   // THE TREND PICK. The axis name shares its row with the column range and is the
   // one that shrinks, so it has the row less about seventy points of range.
   'trend.axis': { file: 'TrendPick.tsx', font: 'Inter_700Bold', size: 9, track: 1.1, lines: 1, room: () => PHONE - 24 * 2 - 78 },
+  // AND THE RANGE BESIDE IT, which nothing measured at all. The head is a
+  // space-between row holding the axis and `first → last`, and only the AXIS
+  // shrinks — so a long range pushes both off the row while this file, reading
+  // the axis against a flat 78pt allowance for a range it had never seen, said
+  // every label fitted. The rendered deck found the pair cut in four lessons at
+  // 360, 384 AND 390. Measured alone here, and as a PAIR below, because neither
+  // number on its own is the constraint.
+  'trend.range': { file: 'TrendPick.tsx', font: 'Inter_500Medium', size: 9, track: 0.8, lines: 1, room: () => PHONE - 24 * 2 - 60 },
   // A tile's caption. Four shapes go two by two with two lines each; three sit in
   // one row with three lines each. Each tile's face has 5 of padding and 1.5 of
   // border a side, and the tiles are 6 apart.
@@ -110,6 +118,35 @@ const SLOTS = {
   // The holder names follow HELD BY (about 42 wide) and a 7px gap, indented 17
   // under the gem. They are revealed on answering and must fit one line.
   'poll.names': { file: 'PollBallot.tsx', font: 'Inter_700Bold', size: 11, track: 0, lines: 1, room: () => PHONE - 20 * 2 - 20 - 3 - 17 - 42 - 7 },
+
+  // ── THE TWO THAT REPLACED THE RAIL AND THE SEAM (R21, R22) ─────────────────
+  //
+  // Same reasoning as the pair above, and by now it is the rule rather than the
+  // observation: a control that arrives without a row here is a control this file
+  // silently stops measuring, and the run still prints "every control label fits".
+  //
+  // Both lay their tiles in a `flex: 1` slot inside `wrap`'s 24 a side, six apart,
+  // two to a row at four tiles and all in one row below that. Inside each slot is
+  // LipPlate's `core` (1.5 of border a side) and `face` (5 of padding a side), so a
+  // tile's usable width is its slot less thirteen.
+  // Four items go two by two at 10.5 over two lines; three sit in one row, which
+  // is an 87dp tile — so that case drops to 10pt over four lines, exactly as the
+  // trend tiles do at the identical geometry. The first draft gave both two lines
+  // and this check found 34 of the corpus's own captions too long for the narrow
+  // one, nearly all of them ordinary four-word phrases: the box was what was
+  // wrong, not the copy (the same finding as sort.chip above).
+  'order.caption': { file: 'OrderTiles.tsx', font: 'Inter_500Medium', size: 10.5, track: 0, lines: 2, room: () => (PHONE - 24 * 2 - 6) / 2 - 13 },
+  'order.caption3': { file: 'OrderTiles.tsx', font: 'Inter_500Medium', size: 10, track: 0, lines: 4, room: () => (PHONE - 24 * 2 - 12) / 3 - 13 },
+  // The axis shares its row with the count ("2 OF 3", about 40 wide) and an 8px gap,
+  // and is `numberOfLines={1}` with `flexShrink`, so it is the one that clips.
+  'order.axis': { file: 'OrderTiles.tsx', font: 'Inter_700Bold', size: 9, track: 1.1, lines: 1, room: () => PHONE - 24 * 2 - 8 - 40 },
+  // An odd is always four tiles, so always two to a row.
+  'odd.caption': { file: 'OddOneOut.tsx', font: 'Inter_500Medium', size: 10.5, track: 0, lines: 2, room: () => (PHONE - 24 * 2 - 6) / 2 - 13 },
+  // A tile with no drawing prints its words INSIDE the art box instead: one more
+  // unit of border a side and four of its own padding.
+  'odd.bare': { file: 'OddOneOut.tsx', font: 'Inter_700Bold', size: 11, track: 0, lines: 3, room: () => (PHONE - 24 * 2 - 6) / 2 - 13 - 2 - 8 },
+  // Beside "ONE DOES NOT BELONG", which sets at about 118 at 9px with 0.8 tracking.
+  'odd.axis': { file: 'OddOneOut.tsx', font: 'Inter_700Bold', size: 9, track: 1.1, lines: 1, room: () => PHONE - 24 * 2 - 8 - 118 },
 };
 
 const FONT_FILE = {
@@ -164,6 +201,11 @@ for (const f of scripts) {
   // tile's caption; the axis names the row above them.
   for (const b of blocks('plot')) {
     add('trend.axis', str(b, 'axis'), id);
+    // `first  →  last`, exactly as TrendPick joins them.
+    {
+      const cols = [...(/cols: \[([^\]]*)\]/.exec(b)?.[1] ?? '').matchAll(/'((?:[^'\\]|\\.)*)'/g)].map((v) => unesc(v[1]));
+      if (cols.length) add('trend.range', `${cols[0]}  \u2192  ${cols[cols.length - 1]}`, id);
+    }
     const caps = readsIn(b);
     for (const r of caps) add(caps.length >= 4 ? 'trend.caption4' : 'trend.caption3', r, id);
   }
@@ -191,6 +233,21 @@ for (const f of scripts) {
       const names = [...h[1].matchAll(/'((?:[^'\\]|\\.)*)'/g)].map((v) => unesc(v[1]));
       if (names.length) add('poll.names', names.join('  ·  '), id);
     }
+  }
+  // And the two that replaced the rail and the seam (R21, R22).
+  for (const b of blocks('order')) {
+    const items = readsIn(b);
+    for (const v of items) add(items.length >= 4 ? 'order.caption' : 'order.caption3', v, id);
+    add('order.axis', str(b, 'axis'), id);
+  }
+  for (const b of blocks('odd')) {
+    // A tile's words sit UNDER a drawing where there is one and INSIDE the art box
+    // where there is not, and the two boxes are different sizes — so which slot a
+    // string belongs to depends on whether its own tile carries a `draw`.
+    for (const t of b.matchAll(/\{[^{}]*?reads: '((?:[^'\\]|\\.)*)'[^{}]*\}/g)) {
+      add(/\bdraw:/.test(t[0]) ? 'odd.caption' : 'odd.bare', unesc(t[1]), id);
+    }
+    add('odd.axis', str(b, 'axis'), id);
   }
 }
 
@@ -322,6 +379,36 @@ jobs.forEach((j, i) => {
   else if (m.lines > j.lines) bad.push({ ...j, ...m, why: `needs ${m.lines} lines, has ${j.lines}` });
 });
 
+// ── AND THE PAIR, BECAUSE THE ROW IS WHAT THEY SHARE ────────────────────────
+//
+// The axis and the range sit in one space-between row with an 8pt gap inside the
+// deck's 24 a side. Each can fit its own generous bound and the two together
+// still overflow, which is the shape the render caught and no per-label rule
+// could: five heads were over, the worst by 64pt.
+const HEAD_ROOM = PHONE - 24 * 2 - 8;
+let headBad = 0;
+{
+  const axisW = new Map(); const rangeW = new Map();
+  jobs.forEach((j, i) => {
+    const into = j.slot === 'trend.axis' ? axisW : j.slot === 'trend.range' ? rangeW : null;
+    if (!into) return;
+    for (const id of j.from) into.set(id, Math.max(into.get(id) ?? 0, measured[i].oneLine));
+  });
+  const over = [];
+  for (const [id, a] of axisW) {
+    const r = rangeW.get(id) ?? 0;
+    if (a + r > HEAD_ROOM) over.push({ id, a, r, total: a + r });
+  }
+  over.sort((x, y) => y.total - x.total);
+  headBad = over.length;
+  if (over.length) {
+    console.log(`  FAIL  the trend head fits its row  ${over.length} do not\n`);
+    for (const o of over.slice(0, +(process.env.CONTROLS_N || 6))) {
+      console.log(`      ${o.total.toFixed(0).padStart(4)}dp in ${HEAD_ROOM.toFixed(0)}dp · axis ${o.a.toFixed(0)} + range ${o.r.toFixed(0)}   [${o.id}]`);
+    }
+  }
+}
+
 const bySlot = new Map();
 for (const b of bad) {
   if (!bySlot.has(b.slot)) bySlot.set(b.slot, []);
@@ -331,10 +418,10 @@ for (const [slot, list] of bySlot) {
   const s = SLOTS[slot];
   console.log(`  ${slot}  (${s.file} · ${s.size}pt ${s.font.replace('Inter_', '')} · ${s.lines} lines)`);
   list.sort((a, b) => b.oneLine - a.oneLine);
-  for (const b of list.slice(0, 6)) {
+  for (const b of list.slice(0, +(process.env.CONTROLS_N || 6))) {
     console.log(`      ${String(b.oneLine).padStart(6)}dp in ${b.room.toFixed(0)}dp · ${b.why.padEnd(30)} ${JSON.stringify(b.text).slice(0, 62)}  [${b.from.slice(0, 2).join(', ')}${b.from.length > 2 ? ` +${b.from.length - 2}` : ''}]`);
   }
-  if (list.length > 6) console.log(`      … and ${list.length - 6} more`);
+  if (list.length > +(process.env.CONTROLS_N || 6)) console.log(`      … and ${list.length - +(process.env.CONTROLS_N || 6)} more`);
   console.log('');
 }
 
@@ -344,7 +431,8 @@ console.log(noReact.length
   : '  ok    the reading is driven from the UI thread, never from React state');
 console.log('');
 
-const ok = bad.length === 0 && noReact.length === 0;
+const ok = bad.length === 0 && noReact.length === 0 && headBad === 0;
+if (!headBad) console.log('  ok    the trend head fits its row  45 heads, axis and range together');
 console.log(`  ${bad.length ? 'FAIL' : 'ok  '}  every control label fits the room it is given  ${bad.length} do not`);
 console.log(ok
   ? '\nnothing a control draws runs off its box.\n'

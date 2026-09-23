@@ -96,7 +96,7 @@ const AGAIN = BEATS.map((b) => (b.again ? 1 : 0));
 // R7b — the stage follows the control on its own graded beat, and only there.
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.drag ? 1 : 0));
+const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 // The columns only GROW on the beat that raises them; on every later beat they
 // hold their height, so they never re-climb behind the reader's back (the prop
 // rule that aesthetics-1's apple taught).
@@ -104,7 +104,7 @@ const CLIMB = RISE.map((v, k) => (v > 0 && (k === 0 || RISE[k - 1] === 0) ? 1 : 
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic35'));
 
-export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFig = useHeld();
   const cv = useCarry(9);
@@ -134,7 +134,7 @@ export default function Logic35Scene({ clock, bt, bi, qv, i, picked, onPick, dra
       picksOn: carry(cv, 3, n, PICKS[p], PICKS[n], tr),
       // R7c — the hidden hand under both columns is the thing being cut. A bigger
       // study leaves it exactly where it was; a coin takes it away.
-      underOn: carry(cv, 4, n, UNDER[p], reacting ? 1 - dragPos.value : UNDER[n], tr),
+      underOn: carry(cv, 4, n, UNDER[p], reacting ? 1 - pickPos.value : UNDER[n], tr),
       // The cut is made once, on the beat that makes it, and stays made.
       cut: CUT[n] === 1 ? (n > 0 && CUT[p] === 1 ? 1 : ease01((bt.value - 0.25) / 0.5)) : 0,
       // The right candidate fills as the answer lands.

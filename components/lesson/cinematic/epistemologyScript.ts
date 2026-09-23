@@ -156,18 +156,16 @@ export const BEATS: EpistBeat[] = [
     tie: true,
     qkey: 'q2',
     interact: {
-      prompt: 'How much support must a true belief have to count as knowledge?',
-      drag: {
-        lo: 'NO REASONS AT ALL',
-        hi: 'STRONG SUPPORTING REASONS',
-        start: 0,
-        zones: [
-          { id: 'hunch', upto: 0.3, reads: 'a lucky guess, true yet not knowledge' },
-          { id: 'sure', upto: 0.66, reads: 'some grounds, yet too weak to justify it' },
-          { id: 'know', upto: 1, reads: 'strong reasons, so the belief is knowledge', correct: true },
+      prompt: 'Put these in order, from least supported to best.',
+      order: {
+        axis: 'LEAST SUPPORT FIRST',
+        items: [
+          { id: 'guess', reads: 'A LUCKY GUESS' },
+          { id: 'weak', reads: 'SOME GROUNDS, TOO WEAK' },
+          { id: 'know', reads: 'STRONG REASONS' },
         ],
       },
-      explain: 'Strong reasons, so the belief is knowledge. Justification comes from reasons, not from how confident you feel. A true belief without adequate reasons is correct only by luck, so it isn’t knowledge.',
+      explain: 'Only the last is knowledge. A true belief can be arrived at by luck or held on grounds that don\'t carry it, and neither is knowing. What the third adds is support strong enough that being right isn\'t an accident.',
       xp: 5,
     },
     dur: 1.0,

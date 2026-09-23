@@ -36,18 +36,18 @@ export const BEATS: Logic36Beat[] = [
   {
     p: 461, x: 58, room: 1, live_d: 1, live: 1,
     interact: {
-      prompt: 'How much of the room must be searched before an empty result shows there’s no elephant?',
-      drag: {
-        lo: 'LOOKED NOWHERE',
-        hi: 'LOOKED EVERYWHERE',
-        start: 0,
-        zones: [
-          { id: 'none', upto: 0.3, reads: 'the empty result shows almost nothing' },
-          { id: 'part', upto: 0.66, reads: 'the elephant is probably absent' },
-          { id: 'all', upto: 1, reads: 'the search shows there’s no elephant', correct: true },
+      prompt: 'As more of the room is searched, which shape does the empty result take?',
+      plot: {
+        cols: ['A CORNER', 'HALF', 'ALL OF IT'],
+        axis: 'EVIDENCE OF NO ELEPHANT',
+        start: [0.2, 0.2, 0.2],
+        shapes: [
+          { id: 'rise', profile: [0.05, 0.25, 0.5, 0.78, 1], reads: 'it grows as the search covers more', correct: true },
+          { id: 'flat', profile: [0.1, 0.1, 0.1, 0.1, 0.1], reads: 'an absence never shows anything' },
+          { id: 'jump', profile: [0.9, 0.92, 0.94, 0.96, 1], reads: 'one empty corner is already enough' },
         ],
       },
-      explain: 'The search shows there’s no elephant. Every searched square was empty at every setting. Only the share of the room covered changed, and that share decides how much an empty result proves.',
+      explain: 'It grows with the search. Absence of evidence is evidence of absence to the extent that you would have found the thing had it been there, so an elephant is settled by a glance and a mouse isn\'t. What matters is how thorough the looking was.',
       xp: 5,
     },
     dur: 1.0,

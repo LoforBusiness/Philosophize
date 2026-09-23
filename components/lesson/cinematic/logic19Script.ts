@@ -86,18 +86,16 @@ export const BEATS: Log19Beat[] = [
   {
     p: 442, x: 268, rule: 1, cards: 1, turned: 1,
     interact: {
-      prompt: 'To test a belief, how should your search be divided between confirming and refuting cases?',
-      split: {
-        left: 'COULD CONFIRM IT',
-        right: 'COULD REFUTE IT',
-        start: 0.82,
-        zones: [
-          { id: 'refute', upto: 0.4, reads: 'mostly cases that could refute it', correct: true },
-          { id: 'even', upto: 0.65, reads: 'confirming and refuting cases equally' },
-          { id: 'confirm', upto: 1, reads: 'mostly cases that could confirm it' },
+      prompt: 'To test a belief, what should you go looking for?',
+      sort: {
+        chip: 'YOUR SEARCH',
+        bins: [
+          { id: 'refute', label: 'CASES AGAINST', reads: 'mostly cases that could show it false', correct: true },
+          { id: 'even', label: 'HALF AND HALF', reads: 'confirming and refuting cases alike' },
+          { id: 'confirm', label: 'CASES FOR', reads: 'mostly cases that would confirm it' },
         ],
       },
-      explain: 'Mostly cases that could refute the belief. Confirming cases are easy to find, and no number of them proves a general claim. One refuting case can show the claim false, so a genuine test looks there.',
+      explain: 'Cases that could show it false. A confirming case is consistent with the belief being wrong in some other part of its range, so it moves you very little; a refuting case settles the matter. Looking for agreement finds it whether or not the belief is true.',
       xp: 5,
     },
     dur: 1.0,

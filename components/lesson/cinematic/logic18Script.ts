@@ -64,18 +64,18 @@ export const BEATS: Log18Beat[] = [
   {
     p: 165, x: 128, crowd: 1, gap: 1, needle: 0.5, broken: 1, live_d: 1,
     interact: {
-      prompt: 'If everyone asserts that the water is safe, where does the needle point?',
-      drag: {
-        lo: 'ONE PERSON SAYS SO',
-        hi: 'EVERYBODY SAYS SO',
-        start: 0.08,
-        zones: [
-          { id: 'few', upto: 0.35, reads: 'few people agree, and the needle hasn’t moved' },
-          { id: 'many', upto: 0.72, reads: 'most agree, and the needle still hasn’t moved' },
-          { id: 'all', upto: 1, reads: 'everyone agrees, and the needle is where it began', correct: true },
+      prompt: 'As more people agree, which shape does the evidence take?',
+      plot: {
+        cols: ['A FEW', 'MOST', 'EVERYONE'],
+        axis: 'EVIDENCE THE WATER IS SAFE',
+        start: [0.2, 0.2, 0.2],
+        shapes: [
+          { id: 'flat', profile: [0.12, 0.12, 0.12, 0.12, 0.12], reads: 'it never moves', correct: true },
+          { id: 'rise', profile: [0.1, 0.35, 0.6, 0.82, 1], reads: 'it climbs with the numbers' },
+          { id: 'late', profile: [0.1, 0.12, 0.2, 0.55, 1], reads: 'it jumps once everyone agrees' },
         ],
       },
-      explain: 'Everyone agrees, and the needle is where it began. How many people hold a view, and how strongly, are facts about them, not about the water. Only evidence, such as a test, can move the needle.',
+      explain: 'It never moves. Counting heads tells you what people believe, not whether the water is safe, so the needle stays where the evidence left it. One person who tested it moves the needle further than a unanimous room that didn\'t.',
       xp: 5,
     },
     dur: 1.0,
