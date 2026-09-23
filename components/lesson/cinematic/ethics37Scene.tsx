@@ -188,6 +188,7 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
           disabled={!live || answered}
           style={styles.hitPlans}
         >
+          <Text style={[styles.hitName]}>THEIR PLANS</Text>
           <View style={[styles.hitBox, live && !answered && styles.hitLive]} pointerEvents="none" />
         </Target>
         <Target
@@ -198,6 +199,7 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
           disabled={!live || answered}
           style={styles.hitCord}
         >
+          <Text style={[styles.hitName]}>THE PROMISE</Text>
           <View style={[styles.hitBox, live && !answered && styles.hitLive, answered && picked === 'cord' && styles.hitWrong]} pointerEvents="none" />
         </Target>
         <Target
@@ -208,6 +210,7 @@ export default function Ethics37Scene({ clock, bt, bi, i, picked, onPick, dragPo
           disabled={!live || answered}
           style={styles.hitPosts}
         >
+          <Text style={[styles.hitName, styles.hitNameL]}>THE TWO</Text>
           <View style={[styles.hitBox, live && !answered && styles.hitLive, answered && picked === 'posts' && styles.hitWrong]} pointerEvents="none" />
         </Target>
       </Animated.View>
@@ -292,9 +295,24 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8, color: SOFT, includeFontPadding: false,
   },
 
-  hitPlans: { position: 'absolute', left: 180, top: 336, width: 166, height: 58 },
-  hitCord: { position: 'absolute', left: 156, top: 288, width: 188, height: 26 },
-  hitPosts: { position: 'absolute', left: 142, top: 316, width: 26, height: 76 },
+  // THE THREE CHOICES, EACH WITH ITS NAME IN IT (S11).
+  //
+  // They were three bare regions 26 to 188 units wide with nothing written in any of
+  // them, sitting edge to edge: the cord's box ended at 314 and the posts' began at
+  // 316, and `Target` draws its halo three units outside, so the two outlines met.
+  // Each box now holds its own label in the clear band above the art it covers, and
+  // the three stand apart.
+  hitCord: { position: 'absolute', left: 152, top: 282, width: 196, height: 34 },
+  hitPosts: { position: 'absolute', left: 96, top: 320, width: 72, height: 78 },
+  hitPlans: { position: 'absolute', left: 172, top: 320, width: 176, height: 78 },
+  /** The name of the thing the box is over, at the top of it, clear of the art. */
+  hitName: {
+    position: 'absolute', left: 0, right: 0, top: 3,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.8,
+    color: SOFT, textAlign: 'center', includeFontPadding: false,
+  },
+  /** The posts stand at 150, so their name is set LEFT of them rather than over. */
+  hitNameL: { textAlign: 'left', left: 4 },
   hitBox: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: 4 },
   /** WHAT "TAP ONE OF THESE" LOOKS LIKE WHILE THE QUESTION IS OPEN.
    *

@@ -56,6 +56,8 @@ const BASE_TR = 0.85;
 const FALL = [0.86, 0.8, 0.66, 0.62, 0.44, 0.34, 0.3, 0.16, 0.06];
 
 const PAN_Y = 250;
+/** Where each panel's caption is set — the top of that panel's tap target (AN3). */
+const CAP_Y = 236;
 const PAN_H = 92;
 const MUS_X = 30;
 const MUS_W = 130;
@@ -237,7 +239,7 @@ const styles = StyleSheet.create({
   floor: floorStyle(TONE, GROUND),
 
   cap: {
-    position: 'absolute', top: 236, textAlign: 'center',
+    position: 'absolute', top: CAP_Y, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
   },
   panel: {
@@ -256,8 +258,12 @@ const styles = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: SOFT, includeFontPadding: false,
   },
 
-  hit: { position: 'absolute', top: PAN_Y, height: PAN_H },
-  hitBox: { height: PAN_H, borderRadius: 3 },
+  // AN3 — THE HIT BOX HOLDS THE NAME. Each panel is captioned at y 236 and the
+  // targets began at the panel itself, so the reader was asked "which panel" and
+  // given three outlined rectangles whose names were fourteen units above them.
+  // The box reaches up to the caption; no second copy of the word is written.
+  hit: { position: 'absolute', top: CAP_Y, height: PAN_H + (PAN_Y - CAP_Y) },
+  hitBox: { height: PAN_H + (PAN_Y - CAP_Y), borderRadius: 3 },
   right: { borderWidth: 3, borderColor: INK },
   wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });

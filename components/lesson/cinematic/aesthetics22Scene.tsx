@@ -63,6 +63,10 @@ const M_X = 252;
 const M_W = 128;
 const M_H = 30;
 const HEART_Y = 256;
+/** How far the heart target reaches up to take in its own HEART RATE label (AN3). */
+const LAB_RISE = 14;
+/** The row under the screen that carries its name, on paper every beat leaves clear. */
+const CAP_H = 22;
 const BELIEF_Y = 312;
 
 // The gap between the heart track (bottom 286) and the belief label (top 300).
@@ -186,16 +190,25 @@ export default function Aesthetics22Scene({
       <Target
         id="screen" correct={false} picked={picked} onPick={onPick}
         disabled={!live || answered}
-        style={[styles.hit, { left: SC_X, top: SC_Y, width: SC_W, height: SC_H }]}
+        style={[styles.hit, { left: SC_X, top: SC_Y, width: SC_W, height: SC_H + CAP_H }]}
       >
-        <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: SC_W, height: SC_H }, answered && picked === 'screen' && styles.wrong]} pointerEvents="none" />
+        {/* AN1 — THE ONLY CHOICE WITH NOTHING TO CALL IT. The other two are meters
+            and wear their readings; this one was the screen and a dashed outline,
+            so a reader picking it was picking a rectangle. The name sits UNDER the
+            picture, on the paper the beats leave clear there, because the slime
+            comes down the screen and a word on it would be covered (D31). */}
+        <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: SC_W, height: SC_H + CAP_H }, answered && picked === 'screen' && styles.wrong]} pointerEvents="none" />
+        <Text style={styles.hitName} pointerEvents="none">SEEING IT HAPPEN</Text>
       </Target>
       <Target
         id="heart" correct={false} picked={picked} onPick={onPick}
         disabled={!live || answered}
-        style={[styles.hit, { left: M_X, top: HEART_Y, width: M_W, height: M_H }]}
+        style={[styles.hit, { left: M_X, top: HEART_Y - LAB_RISE, width: M_W, height: M_H + LAB_RISE }]}
       >
-        <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: M_W, height: M_H }, answered && picked === 'heart' && styles.wrong]} pointerEvents="none" />
+        {/* AN3 — the name it already has is just outside the box. HEART RATE is set
+            twelve units above the track, so the target reaches up to hold it rather
+            than a second copy being written inside. */}
+        <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: M_W, height: M_H + LAB_RISE }, answered && picked === 'heart' && styles.wrong]} pointerEvents="none" />
       </Target>
       <Target
         id="belief" correct picked={picked} onPick={onPick}
@@ -266,6 +279,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
 
+  // The screen's own name, set to match the meters' labels (AN1).
+  hitName: {
+    position: 'absolute', left: 0, right: 0, top: SC_H + 6, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,
+  },
   mLabel: {
     position: 'absolute', left: M_X, width: M_W,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT, includeFontPadding: false,

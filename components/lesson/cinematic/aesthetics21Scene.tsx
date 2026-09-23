@@ -71,6 +71,8 @@ const SLAB_H = [12, 12, 92];
 const SLAB_STEP = [14, 14, 0];
 
 const STOCK_TOP = 252;
+/** How far each column's target reaches up to take in its own caption (AN3). */
+const CAP_RISE = 20;
 const PLATE_Y = 352;
 
 // The empty-set mark sits above the ash (331…344) and below the caption (234…244).
@@ -359,8 +361,11 @@ const styles = StyleSheet.create({
   },
   plateTextGone: { color: PAPER },
 
-  hit: { position: 'absolute', top: STOCK_TOP, width: COL_W, height: 92 },
-  hitBox: { width: COL_W, height: 92, borderRadius: 3 },
+  // AN3 — THE HIT BOX HOLDS THE NAME. A NOVEL, A SYMPHONY and A PAINTING are set at
+  // y 234 and the columns were tapped from 252, so all three choices in "which of
+  // the three works no longer exists" were unnamed rectangles.
+  hit: { position: 'absolute', top: STOCK_TOP - CAP_RISE, width: COL_W, height: 92 + CAP_RISE },
+  hitBox: { width: COL_W, height: 92 + CAP_RISE, borderRadius: 3 },
   right: { borderWidth: 3, borderColor: INK },
   wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', opacity: 0.5 },
 });

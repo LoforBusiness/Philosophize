@@ -194,7 +194,7 @@ export default function Metaphysics21Scene({
       <Target
         id="now" correct picked={picked} onPick={onPick}
         disabled={!live || answered}
-        style={[styles.hit, { left: NOW_X - 2, top: NOW_Y, width: NOW_W + 4, height: NOW_H }]}
+        style={[styles.hit, { left: NOW_X, top: NOW_Y, width: NOW_W, height: NOW_H }]}
       >
         {/* THE ANSWER IS THE MOMENT, so the moment is what lifts (E39). This art was
             a sibling in an absoluteFill wrapper and the Target held an empty box, so
@@ -293,8 +293,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },
 
-  hit: { position: 'absolute', top: BOX_Y, height: BOX_H },
-  hitBox: { height: BOX_H, borderRadius: 3 },
+  // AN3 — THE HIT BOX HOLDS THE NAME. THE PAST and THE FUTURE are set at y 238,
+  // hard against the ends of the line, and the targets began at the boxes 24 units
+  // below them — so two of the three choices were unnamed outlines. The box reaches
+  // up to the label rather than a second copy of the word being written inside it.
+  hit: { position: 'absolute', top: LABEL_Y, height: BOX_H + (BOX_Y - LABEL_Y) },
+  hitBox: { height: BOX_H + (BOX_Y - LABEL_Y), borderRadius: 3 },
   right: { borderWidth: 3, borderColor: INK },
   wrong: { borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed' },
 });

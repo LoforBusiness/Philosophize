@@ -240,5 +240,48 @@ else {
   else for (const f of faults) no('a beat takes its answer in one place only (E41)', f);
 }
 
+// ── S14 · A CHOICE HAS A NAME ────────────────────────────────────────────────
+//
+// A reader, on ethics37: "you tap above the stickman and there's no words to press,
+// its confusing." Measured in the rendered page at that beat: three live targets,
+// nothing written inside any of them and no word lying on any of them. The reader is
+// asked to pick one of three outlined regions and given nothing to pick BY.
+//
+// WHAT THIS CAN AND CANNOT SEE. A bare hit box is very often right — CLAUDE.md calls
+// it "the commonest correct shape in the corpus", and political7, the lesson the
+// reader holds up as the standard, has two of them with their names drawn on the art
+// underneath. Whether a name is REACHABLE is a question about the render, and
+// `check:blank` is where it is asked, target by target, in a browser.
+//
+// What a static read can hold is the shape that actually bit: a scene whose targets
+// are ALL wordless, which is where a reader has two or more boxes and no way to tell
+// them apart. It is a high-water mark, because thirteen scenes were in that state
+// when this was written and ten of them turned out to be fine.
+{
+  const all = [];
+  for (const f of fs.readdirSync(CIN).filter((n) => n.endsWith('Scene.tsx')).sort()) {
+    const src = fs.readFileSync(path.join(CIN, f), 'utf8');
+    let i = 0; let bareN = 0; let total = 0;
+    for (;;) {
+      const at = src.indexOf('<Target', i);
+      if (at < 0) break;
+      const close = src.indexOf('</Target>', at);
+      const selfClose = src.indexOf('/>', at);
+      const end = close < 0 || (selfClose > 0 && selfClose < close) ? selfClose : close;
+      const body = src.slice(at, end > 0 ? end : src.length);
+      total += 1;
+      if (!/<Text|<Animated\.Text/.test(body)) bareN += 1;
+      i = (end > 0 ? end : at) + 1;
+    }
+    if (total >= 2 && bareN === total) all.push(f.replace(/Scene\.tsx$/, ''));
+  }
+  const BUDGET = +(process.env.NONAME_BUDGET ?? 10);
+  if (all.length > BUDGET) {
+    no('every beat names its choices (S14)', `${all.length} scene(s) draw 2+ targets and write inside none of them, over the budget of ${BUDGET}: ${all.slice(0, 6).join(', ')}`);
+  } else {
+    ok('every beat names its choices (S14)', `${all.length} scene(s) leave every target wordless, budget ${BUDGET} — run npm run check:named to see whether the art names them`);
+  }
+}
+
 console.log(bad ? `\n${bad} failing.\n` : '\nall clear.\n');
 process.exit(bad ? 1 : 0);

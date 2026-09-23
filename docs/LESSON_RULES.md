@@ -10279,3 +10279,164 @@ just gone FLATTER while putting more tone on the stage than the rectangle it rep
 It decides how big a scene's art is, so it is in `muststamp`'s SHARED list beside
 `Target.tsx` and `Silhouette.tsx`. A change to how objects are drawn resizes them in
 every scene that draws one, and those scenes' must-boxes go stale with it.
+
+### AA10 · The visitor may not walk THROUGH the lead
+
+> *"a lot of overlapping happens above the stickman, this again is absolutely
+> unacceptable."*
+
+AA7 asks whether the second figure fits WHERE HE STANDS. It says nothing about how he
+got there, and `make:visitor`'s first rule was *"he comes on from whichever edge he is
+nearer, so the walk is short"* — which sends him straight through the lead whenever he
+lands on the far side of him. In ethics37 he entered at −60 and walked to 166 with the
+mascot standing at 54; measured live at the arrival beat, **their two heads were nine
+pixels apart and a head is thirty-nine.**
+
+He now comes on from the side he is going to stand on. Short was the wrong thing to
+optimise: entering from behind the destination costs at most a stage's width of
+walking, which `rig.moveTr` prices honestly, and it cannot put two figures in one
+place on the way.
+
+**AND THE LEAD'S POSITION IS READ OFF THE SCRIPT, NOT THE MUST-BOX.** A must-box is a
+MOMENT, not a place (AB10) — the probe reads the figure wherever it catches him, and
+113 of 317 walking beats store him 40 or more units from the x the beat walks him to.
+Deciding the side off a recorded box fixed ethics37 and broke ethics14, whose mascot
+the box had caught mid-stride. A script with no `x` at all is the COMMON case, not an
+edge one: the mascot stands still in most lessons and the scene supplies his place as
+its own `FIG_X`.
+
+`check:wardrobe` AA10 holds it; `node scratchpad/ct-aa10.mjs` stages the old rule
+corpus-wide and watches it go red.
+
+### AA11 · A figure occupies his whole height, not his feet
+
+The clear-floor scan that places him ran **400…505** — the floor — while a figure's own
+recorded box runs **378…506**. So anything hanging between 378 and 400 was invisible to
+it, and he could be placed under it. ethics37's frame posts run down to 392 and the tap
+target over them to 392, so the visitor was put at 166 with his HAT inside the box the
+reader is asked to tap: on screen, an outlined rectangle drawn across a stickman's
+head.
+
+The band is his full height now. **That means fewer visitors — 32 lessons to 28 — and
+that is the right trade**, for the same reason AA8 already refuses forty: a second
+figure standing in the middle of the question is worse than no second figure.
+
+---
+
+## Group AN · A choice has a name
+
+> *"It's one where you tap above the stickman and there's no words to press, its
+> confusing."*
+
+### AN1 · A reader must be able to tell the choices apart
+
+Measured in the rendered page at ethics37's graded beat: **three live targets, nothing
+written inside any of them, and no word lying on any of them.** Three outlined regions
+and nothing to choose by. The lesson's own panel said *"Tap one of the 3 outlined parts
+above"*.
+
+S11 already has the remedy — *"a caption that is a LABEL goes inside the Target,
+because a thing and the word for it ride together"* — and it had not been applied to
+the stage questions. Each of ethics37's three now carries its name.
+
+### AN2 · A BARE HIT BOX IS USUALLY RIGHT, so the rule cannot be static
+
+94 of the corpus's 253 targets carry no `<Text>`, and **political7 — the lesson the
+reader holds up as the standard — is one of them**, because its names are drawn on the
+art underneath. A static rule that failed those would be the boxiness metric again.
+
+So the question is whether a name is REACHABLE, and only the page knows:
+
+- **`npm run check:named`** drives each lesson until its targets go live and reads, for
+  every one, the words INSIDE it, the words lying ON it, and the words set BESIDE it.
+  Its first sweep of the thirteen all-wordless scenes found three real faults —
+  ethics37, metaphysics23 and metaphysics20 — and passed political7, which is the test
+  that matters.
+- **`check:shape` S14** holds the cheap half offline, as a high-water mark: a scene
+  that draws two or more targets and writes inside none of them.
+
+**THE THIRD RULE IS THE ONE THAT MADE IT USABLE, AND IT WAS ADDED AFTER A FULL SWEEP.**
+Held to overlap alone the checker called nine more lessons blank, and six of them were
+drawn correctly: logic40's three stones are captioned thirteen units beneath them,
+metaphysics36's sixteen doors carry their numbers under the sill, political19's two
+panels are titled just above. A caption set against the thing it names is the commonest
+shape in this corpus, not a defect — so a word outside every target may name the one it
+is NEAREST to, on three conditions. It has to be CLOSE, at most sixteen screen pixels.
+It has to be LINED UP, because a word off to one side is a different thing's label. And
+the nearest target must be nearer by half again than the next — which is the condition
+that matters, because ethics17 sets BEING BELIEVED, one answer's own caption, six units
+under another answer's row, and a rule that handed that word to both would have let a
+genuinely blank box through.
+
+**AND THE CHECKER ITSELF PRINTED A GREEN ON A RUN THAT READ NOTHING.** A sweep of the
+sixteen fixed lessons came back `NEVER RENDERED` on every one and still ended with
+*"every choice has a name"* and exit 0 — the fifth time this repo has recorded that
+shape, and the first in a checker written the same week the other four were read.
+Three things came out of it, and the middle one is the cause:
+
+- **A page that never came up is counted and FAILS the run.** It is not a finding —
+  it is a fact about the machine, not the lesson — but a green that means nothing is
+  worse than a red that means "look again".
+- **It writes its own route now.** It used to navigate to `previewsheet23`, which no
+  script creates: a file somebody leaves on disk by hand and `check:routes` then
+  blocks every commit on. So the sequence was write, sweep, delete before
+  committing — and deleting it and then sweeping is exactly what produced sixteen
+  blind readings with nothing wrong anywhere in the app. `check:alive` and
+  `sheet:beats` still share that hand-written route and have the same hole.
+- **AND THE ROUTE MUST PREDATE METRO, which the failure message now says out loud.**
+  Expo Router builds its table from the bundle, so a route written under a running
+  server serves *"This screen doesn't exist"* — a screen that renders perfectly well,
+  so any wait on "has the page any divs" sits on it until the budget runs out and
+  then blames the lesson. It reloads a not-found screen while it waits and prints
+  what the page actually said, because NEVER RENDERED alone cannot tell a broken
+  scene from a missing route from a starved machine, and those want three different
+  answers.
+
+**AND TWO LESSONS ARE LISTED AS WORDLESS BY DESIGN**, in `EXEMPT` at the top of the
+script, with the reason beside each. `logic23` draws a truth table as LAMPS rather than
+letters, so each row is its own pattern and naming the rows would teach the notation the
+scene exists to avoid; `epistemology36` shows four pairs of stockings the experiment
+requires to be identical (A1), and what separates them is position in the row, which is
+the answer. They are a LIST rather than a budget, because a number would quietly admit a
+new one and neither is a shape anybody should copy by accident. Everything else in the
+corpus names every choice, and the check now exits non-zero if that stops being true.
+
+### AN3 · The name it already has is usually just outside the box
+
+Neither of the other two lessons needed new art. `metaphysics23` sets REPAIRED and
+REASSEMBLED at y 360 while the hit boxes stopped at 356 — **the reader taps a region
+whose name is four units below it.** `metaphysics20` sets BASE REALITY twelve units
+above the frame it names. Both were fixed by extending the box to hold the name, not by
+writing a new one. Only the third choice in each — an unnamed gap, an unnamed grid —
+needed a word invented.
+
+**THE FULL SWEEP FOUND TWELVE MORE, AND ELEVEN WERE THIS.** Every scene in the corpus
+that puts two or more targets in front of a reader and leaves a word out of at least one
+of them is 41 lessons; measured, twelve had a choice a reader could not name. Nine were
+fixed by moving the BOX rather than writing anything: aesthetics18's three panels are
+captioned at y 236 and were tapped from 250, metaphysics21's THE PAST and THE FUTURE sit
+24 units above the boxes they name, epistemology14's WHAT YOU SEE and THE WORLD six
+units below, logic37's two barber boxes sixteen above, aesthetics21's three works
+eighteen, aesthetics37's two performances five, political22's HIS REACH — **the correct
+answer's own caption** — twelve units above the housing it belongs to.
+
+**Only where the stage genuinely says nothing is a word invented**, and there were four:
+aesthetics13's two canvases (CANVAS A · CANVAS B, above them, because every square inch
+inside a canvas is the painting), aesthetics22's screen (SEEING IT HAPPEN, below it,
+because the slime comes down the screen), aesthetics17's creature (THE SHAPE, inside the
+frame and above it), metaphysics22's junction and ethics17's copies. Each one is placed
+on paper the beats leave clear, checked against `mustBoxes` rather than guessed, and
+measured against the real `.ttf` for the box it is drawn in.
+
+### AN4 · Two live targets may not touch
+
+`Target` draws its halo three units outside its box, so boxes that merely abut have
+outlines that run into one another. ethics37's cord ended at 314 and its posts began at
+316, and on screen the three outlines crossed. They stand apart now.
+
+**It is also the constraint that decides HOW a box grows.** aesthetics37's two systems
+are 102 apart with 82-tall targets, so growing each one down to its caption would have
+put the first row's halo through the second's: the box MOVES UP instead and keeps its
+height. metaphysics21's now column overhung its own drawing by two units each way, which
+ran its halo into the future's, and metaphysics22's EVERYTHING BEFORE ended two units
+short of the junction. Ask what a growing box will meet before growing it.

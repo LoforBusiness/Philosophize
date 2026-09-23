@@ -394,8 +394,31 @@ for (const l of LESSONS) {
   for (const [i, a] of row.at.entries()) {
     if (a && beats[i]) {
       const walks = !!walk && i > 0 && Math.abs((walk[i] ?? 0) - (walk[i - 1] ?? 0)) > 1;
+      // ...AND SO IS A BEAT THE PROBE OUTRAN. A must-box is a MOMENT, not a place
+      // (AB10): the harness settles on the CAMERA, and a long walk outlasts it, so
+      // the figure can be caught in flight on the beat that starts the journey AND
+      // on the two beats after it. metaphysics22 sends him 132 → 268, which is 136
+      // units at WALK_SPEED, and all three beats recorded him between 104 and 157
+      // while the table correctly aims at where the script leaves him.
+      //
+      // So a beat is also exempt when the recorded figure lies ON THE PATH the
+      // script is walking him along — between the last x it changed from and the
+      // one it changed to. That is a fact about the instrument, not about the
+      // table, and it cannot excuse the case this rule exists for: aesthetics4 hung
+      // all four bubbles at x 219 while its lead stood at 334, which is nowhere on
+      // any journey.
+      let from = null;
+      if (walk) for (let j = i; j > 0; j -= 1) if (Math.abs(walk[j] - walk[j - 1]) > 1) { from = walk[j - 1]; break; }
+      const onPath = (f) => {
+        if (from === null) return false;
+        const lo = Math.min(from, walk[i]) - 8; const hi = Math.max(from, walk[i]) + 8;
+        const cx = f.b[0] + f.b[2] / 2;
+        return cx >= lo && cx <= hi;
+      };
       const figs = beats[i].filter((it) => it.k === 'fig');
-      if (!walks && figs.length && !figs.some((f) => a[3] >= f.b[0] - 8 && a[3] <= f.b[0] + f.b[2] + 8)) {
+      if (!walks && figs.length
+        && !figs.some((f) => a[3] >= f.b[0] - 8 && a[3] <= f.b[0] + f.b[2] + 8)
+        && !figs.some(onPath)) {
         astray.push(`${l.id}[${i}] aimed at x ${a[3]}`);
       }
     }

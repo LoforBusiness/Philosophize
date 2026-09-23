@@ -95,7 +95,7 @@ function textOf(stem) {
 
 const SOBER = new Set(RULE_SOBER);
 const applied = side.wardrobeReach || {};
-const bad = { stale: [], band: [], twins: [], heavy: [], unknown: [], floats: [], visitor: [] };
+const bad = { stale: [], band: [], twins: [], heavy: [], unknown: [], floats: [], visitor: [], cross: [] };
 
 /**
  * The visitor cues, if any. AA7 checks HIM where he stands, which `fits` cannot:
@@ -107,8 +107,8 @@ const VIS = {};
 {
   const f = path.join(REPO, 'data/lessonVisitor.ts');
   if (fs.existsSync(f)) {
-    for (const m of fs.readFileSync(f, 'utf8').matchAll(/'([a-z-]+-[a-z]+-\d+)':\s*\{ enter: (\d+), x: (-?\d+)/g)) {
-      VIS[m[1]] = { enter: +m[2], x: +m[3] };
+    for (const m of fs.readFileSync(f, 'utf8').matchAll(/'([a-z-]+-[a-z]+-\d+)':\s*\{ enter: (\d+), x: (-?\d+), from: (-?\d+)/g)) {
+      VIS[m[1]] = { enter: +m[2], x: +m[3], from: +m[4] };
     }
   }
 }
@@ -303,6 +303,62 @@ report('twins', 'AA3 neighbours never dress the same (Q)');
 report('heavy', 'AA4 a grave lesson wears nothing loud (N11)');
 report('floats', 'AA6 no hat floats — headwear overlaps the skull', 'see seatY() in wardrobe.ts');
 report('visitor', 'AA7 the visitor fits where he actually stands', 'run: npm run make:visitor && npm run make:wardrobe');
+// ── AA10 · HE MAY NOT WALK THROUGH THE LEAD ─────────────────────────────────
+//
+// AA7 asks whether he fits WHERE HE STANDS and says nothing about how he got there.
+// The generator's first rule was "come on from whichever edge he is nearer, so the
+// walk is short", which sends him straight through the lead whenever he lands on the
+// far side of him. Measured live in ethics37 at the arrival beat, the two heads were
+// NINE pixels apart and a head is thirty-nine.
+//
+// The lead stands where the SCRIPT puts him on the beat the visitor walks in — not
+// where a must-box caught him, which is a moment rather than a place (AB10) — and a
+// script with no x at all takes the scene's own resting constant, which is the common
+// case rather than an edge one.
+{
+  const restOf = (stem) => {
+    const p = path.join(REPO, DIR, `${stem}Scene.tsx`);
+    if (!fs.existsSync(p)) return null;
+    const m = /\bconst (?:FIG_X|FIGX|MAN_X|LEAD_X|HE_X|X0)\s*=\s*(-?\d+(?:\.\d+)?)/.exec(fs.readFileSync(p, 'utf8'));
+    return m ? +m[1] : null;
+  };
+  const trackOf = (stem) => {
+    const p = path.join(REPO, DIR, `${stem}Script.ts`);
+    if (!fs.existsSync(p)) return null;
+    const src = fs.readFileSync(p, 'utf8');
+    const body = src.slice(src.indexOf('export const BEATS'));
+    const blocks = [];
+    let depth = 0; let start = -1;
+    const open = body.indexOf('= [') + 2;
+    for (let i = open; i < body.length; i += 1) {
+      const c = body[i];
+      if (c === '{') { if (!depth) start = i; depth += 1; }
+      else if (c === '}') { depth -= 1; if (!depth && start >= 0) { blocks.push(body.slice(start, i + 1)); start = -1; } }
+      else if (c === ']' && !depth) break;
+    }
+    let last = null;
+    const track = blocks.map((b) => {
+      const hit = /(?:^|[^A-Za-z])x:\s*(-?\d+(?:\.\d+)?)/.exec(b);
+      if (hit) last = +hit[1];
+      return last;
+    });
+    return track.some((v) => v !== null) ? track : null;
+  };
+  for (const L of lessons) {
+    const cue = VIS[L.id];
+    if (!cue || cue.from === undefined) continue;
+    const track = trackOf(L.stem);
+    const him = (track && track[Math.min(cue.enter, track.length - 1)]) ?? restOf(L.stem);
+    if (him === null || him === undefined) continue;
+    const lo = Math.min(cue.from, cue.x);
+    const hi = Math.max(cue.from, cue.x);
+    if (him > lo + 20 && him < hi - 20) {
+      bad.cross.push(`${L.id}: the visitor walks ${cue.from} → ${cue.x}, through the lead at ${him}`);
+    }
+  }
+}
+report('cross', 'AA10 the visitor never walks through the lead', 'run: npm run make:visitor');
+
 
 if (preExisting.length) {
   console.log(`\n  ~ ${preExisting.length} lesson(s) already draw the BARE figure outside their own band.`);

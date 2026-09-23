@@ -222,6 +222,7 @@ export default function Metaphysics23Scene({ clock, bt, bi, i, picked, onPick, g
         disabled={!live || answered}
         style={[styles.hit, { left: 176, width: 48 }]}
       >
+        <Text style={styles.gapName}>NEITHER</Text>
         <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: 48 }, answered && picked === 'gap' && styles.wrong]} pointerEvents="none" />
       </Target>
       <Target
@@ -282,7 +283,16 @@ const styles = StyleSheet.create({
   },
   pileBar: { position: 'absolute', width: 26, height: 3.5, backgroundColor: INK, borderRadius: 1.5 },
 
-  hit: { position: 'absolute', top: HULL_Y, height: HULL_H },
+  // THE BOX HOLDS THE NAME IT IS ALREADY GIVEN (S11). It stopped at the hull's
+  // foot while REPAIRED and REASSEMBLED are set at LABEL_Y, four units below, so
+  // all three choices measured as unnamed in the rendered page.
+  /** The gap between the hulls is a choice too, so it says which choice it is. */
+  gapName: {
+    position: 'absolute', left: 0, right: 0, top: LABEL_Y - HULL_Y,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1,
+    color: SOFT, textAlign: 'center', includeFontPadding: false,
+  },
+  hit: { position: 'absolute', top: HULL_Y, height: LABEL_Y + 11 - HULL_Y },
   hitBox: { height: HULL_H, borderRadius: 6 },
   /** WHAT "TAP ONE OF THESE" LOOKS LIKE WHILE THE QUESTION IS OPEN.
    *

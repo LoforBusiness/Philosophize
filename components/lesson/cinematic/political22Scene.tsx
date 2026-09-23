@@ -66,6 +66,10 @@ const H_H = 110;
 
 const SL_X = 306;
 const SL_W = 24;
+/** How far the housing's target reaches up to take in its own HIS REACH (AN3). */
+const CAP_RISE = 14;
+/** The lever's target, raised to hold its own name above the slot (AN1). */
+const LEV_HIT_Y = 255;
 const SL_Y = 264;
 const SL_H = 86;
 
@@ -227,16 +231,28 @@ export default function Political22Scene({
       <Target
         id="reach" correct picked={picked} onPick={onPick}
         disabled={!live || answered}
-        style={[styles.hit, { left: H_X, top: H_Y, width: H_W, height: H_H }]}
+        style={[styles.hit, { left: H_X, top: H_Y - CAP_RISE, width: H_W, height: H_H + CAP_RISE }]}
       >
-        <View style={[styles.hitBox, { width: H_W, height: H_H }, answered && styles.right]} pointerEvents="none" />
+        {/* AN3 — THE HIT BOX HOLDS THE NAME. HIS REACH is set at y 240, over the
+            housing rather than in it, and this box began at the housing's own top
+            edge — so the CORRECT answer was the one choice with its name outside it.
+            The box reaches up to the caption; nothing is written twice. */}
+        <View style={[styles.hitBox, { width: H_W, height: H_H + CAP_RISE }, answered && styles.right]} pointerEvents="none" />
       </Target>
       <Target
         id="lever" correct={false} picked={picked} onPick={onPick}
         disabled={!live || answered}
-        style={[styles.hit, { left: 296, top: 260, width: 44, height: 34 }]}
+        style={[styles.hit, { left: 296, top: LEV_HIT_Y, width: 44, height: 294 - LEV_HIT_Y }]}
       >
-        <View style={[styles.hitBox, { width: 44, height: 34 }, answered && picked === 'lever' && styles.wrong]} pointerEvents="none" />
+        {/* AN1 — THE LEVER IS NAMED. Its two rivals are captioned and this was the
+            bare mechanism, so the third choice had nothing to choose it by. The word
+            goes ABOVE the slot, in the nine clear units between the housing's own
+            2.5-thick border (252…254.5) and the slot's top at 264 — entirely on
+            STONE, so it is never half on the slot's paper, and never crossed by the
+            slot's side rules, which is the fault epistemology23 shipped. It sets at
+            29.5 units in a box of 44. */}
+        <View style={[styles.hitBox, { width: 44, height: 294 - LEV_HIT_Y }, answered && picked === 'lever' && styles.wrong]} pointerEvents="none" />
+        <Text style={styles.levName} pointerEvents="none">LEVER</Text>
       </Target>
 
       {/* By Berlin's test, nobody is interfering, so she is free. */}
@@ -297,6 +313,13 @@ const styles = StyleSheet.create({
   lever: {
     position: 'absolute', left: SL_X + SL_W / 2 - LV_W / 2, width: LV_W, height: LV_H,
     backgroundColor: INK, borderRadius: 4,
+  },
+  levName: {
+    position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center',
+    // 8.6, not 8: this lesson's stage fit is 0.94, so 8 reaches the reader at 7.5 (D34).
+    // LEVER sets at 31.4 in a box of 44, so nothing else has to move.
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 9.6, letterSpacing: 1,
+    color: INK, includeFontPadding: false,
   },
   state: {
     position: 'absolute', left: 230, width: 66, lineHeight: 9,

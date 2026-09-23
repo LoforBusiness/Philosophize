@@ -140,10 +140,12 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, 
       {/* what reaches you — and it never moves */}
       <Target id={'screen'} correct={true} picked={picked} onPick={onPick}
               style={styles.screen} disabled={!live || answered}>
-        <View style={styles.box}>
-          <View style={styles.horizon} pointerEvents="none" />
-          <View style={styles.sun} pointerEvents="none" />
-          <ObjectArt parts={tree(28, 68, 34, 58)} tone={TONE} />
+        <View style={styles.boxWrap}>
+          <View style={styles.box}>
+            <View style={styles.horizon} pointerEvents="none" />
+            <View style={styles.sun} pointerEvents="none" />
+            <ObjectArt parts={tree(28, 68, 34, 58)} tone={TONE} />
+          </View>
         </View>
       </Target>
       {/* "every check happens on this side of the screen" — a ring round its frame. */}
@@ -165,18 +167,20 @@ export default function Epistemology14Scene({ clock, bt, bi, i, picked, onPick, 
       {/* the world, whatever it turns out to be */}
       <Target id={'world'} correct={false} picked={picked} onPick={onPick}
               style={styles.world} disabled={!live || answered}>
-        <View style={[styles.box, wrong('world') && styles.pickWrong]}>
-          <Animated.View style={[styles.layer, realStyle]} pointerEvents="none">
-            <View style={styles.horizon} />
-            <View style={[styles.hill, { left: 14, width: 44, height: 26 }]} />
-            <View style={[styles.hill, { left: 54, width: 52, height: 34 }]} />
-          </Animated.View>
-          <Animated.View style={[styles.layer, vatStyle]} pointerEvents="none">
-            <View style={styles.tank} />
-            <View style={styles.brain} />
-            <View style={[styles.lead, { left: 30 }]} />
-            <View style={[styles.lead, { left: 74 }]} />
-          </Animated.View>
+        <View style={styles.boxWrap}>
+          <View style={[styles.box, wrong('world') && styles.pickWrong]}>
+            <Animated.View style={[styles.layer, realStyle]} pointerEvents="none">
+              <View style={styles.horizon} />
+              <View style={[styles.hill, { left: 14, width: 44, height: 26 }]} />
+              <View style={[styles.hill, { left: 54, width: 52, height: 34 }]} />
+            </Animated.View>
+            <Animated.View style={[styles.layer, vatStyle]} pointerEvents="none">
+              <View style={styles.tank} />
+              <View style={styles.brain} />
+              <View style={[styles.lead, { left: 30 }]} />
+              <View style={[styles.lead, { left: 74 }]} />
+            </Animated.View>
+          </View>
         </View>
       </Target>
       <View style={[styles.label, { left: WOR_L, width: WOR_W }]} pointerEvents="none">
@@ -213,14 +217,22 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
   fill: { flex: 1 },
 
-  screen: { position: 'absolute', left: SCR_L, top: BOX_T, width: SCR_W, height: BOX_H },
+  // AN3 — THE HIT BOX HOLDS THE NAME. The two pictures used to be tapped through a
+  // box that stopped at the art, with WHAT YOU SEE and THE WORLD set six units below
+  // it, so a reader tapping a picture was choosing between two unnamed frames. The
+  // target runs down to the foot of the label now; the label itself stays a sibling
+  // drawn on top with no touch of its own, so the panel still counts three choices.
+  screen: { position: 'absolute', left: SCR_L, top: BOX_T, width: SCR_W, height: LAB_T + 30 - BOX_T },
+  // …and the picture keeps its own height inside that taller box, because a `flex: 1`
+  // child of it would stretch the drawing to fill the label's row (A1).
+  boxWrap: { position: 'absolute', left: 0, right: 0, top: 0, height: BOX_H },
   // "every check happens on this side of the screen" — a dashed ring on the frame,
   // never on what is drawn inside it, which must not move (A1).
   checkRing: {
     position: 'absolute', left: SCR_L - 5, top: BOX_T - 5, width: SCR_W + 10, height: BOX_H + 10,
     borderWidth: 2, borderColor: INK, borderRadius: 8, borderStyle: 'dashed',
   },
-  world: { position: 'absolute', left: WOR_L, top: BOX_T, width: WOR_W, height: BOX_H },
+  world: { position: 'absolute', left: WOR_L, top: BOX_T, width: WOR_W, height: LAB_T + 30 - BOX_T },
   box: { flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP, overflow: 'hidden' },
   layer: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
 

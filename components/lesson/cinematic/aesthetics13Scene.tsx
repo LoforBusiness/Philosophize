@@ -50,6 +50,8 @@ const ART_W = 124;
 const ART_T = 304;
 const ART_H = 100;
 const ART_X = [108, 252];
+/** The row above each canvas that carries its name (AN1). */
+const CAP_H = 18;
 
 const STRIP = { left: 100, top: 430, width: 284, height: 66 };
 const SPINE_Y = 22;                       // relative to the strip
@@ -159,6 +161,9 @@ export default function Aesthetics13Scene({ clock, bt, bi, i, picked, onPick, pi
         <Animated.View key={x} style={[styles.art, { left: x }, artStyle]}>
           <Target id={k === 0 ? 'left' : 'right'} correct={false} picked={picked} onPick={onPick}
               style={styles.fill} disabled={!live || answered}>
+            <Text style={styles.artName} pointerEvents="none">
+              {k === 0 ? 'CANVAS A' : 'CANVAS B'}
+            </Text>
             <View
               style={[
                 styles.artInner,
@@ -233,9 +238,18 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
   fill: { flex: 1 },
 
-  art: { position: 'absolute', top: ART_T, width: ART_W, height: ART_H },
+  // AN1 — EACH CANVAS IS NAMED. The two were tapped through bare frames, so the
+  // reader was choosing between two pictures the lesson has just spent four beats
+  // saying are identical. The names sit ABOVE them, on paper the graded beat leaves
+  // clear, because every square inch inside a canvas is the painting (D31).
+  art: { position: 'absolute', top: ART_T - CAP_H, width: ART_W, height: ART_H + CAP_H },
   artInner: {
-    flex: 1, borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+    position: 'absolute', left: 0, right: 0, top: CAP_H, height: ART_H,
+    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
+  },
+  artName: {
+    position: 'absolute', left: 0, right: 0, top: 2, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
   // The same four shapes in both canvases, at the same coordinates.
   sill: { position: 'absolute', left: 8, top: 54, width: 42, height: 2, backgroundColor: INK },
@@ -310,7 +324,12 @@ const styles = StyleSheet.create({
   },
 });
 
-// Ink runs from the canvases (304) to the strip's tab (496). Band 298…512 = 214 (H59).
+// Ink runs from the canvas NAMES (288) to the strip's tab (496). Band 282…512 = 230
+// (H59). It opened at 298 while the canvases were the topmost thing on the stage;
+// AN1 put CANVAS A and CANVAS B above them, and a word ten units above the band is
+// a word no shot can reach — `check:space` says so by name. The figure is 103 of
+// 230, which is 44.8%: over H58's 38%, as it already was at 214, and this lesson is
+// one of the eighteen `check:scale` carries. A taller band lowers that share.
 export function Aesthetics13Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics13Scene} band={[298, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics13Scene} band={[282, 512]} camera={CAM} />;
 }

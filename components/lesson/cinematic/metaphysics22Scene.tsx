@@ -61,6 +61,9 @@ const UP_Y = 261;
 const DN_Y = 337;
 const BR_R = 286;
 
+/** The junction's box, widened to hold its own name (AN1) — 176…276, four units
+ *  clear of the lower branch plate's halo at 283. */
+const JUNC_W = 100;
 const PL_X = 286;
 const PL_W = 86;
 const PL_H = 34;
@@ -175,16 +178,27 @@ export default function Metaphysics22Scene({ clock, bt, bi, i, picked, onPick, p
       <Target
         id="before" correct picked={picked} onPick={onPick}
         disabled={!live || answered}
-        style={[styles.hit, { left: RAIL_L, top: 286, width: 140, height: 40 }]}
+        style={[styles.hit, { left: RAIL_L, top: 286, width: 134, height: 40 }]}
       >
-        <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: 140, height: 40 }, answered && styles.right]} pointerEvents="none" />
+        {/* AN4 — two live targets may not touch. This box ended at 174 and the
+            junction's began at 176, so with `Target`'s halo three units outside each
+            of them the two outlines ran into one another. Six units narrower; the
+            plate's own words end at 143 and are untouched. */}
+        <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: 134, height: 40 }, answered && styles.right]} pointerEvents="none" />
       </Target>
       <Target
         id="junction" correct={false} picked={picked} onPick={onPick}
         disabled={!live || answered}
-        style={[styles.hit, { left: 176, top: 286, width: 28, height: 28 }]}
+        style={[styles.hit, { left: 176, top: 286, width: JUNC_W, height: 28 }]}
       >
-        <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: 28, height: 28 }, answered && picked === 'junction' && styles.wrong]} pointerEvents="none" />
+        {/* AN1 — THE JUNCTION IS NAMED. Its two rivals are captioned plates and this
+            was a bare 28-unit diamond, so one of the three choices had nothing to
+            choose it by. The name goes to the RIGHT of it, on paper every beat leaves
+            clear: above is the rail's own stem and below is the lower branch, and a
+            word with a three-unit rule through it is worse than no word (D31). Two
+            lines because the slot is 68 wide and the phrase sets at 79. */}
+        <View style={[styles.hitBox, live && !answered && styles.hitLive, { width: JUNC_W, height: 28 }, answered && picked === 'junction' && styles.wrong]} pointerEvents="none" />
+        <Text style={styles.juncName} pointerEvents="none">{`THE${'\n'}JUNCTION`}</Text>
       </Target>
       <Target
         id="other" correct={false} picked={picked} onPick={onPick}
@@ -253,6 +267,11 @@ const styles = StyleSheet.create({
   },
 
   hit: { position: 'absolute' },
+  juncName: {
+    position: 'absolute', left: 32, width: 68, top: 3, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 1,
+    color: SOFT, includeFontPadding: false,
+  },
   hitBox: { borderRadius: 4 },
   /** WHAT "TAP ONE OF THESE" LOOKS LIKE WHILE THE QUESTION IS OPEN.
    *

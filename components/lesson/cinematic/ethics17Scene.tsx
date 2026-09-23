@@ -58,6 +58,10 @@ const COPY_Y = 294;
 const COPY_W = 32;
 const COPY_H = 24;
 const COPY_X = [34, 78, 122, 166, 210, 254, 298, 342];
+/** The tappable copy's box, grown to hold its own name above it (AN1). THE COPIES
+ *  sets at 54.9 units at 8pt, so 56 is the narrowest box that holds it. */
+const COPY_CAP_W = 56;
+const COPY_CAP_H = 20;
 
 const BAR_X = 34;
 const BAR_Y = 336;
@@ -125,6 +129,8 @@ export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPo
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  // The name arrives with the things it names, on the copies' own track.
+  const copiesInStyle = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.copies * 8 - 1) }));
   const answered = picked !== null;
   const live = !!BEATS[i]?.interact && !BEATS[i]?.interact?.cards && LIVE[i] === 1;
 
@@ -171,8 +177,18 @@ export default function Ethics17Scene({ clock, bt, bi, i, picked, onPick, dragPo
         picked={picked}
         onPick={onPick}
         disabled={!live || answered}
-        style={[styles.copyHit, { left: COPY_X[1] }]}
+        style={[styles.copyHit, { left: COPY_X[1] - (COPY_CAP_W - COPY_W) / 2 }]}
       >
+        {/* AN1 — THE COPIES ARE NAMED. The other two choices are a lettered card
+            and a captioned bar; this was a blank 32-unit rectangle, so one of the
+            three had nothing to choose it by. The name goes ABOVE the row: below it
+            is BEING BELIEVED, which is a different answer's caption, and a word of
+            one choice sitting under another is worse than no word at all. It rides
+            the copies' own track, so it arrives when they do and is never on stage
+            beside the notes that use this gap on beats 1–3. */}
+        <Animated.View style={[styles.copyName, copiesInStyle]} pointerEvents="none">
+          <Text style={styles.copyNameT}>THE COPIES</Text>
+        </Animated.View>
         <View
           style={[styles.copyHitBox, answered && picked === 'copy' && styles.wrong]}
           pointerEvents="none"
@@ -274,8 +290,21 @@ const styles = StyleSheet.create({
     position: 'absolute', width: COPY_W, height: COPY_H,
     borderWidth: 1.5, borderColor: SOFT, borderRadius: 2, backgroundColor: STONE, boxShadow: LIP,
   },
-  copyHit: { position: 'absolute', top: COPY_Y, width: COPY_W, height: COPY_H },
-  copyHitBox: { width: COPY_W, height: COPY_H, borderRadius: 2 },
+  copyHit: {
+    position: 'absolute', top: COPY_Y - COPY_CAP_H, width: COPY_CAP_W, height: COPY_H + COPY_CAP_H,
+  },
+  copyName: { position: 'absolute', left: 0, right: 0, top: 0, alignItems: 'center' },
+  copyNameT: {
+    // 8.6, not 8: this lesson's stage fit is 0.94, so 8 reaches the reader at 7.5
+    // and `check:legible` calls that a blank box (D34). THE COPIES then sets at 58.5
+    // with the house 0.8 of tracking and the slot is 56, so the tracking comes down
+    // to 0.4 rather than the box growing into its neighbours (AN4).
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: SOFT, includeFontPadding: false,
+  },
+  copyHitBox: {
+    position: 'absolute', left: (COPY_CAP_W - COPY_W) / 2, top: COPY_CAP_H,
+    width: COPY_W, height: COPY_H, borderRadius: 2,
+  },
 
   // Positioned against the TARGET now, not the stage, so it rides the answer lift
   // with the bar it names.

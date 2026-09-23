@@ -54,6 +54,8 @@ const FRAME_T = 292;
 const SHAPE_L = 274;
 const SHAPE_W = 102;
 const SHAPE_T = 316;
+/** The row inside the frame, above the creature, that carries its name (AN1). */
+const SHAPE_CAP = 20;
 
 // The gap between the fear panel (right edge 240) and the frame (left edge 254),
 // and the gap above the frame (consequence panel ends 276, frame starts 292).
@@ -194,6 +196,7 @@ export default function Aesthetics17Scene({ clock, bt, bi, i, picked, onPick, pi
         >
           {/* A wrong pick marks the creature by form: it greys, rather than a box
               round it changing its border. */}
+          <Text style={styles.shapeName} pointerEvents="none">THE SHAPE</Text>
           <View style={styles.shapeBody} pointerEvents="none">
             <Shapes parts={CREATURE} color={answered && picked === 'shape' ? SOFT : undefined} />
           </View>
@@ -283,10 +286,19 @@ const styles = StyleSheet.create({
   frame: {
     position: 'absolute', left: FRAME_L, top: FRAME_T, width: FRAME_W, height: 500 - FRAME_T,
     borderWidth: 3, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE, boxShadow: LIP },
+  // AN1 — THE CREATURE IS NAMED. The other two choices are captioned panels and
+  // this one was the drawing alone, so a reader picking it was picking an outline
+  // round an animal. The name sits INSIDE the frame and ABOVE the creature, on the
+  // gap the frame already leaves between its own top edge and the shape (D31).
   shapeWrap: {
-    position: 'absolute', left: SHAPE_L, top: SHAPE_T, width: SHAPE_W, height: 500 - SHAPE_T,
+    position: 'absolute', left: SHAPE_L, top: SHAPE_T - SHAPE_CAP, width: SHAPE_W,
+    height: 500 - (SHAPE_T - SHAPE_CAP),
   },
-  shapeBody: { flex: 1 },
+  shapeName: {
+    position: 'absolute', left: 0, right: 0, top: 2, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: INK, includeFontPadding: false,
+  },
+  shapeBody: { position: 'absolute', left: 0, right: 0, top: SHAPE_CAP, bottom: 0 },
 
   onInk: { color: PAPER },
   pickRight: { backgroundColor: INK, borderColor: INK },

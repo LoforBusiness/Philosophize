@@ -52,6 +52,8 @@ const BOX_Y = 288;
 const BOX_W = 108;
 const BOX_H = 92;
 const BOX_X = [136, 256];
+/** How far each box's target reaches up to take in its own caption (AN3). */
+const CAP_RISE = 18;
 const BOX_CAP = ['SHAVES HIMSELF', 'SHAVED BY HIM'];
 const BOX_ID = ['self', 'barber'];
 
@@ -260,8 +262,13 @@ const styles = StyleSheet.create({
   // barber's token crosses between the two boxes.
   setToken: { position: 'absolute', left: SET_X - 6, top: SET_Y + 18, width: 10, height: 10, borderRadius: 5, backgroundColor: INK },
 
-  hit: { position: 'absolute', top: BOX_Y, width: BOX_W, height: BOX_H },
-  hitBox: { position: 'absolute', left: 0, top: 0, width: BOX_W, height: BOX_H, borderRadius: 4 },
+  // AN3 — THE HIT BOX HOLDS THE NAME. SHAVES HIMSELF and SHAVED BY HIM are set at
+  // y 272 and the boxes begin at 288, so the reader was asked which box the barber
+  // belongs in and handed two outlines whose names were sixteen units above them.
+  hit: { position: 'absolute', top: BOX_Y - CAP_RISE, width: BOX_W, height: BOX_H + CAP_RISE },
+  hitBox: {
+    position: 'absolute', left: 0, top: 0, width: BOX_W, height: BOX_H + CAP_RISE, borderRadius: 4,
+  },
   hitWrong: { borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed' },
 });
 

@@ -57,6 +57,8 @@ const SYS_W = 236;
 // beat, and an answered row, which rises 10, put its top rule through the label as well.
 // At 273 the halo clears the label by 3 and a risen stave clears it by 4.
 const STAVE_Y = [273, 375];
+/** How far above its stave each row's target starts, so it holds its caption (AN3). */
+const CAP_RISE = 25;
 const PERF_Y = [337, 439];
 const NOTE_X = [150, 178, 206, 234, 262, 290, 318, 346];
 const LIFT = 64;
@@ -182,7 +184,7 @@ export default function Aesthetics37Scene({ clock, bt, bi, i, picked, onPick, dr
             picked={picked}
             onPick={onPick}
             disabled={!live || answered}
-            style={[styles.hit, { top: STAVE_Y[r] - 8 }]}
+            style={[styles.hit, { top: STAVE_Y[r] - CAP_RISE }]}
           >
             <View
               style={[styles.hitBox, answered && picked === 'written' && r === 0 && styles.hitWrong]}
@@ -234,6 +236,11 @@ const styles = StyleSheet.create({
 
   // 82, not 84: the first row's halo then ends at 350, three clear of the second row's
   // label at 353, and the ring's foot still passes 3 under the notes on its rule.
+  // AN3 — THE HIT BOX HOLDS THE NAME. WRITTEN FIRST and MADE UP TONIGHT are set
+  // five units above each system and the targets began at the stave, so neither of
+  // the two choices had a word in it. The box moves UP rather than growing: at 82
+  // tall it already runs well past the stave, and growing it would put the first
+  // row's halo through the second's (AN4).
   hit: { position: 'absolute', left: SYS_X - 6, width: SYS_W + 12, height: 82 },
   hitBox: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: 4 },
   hitWrong: { borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed' },

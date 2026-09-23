@@ -37,9 +37,23 @@ const DIR = 'components/lesson/cinematic';
 const OUT = 'data/lessonVisitor.ts';
 const STAGE_W = 400;
 const FIG_W = 48;
-/** The floor band a standing figure occupies, in stage units. */
-const FLOOR_TOP = 400;
-const FLOOR_BOT = 505;
+/**
+ * The band a standing figure occupies, in stage units.
+ *
+ * HIS WHOLE HEIGHT, NOT HIS FEET. This was 400…505 — the floor — and a figure's own
+ * recorded box runs 378…506, so anything hanging between 378 and 400 was invisible to
+ * the scan and he could be placed under it. ethics37 is the reader's case: the posts
+ * of its frame run down to 392 and its tap target over them to 392, so the visitor was
+ * put at 166 with his HAT inside the box the reader is asked to tap. On screen that is
+ * an outlined rectangle drawn across a stickman's head — "a lot of overlapping happens
+ * above the stickman".
+ *
+ * A taller band means fewer visitors, and that is the right trade: a second figure who
+ * stands in the middle of the question is worse than no second figure, which is AA8's
+ * own reasoning for refusing 40 lessons already.
+ */
+const FLOOR_TOP = 378;
+const FLOOR_BOT = 506;
 
 const side = JSON.parse(fs.readFileSync(path.join(DIR, 'mustBoxes.ts.json'), 'utf8'));
 const route = fs.readFileSync('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx', 'utf8');
@@ -124,6 +138,18 @@ for (const L of lessons) {
   if (askAt < 1) { skipped.noAsk += 1; continue; }
   const enterAt = askAt - 1;
 
+  // THE MASCOT'S x ON EVERY BEAT, off the script the scene walks him by. A beat with
+  // no x of its own keeps the one before it, which is what the scenes themselves do
+  // (`BEATS.map((b) => b.x ?? FIG_X)`).
+  const xTrack = (() => {
+    let last = null;
+    return blocks.map((b) => {
+      const hit = /(?:^|[^A-Za-z])x:\s*(-?\d+(?:\.\d+)?)/.exec(b);
+      if (hit) last = +hit[1];
+      return last;
+    });
+  })();
+
   const reach = (side.wardrobeReach || {})[L.id] || { up: 0, side: 0 };
   const a = freeFloor(side.words[L.id]?.[enterAt], reach);
   const b = freeFloor(side.words[L.id]?.[askAt], reach);
@@ -181,12 +207,46 @@ for (const L of lessons) {
   const fig = (side.words[L.id]?.[askAt] || []).find((it) => it.k === 'fig' && !it.v);
   const leadX = fig ? fig.b[0] + fig.b[2] / 2 : STAGE_W / 2;
 
+  // AND WHERE HE IS STANDING WHEN THE VISITOR WALKS IN, which is a different beat and
+  // often a different place. The entry side is decided against THIS one: the walk
+  // happens on the enter beat, so it is the enter beat's mascot the path must miss.
+  //
+  // READ OFF THE SCRIPT'S OWN x TRACK, NOT THE MUST-BOX. A must-box is a MOMENT, not
+  // a place — the probe reads the figure wherever it catches him, and CLAUDE.md
+  // records 113 of 317 walking beats storing him 40 or more units from the x the
+  // beat walks him to. Deciding the side off the recorded box put ethics14's visitor
+  // on the wrong side of a mascot the box had caught mid-stride. The script's x is
+  // where he comes to REST, which is where he is while the visitor crosses the stage.
+  // Same correction `make:thoughts` already took (AB10).
+  //
+  // AND A SCRIPT WITH NO `x` AT ALL IS THE COMMON CASE, not an edge one: the mascot
+  // stands still in most lessons, so the scene supplies his place as its own constant
+  // and the beats never mention it (`b.x ?? FIG_X`). Falling back to the must-box
+  // there put ethics14's visitor on the wrong side of a mascot who is at 40 and was
+  // recorded mid-stride.
+  const restX = (() => {
+    const m = /\bconst (?:FIG_X|FIGX|MAN_X|LEAD_X)\s*=\s*(-?\d+(?:\.\d+)?)/.exec(scene);
+    return m ? +m[1] : null;
+  })();
+  const leadIn = xTrack[Math.min(enterAt, xTrack.length - 1)] ?? restX ?? leadX;
+
   rows[L.id] = {
     enter: enterAt,
     x,
-    // He comes on from whichever edge he is nearer, so the walk is short.
-    from: x < STAGE_W / 2 ? -60 : STAGE_W + 60,
-    // +1 faces right. He turns toward the lead once he has arrived.
+    // HE COMES ON FROM THE SIDE HE IS GOING TO STAND ON, so his path never crosses
+    // the lead. The first rule here was "whichever edge he is nearer, so the walk is
+    // short", and short is the wrong thing to optimise: in ethics37 he lands at 166
+    // with the mascot at 54, so the nearer edge is the LEFT and he walked straight
+    // through him. Measured live at the arrival beat, the two heads were NINE pixels
+    // apart and a head is thirty-nine — the reader's "a lot of overlapping happens
+    // above the stickman".
+    //
+    // Entering from behind the destination costs at most a stage's width of walking,
+    // which `rig.moveTr` prices honestly, and it cannot put two figures in the same
+    // place on the way.
+    from: x >= leadIn ? STAGE_W + 60 : -60,
+    // +1 faces right. He turns toward the lead once he has arrived; while he is
+    // walking, Visitor.tsx faces him the way he is travelling (AF/C18).
     dir: leadX >= x ? 1 : -1,
   };
 }

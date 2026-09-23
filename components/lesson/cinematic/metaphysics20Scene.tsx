@@ -197,6 +197,7 @@ export default function Metaphysics20Scene({ clock, bt, bi, i, picked, onPick, d
           id="sim" correct picked={picked} onPick={onPick}
           disabled={!live || answered} style={styles.simHit}
         >
+          <Text style={styles.simName}>THE SIMULATIONS</Text>
           <View style={[styles.simHitBox, answered && styles.right]} pointerEvents="none" />
         </Target>
       </Animated.View>
@@ -291,8 +292,17 @@ const styles = StyleSheet.create({
     borderRadius: TOKEN_D / 2, borderWidth: 2.5, borderColor: INK,
   },
 
-  realHit: { position: 'absolute', left: OUT_X, top: OUT_Y, width: OUT_W, height: OUT_H },
+  // THE BOX HOLDS THE NAME IT IS ALREADY GIVEN (S11): BASE REALITY is set at
+  // OUT_Y - 12, just outside the box the reader taps, so the choice measured as
+  // unnamed in the rendered page.
+  realHit: { position: 'absolute', left: OUT_X, top: OUT_Y - 16, width: OUT_W, height: OUT_H + 16 },
   realHitBox: { width: OUT_W, height: OUT_H, borderRadius: 4 },
+  /** The grid is the other choice, so it says so — at its foot, clear of the cells. */
+  simName: {
+    position: 'absolute', left: 0, right: 0, bottom: -12,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1,
+    color: SOFT, textAlign: 'center', includeFontPadding: false,
+  },
   simHit: { position: 'absolute', left: GRID_X, top: GRID_Y, width: 294, height: 84 },
   simHitBox: { width: 294, height: 84, borderRadius: 3 },
 
