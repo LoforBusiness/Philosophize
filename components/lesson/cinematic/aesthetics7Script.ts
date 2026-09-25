@@ -35,7 +35,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 3.5,
   },
   {
-    p: 462, x: 90, q: 8, art: 1, capt: 0, grounds: 1,
+    p: 462, x: 90, q: 263, art: 1, capt: 0, grounds: 1,
     text: 'The difficulty is to say on what grounds, if beauty is a matter of feeling.',
     dur: 1.8,
   },
@@ -57,7 +57,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 3.6,
   },
   {
-    p: 260, x: 160, q: 161, art: 1, capt: 1, viewerMind: 1,
+    p: 260, x: 160, q: 263, art: 1, capt: 1, viewerMind: 1,
     text: 'Beauty, for Hume, is a sentiment, a feeling that arises in the mind of the viewer.',
     dur: 1.8,
   },
@@ -101,7 +101,7 @@ export const BEATS: Aesthetics7Beat[] = [
     dur: 3.6,
   },
   {
-    p: 459, x: 170, q: 45, art: 1, capt: 3, marks: 1, standard: 1,
+    p: 459, x: 170, q: 263, art: 1, capt: 3, marks: 1, standard: 1,
     text: 'Hume holds that the joint verdict of such critics is the standard of taste.',
     dur: 1.8,
   },

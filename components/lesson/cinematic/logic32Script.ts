@@ -24,7 +24,7 @@ export interface Logic32Beat extends BaseBeat {
 
 export const BEATS: Logic32Beat[] = [
   {
-    a: 23, b: 0,
+    a: 23, b: 263,
     dur: 4.0,
     text: 'One person puts a question to another. Whichever way the second person answers, the answer admits a charge.',
   },
@@ -46,13 +46,13 @@ export const BEATS: Logic32Beat[] = [
     text: 'The accusation is now on the record, although no one ever stated it.',
   },
   {
-    a: 163, b: 46, q: 1, tried: 2,
+    a: 263, b: 46, q: 1, tried: 2,
     dur: 3.8,
     text: 'Answering no seems safer, but it’s worse. It means you haven’t stopped, which admits that the offence continues.',
     cite: 'Answer: no',
   },
   {
-    a: 163, b: 46, q: 1, tried: 2, named: 1,
+    a: 163, b: 263, q: 1, tried: 2, named: 1,
     dur: 1.8,
     text: 'A question like this is called a loaded question: it presupposes a claim that any direct answer concedes.',
   },

@@ -2141,8 +2141,8 @@ export function actStance(code: number, t: number, u: number): Stance {
     // Three movements in order, which is what makes it read as a thought rather
     // than an arm: the head is DOWN first, then it comes up, and only then does
     // the hand follow. Reverse any two and it becomes a person hailing a bus.
-    const up = ease01(clamp01((p - 0.30) / 0.28));
-    const off = 1 - ease01(clamp01((p - 0.80) / 0.20));
+    const up = ease01(clamp01((p - 0.26) / 0.26));
+    const off = 1 - ease01(clamp01((p - 0.67) / 0.33));
     const r = up * off;
     const brood = (1 - up) * ease01(clamp01(p / 0.24));
     return {
@@ -3237,7 +3237,7 @@ export function actStance(code: number, t: number, u: number): Stance {
     const up = ease01(clamp01(p / 0.16));
     const d = clamp01((p - 0.18) / 0.22);
     const u = clamp01((p - 0.42) / 0.28);
-    const off = 1 - ease01(clamp01((p - 0.84) / 0.16));
+    const off = 1 - ease01(clamp01((p - 0.74) / 0.26));
     const r = up * off;
     return {
       ...s,
@@ -3985,8 +3985,41 @@ export function actStance(code: number, t: number, u: number): Stance {
 // ends somewhere other than the stand — 92 kneels down, 1 sits — therefore holds
 // its destination, which is the correct thing for the next beat to inherit.
 
-/** How long a played action takes. Matches the window rig's own accents decay over. */
-export const PLAY_SECONDS = 1.5;
+/**
+ * How long a played action takes before he is standing there again.
+ *
+ * It was 1.5, and every action spends its last 10–15% of u putting the hands back
+ * — so the return was squeezed into a fifth of a second and read as the arm being
+ * DROPPED (owner, 2026-09-25: "at the end of the animation … the hand will very
+ * quickly move down"; act 80 measured 5.2 units a frame). It is longer now, and
+ * `playU` spends the extra time on the ENDING only. `check:moves` §8 holds every
+ * ending under a speed ceiling, and asserts `wanderrule.PLAY_SECONDS` agrees.
+ */
+export const PLAY_SECONDS = 2.4;
+
+/** Where the warp hands over: the first 45% of the time covers the first 65% of u. */
+const PLAY_KNEE_T = 0.45;
+const PLAY_KNEE_U = 0.65;
+
+/**
+ * Beat time → action progress. Linear up to the knee — so the front plays at
+ * 0.60 u/s, within 10% of the old 0.667 — then a cubic Hermite that leaves the
+ * knee at the same slope and ARRIVES at u = 1 with zero velocity, so every return
+ * to the stand decelerates into it rather than stopping dead. The start slope of
+ * the Hermite is 2.46 in its own units, under the 3 above which it would overshoot
+ * and run u backwards.
+ */
+export function playU(bt: number): number {
+  'worklet';
+  const tau = clamp01(bt / PLAY_SECONDS);
+  const m = PLAY_KNEE_U / PLAY_KNEE_T;
+  if (tau <= PLAY_KNEE_T) return tau * m;
+  const s = (tau - PLAY_KNEE_T) / (1 - PLAY_KNEE_T);
+  const d = 1 - PLAY_KNEE_U;
+  const m0 = (m * (1 - PLAY_KNEE_T)) / d;
+  const h = (-2 * s * s * s + 3 * s * s) + (s * s * s - 2 * s * s + s) * m0;
+  return PLAY_KNEE_U + d * h;
+}
 
 /** rig's emotes for 0–99, this file's actions for 100+. See the note above. */
 export function emoteAny(code: number, t: number): Stance {
@@ -4002,11 +4035,12 @@ export function emoteAny(code: number, t: number): Stance {
 export function emoteAnyLive(code: number, t: number, bt: number): Stance {
   'worklet';
   if (code < 100) return emoteLive(code, t, bt);
-  // PLAYED: u runs 0 → 1 over the first PLAY_SECONDS of the beat and then stays
-  // there, so the action performs once and the figure settles into whatever it
-  // ended in. `clamp01` rather than a modulo — a played action that restarted
-  // every 1.5s would be a tic, not a gesture.
-  if (code >= 300) return actStance(code - 299, t, clamp01(bt / PLAY_SECONDS));
+  // PLAYED: u runs 0 → 1 over the first PLAY_SECONDS of the beat, through `playU`
+  // so the return to the stand is unhurried, and then stays there — the action
+  // performs once and the figure settles into whatever it ended in. Clamped rather
+  // than a modulo: a played action that restarted every few seconds would be a
+  // tic, not a gesture.
+  if (code >= 300) return actStance(code - 299, t, playU(bt));
   return actStance(code - 99, t, 1);
 }
 

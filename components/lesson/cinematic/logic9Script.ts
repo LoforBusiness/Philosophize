@@ -51,7 +51,7 @@ export const BEATS: L9Beat[] = [
     dur: 3.8,
   },
   {
-    a: 403, d: 29, dx: 264, claim: true, straw: 2, strawX: true,
+    a: 403, d: 263, dx: 264, claim: true, straw: 2, strawX: true,
     text: 'In effect, you defeat a position you built yourself, not your opponent’s.',
     dur: 1.8,
   },

@@ -389,7 +389,12 @@ export function holdEnv(u: number) {
  */
 export function lift(bt: number): number {
   'worklet';
-  return Math.sin(Math.min(bt, 1.5) / 1.5 * Math.PI);
+  // SQUARED, so the arm is STILL at both ends. A plain sine returns to zero at its
+  // fastest — the hand arrived at rest at full speed and stopped dead, which is the
+  // "quickly moves down at the end" a reader named (2026-09-25). sin² has the same
+  // peak and the same 1.5s, and its slope is zero where it lands.
+  const s = Math.sin(Math.min(bt, 1.5) / 1.5 * Math.PI);
+  return s * s;
 }
 
 // ── the guard, and the ten boxing moves ──────────────────────────────────────
@@ -1764,6 +1769,12 @@ export interface Bundle {
    * moment it matters.
    */
   dir: number;
+  /**
+   * The chair and the mug, when the routine is on screen (chairPlay.ts): `[on, open,
+   * x, y, front, mugOn, steam, life]` with x, y the chair's origin in STAGE units.
+   * Absent everywhere else, which is every figure but a solo lead mid-routine.
+   */
+  prop?: readonly number[];
 }
 
 /** Off-stage and invisible — used for figures not in the current shot. */

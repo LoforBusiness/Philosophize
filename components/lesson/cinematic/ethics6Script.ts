@@ -33,7 +33,7 @@ export interface Ethics6Beat extends BaseBeat {
 
 export const BEATS: Ethics6Beat[] = [
   {
-    d: 2, str: 0, tx: 70, card: 0,
+    d: 2, str: 263, tx: 70, card: 0,
     text: 'Some acts that save five lives at the cost of one still strike most people as wrong.',
     dur: 1.8,
   },
@@ -84,7 +84,7 @@ export const BEATS: Ethics6Beat[] = [
     dur: 3.4,
   },
   {
-    d: 165, str: 0, tx: 180, card: 2, stamp: 1,
+    d: 165, str: 263, tx: 180, card: 2, stamp: 1,
     interact: {
       prompt: 'Which of these differs between the two cases?',
       odd: {
@@ -102,7 +102,7 @@ export const BEATS: Ethics6Beat[] = [
     dur: 1.0,
   },
   {
-    d: 177, str: 0, tx: 180, card: 2, stamp: 1,
+    d: 177, str: 260, tx: 180, card: 2, stamp: 1,
     interact: {
       prompt: 'Is it true that a strict utilitarian must judge the lever and footbridge cases alike?',
       cards: [

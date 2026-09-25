@@ -342,10 +342,13 @@ function Gloss({ S, k, text }: { S: SharedValue<any>; k: number; text: string })
  */
 function boundStance(t: number, seed: number): Stance {
   'worklet';
-  const w = Math.sin(t * 1.6 + seed) * 0.58 + Math.sin(t * 1.03 + seed * 2.7) * 0.42;
+  const w = Math.sin(t * 2.3 + seed) * 0.58 + Math.sin(t * 1.47 + seed * 2.7) * 0.42;
   const v = Math.sin(t * 2.2 + seed * 1.9) * 0.6 + Math.sin(t * 1.4 + seed) * 0.4;
   return {
-    tilt: 0.03 + w * 0.06,
+    // THE STRUGGLE HAS TO READ (N21): at ±0.06 of lean and a unit of hand a roped
+    // figure moved less than a standing one breathes, so five of them were statues
+    // while the decider talked. Straining against the rope is the lean and the pull.
+    tilt: 0.03 + w * 0.17,
     neck: -0.03 + v * 0.16,                 // head turning to look for the trolley
     // FLAT (AL1). `v` used to ride the pelvis too, so every bound figure drifted
     // 1.8 units up and down on a clock. The strain is the lean, the feet and the
@@ -354,16 +357,18 @@ function boundStance(t: number, seed: number): Stance {
     // Bound at the ankles: the feet stay together and shift weight rather than step.
     footL: { x: -3.4 + w * 0.5, y: 0 },
     footR: { x: 3.4 + w * 0.5, y: 0 },
-    // Both fists BEHIND the pelvis (the figure faces +x), which is what reads as
+    // Both fists BEHIND the pelvis (in his own frame), which is what reads as
     // "hands tied" from a silhouette with no rope drawn.
-    fistL: { x: -11 - v * 0.8, y: 5 + w * 1.4 },
-    fistR: { x: -13 + v * 0.8, y: 6 - w * 1.4 },
+    fistL: { x: -11 - v * 3.4, y: 5 + w * 4.2 },
+    fistR: { x: -13 + v * 3.4, y: 6 - w * 4.2 },
     adv: 0,
   };
 }
 
+// N21 — facing LEFT, toward the lever and the one deciding: a row of five facing
+// empty stage were five people with nobody to plead with.
 function Bound({ x, y, seed, clock }: { x: number; y: number; seed: number; clock: SharedValue<number> }) {
-  const D = useDerivedValue<Bundle>(() => pose(boundStance(clock.value, seed), x, y, PEG_K, 1, 1));
+  const D = useDerivedValue<Bundle>(() => pose(boundStance(clock.value, seed), x, y, PEG_K, -1, 1));
   return <Stickman role="second" D={D} k={PEG_K} />;
 }
 

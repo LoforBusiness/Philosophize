@@ -50,12 +50,14 @@ import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, stageAnswered, styles,
   XpPill, TapNudge,
   COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, GROUND, INK,
-  type BaseBeat, REACT, WANDER, wanderReset, Thought, useCarry, carry,} from './cinematicKit';
+  type BaseBeat, REACT, WANDER, VISIT, wanderReset, Thought, useCarry, carry,} from './cinematicKit';
 import { ease01, moveTr } from './rig';
 import { quipFor, visitorSays } from './quips';
 import { THOUGHTS } from '@/data/lessonThoughts';
 import { MARKS } from '@/data/lessonMarks';
 import { WANDER_PLANS } from '@/data/lessonWander';
+import { CHAIR_PLANS } from '@/data/lessonChair';
+import { CHAIR, chairReset } from './chairPlay';
 import StageMark from './StageMark';
 import { tapSide } from './tapNav';
 import EdgeFlash, { useEdgeFlash } from './EdgeFlash';
@@ -503,7 +505,7 @@ export default function CinematicPlayer({
   // The movement layer is a module-level singleton, like `REACT` — one lesson plays
   // at a time — so it is put back to standing when a player goes. On the way IN it
   // is reset in the beat block above, where it cannot race the first plan.
-  useEffect(() => wanderReset, []);
+  useEffect(() => () => { wanderReset(); chairReset(EMPTY_PLAN); }, []);
   const figCarry = useCarry(1);
   const figX = useDerivedValue(() => {
     const t = walkSv.value;
@@ -995,7 +997,20 @@ export default function CinematicPlayer({
     // so resetting there blanked beat 0 every time. Measured in the browser, his
     // ankle moved 0.5px through a beat that walks him forty units — the wiring
     // looked dead and was being switched off a frame after it was switched on.
-    if (firstBeat) wanderReset();
+    if (firstBeat) {
+      wanderReset();
+      // The chair routine's playhead (chairPlay.ts). Off under the measuring harness
+      // for the reason the wander is: a must-box records what the SCENE draws.
+      chairReset((wanderOff() ? null : CHAIR_PLANS[lesson.id]) ?? EMPTY_PLAN);
+      // The lead turns to face a visitor who could only stand behind him (N21).
+      if (visitorCue) {
+        VISIT.side.value = visitorCue.turn ?? 0;
+        VISIT.enter.value = visitorCue.enter;
+        VISIT.walk.value = moveTr(visitorCue.from, visitorCue.x, 0.85);
+      }
+    }
+    VISIT.beat.value = i;
+    CHAIR.beat.value = i;
     WANDER.plan.value = (wanderOff() ? null : WANDER_PLANS[lesson.id]?.[i]) ?? EMPTY_PLAN;
     WANDER.bt.value = 0;
     WANDER.gen.value += 1;

@@ -1092,7 +1092,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **sixty-six** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **sixty-seven** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1103,7 +1103,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` · `check-firstrun` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-wander` · `check-skin` · `check-thoughts` · `check-marks` · `check-objects` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-wander` · `check-chair` · `check-skin` · `check-thoughts` · `check-marks` · `check-objects` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
 > replays the figure, and a prop's animation was invisible to every check unless it
@@ -4675,6 +4675,48 @@ frozen everywhere, and acts 29–55 loop on the clock too; and **`liven-lessons`
 flag WRITES** — its dry run is `--dry` — which placed sixty jokes nobody asked for
 until the 90 scripts were restored from HEAD.
 
+### A gesture ends slowly now (N19)
+
+> *"at the end of the animation … the hand will very quickly move down."*
+
+Every played action returned its hands to the stand in the last 10–15% of a linear
+1.5 s, so the arm was DROPPED: act 80 at 5.2 units a frame, 40-odd acts above 2.
+`PLAY_SECONDS` is 2.4 and `playU` gives the extra time to the ending only, arriving
+with zero velocity; rig's `lift()` is `sin²`. `check:moves` §8 holds every ending
+under 2.0 units a frame, with four acts fast by design named, and asserts
+`wanderrule.PLAY_SECONDS` agrees. No box moved (end poses are unchanged), so it cost
+no re-measure; `make:wander` was re-run because it waits for a played action.
+
+### A look and a floor seat that read (N20)
+
+> *"its like his head moves up but his body down"* · *"the lying down animation is
+> pretty bad"*
+
+The drift layer's look down bent the body forward and tipped the head BACK, so the
+two cancelled and the body sank under a still head. On a faceless disc the only cue
+is the head against the shoulder line, so a look now throws the head clean past it
+(neck +1.1 up, −1.2 down) with the body leaning the same way; hands as the cue were
+drawn and dropped. The floor seat is an L — back up, legs flat, hands propped behind
+— chosen from a grid over knees-up and hands-on-thighs seats, which melt into a lump
+under a head this size. `check:wander` holds the look standing, seated and crouched.
+Both live in `wander.ts`, outside `muststamp`, so no re-measure.
+
+### Two figures on a stage are talking (N21)
+
+> *"if there is more than 1 stickman on screen they must be communicating"*
+
+`check:replay` already RAN every scene offline; it now also reads every `<Stickman>`'s
+pose bundle, so place, facing and liveliness per settled beat come from the real
+scene. It found 37 figure-beats facing nobody (narrators left with their backs to a
+companion by `dirsFrom`, rows of roped figures facing empty stage), 169 frozen
+listeners (a bare `stand()` has had no life since group AL) and 28 beats of a visitor
+talking to the lead's back (19 of 32 visitors). All three are zero-budget rules now:
+`walkFacing`/`restToward` turn a narrator back to his partner after a walk; listeners
+take measured listening holds (`scripts/liven-pairs.mjs` from the check's own list);
+`make:visitor` places the visitor where the lead faces, from `leadFacing.json`
+(`REPLAY_FACING`), or turns a still lead round (`VisitorCue.turn`, `VISIT` in
+cinematicKit). 30 visitors, 8 of them turned to.
+
 ### And the picture has the app's own depth now (group AG)
 
 > *"I have recently updated the UI of the app. Everything in the app other than the
@@ -4985,6 +5027,38 @@ Counts held: 268 thoughts across 246 lessons, 862 wander plans.
 > because a jump has to stay legal). Recorded rather than flattened: two boxers who
 > never duck are not boxers. If it ever reads as the same defect, the fight's
 > `bob` terms are the thing to damp, not the rule.
+
+### And he brings a lawn chair, across several taps (group AO)
+
+> *"grab a chair out of noware, like a lawn chair, set it up, and then sit down,
+> mabye fidget his hand and arms just a little, maybe pull out some coffee or tea,
+> crossing his legs sometimes."* (2026-09-25)
+
+**25 lessons sit him in a lawn chair and 45 more hand him a mug standing up.** The chair
+comes out from behind his back, is flicked open, set down and sat in on one beat; the
+beats after it cross his legs, bring the mug out, sip, drum the armrest and look up or
+down; the last one folds it away. It is the first thing he does ACROSS beats, so it is a
+TIMELINE with a playhead (`chairPlay.ts`): a tap on early hurries the routine at 1.8×
+until it catches up, a tap back runs it backwards, and nothing is ever teleported.
+Player-drawn through `lookPose` like the wander, so no scene changed and no box went
+stale; the chair and the mug are Views (`ChairArt.tsx`) mounted only for the lead in a
+lesson that has a routine.
+
+- **Only 25, and the constraint is the corpus rather than the room.** A stretch needs
+  consecutive beats where he is free — no prop, no walk, no pen mark, one figure, no
+  visitor, not grave — and most lessons break that every other beat. What bought the
+  count up was letting a question beat sit INSIDE a stretch (he just sits, `SEAT_REST`)
+  and letting one long line carry two parts; the median line is 6.4 seconds.
+- **The first replay measured an elbow moving 25 units in 0.2s**, while he carried the
+  chair round his body at shoulder height — two-bone IK folding flat. The hand now goes
+  round a ring about the shoulder and dips as it crosses him (AO3), and read patiently
+  the worst frame is 2.1 units. **The same check's first reading was 13 units for the
+  chair, and that one was the instrument**: a webbing face seen edge-on flips its skew
+  and swaps which corner is which. Corners are compared as a set.
+- **The approved sheet hid the chair sinking 14 units into the floor** as it opened; the
+  small cells could not show it and `check:chair` §4 could.
+- **The chain is `make:chair`, then `make:thoughts`, `make:wander`, `make:marks`**. The
+  thoughts lost 21 bubbles to it (268 → 247): a bubble is placed against his standing head.
 
 ### And the objects are drawings now, against real references (group AM)
 

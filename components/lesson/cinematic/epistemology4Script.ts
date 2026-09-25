@@ -48,7 +48,7 @@ export const BEATS: Epi4Beat[] = [
     dur: 4.6,
   },
   {
-    e: 424, r: 0, fill: 0.85, school: 1,
+    e: 424, r: 263, fill: 0.85, school: 1,
     quote: {
       id: 'lq-epistemology-knowledge-4-1',
       text: 'Let us suppose the mind to be white paper, void of all characters, without any ideas. How comes it to be furnished?',
@@ -73,7 +73,7 @@ export const BEATS: Epi4Beat[] = [
   },
   {
     // The boy's square is drawn between the panels as the problem is named …
-    e: 158, r: 19, glow: 1, school: 1, apriori: 1, meno: 0.5,
+    e: 263, r: 19, glow: 1, school: 1, apriori: 1, meno: 0.5,
     text: 'In Plato’s Meno, Socrates questions an untaught boy from Meno’s household about how to double a square. Socrates insists he teaches the boy nothing and only asks questions.',
     cite: 'Plato, Meno',
     dur: 3.2,

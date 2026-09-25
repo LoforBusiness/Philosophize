@@ -52,7 +52,7 @@ export interface Pol3Beat extends BaseBeat {
 export const BEATS: Pol3Beat[] = [
   {
     // The gunman and the one he makes obey: the force diagram alone.
-    sub: 2, r: 28, scroll: 0, pair: 0, force: 1, flow: 0, seal: 0,
+    sub: 2, r: 263, scroll: 0, pair: 0, force: 1, flow: 0, seal: 0,
     text: 'A gunman can make you obey. What, if anything, makes you owe obedience to a government?',
     dur: 1.8,
   },

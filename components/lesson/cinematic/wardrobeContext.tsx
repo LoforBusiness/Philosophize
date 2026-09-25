@@ -1,6 +1,7 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { BY_ID, type Piece } from './wardrobe';
 import { WARDROBE } from '../../../data/lessonWardrobe';
+import { CHAIR_PLANS } from '../../../data/lessonChair';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHAT THE FIGURES IN THIS LESSON ARE WEARING.
@@ -31,10 +32,15 @@ export interface Worn {
    * an argument and get two looks; more than two are a crowd and get none.
    */
   crowd: Piece[];
+  /**
+   * Whether this lesson plays a chair or mug routine (chairPlay.ts). Only then does
+   * the lead mount the Views that draw them, so the other lessons pay nothing.
+   */
+  prop: boolean;
 }
 
 const NONE: Piece[] = [];
-const EMPTY: Worn = { lead: NONE, second: NONE, crowd: NONE };
+const EMPTY: Worn = { lead: NONE, second: NONE, crowd: NONE, prop: false };
 const Ctx = createContext<Worn>(EMPTY);
 
 export function WardrobeProvider({ lessonId, children }: { lessonId: string; children: ReactNode }) {
@@ -49,6 +55,7 @@ export function WardrobeProvider({ lessonId, children }: { lessonId: string; chi
       lead: BY_ID[leadId]?.pieces ?? NONE,
       second: BY_ID[secondId]?.pieces ?? NONE,
       crowd: NONE,
+      prop: !!CHAIR_PLANS[lessonId],
     };
   }, [lessonId]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -57,4 +64,9 @@ export function WardrobeProvider({ lessonId, children }: { lessonId: string; chi
 /** What this figure wears. Outside a lesson (the launch screen, the road) it is nothing. */
 export function useWorn(role: 'lead' | 'second' | 'crowd' = 'lead'): Piece[] {
   return useContext(Ctx)[role];
+}
+
+/** Whether the lead in this lesson may be handed a chair or a mug. */
+export function useHasProp(): boolean {
+  return useContext(Ctx).prop;
 }

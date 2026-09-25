@@ -29,15 +29,17 @@ const { transform } = await import(
 );
 const TMP = path.join(os.tmpdir(), 'ph-wander-sheet');
 mkdirSync(TMP, { recursive: true });
-const emit = (rel, name) => {
-  const src = transform(readFileSync(path.join(REPO, rel), 'utf8'), { transforms: ['typescript'] }).code
+// `from` overrides where a file is read from — WANDER_SRC draws a HEAD copy of
+// wander.ts for a before strip, without touching the working tree.
+const emit = (rel, name, from) => {
+  const src = transform(readFileSync(from || path.join(REPO, rel), 'utf8'), { transforms: ['typescript'] }).code
     .replace(/(from\s+['"])\.\/([A-Za-z0-9_-]+)(['"])/g, '$1./$2.mjs$3');
   writeFileSync(path.join(TMP, name), src);
   return pathToFileURL(path.join(TMP, name)).href;
 };
 const RIG = await import(emit('components/lesson/cinematic/rig.ts', 'rig.mjs'));
 await import(emit('components/lesson/cinematic/moves.ts', 'moves.mjs'));
-const WA = await import(emit('components/lesson/cinematic/wander.ts', 'wander.mjs'));
+const WA = await import(emit('components/lesson/cinematic/wander.ts', 'wander.mjs', process.env.WANDER_SRC));
 
 const INK = '#1A1A1A';
 const PAPER = '#FAFAF7';
@@ -99,6 +101,9 @@ const PATTERNS = [
     W.LOOK, 0.6, 0.55, 1,
     W.LOOK, 1.75, 0.5, -0.55,
     W.LOOK, 2.8, 0.5, 0]],
+  ['look down, full', [0, 0,
+    W.LOOK, 0.6, 0.55, -1,
+    W.LOOK, 2.4, 0.5, 0]],
   ['over the shoulder', [0, 0,
     W.TURN, 0.6, 0.32, -1,
     W.LOOK, 1.0, 0.4, -0.5,
@@ -118,6 +123,9 @@ if (arg) {
   strips = list.map((p, i) => [`beat ${i}`, p]).filter(([, p]) => p);
 }
 
+// ONLY=<text> keeps the strips whose name contains it — one move, drawn large.
+if (process.env.ONLY) strips = strips.filter(([n]) => process.env.ONLY.split('|').some((o) => n.includes(o)));
+const OUT_TAG = process.env.OUT_TAG ? `-${process.env.OUT_TAG}` : '';
 const FRAMES = Number(process.env.FRAMES || 8);
 const FIG = Number(process.env.FIG || 132);
 const k = FIG / RIG.FIG_H;
@@ -158,7 +166,7 @@ for (const [i, [name, plan]] of strips.entries()) {
   }
 }
 
-const OUT = path.join(REPO, 'scripts', '.lesson-shots', `wander-${arg || 'patterns'}.png`);
+const OUT = path.join(REPO, 'scripts', '.lesson-shots', `wander-${arg || 'patterns'}${OUT_TAG}.png`);
 mkdirSync(path.dirname(OUT), { recursive: true });
 const img = new Jimp(sheet.w, sheet.h);
 for (let q = 0; q < sheet.w * sheet.h; q += 1) {

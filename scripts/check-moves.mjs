@@ -439,6 +439,59 @@ if (!process.argv.includes('--probe')) checkWalkUnchanged();
   }
 }
 
+// ── check 8 · a gesture ENDS slowly (owner, 2026-09-25) ──────────────────────
+//
+// "the stickman will sometimes make a movement with his hand and then at the end
+// of the animation … the hand will very quickly move down." Measured, it was the
+// PLAYED band: every action squeezed into 1.5 s and returning to the stand in its
+// last 10–15% of u — act 80 dropped the arm at 5.2 units a frame. This measures
+// the solved wrists, frame by frame at 60 Hz, over the ENDING of every played
+// action (from 0.55 of its play window on), which is where the return lives.
+//
+// Unknown act numbers resolve to the plain stand, which moves nothing, so the
+// range can run past the last act without a false finding.
+{
+  const ENDING_CEILING = 2.0;               // stage units per 60 Hz frame
+  // Fast because the speed IS the move: a jump's landing, the double take's snap,
+  // the third point that overshoots, and a heel click. Each one is the owner's.
+  const FAST_BY_DESIGN = new Set([3, 97, 114, 117]);
+  const T8 = 7.3;
+  const over = [];
+  let worstAll = 0;
+  let measured = 0;
+  for (let act = 1; act <= 250; act += 1) {
+    if (FAST_BY_DESIGN.has(act)) continue;
+    const code = M.playCode(act);
+    const from = 0.55 * M.PLAY_SECONDS;
+    let prev = null; let worst = 0; let at = 0;
+    for (let bt = from - 1 / 60; bt <= M.PLAY_SECONDS + 0.2; bt += 1 / 60) {
+      const j = solveAt(M.emoteAnyLive(code, T8 + bt, bt), 200);
+      if (prev) {
+        for (const w of ['wrL', 'wrR']) {
+          const d = Math.hypot(j[w].x - prev[w].x, j[w].y - prev[w].y);
+          if (d > worst) { worst = d; at = bt; }
+        }
+      }
+      prev = j;
+    }
+    measured += 1;
+    worstAll = Math.max(worstAll, worst);
+    if (worst > ENDING_CEILING) over.push(`act ${act} (code ${code}) ${worst.toFixed(2)}u/frame at ${at.toFixed(2)}s`);
+  }
+  if (FAST_BY_DESIGN.size > 4) note('endings', 'fast', 'the fast-by-design list grew — each one needs the owner');
+  // make:wander waits PLAY_SECONDS + 0.4 after a played action, from its own copy.
+  const WR = await import(pathToFileURL(path.join(process.cwd(), 'scripts/lib/wanderrule.mjs')).href);
+  if (WR.PLAY_SECONDS !== M.PLAY_SECONDS) {
+    note('wanderrule', 'sync', `wanderrule.PLAY_SECONDS ${WR.PLAY_SECONDS} ≠ moves.PLAY_SECONDS ${M.PLAY_SECONDS}`);
+  }
+  if (over.length) {
+    console.log(`\n${over.length} played action(s) end faster than ${ENDING_CEILING}u a frame (check 8):`);
+    for (const o of over) console.log(`  ${o}`);
+    process.exit(1);
+  }
+  console.log(`endings: ${measured} played actions, worst ${worstAll.toFixed(2)}u/frame (ceiling ${ENDING_CEILING})`);
+}
+
 const PAIRS = {};
 for (const m of MOTIONS) {
   if (!m.pair) continue;

@@ -5,7 +5,7 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, stand, travelStance, type Bundle, } from './rig';
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, stand, travelStance, type Bundle, type Stance, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive, gazeAt, pointAt } from './moves';
@@ -126,6 +126,23 @@ const DUTY_Y = FAR_G;
 // theory. The only moving quantity is how far he reaches for the child, and driving it off
 // the knob would say that the more theory you accept the more you help, a claim the lesson
 // does not make.
+/**
+ * A child waving for help (N21). `arms` 2 alternates both raised arms; 1 waves the
+ * near arm overhead. Hands only — group AL: nothing moves the pelvis on a clock.
+ */
+function waving(s: Stance, t: number, arms: number): Stance {
+  'worklet';
+  const a = Math.sin(t * 3.1);
+  if (arms === 2) {
+    return {
+      ...s,
+      fistL: { x: s.fistL.x - 3 * a, y: s.fistL.y - 7 * a },
+      fistR: { x: s.fistR.x - 3 * a, y: s.fistR.y + 7 * a },
+    };
+  }
+  return { ...s, fistR: { x: 26 + 5 * a, y: -38 + 2 * Math.abs(a) } };
+}
+
 export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
   const heldS = useHeld();
   const cv = useCarry(3);
@@ -160,8 +177,11 @@ export default function Ethics10Scene({ clock, bt, bi, i, picked, onPick }: Scen
     // the settled HOLD rather than a live pose: `emoteHold` already carries its own
     // drift, and a `lift` driven by anything other than a real beat clock would be
     // a raised arm that never comes down (C20).
-    const nearS = emoteHold(24, t + 2.1);
-    const farS = stand(t + 5.6);
+    // N21 — A CHILD IN THE WATER IS CALLING FOR HELP, and both were held still: the
+    // near one in a fixed arms-up pose, the far one standing. Now the near child's
+    // arms go up and down in turn and the far one waves one arm across the distance.
+    const nearS = waving(emoteHold(24, t + 2.1), t, 2);
+    const farS = waving(stand(t + 5.6), t + 0.8, 1);
 
     // ── HE REACHES FOR THE CHILD, AND LOOKS AT IT ─────────────────────────────
     //

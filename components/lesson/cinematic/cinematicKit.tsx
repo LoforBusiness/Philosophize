@@ -10,7 +10,8 @@ import QuotePlate from '@/components/shared/QuotePlate';
 import { eraGroupOfDate } from '@/data/philosophers';
 import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import { C, RADIUS, LIP } from '@/constants/design';
-import { ease01, pose, seg, type Bundle, type Stance } from './rig';
+import { ease01, mixStance, pose, seg, type Bundle, type Stance } from './rig';
+import { CHAIR, chairStep, frameAt } from './chairPlay';
 import { gazeAt } from './moves';
 import {
   gazeKeep, wanderDir, wanderRest, wanderStance, wanderState, type WanderState,
@@ -712,6 +713,31 @@ export function facing(from: number, to: number, t: number, dur = 0.36): number 
   return from + (to - from) * (u * u * (3 - 2 * u));
 }
 
+/**
+ * WALK THE WAY YOU ARE GOING, THEN TURN BACK TO THE PERSON YOU ARE WITH (N21).
+ *
+ * `dirsFrom` holds whatever way he last walked, so a narrator who crosses to the
+ * left of a companion stops with his back to him and talks to nobody — measured in
+ * aesthetics7 and ethics8, five and three beats of it. This faces the travel
+ * direction while the walk runs (`walkS`, the same `moveTr` the scene walks on, so
+ * C18's no-moonwalk rule holds), then turns — eased through a profile, like
+ * `facing` — to `restTo` once he has arrived. A beat with no walk just turns.
+ *
+ * `restFrom` is where the previous beat LEFT him facing, which is its own `restTo`.
+ */
+export function walkFacing(restFrom: number, travel: number, restTo: number, bt: number, walkS: number): number {
+  'worklet';
+  const dur = 0.36;
+  if (walkS <= dur) return facing(restFrom, restTo, bt, dur);
+  if (bt < walkS) return facing(restFrom, travel, bt, dur);
+  return facing(travel, restTo, bt - walkS, dur);
+}
+
+/** Per beat, which way to face the partner at `px` from the beat's own x (N21). */
+export function restToward(xs: number[], px: number, fallback = 1): number[] {
+  return xs.map((x) => (px > x + 1 ? 1 : px < x - 1 ? -1 : fallback));
+}
+
 // ── …AND EVERY OTHER TRACK, WHICH HAD THE SAME DEFECT AND NO LIMB TO SHOW IT ──
 //
 // `carryFrom` above fixed the STANCE. It did not fix anything else, and a scene
@@ -920,8 +946,46 @@ export const WANDER = {
   slegU: makeMutable(-1),
 };
 
+/**
+ * THE LEAD TURNS TO THE VISITOR (N21).
+ *
+ * Placed by room alone, most visitors walked in behind the lead and argued with the
+ * back of his head. `make:visitor` now stands him where the lead faces, and where
+ * the only room is behind a lead who never walks again the cue carries `turn` — the
+ * side to face. The player writes the cue here when a beat is installed, and
+ * `visitTurn` eases the lead round from the moment the visitor has arrived, rate-
+ * limited on the frame clock so a tap either way can never flip him.
+ */
+export const VISIT = {
+  side: makeMutable(0),
+  enter: makeMutable(-1),
+  walk: makeMutable(0),
+  beat: makeMutable(-1),
+  u: makeMutable(0),
+  last: makeMutable(-1),
+};
+
+/** How far round the lead has turned to the visitor, 0…1, eased. */
+function visitTurn(): number {
+  'worklet';
+  if (!VISIT.side.value) return 0;
+  const arrived = VISIT.beat.value > VISIT.enter.value
+    || (VISIT.beat.value === VISIT.enter.value && WANDER.bt.value >= VISIT.walk.value);
+  const target = arrived ? 1 : 0;
+  const now = WANDER.now.value;
+  const dt = VISIT.last.value < 0 ? 0 : Math.max(0, Math.min(0.1, now - VISIT.last.value));
+  VISIT.last.value = now;
+  const step = dt / 0.36;
+  const u = VISIT.u.value;
+  const nu = target > u ? Math.min(target, u + step) : Math.max(target, u - step);
+  VISIT.u.value = nu;
+  return nu * nu * (3 - 2 * nu);
+}
+
 /** Put the layer back where a lesson starts. The player calls it on its way out. */
 export function wanderReset() {
+  VISIT.side.value = 0; VISIT.enter.value = -1; VISIT.walk.value = 0;
+  VISIT.beat.value = -1; VISIT.u.value = 0; VISIT.last.value = -1;
   WANDER.plan.value = [];
   WANDER.bt.value = 0;
   WANDER.now.value = 0;
@@ -1038,13 +1102,39 @@ export function lookPose(
   const wst = wanderNow(dir);
   const ws = wanderStance(s, wst, WANDER.now.value, k);
   const wx = x + wst.dx;
-  const wdir = wanderDir(dir, wst);
+  // Turned to the visitor (N21): the facing eases round to his side, and the gaze
+  // hands the neck back as it does — level, he is looking straight at a man his own
+  // height, where the generated gaze would have kept him staring at the art behind.
+  const vu = visitTurn();
+  const wdir0 = wanderDir(dir, wst);
+  const wdir = vu > 0 ? wdir0 + (VISIT.side.value - wdir0) * vu : wdir0;
   // A DELIBERATE LOOK AND THE GENERATED GAZE ARE TWO OPINIONS ON ONE NECK, and
   // the loser is whichever is applied first. `gazeKeep` hands the neck over while
   // the layer is using it, on the layer's own eased values, so neither cuts.
-  const gw = w * gazeKeep(wst);
-  if (gw <= 0) return pose(reacted(ws, r), wx, groundY, k, wdir, opacity);
-  const g = gazeAt(ws, wx, groundY, k, wdir, gx, gy, gw);
+  //
+  // ── AND THE CHAIR, WHICH TAKES THE WHOLE MAN WHILE IT PLAYS (chairPlay.ts) ─
+  //
+  // The routine is a full stance — he reaches behind his back, sits, crosses his
+  // legs — so it is blended over the stance the scene and the layer produced, and
+  // the generated gaze hands the neck back as it arrives, for the same reason the
+  // wander's own look does: two opinions on one neck. The chair and the mug ride
+  // out on the bundle for `Stickman` to draw.
+  const cu = chairStep(WANDER.now.value, WANDER.bt.value);
+  const cf = cu > 0 ? frameAt(CHAIR.plan.value, CHAIR.p.value, WANDER.now.value) : null;
+  const cs = cf ? mixStance(ws, cf.s, cu) : ws;
+  const gw = w * gazeKeep(wst) * (1 - vu) * (1 - cu);
+  const withProp = (b: Bundle): Bundle => {
+    'worklet';
+    if (!cf) return b;
+    const d = wdir < 0 ? -1 : 1;
+    return {
+      ...b,
+      prop: [cf.chair.on, cf.chair.open, wx + d * k * cf.chair.x, groundY + k * cf.chair.y,
+        cf.chair.front, cf.mug.on, cf.mug.steam, WANDER.now.value],
+    };
+  };
+  if (gw <= 0) return withProp(pose(reacted(cs, r), wx, groundY, k, wdir, opacity));
+  const g = gazeAt(cs, wx, groundY, k, wdir, gx, gy, gw);
   // ── AND THE LEAN, BECAUSE A HEAD MOVE IS NOT A MOVE (N12) ─────────────────
   //
   // The rule book already records this against the four "looking" actions in
@@ -1059,8 +1149,8 @@ export function lookPose(
   // actually turned keeps the two locked together and costs no second solve: the
   // total comes to about 0.6 of the gaze angle, so a figure craning up at a
   // machine above him moves his head some sixteen units rather than five.
-  const lean = (g.neck - ws.neck) * 0.5;
-  return pose(reacted({ ...g, tilt: g.tilt + lean }, r), wx, groundY, k, wdir, opacity);
+  const lean = (g.neck - cs.neck) * 0.5;
+  return withProp(pose(reacted({ ...g, tilt: g.tilt + lean }, r), wx, groundY, k, wdir, opacity));
 }
 
 /**

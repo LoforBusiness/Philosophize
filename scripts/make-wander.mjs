@@ -32,9 +32,8 @@
 import fs from 'node:fs';
 import { loadTs } from './lib/loadts.mjs';
 import { corpus } from './lib/gestures.mjs';
-import { sceneOf, walkOf } from './lib/scenefig.mjs';
-import { windowOf } from './lib/tourrule.mjs';
-import { poseTrack } from './lib/posetrack.mjs';
+import { walkOf } from './lib/scenefig.mjs';
+import { soloFigure, leadBox, windowsFor } from './lib/figroom.mjs';
 import { LESSONS, beatsOf, parseManifest } from './lib/narration.mjs';
 import { markBox } from './lib/marks.mjs';
 import {
@@ -52,6 +51,10 @@ const { TOURS } = await loadTs(`${DIR}/tours.ts`);
 const { VISITOR } = await loadTs('data/lessonVisitor.ts');
 const { THOUGHTS } = await loadTs('data/lessonThoughts.ts');
 const { MARKS } = await loadTs('data/lessonMarks.ts');
+// THE CHAIR ROUTINE OWNS ITS BEATS, and the beat after its last one, while its
+// putaway may still be hurrying to finish (chairPlay.ts): a plan there would walk
+// him off with the chair still in his hands. `make:chair` runs first.
+const { CHAIR_PLANS } = await loadTs('data/lessonChair.ts');
 // THE MANIFEST IS PARSED, NOT IMPORTED. Every line in it is a `require()` of an
 // mp3, so evaluating the module in Node is an ambiguous-module-syntax error — and
 // `parseManifest` is the reader `check:narration` already holds it to.
@@ -64,69 +67,8 @@ const rows = corpus();
 const CODES = new Map(rows.map((r) => [r.id, r.beats.map((b) => b.code)]));
 const GRADED = new Map(rows.map((r) => [r.id, r.beats.map((b) => b.graded)]));
 
-const bandOf = (id) => {
-  const s = sceneOf(id);
-  const m = s && s.match(/band=\{\[\s*(-?\d+)\s*,\s*(-?\d+)\s*\]\}/);
-  return m ? [+m[1], +m[2]] : [0, 560];
-};
-
-/**
- * WHICH SCENES THIS LAYER MAY DRIVE AT ALL.
- *
- * `lookPose` is a singleton seam — one module-level shared value read by whichever
- * scene is mounted — so it moves EVERY figure a scene poses through it. That is
- * right for the 224 scenes with one figure and wrong for a scene that poses a
- * crowd or a pair: they would walk in lockstep, which reads as one figure
- * duplicated rather than two people (`strideStance`'s own `seed` note).
- *
- * Detected from the source rather than assumed: more than one `<Stickman>`, a pose
- * call inside a `.map(`, or two pose tracks (`poseTrack` returns null) all mean
- * the lesson is left alone.
- */
-function soloFigure(id) {
-  const src = sceneOf(id);
-  if (!src) return false;
-  const mounts = (src.match(/<Stickman\b/g) || []).length;
-  if (mounts !== 1) return false;
-  if (/\.map\([^)]*\)\s*=>[\s\S]{0,400}?\b(lookPose|reactPose)\(/.test(src)) return false;
-  const stem = (LESSONS[id] || '').replace(/Script\.ts$/, '');
-  return !!poseTrack(DIR, stem);
-}
-
-/** +1 facing right, −1 facing left, held while he stands still — `rig.dirsFrom`. */
-/**
- * The lead figure's box on a beat: `{ x, y, w, h, items }`, or null for a crowd.
- *
- * A BEAT RECORDS THE SAME FIGURE SEVERAL TIMES, and that cost a diagnosis: the
- * probe reads the stage more than once per beat and keeps each reading, so
- * `aesthetics-aesthetics-1` has three `fig` boxes within a unit of each other and
- * `ethics-ethics-6` has twenty-two — five citizens read four times over. Taking
- * "exactly one fig item" as "one figure" therefore found a single figure in 12
- * beats of 2,600.
- *
- * So they are clustered by overlap: one cluster is one person, and a beat with more
- * than one is left alone whatever the scene's source looked like.
- */
-function leadBox(items) {
-  const figs = (items || []).filter((it) => it.k === 'fig' && !it.v);
-  if (!figs.length) return null;
-  const groups = [];
-  for (const it of figs) {
-    const [x, , w] = it.b;
-    const g = groups.find((q) => x <= q.x1 + 4 && x + w >= q.x0 - 4);
-    if (g) {
-      g.x0 = Math.min(g.x0, x); g.x1 = Math.max(g.x1, x + w); g.items.push(it);
-    } else groups.push({ x0: x, x1: x + w, items: [it] });
-  }
-  if (groups.length !== 1) return null;
-  const g = groups[0];
-  const y0 = Math.min(...g.items.map((it) => it.b[1]));
-  const y1 = Math.max(...g.items.map((it) => it.b[1] + it.b[3]));
-  return { x: g.x0, y: y0, w: g.x1 - g.x0, h: y1 - y0, items: g.items };
-}
-
 const plans = {};
-const tally = { skipCode: 0, skipRoom: 0, skipWalk: 0, skipGraded: 0, solo: 0, lessons: 0 };
+const tally = { skipChair: 0, skipCode: 0, skipRoom: 0, skipWalk: 0, skipGraded: 0, solo: 0, lessons: 0 };
 const used = {};
 const spans = [];
 let planned = 0;
@@ -139,7 +81,6 @@ for (const [id, file] of Object.entries(LESSONS)) {
   const beats = beatsOf(file);
   const items = J.words[id];
   if (!items) continue;
-  const band = bandOf(id);
   const codes = CODES.get(id) || [];
   const graded = GRADED.get(id) || [];
   const walk = await walkOf(id);
@@ -149,25 +90,9 @@ for (const [id, file] of Object.entries(LESSONS)) {
   const lines = NARRATION[id] || {};
   const thoughts = THOUGHTS[id]?.at || [];
 
-  const toured = (k) => !graded[k] && (TOURS[id]?.[k]?.length ?? 0) > 0;
-  const mustWin = (k) => (J.boxes[id]?.[k] ? windowOf(J.boxes[id][k], band, GROUND_Y) : null);
-  const leaves = (k) => {
-    if (toured(k)) {
-      const last = TOURS[id][k][TOURS[id][k].length - 1];
-      return windowOf(last.length === 10 ? last.slice(6, 10) : last.slice(0, 4), band, GROUND_Y);
-    }
-    if (k === 0 || graded[k]) return mustWin(k);
-    return leaves(k - 1);
-  };
-  const windowsAt = (k) => {
-    if (!/\bcamera=\{/.test(sceneOf(id) ?? '')) return [];
-    if (toured(k)) {
-      return TOURS[id][k].flatMap((st) => [windowOf(st.slice(0, 4), band, GROUND_Y),
-        ...(st.length === 10 ? [windowOf(st.slice(6, 10), band, GROUND_Y)] : [])]);
-    }
-    const w = k === 0 || graded[k] ? mustWin(k) : leaves(k - 1);
-    return w ? [w] : [];
-  };
+  const windowsAt = windowsFor(id, graded, TOURS, J);
+  const chair = CHAIR_PLANS[id];
+  const chairBeat = (k) => !!chair && k >= chair[0] && k <= chair[chair.length - 4] + 1;
 
   const out = new Array(beats.length).fill(null);
   let lastKind = '';
@@ -178,6 +103,7 @@ for (const [id, file] of Object.entries(LESSONS)) {
   for (let i = 0; i < beats.length; i += 1) {
     const b = beats[i];
     if (b.interact || b.mc || b.tap || b.summary) { tally.skipGraded += 1; continue; }
+    if (chairBeat(i)) { tally.skipChair += 1; continue; }
     const tier = poseTier(codes[i] ?? 0);
     if (tier === 'bound') { tally.skipCode += 1; continue; }
     // A beat the scene walks him through is already a walk, and the beat a second
@@ -214,7 +140,11 @@ for (const [id, file] of Object.entries(LESSONS)) {
     const seed = hash01(`${id}:${i}:af`);
     // A bubble is placed against his RESTING head, so a beat that draws one may
     // only be given the moves that leave his feet and his height alone.
-    const still = !!thoughts[i] || tier === 'late' || !measured;
+    // AND ONCE A VISITOR HAS WALKED IN HE IS IN A CONVERSATION (N21): no stroll, no
+    // sit, no turn to look behind him — each one takes him away from, or turns his
+    // back on, the person he is talking to, and the player may be holding him turned
+    // to face that person (`VisitorCue.turn`). A look and a weight shift keep him alive.
+    const still = !!thoughts[i] || tier === 'late' || !measured || (!!cue && i > cue.enter);
     const f = face ? face[i] : 1;
     const moves = choose({
       seed, dur, pauses, room, still, facing: f, lastKind,
@@ -424,7 +354,7 @@ const stat = (A) => {
 };
 console.log(`${tally.lessons} lessons with one figure  ·  ${tally.solo} left alone (a crowd, a pair, or two pose tracks)`);
 console.log(`  ${planned} beat(s) given a plan, of ${freeBeats} where he is free to move`);
-console.log(`  skipped: ${tally.skipGraded} graded or summary · ${tally.skipCode} at a prop or already moving · ${tally.skipWalk} the scene walks him · ${tally.skipRoom} no room`);
+console.log(`  skipped: ${tally.skipGraded} graded or summary · ${tally.skipCode} at a prop or already moving · ${tally.skipWalk} the scene walks him · ${tally.skipRoom} no room · ${tally.skipChair} the chair's`);
 console.log(`  ${Object.entries(used).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} ${n}`).join(' · ')}`);
 console.log(`  a step is ${stat(spans)} stage units`);
 console.log(`  ${Object.keys(plans).length} lessons in the table`);

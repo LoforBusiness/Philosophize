@@ -137,14 +137,18 @@ function calm(t: number, k: number, bow: number): Stance {
   'worklet';
   const s = stand(t + k * 1.7);
   const shift = Math.sin(t * (0.55 + k * 0.08) + k * 2.1);
+  // N21 — AT PEACE IS NOT FROZEN. The sovereign is speaking to them, and at a
+  // twentieth of a radian of head they stood like posts; the nod is what says they
+  // are listening. Its own tempo per citizen, so four heads never bob in step.
+  const nod = Math.max(0, Math.sin(t * (1.9 + k * 0.23) + k * 1.3)) ** 2;
   return {
     ...s,
-    tilt: s.tilt + shift * 0.04 - bow * 0.16,
-    neck: s.neck + shift * 0.05 + bow * 0.32,
+    tilt: s.tilt + shift * 0.05 - bow * 0.16,
+    neck: s.neck + shift * 0.05 - nod * 0.24 + bow * 0.32,
     footL: { x: s.footL.x - shift * 1.8, y: s.footL.y },
     footR: { x: s.footR.x - shift * 1.8, y: s.footR.y },
-    fistL: { x: -13 - shift * 1.2, y: 4 + shift * 1.5 + bow * 2 },
-    fistR: { x: 13 - shift * 1.2, y: 4 - shift * 1.5 + bow * 2 },
+    fistL: { x: -13 - shift * 2.6, y: 4 + shift * 2.4 + bow * 2 },
+    fistR: { x: 13 - shift * 2.6, y: 4 - shift * 2.4 + bow * 2 },
   };
 }
 function sovereignPose(t: number): Stance {

@@ -11,6 +11,7 @@ import { clamp01,
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './aesthetics7Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, reactPose,
+  walkFacing, restToward,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
@@ -119,6 +120,9 @@ const X = BEATS.map((b) => b.x ?? 160);
 // and leans in on the quote. See followMoves in ./camera.ts.
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics7'));
 const DIR = dirsFrom(X, 1);
+// N21 — at rest he faces the companion; `dirsFrom` alone left him with
+// his back to them after every walk left.
+const REST = restToward(X, COMP_X);
 const Q = BEATS.map((b) => b.q ?? 0);
 const ARTV = BEATS.map((b) => b.art ?? 0);
 const MKV = BEATS.map((b) => b.marks ?? 0);
@@ -183,7 +187,7 @@ export default function Aesthetics7Scene({ clock, bt, bi, i, picked, onPick, dra
     const c = keepHeld(heldC, mixStance(carryFrom(heldC, n, emoteHold(Q[p], t)), emoteLive(Q[n], t, bt.value), tr));
 
     return {
-      fig: reactPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
+      fig: reactPose(s, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, walkFacing(REST[p], DIR[n], REST[n], bt.value, X[p] !== X[n] ? moveTr(X[p], X[n], 0.85) : 0), 1),
       comp: pose(c, COMP_X, GROUND, K_FIG, -1, 1),
       art: carry(cv, 1, n, ARTV[p], ARTV[n], tr),
       capt: captOn ? (captFade ? grow : 1) : 0,

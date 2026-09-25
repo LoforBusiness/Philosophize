@@ -32,7 +32,7 @@ export interface Aes4Beat extends BaseBeat {
 
 export const BEATS: Aes4Beat[] = [
   {
-    a: 2, v: 0, ask: 1, test: 0, verdict: 0, signed: 0, art: 0,
+    a: 2, v: 263, ask: 1, test: 0, verdict: 0, signed: 0, art: 0,
     text: 'In 1917, a mass-produced urinal was submitted to an art exhibition. It wasn’t carved or painted, only chosen.',
     dur: 2.8,
   },
@@ -48,7 +48,7 @@ export const BEATS: Aes4Beat[] = [
     dur: 2.6,
   },
   {
-    a: 167, v: 10, test: 2,
+    a: 167, v: 263, test: 2,
     text: 'The second, from Tolstoy, holds that art expresses a feeling and conveys it to an audience. Both theories assume someone made the work.',
     dur: 2.4,
   },
@@ -81,18 +81,18 @@ export const BEATS: Aes4Beat[] = [
     dur: 3.6,
   },
   {
-    a: 383, v: 4, test: 3, verdict: 1, signed: 1, art: 1, status: 2,
+    a: 383, v: 263, test: 3, verdict: 1, signed: 1, art: 1, status: 2,
     text: 'Fountain copies nothing and expresses no feeling, so neither theory fits. For George Dickie, the institutions of the artworld make it art.',
     cite: 'The artworld confers',
     dur: 2.4,
   },
   {
-    a: 400, v: 4, test: 3, verdict: 1, signed: 1, art: 1, status: 2, own: 1,
+    a: 400, v: 260, test: 3, verdict: 1, signed: 1, art: 1, status: 2, own: 1,
     text: 'Asking whether something is art is philosophical. It forces you to state the definition you privately hold.',
     dur: 2.6,
   },
   {
-    a: 380, v: 4, test: 3, verdict: 1, signed: 1, art: 1, status: 2,
+    a: 380, v: 263, test: 3, verdict: 1, signed: 1, art: 1, status: 2,
     interact: {
       prompt: 'If an identical urinal in a shop isn’t art, what makes Fountain art?',
       cards: [

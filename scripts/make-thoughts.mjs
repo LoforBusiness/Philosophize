@@ -137,6 +137,16 @@ const SAY = existingSay();
 // precisely this reason.
 const { quipFor, visitorSays } = await loadTs('components/lesson/cinematic/quips.ts');
 const { VISITOR } = await loadTs('data/lessonVisitor.ts');
+// THE CHAIR'S BEATS GET NO BUBBLE. A bubble is placed against his STANDING head, and
+// for those beats he is in a lawn chair with his head 14 units lower (chairPlay.ts),
+// or on his way into it. `make:chair` runs first and does not look at this table.
+const { CHAIR_PLANS } = await loadTs('data/lessonChair.ts');
+const CH_MUG_STAND = 12;
+const inChair = (id, i) => {
+  const c = CHAIR_PLANS[id];
+  if (!c || c[1] === CH_MUG_STAND) return false;
+  return i >= c[0] && i <= c[c.length - 4];
+};
 // THE CAMERA'S FRAMES, so a bubble is never placed where the shot cuts it in half.
 const { TOURS } = await loadTs('components/lesson/cinematic/tours.ts');
 /** The ground every scene stands on: CinematicPlayer's default, and no scene passes another. */
@@ -445,7 +455,7 @@ for (const [id, beats] of Object.entries(J.words)) {
       face = SAY_FACE;
       text = boxH(a, face).h >= boxH(b, face).h ? a : b;
     } else if (said[i]) text = said[i];
-    if (!text) { at.push(null); continue; }
+    if (!text || inChair(id, i)) { at.push(null); continue; }
     const { h } = boxH(text, face);
     // The band is passed IN, because a box above its top edge is not subtle, it
     // is gone (H59) — and checking it afterwards would throw away a placement a

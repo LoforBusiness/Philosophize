@@ -8901,6 +8901,105 @@ scene event — a label writing in, a card turning, a column lighting, a prop ar
 chosen from the words of that beat. `political-political-1`'s first seven taps used to
 hold one frame; they now stage the state of nature as it is described.
 
+### N19 · A gesture ENDS slowly — the hands come home, they are not dropped
+
+> *"the stickman will sometimes make a movement with his hand and then at the end of
+> the animation … the hand will very quickly move down … I dont want any of these
+> really fast movements."* (2026-09-25)
+
+Every played action (the 300 band) ends at the plain stand, and most of them spend
+their last 10–15% of `u` putting the hands back. With `u` running linearly over 1.5 s
+that return was squeezed into about a fifth of a second: act 80's finger fell from
+overhead to the thigh at **5.2 units a frame**, and 40-odd acts ended above 2. It was
+invisible to every check because none of them asked how fast anything moved, only
+whether it jumped between frames — and a fast, continuous fall is not a jump.
+
+- `PLAY_SECONDS` is **2.4**, and `playU` warps beat time into progress: the first 65%
+  of `u` plays at nearly the old speed, and the last 35% gets over a second and
+  arrives with zero velocity. The held pose at `u = 1` is unchanged, so group L's
+  hand-over at a tap is unchanged.
+- rig's `lift()` is `sin²`, not `sin`: a sine lands at its fastest.
+- **`check:moves` §8** solves the wrists at 60 Hz over the ending of every played
+  action (from 0.55 of the window) and fails above **2.0 units a frame**. Four acts
+  are fast by design and exempt by name — the jump's landing (3), the double take
+  (97), the overshooting third point (114) and the heel click (117) — and the list
+  may not grow without the owner. It also asserts `wanderrule.PLAY_SECONDS` equals
+  the one in `moves.ts`, because `make:wander` waits for a played action to finish
+  before it moves him.
+- **A new act that fails §8** widens its own return window. Never raise the ceiling.
+- `node scripts/sheet-moves.mjs` with `PLAYED=1 ACTS=80,81` draws acts against the
+  beat's own clock, which is the only strip that shows timing; `RIG_SRC` and
+  `MOVES_SRC` draw a HEAD copy for a before strip.
+
+### N20 · A look and a seat have to read on a faceless figure
+
+> *"one of the movements where the stickman I think is looking down and up looks bad,
+> its like his head moves up but his body down"* and *"the lying down animation is
+> pretty bad, dont really know what I am looking at"* (2026-09-25).
+
+**The look down cancelled itself.** Measured on the rig, facing +x: negative `tilt`
+leans the body forward and positive `neck` tips the head back. The drift layer's look
+down bent the body forward (tilt −0.30) and tipped the head back (neck +0.34), so the
+head held still while the body sank under it, and the look up moved the head six units,
+inside its own radius. **On a faceless disc the only cue the eye reads is where the head
+sits against the shoulder line**, so a look has to carry the head clean past it: neck
++1.1 (thrown back behind the shoulders) for up, −1.2 (hanging in front of the chest)
+for down, with the body leaning a little the SAME way. Hands were tried as the cue and
+dropped. At the brow they read as a wave or a hand to the ear, on the hips as a
+zig-zag, and on the thighs they vanished into the legs.
+
+**The floor seat is an L.** It was legs out with the torso leaning well back and the
+propping arm inside the trunk, which read as half lying down. Knees-up and
+hands-on-thighs seats were drawn in a grid and both melt into one lump under a head
+this size. Back straight up, legs flat along the floor, hands propped behind (`sitOut`
+in `wander.ts`) cannot be read as anything else, and a look up from it reads as
+sitting and gazing up.
+
+**`check:wander` holds the look**: standing, seated and crouched, a full look up must
+move the head back 12 and leave it 8 behind the chest, a full look down must move it
+forward 12, lower it 4 and leave it 8 past the chest, and the chest may never travel
+against the head. Counter-tested by putting the old look down back in a copy
+(`RIG_SRC`), which fails it six ways. `ONLY="look down, full"` and `WANDER_SRC=<HEAD
+copy>` on `sheet-wander.mjs` draw one move before and after.
+
+### N21 · Two figures on a stage are talking
+
+> *"when there are 2 stickman on screan and I see that they arent facing each other,
+> it never looks good, if there is more than 1 stickman on screen they must be
+> communicating and operating in some way that looks natural."* (2026-09-25)
+
+Three rules, all read off the REAL scenes by `check:replay`, which now records every
+`<Stickman>`'s place, facing and how far its head and hands travel through each settled
+beat (in the figure's own units, so a half-size child waving counts as waving):
+
+- **Every figure faces another figure.** A narrator who walked left of his companion
+  stopped with his back to him, because `dirsFrom` holds the last direction walked —
+  five beats of aesthetics7 and three of ethics8. `walkFacing` (cinematicKit) faces the
+  way he is going while the walk runs and then turns, eased, to `restToward` the partner.
+  Rows of roped figures in the two trolley lessons faced empty stage; they face the lever
+  and the one deciding now. The summary beat and a figure still off the edge are skipped.
+- **Nobody stands frozen while another talks.** A figure whose head and hands travel
+  under 4 units a beat while another travels over 12 is a statue being spoken to —
+  76 beats of it before, most of them a listener holding the plain stand, which has had
+  no life of its own since group AL. The listener takes a LISTENING hold (263 nodding
+  along, 260 waiting for the answer, 257 thinking it over — measured to move 4+ units in
+  any five-second window; 159 and 177 measured 0.9 and 1.4 and are not listeners at
+  all). `node scripts/liven-pairs.mjs <replay-log>` sets them from the check's own
+  list, rotated, and changes nothing on a second run. A figure the scene poses itself
+  (the slumped friend, the child in the pond, the crowd) is given its motion in the
+  scene, and the motion is the one its situation has: grief stirs, a child waves.
+- **The lead faces the visitor.** Placed by room alone, 19 of 32 visitors walked in
+  behind the lead. `make:visitor` stands him on the side the lead faces on every beat he
+  is there, from `leadFacing.json` (`REPLAY_FACING=… npm run check:replay`); where the only
+  room is behind a lead who never walks again, the cue carries `turn` and the player turns
+  the lead round (`VISIT`, `visitTurn` in cinematicKit, rate-limited so no tap flips him);
+  a lead who walks on is never turned, because a turn laid over a walk is C18's moonwalk,
+  and that lesson has no visitor. Once a visitor is in, `make:wander` gives the lead only
+  in-place moves — no stroll, no sit, no turn to look behind him.
+
+All three are budgets of zero in `check:replay`, counter-tested by the numbers they
+started at (37, 169 and 28).
+
 ### AA9 · A costume piece hangs off something the eye can see
 
 > *"the box behind the stickman follow[s] in a bad way, you can remove that box by
@@ -10634,3 +10733,75 @@ put the first row's halo through the second's: the box MOVES UP instead and keep
 height. metaphysics21's now column overhung its own drawing by two units each way, which
 ran its halo into the future's, and metaphysics22's EVERYTHING BEFORE ended two units
 short of the junction. Ask what a growing box will meet before growing it.
+
+## Group AO · A set piece that spans several taps
+
+> *"a couple of things I want the stickman to do is like grab a chair out of noware,
+> like a lawn chair, set it up, and then sit down, mabye fidget his hand and arms just
+> a little, maybe pull out some coffee or tea, crossing his legs sometimes … All off
+> these things are supposed to be made very natural and look very good, you should never
+> guess to what you are seeing."* (2026-09-25)
+
+Everything the figure had done until now happened inside one beat. This is the first
+thing he does ACROSS beats: he reaches behind his back, brings a folded lawn chair
+round, flicks it open, sets it down and sits (one beat); crosses his legs, brings a mug
+out and sips, drums the armrest, looks up and down (the beats after); then stands, folds
+it and tucks it away (the last). 25 lessons do it and 45 more have a mug standing up.
+`lawnChair.ts` is the drawing, `chairRoutine.ts` the choreography as a pure function of
+time, `chairPlay.ts` the playhead, `ChairArt.tsx` the Views, `data/lessonChair.ts` where
+(written by `npm run make:chair`), and `npm run check:chair` holds it.
+
+### AO1 · A set piece is one timeline, and a tap moves the playhead, never the picture
+
+The parts are laid end to end and each beat owns a stretch of the timeline. On its own
+beat the playhead runs at 1×; tap on early and it HURRIES (1.8×, not faster — the same
+note asked for nothing fast) until it catches up; tap back and it runs BACKWARDS to the
+end of that beat's stretch, so he sits back down rather than being teleported into an
+earlier picture. A beat before the stretch is the timeline's start and a beat after it
+the end, so leaving early finishes the putaway and coming back in from after it leaves
+him standing with nothing to redo. `check:chair` §5 replays every stretch patiently,
+tapping every 0.3 to 3.0 seconds in tenths, and tapping back, and holds the worst
+one-frame move of the man and the chair to a ceiling.
+
+### AO2 · Every part starts and ends on its neighbour's rest
+
+A fidget swells in and dies away; a look goes up and comes back; a hand goes TO the
+armrest and returns. A part that switched anything on at t 0 is a jump on every tap,
+and the playhead cannot hide it because the jump is in the drawing itself. The idle
+drift rides the scene clock (`life`), not the part clock, so it runs straight through
+a change of part (group L).
+
+### AO3 · The hand goes round the shoulder, and low across the body
+
+Two-bone IK folds the arm flat when the hand passes near the shoulder and throws the
+elbow over the top in a handful of frames: the first replay measured the elbow moving
+25 units in 0.2s while he carried the chair round, and a mug going back behind him did
+the same. `roundShoulder` holds the hand on a ring about the shoulder and `ARM_DIP`
+carries it low as it crosses him, which is also how a person carries a chair. The chair
+follows the undipped path, so it does not sag with the elbow.
+
+### AO4 · The chair stands on the floor
+
+Open, the chair is 16 units taller than the folded package below his grip, so he LIFTS
+it as it opens, and a package reached for behind his back rides along the ground rather
+than hanging below it. `check:chair` §4 re-derives how far any part ever reaches —
+back, front, seated, up — and fails if the generator's room test assumes less, or if
+anything goes below the ground line.
+
+### AO5 · Where it plays is measured, and a man in a chair is not in a conversation
+
+One figure, no visitor (N21: a man who sits down in the middle of a conversation has
+walked out of it), never a grave lesson (N11), never two chair lessons within two of
+each other, and no mug straight after another set piece. Every beat of a stretch is
+measured for clear floor at the CHAIR's height — a plate at his chest is no obstacle
+to a chair at his knees — and inside every frame the camera shows; the camera is never
+touched. A QUESTION beat may fall inside a stretch, and there he only sits
+(`SEAT_REST`): a man sipping beside a question is competing with it.
+
+### AO6 · The layers after it make room, in order
+
+`make:chair` runs first. `make:thoughts` puts no bubble on a chair beat (a bubble is
+placed against his standing head), and `make:wander` gives no plan to a chair beat or to
+the beat after one (an early tap hurries the putaway into it). Run order:
+`make:chair`, then `make:thoughts`, `make:wander`, `make:marks`. `check:chair` §3 fails
+when the committed table is not what `make:chair` writes today.

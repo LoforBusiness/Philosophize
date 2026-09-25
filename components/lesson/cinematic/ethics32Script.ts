@@ -57,7 +57,7 @@ export const BEATS: Ethics32Beat[] = [
     cite: 'A new case',
   },
   {
-    a: 383, b: 12, reasons: 3, card: 2, fresh: 1, pick: 1,
+    a: 383, b: 263, reasons: 3, card: 2, fresh: 1, pick: 1,
     dur: 1.0,
     interact: {
       prompt: 'Which of the two people can decide the new case?',

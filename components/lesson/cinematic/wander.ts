@@ -47,9 +47,15 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import {
   type Stance, clamp01, ease01, lerp, mixStance, strideStance, stanceUsed, gaitVary,
-  WALK, WALK_SPEED, U,
+  stand, life2, WALK, WALK_SPEED, U,
 } from './rig';
 import { postureHold } from './moves';
+
+/** The floor seat, relative to the pelvis (see `sitOut`). */
+const SEAT_DROP = 30;
+const SEAT_FOOT_X = 36;
+const SEAT_HAND_X = -15;
+const SEAT_HAND_Y = 27;
 
 /** A move's kind. The generator writes these numbers; `check:wander` reads them. */
 export const W_STEP = 1;
@@ -353,10 +359,38 @@ export function wanderState(
  * whole docstring is about. A body does it in two: the knees bend and the weight
  * comes down (`postureHold(0)`, the crouch), and only then do the legs go out.
  */
+/**
+ * THE SEAT HE ENDS IN: BACK UPRIGHT, LEGS OUT, HANDS PROPPED BEHIND (N20).
+ *
+ * It was `postureHold(3)` — legs out, but the torso leaning well back and the
+ * propping arm lost inside the trunk at lesson size (rule 1b), so the whole thing
+ * read as half lying down: *"the lying down animation is pretty bad, dont really
+ * know what I am looking at"* (owner, 2026-09-25). Drawn in a grid against knees-up
+ * and hands-on-thighs seats — both of which melt into one lump under a head this
+ * size — the plain L is the one that cannot be read as anything else: the back
+ * straight up, the legs flat along the floor, and both arms a clear diagonal to the
+ * floor behind him. The feet land where the old seat's did (inside SIT_REACH).
+ *
+ * It breathes only in the hands — group AL: nothing moves his pelvis on a clock.
+ */
+function sitOut(t: number): Stance {
+  'worklet';
+  const s = stand(t);
+  const g = life2(t, 0.9, 1.37, 0.6);
+  return {
+    ...s,
+    bob: s.bob - SEAT_DROP,
+    footL: { x: SEAT_FOOT_X - 4, y: 0 },
+    footR: { x: SEAT_FOOT_X, y: 0 },
+    fistL: { x: SEAT_HAND_X, y: SEAT_HAND_Y + g * 0.6 },
+    fistR: { x: SEAT_HAND_X + 4, y: SEAT_HAND_Y + 1 - g * 0.6 },
+  };
+}
+
 function sitStance(base: Stance, t: number, p: number): Stance {
   'worklet';
   const squat = postureHold(0, t);
-  const seat = postureHold(3, t);
+  const seat = sitOut(t);
   if (p <= 0.52) return mixStance(base, squat, ease01(p / 0.52));
   const q = ease01((p - 0.52) / 0.48);
   const m = mixStance(squat, seat, q);
@@ -375,60 +409,36 @@ function sitStance(base: Stance, t: number, p: number): Stance {
 }
 
 /**
- * WHERE HE IS LOOKING — AND THE TILT MUST NOT CANCEL THE NECK.
+ * WHERE HE IS LOOKING — THE HEAD AND THE BODY GO THE SAME WAY.
  *
- * N12's rule is that attention goes on the spine as well as the neck, and the
- * FIRST DRAFT OF THIS FUNCTION obeyed it and moved the head 0.7 units. Measured
- * against the bare breath's 2.6, a deliberate look up was invisible — which is
- * N12's own defect, arrived at by following N12.
- *
- * The arithmetic says why, and it is worth stating because the next person will
- * write the same thing. The head centre is
- *
- *     x = sin(PI + tilt) * 33 + sin(PI + tilt + neck) * 16
- *
- * so it is driven by `tilt` and by `tilt + neck` — and sin(PI + e) is about −e,
- * which makes POSITIVE tilt lean back and NEGATIVE neck tip the head forward.
- * Leaning back to carry a look up therefore moves the chest one way and the head
- * the other, and at 0.11 against −0.30 the two come within a unit of cancelling.
- *
- * The corpus already had the answer in its own two looking poses, and in both the
- * body moves the head the SAME way as the neck: act 65 GAZING UP is `neck −0.30`
- * with `tilt −0.05`, and act 152 LOOK UNDER is `neck +0.34` with the body bent
- * 0.30 forward and dropped 4.5. The difference between up and down is the BOB, not
- * the tilt, and both read because nothing fights the neck.
- *
- * And on this figure no amount of either RAISES the head: y is at its most
- * negative when tilt and neck are both zero, so standing upright is the highest
- * his head ever gets. Anything that has to read as "up" says so with the body.
+ * Measured on the rig, facing +x: negative `tilt` leans the body forward and
+ * positive `neck` tips the head back; standing upright is the highest the head
+ * ever gets. The first version of this function got the up look invisible (0.7
+ * units of head, N12), and its replacement bent the body forward while tipping the
+ * head BACK for a look down — the two cancelled, so the head held still while the
+ * body sank under it: *"his head moves up but his body down"* (owner, 2026-09-25).
  */
 function looked(s: Stance, look: number): Stance {
   'worklet';
   if (!look) return s;
+  // THE HEAD CARRIES IT, AND IT HAS TO CLEAR THE SHOULDERS TO BE SEEN (N20).
+  //
+  // On a faceless disc the only cue the eye reads is where the head sits against
+  // the shoulder line. A neck of 0.3 moved the head about six units — inside its
+  // own radius, so nothing seemed to happen, and the body's lean was all anyone
+  // saw. At 1.1–1.2 the head goes clean past the shoulders: thrown back behind
+  // them for up, hanging in front of the chest for down. Drawn and chosen from a
+  // grid (hands at the brow read as a wave; hands on the hips or thighs read as a
+  // zig-zag, or vanished into the legs). The body leans a little the SAME way, so
+  // nothing works against the head. It leaves the hands alone, so a look taken
+  // from a seat keeps the seat's arms round the knees.
   if (look > 0) {
-    return {
-      ...s,
-      neck: s.neck - 0.30 * look,
-      tilt: s.tilt - 0.05 * look,
-      bob: s.bob + 0.5 * look,
-      // The chest opens as he looks up — act 65's own "arms forgotten", kept out
-      // of the trunk so a forearm still shows (rule 1b).
-      fistL: { x: s.fistL.x - 2.5 * look, y: s.fistL.y + 2 * look },
-      fistR: { x: s.fistR.x + 2.5 * look, y: s.fistR.y + 2 * look },
-    };
+    return { ...s, tilt: s.tilt + 0.15 * look, neck: s.neck + 1.1 * look };
   }
   const d = -look;
-  return {
-    ...s,
-    neck: s.neck + 0.34 * d,
-    tilt: s.tilt - 0.30 * d,
-    bob: s.bob - 4.5 * d,
-    footL: { x: s.footL.x, y: s.footL.y + 3.4 * d },
-    footR: { x: s.footR.x, y: s.footR.y + 3.4 * d },
-    fistL: { x: s.fistL.x - 5 * d, y: s.fistL.y + 5 * d },
-    fistR: { x: s.fistR.x + 5 * d, y: s.fistR.y + 5 * d },
-  };
+  return { ...s, tilt: s.tilt - 0.2 * d, neck: s.neck - 1.2 * d };
 }
+
 
 /**
  * A weight shift, and it has to beat the breath to be worth having.

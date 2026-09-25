@@ -48,6 +48,8 @@ const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-st
 // Nothing is drawn above y 210 or below the ground line, hence band [200, 512].
 
 const K = K_FIG * 0.82;
+/** Nodding along · waiting for the answer · thinking it over — the holds measured to move (N21). */
+const CROWD_LISTEN = [263, 260, 257, 260];
 const CROWD_A = [44, 100, 156, 212];
 const CROWD_B = [60, 116, 172, 228];
 const ONE_X = 330;
@@ -133,8 +135,11 @@ export default function Political9Scene({ clock, bt, bi, i, picked, onPick }: Sc
     const member = (k: number) => {
       'worklet';
       const off = t + k * 1.63;
-      const g = VOTE[n] > 0 ? 20 : 0;
-      const gp = VOTE[p] > 0 ? 20 : 0;
+      // N21 — A CROWD BEING SPOKEN TO LISTENS. It stood in the plain stand (code 0)
+      // whenever it was not voting, so for four beats the one addressed four
+      // statues. Each member has its own listening hold, so they do not nod in step.
+      const g = VOTE[n] > 0 ? 20 : CROWD_LISTEN[k];
+      const gp = VOTE[p] > 0 ? 20 : CROWD_LISTEN[k];
       const s = travelStance(
         from[k], to[k],
         emoteHold(gp, off), emoteHold(g, off), emoteLive(g, off, bt.value),

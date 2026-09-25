@@ -17,29 +17,34 @@ export interface VisitorCue {
   from: number;
   /** Which way he faces once he has arrived: +1 right, −1 left. */
   dir: number;
+  /**
+   * Present when the lead has to be turned round to face him (N21): the side the
+   * lead turns to, +1 right, −1 left. Only for a lead who never walks after he
+   * arrives, so the turn cannot fight a walk.
+   */
+  turn?: number;
 }
 
 export const VISITOR: Record<string, VisitorCue> = {
-  'ethics-ethics-1': { enter: 10, x: 200, from: -60, dir: 1 },
-  'epistemology-knowledge-1': { enter: 9, x: 358, from: 460, dir: -1 },
+  'ethics-ethics-1': { enter: 10, x: 196, from: -60, dir: 1 },
+  'epistemology-knowledge-1': { enter: 9, x: 358, from: 460, dir: -1, turn: 1 },
   'aesthetics-aesthetics-3': { enter: 5, x: 275, from: -60, dir: 1 },
-  'political-political-4': { enter: 7, x: 88, from: -60, dir: 1 },
-  'ethics-ethics-7': { enter: 10, x: 305, from: 460, dir: -1 },
+  'political-political-4': { enter: 7, x: 282, from: 460, dir: -1 },
   'ethics-ethics-31': { enter: 8, x: 282, from: 460, dir: -1 },
   'political-political-33': { enter: 8, x: 115, from: 460, dir: -1 },
-  'logic-arguments-39': { enter: 6, x: 43, from: -60, dir: 1 },
-  'logic-arguments-16': { enter: 8, x: 56, from: -60, dir: 1 },
+  'logic-arguments-39': { enter: 6, x: 43, from: -60, dir: 1, turn: -1 },
+  'logic-arguments-16': { enter: 8, x: 367, from: 460, dir: -1 },
   'logic-arguments-18': { enter: 7, x: 350, from: 460, dir: -1 },
-  'ethics-ethics-20': { enter: 6, x: 58, from: -60, dir: 1 },
-  'epistemology-knowledge-18': { enter: 7, x: 51, from: -60, dir: 1 },
-  'epistemology-knowledge-20': { enter: 8, x: 130, from: -60, dir: 1 },
-  'logic-arguments-21': { enter: 7, x: 62, from: -60, dir: 1 },
-  'epistemology-knowledge-23': { enter: 6, x: 56, from: -60, dir: 1 },
-  'epistemology-knowledge-25': { enter: 8, x: 36, from: -60, dir: 1 },
-  'metaphysics-being-21': { enter: 8, x: 124, from: -60, dir: 1 },
-  'political-political-22': { enter: 7, x: 118, from: -60, dir: 1 },
-  'aesthetics-aesthetics-38': { enter: 6, x: 38, from: -60, dir: 1 },
-  'political-political-38': { enter: 6, x: 38, from: -60, dir: 1 },
+  'ethics-ethics-20': { enter: 6, x: 350, from: 460, dir: -1 },
+  'epistemology-knowledge-18': { enter: 7, x: 357, from: 460, dir: -1 },
+  'epistemology-knowledge-20': { enter: 8, x: 352, from: 460, dir: -1 },
+  'logic-arguments-21': { enter: 7, x: 354, from: 460, dir: -1 },
+  'epistemology-knowledge-23': { enter: 6, x: 352, from: 460, dir: -1 },
+  'epistemology-knowledge-25': { enter: 8, x: 36, from: -60, dir: 1, turn: -1 },
+  'metaphysics-being-21': { enter: 8, x: 350, from: 460, dir: -1 },
+  'political-political-22': { enter: 7, x: 118, from: -60, dir: 1, turn: -1 },
+  'aesthetics-aesthetics-38': { enter: 6, x: 38, from: -60, dir: 1, turn: -1 },
+  'political-political-38': { enter: 6, x: 38, from: -60, dir: 1, turn: -1 },
   'aesthetics-aesthetics-33': { enter: 7, x: 351, from: 460, dir: -1 },
   'aesthetics-aesthetics-34': { enter: 6, x: 118, from: 460, dir: -1 },
   'ethics-ethics-33': { enter: 8, x: 113, from: 460, dir: -1 },
@@ -49,7 +54,6 @@ export const VISITOR: Record<string, VisitorCue> = {
   'metaphysics-being-33': { enter: 9, x: 359, from: 460, dir: -1 },
   'metaphysics-being-34': { enter: 10, x: 346, from: 460, dir: -1 },
   'political-political-15': { enter: 5, x: 45, from: -60, dir: 1 },
-  'metaphysics-being-8': { enter: 12, x: 301, from: 460, dir: -1 },
-  'ethics-ethics-40': { enter: 7, x: 39, from: -60, dir: 1 },
-  'ethics-ethics-27': { enter: 7, x: 31, from: -60, dir: 1 },
+  'ethics-ethics-40': { enter: 7, x: 39, from: -60, dir: 1, turn: -1 },
+  'ethics-ethics-27': { enter: 7, x: 31, from: -60, dir: 1, turn: -1 },
 };

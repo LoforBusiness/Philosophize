@@ -36,8 +36,11 @@ const { transform } = await import(
 );
 const TMP = path.join(os.tmpdir(), 'ph-moves-sheet');
 mkdirSync(TMP, { recursive: true });
+// RIG_SRC / MOVES_SRC point at another copy of a file — a HEAD copy for a before
+// strip — without touching the working tree.
+const SRC_OF = { 'components/lesson/cinematic/rig.ts': process.env.RIG_SRC, 'components/lesson/cinematic/moves.ts': process.env.MOVES_SRC };
 const emit = (rel, name) => {
-  const src = transform(readFileSync(path.join(REPO, rel), 'utf8'), { transforms: ['typescript'] }).code
+  const src = transform(readFileSync(SRC_OF[rel] || path.join(REPO, rel), 'utf8'), { transforms: ['typescript'] }).code
     .replace(/(from\s+['"])\.\/([A-Za-z0-9_-]+)(['"])/g, '$1./$2.mjs$3');
   writeFileSync(path.join(TMP, name), src);
   return pathToFileURL(path.join(TMP, name)).href;
@@ -98,7 +101,13 @@ const LIVING = (a) => (a >= 59 && a <= 78) || (a >= 157 && a <= 182);
 const from = Number(process.argv[2] || 121);
 const to = Number(process.argv[3] || from);
 const acts = [];
-for (let a = from; a <= to; a += 1) acts.push(a);
+if (process.env.ACTS) for (const a of process.env.ACTS.split(',')) acts.push(Number(a));
+else for (let a = from; a <= to; a += 1) acts.push(a);
+// PLAYED=1 samples the act the way a lesson plays it — `emoteAnyLive` against the
+// beat's own clock — so a strip shows the TIMING (how long the return takes), where
+// the default samples u evenly and hides it.
+const PLAYED = !!process.env.PLAYED;
+const SPAN = PLAYED ? Number(process.env.SPAN_S || M.PLAY_SECONDS + 0.3) : 1;
 
 const FRAMES = Number(process.env.FRAMES || 6);
 const one = acts.length === 1;
@@ -133,7 +142,10 @@ for (const [i, a] of acts.entries()) {
 
     // u across the shot for a one-shot; t across twelve seconds for a hold.
     const u = FRAMES === 1 ? 1 : f / (FRAMES - 1);
-    const st = LIVING(a) ? M.actStance(a, 3 + u * 12, 1) : M.actStance(a, 3, u);
+    const st = PLAYED
+      ? M.emoteAnyLive(M.playCode(a), 3 + u * SPAN, u * SPAN)
+      : LIVING(a) ? M.actStance(a, 3 + u * 12, 1) : M.actStance(a, 3, u);
+    if (PLAYED) text(sheet, `${(u * SPAN).toFixed(2)}s`, ox + 3, top + CELL_H - 12, '#6B6B6B', 1);
 
     const groundY = CELL_H - Math.round(FIG * 0.16);
     const B = RIG.pose(st, CELL_W / 2, groundY, k, 1, 1);
@@ -144,7 +156,7 @@ for (const [i, a] of acts.entries()) {
 
 const outDir = path.join(REPO, 'scripts', '.lesson-shots');
 mkdirSync(outDir, { recursive: true });
-const out = path.join(outDir, one ? `move-${from}.png` : `moves-${from}-${to}.png`);
+const out = path.join(outDir, process.env.OUT_NAME || (one ? `move-${from}.png` : `moves-${from}-${to}.png`));
 const img = new Jimp(sheetW, sheetH);
 for (let p = 0; p < sheetW * sheetH; p += 1) {
   img.bitmap.data[p * 4] = sheet.px[p * 3];

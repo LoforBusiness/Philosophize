@@ -5,12 +5,13 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import {
-  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
+  WALK, clamp01, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, type Stance, } from './rig';
 // The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
 // rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
 import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
 import { BEATS } from './ethics8Script';
 import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, reactPose,
+  walkFacing, restToward,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
@@ -80,6 +81,9 @@ const CARDS = [
 const P = BEATS.map((b) => b.p ?? 0);
 const X = BEATS.map((b) => b.x ?? 208);
 const DIR = dirsFrom(X, 1);
+// N21 — at rest he faces the one he is sitting with; `dirsFrom` alone left him with
+// his back to them after every walk left.
+const REST = restToward(X, OTH_X);
 const GRIDV = BEATS.map((b) => b.grid ?? 0);
 const OTHV = BEATS.map((b) => b.oth ?? 0);
 const THRV = BEATS.map((b) => b.thread ?? 0);
@@ -89,6 +93,23 @@ const NOTE = BEATS.map((b) => b.note ?? 0);
 // Derived from the beat rather than declared as a channel so it cannot fall out
 // of step with the control it is about.
 const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
+
+/**
+ * The slump, alive (N21): a slow sink-and-lift of the head, a hand that stirs, and
+ * the head raised toward the narrator as the thread between them draws (0..1).
+ * No pelvis motion — group AL.
+ */
+function slumpLive(s: Stance, t: number, thread: number): Stance {
+  'worklet';
+  const sway = Math.sin(t * 1.25) * 0.6 + Math.sin(t * 0.79 + 1.3) * 0.4;
+  const stir = Math.max(0, Math.sin(t * 1.1 + 0.4));
+  return {
+    ...s,
+    neck: s.neck + 0.3 * sway + 0.3 * thread,
+    fistR: { x: s.fistR.x + 4 * sway, y: s.fistR.y - 9 * stir },
+    fistL: { x: s.fistL.x - 1.5 * sway, y: s.fistL.y },
+  };
+}
 
 export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos }: SceneApi) {
   const reacting = REACT[i] === 1;
@@ -119,13 +140,16 @@ export default function Ethics8Scene({ clock, bt, bi, i, picked, onPick, dragPos
     const thread = carry(cv, 2, n, THRV[p], THRV[n], tr);
 
     return {
-      fig: reactPose(s, fx, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1),
-      // The cared-for figure never moves and never re-animates: a settled slump
-      // with only stand()'s breath under it, so they read as present, not busy.
+      fig: reactPose(s, fx, GROUND, K_FIG, walkFacing(REST[p], DIR[n], REST[n], bt.value, X[p] !== X[n] ? moveTr(X[p], X[n], 0.85) : 0), 1),
+      // The cared-for figure never walks and never gestures — a settled slump, so
+      // they read as present, not busy. It used to live on stand()'s breath, which
+      // group AL removed, and that left a photograph being talked to (N21). Now the
+      // head sinks and lifts on a slow cycle, one hand stirs, and when the thread
+      // draws between them the head comes up toward the one who came.
       // 48, not 46: the script says they are ON THE FLOOR by their bed. 46 is a
       // standing slump, which put them upright on the ground line — the picture
       // flatly contradicting the sentence.
-      other: pose(emoteHold(48, t), OTH_X, GROUND, K_FIG, -1, oth),
+      other: pose(slumpLive(emoteHold(48, t), t, thread), OTH_X, GROUND, K_FIG, -1, oth),
       fx,
       oth,
       thread,

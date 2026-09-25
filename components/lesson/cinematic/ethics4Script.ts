@@ -33,12 +33,12 @@ export interface Ethics4Beat extends BaseBeat {
 
 export const BEATS: Ethics4Beat[] = [
   {
-    a: 167, b: 8, floor: 0, rows: 1,
+    a: 167, b: 263, floor: 0, rows: 1,
     text: 'Cultures disagree about right and wrong. That disagreement is an observable fact.',
     dur: 1.8,
   },
   {
-    a: 167, b: 8, floor: 0, rows: 1, note: 1,
+    a: 167, b: 260, floor: 0, rows: 1, note: 1,
     text: 'The claim that no correct answer lies behind the disagreement is much stronger, and logically separate.',
     dur: 2.3,
   },
@@ -49,7 +49,7 @@ export const BEATS: Ethics4Beat[] = [
     dur: 1.8,
   },
   {
-    a: 266, b: 161, rows: 2, note: 2,
+    a: 266, b: 263, rows: 2, note: 2,
     text: 'The second claim is moral relativism. It holds that rightness depends on a group’s code, with no higher standard.',
     dur: 2.9,
   },

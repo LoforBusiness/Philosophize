@@ -201,7 +201,7 @@ const BLEND = 0.38;
  *
  * Six of the ten lines carry no gesture of their own, so they all run TALK — and
  * every code at 100+ is an ACTION, which `emoteAnyLive` plays once over
- * PLAY_SECONDS (1.5s) and then HOLDS. A line lasts about three seconds. So he
+ * PLAY_SECONDS (1.5s then; 2.4s since 2026-09-25) and then HOLDS. A line lasts about three seconds. So he
  * gestured for the first half of each line and then stood still for the rest of
  * it, ten times over.
  *

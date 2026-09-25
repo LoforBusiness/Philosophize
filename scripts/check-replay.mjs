@@ -85,6 +85,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import Module, { createRequire } from 'node:module';
+import { loadTs } from './lib/loadts.mjs';
 
 const REPO = process.cwd();
 const CIN = path.join(REPO, 'components', 'lesson', 'cinematic');
@@ -92,11 +93,21 @@ const ROUTE_FILE = path.join(REPO, 'app', '(app)', 'branches', '[branchSlug]', '
 const require = createRequire(import.meta.url);
 const { transform } = require(path.join(REPO, 'node_modules', 'sucrase'));
 
+const FIG_DUMP = !!process.env.REPLAY_FIGS;
 const ONLY = process.env.REPLAY_ONLY ? new Set(process.env.REPLAY_ONLY.split(',')) : null;
 const VERBOSE = !!process.env.REPLAY_VERBOSE;
 
 // ── BUDGETS (high-water marks; they may only go down) ───────────────────────
 const C20C_BUDGET = 0;
+// N21 — two figures on a stage are talking, so they face each other and the one
+// being talked to is not a statue. High-water marks, like every budget here.
+const FACING_BUDGET = Number(process.env.FACING_BUDGET ?? 0);
+const FROZEN_BUDGET = Number(process.env.FROZEN_BUDGET ?? 0);
+const VISITOR_FACE_BUDGET = Number(process.env.VISITOR_FACE_BUDGET ?? 0);
+/** Head-and-hand travel through a beat, stage units: over TALKING is a figure doing
+ *  something; under STILL is breath alone (group AL left nothing else). */
+const TALKING = 12;
+const STILL = 4;
 const STRIP_BUDGET = 0;
 const DETACH_BUDGET = 0;
 // A CUT is a jump where the beat really did change — a prop that appears, vanishes
@@ -430,6 +441,11 @@ function walkTree(root, inst, file) {
     const src = node.source ? `${path.basename(node.source.fileName || file)}:${node.source.lineNumber}` : '';
     const link = {
       type: typeName(type), statics, tokens, src, key,
+      // A FIGURE: every `<Stickman D=…>` hands over its pose bundle, so the facing
+      // and the place of each figure on a beat can be read off the real scene (N21).
+      figD: props && props.D && typeof props.D === 'object' && 'value' in props.D ? props.D : null,
+      figRole: props && typeof props.role === 'string' ? props.role : null,
+      figK: props && typeof props.k === 'number' ? props.k : 1,
       text: textOf(props.children).join(' ').replace(/\s+/g, ' ').trim(),
       childless: !hasChild(props.children),
     };
@@ -682,10 +698,49 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
       return m;
     };
     const beatSnaps = {};
+    const figs = elements.filter((ch) => ch[ch.length - 1].figD);
+    // How far each figure's head and hands travel through the beat — a figure that
+    // stands frozen while another talks to him is the other half of N21.
+    const figMove = figs.map(() => ({ lo: null, hi: null }));
+    const figSample = () => figs.forEach((ch, i) => {
+      let B = null;
+      try { B = ch[ch.length - 1].figD.value; } catch { B = null; }
+      if (!B || !B.head || !B.wrR || !B.wrL) return;
+      const v = [B.head[0].translateX, B.head[1].translateY, B.wrR[0].translateX, B.wrR[1].translateY,
+        B.wrL[0].translateX, B.wrL[1].translateY].map(Number);
+      const m = figMove[i];
+      m.lo = m.lo ? m.lo.map((a, j) => Math.min(a, v[j])) : v.slice();
+      m.hi = m.hi ? m.hi.map((a, j) => Math.max(a, v[j])) : v.slice();
+    });
     for (let f = 0; f <= steps; f++) {
       FRAME++;
+      if (f % 6 === 0) figSample();
       if (f === 0) beatSnaps.first = snap();
-      else if (f === steps) { beatSnaps.last = snap(); detachedIn(elements, n, detached); }
+      else if (f === steps) {
+        beatSnaps.last = snap(); detachedIn(elements, n, detached);
+        beatSnaps.figs = figs.map((ch) => {
+          const link = ch[ch.length - 1];
+          let B = null;
+          try { B = link.figD.value; } catch { B = null; }
+          if (!B || !B.pel || !B.head) return null;
+          return {
+            src: link.src, role: link.figRole, k: link.figK,
+            dir: B.dir < 0 ? -1 : 1,
+            x: +B.pel[0].translateX || 0, y: +B.pel[1].translateY || 0,
+            hx: +B.head[0].translateX || 0, hy: +B.head[1].translateY || 0,
+            opacity: B.opacity ?? 1,
+            move: (() => {
+              const m = figMove[figs.indexOf(ch)];
+              if (!m || !m.lo) return 0;
+              const d = m.hi.map((h, j) => h - m.lo[j]);
+              // In the figure's OWN units: a child drawn at half size waving is as
+              // alive as a man waving, and measures half as far on the stage.
+              const kk = link.figK > 0.05 ? link.figK : 1;
+              return +(Math.max(Math.hypot(d[0], d[1]), Math.hypot(d[2], d[3]), Math.hypot(d[4], d[5])) / kk).toFixed(1);
+            })(),
+          };
+        }).filter(Boolean);
+      }
       else {
         // Every style is still evaluated every frame: `carry` and `keepHeld` write
         // their memory as they are read, exactly as on the UI thread.
@@ -714,6 +769,25 @@ function checkLesson({ id, file }) {
   if (!Array.isArray(BEATS) || !BEATS.length) return { bespoke: true };
 
   const { snaps, strips, detached } = play(Scene, BEATS, sceneFile);
+
+  // REPLAY_FACING=<file> records, for every lesson with ONE figure on its stage,
+  // which way he faces at rest on each beat (null where he is not drawn) — what
+  // `make:visitor` needs to stand a visitor where the lead can see him (N21).
+  if (process.env.REPLAY_FACING) {
+    const f = process.env.REPLAY_FACING;
+    const cur = fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {};
+    const per = snaps.map((s) => (s.figs || []).filter((fg) => fg.opacity > 0.3));
+    if (per.every((v) => v.length <= 1)) cur[id] = per.map((v) => (v.length ? v[0].dir : null));
+    fs.writeFileSync(f, JSON.stringify(cur));
+  }
+
+  // REPLAY_FIGS=<file> records every beat's settled figures — place, facing, head.
+  if (process.env.REPLAY_FIGS) {
+    const f = process.env.REPLAY_FIGS;
+    const cur = fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {};
+    cur[id] = snaps.map((s) => s.figs || []);
+    fs.writeFileSync(f, JSON.stringify(cur));
+  }
 
   // REPLAY_DUMP=<file> records every beat's SETTLED frame by tree position (no line
   // numbers), so a timing-only edit can be shown to leave every resting picture alone.
@@ -750,7 +824,7 @@ function checkLesson({ id, file }) {
   const errors = [...TOKENS.values()]
     .filter((s) => s.token.__animatedStyle >= tokenStart && s.error)
     .map((s) => String(s.error.message || s.error));
-  return { findings, strips, detached, errors: [...new Set(errors)].slice(0, 3) };
+  return { findings, strips, detached, errors: [...new Set(errors)].slice(0, 3), figs: snaps.map((sn) => sn.figs || []), summary: BEATS.map((b) => !!b.summary) };
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -839,6 +913,64 @@ if (unread.length) {
   console.log('');
 }
 
+// ── N21 · TWO FIGURES ARE TALKING ───────────────────────────────────────────
+//
+// "if there is more than 1 stickman on screen they must be communicating and
+// operating in some way that looks natural" (owner, 2026-09-25). Read off each
+// real scene's settled frame: every figure on stage faces at least one other
+// figure; nobody stands frozen while another talks; and the lead faces the visitor
+// the player walks in (AA8), who until now could arrive behind his back.
+const facingAway = [];
+const frozenListeners = [];
+for (const r of rows) {
+  (r.figs || []).forEach((beat, n) => {
+    // The summary card replaces the stage, and a figure still off the edge is
+    // walking on — neither is two people standing together.
+    if (r.summary && r.summary[n]) return;
+    const vis = beat.filter((fg) => fg.opacity > 0.3 && Math.abs(fg.move) < 1000 && fg.x > -10 && fg.x < 410);
+    if (vis.length < 2) return;
+    for (const fg of vis) {
+      const faces = vis.some((o) => o !== fg && Math.abs(o.x - fg.x) > 4 && Math.sign(o.x - fg.x) === fg.dir);
+      if (!faces) facingAway.push(`${r.id} beat ${n}: the figure at x ${Math.round(fg.x)} faces nobody`);
+    }
+    if (vis.some((fg) => fg.move > TALKING)) {
+      for (const fg of vis) {
+        if (fg.move <= STILL) frozenListeners.push(`${r.id} beat ${n}: the figure at x ${Math.round(fg.x)} stands frozen while another talks`);
+      }
+    }
+  });
+}
+const visitorAway = [];
+{
+  const { VISITOR } = await loadTs('data/lessonVisitor.ts');
+  for (const r of rows) {
+    const cue = VISITOR[r.id];
+    if (!cue || !r.figs) continue;
+    for (let n = cue.enter + 1; n < r.figs.length; n++) {
+      if (r.summary && r.summary[n]) continue;
+      const vis = (r.figs[n] || []).filter((fg) => fg.opacity > 0.3 && fg.x > -10 && fg.x < 410);
+      if (!vis.length) continue;
+      const lead = vis.reduce((a, fg) => (Math.abs(fg.x - cue.x) < Math.abs(a.x - cue.x) ? fg : a));
+      const toward = Math.sign(cue.x - lead.x);
+      // `turn` is the player turning the lead round to face him once he has arrived.
+      if (lead.dir !== toward && !cue.turn) {
+        visitorAway.push(`${r.id} beat ${n}: the visitor at x ${cue.x} is behind the lead at x ${Math.round(lead.x)}`);
+      }
+      if (cue.dir !== -toward) visitorAway.push(`${r.id} beat ${n}: the visitor faces away from the lead`);
+    }
+  }
+}
+const showN21 = (list, title) => {
+  if (!list.length) return;
+  console.log(`  ${title}`);
+  for (const l of list.slice(0, VERBOSE ? 400 : 40)) console.log(`    ${l}`);
+  if (!VERBOSE && list.length > 40) console.log(`    …and ${list.length - 40} more (REPLAY_VERBOSE=1)`);
+  console.log('');
+};
+showN21(facingAway, 'FACING — a figure on a shared stage faces nobody (N21):');
+showN21(frozenListeners, 'FROZEN — a figure stands still while another talks (N21):');
+showN21(visitorAway, 'VISITOR — the visitor and the lead are not facing (N21):');
+
 ok('nothing moves on a beat where nothing changed (C20c)', c20c.length <= C20C_BUDGET,
   `${c20c.length} in ${byLesson(c20c)} lessons, budget ${C20C_BUDGET}`);
 ok('no painted box is only as tall as its padding (S12)', strips.length <= STRIP_BUDGET,
@@ -849,6 +981,12 @@ ok('cuts at a beat change stay within budget (group L)', cuts.length <= CUT_BUDG
   `${cuts.length} in ${byLesson(cuts)} lessons${Number.isFinite(CUT_BUDGET) ? `, budget ${CUT_BUDGET}` : ''}`);
 ok('every animated style could be evaluated', styleErrors.length <= STYLE_ERROR_BUDGET,
   `${styleErrors.length} lessons, budget ${STYLE_ERROR_BUDGET}`);
+ok('every figure on a shared stage faces another (N21)', facingAway.length <= FACING_BUDGET,
+  `${facingAway.length}, budget ${FACING_BUDGET}`);
+ok('nobody stands frozen while another talks to him (N21)', frozenListeners.length <= FROZEN_BUDGET,
+  `${frozenListeners.length}, budget ${FROZEN_BUDGET}`);
+ok('the lead and the visitor face each other (N21)', visitorAway.length <= VISITOR_FACE_BUDGET,
+  `${visitorAway.length}, budget ${VISITOR_FACE_BUDGET}`);
 ok('every scene could be run', unread.length <= UNREAD_BUDGET, `${unread.length} unread, budget ${UNREAD_BUDGET}`);
 console.log(`\n  not counted: ${pulses.length} authored pulses, ${advisory.length} changes out of a graded beat${VERBOSE ? '' : ' (REPLAY_VERBOSE=1 lists them)'}.`);
 

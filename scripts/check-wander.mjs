@@ -434,11 +434,54 @@ if (kinds.size < PATTERN_FLOOR) {
 } else console.log(`  ok  ${kinds.size} distinct patterns in the corpus  floor ${PATTERN_FLOOR}`);
 
 // AND A FLOOR ON HOW MUCH OF THE CORPUS MOVES, so the table cannot quietly empty.
+// The chair routine (chairPlay.ts) takes whole beats from this layer — he is setting
+// up a lawn chair, sitting in it, having a mug — so those beats count as moving: the
+// floor is about a figure that stands still, and he is not standing still there.
+const { CHAIR_PLANS } = await loadTs('data/lessonChair.ts');
+let chairBeats = 0;
+for (const p of Object.values(CHAIR_PLANS)) chairBeats += p[p.length - 4] - p[0] + 1;
 const PLAN_FLOOR = 800;
-if (planned < PLAN_FLOOR) {
+const moving = planned + chairBeats;
+if (moving < PLAN_FLOOR) {
   fail += 1;
-  console.log(`  ✗   only ${planned} beats carry a plan  floor ${PLAN_FLOOR}`);
-} else console.log(`  ok  ${planned} beats carry a plan  floor ${PLAN_FLOOR}`);
+  console.log(`  ✗   only ${moving} beats move him (${planned} plans + ${chairBeats} with the chair or a mug)  floor ${PLAN_FLOOR}`);
+} else console.log(`  ok  ${moving} beats move him (${planned} plans + ${chairBeats} with the chair or a mug)  floor ${PLAN_FLOOR}`);
+
+// A LOOK HAS TO READ AS ONE, AND THE BODY MAY NOT FIGHT IT (N20).
+//
+// "his head moves up but his body down" (owner, 2026-09-25). The look down that
+// prompted it bent the body forward and tipped the head BACK, so the head held
+// still while the body sank; and on a faceless disc a head that stays inside its
+// own radius of where it was is no look at all. Measured, standing and seated: the
+// head must clear the shoulder line in the look's direction by a clear margin, and
+// the chest must not travel against it.
+{
+  const T = 4.2;
+  const fig = (st) => {
+    const s = WANDER.wanderStance(RIG.emoteHold(0, T), { ...WANDER.wanderRest(), ...st }, T, 1);
+    return RIG.solve({ x: 200, groundY: 500, k: 1, dir: 1, ...s });
+  };
+  const LOOK_CLEAR = 8;          // head centre past the chest, in the look's direction
+  const LOOK_TRAVEL = 12;        // head centre moved from where it stood
+  const bads = [];
+  for (const [label, extra] of [['standing', {}], ['seated', { sit: 1 }], ['crouched', { crouch: 1 }]]) {
+    const rest = fig(extra);
+    const up = fig({ ...extra, look: 1 });
+    const down = fig({ ...extra, look: -1 });
+    if (!(rest.head.x - up.head.x >= LOOK_TRAVEL)) bads.push(`${label}: a look up moves the head back ${(rest.head.x - up.head.x).toFixed(1)}, needs ${LOOK_TRAVEL}`);
+    if (!(up.chest.x - up.head.x >= LOOK_CLEAR)) bads.push(`${label}: a look up leaves the head ${(up.chest.x - up.head.x).toFixed(1)} behind the chest, needs ${LOOK_CLEAR}`);
+    if (up.chest.x - rest.chest.x > 1) bads.push(`${label}: the chest goes FORWARD ${(up.chest.x - rest.chest.x).toFixed(1)} on a look up`);
+    if (!(down.head.x - rest.head.x >= LOOK_TRAVEL)) bads.push(`${label}: a look down moves the head forward ${(down.head.x - rest.head.x).toFixed(1)}, needs ${LOOK_TRAVEL}`);
+    if (!(down.head.x - down.chest.x >= LOOK_CLEAR)) bads.push(`${label}: a look down leaves the head ${(down.head.x - down.chest.x).toFixed(1)} past the chest, needs ${LOOK_CLEAR}`);
+    if (!(down.head.y - rest.head.y >= 4)) bads.push(`${label}: a look down lowers the head ${(down.head.y - rest.head.y).toFixed(1)}, needs 4`);
+    if (rest.chest.x - down.chest.x > 1) bads.push(`${label}: the chest goes BACK ${(rest.chest.x - down.chest.x).toFixed(1)} on a look down`);
+  }
+  if (bads.length) {
+    fail += 1;
+    console.log(`  ✗   ${bads.length} look(s) do not read (N20):`);
+    for (const b of bads) console.log(`        ${b}`);
+  } else console.log('  ok  a look up and a look down each carry the head clear of the chest, standing, seated and crouched');
+}
 
 if (bad.length) {
   console.log(`\n  ✗   ${bad.length} plan(s) break a rule:`);

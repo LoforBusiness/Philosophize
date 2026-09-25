@@ -22,7 +22,7 @@ export interface Epi2Beat extends BaseBeat {
 
 export const BEATS: Epi2Beat[] = [
   {
-    d: 12, m: 5, doubt: 0.1,
+    d: 263, m: 5, doubt: 0.1,
     text: 'Can you be wrong about something you feel certain of? René Descartes set out to doubt his beliefs, to find a firm foundation for knowledge.',
     dur: 3.8,
   },

@@ -71,7 +71,7 @@ export const BEATS: Ethics2Beat[] = [
     dur: 2.7,
   },
   {
-    p: 416, x: 262, g: 21, gx: 108, named: 3, lens: 1, equal: 1,
+    p: 416, x: 262, g: 263, gx: 108, named: 3, lens: 1, equal: 1,
     text: 'For Mill, consequences alone determine whether an act is right, and each person’s happiness counts equally.',
     dur: 2.1,
   },
@@ -106,7 +106,7 @@ export const BEATS: Ethics2Beat[] = [
     dur: 1.8,
   },
   {
-    p: 266, x: 262, g: 22, gx: 108, named: 3, lens: 3, habit: 1,
+    p: 266, x: 262, g: 263, gx: 108, named: 3, lens: 3, habit: 1,
     text: 'Aristotle holds that virtue is acquired by practice. Each honest act makes the next easier, until honesty is part of your character.',
     dur: 3.3,
   },

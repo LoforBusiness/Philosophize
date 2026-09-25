@@ -19,6 +19,7 @@ import { stageTone } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { Shot } from './camera';
 import { BEATS, type BoardKey } from './logic1Script';
+import { emoteAny } from './moves';
 import AnatomyDiagram from './illustrations/AnatomyDiagram';
 import SyllogismChart from './illustrations/SyllogismChart';
 import LoudnessChart from './illustrations/LoudnessChart';
@@ -476,10 +477,13 @@ export default function Logic1Scene({
       const F = fightAt(t);
       redS = F.red; blueS = F.blue; fightGap = F.gap;
     } else {
-      const rFrom = RED_TALK[p] ? narratorHold(0, t) : stand(t);
-      const bFrom = BLUE_TALK[p] ? narratorHold(0, t) : stand(t);
-      const rTo = RED_TALK[n] ? narratorLive(0, t, bt.value) : stand(t);
-      const bTo = BLUE_TALK[n] ? narratorLive(0, t, bt.value) : stand(t);
+      // N21 — THE ONE NOT SPEAKING IS LISTENING, not standing. A bare stand() has
+      // had no life of its own since group AL, so the arguer waiting his turn was a
+      // post being argued at. Red nods along; blue waits for the answer, each on his own clock.
+      const rFrom = RED_TALK[p] ? narratorHold(0, t) : emoteAny(263, t);
+      const bFrom = BLUE_TALK[p] ? narratorHold(0, t) : emoteAny(260, t + 1.7);
+      const rTo = RED_TALK[n] ? narratorLive(0, t, bt.value) : emoteAny(263, t);
+      const bTo = BLUE_TALK[n] ? narratorLive(0, t, bt.value) : emoteAny(260, t + 1.7);
       redS = mixStance(rFrom, rTo, tr);
       blueS = mixStance(bFrom, bTo, tr);
     }

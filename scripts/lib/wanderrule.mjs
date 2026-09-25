@@ -128,8 +128,8 @@ export function freePose(code) {
   return poseTier(code) === 'free';
 }
 
-/** How long a played action takes before he is standing there again (moves.PLAY_SECONDS). */
-export const PLAY_SECONDS = 1.5;
+/** How long a played action takes before he is standing there again. Must equal moves.PLAY_SECONDS — check:moves §8 asserts it. */
+export const PLAY_SECONDS = 2.4;
 
 /**
  * The clear spans of floor on one beat, in stage units.
