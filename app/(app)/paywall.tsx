@@ -1,19 +1,16 @@
 import { router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenTransition from '@/components/shared/ScreenTransition';
-import PaywallContent from '@/components/shared/PaywallContent';
+import HardPaywall from '@/components/paywall/HardPaywall';
+import { C } from '@/constants/design';
 
-const Page = '#F1EEE7';
-
-// Full-screen Scholar's Pass route — pushed from Settings. (The post-lesson and
-// daily-limit moments use the slide-up PaywallSheet instead; both share
-// PaywallContent.)
+// Full-screen Scholar's Pass route. Since the hard paywall (2026-09-25) it draws
+// the one paywall, `HardPaywall`, the same screen the sheet and the lesson
+// route draw.
 export default function PaywallScreen() {
+  const leave = () => (router.canGoBack() ? router.back() : router.replace('/(app)'));
   return (
-    <ScreenTransition bg={Page}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: Page }} edges={['top', 'bottom']}>
-        <PaywallContent onClose={() => router.back()} source="route" />
-      </SafeAreaView>
+    <ScreenTransition bg={C.paper}>
+      <HardPaywall source="route" onClose={leave} onUnlocked={leave} />
     </ScreenTransition>
   );
 }

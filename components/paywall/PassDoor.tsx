@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { router } from 'expo-router';
 import Button from '@/components/ui/Button';
 import { MetalPlate } from '@/components/profile/Struck';
 import { INK, MID, PATINA } from '@/components/shared/tone';
@@ -15,7 +14,7 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { track } from '@/lib/posthog';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE DOOR UNDER THE CHART, ON THE PASS TAB AND IN SETTINGS.
+// THE DOOR UNDER THE CHART, ON THE PASS TAB, IN SETTINGS AND ON THE PAYWALL.
 //
 //   "when a user is using the free version ... they are offered the free trial,
 //    the three day free trial ... instead of just this pay six ninety nine."
@@ -41,8 +40,13 @@ import { track } from '@/lib/posthog';
 //     which buys the base plan by option (see lib/purchases/basePlan.ts), and it
 //     is drawn only while the store has named such an option.
 //   · NO TRIAL ON OFFER (they have had one, or it is not configured): the price
-//     and the button. Promising free days the store will not give is the one thing
-//     this door may never do.
+//     and the button, which buys the Pass here and now. Promising free days the
+//     store will not give is the one thing this door may never do.
+//
+// ONE DOOR EVERYWHERE, since the hard paywall (2026-09-25). The no-trial button
+// used to push the old paywall route, which ran its own copy of the purchase;
+// the paywall IS this door now (`HardPaywall`), so the purchase runs here and
+// there is exactly one path that charges anybody.
 //
 // A reader who HOLDS the Pass, on the trial or paid, gets nothing from this
 // component. The screen shows `TrialStatus` or the ACTIVE plate instead.
@@ -51,7 +55,8 @@ import { track } from '@/lib/posthog';
 // no screen raises its own ceremony (check-pass §9e).
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type DoorSource = 'pass_tab' | 'settings';
+/** Where the door is. The paywall's own sources name why it was raised. */
+export type DoorSource = 'pass_tab' | 'settings' | 'intro' | 'locked_lesson' | 'locked_review' | 'route';
 
 export default function PassDoor({ source, compact = false }: {
   source: DoorSource;
@@ -74,6 +79,7 @@ export default function PassDoor({ source, compact = false }: {
   // to starting a trial would be the §14 lie in its most expensive form.
   const basePlan = useSubscriptionStore((s) => s.monthly?.basePlan ?? null);
   const subscribeNow = useSubscriptionStore((s) => s.subscribeNow);
+  const purchaseMonthly = useSubscriptionStore((s) => s.purchaseMonthly);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   // Its OWN busy flag and its own notice. Sharing them would grey out the trial
@@ -95,11 +101,20 @@ export default function PassDoor({ source, compact = false }: {
   const price = monthly?.priceString ?? FALLBACK_PRICE;
   const period = BILLING_PERIOD_LABEL;
 
-  // A PAID PURCHASE IS NOT RUN FROM HERE. The paywall route owns the busy state,
-  // the failure notices and the restore path.
-  const subscribe = () => {
+  // NO TRIAL ON OFFER: the price, and the purchase, run from here. It shares
+  // `paying` with the charge-today box because only one of the two is ever drawn.
+  const subscribe = async () => {
+    if (paying) return;
+    setPayNotice(null);
     track('subscribe_clicked', { plan: 'monthly', billing: 'monthly', source });
-    router.push('/(app)/paywall');
+    setPaying(true);
+    const outcome = await purchaseMonthly(source);
+    setPaying(false);
+    setPayNotice(
+      outcome === 'unavailable' ? 'Purchases run in the installed Ashmere app.'
+      : outcome === 'error' ? 'Something went wrong starting your subscription. Please try again.'
+      : null,
+    );
   };
 
   // Google's sheet opens over this screen. A sheet the reader closes says
@@ -174,7 +189,13 @@ export default function PassDoor({ source, compact = false }: {
         <Text style={st.price}>{price}</Text>
         {` a ${period} · Cancel any time`}
       </Text>
-      <Button label={compact ? 'Get the Pass' : 'Get the Scholar’s Pass'} size="lg" onPress={subscribe} />
+      <Button
+        label={paying ? 'One moment…' : compact ? 'Get the Pass' : 'Get the Scholar’s Pass'}
+        size="lg"
+        disabled={paying}
+        onPress={() => void subscribe()}
+      />
+      {payNotice ? <Text style={st.notice}>{payNotice}</Text> : null}
     </View>
   );
 }

@@ -49,7 +49,6 @@ import { useReminders } from '@/lib/notifications/useReminders';
 import { useNotificationOpens } from '@/lib/notifications/useNotificationOpens';
 import { consumeReloadedFlag, useFirstRunUpdate } from '@/lib/updates/firstRun';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
-import { ads } from '@/lib/ads';
 import * as Application from 'expo-application';
 import { effectiveStreak, daysMissed } from '@/lib/utils/streak';
 import { restDaysHeld } from '@/constants/streak';
@@ -374,14 +373,12 @@ export default function RootLayout() {
     return () => sub.remove();
   }, []);
 
-  // Initialize ads (consent + preload an interstitial) only for FREE users —
-  // subscribers never see ads, so we don't even gather consent for them. No-op
-  // stub on web/Expo Go. initialize() is idempotent.
-  const subReady = useSubscriptionStore((s) => s.ready);
-  const isPro = useSubscriptionStore((s) => s.isPro);
-  useEffect(() => {
-    if (subReady && !isPro) ads.initialize();
-  }, [subReady, isPro]);
+  // NO ADS ARE INITIALISED (2026-09-25). This used to gather ad consent and
+  // preload an interstitial for every free reader; the hard paywall removed the
+  // only advertisement the app showed, so asking an EEA reader to consent to
+  // advertising that never appears would be a form about nothing. `lib/ads`
+  // stays in the tree, unused, to be deleted in a commit of its own, and
+  // Settings' ad-privacy row hides itself because consent is never required.
 
   // Decode the sound clips before anything asks for one. Without this the FIRST
   // tap of a session is silent — the player is still being built when the cue

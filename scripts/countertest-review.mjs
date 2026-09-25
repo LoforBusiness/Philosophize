@@ -62,8 +62,8 @@ try {
     "        ask: {\n          prompt: 'How many of the three lenses",
     "        text: {\n          prompt: 'How many of the three lenses");
 
-  // THE FREE DAY. Staged in the component rather than the table, so this one damages
-  // its own file and restores it.
+  // A REVIEW THAT COUNTS AS A LESSON. Staged in the component rather than the table,
+  // so this one damages its own file and restores it.
   {
     const F = 'components/lesson/cinematic/review/UnitReview.tsx';
     const before = fs.readFileSync(F);
@@ -72,10 +72,31 @@ try {
 // bumpDailyLessons
 `);
       const res = run();
-      if (res.red && res.out.includes('FREEDAY')) { pass += 1; console.log('  ok   a review that spends a free day'); } else {
-        fail += 1; console.log(`  ✗    a review that spends a free day — ${res.red ? 'red, but not for FREEDAY' : 'stayed silent'}`);
+      if (res.red && res.out.includes('LESSON')) { pass += 1; console.log('  ok   a review that counts as a lesson'); } else {
+        fail += 1; console.log(`  ✗    a review that counts as a lesson — ${res.red ? 'red, but not for LESSON' : 'stayed silent'}`);
       }
     } finally { fs.writeFileSync(F, before); }
+  }
+
+  // A REVIEW WITH NO PASS GATE, and one with no latch (the hard paywall).
+  {
+    const F = 'app/(app)/branches/[branchSlug]/[pathSlug]/review.tsx';
+    const before = fs.readFileSync(F);
+    const text = before.toString('utf8');
+    for (const [name, from, to] of [
+      ['a review a free reader walks straight into', '<HardPaywall source="locked_review"', '<View source="locked_review"'],
+      ['a review a lapsed trial ejects the reader from', 'everOpen.current = true', 'everOpen.current = false'],
+    ]) {
+      const damaged = text.replace(from, to);
+      if (damaged === text) { fail += 1; console.log(`  ✗    ${name} — the damage changed nothing`); continue; }
+      try {
+        fs.writeFileSync(F, damaged);
+        const res = run();
+        if (res.red && res.out.includes('PASS')) { pass += 1; console.log(`  ok   ${name}`); } else {
+          fail += 1; console.log(`  ✗    ${name} — ${res.red ? 'red, but not for PASS' : 'stayed silent'}`);
+        }
+      } finally { fs.writeFileSync(F, before); }
+    }
   }
 
   // THE LOADING SCREEN (AK11). Three ways to lose it, all staged in the route itself:

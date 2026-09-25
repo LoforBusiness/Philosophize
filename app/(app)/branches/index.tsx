@@ -6,6 +6,7 @@ import ScreenTransition from '@/components/shared/ScreenTransition';
 import LearnPlate from '@/components/learn/LearnPlate';
 import Card from '@/components/ui/Card';
 import StatSticker from '@/components/shared/StatSticker';
+import { openIntro } from '@/components/professor/openIntro';
 import { getBranchBySlug, branchCountsFromUnits } from '@/data';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { BRANCH } from '@/constants/design';
@@ -41,12 +42,22 @@ const PRES: BranchPres[] = [
 ];
 
 const PAD = 20;
+
+/**
+ * THE LIBRARY, for the intro card. The same photograph Quick Start rotates through,
+ * because a lecture belongs in one — and it is already in the bundle.
+ */
+const INTRO_ART = require('../../../assets/images/quickstart/03-library.jpg');
 /** The display order, shared with the plate's shelf so the two cannot disagree. */
 const SLUGS = PRES.map((p) => p.slug);
 
 export default function LearnScreen() {
   const { width: winW } = useWindowDimensions();
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
+  // THE BRANCHES OPEN AFTER THE PROFESSOR'S INTRO (2026-09-25). Until it has been
+  // watched this tab shows one card, the intro, and nothing plays until it is
+  // pressed. Home's Quick Start is the other door to the same film.
+  const introSeen = useUserDataStore((s) => s.seenProfessorIntro);
   const done = branchCountsFromUnits(lessonsByUnit);
   const cards = PRES.map((p) => {
     const branch = getBranchBySlug(p.slug);
@@ -69,8 +80,42 @@ export default function LearnScreen() {
             object on this screen with no light on it. */}
         <LearnPlate width={winW - PAD * 2} slugs={SLUGS} />
 
-        {/* Branch cards */}
-        {cards.map((c, i) => {
+        {!introSeen ? (
+          <Card
+            tone="ink"
+            pad={0}
+            onPress={() => openIntro('learn')}
+            style={styles.card}
+            containerStyle={styles.cardBox}
+            accessibilityLabel="Start the introduction"
+          >
+            <View nativeID="learn-intro">
+              <ImageBackground source={INTRO_ART} style={styles.introBg} imageStyle={styles.cardImg} resizeMode="cover">
+                <LinearGradient
+                  colors={[SCRIM_TOP, SCRIM_MID, SCRIM_DEEP]}
+                  locations={[0, 0.4, 1]}
+                  style={StyleSheet.absoluteFill}
+                />
+                <View style={styles.cardBody}>
+                  <Text style={styles.branchKicker}>START HERE</Text>
+                  <View style={styles.nameRow}>
+                    <Text style={styles.branchName} numberOfLines={1}>Your first lecture</Text>
+                    <Text style={styles.arrow}>→</Text>
+                  </View>
+                  <Text style={styles.branchDesc} numberOfLines={3}>
+                    A one-minute introduction from the professor. The six branches open after it.
+                  </Text>
+                  <View style={styles.introCta}>
+                    <Text style={styles.introCtaText}>▶   START THE INTRO</Text>
+                  </View>
+                </View>
+              </ImageBackground>
+            </View>
+          </Card>
+        ) : null}
+
+        {/* Branch cards — once the intro has been watched */}
+        {introSeen && cards.map((c, i) => {
           if (!c.branch) return null;
           const unitNames = c.units.map((u) => u.name.toUpperCase()).join(' · ');
           return (
@@ -136,7 +181,9 @@ export default function LearnScreen() {
           );
         })}
 
-        <Text style={styles.footer}>Choose a branch to begin your inquiry</Text>
+        <Text style={styles.footer}>
+          {introSeen ? 'Choose a branch to begin your inquiry' : 'Watch the introduction to begin'}
+        </Text>
       </ScrollView>
     </SafeAreaView>
     </ScreenTransition>
@@ -186,6 +233,12 @@ const styles = StyleSheet.create({
   cardBg: { width: '100%', height: 152, justifyContent: 'flex-end' },
   cardImg: { borderRadius: 14 },
   cardBody: { paddingHorizontal: 16, paddingBottom: 14 },
+  introBg: { width: '100%', height: 232, justifyContent: 'flex-end' },
+  introCta: {
+    alignSelf: 'flex-start', marginTop: 12, backgroundColor: ArtCream, borderRadius: 10,
+    paddingHorizontal: 14, paddingVertical: 9,
+  },
+  introCtaText: { fontFamily: 'Inter_700Bold', fontSize: 12.5, color: Ink, letterSpacing: 1.4 },
   nameRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
 
   branchKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: ArtFaint, letterSpacing: 2 },

@@ -16,11 +16,8 @@ import { landOnBranch } from './lessonNav';
 import { useUserDataStore, previewDailyActivity, previewNewBadges, daysBetween, type DayInfo } from '@/stores/userDataStore';
 import { restDaysHeld } from '@/constants/streak';
 import NotifyPrompt from './NotifyPrompt';
-import TrialOffer from '@/components/paywall/TrialOffer';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
-import { ads } from '@/lib/ads';
-import { FREE_DAILY_LESSON_LIMIT } from '@/constants/subscription';
 import { bankedLesson } from '@/lib/analytics/lessonClock';
 import {
   XP_PER_LESSON_COMPLETION, XP_PER_CORRECT_ANSWER, XP_PER_PERFECT_LESSON,
@@ -201,22 +198,17 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   const registerDailyActivity = useUserDataStore((s) => s.registerDailyActivity);
   const bumpDailyLessons = useUserDataStore((s) => s.bumpDailyLessons);
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
-  const dailyLessonCount = useUserDataStore((s) => s.dailyLessonCount);
-  const dailyLessonDate = useUserDataStore((s) => s.dailyLessonDate);
   // The recorded day history, for the week strip in the streak ceremony. The
   // ceremony unions today in itself, because nothing is written until Continue.
   const activeDays = useUserDataStore((s) => s.activeDays);
   const restDays = useUserDataStore((s) => s.restDays);
   const joinedAt = useUserDataStore((s) => s.joinedAt);
 
+  // Only the rest-day rules still differ by tier. Since the hard paywall
+  // (2026-09-25) a reader who reaches this screen holds the Pass, or held it when
+  // the lesson opened: the lesson route's latch keeps a lesson open through a
+  // trial that ends mid-read, so there is no free path out of here any more.
   const isPro = useSubscriptionStore((s) => s.isPro);
-  // READ AS FUNCTIONS, NOT AS DERIVED BOOLEANS. `canStartTrial` reads three
-  // fields; subscribing to it as a value would re-render this screen on every
-  // entitlement write during a purchase, and the answer is only ever needed at
-  // the instant the button is pressed.
-  const canStartTrial = useSubscriptionStore((s) => s.canStartTrial);
-  const startTrial = useSubscriptionStore((s) => s.startTrial);
-  const openPaywall = useUIStore((s) => s.openPaywall);
   const markLessonFinished = useUIStore((s) => s.markLessonFinished);
 
   // The XP ticks, the badge strike and the rank-up fanfare are all part of the
@@ -237,46 +229,21 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   // the ceremony — that effect already gates on `phase !== 'reward'`.
   const [phase, setPhase] = useState<'pending' | 'rankup' | 'streak' | 'reward'>('pending');
   const [rankUp, setRankUp] = useState<{ from: RankDef; to: RankDef; next: RankDef | null; totalXP: number } | null>(null);
-  // THE TRIAL OFFER, WHICH REPLACES THIS SCREEN RATHER THAN SITTING OVER IT.
-  //
-  // Both are Modals, and one Modal at a time is worth more than the alternative:
-  // nesting them works but leaves two full-screen presentations stacked, and on
-  // the way back out of a declined offer the reward would re-present itself
-  // behind the dismissal. The reward has finished saying what it had to say by
-  // the time this can be true -- `commit()` has already run -- so it steps aside.
-  const [offer, setOffer] = useState(false);
   // Badges finishing WOULD earn. Like the streak and the rank above, worked out
   // without writing any of it — see previewNewBadges.
   const [badges, setBadges] = useState<BadgeDef[]>([]);
 
-  // Has this free user used up today's allowance? The daily count is NOT bumped
-  // until they press the button, so this lesson is not in it yet — hence the + 1.
-  const usedToday = dailyLessonDate === dateStr(new Date()) ? dailyLessonCount : 0;
-  const atLimit = !isPro && usedToday + 1 >= FREE_DAILY_LESSON_LIMIT;
-
-  // Continue order for FREE users: reward screen → interstitial ad → then, if
-  // they've hit the daily cap, the Scholar's Pass slides up as a dismissible
-  // option over the lesson list (never a blocking gate). Subscribers and free
-  // users with lessons left just return. showInterstitial never throws and
-  // resolves even with no ad ready, so navigation is never blocked.
   // ───────────────────────────────────────────────────────────────────────────
   // THE COMPLETION IS COMMITTED HERE, NOT ON MOUNT.
   //
   // It used to run in an effect the moment this screen appeared, which meant a
   // reader could reach the reward, kill the app, reopen it, and find the lesson
-  // marked complete — progress, XP, streak and the day's allowance all banked —
-  // without ever seeing the interstitial that pays for the free tier. Pressing the
-  // button was optional, and skipping it was strictly better for them.
-  //
-  // So nothing is written until this runs. Everything above is a PREVIEW computed
-  // from the store without touching it. Leave before pressing the button and the
-  // lesson simply was not finished: no XP, no streak, no unlock, and the lesson is
-  // still there to be played again.
-  //
-  // Order matters. The award is committed FIRST and the ad shown after, so a
-  // failed, slow or unavailable ad can never cost someone the lesson they earned —
-  // `showInterstitial` already resolves rather than throwing, and this way even a
-  // crash mid-ad leaves the progress banked.
+  // marked complete without ever seeing the interstitial that then paid for the
+  // free tier. There is no interstitial since the hard paywall, and the rule
+  // stays anyway: nothing is written until this runs. Everything above is a
+  // PREVIEW computed from the store without touching it. Leave before pressing
+  // the button and the lesson simply was not finished: no XP, no streak, no
+  // unlock, and the lesson is still there to be played again.
   // ───────────────────────────────────────────────────────────────────────────
   const commit = () => {
     if (ran.current) return;
@@ -284,7 +251,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     recordLessonComplete(lessonId, xp);
     const today = dateStr(new Date());
     const yesterday = dateStr(new Date(Date.now() - 86_400_000));
-    bumpDailyLessons(today); // count this completion toward the free daily allowance
+    bumpDailyLessons(today); // Home's daily-goal dots count these
     const dayInfo = registerDailyActivity(today, yesterday, { isPro });
     // The two facts this screen cannot derive: how long it took, and which
     // format it was. Both are held by the route — see lib/analytics/lessonClock.
@@ -356,7 +323,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     //
     // The reward screen still plays in full — that is half of what there is to
     // test — but nothing is written: no XP, no completion, no streak, no daily
-    // count, no ad, and no `markLessonFinished`, so the branch world does not
+    // count, and no `markLessonFinished`, so the branch world does not
     // walk for a lesson that was never really finished.
     //
     // Compared by LESSON ID, not by a boolean, so this can only ever apply to the
@@ -367,77 +334,11 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
       router.back();
       return;
     }
+    // No ad, no offer and no paywall: since the hard paywall (2026-09-25) there is
+    // no free reader here to show them to.
     commit();
-    if (isPro) {
-      onDone();
-      goToBranch();
-      return;
-    }
-    // THE OFFER GOES BEFORE THE AD, AND ACCEPTING MEANS THE AD NEVER PLAYS.
-    //
-    // Not a trick -- the first row of the certificate they were just shown says
-    // "Advertisements: none, ever", and this is that row being honoured one
-    // second after it was promised rather than a fortnight later. It also means
-    // the reader's own decision is what removes the interruption, which is the
-    // difference between a subscription and a toll.
-    //
-    // Only while there is a trial left to give: `canStartTrial()` is false for
-    // anyone paying and for anyone who has already spent one, so a reader who
-    // declined it in March does not meet it again every night for a year.
-    if (canStartTrial()) {
-      setAdvancing(false); // the offer's own buttons take it from here
-      setOffer(true);
-      return;
-    }
-    await finishFree();
-  };
-
-  // What happens to a free reader who is not being offered anything, and to one
-  // who has just said no: the ad, then the branch, then the Pass if they are out
-  // of lessons. Extracted so the two paths cannot drift -- a declined offer must
-  // leave the reader exactly where declining nothing would have.
-  //
-  // `justDeclined` is not a detail. A reader at their daily limit who has this
-  // second refused the offer would otherwise meet the Pass again eight seconds
-  // later, on the branch screen, as a sheet -- asked twice about the same thing
-  // inside ten seconds, the second time immediately after saying no. That is the
-  // ambush the Pass tab exists to be the opposite of. They keep the tab, they
-  // keep tomorrow's limit notice; they do not get chased down the corridor.
-  const finishFree = async (justDeclined = false) => {
-    try {
-      await ads.showInterstitial();
-    } catch {}
-    onDone(); // close the reward + leave the lesson
-    // The branch screen first either way, so the celebration is never the thing
-    // that gets skipped. A free reader who has just spent their last lesson of the
-    // day still sees their progress advance, and the Pass slides up over it.
+    onDone();
     goToBranch();
-    if (atLimit && !justDeclined) openPaywall();
-  };
-
-  // Accepting opens Google Play's payment sheet over the offer. Only once it has
-  // actually started does this screen close: the conferral, which the store
-  // raises globally, then plays over the branch the reader is returned to. No ad
-  // and no paywall: they are a Scholar as of that line.
-  //
-  // A sheet the reader closes, or one that fails, leaves them ON the offer, which
-  // says what went wrong and still has "Not today". Closing the screen first, as
-  // the on-device trial could, would drop somebody who backed out of Google's
-  // sheet onto the branch with no Pass and no ad, having skipped both.
-  const acceptTrial = async () => {
-    const outcome = await startTrial('post_lesson');
-    if (outcome === 'success') {
-      setOffer(false);
-      onDone();
-      goToBranch();
-    }
-    return outcome;
-  };
-
-  const declineTrial = () => {
-    setOffer(false);
-    setAdvancing(true);
-    void finishFree(true);
   };
 
   // What finishing WOULD do, worked out without writing any of it. Both halves
@@ -550,11 +451,6 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
   // INCLUDING the reward modal that has just been mounted. Every cinematic
   // lesson ended on a blank screen with no way forward. Add hooks above.
 
-  // The offer replaces this screen while it is up. See the note on `offer`.
-  if (offer) {
-    return <TrialOffer onAccept={acceptTrial} onDecline={declineTrial} />;
-  }
-
   // One frame of bare paper while the completion effect decides which screen this
   // is. Painting the reward first would flash XP behind a rank-up.
   if (phase === 'pending') {
@@ -594,11 +490,10 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
           pendingRest={info.restSpent > 0 ? daysBetween(lastLessonDate, dateStr(new Date())) : undefined}
           today={dateStr(new Date())}
           since={joinedAt ? dateStr(new Date(joinedAt)) : null}
-          // THE ONLY LINE ALLOWED TO ASK FOR ANOTHER LESSON, and it asks only
-          // when there is one to have. `atLimit` is the same fact the Continue
-          // path below acts on, so the ceremony can never invite a reader into a
-          // lesson the next screen refuses them.
-          moreToday={!atLimit}
+          // THE ONLY LINE ALLOWED TO ASK FOR ANOTHER LESSON. It used to ask
+          // only while a free reader had one left today; with the free daily
+          // lesson gone (2026-09-25) everybody reaching this screen has one.
+          moreToday
           onDone={() => setPhase('reward')}
         />
       </Modal>

@@ -1,0 +1,24 @@
+// TEMPORARY — DELETE BEFORE COMMITTING. Any file in app/ is a real route (§21).
+// Written and removed by scripts/sheet-professor.mjs; check-routes.mjs blocks a build
+// if one is left behind.
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import ProfessorIntro from '@/components/professor/ProfessorIntro';
+import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
+
+export default function PreviewProfessor() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    useUserDataStore.setState({ _hasHydrated: true } as never);
+    // The root layout holds every route behind the launch animation (sheet-pass).
+    useUIStore.setState({ launchDone: true } as never);
+    setReady(true);
+  }, []);
+  if (!ready) return <View style={{ flex: 1 }} nativeID="prof-boot" />;
+  return (
+    <View nativeID="prof-root" style={{ flex: 1 }}>
+      <ProfessorIntro onDone={() => {}} />
+    </View>
+  );
+}

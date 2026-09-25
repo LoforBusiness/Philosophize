@@ -167,19 +167,31 @@ export const EVENTS = {
     where: 'stores/userDataStore.ts',
   },
 
+  // ── the professor's intro (2026-09-25) ────────────────────────────────────
+  intro_started: {
+    note: 'The professor\'s intro lecture began. It is opened by the reader — from Home\'s Quick Start or the Learn tab — never by itself, so this counts people who chose to start, and against install counts it says how many found the door.',
+    props: [],
+    where: 'components/professor/ProfessorIntro.tsx',
+  },
+  intro_skipped: {
+    note: 'They pressed Skip. `at_line` is the line (1–6) on screen when they did: a pile-up at 1 means the walk-in is too long, at 6 means the pitch is.',
+    props: ['at_line'],
+    where: 'components/professor/ProfessorIntro.tsx',
+  },
+  intro_completed: {
+    note: 'The lecture played to its end. Followed for a free reader by `paywall_viewed` with `source: intro`, and the pair is the intro\'s own conversion.',
+    props: [],
+    where: 'components/professor/ProfessorIntro.tsx',
+  },
+
   // ── money ─────────────────────────────────────────────────────────────────
   paywall_viewed: {
-    note: 'The offer was shown. `source` is the moment that raised it and is the whole point of the event — `pass_tab` is somebody who WENT LOOKING, which is a different intention from every other source and the only one that is not a wall.',
+    note: 'The offer was shown. `source` is the moment that raised it and is the whole point of the event — `pass_tab` is somebody who WENT LOOKING, which is a different intention from every other source and the only one that is not a wall. Since the hard paywall (2026-09-25) the walls are `intro` (after the professor\'s lecture), `locked_lesson` and `locked_review` (a lesson or review tapped without the Pass), and `route` (the full-screen paywall route).',
     props: ['source', 'available'],
-    where: 'components/shared/PaywallContent.tsx, app/(app)/settings.tsx, app/(app)/pass.tsx',
-  },
-  daily_limit_reached: {
-    note: 'A free reader ran out of lessons for the day. The loudest pressure signal the app has.',
-    props: ['branch_slug', 'lesson_id', 'limit'],
-    where: 'components/paywall/DailyLimit.tsx',
+    where: 'components/paywall/HardPaywall.tsx, app/(app)/settings.tsx, app/(app)/pass.tsx',
   },
   lesson_locked_viewed: {
-    note: 'A gated lesson was opened. `reason` is pro | unreached — "paying would fix this" versus "read the unit first".',
+    note: 'A lesson that money cannot open was opened: a Pass holder further along a unit than they have read. `reason` is always `unreached` since the hard paywall (2026-09-25); a lesson the Pass WOULD open raises the paywall and reports `paywall_viewed` with `source: locked_lesson` instead.',
     props: ['reason', 'branch_slug', 'lesson_id', 'gated_by_pro'],
     where: 'components/paywall/LessonLocked.tsx',
   },
@@ -199,9 +211,9 @@ export const EVENTS = {
     where: 'components/shared/RatePrompt.tsx',
   },
   trial_offered: {
-    note: 'Google Play\'s free trial was put in front of a free reader it is on offer to: after a lesson and before the ad (`post_lesson`), or as the door on the Pass tab or in Settings (`pass_tab`, `settings`). Paired with `trial_started` by `source` it is the only conversion rate this offer has -- there is no separate decline event, because offered-minus-started IS the decline.',
-    props: ['source', 'lessons_left'],
-    where: 'components/paywall/TrialOffer.tsx, components/paywall/PassDoor.tsx',
+    note: 'Google Play\'s free trial was put in front of a free reader it is on offer to, as the door wherever the Pass is offered (`source` names the screen). Paired with `trial_started` by `source` it is the only conversion rate this offer has -- there is no separate decline event, because offered-minus-started IS the decline. Until the hard paywall (2026-09-25) it was also offered after a lesson (`post_lesson`); that source stops arriving then.',
+    props: ['source'],
+    where: 'components/paywall/PassDoor.tsx',
   },
   trial_started: {
     note: 'Google Play\'s free trial started: the payment sheet completed and the entitlement came back as a TRIAL. Nobody has been charged yet, and it converts only if they do not cancel, so this is NOT a revenue event and must never be given a `$revenue` property. `days` is the offer\'s length as the store stated it.',
@@ -216,7 +228,7 @@ export const EVENTS = {
   subscribe_clicked: {
     note: 'The purchase sheet was opened. `skipped_trial` is true for the charge-today button under the trial door -- the reader was offered free days and asked to pay instead, which is the only place that intent is visible.',
     props: ['plan', 'billing', 'source', 'skipped_trial'],
-    where: 'components/shared/PaywallContent.tsx, components/paywall/PassDoor.tsx',
+    where: 'components/paywall/PassDoor.tsx',
   },
   subscribe_succeeded: {
     note: 'The entitlement went live. `$revenue` is the property PostHog revenue views read. `skipped_trial` separates a purchase made instead of a trial from one that followed a trial -- without it both land here identically and the trial-skip button cannot be judged at all.',

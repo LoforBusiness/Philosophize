@@ -80,7 +80,7 @@ replacing the letterpress D.
 | Build version | expo-application | ~56 | Real APK versionCode — powers the forced-update gate (§20) |
 | OTA | expo-updates | ~56 | EAS Update; **runtime-versioned** — read §18 before publishing |
 | Subscriptions | react-native-purchases | 10.x | RevenueCat; entitlement `scholars_pass` |
-| Ads | react-native-google-mobile-ads | 16.x | AdMob interstitial for free users only |
+| Ads | react-native-google-mobile-ads | 16.x | **Unused since the hard paywall (2026-09-25)** — no ad is shown or initialised; the module stays for a commit of its own |
 | Analytics | posthog-react-native | 4.x | Manual `$screen` events; consent-gated |
 | Reminders | expo-notifications | ~56 | **LOCAL only** — no server, no push token. Live since build 19 (§22) |
 | Widget | react-native-android-widget | 0.20 | Android home-screen "Quote of the Day" |
@@ -130,7 +130,9 @@ Philosophize/
 │       │                        #   way Brilliant draws it (§14). The only permanent
 │       │                        #   address the offer has; the rest of the family
 │       │                        #   are interruptions
-│       └── paywall.tsx          # Hidden route — hosts PaywallContent full-screen
+│       ├── paywall.tsx          # Hidden route — the one paywall, HardPaywall
+│       └── intro.tsx            # Hidden route — THE PROFESSOR'S INTRO, then the
+│                                #   paywall for a free reader (§14)
 ├── components/
 │   ├── lesson/                  # LessonRunner, CardShell, LessonReward, LessonLoader
 │   │   ├── cards/               # 8 card components (incl. DilemmaCard, QuoteCard)
@@ -151,13 +153,19 @@ Philosophize/
 │   ├── launch/                  # LaunchScreen + launchArt + launchScenes +
 │   │                            #   LaunchFigure + launchMotion (§19)
 │   ├── home/                    # QuickStartCard, StickmanStroll
-│   ├── paywall/                 # THE PASS FAMILY — PassChart (the Free-against-
-│   │                            #   Pass chart + tiles, on the tab, the trial
-│   │                            #   offer and Settings), PassDoor (trial or buy),
-│   │                            #   TrialStatus (a running trial + Cancel),
-│   │                            #   TrialReminderAsk, TrialOffer, PassConferred, PassParts,
-│   │                            #   DailyLimit, LessonLocked, Certificate,
-│   │                            #   PassHerald (§14)
+│   ├── paywall/                 # THE PASS FAMILY — HardPaywall (the one paywall),
+│   │                            #   PassChart (the Free-against-Pass chart + the
+│   │                            #   free tiles, on the tab, the paywall and
+│   │                            #   Settings), PassDoor (trial or buy — every
+│   │                            #   purchase runs here), TrialStatus (a running
+│   │                            #   trial + Cancel), TrialReminderAsk,
+│   │                            #   PassConferred, LessonLocked (the not-yet
+│   │                            #   screen), PassParts, Certificate, PassHerald (§14)
+│   ├── professor/               # THE INTRO LECTURE — ProfessorIntro (the film),
+│   │                            #   professorAt (his timeline), lectureRoom,
+│   │                            #   chalk + hershey (single-stroke letters),
+│   │                            #   professorScript (the words), GENERATED
+│   │                            #   professorVoice, lectureVoice (§14)
 │   ├── gamification/            # StreakBook, StreakWeek, RankUpScreen
 │   ├── widget/                  # Android home-screen widget surface
 │   └── shared/                  # SketchIcon, Glyph, PhilosopherSheet, RanksBadgesSheet,
@@ -1092,7 +1100,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **sixty-seven** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **sixty-eight** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1103,7 +1111,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` · `check-firstrun` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-wander` · `check-chair` · `check-skin` · `check-thoughts` · `check-marks` · `check-objects` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-wander` · `check-chair` · `check-skin` · `check-thoughts` · `check-marks` · `check-objects` · `check-professor` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
 > replays the figure, and a prop's animation was invisible to every check unless it
@@ -1308,12 +1316,14 @@ they belong to, so the rule book has them and this file did not:
   simpler — "there's too much information, there's too many statistics … I want
   the user to be focused on the lessons." Insights was the sixth and its readings
   are one card inside Profile now (§19).
-- **Money:** RevenueCat `scholars_pass` entitlement; AdMob interstitial after a
-  free user's lesson; free daily lesson limit. The offer, the daily limit and the
-  locked lesson are **one family** (`components/paywall/`) built out of the
-  reader's own account — their rank pin, six mastery bars, and the wait to finish
-  the library drawn in real days. Every claim on them is derived from the gate
-  that enforces it and re-checked by `check:pass` (§14).
+- **Money:** RevenueCat `scholars_pass` entitlement, and a **HARD PAYWALL since
+  2026-09-25**: every lesson and unit review needs the Pass or its three-day
+  trial, and everything else in the app is free. No ad, no free daily lesson.
+  There is one paywall (`HardPaywall`), built from the Pass tab's own chart and
+  door, and before it a reader meets **the professor's intro** — a forty-second
+  self-playing lecture opened from Home's Quick Start or the Learn tab (§14).
+  Every claim is derived from the gate that enforces it and re-checked by
+  `check:pass`.
 - **Infra:** Supabase auth + cloud sync; EAS Build + EAS Update; forced-update
   gate (§20). **PostHog, and its events are a declared set** —
   `lib/analytics/taxonomy.ts` holds all 29 with their properties and `npm run
@@ -2155,19 +2165,67 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
 > `npm run check:pass` re-derives every row from the function that enforces it.**
 > The aspiration is still below, and it is labelled as one.
 
-### What the Pass actually buys, today
+### What the Pass actually buys, today — a hard paywall (2026-09-25)
 
-Five things differ by tier, and all five are enforced in code:
+The owner's research found a hard paywall converts better than freemium. **Every
+lesson needs the Scholar's Pass or its three-day trial; everything else is free.**
+Four rows, each a cross on Free and a tick on the Pass, and all four enforced:
 
 | | Free | Scholar's Pass | Enforced by |
 |---|---|---|---|
-| Lessons a day | `FREE_DAILY_LESSON_LIMIT` (1) | unlimited | the lesson route's frozen gate |
-| Advertisements | one after each lesson | none | `LessonReward.handleContinue` |
-| Reopen a finished lesson | **no** | any, any time | `lessonAccess(li < unitDone)` |
-| Start a unit out of order | no | any unit, any time | `startable = isPro \|\| …` |
-| Rest days | 2 held · 1 per 10 | 5 held · 1 per 5 | `restCap` / `restEarnEvery` |
+| All the lessons | no | every one | `lessonAccess` — `if (!isPro)` shuts all of them |
+| Narrated and animated | no | every one | `check:pass` counts the narration manifest and the `CINEMATIC` map |
+| Unit reviews | no | all of them | the review route draws `HardPaywall` without the Pass |
+| Start any unit | no | any, any time | `lessonAccess` with `unitStartable` ignored on the Pass |
 
-**Replay and jumping ahead were missing from the paywall for its whole life**, so
+**Free for everyone**, and said just as loudly (the tiles under the chart): all the
+thinkers, their quotations to save, their quizzes, the ranks, the badges, XP and
+the streak, Quote of the Day, the widget, Profile and Settings. A hard paywall that
+does not say what is still free reads as an app that has locked everything.
+
+**What went:** `FREE_DAILY_LESSON_LIMIT`, the daily-limit screen, the frozen gate in
+the lesson route, the ad after a lesson (and AdMob's initialisation — asking for
+consent to adverts that never show is a form about nothing), `TrialOffer` after a
+lesson, and `PaywallContent`. `check:pass` §12 fails the build if any of those
+names comes back. **What stayed:** `dailyLessonCount` (Home's goal dots read it) and
+rest days, which differ by tier still. The lesson route's one-way latch stayed too,
+for a new reason: a trial that ENDS mid-lesson must not eject the reader
+(`check:access` walks it).
+
+### The professor's intro, and why nothing plays it but the reader
+
+A professor stickman in a mortarboard walks into a lecture room, stops beside a
+chalkboard on an easel, and speaks six lines (about 36 seconds, the lessons' voice)
+on what the lessons are and what they are worth off the page — and as he speaks,
+the chalk writes each line's drawing on the board. The last line names the Pass and
+the three free days; for a free reader the paywall follows (`source: intro`).
+
+- **The reader opens it; nothing else does.** Owner: *"they will only see this intro
+  if they are on the home and click a quickstart … or if they go to the learn tab
+  they must click the intro before … any of the branches … I dont want it to force
+  play."* Until `seenProfessorIntro` is set, Home's Quick Start card IS the intro
+  and the Learn tab shows one intro card in place of the six branches. The lesson
+  route plays it only as a BACKSTOP, for a lesson reached some other way.
+- **Once per account.** The flag is cloud-synced and merged with OR; a skip counts.
+- **Built on the seated welcome's engine**: one clock (`?t=` freezes it on the web),
+  a zero-import timeline (`professorAt`), the voice started line by line on that
+  clock (`lectureVoice`, one MP3 from `make:professor-voice`).
+- **The chalk is DRAWN.** Hershey's single-stroke letters (`hershey.ts`), laid out
+  and timed by length in `chalk.ts`; each piece is its own small `<Svg>` (§17 rule 7),
+  with a faint dust left under finished strokes. `npm run sheet:chalk` draws all six
+  boards in plain Node.
+- **Two facts are fixed in the recording** and noted in `professorScript.ts`: no
+  lesson count is spoken, and "three days" is — so if the Play trial ever changes
+  length, line 6 is re-recorded.
+- **`check:professor`** (in `npm run check`) holds the flag and its merge, that each
+  take says the script's words, that every stroke stays on the board and is timed
+  forward, the whole film replayed at 60fps (no jump, planted feet, hands clear of
+  his head — the first "pointing up" gesture put a hand at his cheek and read as
+  scratching it), and no hex in `components/professor/`. `npm run sheet:professor`
+  photographs the real film at fourteen instants; `npm run check:paywall-flow` walks
+  the doors, the intro, Skip and the paywall through seven cases in a browser.
+
+**(Before the hard paywall)** replay and jumping ahead were missing from the paywall for its whole life, so
 the two biggest things the Pass buys were being given away for nothing. That is
 the failure mode a hand-written benefit list has in the direction nobody watches
 for — everyone guards against over-promising, and nothing guards against silence.
@@ -2226,7 +2284,7 @@ reader asked for the post-lesson offer and Settings › Subscription to wear the
 tab's look, for the tab's arrival on the post-lesson offer but not in Settings,
 and for the three-day trial to be what a free reader is offered first in all
 three. `components/paywall/PassChart.tsx` is the chart and the tiles: the tab
-replays its arrival on focus, `TrialOffer` plays it once the modal has slid up,
+replays its arrival on focus, `TrialOffer` (retired 2026-09-25) played it once the modal had slid up,
 and Settings draws it `size="compact"` and still, picking smaller columns from
 the card's measured width, because that card sits beside a rail and is about
 225pt wide at 390dp and 160pt at 320dp. `components/paywall/PassDoor.tsx` is the
@@ -2401,8 +2459,9 @@ and fails on any digit left in literal text.
 > to be re-argued is whether a sixth destination earns the room, and the streak
 > still does not: it is already one tap from every screen that shows the count.
 
-**Free tier** — enough to fall in love: a lesson a day, every branch's first unit
-in order, the full streak, XP, rank and badge systems, and all 341 thinkers.
+**Free tier** — since 2026-09-25, everything but the lessons: all 341 thinkers and
+their quotations and quizzes, the full streak, XP, rank and badge systems, Quote of
+the Day and the widget. The lessons need the Pass or its trial.
 
 **Why someone pays (the thesis — the aspiration, not the current feature list):**
 1. They actually **retain** what they learn (spaced review), not just tap through it.
@@ -5360,6 +5419,11 @@ either could be undone by a tidy-up that noticed a review looks a lot like a les
 so `check:review` §5 fails on `bumpDailyLessons`, `FREE_DAILY_LESSON_LIMIT` or
 `recordLessonComplete` appearing in any review source.
 
+> **RETIRED BY THE HARD PAYWALL (2026-09-25).** There is no free day left to protect,
+> and a review now needs the Pass like a lesson does. `check:review` §5 holds the new
+> rule instead: the review route reads `isPro`, draws `HardPaywall` without it, and
+> keeps the lesson route's one-way latch — and a review still never counts as a lesson.
+
 **AND THE MARK IS A RELOAD RATHER THAN A STAR (AK10)**, because a star means premium, a
 favourite or a rating in every app a reader has ever used, and a review is none of those.
 
@@ -7949,8 +8013,9 @@ Two decisions worth not re-litigating:
   into a paywall. It also goes through `lessonAccessibility()`, so it can never
   be a side door into a lesson that has not been earned or paid for.
 - **The goal counts lessons, not minutes.** Nothing in this app has ever
-  recorded a duration. `dailyLessonCount` already exists for the free-tier gate,
-  so a lesson goal is one the app can actually measure you against.
+  recorded a duration. `dailyLessonCount` already existed for the free-tier gate
+  (retired 2026-09-25; the count stays for this), so a lesson goal is one the app
+  can actually measure you against.
 
 ### Notifications need a binary, and the section knows it
 

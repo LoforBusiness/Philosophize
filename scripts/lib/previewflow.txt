@@ -1,0 +1,63 @@
+// TEMPORARY — DELETE BEFORE COMMITTING. Any file in app/ is a real route (§21).
+// Written and removed by scripts/check-paywall-flow.mjs; check-routes.mjs blocks a
+// build if one is left behind.
+//
+//   ?case=home|homefull|learn|intro|lesson   which real screen to draw
+//                                   (home = the Quick Start card alone; homefull = all of Home)
+//   ?seen=1                         the professor's intro already watched
+//   ?pass=free|trial|paid           the reader's plan, seeded the way the store holds it
+//   ?lessonId=…                     for case=lesson (the route reads it from here)
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import QuickStartCard from '@/components/home/QuickStartCard';
+import HomeScreen from '@/app/(app)/index';
+import LearnScreen from '@/app/(app)/branches/index';
+import IntroScreen from '@/app/(app)/intro';
+import LessonScreen from '@/app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId]';
+import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
+
+const q = (k: string) =>
+  typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(k);
+
+const HOUR = 3_600_000;
+
+export default function PreviewFlow() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    useUserDataStore.setState({
+      _hasHydrated: true,
+      seenProfessorIntro: q('seen') === '1',
+      lessonsByUnit: {},
+      lessonsByBranch: {},
+    } as never);
+    useUIStore.setState({ launchDone: true } as never);
+    const pass = q('pass') ?? 'free';
+    const now = Date.now();
+    const NONE = { active: false, onTrial: false, expiresAt: null, willRenew: false, productId: null };
+    const sub = pass === 'trial'
+      ? { active: true, onTrial: true, expiresAt: now + 60 * HOUR, willRenew: true, productId: 'p:monthly' }
+      : pass === 'paid'
+        ? { active: true, onTrial: false, expiresAt: now + 20 * 24 * HOUR, willRenew: true, productId: 'p:monthly' }
+        : NONE;
+    // `refresh` neutralised, or the web stub answers "not subscribed" a frame later
+    // and overwrites the seeded plan (sheet-pass learned this).
+    useSubscriptionStore.setState({
+      ready: true, available: false, entitled: pass !== 'free', isReviewer: false, sub,
+      trialEndsAt: null, isPro: pass !== 'free', refresh: async () => {},
+    } as never);
+    setReady(true);
+  }, []);
+  if (!ready) return <View style={{ flex: 1 }} nativeID="flow-boot" />;
+  const c = q('case') ?? 'home';
+  return (
+    <View nativeID="flow-root" style={{ flex: 1, backgroundColor: '#FAFAF7' }}>
+      {c === 'home' ? <View style={{ padding: 20 }}><QuickStartCard /></View>
+        : c === 'homefull' ? <HomeScreen />
+        : c === 'learn' ? <LearnScreen />
+          : c === 'intro' ? <IntroScreen />
+            : <LessonScreen />}
+    </View>
+  );
+}

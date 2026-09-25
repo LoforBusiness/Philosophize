@@ -22,7 +22,7 @@ export const MONTHLY_PRODUCT_ID = {
 
 // Reviewer / tester allow-list. Accounts listed here are granted Scholar's Pass
 // WITHOUT a purchase, so app-store reviewers and internal testers can get past
-// the paywall (and the daily-lesson limit + ads) by simply signing in with one
+// the paywall by simply signing in with one
 // of these accounts. Matching is case-insensitive on the account's email.
 //
 // Read from the environment (comma-separated) rather than hardcoded, because
@@ -49,12 +49,10 @@ export function isReviewerAccount(email: string | null | undefined): boolean {
   return REVIEWER_EMAILS.includes(e);
 }
 
-// Free tier: how many lessons a non-subscriber may complete per calendar day.
-// Tunable — the Settings copy, paywall, and lesson gate all read this number.
-export const FREE_DAILY_LESSON_LIMIT = 1;
-
-// Grammar helper so copy reads "1 lesson" / "3 lessons" automatically.
-export const lessonsWord = (n: number) => (n === 1 ? 'lesson' : 'lessons');
+// THERE IS NO FREE TIER OF LESSONS (2026-09-25). `FREE_DAILY_LESSON_LIMIT` lived
+// here until the hard paywall: every lesson now needs the Pass or its trial, and
+// everything else in the app is free (lib/utils/passValue.ts). `check:pass`
+// fails the build if the constant comes back.
 
 // Fallback price shown before RevenueCat returns a localized price (and on
 // web/Expo Go, where the store isn't available). The real price always comes

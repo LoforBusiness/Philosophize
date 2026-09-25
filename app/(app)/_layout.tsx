@@ -65,10 +65,10 @@ import { useUIStore } from '@/stores/uiStore';
  * cleanly the first time" report, and it is the same defect `lazy: false` was
  * introduced to fix for tabs.
  *
- * `settings`, `paywall` and `devlessons` stay lazy on purpose. Settings is two
- * taps in behind a gear nobody presses twice a day; the paywall's expensive half
- * is `PaywallContent`, which the Pass tab already builds; and devlessons is a
- * tester. Warming is not free -- every entry is one more tree mounted for the
+ * `settings`, `paywall`, `intro` and `devlessons` stay lazy on purpose. Settings
+ * is two taps in behind a gear nobody presses twice a day; the paywall's expensive
+ * half is the Pass tab's own chart, which that tab already builds; the intro plays
+ * once per account; and devlessons is a tester. Warming is not free -- every entry is one more tree mounted for the
  * session -- so it is spent on the route a reader actually opens from a place
  * they are already standing.
  *
@@ -138,7 +138,9 @@ export default function AppLayout() {
   // Matched on the segment rather than the pathname so it cannot be fooled by a
   // slug that happens to contain the word.
   const segments = useSegments() as string[];
-  const inLesson = segments.includes('lesson');
+  // The professor's intro is a film, like a lesson, and a stray tap on the bar
+  // below it would leave mid-lecture — so it hides the bar for the same reasons.
+  const inLesson = segments.includes('lesson') || segments.includes('intro');
   // The tab the reader is on, by route name. The index route has no segment of
   // its own. On a hidden route (settings, the paywall, the streak) no tab is open,
   // which is also what the bar itself shows.
@@ -287,8 +289,11 @@ export default function AppLayout() {
       />
       {/* Reachable via router.push from the profile, hidden from the tab bar */}
       <Tabs.Screen name="settings" options={{ href: null }} />
-      {/* Paywall — pushed from Settings and the daily-limit gate, hidden from tabs */}
+      {/* Paywall — the full-screen route of the one paywall, hidden from tabs */}
       <Tabs.Screen name="paywall" options={{ href: null }} />
+      {/* The professor's intro — opened from Home's Quick Start or the Learn tab,
+          never by itself (2026-09-25). Hidden from tabs, and hides the bar. */}
+      <Tabs.Screen name="intro" options={{ href: null }} />
       {/* The streak, pushed from wherever the count appears. A tab of its own was
           the obvious home and is still the wrong one — the streak does not need
           to outrank Learn to matter, and it is already one tap from every screen

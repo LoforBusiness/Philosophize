@@ -3,12 +3,10 @@
 // if one is left behind.
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import PaywallContent from '@/components/shared/PaywallContent';
+import HardPaywall from '@/components/paywall/HardPaywall';
 import PassTab from '@/app/(app)/pass';
 import SettingsScreen from '@/app/(app)/settings';
-import DailyLimit from '@/components/paywall/DailyLimit';
 import LessonLocked from '@/components/paywall/LessonLocked';
-import TrialOffer from '@/components/paywall/TrialOffer';
 import PassConferred from '@/components/paywall/PassConferred';
 import ProfileScreen from '@/app/(app)/profile';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -173,31 +171,17 @@ export default function PreviewPass() {
     // `useFocusEffect`, which no-ops without a focus context, and the analytics
     // call behind it is a stub on web.
     body = <PassTab />;
-  } else if (s === 'trial') {
-    // THE POST-LESSON OFFER. A Modal, which react-native-web portals outside this
-    // root; sheet-pass reads the whole body for that reason.
-    body = <TrialOffer onAccept={async () => 'unavailable'} onDecline={() => {}} />;
   } else if (s === 'conferral') {
     // THE CEREMONY, as a trial that has just started. Also a Modal.
     body = <PassConferred kind="trial" onDone={() => {}} />;
-  } else if (s === 'limit') {
-    body = <DailyLimit lesson={unit0.lessons[2]} branch={branch} onExit={() => {}} />;
   } else if (s === 'locked') {
     const unit = kind === 'ahead' ? unit1 : unit0;
     const lesson = kind === 'replay' ? unit0.lessons[0]
       : kind === 'ahead' ? unit1.lessons[0]
       : unit0.lessons[3];
-    body = (
-      <LessonLocked
-        lesson={lesson}
-        branch={branch}
-        unit={unit}
-        gatedByPro={kind !== 'unreached'}
-        onExit={() => {}}
-      />
-    );
+    body = <LessonLocked lesson={lesson} branch={branch} unit={unit} onExit={() => {}} />;
   } else {
-    body = <PaywallContent onClose={() => {}} source="preview" />;
+    body = <HardPaywall source="route" onClose={() => {}} />;
   }
 
   return (

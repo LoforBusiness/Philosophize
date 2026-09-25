@@ -3,12 +3,14 @@ import { Modal, View, Pressable, StyleSheet, useWindowDimensions } from 'react-n
 import { MotiView, AnimatePresence } from 'moti';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useUIStore } from '@/stores/uiStore';
-import PaywallContent from './PaywallContent';
+import HardPaywall from '@/components/paywall/HardPaywall';
 
-// The Scholar's Pass offer presented as a dismissible slide-up — shown after a
-// free user finishes their daily lesson (post-ad) and from the daily-limit gate.
-// Tapping the backdrop, the handle area, or the close button dismisses it and
-// returns the user to where they were. Mounted globally in the root layout.
+// The Scholar's Pass offer presented as a dismissible slide-up — raised from a
+// locked stop on a branch road, a lesson or a unit review (since the hard
+// paywall, 2026-09-25, every lesson needs the Pass). Tapping the backdrop, the
+// handle area, or the close button dismisses it and returns the user to where
+// they were; so does the Pass arriving, and the stop they tapped is then open.
+// Mounted globally in the root layout.
 const Page = '#F1EEE7';
 const Ink = '#1A1A1A';
 const InkFaint = '#D9D7CE';
@@ -16,6 +18,7 @@ const InkFaint = '#D9D7CE';
 export default function PaywallSheet() {
   const open = useUIStore((s) => s.paywallOpen);
   const close = useUIStore((s) => s.closePaywall);
+  const source = useUIStore((s) => s.paywallSource);
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const H = Math.round(height * 0.93);
@@ -49,7 +52,7 @@ export default function PaywallSheet() {
           >
             <View style={styles.handle} />
             <View style={{ flex: 1 }}>
-              <PaywallContent onClose={close} source="post-lesson" />
+              <HardPaywall source={source} onClose={close} onUnlocked={close} inSheet />
             </View>
           </MotiView>
         )}

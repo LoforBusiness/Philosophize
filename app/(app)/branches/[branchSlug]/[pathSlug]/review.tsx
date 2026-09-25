@@ -18,8 +18,13 @@
 // entered the same way a lesson is, from the same road, and arriving straight into a
 // beat where every lesson gives a moment first reads as the review being a different
 // kind of thing. It is not.
+//
+// AND IT NEEDS THE PASS, like every lesson, since the hard paywall (2026-09-25).
+// Without it the one paywall (`HardPaywall`) is drawn instead; with it, the same
+// one-way latch the lesson route holds keeps a review open through a trial that
+// ends while it is being read. `?test=1` opens it regardless, for the tester.
 // ─────────────────────────────────────────────────────────────────────────────
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,18 +33,27 @@ import LessonLoader from '@/components/lesson/LessonLoader';
 import { LessonGuideHost } from '@/components/lesson/cinematic/LessonGuide';
 import UnitReview, { hasReview } from '@/components/lesson/cinematic/review/UnitReview';
 import { exitLesson } from '@/components/lesson/exitLesson';
+import HardPaywall from '@/components/paywall/HardPaywall';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { track } from '@/lib/posthog';
 
 export default function UnitReviewScreen() {
-  const { branchSlug, pathSlug } = useLocalSearchParams<{ branchSlug: string; pathSlug: string }>();
+  const { branchSlug, pathSlug, test } = useLocalSearchParams<{ branchSlug: string; pathSlug: string; test?: string }>();
   const branch = ALL_BRANCHES.find((b) => b.slug === branchSlug) ?? null;
   const unit = branch?.paths.find((p) => p.slug === pathSlug) ?? null;
   const ok = !!branch && !!unit && hasReview(unit.id);
   const [loading, setLoading] = useState(true);
+  const isPro = useSubscriptionStore((s) => s.isPro);
+  // ONCE OPEN, OPEN FOR THE VISIT — the lesson route's latch, for the same reason:
+  // a trial that ends mid-review must not throw the reader onto the paywall.
+  const everOpen = useRef(false);
+  if (isPro || test === '1') everOpen.current = true;
+  const allowed = everOpen.current;
 
   useEffect(() => {
-    if (ok && unit) track('unit_review_started', { unit_id: unit.id, branch_slug: branchSlug });
-  }, [ok, unit, branchSlug]);
+    if (ok && unit && allowed) track('unit_review_started', { unit_id: unit.id, branch_slug: branchSlug });
+  }, [ok, unit, branchSlug, allowed]);
+  // Every hook is above this line (§17 rule 1).
 
   if (!ok || !branch || !unit) {
     return (
@@ -49,6 +63,10 @@ export default function UnitReviewScreen() {
         </Text>
       </SafeAreaView>
     );
+  }
+
+  if (!allowed) {
+    return <HardPaywall source="locked_review" onClose={exitLesson} />;
   }
 
   // It sits BELOW the not-found return, exactly as the lesson route puts it below its

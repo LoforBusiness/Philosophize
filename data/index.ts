@@ -80,26 +80,26 @@ export function branchCountsFromUnits(
  * When the branch screen kept its own copy of this reasoning the two drifted,
  * and a reader could be shown a lesson in one place and refused it in another.
  *
- *  • a lesson further ahead in its unit is locked, for everybody;
- *  • a unit's NEXT lesson is openable if the plan lets them start that unit —
- *    paid may start any unit, free must have closed every earlier one;
- *  • an ALREADY-FINISHED lesson is a REPLAY, and replay is part of the Pass.
+ * A HARD PAYWALL SINCE 2026-09-25: every lesson needs the Scholar's Pass or its
+ * trial, and everything else in the app is free. So:
  *
- * That last line changed, and it takes something away rather than merely
- * withholding it: replaying a finished lesson used to be free. It is a
- * deliberate product decision, not a tidy-up — see the note on the flip risk in
- * `[lessonId].tsx`, which is the one place it could have gone badly wrong.
+ *  • without the Pass nothing opens, and the Pass is always the reason;
+ *  • with it, the next lesson in any unit and every replay open;
+ *  • a lesson further ahead in its unit is still locked, with no paywall —
+ *    money cannot unlock a lesson the reader has not reached.
  *
- * `needsPass` is true only where money is actually the obstacle, so a paywall is
- * offered exactly there and never in front of a lesson the reader simply has not
- * reached yet.
+ * `unitStartable` stays in the signature so no caller changes. It was the free
+ * tier's units-in-order rule, and on the Pass it is always true.
+ *
+ * The one transition that can hurt now is a trial EXPIRING while a lesson is
+ * open. The lesson route's one-way latch holds it (`check:access` walks it).
  */
 export function lessonAccess(
   li: number, unitDone: number, unitStartable: boolean, isPro: boolean
 ): { open: boolean; needsPass: boolean } {
+  if (!isPro) return { open: false, needsPass: true };            // the hard paywall
   if (li > unitDone) return { open: false, needsPass: false };   // not reached yet
-  if (li < unitDone) return { open: isPro, needsPass: !isPro };  // a replay
-  return { open: unitStartable, needsPass: !unitStartable };     // the next one
+  return { open: true, needsPass: false };                       // next, or a replay
 }
 
 // Can this user open this lesson right now? The id-based form of `lessonAccess`

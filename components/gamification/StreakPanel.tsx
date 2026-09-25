@@ -166,7 +166,9 @@ export default function StreakPanel({
           <Text style={[styles.count, { color: mark }]}>
             {alive ? `${streak} DAY${streak === 1 ? '' : 'S'} RUNNING` : 'NO STREAK YET'}
           </Text>
-          <Text style={[styles.caption, { color: soft }]} numberOfLines={2}>{caption}</Text>
+          {/* THREE LINES, not two: at 320dp "Today is counted. The run is safe."
+              wraps to three beside the chip and was being cut off mid-sentence. */}
+          <Text style={[styles.caption, { color: soft }]} numberOfLines={3}>{caption}</Text>
         </View>
         {/* THE SOCIETY THE READER IS ALREADY IN, worn as a chip. It is the one
             thing on this panel that is a title rather than a number, and a title

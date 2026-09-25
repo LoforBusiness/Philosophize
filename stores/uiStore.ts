@@ -39,9 +39,12 @@ interface UIStore {
   savedQuotesOpen: boolean;
   openSavedQuotes: () => void;
   closeSavedQuotes: () => void;
-  // Paywall sheet — slides the Scholar's Pass offer up as a dismissible option
-  // (after a lesson, or from the daily-limit gate).
+  // Paywall sheet — slides the Scholar's Pass offer up as a dismissible option,
+  // from a locked stop on a branch road (a lesson or a unit review). Since the
+  // hard paywall (2026-09-25) it draws `HardPaywall`; `paywallSource` is why it
+  // was raised, and rides `paywall_viewed`.
   paywallOpen: boolean;
+  paywallSource: 'locked_lesson' | 'locked_review';
 
   // ── THE LESSON TESTER (dev only) ───────────────────────────────────────────
   //
@@ -60,7 +63,7 @@ interface UIStore {
   unlockDev: () => void;
   testLessonId: string | null;
   setTestLesson: (id: string | null) => void;
-  openPaywall: () => void;
+  openPaywall: (source?: 'locked_lesson' | 'locked_review') => void;
   closePaywall: () => void;
   /**
    * Bumped when the OS notification permission has just been granted, so the
@@ -163,11 +166,12 @@ export const useUIStore = create<UIStore>((set) => ({
   openSavedQuotes: () => set({ savedQuotesOpen: true }),
   closeSavedQuotes: () => set({ savedQuotesOpen: false }),
   paywallOpen: false,
+  paywallSource: 'locked_lesson',
   devUnlocked: __DEV__,
   unlockDev: () => set({ devUnlocked: true }),
   testLessonId: null,
   setTestLesson: (id) => set({ testLessonId: id }),
-  openPaywall: () => set({ paywallOpen: true }),
+  openPaywall: (source = 'locked_lesson') => set({ paywallOpen: true, paywallSource: source }),
   closePaywall: () => set({ paywallOpen: false }),
   remindersNonce: 0,
   bumpReminders: () => set((s) => ({ remindersNonce: s.remindersNonce + 1 })),

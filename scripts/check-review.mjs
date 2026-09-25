@@ -133,14 +133,18 @@ if (FACE) {
   }
 }
 
-// ── 5 · A REVIEW COSTS A FREE READER NOTHING ─────────────────────────────────
+// ── 5 · A REVIEW NEEDS THE PASS, AND IS STILL NOT A LESSON ───────────────────
 //
-// The owner: *"I dont want the review to take up a user's free day. If the user does
-// the review they can still do a lesson."* That is already true, and only by accident:
-// a review never calls `bumpDailyLessons`, and the free-tier gate lives in the lesson
-// route, which a review does not go through. Both halves are facts about where the
-// code happens to sit, and either could be undone by a tidy-up that noticed a review
-// looks a lot like a lesson. So both are rules now.
+// This section used to hold the opposite promise — *"I dont want the review to take up
+// a user's free day"* — and the hard paywall (2026-09-25) retired the free day it was
+// protecting. Every lesson needs the Scholar's Pass or its trial now, and a review is
+// the capstone of a unit's lessons, so it needs the Pass too. The route had no gate at
+// all until then, because a free reader was always allowed in, which is exactly the
+// kind of fact about where code happens to sit that a rule has to hold.
+//
+// Two halves. PASS: the route reads `isPro`, draws `HardPaywall` without it, and
+// holds the one-way latch the lesson route holds. LESSON: a review still never counts
+// as a lesson — it must not move `lessonsByUnit` or Home's daily-goal count.
 const REVIEW_SRC = [
   'app/(app)/branches/[branchSlug]/[pathSlug]/review.tsx',
   'components/lesson/cinematic/review/UnitReview.tsx',
@@ -148,10 +152,24 @@ const REVIEW_SRC = [
 ].filter((f) => fs.existsSync(f)).map((f) => [f, fs.readFileSync(f, 'utf8')]);
 if (!REVIEW_SRC.length) note('SOURCE', 'the review screens are missing');
 for (const [f, src] of REVIEW_SRC) {
-  for (const banned of ['bumpDailyLessons', 'FREE_DAILY_LESSON_LIMIT', 'recordLessonComplete']) {
+  for (const banned of ['bumpDailyLessons', 'recordLessonComplete']) {
     if (src.includes(banned)) {
-      note('FREEDAY', `${f} uses ${banned} — a review must cost a free reader neither a lesson nor the gate`);
+      note('LESSON', `${f} uses ${banned} — a review is not a lesson and must not count as one`);
     }
+  }
+}
+{
+  const f = 'app/(app)/branches/[branchSlug]/[pathSlug]/review.tsx';
+  const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const src = strip(REVIEW_SRC.find(([n]) => n === f)?.[1] ?? '');
+  if (!/useSubscriptionStore\(\(s\) => s\.isPro\)/.test(src)) {
+    note('PASS', `${f} does not read isPro — a review needs the Scholar's Pass (hard paywall)`);
+  }
+  if (!/<HardPaywall\b[^>]*source="locked_review"/.test(src)) {
+    note('PASS', `${f} never draws <HardPaywall source="locked_review"> — a free reader walks straight in`);
+  }
+  if (!/everOpen\.current = true/.test(src)) {
+    note('PASS', `${f} has no one-way latch — a trial ending mid-review would eject the reader`);
   }
 }
 
@@ -189,7 +207,7 @@ if (!bad.length) {
   console.log('  ok    every unit in the app has a review, and every review is for a real unit');
   console.log(`  ok    every review asks ${QUESTIONS} questions, each with one control and one answer`);
   console.log('  ok    every plate word fits the slot the shared stage draws it in');
-  console.log('  ok    no review screen spends a free reader’s daily lesson or reads the gate');
+  console.log('  ok    a review needs the Pass, holds its latch, and never counts as a lesson');
   console.log('  ok    the review route opens on LessonLoader, ahead of the review itself');
   console.log('\nevery unit ends with a review that can be finished.');
   process.exit(0);

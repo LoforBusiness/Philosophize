@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { View, Text, StyleSheet, ImageBackground, type ImageSourcePropType } from 'react-native';
 import { openLesson } from '@/components/lesson/lessonNav';
+import { openIntro } from '@/components/professor/openIntro';
 import { LinearGradient } from 'expo-linear-gradient';
 import Card from '@/components/ui/Card';
 import { mix } from '@/components/shared/tone';
@@ -55,10 +56,16 @@ interface Props {
  *
  * Renders nothing at all once every lesson in every branch is finished — a card
  * that says "start a lesson" and can't is worse than no card.
+ *
+ * AND UNTIL THE PROFESSOR'S INTRO HAS BEEN WATCHED, IT IS THE INTRO (2026-09-25).
+ * The same card, the same sky, the same ledge — it is the first door into the
+ * lessons, and it only ever opens when the reader presses it. Nothing plays the
+ * intro by itself; this card and the Learn tab are its two doors.
  */
 export default function QuickStartCard({ style }: Props) {
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
   const startingBranch = useUserDataStore((s) => s.startingBranch);
+  const introSeen = useUserDataStore((s) => s.seenProfessorIntro);
 
   const dayNumber = Math.floor(Date.now() / 86_400_000);
   const pick = useMemo(
@@ -67,17 +74,28 @@ export default function QuickStartCard({ style }: Props) {
   );
   const art = ART[quickStartArtIndex(dayNumber, ART.length)];
 
-  if (!pick) return null;
+  // The intro comes first, and it is offered even to a reader with nothing left to
+  // read, so the card's early return sits BELOW it.
+  const intro = !introSeen;
+  if (!intro && !pick) return null;
 
   // Through lessonNav, ANCHORED: pushed plainly from Home into a Learn tab not yet
   // built, the lesson arrived with no branch list under it (see lessonNav.ts).
-  const open = () => openLesson(pick.branch.slug, pick.unit.slug, pick.lesson.id);
+  const open = intro
+    ? () => openIntro('home')
+    : () => pick && openLesson(pick.branch.slug, pick.unit.slug, pick.lesson.id);
+  // The intro's words. Short on purpose: the title is 34pt in a card that is 236pt
+  // wide on a 320dp phone, and it has two lines.
+  const tab = intro ? 'QUICK START · INTRO' : `QUICK START · ${pick!.branch.name.toUpperCase()}`;
+  const title = intro ? 'Your first lecture' : pick!.lesson.title;
+  const meta = intro ? 'WITH THE PROFESSOR · 1 MIN' : `${pick!.unit.name} · ${pick!.lesson.estimatedMinutes} MIN`;
+  const cta = intro ? '▶   START THE INTRO' : '▶   START LESSON';
 
   return (
     // ON THE TEAL LEDGE (2026-09-16), like the app's primary button: the card is
     // the one big thing on Home you press, so it stands on a solid ledge and sinks
     // onto it rather than shrinking. The hard offset shadow it carried is gone.
-    <Card tone="ink" onPress={open} pad={0} style={styles.card} containerStyle={style} accessibilityLabel={`Start ${pick.lesson.title}`}>
+    <Card tone="ink" onPress={open} pad={0} style={styles.card} containerStyle={style} accessibilityLabel={`Start ${title}`}>
       <ImageBackground source={art} style={styles.bg} imageStyle={styles.img} resizeMode="cover">
         {/* Stops are computed from the card's height: the body is a fixed number
             of dp, so its FRACTION shrinks as the card grows, and a hard-coded
@@ -91,17 +109,17 @@ export default function QuickStartCard({ style }: Props) {
         <View style={styles.top}>
           <View style={styles.tab}>
             <Text style={styles.tabText} numberOfLines={1}>
-              QUICK START · {pick.branch.name.toUpperCase()}
+              {tab}
             </Text>
           </View>
         </View>
 
         <View style={styles.body}>
           <Text style={styles.title} numberOfLines={2}>
-            {pick.lesson.title}
+            {title}
           </Text>
           <Text style={styles.meta} numberOfLines={1}>
-            {pick.unit.name} · {pick.lesson.estimatedMinutes} MIN
+            {meta}
           </Text>
 
           {/* Full width, not a pill. The whole card has always been tappable, but
@@ -112,7 +130,7 @@ export default function QuickStartCard({ style }: Props) {
           <View style={styles.ctaWrap}>
             <View style={styles.ctaLedge} />
             <View style={styles.cta}>
-              <Text style={styles.ctaText}>▶   START LESSON</Text>
+              <Text style={styles.ctaText}>{cta}</Text>
             </View>
           </View>
         </View>

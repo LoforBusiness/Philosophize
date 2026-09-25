@@ -30,8 +30,8 @@ import { track } from '@/lib/posthog';
 // The tab printed a herald, an engraved Scholar's Pass with eleven ruled rows,
 // the wall in days, and then an engraved Day Pass with the same eleven rows
 // again. It is one chart now, the way Brilliant draws it, then the door, then
-// what both plans share. The chart and the tiles are `PassChart`, drawn in three
-// places (this tab, the post-lesson trial offer and Settings); the door is
+// what is free for everyone. The chart and the tiles are `PassChart`, drawn here,
+// in Settings and on the paywall (`HardPaywall`); the door is
 // `PassDoor`, which offers the free trial first while there is one to give.
 //
 // ── EVERY CELL AND EVERY FIGURE IS STILL DERIVED ────────────────────────────
@@ -124,7 +124,7 @@ export default function PassTab() {
             )}
           </View>
 
-          <Text style={st.kicker}>EVERY PLAN INCLUDES</Text>
+          <Text style={st.kicker}>FREE FOR EVERYONE</Text>
           <PlanTiles />
 
           <Text style={st.legal}>The Scholar’s Pass renews every {period} until cancelled.</Text>

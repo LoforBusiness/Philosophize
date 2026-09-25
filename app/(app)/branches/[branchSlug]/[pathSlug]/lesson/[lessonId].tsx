@@ -259,9 +259,9 @@ import ScreenTransition from '@/components/shared/ScreenTransition';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
-import DailyLimit from '@/components/paywall/DailyLimit';
 import LessonLocked from '@/components/paywall/LessonLocked';
-import { FREE_DAILY_LESSON_LIMIT } from '@/constants/subscription';
+import HardPaywall from '@/components/paywall/HardPaywall';
+import ProfessorIntro from '@/components/professor/ProfessorIntro';
 import { openedLesson, closedLesson } from '@/lib/analytics/lessonClock';
 
 const Page = '#FAFAF7';
@@ -269,8 +269,8 @@ const Page = '#FAFAF7';
 // Lessons that play as a continuous animated scene instead of the card pager.
 // A cinematic component takes the same `{ lesson }` prop and renders LessonReward
 // itself when it finishes, so XP, the streak, badges and the daily counter all
-// still run through exactly one path. Everything above this line — hydration, the
-// unlock gate, the daily limit — applies to both kinds of lesson unchanged.
+// still run through exactly one path. Everything above this line — hydration and
+// the unlock gate — applies to both kinds of lesson unchanged.
 // Removing an entry here is a complete, safe rollback to the normal card runner.
 // EXPORTED so the lesson audit can mount any scene without duplicating the map.
 // A named export in a route file is inert — Expo Router only reads the default.
@@ -561,13 +561,6 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   'political-political-18': Political18Lesson,
 };
 
-/** '6 AUG' — the day the pass was spent, struck across it. */
-function todayStr() {
-  const d = new Date();
-  const p = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
-
 export default function LessonScreen() {
   const { lessonId, test } = useLocalSearchParams<{ lessonId: string; test?: string }>();
   const result = getLessonById(lessonId);
@@ -589,26 +582,12 @@ export default function LessonScreen() {
   const [loading, setLoading] = useState(true);
 
   const isPro = useSubscriptionStore((s) => s.isPro);
-  const dailyLessonCount = useUserDataStore((s) => s.dailyLessonCount);
-  const dailyLessonDate = useUserDataStore((s) => s.dailyLessonDate);
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
   const hasHydrated = useUserDataStore((s) => s._hasHydrated);
   // The gate screens are their own components now (components/paywall/), so the
   // reader's name, rank and card width are read where they are drawn rather than
   // here — this route was carrying six store reads and a width calculation for
   // two screens it did not otherwise know anything about.
-
-  // Freeze the daily-limit gate ONCE — but only after the persisted store has
-  // hydrated, so we never freeze a pre-hydration default (which would read used=0
-  // and let a capped free user sneak an extra lesson). atLimit must be frozen
-  // because completing the lesson bumps the daily count, and that must not flip
-  // this screen to the limit lock mid-celebration and steal the XP + streak.
-  const atLimitRef = useRef<boolean | null>(null);
-  if (hasHydrated && atLimitRef.current === null) {
-    const used = dailyLessonDate === todayStr() ? dailyLessonCount : 0;
-    atLimitRef.current = !isPro && used >= FREE_DAILY_LESSON_LIMIT;
-  }
-  const atLimit = (atLimitRef.current ?? false) && !testing;
 
   // ── ONCE IT HAS OPENED, IT STAYS OPEN FOR THIS VISIT ───────────────────────
   //
@@ -617,13 +596,13 @@ export default function LessonScreen() {
   // because "completing a lesson only ever advances progress, which can unlock
   // but never lock".
   //
-  // THAT INVARIANT IS GONE. Replay is part of the Pass now (see `lessonAccess`),
-  // so the moment a free reader finishes lesson 3 the unit's count goes to 4 and
-  // lesson 3 stops being the next one and becomes a replay — locked, live, while
-  // they are still standing in it. Without the latch below they are thrown onto
-  // the lock screen at the exact moment they earn the reward, by a paywall for a
-  // lesson they have this second completed. It is the worst possible place to
-  // put one.
+  // THAT INVARIANT IS GONE. Every lesson needs the Pass since the hard paywall
+  // (2026-09-25), so a trial that ENDS while a reader is mid-lesson closes the
+  // lesson live, while they are still standing in it. Without the latch below
+  // they are thrown onto the paywall at the exact moment they earn the reward,
+  // for a lesson they have this second completed. It is the worst possible
+  // place to put one. (Before the hard paywall the same thing happened to a free
+  // reader finishing lesson 3, which then became a paid replay.)
   //
   // A ONE-WAY latch: openable → stays openable until they leave. It does not
   // latch the other way, so buying the Pass mid-lesson still unlocks at once.
@@ -634,6 +613,18 @@ export default function LessonScreen() {
   const locked = !access.accessible && !testing;
   const gatedByPro = access.gatedByPro;
 
+  // ── THE BACKSTOP FOR THE PROFESSOR'S INTRO ─────────────────────────────────
+  //
+  // The intro's two doors are Home's Quick Start and the Learn tab, and it never
+  // plays by itself (2026-09-25). But a lesson can still be reached another way —
+  // a thinker's "lessons featuring", an old link — and one reached like that
+  // before the intro has been watched plays it first. That is still a reader's
+  // tap. After it: the lesson with the Pass, the paywall without (`source:
+  // intro`). Every hook here sits above the early returns below (§17 rule 1).
+  const introSeen = useUserDataStore((s) => s.seenProfessorIntro);
+  const markIntroSeen = useUserDataStore((s) => s.markProfessorIntroSeen);
+  const [afterIntro, setAfterIntro] = useState(false);
+
   if (!result) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFAF7', alignItems: 'center', justifyContent: 'center' }}>
@@ -642,41 +633,42 @@ export default function LessonScreen() {
     );
   }
 
-  // Wait for persisted progress before deciding access / the daily limit, so a
+  // Wait for persisted progress before deciding access, so a
   // cold deep-link into a lesson never evaluates the gates against an empty
   // default store. AsyncStorage rehydration is near-instant.
   if (!hasHydrated) {
     return <ScreenTransition bg="#FAFAF7"><View style={{ flex: 1, backgroundColor: '#FAFAF7' }} /></ScreenTransition>;
   }
 
-  // ── THE TWO GATES, BOTH DRAWN ELSEWHERE ────────────────────────────────────
+  // ── THE GATE, DRAWN ELSEWHERE ──────────────────────────────────────────────
   //
-  // components/paywall/ holds them, because they are two thirds of one family —
-  // the offer, the daily limit, and the locked lesson share a header, a struck
-  // vocabulary and a comparison table, and they were three unrelated drawings
-  // while they lived in three files. Keeping them here also meant this route
-  // owned ~90 lines of styling for screens that never play a lesson.
-  //
-  // Reached via a deep link or the back stack rather than by tapping a live
-  // marker; `LessonLocked` works out which of the three reasons applies.
-  if (locked) {
+  // Since the hard paywall (2026-09-25) there are two ways a lesson stays shut.
+  // Where the Pass would open it, the one paywall: access is computed live, so
+  // the moment a trial starts or a purchase lands this route re-renders straight
+  // into the lesson and nothing needs doing in `onUnlocked`. Where it would not
+  // (a Pass holder further along a unit than they have read), `LessonLocked`
+  // names the lesson to open instead, and shows no paywall.
+  if (!introSeen && !testing && !afterIntro) {
     return (
       <ScreenTransition bg={Page}>
-        <LessonLocked
-          lesson={result.lesson}
-          branch={result.branch}
-          unit={result.path}
-          gatedByPro={gatedByPro}
-          onExit={exitLesson}
-        />
+        <ProfessorIntro onDone={() => { markIntroSeen(); setAfterIntro(true); }} />
       </ScreenTransition>
     );
   }
 
-  if (atLimit) {
+  if (locked) {
     return (
       <ScreenTransition bg={Page}>
-        <DailyLimit lesson={result.lesson} branch={result.branch} onExit={exitLesson} />
+        {gatedByPro ? (
+          <HardPaywall source={afterIntro ? 'intro' : 'locked_lesson'} onClose={exitLesson} />
+        ) : (
+          <LessonLocked
+            lesson={result.lesson}
+            branch={result.branch}
+            unit={result.path}
+            onExit={exitLesson}
+          />
+        )}
       </ScreenTransition>
     );
   }

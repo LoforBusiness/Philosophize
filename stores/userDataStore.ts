@@ -442,6 +442,14 @@ interface UserDataState {
   settings: AppSettings;
   hasSeenWelcome: boolean;                     // first-launch intro animation already played
   /**
+   * THE PROFESSOR'S INTRO LECTURE HAS BEEN WATCHED (or skipped). Until it is, Home's
+   * Quick Start is the intro and the Learn tab shows it in place of the branches
+   * (2026-09-25). Cloud-synced and merged with OR, so it plays once per ACCOUNT, not
+   * once per phone. Not the welcome above: that is the first screen of the app, and
+   * this is the door into the lessons.
+   */
+  seenProfessorIntro: boolean;
+  /**
    * WHICH welcome they have seen, not merely whether they have seen one.
    *
    * `hasSeenWelcome` is a one-way latch, so a change to the intro could never reach
@@ -492,6 +500,7 @@ interface UserDataState {
   setNameFont: (id: string) => void;
   setSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void;
   setHasSeenWelcome: (v: boolean) => void;
+  markProfessorIntroSeen: () => void;
   /** Records the intro they just finished. Sets `hasSeenWelcome` too, so a rollback
    *  to a build that still reads the boolean does not replay it. */
   setWelcomeVersion: (v: number) => void;
@@ -806,6 +815,7 @@ export const useUserDataStore = create<UserDataState>()(
       settings: DEFAULT_SETTINGS,
       hasSeenWelcome: false,
       welcomeVersion: 0,
+      seenProfessorIntro: false,
       _hasHydrated: false,
       _syncOwnerId: null,
 
@@ -1102,6 +1112,8 @@ export const useUserDataStore = create<UserDataState>()(
 
       setHasSeenWelcome: (v) => set({ hasSeenWelcome: v }),
 
+      markProfessorIntroSeen: () => set({ seenProfessorIntro: true }),
+
       setWelcomeVersion: (v) => set({ welcomeVersion: v, hasSeenWelcome: true }),
 
       resetProgress: () =>
@@ -1165,6 +1177,7 @@ export const useUserDataStore = create<UserDataState>()(
           earnedBadges: [],
           unitsReviewed: [],
           badgesInitialized: true,
+          seenProfessorIntro: false,
           displayName: 'Philosopher',
           email: '',
           bio: '',
@@ -1224,6 +1237,7 @@ export const useUserDataStore = create<UserDataState>()(
           joinedAt: null,
           earnedBadges: [],
           badgesInitialized: true,
+          seenProfessorIntro: false,
           displayName: 'Philosopher',
           email: '',
           bio: '',
@@ -1310,6 +1324,7 @@ export const useUserDataStore = create<UserDataState>()(
         settings: state.settings,
         hasSeenWelcome: state.hasSeenWelcome,
         welcomeVersion: state.welcomeVersion,
+        seenProfessorIntro: state.seenProfessorIntro,
         _syncOwnerId: state._syncOwnerId,
       }),
       // Merge persisted settings over defaults so newly-added keys are present.

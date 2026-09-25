@@ -751,10 +751,14 @@ export default function ProfileScreen() {
               <Text style={styles.quotesCount}>
                 {quotesSaved > 0 ? `${quotesSaved} SAVED` : 'NONE YET'}
               </Text>
-              <Text style={styles.quotesTeaser} numberOfLines={1}>
+              {/* A saved quote's teaser is cut to one line on purpose. The empty
+                  line is an instruction and is allowed two, so it is never cut. It
+                  names thinkers, not lessons: since the hard paywall (2026-09-25) a
+                  free reader saves quotes from a thinker's page. */}
+              <Text style={styles.quotesTeaser} numberOfLines={quotesSaved > 0 ? 1 : 2}>
                 {quotesSaved > 0
                   ? `“${savedQuotes[0].text}”`
-                  : 'Save quotes from lessons to collect them here'}
+                  : 'Save quotes from any thinker to keep them here'}
               </Text>
             </View>
             {/* mirrored "back" chevron → forward chevron */}

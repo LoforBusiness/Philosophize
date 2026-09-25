@@ -89,10 +89,11 @@ export default function BranchDetailScreen() {
   const [focusUnitId, setFocusUnitId] = useState<string | null>(null);
 
 
-  // Progress is per-unit: each unit tracks its own completed count, and whether
-  // its NEXT lesson is startable depends on the plan — free users must finish
-  // the earlier units first (strictly sequential), while paid users can start
-  // any unit at will. Within a unit, everyone is sequential.
+  // Progress is per-unit: each unit tracks its own completed count. Since the
+  // hard paywall (2026-09-25) a free reader opens no lesson at all, and every
+  // stop offers the Pass (`lessonAccess`); `startable` below still draws the
+  // units-in-order shape for a free reader's road, and on the Pass any unit may
+  // be started. Within a unit, everyone is sequential.
   const allUnits = branch?.paths ?? [];
   const units: UnitModel[] = [];
   let allPrevComplete = true;
@@ -438,7 +439,14 @@ export default function BranchDetailScreen() {
             // photograph above it is of. See sceneArt.
             place={branch.slug}
             onOpen={(l) => {
-              if (l.review) { openReview(branch.slug, l.unitSlug); return; }
+              // A REVIEW NEEDS THE PASS TOO since the hard paywall (2026-09-25).
+              // It is never locked on the road, only not yet reached, so the
+              // check is here rather than in BranchWorld's own lock.
+              if (l.review) {
+                if (!isPro) { openPaywall('locked_review'); return; }
+                openReview(branch.slug, l.unitSlug);
+                return;
+              }
               const u = allUnits.find((x) => x.id === l.unitId);
               const les = u?.lessons.find((x) => x.id === l.id);
               if (u && les) openLesson(u, les);
@@ -569,7 +577,11 @@ export default function BranchDetailScreen() {
                           the right to look back over it, Pass or no Pass. */}
                       {expanded && hasReview(u.unit.id) && u.done >= u.unit.lessons.length ? (
                         <Pressable
-                          onPress={() => { setDrawerOpen(false); openReview(branch.slug, u.unit.slug); }}
+                          onPress={() => {
+                            setDrawerOpen(false);
+                            if (!isPro) { openPaywall('locked_review'); return; }
+                            openReview(branch.slug, u.unit.slug);
+                          }}
                           style={({ pressed }) => [styles.lessonRow, styles.reviewRow, pressed && { opacity: 0.55 }]}
                         >
                           {/* NOT A STAR. A star is what every app uses for premium, a
@@ -602,7 +614,7 @@ export default function BranchDetailScreen() {
                   style={({ pressed }) => [styles.drawerHint, pressed && { opacity: 0.6 }]}
                 >
                   <Text style={styles.drawerHintText}>
-                    Scholar’s Pass reopens any lesson you have finished.
+                    Every lesson opens with the Scholar’s Pass.
                   </Text>
                 </Pressable>
               )}

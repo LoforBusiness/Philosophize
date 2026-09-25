@@ -118,6 +118,13 @@ const PROBE = `(() => {
           over: Math.round(el.scrollHeight - el.clientHeight),
         });
       }
+      // AND THE ONE-LINE CLAMP, which react-native-web draws as nowrap plus an
+      // ellipsis rather than as a line clamp, so the rule above never saw it. At
+      // 320dp the free tiles printed "1,…" for 1,856 quotes and this probe called
+      // the paywall clean.
+      if (clamp === 0 && s.textOverflow === 'ellipsis' && over > 1) {
+        truncated.push({ text: el.textContent.trim().slice(0, 40), lines: 1, over: Math.round(over) });
+      }
     }
   }
 
@@ -165,8 +172,8 @@ const SCREENS = [
               'BRANCH MASTERY', 'LESSONS DONE', 'TOTAL XP'] },
   { key: 'pass-tab', q: 's=tab',
     want: ['Every lesson, every day', 'with the Scholar’s', 'Benefits', 'Free', 'Pass',
-           'Lessons a day', 'Unlimited', 'Replay lessons', 'In order',
-           'EVERY PLAN INCLUDES', 'badges', 'DAYS FREE', 'Start your',
+           'lessons', 'Narrated and animated', 'Unit reviews', 'Start any unit',
+           'FREE FOR EVERYONE', 'thinkers', 'quizzes', 'badges', 'DAYS FREE', 'Start your',
            'We’ll remind you a day before your free trial ends.',
            'it automatically becomes a Scholar’s Pass', 'Cancel any time before then',
            // THE SECOND DOOR, under the trial: pay today, no free days. Asserted
@@ -175,7 +182,8 @@ const SCREENS = [
            // and this sweep would say nothing.
            'Don’t want the free days?', 'Subscribe now instead', 'today and'],
     // The on-device trial's old words, which Google's trial would make untrue.
-    notWant: ['Get the Scholar’s Pass', 'No card and no charge', 'Or subscribe now for'] },
+    notWant: ['Get the Scholar’s Pass', 'No card and no charge', 'Or subscribe now for',
+              'Lessons a day', 'Unlimited', 'Replay lessons', 'In order', 'EVERY PLAN INCLUDES'] },
   // AND THE OTHER HALF OF THAT DECISION: the store named no option that charges
   // today, so the box must not be drawn at all. A charge-now button that fell
   // back to starting a trial is the §14 lie in its most expensive form, so the
@@ -184,7 +192,7 @@ const SCREENS = [
     want: ['DAYS FREE', 'Start your', 'We’ll remind you a day before your free trial ends.'],
     notWant: ['Don’t want the free days?', 'Subscribe now instead'] },
   { key: 'pass-tab-new', q: 's=tab&seed=new',
-    want: ['Benefits', 'EVERY PLAN INCLUDES', 'Start your', 'We’ll remind you'] },
+    want: ['Benefits', 'FREE FOR EVERYONE', 'Start your', 'We’ll remind you'] },
   // GOOGLE'S TRIAL RUNNING: the end, what it becomes and Cancel, above the chart.
   { key: 'pass-tab-trial', q: 's=tab&trial=on',
     want: ['You hold the', 'DAYS LEFT', 'Your free trial ends',
@@ -212,13 +220,6 @@ const SCREENS = [
   { key: 'pass-tab-pro', q: 's=tab&pro=1',
     want: ['You hold the', 'ACTIVE', 'Benefits'],
     notWant: ['Get the Scholar’s Pass', 'Start your', 'Cancel free trial'] },
-  // THE OFFER AFTER A LESSON, on the tab's chart and with its arrival.
-  { key: 'trial-offer', q: 's=trial',
-    want: ['THAT WAS TODAY’S LESSON', 'DAYS FREE', 'Benefits', 'Replay lessons',
-           'EVERY PLAN INCLUDES', 'Start your', 'Not today',
-           'We’ll remind you a day before your free trial ends.',
-           'it automatically becomes a Scholar’s Pass'],
-    notWant: ['no card, no charge'] },
   // THE CEREMONY, for a trial that has just started: its terms say the charge.
   { key: 'conferral-trial', q: 's=conferral&trial=on',
     want: ['CONFERRED', 'Free until', 'it automatically becomes a Scholar’s Pass', 'Begin'],
@@ -226,33 +227,30 @@ const SCREENS = [
   // AND THE ASK, on a phone that has not been asked yet: the moment a trial starts.
   { key: 'conferral-trial-ask', q: 's=conferral&trial=on&notify=ask',
     want: ['Get a reminder the day before it ends', 'It would arrive on', 'Turn on reminders', 'Not now', 'Begin'] },
+  // THE ONE PAYWALL (2026-09-25): the tab's chart and door, what stays free, and
+  // a way to restore — a hard paywall must never trap somebody who reinstalled.
   { key: 'paywall', q: 's=paywall',
-    want: ['ADMIT THE BEARER', 'FREE AGAINST THE PASS', 'WHERE YOU ARE',
-           'AT 1 LESSON A DAY', 'no wait at all', 'days free', 'Start your',
+    want: ['Unlock every lesson', 'Everything else in Ashmere stays free', 'Benefits',
+           'Unit reviews', 'DAYS FREE', 'Start your',
            'We’ll remind you a day before your free trial ends.',
-           'Starting the free trial costs nothing today'],
-    notWant: ['Start —'] },
-  // No trial on offer: the paywall charges today, and says so.
+           'it automatically becomes a Scholar’s Pass', 'Restore purchase',
+           'FREE FOR EVERYONE', 'quizzes'],
+    notWant: ['AT 1 LESSON A DAY', 'Stop waiting', 'FREE AGAINST THE PASS', 'advertisement'] },
+  // No trial on offer: the door charges today, and says so.
   { key: 'paywall-used', q: 's=paywall&trial=used',
-    want: ['Start —', 'Payment is charged'], notWant: ['days free', 'We’ll remind you'] },
-  // A reader on day one: every bar empty, and the wait is the whole library.
+    want: ['Get the Scholar’s Pass', 'Cancel any time', 'Restore purchase'],
+    notWant: ['DAYS FREE', 'We’ll remind you'] },
   { key: 'paywall-new', q: 's=paywall&seed=new',
-    want: ['FREE AGAINST THE PASS', '0 of 246 lessons opened', '246 more days'] },
-  { key: 'paywall-pro', q: 's=paywall&pro=1', want: ['You’re a Scholar', 'ACTIVE'],
-    notWant: ['Cancel free trial'] },
+    want: ['Unlock every lesson', 'Start your', 'FREE FOR EVERYONE'] },
+  { key: 'paywall-pro', q: 's=paywall&pro=1', want: ['You hold the', 'ACTIVE', 'Done'],
+    notWant: ['Cancel free trial', 'Restore purchase', 'Start your'] },
   // On the trial, the paywall shows the trial's own panel where a subscriber sees ACTIVE.
   { key: 'paywall-trial', q: 's=paywall&trial=on',
     want: ['Your free trial ends', 'Cancel free trial', 'automatically becomes a Scholar’s Pass'],
     notWant: ['You’re a Scholar', 'ACTIVE'] },
-  { key: 'limit', q: 's=limit',
-    want: ['WAITING FOR YOU', 'Opens in', 'TODAY BANKED', 'DAY PASS', 'USED ·'] },
-  { key: 'locked-replay', q: 's=locked&k=replay',
-    want: ['already finished', 'WHAT THE PASS OPENS', 'Reopen'] },
-  { key: 'locked-ahead', q: 's=locked&k=ahead',
-    want: ['jump ahead', 'WHAT THE PASS OPENS'] },
-  // The one money cannot fix: no paywall, and the lesson they should open named.
+  // The one lock money cannot open: no paywall, and the lesson they should open named.
   { key: 'locked-unreached', q: 's=locked&k=unreached',
-    want: ['Not yet', 'OPEN THIS ONE INSTEAD'], notWant: ['WHAT THE PASS OPENS'] },
+    want: ['Not yet', 'OPEN THIS ONE INSTEAD'], notWant: ['WHAT THE PASS OPENS', 'Scholar’s Pass'] },
 
   // ── SETTINGS › SUBSCRIPTION ────────────────────────────────────
   //
@@ -266,7 +264,7 @@ const SCREENS = [
   // `click` names a section on the settings rail, because the section is reached
   // by pressing it rather than by a prop.
   { key: 'settings-sub', q: 's=settings', click: 'Subscription',
-    want: ['You are on the Free plan', 'Benefits', 'Replay lessons', 'Streak rest days',
+    want: ['You are on the Free plan', 'Benefits', 'Unit reviews', 'Start any unit',
            'DAYS FREE', 'Start the free trial', 'We’ll remind you a day before your free trial ends.',
            'it automatically becomes a Scholar’s Pass', 'See everything it includes',
            // The charge-today door reaches Settings from the same component, so
@@ -363,13 +361,23 @@ try {
     // which is indistinguishable from a broken screen and was exactly wrong
     // about a screen that had just been watched rendering. Raise it before
     // concluding anything.
+    // AND A NOT-FOUND PAGE IS RELOADED, not waited on. The route file is written
+    // on the way in and Metro registers it a moment later, so the first
+    // navigation of a run could land on "This screen doesn't exist" and poll it
+    // for a minute — the first case failed on every narrow-phone run while the
+    // same screen rendered fine one case later. check:readable learned this
+    // first (§21); every twentieth poll, about five seconds, a not-found page is
+    // asked again.
     for (let i = 0; i < MOUNT_TRIES && !up; i++) {
       const probe = await send('Runtime.evaluate', {
         expression: `(() => { const e = document.getElementById('pass-root');
-          return e ? e.getBoundingClientRect().height : 0; })()`,
+          if (e) return e.getBoundingClientRect().height;
+          return /doesn.t exist/.test(document.body ? document.body.innerText : '') ? -1 : 0; })()`,
         returnByValue: true,
       });
-      up = (probe?.result?.value ?? 0) > 100;
+      const v = probe?.result?.value ?? 0;
+      up = v > 100;
+      if (!up && v === -1 && i % 20 === 19) await send('Page.reload', {});
       if (!up) await wait(250);
     }
     // Fonts, and Moti's enter animations, once it is actually there.
@@ -413,8 +421,19 @@ try {
     let r;
     try { r = JSON.parse(result.value); } catch { r = { mounted: false, raw: result.value }; }
 
+    // WHAT THE PAGE SAYS INSTEAD, when it is not the screen. A blank body is a
+    // load still running; an error overlay or "doesn't exist" is something else,
+    // and without this the three read identically.
+    let instead = '';
+    if (!r.mounted) {
+      const t = await send('Runtime.evaluate', {
+        expression: `(document.body && document.body.innerText || '').replace(/\\s+/g, ' ').trim().slice(0, 220)`,
+        returnByValue: true,
+      });
+      instead = ` — the page says: ${JSON.stringify(t?.result?.value ?? '')}`;
+    }
     ok(r.mounted, 'React mounted and the screen drew itself',
-      r.mounted ? `${r.height}px viewport · ${r.content || r.height}px of content` : 'no #pass-root — a module or render fault');
+      r.mounted ? `${r.height}px viewport · ${r.content || r.height}px of content` : `no #pass-root — a module or render fault${instead}`);
     if (!r.mounted) continue;
 
     ok(!r.docWider, 'the page does not scroll sideways', `doc ${r.scrollW} vs viewport ${r.vw}`);

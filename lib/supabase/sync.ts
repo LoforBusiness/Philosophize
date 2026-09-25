@@ -32,6 +32,8 @@ export interface CloudState {
   earnedBadges: string[];
   unitsReviewed: string[];
   badgesInitialized: boolean;
+  /** The professor's intro has been watched. OR-merged: seen anywhere is seen. */
+  seenProfessorIntro: boolean;
   displayName: string;
   email: string;
   bio: string;
@@ -44,6 +46,7 @@ export interface CloudState {
 const SYNC_FIELDS: (keyof CloudState)[] = [
   'savedQuotes', 'profileQuote', 'philosopherViews', 'philosopherLessons', 'lessonsByUnit', 'lessonsByBranch', 'beliefResultId',
   'streak', 'totalXP', 'xpEvents', 'rankIndex', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'unitsReviewed', 'badgesInitialized',
+  'seenProfessorIntro',
   'displayName', 'email', 'bio', 'portrait', 'profileBackground', 'nameFont', 'settings',
   'restDaysEarned', 'restDaysUsed', 'startingBranch', 'onboardingVersion',
   // The daily history behind the streak calendar. Merged as a UNION below, the
@@ -252,6 +255,8 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
       ? Math.min(local.joinedAt, remote.joinedAt)
       : local.joinedAt ?? remote.joinedAt ?? null;
   const badgesInitialized = !!(local.badgesInitialized || remote.badgesInitialized);
+  // Once watched on any phone, never played again on another.
+  const seenProfessorIntro = !!(local.seenProfessorIntro || remote.seenProfessorIntro);
   // Rest days: max on BOTH halves. The higher earn count is the true one, and so
   // is the higher spend — which is exactly why they are stored apart. Taking the
   // max of a single "remaining" figure would hand back a rest day already spent
@@ -338,6 +343,7 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
     earnedBadges,
     unitsReviewed,
     badgesInitialized,
+    seenProfessorIntro,
     displayName,
     email,
     bio,

@@ -261,9 +261,10 @@ function eyebrowFor(prevStreak: number, restSpent: number): string {
  *
  * Ordered so the strongest true thing wins. The invitation is second because it
  * is the only line that can ask for another lesson, and it is offered ONLY when
- * one actually exists: `FREE_DAILY_LESSON_LIMIT` is 1, so for most readers
- * Continue leads to an ad and the Pass, and "go again" would be a screen telling
- * somebody to do a thing the next screen refuses them.
+ * one actually exists. That used to exclude a free reader on their one lesson a
+ * day; since the hard paywall (2026-09-25) everybody who finishes a lesson holds
+ * the Pass, so the reward passes `moreToday` always and the milestone lines below
+ * are for a caller that one day cannot.
  */
 function tailFor(streak: number, moreToday: boolean): string {
   const next = nextMilestone(streak);

@@ -14,17 +14,18 @@ import { StruckTile } from '@/components/profile/Struck';
 import { INK, MID, GHOST, PAPER, PAPER_LIT, mix, PATINA, FLAT_EDGE, FLOOR, FLOOR_CUT } from '@/components/shared/tone';
 import { SPACE } from '@/constants/design';
 import {
-  compareRows, includedTiles, type Cell, type CompareRow, type IncludedTile,
+  compareRows, freeTiles, type Cell, type CompareRow, type FreeTile,
 } from '@/lib/utils/passCompare';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE FREE-AGAINST-PASS CHART, AND THE ONE PLACE IT IS DRAWN.
 //
 // It was drawn inside the Pass tab, and then a reader asked for the same look in
-// two more places: the offer a free reader meets after a lesson, and Settings ›
-// Subscription. Three copies of a chart that takes money is three places for a
-// claim to go stale, which is §14's founding fault, so there is one chart and
-// three screens draw it.
+// more places. Since the hard paywall (2026-09-25) those are the Pass tab,
+// Settings › Subscription and the paywall itself (`HardPaywall`, after the
+// professor's intro and in front of a locked lesson). Several copies of a chart
+// that takes money is several places for a claim to go stale, which is §14's
+// founding fault, so there is one chart and every screen draws it.
 //
 // Brilliant's own paywall is the model (researched against their app, 2025): a
 // Benefits column, a quiet Free column, and the paid column raised in a bright
@@ -37,7 +38,7 @@ import {
 //
 // Pass a `play` driver and the chart arrives: a glint crosses the plate, then the
 // Pass column's cells stamp in one row at a time. The tab replays it on focus and
-// the post-lesson offer on mount. Settings passes none, on the reader's own
+// the paywall on mount. Settings passes none, on the reader's own
 // instruction: it is somewhere a reader goes to do one thing.
 //
 // ── THREE SIZES, BECAUSE SETTINGS IS NARROW ─────────────────────────────────
@@ -48,7 +49,7 @@ import {
 // the smallest below `COMPACT_MIN`.
 //
 // EVERY CELL AND FIGURE IS DERIVED. `compareRows()` builds the rows from
-// `PASS_LINES` and `includedTiles()` counts the library out of the tree;
+// `PASS_LINES` and `freeTiles()` counts what is free out of the tree;
 // `npm run check:pass` re-derives both and reads this file for a typed digit.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -117,11 +118,11 @@ const TILE_RANK = RANKS.findIndex((_, i) => rankOrder(i) === 'BRONZE' && rankDeg
 const TILE_BADGE = BADGES.find((b) => b.tier === 1) ?? BADGES[0];
 const ICON = 19;
 
-function TileIcon({ id }: { id: IncludedTile['id'] }) {
+function TileIcon({ id }: { id: FreeTile['id'] }) {
   switch (id) {
-    case 'library': return <StatSticker name="lessons" size={ICON} />;
     case 'thinkers': return <StatSticker name="thinkers" size={ICON} />;
-    case 'quotes': return <StatSticker name="quotes" size={ICON} />;
+    case 'quotations': return <StatSticker name="quotes" size={ICON} />;
+    case 'quizzes': return <StatSticker name="lessons" size={ICON} />;
     case 'streak': return <StatSticker name="xp" size={ICON} />;
     case 'ranks': {
       const i = Math.max(0, TILE_RANK);
@@ -138,8 +139,8 @@ function TileIcon({ id }: { id: IncludedTile['id'] }) {
  * The driver for a chart's arrival, and the call that plays it.
  *
  * `replay(delay)` snaps the driver to 0 and runs it back to 1. The delay is for a
- * screen that is itself still arriving: the post-lesson offer slides up as a
- * modal, and cells stamped during the slide are stamped where nobody can see.
+ * screen that is itself still arriving: the paywall slides up as a modal, and
+ * cells stamped during the slide are stamped where nobody can see.
  */
 export function usePassArrival() {
   const play = useSharedValue(1);
@@ -316,15 +317,16 @@ function Sheen({ play, tableH, style: box }: {
 }
 
 /**
- * WHAT EVERY PLAN INCLUDES, as six tiles in two rows of three.
+ * WHAT IS FREE FOR EVERYONE, as six tiles in two rows of three.
  *
  * Printed ONCE, under the chart, rather than as rows in both columns: NN/g's rule
- * for a comparison on a phone is to merge what both options share. Each row is a
- * flex row, so the tiles take the width they are given without being measured,
- * and `flex-start` because StruckTile's face does not stretch with its shadow.
+ * for a comparison on a phone is to merge what both options share. On a hard
+ * paywall it is also the proof the app is not a locked door. Each row is a flex
+ * row, so the tiles take the width they are given without being measured, and
+ * `flex-start` because StruckTile's face does not stretch with its shadow.
  */
 export function PlanTiles() {
-  const tiles = useMemo(() => includedTiles(), []);
+  const tiles = useMemo(() => freeTiles(), []);
   const rows = [tiles.slice(0, 3), tiles.slice(3)];
   return (
     <View style={st.tiles}>
@@ -337,12 +339,16 @@ export function PlanTiles() {
   );
 }
 
-function Tile({ tile }: { tile: IncludedTile }) {
+function Tile({ tile }: { tile: FreeTile }) {
   return (
     <StruckTile pad={2} style={st.tile}>
       <View style={st.tileTop}>
         <TileIcon id={tile.id} />
-        <Text style={st.tileFigure} numberOfLines={1}>{tile.figure}</Text>
+        {/* A FOUR-DIGIT FIGURE SETS SMALLER. At 320dp a tile is 85pt, and
+            "1,856" at the full size clipped to "1,…", and at 15 by two points. */}
+        <Text style={[st.tileFigure, tile.figure.length > 3 && st.tileFigureLong]} numberOfLines={1}>
+          {tile.figure}
+        </Text>
       </View>
       <Text style={st.tileNoun} numberOfLines={2}>{tile.noun}</Text>
     </StruckTile>
@@ -455,5 +461,6 @@ const st = StyleSheet.create({
   tileFigure: {
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: INK, includeFontPadding: false,
   },
+  tileFigureLong: { fontSize: 14 },
   tileNoun: { fontFamily: 'Inter_500Medium', fontSize: 11, lineHeight: 14, color: MID, marginTop: 3 },
 });

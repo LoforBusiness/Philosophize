@@ -16,6 +16,11 @@
 // them from the function that enforces it. A gate that changes, or a claim that
 // stops being true, fails the build instead of quietly becoming a lie.
 //
+// A HARD PAYWALL SINCE 2026-09-25: every lesson needs the Pass or its trial, and
+// everything else is free. So the claims are now what the Pass OPENS (sections 1
+// and 7), what stays FREE (section 7), and that the free tier of lessons is gone
+// and stays gone (section 12).
+//
 // It also holds the family to the palette rule check-ui holds converted screens
 // to, and measures the contrast pairs these screens actually produce — including
 // the one class of bug §19 records: a colour that passes on paper and fails in
@@ -31,7 +36,6 @@ const V = await import('@/lib/utils/passValue');
 const TR = await import('@/lib/utils/trial');
 const DATA = await import('@/data');
 const SUB = await import('@/constants/subscription');
-const STREAK = await import('@/constants/streak');
 const D = await import('@/constants/design');
 const T = await import('@/components/shared/tone');
 
@@ -57,141 +61,82 @@ const LINE = (id) => V.PASS_LINES.find((l) => l.id === id);
 head('1 · EVERY CLAIM IS ENFORCED SOMEWHERE ELSE');
 //
 // One assertion per row, each re-deriving the claim from the code that makes it
-// true. `GATES` is the list of things that actually differ by tier; if the two
-// ever disagree, either a gate has appeared that the paywall does not mention or
-// the paywall is advertising something nobody enforces.
-const GATES = ['lessons', 'ads', 'replay', 'units', 'rest'];
+// true. Since the hard paywall every row is something the Pass OPENS and the free
+// tier has none of, so each row is proved twice: shut without the Pass, open with.
+const GATES = ['lessons', 'narrated', 'reviews', 'units'];
 
 ok(V.PASS_LINES.length === GATES.length,
-  'the table has one row per real gate', `${V.PASS_LINES.length} rows, ${GATES.length} gates`);
+  'the table has one row per thing the Pass opens', `${V.PASS_LINES.length} rows, ${GATES.length} gates`);
 ok(GATES.every((g) => LINE(g)), 'every gate has a row',
   GATES.filter((g) => !LINE(g)).join(' ') || 'all present');
 ok(new Set(V.PASS_LINES.map((l) => l.id)).size === V.PASS_LINES.length, 'no id appears twice');
+ok(V.PASS_LINES.every((l) => l.free === null),
+  'the Free column has none of any row — every lesson needs the Pass');
 
-// ── lessons a day ────────────────────────────────────────────────────────────
-ok(LINE('lessons').free === String(SUB.FREE_DAILY_LESSON_LIMIT),
-  'the daily allowance on the table is the one the gate reads',
-  `table "${LINE('lessons').free}" · FREE_DAILY_LESSON_LIMIT ${SUB.FREE_DAILY_LESSON_LIMIT}`);
-ok(V.allowanceLabel().startsWith(String(SUB.FREE_DAILY_LESSON_LIMIT)),
-  'and so is the sentence version', V.allowanceLabel());
+// ── the lessons ──────────────────────────────────────────────────────────────
 {
-  // The route's own freeze must compare against the same constant.
-  const route = read('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx');
-  ok(/used >= FREE_DAILY_LESSON_LIMIT/.test(route),
-    'the lesson route gates on that constant, not a literal');
+  let leaks = 0, refused = 0;
+  for (const startable of [true, false]) {
+    for (let done = 0; done <= 6; done++) {
+      for (let li = 0; li <= done; li++) {
+        if (DATA.lessonAccess(li, done, startable, false).open) leaks++;
+        if (!DATA.lessonAccess(li, done, startable, true).open) refused++;
+      }
+    }
+  }
+  ok(leaks === 0, 'no lesson opens without the Pass', `${leaks} open`);
+  ok(refused === 0, 'and the Pass opens every lesson a reader has reached', `${refused} refused`);
+  let lessons = 0;
+  for (const b of DATA.ALL_BRANCHES) for (const u of b.paths) lessons += u.lessons.length;
+  ok(LINE('lessons').label.includes(String(lessons)) && LINE('lessons').pass.includes(String(lessons)),
+    'the lessons row counts the real library', `${lessons} — "${LINE('lessons').label}"`);
+  ok(LINE('lessons').pass.includes(String(DATA.ALL_BRANCHES.length)),
+    'and the real branches', `${DATA.ALL_BRANCHES.length}`);
 }
 
-// ── advertisements ───────────────────────────────────────────────────────────
-{
-  const reward = read('components/lesson/LessonReward.tsx');
-  const pro = reward.indexOf('if (isPro) {');
-  const ad = reward.indexOf('ads.showInterstitial()');
-  ok(pro > 0 && ad > pro, 'a subscriber returns before the interstitial is shown',
-    pro > 0 && ad > pro ? 'isPro branch precedes the ad call' : 'could not find the ordering');
-  ok(/return;\s*\n\s*}\s*\n\s*try {/.test(reward.slice(pro, ad + 40)) || reward.slice(pro, ad).includes('return;'),
-    'and it returns rather than falling through');
-}
-
-// ── replay ───────────────────────────────────────────────────────────────────
+// ── narrated and animated ────────────────────────────────────────────────────
 //
-// `lessonAccess(li, unitDone, startable, isPro)`. A FINISHED lesson is li < done.
+// "Every lesson read aloud" is a claim about 246 lessons, so it is counted: every
+// lesson in the tree has narration in the manifest and a scene in the CINEMATIC map.
 {
-  const free = DATA.lessonAccess(0, 1, true, false);
-  const paid = DATA.lessonAccess(0, 1, true, true);
-  ok(free.open === false && free.needsPass === true,
-    'a free reader cannot reopen a lesson they finished',
-    `open ${free.open}, needsPass ${free.needsPass}`);
-  ok(paid.open === true, 'and the Pass does open it');
-  ok(LINE('replay').free === null,
-    'so the free column shows nothing at all for replay', String(LINE('replay').free));
+  const man = read('lib/narration/manifest.ts');
+  const route = read('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx');
+  const silent = [], still = [];
+  for (const b of DATA.ALL_BRANCHES) {
+    for (const u of b.paths) {
+      for (const l of u.lessons) {
+        if (!man.includes(`'${l.id}':`) && !man.includes(`"${l.id}":`)) silent.push(l.id);
+        if (!route.includes(`'${l.id}':`)) still.push(l.id);
+      }
+    }
+  }
+  ok(silent.length === 0, 'every lesson is narrated, so the narrated row is true',
+    silent.slice(0, 3).join(' ') || 'all voiced');
+  ok(still.length === 0, 'and every lesson plays as an animated scene',
+    still.slice(0, 3).join(' ') || 'all cinematic');
 }
 
-// ── starting a unit out of order ─────────────────────────────────────────────
+// ── the unit reviews ─────────────────────────────────────────────────────────
 {
-  const notStartable = DATA.lessonAccess(0, 0, false, false);
-  ok(notStartable.open === false && notStartable.needsPass === true,
-    'a unit whose predecessors are unfinished is shut to a free reader');
-  ok(DATA.lessonAccess(0, 0, true, true).open === true, 'and open once it is startable');
-  const src = read('data/index.ts');
-  ok(/const startable = isPro \|\|/.test(src),
-    'and `isPro` is what makes any unit startable', 'data/index.ts');
-  ok(LINE('units').free !== null && /order/i.test(LINE('units').free),
-    'the free column says the units come in order', LINE('units').free);
+  const review = read('app/(app)/branches/[branchSlug]/[pathSlug]/review.tsx');
+  ok(/useSubscriptionStore\(\(s\) => s\.isPro\)/.test(review) && /<HardPaywall\b[^>]*source="locked_review"/.test(review),
+    'a unit review needs the Pass', 'the review route draws the paywall without it');
+  const road = read('app/(app)/branches/[branchSlug]/index.tsx');
+  ok((road.match(/openPaywall\('locked_review'\)/g) || []).length >= 2,
+    'and both of the road\u2019s doors into a review raise it', 'the stop on the road and the drawer row');
+  let units = 0;
+  for (const b of DATA.ALL_BRANCHES) units += b.paths.length;
+  ok(LINE('reviews').pass.includes(String(units)), 'the reviews row counts the real units', `${units} — "${LINE('reviews').pass}"`);
 }
 
-// ── rest days ────────────────────────────────────────────────────────────────
+// ── starting any unit ────────────────────────────────────────────────────────
 {
-  ok(STREAK.restCap(true) > STREAK.restCap(false),
-    'the Pass holds more rest days', `${STREAK.restCap(false)} → ${STREAK.restCap(true)}`);
-  ok(STREAK.restEarnEvery(true) < STREAK.restEarnEvery(false),
-    'and earns them faster', `every ${STREAK.restEarnEvery(false)} → every ${STREAK.restEarnEvery(true)}`);
-  const f = LINE('rest').free, p = LINE('rest').pass;
-  ok(f.includes(String(STREAK.REST_CAP_FREE)) && f.includes(String(STREAK.REST_EARN_EVERY_FREE)),
-    'the free cell carries the real free numbers', f);
-  ok(p.includes(String(STREAK.REST_CAP_PRO)) && p.includes(String(STREAK.REST_EARN_EVERY_PRO)),
-    'and the pass cell the real pass numbers', p);
+  ok(DATA.lessonAccess(0, 0, false, true).open === true,
+    'the Pass starts any unit, including one whose predecessors are unfinished');
+  ok(DATA.lessonAccess(0, 0, false, false).open === false, 'and nothing does without it');
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-head('2 · THE FIGURES ON THE WALL');
-//
-// The wait in days is the screen's main argument and the number nobody would
-// catch being wrong — 208 and 219 look equally plausible on a phone.
-{
-  ok(V.daysAtFreePace(208, 1) === 208, 'one a day, 208 left, is 208 days');
-  ok(V.daysAtFreePace(209, 1) === 209, 'and 209 is 209');
-  ok(V.daysAtFreePace(5, 2) === 3, 'two a day rounds UP, not down', String(V.daysAtFreePace(5, 2)));
-  ok(V.daysAtFreePace(0, 1) === 0, 'nothing left is no wait');
-  ok(V.daysAtFreePace(-5, 1) === 0, 'and a negative remainder cannot promise a negative wait');
-  ok(V.daysAtFreePace(10, 0) === 0, 'a zero allowance does not divide by zero');
-}
-{
-  ok(!/\d/.test(V.paceLabel(0)), 'zero days is not printed as a number', V.paceLabel(0));
-  ok(V.paceLabel(1) === '1 more day', 'one day is singular', V.paceLabel(1));
-  ok(/days$/.test(V.paceLabel(364)), 'under a year it counts days', V.paceLabel(364));
-  ok(/year/.test(V.paceLabel(365)), 'a year or more switches to years', V.paceLabel(365));
-  ok(/years/.test(V.paceLabel(900)), 'and pluralises them', V.paceLabel(900));
-}
-{
-  const total = V.libraryTotal();
-  let sum = 0;
-  for (const b of DATA.ALL_BRANCHES) for (const u of b.paths) sum += u.lessons.length;
-  ok(total === sum && total > 0, 'the library total is counted out of the tree', `${total} lessons`);
-
-  const empty = V.libraryStanding({});
-  ok(empty.done === 0 && empty.left === total && empty.pct === 0, 'a new reader stands at zero');
-
-  // A corrupt or ahead-of-its-time count must not produce a number over the
-  // total or a negative remainder — `lessonsByBranch` is a derived mirror and a
-  // merge can legitimately hand it something larger than this build's tree.
-  const over = {};
-  for (const b of DATA.ALL_BRANCHES) over[b.slug] = 99_999;
-  const cap = V.libraryStanding(over);
-  ok(cap.done === total && cap.left === 0 && cap.pct === 1,
-    'and an over-count is clamped rather than shown', `${cap.done}/${cap.total}`);
-}
-{
-  // Local midnight, not UTC and not "24 hours from now" — the allowance is keyed
-  // on a local calendar date.
-  const oneMinuteToMidnight = new Date(2026, 7, 22, 23, 59, 0, 0);
-  ok(V.msToRenewal(oneMinuteToMidnight) === 60_000,
-    'a minute to midnight is a minute', `${V.msToRenewal(oneMinuteToMidnight)}ms`);
-  const justAfter = new Date(2026, 7, 22, 0, 0, 0, 0);
-  ok(V.msToRenewal(justAfter) === 86_400_000, 'and midnight itself is a full day');
-  // The clocks-change days are exactly why this is built with the Date
-  // constructor rather than by adding 86_400_000.
-  const anyDay = new Date(2026, 2, 29, 12, 0, 0, 0);
-  ok(V.msToRenewal(anyDay) > 0 && V.msToRenewal(anyDay) <= 86_400_000,
-    'and it is never negative or longer than a day');
-}
-{
-  ok(V.renewalLabel(0) === 'under a minute', 'a spent clock says so', V.renewalLabel(0));
-  ok(V.renewalLabel(48 * 60_000) === '48m', 'under an hour is minutes alone', V.renewalLabel(48 * 60_000));
-  ok(V.renewalLabel(61 * 60_000) === '1h 1m', 'over an hour carries both', V.renewalLabel(61 * 60_000));
-  ok(V.renewalLabel(120 * 60_000) === '2h', 'and drops a zero minute', V.renewalLabel(120 * 60_000));
-  ok(!/\ds\b/.test(V.renewalLabel(90 * 60_000)), 'seconds never appear');
-}
-
 // ═════════════════════════════════════════════════════════════════════════════
 head('3 · THE FAMILY DECLARES NO COLOUR OF ITS OWN');
 //
@@ -200,14 +145,12 @@ head('3 · THE FAMILY DECLARES NO COLOUR OF ITS OWN');
 // the fifteenth place a value gets chosen by eye.
 const FAMILY = [
   'components/paywall/PassParts.tsx',
-  'components/paywall/TrialOffer.tsx',
+  'components/paywall/HardPaywall.tsx',
   'components/paywall/PassConferred.tsx',
   'components/paywall/TrialStatus.tsx',
   'components/paywall/TrialReminderAsk.tsx',
   'lib/utils/trialTerms.ts',
-  'components/paywall/DailyLimit.tsx',
   'components/paywall/LessonLocked.tsx',
-  'components/shared/PaywallContent.tsx',
   'components/shared/branchMarks.ts',
   'lib/utils/passValue.ts',
 ];
@@ -279,21 +222,6 @@ for (const rel of FAMILY.filter((f) => f.endsWith('.tsx'))) {
     long.map((l) => `"${l}"`).join(' ') || `${labels.length} plate(s)`);
 }
 
-// THE WALL'S TICKS ARE THE ARGUMENT, so they are held to the 3:1 non-text mark
-// floor rather than left to whatever recedes prettily. `C.dim` measures 2.11:1
-// on paper and its own comment rules it out for anything that must be seen; so
-// did gold's `base`, at 2.51:1, which is why the struck tick is drawn from the
-// shaded half of the metal, the palette's purple since 2026-09-15.
-ok(ratio(D.C.inkSoft, PAPER) >= 3, 'the free run of day-ticks is visible on paper',
-  `${ratio(D.C.inkSoft, PAPER).toFixed(2)}:1`);
-ok(ratio(T.PATINA.shade, PAPER) >= 3, 'and so is the single struck one beside it',
-  `${ratio(T.PATINA.shade, PAPER).toFixed(2)}:1`);
-{
-  const parts = read('components/paywall/PassParts.tsx');
-  ok(/PATINA\.base, PATINA\.shade, PATINA\.rim/.test(parts),
-    'and it is struck from that half, not the lit one');
-}
-
 // ── inkSoft IS A PAPER TONE ─────────────────────────────────────────────────
 //
 // 5.33:1 on paper, 3.07:1 in a StruckTile's shaded corner. Nothing in the
@@ -308,48 +236,43 @@ ok(ratio(D.C.inkSoft, PAPER) >= 4.5 && ratio(D.C.inkSoft, SHADE) < 4.5,
   const caption = parts.match(/nextCaption: \{[^}]*\}/);
   ok(!!caption && !/inkSoft/.test(caption[0]),
     'the tile caption does not take it', caption ? caption[0] : 'not found');
-  const locked = read('components/paywall/LessonLocked.tsx');
-  const label = locked.match(/openLabel: \{[^}]*\}/);
-  ok(!!label && !/inkSoft/.test(label[0]),
-    'nor does the tile label', label ? label[0] : 'not found');
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-head('5 · THE SCREENS ARE WIRED TO THE TABLE, NOT TO A COPY OF IT');
+head('5 · ONE PAYWALL, BUILT OF THE TAB\u2019S OWN PARTS');
+//
+// The daily limit, the locked lesson and the old paywall each argued a different
+// case for the same purchase. There is one paywall now, `HardPaywall`, and it is
+// the Pass tab's chart and door, so no screen can say something the tab does not.
 {
-  const parts = read('components/paywall/PassParts.tsx');
-  ok(/PASS_LINES\.map\(/.test(parts),
-    'the comparison renders every row of PASS_LINES', 'a new gate cannot be silently dropped');
-  ok(/left <= 0/.test(parts),
-    'the wall says nothing when there is nothing left to wait for (A1)');
-  ok(/Math\.min\(days, CAP\)/.test(parts),
-    'and never draws more ticks than there are days (A1)');
-
-  const pay = read('components/shared/PaywallContent.tsx');
-  ok(/PassTable/.test(pay), 'the paywall shows the comparison');
-  ok(/TheWall/.test(pay) && /LibraryLine/.test(pay), 'and the reader’s own standing');
-  const card = pay.match(/const PASS_CARD_LINES = \[([\s\S]*?)\];/);
-  ok(!!card, 'the engraved card lines are one named list');
-  if (card) {
-    const n = card[1].split('\n').filter((l) => l.trim().startsWith("'")).length;
-    ok(n === 3, 'and there are three of them — what the card face fits', `${n} lines`);
-  }
+  const hp = read('components/paywall/HardPaywall.tsx');
+  ok(/<PassChart\b[^>]*\bplay=/.test(hp) && /<PassDoor\b/.test(hp) && /<PlanTiles\b/.test(hp),
+    'the paywall draws the tab\u2019s chart, door and free tiles');
+  ok(/<TrialStatus\b[^>]*source="paywall"/.test(hp),
+    'and a running trial\u2019s own panel');
+  ok(/restore\(\)/.test(hp), 'and a way to restore a purchase — a hard paywall must never trap a reinstall');
+  ok(/onUnlocked\?\.\(\)/.test(hp) && /heldAtMount/.test(hp),
+    'it hands a reader on the moment the Pass arrives, and only then');
 
   const route = read('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx');
-  ok(/<DailyLimit/.test(route) && /<LessonLocked/.test(route),
-    'the lesson route delegates both gates');
-  ok(!/lockTitle|lockWrap|primaryBtn/.test(route),
-    'and keeps none of their old styling');
+  // The source is `locked_lesson`, or `intro` when the lesson route has just
+  // played the professor's intro as its backstop.
+  ok(/gatedByPro \? \(\s*<HardPaywall source=(?:"locked_lesson"|\{afterIntro \? 'intro' : 'locked_lesson'\})/.test(route),
+    'a lesson the Pass would open draws the paywall');
+  ok(/<LessonLocked\b/.test(route) && !/gatedByPro=\{/.test(route),
+    'and one it would not draws the not-yet screen, with no paywall');
+  const locked = read('components/paywall/LessonLocked.tsx')
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  ok(!/HardPaywall|openPaywall|PASS_LINES/.test(locked),
+    'the not-yet screen sells nothing — money cannot open it');
 
-  // The replay case is why LessonLocked exists: the old copy told a reader who
-  // had FINISHED a lesson to go and finish the unit before it.
-  const locked = read('components/paywall/LessonLocked.tsx');
-  ok(/'replay'/.test(locked) && /'ahead'/.test(locked) && /'unreached'/.test(locked),
-    'the locked screen tells the three reasons apart');
-  ok(/kind !== 'unreached'/.test(locked),
-    'and shows no paywall for the one money cannot fix');
+  ok(/<HardPaywall\b/.test(read('components/shared/PaywallSheet.tsx')),
+    'the sheet raised from a locked stop on the road is the same paywall');
+  ok(/<HardPaywall\b/.test(read('app/(app)/paywall.tsx')),
+    'and so is the full-screen route');
 }
 
+// ═════════════════════════════════════════════════════════════════════════════
 // ═════════════════════════════════════════════════════════════════════════════
 head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
 //
@@ -368,63 +291,30 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
   const BG = await import('@/data/badges');
   const INS = await import('@/constants/insignia');
 
-  const lines = V.includedLines();
-  const byId = (id) => lines.find((l) => l.id === id);
-  const IDS = ['library', 'thinkers', 'quotes', 'ranks', 'badges', 'streak'];
-
-  ok(lines.length === IDS.length, 'the schedule has one row per included id',
-    `${lines.length} rows`);
-  ok(IDS.every((i) => byId(i)), 'every id is present',
-    IDS.filter((i) => !byId(i)).join(' ') || 'all present');
-  ok(new Set(lines.map((l) => l.id)).size === lines.length, 'no id appears twice');
-
-  // ── the library ───────────────────────────────────────────────────────────
-  let lessons = 0, units = 0;
-  for (const b of DATA.ALL_BRANCHES) {
-    units += b.paths.length;
-    for (const u of b.paths) lessons += u.lessons.length;
-  }
-  const lib = byId('library').detail;
-  ok(lib.includes(String(lessons)), 'the library row counts the real lessons', `${lessons} — "${lib}"`);
-  ok(lib.includes(String(units)), 'and the real units', `${units}`);
-  ok(lib.includes(String(DATA.ALL_BRANCHES.length)), 'and the real branches',
-    `${DATA.ALL_BRANCHES.length}`);
-  ok(V.libraryTotal() === lessons, '`libraryTotal` agrees with this count', `${V.libraryTotal()}`);
-
-  // ── the thinkers ──────────────────────────────────────────────────────────
-  const th = byId('thinkers').detail;
-  ok(th.includes(String(PH.ALL_PHILOSOPHERS.length)),
-    'the thinkers row counts ALL_PHILOSOPHERS', `${PH.ALL_PHILOSOPHERS.length} — "${th}"`);
-
-  // ── the quotes ────────────────────────────────────────────────────────────
+  // ── WHAT IS FREE, COUNTED A SECOND TIME ───────────────────────────────────
   //
-  // Counted a second time, here, rather than trusting `saveableQuotes()` — the
-  // point of this file is that the screen's arithmetic is checked BY different
-  // arithmetic, not restated by it.
-  let quotes = 0;
-  for (const b of DATA.ALL_BRANCHES) {
-    for (const u of b.paths) {
-      for (const l of u.lessons) {
-        for (const c of l.cards) if (c.type === 'quote') quotes++;
-      }
-    }
-  }
-  const qd = byId('quotes').detail;
-  ok(V.saveableQuotes() === quotes, '`saveableQuotes` counts every quote card', `${quotes}`);
-  ok(qd.includes(String(quotes)), 'and the quotes row prints that figure', `"${qd}"`);
-
-  // ── the two ladders ───────────────────────────────────────────────────────
-  const rk = byId('ranks').detail;
-  ok(rk.includes(String(RK.RANKS.length)), 'the ranks row counts the real ladder',
-    `${RK.RANKS.length} — "${rk}"`);
-  ok(rk.includes(String(INS.ORDERS.length)), 'and the real number of orders',
-    `${INS.ORDERS.length}`);
-
-  const bg = byId('badges').detail;
-  const tiers = new Set(BG.BADGES.map((b) => b.tier)).size;
-  ok(bg.includes(String(BG.BADGES.length)), 'the badges row counts the real roll',
-    `${BG.BADGES.length} — "${bg}"`);
-  ok(bg.includes(String(tiers)), 'and the tiers actually struck in it', `${tiers}`);
+  // Counted here rather than trusting `freeThings()` — the point of this file is
+  // that the screen's arithmetic is checked BY different arithmetic, not
+  // restated by it. The quotations are the THINKERS' quotations: a free reader
+  // saves them from a thinker's page, and the lesson quote cards are behind the
+  // Pass with the lessons.
+  const QZ = await import('@/data/philosopherQuizzes');
+  const free = V.freeThings();
+  const byId = (id) => free.find((l) => l.id === id);
+  const IDS = ['thinkers', 'quotations', 'quizzes', 'ranks', 'badges', 'streak'];
+  ok(free.length === IDS.length && IDS.every((i) => byId(i)), 'one free tile per free id',
+    free.map((t) => t.id).join(' · '));
+  let quotations = 0;
+  for (const p of PH.ALL_PHILOSOPHERS) quotations += (p.quotes || []).length;
+  const quizzes = PH.ALL_PHILOSOPHERS.filter((p) => QZ.hasQuiz(p.id)).length;
+  const num = (id) => Number(String(byId(id)?.figure).replace(/,/g, ''));
+  ok(num('thinkers') === PH.ALL_PHILOSOPHERS.length, 'the thinkers tile counts ALL_PHILOSOPHERS', `${byId('thinkers')?.figure}`);
+  ok(num('quotations') === quotations, 'the quotes tile counts every thinker\u2019s quotations', `${byId('quotations')?.figure} of ${quotations}`);
+  ok(num('quizzes') === quizzes, 'the quizzes tile counts the thinkers with a quiz', `${byId('quizzes')?.figure}`);
+  ok(num('ranks') === RK.RANKS.length, 'the ranks tile counts the real ladder', `${byId('ranks')?.figure}`);
+  ok(num('badges') === BG.BADGES.length, 'the badges tile counts the real roll', `${byId('badges')?.figure}`);
+  ok(!free.some((t) => /lesson/i.test(t.noun)), 'and no free tile is a lesson');
+  void INS;
 
   // ── NOTHING ON THE CERTIFICATE IS TYPED ───────────────────────────────────
   //
@@ -540,9 +430,9 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
   // constant its gate reads, not from the long form it was made from.
   const CMP = await import('@/lib/utils/passCompare');
   const cmp = CMP.compareRows();
-  // ONE CHART, DRAWN IN THREE PLACES. The tab, the post-lesson trial offer and
-  // Settings all render `PassChart`, so the chart's own source is what is read
-  // for its rows, and each screen is held to drawing it rather than a copy.
+  // ONE CHART, DRAWN IN EVERY PLACE. The tab, Settings and the paywall all render
+  // `PassChart`, so the chart's own source is what is read for its rows, and each
+  // screen is held to drawing it rather than a copy.
   const chartSrc = read('components/paywall/PassChart.tsx');
   ok(/compareRows\(\)/.test(chartSrc) && /rows\.map\(/.test(chartSrc),
     'the shared chart draws from compareRows() rather than a typed list');
@@ -550,45 +440,28 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
     'and the tab draws that chart, with its arrival');
   ok(cmp.length === V.PASS_LINES.length && cmp.every((r, i) => r.id === V.PASS_LINES[i].id),
     'the chart has one row per PASS_LINES entry, in the same order', cmp.map((r) => r.id).join(' · '));
-  const cell = (id, side) => cmp.find((r) => r.id === id)?.[side];
-  const said = (c) => (c?.kind === 'value' ? c.text : c?.kind);
-  ok(said(cell('lessons', 'free')) === String(SUB.FREE_DAILY_LESSON_LIMIT),
-    'the Free column\'s lessons a day is the allowance the gate reads', `"${said(cell('lessons', 'free'))}"`);
-  ok(cell('ads', 'free')?.kind === 'no' && LINE('ads').free !== null,
-    'the Free column does not have "No ads", because a free reader sees them');
-  ok((cell('replay', 'free')?.kind === 'no') === (LINE('replay').free === null),
-    'replay is crossed out on Free exactly when the free tier cannot replay at all');
-  ok(cell('units', 'free')?.kind === 'value',
-    'starting a unit is NOT crossed out on Free: a free reader can start them in order');
-  ok(String(said(cell('rest', 'free'))).includes(String(STREAK.REST_CAP_FREE))
-      && String(said(cell('rest', 'pass'))).includes(String(STREAK.REST_CAP_PRO)),
-    'the rest days held are the two caps the streak reads',
-    `"${said(cell('rest', 'free'))}" · "${said(cell('rest', 'pass'))}"`);
-  ok(cmp.every((r) => r.pass.kind !== 'no'), 'nothing in the Pass column is crossed out');
-  ok(cmp.every((r) => said(r.free) !== said(r.pass)),
-    'and every row differs between the columns, or it is not a difference');
+  ok(cmp.every((r) => r.free.kind === 'no'), 'every Free cell is a cross — the free tier has no lessons at all');
+  ok(cmp.every((r) => r.pass.kind === 'yes'), 'and every Pass cell a tick');
+  ok(cmp.every((r) => r.label === LINE(r.id).label), 'each row is labelled from PASS_LINES, not re-typed');
 
   // THE SHARED HALF, ONCE. NN/g's rule for a comparison on a phone is to merge
   // what both options share rather than repeat it, and the certificates printed
   // the same six rows twice.
-  const tiles = CMP.includedTiles();
-  ok(/includedTiles\(\)/.test(chartSrc) && (tab.match(/<PlanTiles\b/g) || []).length === 1,
-    'the tab prints what every plan includes once, from includedTiles()');
-  ok(tiles.length === IDS.length && IDS.every((id) => tiles.some((t) => t.id === id)),
-    'one tile per included id', tiles.map((t) => t.id).join(' · '));
-  const fig = (id) => tiles.find((t) => t.id === id)?.figure;
-  ok(fig('library') === String(lessons), 'the lessons tile counts the real lessons', `${fig('library')} of ${lessons}`);
-  ok(fig('thinkers') === String(PH.ALL_PHILOSOPHERS.length), 'the thinkers tile counts ALL_PHILOSOPHERS', `${fig('thinkers')}`);
-  ok(fig('quotes') === String(quotes), 'the quotes tile counts every quote card', `${fig('quotes')}`);
-  ok(fig('ranks') === String(RK.RANKS.length), 'the ranks tile counts the real ladder', `${fig('ranks')}`);
-  ok(fig('badges') === String(BG.BADGES.length), 'the badges tile counts the real roll', `${fig('badges')}`);
+  const tiles = CMP.freeTiles();
+  ok(/freeTiles\(\)/.test(chartSrc) && (tab.match(/<PlanTiles\b/g) || []).length === 1,
+    'the tab prints what is free once, from freeTiles()');
+  ok(tiles.length === free.length && tiles.every((t, i) => t.id === free[i].id && t.figure === free[i].figure),
+    'and the tiles are the free list, not a copy of it');
+  ok(/FREE FOR EVERYONE/.test(tab) && /FREE FOR EVERYONE/.test(read('components/paywall/HardPaywall.tsx')),
+    'headed FREE FOR EVERYONE on the tab and the paywall');
 
   // ── NO COLOUR IS DECLARED IN THE NEW FILES ────────────────────────────────
   //
   // Same rule section 5 holds the rest of the family to. `mix()` of two tones is
   // fine and is how the certificate derives its gold rules; a raw hex is not.
   for (const f of ['components/paywall/Certificate.tsx', 'components/paywall/PassHerald.tsx', 'app/(app)/pass.tsx',
-                   'components/paywall/PassChart.tsx', 'components/paywall/PassDoor.tsx']) {
+                   'components/paywall/PassChart.tsx', 'components/paywall/PassDoor.tsx',
+                   'components/paywall/HardPaywall.tsx']) {
     const src = read(f).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
     const hexes = [...src.matchAll(/#[0-9a-fA-F]{3,8}\b/g)].map((m) => m[0]);
     ok(hexes.length === 0, `${f.split('/').pop()} declares no colour of its own`,
@@ -789,24 +662,13 @@ head('9 · THE TRIAL IS GOOGLE PLAY\'S, AND NOBODY IS SURPRISED BY THE CHARGE');
     'and a retired on-device trial still ends by the clock',
     'one that expired while the app was shut must not survive the restart');
 
-  // -- 9b. OFFERED BEFORE THE AD, AND ONLY WHILE GOOGLE WILL GIVE IT --------
+  // -- 9b. OFFERED ONLY WHILE GOOGLE WILL GIVE IT ----------------------------
   //
-  // Before the ad, because the second after an interstitial is the worst frame of
-  // mind to ask somebody about a subscription. And only while the STORE is
-  // offering this reader a trial. A button promising free days over a sheet that
-  // charges at once is the lie section 14 exists to prevent, and Google lists
-  // only the offers a reader is still eligible for, so its answer is the only one
-  // that can be trusted.
-  const rw = strip(read('components/lesson/LessonReward.tsx'));
-  const a = rw.indexOf('const handleContinue');
-  const b = rw.indexOf('const finishFree');
-  ok(a >= 0 && b > a, 'the reward screen separates the offer from the free finish');
-  const cont = rw.slice(a, b);
-  ok(/canStartTrial\(\)/.test(cont), 'the offer is gated on canStartTrial()');
-  ok(!/showInterstitial/.test(cont),
-    'and no ad can run before it', 'the interstitial lives past the offer, not in front of it');
-  ok(/isPro\b[\s\S]{0,120}?return;/.test(cont),
-    'and a reader who holds the Pass is returned before either');
+  // Only while the STORE is offering this reader a trial. A button promising
+  // free days over a sheet that charges at once is the lie section 14 exists to
+  // prevent, and Google lists only the offers a reader is still eligible for, so
+  // its answer is the only one that can be trusted. (It was also offered after a
+  // lesson, before the ad, until the hard paywall removed both.)
   // The IMPLEMENTATION, not the interface line above it that shares its name. And
   // `trialUsed` anywhere but the migration that deletes it: the old device flag
   // must not decide an offer the store now owns.
@@ -831,11 +693,6 @@ head('9 · THE TRIAL IS GOOGLE PLAY\'S, AND NOBODY IS SURPRISED BY THE CHARGE');
   // Section 14's founding fault was three hand-typed benefits with two of the
   // five real ones missing. A trial screen listing what the trial gives is where
   // that happens again, so it may not have a list of its own.
-  const off = read('components/paywall/TrialOffer.tsx');
-  ok(/<PassChart\b[^>]*\bplay=/.test(off),
-    'the offer renders the shared chart, with the arrival the tab plays');
-  ok(/<PlanTiles\b/.test(off),
-    'and the whole included schedule under it');
   const conf = read('components/paywall/PassConferred.tsx');
   ok(/PASS_LINES\.map/.test(conf) && /grade="granted"/.test(conf),
     'and the conferral shows the same five rows, not a summary of them');
@@ -849,8 +706,9 @@ head('9 · THE TRIAL IS GOOGLE PLAY\'S, AND NOBODY IS SURPRISED BY THE CHARGE');
   // copy somebody typed.
   const statusSrc = read('components/paywall/TrialStatus.tsx');
   const askSrc = read('components/paywall/TrialReminderAsk.tsx');
+  const hpSrc = read('components/paywall/HardPaywall.tsx');
   for (const [rel, src, last] of [
-    ['TrialOffer', off, true], ['PassConferred', conf, true],
+    ['HardPaywall', hpSrc, true], ['PassConferred', conf, true],
     ['TrialStatus', statusSrc, false], ['TrialReminderAsk', askSrc, false],
   ]) {
     const t = strip(src);
@@ -879,8 +737,8 @@ head('9 · THE TRIAL IS GOOGLE PLAY\'S, AND NOBODY IS SURPRISED BY THE CHARGE');
   // unmounted mid-animation by its own success.
   ok(/showConferral\('purchase'\)/.test(store) && /showConferral\('trial'\)/.test(store),
     'both doors raise the conferral from the store');
-  for (const rel of ['components/shared/PaywallContent.tsx', 'app/(app)/pass.tsx',
-                     'app/(app)/settings.tsx', 'components/paywall/DailyLimit.tsx',
+  for (const rel of ['components/paywall/HardPaywall.tsx', 'app/(app)/pass.tsx',
+                     'app/(app)/settings.tsx',
                      'components/paywall/PassDoor.tsx', 'components/paywall/TrialStatus.tsx']) {
     ok(!/showConferral/.test(read(rel)), `${rel} does not raise its own ceremony`);
   }
@@ -943,9 +801,7 @@ head('9 · THE TRIAL IS GOOGLE PLAY\'S, AND NOBODY IS SURPRISED BY THE CHARGE');
   ok(/Cancel any time before then/.test(terms) && /won’t be charged/.test(terms) && terms.includes(TERMS.STORE),
     'and how to cancel without being charged', terms);
   for (const [rel, where] of [
-    ['components/paywall/PassDoor.tsx', 'the Pass tab and Settings'],
-    ['components/paywall/TrialOffer.tsx', 'the offer after a lesson'],
-    ['components/shared/PaywallContent.tsx', 'the paywall'],
+    ['components/paywall/PassDoor.tsx', 'the Pass tab, Settings and the paywall'],
   ]) {
     const src = strip(read(rel));
     ok(/\{REMINDER_PROMISE\}/.test(src) && /conversionTerms\(/.test(src) && /startTrialLabel\(/.test(src),
@@ -1064,7 +920,6 @@ head('10 · THE MOTTO IS A WHOLE SENTENCE, AND IT BREAKS LIKE ONE');
   const src = [
     ['pass tab', read('app/(app)/pass.tsx'), 13.5, (w) => w - 96],
     ['settings', read('app/(app)/settings.tsx'), 12, () => 137],
-    ['trial offer', read('components/paywall/TrialOffer.tsx'), 13.5, (w) => w - 96],
     ['conferral', read('components/paywall/PassConferred.tsx'), 13.5, (w) => w - 96],
   ];
   const WIDTHS = [430, 412, 390, 375, 360, 320];
@@ -1174,7 +1029,12 @@ head('10 · THE MOTTO IS A WHOLE SENTENCE, AND IT BREAKS LIKE ONE');
   ok(/basePlan \? \(/.test(door),
     'the charge-today box is drawn only when the store named an option',
     'a fallback to the trial here would be the most expensive lie on the screen');
-  ok(/subscribeNow\(/.test(door) && !/purchaseMonthly\(/.test(door),
+  // THE BOX'S OWN HANDLER, not the whole file: since the hard paywall the door
+  // also runs the plain purchase for a reader with no trial on offer, which is
+  // `purchaseMonthly` and is correct there. What must never happen is the box
+  // that says "no free days" reaching the default purchase, which starts one.
+  const payNow = door.slice(door.indexOf('const payNow'), door.indexOf('if (isPro) return null'));
+  ok(payNow.length > 0 && /subscribeNow\(/.test(payNow) && !/purchaseMonthly\(/.test(payNow),
     'and it goes through subscribeNow, never the default purchase');
   ok(/skipTrialTerms\(/.test(door) && /skipTrialLabel\(/.test(door),
     'its wording comes from trialTerms like every other door');
@@ -1189,6 +1049,35 @@ head('10 · THE MOTTO IS A WHOLE SENTENCE, AND IT BREAKS LIKE ONE');
   // drift this repo has recorded more often than any other defect.
   ok((store.match(/track\('subscribe_succeeded'/g) || []).length === 1,
     'there is still exactly one place that reports a sale');
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+head('12 · THE FREE TIER OF LESSONS IS GONE, AND STAYS GONE');
+//
+// The hard paywall (2026-09-25) deleted the free daily lesson, the screen that
+// said it was used up, the advertisement after it and the trial offered between
+// the two. Each one is a name, and a name that comes back into the app is a free
+// tier coming back by accident. Comments are stripped first (L8): this file and
+// the ones it reads explain the history in exactly these words.
+{
+  const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  const BANNED = ['FREE_DAILY_LESSON_LIMIT', 'DailyLimit', 'TrialOffer', 'PaywallContent', 'showInterstitial', 'ads.initialize'];
+  const hits = [];
+  const walk = (dir) => {
+    for (const e of fs.readdirSync(path.join(REPO, dir), { withFileTypes: true })) {
+      const rel = `${dir}/${e.name}`;
+      if (e.isDirectory()) { if (e.name !== 'node_modules') walk(rel); continue; }
+      if (!/\.(ts|tsx)$/.test(e.name) || rel.startsWith('lib/ads/')) continue;
+      const src = strip(read(rel));
+      for (const w of BANNED) if (src.includes(w)) hits.push(`${rel}: ${w}`);
+    }
+  };
+  for (const d of ['app', 'components', 'lib', 'constants', 'stores']) walk(d);
+  ok(hits.length === 0, 'nothing brings back a free lesson, its limit screen, its ad or its offer',
+    hits.slice(0, 4).join(' · ') || 'none of the six names appears');
+  for (const gone of ['components/paywall/DailyLimit.tsx', 'components/paywall/TrialOffer.tsx', 'components/shared/PaywallContent.tsx']) {
+    ok(!fs.existsSync(path.join(REPO, gone)), `${gone} stays deleted`);
+  }
 }
 
 console.log(bad === 0 ? '\nPASS — the paywall says only what the code enforces.\n'

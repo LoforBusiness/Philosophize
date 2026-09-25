@@ -6,12 +6,13 @@
 // wrong is not a visual defect — it either gives the Pass away or refuses a
 // paying reader something they bought.
 //
-// The subtle one, and the reason this file exists: replaying a finished lesson
-// is part of the Pass, which means FINISHING a lesson can take it away from a
-// free reader. `unitDone` goes 3 → 4 and lesson 3 stops being the next one and
-// becomes a replay. The lesson route holds a one-way latch for exactly that
-// moment; without it the reader is thrown onto a paywall at the instant they
-// complete a lesson. That transition is simulated below rather than trusted.
+// A HARD PAYWALL SINCE 2026-09-25. Every lesson needs the Scholar's Pass or its
+// trial; everything else in the app is free. There is no free lesson left, so
+// the old subtle case — finishing a lesson turning it into a paid replay — has
+// gone with it. The case that replaces it is a TRIAL EXPIRING while a lesson is
+// open: the live rule closes the lesson, and the route's one-way latch must hold
+// it open for the rest of the visit. That transition is simulated below rather
+// than trusted.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -43,82 +44,90 @@ const ok = (pass, label, detail) => {
 };
 const shape = (a) => `${a.open ? 'open' : 'shut'}${a.needsPass ? '+pass' : ''}`;
 
-console.log('\nWHO MAY OPEN A LESSON\n');
+console.log('\nWHO MAY OPEN A LESSON (a hard paywall)\n');
 
 // ── the table ────────────────────────────────────────────────────────────────
 const cases = [
   // li, unitDone, startable, isPro,  expected
-  [5, 3, true, true, 'shut'],           // ahead of you: nobody, not even paid
-  [5, 3, true, false, 'shut'],
-  [3, 3, true, false, 'open'],          // the next one, free, unit startable
-  [3, 3, false, false, 'shut+pass'],    // the next one, free, a unit ahead
-  [3, 3, false, true, 'shut+pass'],     // (paid is always startable in practice)
-  [1, 3, true, true, 'open'],           // a replay, paid
-  [1, 3, true, false, 'shut+pass'],     // a replay, free — the Pass would fix it
-  [0, 32, true, false, 'shut+pass'],
+  [0, 0, true, false, 'shut+pass'],     // a free reader's very first lesson
+  [0, 0, false, false, 'shut+pass'],
+  [3, 3, true, false, 'shut+pass'],     // the next one, free
+  [1, 3, true, false, 'shut+pass'],     // a replay, free
+  [5, 3, true, false, 'shut+pass'],     // ahead, free: the Pass is still the reason
+  [3, 3, true, true, 'open'],           // the next one, on the Pass
+  [3, 3, false, true, 'open'],          // any unit may be started on the Pass
+  [1, 3, true, true, 'open'],           // a replay, on the Pass
+  [5, 3, true, true, 'shut'],           // not reached yet: closed, and no paywall
 ];
 for (const [li, done, startable, isPro, want] of cases) {
   const got = shape(lessonAccess(li, done, startable, isPro));
-  ok(got === want, `li ${li} of ${done} done · ${isPro ? 'paid' : 'free'} · ${startable ? 'startable' : 'locked unit'}`,
+  ok(got === want, `li ${li} of ${done} done · ${isPro ? 'pass' : 'free'} · ${startable ? 'startable' : 'unit ahead'}`,
     got === want ? got : `got ${got}, wanted ${want}`);
+}
+
+// ── a free reader opens nothing, and the Pass is always the reason ──────────
+{
+  const leaks = [];
+  for (const startable of [true, false]) {
+    for (let done = 0; done <= 8; done++) {
+      for (let li = 0; li <= 10; li++) {
+        const a = lessonAccess(li, done, startable, false);
+        if (a.open) leaks.push(`li ${li} of ${done} open`);
+        else if (!a.needsPass) leaks.push(`li ${li} of ${done} shut with no paywall`);
+      }
+    }
+  }
+  ok(leaks.length === 0, 'no lesson opens without the Pass, and every one offers it', leaks.slice(0, 2).join('; ') || 'none');
 }
 
 // ── a paying reader is never refused anything they have reached ─────────────
 {
   let refused = 0;
-  for (let done = 0; done <= 8; done++) {
-    for (let li = 0; li <= done; li++) {
-      if (!lessonAccess(li, done, true, true).open) refused++;
+  for (const startable of [true, false]) {
+    for (let done = 0; done <= 8; done++) {
+      for (let li = 0; li <= done; li++) {
+        if (!lessonAccess(li, done, startable, true).open) refused++;
+      }
     }
   }
   ok(refused === 0, 'the Pass never refuses a lesson already reached', `${refused} refusals`);
 }
 
-// ── a paywall is only ever offered where money is the obstacle ──────────────
+// ── a paywall is never shown to somebody who already has the Pass ───────────
 {
   const wrong = [];
-  for (const isPro of [true, false]) {
-    for (const startable of [true, false]) {
-      for (let done = 0; done <= 6; done++) {
-        for (let li = 0; li <= 10; li++) {
-          const a = lessonAccess(li, done, startable, isPro);
-          if (a.needsPass && li > done) wrong.push(`li ${li}>${done}`);
-          if (a.needsPass && a.open) wrong.push('open and gated at once');
-          if (a.needsPass && isPro && li < done) wrong.push('paid reader shown a paywall for a replay');
-        }
+  for (const startable of [true, false]) {
+    for (let done = 0; done <= 6; done++) {
+      for (let li = 0; li <= 10; li++) {
+        const a = lessonAccess(li, done, startable, true);
+        if (a.needsPass) wrong.push(`li ${li} of ${done}`);
+        if (a.needsPass && a.open) wrong.push('open and gated at once');
       }
     }
   }
-  ok(wrong.length === 0, 'no paywall in front of a lesson money cannot unlock', wrong.slice(0, 2).join('; ') || 'none');
+  ok(wrong.length === 0, 'no paywall in front of a Pass holder', wrong.slice(0, 2).join('; ') || 'none');
 }
 
-// ── THE FLIP, and the latch that answers it ─────────────────────────────────
-//
-// Walk a free reader through finishing lesson 3 of a unit and check both halves:
-// the rule really does close behind them (so the feature works), and the route's
-// latch really does keep them in (so it does not hurt).
+// ── A TRIAL EXPIRING MID-LESSON, and the latch that answers it ──────────────
 {
-  const before = lessonAccess(3, 3, true, false);
-  const after = lessonAccess(3, 4, true, false);
-  ok(before.open && !after.open, 'finishing a lesson does close it behind a free reader',
-    `${shape(before)} -> ${shape(after)}`);
+  const during = lessonAccess(3, 3, true, true);
+  const lapsed = lessonAccess(3, 3, true, false);
+  ok(during.open && !lapsed.open, 'losing the Pass does close a lesson under the live rule',
+    `${shape(during)} -> ${shape(lapsed)}`);
 
   // the latch, as the route implements it: once open, stays open for the visit
   let everOpen = false;
   const visit = (live) => { if (live.open) everOpen = true; return everOpen ? { open: true, needsPass: false } : live; };
-  const during = visit(before);
-  const onFinish = visit(after);
-  ok(during.open && onFinish.open, 'and the latch keeps them in the lesson they just finished',
-    `${shape(during)} -> ${shape(onFinish)} (unlatched would be ${shape(after)})`);
+  const a = visit(during);
+  const b = visit(lapsed);
+  ok(a.open && b.open, 'and the latch keeps the reader in the lesson they are reading',
+    `${shape(a)} -> ${shape(b)} (unlatched would be ${shape(lapsed)})`);
 
-  // a fresh visit later is correctly shut
   everOpen = false;
-  ok(!visit(after).open, 'while a later visit to it is properly shut', shape(visit(after)));
+  ok(!visit(lapsed).open, 'while a later visit without the Pass is properly shut', shape(visit(lapsed)));
 
-  // and buying the Pass mid-lesson unlatches upward, not downward
   everOpen = false;
-  const paidNow = visit(lessonAccess(3, 4, true, true));
-  ok(paidNow.open, 'buying the Pass in the middle opens it at once', shape(paidNow));
+  ok(visit(lessonAccess(0, 0, true, true)).open, 'and starting the trial on the paywall opens it at once');
 }
 
 // ── the route really does hold that latch ───────────────────────────────────
@@ -126,7 +135,7 @@ for (const [li, done, startable, isPro, want] of cases) {
   const route = fs.readFileSync(
     path.join(REPO, 'app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx'), 'utf8');
   ok(/everOpen\.current = true/.test(route) && /everOpen\.current \?/.test(route),
-    'the lesson route still carries the latch', 'remove it and finishing a lesson ejects a free reader');
+    'the lesson route still carries the latch', 'remove it and a trial ending ejects a reader mid-lesson');
 }
 
 console.log(bad ? `\n${bad} problem(s).\n` : '\nthe gate is sound.\n');
