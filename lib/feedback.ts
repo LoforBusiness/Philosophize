@@ -36,8 +36,16 @@ import { useUserDataStore } from '@/stores/userDataStore';
 // What is left is the end of a lesson: the reward chime, or the rank-up fanfare
 // that replaces it. Both play after the last beat, when nothing is being read.
 //
+// AND SINCE 25 SEP 2026, THE STAMP ON THE DAY STREAK. The argument a third sound
+// has to win is against the narration, and this one wins it the same way the
+// other two do: the ceremony is a screen of its own after the last beat. It had
+// been silent while the reward chime played underneath it, starting before the
+// die had even landed; now the stamp is heard on the frame it strikes and the
+// chime stands aside on that lesson (LessonReward.tsx). All three were chosen by
+// ear — see the header of scripts/lib/chime.mjs.
+//
 // Every moment still calls `cue()`, because the haptics were never the problem
-// and they keep doing their job. A third sound has to be argued against the
+// and they keep doing their job. A fourth sound has to be argued against the
 // narration first, and `check:sound` fails the build until it has been.
 // ─────────────────────────────────────────────────────────────────────────────
 const HEARD: Record<Cue, boolean> = {
@@ -49,10 +57,20 @@ const HEARD: Record<Cue, boolean> = {
   right: false,
   tick: false,
   badge: false,
-  seal: false,
+  seal: true,
   reward: true,
   rankup: true,
 };
+
+/**
+ * How far into the lesson-complete sound its chord lands, in ms.
+ *
+ * It opens on a short swoosh, so a caller timing it to something that LANDS on
+ * screen (the unit review's stamp) starts it this much early. A caller that only
+ * marks a screen appearing plays it straight, because there the swoosh is the
+ * screen arriving. Matches the 0.3 in `lessonComplete()` in scripts/make-sounds.mjs.
+ */
+export const REWARD_HIT_MS = 300;
 
 /**
  * Whether a moment makes a sound. The lesson player asks before it schedules one,

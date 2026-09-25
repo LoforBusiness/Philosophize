@@ -2,7 +2,7 @@ import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-aud
 import type { Cue, SoundProvider } from './types';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE SOUNDS, PLAYED. THERE ARE TWO.
+// THE SOUNDS, PLAYED. THERE ARE THREE.
 //
 // IMPORTS expo-audio AT MODULE SCOPE, which is exactly why nothing may import
 // this file directly — go through ./index, which wraps the require in a try. On a
@@ -11,11 +11,12 @@ import type { Cue, SoundProvider } from './types';
 // app is quiet until they update" and "the app crashes on launch for everyone
 // still on build 16". Same rule, same reason, as lib/notifications (§22).
 //
-// ONLY THE CUES lib/feedback.ts HEARS HAVE A CLIP. Since 11 Sep 2026 that is the
-// reward chime and the rank-up fanfare, so nothing plays over the lesson
-// narration, and the other sixteen clips were deleted. A cue with no clip here is
+// ONLY THE CUES lib/feedback.ts HEARS HAVE A CLIP. Since 11 Sep 2026 that has
+// been the end of a lesson only, so nothing plays over the narration, and the
+// other sixteen clips were deleted. Since 25 Sep it is three: the lesson-complete
+// hit, the stamp on the day streak and the rank-up. A cue with no clip here is
 // simply silent. `check:sound` holds this list and feedback.ts's HEARD table to the
-// same two.
+// same three.
 //
 // ── THE THREE DECISIONS THAT MATTER ─────────────────────────────────────────
 //
@@ -52,6 +53,7 @@ import type { Cue, SoundProvider } from './types';
 const SOURCES = {
   reward: require('../../assets/sound/reward.wav'),
   rankup: require('../../assets/sound/rankup.wav'),
+  seal: require('../../assets/sound/seal.wav'),
 } as const;
 
 type Key = keyof typeof SOURCES;
@@ -63,19 +65,24 @@ let enabled = true;
 /**
  * The floor between two hits of the same cue, in ms.
  *
- * Only a runaway guard now: both sounds fire at most once a lesson. Without it a
+ * Only a runaway guard now: each sound fires at most once a lesson. Without it a
  * repeated call would rewind the clip to zero before it got past its attack, which
  * is a buzz rather than a second chime.
  */
-const THROTTLE: Record<Key, number> = { reward: 400, rankup: 800 };
+const THROTTLE: Record<Key, number> = { reward: 400, rankup: 800, seal: 800 };
 const lastAt: Partial<Record<Key, number>> = {};
 
 /**
- * Per-clip trim. The MIX is baked into the files — `finish(buf, peak)` in
- * scripts/make-sounds.mjs is where a clip's loudness is decided — so this only
- * sets how far each one sits above the default player level.
+ * Per-clip trim, and since 2026-09-25 it does real work. The three clips are all
+ * mastered to the same peak, so measured on their loudest 400ms the lesson hit is
+ * −9.9 dB, the rank-up −10.7 and the stamp −12.6. Left there, the sound heard
+ * after every lesson would be the loudest thing the app plays, and the rank-up —
+ * the rare one — would sound SMALLER than it.
+ *
+ * So the everyday sound comes down to where the old chime sat (−14.9 dB) and the
+ * rank-up stays on top: about −14.3, −13.9 and −11.1.
  */
-const LEVEL: Record<Key, number> = { reward: 0.9, rankup: 0.95 };
+const LEVEL: Record<Key, number> = { reward: 0.6, seal: 0.7, rankup: 0.95 };
 
 const hasClip = (cue: Cue): cue is Key => Object.prototype.hasOwnProperty.call(SOURCES, cue);
 

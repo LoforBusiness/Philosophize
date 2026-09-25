@@ -94,20 +94,23 @@ const XP_CELL = Math.round(XP_SIZE * 0.54);
 const XP_TICKS = 14;
 
 /**
- * How far into the rank-up fanfare its top note falls, in ms.
+ * How far into the rank-up sound its burst falls, in ms.
  *
- * Matches the `at(0.34, …)` on the D6 in scripts/make-sounds.mjs. The phrase is
- * started this much before RankUpScreen's burst so the two coincide.
+ * Matches `H = 1.33` in `riseAndBurst()` in scripts/make-sounds.mjs. The sound
+ * BUILDS while RankUpScreen's ring fills and bursts as it closes, so it is
+ * started this much before `T_BURST` — 120ms after the screen appears, which is
+ * the moment the ring starts filling.
  */
-const RANKUP_PEAK = 340;
+const RANKUP_PEAK = 1330;
 
 /**
  * When the XP number starts counting, in ms after the screen appears.
  *
  * Set by the SOUND, which is the unusual direction but the right one here: the
- * completion phrase in scripts/make-sounds.mjs lifts A4 → D5 → the D-major chord
- * and has said everything it has to say by 600ms. The counter comes in just after
- * that, so the reader hears an ending and then a tally rather than both at once.
+ * lesson-complete sound in scripts/make-sounds.mjs swooshes into its chord at
+ * 300ms and the chord's attack has spent itself by about 800. The counter comes
+ * in just after that, so the reader hears an ending and then a tally rather than
+ * both at once.
  */
 const XP_AFTER_CHIME = 950;
 
@@ -483,7 +486,12 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     // moment the lesson ENDED, and the number arriving after it is the detail.
     // Skipped on a rank-up, which pre-empts this screen entirely and has its own
     // moment to sound — two flourishes 300ms apart is a jingle.
-    if (earned <= st.rankIndex) cue('reward');
+    //
+    // AND SKIPPED ON THE LESSON THAT STRIKES THE DAY, for the same reason. That
+    // lesson opens on StreakCeremony, which sounds its own stamp on the frame the
+    // die lands; the chime played here used to start under the ceremony before
+    // the die had even fallen. One lesson, one sound.
+    if (earned <= st.rankIndex && !day.firstOfDay) cue('reward');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

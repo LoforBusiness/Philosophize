@@ -3,9 +3,9 @@
  * a call site asks for a MOMENT, not for a file, so what that moment gets can
  * change without touching the places that ask for it.
  *
- * A moment is felt, heard, or both, and lib/feedback.ts decides which. Since
- * 11 Sep 2026 only `reward` and `rankup` are heard, so nothing plays over the
- * lesson narration. The rest keep their haptics, and keep their names so a sound
+ * A moment is felt, heard, or both, and lib/feedback.ts decides which. Only
+ * `reward`, `seal` and `rankup` are heard, all after a lesson's last beat, so
+ * nothing plays over the lesson narration. The rest keep their haptics, and keep their names so a sound
  * could come back without re-wiring a single call site.
  */
 export type Cue =
@@ -20,7 +20,7 @@ export type Cue =
   | 'tick'     // the XP counter; the caller passes the count as `step`
   | 'reward'   // the chime at the end of a lesson (heard)
   | 'badge'    // a badge pressed onto the reward screen
-  | 'seal'     // the day struck onto the streak
+  | 'seal'     // the day struck onto the streak (heard)
   | 'rankup';  // the only fanfare in the app (heard)
 
 export interface SoundProvider {

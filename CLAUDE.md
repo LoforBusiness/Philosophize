@@ -87,7 +87,7 @@ replacing the letterpress D.
 | Validation | Zod | 4.x | API boundary validation only |
 | Date math | date-fns | 4.x | Streak calculation |
 | Haptics | expo-haptics | ~56 | Live in the runners via `lib/feedback.ts` |
-| Sound | expo-audio | ~56 | Live since build 19. **Two sounds only since 2026-09-11**, the lesson reward and the rank-up, so nothing plays over the narration (`HEARD` in `lib/feedback.ts`, held by `check:sound`). Clips are GENERATED (`scripts/make-sounds.mjs`) |
+| Sound | expo-audio | ~56 | Live since build 19. **Three sounds only**, all after a lesson's last beat so nothing plays over the narration: the lesson-complete hit, the day-streak stamp (since 2026-09-25) and the rank-up (`HEARD` in `lib/feedback.ts`, held by `check:sound`). Clips are GENERATED (`scripts/make-sounds.mjs` on the `scripts/lib/chime.mjs` kit) and were chosen by ear from a listening page |
 
 Every native-dependent module has a `stub.ts` + `index.web.ts` pair (`lib/ads`,
 `lib/purchases`, `lib/auth/social`) so the app still runs on web and in Expo Go,
@@ -2003,7 +2003,23 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     struck object. What is left is the reward chime and the rank-up fanfare, and
     both play after the last beat. `HEARD` in `lib/feedback.ts` decides, the
     player schedules nothing that is not heard, and `check:sound` fails the build
-    on a third sound. Every haptic stayed.
+    on a sound it does not list. Every haptic stayed.
+
+    **AND ON 25 SEP 2026 ALL THREE REWARD SOUNDS WERE REPLACED, BY EAR.** *"It
+    sounds pretty cheap"* — and it was: three sine partials a note, dry, at
+    22.05 kHz, a description of a chime rather than an instrument in a room. Two
+    rounds of candidates went on a listening page (a published artifact, so it
+    could be heard on a phone): the first was bells and mallets throughout and
+    came back *"too much of the same instrument"*; the second gave every option a
+    different one. The picks: a swoosh into a synth chord for lesson complete, a
+    stamp thud into a rising "flame" swell for the day streak, and a build that
+    bursts on the new pin for the rank-up. The streak stamp is a THIRD heard sound
+    (`seal`, on `T_STRIKE`), and on the lesson that strikes the day the lesson
+    chime stands aside so one lesson makes one sound. Two timings moved with the
+    clips: `RANKUP_PEAK` is 1330 because the rank-up now builds for the whole ring
+    fill, and the unit review starts its sound `REWARD_HIT_MS` early so the chord
+    lands with the stamp. The kit is `scripts/lib/chime.mjs`, zero imports, 44.1
+    kHz, and the three written clips are byte-identical to what was approved.
   - **And every lesson speaks, all 246.** `ethics-ethics-9` ("When Both Choices Are
     Wrong") came first, then the first two lessons of every branch in reading
     order, then the rest of every branch's first unit, then every branch's second

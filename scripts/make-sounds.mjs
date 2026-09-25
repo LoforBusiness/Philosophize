@@ -46,6 +46,12 @@ import {
   mix, gain, at, finish, wav, secs, bell,
   MATERIAL, modal, reflect, tilted, sweepBand,
 } from './lib/dsp.mjs';
+// The three HEARD sounds are played on a second kit — see its header for why.
+import {
+  SR as CHIME_RATE, buf as chimeBuf, reseed as reseedChime, add, NOTE,
+  whooshUp, thud, superStab, glock, synthPluck, sweepNoise, pad, brass, sparkle,
+  reverb, master,
+} from './lib/chime.mjs';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CHOSEN IN THE LAB, INSTALLED HERE.
@@ -241,55 +247,6 @@ function tap() {
   ), 0.26);
 }
 
-/**
- * THE LESSON IS FINISHED — a three-step lift that RESOLVES onto a chord.
- *
- * This replaces a version that was two notes a fifth apart and described itself as
- * "one warm chime, not a fanfare". The restraint was aimed at the wrong risk. The
- * thing that plays at the end of every lesson does have to survive repetition, but
- * it also has to READ AS AN ENDING, and two notes fading out is an ellipsis rather
- * than a full stop. Nothing about it said "done".
- *
- * What makes an ending is resolution, not volume. A4 lifts to D5 lifts to the
- * chord — F#5 and A5 arriving together over a D5 that is still sounding — so the
- * phrase climbs and then LANDS on the tonic triad instead of trailing off. The
- * whole statement is over inside 600ms, which is deliberate: the XP counter starts
- * ticking after it, and a finishing sound still going while the number counts is
- * two events on top of each other instead of one following the other.
- *
- * Kept distinct from the rank-up, which is the other pitched flourish and must not
- * be confused with it: that one climbs FOUR notes to a high D and holds for 1.85s.
- * This one is a third as long, resolves downward into its chord rather than
- * reaching above it, and never touches D6 except as a trace of shine.
- */
-function reward() {
-  // SHORTENED, because it was eating the XP counter. The chord used to ring for
-  // 1.10s on decays of 0.36–0.40, and its octave partials sit at 1175, 1480 and
-  // 1760 Hz — which are EXACTLY the three counter pitches. So the ticks were
-  // masked twice over: nine times quieter, and at the same frequencies as the
-  // thing on top of them. The phrase still lifts and lands the same way, it just
-  // stops afterwards instead of hanging over the tally.
-  const n = secs(0.85);
-  const note = (f, delay, g, decay = 0.34) => {
-    const d = secs(delay);
-    const len = n - d;
-    const e = env(len, 0.004, decay);
-    const body = mix(
-      sine(len, f),
-      gain(sine(len, f * 2), 0.28),
-      gain(sine(len, f * 3.01), 0.08),
-    );
-    return [...new Array(d).fill(0), ...body.map((x, i) => x * e[i] * g)];
-  };
-  return finish(mix(
-    note(440.00, 0.000, 0.55, 0.13),   // A4 — the step off
-    note(587.33, 0.085, 0.75, 0.16),   // D5 — the step up
-    note(587.33, 0.180, 0.95, 0.26),   // D5 again, this time to hold under the chord
-    note(739.99, 0.180, 0.70, 0.24),   // F#5 ┐ the third and fifth land together:
-    note(880.00, 0.180, 0.62, 0.24),   // A5  ┘ this is the moment it reads as an end
-    note(1174.66, 0.195, 0.16, 0.16),  // a trace of D6 for shine, not a fourth step
-  ), 0.78);
-}
 
 // ── the second set: the app gets a voice for the things it rewards ───────────
 //
@@ -480,28 +437,6 @@ function badge() {
   return finish(mix(strike, fifth, shine.map((x, i) => x * se[i])), 0.72);
 }
 
-/**
- * A RANK-UP — the only fanfare in the app, and it is four notes.
- *
- * Rank-ups are rare (25 tiers over the whole curriculum) and they take the whole
- * screen before the reward, so this is the one place a phrase is earned. D5 · F#5
- * · A5 · D6 climbing, with the top note held and the D5 struck again beneath it
- * so it resolves onto a chord rather than stopping.
- *
- * Still no percussion and still no brass. It is the same struck tone as
- * everything else, just more of it — the app is a pen and paper, and it does not
- * suddenly own a drum kit because you reached Dialectician.
- */
-function rankup() {
-  const N = secs(1.85);
-  return finish(mix(
-    at(0.00, bell(secs(1.85), 587.33, 0.26, 0.85)),
-    at(0.11, bell(secs(1.74), 739.99, 0.26, 0.85)),
-    at(0.22, bell(secs(1.63), 880.00, 0.28, 0.90)),
-    at(0.34, bell(secs(1.51), 1174.66, 0.40, 1.00)),
-    at(0.34, bell(secs(1.51), 293.66, 0.55, 0.55)),
-  ).slice(0, N), 0.82);
-}
 
 /**
  * ARRIVING — the shift of weight as a walk stops, not another footfall.
@@ -572,43 +507,81 @@ function impact() {
   ), { time: 0.34, wet: 0.45, damp: 0.42 }).slice(0, n), 0.66);
 }
 
+// ── the three that are heard ─────────────────────────────────────────────────
+//
+// CHOSEN BY EAR ON 2026-09-25, and the reader's verdict on what they replaced is
+// the brief: the old lesson chime "sounds pretty cheap". It was three sine
+// partials a note, dry, at 22.05 kHz — a description of a chime rather than an
+// instrument in a room. Two rounds of candidates were rendered and listened to.
+// The first was bells and mallets throughout and came back "too much of the
+// same instrument"; these are from the second, where every option was a
+// different one. The kit is ./lib/chime.mjs.
+//
+// ONE FAMILY. All three are in D, all three share the felt thud and the
+// reverb, and the lesson hit is deliberately a small version of the rank-up:
+// a swoosh into a chord that lands, where the rank-up is a build into a burst.
+
 /**
- * A SEAL COMING DOWN ON PAPER — the day being struck into the ledger.
+ * LESSON COMPLETE — a short swoosh up into a punchy synth chord, a soft boom
+ * under it and a glockenspiel on top.
  *
- * The streak moment was the only reward in the app that made no sound at all.
- * The chime, the badge bell and the rank fanfare all had one; the animation that
- * decides whether somebody comes back tomorrow was silent, and silent on the
- * exact frame it most needed weight.
- *
- * IT IS A PRESS, NOT A KNOCK, and that is the whole difference from `impact`.
- * That one is a struck panel — something rapped. This is a die pushed INTO a
- * surface, so it is lower, it has almost no edge, and it stops almost at once:
- * the paper and the desk under it kill the tail. A long ring here would read as
- * a bell, which `badge` already owns, and two bells are one bell heard twice.
- *
- * Three layers and no more: the press, the die at D3 in struck metal damped hard
- * (0.92 — higher modes die first, which is what makes it read as damped rather
- * than merely short), and one brief octave above so there is brass in it instead
- * of a thud with a tone underneath.
- *
- * PEAK 0.70 IS THE FREQUENCY RULE, not a taste. `validate-sound` holds that the
- * thing which fires often is quieter than the thing which fires rarely: this
- * lands once a day, above `impact`'s many-per-lesson 0.66 and below `badge`'s
- * 0.72.
+ * THE HIT IS 300ms IN, not at zero: the swoosh is the run-up. A caller that
+ * times this to something landing on screen starts it `REWARD_HIT_MS` early
+ * (lib/feedback.ts), so the chord lands on the frame and the swoosh leads into
+ * it — which is what the unit review's stamp does.
  */
-function seal() {
-  reseed(4489);
-  const n = secs(0.90);
-  const cn = secs(0.026);
-  const c = lowpass(tilted(cn, -1.05), 0.20);
-  const ce = env(cn, 0.0006, 0.0075);
-  const die = modal(n, 146.83, MATERIAL.metal, { decay: 0.26, damp: 0.92, g: 0.9, tilt: 1.05 });
-  const edge = at(0.008, bell(secs(0.42), 293.66, 0.14, 0.26));
-  return finish(reflect(mix(
-    c.map((x, i) => x * ce[i] * 0.6),
-    die,
-    edge,
-  ), { time: 0.30, wet: 0.36, damp: 0.5 }).slice(0, n), 0.70);
+function lessonComplete() {
+  const n = NOTE;
+  reseedChime(46); const o = chimeBuf(1.9);
+  add(o, whooshUp(0.3, 0.3), 0);
+  add(o, thud(0.6, { f0: 140, f1: 70, dur: 0.4, click: 0.5 }), 0.3);
+  add(o, superStab([n.D4, n.Fs4, n.A4, n.D5], 0.7, 1.3, { attack: 0.01, decay: 0.5, close: 0.35 }), 0.3);
+  add(o, glock(n.D6, 0.3, 1.3), 0.3); add(o, glock(n.A6, 0.16, 1.2), 0.36);
+  return master(reverb(o, { size: 0.8, wet: 0.26, tail: 0.9 }), { max: 1.6 });
+}
+
+/**
+ * THE DAY IS STRUCK — the stamp's thud, then a whoosh rising into a warm synth
+ * swell, like a flame catching.
+ *
+ * Zero is CONTACT: StreakCeremony fires it on `T_STRIKE`, the frame the die
+ * touches the paper, so the thud needs no lead. The small plucked A5 at 0.86s
+ * is the day token landing on the week — `T_DAY − T_LAND` in that file, 860ms.
+ */
+function streakFlame() {
+  const n = NOTE;
+  reseedChime(51); const o = chimeBuf(2.2);
+  add(o, thud(0.9, { f0: 150, f1: 65, dur: 0.5 }), 0);
+  add(o, whooshUp(0.45, 0.25, 300, 3500), 0.02);
+  add(o, superStab([n.D4, n.A4, n.D5], 0.55, 1.5, { attack: 0.25, decay: 0.6, cutoff: 3500, close: 0.6 }), 0.05);
+  add(o, synthPluck(n.A5, 0.3, 0.6, { decay: 0.2 }), 0.86);
+  return master(reverb(o, { size: 0.75, wet: 0.25, tail: 0.8 }), { max: 1.9 });
+}
+
+/**
+ * RANK UP — it BUILDS while the ring fills and BURSTS as the new pin lands.
+ *
+ * A rising noise band and a swelling chord for the build, six glockenspiel notes
+ * that close in on the hit as the ring accelerates, then at 1.33s: a boom, a
+ * brass D-major chord, a glockenspiel run up to D7, a sustained pad and a
+ * scatter of sparkle. `RANKUP_PEAK` in LessonReward.tsx is this 1.33s, so the
+ * clip starts that much before RankUpScreen's `T_BURST` and the two coincide.
+ */
+function riseAndBurst() {
+  const n = NOTE;
+  reseedChime(31);
+  const H = 1.33; const o = chimeBuf(4.0);
+  add(o, sweepNoise(H, 300, 6000, { q: 1.8, g: 0.22 }), 0);
+  add(o, pad([n.D4, n.A4, n.D5], { dur: H + 0.1, attack: H, release: 0.12, g: 0.55, cutoff: 3000 }), 0);
+  // quickening tick-up into the hit
+  [0.62, 0.86, 1.03, 1.15, 1.23, 1.29].forEach((t, k) =>
+    add(o, glock([n.A5, n.B5, n.Cs6, n.D6, n.E6, n.Fs6][k], 0.1 + k * 0.03, 0.6), t));
+  add(o, thud(1.0, { f0: 120, f1: 55, dur: 0.8, click: 0.8 }), H);
+  for (const f of [n.D4, n.Fs4, n.A4, n.D5]) add(o, brass(f, 0.3, 1.9, { attack: 0.03, decay: 0.9 }), H);
+  [n.D6, n.Fs6, n.A6, n.D7].forEach((f, k) => add(o, glock(f, 0.34 - k * 0.04, 1.8), H + k * 0.055));
+  add(o, pad([n.D5, n.Fs5, n.A5], { dur: 2.0, attack: 0.02, release: 1.6, g: 0.25, cutoff: 3500 }), H);
+  add(o, sparkle(1.2, [n.D7, n.A7, n.Fs7], { count: 9, g: 0.07, from: 0.25 }), H);
+  return master(reverb(o, { size: 0.85, wet: 0.3, tail: 1.2 }), { max: H + 2.2 });
 }
 
 // HI for anything with a transient in it — a heel, a fingertip, a page edge, a
@@ -627,24 +600,23 @@ const SET = {
   'tick-2': atRate(HI, () => tick(1479.98)),
   'tick-3': atRate(HI, () => tick(1760.00)),
 
-  reward: atRate(LO, reward),
   'right-1': atRate(LO, () => right(587.33)),
   'right-2': atRate(LO, () => right(739.99)),
   'right-3': atRate(LO, () => right(880.00)),
   badge: atRate(LO, badge),
-  rankup: atRate(LO, rankup),
-  // LO like the other struck tones: the die's highest mode is 146.83 × 6.4 ≈
-  // 940 Hz and the press is low-passed at 0.20, so there is nothing above
-  // 11 kHz for the extra bytes to carry.
-  seal: atRate(LO, seal),
+
+  // The three that are HEARD, played on ./lib/chime.mjs at its own 44.1 kHz.
+  reward: { rate: CHIME_RATE, data: lessonComplete() },
+  seal: { rate: CHIME_RATE, data: streakFlame() },
+  rankup: { rate: CHIME_RATE, data: riseAndBurst() },
 };
 
-// ONLY WHAT THE APP LOADS IS WRITTEN. Since 11 Sep 2026 the app plays two sounds,
-// the reward chime and the rank-up fanfare, so nothing plays over the lesson
-// narration (lib/feedback.ts). Every recipe above is still BUILT, in its original
-// order, so the two that are written cannot change by a byte; only the clips
-// lib/sound/real.ts requires reach assets/sound/. The rest stay as the record of
-// how each sound was made.
+// ONLY WHAT THE APP LOADS IS WRITTEN. The app plays three sounds, all after a
+// lesson's last beat, so nothing plays over the narration (lib/feedback.ts): the
+// lesson-complete hit, the day stamp and the rank-up. Every other recipe above is
+// still BUILT, as the record of how each sound was made; only the clips
+// lib/sound/real.ts requires reach assets/sound/. The three written ones reseed
+// their own generator, so what is built before them cannot move them by a byte.
 const loaded = new Set([...fs.readFileSync(path.join(ROOT, 'lib', 'sound', 'real.ts'), 'utf8')
   .matchAll(/assets\/sound\/([a-z0-9-]+)\.wav/g)].map((m) => m[1]));
 
@@ -658,7 +630,10 @@ for (const [name, { rate, data }] of Object.entries(SET)) {
   fs.writeFileSync(path.join(OUT, `${name}.wav`), buf);
   total += buf.length;
   written += 1;
-  const peak = Math.max(...data.map(Math.abs));
+  // A loop, not Math.max(...data): a 44.1 kHz clip is over a hundred thousand
+  // samples, and spreading that many arguments overflows the stack.
+  let peak = 0;
+  for (const v of data) peak = Math.max(peak, Math.abs(v));
   console.log(
     `  ${name.padEnd(8)} ${String((data.length / rate * 1000).toFixed(0)).padStart(5)}ms  ` +
     `${String((rate / 1000).toFixed(1)).padStart(5)}kHz  ` +

@@ -8,9 +8,10 @@
 //   1. a clip that clicks, clips, or is silent — the defects that make an app
 //      sound broken rather than sound wrong
 //   2. a pitched clip that does not contain the note it was written from
-//   3. A SOUND THAT COULD PLAY OVER THE NARRATION. Since 11 Sep 2026 only the
-//      reward chime and the rank-up fanfare are heard, both after a lesson's last
-//      beat. A third fails the build until somebody decides it is worth it.
+//   3. A SOUND THAT COULD PLAY OVER THE NARRATION. Only the lesson-complete
+//      sound, the day stamp (since 25 Sep 2026) and the rank-up are heard, all
+//      after a lesson's last beat. A fourth fails the build until somebody decides
+//      it is worth it.
 //   4. A FOOTSTEP THAT DOES NOT LAND ON THE FOOT. The footfall is silent now and
 //      the player schedules nothing while it is, but its timing is still held so it
 //      could come back without re-deriving any of this. It does NOT re-derive
@@ -82,7 +83,10 @@ for (const f of files) {
   clips[name] = w;
   totalKB += w.size / 1024;
 
-  const peak = Math.max(...w.x.map(Math.abs));
+  // A loop, not Math.max(...): a 44.1 kHz clip is over a hundred thousand
+  // samples, and spreading that many arguments overflows the stack.
+  let peak = 0;
+  for (let i = 0; i < w.n; i++) peak = Math.max(peak, Math.abs(w.x[i]));
   const dc = w.x.reduce((a, v) => a + v, 0) / w.n;
   const rms = (a, b) => {
     let s = 0;
@@ -147,6 +151,11 @@ for (const [note, label] of [[N.D5, 'D5'], [N.Fs5, 'F#5'], [N.A5, 'A5'], [N.D6, 
   const r = hasNote('rankup', note, 8);
   ok(`rankup contains ${label}`, r.pass, `${r.ratio.toFixed(0)}×`);
 }
+// The stamp is in the same key: a D chord under it and an A5 when the day lands.
+for (const [note, label] of [[N.D5, 'D5'], [N.A5, 'A5']]) {
+  const r = hasNote('seal', note, 8);
+  ok(`seal contains ${label}`, r.pass, `${r.ratio.toFixed(0)}×`);
+}
 
 // ── 3. NOTHING IS HEARD BUT THE END OF A LESSON ──────────────────────────────
 //
@@ -156,14 +165,16 @@ for (const [note, label] of [[N.D5, 'D5'], [N.Fs5, 'F#5'], [N.A5, 'A5'], [N.D6, 
 // which never play together, because a rank-up replaces the chime — would measure
 // nothing. The decision itself is held in section 5 instead.
 
-// ── 3a2. THE STRUCK TONES STAY AT 22.05 kHz ─────────────────────────────────
+// ── 3a2. THE HEARD THREE ARE 44.1 kHz ────────────────────────────────────────
 //
-// The material checks that used to sit here compared a leather heel with a wooden
-// knock, and both clips were deleted on 11 Sep 2026. What still applies to the two
-// that are left is the rate.
-head('the struck tones stay at 22.05 kHz');
-ok('the struck tones stay at 22.05 kHz', ['reward', 'rankup'].every((c) => clips[c].rate === 22050),
-  'their highest partial is a third of the way to that ceiling — the bytes would buy nothing');
+// This used to hold the struck tones at 22.05 kHz, on the grounds that a bell's
+// highest partial is a third of the way to that ceiling. The three sounds chosen
+// on 25 Sep 2026 are not a bell: a swoosh, a glockenspiel run to D7, sparkle and a
+// reverb tail all live above 11 kHz, and at 22.05 that air is simply gone — the
+// dull ceiling the file header already records costing the first set its crispness.
+head('the heard three are 44.1 kHz');
+ok('the heard three are 44.1 kHz', ['reward', 'seal', 'rankup'].every((c) => clips[c] && clips[c].rate === 44100),
+  'their swoosh, sparkle and room sit above the 11 kHz a 22.05 clip can carry');
 
 // ── 3a3. NO CLIP MAY HISS ────────────────────────────────────────────────────
 //
@@ -461,8 +472,8 @@ for (const r of rows) {
 //
 // Decided 11 Sep 2026: every lesson is going to be read aloud by a voice that is on
 // by default, and nothing the app plays may land on top of it. So `HEARD` in
-// lib/feedback.ts lets two cues through, the reward chime and the rank-up fanfare,
-// which both play after a lesson's last beat. This section holds that decision and
+// lib/feedback.ts lets three cues through, the lesson-complete sound, the day stamp
+// and the rank-up, which all play after a lesson's last beat. This section holds that decision and
 // the wiring under it: every cue has a heard decision and a haptic decision, every
 // heard cue has a clip and a throttle, no clip exists for a cue that is not heard,
 // and the lesson player schedules nothing it would not play.
@@ -496,10 +507,10 @@ for (const c of cues) {
   ok(`'${c}'${isHeard ? '  heard' : ''}`, missing.length === 0, missing.join(' · '));
 }
 
-// THE DECISION, HELD. A third sound fails here, and the fix is not to widen this
+// THE DECISION, HELD. A fourth sound fails here, and the fix is not to widen this
 // list but to decide first that it will not play over the narration.
-const ALLOWED = ['rankup', 'reward'];
-ok('only the lesson reward and the rank-up make a sound',
+const ALLOWED = ['rankup', 'reward', 'seal'];
+ok('only the lesson reward, the day stamp and the rank-up make a sound',
   [...heardCues].sort().join() === ALLOWED.join(),
   `heard: ${[...heardCues].sort().join(', ') || 'nothing'}`);
 

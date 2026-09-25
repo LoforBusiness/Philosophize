@@ -37,7 +37,7 @@ import { clamp01, ease01, lerp, mixStance, pose, strideStance, WALK, type Bundle
 import { emoteAny, emoteAnyLive } from '../moves';
 import { stageTone } from '../stageTones';
 import { PLATE_FACE } from '../stageSkin';
-import { cue } from '@/lib/feedback';
+import { cue, REWARD_HIT_MS } from '@/lib/feedback';
 
 /** Where he walks from, and where he swings. */
 const FROM_X = -52;
@@ -100,7 +100,9 @@ export default function UnitStamp({
     ));
     bit.value = withDelay(T_HIT * 1000, withTiming(1, { duration: 180, easing: Easing.out(Easing.cubic) }));
     tally.value = withDelay(T_HIT * 1000 + 120, withTiming(1, { duration: 900, easing: Easing.out(Easing.cubic) }));
-    const s = setTimeout(() => cue('reward'), Math.round(T_HIT * 1000));
+    // The sound opens on a swoosh and its chord lands REWARD_HIT_MS in, so it
+    // starts that much early and the chord lands with the stamp.
+    const s = setTimeout(() => cue('reward'), Math.max(0, Math.round(T_HIT * 1000) - REWARD_HIT_MS));
     return () => clearTimeout(s);
   }, [t, ring, bit, tally]);
 
