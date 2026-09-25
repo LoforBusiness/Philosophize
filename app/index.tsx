@@ -1,8 +1,15 @@
 import { View } from 'react-native';
 import AuthPanel from '@/components/shared/AuthPanel';
 import WelcomeAnimation, { WELCOME_VERSION } from '@/components/welcome/WelcomeAnimation';
+import SeatedWelcome from '@/components/welcome/SeatedWelcome';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
+
+// WHICH first screen. The seated host (the top hat, the armchair, the voice) is on
+// trial against the older standing intro, which is kept whole: going back is
+// `const Intro = WelcomeAnimation`. Neither bumps WELCOME_VERSION, so it is still only
+// a reader's first open that sees it.
+const Intro: typeof WelcomeAnimation = SeatedWelcome;
 
 // First screen on launch when there's no Supabase session. On the very first
 // open we play the welcome animation once; afterwards (and on every later launch)
@@ -32,7 +39,7 @@ export default function AuthScreen() {
   // `authChecked` is true, `start` is tied to that, and the redirect into (app) has
   // been issued by then. So the intro is mounted but never started, underneath a
   // launch screen that is still covering the whole window.
-  if (welcomeVersion < WELCOME_VERSION) return <WelcomeAnimation start={launchDone} />;
+  if (welcomeVersion < WELCOME_VERSION) return <Intro start={launchDone} />;
 
   return <AuthPanel />;
 }
