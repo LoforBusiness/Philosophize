@@ -262,9 +262,28 @@ function Tag({
     // check:frame counted both as art being sliced, and it was right: a tag
     // leaving should still leave inside the frame. Nothing here translates now.
     const c = tg.stake ? SCENE.value.cut : 0;
+    // THE CUT MAY NOT MULTIPLY TARGET'S OWN DIM (D35, and Target.tsx's rule).
+    //
+    // This used to fade on `1 - c`, and these tags are Targets: once the question
+    // is answered Target dims the losers to 0.7, so the two stacked — measured
+    // through a real answer, 0.70 x 0.33 = 0.233 at 7.3px, which is under both the
+    // contrast floor and D34's 8px. Four options the reader had just been asked to
+    // weigh, left as grey smears. It is the same 0.5 x 0.45 = 0.225 defect
+    // Target.tsx records being swept out of 113 places, arriving through a wrapper
+    // OUTSIDE the Target where check:blank cannot see it.
+    //
+    // So the cut takes them AWAY rather than leaving them half-there: legible while
+    // they are on the stage, gone once they are not. The shrink still carries the
+    // motion, so it does not read as a pop.
+    const gone = c > 0.5 ? 1 : 0;
+    // AND THE SHRINK FOLLOWS THE SAME RULE (D34). With the opacity fixed the
+    // re-check still found all four at 7.3px: `cut` rests at 0.5 on the answered
+    // beat, and `1 - 0.34 * c` held them at 0.83 scale while they were fully on
+    // screen — 9px landing under the 8px floor. So they are full size whenever they
+    // are visible, and only shrink on the side where they are already gone.
     return {
-      opacity: a * (1 - c),
-      transform: [{ translateX: (1 - a) * 14 }, { scale: 1 - 0.34 * c }],
+      opacity: a * (1 - gone),
+      transform: [{ translateX: (1 - a) * 14 }, { scale: gone ? 1 - 0.34 * c : 1 }],
     };
   });
 

@@ -383,6 +383,14 @@ const gaps = [];
  * is one moment and the probe routinely catches him mid-walk.
  */
 const astray = [];
+// A HEAD'S RADIUS, NOT 8. The recorded figure is often a narrow sliver — 9 to 24
+// units of whatever leaf the probe caught, beside the x the script stands him at —
+// so the aim, which is that x, can sit a little outside it while pointing straight
+// at his head. logic-arguments-35 beat 11 aims at 130 with the sliver at 139…155,
+// nine units out, and is right (2026-09-24). What this rule exists for is a bubble
+// aimed where nobody is — aesthetics4's, 115 units out — and a head's radius (20)
+// still refuses that by a wide margin.
+const AIM_SLACK = 20;
 let unsure = 0;
 for (const l of LESSONS) {
   const row = THOUGHTS[l.id];
@@ -417,7 +425,7 @@ for (const l of LESSONS) {
       };
       const figs = beats[i].filter((it) => it.k === 'fig');
       if (!walks && figs.length
-        && !figs.some((f) => a[3] >= f.b[0] - 8 && a[3] <= f.b[0] + f.b[2] + 8)
+        && !figs.some((f) => a[3] >= f.b[0] - AIM_SLACK && a[3] <= f.b[0] + f.b[2] + AIM_SLACK)
         && !figs.some(onPath)) {
         astray.push(`${l.id}[${i}] aimed at x ${a[3]}`);
       }

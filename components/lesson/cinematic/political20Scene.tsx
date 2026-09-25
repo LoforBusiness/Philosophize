@@ -40,7 +40,7 @@ const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-st
 //   at 368, so 29 units stay clear. The middle column is between the figure's two
 //   stops, and the two never share a row.
 //
-// Ink runs y 232 (the stack captions) … y 500. BAND 226…512 = 286, with the
+// Ink runs y 228 (the stack captions) … y 500. BAND 226…512 = 286, with the
 // 103-unit figure at 36%.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -269,10 +269,23 @@ const styles = StyleSheet.create({
     borderTopWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
     transformOrigin: '50% 50%',
   },
+  // BETWEEN THE TWO HEADINGS, NOT UNDER HIS HAT (D31).
+  //
+  // This hung under the dashed rule at y 388, centred across the stage — and it
+  // shows on beat 2 only, the beat he stands dead centre at x 200 wearing the
+  // traveller's hat. check:readable found it struck by a 34x24 piece tilted 23°:
+  // the hat, riding his head, across the middle of the sentence.
+  //
+  // Nothing below or beside would do: the figure walks x 81…323 across the lesson
+  // and two other captions live in that strip. The top centre is empty on beat 2 —
+  // only HER VIEW OF LIFE (x 38…130) and HIS VIEW OF LIFE (284…373) are up there —
+  // and it reads better anyway: the claim that a free society holds both, set
+  // between the two views it holds. 0.5 tracking takes the line to about 136 wide,
+  // clearing both headings by 8 and 10 on the same baseline.
   alwaysCap: {
-    position: 'absolute', left: STACK_X[0], top: STACK_TOP[3] + BLOCK_H + 44,
+    position: 'absolute', left: STACK_X[0], top: 228,
     width: STACK_X[1] + STACK_W - STACK_X[0], textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.5, color: SOFT,
     includeFontPadding: false,
   },
   // Under the shelf, in the middle column the candidates and the shelf share.
@@ -285,9 +298,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK,
     includeFontPadding: false,
   },
+  // The frame's top edge at 240 and the headings above it at 228: with the edge at
+  // 238 and the headings at 232 the dashed rule ran through the lower half of
+  // HER VIEW OF LIFE and HIS VIEW OF LIFE (check:readable STRIKE, 2026-09-24). The
+  // first block starts at 244, so the frame still stands 4 clear of it.
   keptBox: {
-    position: 'absolute', top: STACK_TOP[0] - 6, width: STACK_W + 8,
-    height: STACK_TOP[3] + BLOCK_H - STACK_TOP[0] + 12,
+    position: 'absolute', top: STACK_TOP[0] - 4, width: STACK_W + 8,
+    height: STACK_TOP[3] + BLOCK_H - STACK_TOP[0] + 10,
     borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 8,
   },
 
@@ -299,7 +316,7 @@ const styles = StyleSheet.create({
   floor: floorStyle(TONE, GROUND),
 
   stackCap: {
-    position: 'absolute', top: 232, width: STACK_W, textAlign: 'center',
+    position: 'absolute', top: 228, width: STACK_W, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT, includeFontPadding: false,
   },
   block: {

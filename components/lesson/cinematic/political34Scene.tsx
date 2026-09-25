@@ -191,7 +191,12 @@ const styles = StyleSheet.create({
   ring: { position: 'absolute', borderColor: INK, marginTop: -240 },
   reach: {
     position: 'absolute', borderWidth: 2, borderColor: SOFT, borderStyle: 'dashed',
-    marginTop: -300, backgroundColor: STONE, boxShadow: LIP },
+    // −240, the clip's own top, like the rings — it was −300 from the lesson's first
+    // commit, which centred the reach 60 units ABOVE the rings it sits between
+    // while the overspill arrow started on a circle round the true centre. The
+    // stray disc's flat, clipped top then ran along the foot of BEYOND ITS REACH
+    // (check:readable STRIKE, 2026-09-24).
+    marginTop: -240, backgroundColor: STONE, boxShadow: LIP },
 
   // 60 WIDE, NOT 46: EVERYONE is 53dp with its tracking and was losing its tail on
   // every beat — and it is the outermost ring, the whole point of the question.

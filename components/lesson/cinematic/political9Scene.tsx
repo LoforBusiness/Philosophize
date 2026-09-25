@@ -284,8 +284,13 @@ const styles = StyleSheet.create({
   },
   // A STAMP, NOT A ROW: it is struck across the count rather than added to it, so
   // it reads as a verdict on what the four have just done.
+  // Struck across the COUNT, not the heading. The banner is 192 wide and tilted
+  // −4°, so its right end rides about 7 units above its top: at TALLY_T + 16 that
+  // end lay across VOTE (tag glyphs y ≈ 220…226; check:readable STRIKE,
+  // 2026-09-24). At + 26 the raised end clears the tag by about 3 and the band
+  // still runs through 4 — 1 (y ≈ 229…262).
   tyranny: {
-    position: 'absolute', left: TALLY_L - 26, top: TALLY_T + 16, width: TALLY_W + 52,
+    position: 'absolute', left: TALLY_L - 26, top: TALLY_T + 26, width: TALLY_W + 52,
     paddingVertical: 3, borderWidth: 2, borderColor: INK, borderRadius: 6,
     backgroundColor: PLATE_FACE, alignItems: 'center', justifyContent: 'center',
   },

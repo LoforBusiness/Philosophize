@@ -244,8 +244,12 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   // Round the last box of the past — yesterday's own — as an empty outline.
+  // Only the part of it the reader can see: that box runs on under the NOW plate
+  // (which starts at x 188), and this ring is drawn OVER the plate, so ringing the
+  // whole box put its right side at x 196…198, straight through the N of NOW
+  // (check:readable STRIKE, 2026-09-24). It ends at 186, two units short of the plate.
   nowhereBox: {
-    position: 'absolute', left: PAST_X[3] - 4, top: BOX_Y - 4, width: BOX_W + 8, height: BOX_H + 8,
+    position: 'absolute', left: PAST_X[3] - 4, top: BOX_Y - 4, width: NOW_X - (PAST_X[3] - 4), height: BOX_H + 8,
     borderWidth: 2, borderColor: INK, borderStyle: 'dashed', borderRadius: 6,
   },
   // A second NOW, standing in the future's second box: the same column drawn

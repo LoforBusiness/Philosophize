@@ -283,8 +283,26 @@ function Headline({ S }: { S: SharedValue<any> }) {
 // strip is never blank and never doubled.
 
 function Ledger({ S }: { S: SharedValue<any> }) {
-  const war = useAnimatedStyle(() => ({ opacity: clamp01((0.5 - S.value.auth) * 6 + 0.5) * clamp01(S.value.reveal - 1) }));
-  const civil = useAnimatedStyle(() => ({ opacity: clamp01((S.value.auth - 0.5) * 6 + 0.5) }));
+  // TWO DIFFERENT SENTENCES IN ONE BOX MAY NEVER BOTH BE ON SCREEN (D35).
+  //
+  // These cross-faded on one value: war was clamp01((0.5 - auth) * 6 + 0.5) and
+  // civil the same expression read the other way, so at auth 0.5 BOTH came out at
+  // exactly 0.5 and the reader got the two strings interleaved at half strength —
+  // "SOLINTDAUSRTYPO·OARRTS·ALETTTERSRU·TSIOSCH·IETSHORT" — in the first lesson of
+  // the branch. check:readable found it as two FAINT words at a=0.5 in one box.
+  //
+  // A cross-fade is the right move for a picture and the wrong one for a caption:
+  // D35's rule is legible or absent, never dim. So the swap is instantaneous. It
+  // is not a group-L teleport — nothing moves, one sentence replaces another, and
+  // that is what reading a changed label looks like.
+  //
+  // The ternaries are INLINE on purpose. A `const shown = (v) => …` helper called
+  // from a worklet is packed as a RemoteFunction and throws on the UI thread in
+  // release (§17 rule 6), and it is invisible in a browser.
+  const war = useAnimatedStyle(() => ({
+    opacity: (S.value.auth < 0.5 ? 1 : 0) * clamp01(S.value.reveal - 1),
+  }));
+  const civil = useAnimatedStyle(() => ({ opacity: S.value.auth < 0.5 ? 0 : 1 }));
   return (
     <View style={styles.ledger} pointerEvents="none">
       {/* numberOfLines guards the 12-unit strip: the widest line measures ~281 of

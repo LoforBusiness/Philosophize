@@ -134,7 +134,7 @@ export default function Metaphysics14Scene({ clock, bt, bi, i, picked, onPick, p
   return (
     <Animated.View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-      <Text style={styles.head} numberOfLines={2}>FIVE WAYS THE WORLD COULD HAVE GONE</Text>
+      <Text style={styles.head} numberOfLines={1}>FIVE WAYS THE WORLD COULD HAVE GONE</Text>
 
       {CLAIMS.map((c, k) => (
         <Claim key={c.id} k={k} SCENE={SCENE} live={live} answered={answered} picked={picked} onPick={onPick} />
@@ -229,8 +229,12 @@ const styles = StyleSheet.create({
   floor: floorStyle(TONE, GROUND),
   fill: { flex: 1 },
 
+  // One line across the whole column (x 96…390), not 210 at the right: at 210
+  // the heading wrapped, GONE fell to a second line at y ≈ 243…252, and the
+  // spotlight's dashed top edge — drawn just above the first claim at 254 — ran
+  // straight through it (check:readable STRIKE, 2026-09-24).
   head: {
-    position: 'absolute', left: 180, top: HEAD_T, width: 210,
+    position: 'absolute', left: CLAIM_L, top: HEAD_T, width: 390 - CLAIM_L,
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
     textAlign: 'right', includeFontPadding: false,
   },

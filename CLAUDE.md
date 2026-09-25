@@ -1245,7 +1245,7 @@ they belong to, so the rule book has them and this file did not:
   he reacts**: 78 of 246 lessons put a costume on him from a wardrobe of eleven
   (`npm run sheet:wardrobe`), neighbours never match, grave lessons are held to
   the sober set, and he nods or draws back on every answer in the scenes that
-  route through `lookPose`. **36 lessons also have a second figure walk in** on the
+  route through `lookPose`. **32 lessons also have a second figure walk in** on the
   beat before a two-sided question, dressed differently and turned to face him
   (group AA) — the count moves whenever the must-boxes are re-measured, because
   whether there is ROOM for him is derived from them.
@@ -4678,6 +4678,41 @@ applied it to 239 scenes**: 235 plates given a real corner, 184 tiles given a wh
 face, 170 grounds given a lit near edge and a shaded foot, 231 ledges given an ink
 drop, and a pill under every figure in every lesson.
 
+> **AND THE PILL WAS A GREY OBJECT, NOT A SHADOW (AG5b).** *"I dont want that gray
+> thing at the stickmans feet that follows him around, I like the idea of a shadow
+> but this doesnt look very good."* It was a flat 34×5 capsule at 16% ink, and
+> `npm run sheet:shadow` — the real rig on the real floor, in plain Node — showed
+> three faults, of which only the first needed a new mechanism: **a hard edge is an
+> object** (everything else struck here has a lit or shaded edge, so a flat slab
+> with a hard boundary is a lozenge lying on the floor); **a shadow is the size of
+> what casts it** (34 units against a foot span of 12 stood 11 units clear on each
+> side and read as a mat); and **it belongs BELOW the ground line** (centred on the
+> ankle, half its height sat on bare paper and it crossed the floor's own white top
+> hairline).
+>
+> **THE OBVIOUS SOFT SHADOW IS A HOLLOW RING.** CSS clips an outer `box-shadow` to
+> OUTSIDE the border box, so a transparent View with a blurred shadow comes back
+> with its middle knocked out. It is a FILL PLUS A HALO, and the seam is invisible
+> at exactly one ratio: a gaussian across a step edge reads half the inside value
+> AT the edge, so the fill must be **half** the halo's alpha. Anything else puts a
+> visible step back where the box ends, which is the hard edge again under a blur.
+>
+> **IT IS THE FIRST BLURRED SHADOW IN THE APP**, which is worth knowing before
+> adding a second — every other `boxShadow` here is a hard band at 0px blur, on
+> purpose (`lipOf`: *"a hard band of the tone's own shade, not a blur"*). What makes
+> it acceptable is the failure mode: a platform that ignores the blur is left with
+> the fill, a narrow quiet pill below the hairline, which is better than what it
+> replaced and never worse. No re-measure was owed — `stageSkin.ts` and
+> `Stickman.tsx` are both outside `muststamp`'s hash by design, the new pill is
+> NARROWER (a box that still accounts for 34 units is merely loose, which is safe)
+> and its 0.5-unit lower reach is inside `mustBox`'s own 4-unit pad.
+>
+> **The sheet reads `pillStyle` itself rather than a copy of its numbers**, so it
+> verifies rather than restates, and it keeps the old capsule beside the new mark so
+> the comparison stays honest. `check:skin` holds the width, the fill-to-halo ratio
+> and the offset; `node scripts/countertest-skin.mjs` stages all five defects on a
+> COPY through `SKIN_SRC`, so the working tree is never edited (group AL's rule).
+
 **THE OWNER PICKED THE WHITE FACE FROM THREE RENDERS of one real lesson** — today's
 tinted tile, the tinted tile with the new depth, and white. It is also the answer
 that drops the beige: `STONE` is the branch hue at L\* 81, a tan on the warm
@@ -7577,6 +7612,53 @@ browser at it; the first transform can take longer than a navigation timeout.
   110 seconds on the not-found screen without ever reloading it. A one-lesson run has only
   that first page to lose. It reloads a not-found screen every five seconds now and says
   what the page showed when a stage never comes, and with that both cases passed.
+
+  **AND IT IS NOT IN `npm run check`, WHICH IS HOW 59 WORDS PILED UP (2026-09-24).**
+  It needs Metro and a browser, so nothing runs it unless somebody does, and a reader
+  found the words first: *"words are cut off above the stickman … it is really
+  sloppy."* One sweep named 59 across 38 lessons, and the causes are recorded in
+  LESSON_RULES (D35's three new routes to a smear, S13's strike crops, AA8's visitor
+  standing on a later beat's caption). Two instruments came out of it:
+  `READ_SHOTS=<dir>` crops every STRIKE and UNDER on the beat the sweep found it, and
+  `sheet:beats` now claims its own route and reloads a not-found page — it had never
+  written one, so it only ever worked while another harness's route happened to be on
+  disk. **Run it after any pass that moves, grows or re-times stage art**, at
+  `LANES=1` for anything it names, because every one of the 59 was a line or a fade
+  that a later change carried into a word the earlier change had cleared.
+
+  **AND 145 OF THE MUST-BOX TABLES WERE ONE BEAT LATE FROM THEIR FIRST QUESTION
+  ON.** A correct table has one row fewer than the script has beats, because
+  `measure-must` stops when the summary replaces the stage. 145 had a row for every
+  beat: a question measured twice, once unanswered and once again, so every later
+  row described the beat BEFORE it. Thoughts, gaze, wander, the visitor and the
+  tours all read these rows by beat index, which is how `epistemology-knowledge-4`
+  placed a thought bubble over "= KNOWLEDGE" — the row it was placed against had
+  no Kant sum in it yet. It survived every re-measure because the merge kept the
+  LONGER reading whenever a scene's stamp had not moved, so a correct fresh run was
+  thrown away each time for being shorter. A complete reading now replaces one
+  longer than the script allows, and `scratchpad/readable-2026-09-23/rowcount.mjs`
+  counts the tables that still have a row for every beat. **Count rows against the
+  script after any re-measure**: nothing else in the suite can tell a table shifted
+  by one from a correct one, because every row in it is a real, correctly measured
+  frame of the lesson. `measure-must` now also refuses a second row for a beat it has
+  already recorded (the progress bar gives the index), which is what caught 34 of
+  them on the realign.
+
+  **AND THE VISITOR WAS MEASURED AS PART OF THE SCENE.** The player draws him inside
+  the stage and nothing switched him off for the probe, so a lesson re-measured
+  while it had a visitor recorded his body as a plain figure; `make:visitor` skips
+  only its own synthetic `v` boxes, read that body as an obstacle on his own spot,
+  and refused him — and the next re-measure, without him, gave him back. The count
+  wandered 36 → 30 → 25 across one day's re-measures. `setVisitorOff` in
+  `tourFlag.ts` is the fourth switch the measuring route throws, beside thoughts,
+  tours and wander, and the chain is now byte-identical on a second run.
+
+  **AND RE-MEASURING COSTS A FRESH REACH SNAPSHOT EVERY TIME.** `measure-must`
+  drops the costume and pose reach records, and restoring them from a snapshot taken
+  before an earlier chain run puts stale records back: `make:wardrobe` then takes
+  the old costume's reach off boxes carrying the new one. Nine lessons came out with
+  negative-width figure boxes that way (found as bubbles "aimed where the beat draws
+  nobody"). Snapshot the records immediately before each re-measure.
 
   **A RULE THAT REMOVES EVIDENCE CAN BREAK A RULE THAT COUNTS IT.** The same file
   had a guard that dropped a word outright when the paint stack put another word

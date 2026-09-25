@@ -140,7 +140,10 @@ export default function Logic25Scene({ clock, bt, bi, i, picked, onPick, dragPos
     width: FAKE_N * BAR_UNIT * SCENE.value.fake,
   }));
   const realLab = useAnimatedStyle(() => ({ opacity: SCENE.value.real }));
-  const fakeLab = useAnimatedStyle(() => ({ opacity: SCENE.value.fake }));
+  // LEGIBLE OR ABSENT (D35). `fake` is a fade that rests mid-range on the graded
+  // beat, and this is a LABEL -- measured at opacity 0.50 and 2:1, which is a
+  // smear rather than a word. The bar it labels still fades on the raw track.
+  const fakeLab = useAnimatedStyle(() => ({ opacity: SCENE.value.fake > 0.5 ? 1 : 0 }));
 
   // ── the tap event (group AH) ───────────────────────────────────────────────
   // WHAT THE QUICK READING LEAVES OUT, set beside the result it is read off. Left

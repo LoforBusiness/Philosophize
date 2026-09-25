@@ -164,16 +164,35 @@ for (const L of lessons) {
   })();
 
   const reach = (side.wardrobeReach || {})[L.id] || { up: 0, side: 0 };
-  const a = freeFloor(side.words[L.id]?.[enterAt], reach);
-  const b = freeFloor(side.words[L.id]?.[askAt], reach);
-  const both = [];
-  for (const [p, q] of a) {
-    for (const [r, s] of b) {
-      const lo = Math.max(p, r); const hi = Math.min(q, s);
-      if (hi - lo >= FIG_W) both.push([lo, hi]);
+  // CLEAR ON EVERY BEAT HE IS STANDING THERE, NOT ON TWO OF THEM.
+  //
+  // This used to intersect the free floor of the entrance beat and the question
+  // beat and nothing else — but he walks in and STAYS until the lesson ends, and a
+  // scene keeps drawing after its question. aesthetics3 is the case that found it:
+  // the floor at x 54 was clear on beats 5 and 6, so he was stood there, and on
+  // beat 8 the scene wrote MUSIC ARRIVES BEFORE REASON along the foot of its bar
+  // chart — straight through his shins. check:readable found it as a STRIKE, and a
+  // reader saw it as a word cut off above the stickman.
+  //
+  // fitsAt, just below, already walked every beat from the entrance to the end; it
+  // only ever asked about the stage edges. The floor scan now covers the same
+  // span, so the two agree about how long he is there.
+  const beatsOf = side.words[L.id] || [];
+  let both = null;
+  for (let bt = enterAt; bt < beatsOf.length; bt += 1) {
+    const free = freeFloor(beatsOf[bt], reach);
+    if (both === null) { both = free.filter(([lo, hi]) => hi - lo >= FIG_W); continue; }
+    const next = [];
+    for (const [p, q] of both) {
+      for (const [r, s] of free) {
+        const lo = Math.max(p, r); const hi = Math.min(q, s);
+        if (hi - lo >= FIG_W) next.push([lo, hi]);
+      }
     }
+    both = next;
+    if (!both.length) break;
   }
-  if (!both.length) { skipped.noRoom += 1; continue; }
+  if (!both || !both.length) { skipped.noRoom += 1; continue; }
   both.sort((x, y) => (y[1] - y[0]) - (x[1] - x[0]));
 
   // AND HE MUST FIT WHERE HE IS PUT — MEASURED THE WAY AA7 MEASURES IT.

@@ -148,7 +148,7 @@ import { getLessonById } from '@/data/index';
 import { CINEMATIC } from './(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId]';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { setThoughtsOff, setToursOff, setWanderOff } from '@/components/lesson/cinematic/tourFlag';
+import { setThoughtsOff, setToursOff, setVisitorOff, setWanderOff } from '@/components/lesson/cinematic/tourFlag';
 
 export default function PreviewFrame() {
   const [go, setGo] = useState(false);
@@ -172,6 +172,9 @@ export default function PreviewFrame() {
   // output — a box recorded mid-step narrows the clear floor, which moves the next
   // run's plan, which moves the box again. See tourFlag.ts.
   setWanderOff(true);
+  // AND NEVER WITH THE VISITOR ON STAGE. His measured body is an obstacle to placing
+  // him; make:wardrobe gives the camera a synthetic box for him instead. tourFlag.ts.
+  setVisitorOff(true);
   const id = q?.get('id') ?? '';
   const found = getLessonById(id);
   const Comp = (CINEMATIC as Record<string, any>)[id];
@@ -309,7 +312,16 @@ function stampFor(comp) {
     let mid = 0; const pending = new Map();
     const send = (m, p = {}) => new Promise((res) => { const i = ++mid; pending.set(i, res); ws.send(JSON.stringify({ id: i, method: m, params: p })); });
     await new Promise((r) => { ws.onopen = r; });
-    ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.id && pending.has(m.id)) { pending.get(m.id)(m.result); pending.delete(m.id); } };
+    ws.onmessage = (e) => {
+      const m = JSON.parse(e.data);
+      if (m.id && pending.has(m.id)) { pending.get(m.id)(m.result); pending.delete(m.id); }
+      // MUST_DEBUG=1 prints what the page threw — a lesson that NEVER RENDERED A STAGE
+      // is otherwise a message with no reason in it.
+      if (process.env.MUST_DEBUG && m.method === 'Runtime.exceptionThrown') {
+        const d = m.params?.exceptionDetails;
+        console.log('PAGE THREW', String(d?.exception?.description || d?.text).slice(0, 400));
+      }
+    };
     await send('Page.enable'); await send('Runtime.enable');
     // A BACKGROUND TAB IS NOT LAID OUT, and this whole thing depends on layout.
     //
@@ -391,7 +403,7 @@ const STAGE_NEXT = +(process.env.STAGE_TRIES || 60);
     // ceiling the content had outgrown.
     //
     // 28 clears the longest lesson in the repo (argument, 26) with room to spare.
-    for (let b = 0; b < 28; b++) {
+    for (let b = 0; b < 36; b++) {   // 36: a beat met twice now costs a pass without a row
       // THREE READINGS, ACROSS THE BEAT, AND UNION.
       //
       // A beat runs 4–5 seconds and its labels do not all arrive at the start:
@@ -403,6 +415,9 @@ const STAGE_NEXT = +(process.env.STAGE_TRIES || 60);
       // across the sweep and is the whole difference between a measurement and a
       // hopeful one.
       const r1 = JSON.parse(await T.ev(MEASURE));
+      // MUST_TRACE=1 prints the progress bar beside what the stage shows, per row — the
+      // one reading that tells a beat measured twice from a summary that keeps the stage.
+      if (process.env.MUST_TRACE) console.log('TRACE', id, 'row', b, 'prog', r1.prog, 'none', !!r1.none);
       // Only the FIRST reading ends the lesson. The stage was there a moment ago,
       // so its absence at the top of a beat is the summary card having replaced it.
       if (r1.none) break;
@@ -442,7 +457,19 @@ const STAGE_NEXT = +(process.env.STAGE_TRIES || 60);
       // which is the same fault more quietly, so nulls are passed through and
       // mergeReadings skips them in place.
       const items = [r1, r2, r3, r4].map((r) => (r && !r.none ? r.items : null));
-      per.push(mergeReadings(...items));
+      // A BEAT THAT ALREADY HAS A ROW DOES NOT GET A SECOND ONE. Under load a tap can
+      // be counted as an advance while the lesson is still on the same beat, and the
+      // row it then recorded was that beat again — so every later row belonged to the
+      // beat before it. 145 of 246 tables carried one (2026-09-24); the same lessons
+      // measured alone came out exact. The progress bar IS the beat index, so ask it
+      // which beat these readings were of, at the last reading, when it has settled.
+      const settled = [r4, r3, r2, r1].find((r) => r && !r.none && r.prog >= 0);
+      const at = settled ? idxOf(settled.prog) : -1;
+      if (at >= 0 && at < per.length) {
+        if (process.env.MUST_TRACE) console.log('TRACE', id, 'row', b, 'is beat', at, 'again: not recorded');
+      } else {
+        per.push(mergeReadings(...items));
+      }
       if ((r4.none ? (r3.none ? r2 : r3) : r4).done) break;
       // ADVANCE, AND CHECK THAT IT ADVANCED — against the progress bar, which is
       // literally (beat + 1) / beats. The old test compared a hash of the page
@@ -452,7 +479,13 @@ const STAGE_NEXT = +(process.env.STAGE_TRIES || 60);
       // before concluding the lesson is stuck.
       let moved = false;
       let ended = false;
-      for (let attempt = 0; attempt < 4 && !moved; attempt++) {
+      // SIX ATTEMPTS, THE LAST TWO PLAIN TAPS. The control is answered on the fourth,
+      // and its advancing tap followed 700ms later with nothing after it — so a beat
+      // whose explanation was still opening when that tap landed parked the sweep
+      // there, the lesson came back a beat short, and the table refused it.
+      // epistemology-knowledge-4 stopped on its sort beat that way, deterministically,
+      // one lane or three (2026-09-24).
+      for (let attempt = 0; attempt < 6 && !moved; attempt++) {
         // Second try onward: the beat is probably gated, so answer it first.
         // TRY BOTH KINDS OF ANSWER, in separate attempts.
         //
@@ -601,6 +634,15 @@ const STAGE_NEXT = +(process.env.STAGE_TRIES || 60);
         const stampMoved = (prev.stamps ?? {})[id] !== stamps[id];
         const complete = words[id].length >= want;
         if (stampMoved && complete) continue;                      // the scene moved, and this reading is whole
+        // AN OLD READING LONGER THAN THE SCRIPT ALLOWS IS NOT "MORE", IT IS WRONG.
+        // The script has `want` beats before its summary, so a row past that is a
+        // beat measured twice — a question read once before its answer and once
+        // after — and every row after the duplicate belongs to the beat BEFORE it.
+        // Keeping the longer reading kept exactly that: 145 of 246 tables carried a
+        // row for every beat, and a fresh, correct reading of the same lesson was
+        // discarded on every run for being shorter (2026-09-24). The thought
+        // bubbles, the gaze and the wander all read these rows by index.
+        if (complete && words[id].length === want && before.length > want) continue;
         if (before.length > words[id].length) {
           allWords[id] = before;
           // AND KEEP THE OLD STAMP WITH THE OLD BOXES. Writing the new stamp over

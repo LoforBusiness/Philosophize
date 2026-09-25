@@ -65,6 +65,15 @@ const BOD_X = 172;
 const BOD_W = 130;
 const ASK_X = 314;
 const ASK_W = 58;
+// The third TARGET is wider than its panel. Its ring and its pip start at the
+// caption's height (CAP_Y), and WHO IS SAD sets 64.4 units wide (Inter Bold 8.6,
+// tracked 1.2, measured against the .ttf) over a 58-unit panel — so a ring the
+// panel's width ran its two sides through the W and the D and dropped its pip on
+// the D (check:readable STRIKE, 2026-09-24). At x 306…388 the caption (x 311…375)
+// clears the left side by 5 and the pip (x 379…385, 3 in from the right edge) by
+// 4, and the ring stays 4 units clear of A PERSON's, which ends at 302.
+const ASK_HIT_W = 82;
+const ASK_HIT_X = 306;
 
 const BAR_W = 8;
 const BAR_STEP = 14;
@@ -219,9 +228,9 @@ export default function Aesthetics18Scene({ clock, bt, bi, i, picked, onPick, dr
       </Target>
       <Target
         id="feeling" correct={false} picked={picked} onPick={onPick}
-        disabled={!live || answered} style={[styles.hit, { left: ASK_X, width: ASK_W }]}
+        disabled={!live || answered} style={[styles.hit, { left: ASK_HIT_X, width: ASK_HIT_W }]}
       >
-        <View style={[styles.hitBox, { width: ASK_W }, answered && picked === 'feeling' && styles.wrong]} pointerEvents="none" />
+        <View style={[styles.hitBox, { width: ASK_HIT_W }, answered && picked === 'feeling' && styles.wrong]} pointerEvents="none" />
       </Target>
 
       <View style={styles.ground} pointerEvents="none" />

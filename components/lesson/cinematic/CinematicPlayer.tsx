@@ -24,7 +24,7 @@ import { GAZE } from './gazeTargets';
 import { WardrobeProvider } from './wardrobeContext';
 import Visitor from './Visitor';
 import { VISITOR } from '../../../data/lessonVisitor';
-import { thoughtsOff, toursOff, wanderOff } from './tourFlag';
+import { thoughtsOff, toursOff, visitorOff, wanderOff } from './tourFlag';
 import { cue, touch, heard } from '@/lib/feedback';
 import { footfallTrack } from './footfalls';
 import ChoiceCards, { seedFor } from './ChoiceCards';
@@ -310,7 +310,7 @@ export default function CinematicPlayer({
   const lessonFocus = LESSON_FOCUS[lesson.id];
   // The second figure who walks in because the argument has two sides — see
   // Visitor.tsx. Most lessons have no cue and mount nothing.
-  const visitorCue = VISITOR[lesson.id];
+  const visitorCue = visitorOff() ? undefined : VISITOR[lesson.id];
   const focus = lessonFocus && lessonFocus.beat === i ? lessonFocus.phrase : undefined;
   const [pickedOk, setPickedOk] = useState(false);
   // EVERY ANSWER, BY BEAT. The reader can go back now (tapNav.ts), and a question they

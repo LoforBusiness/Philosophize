@@ -183,7 +183,16 @@ export default function Political4Scene({ clock, bt, bi, dragPos, pickPos, i, ga
   // that emphasis goes on the live one and is never taken from the others. So the
   // ground is laid back over them at 0.62, which quiets the cell without touching any
   // type's contrast on the beats where nothing is being singled out.
-  const quietStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.only * 0.62 }));
+  // THE VEIL MAY PUSH THE CELLS BACK, NOT BURY THEIR WORDS (D35).
+  //
+  // This is a PAPER box laid OVER each of the three quiet cells, and it was 0.62
+  // deep. Ink under 62% paper, on a card under 62% paper, comes out about 2.2:1 —
+  // check:readable found all four words UNDER it, pixel-confirmed. The intent is
+  // right and stays: the three are still the reader's own call, so they go quiet
+  // rather than away. It was the depth that was wrong. 0.3 is the push-back this
+  // app already uses (Target dims an untaken option to 0.7, which is 1 − 0.3) and
+  // leaves the words near 5.3:1 while the harming act still stands clear.
+  const quietStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.only * 0.3 }));
 
   return (
     <View style={styles.scene}>

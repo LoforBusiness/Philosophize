@@ -18,6 +18,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { ANSWER_CONTROL } from './lib/answerctl.mjs';
+import { claimRoute } from './lib/previewroute.mjs';
 
 const REPO = process.cwd();
 const CDP = +(process.env.CDP_PORT || 9391);
@@ -86,15 +87,71 @@ const STAGE_BOX = `(() => {
   return { x: r.x, y: r.y, width: r.width, height: r.height };
 })()`;
 
+// IT NEVER WROTE ITS OWN ROUTE, AND THAT IS WHY IT "NEVER RENDERED A STAGE".
+//
+// Every other browser harness here claims a route on the way in and deletes it on
+// the way out — any file in app/ is a real route and would ship if left behind
+// (§21). This one only ever NAVIGATED to `/previewsheet23`, so it worked while a
+// matching file happened to be lying on disk and printed NEVER RENDERED A STAGE
+// the moment one was not. That message reads exactly like a broken lesson, which
+// is the failure §21 keeps recording: a harness that measured nothing must not
+// look like a lesson that is wrong.
+const { release: dropRoute } = claimRoute({
+  route: `app/${ROUTE}.tsx`,
+  owner: 'sheet-beats',
+  src: `// WRITTEN BY scripts/sheet-beats.mjs — deleted again when it finishes.
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import { getLessonById } from '@/data/index';
+import { CINEMATIC } from './(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId]';
+import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
+import { setWanderOff } from '@/components/lesson/cinematic/tourFlag';
+
+export default function PreviewBeats() {
+  const [go, setGo] = useState(false);
+  useEffect(() => {
+    useUserDataStore.setState({ _hasHydrated: true } as any);
+    useUIStore.setState({ launchDone: true } as any);
+    setGo(true);
+  }, []);
+  // The figure holds still for a still frame, exactly as check-readable does it.
+  setWanderOff(true);
+  const q = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const id = q?.get('id') ?? '';
+  const found = getLessonById(id);
+  const Comp = (CINEMATIC as Record<string, any>)[id];
+  if (!go || !found || !Comp) return <View style={{ flex: 1, backgroundColor: '#FAFAF7' }} />;
+  return <Comp lesson={found.lesson} />;
+}
+`,
+});
+process.on('exit', dropRoute);
+
 fs.mkdirSync(OUT, { recursive: true });
 await send('Page.navigate', { url: `http://localhost:${WEB}/${ROUTE}?id=${LESSON}${TOUR}` });
+// AND A NOT-FOUND SCREEN HAS TO BE RELOADED, not waited on.
+//
+// Expo Router builds its route table when the bundle is transformed, so a route
+// written moments before the navigation is not there yet and the page answers
+// "This screen doesn't exist" — which renders a handful of divs and never more,
+// so a poll that only counts divs waits out its whole budget and then blames the
+// lesson. check-readable was fixed for exactly this; this file never was. Re-
+// navigating every few seconds costs nothing and is the only thing that clears it.
 let ready = false;
 for (let i = 0; i < 90; i++) {
   const c = await ev("document.querySelectorAll('div').length");
   if (c > 60) { ready = true; break; }
+  if (i && i % 7 === 0) {
+    await send('Page.navigate', { url: `http://localhost:${WEB}/${ROUTE}?id=${LESSON}${TOUR}` });
+  }
   await wait(700);
 }
-if (!ready) { console.log(`${LESSON} — NEVER RENDERED A STAGE`); process.exit(1); }
+if (!ready) {
+  const shown = await ev("document.body ? document.body.innerText.slice(0, 120) : 'no body'");
+  console.log(`${LESSON} — NEVER RENDERED A STAGE (page showed: ${JSON.stringify(shown)})`);
+  process.exit(1);
+}
 await wait(2000);
 
 // A SCENE TARGET IS NOT A CONTROL, AND ANSWER_CONTROL ONLY KNOWS CONTROLS.

@@ -135,7 +135,7 @@ export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick, pi
       affirm: carry(cv, 7, n, AFFIRM[p], AFFIRM[n], tr),
       // "A gift, which only the wronged person may give" — a dashed box owns it.
       own: carry(cv, 8, n, OWN[p], OWN[n], tr),
-      // "Doesn't make forgiveness... owed" — a struck "NOT A DUTY" plate.
+      // "Doesn't make forgiveness... owed" — a NOT OWED plate.
       notDuty: carry(cv, 9, n, NOT_DUTY[p], NOT_DUTY[n], tr),
     };
   });
@@ -211,10 +211,13 @@ export default function Ethics36Scene({ clock, bt, bi, qv, i, picked, onPick, pi
       {/* "A gift, which only the wronged person may give" — a dashed box owns it. */}
       <Animated.View style={[styles.own, ownStyle]} pointerEvents="none" />
 
-      {/* "Doesn't make forgiveness... owed" — a struck "NOT A DUTY" plate. */}
+      {/* "Doesn't make forgiveness... owed" — NOT OWED, in plain words. It read NOT
+          A DUTY with a line through it, and crossing out "not a duty" says the
+          opposite of the sentence under it; a struck OWED would not do either,
+          because on this page a line through a row means FORGIVEN — the debt
+          cancelled — which is a different claim (A1, found 2026-09-24). */}
       <Animated.View style={[styles.notDutyTag, notDutyStyle]} pointerEvents="none">
-        <Text style={styles.notDutyText} numberOfLines={1}>NOT A DUTY</Text>
-        <View style={styles.notDutyStrike} />
+        <Text style={styles.notDutyText} numberOfLines={1}>NOT OWED</Text>
       </Animated.View>
 
       <View style={styles.ground} pointerEvents="none" />
@@ -305,7 +308,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 330, top: 390, width: 70, height: 26,
     borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 4,
   },
-  // "DOESN'T MAKE FORGIVENESS... OWED" — a struck plate in the clear corner.
+  // "DOESN'T MAKE FORGIVENESS... OWED" — NOT OWED on a plate in the clear corner.
   notDutyTag: {
     position: 'absolute', left: 262, top: 418, width: 94, height: 16,
     borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
@@ -313,9 +316,6 @@ const styles = StyleSheet.create({
   },
   notDutyText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.4, color: INK, includeFontPadding: false,
-  },
-  notDutyStrike: {
-    position: 'absolute', left: 4, top: 7, width: 86, height: 2, backgroundColor: INK, transform: [{ rotate: '-8deg' }],
   },
 });
 

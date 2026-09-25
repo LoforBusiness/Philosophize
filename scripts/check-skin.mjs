@@ -17,7 +17,9 @@ import path from 'node:path';
 import { skinScene } from './skin-stage.mjs';
 
 const DIR = 'components/lesson/cinematic';
-const SKIN = fs.readFileSync(path.join(DIR, 'stageSkin.ts'), 'utf8');
+// SKIN_SRC lets a counter-test stage a defect on a COPY rather than in the
+// working tree, which another session is usually building in (group AL).
+const SKIN = fs.readFileSync(process.env.SKIN_SRC || path.join(DIR, 'stageSkin.ts'), 'utf8');
 const STICK = fs.readFileSync(path.join(DIR, 'Stickman.tsx'), 'utf8');
 
 let bad = 0;
@@ -35,9 +37,21 @@ rule(/inset 0px 1\.5px 0px rgba\(255, 255, 255, 0\.85\)/.test(SKIN),
   'a plate is lit along its top edge, from inside its own box');
 rule(/0px 4px 0px \$\{tone\.SHADE\}/.test(SKIN),
   'and stands on a hard ledge of its own shaded tone — not a blur');
-rule(/borderRadius: h \/ 2/.test(SKIN) && /34 \* k/.test(SKIN),
+rule(/borderRadius: h \/ 2/.test(SKIN) && /const w = 26 \* k/.test(SKIN),
   'the shadow under a figure is a PILL, sized from his own scale',
   'Duolingo: "never an oval, because ovals imply perspective"');
+// THE SEAM. A fill beside a blurred halo only reads as one soft mark when the fill
+// is HALF the halo's alpha — a gaussian across a step edge is half the inside value
+// at the edge, so any other ratio puts a visible step back where the box ends, which
+// is the hard grey capsule the owner threw out. Re-derived rather than restated.
+rule(/backgroundColor: `rgba\(26, 26, 26, \$\{PILL_ALPHA \/ 2\}\)`/.test(SKIN)
+  && /boxShadow: `0px 0px \$\{7 \* k\}px rgba\(26, 26, 26, \$\{PILL_ALPHA\}\)`/.test(SKIN),
+  'and its fill is half its halo, so the two meet with no step',
+  'a transparent box would be a hollow RING: CSS clips an outer shadow to outside the box');
+// It must sit UNDER the floor's lit top edge, not across it. Centred on the ankle
+// it straddled the ground line and half of it lay on bare paper.
+rule(/top: -h \/ 2 \+ 1\.5 \* k/.test(SKIN),
+  'and it sits below the ground line rather than across it');
 rule(/borderTopWidth: 1\.5/.test(SKIN) && /inset 0px -7px 0px \$\{tone\.SHADE\}/.test(SKIN),
   'the ground is a band with a lit near edge and a shaded foot');
 // ZERO REACT, like `rig.ts` and `tone.ts`, so a checker can read it in plain Node.

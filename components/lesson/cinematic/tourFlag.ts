@@ -75,3 +75,21 @@ export function setWanderOff(v: boolean) {
 export function wanderOff(): boolean {
   return rooted;
 }
+
+// AND A FOURTH, FOR THE VISITOR (Visitor.tsx), FOR THE SAME HARNESS AND THE SAME LOOP.
+//
+// The player draws him inside the stage, so a live visitor is recorded as a plain
+// figure — and make:visitor, which skips only the synthetic boxes make:wardrobe writes
+// for him (`v`), then reads his own measured body as an obstacle standing on his own
+// spot and refuses him. The next re-measure no longer draws him, so the run after that
+// gives him back: the count wandered 36 → 30 → 25 across one day's re-measures
+// (2026-09-24). The camera still frames him, through make:wardrobe's synthetic box.
+let alone = false;
+
+export function setVisitorOff(v: boolean) {
+  alone = v;
+}
+
+export function visitorOff(): boolean {
+  return alone;
+}

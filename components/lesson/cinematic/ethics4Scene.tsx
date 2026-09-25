@@ -140,6 +140,9 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick, dragPos
   const DA = useDerivedValue<Bundle>(() => SCENE.value.a);
   const DB = useDerivedValue<Bundle>(() => SCENE.value.b);
   const chartStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.floor }));
+  // The same value, read as a threshold, for the layer that carries the words. See
+  // the note at the chart itself.
+  const chartWords = useAnimatedStyle(() => ({ opacity: SCENE.value.floor > 0.5 ? 1 : 0 }));
   // Fades in over the first fifth of its window and out over the last, so it
   // arrives and settles rather than snapping on, and is invisible at rest.
   const noteStyle = useAnimatedStyle(() => {
@@ -172,12 +175,25 @@ export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick, dragPos
       <Stickman role="second" D={DB} k={K_FIG} />
 
       {/* ── the floor: Brown's universals, drawn as a bar chart ───────────── */}
+      {/* THE BARS RIDE THE REACTION; THE WORDS DO NOT (D35).
+
+          `floor` is driven by the control on the graded beat —
+          `reacting ? 1 - pickPos.value : FLOOR[n]` — so with the question not yet
+          answered it RESTS mid-range, and every word in here rested with it.
+          Measured: "THE FLOOR — FOUND IN EVERY SOCIETY DOCUMENTED" at opacity 0.50
+          and 2:1 contrast, which is a smear in the shape of a sentence.
+
+          R7c is right and stays: the chart still fades as the reader moves. It is
+          the WORDS that may not be dimmed, so they take the same value read as a
+          threshold — legible while the chart is there, gone once it is not. */}
       <Animated.View style={[StyleSheet.absoluteFill, chartStyle]} pointerEvents="none">
+        {TRAITS.map((tr, k) => <Bar key={`b${tr}`} S={SCENE} k={k} />)}
+      </Animated.View>
+      <Animated.View style={[StyleSheet.absoluteFill, chartWords]} pointerEvents="none">
         <Text style={styles.chartHdr}>THE FLOOR — FOUND IN EVERY SOCIETY DOCUMENTED</Text>
         {TRAITS.map((tr, k) => (
           <Text key={`t${tr}`} style={[styles.traitT, { top: CHART_T + k * PITCH }]}>{tr}</Text>
         ))}
-        {TRAITS.map((tr, k) => <Bar key={`b${tr}`} S={SCENE} k={k} />)}
         {TRAITS.map((tr, k) => (
           <Text key={`v${tr}`} style={[styles.valT, { top: CHART_T + k * PITCH }]}>ALL</Text>
         ))}

@@ -398,8 +398,12 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: INK, borderStyle: 'dashed',
   },
   // "but do you know the time?" — a small badge on the reading it questions.
+  // Beside the reading, not on it: at x 128…144, y 282…298 the badge sat over the
+  // last 0 of 3:00, which spans about x 101…131, y 290…302 (check:readable STRIKE,
+  // 2026-09-24). At x 134 it clears the digits by 3, its centre stays inside the
+  // dial's 44 radius, and the hour hand (along y 270) passes above it.
   knowBadge: {
-    position: 'absolute', left: 128, top: 282, width: 16, height: 16, borderRadius: 8,
+    position: 'absolute', left: 134, top: 287, width: 16, height: 16, borderRadius: 8,
     borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },

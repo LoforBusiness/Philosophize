@@ -246,8 +246,16 @@ export default function Metaphysics10Scene({ clock, bt, bi, i, picked, onPick, d
   const frameStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.frame }));
   // The tags dim WITH the objects when `absent` is up — the tag depends on the
   // thing it is pinned to, exactly as Aristotle's view says it must.
+  // THE "ABSENT" DIM MAY NOT TAKE THE WORD BELOW READING (D35).
+  //
+  // This was `1 - 0.55 * absent`, so with the tags up and absent full it rested at
+  // 0.45 — measured, RED at 2.9:1, which is under the floor and is the smear D35
+  // exists to forbid. The dim is saying something real (the redness is not in the
+  // things), so it stays as a signal; it is the DEPTH that was wrong. 0.7 is the
+  // value Target already uses for an option the reader did not take, so it reads
+  // as pushed back in this app's own vocabulary and still reads as a word.
   const tagStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.tags * (1 - 0.55 * SCENE.value.absent),
+    opacity: SCENE.value.tags * (1 - 0.3 * SCENE.value.absent),
     transform: [{ translateY: (1 - SCENE.value.tags) * -6 }],
   }));
   const strStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.str }));

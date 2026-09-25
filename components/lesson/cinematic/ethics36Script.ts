@@ -28,7 +28,7 @@ export interface Ethics36Beat extends BaseBeat {
   /** 1 = a "?" holds beside the ledger, for "what does forgiveness change". */ query?: number;
   /** 1 = a check marks the WHOSE FAULT row, for it standing rather than lapsing. */ affirm?: number;
   /** 1 = a dashed box outlines the YOURS TO GIVE label, for "a gift". */ own?: number;
-  /** 1 = a struck "NOT A DUTY" plate holds in the clear corner. */ notDuty?: number;
+  /** 1 = a NOT OWED plate holds in the clear corner. */ notDuty?: number;
 }
 
 export const BEATS: Ethics36Beat[] = [

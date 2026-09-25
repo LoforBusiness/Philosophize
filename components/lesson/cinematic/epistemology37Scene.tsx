@@ -255,9 +255,17 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: INK,
     includeFontPadding: false,
   },
-  // Below the water line, clear of the verdict card at CARD_X / CARD_Y.
+  // UNDER THE VERDICT IT GLOSSES, NOT UNDER THE FIGURE (D31).
+  //
+  // This sat at x 86…246, y 452…476 — and on the last beats he walks to x 126 and
+  // sits, so his shins hung straight through it. check:readable found it struck by
+  // a near-vertical 14×33 limb at x 120; a reader saw a word cut off by the man.
+  // Sliding it right does not work: his box on beat 10 reaches x 186. Directly
+  // under the verdict card it is clear of him on every beat (checked against the
+  // recorded boxes), it sits with the claim it is about, and the text measures
+  // 98.5 against the card's 116. 8 below the card's foot clears its lip.
   whosePlate: {
-    position: 'absolute', left: 86, top: CARD_Y + 44, width: 160, height: 24,
+    position: 'absolute', left: CARD_X, top: CARD_Y + 52, width: 116, height: 24,
     borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: INK,
     alignItems: 'center', justifyContent: 'center',
   },

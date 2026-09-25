@@ -136,6 +136,12 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
       // perspective"* — and this drawing is flat and seen straight on, so the rule
       // applies exactly. It is the one thing that puts him ON the floor rather than
       // in front of it.
+      //
+      // It is a FILL PLUS A HALO now rather than a flat capsule, and it hugs his
+      // feet instead of standing 11 units clear of them on each side — the flat
+      // one read as a grey object lying on the floor, which is what the owner
+      // reported. `pillStyle` carries the whole finding and `npm run sheet:shadow`
+      // is what showed it.
       pill: pillStyle(k),
     };
   }, [k, color, gloves]);

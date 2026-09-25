@@ -221,6 +221,26 @@ export default function Political6Scene({ clock, bt, bi, i, picked, onPick, drag
         <Text style={styles.chipSub}>ONLY IF IT LIFTS</Text>
       </Animated.View>
 
+
+      {/* ── legend: what the dark bar and the dashed line mean ───────────────── */}
+      <Animated.View style={[styles.legend, chartStyle]} pointerEvents="none">
+        <View style={styles.legSwatch} />
+        <Text style={styles.legText}>WORST-OFF</Text>
+        <View style={styles.legDash} />
+        <View style={styles.legDash} />
+        <Text style={styles.legText}>EQUALITY LINE</Text>
+      </Animated.View>
+
+      {/* ── the two societies ────────────────────────────────────────────────── */}
+      {renderPanel('equal')}
+      {renderPanel('lift')}
+
+      {/* THE TAP EVENTS ARE DRAWN AFTER THE PANELS, not before them. Every one of
+          them sits over a panel, and a panel's face is an opaque tone — so the "?"
+          places, the gap rule and its label, JUDGED HERE and the wash were all
+          painted underneath and never seen, while check:still counted them as the
+          beats' events because their values changed (found through check:readable,
+          2026-09-24). */}
       {/* Any of the three could be you: a "?" over each bar of the equal society. */}
       {SOC.equal.bars.map((h, k) => (
         <Animated.View key={`pl${k}`} style={[styles.place, { left: barCX(SOC.equal.left, k) - 9, top: barTop(SOC.equal.bars, k) - 22 }, placeStyles[k]]} pointerEvents="none">
@@ -241,19 +261,6 @@ export default function Political6Scene({ clock, bt, bi, i, picked, onPick, drag
         <Text style={styles.judgeText}>JUDGED HERE</Text>
       </Animated.View>
       <Animated.View style={[styles.bestQuiet, { left: barCX(UN.left, 2) - BAR_W / 2 - 3, top: barTop(UN.bars, 2) - 3 }, bestQuietStyle]} pointerEvents="none" />
-
-      {/* ── legend: what the dark bar and the dashed line mean ───────────────── */}
-      <Animated.View style={[styles.legend, chartStyle]} pointerEvents="none">
-        <View style={styles.legSwatch} />
-        <Text style={styles.legText}>WORST-OFF</Text>
-        <View style={styles.legDash} />
-        <View style={styles.legDash} />
-        <Text style={styles.legText}>EQUALITY LINE</Text>
-      </Animated.View>
-
-      {/* ── the two societies ────────────────────────────────────────────────── */}
-      {renderPanel('equal')}
-      {renderPanel('lift')}
 
       {/* ── the shared reference level, drawn across BOTH charts ─────────────── */}
       {EQ_DASHES.map((k) => <EqDash key={k} S={SCENE} k={k} />)}
@@ -315,8 +322,13 @@ const styles = StyleSheet.create({
     height: UN.bars[2] - UN.bars[0], backgroundColor: SOFT, transformOrigin: '50% 0%',
   },
   gapCap: { position: 'absolute', left: GAP_X - 4, width: 10, height: 2, backgroundColor: SOFT },
+  // ABOVE the rule's top, right-aligned to end over it — not beside it. The rule
+  // runs at x 386, the panel ends at 396 and the stage at 400, so a label set at
+  // GAP_X + 7 wrapped into two lines that hung off the stage and across the panel's
+  // rim (check:readable CUT + STRIKE, 2026-09-24). Above the best-paid bar's head
+  // (y 324) the panel is bare paper down from its top at 302.
   gapText: {
-    position: 'absolute', left: GAP_X + 7, top: BAR_BASE - UN.bars[2] + 6,
+    position: 'absolute', left: GAP_X + 4 - 60, top: BAR_BASE - UN.bars[2] - 14, width: 60, textAlign: 'right',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0.9, color: SOFT,
     includeFontPadding: false,
   },

@@ -34,7 +34,7 @@ const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-st
 //   acts are fixed and only what they were WORTH is in question (A1).
 // · THREE NAMES of 76 under the rail at y 366, centred on each mark.
 // · TWO CAPTIONS at y 244 mark the ends: DUTY at x 110 and A GIFT at x 310.
-// · the LINE is 3 wide at x 110 + line × 260, running y 250…364, drawn BEHIND the
+// · the LINE is 3 wide at x 110 + line × 260, running y 257…364, drawn BEHIND the
 //   marks so it never crosses a word.
 // · THREE PLATES of 90×34 at x 124 · 216 · 308 (124…398), top y 452, two lines.
 // · the figure stands at x 24 and walks to 80; his widest span at the walked mark
@@ -60,7 +60,10 @@ const NAME_W = 76;
 const NAME_T = 366;
 
 const END_T = 244;
-const LINE_T = 250;
+// The line starts BELOW the end captions (y 244…254), not among them: from 250 it
+// ran up through whichever caption it stopped under, and past the kidney mark
+// that is A GIFT — the line cut its T in half (check:readable STRIKE, 2026-09-24).
+const LINE_T = 257;
 const LINE_B = 364;
 
 const PLATE_X = [124, 216, 308];
@@ -198,9 +201,13 @@ export default function Ethics29Scene({ clock, bt, bi, i, picked, onPick, dragPo
         {/* How each act reads, common sense's own verdict: tall for the kidney,
             middling for the fair share, an uncertain dash for walking past. */}
         <Animated.View style={[StyleSheet.absoluteFill, weighStyle]} pointerEvents="none">
-          <View style={[styles.weighBarSoft, { left: MARK_X[0] + MARK_W / 2 - 1, top: 256, height: 6 }]} />
-          <View style={[styles.weighBar, { left: MARK_X[1] + MARK_W / 2 - 1, top: 252, height: 10 }]} />
-          <View style={[styles.weighBar, { left: MARK_X[2] + MARK_W / 2 - 1, top: 248, height: 14 }]} />
+          {/* Half the height they were, in the same 14 : 10 : 6 proportion. They stand on
+              the marks' tops at 262, and the tallest reached 248 — into the end
+              captions' band (y 244…254), through the T of A GIFT (check:readable
+              STRIKE, 2026-09-24). Topping out at 255 keeps them under it. */}
+          <View style={[styles.weighBarSoft, { left: MARK_X[0] + MARK_W / 2 - 1, top: 259, height: 3 }]} />
+          <View style={[styles.weighBar, { left: MARK_X[1] + MARK_W / 2 - 1, top: 257, height: 5 }]} />
+          <View style={[styles.weighBar, { left: MARK_X[2] + MARK_W / 2 - 1, top: 255, height: 7 }]} />
         </Animated.View>
       </Animated.View>
 
@@ -278,7 +285,9 @@ const styles = StyleSheet.create({
   spanTick: { position: 'absolute', top: 253, width: 1.5, height: 6, backgroundColor: SHADE },
 
   // A small tick over the kidney mark: praiseworthy if done.
-  earnWrap: { position: 'absolute', top: 248, width: 8, height: 8 },
+  // Between A GIFT's baseline (y ≈ 252) and the mark's top (262), not on the
+  // caption: at 248 the tick sat across the T of A GIFT.
+  earnWrap: { position: 'absolute', top: 254, width: 8, height: 8 },
   earnA: { position: 'absolute', left: 0, top: 4, width: 4, height: 1.5, backgroundColor: INK, transform: [{ rotate: '45deg' }] },
   earnB: { position: 'absolute', left: 2, top: 1, width: 7, height: 1.5, backgroundColor: INK, transform: [{ rotate: '-45deg' }] },
 

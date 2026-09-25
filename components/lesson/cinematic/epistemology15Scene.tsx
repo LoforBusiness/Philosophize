@@ -237,7 +237,10 @@ const styles = StyleSheet.create({
     borderRadius: 8, borderWidth: 2, borderColor: INK, borderStyle: 'dashed',
   },
   chairCellRing: { left: COL_X[1] - 5, top: ROW_Y[1] - 5 },
-  emptyCellRing: { left: COL_X[1] - 5, top: ROW_Y[0] - 5 },
+  // The top row's ring starts just above its cell, not 5 above it: the column
+  // heading runs two lines down to y ≈ 266, and a ring from 263 put its dashed top
+  // through SOMETHING (check:readable STRIKE, 2026-09-24). The bottom is unchanged.
+  emptyCellRing: { left: COL_X[1] - 5, top: ROW_Y[0] - 1, height: CELL_H + 6 },
   // "anything that adds... can be known only after looking" — the whole row.
   afterRowRing: {
     position: 'absolute', left: COL_X[0] - 4, top: ROW_Y[1] - 4,

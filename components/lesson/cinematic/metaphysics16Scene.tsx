@@ -64,12 +64,21 @@ const PICKV = BEATS.map((b) => b.pick ?? 0);
 const ARROW_L = PANEL_W / 2 - 9 - 8;   // arrowWrap's left, padded
 const ARROW_W = 18 + 16;
 const SPOT = BEATS.map((b) => b.spot ?? 0);
+// EVERY SHAPE EITHER ENCLOSES A TAG ROW WHOLE OR STOPS ABOVE IT. The tag
+// (AND HE IS BEHIND IT / AND HE HATES IT) sits across the middle of the column at
+// y ≈ 340…350 and is about 110 wide, while the arrows it sits between are 18 — so a
+// frame the arrows' width ran its two sides through the words, the two-panel frames
+// started and ended inside the tags, and the second-order frame ran its bottom edge
+// through them at 342 (check:readable STRIKE, 2026-09-24).
+const INSET = 6;
 function spotRect(v: number): [number, number, number, number] {
-  if (v === 1) return [PANEL_L[1] + ARROW_L, PANEL_T + 34, ARROW_W, 122];        // unwilling: whole arrow column
-  if (v === 2) return [PANEL_L[0] + ARROW_L, PANEL_T + 34, PANEL_L[1] - PANEL_L[0] + ARROW_W, 58]; // both: second-order arrow
-  if (v === 3) return [PANEL_L[0] + ARROW_L, PANEL_T + 34, ARROW_W, 122];        // willing: whole arrow column
-  if (v === 4) return [PANEL_L[0] + ARROW_L, PANEL_T + 82, PANEL_L[1] - PANEL_L[0] + ARROW_W, 26]; // both: tag row
-  return [PANEL_L[0] + ARROW_L, PANEL_T + 34, ARROW_W, 122];
+  const column = (k: number): [number, number, number, number] =>
+    [PANEL_L[k] + INSET, PANEL_T + 34, PANEL_W - 2 * INSET, 122];                  // whole middle of a panel
+  if (v === 1) return column(1);                                                  // unwilling
+  if (v === 2) return [PANEL_L[0] + ARROW_L, PANEL_T + 32, PANEL_L[1] - PANEL_L[0] + ARROW_W, 55]; // both: second-order arrow, ending at 337
+  if (v === 3) return column(0);                                                  // willing
+  if (v === 4) return [PANEL_L[0] + 4, PANEL_T + 82, PANEL_L[1] + PANEL_W - PANEL_L[0] - 8, 26]; // both: tag row, both tags inside
+  return column(0);
 }
 const SPOT_L = SPOT.map((v) => spotRect(v)[0]);
 const SPOT_T = SPOT.map((v) => spotRect(v)[1]);

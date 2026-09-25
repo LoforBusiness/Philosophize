@@ -32,7 +32,7 @@ const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-st
 //   file moves them — the lesson's claim is that the scene never changes.
 // · the VIEWFINDER is a 118×86 frame with 3-thick corners only (no full border,
 //   so it reads as a finder rather than a box). It slides x 104…274 at y 296.
-// · the two PRINTS hang below at y 410…470: 108×60 each at x 150 and x 268, each
+// · the two PRINTS hang below at y 410…470: 108×60 each at x 172 and x 284, each
 //   showing the marks its own crop contains, with its caption beneath at y 472.
 // · the figure stands at x 54 and walks to 128; crown ~397. The square begins at
 //   x 104, so on his second position he stands under its left end and beside the
@@ -64,7 +64,12 @@ const FIND_HI = 274;
 const PRINT_Y = 410;
 const PRINT_W = 108;
 const PRINT_H = 60;
-const PRINT_X = [150, 268];
+// 172 and 284, not 150 and 268: on his second position (x 128) the figure's near
+// leg reaches about x 146 and the CANE he may be dressed with stands at x 157, and
+// the first caption started at 144 — so the leg, then the cane, ran through the TH
+// of THOUSANDS TURN OUT (check:readable STRIKE, 2026-09-24, twice). The caption
+// now starts at 166. The second print ends at 392, its caption box at 398.
+const PRINT_X = [172, 284];
 const PRINT_CAP = ['THOUSANDS TURN OUT', 'NOBODY CAME'];
 /** Which slice of the square each print shows — the two extremes of the rail. */
 const PRINT_FROM = [104, 274];

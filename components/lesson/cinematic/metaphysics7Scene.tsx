@@ -144,9 +144,19 @@ export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dr
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const lineStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.line }));
   // The spotlight rides the figure: it IS wherever they are standing.
+  //
+  // THE WORDS DO NOT RIDE THE FADE (D35). This carried `opacity: spot * line` on
+  // the whole wrap, and YOUR NOW / KEEPS CHANGING are inside it — measured through
+  // a real run the pair rested at 0.161, which is a smear in the shape of a word.
+  // A product of two dimming tracks is the worst case of it: neither track has to
+  // be especially low for the result to be. So the wrap carries only the travel,
+  // the RING carries the fade, and the label is legible or absent.
   const ringStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.spot * SCENE.value.line,
     transform: [{ translateX: SCENE.value.fx - RING_W / 2 }],
+  }));
+  const ringInk = useAnimatedStyle(() => ({ opacity: SCENE.value.spot * SCENE.value.line }));
+  const ringWord = useAnimatedStyle(() => ({
+    opacity: SCENE.value.spot * SCENE.value.line > 0.5 ? 1 : 0,
   }));
   // group AH — the still-tap events.
   const qMarkStyle = useAnimatedStyle(() => ({
@@ -161,7 +171,12 @@ export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dr
   // opacity, so the rest of the timeline is untouched.
   const pastStemStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.line * (1 - SCENE.value.pastCut) }));
   const futureStemStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.line * (1 - SCENE.value.futureCut) }));
-  const changeTagStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.keepsChanging }));
+  // Legible or absent, and gated on the spotlight it rides in (D35). It used to
+  // inherit the wrap's `spot * line` as well as its own track; now the wrap carries
+  // no opacity, so it has to state both itself or it would outlive the ring.
+  const changeTagStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.keepsChanging > 0.5 && SCENE.value.spot * SCENE.value.line > 0.5 ? 1 : 0,
+  }));
   const pagesStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.pages,
     transform: [{ translateY: (1 - SCENE.value.pages) * 6 }],
@@ -221,8 +236,8 @@ export default function Metaphysics7Scene({ clock, bt, bi, i, picked, onPick, dr
 
       {/* ── the travelling "your now" spotlight ──────────────────────────────── */}
       <Animated.View style={[styles.ringWrap, ringStyle]} pointerEvents="none">
-        <View style={styles.ring} />
-        <Text style={styles.ringLabel}>YOUR NOW</Text>
+        <Animated.View style={[styles.ring, ringInk]} />
+        <Animated.Text style={[styles.ringLabel, ringWord]}>YOUR NOW</Animated.Text>
         {/* group AH — "which moment that is keeps changing": a small note rides
             along with the spotlight it describes. */}
         <Animated.View style={[styles.changeTagWrap, changeTagStyle]} pointerEvents="none">

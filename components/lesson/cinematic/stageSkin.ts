@@ -141,18 +141,55 @@ export const PLATE_FACE = '#FFFFFF';
  * It is drawn by `Stickman` rather than by a scene, so every figure in every lesson
  * gets it — and it is sized from the figure's own scale, because a fixed pill under
  * a figure drawn at 1.16× reads as a puddle he is standing beside.
+ *
+ * ── AND ITS FIRST DRAWING WAS A GREY OBJECT, NOT A SHADOW ───────────────────
+ *
+ * The owner: *"I dont want that gray thing at the stickmans feet that follows him
+ * around, I like the idea of a shadow but this doesnt look very good."* Rendered
+ * through the real rig onto the real floor (`sheet:shadow`), it was three separate
+ * faults and only the first needs a new mechanism:
+ *
+ *   · A HARD EDGE. It was a flat 16% slab with a hard boundary, in an app where
+ *     every struck thing has a lit or shaded edge. A hard-edged grey capsule is
+ *     an object lying on the floor; at this alpha it is *"a gray thing"* exactly.
+ *   · WIDER THAN HE IS. 34 units against a foot span of about 12, so it stood 11
+ *     units clear on each side and read as a mat he was standing on.
+ *   · ACROSS THE GROUND LINE, not below it. Centred on his ankles, half its height
+ *     lay on PAPER above the floor and it crossed the floor's own white hairline —
+ *     a grey lozenge laid over a boundary.
+ *
+ * ── A FILL PLUS A HALO, AND THE RATIO IS THE WHOLE TRICK ────────────────────
+ *
+ * The obvious soft shadow — a transparent View with a blurred `boxShadow` — does
+ * not work: CSS clips an outer box-shadow to OUTSIDE the border box, so what comes
+ * back is a hollow RING with its middle knocked out. What works is a fill and a
+ * halo together, and the seam between them is invisible at exactly one ratio. A
+ * gaussian across a step edge reads half the inside value AT the edge, so the fill
+ * must be half the halo's alpha — otherwise there is a visible step where the box
+ * ends, which is the hard edge back again under a blur.
+ *
+ * THIS IS THE FIRST BLURRED SHADOW IN THE APP. Every other `boxShadow` here is a
+ * hard band at 0px blur, on purpose (see `lipOf`). The failure mode is the reason
+ * that is acceptable: if a platform ignores the blur, what is left is the fill —
+ * a narrower, quieter pill sitting below the hairline, which is still better than
+ * what it replaced and never worse.
  */
+export const PILL_ALPHA = 0.26;
+
 export function pillStyle(k: number) {
-  const w = 34 * k;
-  const h = 5 * k;
+  const w = 26 * k;
+  const h = 3 * k;
   return {
     position: 'absolute' as const,
     left: -w / 2,
-    top: -h / 2,
+    // BELOW the ground line rather than across it: `Stickman` translates this to
+    // the ankle, and the floor's lit top edge starts there.
+    top: -h / 2 + 1.5 * k,
     width: w,
     height: h,
     borderRadius: h / 2,
-    backgroundColor: 'rgba(26, 26, 26, 0.16)',
+    backgroundColor: `rgba(26, 26, 26, ${PILL_ALPHA / 2})`,
+    boxShadow: `0px 0px ${7 * k}px rgba(26, 26, 26, ${PILL_ALPHA})`,
   };
 }
 

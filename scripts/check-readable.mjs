@@ -47,6 +47,7 @@
 // "This screen doesn't exist" — which reads exactly like a broken route table.
 import http from 'node:http';
 import fs from 'node:fs';
+import path from 'node:path';
 import { claimRoute } from './lib/previewroute.mjs';
 import { sweepStaleTabs, closeTab } from './lib/cdptab.mjs';
 import { ANSWER_CONTROL } from './lib/answerctl.mjs';
@@ -94,6 +95,7 @@ function inkRange(img, x, y, w, h) {
   const hi = ls[Math.floor(ls.length * 0.9)];
   return (hi + 0.05) / (lo + 0.05);
 }
+
 
 const PORT = +(process.env.CDP_PORT || 9391);
 const WEB = +(process.env.WEB_PORT || 8861);
@@ -1112,6 +1114,19 @@ function allIds() {
     // breaks it is printed inside the same box". The three crackA/B/C rules are
     // drawn ACROSS the boast on purpose — a claim that refutes itself, breaking.
     'epistemology-knowledge-6': ['NOTHING IS KNOWN', '…INCLUDING THAT?'],
+    // REJECT_LABELS in the scene: "the two reasons Mill refuses, before the real
+    // argument exists". Each card carries its own `rejectStrike` rule drawn across
+    // the words — the lesson is those two justifications being crossed out, and a
+    // reader looking at them saw them crossed out, which is the point. Found as two
+    // STRIKEs in the 2026-09-23 sweep and judged by eye.
+    'political-political-13': ['YOUR OWN GOOD', 'OTHERS DISLIKE IT'],
+
+    // The collapse: the premises are stones stacked on the conclusion, and at the
+    // camera's push three stones 114 wide cannot sit in the frame without one
+    // lying on another's edge (CLAUDE.md §17, the port of this lesson). The stone
+    // above rests on the conclusion's rim, not its words — judged by eye on the
+    // crop check:readable itself took on the struck beat (READ_SHOTS, 2026-09-24).
+    'logic-arguments-2': ['Socrates is mortal'],
   };
 
   const nBeatsOf = (() => {
@@ -1302,6 +1317,31 @@ function allIds() {
           const rest = h.why.split('+').filter((w) => w !== 'STRIKE').join('+');
           return rest ? { ...h, why: rest } : null;
         }).filter(Boolean);
+      }
+      // READ_SHOTS=<dir> SAVES WHAT THE READER SEES AT EVERY STRIKE, UNDER AND BLANK.
+      //
+      // STRIKE cannot be settled by measurement — see STRUCK_ON_PURPOSE above, and
+      // the 2026-09-23 attempt recorded in CLAUDE.md: hiding the striker and
+      // re-shooting measured 0.012 to 0.370 of the word's rectangle changed on
+      // twenty words a person had judged readable, because the commonest "striker"
+      // is the word's own background plate drawn as a sibling. So a strike needs
+      // eyes, and eyes need the RIGHT frame. A separate sheet that re-walks the
+      // lesson cannot promise that — two harnesses disagree about which beat is
+      // which — so the crop is taken here, by the run that made the finding, on
+      // the beat it made it.
+      if (process.env.READ_SHOTS && hits.some((h) => /STRIKE|UNDER|BLANK/.test(h.why))) {
+        const pad = 26;
+        for (const h of hits.filter((x) => /STRIKE|UNDER|BLANK/.test(x.why) && Array.isArray(x.r))) {
+          const clip = {
+            x: Math.max(0, h.r[0] - pad), y: Math.max(0, h.r[1] - pad),
+            width: h.r[2] + pad * 2, height: h.r[3] + pad * 2, scale: 2,
+          };
+          const img = await shoot(clip);
+          if (!img) continue;
+          const safe = String(h.t).replace(/[^A-Za-z0-9]+/g, '_').slice(0, 28);
+          fs.mkdirSync(process.env.READ_SHOTS, { recursive: true });
+          await img.writeAsync(path.join(process.env.READ_SHOTS, `${id}__b${b}__${h.why}__${safe}.png`));
+        }
       }
       if (hits.length) beats.push({ beat: b, hits });
       if (got.done) break;

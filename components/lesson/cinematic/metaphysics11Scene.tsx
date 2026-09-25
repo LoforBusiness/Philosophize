@@ -49,10 +49,11 @@ const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-st
 //     until the cobbler walks onto it, and only his NAME is written up on arrival.
 //   · the names sit at y 469 … 485, mid-stand. The lowest ink either figure draws
 //     is an ankle dot reaching y 459.5, which stops 9.5 clear of them (D31).
-//   · the MEMORIES plate is 96 × 26 with a 14-unit leader down to the crown, so
-//     its top edge rides at y ≈ 311, and 279 at the top of its travel arc (that
-//     is the measured worst case over every pose and every frame of the arc). It
-//     is the highest thing the scene ever draws — hence band [268, 510].
+//   · the MEMORIES plate is 96 × 26 with a 20-unit leader down to the crown, so
+//     its top edge rides at y ≈ 305, and 273 at the top of its travel arc (the
+//     measured worst case over every pose and every frame of the arc was 279 at a
+//     14-unit leader; the leader grew by 6 to give "= PERSON" room, see LEADER).
+//     It is the highest thing the scene ever draws — hence band [268, 510].
 //
 // DELIBERATE, so a later audit does not "fix" them (A5) —
 //   · NEITHER FIGURE MOVES after the cobbler walks on. That is the lesson: the
@@ -89,7 +90,15 @@ const NAME_SEP = 13;
 
 const TOK_W = 96;
 const TOK_H = 26;
-const LEADER = 14;                          // plate → crown
+// plate → crown. WAS 14, AND "= PERSON" HAD NOWHERE TO GO.
+//
+// The gloss hangs under the plate, and 14 units between the plate and the crown is
+// less than a 12px line needs, so it came out with its lower edge inside the head.
+// check:readable found it struck by a 39x39 div — the head, radius 20. At 20 the
+// line clears the plate by 2 and the crown by about 4; the plate's own arc top
+// rises from y 279 to 273, which is still inside the band's 268 (the note at the
+// foot of this file measures that clearance).
+const LEADER = 20;
 const ARC = 26;                             // how high the plate rides mid-flight
 // Rig landmarks, in rig units (B10): the pelvis stands 34 above the feet and the
 // head is a disc of radius 20. Everything pinned to a figure is derived from these
@@ -255,7 +264,7 @@ export default function Metaphysics11Scene({ clock, bt, bi, i, picked, onPick, d
   }));
   const personStyle = useAnimatedStyle(() => ({
     opacity: SCENE.value.person,
-    transform: [{ translateX: SCENE.value.tokX }, { translateY: SCENE.value.tokY + TOK_H + 4 }],
+    transform: [{ translateX: SCENE.value.tokX }, { translateY: SCENE.value.tokY + TOK_H + 2 }],
   }));
 
   return (
@@ -369,11 +378,14 @@ const styles = StyleSheet.create({
   query: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, color: INK, includeFontPadding: false },
   // Rides the MEMORIES badge's own position (TOK_W wide, centred, like tokWrap).
   tinyWrap: { position: 'absolute', left: 0, top: 0, width: TOK_W, alignItems: 'center' },
-  tinyText: { fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.6, color: SHADE, includeFontPadding: false },
+  // INK, not SHADE: SHADE is the branch hue's shaded side, right for a mass and
+  // 2.4:1 as type on paper — "= PERSON" read as a smear (check:readable FAINT,
+  // 2026-09-24). It names the answer's gloss, so it is set like every other word.
+  tinyText: { fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.6, color: INK, includeFontPadding: false },
 });
 
-// Art runs from the MEMORIES plate at the top of its arc (measured worst case
-// y 279, and 268 leaves it a little air) down to the ground line at 500. Nothing
+// Art runs from the MEMORIES plate at the top of its arc (y 273 since LEADER grew
+// to 20; 268 still leaves it 5 units of air) down to the ground line at 500. Nothing
 // else is drawn above the crowns at y 351, and the stands stop on the floor — so
 // the band is 242 units, inside the ~280 below which a tighter crop buys nothing
 // and above which every single thing in the scene renders smaller (H59).

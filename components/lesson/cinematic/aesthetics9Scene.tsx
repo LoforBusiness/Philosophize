@@ -345,8 +345,11 @@ const styles = StyleSheet.create({
 
   // A small corner badge on the plinth box: beauty remains possible, but it is a
   // pinned-on maybe now, not the crown that used to rule the whole stage.
+  // On the TOP-right corner. On the bottom-right (y 298) it sat over the end of the
+  // box's small print, 24 GIANT SIZE PKGS (check:readable STRIKE, 2026-09-24); at
+  // 226 it straddles the rim above the content, which is centred and starts near 248.
   maybeBadge: {
-    position: 'absolute', left: 322, top: 298, paddingHorizontal: 5, paddingVertical: 2,
+    position: 'absolute', left: 322, top: 226, paddingHorizontal: 5, paddingVertical: 2,
     borderWidth: 1.5, borderColor: INK, borderRadius: 9, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
   maybeText: { fontFamily: 'Inter_700Bold', fontSize: 8.7, letterSpacing: 0.4, color: INK,

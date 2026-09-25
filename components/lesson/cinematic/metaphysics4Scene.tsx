@@ -36,14 +36,16 @@ const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-st
 //     so it is drawn well past the ~90-unit "reads at a glance" floor.
 //   · Its rim TOPS out at 294 − 53×1.05 = 238.4 on the same breath, four units
 //     under the foot of WHAT-IS-NOT. With the centre at 288 it reached 232.4, and
-//     every breath drew the ring through the bottom of -IS- (S9).
+//     every breath drew the ring through the bottom of -IS- (S9). The seal ring
+//     that arrives on rejection is 16 wider and tops out at 233, which is why the
+//     label sits at 219.
 //   · The LEDGER owns x 14–238, well left of the figure. Its rows are the whole
 //     lesson: what you SAID, and the something it BECAME — closed off by a TALLY
 //     that keeps the score of the trap: every grab counted, no escapes. Three
 //     EMPTY row frames are ruled in from the first beat, so the table reads as a
 //     ledger before anything is written in it and each grab lands in a waiting
 //     slot rather than materialising out of blank paper.
-//   · Nothing is drawn above y = 224 or below the ankle joints at y ≈ 507, which
+//   · Nothing is drawn above y = 219 or below the ankle joints at y ≈ 507, which
 //     is what lets the player crop to band [216, 512] and render ~2.19× instead
 //     of the letterboxed 1.15×.
 
@@ -357,8 +359,12 @@ const styles = StyleSheet.create({
     backgroundColor: INK, borderRadius: 2, transformOrigin: '0% 50%',
   },
 
+  // Top 219, not 224: the seal ring (group AH) is 16 units wider than the rim and
+  // tops out at 294 − 61 = 233, which put it through the foot of WHAT-IS-NOT —
+  // the S9 fault the header records, back by a second route (check:readable STRIKE,
+  // 2026-09-24). At 219 the glyphs end near 228, five clear of the ring.
   voidLabel: {
-    position: 'absolute', left: 282, top: 224, width: 112, textAlign: 'center',
+    position: 'absolute', left: 282, top: 219, width: 112, textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.4, color: SOFT,
     includeFontPadding: false,
   },

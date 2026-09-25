@@ -35,7 +35,7 @@ const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-st
 //   3-thick frame. Inside each, a ZEBRA about 80 wide × 60 tall — SAME drawing,
 //   SAME stripes in both, because the reader's evidence does not tell them apart.
 //   Only the plaques at y 440…452 differ.
-// · the RELEVANCE FENCE is a 3-thick upright the drag slides across x 96…392 at
+// · the RELEVANCE FENCE is a 3-thick upright the drag slides across x 122…392 at
 //   y 320…440, so the reader can see how much of the zoo it is being asked to
 //   exclude.
 // · the figure stands at x 58 and walks to 130. His crown reaches ~397, below
@@ -109,7 +109,10 @@ const ZEBRA_MARKS: Part[] = [
   bar(38.4, 36.2, 46.4, 30.2, 2.4, INK), bar(34.8, 31.4, 42.8, 25.4, 2.4, INK),
 ];
 
-const FENCE_LO = 96;
+// 122, not 96: the fence starts at its low end on the question beat, and RELEVANT
+// is centred on it — at 96 the word ran x 70…126, across the figure standing at
+// x 58 and the cane he carries at x 78 (check:readable STRIKE, 2026-09-24).
+const FENCE_LO = 122;
 const FENCE_HI = 392;
 
 const CAP_T = 238;

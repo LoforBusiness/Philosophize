@@ -35,8 +35,8 @@ const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-st
 //   OSCILLATES between the two boxes on the WALL clock: x 200 ± 46, a full cycle
 //   every 2.4s, so it is still moving while the reader reads and it never lands.
 //   That is the only honest animation for a thing with no answer.
-// · the SET PANEL is 236×46 at x 136, y 404…450, holding the same puzzle in the
-//   set-theoretic form, with its own small unresolved token at x 356.
+// · the SET PANEL is 236×46 at x 156, y 404…450, holding the same puzzle in the
+//   set-theoretic form, with its own small token swinging across its left edge.
 // · the figure stands at x 56 and walks to 128; crown ~397, left of the boxes,
 //   which begin at x 136.
 //
@@ -64,7 +64,11 @@ const LANDS: readonly (readonly [number, number])[] = [
   [0, 0], [1, 0], [0, 1], [1, 1], [0, 2], [1, 2], [0, 3], [1, 3],
 ];
 
-const SET_X = 136;
+// 156, not the boxes' 136: from beat 8 the figure stands at x 128 and his head
+// spans about x 108…148 at the panel's own height, so a panel starting at 136 put
+// his head across THAT at the start of the second line (check:readable STRIKE,
+// 2026-09-24). The panel is 236 wide and ends at 392, inside the stage.
+const SET_X = 156;
 const SET_Y = 404;
 
 const CAP_T = 236;

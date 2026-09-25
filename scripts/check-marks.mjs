@@ -48,8 +48,14 @@ const OWN_PLAYER = new Set(['logic-arguments-1', 'logic-arguments-2']);
  * the pen off a beat that now draws its own. This is the floor moving because the
  * thing it counted was replaced, not because a table was lost — the candidate report
  * says so: 224 frozen taps, 190 of them a question, quote or summary.
+ *
+ * 2 on 2026-09-24, and again not a lost table. 145 must-box tables had carried a
+ * duplicated row, so every beat after a question was measured as the beat before
+ * it; re-measured, `epistemology-knowledge-39` beat 5 turns out to have the figure
+ * where its MAJORITY underline was drawn. A mark on the stickman is the defect this
+ * file exists to refuse, so it goes rather than the rule bending round it.
  */
-const MARKS_FLOOR = 3;
+const MARKS_FLOOR = 2;
 
 let fails = 0;
 const ok = (m, d = '') => console.log(`  ok    ${m}${d ? `  ${d}` : ''}`);

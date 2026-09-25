@@ -3963,6 +3963,27 @@ one careless file.
 
 ### D35 · A word is legible or it is absent — never dimmed to a smear
 
+> **THREE MORE ROUTES TO THE SAME SMEAR (2026-09-24), and none is a dimmed layer
+> written as one.** Each passes every source check, because the opacity is right at
+> both ends and wrong in the middle — where the scene then RESTS:
+>
+> - **A reaction that parks a layer part way.** R7c drives a track off `pickPos`
+>   and `OddOneOut` parks `pickPos` at 0.5 until a tile is tapped, so a layer whose
+>   opacity (or a shutter whose travel) follows it sits HALF way on the question
+>   beat itself. `ethics4`, `metaphysics6` and `aesthetics10` all rested there, the
+>   last with its shutter half across GLORY IN CRUELTY. A reaction's words ride their
+>   own binary opacity; a reaction's state is WHOLE per option, never a lerp across
+>   four tiles.
+> - **A cross-fade inside one box.** `politicalScene` faded one caption out and the
+>   next in over the same `auth`, so at 0.5 both sat in one place at half strength.
+>   Two captions that share a box swap; they do not blend.
+> - **A fade that multiplies another.** `aesthetics15`'s answer fade stacked on
+>   `Target`'s own dim of the unchosen card, 0.35 × 0.66 = 0.23, and `metaphysics7`
+>   rode a label on `spot × line`. Target owns a target's opacity (S11); a word
+>   inside anything else that fades takes ONE driver, binary.
+>
+> `check:readable` found all of these as FAINT; the source cannot.
+
 D34 fixed the SIZE and the reader came straight back:
 
 > *"I am still seeing that there are boxes that are blank and I cannot see what
@@ -6941,6 +6962,26 @@ it reloads that screen now. A counter-test that measures nothing has to fail as 
 as one that measures wrong, so it prints what the checker said about any sweep that did
 not reach its beats.
 
+> **AND A STRIKE HAS TO BE LOOKED AT, AT ITS OWN BEAT (2026-09-24).** The paint stack
+> can say something crosses a word; it cannot say whether the word still reads. A
+> pixel test was built to settle it — hide the striker, re-shoot, compare — and
+> DELETED: it scored 0.01 to 0.37 on twenty words already judged readable, because the
+> commonest "striker" is the word's own plate drawn as a sibling, and hiding a plate
+> changes the word's rectangle whether or not it covered anything. So the crops come
+> from the run that made the finding: `READ_SHOTS=<dir> npm run check:readable` saves
+> every STRIKE and UNDER on the beat it was found, since a separate sheet re-walking
+> the lesson cannot promise the same beat. Of 22, **19 were real**, and nearly all were
+> one shape — a line drawn beside a word and later moved, grown or re-timed into it:
+> a spotlight frame the arrows' width round a tag three times as wide
+> (`metaphysics16`), a heading that wrapped under a spotlight's edge (`metaphysics14`),
+> a ring drawn over a plate it half-hides (`metaphysics21`), a group AH seal ring
+> sixteen units wider than the rim S9 had cleared (`metaphysics4`), a tilted banner
+> whose raised end reached the heading (`political9`), and a disc centred sixty units
+> off the rings it sits between (`political34`, since the lesson was written). One was
+> worse than a strike: `ethics36` crossed out NOT A DUTY, which says the opposite of
+> the sentence under it (A1). What is judged readable goes in `STRUCK_ON_PURPOSE` by
+> the word, with the reason — never by the lesson, so a new strike still fails.
+
 ---
 
 ## C18 · A figure that walks left has to turn and face left
@@ -8316,6 +8357,15 @@ ground. `mustBoxes` records every item every beat draws, so `make:visitor` finds
 the widest clear floor that exists on BOTH the entrance beat and the question beat
 — both, because a visitor who has to move out of the way between them is worse
 than no visitor. 18 lessons are refused for having nowhere to put him.
+
+> **AND EVERY BEAT AFTER THE QUESTION TOO (2026-09-24).** "Both" was the entrance
+> and the question, and he STAYS: from the beat he arrives to the end of the
+> lesson. So a spot clear on those two beats could be where a later beat hangs a
+> caption, and `aesthetics3` parked him at x 54 under MUSIC ARRIVES BEFORE REASON,
+> which check:readable reported as a word struck by a figure. `make:visitor` now
+> intersects the clear floor over every beat he is on stage. Two lessons lost him
+> (`political-political-1`, `-15`) and four moved, which is the rule working: a
+> visitor standing on a word is worse than no visitor, for the same reason as above.
 
 > **BLEED IS BACKGROUND, NOT AN OBSTACLE**, and forgetting it costs the whole
 > feature. The floor every scene now lays down is a full-width View running past
@@ -9705,6 +9755,38 @@ that puts him ON the floor rather than in front of it.
 `Stickman` draws it, so every figure in every lesson has one: sized from his own
 scale, placed at the midpoint of his ankles at whichever is lower, and fading as his
 feet part — a figure mid-stride is not standing on one spot.
+
+### AG5b · A shadow has no edge, hugs the feet, and sits BELOW the ground line
+
+The first drawing of AG5 was a flat 34×5 capsule at 16% ink, and the owner threw it
+out: *"I dont want that gray thing at the stickmans feet that follows him around, I
+like the idea of a shadow but this doesnt look very good."* `npm run sheet:shadow`
+showed three faults and every one of them is general:
+
+- **A HARD EDGE IS AN OBJECT.** Every struck thing in this app has a lit or shaded
+  edge; a flat grey slab with a hard boundary is a thing lying on the floor, and at
+  a low alpha it is a smudge in the shape of a lozenge. This is the same finding
+  D35 makes about a ghosted word: legible or absent, never dim.
+- **A SHADOW IS THE SIZE OF WHAT CASTS IT.** 34 units against a foot span of about
+  12 stood 11 units clear on each side, which reads as a mat he is standing on.
+- **BELOW THE GROUND LINE, NOT ACROSS IT.** Centred on the ankle, half its height
+  lay on bare PAPER above the floor and it crossed the floor's own white top
+  hairline (AG4) — a grey mark laid over a boundary.
+
+**The construction is a FILL PLUS A HALO, and the ratio is the rule.** A transparent
+View with a blurred `boxShadow` does not work: CSS clips an outer box-shadow to
+outside the border box, so it comes back a hollow RING with its middle knocked out.
+A fill and a halo together work, and the seam is invisible at exactly one ratio — a
+gaussian across a step edge reads half the inside value AT the edge, so the fill must
+be **half** the halo's alpha. Any other ratio puts a visible step back where the box
+ends, which is the hard edge again under a blur.
+
+**This is the first blurred shadow in the app**, and that is worth knowing before
+adding a second: every other `boxShadow` here is a hard band at 0px blur, on purpose
+(AG1). It is acceptable because of its failure mode — a platform that ignores the
+blur is left with the fill, a narrow quiet pill below the hairline, which is better
+than what it replaced and never worse. `check:skin` holds all three properties and
+`node scripts/countertest-skin.mjs` stages each defect on a copy.
 
 ### AG6 · The corner a plate turns
 

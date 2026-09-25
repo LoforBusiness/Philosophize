@@ -112,6 +112,17 @@ const DIR = dirsFrom(X, 1);
 const FILM = BEATS.map((b) => b.film ?? 0);
 const PANELV = BEATS.map((b) => b.panel ?? 0);
 const SHUT = BEATS.map((b) => b.shut ?? 0);
+// The shutter per ODD tile. Plato accepts three of the four, and each is a reason
+// to shut the panel; beauty outweighing the city is the one he does not accept,
+// so the panel stays open. A WHOLE state per tile: read linearly off `pickPos`
+// the shutter stopped a third or two thirds of the way over GLORY IN CRUELTY, and
+// before any tap OddOneOut parks `pickPos` at 0.5, which left it half shut across
+// the words on the question beat itself (check:readable STRIKE, 2026-09-24).
+// So it follows the TAPPED tile, eased by how far `pickPos` has travelled from its
+// parked 0.5 toward that tile's slot — the tile's own 300ms — and stays open until
+// something is tapped.
+const ODD_TILES = BEATS.find((b) => b.interact?.odd)?.interact?.odd?.tiles ?? [];
+const ODD_N = ODD_TILES.length;
 const LINKV = BEATS.map((b) => b.link ?? 0);
 const MARKV = BEATS.map((b) => (b.mark ? 1 : 0));
 
@@ -122,6 +133,9 @@ const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
 
 export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
   const reacting = REACT[i] === 1;
+  const pickIdx = picked ? ODD_TILES.findIndex((t) => t.id === picked) : -1;
+  const semGoal = pickIdx >= 0 && ODD_N > 1 ? pickIdx / (ODD_N - 1) : 0.5;
+  const shutGoal = pickIdx >= 0 && !ODD_TILES[pickIdx].correct ? 1 : 0;
   const heldS = useHeld();
   const cv = useCarry(6);
   const cur = BEATS[i];
@@ -156,10 +170,10 @@ export default function Aesthetics10Scene({ clock, bt, bi, i, picked, onPick, dr
       panel: carry(cv, 2, n, PANELV[p], PANELV[n], tr, panelFade ? grow : 1),
       // The shutter runs over the LAST 60% of the transition, so on the beat he
       // walks in he arrives at the jamb first and draws it across after.
-      // R7b — the knob closes the shutter. Drag toward THE CITY ABOVE ALL and it
-      // comes down over what the work asks you to feel; drag back to beauty and it
-      // runs off. The reader does the censoring, which is what Plato was proposing.
-      shut: carry(cv, 3, n, SHUT[p], reacting ? pickPos.value : SHUT[n], ease01(seg(tr, 0.4, 1))),
+      // R7b — the pick works the shutter. Any of Plato's three premises brings it
+      // down over what the work asks you to feel; beauty over the city leaves it
+      // open. The reader does the censoring, which is what Plato was proposing.
+      shut: carry(cv, 3, n, SHUT[p], reacting ? shutGoal * (semGoal === 0.5 ? 1 : Math.min(1, Math.abs(pickPos.value - 0.5) / Math.abs(semGoal - 0.5))) : SHUT[n], ease01(seg(tr, 0.4, 1))),
       link: carry(cv, 4, n, LINKV[p], LINKV[n], tr, linkFade ? grow : 1),
       verdict: verdictOn ? (verdictFade ? grow : 1) : 0,
       mark: carry(cv, 5, n, MARKV[p], MARKV[n], markFade ? grow : 1),

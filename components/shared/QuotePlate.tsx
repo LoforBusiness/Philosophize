@@ -235,7 +235,19 @@ export default function QuotePlate({
 
         <View style={styles.byline}>
           <View style={styles.bylineText}>
-            <Text style={[styles.author, { fontSize: S.author }]} numberOfLines={1}>{author}</Text>
+            {/* TWO LINES, for the reason the meta row below already gives.
+                A byline is usually one name and fits easily, but a joint
+                attribution is not: measured against the real Playfair .ttf,
+                three of the corpus's 246 run past the ~216px the text column
+                gets at 390dp — "Richard E. Nisbett and Timothy D. Wilson" at
+                288, "Amos Tversky and Daniel Kahneman" at 255 and
+                "W. K. Wimsatt & Monroe Beardsley" at 245. Clamped to one line
+                those truncate mid-surname, which is §14's distinction: declaring
+                a clamp is deliberate, running out of lines inside one is a word
+                the reader does not get. Shortening the citations was the other
+                option and it loses information the rewrite pass put there on
+                purpose (§13). */}
+            <Text style={[styles.author, { fontSize: S.author }]} numberOfLines={2}>{author}</Text>
             <View style={styles.eraRow}>
               <View style={[styles.pip, { backgroundColor: P.spine.base }]} />
               {/* TWO LINES, because the LESSON deck passes a work as well as a date.

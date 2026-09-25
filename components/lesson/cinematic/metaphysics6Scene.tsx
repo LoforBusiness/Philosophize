@@ -128,6 +128,17 @@ export default function Metaphysics6Scene({ clock, bt, bi, i, dragPos, pickPos, 
     opacity: SCENE.value.two,
     transform: [{ translateX: (1 - SCENE.value.two) * 22 }],
   }));
+  // THE LABEL DOES NOT RIDE THE REACTION (D35).
+  //
+  // `two` is driven by the control on the graded beat -- carry(..., reacting ?
+  // 1 - pickPos.value : TWO[n], tr) -- so before the reader answers it RESTS
+  // mid-range, and REBUILT rested with it at opacity 0.50 against a 2:1 ground.
+  // R7c stays: the rebuilt ship still fades in as the reader moves. The word takes
+  // the same value as a threshold, and keeps the slide so it still arrives with it.
+  const twoWord = useAnimatedStyle(() => ({
+    opacity: SCENE.value.two > 0.5 ? 1 : 0,
+    transform: [{ translateX: (1 - SCENE.value.two) * 22 }],
+  }));
   const askStyle = useAnimatedStyle(() => {
     const u = ease01(SCENE.value.two);
     return { opacity: u, transform: [{ scale: 0.55 + 0.45 * u }, { rotate: `${(1 - u) * -14}deg` }] };
@@ -229,6 +240,8 @@ export default function Metaphysics6Scene({ clock, bt, bi, i, dragPos, pickPos, 
       {/* ── the ship rebuilt from the hoarded planks, and the question it forces ─ */}
       <Animated.View style={[StyleSheet.absoluteFill, two]} pointerEvents="none">
         <Ship S={SCENE} x={SHIP2_X} live={false} />
+      </Animated.View>
+      <Animated.View style={[StyleSheet.absoluteFill, twoWord]} pointerEvents="none">
         <View style={[styles.shipLabel, { left: SHIP2_X - 58 }]}>
           <Text style={styles.shipLabelT}>REBUILT</Text>
         </View>

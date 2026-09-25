@@ -186,6 +186,7 @@
     "worklist:prose": "node scripts/prose-worklist.mjs",
     "dossier": "node scripts/lesson-dossier.mjs",
     "sheet:wardrobe": "node scripts/sheet-wardrobe.mjs",
+    "sheet:shadow": "node scripts/sheet-shadow.mjs",
     "make:wardrobe": "node scripts/make-wardrobe.mjs",
     "check:wardrobe": "node scripts/check-wardrobe.mjs",
     "make:figure-roles": "node scripts/make-figure-roles.mjs",

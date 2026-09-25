@@ -19,9 +19,6 @@ export interface StageMarkSpot {
 }
 
 export const MARKS: Record<string, Record<number, StageMarkSpot>> = {
-  'epistemology-knowledge-39': {
-    5: { w: 11, style: 'arrowL', box: [107.9, 391, 29, 16], label: "MAJORITY" },
-  },
   'ethics-ethics-12': {
     1: { w: 5, style: 'underline', box: [174, 245.5, 47.7, 8], label: "PROMISE" },
   },
