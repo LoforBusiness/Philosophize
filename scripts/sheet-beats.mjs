@@ -171,6 +171,10 @@ const ANSWER_TARGET = `(() => {
   const els = [...document.querySelectorAll('[role="button"],[tabindex]')]
     .filter((e) => e.getAttribute('data-testid') !== 'thinker-name')
     .filter((e) => e.getAttribute('aria-disabled') !== 'true')
+    // The player's body is itself a focusable Pressable that CONTAINS the stage, and
+    // it sits first in document order — clicking it is a tap to advance, which a
+    // gated beat ignores, so a two-card question parked the run on it.
+    .filter((e) => !e.contains(clip))
     .filter((e) => {
       const r = e.getBoundingClientRect();
       // On the stage, or in the deck immediately under it — never above it.

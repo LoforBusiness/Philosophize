@@ -18,7 +18,11 @@ const T = await import('@/components/shared/tone');
 const R = await import('./lib/rasterpath.mjs');
 
 const S = +(process.argv[2] || 2.6);
-const IDS = ['title', 'branches', 'logic_ethics', 'epistemology', 'format', 'pass'];
+// LESSON=logic1 draws a lesson's own boards instead — every phase of each, finished.
+const LESSON = process.env.LESSON;
+const LB = LESSON ? await import(`@/components/lesson/cinematic/${LESSON}Boards`) : null;
+const IDS = LB ? Object.keys(LB.BOARD_PHASES) : ['title', 'branches', 'logic_ethics', 'epistemology', 'format', 'pass'];
+const layout = (id) => (LB ? C.layoutRaws(LB.BOARD_PHASES[id].flat(), id) : C.layoutChalk(id));
 const GAP = 14;
 const BW = Math.round(C.BOARD_W * S), BH = Math.round(C.BOARD_H * S);
 const cols = 2, rows = 3;
@@ -52,7 +56,7 @@ function polyOf(d) {
 IDS.forEach((id, n) => {
   const ox = GAP + (n % cols) * (BW + GAP), oy = GAP + Math.floor(n / cols) * (BH + GAP);
   cv.fillRect(ox, oy, BW, BH, T.DEEP);
-  for (const p of C.layoutChalk(id)) {
+  for (const p of layout(id)) {
     // the piece's box, faint, so crowding shows
     const bx = ox + p.box.x * S, by = oy + p.box.y * S, bw = p.box.w * S, bh = p.box.h * S;
     for (const [a, b, c, d] of [[bx, by, bx + bw, by], [bx, by + bh, bx + bw, by + bh], [bx, by, bx, by + bh], [bx + bw, by, bx + bw, by + bh]]) {
@@ -70,7 +74,7 @@ IDS.forEach((id, n) => {
 });
 
 fs.mkdirSync('scripts/.lesson-shots', { recursive: true });
-const out = 'scripts/.lesson-shots/chalk.png';
+const out = `scripts/.lesson-shots/chalk${LESSON ? '-' + LESSON : ''}.png`;
 const img = await new Promise((res, rej) => new Jimp(cv.w, cv.h, (e, i) => (e ? rej(e) : res(i))));
 for (let i = 0; i < cv.w * cv.h; i += 1) {
   img.bitmap.data[i * 4] = cv.px[i * 3];

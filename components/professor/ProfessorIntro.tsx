@@ -3,9 +3,8 @@ import { View, Text, Pressable, StyleSheet, useWindowDimensions, type ViewStyle 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue, useFrameCallback, useAnimatedReaction, useDerivedValue, useAnimatedStyle,
-  useAnimatedProps, runOnJS, type SharedValue,
+  runOnJS, type SharedValue,
 } from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
 import Stickman from '@/components/lesson/cinematic/Stickman';
 import ObjectArt from '@/components/lesson/cinematic/ObjectArt';
 import { stageToneOf } from '@/components/lesson/cinematic/stageTones';
@@ -17,7 +16,8 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { track } from '@/lib/posthog';
 import { LINES } from './professorScript';
 import { VOICE_LINES } from './professorVoice';
-import { layoutChalk, CHALK_W, type ChalkPiece, type ChalkStroke } from './chalk';
+import { layoutChalk, type ChalkPiece } from './chalk';
+import ChalkPieces from './ChalkPieces';
 import {
   professorAt, lineAt, chalkWindow, LINE_T, T_END, K_PROF, WIPE,
 } from './professorAt';
@@ -51,17 +51,9 @@ import { lectureVoice } from './lectureVoice';
 // time, so a dropped frame can never let the words and the voice drift apart.
 //
 // A PIECE OF CHALK IS ONE SMALL <Svg>, sized to its own box, and never a board-sized
-// one: react-native-svg redraws a whole SvgView for every animated property written
-// to it (CLAUDE.md §17 rule 7, §19's GPU budget).
+// one (./ChalkPieces, shared with the lesson that writes on a board).
 // ─────────────────────────────────────────────────────────────────────────────
 
-const AnimatedPath = Animated.createAnimatedComponent(Path);
-
-/** The chalk as it lands: nearly white, a touch of the slate showing through. */
-const CHALK_OPACITY = 0.92;
-/** The dust a finished stroke leaves on the slate. */
-const DUST_OPACITY = 0.12;
-const DUST_W = CHALK_W * 2.6;
 /** Four caption lines at the caption's line height. */
 const CAPTION_ROOM = 4 * 30;
 
@@ -236,58 +228,10 @@ const Board = memo(function Board({ index, pieces, clock }: {
   const progress = useDerivedValue(() => clamp01((clock.value - a) / (b - a)));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, wipe]} nativeID={`chalk-board-${index}`}>
-      {pieces.map((p, k) => <Piece key={k} piece={p} progress={progress} />)}
+      <ChalkPieces pieces={pieces} progress={progress} x={CHALK_X} y={CHALK_Y} s={BOARD_S} />
     </Animated.View>
   );
 });
-
-function Piece({ piece, progress }: { piece: ChalkPiece; progress: SharedValue<number> }) {
-  const { box } = piece;
-  const dust = useMemo(() => piece.strokes.map((s) => s.d).join(' '), [piece]);
-  const dustProps = useAnimatedProps(() => ({
-    strokeOpacity: DUST_OPACITY * clamp01((progress.value - piece.t1) / 0.05),
-  }));
-  return (
-    <Svg
-      width={box.w * BOARD_S}
-      height={box.h * BOARD_S}
-      viewBox={`0 0 ${box.w} ${box.h}`}
-      style={{ position: 'absolute', left: CHALK_X + box.x * BOARD_S, top: CHALK_Y + box.y * BOARD_S }}
-    >
-      <AnimatedPath
-        d={dust}
-        stroke={PAPER_LIT}
-        strokeWidth={DUST_W}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-        animatedProps={dustProps}
-      />
-      {piece.strokes.map((s, i) => <Stroke key={i} stroke={s} progress={progress} />)}
-    </Svg>
-  );
-}
-
-function Stroke({ stroke, progress }: { stroke: ChalkStroke; progress: SharedValue<number> }) {
-  // The length is padded a little so a round cap never shows before the stroke begins.
-  const len = stroke.len + CHALK_W;
-  const props = useAnimatedProps(() => {
-    const u = clamp01((progress.value - stroke.t0) / (stroke.t1 - stroke.t0));
-    return { strokeDashoffset: len * (1 - u), strokeOpacity: u > 0 ? CHALK_OPACITY : 0 };
-  });
-  return (
-    <AnimatedPath
-      d={stroke.d}
-      stroke={PAPER_LIT}
-      strokeWidth={CHALK_W}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeDasharray={[len, len]}
-      fill="none"
-      animatedProps={props}
-    />
-  );
-}
 
 // ── the caption: each word arrives as the voice reaches it ───────────────────
 

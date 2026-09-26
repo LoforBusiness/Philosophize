@@ -115,13 +115,20 @@ function normalise(str: string): string {
   return str.toUpperCase().replace(/[’‘]/g, "'");
 }
 
-interface Raw { polys: Poly[]; text?: string }
+/**
+ * One piece before layout: its strokes as flat point lists in BOARD units, and the
+ * words it spells if it is a word. The builders below make these; `layoutRaws`
+ * turns a list of them into timed pieces. PUBLIC since 2026-09-25, so a lesson can
+ * write its own boards in the same chalk (logic-arguments-1 does).
+ */
+export interface ChalkRaw { polys: Poly[]; text?: string }
+type Raw = ChalkRaw;
 
 /**
  * A line of chalk lettering with its cap top at `y`. `align` places it at `x`
  * (left edge, centre or right edge); `maxW` shrinks the cap height until it fits.
  */
-function text(str: string, x: number, y: number, cap: number, opts: { align?: 'left' | 'center'; maxW?: number } = {}): Raw {
+export function text(str: string, x: number, y: number, cap: number, opts: { align?: 'left' | 'center'; maxW?: number } = {}): Raw {
   let c = cap;
   if (opts.maxW) while (c > 6 && textWidth(str, c) > opts.maxW) c -= 0.5;
   const k = c / (BASELINE - CAP_TOP);
@@ -144,10 +151,21 @@ function text(str: string, x: number, y: number, cap: number, opts: { align?: 'l
   return { polys, text: str };
 }
 
-const line = (x1: number, y1: number, x2: number, y2: number): Raw => ({ polys: [[x1, y1, x2, y2]] });
+export const line = (x1: number, y1: number, x2: number, y2: number): Raw => ({ polys: [[x1, y1, x2, y2]] });
+
+/** Any freehand stroke: a flat list of x, y pairs, board units. */
+export const stroke = (...pts: number[]): Raw => ({ polys: [pts] });
+
+/** A line ending in an arrowhead at (x2, y2). */
+export function arrow(x1: number, y1: number, x2: number, y2: number, head = 7): Raw {
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  const l = [x2 - Math.cos(a - 0.5) * head, y2 - Math.sin(a - 0.5) * head];
+  const r = [x2 - Math.cos(a + 0.5) * head, y2 - Math.sin(a + 0.5) * head];
+  return { polys: [[x1, y1, x2, y2], [l[0], l[1], x2, y2, r[0], r[1]]] };
+}
 
 /** A hand-drawn loop: an ellipse that overshoots where it began, as a hand does. */
-function loop(cx: number, cy: number, rx: number, ry: number, from = -2.8, sweep = 6.9): Raw {
+export function loop(cx: number, cy: number, rx: number, ry: number, from = -2.8, sweep = 6.9): Raw {
   const p: Poly = [];
   const n = 48;
   for (let i = 0; i <= n; i += 1) {
@@ -159,7 +177,7 @@ function loop(cx: number, cy: number, rx: number, ry: number, from = -2.8, sweep
 }
 
 /** A shallow arc from (x1, y) to (x2, y), sagging `sag` below: a pan, or an underline. */
-function arc(x1: number, x2: number, y: number, sag: number): Raw {
+export function arc(x1: number, x2: number, y: number, sag: number): Raw {
   const p: Poly = [];
   const n = 12;
   for (let i = 0; i <= n; i += 1) {
@@ -169,8 +187,8 @@ function arc(x1: number, x2: number, y: number, sag: number): Raw {
   return { polys: [p] };
 }
 
-const tick = (x: number, y: number, s: number): Raw => ({ polys: [[x, y + 0.45 * s, x + 0.35 * s, y + 0.85 * s, x + s, y - 0.1 * s]] });
-const cross = (x1: number, y1: number, x2: number, y2: number): Raw => ({ polys: [[x1, y1, x2, y2], [x2, y1, x1, y2]] });
+export const tick = (x: number, y: number, s: number): Raw => ({ polys: [[x, y + 0.45 * s, x + 0.35 * s, y + 0.85 * s, x + s, y - 0.1 * s]] });
+export const cross = (x1: number, y1: number, x2: number, y2: number): Raw => ({ polys: [[x1, y1, x2, y2], [x2, y1, x1, y2]] });
 
 // ── the six boards ───────────────────────────────────────────────────────────
 
@@ -252,12 +270,20 @@ function board(id: ChalkId): Raw[] {
 const round = (v: number) => Math.round(v * 10) / 10;
 
 /**
- * The drawing for one line, as pieces with every stroke's window set. Deterministic:
- * the same id always lays out the same way.
+ * The drawing for one of the professor's lines, as pieces with every stroke's window
+ * set. Deterministic: the same id always lays out the same way.
  */
 export function layoutChalk(id: ChalkId): ChalkPiece[] {
-  const seedBase = id.split('').reduce((n, c) => n * 31 + c.charCodeAt(0), 7);
-  const raws = board(id);
+  return layoutRaws(board(id), id);
+}
+
+/**
+ * Any list of pieces, laid out and timed: every stroke's window dealt by length
+ * across 0..1, with a lift between pieces. `seed` keys the hand-drawn wobble, so the
+ * same board is drawn the same way on every run.
+ */
+export function layoutRaws(raws: readonly ChalkRaw[], seed: string): ChalkPiece[] {
+  const seedBase = seed.split('').reduce((n, c) => n * 31 + c.charCodeAt(0), 7);
   // Wobble scales with the stroke's size, but never past a third of a unit.
   const pieces = raws.map((r, pi) => {
     const polys = r.polys.map((p, si) => wobble(p, seedBase + pi * 97 + si, 0.3));

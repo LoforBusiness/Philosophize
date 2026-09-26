@@ -1,413 +1,185 @@
-import { useRef } from 'react';
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
-  Easing, makeMutable, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming,
+  makeMutable, useAnimatedStyle, useDerivedValue, useSharedValue,
   type SharedValue,
 } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer, { type SceneApi } from './CinematicPlayer';
 import {
-  BLANK, MOVE_ADV, WALK, boxMove, clamp01, dirsFrom, ease01, easeOutBack, life2, lerp,
+  BLANK, WALK, clamp01, dirsFrom, ease01, easeOutBack, lerp,
   mixStance, moveTr, narratorHold, narratorLive, pose, stand, travelStance,
   type Bundle, type Stance,
 } from './rig';
 import {
-  Bubble, GROUND, K_FIG, STAGE_H, INK, SOFT, PAPER, carry, lookPose, useCarry,
+  Bubble, GROUND, K_FIG, STAGE_H, INK, PAPER, carry, lookPose, useCarry,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
-import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
+import { stageTone, stageToneOf } from './stageTones';
+import { floorStyle, lipOf } from './stageSkin';
 import type { Shot } from './camera';
 import { BEATS, type BoardKey } from './logic1Script';
 import { emoteAny } from './moves';
-import AnatomyDiagram from './illustrations/AnatomyDiagram';
-import SyllogismChart from './illustrations/SyllogismChart';
-import LoudnessChart from './illustrations/LoudnessChart';
-import TwoRoadsChart from './illustrations/TwoRoadsChart';
+import ObjectArt from './ObjectArt';
+import { lectern, notes, bust, klepsydra, LECTERN_OFF } from './logic1Set';
+import { BOARD_PHASES } from './logic1Boards';
+import ChalkPieces from '@/components/professor/ChalkPieces';
+import { layoutRaws, BOARD_W, BOARD_H, type ChalkPiece } from '@/components/professor/chalk';
+import {
+  DEEP, OLIVE, SAGE, EMBER, PAPER_LIT, MID,
+} from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// logic-arguments-1, "Arguments Are Not Fights" — ON THE SHARED PLAYER AT LAST.
+// logic-arguments-1, "Arguments Are Not Fights" — IN A TV DEBATE STUDIO.
 //
-// This lesson and logic-arguments-2 were the last two in the app carrying their
-// own copies of `CinematicPlayer` — 1,474 and 945 lines — and that is the whole
-// reason they looked wrong. NINE of the validators discover lessons by globbing
-// `*Scene.tsx`, so a bespoke `*Lesson.tsx` was invisible to every one of them,
-// and every corpus-wide pass keyed on the same glob: the six-swatch palette, the
-// depth kit, the gamified controls, the gaze, the wander, the thoughts, the pen
-// and the tappable names all reached 244 lessons and skipped these two. A reader
-// found it from the outside, on the FIRST lesson in Logic.
+// Redrawn on 2026-09-25 in the style of the professor's lecture room, at the owner's
+// ask: *"redesign it … with the good objects making the objects real world things
+// instead of just random boxes."* The owner chose the setting — a TV debate studio,
+// over a boxing ring and a kitchen table — and approved every beat's object.
 //
-// WHAT THE PLAYER TAKES OVER, and every item is something this file used to do
-// by hand: the deck and its cross-fade, the narration and the rising letters, the
-// back-and-forward tap navigation and its guide, the question controls (struck in
-// the branch hue, with the verdict seal and the XP coin), the quote plate, the
-// scoring, the reward, the thought bubbles, the pen, the wardrobe and the camera.
-// Roughly 800 lines of duplicated player went with it.
+//   ACT 1  two speakers shout across two lecterns with gooseneck microphones. A
+//          VOLUME needle meter swings into the red; the REASONS flip counter never
+//          leaves 0; the ON AIR light blinks.
+//   ACT 2  the narrator walks on, and a chalkboard — the professor's own board and
+//          chalk — writes the anatomy of an argument.
+//   ACT 3  Aristotle's bust beside the syllogism; a counter balance tipping away
+//          from a megaphone toward the evidence; a signpost to TRUTH and WINNING;
+//          and Socrates' cross-examination scratched into a wax tablet, timed by an
+//          Athenian water clock, stamped CONTRADICTION.
+//   ACT 4  the same two at the same lecterns, calm, with their notes on the tops —
+//          the rents line, then the skylines — and the counter flips 1, 2, 3.
 //
-// WHAT THIS FILE KEEPS is the art, unchanged in composition: the coupled boxing
-// round, the narrator's walk-on, the framed easel, the scoreboard and the
-// Socratic exchange. Only its COLOURS moved — off four local hex literals and
-// onto `stageTone('logic')` and the depth kit, which is the redesign.
+// WHAT IS UNCHANGED, AND WHY IT HAS TO BE: every word, the voice and both questions
+// (logic1Script.ts is untouched — 20 of its 25 beats are voiced and keyed by index),
+// the SCENE / CHROME split and the pinned camera table. The chrome is still what the
+// camera does not move: the board, the instruments and the tablet hold one size
+// while the shot pushes 1.21× → 1.58× on the figures below them.
 //
-// TWO CAPABILITIES HAD TO BE ADDED TO THE SHARED PLAYER FIRST, because it could
-// not express what this lesson does, and a shared player that is not a superset
-// of the bespoke one cannot replace it:
-//
-//   · `Shot.pin` — the ground line is pinned in every shot here, and the shared
-//     camera lerped `cy` linearly against a geometric `s`, which sags the floor
-//     mid-transition (this lesson's own author measured it and solved it by
-//     deriving cy). `pin` derives it instead: 0.0000000000 units of drift.
-//   · `Chrome` — the easel, the scoreboard and the exchange hold ONE size on
-//     screen while the camera pushes 1.21× → 1.58× on the figures below them.
-//     Inside the camera they would zoom and clip, so they are drawn in a layer
-//     that is band-clipped and fit-scaled but not camera-transformed.
-//
-// THE CAMERA IS UNCHANGED, deliberately and to the number: the authored shot
-// table below is the one this lesson always had, handed to the player as `shots`
-// rather than resolved from verbs, with its ground pin intact.
-//
-// NOT ONE WORD OF THE SCRIPT MOVED (AH8), and here the rule is stricter than
-// usual — 20 of the 25 beats are voiced and keyed by beat index, with the words
-// each WAV was rendered from recorded in `assets/narration/renders.json`.
+// THE FIGHT CHOREOGRAPHY IS GONE with the ring: speakers at lecterns do not trade
+// punches, they lean in and point.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones), the same
-// three tones at the same luminance the old local greys had to the third decimal
-// — so every contrast measured against the old local paper grey still holds.
+// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones); the room's
+// other materials — wood, marble, clay — take the palette's own hues at the same
+// grey luminance, so every contrast on the stage holds.
 const TONE = stageTone('logic');
-const { RULE, STONE, SHADE } = TONE;
 const LIP = lipOf(TONE);
+const WOOD = stageToneOf(OLIVE);
+const MARBLE = stageToneOf(SAGE);
+const CLAY = stageToneOf(EMBER);
 
 //
 // ── AND IT DOES NOT CLAIM A WALK (validate-sound §5) ──────────────────────
 //
-// `walk={X}` is an ASSERTION: "I drive exactly one figure through
-// `travelStance(X[p], X[n], …, WALK)` with the default seed", which is the only
-// case `./footfalls` solves for. This scene drives its narrator from its own
-// staging table (`STAGE[i].nx`, with a per-act transition), which is not that
-// shape, and it walks two boxers as well. So the prop is not
-// passed, and `validate-sound` re-derives that both ways rather than trusting it.
-//
-// The price is the one CLAUDE.md already records for three other scenes: the
-// player derives the live figure x from `walk`, so a thought bubble on a beat
-// where he moves cannot follow him and sits at its measured spot instead. Nothing
-// is lost in sound, because the app plays exactly two sounds and neither is a
-// footstep (`HEARD` in lib/feedback.ts).
+// `walk={X}` is an assertion this scene does not meet: the narrator is driven from
+// its own staging table, and two speakers stand as well. See the note this file has
+// carried since the port.
 
 // ── THE BAND ───────────────────────────────────────────────────────
-// Unchanged from the bespoke player, and it can be: the pin means the ground line
-// lands at one screen place in every shot and through every move, so the extremes
-// are bounded by the endpoint scales alone. The un-zoomed chrome literals (frame
-// 144…320, scoreboard 144…198, exchange 148…300) set the top; the closest shot's
-// ankle joint sets the bottom. So it is 136…516, written as literals below
-// because that is what `validate-cinematic` reads (H59).
+// 136…516, as before: the ground lands at one screen place in every shot (the pin),
+// the chrome sets the top (instruments 142…, board 144…) and the closest shot's ankle
+// sets the bottom.
 
 /** Where the ground line lands on screen — the same for every shot, by design. */
 const GROUND_Y = 496;
-/**
- * The pin: `s · (GROUND − cy)`, which is what holds the ground line still.
- * Derived from the screen place rather than typed, so the two cannot disagree.
- */
+/** The pin: `s · (GROUND − cy)`, which is what holds the ground line still. */
 const PIN = GROUND_Y - STAGE_H / 2;          // 216
 
-// Two figures 146 apart at the old 1.35 figure scale → 108 at K_FIG 1.0. Derived
-// from K_FIG rather than declared, because rule 3: a file that declares its own
-// K_FIG shadows the shared one and silently misses every future correction.
-const FIG_SPACING = K_FIG / 1.35;
-
+/** The chalkboard's frame, in band space (the chrome), and the slate inside it. */
 const FRAME = { x: 56, y: 144, w: 288, h: 176 };
-const BOARD = { x: 70, y: 148, w: 259, h: 148 };
-const TRAY_Y = 152;
-const PLATE_Y = 156;
+const SLATE = { x: FRAME.x + 7, y: FRAME.y + 7, w: FRAME.w - 14, h: FRAME.h - 14 };
+const CHALK_S = Math.min(SLATE.w / BOARD_W, SLATE.h / BOARD_H);
+const CHALK_X = SLATE.x + (SLATE.w - BOARD_W * CHALK_S) / 2;
+const CHALK_Y = SLATE.y + (SLATE.h - BOARD_H * CHALK_S) / 2;
+/** How long a phase of chalk takes to write, from shortly after its beat begins. */
+const CHALK_T = 2.4;
 
-const RING_L = 80;
-const RING_R = 320;
-/** Post top. Chest-high on the boxers, so it frames without crowding. */
-const POST_T = 420;
-
-/**
- * Where a shout sits, in STAGE space now rather than screen space.
- *
- * The bespoke player drew bubbles outside the camera and had to convert each
- * speaker's head into screen x to keep the tail attached. Inside the camera that
- * conversion is the camera's job, so the bubble takes the head's stage x directly
- * and scales with the man it belongs to — which is what every other lesson does.
- * 340 is the old screen 250 read back through the fight shot (s 1.54, cy 359.7),
- * so it lands where it always did and still clears both crowns.
- */
 // WHERE A SHOUT SITS, in SCENE y, converted per beat (see `topOf`). 82 above the
 // crown is the gap the bespoke player used.
 const BUBBLE_TOP = 340;
 
-// BAND-SPACE x OF EACH SPEAKER'S MARK, published by the scene for the chrome.
-//
-// THE SHOUTS USED TO BE DRAWN INSIDE THE CAMERA, AND THEY WERE CUT. `Bubble`
-// clamps a long line so it cannot walk off the stage — against STAGE_W, in the
-// coordinates it is drawn in. Inside a camera that is pushed and panned, scene
-// 0…400 is NOT what the reader can see: measured on beat 3, #stage-clip runs
-// x 16…374 and "NO — YOU'RE WRONG!" ran 120…383, so the last letters of a shout
-// were outside the stage while the component's own clamp reported it safely
-// inside. `check:frame` calls the camera clean and is right about what it
-// measures — it compares the art against the crop, and this is a box the crop
-// never contained in the first place.
-//
-// So the chrome draws them, where the clamp is against the width the reader
-// actually has, and the scene — the only place the staging exists — hands over
-// where each speaker STANDS. The conversion is `200 + s·(x − cx)`, from the authored
-// shot: `containShot` may pull a scale in a little, which moves a tail by a few
-// units and can no longer put a word off the stage.
-//
-// THE MARK, AND NOT THE HEAD, AND THAT IS THE OTHER HALF OF A READER'S COMPLAINT:
-// *"the boxes above where the fighting stickman talk seem to do this glitch when I
-// press the next tab, I need it to be a smooth transition from one text to
-// another."* Recorded frame by frame in the real app, a shout slid 13px sideways
-// while it faded out and the one replacing it drifted 16px more as it arrived, with
-// a worst single frame of 8px. Nothing was broken: the box was tethered to
-// `headAt(stance)` of a boxer who is LUNGING — `fightAt` closes the pair by tens of
-// units at the start of every exchange and a punch carries the head further — so
-// the box inherited the punch. A word being read has to hold still.
-//
-// So the published x is the beat's own MARK (`STAGE[n].rx`), carried between beats
-// like every other track, and the TAIL does the pointing: `Bubble` already leans it
-// toward the speaker by up to half the box, which covers the twenty-odd units the
-// live head strays from the mark. Both shouting acts hold one pair of marks for
-// every beat, so the box is perfectly still for as long as its words are up.
+// BAND-SPACE x OF EACH SPEAKER'S MARK, published by the scene for the chrome. A shout
+// is drawn in the chrome, where `Bubble`'s clamp is against the width the reader
+// actually has, and it sits over the speaker's MARK rather than his head, so a word
+// being read holds still (the note this lesson has carried since the port).
 const SAY_R = makeMutable(200);
 const SAY_B = makeMutable(200);
 
-const XFADE = 420;                            // ms — the board-to-board cross-fade
-
-// ── the fight choreography ───────────────────────────────────────────────────
-// A real spar is call-and-response, not two people shadow-boxing side by side, so
-// the boxers are coupled: each row is one exchange [redMove, blueMove, seconds,
-// range], timed so a block or a duck lands right as the punch it answers arrives.
-// Every move returns to the guard at its ends, so exchanges chain cleanly.
-//
-// The fourth number is the exchange's INTENT and the separation is DERIVED from
-// it, because every move carries its own lunge and two of them stack — hand-typed
-// distances have to remember all of it, which is how an earlier clinch ended up as
-// one black blob. `FIGHT_BASE` does the sum.
-//
-//   0 OUT     112 — circling or falling short. Nothing can reach.
-//   1 TRADING  80 — the punch is stopped BY the guard, which is what a blocked
-//                   shot looks like: 35 (jab) + 26 (his raised block) + 18.
-//   2 LANDING  62 — tighter than the static geometry suggests, deliberately: by
-//                   the instant the fist arrives the defender has already begun to
-//                   go, which is 20-odd units a static sum does not see.
-//   3 CLINCH   76 — close enough to read as leaning together, far enough that two
-//                   20-radius heads still show as two.
-const RANGE_E = [112, 80, 62, 76];
-const FIGHT: [number, number, number, number][] = [
-  [15, 15, 0.95, 0],  // circling, sizing each other up — nothing can reach
-  [14, 12, 0.50, 1],  // red feints — blue parries at nothing
-  [24, 5, 0.70, 1],   // red doubles the jab — blue blocks both
-  [1, 7, 0.45, 1],    // red jabs — slipped, and it goes past the ear
-  [2, 5, 0.95, 1],    // red cross — blue blocks and gives ground
-  [22, 22, 0.55, 0],  // both bounce out, breathing
-  [11, 5, 0.80, 1],   // red digs to the body — blue covers
-  [5, 10, 0.70, 1],   // blue's lead hook — red blocks
-  [6, 3, 0.90, 1],    // blue hooks over the top — red ducks under it
-  [2, 21, 0.95, 2],   // RED LANDS THE CROSS — blue's balance goes
-  [0, 8, 0.75, 0],    // blue backs off to clear his head
-  [15, 25, 0.70, 0],  // red circles; blue wipes his nose
-  [4, 13, 1.00, 1],   // red uppercut — blue rolls away from it
-  [12, 1, 0.50, 1],   // blue jabs — red parries
-  [1, 1, 0.50, 0],    // both jab at once, both fall short
-  [18, 19, 0.85, 1],  // red loops one over the top — blue rolls the shoulder
-  [21, 2, 0.95, 2],   // BLUE LANDS THE CROSS — red is hurt and gives ground
-  [8, 17, 0.85, 0],   // red resets the distance; blue drops his hands
-  [10, 23, 0.65, 1],  // red's lead hook — blue pulls straight back off it
-  [16, 16, 0.90, 3],  // they fall into a clinch and nothing happens at all
-  [20, 8, 0.55, 1],   // red shoves off to make room
-  [3, 12, 0.70, 1],   // red hook — parried
-  [14, 6, 0.60, 0],   // red feints; blue ducks at air
-  [11, 5, 0.75, 1],   // the body again
-  [22, 22, 0.70, 0],  // bouncing, breathing, back out of range
-];
-const FIGHT_DUR = FIGHT.reduce((a, e) => a + e[2], 0);
-const FIGHT_START: number[] = (() => {
-  let a = 0;
-  return FIGHT.map((e) => { const s = a; a += e[2]; return s; });
-})();
-// Stand far enough back that the LUNGES bring them to the intended distance. Only
-// the advancing move counts: a defender's `adv` is negative and on a landing
-// exchange his reaction is delayed, so he has not moved yet at the instant the
-// punch arrives — which is exactly the instant this has to be right.
-const FIGHT_BASE: number[] = FIGHT.map(
-  (e) => RANGE_E[e[3]] + Math.max(0, MOVE_ADV[e[0]]) + Math.max(0, MOVE_ADV[e[1]]),
-);
-
-/** Resolve the coupled fight pose AND the pair's separation at time t. */
-function fightAt(t: number): { red: Stance; blue: Stance; gap: number } {
-  'worklet';
-  const lap = Math.floor(t / FIGHT_DUR);
-  const swap = lap - Math.floor(lap / 2) * 2 === 1;   // odd laps flip who presses
-  const tc = t - lap * FIGHT_DUR;
-  let idx = 0;
-  for (let i = 0; i < FIGHT.length; i++) {
-    if (tc < FIGHT_START[i] + FIGHT[i][2]) { idx = i; break; }
-  }
-  const ex = FIGHT[idx];
-  const u = clamp01((tc - FIGHT_START[idx]) / ex[2]);
-  const rc = swap ? ex[1] : ex[0];
-  const bc = swap ? ex[0] : ex[1];
-  // SEEDS 1 AND 2, and they matter more than any single move in the table. Both
-  // fighters used to call guard(t) on the same clock with the same frequencies, so
-  // they bounced and breathed on identical frames — two bodies moving as one
-  // mirrored object, which is most of why the fight read as cheap.
-  const R = boxMove(rc, t, u, 1);
-  const B = boxMove(bc, t, u, 2);
-  // The separation they STAND at, eased from the last exchange's into this one's
-  // over the first third — the closing (or the breaking) itself, finished before
-  // the punch peaks at ~0.42. Every move's `adv` is zero at both ends, so matching
-  // the bases at the boundary makes the whole track continuous.
-  const pi = idx > 0 ? idx - 1 : FIGHT.length - 1;
-  const gap = lerp(FIGHT_BASE[pi], FIGHT_BASE[idx], ease01(u / 0.34))
-    + life2(t, 0.29, 0.17, 0.6) * 2.5;          // a slow non-periodic breath on top
-  return { red: R, blue: B, gap };
-}
-
 // ── THE NARRATOR'S TRACK ─────────────────────────────────────────────────────
-// One x per beat, written down rather than derived, and it only ever moves RIGHT.
-// SKATING is why it exists: a rule ("132 under the board, 200 alone") slid him 131
-// units the instant he arrived and then 68 units back and forth four times, feet
-// planted. TURNING is why it is monotonic — `dir` is ±1 and flips in one frame, so
-// a figure that walks left then right snaps between mirrored copies of itself.
+// One x per beat, only ever moving RIGHT (a figure that walks left then right snaps
+// between mirrored copies of itself). He waits just outside the FRAME, not outside
+// the STAGE, because no legal shot can show a negative x.
 const NARR_X: number[] = [
-  46, 46, 46, 46,                              // act 1 — waiting just off the FRAME
-  88, 200, 200, 200, 200,                       // act 2 — emerges, then walks to the centre
-  200, 200, 200, 200, 200, 200, 200, 200, 200, // act 3 — centred under the diagrams
+  46, 46, 46, 46,                              // act 1 — waiting just off the frame
+  200, 200, 200, 200, 200,                      // act 2 — walks in between the lecterns
+  200, 200, 200, 200, 200, 200, 200, 200, 200, // act 3 — centred under the board
   200, 200, 200, 200, 200,                     // act 4 — gone, parked where he left
   200, 200,                                    // act 5
 ];
-
-// THE CAMERA CAN NEVER SHOW HIM ARRIVING FROM OFF-STAGE, WHICH IS WHY HE NO LONGER
-// STARTS THERE.
-//
-// A reader: *"I cannot see the stickman when he arrives on screen and then after he
-// just appears in the middle."* Both halves were true and the cause is geometry
-// rather than timing. He used to wait at x −50 — fifty units OUTSIDE a 400-wide
-// stage — and `fit`/`checkShots` hold every window inside that stage, so no legal
-// shot can contain a negative x: at s = 1 the window is exactly 0…400 and any push
-// narrows it. Worse, a beat's camera STARTS at the previous beat's framing, and the
-// beat before his entrance is the fight at s 1.54, whose window is 70…330. So the
-// first 1.5s of a 2.2s walk happened behind the left edge of the picture and he
-// crossed into view at x 12 with half a second left.
-//
-// So he waits just outside the FRAME instead of outside the STAGE: his box is
-// 26…66 against that window's left edge at 70.1, four units clear, which is why 46
-// and not 50. He is invisible on the frame his fade begins (nMode 3 finishes it in
-// the first fifth) and emerges from the left edge as the camera pulls back — the
-// reader watches him walk in.
-//
-// AND HE WALKS TO THE CENTRE WHEN THE FIGHT GOES, which is the other half of what
-// was asked. Act 2's first beat is still ABOUT the shouting match (its own
-// narration says so, and `narr: 0` is an open hand with his back to it), so the
-// boxers are still standing and he stops at 88 — his reaching hand clears red's box
-// at 126 by seven units. They leave on the next beat and he takes the middle of the
-// stage, and every later mark is 200: the old track shuffled him 128→146→168→186
-// →196→206 in eighteen-unit steps that read as drift rather than as walking, and
-// nothing above him needs the room — the board's frame ends at screen 320 and his
-// crown lands at 325 or lower.
-/** All +1 while the track is monotonic — kept honest in case it ever isn't. */
 const NARR_DIR = dirsFrom(NARR_X, 1);
 
-// Every scale is measured against what else is on stage that beat. The ground is
-// pinned, so a crown lands at 496 − 141·s and the only question is what sits above
-// it: a BOARD beat must clear the easel (ends at screen 320) → 1.21; a RING beat
-// must clear the shouts (~254) → ≤1.65; a STACK beat must clear the stamp (300) →
-// ≤1.83; a SOLO beat has only the 54-tall scoreboard → ≤2.0.
-const S_FIGHT = 1.54;
+// Every scale is measured against what else is on stage that beat, exactly as before.
+const S_FIGHT = 1.42;
 const S_WALK = 1.22;
 const S_BOARD = 1.21;
 const S_SOLO = 1.58;
+const S_BUST = 1.5;
 const S_STACK = 1.46;
-const S_REMATCH = 1.55;
+const S_REMATCH = 1.42;
 
 /**
- * THE STAGING TABLE — one row per beat, and it used to BE the shot table.
- *
- * The bespoke player's `Shot` carried the camera and the placement of all three
- * figures in one record, which is why it could not be handed to the shared player:
- * a shared `Shot` is camera only. Split here, the same numbers drive both — the
- * camera table below is derived from this one rather than typed twice.
+ * The two speakers' marks. The same in both acts now: it is one studio. Wider than
+ * the boxers stood (54 a side): a lectern stands in front of each, and
+ * at the boxers' spacing the two lecterns met in the middle and read as one desk.
  */
+const RX = 200 - 90;
+const BX = 200 + 90;
+
+/** One row per beat: the camera and where each figure stands. */
 interface Stage {
   s: number; cx: number; tr: number;
   rx: number; rOn: number; rMode: number;
   bx: number; bOn: number; bMode: number;
   nx: number; nOn: number; nMode: number;
-  ring: number;
+  /** The studio furniture: the lecterns and their microphones. */
+  set: number;
 }
 
 const STAGE: Stage[] = BEATS.map((b, i) => {
   const base: Stage = {
     s: 1, cx: 200, tr: 0.75,
-    rx: 200 - 73 * FIG_SPACING, rOn: 0, rMode: 0,
-    bx: 200 + 73 * FIG_SPACING, bOn: 0, bMode: 0,
+    rx: RX, rOn: 0, rMode: 0,
+    bx: BX, bOn: 0, bMode: 0,
     nx: NARR_X[i], nOn: 0, nMode: 2,
-    ring: 0,
+    set: 0,
   };
-  if (b.act === 1) {
-    // Close on the ring. 108 apart, set by the LUNGES rather than the resting
-    // stance: a real exchange closes them to about 67, which is where a
-    // full-reach punch arrives AT the head rather than through it.
-    return { ...base, s: S_FIGHT, rOn: 1, bOn: 1, ring: 1 };
-  }
+  if (b.act === 1) return { ...base, s: S_FIGHT, rOn: 1, bOn: 1, set: 1 };
   if (b.act === 2) {
     const first = BEATS.findIndex((x) => x.act === 2) === i;
     return {
       ...base,
       s: first ? S_WALK : b.board ? S_BOARD : S_SOLO,
-      // 2.2s bought 96 stage units of walking when he entered from −50. The
-      // emergence is 42 units now, and 2.2s would draw it at 19 units a second
-      // against WALK_SPEED's 56 — slow motion. It goes through `moveTr` with
-      // every other beat instead (see the loop below).
       tr: first ? 0.85 : 0.75,
-      // The camera sits LEFT of centre for the entrance purely to buy paper
-      // between him and the fight — 80 units of clear air instead of 52.
       cx: first ? 176 : 200,
-      rOn: first ? 1 : 0, bOn: first ? 1 : 0, ring: first ? 1 : 0,
+      rOn: first ? 1 : 0, bOn: first ? 1 : 0, set: first ? 1 : 0,
       nOn: 1, nMode: first ? 3 : b.board ? 2 : 1,
     };
   }
   if (b.act === 3) {
-    // He holds a mark and the CAMERA reframes — closest where the only thing above
-    // him is the exchange. The board never constrains him: its frame ends at 320
-    // and his crown lands at 346 or lower.
     return { ...base, s: b.board ? S_BOARD : b.stack ? S_STACK : S_SOLO, nOn: 1, nMode: b.board ? 2 : 1 };
   }
-  if (b.act === 4) {
-    // The rematch: same two figures, standing, calm — the closest shot in the
-    // lesson, because nothing else is on stage to make room for.
-    return {
-      ...base, s: S_REMATCH,
-      rx: 200 - 52 * FIG_SPACING, bx: 200 + 52 * FIG_SPACING,
-      rOn: 1, bOn: 1, rMode: 1, bMode: 1,
-    };
-  }
-  return base;                                 // act 5 — nobody on stage
+  if (b.act === 4) return { ...base, s: S_REMATCH, rOn: 1, bOn: 1, rMode: 1, bMode: 1, set: 1 };
+  // Act 5: Aristotle's own sentence, under his bust at centre stage. The studio
+  // after the show was two small empty lecterns on a bare floor for a whole beat.
+  return { ...base, s: S_BUST };
 });
 
-// A beat that MOVES the narrator needs a transition as long as the walk actually
-// takes. Left flat, the same strides get crammed into whatever the cross-fade
-// happens to be — the documented reason a walk reads as a sprint (rig `moveTr`).
-// THE ENTRANCE IS NO LONGER EXEMPT. It used to set its own 2.2s because it covered
-// 96 units from off-stage; it covers 42 from just outside the frame, and the rule
-// every other beat obeys — a walk lasts as long as its distance needs — is the
-// right one for it too.
+// A walk lasts as long as its distance needs (rig `moveTr`).
 for (let i = 1; i < STAGE.length; i++) {
   STAGE[i].tr = moveTr(STAGE[i - 1].nx, STAGE[i].nx, STAGE[i].tr);
 }
 
-/**
- * The camera, handed to the player as an authored table.
- *
- * `cy` is DERIVED from the scale through the pin rather than stored, exactly as
- * the bespoke player derived it, and `pin` tells the shared camera to keep
- * deriving it through every move instead of lerping it. That one field is the
- * difference between this lesson's floor holding still and sagging on every tap.
- */
+/** The camera, as an authored table, its ground pinned (`Shot.pin`). */
 const SHOTS: Shot[] = STAGE.map((st) => ({
   cx: st.cx, cy: GROUND - PIN / st.s, s: st.s, tr: st.tr, pin: PIN,
 }));
@@ -420,44 +192,54 @@ const NARR_G: number[] = BEATS.map((b) => b.narr ?? 0);
 const RED_TALK: boolean[] = BEATS.map((b) => !!b.say?.some((s) => s.who === 'red'));
 const BLUE_TALK: boolean[] = BEATS.map((b) => !!b.say?.some((s) => s.who === 'blue'));
 const BOARD_OF: (BoardKey | null)[] = BEATS.map((b) => b.board ?? null);
+/** Which phase of its board each beat writes: 0 on the board's first beat, 1 on its second. */
+const PHASE_OF: number[] = BOARD_OF.map((k, i) => {
+  let n = 0;
+  for (let j = i - 1; j >= 0 && BOARD_OF[j] === k && k; j--) n++;
+  return n;
+});
+/** The act of each beat — the ON AIR light is on while the show is. */
+const ACT: number[] = BEATS.map((b) => b.act);
+/** The props that stand on the floor for one board or one exchange. */
+const BUST_ON: number[] = BEATS.map((b) => (b.board === 'syllogism' || b.quote ? 1 : 0));
+/** Where the bust stands: beside the narrator for the syllogism, alone at centre for the quote. */
+const BUST_DX: number[] = BEATS.map((b) => (b.quote ? 200 - 300 : 0));
+const CLOCK_ON: number[] = STACK.map((s) => (s > 0 ? 1 : 0));
+/** The notes on each lectern: rents from the first premise on, the skylines from the reply. */
+const FIRST_PREMISE = BEATS.findIndex((b) => b.act === 4 && b.say?.some((s) => s.who === 'red'));
+const FIRST_REPLY = BEATS.findIndex((b) => b.act === 4 && b.say?.some((s) => s.who === 'blue'));
+const NOTE_R: number[] = BEATS.map((_, i) => (i >= FIRST_PREMISE ? 1 : 0));
+const NOTE_B: number[] = BEATS.map((_, i) => (i >= FIRST_REPLY ? 1 : 0));
 
-const BOARDS: Record<BoardKey, React.ComponentType<{ p: SharedValue<number>; w?: number; h?: number }>> = {
-  anatomy: AnatomyDiagram,
-  syllogism: SyllogismChart,
-  loudness: LoudnessChart,
-  tworoads: TwoRoadsChart,
-};
+/** Every phase of every board, laid out once. */
+const LAYOUT: Record<BoardKey, ChalkPiece[][]> = Object.fromEntries(
+  (Object.keys(BOARD_PHASES) as BoardKey[]).map((k) => [
+    k, BOARD_PHASES[k].map((raws, p) => layoutRaws(raws, `${k}${p}`)),
+  ]),
+) as Record<BoardKey, ChalkPiece[][]>;
 
-const BOARD_TITLE: Record<BoardKey, string> = {
-  anatomy: 'ANATOMY OF AN ARGUMENT',
-  syllogism: 'ARISTOTLE’S SYLLOGISM',
-  loudness: 'VOLUME IS NOT A REASON',
-  tworoads: 'TWO REASONS TO ARGUE',
-};
+// The set, laid out once.
+const LECTERN_R = lectern(RX + LECTERN_OFF, -1);
+const LECTERN_B = lectern(BX - LECTERN_OFF, 1);
+const NOTES_R = notes(RX + LECTERN_OFF, -1, 'rise');
+const NOTES_B = notes(BX - LECTERN_OFF, 1, 'built');
+const BUST_X = 300;
+const BUST = bust(BUST_X);
+const KLEP = klepsydra(262);
 
 const STACK_ROWS = [
   { text: 'WHO IMPROVES THE YOUNG?', ask: true },
   { text: 'EVERYONE BUT YOU.', ask: false },
   { text: 'AND WITH HORSES — EVERYONE?', ask: true },
 ];
-/** What the chrome driver hands its three graphics — one shape, so no prop narrows it. */
-interface Graph {
-  scoreOn: number; stackOn: number; s0: number; s1: number; s2: number; stampU: number;
-}
 
-const STACK_TOP = 148;
-const STACK_ROW_H = 34;
-const STACK_GAP = 8;
-
-// ── THE SCENE: the ring, the three figures, the shouts ───────────────────────
+// ── THE SCENE: the studio, the three figures, the props on the floor ─────────
 export default function Logic1Scene({
   clock, bt, bi, i, gazeX, gazeY, gazeOn,
 }: SceneApi) {
-  // Every interpolated track is CARRIED (AH4/L5): a plain lerp from the previous
-  // beat's TARGET starts from where that beat was heading rather than from what is
-  // on screen, so a tap mid-transition covers the whole remaining distance in one
-  // frame. `carry` is lerp with a memory and takes the same numbers.
-  const cv = useCarry(11);
+  // Every interpolated track is CARRIED (AH4/L5), so a tap mid-transition never
+  // jumps the remaining distance in one frame.
+  const cv = useCarry(14);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -467,105 +249,61 @@ export default function Logic1Scene({
     const tr = ease01(bt.value / cur.tr);
     const t = clock.value;
 
-    // Red and blue. In fight mode they are coupled through `fightAt` (one attacks,
-    // the other answers); otherwise they stand — the speaker gesturing — and blend
-    // from the previous beat's pose so tapping between beats never snaps a hand.
-    let redS: Stance;
-    let blueS: Stance;
-    let fightGap = -1;
-    if (cur.rMode === 0 && cur.bMode === 0) {
-      const F = fightAt(t);
-      redS = F.red; blueS = F.blue; fightGap = F.gap;
-    } else {
-      // N21 — THE ONE NOT SPEAKING IS LISTENING, not standing. A bare stand() has
-      // had no life of its own since group AL, so the arguer waiting his turn was a
-      // post being argued at. Red nods along; blue waits for the answer, each on his own clock.
-      const rFrom = RED_TALK[p] ? narratorHold(0, t) : emoteAny(263, t);
-      const bFrom = BLUE_TALK[p] ? narratorHold(0, t) : emoteAny(260, t + 1.7);
-      const rTo = RED_TALK[n] ? narratorLive(0, t, bt.value) : emoteAny(263, t);
-      const bTo = BLUE_TALK[n] ? narratorLive(0, t, bt.value) : emoteAny(260, t + 1.7);
-      redS = mixStance(rFrom, rTo, tr);
-      blueS = mixStance(bFrom, bTo, tr);
-    }
+    // THE TWO SPEAKERS. The one talking gestures — emphatically in the quarrel, openly
+    // in the rematch — and the other LISTENS on a living hold (N21: a held pose while
+    // another man shouts at you is a post being argued at). Each blends from the
+    // previous beat's pose, so a tap never snaps a hand.
+    const hot = cur.rMode === 0;
+    const wasHot = prv.rMode === 0;
+    const redFrom = RED_TALK[p] ? narratorHold(wasHot ? 1 : 0, t) : emoteAny(263, t);
+    const blueFrom = BLUE_TALK[p] ? narratorHold(wasHot ? 1 : 0, t) : emoteAny(260, t + 1.7);
+    const redTo = RED_TALK[n] ? narratorLive(hot ? 1 : 0, t, bt.value) : emoteAny(263, t);
+    const blueTo = BLUE_TALK[n] ? narratorLive(hot ? 1 : 0, t, bt.value) : emoteAny(260, t + 1.7);
+    const redS: Stance = mixStance(redFrom, redTo, tr);
+    const blueS: Stance = mixStance(blueFrom, blueTo, tr);
 
-    // The narrator, through the ONE canonical body motion every other lesson uses.
-    // `travelStance` picks: if the beat moves him he WALKS there, feet driven by
-    // distance so they never skate; if it doesn't, the previous beat's settled pose
-    // blends into this beat's living one. If the previous beat was the entrance (or
-    // he was off stage) the blend starts from a plain stand, so there is no phantom
-    // gesture to come out of.
-    const fromHold = STAGE[p].nMode === 3 || STAGE[p].nOn < 0.5
-      ? stand(t)
-      : narratorHold(NARR_G[p], t);
+    // The narrator, through the one canonical body motion every lesson uses.
+    const fromHold = STAGE[p].nMode === 3 || STAGE[p].nOn < 0.5 ? stand(t) : narratorHold(NARR_G[p], t);
     const narrS = travelStance(
-      prv.nx, cur.nx,
-      fromHold,
-      narratorHold(NARR_G[n], t),
-      narratorLive(NARR_G[n], t, bt.value),
+      prv.nx, cur.nx, fromHold,
+      narratorHold(NARR_G[n], t), narratorLive(NARR_G[n], t, bt.value),
       tr, WALK, 0,
     );
 
-    // Root motion: a lunge carries the whole body, so a punch reads as aimed at
-    // someone rather than as shadow-boxing. In the fight the pair are placed from
-    // the choreography's own range track — they close to trade and open to circle —
-    // rather than from two fixed marks; in the rematch the table owns them.
-    const rx = fightGap > 0
-      ? 200 - fightGap / 2 + redS.adv
-      : carry(cv, 0, n, prv.rx, cur.rx, tr) + redS.adv;
-    const bx = fightGap > 0
-      ? 200 + fightGap / 2 - blueS.adv
-      : carry(cv, 1, n, prv.bx, cur.bx, tr) - blueS.adv;
+    const rx = carry(cv, 0, n, prv.rx, cur.rx, tr) + redS.adv;
+    const bx = carry(cv, 1, n, prv.bx, cur.bx, tr) - blueS.adv;
     const nx = carry(cv, 2, n, prv.nx, cur.nx, tr);
-    // THEY LEAVE QUICKLY AND ARRIVE AT THE BEAT'S OWN PACE. He now walks to the
-    // centre on the beat the fight ends, straight through where the two of them
-    // were standing — and a carry over the whole beat had them at half opacity as
-    // he passed, so he waded through two ghosts. Fading them over the first third
-    // empties the floor before he reaches it. An entrance keeps the full beat: the
-    // rematch in act 4 should arrive, not snap on.
+    // They leave quickly and arrive at the beat's own pace (the narrator walks
+    // through where they stood on the beat they go).
     const gone = (a: number, b: number) => { 'worklet'; return b < a ? clamp01(tr * 3) : tr; };
     const rOn = carry(cv, 3, n, prv.rOn, cur.rOn, gone(prv.rOn, cur.rOn));
     const bOn = carry(cv, 4, n, prv.bOn, cur.bOn, gone(prv.bOn, cur.bOn));
-    // He is SOLID before he is visible. Fading him up across the whole entrance
-    // made him materialise out of the paper two-thirds of the way in — a ghost
-    // condensing beside the fight rather than someone walking on from the wing. He
-    // starts at stage −50, so ramping over the first fifth finishes it while he is
-    // still off-stage and the reader only ever sees a solid figure walk in.
-    const nOn = cur.nMode === 3
-      ? ease01(clamp01(tr / 0.2))
-      : carry(cv, 5, n, prv.nOn, cur.nOn, tr);
+    const nOn = cur.nMode === 3 ? ease01(clamp01(tr / 0.2)) : carry(cv, 5, n, prv.nOn, cur.nOn, tr);
 
     return {
-      // CARRIED like the rest (L5): the ring fades at an act boundary, and a plain
-      // lerp from the previous beat's target jumps if the reader taps mid-fade.
-      ring: carry(cv, 8, n, prv.ring, cur.ring, tr),
-      // The camera's live framing, and each speaker's MARK, so the chrome can put a
-      // shout over whoever is speaking (see SAY_R). All carried for the same reason.
+      set: carry(cv, 8, n, prv.set, cur.set, gone(prv.set, cur.set)),
+      notesR: carry(cv, 11, n, NOTE_R[p], NOTE_R[n], tr),
+      notesB: carry(cv, 12, n, NOTE_B[p], NOTE_B[n], tr),
+      bust: carry(cv, 9, n, BUST_ON[p], BUST_ON[n], tr),
+      // It only ever MOVES while invisible (act 3 and act 5 are never neighbours), so
+      // it takes the place of whichever beat shows it rather than sliding.
+      bustDx: BUST_ON[n] ? BUST_DX[n] : BUST_DX[p],
+      klep: carry(cv, 10, n, CLOCK_ON[p], CLOCK_ON[n], tr),
       cs: carry(cv, 6, n, SHOTS[p].s, SHOTS[n].s, tr),
       ccx: carry(cv, 7, n, SHOTS[p].cx, SHOTS[n].cx, tr),
-      rxm: carry(cv, 9, n, STAGE[p].rx, STAGE[n].rx, tr),
-      bxm: carry(cv, 10, n, STAGE[p].bx, STAGE[n].bx, tr),
-      // The HEAD is no longer published. A tail pointing at the spot between the
-      // feet was the original complaint — "every tail a head's width wide, because
-      // a boxer leans in" — and the answer was to follow the head, which then
-      // followed the punch (see SAY_R). The mark is the compromise that holds
-      // still: six units of lean on a tail that can lean fifty.
+      rxm: carry(cv, 13, n, STAGE[p].rx, STAGE[n].rx, tr),
+      bxm: STAGE[n].bx,
       red: rOn > 0.002 ? pose(redS, rx, GROUND, K_FIG, 1, rOn) : BLANK,
       blue: bOn > 0.002 ? pose(blueS, bx, GROUND, K_FIG, -1, bOn) : BLANK,
-      // THE NARRATOR IS THE MASCOT HERE — the two boxers are the argument — so he
-      // is the one the shared figure layers belong on: `lookPose` turns him toward
-      // what the beat draws, nods him on a right answer and draws him back on a
-      // wrong one, and runs the wander that moves his whole body between taps. The
-      // boxers keep plain `pose`: a fighter agreeing with your answer would be the
-      // picture disagreeing with the lesson.
+      // THE NARRATOR IS THE MASCOT — the two speakers are the argument — so he is the
+      // one the shared figure layers belong on (gaze, reaction, wander).
       narr: nOn > 0.002
         ? lookPose(narrS, nx, GROUND, K_FIG, NARR_DIR[n], nOn, gazeX.value, gazeY.value, gazeOn.value)
         : BLANK,
     };
   });
 
-  // The two shouts' band-space x, written where the stances are known. Carried,
-  // like every other track here (L5): a plain lerp of the camera between two beats
-  // starts from where the last beat was heading rather than from what is on screen.
+  // The two shouts' band-space x, for the chrome (see SAY_R).
   useDerivedValue(() => {
     const v = SCENE.value;
     SAY_R.value = 200 + v.cs * (v.rxm - v.ccx);
@@ -576,59 +314,110 @@ export default function Logic1Scene({
   const DR = useDerivedValue<Bundle>(() => SCENE.value.red);
   const DB = useDerivedValue<Bundle>(() => SCENE.value.blue);
   const DN = useDerivedValue<Bundle>(() => SCENE.value.narr);
-  const ringStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.ring }));
+  const setStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.set }));
+  const notesRStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.notesR * SCENE.value.set }));
+  const notesBStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.notesB * SCENE.value.set }));
+  const bustStyle = useAnimatedStyle(() => ({
+    opacity: SCENE.value.bust,
+    transform: [{ translateX: SCENE.value.bustDx }],
+  }));
+  const klepStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.klep }));
 
   const st = STAGE[i];
-  const beat = BEATS[i];
-  const prevBeat = i > 0 ? BEATS[i - 1] : undefined;
+  // A PROP IS MOUNTED ONLY ON ITS OWN BEATS, and the one after while it fades out.
+  // Always-mounted at opacity 0 would be invisible to the reader and fully visible to
+  // the must-box probe, which reads an element's OWN opacity and not its parents' —
+  // so every beat's box would carry the bust, the water clock and both lecterns, and
+  // the camera could never push in on anything.
+  const pi = i > 0 ? i - 1 : 0;
+  const onNowOrLeaving = (a: readonly number[]) => a[i] > 0 || a[pi] > 0;
+  const showSet = STAGE[i].set > 0 || STAGE[pi].set > 0;
+  const showBust = onNowOrLeaving(BUST_ON);
+  const showKlep = onNowOrLeaving(CLOCK_ON);
+  const showNotesR = showSet && onNowOrLeaving(NOTE_R);
+  const showNotesB = showSet && onNowOrLeaving(NOTE_B);
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-      {/* THE RING. Act 1 used to be two figures on a bare rule, which read as
-          "nowhere". It is a raised canvas: a front edge with an end cap each side
-          so the mat has thickness, and a corner post standing on each end. All of
-          it RULE weight and behind the boxers, so it builds the place without
-          competing — and no rope, because a rope at head height rules a line
-          straight through both faces. */}
-      <Animated.View style={[StyleSheet.absoluteFill, ringStyle]} pointerEvents="none">
-        <View style={styles.matEdge} />
-        <View style={[styles.matCap, { left: RING_L }]} />
-        <View style={[styles.matCap, { left: RING_R }]} />
-        <View style={[styles.post, { left: RING_L - 1.5 }]} />
-        <View style={[styles.post, { left: RING_R - 1.5 }]} />
-        <View style={[styles.turnbuckle, { left: RING_L - 6.5 }]} />
-        <View style={[styles.turnbuckle, { left: RING_R - 6.5 }]} />
-      </Animated.View>
+      {/* THE FLOOR, from the depth kit, drawn first so it sits behind everything. */}
+      <View style={styles.floor} pointerEvents="none" />
 
-      {/* THE FLOOR, from the depth kit — a band with a lit near edge and a shaded
-          foot, where this lesson used to draw 1.5pt of rule and nothing else. It is
-          drawn first so it sits behind everything and is clipped by the band. */}
-      <View style={floorStyle(TONE, GROUND)} pointerEvents="none" />
+      {/* THE PROPS OF ACT 3, each on the floor beside the narrator for its beats. */}
+      {showBust ? (
+        <Animated.View style={[StyleSheet.absoluteFill, bustStyle]} pointerEvents="none">
+          <ObjectArt parts={BUST} tone={MARBLE} />
+        </Animated.View>
+      ) : null}
+      {showKlep ? (
+        <Animated.View style={[StyleSheet.absoluteFill, klepStyle]} pointerEvents="none">
+          <ObjectArt parts={KLEP.parts} tone={CLAY} />
+          <Drops clock={clock} />
+        </Animated.View>
+      ) : null}
 
-      {/* THE BOXERS ARE A CROWD, in the wardrobe's own sense: the narrator is the
-          mascot (he is the one `lookPose` poses, which is how `scenefig` identifies
-          him), and wardrobeContext's rule is that two figures are an argument and
-          get two looks while more than two get none. Without a role all three wore
-          the lead's costume — and two boxers in matching top hats is a worse
-          picture than two bare ones. */}
-      {st.rOn > 0 ? <Stickman D={DR} k={K_FIG} gloves={beat.act === 1} role="crowd" /> : null}
-      {st.bOn > 0 ? <Stickman D={DB} k={K_FIG} gloves={beat.act === 1} role="crowd" /> : null}
+      {/* THE SPEAKERS stand BEHIND their lecterns: the lectern is drawn after them, so
+          it covers the legs the way a podium does. They are a CROWD in the wardrobe's
+          sense — the narrator is the mascot. */}
+      {st.rOn > 0 ? <Stickman D={DR} k={K_FIG} role="crowd" /> : null}
+      {st.bOn > 0 ? <Stickman D={DB} k={K_FIG} role="crowd" /> : null}
+      {showSet ? (
+        <Animated.View style={[StyleSheet.absoluteFill, setStyle]} pointerEvents="none">
+          <ObjectArt parts={LECTERN_R} tone={TONE} />
+          <ObjectArt parts={LECTERN_B} tone={TONE} />
+        </Animated.View>
+      ) : null}
+      {showNotesR ? (
+        <Animated.View style={[StyleSheet.absoluteFill, notesRStyle]} pointerEvents="none">
+          <ObjectArt parts={NOTES_R} tone={TONE} />
+        </Animated.View>
+      ) : null}
+      {showNotesB ? (
+        <Animated.View style={[StyleSheet.absoluteFill, notesBStyle]} pointerEvents="none">
+          <ObjectArt parts={NOTES_B} tone={TONE} />
+        </Animated.View>
+      ) : null}
       {st.nOn > 0 ? <Stickman D={DN} k={K_FIG} /> : null}
     </View>
   );
 }
 
+/** Three drops falling from the upper pot's spout into the lower pot, on the idle clock. */
+function Drops({ clock }: { clock: SharedValue<number> }) {
+  const [sx, sy] = KLEP.spout;
+  const [mx, my] = KLEP.mouth;
+  const d0 = useAnimatedStyle(() => dropAt(clock.value, 0, sx, sy, mx, my));
+  const d1 = useAnimatedStyle(() => dropAt(clock.value, 0.33, sx, sy, mx, my));
+  const d2 = useAnimatedStyle(() => dropAt(clock.value, 0.66, sx, sy, mx, my));
+  return (
+    <>
+      <Animated.View style={[styles.drop, d0]} />
+      <Animated.View style={[styles.drop, d1]} />
+      <Animated.View style={[styles.drop, d2]} />
+    </>
+  );
+}
+
+function dropAt(t: number, phase: number, sx: number, sy: number, mx: number, my: number) {
+  'worklet';
+  const u = (t * 0.9 + phase) % 1;
+  // Falling accelerates; a drop leaves the spout slowly and lands fast.
+  const f = u * u;
+  return {
+    opacity: u < 0.9 ? 1 : (1 - u) * 10,
+    transform: [{ translateX: lerp(sx, mx, u) - 1.5 }, { translateY: lerp(sy, my, f) - 1.5 }],
+  };
+}
+
 // ── THE CHROME: what the camera does not move ────────────────────────────────
-// The easel, the scoreboard and the exchange are diagrams a reader keeps reading
-// while the shot pushes from 1.21× to 1.58× on the figures below them, so they are
-// drawn outside the camera at one size. See `Chrome` on CinematicPlayer.
-export function Logic1Chrome({ bt, bi, i }: SceneApi) {
+// The board, the instruments and the tablet are read while the shot pushes from
+// 1.21× to 1.58× on the figures below them, so they are drawn outside the camera at
+// one size. See `Chrome` on CinematicPlayer.
+export function Logic1Chrome({ clock, bt, bi, i }: SceneApi) {
   const GRAPH = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    // Asymmetric: a card LEAVES quickly and ARRIVES unhurried, so a graphic on its
-    // way out is gone before the board replacing it has drawn anything — the two
-    // never sit on top of each other at half opacity.
+    // A card LEAVES quickly and ARRIVES unhurried, so two never sit on top of each
+    // other at half opacity.
     const away = 1 - ease01(bt.value / 0.25);
     const here = ease01(bt.value / 0.7);
     const swap = (was: boolean, now: boolean) => {
@@ -636,8 +425,6 @@ export function Logic1Chrome({ bt, bi, i }: SceneApi) {
       return now ? (was ? 1 : here) : was ? away : 0;
     };
     const rise = ease01(bt.value / 0.55);
-    // On the way OUT the rows hold their last state while the card fades, rather
-    // than emptying a frame before it disappears.
     const cnt = STACK[n] > 0 ? STACK[n] : STACK[p];
     const stackRow = (k: number) => {
       'worklet';
@@ -645,20 +432,18 @@ export function Logic1Chrome({ bt, bi, i }: SceneApi) {
     };
     return {
       scoreOn: swap(VOL[p] >= 0, VOL[n] >= 0),
+      boardOn: swap(BOARD_OF[p] !== null, BOARD_OF[n] !== null),
       stackOn: swap(STACK[p] > 0, STACK[n] > 0),
       s0: stackRow(0), s1: stackRow(1), s2: stackRow(2),
-      stampU: cnt >= 3 ? (STACK[p] >= 3 ? 1 : clamp01((bt.value - 0.45) / 0.4)) : 0,
+      stampU: cnt >= 3 ? (STACK[p] >= 3 ? 1 : clamp01((bt.value - 0.45) / 0.9)) : 0,
     };
   });
 
   const p = i > 0 ? i - 1 : 0;
   const beat = BEATS[i];
   const prevBeat = i > 0 ? BEATS[i - 1] : undefined;
-  // A SHOUT KEEPS ITS DISTANCE FROM THE HEAD, and the head's screen place depends
-  // on the beat's own scale (1.21…1.58 here), so one band constant would hang it
-  // 57 units off the crown at one end of that range. The scene-space gap is
-  // converted per beat instead, and the leaving bubble is converted with the beat
-  // it belongs to rather than the one arriving.
+  // A shout keeps its distance from the head, and the head's screen place depends on
+  // the beat's own scale, so the scene-space gap is converted per beat.
   const topOf = (k: number) => Math.round(GROUND_Y + SHOTS[k].s * (BUBBLE_TOP - GROUND));
   const volLevel = VOL[i] >= 0 ? VOL[i] : VOL[p] >= 0 ? VOL[p] : 0;
   const reaLevel = REA[i] >= 0 ? REA[i] : REA[p] >= 0 ? REA[p] : 0;
@@ -667,15 +452,13 @@ export function Logic1Chrome({ bt, bi, i }: SceneApi) {
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <BoardStage boardKey={BOARD_OF[i]} />
-      <Scoreboard
-        bt={bt} G={GRAPH}
-        vol={volLevel} reasons={reaLevel} volFrom={volFrom} reasonsFrom={reaFrom}
+      <Chalkboard i={i} bt={bt} G={GRAPH} />
+      <Instruments
+        clock={clock} bt={bt} G={GRAPH} act={ACT[i]} pulseZero={i === 5}
+        vol={volLevel} volFrom={volFrom} reasons={reaLevel} reasonsFrom={reaFrom}
       />
-      <SocraticStack G={GRAPH} />
+      <WaxTablet G={GRAPH} />
 
-      {/* The PREVIOUS beat's shouts stay mounted for a moment so they fade out with
-          everything else, rather than being the one graphic cut dead on the tap. */}
       {prevBeat?.say?.map((s) => (
         <Bubble
           key={`out-${s.who}-${s.text}`}
@@ -696,244 +479,358 @@ export function Logic1Chrome({ bt, bi, i }: SceneApi) {
   );
 }
 
-// ── the illustration board, cross-faded ──────────────────────────────────────
-// Each board has its OWN draw-on progress, so the incoming one draws itself while
-// the outgoing holds its finished state and fades — two values, which is why this
-// cannot reuse the generic Fade. The FRAME travels with its illustration: mounted
-// separately it snapped out of existence while the drawing inside went on fading,
-// and the picture hung frameless in mid-air.
-function BoardStage({ boardKey }: { boardKey: BoardKey | null }) {
-  const fade = useSharedValue(1);
-  const curP = useSharedValue(1);
-  const prevP = useSharedValue(1);
-  const lastKey = useRef<BoardKey | null>(boardKey);
-  const prevKey = useRef<BoardKey | null>(null);
+interface Graph {
+  scoreOn: number; boardOn: number; stackOn: number;
+  s0: number; s1: number; s2: number; stampU: number;
+}
 
-  if (boardKey !== lastKey.current) {
-    prevKey.current = lastKey.current;
-    lastKey.current = boardKey;
-    prevP.value = 1;
-    fade.value = 0;
-    fade.value = withTiming(1, { duration: XFADE, easing: Easing.inOut(Easing.cubic) });
-    curP.value = 0;
-    curP.value = withTiming(1, { duration: 2600, easing: Easing.out(Easing.cubic) });
-  }
-
-  const curStyle = useAnimatedStyle(() => ({ opacity: fade.value }));
-  const prevStyle = useAnimatedStyle(() => ({ opacity: 1 - fade.value }));
-
-  const curK = boardKey;
-  const prevK = prevKey.current;
-  const Cur = curK ? BOARDS[curK] : null;
-  const Prev = prevK ? BOARDS[prevK] : null;
+// ── the chalkboard ───────────────────────────────────────────────────────────
+// The professor's board: a wooden frame round a DEEP slate, a ledge with a stick of
+// chalk, and chalk that writes itself (components/professor/ChalkPieces). A board
+// that stays up for two beats adds to itself on the second: every phase before this
+// beat's is drawn finished, and this beat's writes over CHALK_T. When the board
+// CHANGES, the old chalk is wiped quickly and the new begins.
+function Chalkboard({ i, bt, G }: { i: number; bt: SharedValue<number>; G: SharedValue<Graph> }) {
+  const key = BOARD_OF[i];
+  const prevKey = i > 0 ? BOARD_OF[i - 1] : null;
+  const phase = PHASE_OF[i];
+  const done = useSharedValue(1);
+  const writing = useDerivedValue(() => clamp01((bt.value - 0.3) / CHALK_T));
+  const frame = useAnimatedStyle(() => ({ opacity: G.value.boardOn }));
+  // The previous board's chalk, wiped over the first quarter-second of a new board.
+  const wipe = useAnimatedStyle(() => ({ opacity: 1 - clamp01(bt.value / 0.25) }));
+  const showKey = key ?? prevKey;
+  const showPhase = key ? phase : prevKey ? PHASE_OF[i - 1] : 0;
+  const oldKey = key && prevKey && prevKey !== key ? prevKey : null;
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      {Prev && prevK ? (
-        <Animated.View style={[StyleSheet.absoluteFill, prevStyle]} pointerEvents="none">
-          <BoardFrame title={BOARD_TITLE[prevK]} />
-          <View style={{ position: 'absolute', left: BOARD.x, top: BOARD.y }}>
-            <Prev p={prevP} w={BOARD.w} h={BOARD.h} />
-          </View>
+    <Animated.View style={[StyleSheet.absoluteFill, frame]} pointerEvents="none">
+      <View style={[styles.frame, { boxShadow: lipOf(WOOD) }]} />
+      <View style={styles.slate} />
+      <View style={styles.ledge} />
+      <View style={styles.chalkStick} />
+      {oldKey ? (
+        <Animated.View style={[StyleSheet.absoluteFill, wipe]}>
+          {LAYOUT[oldKey].slice(0, PHASE_OF[i - 1] + 1).map((pieces, k) => (
+            <ChalkPieces key={`o${k}`} pieces={pieces} progress={done} x={CHALK_X} y={CHALK_Y} s={CHALK_S} />
+          ))}
         </Animated.View>
       ) : null}
-      {Cur && curK ? (
-        <Animated.View style={[StyleSheet.absoluteFill, curStyle]} pointerEvents="none">
-          <BoardFrame title={BOARD_TITLE[curK]} />
-          <View style={{ position: 'absolute', left: BOARD.x, top: BOARD.y }}>
-            <Cur p={curP} w={BOARD.w} h={BOARD.h} />
-          </View>
-        </Animated.View>
-      ) : null}
-    </View>
-  );
-}
-
-/** The framed easel, drawn BEFORE the illustration so the paper sits behind the strokes. */
-function BoardFrame({ title }: { title: string }) {
-  return (
-    <View pointerEvents="none" style={styles.frame}>
-      <View style={styles.tray} />
-      <Text style={styles.frameTitle} numberOfLines={1}>{title}</Text>
-    </View>
-  );
-}
-
-// ── the scoreboard ───────────────────────────────────────────────────────────
-// Two ten-cell meters keeping the count the whole lesson turns on: how loud it has
-// got, and how many reasons have actually been given. Act 1 drives VOLUME to full
-// with REASONS flat on zero; act 4 replays the same disagreement with the numbers
-// the other way round.
-const CELLS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-// ONLY THE CELLS THAT CHANGED MAY ANIMATE. This was "the box above the stage
-// glitches on every tap", and it is a `bt` bug: cell opacity was `(bt − k·0.045)/
-// 0.2`, and `bt` resets on every beat change, so all ten cells of an already-full
-// meter dropped to nothing and swept back in. A cell now knows whether it was lit
-// LAST beat as well as this one.
-function Cell({
-  bt, k, from, was, now,
-}: { bt: SharedValue<number>; k: number; from: number; was: boolean; now: boolean }) {
-  const st = useAnimatedStyle(() => {
-    if (was && now) return { opacity: 1 };
-    if (now) return { opacity: clamp01((bt.value - 0.22 - (k - from) * 0.05) / 0.22) };
-    if (was) return { opacity: 1 - clamp01(bt.value / 0.22) };
-    return { opacity: 0 };
-  });
-  return (
-    <View style={styles.cell}>
-      <Animated.View style={[styles.cellFill, st]} />
-    </View>
-  );
-}
-
-function MeterRow({
-  bt, label, from, to, top,
-}: { bt: SharedValue<number>; label: string; from: number; to: number; top: number }) {
-  return (
-    <View style={[styles.meterRow, { top }]}>
-      <Text style={styles.meterLabel} numberOfLines={1}>{label}</Text>
-      <View style={styles.cells}>
-        {CELLS.map((k) => (
-          <Cell key={k} bt={bt} k={k} from={from} was={k < from} now={k < to} />
-        ))}
-      </View>
-    </View>
-  );
-}
-
-function Scoreboard({
-  bt, G, vol, reasons, volFrom, reasonsFrom,
-}: {
-  bt: SharedValue<number>;
-  G: SharedValue<Graph>;
-  vol: number; reasons: number; volFrom: number; reasonsFrom: number;
-}) {
-  const card = useAnimatedStyle(() => ({ opacity: G.value.scoreOn }));
-  return (
-    <Animated.View style={[styles.score, card]} pointerEvents="none">
-      <MeterRow bt={bt} label="VOLUME" from={volFrom} to={vol} top={8} />
-      <MeterRow bt={bt} label="REASONS" from={reasonsFrom} to={reasons} top={28} />
+      {showKey
+        ? LAYOUT[showKey].slice(0, showPhase + 1).map((pieces, k) => (
+          <ChalkPieces
+            key={`${showKey}${k}`}
+            pieces={pieces}
+            progress={key && k === phase ? writing : done}
+            x={CHALK_X} y={CHALK_Y} s={CHALK_S}
+          />
+        ))
+        : null}
     </Animated.View>
   );
 }
 
-// ── the Socratic exchange ────────────────────────────────────────────────────
-// Three lines of the Apology's cross-examination as a stack: question, answer, the
-// question that broke it — then CONTRADICTION comes down across the whole exchange
-// like a stamp. Questions are inked boxes; the answer is dashed, because it is the
-// thing that turns out not to hold.
-function SocraticStack({ G }: { G: SharedValue<Graph> }) {
-  const wrap = useAnimatedStyle(() => ({ opacity: G.value.stackOn }));
-  const r0 = useAnimatedStyle(() => ({ opacity: G.value.s0, transform: [{ translateX: (1 - G.value.s0) * -14 }] }));
-  const r1 = useAnimatedStyle(() => ({ opacity: G.value.s1, transform: [{ translateX: (1 - G.value.s1) * 14 }] }));
-  const r2 = useAnimatedStyle(() => ({ opacity: G.value.s2, transform: [{ translateX: (1 - G.value.s2) * -14 }] }));
-  const rows = [r0, r1, r2];
-  const stamp = useAnimatedStyle(() => {
-    const u = G.value.stampU;
-    return {
-      opacity: clamp01(u / 0.35),
-      transform: [{ rotate: '-7deg' }, { scale: lerp(1.3, 1, easeOutBack(u)) }],
-    };
-  });
+// ── the instruments on the studio wall ───────────────────────────────────────
+// Where the scoreboard's two bars were: a VOLUME needle meter (a cream face, an arc
+// scale ending in a red band, a needle from the bottom centre — drawn against a
+// cassette deck's own meters), an ON AIR light, and a REASONS flip counter whose
+// digit flips when a reason is given.
+// 62 tall, not 56: at 56 the needle's pivot sat on the top of VOLUME (check:readable
+// STRIKE), and the pivot is where the needle has to come from.
+const VU = { x: 46, y: 143, w: 134, h: 62 };
+const AIR = { x: 182, y: 158, w: 56, h: 32 };
+const CTR = { x: 240, y: 143, w: 114, h: 62 };
+const PIVOT = { x: VU.x + VU.w / 2, y: VU.y + 41 };
+const ARC_R = 30;
+const TICKS = Array.from({ length: 11 }, (_, k) => k);
 
+function Instruments({
+  clock, bt, G, act, pulseZero, vol, volFrom, reasons, reasonsFrom,
+}: {
+  clock: SharedValue<number>; bt: SharedValue<number>; G: SharedValue<Graph>;
+  act: number; pulseZero: boolean;
+  vol: number; volFrom: number; reasons: number; reasonsFrom: number;
+}) {
+  const card = useAnimatedStyle(() => ({ opacity: G.value.scoreOn }));
+  // The needle: from last beat's level to this one's, then a nervous shiver once it
+  // is in the red. `clock` never resets, so the shiver never restarts on a tap.
+  const needle = useAnimatedStyle(() => {
+    const u = ease01(clamp01((bt.value - 0.15) / 0.8));
+    const v = lerp(volFrom, vol, u);
+    const shiver = v >= 8 ? Math.sin(clock.value * 23) * 1.6 + Math.sin(clock.value * 37) * 0.8 : 0;
+    return { transform: [{ rotate: `${-50 + v * 10 + shiver}deg` }] };
+  });
+  // ON AIR: the LAMP is lit while the show is on and blinks during the quarrel. The
+  // words never dim — the ember cannot carry a word (tone.ts), and a word that blinks
+  // is a word at 0.7 for half the time — so they sit on the dark plate, and only the
+  // lamp beside them does the blinking.
+  const air = useAnimatedStyle(() => ({
+    opacity: act === 1 ? 0.35 + 0.65 * (Math.sin(clock.value * 8) > 0 ? 1 : 0) : 1,
+  }));
+  const on = act !== 3 && act !== 5;
+  // The flip: the old digit folds away, the new one unfolds.
+  const flips = reasons !== reasonsFrom;
+  const outgoing = useAnimatedStyle(() => ({
+    transform: [{ scaleY: flips ? 1 - clamp01((bt.value - 0.3) / 0.15) : 1 }],
+    opacity: flips && bt.value > 0.45 ? 0 : 1,
+  }));
+  const incoming = useAnimatedStyle(() => ({
+    transform: [{ scaleY: clamp01((bt.value - 0.45) / 0.15) }],
+    opacity: bt.value > 0.45 ? 1 : 0,
+  }));
+  // "Because a quarrel contains no reasons" — the 0 gives a single nudge.
+  const nudge = useAnimatedStyle(() => {
+    if (!pulseZero) return { transform: [{ scale: 1 }] };
+    const a = clamp01((bt.value - 0.8) / 0.5);
+    return { transform: [{ scale: 1 + 0.16 * Math.sin(Math.PI * a) }] };
+  });
   return (
-    <Animated.View style={[StyleSheet.absoluteFill, wrap]} pointerEvents="none">
-      {STACK_ROWS.map((r, k) => (
-        <Animated.View
-          key={r.text}
-          style={[
-            styles.stackRow,
-            r.ask ? styles.stackAsk : styles.stackAns,
-            { top: STACK_TOP + k * (STACK_ROW_H + STACK_GAP) },
-            rows[k],
-          ]}
-        >
-          <Text style={[styles.stackText, !r.ask && styles.stackTextSoft]} numberOfLines={1}>
-            {r.text}
-          </Text>
+    <Animated.View style={[StyleSheet.absoluteFill, card]} pointerEvents="none">
+      {/* THE METER */}
+      <View style={[styles.vu, { boxShadow: LIP }]}>
+        <View style={styles.vuFace} />
+        <Text style={styles.vuLabel} numberOfLines={1}>VOLUME</Text>
+      </View>
+      {TICKS.map((k) => {
+        const a = ((-50 + k * 10) * Math.PI) / 180;
+        const red = k >= 8;
+        return (
+          <View
+            key={k}
+            style={[
+              styles.tick,
+              red && styles.tickRed,
+              {
+                left: PIVOT.x + Math.sin(a) * ARC_R - 1,
+                top: PIVOT.y - Math.cos(a) * ARC_R - (k % 5 === 0 ? 7 : 5),
+                height: k % 5 === 0 ? 7 : 5,
+                transform: [{ rotate: `${-50 + k * 10}deg` }],
+              },
+            ]}
+          />
+        );
+      })}
+      <Animated.View style={[styles.needleArm, needle]}>
+        <View style={styles.needle} />
+      </Animated.View>
+      <View style={styles.pivot} />
+
+      {/* ON AIR */}
+      <View style={[styles.air, { boxShadow: LIP }]}>
+        <Animated.View style={[styles.lamp, on ? styles.lampOn : styles.lampOff, on && air]} />
+        <Text style={styles.airText} numberOfLines={1}>ON AIR</Text>
+      </View>
+
+      {/* THE FLIP COUNTER */}
+      <View style={[styles.ctr, { boxShadow: LIP }]}>
+        <Text style={styles.ctrLabel} numberOfLines={1}>REASONS</Text>
+      </View>
+      <Animated.View style={[styles.card, nudge]}>
+        <Animated.View style={[styles.cardFace, outgoing]}>
+          <Text style={styles.digit}>{String(reasonsFrom)}</Text>
         </Animated.View>
-      ))}
-      <Animated.View style={[styles.stamp, stamp]}>
-        <Text style={styles.stampText} numberOfLines={1}>CONTRADICTION</Text>
+        {flips ? (
+          <Animated.View style={[styles.cardFace, incoming]}>
+            <Text style={styles.digit}>{String(reasons)}</Text>
+          </Animated.View>
+        ) : null}
+        <View style={styles.cardSplit} />
       </Animated.View>
     </Animated.View>
   );
 }
 
-// Every plate that STANDS now stands on a hard ledge of its own shaded tone, and
-// every face is the kit's white rather than bare paper — the depth kit (group AG),
-// which is the half of the redesign that is not the palette. A border WIDTH is
-// never touched by the kit: it shrinks the content area and can re-wrap a word.
+// ── the wax tablet, the stylus and the stamp ─────────────────────────────────
+// Socrates' cross-examination of Meletus, scratched into wax a line at a time — the
+// question, the answer, the question that broke it — and then CONTRADICTION stamped
+// across all three with a real rubber stamp: it falls, strikes, and lifts away,
+// leaving its impression.
+const TAB = { x: 62, y: 148, w: 276, h: 148 };
+const ROW_TOP = TAB.y + 20;
+const ROW_H = 30;
+const ROW_GAP = 10;
+
+function WaxTablet({ G }: { G: SharedValue<Graph> }) {
+  const wrap = useAnimatedStyle(() => ({ opacity: G.value.stackOn }));
+  // A line is SCRATCHED in, left to right: its clip widens with its value.
+  const r0 = useAnimatedStyle(() => ({ width: `${G.value.s0 * 100}%` }));
+  const r1 = useAnimatedStyle(() => ({ width: `${G.value.s1 * 100}%` }));
+  const r2 = useAnimatedStyle(() => ({ width: `${G.value.s2 * 100}%` }));
+  const rows = [r0, r1, r2];
+  // The stamp: falls accelerating (0 → 0.35), squashes on contact, lifts away.
+  const tool = useAnimatedStyle(() => {
+    const u = G.value.stampU;
+    const fall = clamp01(u / 0.35);
+    const lift = clamp01((u - 0.55) / 0.4);
+    const y = u < 0.35 ? -90 + 90 * fall * fall : -70 * ease01(lift);
+    const squash = u >= 0.35 && u < 0.5 ? 0.94 : 1;
+    return {
+      opacity: u <= 0 ? 0 : 1 - clamp01((u - 0.8) / 0.2),
+      transform: [{ translateY: y }, { rotate: '-7deg' }, { scaleY: squash }],
+    };
+  });
+  const mark = useAnimatedStyle(() => {
+    const u = G.value.stampU;
+    return {
+      opacity: u >= 0.35 ? 1 : 0,
+      transform: [{ rotate: '-7deg' }, { scale: u >= 0.35 ? lerp(1.04, 1, clamp01((u - 0.35) / 0.2)) : 1 }],
+    };
+  });
+  const toolTone = useMemo(() => ({ handle: WOOD.SHADE, block: WOOD.STONE }), []);
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, wrap]} pointerEvents="none">
+      <View style={[styles.tablet, { boxShadow: lipOf(WOOD) }]} />
+      <View style={styles.wax} />
+      {STACK_ROWS.map((r, k) => (
+        <View key={r.text} style={[styles.rowClip, { top: ROW_TOP + k * (ROW_H + ROW_GAP) }]}>
+          <Animated.View style={[styles.rowReveal, rows[k]]}>
+            <Text style={[styles.rowText, !r.ask && styles.rowTextAns]} numberOfLines={1}>{r.text}</Text>
+          </Animated.View>
+        </View>
+      ))}
+      {/* the stylus, laid across the corner */}
+      <View style={styles.stylus} />
+      <Animated.View style={[styles.imprint, mark]}>
+        <Text style={styles.imprintText} numberOfLines={1}>CONTRADICTION</Text>
+      </Animated.View>
+      <Animated.View style={[styles.stampTool, tool]}>
+        <View style={[styles.stampKnob, { backgroundColor: toolTone.handle }]} />
+        <View style={[styles.stampNeck, { backgroundColor: toolTone.handle }]} />
+        <View style={[styles.stampBlock, { backgroundColor: toolTone.block }]} />
+        <View style={styles.stampRubber} />
+      </Animated.View>
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
-  matEdge: {
-    position: 'absolute', left: RING_L, width: RING_R - RING_L, top: GROUND + 6, height: 1.5,
-    backgroundColor: RULE,
-  },
-  matCap: { position: 'absolute', width: 1.5, top: GROUND, height: 7.5, backgroundColor: RULE },
-  post: { position: 'absolute', width: 3, top: POST_T, height: GROUND + 7.5 - POST_T, backgroundColor: RULE },
-  turnbuckle: {
-    position: 'absolute', width: 13, top: POST_T - 2, height: 6, borderRadius: 2,
-    backgroundColor: RULE,
-  },
+  floor: floorStyle(TONE, GROUND),
+  drop: { position: 'absolute', left: 0, top: 0, width: 3, height: 3, borderRadius: 1.5, backgroundColor: DEEP },
 
   frame: {
     position: 'absolute', left: FRAME.x, top: FRAME.y, width: FRAME.w, height: FRAME.h,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
-    boxShadow: LIP,
+    borderRadius: 6, backgroundColor: WOOD.STONE, borderWidth: 1.5, borderColor: INK,
   },
-  tray: { position: 'absolute', left: 10, right: 10, top: TRAY_Y, height: 1, backgroundColor: RULE },
-  frameTitle: {
-    position: 'absolute', left: 8, right: 8, top: PLATE_Y, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.5, color: SOFT,
-    includeFontPadding: false,
+  slate: {
+    position: 'absolute', left: SLATE.x, top: SLATE.y, width: SLATE.w, height: SLATE.h,
+    borderRadius: 3, backgroundColor: DEEP,
+  },
+  ledge: {
+    position: 'absolute', left: FRAME.x - 6, top: FRAME.y + FRAME.h - 2, width: FRAME.w + 12, height: 7,
+    borderRadius: 2, backgroundColor: WOOD.SHADE, borderWidth: 1.5, borderColor: INK,
+  },
+  chalkStick: {
+    position: 'absolute', left: FRAME.x + 40, top: FRAME.y + FRAME.h - 5, width: 14, height: 3.5,
+    borderRadius: 1.5, backgroundColor: PAPER_LIT,
   },
 
-  score: {
-    position: 'absolute', left: 42, top: 144, width: 320, height: 54,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE,
-    boxShadow: LIP,
+  vu: {
+    position: 'absolute', left: VU.x, top: VU.y, width: VU.w, height: VU.h,
+    borderRadius: 6, backgroundColor: TONE.STONE, borderWidth: 1.5, borderColor: INK,
   },
-  meterRow: { position: 'absolute', left: 10, right: 10, height: 14, flexDirection: 'row', alignItems: 'center' },
-  meterLabel: {
-    width: 84, fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.8,
-    color: INK, includeFontPadding: false,
+  vuFace: {
+    position: 'absolute', left: 6, top: 5, right: 6, height: 38,
+    borderRadius: 3, backgroundColor: PAPER_LIT, borderWidth: 1, borderColor: TONE.SHADE,
   },
-  cells: { flexDirection: 'row', gap: 2.2 },
-  cell: { width: 18, height: 14, borderWidth: 1.5, borderColor: SHADE, borderRadius: 2, backgroundColor: STONE },
-  cellFill: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: INK },
+  vuLabel: {
+    position: 'absolute', left: 0, right: 0, bottom: 2, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.2, color: INK, includeFontPadding: false,
+  },
+  tick: { position: 'absolute', width: 2, backgroundColor: INK, transformOrigin: '50% 100%' },
+  tickRed: { backgroundColor: EMBER },
+  needleArm: {
+    position: 'absolute', left: PIVOT.x - 1, top: PIVOT.y - ARC_R - 2, width: 2, height: (ARC_R + 2) * 2,
+  },
+  needle: { width: 1.8, height: ARC_R + 2, backgroundColor: INK, marginLeft: 0.1, borderRadius: 0.9 },
+  pivot: {
+    position: 'absolute', left: PIVOT.x - 3.5, top: PIVOT.y - 3.5, width: 7, height: 7, borderRadius: 3.5,
+    backgroundColor: INK,
+  },
 
-  stackRow: {
-    position: 'absolute', left: 62, right: 62, height: STACK_ROW_H,
-    borderWidth: 2, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12,
+  air: {
+    position: 'absolute', left: AIR.x, top: AIR.y, width: AIR.w, height: AIR.h,
+    borderRadius: 5, borderWidth: 1.5, borderColor: INK, backgroundColor: DEEP,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 3,
   },
-  stackAsk: { borderColor: INK },
-  stackAns: { borderColor: SHADE, borderStyle: 'dashed' },
-  stackText: {
-    fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 0.3, color: INK,
-    textAlign: 'center', includeFontPadding: false,
+  lamp: { width: 6, height: 6, borderRadius: 3 },
+  lampOn: { backgroundColor: EMBER },
+  lampOff: { backgroundColor: MID },
+  airText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 0.3, color: PAPER_LIT, includeFontPadding: false,
   },
-  stackTextSoft: { color: SOFT },
-  stamp: {
-    position: 'absolute', left: 116, top: 274, width: 168, height: 26,
+
+  ctr: {
+    position: 'absolute', left: CTR.x, top: CTR.y, width: CTR.w, height: CTR.h,
+    borderRadius: 6, backgroundColor: TONE.SHADE, borderWidth: 1.5, borderColor: INK,
+  },
+  ctrLabel: {
+    position: 'absolute', left: 0, right: 0, bottom: 3, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 1.2, color: INK, includeFontPadding: false,
+  },
+  card: {
+    position: 'absolute', left: CTR.x + CTR.w / 2 - 18, top: CTR.y + 5, width: 36, height: 34,
+  },
+  cardFace: {
+    position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: 3,
+    backgroundColor: PAPER_LIT, alignItems: 'center', justifyContent: 'center',
+  },
+  digit: { fontFamily: 'Inter_700Bold', fontSize: 24, color: INK, includeFontPadding: false },
+  cardSplit: { position: 'absolute', left: 0, right: 0, top: 16.5, height: 1, backgroundColor: TONE.SHADE },
+
+  tablet: {
+    position: 'absolute', left: TAB.x, top: TAB.y, width: TAB.w, height: TAB.h,
+    borderRadius: 6, backgroundColor: WOOD.STONE, borderWidth: 1.5, borderColor: INK,
+  },
+  wax: {
+    position: 'absolute', left: TAB.x + 10, top: TAB.y + 10, width: TAB.w - 20, height: TAB.h - 20,
+    borderRadius: 3, backgroundColor: WOOD.SHADE,
+  },
+  rowClip: { position: 'absolute', left: TAB.x + 18, width: TAB.w - 36, height: ROW_H, overflow: 'hidden' },
+  rowReveal: { height: ROW_H, overflow: 'hidden', justifyContent: 'center' },
+  rowText: {
+    width: TAB.w - 36, fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 0.3,
+    color: INK, textAlign: 'center', includeFontPadding: false,
+  },
+  // INK, not paper: a stylus line in wax is a groove, and paper on the shaded wax is
+  // 2.5:1 (check:readable FAINT).
+  rowTextAns: { fontStyle: 'italic' },
+  stylus: {
+    position: 'absolute', left: TAB.x + TAB.w - 70, top: TAB.y + TAB.h - 16, width: 64, height: 3.5,
+    borderRadius: 2, backgroundColor: INK, transform: [{ rotate: '-18deg' }],
+  },
+  imprint: {
+    position: 'absolute', left: 110, top: ROW_TOP + 1.5 * ROW_H + ROW_GAP - 6, width: 180, height: 30,
     backgroundColor: INK, borderRadius: 3, alignItems: 'center', justifyContent: 'center',
   },
-  stampText: {
-    fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 1.6, color: PAPER,
-    includeFontPadding: false,
+  imprintText: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 1.8, color: PAPER, includeFontPadding: false,
   },
+  stampTool: {
+    position: 'absolute', left: 150, top: ROW_TOP + 1.5 * ROW_H + ROW_GAP - 62, width: 100, height: 64,
+    alignItems: 'center',
+  },
+  stampKnob: { width: 26, height: 24, borderRadius: 13, borderWidth: 1.5, borderColor: INK },
+  stampNeck: { width: 12, height: 14, marginTop: -2, borderWidth: 1.5, borderColor: INK },
+  stampBlock: { width: 96, height: 18, marginTop: -1, borderRadius: 2, borderWidth: 1.5, borderColor: INK },
+  stampRubber: { width: 92, height: 5, backgroundColor: INK },
 });
 
-// The band is unchanged from the bespoke player and the pin is why it can be: the
-// ground lands at one screen place in every shot and all the way through every
-// move, so the extremes are bounded by the endpoint scales alone. The un-zoomed
-// chrome sets the top (frame 144…320) and the closest shot's ankle sets the
-// bottom, so the art spans 364 of the 380 and nothing can clip.
+// EVERY BEAT KEEPS THE AUTHORED CAMERA (K10's override: an empty `tour`). This
+// lesson writes a shot for every beat and PINS the ground line to one screen place,
+// and a generated tour honours neither. Measured in the browser, the tours pushed to
+// 1.72× with the ground lifted from 496 to 413 — half the frame became floor — and
+// the speech boxes, which are drawn in the chrome over each speaker's mark as the
+// AUTHORED shot places it (outside anything the must-box probe can see), landed on a
+// head and 65px to one side of the man speaking. Mapped here rather than written
+// into the script, whose beats are voiced and keyed by index (AH8).
+const PLAYED = BEATS.map((b) => ({ ...b, tour: [] as number[][] }));
+
+// The band is unchanged and the pin is why it can be: the ground lands at one screen
+// place in every shot and all the way through every move.
 export function Logic1Lesson({ lesson }: { lesson: Lesson }) {
   return (
     <CinematicPlayer
       lesson={lesson}
-      beats={BEATS}
+      beats={PLAYED}
       gesture={NARR_G}
       Scene={Logic1Scene}
       Chrome={Logic1Chrome}
