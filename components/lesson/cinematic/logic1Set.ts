@@ -24,43 +24,77 @@ import { oEll, oRect, oBar, plinth, type ObjPart } from './objects';
 
 const GROUND = 500;
 
-/** Where the two lecterns stand: in front of each speaker's mark, toward the middle. */
-export const LECTERN_OFF = 27;
+/**
+ * WHERE A LECTERN STANDS: 38 units in front of its speaker, toward the middle. Far
+ * enough that his body never touches it and his arms REACH to rest on its top (at 30
+ * they were bunched against his chest and read as a hug), near enough that his hands
+ * land on the top with the elbows still bent. His shoulders are 60 above the floor,
+ * the top is 50.
+ */
+export const LECTERN_OFF = 38;
+/** The upper face of the sloped top, on the lectern's centre line. */
+export const LECTERN_TOP = GROUND - 50;
+/** Half the top's width. */
+export const LECTERN_HALF = 23;
+/**
+ * THE TOP SLOPES DOWN TOWARD THE SPEAKER, which is how a reading desk is built — the
+ * low edge is his, so the page tips up at him. The first draft had it backwards, and
+ * the owner saw it at once: *"the angle closest to the stick man is lower, and then
+ * it goes up."* Degrees.
+ */
+export const LECTERN_TILT = 9;
 
 /**
  * A debate lectern, seen from the side. `cx` is its centre; `speaker` is −1 when the
- * speaker stands to its LEFT (the mic leans that way) and +1 when to its right.
+ * speaker stands to its LEFT and +1 when to its right.
+ *
+ * THE MICROPHONE IS IN FRONT OF HIS FACE. It rises from the far half of the top and
+ * bends back toward him, so its head hangs a few units short of his mouth — the
+ * first draft ran the gooseneck the other way and parked the head behind his skull.
  */
 export function lectern(cx: number, speaker: -1 | 1): ObjPart[] {
-  const top = GROUND - 56;
   const s = speaker;
+  const top = LECTERN_TOP;
+  const tilt = s * LECTERN_TILT;
+  const surf = (x: number) => top + (x - cx) * Math.tan((tilt * Math.PI) / 180);
+  const bodyTop = top + 5;
+  const bodyBot = GROUND - 6;
+  const bodyMid = (bodyTop + bodyBot) / 2;
+  const base = cx - s * 21;                      // the gooseneck's foot, at the far edge
+  const mouthX = cx + s * LECTERN_OFF - s * 29;  // just short of his face
   return [
     // the plinth underfoot
-    oRect('face', cx, GROUND - 3, 46, 6, 0, 1.5),
+    oRect('face', cx, GROUND - 3, 40, 6, 0, 1.5),
     // the body, and its recessed front panel
-    oRect('mass', cx, top + 30, 34, 50, 0, 2),
-    oRect('dark', cx, top + 30, 22, 32, 0, 2),
+    oRect('mass', cx, bodyMid, 32, bodyBot - bodyTop, 0, 2),
+    oRect('dark', cx, bodyMid + 1, 20, bodyBot - bodyTop - 14, 0, 2),
     // a small seal on the panel — the studio's mark
-    oEll('lit', cx, top + 22, 9, 9),
-    oEll('line', cx, top + 22, 4, 4),
-    // the sloped top, falling toward the speaker
-    oRect('mass', cx, top + 2, 44, 7, s * -7, 2),
-    // the gooseneck: up from the back of the top, bending toward his mouth
-    oBar('line', cx + s * 12, top, cx + s * 15, top - 10, 2),
-    oBar('line', cx + s * 15, top - 10, cx + s * 21, top - 18, 2),
-    oEll('line', cx + s * 23, top - 21, 7, 10, s * 35),
+    oEll('lit', cx, bodyTop + 11, 9, 9),
+    oEll('line', cx, bodyTop + 11, 4, 4),
+    // the sloped top, low on his side
+    oRect('mass', cx, top + 3.5, LECTERN_HALF * 2, 7, tilt, 2),
+    // the lip along its low edge, which stops a page sliding off
+    oBar('line', cx + s * (LECTERN_HALF - 1), surf(cx + s * (LECTERN_HALF - 1)) + 1,
+      cx + s * (LECTERN_HALF - 1), surf(cx + s * (LECTERN_HALF - 1)) - 3, 2.2),
+    // the gooseneck: up from the far edge, then arching back over the top toward his
+    // mouth — clear of the notes that stand in the middle of the top in act 4
+    oBar('line', base, surf(base), base + s * 1, top - 19, 2),
+    oBar('line', base + s * 1, top - 19, mouthX - s * 7, top - 24, 2),
+    // the microphone's head, a capsule pointed at him
+    oEll('line', mouthX, top - 23, 10, 6, s * 12),
   ];
 }
 
 /**
- * A sheet of notes on the lectern top, and the little chart on it: `kind` 'rise' is
- * the rents line climbing past a flat wages line; 'built' is two skylines, the
- * taller one with its arrow pointing down.
+ * A sheet of notes lying on the lectern's top, and the little chart on it: `kind`
+ * 'rise' is the rents line climbing past a flat wages line; 'built' is two
+ * skylines, the taller one with its arrow pointing down. It lies ON the slope, so
+ * it takes the top's tilt.
  */
 export function notes(cx: number, speaker: -1 | 1, kind: 'rise' | 'built'): ObjPart[] {
-  const y = GROUND - 62;
+  const tilt = speaker * LECTERN_TILT;
+  const y = LECTERN_TOP - 9;
   const x0 = cx - 11, x1 = cx + 11;
-  const tilt = speaker * -7;
   const parts: ObjPart[] = [oRect('lit', cx, y + 3, 26, 17, tilt, 1)];
   if (kind === 'rise') {
     parts.push(

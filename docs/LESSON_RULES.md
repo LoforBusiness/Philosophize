@@ -7834,6 +7834,38 @@ of snapping between two poses (L1) — and it is paired with a `gazeAt` on the s
 point, because `pointAt`'s own header says a point without a look reads as a
 person gesturing at something behind them.
 
+## Y7 · An object he touches is solid
+
+The owner, on the lecterns in `logic-arguments-1`: *"the podiums aren't even
+there. Now these are objects, so I want them to act like objects, so they put
+their hands on them, not through them … a rule that if it's interacted with, it's
+like it's real. So the stick man can't just go through it, but put their hands on
+it, or bump into it, or interact with it."*
+
+A prop a figure stands AT is a surface, and three things follow:
+
+- **His hands rest ON it.** A hand that belongs on the prop is placed there with
+  `reachHandTo` against the live pose, at the surface's own height where the hand
+  is — so the lean, the breath and the head keep moving and the hand stays where
+  the wood is. A sloped top is sloped for the hand too.
+- **A free hand can land on it and cannot go into it.** Whatever a gesture does,
+  read the hand back with `handAt`; if it is over the prop and below its surface,
+  lift it to the surface. That is a clamp, so it is continuous — the hand lands
+  rather than jumps.
+- **His body stands clear of it.** Place the prop where the torso does not reach
+  it and the arms still can — the lecterns stand 38 units off, because at 30 the
+  arms were bunched against the chest and it read as a hug.
+
+A handover between those states (a hand leaving the prop to gesture, and coming
+back) is CARRIED like any other track (L5), never switched.
+
+And what is ON the prop is placed on it the same way: the microphone rises from
+the far edge and hangs in front of his mouth, not behind his head, and nothing
+leans on the prop through something else on it. `atLectern` in `logic1Scene.tsx` is
+the worked example. This is per-lesson staging (Y5); there is no corpus checker for
+it yet, so the render is the instrument — `sheet:beats` at every beat, looked at up
+close.
+
 ## Group Z — the drawing has to be the thing it names
 
 §13 already records this once, as the cheese: `metaphysics31` drew cheese as a

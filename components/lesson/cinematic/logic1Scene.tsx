@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   makeMutable, useAnimatedStyle, useDerivedValue, useSharedValue,
@@ -13,7 +13,7 @@ import {
   type Bundle, type Stance,
 } from './rig';
 import {
-  Bubble, GROUND, K_FIG, STAGE_H, INK, PAPER, carry, lookPose, useCarry,
+  GROUND, K_FIG, STAGE_H, INK, PAPER, carry, lookPose, useCarry,
 } from './cinematicKit';
 import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf } from './stageSkin';
@@ -21,7 +21,12 @@ import type { Shot } from './camera';
 import { BEATS, type BoardKey } from './logic1Script';
 import { emoteAny } from './moves';
 import ObjectArt from './ObjectArt';
-import { lectern, notes, bust, klepsydra, LECTERN_OFF } from './logic1Set';
+import {
+  lectern, notes, bust, klepsydra, LECTERN_OFF, LECTERN_TOP, LECTERN_HALF, LECTERN_TILT,
+} from './logic1Set';
+import { handAt, reachHandTo } from './interact';
+import SpeechBox from './SpeechBox';
+import { wanderOff } from './tourFlag';
 import { BOARD_PHASES } from './logic1Boards';
 import ChalkPieces from '@/components/professor/ChalkPieces';
 import { layoutRaws, BOARD_W, BOARD_H, type ChalkPiece } from '@/components/professor/chalk';
@@ -94,12 +99,13 @@ const CHALK_Y = SLATE.y + (SLATE.h - BOARD_H * CHALK_S) / 2;
 /** How long a phase of chalk takes to write, from shortly after its beat begins. */
 const CHALK_T = 2.4;
 
-// WHERE A SHOUT SITS, in SCENE y, converted per beat (see `topOf`). 82 above the
-// crown is the gap the bespoke player used.
-const BUBBLE_TOP = 340;
+// WHERE A SPEECH BOX'S TAIL LANDS: a few units above the speaker's crown. The crown's
+// place in the chrome depends on that beat's shot, so it is converted per beat (`tipOf`).
+const CROWN_UP = 103;       // floor to crown, at K_FIG 1
+const TAIL_GAP = 8;
 
 // BAND-SPACE x OF EACH SPEAKER'S MARK, published by the scene for the chrome. A shout
-// is drawn in the chrome, where `Bubble`'s clamp is against the width the reader
+// is drawn in the chrome, where `SpeechBox`'s clamp is against the width the reader
 // actually has, and it sits over the speaker's MARK rather than his head, so a word
 // being read holds still (the note this lesson has carried since the port).
 const SAY_R = makeMutable(200);
@@ -108,9 +114,12 @@ const SAY_B = makeMutable(200);
 // ── THE NARRATOR'S TRACK ─────────────────────────────────────────────────────
 // One x per beat, only ever moving RIGHT (a figure that walks left then right snaps
 // between mirrored copies of itself). He waits just outside the FRAME, not outside
-// the STAGE, because no legal shot can show a negative x.
+// the STAGE, because no legal shot can show a negative x. At 46 he was INSIDE the
+// entrance beat's frame (the pulled-back shot shows x 33 and up), so he faded in
+// where the reader could see him rather than walking on; at 10 his whole body is
+// clear of it and the first thing seen of him is a foot stepping in.
 const NARR_X: number[] = [
-  46, 46, 46, 46,                              // act 1 — waiting just off the frame
+  10, 10, 10, 10,                              // act 1 — waiting just off the frame
   200, 200, 200, 200, 200,                      // act 2 — walks in between the lecterns
   200, 200, 200, 200, 200, 200, 200, 200, 200, // act 3 — centred under the board
   200, 200, 200, 200, 200,                     // act 4 — gone, parked where he left
@@ -211,6 +220,21 @@ const FIRST_REPLY = BEATS.findIndex((b) => b.act === 4 && b.say?.some((s) => s.w
 const NOTE_R: number[] = BEATS.map((_, i) => (i >= FIRST_PREMISE ? 1 : 0));
 const NOTE_B: number[] = BEATS.map((_, i) => (i >= FIRST_REPLY ? 1 : 0));
 
+/** The meters' level on each beat, and the level each beat's needle travels from. */
+const levelOf = (a: number[]) => a.map((v, n) => (v >= 0 ? v : n > 0 && a[n - 1] >= 0 ? a[n - 1] : 0));
+const fromOf = (a: number[], lvl: number[]) =>
+  a.map((_, n) => { const p = n > 0 ? n - 1 : 0; return a[p] >= 0 ? a[p] : lvl[n]; });
+const VOL_LVL = levelOf(VOL);
+const VOL_FROM = fromOf(VOL, VOL_LVL);
+const REA_LVL = levelOf(REA);
+const REA_FROM = fromOf(REA, REA_LVL);
+/** Every figure the counter can show. */
+const DIGITS = [...new Set([...REA_LVL, ...REA_FROM])].sort((a, b) => a - b);
+/** Every line spoken in the lesson, with the beat it is said on. */
+const SAYS = BEATS.flatMap((b, n) => (b.say ?? []).map((sy) => ({
+  n, who: sy.who, text: sy.text, shout: b.act === 1,
+})));
+
 /** Every phase of every board, laid out once. */
 const LAYOUT: Record<BoardKey, ChalkPiece[][]> = Object.fromEntries(
   (Object.keys(BOARD_PHASES) as BoardKey[]).map((k) => [
@@ -219,10 +243,46 @@ const LAYOUT: Record<BoardKey, ChalkPiece[][]> = Object.fromEntries(
 ) as Record<BoardKey, ChalkPiece[][]>;
 
 // The set, laid out once.
-const LECTERN_R = lectern(RX + LECTERN_OFF, -1);
-const LECTERN_B = lectern(BX - LECTERN_OFF, 1);
-const NOTES_R = notes(RX + LECTERN_OFF, -1, 'rise');
-const NOTES_B = notes(BX - LECTERN_OFF, 1, 'built');
+const LEC_R = RX + LECTERN_OFF;
+const LEC_B = BX - LECTERN_OFF;
+const LECTERN_R = lectern(LEC_R, -1);
+const LECTERN_B = lectern(LEC_B, 1);
+const NOTES_R = notes(LEC_R, -1, 'rise');
+const NOTES_B = notes(LEC_B, 1, 'built');
+const SLOPE = Math.tan((LECTERN_TILT * Math.PI) / 180);
+
+/** The y of a lectern top's upper face at stage x `hx` (`side`: which side its speaker stands). */
+function surfaceY(cx: number, side: number, hx: number): number {
+  'worklet';
+  return LECTERN_TOP + (hx - cx) * side * SLOPE;
+}
+
+/**
+ * A SPEAKER'S HANDS ARE ON HIS LECTERN, NOT THROUGH IT. The owner, of the first
+ * draft: *"the podiums aren't even there … I want them to act like objects, so they
+ * put their hands on them, not through them."*
+ *
+ * The back hand rests at the low edge of the top the whole time. The front hand
+ * rests beside it while he listens, and is FREE while he speaks (`free` 1) — but
+ * wherever the gesture sends it, it is never lower than the top's surface where the
+ * top is, so it can land on the lectern and cannot go into it. Both are placed with
+ * `reachHandTo` on the pose he is actually in, so the rest of him (the lean, the
+ * head) keeps moving and the hands stay where the wood is.
+ */
+function atLectern(s: Stance, x: number, cx: number, side: -1 | 1, free: number): Stance {
+  'worklet';
+  const p = { x, groundY: GROUND, k: K_FIG, dir: -side };
+  const back = cx + side * (LECTERN_HALF - 6);
+  const front = cx + side * (LECTERN_HALF - 16);
+  let o = reachHandTo(s, p, -1, back, surfaceY(cx, side, back) - 4.5, 1);
+  o = reachHandTo(o, p, 1, front, surfaceY(cx, side, front) - 4.5, 1 - free);
+  const h = handAt(o, p, 1);
+  if (Math.abs(h.x - cx) < LECTERN_HALF + 3) {
+    const floor = surfaceY(cx, side, h.x) - 4.5;
+    if (h.y > floor) o = reachHandTo(o, p, 1, h.x, floor, 1);
+  }
+  return o;
+}
 const BUST_X = 300;
 const BUST = bust(BUST_X);
 const KLEP = klepsydra(262);
@@ -239,7 +299,7 @@ export default function Logic1Scene({
 }: SceneApi) {
   // Every interpolated track is CARRIED (AH4/L5), so a tap mid-transition never
   // jumps the remaining distance in one frame.
-  const cv = useCarry(14);
+  const cv = useCarry(16);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -259,8 +319,8 @@ export default function Logic1Scene({
     const blueFrom = BLUE_TALK[p] ? narratorHold(wasHot ? 1 : 0, t) : emoteAny(260, t + 1.7);
     const redTo = RED_TALK[n] ? narratorLive(hot ? 1 : 0, t, bt.value) : emoteAny(263, t);
     const blueTo = BLUE_TALK[n] ? narratorLive(hot ? 1 : 0, t, bt.value) : emoteAny(260, t + 1.7);
-    const redS: Stance = mixStance(redFrom, redTo, tr);
-    const blueS: Stance = mixStance(blueFrom, blueTo, tr);
+    const redMix: Stance = mixStance(redFrom, redTo, tr);
+    const blueMix: Stance = mixStance(blueFrom, blueTo, tr);
 
     // The narrator, through the one canonical body motion every lesson uses.
     const fromHold = STAGE[p].nMode === 3 || STAGE[p].nOn < 0.5 ? stand(t) : narratorHold(NARR_G[p], t);
@@ -270,15 +330,24 @@ export default function Logic1Scene({
       tr, WALK, 0,
     );
 
-    const rx = carry(cv, 0, n, prv.rx, cur.rx, tr) + redS.adv;
-    const bx = carry(cv, 1, n, prv.bx, cur.bx, tr) - blueS.adv;
+    const rx = carry(cv, 0, n, prv.rx, cur.rx, tr) + redMix.adv;
+    const bx = carry(cv, 1, n, prv.bx, cur.bx, tr) - blueMix.adv;
+    // How free each front hand is — 1 while that man speaks — carried, so a hand
+    // lifts off the lectern and settles back onto it rather than jumping.
+    const redFree = carry(cv, 14, n, RED_TALK[p] ? 1 : 0, RED_TALK[n] ? 1 : 0, tr);
+    const blueFree = carry(cv, 15, n, BLUE_TALK[p] ? 1 : 0, BLUE_TALK[n] ? 1 : 0, tr);
+    const redS = atLectern(redMix, rx, LEC_R, -1, redFree);
+    const blueS = atLectern(blueMix, bx, LEC_B, 1, blueFree);
     const nx = carry(cv, 2, n, prv.nx, cur.nx, tr);
     // They leave quickly and arrive at the beat's own pace (the narrator walks
     // through where they stood on the beat they go).
     const gone = (a: number, b: number) => { 'worklet'; return b < a ? clamp01(tr * 3) : tr; };
     const rOn = carry(cv, 3, n, prv.rOn, cur.rOn, gone(prv.rOn, cur.rOn));
     const bOn = carry(cv, 4, n, prv.bOn, cur.bOn, gone(prv.bOn, cur.bOn));
-    const nOn = cur.nMode === 3 ? ease01(clamp01(tr / 0.2)) : carry(cv, 5, n, prv.nOn, cur.nOn, tr);
+    // CARRIED ON THE ENTRANCE BEAT TOO. It used to bypass `carry` there, so the slot's
+    // memory still held act 1's 0 and the next tap faded him out and back in again in
+    // the middle of the stage — measured, opacity 0.01 → 1 over 800ms on beat 5.
+    const nOn = carry(cv, 5, n, prv.nOn, cur.nOn, cur.nMode === 3 ? ease01(clamp01(tr / 0.2)) : tr);
 
     return {
       set: carry(cv, 8, n, prv.set, cur.set, gone(prv.set, cur.set)),
@@ -324,14 +393,27 @@ export default function Logic1Scene({
   const klepStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.klep }));
 
   const st = STAGE[i];
-  // A PROP IS MOUNTED ONLY ON ITS OWN BEATS, and the one after while it fades out.
-  // Always-mounted at opacity 0 would be invisible to the reader and fully visible to
-  // the must-box probe, which reads an element's OWN opacity and not its parents' —
-  // so every beat's box would carry the bust, the water clock and both lecterns, and
-  // the camera could never push in on anything.
+  // A FIGURE OR A PROP IS MOUNTED ON ITS OWN BEATS, and on the beat after only for as
+  // long as it takes to fade out. Unmounting it on the tap made it vanish (the two
+  // speakers popped out of existence as the narrator arrived); leaving it mounted at
+  // opacity 0 is invisible to the reader and fully visible to the must-box probe,
+  // which reads an element's OWN opacity and not its parents' — so every beat's box
+  // would carry the bust, the water clock and both lecterns.
+  const [settledAt, setSettledAt] = useState(-1);
+  useEffect(() => {
+    const t = setTimeout(() => setSettledAt(i), 600);
+    return () => clearTimeout(t);
+  }, [i]);
+  // Not under the measuring harness, which reads a beat inside its first 0.3s and would
+  // record the leaving figures as part of what the beat stages (the must-box probe
+  // reads each limb's OWN opacity, which stays 1 while the figure fades).
+  const lingering = settledAt !== i && !wanderOff();
   const pi = i > 0 ? i - 1 : 0;
-  const onNowOrLeaving = (a: readonly number[]) => a[i] > 0 || a[pi] > 0;
-  const showSet = STAGE[i].set > 0 || STAGE[pi].set > 0;
+  const onNowOrLeaving = (a: readonly number[]) => a[i] > 0 || (lingering && a[pi] > 0);
+  const showSet = STAGE[i].set > 0 || (lingering && STAGE[pi].set > 0);
+  const showRed = st.rOn > 0 || (lingering && STAGE[pi].rOn > 0);
+  const showBlue = st.bOn > 0 || (lingering && STAGE[pi].bOn > 0);
+  const showNarr = st.nOn > 0 || (lingering && STAGE[pi].nOn > 0);
   const showBust = onNowOrLeaving(BUST_ON);
   const showKlep = onNowOrLeaving(CLOCK_ON);
   const showNotesR = showSet && onNowOrLeaving(NOTE_R);
@@ -358,8 +440,8 @@ export default function Logic1Scene({
       {/* THE SPEAKERS stand BEHIND their lecterns: the lectern is drawn after them, so
           it covers the legs the way a podium does. They are a CROWD in the wardrobe's
           sense — the narrator is the mascot. */}
-      {st.rOn > 0 ? <Stickman D={DR} k={K_FIG} role="crowd" /> : null}
-      {st.bOn > 0 ? <Stickman D={DB} k={K_FIG} role="crowd" /> : null}
+      {showRed ? <Stickman D={DR} k={K_FIG} role="crowd" /> : null}
+      {showBlue ? <Stickman D={DB} k={K_FIG} role="crowd" /> : null}
       {showSet ? (
         <Animated.View style={[StyleSheet.absoluteFill, setStyle]} pointerEvents="none">
           <ObjectArt parts={LECTERN_R} tone={TONE} />
@@ -376,7 +458,7 @@ export default function Logic1Scene({
           <ObjectArt parts={NOTES_B} tone={TONE} />
         </Animated.View>
       ) : null}
-      {st.nOn > 0 ? <Stickman D={DN} k={K_FIG} /> : null}
+      {showNarr ? <Stickman D={DN} k={K_FIG} /> : null}
     </View>
   );
 }
@@ -409,9 +491,27 @@ function dropAt(t: number, phase: number, sx: number, sy: number, mx: number, my
 }
 
 // ── THE CHROME: what the camera does not move ────────────────────────────────
-// The board, the instruments and the tablet are read while the shot pushes from
-// 1.21× to 1.58× on the figures below them, so they are drawn outside the camera at
-// one size. See `Chrome` on CinematicPlayer.
+// The board, the instruments, the tablet and the speech boxes are read while the
+// shot pushes from 1.21× to 1.58× on the figures below them, so they are drawn
+// outside the camera at one size. See `Chrome` on CinematicPlayer.
+//
+// ── NOTHING IN HERE MIXES REACT'S BEAT NUMBER WITH THE SHARED CLOCK ───────────
+//
+// The owner, watching on a phone: *"after you finish the first text, and then tap
+// the screen, the next animation very quickly appears and then disappears and then
+// it's properly drawn out"* — and the same of every speech box. Both were one fault.
+// The player rewinds `bt` during React's render, but on a device a shared value
+// lives on the UI thread and the rewind reaches it a frame or so after React has
+// committed the new tree. Anything that chose WHAT to draw from React's `i` and
+// timed it from `bt` was drawn for a frame at the previous beat's elapsed time: the
+// new chalk phase fully written, the new line fully shown — and then the clock
+// landed at 0 and they went back and started again. A browser has one thread, so
+// no harness here could ever see it.
+//
+// So every animated value below is a function of `bi` and `bt` TOGETHER, which are
+// written in one statement and reach the UI thread in one batch; React's `i` only
+// decides what is MOUNTED, and it mounts a window of beats around itself so that
+// whichever beat the UI thread is still drawing, its pieces exist.
 export function Logic1Chrome({ clock, bt, bi, i }: SceneApi) {
   const GRAPH = useDerivedValue(() => {
     const n = bi.value;
@@ -439,44 +539,53 @@ export function Logic1Chrome({ clock, bt, bi, i }: SceneApi) {
     };
   });
 
-  const p = i > 0 ? i - 1 : 0;
-  const beat = BEATS[i];
-  const prevBeat = i > 0 ? BEATS[i - 1] : undefined;
-  // A shout keeps its distance from the head, and the head's screen place depends on
-  // the beat's own scale, so the scene-space gap is converted per beat.
-  const topOf = (k: number) => Math.round(GROUND_Y + SHOTS[k].s * (BUBBLE_TOP - GROUND));
-  const volLevel = VOL[i] >= 0 ? VOL[i] : VOL[p] >= 0 ? VOL[p] : 0;
-  const reaLevel = REA[i] >= 0 ? REA[i] : REA[p] >= 0 ? REA[p] : 0;
-  const volFrom = VOL[p] >= 0 ? VOL[p] : volLevel;
-  const reaFrom = REA[p] >= 0 ? REA[p] : reaLevel;
+  // What is MOUNTED: the beats the UI thread could be drawing (one either side of
+  // React's), and the one before each of those, whose pieces are still leaving.
+  const lo = Math.max(0, i - 2);
+  const hi = Math.min(BEATS.length - 1, i + 1);
+  const phases: { k: BoardKey; ph: number }[] = [];
+  for (let b = lo; b <= hi; b++) {
+    const k = BOARD_OF[b];
+    if (!k) continue;
+    for (let ph = 0; ph <= PHASE_OF[b]; ph++) {
+      if (!phases.some((q) => q.k === k && q.ph === ph)) phases.push({ k, ph });
+    }
+  }
+  const says = SAYS.filter((sy) => sy.n >= lo && sy.n <= hi);
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <Chalkboard i={i} bt={bt} G={GRAPH} />
-      <Instruments
-        clock={clock} bt={bt} G={GRAPH} act={ACT[i]} pulseZero={i === 5}
-        vol={volLevel} volFrom={volFrom} reasons={reaLevel} reasonsFrom={reaFrom}
-      />
+      <Animated.View style={[StyleSheet.absoluteFill, useBoardFrame(GRAPH)]} pointerEvents="none">
+        <View style={[styles.frame, { boxShadow: lipOf(WOOD) }]} />
+        <View style={styles.slate} />
+        <View style={styles.ledge} />
+        <View style={styles.chalkStick} />
+        {phases.map((q) => <BoardPhase key={`${q.k}${q.ph}`} board={q.k} ph={q.ph} bi={bi} bt={bt} />)}
+      </Animated.View>
+      <Instruments clock={clock} bt={bt} bi={bi} G={GRAPH} />
       <WaxTablet G={GRAPH} />
-
-      {prevBeat?.say?.map((s) => (
-        <Bubble
-          key={`out-${s.who}-${s.text}`}
-          bt={bt} text={s.text} top={topOf(p)} leaving
-          x={s.who === 'red' ? SAY_R : SAY_B}
-          shout={prevBeat.act === 1}
-        />
-      ))}
-      {beat.say?.map((s) => (
-        <Bubble
-          key={`${s.who}-${s.text}`}
-          bt={bt} text={s.text} top={topOf(i)}
-          x={s.who === 'red' ? SAY_R : SAY_B}
-          shout={beat.act === 1}
+      {says.map((sy) => (
+        <SpeechBox
+          key={`${sy.n}-${sy.who}`}
+          text={sy.text} beat={sy.n} bi={bi} bt={bt}
+          x={sy.who === 'red' ? SAY_R : SAY_B}
+          tipY={tipOf(sy.n)}
+          side={sy.who === 'red' ? -1 : 1}
+          shout={sy.shout}
+          lip={sy.shout ? EMBER : TONE.SHADE}
         />
       ))}
     </View>
   );
+}
+
+/** Where a speech box's tail lands on beat `k`: just above the speaker's crown. */
+function tipOf(k: number): number {
+  return Math.round(GROUND_Y - SHOTS[k].s * CROWN_UP - TAIL_GAP);
+}
+
+function useBoardFrame(G: SharedValue<Graph>) {
+  return useAnimatedStyle(() => ({ opacity: G.value.boardOn }));
 }
 
 interface Graph {
@@ -485,46 +594,34 @@ interface Graph {
 }
 
 // ── the chalkboard ───────────────────────────────────────────────────────────
-// The professor's board: a wooden frame round a DEEP slate, a ledge with a stick of
-// chalk, and chalk that writes itself (components/professor/ChalkPieces). A board
-// that stays up for two beats adds to itself on the second: every phase before this
-// beat's is drawn finished, and this beat's writes over CHALK_T. When the board
-// CHANGES, the old chalk is wiped quickly and the new begins.
-function Chalkboard({ i, bt, G }: { i: number; bt: SharedValue<number>; G: SharedValue<Graph> }) {
-  const key = BOARD_OF[i];
-  const prevKey = i > 0 ? BOARD_OF[i - 1] : null;
-  const phase = PHASE_OF[i];
-  const done = useSharedValue(1);
-  const writing = useDerivedValue(() => clamp01((bt.value - 0.3) / CHALK_T));
-  const frame = useAnimatedStyle(() => ({ opacity: G.value.boardOn }));
-  // The previous board's chalk, wiped over the first quarter-second of a new board.
-  const wipe = useAnimatedStyle(() => ({ opacity: 1 - clamp01(bt.value / 0.25) }));
-  const showKey = key ?? prevKey;
-  const showPhase = key ? phase : prevKey ? PHASE_OF[i - 1] : 0;
-  const oldKey = key && prevKey && prevKey !== key ? prevKey : null;
+// A board that stays up for two beats ADDS to itself on the second. Each phase is
+// its own set of pieces; how much of it is written is read off the shared beat and
+// clock alone (see the note above Logic1Chrome):
+//   · the beat's own board, an earlier phase   → written
+//   · the beat's own board, this beat's phase  → writing, from 0.3s, over CHALK_T
+//   · the beat's own board, a later phase      → not yet
+//   · the PREVIOUS beat's board                → as it was left, wiped over 0.25s
+function BoardPhase({
+  board, ph, bi, bt,
+}: { board: BoardKey; ph: number; bi: SharedValue<number>; bt: SharedValue<number> }) {
+  const progress = useDerivedValue(() => {
+    const n = bi.value;
+    if (BOARD_OF[n] === board) {
+      const at = PHASE_OF[n];
+      return at > ph ? 1 : at === ph ? clamp01((bt.value - 0.3) / CHALK_T) : 0;
+    }
+    if (n > 0 && BOARD_OF[n - 1] === board) return PHASE_OF[n - 1] >= ph ? 1 : 0;
+    return 0;
+  });
+  const shown = useAnimatedStyle(() => {
+    const n = bi.value;
+    if (BOARD_OF[n] === board) return { opacity: 1 };
+    if (n > 0 && BOARD_OF[n - 1] === board) return { opacity: 1 - clamp01(bt.value / 0.25) };
+    return { opacity: 0 };
+  });
   return (
-    <Animated.View style={[StyleSheet.absoluteFill, frame]} pointerEvents="none">
-      <View style={[styles.frame, { boxShadow: lipOf(WOOD) }]} />
-      <View style={styles.slate} />
-      <View style={styles.ledge} />
-      <View style={styles.chalkStick} />
-      {oldKey ? (
-        <Animated.View style={[StyleSheet.absoluteFill, wipe]}>
-          {LAYOUT[oldKey].slice(0, PHASE_OF[i - 1] + 1).map((pieces, k) => (
-            <ChalkPieces key={`o${k}`} pieces={pieces} progress={done} x={CHALK_X} y={CHALK_Y} s={CHALK_S} />
-          ))}
-        </Animated.View>
-      ) : null}
-      {showKey
-        ? LAYOUT[showKey].slice(0, showPhase + 1).map((pieces, k) => (
-          <ChalkPieces
-            key={`${showKey}${k}`}
-            pieces={pieces}
-            progress={key && k === phase ? writing : done}
-            x={CHALK_X} y={CHALK_Y} s={CHALK_S}
-          />
-        ))
-        : null}
+    <Animated.View style={[StyleSheet.absoluteFill, shown]}>
+      <ChalkPieces pieces={LAYOUT[board][ph]} progress={progress} x={CHALK_X} y={CHALK_Y} s={CHALK_S} />
     </Animated.View>
   );
 }
@@ -544,42 +641,36 @@ const ARC_R = 30;
 const TICKS = Array.from({ length: 11 }, (_, k) => k);
 
 function Instruments({
-  clock, bt, G, act, pulseZero, vol, volFrom, reasons, reasonsFrom,
+  clock, bt, bi, G,
 }: {
-  clock: SharedValue<number>; bt: SharedValue<number>; G: SharedValue<Graph>;
-  act: number; pulseZero: boolean;
-  vol: number; volFrom: number; reasons: number; reasonsFrom: number;
+  clock: SharedValue<number>; bt: SharedValue<number>; bi: SharedValue<number>; G: SharedValue<Graph>;
 }) {
   const card = useAnimatedStyle(() => ({ opacity: G.value.scoreOn }));
   // The needle: from last beat's level to this one's, then a nervous shiver once it
-  // is in the red. `clock` never resets, so the shiver never restarts on a tap.
+  // is in the red. `clock` never resets, so the shiver never restarts on a tap. The
+  // swing is CARRIED (L5), so a tap mid-swing sends it on from where it is.
+  // Its own one-slot carry: the instruments are a separate component from the scene,
+  // so they cannot share the scene's slots.
+  const needleCarry = useCarry(1);
   const needle = useAnimatedStyle(() => {
+    const n = bi.value;
     const u = ease01(clamp01((bt.value - 0.15) / 0.8));
-    const v = lerp(volFrom, vol, u);
+    const v = carry(needleCarry, 0, n, VOL_FROM[n], VOL_LVL[n], u);
     const shiver = v >= 8 ? Math.sin(clock.value * 23) * 1.6 + Math.sin(clock.value * 37) * 0.8 : 0;
     return { transform: [{ rotate: `${-50 + v * 10 + shiver}deg` }] };
   });
   // ON AIR: the LAMP is lit while the show is on and blinks during the quarrel. The
   // words never dim — the ember cannot carry a word (tone.ts), and a word that blinks
   // is a word at 0.7 for half the time — so they sit on the dark plate, and only the
-  // lamp beside them does the blinking.
-  const air = useAnimatedStyle(() => ({
-    opacity: act === 1 ? 0.35 + 0.65 * (Math.sin(clock.value * 8) > 0 ? 1 : 0) : 1,
-  }));
-  const on = act !== 3 && act !== 5;
-  // The flip: the old digit folds away, the new one unfolds.
-  const flips = reasons !== reasonsFrom;
-  const outgoing = useAnimatedStyle(() => ({
-    transform: [{ scaleY: flips ? 1 - clamp01((bt.value - 0.3) / 0.15) : 1 }],
-    opacity: flips && bt.value > 0.45 ? 0 : 1,
-  }));
-  const incoming = useAnimatedStyle(() => ({
-    transform: [{ scaleY: clamp01((bt.value - 0.45) / 0.15) }],
-    opacity: bt.value > 0.45 ? 1 : 0,
-  }));
+  // lamp beside them does the blinking. The lit lamp sits over an unlit one.
+  const lit = useAnimatedStyle(() => {
+    const a = ACT[bi.value];
+    if (a === 3 || a === 5) return { opacity: 0 };
+    return { opacity: a === 1 ? 0.35 + 0.65 * (Math.sin(clock.value * 8) > 0 ? 1 : 0) : 1 };
+  });
   // "Because a quarrel contains no reasons" — the 0 gives a single nudge.
   const nudge = useAnimatedStyle(() => {
-    if (!pulseZero) return { transform: [{ scale: 1 }] };
+    if (bi.value !== 5) return { transform: [{ scale: 1 }] };
     const a = clamp01((bt.value - 0.8) / 0.5);
     return { transform: [{ scale: 1 + 0.16 * Math.sin(Math.PI * a) }] };
   });
@@ -616,25 +707,44 @@ function Instruments({
 
       {/* ON AIR */}
       <View style={[styles.air, { boxShadow: LIP }]}>
-        <Animated.View style={[styles.lamp, on ? styles.lampOn : styles.lampOff, on && air]} />
+        <View style={styles.lamp}>
+          <View style={[styles.lampFill, styles.lampOff]} />
+          <Animated.View style={[styles.lampFill, styles.lampOn, lit]} />
+        </View>
         <Text style={styles.airText} numberOfLines={1}>ON AIR</Text>
       </View>
 
-      {/* THE FLIP COUNTER */}
+      {/* THE FLIP COUNTER: every figure it can show is mounted; which is up, and how
+          far through its flip, is read off the shared beat and clock. */}
       <View style={[styles.ctr, { boxShadow: LIP }]}>
         <Text style={styles.ctrLabel} numberOfLines={1}>REASONS</Text>
       </View>
       <Animated.View style={[styles.card, nudge]}>
-        <Animated.View style={[styles.cardFace, outgoing]}>
-          <Text style={styles.digit}>{String(reasonsFrom)}</Text>
-        </Animated.View>
-        {flips ? (
-          <Animated.View style={[styles.cardFace, incoming]}>
-            <Text style={styles.digit}>{String(reasons)}</Text>
-          </Animated.View>
-        ) : null}
+        {DIGITS.map((d) => <Digit key={d} d={d} bi={bi} bt={bt} />)}
         <View style={styles.cardSplit} />
       </Animated.View>
+    </Animated.View>
+  );
+}
+
+/** One figure on the flip counter: the old one folds away, the new one unfolds. */
+function Digit({ d, bi, bt }: { d: number; bi: SharedValue<number>; bt: SharedValue<number> }) {
+  const face = useAnimatedStyle(() => {
+    const n = bi.value;
+    const t = bt.value;
+    const from = REA_FROM[n];
+    const to = REA_LVL[n];
+    if (from !== to && d === from) {
+      return { opacity: t > 0.45 ? 0 : 1, transform: [{ scaleY: 1 - clamp01((t - 0.3) / 0.15) }] };
+    }
+    if (from !== to && d === to) {
+      return { opacity: t > 0.45 ? 1 : 0, transform: [{ scaleY: clamp01((t - 0.45) / 0.15) }] };
+    }
+    return { opacity: d === to ? 1 : 0, transform: [{ scaleY: 1 }] };
+  });
+  return (
+    <Animated.View style={[styles.cardFace, face]}>
+      <Text style={styles.digit}>{String(d)}</Text>
     </Animated.View>
   );
 }
@@ -751,7 +861,8 @@ const styles = StyleSheet.create({
     borderRadius: 5, borderWidth: 1.5, borderColor: INK, backgroundColor: DEEP,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 3,
   },
-  lamp: { width: 6, height: 6, borderRadius: 3 },
+  lamp: { width: 6, height: 6 },
+  lampFill: { position: 'absolute', left: 0, top: 0, width: 6, height: 6, borderRadius: 3 },
   lampOn: { backgroundColor: EMBER },
   lampOff: { backgroundColor: MID },
   airText: {
