@@ -34,7 +34,7 @@ import { walkOf, scaleOf } from './lib/scenefig.mjs';
 import { LESSONS, beatsOf, parseManifest } from './lib/narration.mjs';
 import { markBox } from './lib/marks.mjs';
 import { grave } from './lib/liveliness.mjs';
-import { poseTier, freeFloor, hash01, facingOf } from './lib/wanderrule.mjs';
+import { poseTier, freeFloor, hash01, facingOf, HANDS_ON_PROP } from './lib/wanderrule.mjs';
 import { soloFigure, leadBox, windowsFor, sceneExists } from './lib/figroom.mjs';
 
 const DRY = process.argv.includes('--dry');
@@ -101,6 +101,8 @@ const RUNS = [];
 async function survey(id) {
   const file = LESSONS[id];
   if (!file || !sceneExists(id) || !soloFigure(id)) return null;
+  // His hands are on a prop all lesson (Y7): no chair, no mug.
+  if (HANDS_ON_PROP.has(id)) return null;
   const beats = beatsOf(file);
   const items = J.words[id];
   if (!items) return null;

@@ -2,16 +2,17 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Script for the cinematic version of ethics-ethics-1, "Why Humans Care About
-// Right and Wrong". Theme: THE CONSCIENCE THAT STEPS OUT.
+// Right and Wrong".
+// Theme: A HALLWAY MIRROR AT NIGHT, AND A FOUND WALLET.
 //
-// A figure acts; then a faint second self — his conscience — steps out of him,
-// turns back, and weighs the deed on a balance. The ledger above him sets what an
-// animal shares, the raw materials of morality (it cares, it plays fair), beside
-// the one thing only a person does: step out of itself to ask "was that right?".
-// That reflective step is the whole lesson.
+// He picks a found wallet up off the hall floor, and the reflection in the hall
+// mirror — his conscience — stops copying him and weighs the deed on a balance. The
+// diary on the hall table sets what animals share beside what only a person does;
+// the bookcase holds three answers to where conscience comes from; a plant on the
+// windowsill grows into Aristotle's flourishing.
 //
-// The two graded questions are lifted from data/.../why-humans-care-about-right-
-// and-wrong.ts so scoring matches the card runner.
+// Redrawn 2026-09-25 after the logic debate studio. The narration is unchanged; the
+// first question moved onto the stage, as three notes stuck to the mirror.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface EthicsBeat extends BaseBeat {
@@ -46,6 +47,10 @@ export interface EthicsBeat extends BaseBeat {
   seed?: boolean;
   /** A flower opens at the sprout's tip once flourishing is named — the life cycle completing, "over a complete life". */
   bloom?: boolean;
+  /** Aristotle's question is written in the night window: WHAT MAKES A LIFE GO WELL? */
+  good?: boolean;
+  /** The question is asked ON THE STAGE: three notes stuck to the mirror. */
+  pick?: boolean;
 }
 
 export const BEATS: EthicsBeat[] = [
@@ -96,18 +101,21 @@ export const BEATS: EthicsBeat[] = [
     dur: 2.3,
   },
   {
+    good: true,
     hpose: 2,
     text: 'Aristotle asked a different question. He asked not which rules to follow, but what makes a human life go well.',
     cite: 'Aristotle, Nicomachean Ethics',
     dur: 1.8,
   },
   {
+    good: true,
     you: true,
     hpose: 2,
     text: 'Aristotle held that reason is the capacity that distinguishes human beings from other living things.',
     dur: 2.1,
   },
   {
+    good: true,
     hpose: 259,                                      // explaining, the hands never quite stop (moves hold 160)
     you: true,
     seed: true,
@@ -115,6 +123,7 @@ export const BEATS: EthicsBeat[] = [
     dur: 1.8,
   },
   {
+    good: true,
     seed: true,
     hpose: 0,
     quote: {
@@ -133,13 +142,10 @@ export const BEATS: EthicsBeat[] = [
     hpose: 4,
     judge: true,
     weigh: 'q1',
+    pick: true,
     interact: {
       prompt: 'What sets a person apart from other social animals?',
-      cards: [
-        { text: 'Judging their own acts by reasons', correct: true },
-        { text: 'Feeling empathy for others', correct: false },
-      ],
-      explain: 'Judging their own acts by reasons. Chimpanzees and capuchin monkeys also show empathy and a sense of fairness, so empathy isn’t the difference. A person can also step back from an act and ask whether it was right.',
+      explain: 'Judging their own acts. Chimpanzees and capuchin monkeys also show sympathy and a sense of fairness, so neither is the difference. A person can step back from an act and weigh reasons for and against it.',
       xp: 5,
     },
     dur: 1.0,
@@ -164,12 +170,14 @@ export const BEATS: EthicsBeat[] = [
     dur: 1.0,
   },
   {
+    good: true,
     hpose: 2,
     plant: true,
     text: 'Aristotle calls the highest human good eudaimonia. It’s often translated as happiness, but it’s an activity, not a feeling.',
     dur: 2.2,
   },
   {
+    good: true,
     hpose: 2,
     plant: true,
     bloom: true,

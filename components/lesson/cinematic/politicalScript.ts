@@ -2,12 +2,15 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic political-political-1, "Why Societies Need Rules"
-// Theme: THE WAR OF ALL AGAINST ALL, AND THE SOVEREIGN THEY RAISE.
+// Theme: A TOWN CROSSROADS WHOSE TRAFFIC LIGHTS HAVE DIED.
 //
-// Strip away every law and ruler and Hobbes's state of nature appears: a brawl of
-// all against all, nasty and short. Then the multitude authorizes one sovereign —
-// crowned, holding the sword — and the fighting resolves into order. Covenants
-// without that sword, Hobbes warns, are but words.
+// Four neighbours at a crossroads. The lights die, the shutters come down and the
+// neighbours fight: Hobbes's state of nature, a war of all against all. Then an
+// officer walks up to the soapbox, the one power they authorise, and when he stands
+// on it the lights come back, the shutters go up and the fighting stops. Covenants
+// without that power, Hobbes warns, are but words.
+//
+// Redrawn 2026-09-25 after the logic debate studio. The narration is unchanged.
 //
 // Both graded questions come from data/.../why-societies-need-rules.ts.
 // ─────────────────────────────────────────────────────────────────────────────

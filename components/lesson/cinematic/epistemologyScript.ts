@@ -2,33 +2,37 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic epistemology-knowledge-1, "What Does It Mean to Know?"
-// Theme: THE DOOR WITH THREE LOCKS.
+// Theme: AN EVIDENCE BOARD IN A COURTROOM, TIED WITH RED STRING.
 //
-// Knowledge is a door held by three locks — it is TRUE, you BELIEVE it, and you
-// have JUSTIFICATION. Turn all three and it opens. A lucky guess turns true and
-// belief, but the justification lock never moves, so the door stays shut — being
-// right by luck is not knowing.
+// Knowledge is an evidence board: three cards pinned to it — TRUE, BELIEF and
+// REASONS — and a red string that ties the belief through its reasons to the truth.
+// Plato's jurors are talked round by an advocate: the REASONS card falls, the string
+// goes slack, and the board is stamped JUST LUCK.
 //
-// Both graded questions come from data/.../what-does-it-mean-to-know.ts.
+// Redrawn 2026-09-25 after the logic debate studio. The narration is unchanged; the
+// first question moved onto the stage, where the reader picks the card that would
+// make the jurors' true belief knowledge.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface EpistBeat extends BaseBeat {
   /** Seeker pose: 0 stand · 2 present · 3 count · 4 reflect · 5 reach-to-turn-a-key. */
   hpose?: number;
-  /** Target lit level of the three locks [true, belief, justification], 0..1. */
+  /** Which cards are pinned to the board [true, belief, reasons]: 1 pinned, below 0.9 not. */
   locks?: [number, number, number];
   /** This beat's correct answer turns the justification key (q1) or proves luck (q2). */
   qkey?: 'q1' | 'q2';
   /** The sign over the gate names the field that studies it: EPISTEMOLOGY. */
   field?: boolean;
-  /** All three conditions together are sufficient: with every lock turned, the door opens. */
+  /** The board has been judged: stamped KNOWLEDGE with all three cards, JUST LUCK without REASONS. */
   opens?: boolean;
-  /** Justification ties belief to truth: a rod couples the three bolts while REASONS is turned. */
+  /** Justification ties belief to truth: the red string runs from BELIEF through REASONS to TRUE. */
   tie?: boolean;
-  /** Being persuaded is tried as the reason, and struck out under REASONS. */
+  /** Being persuaded is pinned in the REASONS slot, and struck out. */
   persuaded?: boolean;
-  /** The third lock, REASONS, is ringed: the condition the next beats are about. */
+  /** The third card, REASONS, is ringed: the condition the next beats are about. */
   third?: boolean;
+  /** The question is asked ON THE STAGE: three loose cards on the easel's shelf. */
+  pick?: boolean;
 }
 
 export const BEATS: EpistBeat[] = [
@@ -137,13 +141,10 @@ export const BEATS: EpistBeat[] = [
     opens: true,
     tie: true,
     qkey: 'q1',
+    pick: true,
     interact: {
-      prompt: 'Which conditions together make a belief count as knowledge?',
-      cards: [
-        { text: 'Justified true belief', correct: true },
-        { text: 'Certain, widely agreed, and true', correct: false },
-      ],
-      explain: 'Justified true belief. Feeling certain isn’t a reason, and a crowd can agree without good grounds. Knowledge needs a true belief supported by adequate reasons.',
+      prompt: 'The jurors’ verdict was true, and they believed it. Which card would make it knowledge?',
+      explain: 'Good reasons. The jurors already had truth and belief. Feeling certain isn’t a reason, and a whole jury can agree without good grounds. Justification is what turns a true belief into knowledge.',
       xp: 5,
     },
     dur: 1.0,

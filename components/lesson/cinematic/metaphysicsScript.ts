@@ -2,14 +2,17 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic metaphysics-being-1, "Why Does Anything Exist?"
-// Theme: ERASING THE WORLD TO REACH NOTHING.
+// Theme: A PLANETARIUM SWITCHED OFF, STAR BY STAR.
 //
-// A figure under a full sky tries to think his way to pure nothing — he wipes the
-// stars away, but a dark void is still something; nothing slips his grip. Then
-// science's chain of "because ←" links recedes forever, each state explained by an
-// earlier one, never reaching a floor.
+// An operator at the console of a planetarium. The projector throws the sky and each
+// idea onto the dome as a lit slide; he turns the dial down until every star is out,
+// and the empty dark dome is still there — still something. Then a row of dominoes
+// on the floor falls, each knocked by the one before, back to a box nobody explains.
 //
-// Both graded questions come from data/.../why-does-anything-exist.ts.
+// Redrawn 2026-09-25 with the logic debate studio's lessons (solid props, a chrome
+// that never mixes React's beat with the shared clock). The narration is unchanged;
+// the first question moved onto the stage, where the reader taps the domino, the
+// first push or the box.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface MetaBeat extends BaseBeat {
@@ -34,6 +37,8 @@ export interface MetaBeat extends BaseBeat {
    * the head of the chain is lit: why the states and laws exist at all is left open.
    */
   open?: number;
+  /** The question is asked ON THE STAGE: tap the domino, the first push, or the box. */
+  pick?: boolean;
 }
 
 export const BEATS: MetaBeat[] = [
@@ -124,14 +129,10 @@ export const BEATS: MetaBeat[] = [
     open: 0.4,
     first: true,
     needs: true,
-    qregress: 'q1',
+    pick: true,
     interact: {
-      prompt: 'Why can’t science fully answer why anything exists at all?',
-      cards: [
-        { text: 'Science presupposes that something exists', correct: true },
-        { text: 'The Big Bang already answers it', correct: false },
-      ],
-      explain: 'Science presupposes that something exists. It explains each state by an earlier state and the laws of nature. Every such explanation assumes that states and laws exist. The Big Bang theory describes one such state, so the theory can’t answer the question.',
+      prompt: 'Science explains each domino by the one before it. Which question does that leave open?',
+      explain: 'Why any exist. The domino before it explains why the last one fell, and an early state explains how the fall began. But every step assumes there are dominoes, and a law that makes them fall. Science presupposes that something exists.',
       xp: 5,
     },
     dur: 1.0,

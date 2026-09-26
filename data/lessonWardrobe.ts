@@ -12,7 +12,7 @@
 // than a mortarboard — N11, one medium over.
 
 export const WARDROBE: Record<string, [string, string]> = {
-  'aesthetics-aesthetics-1': ['plain', 'plain'],
+  'aesthetics-aesthetics-1': ['plain', 'dandy'],
   'aesthetics-aesthetics-2': ['gent', 'smoker'],
   'aesthetics-aesthetics-3': ['plain', 'scholar'],
   'aesthetics-aesthetics-4': ['scholar', 'gent'],
@@ -53,7 +53,7 @@ export const WARDROBE: Record<string, [string, string]> = {
   'aesthetics-aesthetics-39': ['smoker', 'plain'],
   'aesthetics-aesthetics-40': ['plain', 'plain'],
   'aesthetics-aesthetics-41': ['plain', 'plain'],
-  'epistemology-knowledge-1': ['plain', 'plain'],
+  'epistemology-knowledge-1': ['plain', 'smoker'],
   'epistemology-knowledge-2': ['gent', 'plain'],
   'epistemology-knowledge-3': ['plain', 'dandy'],
   'epistemology-knowledge-4': ['scholar', 'gent'],
@@ -94,7 +94,7 @@ export const WARDROBE: Record<string, [string, string]> = {
   'epistemology-knowledge-39': ['plain', 'plain'],
   'epistemology-knowledge-40': ['plain', 'plain'],
   'epistemology-knowledge-41': ['plain', 'plain'],
-  'ethics-ethics-1': ['plain', 'dandy'],
+  'ethics-ethics-1': ['plain', 'plain'],
   'ethics-ethics-2': ['gent', 'smoker'],
   'ethics-ethics-3': ['plain', 'plain'],
   'ethics-ethics-4': ['scholar', 'gent'],

@@ -1,187 +1,139 @@
-import {
-  View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
+import Target from './Target';
+import ObjectArt from './ObjectArt';
 import { BEATS } from './ethicsScript';
 import {
-  clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+  ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteAny, emoteAnyLive } from './moves';
+import { useLinger } from './useLinger';
+import {
+  windowFrame, pot, hallTable, mirrorFrame, bookcase,
+  WIN, GLASS, SILL_Y, POT, DIARY, MGLASS, CASE, SHELF_Y,
+} from './ethicsSet';
+import { DEEP, EMBER, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
+// ─────────────────────────────────────────────────────────────────────────────
+// ethics-ethics-1, "Why Humans Care About Right and Wrong" — A HALLWAY AT NIGHT.
+//
+// Redrawn 2026-09-25, one of five first lessons the owner asked for after the logic
+// debate studio, each displaying its information in a way of its own. Here the
+// information is a REFLECTION: conscience is the figure in the mirror, who copies you
+// until the moment it stops copying and starts weighing what you did.
+//
+//   b0–1  he picks a found wallet up off the hall floor; WAS IT RIGHT? clouds the
+//         mirror, then ABOUT YOUR OWN CONDUCT.
+//   b2    the diary on the hall table: what ANIMALS share — SYMPATHY, FAIRNESS.
+//   b3–4  the reflection stops copying him and holds up a balance; FOR and AGAINST
+//         drop into its pans.
+//   b5–6  the bookcase behind him: DARWIN, FREUD, KANT, under WHERE FROM?; then
+//         DISPUTED, and each book's answer — INSTINCT, SOCIETY, REASON.
+//   b7–9  the reflection keeps its balance; the window: WHAT MAKES A LIFE GO WELL?; the diary's YOU page reads REASON;
+//         a seedling in the pot on the sill.
+//   b11   the first question, ON THE STAGE: three notes stuck to the mirror.
+//   b12   the order question: the balance tips as the answer moves.
+//   b13–14 the plant grows, EUDAIMONIA on its tag; it flowers, FLOURISHING.
+//
+// WHAT IS NOT CHANGED: every word of narration (ethicsScript.ts keeps every beat's
+// text and order; the voice is keyed by index).
+//
+// COMPOSITION, in stage units: the window 14–140 × 296–362 over a hall table (top
+// 440) with the diary 14–142 × 400–440; the mirror 150–262 × 298–488, its glass
+// 158–254 × 306–480; the reader at x 298 facing it; the bookcase 326–394 from 384,
+// its plate 320–398 × 362–378. Band [290, 514].
+// ─────────────────────────────────────────────────────────────────────────────
+
 const TONE = stageTone('ethics');
 const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
+const LIP = lipOf(TONE);
+const WOOD = stageToneOf(TEAL);
+const TR = 0.85;
 
-// The conscience that steps out of a figure and weighs the deed on a balance.
-//
-// The hero visual is THE MORAL LEDGER — a two-column tally (ANIMAL · YOU) whose
-// rows fill in as the lesson builds: both columns tick for feeling and fairness,
-// and only YOU ticks for "judges itself". That single row is the whole lesson and
-// the answer to both graded questions, carried visually rather than said twice.
-// The ledger's ANIMAL column is the only animal in the lesson now: a dog stood at
-// the left edge until 11 Sep 2026, and it came out at the reader's request because
-// it never looked right.
-//
-// COMPOSITION / BAND. Everything is drawn inside one camera (scale 1.14 about
-// (196, 430), transform-origin CENTRE), so design y maps to screen y as
-//   y' = 1.14·y − 249.4      and     x' = 1.14·x − 51.4.
-// Measured extremes across every beat, top to bottom:
-//   ledger top      y 260  →  47   (the opening headline shares this exact box)
-//   ledger bottom   y 348  → 147
-//   figure crown    y 359  → 160
-//   ORIGIN? card    y 366  → 168   … bottom y 486 → 305
-//   ask caption     y 398  → 205
-//   balance beam    y 424  → 234
-//   ground rule     y 501  → 322
-//   ankle joints    y 507  → 329   (the ankle CIRCLE hangs ~7 below GROUND)
-// so the band below is [40, 338] — everything the scene can draw, with margin.
-// Anything added later must be re-measured through the same map before it ships.
-//
-// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
-// The first lesson of the branch had five taps that held one frame. Each now makes
-// the thing it says: "your own conduct" writes under the headline, the reasons FOR
-// and AGAINST drop into the balance's pans, the origin card's question turns to
-// DISPUTED as the narration disputes it, the ledger's YOU column lights when reason
-// is named as what sets humans apart, and a seedling appears on "living well …
-// over a complete life", to grow into FLOURISHING when the word arrives.
-//
-// ACROSS. The balance stands under the ledger's left edge and clear of the figure:
-// its pans span design x 58…190 (screen 15…165), the figure's own ink starts near
-// screen 194, and his reaching hand stops at design 220. The left pan cannot go much
-// further left without coming within a few pixels of the frame.
+const LEAD_X = 298;
+/** The reflection stands a little further off, inside the glass. */
+const K_REF = K_FIG * 0.8;
+const REF_X = MGLASS.w / 2;
+const REF_GROUND = MGLASS.h - 4;
 
-const HUMAN_X = 250;
+const WINDOW_ART = windowFrame();
+const POT_ART = pot();
+const TABLE_ART = hallTable();
+const MIRROR_ART = mirrorFrame();
+const CASE_ART = bookcase();
+
+// the balance the reflection holds up, in the glass's own units
+const BEAM_Y = 24;
+const BEAM_W = 88;
+const PAN_OFF = 23;
+const PAN_W = 44;
+
+const BOOKS = [
+  { name: 'DARWIN', from: 'INSTINCT' },
+  { name: 'FREUD', from: 'SOCIETY' },
+  { name: 'KANT', from: 'REASON' },
+];
+const BOOK_W = 60;
+const BOOK_H = 26;
+
+// the question on the stage: three notes stuck to the mirror
+const NOTE_W = 80;
+const NOTE_H = 22;
+const NOTES = [
+  { id: 'sympathy', l1: 'FEELING', l2: 'SYMPATHY', correct: false },
+  { id: 'fair', l1: 'PLAYING', l2: 'FAIR', correct: false },
+  { id: 'judge', l1: 'JUDGING OWN', l2: 'ACTS', correct: true },
+];
+
+// ── per-beat tracks, read off the script ─────────────────────────────────────
+const firstOf = (f: (b: (typeof BEATS)[number]) => unknown) => {
+  const k = BEATS.findIndex((b) => !!f(b));
+  return k < 0 ? BEATS.length : k;
+};
+const since = (k0: number) => BEATS.map((_, k) => (k >= k0 ? 1 : 0));
 /**
- * Where the balance pivots. 124, not the 158 it was.
- *
- * At 158 the right pan reached design x 224, a hand's width from a figure who stands
- * at 250 and reaches left, and the reader said the scale sat too close to him. With
- * the dog gone the left of the stage is free, so the whole balance moved 34 units
- * left: the right pan now stops at 190, and the left pan at 58 lines up under the
- * ledger's left edge.
- */
-const PIVOT_X = 124;
-const PIVOT_Y = 430;
-
-// ── the moral ledger (design space, inside the camera) ────────────────────────
-// Outer box 294×88 at (58, 260); the 2px border means the INNER box is 290×84 and
-// every column/row offset below is measured inside that.
-const LED_X = 58;
-const LED_W = 294;
-const LED_T = 260;
-const LED_H = 88;
-const LED_HEAD_H = 19;
-const LED_ROW_H = 21;
-const COL_A = 158;                      // ANIMAL column, inner-relative
-const COL_Y = 224;                      // YOU column, inner-relative
-const COL_W = 66;
-
-const ROWS = [
-  { label: 'FEELS FOR OTHERS', animal: true },
-  { label: 'SENSE OF FAIRNESS', animal: true },
-  { label: 'JUDGES ITSELF', animal: false },
-] as const;
-
-// ── the opening headline ──────────────────────────────────────────────────────
-// The first beat is a lone figure on bare paper — the thinnest shot in the lesson —
-// and the line it carries ("a question arrives on its own") is a word animation
-// waiting to happen. The three words assemble one at a time, then a rule sweeps in
-// under them. It occupies the LEDGER'S EXACT FOOTPRINT and retires the moment the
-// ledger is first written, so it costs the band nothing and can never overlap.
-const ASK_WORDS = ['WAS', 'THAT', 'RIGHT?'] as const;
-
-// ── where conscience comes from ───────────────────────────────────────────────
-// The Darwin/Freud/Kant beat used to be pixel-for-pixel the beat before it. Their
-// three answers are a three-row table, so it gets one, filled in a row at a time.
-// It stands in the clear column right of the figure: design x 298…390 (screen
-// 288…393) and y 366…486 (screen 168…305), clear of the ledger above (which ends at
-// design 348), the ground below, and the figure, whose gestures all swing LEFT
-// because it faces left.
-const ORIGIN_ROWS = [
-  { who: 'DARWIN', from: 'INSTINCT' },
-  { who: 'FREUD', from: 'SOCIETY' },
-  { who: 'KANT', from: 'REASON' },
-] as const;
-
-// ── per-beat cues, precomputed for the worklet ────────────────────────────────
-/**
- * A PROP DOES NOT LEAVE THE ROOM AND COME BACK.
- *
- * The script names a cue per beat, and the scene fades the prop with it — which
- * is right for something that arrives, does its job and goes, and wrong the
- * moment a cue reads 0100000100. That is what it read: the dog was here for beat
- * 1, gone for beats 2-6 and back for beat 7, and the balance blinked 0011001100.
- * Both are the subject of the lesson, and both flickered in and out of existence
- * while the reader watched.
- *
- * This fills the gaps between a cue's FIRST and LAST beat, and nothing beyond
- * them. The prop still arrives when the script says and still leaves when the
- * script is done with it; it simply stops teleporting out of the room in between.
- * `npm run check:props` fails the build if any script grows a new one.
+ * A flag the script sets on some beats, held from its first beat to the end: a prop
+ * that leaves and comes back blinks (check:props). The balance and the window's
+ * question are both things that stay once they have arrived.
  */
 function held(flags: number[]): number[] {
-  const first = flags.indexOf(1);
-  if (first < 0) return flags;
-  const last = flags.lastIndexOf(1);
-  return flags.map((_, i) => (i >= first && i <= last ? 1 : 0));
+  const k0 = flags.indexOf(1);
+  return k0 < 0 ? flags : since(k0);
 }
 
 const HPOSE = BEATS.map((b) => b.hpose ?? 0);
-const JUDGE = held(BEATS.map((b) => (b.judge ? 1 : 0)));
-const PLANT = BEATS.map((b) => (b.plant ? 1 : 0));
-const SEED = BEATS.map((b) => (b.seed || b.plant ? 1 : 0));
-/** How grown the sprout is: a seedling before it has a name, full once it does. */
-const GROW = BEATS.map((b) => (b.plant ? 1 : b.seed ? 0.32 : 0));
-/** The flower at the sprout's tip: 0 closed, 1 open. */
-const BLOOM = BEATS.map((b) => (b.bloom ? 1 : 0));
-const OWN = BEATS.map((b) => (b.own ? 1 : 0));
-/** The weights land on the beat that names reasons and stay while the balance does. */
-const FIRST_REASONS = BEATS.findIndex((b) => b.reasons);
-const REASONS = BEATS.map((_, k) => (FIRST_REASONS >= 0 && k >= FIRST_REASONS && JUDGE[k] ? 1 : 0));
-const DISPUTED = BEATS.map((b) => (b.disputed ? 1 : 0));
-const YOU = BEATS.map((b) => (b.you ? 1 : 0));
-/** The first graded beat — the balance settles level while it is considered. */
-const Q1_AT = BEATS.findIndex((b) => b.weigh === 'q1');
+const FIRST_JUDGE = firstOf((b) => b.judge);
+const PICK = BEATS.map((b) => (b.pick ? 1 : 0));
+/** Picked up on the first beat, gone after it. */
+const WALLET = BEATS.map((_, k) => (k === 0 ? 1 : 0));
+/** The mirror clouds with the question until the reflection starts to weigh. */
+const HEAD = BEATS.map((_, k) => (k < FIRST_JUDGE ? 1 : 0));
+const OWN = BEATS.map((_, k) => (k < FIRST_JUDGE && k >= firstOf((b) => b.own) ? 1 : 0));
+const ANIM = since(firstOf((b) => b.critter));
+const YOU = since(firstOf((b) => b.you));
+/** Once conscience has stepped out it keeps weighing — except under the notes. */
+const JUDGE_ON = held(BEATS.map((b) => (b.judge ? 1 : 0)));
+const JUDGE = JUDGE_ON.map((v, k) => (v && !BEATS[k].pick ? 1 : 0));
+const REAS = since(firstOf((b) => b.reasons));
+const ORIG = since(firstOf((b) => b.origins));
+const DISP = since(firstOf((b) => b.disputed));
+const GOOD = held(BEATS.map((b) => (b.good ? 1 : 0)));
+const SEED = since(firstOf((b) => b.seed || b.plant));
+const PLANT = since(firstOf((b) => b.plant));
+const BLOOM = since(firstOf((b) => b.bloom));
+/** The pans hang level until reasons are weighed; then AGAINST is the heavier. */
+const TILT = BEATS.map((_, k) => (REAS[k] ? 7 : 0));
 
-// R7c — on the drag, the reader fills in the ledger's ANIMAL column themselves:
-// NONE OF IT empties the column, the middle zone ticks the two feelings, and ALL OF IT
-// ticks JUDGES ITSELF as well. The edges are the script's own zone boundaries.
-const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
-const FEELINGS_FROM = 0.26;
-const JUDGING_FROM = 0.72;
-/** 0 below the edge, 1 above it, over a short ramp so the dot fills as the knob crosses. */
-function past(x: number, edge: number): number {
-  'worklet';
-  return clamp01((x - edge) / 0.05 + 0.5);
-}
-const ORIGINS = BEATS.map((b) => (b.origins ? 1 : 0));
-
-// How many ledger rows are written by each beat. Derived from the script's own
-// cues rather than hard beat numbers: the shared instincts appear on the beat that
-// opens the animal comparison, and the third row — the one only we can tick — with
-// the conscience.
-const FIRST_CRIT = BEATS.findIndex((b) => b.critter);
-const FIRST_JUDGE = BEATS.findIndex((b) => b.judge);
-const LEDGER = BEATS.map((_, i) =>
-  FIRST_JUDGE >= 0 && i >= FIRST_JUDGE ? 3 : FIRST_CRIT >= 0 && i >= FIRST_CRIT ? 2 : 0
-);
-
-interface Shot { s: number; cx: number; cy: number; tr: number }
-const SHOTS: Shot[] = BEATS.map((b) => ({
-  s: b.summary ? 1 : 1.14, cx: 196, cy: 430, tr: 0.8,
-}));
-
-// ── extra human poses (the rig covers gestures 0/2/3/4) ───────────────────────
 function actPose(t: number): Stance {
   'worklet';
   const s = stand(t);
@@ -189,7 +141,7 @@ function actPose(t: number): Stance {
 }
 function hHold(code: number, t: number): Stance {
   'worklet';
-  if (code >= 100) return emoteAny(code, t);     // the movement catalogue's living holds
+  if (code >= 100) return emoteAny(code, t);
   if (code === 1) return actPose(t);
   if (code === 0) return stand(t);
   return narratorHold(code, t);
@@ -202,431 +154,414 @@ function hLive(code: number, t: number, bt: number): Stance {
   return narratorLive(code, t, bt);
 }
 
-// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
-// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
-// pushes close on a quote, and PULLS BACK to the whole band on a question or a
-// summary — the beats the reader has to read and act on.
-// Beats that do not set `x` stand at HUMAN_X.
-const X = BEATS.map((b) => b.x ?? HUMAN_X);
+const X = BEATS.map(() => LEAD_X);
+// R7c — the balance follows the order control on its own graded beat, and only there.
+const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics'));
 
-export default function EthicsScene({ clock, bt, bi, qv, i, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function EthicsScene({
+  clock, bt, bi, pickPos, i, picked, onPick, gazeX, gazeY, gazeOn,
+}: SceneApi) {
   const reacting = REACT[i] === 1;
-  const heldHumanS = useHeld();
-  const cv = useCarry(11);
+  const held = useHeld();
+  const cv = useCarry(15);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const cur = SHOTS[n], prv = SHOTS[p];
-    const tr = ease01(bt.value / cur.tr);
+    const tr = ease01(bt.value / TR);
     const t = clock.value;
-    const q = clamp01(qv.value);
-
-    const humanS = keepHeld(heldHumanS, mixStance(carryFrom(heldHumanS, n,hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
-    const conOn = carry(cv, 0, n, JUDGE[p], JUDGE[n], tr);
-
-    // Ledger: a row that was already written stays solid; a row this beat ADDS
-    // slides in over the beat's opening, so the tally reads as being filled out.
-    const write = ease01(bt.value / 0.75);
-    const cnt = LEDGER[n], was = LEDGER[p];
-    const row = (k: number) => { 'worklet'; return k < was ? 1 : k < cnt ? write : 0; };
-
-    // Cards that come and go between beats: a card LEAVES quickly (0.25s, so it is
-    // gone before whatever replaces it has drawn anything) and ARRIVES unhurried.
-    const away = 1 - ease01(bt.value / 0.25);
-    const here = ease01(bt.value / 0.6);
-    const askHere = cnt === 0 ? 1 : 0;      // the headline lives where the ledger will
-    const askWas = was === 0 ? 1 : 0;
-    // ONLY WHAT CHANGED MOVES (C20c). The headline writes itself, the origin card
-    // fills row by row and the sprout grows on the beat each ARRIVES — the lesson's
-    // first, or the first after a beat without it — and each holds finished after,
-    // fading out finished too. Keyed to `bt` alone, all three played again on every
-    // tap they were still on stage for.
-    const askWrites = askHere === 1 && (n === 0 || askWas === 0);
-    const origWrites = ORIGINS[n] === 1 && (n === 0 || ORIGINS[p] === 0);
-    const plants = PLANT[n] === 1 && (n === 0 || PLANT[p] === 0);
-    // C20c — the flower opens once, on the beat that names it, and holds open after.
-    const blooms = BLOOM[n] === 1 && (n === 0 || BLOOM[p] === 0);
-
+    const late = (d: number) => {
+      'worklet';
+      return ease01((bt.value - d) / 0.45);
+    };
+    const leadS = keepHeld(held, mixStance(carryFrom(held, n, hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
+    const judge = carry(cv, 5, n, JUDGE[p], JUDGE[n], tr);
+    // the reflection copies him, until conscience steps out and weighs the deed
+    const refS = mixStance(leadS, emoteAnyLive(257, t, bt.value), judge);
     return {
-      cam: { s: lerp(prv.s, cur.s, tr), cx: lerp(prv.cx, cur.cx, tr), cy: lerp(prv.cy, cur.cy, tr) },
-      human: lookPose(humanS, HUMAN_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
-      scaleOn: conOn,
-      tip: Math.sin(t * 1.2) * 4 * conOn * (1 - (n === Q1_AT ? q : 0)),  // settles level on a considered Q1
-      a0: carry(cv, 7, n, 1, reacting ? past(pickPos.value, FEELINGS_FROM) : 1, tr),
-      a1: carry(cv, 8, n, 1, reacting ? past(pickPos.value, FEELINGS_FROM) : 1, tr),
-      a2: carry(cv, 9, n, 0, reacting ? past(pickPos.value, JUDGING_FROM) : 0, tr),
-      ledOn: cnt > 0 ? (was > 0 ? 1 : write) : 0,
-      r0: row(0), r1: row(1), r2: row(2),
-      plant: carry(cv, 1, n, PLANT[p], PLANT[n], tr),
-      seed: carry(cv, 2, n, SEED[p], SEED[n], tr),
-      grow: carry(cv, 3, n, GROW[p], GROW[n], plants ? ease01(bt.value / 1.1) : tr),
-      bloom: carry(cv, 10, n, BLOOM[p], BLOOM[n], blooms ? ease01(bt.value / 1.0) : tr),
-      own: carry(cv, 4, n, OWN[p], OWN[n], tr),
-      reasons: carry(cv, 5, n, REASONS[p], REASONS[n], ease01(bt.value / 0.9)),
-      disputed: DISPUTED[n] ? (DISPUTED[p] ? 1 : here) : DISPUTED[p] ? away : 0,
-      you: carry(cv, 6, n, YOU[p], YOU[n], tr),
-      // the opening headline, assembling word by word
-      askOn: askHere ? (askWas ? 1 : here) : askWas ? away : 0,
-      w0: askWrites ? ease01((bt.value - 0.15) / 0.4) : 1,
-      w1: askWrites ? ease01((bt.value - 0.45) / 0.4) : 1,
-      w2: askWrites ? ease01((bt.value - 0.75) / 0.4) : 1,
-      wRule: askWrites ? ease01((bt.value - 1.15) / 0.5) : 1,
-      // the three-source card, one row at a time
-      origOn: ORIGINS[n] ? (ORIGINS[p] ? 1 : here) : ORIGINS[p] ? away : 0,
-      o0: origWrites ? ease01((bt.value - 0.25) / 0.45) : 1,
-      o1: origWrites ? ease01((bt.value - 0.6) / 0.45) : 1,
-      o2: origWrites ? ease01((bt.value - 0.95) / 0.45) : 1,
+      lead: lookPose(leadS, LEAD_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
+      ref: pose(refS, REF_X, REF_GROUND, K_REF, 1, 1),
+      // picked up: the wallet rises to his hand and is pocketed
+      wallet: n === 0 ? ease01((bt.value - 0.7) / 0.6) : 1,
+      walletOn: carry(cv, 0, n, WALLET[p], WALLET[n], tr),
+      head: carry(cv, 1, n, HEAD[p], HEAD[n], n === 0 ? late(1.1) : tr),
+      own: carry(cv, 2, n, OWN[p], OWN[n], late(0.8)),
+      anim: carry(cv, 3, n, ANIM[p], ANIM[n], late(0.6)),
+      you: carry(cv, 4, n, YOU[p], YOU[n], late(0.5)),
+      judge,
+      reas: carry(cv, 6, n, REAS[p], REAS[n], late(0.7)),
+      orig: carry(cv, 7, n, ORIG[p], ORIG[n], late(0.4)),
+      disp: carry(cv, 8, n, DISP[p], DISP[n], late(0.6)),
+      good: carry(cv, 9, n, GOOD[p], GOOD[n], late(0.4)),
+      seed: carry(cv, 10, n, SEED[p], SEED[n], late(0.5)),
+      plant: carry(cv, 11, n, PLANT[p], PLANT[n], late(0.3)),
+      bloom: carry(cv, 12, n, BLOOM[p], BLOOM[n], late(0.6)),
+      pick: carry(cv, 13, n, PICK[p], PICK[n], tr),
+      tilt: carry(cv, 14, n, TILT[p], reacting ? lerp(0, 14, pickPos.value) : TILT[n], tr),
     };
   });
 
-  const DH = useDerivedValue<Bundle>(() => SCENE.value.human);
-
-  const camStyle = useAnimatedStyle(() => {
-    const c = SCENE.value.cam;
-    return { transform: [{ translateX: STAGE_W / 2 - c.cx * c.s }, { translateY: STAGE_H / 2 - c.cy * c.s }, { scale: c.s }] };
-  });
-
-  return (
-    <Animated.View style={styles.scene}>
-      <Animated.View style={[StyleSheet.absoluteFill, camStyle]}>
-        <View style={styles.ground} />
-        <Ledger S={SCENE} />
-        <AskBanner S={SCENE} />
-        <Origins S={SCENE} />
-        <Sprout S={SCENE} />
-        <Stickman D={DH} k={K_FIG} />
-        <Scale S={SCENE} />
-      </Animated.View>
-    </Animated.View>
-  );
-}
-
-// ── the moral ledger ──────────────────────────────────────────────────────────
-// A plain two-column tally, the way a naturalist would keep score: what the animal
-// has, what you have. The first two rows tick twice. The third ticks once.
-function Ledger({ S }: { S: SharedValue<any> }) {
-  const card = useAnimatedStyle(() => ({ opacity: S.value.ledOn }));
-  const you = useAnimatedStyle(() => ({ opacity: S.value.you * 0.9 }));
-  const animal = [
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.a0 })),
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.a1 })),
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.a2 })),
-  ];
-  const youHead = useAnimatedStyle(() => ({ opacity: S.value.you }));
-  const rowStyles = [
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.r0, transform: [{ translateX: (1 - S.value.r0) * -10 }] })),
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.r1, transform: [{ translateX: (1 - S.value.r1) * -10 }] })),
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.r2, transform: [{ translateX: (1 - S.value.r2) * -10 }] })),
-  ];
+  const DL = useDerivedValue<Bundle>(() => SCENE.value.lead);
+  const DR = useDerivedValue<Bundle>(() => SCENE.value.ref);
+  const wallet = useAnimatedStyle(() => ({
+    opacity: SCENE.value.walletOn * (1 - SCENE.value.wallet),
+    transform: [{ translateY: -34 * SCENE.value.wallet }, { rotate: `${-20 * SCENE.value.wallet}deg` }],
+  }));
 
   return (
-    <Animated.View style={[styles.ledger, card]} pointerEvents="none">
-      {/* column rules + the header underline */}
-      <Animated.View style={[styles.youWash, you]} />
-      <View style={[styles.vRule, { left: COL_A }]} />
-      <View style={[styles.vRule, { left: COL_Y }]} />
-      <View style={styles.hRule} />
-
-      <Text style={[styles.colHead, { left: COL_A, width: COL_W }]}>ANIMAL</Text>
-      <Text style={[styles.colHead, { left: COL_Y, width: COL_W }]}>YOU</Text>
-      <Animated.View style={[styles.youHead, youHead]}>
-        <Text style={styles.youHeadText}>YOU</Text>
-      </Animated.View>
-
-      {ROWS.map((r, k) => (
-        <Animated.View key={r.label} style={[styles.row, { top: LED_HEAD_H + k * LED_ROW_H }, rowStyles[k]]}>
-          <Text style={styles.rowLabel} numberOfLines={1}>{r.label}</Text>
-          <View style={[styles.mark, { left: COL_A + COL_W / 2 - 7 }]}>
-            {/* the authored tick is the ANIMAL column's resting state (a0–a2), which the
-                drag can rewrite; the hollow ring under it is always there */}
-            <View style={styles.dotOff} />
-            <Animated.View style={[styles.dotOn, styles.dotLayer, animal[k]]} />
-          </View>
-          <View style={[styles.mark, { left: COL_Y + COL_W / 2 - 7 }]}>
-            <View style={styles.dotOn} />
-          </View>
+    <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
+      <ObjectArt parts={WINDOW_ART} tone={WOOD} />
+      <View style={styles.glass} pointerEvents="none" />
+      <NightWords S={SCENE} on={on} />
+      <Plant S={SCENE} on={on} />
+      <ObjectArt parts={POT_ART} tone={TONE} />
+      <ObjectArt parts={TABLE_ART} tone={WOOD} />
+      <Diary S={SCENE} on={on} />
+      <ObjectArt parts={CASE_ART} tone={WOOD} />
+      <Books S={SCENE} on={on} />
+      <ObjectArt parts={MIRROR_ART} tone={WOOD} />
+      <Mirror S={SCENE} DR={DR} on={on} />
+      {PICK[i] ? <Notes picked={picked} onPick={onPick} /> : null}
+      <View style={styles.ground} pointerEvents="none" />
+      {on(WALLET) ? (
+        <Animated.View style={[styles.wallet, wallet]} pointerEvents="none">
+          <View style={styles.walletFlap} />
         </Animated.View>
-      ))}
-    </Animated.View>
-  );
-}
-
-// ── the opening headline ──────────────────────────────────────────────────────
-// Three words that assemble, then a rule that sweeps under them. Nothing here is
-// tappable (pointerEvents="none"), so the tap that advances the beat still lands.
-function AskBanner({ S }: { S: SharedValue<any> }) {
-  const card = useAnimatedStyle(() => ({ opacity: S.value.askOn }));
-  const words = [
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.w0, transform: [{ translateY: (1 - S.value.w0) * 12 }] })),
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.w1, transform: [{ translateY: (1 - S.value.w1) * 12 }] })),
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.w2, transform: [{ translateY: (1 - S.value.w2) * 12 }] })),
-  ];
-  const rule = useAnimatedStyle(() => ({
-    opacity: S.value.wRule, transform: [{ scaleX: S.value.wRule }],
-  }));
-  const own = useAnimatedStyle(() => ({ opacity: S.value.own, transform: [{ translateY: (1 - S.value.own) * 5 }] }));
-  return (
-    <Animated.View style={[styles.ask, card]} pointerEvents="none">
-      <View style={styles.askTopRule} />
-      <Text style={styles.askEyebrow} numberOfLines={1}>AND THEN, UNASKED —</Text>
-      <View style={styles.askRow}>
-        {ASK_WORDS.map((w, k) => (
-          <Animated.View key={w} style={words[k]}>
-            <Text style={styles.askWord}>{w}</Text>
-          </Animated.View>
-        ))}
-      </View>
-      <Animated.View style={[styles.askUnder, rule]} />
-      <Animated.Text style={[styles.askOwn, own]} numberOfLines={1}>ABOUT YOUR OWN CONDUCT</Animated.Text>
-    </Animated.View>
-  );
-}
-
-// ── where conscience comes from ───────────────────────────────────────────────
-function Origins({ S }: { S: SharedValue<any> }) {
-  const card = useAnimatedStyle(() => ({ opacity: S.value.origOn }));
-  const ask = useAnimatedStyle(() => ({ opacity: 1 - S.value.disputed }));
-  const disputed = useAnimatedStyle(() => ({
-    opacity: S.value.disputed, transform: [{ scale: 1.25 - 0.25 * S.value.disputed }],
-  }));
-  const rows = [
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.o0, transform: [{ translateX: (1 - S.value.o0) * 10 }] })),
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.o1, transform: [{ translateX: (1 - S.value.o1) * 10 }] })),
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.o2, transform: [{ translateX: (1 - S.value.o2) * 10 }] })),
-  ];
-  return (
-    <Animated.View style={[styles.orig, card]} pointerEvents="none">
-      <Animated.Text style={[styles.origHead, ask]} numberOfLines={1}>ORIGIN?</Animated.Text>
-      <Animated.Text style={[styles.origHead, styles.origDisputed, disputed]} numberOfLines={1}>DISPUTED</Animated.Text>
-      <View style={styles.origRule} />
-      {ORIGIN_ROWS.map((r, k) => (
-        <Animated.View key={r.who} style={[styles.origRow, { top: 20 + k * 33 }, rows[k]]}>
-          <Text style={styles.origWho} numberOfLines={1}>{r.who}</Text>
-          <Text style={styles.origFrom} numberOfLines={1}>{r.from}</Text>
-        </Animated.View>
-      ))}
-    </Animated.View>
-  );
-}
-
-// ── the balance ───────────────────────────────────────────────────────────────
-function Scale({ S }: { S: SharedValue<any> }) {
-  const beam = useAnimatedStyle(() => ({
-    opacity: S.value.scaleOn,
-    transform: [{ translateX: PIVOT_X }, { translateY: PIVOT_Y }, { rotate: `${S.value.tip}deg` }],
-  }));
-  const post = useAnimatedStyle(() => ({ opacity: S.value.scaleOn }));
-  // A weight FALLS into each pan and lands; the two land a beat apart, the way two
-  // considerations are put down one after the other.
-  const dropL = useAnimatedStyle(() => {
-    const u = clamp01(S.value.reasons * 1.25);
-    return { opacity: clamp01(u * 3), transform: [{ translateY: (1 - u) * -34 }] };
-  });
-  const dropR = useAnimatedStyle(() => {
-    const u = clamp01(S.value.reasons * 1.25 - 0.25);
-    return { opacity: clamp01(u * 3), transform: [{ translateY: (1 - u) * -34 }] };
-  });
-  const tags = useAnimatedStyle(() => ({ opacity: clamp01(S.value.reasons * 2 - 1) }));
-  return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      {/* the question the balance exists to answer, stamped above it */}
-      <Animated.View style={[styles.askWrap, post]}>
-        <Text style={styles.askText}>WAS THAT RIGHT?</Text>
-      </Animated.View>
-
-      <Animated.View style={[{ position: 'absolute', left: PIVOT_X - 1.75, top: PIVOT_Y, width: 3.5, height: 68, backgroundColor: INK }, post]} />
-      <Animated.View style={[{ position: 'absolute', left: PIVOT_X - 32, top: PIVOT_Y + 68, width: 64, height: 3.5, backgroundColor: INK, borderRadius: 2 }, post]} />
-      {/* beam + pans, rotating about the pivot */}
-      <Animated.View style={[{ position: 'absolute', left: 0, top: 0, transformOrigin: '0% 0%' }, beam]}>
-        <View style={{ position: 'absolute', left: -58, top: -1.75, width: 116, height: 3.5, backgroundColor: INK, borderRadius: 2 }} />
-        <View style={styles.pan} />
-        <View style={[styles.pan, { left: 50 }]} />
-        <View style={{ position: 'absolute', left: -58, top: 0, width: 1.5, height: 14, backgroundColor: SOFT }} />
-        <View style={{ position: 'absolute', left: 56.5, top: 0, width: 1.5, height: 14, backgroundColor: SOFT }} />
-        <Animated.View style={[styles.weight, { left: -63 }, dropL]} />
-        <Animated.View style={[styles.weight, { left: 53 }, dropR]} />
-        <Animated.Text style={[styles.reasonTag, { left: -88 }, tags]}>FOR</Animated.Text>
-        <Animated.Text style={[styles.reasonTag, { left: 28 }, tags]}>AGAINST</Animated.Text>
-      </Animated.View>
+      ) : null}
+      <Stickman D={DL} k={K_FIG} />
     </View>
   );
 }
 
-// ── the sprout — Aristotle's flourishing, growing as the line lands ───────────
-function Sprout({ S }: { S: SharedValue<any> }) {
-  const wrap = useAnimatedStyle(() => ({ opacity: S.value.seed }));
-  const label = useAnimatedStyle(() => ({ opacity: S.value.plant }));
-  const stem = useAnimatedStyle(() => ({ transform: [{ scaleY: 0.15 + 0.85 * S.value.grow }] }));
-  // Each leaf is hinged at the stem (transformOrigin on its inner edge), so it
-  // unfurls outward rather than inflating from its own middle.
-  // A seedling's leaves are small, not faint: opacity follows the first third of
-  // the growth only, so at seedling size they are already solid ink.
-  const leafL = useAnimatedStyle(() => ({ opacity: clamp01(S.value.grow * 3), transform: [{ rotate: '34deg' }, { scaleX: S.value.grow }] }));
-  const leafR = useAnimatedStyle(() => ({ opacity: clamp01(S.value.grow * 3), transform: [{ rotate: '-34deg' }, { scaleX: S.value.grow }] }));
-  // The flower opening at the tip: "over a complete life" — the sprout's cycle
-  // finishing. It scales in from its own centre, never moving the stem or leaves.
-  const bloomStyle = useAnimatedStyle(() => ({
-    opacity: S.value.bloom,
-    transform: [{ scale: 0.2 + 0.8 * S.value.bloom }],
-  }));
+// ── the window: the moon, and the question about a life ─────────────────────
+
+function NightWords({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.good, transform: [{ translateY: (1 - S.value.good) * 4 }] }));
   return (
-    <Animated.View style={[StyleSheet.absoluteFill, wrap]} pointerEvents="none">
-      <Animated.Text style={[styles.sproutLabel, label]}>FLOURISHING</Animated.Text>
-      <Animated.View style={[styles.stem, stem]} />
-      <Animated.View style={[styles.leaf, { left: 316, top: 470, transformOrigin: '100% 50%' }, leafL]} />
-      <Animated.View style={[styles.leaf, { left: 336, top: 462, transformOrigin: '0% 50%' }, leafR]} />
-      <Animated.View style={[styles.bloom, bloomStyle]} />
-    </Animated.View>
+    <>
+      <View style={styles.moon} pointerEvents="none" />
+      <View style={[styles.star, { left: GLASS.x + 18, top: GLASS.y + 8 }]} pointerEvents="none" />
+      <View style={[styles.star, { left: GLASS.x + 84, top: GLASS.y + 12 }]} pointerEvents="none" />
+      <View style={[styles.star, { left: GLASS.x + 30, top: GLASS.y + 44 }]} pointerEvents="none" />
+      {on(GOOD) ? (
+        <Animated.View style={[styles.nightWords, st]} pointerEvents="none">
+          <Text style={styles.nightText} numberOfLines={1}>WHAT MAKES A</Text>
+          <Text style={styles.nightText} numberOfLines={1}>LIFE GO WELL?</Text>
+        </Animated.View>
+      ) : null}
+    </>
   );
 }
 
+function Plant({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const stem = useAnimatedStyle(() => ({
+    height: 7 * S.value.seed + 13 * S.value.plant + 5 * S.value.bloom,
+  }));
+  const leaves = useAnimatedStyle(() => ({
+    opacity: S.value.seed,
+    transform: [{ translateY: -(4 * S.value.seed + 8 * S.value.plant) }, { scale: 0.6 + 0.4 * S.value.plant }],
+  }));
+  const flower = useAnimatedStyle(() => ({
+    opacity: S.value.bloom,
+    transform: [{ scale: 0.3 + 0.7 * S.value.bloom }],
+  }));
+  const tag = useAnimatedStyle(() => ({ opacity: S.value.plant }));
+  const line2 = useAnimatedStyle(() => ({ opacity: S.value.bloom }));
+  return (
+    <>
+      {on(SEED) ? (
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          <Animated.View style={[styles.stem, stem]} />
+          <Animated.View style={[styles.leaves, leaves]}>
+            <View style={[styles.leaf, { left: 0, transform: [{ rotate: '-30deg' }] }]} />
+            <View style={[styles.leaf, { left: 10, transform: [{ rotate: '30deg' }] }]} />
+          </Animated.View>
+          <Animated.View style={[styles.flower, flower]}>
+            <View style={styles.flowerEye} />
+          </Animated.View>
+        </View>
+      ) : null}
+      {on(PLANT) ? (
+        <Animated.View style={[styles.potTag, tag]} pointerEvents="none">
+          <Text style={styles.tagText} numberOfLines={1}>EUDAIMONIA</Text>
+          <Animated.Text style={[styles.tagText, line2]} numberOfLines={1}>FLOURISHING</Animated.Text>
+        </Animated.View>
+      ) : null}
+    </>
+  );
+}
 
-// The band is measured AFTER the camera (scale 1.14 about (196, 430)): the ledger's
-// top edge lands at 247 and the ankle joints at 329, so [40, 338] holds every pixel
-// the scene can draw on any beat and renders it about 1.9× larger than a full-height
-// fit would.
-export function EthicsLesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={EthicsScene} band={[40, 338]} camera={CAM} />;
+// ── the diary on the hall table: ANIMALS · YOU ──────────────────────────────
+
+function Diary({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const anim = useAnimatedStyle(() => ({ opacity: S.value.anim }));
+  const you = useAnimatedStyle(() => ({ opacity: S.value.you, transform: [{ translateX: (1 - S.value.you) * -4 }] }));
+  return (
+    <View style={styles.diary} pointerEvents="none">
+      <View style={[styles.page, { left: 0 }]} />
+      <View style={[styles.page, { right: 0 }]} />
+      <View style={styles.gutter} />
+      {on(ANIM) ? (
+        <Animated.View style={[styles.col, { left: 4 }, anim]}>
+          <Text style={styles.pageHead} numberOfLines={1}>ANIMALS</Text>
+          <Text style={styles.pageRow} numberOfLines={1}>SYMPATHY</Text>
+          <Text style={styles.pageRow} numberOfLines={1}>FAIRNESS</Text>
+        </Animated.View>
+      ) : null}
+      {on(ANIM) ? (
+        <Animated.View style={[styles.col, { left: DIARY.w / 2 + 4 }, anim]}>
+          <Text style={styles.pageHead} numberOfLines={1}>YOU</Text>
+          {on(YOU) ? (
+            <Animated.Text style={[styles.pageRow, styles.pageYou, you]} numberOfLines={1}>REASON</Animated.Text>
+          ) : null}
+        </Animated.View>
+      ) : null}
+    </View>
+  );
+}
+
+// ── the bookcase behind him: where conscience comes from ────────────────────
+
+function Books({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const names = useAnimatedStyle(() => ({ opacity: S.value.orig }));
+  const plate = useAnimatedStyle(() => ({ opacity: S.value.orig, transform: [{ translateY: (1 - S.value.orig) * -5 }] }));
+  const ask = useAnimatedStyle(() => ({ opacity: 1 - S.value.disp }));
+  const disputed = useAnimatedStyle(() => ({ opacity: S.value.disp }));
+  const tags = useAnimatedStyle(() => ({ opacity: S.value.disp, transform: [{ translateY: (1 - S.value.disp) * 3 }] }));
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {BOOKS.map((b, k) => (
+        <View key={b.name} style={[styles.book, { top: SHELF_Y[k] - BOOK_H }]}>
+          <View style={styles.bookBand} />
+          {on(ORIG) ? <Animated.Text style={[styles.bookText, names]} numberOfLines={1}>{b.name}</Animated.Text> : null}
+          {on(DISP) ? <Animated.Text style={[styles.bookFrom, tags]} numberOfLines={1}>{b.from}</Animated.Text> : null}
+        </View>
+      ))}
+      {on(ORIG) ? (
+        <Animated.View style={[styles.casePlate, plate]}>
+          <Animated.Text style={[styles.plateText, ask]} numberOfLines={1}>WHERE FROM?</Animated.Text>
+          {on(DISP) ? (
+            <Animated.Text style={[styles.plateText, styles.plateOver, disputed]} numberOfLines={1}>DISPUTED</Animated.Text>
+          ) : null}
+        </Animated.View>
+      ) : null}
+    </View>
+  );
+}
+
+// ── the mirror: the question in the glass, and the reflection that weighs it ─
+
+function Mirror({ S, DR, on }: { S: SharedValue<any>; DR: SharedValue<Bundle>; on: (a: readonly number[]) => boolean }) {
+  const head = useAnimatedStyle(() => ({ opacity: S.value.head }));
+  const own = useAnimatedStyle(() => ({ opacity: S.value.own, transform: [{ translateY: (1 - S.value.own) * 4 }] }));
+  const balance = useAnimatedStyle(() => ({ opacity: S.value.judge, transform: [{ translateY: (1 - S.value.judge) * -10 }] }));
+  const beam = useAnimatedStyle(() => ({ transform: [{ rotate: `${S.value.tilt}deg` }] }));
+  const panL = useAnimatedStyle(() => ({
+    transform: [{ translateY: -PAN_OFF * Math.sin((S.value.tilt * Math.PI) / 180) }],
+  }));
+  const panR = useAnimatedStyle(() => ({
+    transform: [{ translateY: PAN_OFF * Math.sin((S.value.tilt * Math.PI) / 180) }],
+  }));
+  const chip = useAnimatedStyle(() => ({ opacity: S.value.reas, transform: [{ translateY: (1 - S.value.reas) * -12 }] }));
+  const ghost = useAnimatedStyle(() => ({ opacity: 0.55 + 0.25 * S.value.judge }));
+  return (
+    <View style={styles.mglass} pointerEvents="none">
+      <View style={styles.sheen} />
+      <Animated.View style={[StyleSheet.absoluteFill, ghost]}>
+        <Stickman D={DR} k={K_REF} />
+      </Animated.View>
+      {on(HEAD) ? (
+        <Animated.View style={[styles.headWords, head]}>
+          <Text style={styles.headText} numberOfLines={1}>WAS IT</Text>
+          <Text style={styles.headText} numberOfLines={1}>RIGHT?</Text>
+          {on(OWN) ? (
+            <Animated.View style={own}>
+              <Text style={styles.ownText} numberOfLines={1}>YOUR OWN</Text>
+              <Text style={styles.ownText} numberOfLines={1}>CONDUCT</Text>
+            </Animated.View>
+          ) : null}
+        </Animated.View>
+      ) : null}
+      {on(JUDGE) ? (
+        <Animated.View style={[StyleSheet.absoluteFill, balance]}>
+          <View style={styles.cord} />
+          <Animated.View style={[styles.pan, { left: MGLASS.w / 2 - PAN_OFF - PAN_W / 2 }, panL]}>
+            <View style={styles.panString} />
+            <View style={styles.panTray} />
+            {on(REAS) ? (
+              <Animated.View style={[styles.chip, chip]}><Text style={styles.chipText} numberOfLines={1}>FOR</Text></Animated.View>
+            ) : null}
+          </Animated.View>
+          <Animated.View style={[styles.pan, { left: MGLASS.w / 2 + PAN_OFF - PAN_W / 2 }, panR]}>
+            <View style={styles.panString} />
+            <View style={styles.panTray} />
+            {on(REAS) ? (
+              <Animated.View style={[styles.chip, chip]}><Text style={styles.chipText} numberOfLines={1}>AGAINST</Text></Animated.View>
+            ) : null}
+          </Animated.View>
+          <Animated.View style={[styles.beam, beam]} />
+          <View style={styles.pivot} />
+        </Animated.View>
+      ) : null}
+    </View>
+  );
+}
+
+// ── the question on the stage: notes stuck to the mirror ────────────────────
+
+function Notes({ picked, onPick }: { picked: string | null; onPick: (id: string, ok: boolean) => void }) {
+  const answered = picked !== null;
+  return (
+    <>
+      {NOTES.map((q, k) => (
+        <Target
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={3}
+          disabled={answered} sealAt="tr"
+          style={[styles.note, { top: MGLASS.y + 6 + k * (NOTE_H + 5) }]}
+        >
+          <View style={[styles.noteFace, answered && q.correct && styles.noteRight]}>
+            <Text style={[styles.noteText, answered && q.correct && styles.noteTextOnInk]} numberOfLines={1}>{q.l1}</Text>
+            <Text style={[styles.noteText, answered && q.correct && styles.noteTextOnInk]} numberOfLines={1}>{q.l2}</Text>
+          </View>
+        </Target>
+      ))}
+    </>
+  );
 }
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 40, right: 40, top: GROUND, height: 1.5, backgroundColor: RULE },
-  pan: {
-    position: 'absolute', left: -66, top: 13, width: 16, height: 10,
-    borderColor: INK, borderWidth: 1.5, borderTopWidth: 0, borderBottomLeftRadius: 8, borderBottomRightRadius: 8,
-    backgroundColor: PAPER,
+  floor: floorStyle(TONE, GROUND),
+  ground: { position: 'absolute', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },
+
+  glass: {
+    position: 'absolute', left: GLASS.x, top: GLASS.y, width: GLASS.w, height: GLASS.h,
+    backgroundColor: DEEP, borderRadius: 1,
+  },
+  moon: {
+    position: 'absolute', left: GLASS.x + 56, top: GLASS.y + 4, width: 11, height: 11, borderRadius: 5.5,
+    backgroundColor: PAPER_LIT,
+  },
+  star: { position: 'absolute', width: 2.5, height: 2.5, borderRadius: 1.25, backgroundColor: PAPER_LIT },
+  nightWords: { position: 'absolute', left: GLASS.x + 6, top: GLASS.y + 20 },
+  nightText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 0.4, color: PAPER_LIT, includeFontPadding: false,
   },
 
-  // Centred on the pivot, so the caption moves with the balance.
-  askWrap: { position: 'absolute', left: PIVOT_X - 58, top: 398, width: 116, alignItems: 'center' },
-  askText: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
-    includeFontPadding: false,
-  },
-
-  // The two weights sit INSIDE the pans (a pan is 16 wide at beam x ±58); their
-  // captions hang under the pans, clear of the post at the pivot and the base.
-  weight: { position: 'absolute', top: 15, width: 10, height: 7, borderRadius: 1.5, backgroundColor: INK },
-  reasonTag: {
-    position: 'absolute', top: 27, width: 60, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.8, letterSpacing: 0.9, color: INK, includeFontPadding: false,
-  },
-
-  // ── ledger ──────────────────────────────────────────────────────────────────
-  youWash: {
-    position: 'absolute', left: COL_Y, top: 0, bottom: 0, width: COL_W, backgroundColor: SHADE,
-  },
-  youHead: {
-    position: 'absolute', left: COL_Y + 8, top: 3, width: COL_W - 16, height: 14, borderRadius: 3,
-    backgroundColor: INK, alignItems: 'center', justifyContent: 'center',
-  },
-  youHeadText: {
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.3, color: PAPER, includeFontPadding: false,
-  },
-  ledger: {
-    position: 'absolute', left: LED_X, top: LED_T, width: LED_W, height: LED_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
-  },
-  vRule: { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: RULE },
-  hRule: { position: 'absolute', left: 0, right: 0, top: LED_HEAD_H, height: 1, backgroundColor: RULE },
-  colHead: {
-    position: 'absolute', top: 6, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.3, color: INK,
-    includeFontPadding: false,
-  },
-  row: { position: 'absolute', left: 0, right: 0, height: LED_ROW_H, justifyContent: 'center' },
-  rowLabel: {
-    position: 'absolute', left: 11, width: COL_A - 17,
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 0.5, color: INK,
-    includeFontPadding: false,
-  },
-  mark: { position: 'absolute', top: LED_ROW_H / 2 - 7, width: 14, height: 14, alignItems: 'center', justifyContent: 'center' },
-  dotOn: { width: 13, height: 13, borderRadius: 7, backgroundColor: INK },
-  dotOff: { width: 13, height: 13, borderRadius: 7, borderWidth: 2, borderColor: SOFT },
-  dotLayer: { position: 'absolute', left: 0.5, top: 0.5 },
-
-  // ── the opening headline ────────────────────────────────────────────────────
-  // Exactly the ledger's box (58…352 × 260…348), so the band is unchanged and the
-  // two can never be on stage together — the headline leaves as the ledger arrives.
-  ask: { position: 'absolute', left: LED_X, top: LED_T, width: LED_W, height: LED_H },
-  askTopRule: { position: 'absolute', left: 0, right: 0, top: 0, height: 1.5, backgroundColor: RULE },
-  askEyebrow: {
-    position: 'absolute', left: 0, right: 0, top: 10, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.6, color: SOFT,
-    includeFontPadding: false,
-  },
-  askRow: {
-    position: 'absolute', left: 0, right: 0, top: 28,
-    flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', gap: 10,
-  },
-  askWord: {
-    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 23, lineHeight: 30, color: INK,
-    includeFontPadding: false,
-  },
-  askUnder: {
-    position: 'absolute', left: (LED_W - 180) / 2, top: 68, width: 180, height: 2,
+  stem: {
+    position: 'absolute', left: POT.cx - 1.25, bottom: STAGE_H - POT.top, width: 2.5, borderRadius: 1.25,
     backgroundColor: INK,
   },
-
-  // The second line of the headline, under its rule (68) and inside its box (88).
-  askOwn: {
-    position: 'absolute', left: 0, right: 0, top: 74, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.5, color: INK, includeFontPadding: false,
+  leaves: { position: 'absolute', left: POT.cx - 10, top: POT.top - 8, width: 20, height: 8 },
+  leaf: { position: 'absolute', top: 0, width: 10, height: 6, borderRadius: 5, backgroundColor: INK },
+  flower: {
+    position: 'absolute', left: POT.cx - 6, top: POT.top - 30, width: 12, height: 12, borderRadius: 6,
+    backgroundColor: EMBER, borderWidth: 1.5, borderColor: INK, alignItems: 'center', justifyContent: 'center',
+  },
+  flowerEye: { width: 4, height: 4, borderRadius: 2, backgroundColor: PAPER_LIT },
+  potTag: {
+    position: 'absolute', left: WIN.x + WIN.w - 76, top: SILL_Y + 9, width: 74, paddingVertical: 2,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center',
+  },
+  tagText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
 
-  // ── where conscience comes from ─────────────────────────────────────────────
-  orig: {
-    position: 'absolute', left: 298, top: 366, width: 92, height: 120,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER,
+  diary: { position: 'absolute', left: DIARY.x, top: DIARY.y, width: DIARY.w, height: DIARY.h },
+  page: {
+    position: 'absolute', top: 0, bottom: 0, width: DIARY.w / 2, borderWidth: 1.5, borderColor: INK,
+    borderRadius: 2, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
-  origHead: {
-    position: 'absolute', left: 0, right: 0, top: 5, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.3, color: SOFT,
-    includeFontPadding: false,
+  gutter: { position: 'absolute', left: DIARY.w / 2 - 1, top: 0, bottom: 0, width: 2, backgroundColor: SHADE },
+  col: { position: 'absolute', top: 4 },
+  pageHead: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
-  origRule: { position: 'absolute', left: 0, right: 0, top: 19, height: 1, backgroundColor: RULE },
-  origDisputed: { color: INK, letterSpacing: 1.5 },
-  origRow: { position: 'absolute', left: 0, right: 0, height: 33, alignItems: 'center', justifyContent: 'center' },
-  origWho: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.2, color: SOFT,
-    includeFontPadding: false,
+  pageRow: {
+    fontFamily: 'Inter_500Medium', fontSize: 9, lineHeight: 11, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
-  origFrom: {
-    fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 0.3, color: INK,
-    includeFontPadding: false, marginTop: 2,
+  pageYou: { fontFamily: 'Inter_700Bold', textDecorationLine: 'underline', textDecorationColor: EMBER },
+
+  book: {
+    position: 'absolute', left: CASE.x + (CASE.w - BOOK_W) / 2, width: BOOK_W, height: BOOK_H,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 1.5, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center', paddingLeft: 7,
+  },
+  bookBand: { position: 'absolute', left: 2, top: 0, bottom: 0, width: 4, backgroundColor: SHADE },
+  bookText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  },
+  bookFrom: {
+    fontFamily: 'Inter_500Medium', fontSize: 9, lineHeight: 11, letterSpacing: 0.3, color: INK, includeFontPadding: false,
+  },
+  casePlate: {
+    position: 'absolute', left: CASE.x - 6, top: CASE.top - 22, width: CASE.w + 12, height: 17,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  plateText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  },
+  plateOver: { position: 'absolute' },
+
+  mglass: {
+    position: 'absolute', left: MGLASS.x, top: MGLASS.y, width: MGLASS.w, height: MGLASS.h,
+    backgroundColor: STONE, borderRadius: 3, overflow: 'hidden',
+  },
+  sheen: {
+    position: 'absolute', left: MGLASS.w - 30, top: -20, width: 10, height: MGLASS.h + 40,
+    backgroundColor: PAPER_LIT, opacity: 0.35, transform: [{ rotate: '18deg' }],
+  },
+  headWords: { position: 'absolute', left: 0, right: 0, top: 12, alignItems: 'center' },
+  headText: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 15, letterSpacing: 1, color: INK, includeFontPadding: false,
+    textAlign: 'center',
+  },
+  ownText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+    textAlign: 'center', marginTop: 1,
+  },
+  cord: { position: 'absolute', left: MGLASS.w / 2 - 0.75, top: 0, width: 1.5, height: BEAM_Y, borderRadius: 0.75, backgroundColor: INK },
+  beam: {
+    position: 'absolute', left: (MGLASS.w - BEAM_W) / 2 + 12, top: BEAM_Y - 1.5, width: BEAM_W - 24, height: 3,
+    borderRadius: 1.5, backgroundColor: INK,
+  },
+  pivot: {
+    position: 'absolute', left: MGLASS.w / 2 - 3, top: BEAM_Y - 3, width: 6, height: 6, borderRadius: 3,
+    backgroundColor: EMBER, borderWidth: 1, borderColor: INK,
+  },
+  pan: { position: 'absolute', top: BEAM_Y, width: PAN_W, height: 32, alignItems: 'center' },
+  panString: { width: 1.5, height: 12, backgroundColor: INK },
+  panTray: { width: PAN_W - 8, height: 5, borderBottomLeftRadius: 6, borderBottomRightRadius: 6, backgroundColor: INK },
+  chip: {
+    position: 'absolute', top: 1, height: 12, paddingHorizontal: 2, borderWidth: 1, borderColor: INK, borderRadius: 2,
+    backgroundColor: PLATE_FACE, alignItems: 'center', justifyContent: 'center',
+  },
+  chipText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.8, lineHeight: 10, letterSpacing: -0.2, color: INK, includeFontPadding: false,
   },
 
-  // ── sprout ──────────────────────────────────────────────────────────────────
-  stem: {
-    position: 'absolute', left: 334.5, top: 452, width: 3, height: 48,
-    backgroundColor: INK, transformOrigin: '50% 100%',
+  note: { position: 'absolute', left: MGLASS.x + (MGLASS.w - NOTE_W) / 2, width: NOTE_W, height: NOTE_H },
+  noteFace: {
+    flexGrow: 1, borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
   },
-  leaf: {
-    position: 'absolute', width: 20, height: 9, borderRadius: 6,
-    backgroundColor: INK, transformOrigin: '50% 50%',
+  noteRight: { backgroundColor: INK },
+  noteText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 9.5, letterSpacing: 0.3, color: INK, includeFontPadding: false,
   },
-  // The flower at the stem's tip — a filled disc, the same ink as the rest of
-  // the plant, opening once "flourishing" is named in full.
-  bloom: {
-    position: 'absolute', left: 328, top: 444, width: 16, height: 16, borderRadius: 8,
-    backgroundColor: INK, transformOrigin: '50% 50%',
+  noteTextOnInk: { color: PAPER_LIT },
+
+  wallet: {
+    position: 'absolute', left: LEAD_X - 36, top: GROUND - 9, width: 18, height: 9, borderRadius: 2,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: SHADE,
   },
-  sproutLabel: {
-    position: 'absolute', left: 288, top: 430, width: 96, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.3, color: SOFT,
-    includeFontPadding: false,
-  },
+  walletFlap: { position: 'absolute', left: 8, top: 1, width: 7, height: 4, borderRadius: 1, backgroundColor: EMBER },
 });
+
+export function EthicsLesson({ lesson }: { lesson: Lesson }) {
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={EthicsScene} band={[290, 514]} camera={CAM} />;
+}

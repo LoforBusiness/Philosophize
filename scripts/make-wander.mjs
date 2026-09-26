@@ -38,7 +38,7 @@ import { LESSONS, beatsOf, parseManifest } from './lib/narration.mjs';
 import { markBox } from './lib/marks.mjs';
 import {
   W, GROUND_Y, SIT_REACH, PLAY_SECONDS, poseTier, freeFloor, roomFor, stepSeconds, pausesOf,
-  hash01, facingOf,
+  hash01, facingOf, HANDS_ON_PROP,
 } from './lib/wanderrule.mjs';
 
 const DRY = process.argv.includes('--dry');
@@ -78,6 +78,8 @@ for (const [id, file] of Object.entries(LESSONS)) {
   const stem = file.replace(/Script\.ts$/, '');
   if (!fs.existsSync(`${DIR}/${stem}Scene.tsx`)) continue;
   if (!soloFigure(id)) { tally.solo += 1; continue; }
+  // His hands are on a prop all lesson (Y7): a step would walk him off it.
+  if (HANDS_ON_PROP.has(id)) { tally.solo += 1; continue; }
   const beats = beatsOf(file);
   const items = J.words[id];
   if (!items) continue;

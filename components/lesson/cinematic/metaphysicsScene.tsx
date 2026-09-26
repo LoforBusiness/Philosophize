@@ -1,135 +1,144 @@
-import {
-  View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
+import Target from './Target';
+import ObjectArt from './ObjectArt';
 import { BEATS } from './metaphysicsScript';
 import {
-  clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+  clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, stand, type Bundle,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteAny, emoteAnyLive } from './moves';
+import { handsOnDesk, type Desk } from './solid';
+import { useLinger } from './useLinger';
+import {
+  projector, controlDesk, dominoBox, dialCentre, CONSOLE, LENS,
+} from './metaphysicsSet';
+import { DEEP, EMBER, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
+// ─────────────────────────────────────────────────────────────────────────────
+// metaphysics-being-1, "Why Does Anything Exist?" — IN A PLANETARIUM AT NIGHT.
+//
+// Redrawn 2026-09-25, one of five first lessons the owner asked for after the logic
+// debate studio: *"completely redesign them … and be unique on how the information is
+// displayed."* Here the information is PROJECTED: every idea is a slide of light the
+// projector throws onto the dome among the stars.
+//
+//   b0–1   the dome full of stars; WHY ANYTHING AT ALL? projected, then Leibniz's
+//          name for it — the first question.
+//   b2–4   the principle of sufficient reason as a slide; NEEDS A REASON tags the sky.
+//   b5–6   Parmenides' slide, NOTHING struck through; then the operator turns the
+//          dial down and the stars go out right to left — and the empty dome is still
+//          there: STILL SOMETHING.
+//   b7–10  a row of dominoes on the floor falls, each knocked by the one before, from
+//          a box nobody explains; the slide says EACH STATE ← AN EARLIER STATE, then
+//          asks BUT WHY ANY STATES AT ALL? The first question is asked ON THE STAGE:
+//          tap the last domino, the first push, or the box.
+//
+// WHAT IS NOT CHANGED: every word of narration (metaphysicsScript.ts beats 0–11 keep
+// their text and order; the voice is keyed by index).
+//
+// THE LESSONS OF THE LOGIC REDESIGN, APPLIED:
+//   · his hands are ON the console (solid.ts, LESSON_RULES Y7): the back hand rests at
+//     the low edge of its sloped top, the front hand on the dial, and a presenting
+//     hand lands on the top rather than going into it;
+//   · a prop, a slide or a card is mounted on its own beats and on the next only while
+//     it fades (useLinger), so nothing pops out and nothing haunts the must-boxes;
+//   · everything that moves reads the shared beat and clock together.
+//
+// COMPOSITION, in stage units: the dome is a half-ellipse, centre x 200, spring line
+// 376, radii 186 × 144, so its crown is at 232; its cove ledge runs 374–382. Below it
+// the wall: the projector (sphere centre 44, 432) throws its beam across the dome, the
+// console (centre 298, top 452) stands before the operator at x 336, who faces left.
+// The dominoes stand at x 128–237 and their box at 92, with the first push — a "?" —
+// between them. The question plates hang at y 386–410.
+// Nothing dark stands at his head's height (crown ~397): the dome ends at 382.
+// Band [224, 514].
+// ─────────────────────────────────────────────────────────────────────────────
+
 const TONE = stageTone('metaphysics');
 const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
-
-// ─────────────────────────────────────────────────────────────────────────────
-// WHY IS THERE SOMETHING RATHER THAN NOTHING?
-//
-// Four pieces of information design carry the argument:
-//   1. EVERYTHING THERE IS — a framed sky the figure wipes clean. When the last
-//      star is gone a plate stamps over the void: STILL SOMETHING. That is the
-//      "remove every object" beat, drawn rather than narrated.
-//   2. SUFFICIENT REASON — Leibniz's rule, written line by line on a card the
-//      exact width of the question plate and joined to it by an arrow, so the
-//      stage reads as an argument: this RULE is what FORCES that question.
-//   3. THE CHAIN OF CAUSES — a labelled left-to-right flow, ? → EARLIER → BEFORE
-//      → NOW, with ghost "?" boxes receding off the left edge. That is exactly
-//      what science does and exactly where it stops.
-//   4. WHY ANYTHING AT ALL? — the lesson's question, stamped on a plate.
-//   5. CAN IT BE THOUGHT? — the Parmenides card: the word NOTHING written out and
-//      then struck through, because "what is not" can be neither thought nor
-//      spoken. A word animation, not a sentence in the deck.
-//
-// The rule card, the chain and the Parmenides card all share the same slice of the
-// stage (y 354..414) — it is the ARGUMENT SLOT, and exactly one thing is ever in
-// it: the rule on the two Leibniz beats, the Parmenides card on the erase beat,
-// the chain on the three science beats. The Parmenides card deliberately waits
-// until bt = 0.7s to fade up, by which point the rule card it replaces is at 7%,
-// so two cards never read on top of each other in that one slot.
-//
-// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
-// The first lesson of the branch had four taps that held one frame. Each now makes
-// the thing it says: "the first question" writes a caption under the question
-// plate (`first`); "a universe that exists … needs a reason" tags the sky NEEDS A
-// REASON (`needs`); the Parmenides card now arrives on the Parmenides sentence
-// (`parm`) and the sky is wiped on the NEXT one, "suppose you remove every
-// object", where it used to be wiped a beat early; and "it can't explain why they
-// exist at all" lights the unanswered box at the head of the chain and sends its
-// ghosts further back (`open`).
-//
-// CAMERA: none (the old one only translated the stage 2px, which made the band
-// impossible to reason about). Design space is final space, so the figure stands
-// on GROUND=500 with its crown at ~361. Art occupies y 244..508 → band [234, 514].
-// ─────────────────────────────────────────────────────────────────────────────
-
+const LIP = lipOf(TONE);
 const TR = 0.85;
 
-// the framed sky
-const SKY_L = 22;
-const SKY_T = 244;
-const SKY_W = 356;
-const SKY_H = 100;
+const DOME = { cx: 200, base: 376, rx: 186, ry: 144 };
+const FIG_X = CONSOLE.cx + 38;
+const DESK: Desk = { cx: CONSOLE.cx, top: CONSOLE.top, half: CONSOLE.half, tilt: CONSOLE.tilt, side: 1 };
+const DIAL_C = dialCentre();
+const PROJECTOR = projector();
+const DESK_ART = controlDesk();
+const BOX_X = 92;
+const BOX = dominoBox(BOX_X);
+const DOM_X = [128, 148, 168, 188, 208, 228];
+const DOM_W = 9;
+const DOM_H = 32;
+/** How far each domino ends up tipped: the last lies nearly flat, the rest lean on their neighbour. */
+const DOM_REST = DOM_X.map((_, k) => (k === DOM_X.length - 1 ? 84 : 62));
 
-// Stars, positioned INSIDE the sky frame (it clips, so nothing can escape it).
-//
-// `th` is the erase level at which a star starts to go, and it is now dealt BY X —
-// high x (nearest the figure, who stands at 340) goes first, low x last — so the
-// erasure reads as a hand sweeping the sky clean from right to left instead of
-// stars randomly winking out. It also fixes a real defect: the thresholds used to
-// run to 0.84 while the beat only erases to 0.86 and each star needs th+0.12 to
-// vanish, so three stars were still visibly on when STILL SOMETHING stamped over
-// an allegedly empty void. The highest th is now 0.64, i.e. every star is gone by
-// erase 0.76 — comfortably before the stamp completes at 0.80.
-const STARS: { x: number; y: number; r: number; th: number; ph: number }[] = [
-  { x: 18, y: 32, r: 2.5, th: 0.63, ph: 0.2 }, { x: 52, y: 60, r: 3.0, th: 0.57, ph: 1.1 },
-  { x: 86, y: 26, r: 2.0, th: 0.52, ph: 2.0 }, { x: 120, y: 52, r: 3.5, th: 0.46, ph: 0.7 },
-  { x: 150, y: 30, r: 2.5, th: 0.41, ph: 1.6 }, { x: 182, y: 66, r: 2.0, th: 0.35, ph: 2.5 },
-  { x: 214, y: 28, r: 3.0, th: 0.30, ph: 0.9 }, { x: 244, y: 56, r: 2.5, th: 0.25, ph: 1.9 },
-  { x: 276, y: 32, r: 3.5, th: 0.20, ph: 0.4 }, { x: 306, y: 62, r: 2.0, th: 0.14, ph: 2.2 },
-  { x: 334, y: 34, r: 3.0, th: 0.10, ph: 1.3 }, { x: 34, y: 80, r: 2.0, th: 0.60, ph: 0.6 },
-  { x: 100, y: 82, r: 2.5, th: 0.49, ph: 1.7 }, { x: 166, y: 84, r: 2.0, th: 0.38, ph: 2.4 },
-  { x: 232, y: 80, r: 3.0, th: 0.27, ph: 0.3 }, { x: 296, y: 84, r: 2.5, th: 0.16, ph: 1.5 },
-  { x: 66, y: 44, r: 2.0, th: 0.55, ph: 0.8 }, { x: 198, y: 44, r: 2.5, th: 0.33, ph: 2.8 },
-  { x: 262, y: 70, r: 2.0, th: 0.22, ph: 1.0 }, { x: 130, y: 76, r: 2.0, th: 0.44, ph: 2.6 },
-  { x: 344, y: 70, r: 2.5, th: 0.08, ph: 0.5 }, { x: 10, y: 58, r: 2.0, th: 0.64, ph: 1.4 },
+// Stars on the dome, kept OFF the slide area (x 70…330, y 262…334) so no projected
+// word ever sits on a dot. `th` is the dial setting at which a star goes out: the
+// right-hand stars (nearest the console) first, so the sky goes out as a sweep.
+const STAR_XY: [number, number, number][] = [
+  [140, 252, 3], [170, 256, 2], [200, 244, 3], [228, 248, 2], [258, 254, 2.5],
+  [48, 318, 2.5], [62, 292, 2], [76, 304, 2], [330, 292, 2.5], [342, 312, 2], [352, 330, 3],
+  [150, 350, 2.5], [176, 340, 2],
+  [226, 362, 2], [246, 348, 2.5], [282, 356, 2], [300, 340, 2.5], [332, 350, 2], [360, 346, 2.5],
+];
+const STARS = STAR_XY.map(([x, y, r], k) => ({
+  x, y, r, th: 0.06 + 0.56 * ((384 - x) / 370), ph: (k * 1.37) % 6.28,
+}));
+
+// the beam from the lamp window to the slide in the middle of the dome
+const SLIDE_C = { x: 200, y: 300 };
+const BEAM_W = 158;
+const BEAM_L = Math.hypot(SLIDE_C.x - LENS.x, SLIDE_C.y - LENS.y);
+const BEAM_ROT = (Math.atan2(SLIDE_C.x - LENS.x, LENS.y - SLIDE_C.y) * 180) / Math.PI;
+
+// the question on the stage: three plates, each on a leader to the thing it names
+const PLATE_Y = 386;
+const PLATE_H = 24;
+const PLATE_W = 96;
+const PICKS = [
+  { id: 'box', label: 'WHY ANY EXIST', cx: 52, to: { x: BOX_X, y: 480 }, correct: true },
+  { id: 'first', label: 'HOW IT BEGAN', cx: 151, to: { x: DOM_X[0] + 5, y: 474 }, correct: false },
+  { id: 'last', label: 'WHY IT FELL', cx: 250, to: { x: DOM_X[5] + 22, y: 490 }, correct: false },
 ];
 
-// Leibniz's rule. Deliberately the SAME left edge and width as the question
-// plate below it, so card → arrow → question reads as one stacked diagram.
-const RULE_L = 24;
-const RULE_T = 354;
-const RULE_W = 252;
-const RULE_H = 60;
-const RULE_CX = RULE_L + RULE_W / 2;
-
-// the chain of causes: a flow of labelled boxes, oldest on the left
-const CH_T = 358;
-const CH_H = 34;
-const BOX_W = 58;
-const LINK_X = [88, 164, 240];               // EARLIER · BEFORE · NOW
-const LINK_LABEL = ['EARLIER', 'BEFORE', 'NOW'];
-const ARROW_X = [70, 146, 222];
-const QBOX_X = 38;
-
-const FIG_X = 340;
-
+// ── per-beat tracks, read off the script ─────────────────────────────────────
 const HPOSE = BEATS.map((b) => b.hpose ?? 0);
 const ERASE = BEATS.map((b) => b.erase ?? 0);
 const CHAIN = BEATS.map((b) => (b.chain ? 1 : 0));
-const QREG = BEATS.map((b) => (b.qregress ? 1 : 0));
-const RULEON = BEATS.map((b) => (b.rule ? 1 : 0));
-// Only the beat that RAISES the card writes it. Without this the rule re-writes
-// itself on every forward tap it survives, which reads as a stutter, not a reveal.
-const RULEIN = RULEON.map((v, k) => (v === 1 && (k === 0 || RULEON[k - 1] === 0) ? 1 : 0));
+/** Only the beat that BRINGS the dominoes knocks them down; after that they lie fallen. */
+const CHAIN_IN = CHAIN.map((v, k) => (v === 1 && (k === 0 || CHAIN[k - 1] === 0) ? 1 : 0));
 const FIRST = BEATS.map((b) => (b.first ? 1 : 0));
 const NEEDS = BEATS.map((b) => (b.needs ? 1 : 0));
 const PARM = BEATS.map((b) => (b.parm ? 1 : 0));
-const OPEN = BEATS.map((b) => b.open ?? 0);
-const OPEN_LIT = OPEN.map((v) => (v > 0 ? 1 : 0));
+const OPEN_LIT = BEATS.map((b) => ((b.open ?? 0) > 0 ? 1 : 0));
+const PICK = BEATS.map((b) => (b.pick ? 1 : 0));
+/** Which slide the projector shows: 1 the question, 2 the rule, 3 Parmenides, 4 the chain. */
+const SLIDE = BEATS.map((b) => (b.chain ? 4 : b.parm ? 3 : b.rule ? 2 : 1));
+const S1 = SLIDE.map((v) => (v === 1 ? 1 : 0));
+const S2 = SLIDE.map((v) => (v === 2 ? 1 : 0));
+const S3 = SLIDE.map((v) => (v === 3 ? 1 : 0));
+const S4 = SLIDE.map((v) => (v === 4 ? 1 : 0));
+/** Only the beat that raises a slide writes it; a slide that stays up holds finished. */
+const RULE_IN = S2.map((v, k) => (v === 1 && (k === 0 || S2[k - 1] === 0) ? 1 : 0));
+const PARM_IN = S3.map((v, k) => (v === 1 && (k === 0 || S3[k - 1] === 0) ? 1 : 0));
+/** A presenting or star-gazing hand is off the console; otherwise both rest on it. */
+const FREE = HPOSE.map((c) => (c === 2 || c === 6 ? 1 : 0));
+const ERASED = ERASE.map((v) => (v > 0 ? 1 : 0));
 
 function hHold(code: number, t: number) {
   'worklet';
-  if (code >= 100) return emoteAny(code, t);     // the movement catalogue's living holds
+  if (code >= 100) return emoteAny(code, t);
   return code === 0 ? stand(t) : narratorHold(code, t);
 }
 function hLive(code: number, t: number, bt: number) {
@@ -138,76 +147,53 @@ function hLive(code: number, t: number, bt: number) {
   return code === 0 ? stand(t) : narratorLive(code, t, bt);
 }
 
-// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
-// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
-// pushes close on a quote, and PULLS BACK to the whole band on a question or a
-// summary — the beats the reader has to read and act on. Beats that do not set
-// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
-// camera that never rests.
+// The camera: `followMoves` gives each beat its own shot (H60b).
 const X = BEATS.map((b) => b.x ?? FIG_X);
-
-// R7b — the stage follows the control on its own graded beat, and only there.
-// Derived from the beat rather than declared as a channel so it cannot fall out
-// of step with the control it is about.
+// R7b — the stage follows the order control on its own graded beat, and only there.
 const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics'));
 
-export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, pickPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
+export default function MetaphysicsScene({
+  clock, bt, bi, pickPos, i, picked, onPick, gazeX, gazeY, gazeOn,
+}: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFigS = useHeld();
-  const cv = useCarry(7);
+  const cv = useCarry(11);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
     const t = clock.value;
-    const q = clamp01(qv.value);
 
-    const figS = keepHeld(heldFigS, mixStance(carryFrom(heldFigS, n,hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
-    // The wipe takes its time: a hand sweeping the sky clean, not a light switched
-    // off. STILL SOMETHING lands two thirds of the way through it.
+    const figS = keepHeld(heldFigS, mixStance(carryFrom(heldFigS, n, hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
+    const free = carry(cv, 9, n, FREE[p], FREE[n], tr);
+    const atDesk = handsOnDesk(figS, FIG_X, DESK, free, 6, 12);
+    // The dial goes down slowly: a hand turning the sky off, not a light switched off.
     const erase = carry(cv, 0, n, ERASE[p], ERASE[n], ease01(bt.value / 1.4));
 
     return {
-      fig: lookPose(figS, FIG_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(atDesk, FIG_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
       erase,
-      // The stamp only lands once the sky is genuinely empty.
-      voidStamp: clamp01((erase - 0.55) / 0.25),
       twinkle: t,
-      // R7b — the knob runs the chain back. Drag from last Tuesday toward why
-      // anything at all and the chain of explanation extends behind the reader, until
-      // it reaches the end of what it can reach.
-      chainOn: carry(cv, 1, n, CHAIN[p], reacting ? pickPos.value : CHAIN[n], tr),
-      // The ghosts recede as the narration says the chain cannot reach its own
-      // start, and a considered answer sends them further still. Carried, so the
-      // second question starts from where the first one left them.
-      regress: carry(cv, 5, n, OPEN[p], OPEN[n] + (QREG[n] === 1 ? Math.min(0.3, 1 - OPEN[n]) * ease01(q) : 0), tr),
-      headLit: carry(cv, 6, n, OPEN_LIT[p], OPEN_LIT[n], tr),
-      first: carry(cv, 3, n, FIRST[p], FIRST[n], ease01((bt.value - 0.2) / 0.6)),
-      needs: carry(cv, 4, n, NEEDS[p], NEEDS[n], ease01((bt.value - 0.45) / 0.5)),
-      intro: n === 0 ? ease01(bt.value / 0.55) : 1,
-      ruleOn: carry(cv, 2, n, RULEON[p], RULEON[n], tr),
-      // The rule WRITES ITSELF on the beat that raises it: first line, then
-      // second, then the arrow drops into the question. Every other beat these
-      // sit at 1, so the card holds finished and fades out finished rather than
-      // un-writing itself on the way off stage.
-      ruleA: RULEIN[n] === 1 ? ease01((bt.value - 0.14) / 0.5) : 1,
-      ruleB: RULEIN[n] === 1 ? ease01((bt.value - 0.46) / 0.5) : 1,
-      ruleC: RULEIN[n] === 1 ? ease01((bt.value - 0.78) / 0.45) : 1,
-      // The Parmenides card runs on its own clock at BOTH ends, because it shares
-      // the argument slot with the rule card before it and the chain after it. It
-      // fades UP late (bt 0.7, by which point the outgoing rule card is at 7%) and
-      // DOWN fast (gone by bt 0.3, while the incoming chain is still at ~34%), so
-      // two cards are never both legible in the same 60 units of stage.
-      // And it writes itself — fade up, then the strike — only on the beat it ARRIVES.
-      // On a second beat of it the card holds, struck, where it used to be written
-      // and struck out again behind the reader (C20c). It follows its own track,
-      // `parm`, because it now arrives a beat before the sky is wiped.
-      noth:
-        PARM[n] > 0
-          ? (n > 0 && PARM[p] > 0 ? 1 : ease01((bt.value - 0.7) / 0.45))
-          : PARM[p] > 0 ? clamp01(1 - bt.value / 0.3) : 0,
-      nothX: PARM[n] > 0 && !(n > 0 && PARM[p] > 0) ? ease01((bt.value - 1.7) / 0.6) : 1,
+      stamp: clamp01((erase - 0.55) / 0.25),
+      s1: carry(cv, 2, n, S1[p], S1[n], tr),
+      s2: carry(cv, 3, n, S2[p], S2[n], tr),
+      s3: carry(cv, 4, n, S3[p], S3[n], tr),
+      s4: carry(cv, 5, n, S4[p], S4[n], tr),
+      first: carry(cv, 6, n, FIRST[p], FIRST[n], ease01((bt.value - 0.25) / 0.6)),
+      needs: carry(cv, 7, n, NEEDS[p], NEEDS[n], ease01((bt.value - 0.45) / 0.5)),
+      // The rule writes itself line by line on the beat that raises it.
+      ruleA: RULE_IN[n] === 1 ? ease01((bt.value - 0.2) / 0.5) : 1,
+      ruleB: RULE_IN[n] === 1 ? ease01((bt.value - 0.55) / 0.5) : 1,
+      // Parmenides: NOTHING, then the strike drawn across it, on the beat it arrives.
+      parmStrike: PARM_IN[n] === 1 ? ease01((bt.value - 1.2) / 0.6) : 1,
+      chainOn: carry(cv, 1, n, CHAIN[p], CHAIN[n], tr),
+      chainIn: CHAIN_IN[n],
+      bt: bt.value,
+      headLit: carry(cv, 8, n, OPEN_LIT[p], OPEN_LIT[n], tr),
+      // R7b — how far back the explanation reaches, on the order question's own beat.
+      reach: carry(cv, 10, n, 0, reacting ? pickPos.value : 0, tr),
     };
   });
 
@@ -216,23 +202,26 @@ export default function MetaphysicsScene({ clock, bt, bi, qv, dragPos, pickPos, 
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-      <Sky S={SCENE} />
-      <Rule S={SCENE} />
-      <Nothing S={SCENE} />
-      <Chain S={SCENE} />
-      <Question S={SCENE} />
+      <Dome S={SCENE} on={on} />
+      <View style={styles.ledge} pointerEvents="none" />
+      <View style={styles.cove} pointerEvents="none" />
+      <ObjectArt parts={PROJECTOR} tone={TONE} />
+      <ObjectArt parts={DESK_ART} tone={TONE} />
+      <DialLights S={SCENE} />
+      {on(CHAIN) ? <Dominoes S={SCENE} tags={!PICK[i]} /> : null}
+      {PICK[i] ? <Picks picked={picked} onPick={onPick} /> : null}
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_FIG} />
     </View>
   );
 }
 
-// ── 1. the framed sky, wiped toward nothing ──────────────────────────────────
+// ── the dome: the stars, the slides, and what is left when they are gone ────────
 
-function Star({ S, star }: { S: SharedValue<any>; star: { x: number; y: number; r: number; th: number; ph: number } }) {
+function Star({ S, star }: { S: SharedValue<any>; star: (typeof STARS)[number] }) {
   const st = useAnimatedStyle(() => {
     const gone = clamp01((S.value.erase - star.th) / 0.12);
-    const tw = 0.55 + 0.45 * Math.sin(S.value.twinkle * 1.6 + star.ph);
+    const tw = 0.6 + 0.4 * Math.sin(S.value.twinkle * 1.6 + star.ph);
     return { opacity: (1 - gone) * tw, transform: [{ scale: 0.5 + 0.5 * (1 - gone) }] };
   });
   return (
@@ -246,304 +235,325 @@ function Star({ S, star }: { S: SharedValue<any>; star: { x: number; y: number; 
   );
 }
 
-function Sky({ S }: { S: SharedValue<any> }) {
-  const dark = useAnimatedStyle(() => ({ opacity: S.value.erase * 0.55 }));
-  const stamp = useAnimatedStyle(() => ({
-    opacity: S.value.voidStamp,
-    transform: [{ scale: lerp(1.14, 1, S.value.voidStamp) }],
-  }));
-  // "A universe that exists … needs a reason": the tag is stamped onto the sky it
-  // is about, in the corner no star and no plate reaches (sky x 244…348, y 4…20).
+/** A slide's opacity: its own track, and it dies with the stars when the dial goes down. */
+function useSlide(S: SharedValue<any>, k: 's1' | 's2' | 's3' | 's4') {
+  return useAnimatedStyle(() => ({ opacity: S.value[k] * (1 - clamp01((S.value.erase - 0.2) / 0.4)) }));
+}
+
+function Dome({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  // The beam is the projector at work: it shows while a slide does, and dies with the dial.
+  const beam = useAnimatedStyle(() => {
+    const v = S.value;
+    const slide = Math.max(v.s1, v.s2, v.s3, v.s4);
+    return { opacity: 0.13 * slide * (1 - clamp01((v.erase - 0.2) / 0.5)) };
+  });
+  const s1 = useSlide(S, 's1');
+  const s2 = useSlide(S, 's2');
+  const s3 = useSlide(S, 's3');
+  const s4 = useSlide(S, 's4');
+  const first = useAnimatedStyle(() => ({ opacity: S.value.first, transform: [{ translateY: (1 - S.value.first) * -4 }] }));
+  const lineA = useAnimatedStyle(() => ({ opacity: S.value.ruleA, transform: [{ translateY: (1 - S.value.ruleA) * 5 }] }));
+  const lineB = useAnimatedStyle(() => ({ opacity: S.value.ruleB, transform: [{ translateY: (1 - S.value.ruleB) * 5 }] }));
+  const strike = useAnimatedStyle(() => ({ transform: [{ scaleX: S.value.parmStrike }] }));
+  const why = useAnimatedStyle(() => ({ opacity: S.value.headLit, transform: [{ translateY: (1 - S.value.headLit) * 5 }] }));
   const needs = useAnimatedStyle(() => ({
-    opacity: S.value.needs,
+    opacity: S.value.needs * (1 - clamp01((S.value.erase - 0.2) / 0.4)),
     transform: [{ scale: lerp(1.12, 1, S.value.needs) }],
   }));
+  const still = useAnimatedStyle(() => ({
+    opacity: S.value.stamp,
+    transform: [{ scale: lerp(1.16, 1, S.value.stamp) }],
+  }));
   return (
-    <View style={styles.sky} pointerEvents="none">
-      <Animated.View style={[styles.voidDisc, dark]} />
+    <View style={styles.domeClip} pointerEvents="none">
+      <View style={styles.domeRim} />
+      <View style={styles.dome} />
+      <Animated.View style={[styles.beam, beam]} />
       {STARS.map((s, k) => <Star key={k} S={S} star={s} />)}
-      <Text style={styles.skyCap}>EVERYTHING THERE IS</Text>
-      <Animated.View style={[styles.needsTag, needs]}>
-        <Text style={styles.needsText} numberOfLines={1}>NEEDS A REASON</Text>
-      </Animated.View>
-      <Animated.View style={[styles.stillPlate, stamp]}>
-        <Text style={styles.stillText}>STILL SOMETHING</Text>
-      </Animated.View>
+
+      {on(S1) ? (
+        <Animated.View style={[styles.slide, s1]}>
+          <Text style={styles.slideTitle} numberOfLines={1}>WHY ANYTHING AT ALL?</Text>
+          <Animated.Text style={[styles.slideCap, first]} numberOfLines={1}>THE FIRST QUESTION · LEIBNIZ, 1714</Animated.Text>
+        </Animated.View>
+      ) : null}
+      {on(S2) ? (
+        <Animated.View style={[styles.slide, s2]}>
+          <Text style={styles.slideKicker} numberOfLines={1}>SUFFICIENT REASON</Text>
+          <Animated.Text style={[styles.slideLine, lineA]} numberOfLines={1}>NOTHING IS TRUE</Animated.Text>
+          <Animated.Text style={[styles.slideLine, lineB]} numberOfLines={1}>WITHOUT A REASON WHY</Animated.Text>
+        </Animated.View>
+      ) : null}
+      {on(S3) ? (
+        <Animated.View style={[styles.slide, s3]}>
+          <Text style={styles.slideKicker} numberOfLines={1}>CAN IT BE THOUGHT?</Text>
+          <View style={styles.nothWrap}>
+            <Text style={styles.nothWord} numberOfLines={1}>NOTHING</Text>
+            <Animated.View nativeID="strike-nothing" style={[styles.nothStrike, strike]} />
+          </View>
+        </Animated.View>
+      ) : null}
+      {on(S4) ? (
+        <Animated.View style={[styles.slide, s4]}>
+          <Text style={styles.slideLine} numberOfLines={1}>EACH STATE ← AN EARLIER STATE</Text>
+          <Animated.Text style={[styles.slideAsk, why]} numberOfLines={1}>BUT WHY ANY STATES AT ALL?</Animated.Text>
+        </Animated.View>
+      ) : null}
+
+      {on(NEEDS) ? (
+        <Animated.View style={[styles.needsTag, needs]}>
+          <Text style={styles.needsText} numberOfLines={1}>NEEDS A REASON</Text>
+        </Animated.View>
+      ) : null}
+      {on(ERASED) ? (
+        <Animated.View style={[styles.stillPlate, still]}>
+          <Text style={styles.stillText} numberOfLines={1}>STILL SOMETHING</Text>
+        </Animated.View>
+      ) : null}
     </View>
   );
 }
 
-// ── 2. Leibniz's rule, and the arrow from it to the question ─────────────────
-// A written rule plus an arrow into the question plate: the reader SEES that the
-// question is not idle curiosity, it is what this rule demands once you point it
-// at everything at once.
-
-function Rule({ S }: { S: SharedValue<any> }) {
-  const wrap = useAnimatedStyle(() => ({ opacity: S.value.ruleOn }));
-  const lineA = useAnimatedStyle(() => ({
-    opacity: S.value.ruleA,
-    transform: [{ translateX: (1 - S.value.ruleA) * -14 }],
-  }));
-  const lineB = useAnimatedStyle(() => ({
-    opacity: S.value.ruleB,
-    transform: [{ translateX: (1 - S.value.ruleB) * -14 }],
-  }));
-  // Origin at the TOP, so the stem grows down out of the card toward the plate.
-  const stem = useAnimatedStyle(() => ({ opacity: S.value.ruleC, transform: [{ scaleY: S.value.ruleC }] }));
-  const head = useAnimatedStyle(() => ({ opacity: S.value.ruleC }));
-  return (
-    <Animated.View style={[StyleSheet.absoluteFill, wrap]} pointerEvents="none">
-      <View style={styles.ruleCard}>
-        <Text style={styles.ruleCap}>SUFFICIENT REASON</Text>
-        <Animated.Text style={[styles.ruleLine, { top: 23 }, lineA]}>NOTHING IS TRUE</Animated.Text>
-        <Animated.Text style={[styles.ruleLine, { top: 39 }, lineB]}>WITHOUT A REASON WHY</Animated.Text>
-      </View>
-      <Animated.View style={[styles.ruleStem, stem]} />
-      <Animated.View style={[styles.ruleHead, head]} />
-    </Animated.View>
-  );
+// ── the console's level lights: they go out with the stars as the dial turns ──
+const LIGHTS = [0, 1, 2, 3, 4];
+function DialLight({ S, k }: { S: SharedValue<any>; k: number }) {
+  const st = useAnimatedStyle(() => {
+    // the right-hand light is the last to go, as the dial turns all the way down
+    const gone = clamp01((S.value.erase - (0.1 + 0.14 * (4 - k))) / 0.1);
+    return { opacity: 1 - 0.8 * gone };
+  });
+  return <Animated.View style={[styles.light, { left: CONSOLE.cx - 8.5 + k * 4 }, st]} />;
 }
-
-// ── 2b. Parmenides: the word NOTHING, written and then struck out ────────────
-// Same footprint as the rule card — the argument slot — so the stage swaps one
-// claim for another rather than growing a second column. The strike is a bar with
-// its origin at the left edge, so it is DRAWN across the word left to right.
-
-function Nothing({ S }: { S: SharedValue<any> }) {
-  const wrap = useAnimatedStyle(() => ({ opacity: S.value.noth }));
-  const strike = useAnimatedStyle(() => ({ transform: [{ scaleX: S.value.nothX }] }));
-  return (
-    <Animated.View style={[styles.nothCard, wrap]} pointerEvents="none">
-      <Text style={styles.nothCap}>CAN IT BE THOUGHT?</Text>
-      <View style={styles.nothWordWrap}>
-        <Text style={styles.nothWord}>NOTHING</Text>
-      </View>
-      <Animated.View style={[styles.nothStrike, strike]} />
-    </Animated.View>
-  );
-}
-
-// ── 3. the chain of causes, receding without a floor ─────────────────────────
-
-function Chain({ S }: { S: SharedValue<any> }) {
-  const wrap = useAnimatedStyle(() => ({ opacity: S.value.chainOn }));
-  const ghost1 = useAnimatedStyle(() => ({
-    opacity: 0.3 + 0.34 * S.value.regress,
-    transform: [{ translateX: -S.value.regress * 9 }],
-  }));
-  const ghost2 = useAnimatedStyle(() => ({
-    opacity: 0.14 + 0.26 * S.value.regress,
-    transform: [{ translateX: -S.value.regress * 18 }],
-  }));
-  // The pulse rides the GLYPH, not the box — a semi-transparent box would let the
-  // ghost behind it show through and read as a printing error.
-  const pulse = useAnimatedStyle(() => ({
-    opacity: (0.6 + 0.4 * Math.abs(Math.sin(S.value.twinkle * 1.4))) * (1 - S.value.headLit),
-  }));
-  // "It can't explain why they exist at all": the one box the chain never reaches
-  // is struck solid, its question mark reversed out of the ink. Two glyphs rather
-  // than one recoloured, so neither ever sits at half contrast on the other's ground.
-  const litFill = useAnimatedStyle(() => ({ opacity: S.value.headLit }));
-  const litGlyph = useAnimatedStyle(() => ({
-    opacity: S.value.headLit * (0.75 + 0.25 * Math.abs(Math.sin(S.value.twinkle * 1.4))),
-  }));
-  return (
-    <Animated.View style={[StyleSheet.absoluteFill, wrap]} pointerEvents="none">
-      {/* the regress: ghosts of the same unanswered box, receding off the edge */}
-      <Animated.View style={[styles.qbox, { left: QBOX_X - 26 }, ghost2]}>
-        <Text style={styles.qboxText}>?</Text>
-      </Animated.View>
-      <Animated.View style={[styles.qbox, { left: QBOX_X - 13 }, ghost1]}>
-        <Text style={styles.qboxText}>?</Text>
-      </Animated.View>
-      <View style={[styles.qbox, { left: QBOX_X }]}>
-        <Animated.View style={[styles.qboxLit, litFill]} />
-        <Animated.Text style={[styles.qboxText, pulse]}>?</Animated.Text>
-        <Animated.View style={[styles.qboxLitWrap, litGlyph]}>
-          <Text style={[styles.qboxText, styles.qboxTextLit]}>?</Text>
-        </Animated.View>
-      </View>
-
-      {ARROW_X.map((x, k) => (
-        <Text key={`a${k}`} style={[styles.chainArrow, { left: x }]}>→</Text>
-      ))}
-      {LINK_X.map((x, k) => (
-        <View key={`b${k}`} style={[styles.chainBox, { left: x }]}>
-          <Text style={styles.chainText}>{LINK_LABEL[k]}</Text>
-        </View>
-      ))}
-      <Text style={styles.chainCap}>EACH STATE EXPLAINED BY AN EARLIER ONE</Text>
-    </Animated.View>
-  );
-}
-
-// ── 4. the question itself, stamped on a plate ───────────────────────────────
-
-function Question({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({
-    opacity: S.value.intro,
-    transform: [{ scale: lerp(1.12, 1, S.value.intro) }],
-  }));
-  // Leibniz's name for it, written under the plate as the narration gives it.
-  const first = useAnimatedStyle(() => ({
-    opacity: S.value.first,
-    transform: [{ translateY: (1 - S.value.first) * -5 }],
+function DialLights({ S }: { S: SharedValue<any> }) {
+  const pointer = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${lerp(-40, -170, S.value.erase)}deg` }],
   }));
   return (
     <>
-      <Animated.View style={[styles.qPlate, st]} pointerEvents="none">
-        <Text style={styles.qPlateText}>WHY ANYTHING AT ALL?</Text>
+      {LIGHTS.map((k) => <DialLight key={k} S={S} k={k} />)}
+      <Animated.View style={[styles.pointer, pointer]} pointerEvents="none" />
+    </>
+  );
+}
+
+// ── the dominoes: each knocked by the one before, back to a box nobody explains ──
+
+function Domino({ S, k }: { S: SharedValue<any>; k: number }) {
+  const st = useAnimatedStyle(() => {
+    const v = S.value;
+    // Falling ACCELERATES — a thing tipping over is slow to start and quick to land.
+    const u = v.chainIn === 1 ? clamp01((v.bt - 0.7 - 0.2 * k) / 0.26) : 1;
+    // how far back the explanation reaches on the order question: lit dominoes
+    const lit = clamp01((v.reach * 1.2 - (DOM_X.length - 1 - k) / DOM_X.length) * 4);
+    return {
+      backgroundColor: lit > 0.5 ? SHADE : PLATE_FACE,
+      transform: [{ rotate: `${DOM_REST[k] * u * u}deg` }],
+    };
+  });
+  return (
+    <Animated.View style={[styles.domino, { left: DOM_X[k] }, st]}>
+      <View style={styles.dominoRule} />
+      <View style={[styles.pip, { top: 6 }]} />
+      <View style={[styles.pip, { top: 21 }]} />
+    </Animated.View>
+  );
+}
+
+function Dominoes({ S, tags }: { S: SharedValue<any>; tags: boolean }) {
+  const wrap = useAnimatedStyle(() => ({ opacity: S.value.chainOn }));
+  // the first push: a question mark the chain never reaches, lit once the slide asks it
+  const qLit = useAnimatedStyle(() => ({
+    opacity: S.value.headLit * (0.8 + 0.2 * Math.sin(S.value.twinkle * 3)),
+  }));
+  const qShake = useAnimatedStyle(() => {
+    const over = clamp01((S.value.reach - 0.55) / 0.3);
+    return { transform: [{ translateX: Math.sin(S.value.twinkle * 30) * 2 * over }] };
+  });
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, wrap]} pointerEvents="none">
+      <ObjectArt parts={BOX} tone={TONE} />
+      {DOM_X.map((_, k) => <Domino key={k} S={S} k={k} />)}
+      <Animated.View style={[styles.qMark, qShake]}>
+        <Animated.View style={[styles.qMarkLit, qLit]} />
+        <Text style={styles.qMarkText}>?</Text>
       </Animated.View>
-      <Animated.Text style={[styles.firstCap, first]} numberOfLines={1}>
-        THE FIRST QUESTION · LEIBNIZ, 1714
-      </Animated.Text>
+      {/* The tags step aside while the question's own plates name the same things. */}
+      {tags ? (
+        <>
+          <View style={[styles.tag, { left: DOM_X[0] - 16 }]}>
+            <Text style={styles.tagText} numberOfLines={1}>EARLIER</Text>
+          </View>
+          <View style={[styles.tag, { left: DOM_X[5] - 18, width: 44 }]}>
+            <Text style={styles.tagText} numberOfLines={1}>NOW</Text>
+          </View>
+        </>
+      ) : null}
+    </Animated.View>
+  );
+}
+
+// ── the question on the stage ────────────────────────────────────────────────
+
+function Picks({ picked, onPick }: { picked: string | null; onPick: (id: string, ok: boolean) => void }) {
+  const answered = picked !== null;
+  return (
+    <>
+      {PICKS.map((q) => {
+        const x0 = q.cx;
+        const y0 = PLATE_Y + PLATE_H;
+        const len = Math.hypot(q.to.x - x0, q.to.y - y0);
+        const ang = (Math.atan2(q.to.x - x0, q.to.y - y0) * 180) / Math.PI;
+        return (
+          <View
+            key={`l-${q.id}`}
+            pointerEvents="none"
+            style={[styles.leader, { left: x0 - 0.75, top: y0, height: len, transform: [{ rotate: `${-ang}deg` }] }]}
+          />
+        );
+      })}
+      {PICKS.map((q) => (
+        <Target
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={6}
+          disabled={answered}
+          style={[styles.pick, { left: q.cx - PLATE_W / 2 }]}
+        >
+          <View style={[styles.pickFace, answered && q.correct && styles.pickRight]}>
+            <Text style={[styles.pickText, answered && q.correct && styles.pickTextOnInk]} numberOfLines={1}>
+              {q.label}
+            </Text>
+          </View>
+        </Target>
+      ))}
     </>
   );
 }
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 24, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
-  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
-  // figure and everything it is looking at standing on bare page;
-  // political7 and political8 both stand their subject on a filled mass.
   floor: floorStyle(TONE, GROUND),
+  ground: { position: 'absolute', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },
 
-  sky: {
-    position: 'absolute', left: SKY_L, top: SKY_T, width: SKY_W, height: SKY_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
+  // THE DOME: a circle SCALED into an ellipse (a corner radius cannot make one), cut
+  // off at its spring line by the clip, with a rim of the lesson's own shade.
+  domeClip: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: DOME.base, overflow: 'hidden' },
+  domeRim: {
+    position: 'absolute', left: DOME.cx - DOME.ry - 3, top: DOME.base - DOME.ry - 3,
+    width: (DOME.ry + 3) * 2, height: (DOME.ry + 3) * 2, borderRadius: DOME.ry + 3,
+    backgroundColor: INK, transform: [{ scaleX: (DOME.rx + 3) / (DOME.ry + 3) }],
   },
-  skyCap: {
-    position: 'absolute', left: 10, top: 5,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.4, color: INK, includeFontPadding: false,
+  dome: {
+    position: 'absolute', left: DOME.cx - DOME.ry, top: DOME.base - DOME.ry,
+    width: DOME.ry * 2, height: DOME.ry * 2, borderRadius: DOME.ry,
+    backgroundColor: DEEP, transform: [{ scaleX: DOME.rx / DOME.ry }],
   },
-  // From y 18, below EVERYTHING THERE IS (y 5…16): from 8 the dark disc ran under
-  // "THERE IS" and took the caption's contrast with it. It still frames the plate.
-  voidDisc: { position: 'absolute', left: 86, top: 18, width: 180, height: 58, borderRadius: 29, backgroundColor: INK },
-  star: { position: 'absolute', backgroundColor: INK },
-  stillPlate: {
-    position: 'absolute', left: 92, top: 31, width: 168, height: 32,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center',
+  star: { position: 'absolute', backgroundColor: PAPER_LIT },
+  // A CSS triangle has a zero-size box, so its pivot is stated in px (§13).
+  beam: {
+    position: 'absolute', left: LENS.x - BEAM_W / 2, top: LENS.y - BEAM_L, width: 0, height: 0,
+    borderLeftWidth: BEAM_W / 2, borderRightWidth: BEAM_W / 2, borderTopWidth: BEAM_L,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: PAPER_LIT,
+    transformOrigin: `${BEAM_W / 2}px ${BEAM_L}px`, transform: [{ rotate: `${BEAM_ROT}deg` }],
   },
-  stillText: {
-    fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 1.4, color: INK, includeFontPadding: false,
+
+  // THE SLIDES: light projected on the dark dome, one idea at a time, all centred on
+  // the same place so one slide replaces the last rather than adding a column.
+  slide: { position: 'absolute', left: 60, width: 280, top: 266, height: 70, alignItems: 'center' },
+  slideTitle: {
+    marginTop: 14, fontFamily: 'Inter_700Bold', fontSize: 18, letterSpacing: 1.1, color: PAPER_LIT,
+    includeFontPadding: false,
   },
-  // Top right of the sky: clear of every star (the nearest, at sky y 28.5, is below
-  // it) and of STILL SOMETHING, whose plate starts at sky y 31. 92 units of type in
-  // 101 of box, so the glyphs keep their 4dp from the rule (D31c).
+  slideCap: {
+    marginTop: 8, fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 1.3, color: PAPER_LIT,
+    includeFontPadding: false,
+  },
+  slideKicker: {
+    fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 1.6, color: PAPER_LIT, includeFontPadding: false,
+  },
+  slideLine: {
+    marginTop: 6, fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 0.6, color: PAPER_LIT,
+    includeFontPadding: false,
+  },
+  slideAsk: {
+    marginTop: 12, fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.8, color: PAPER_LIT,
+    includeFontPadding: false,
+  },
+  nothWrap: { marginTop: 4, alignItems: 'center', justifyContent: 'center' },
+  nothWord: {
+    fontFamily: 'Inter_700Bold', fontSize: 28, letterSpacing: 6, color: PAPER_LIT, includeFontPadding: false,
+  },
+  nothStrike: {
+    position: 'absolute', left: -6, right: -2, top: '50%', height: 3, marginTop: -1.5,
+    backgroundColor: PAPER_LIT, borderRadius: 1.5, transformOrigin: '0% 50%',
+  },
   needsTag: {
-    position: 'absolute', left: 240, top: 3, width: 104, height: 19,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    position: 'absolute', left: 30, top: 342, width: 104, height: 20,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 4, backgroundColor: PAPER_LIT,
     alignItems: 'center', justifyContent: 'center',
   },
   needsText: {
-    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
-
-  ruleCard: {
-    position: 'absolute', left: RULE_L, top: RULE_T, width: RULE_W, height: RULE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
-  },
-  ruleCap: {
-    position: 'absolute', left: 12, top: 7,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.3, color: INK, includeFontPadding: false,
-  },
-  ruleLine: {
-    position: 'absolute', left: 12,
-    fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.4, lineHeight: 15, color: INK,
-    includeFontPadding: false,
-  },
-  ruleStem: {
-    position: 'absolute', left: RULE_CX - 1.25, top: RULE_T + RULE_H,
-    width: 2.5, height: 8, backgroundColor: INK, transformOrigin: '50% 0%',
-  },
-  ruleHead: {
-    position: 'absolute', left: RULE_CX - 5, top: RULE_T + RULE_H + 7,
-    width: 0, height: 0,
-    borderLeftWidth: 5, borderRightWidth: 5, borderTopWidth: 7,
-    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: INK,
-  },
-
-  nothCard: {
-    position: 'absolute', left: RULE_L, top: RULE_T, width: RULE_W, height: RULE_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
-  },
-  nothCap: {
-    position: 'absolute', left: 12, top: 7,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.3, color: INK, includeFontPadding: false,
-  },
-  nothWordWrap: {
-    position: 'absolute', left: 0, right: 0, top: 24, height: 30,
+  stillPlate: {
+    position: 'absolute', left: DOME.cx - 88, top: 284, width: 176, height: 36,
+    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PAPER_LIT, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
-  nothWord: {
-    fontFamily: 'Inter_700Bold', fontSize: 24, letterSpacing: 5, color: INK, includeFontPadding: false,
-  },
-  nothStrike: {
-    position: 'absolute', left: 46, top: 38, width: 160, height: 3,
-    backgroundColor: INK, borderRadius: 1.5, transformOrigin: '0% 50%',
+  stillText: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 1.4, color: INK, includeFontPadding: false,
   },
 
-  qbox: {
-    position: 'absolute', top: CH_T, width: 32, height: CH_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center',
+  // the cove: the ledge the dome stands on, with the warm strip of light along it
+  ledge: {
+    position: 'absolute', left: 8, right: 8, top: DOME.base - 2, height: 8,
+    backgroundColor: STONE, borderWidth: 1.5, borderColor: INK, borderRadius: 3, boxShadow: LIP,
   },
-  qboxText: {
-    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: INK, includeFontPadding: false,
+  cove: { position: 'absolute', left: 14, right: 14, top: DOME.base - 3, height: 1.5, backgroundColor: EMBER },
+
+  // the console's level lights, and the dial's pointer
+  light: {
+    position: 'absolute', top: CONSOLE.top + 20, width: 3, height: 3, borderRadius: 1.5,
+    backgroundColor: PAPER_LIT,
   },
-  qboxLit: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: 2, backgroundColor: INK },
-  qboxLitWrap: {
-    position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center',
-  },
-  qboxTextLit: { color: PAPER },
-  chainBox: {
-    position: 'absolute', top: CH_T, width: BOX_W, height: CH_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  chainText: {
-    fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.4, color: INK, includeFontPadding: false,
-  },
-  chainArrow: {
-    position: 'absolute', top: CH_T + 7, width: 18, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 15, color: SOFT, includeFontPadding: false,
-  },
-  chainCap: {
-    position: 'absolute', left: 24, top: CH_T + 42,
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: INK, includeFontPadding: false,
+  pointer: {
+    position: 'absolute', left: DIAL_C.x - 0.75, top: DIAL_C.y - 5, width: 1.5, height: 5,
+    borderRadius: 0.75, backgroundColor: INK, transformOrigin: '50% 100%',
   },
 
-  qPlate: {
-    position: 'absolute', left: 24, top: 428, width: 252, height: 44,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
+  domino: {
+    position: 'absolute', top: GROUND - DOM_H, width: DOM_W, height: DOM_H,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, transformOrigin: '100% 100%',
+    alignItems: 'center',
+  },
+  dominoRule: { position: 'absolute', left: 1, right: 1, top: DOM_H / 2 - 1.5, height: 1.2, backgroundColor: INK },
+  pip: { position: 'absolute', width: 2.5, height: 2.5, borderRadius: 1.25, backgroundColor: INK },
+  qMark: {
+    position: 'absolute', left: 110, top: 440, width: 16, height: 22, borderRadius: 4,
     alignItems: 'center', justifyContent: 'center',
   },
-  qPlateText: {
-    fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 1.2, color: INK, includeFontPadding: false,
+  qMarkLit: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: 4, backgroundColor: SHADE },
+  qMarkText: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 20, color: INK, includeFontPadding: false },
+  tag: {
+    position: 'absolute', top: 440, width: 58, height: 17,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
   },
-  // Under the plate (its lip ends at 475) and above the floor (500): 202 units of
-  // type across the plate's 252, and the figure's nearest ink is at x 302.
-  firstCap: {
-    position: 'absolute', left: 24, top: 479, width: 252, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 1.2, color: INK,
-    includeFontPadding: false,
+  tagText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 11, letterSpacing: 0.6, color: INK, includeFontPadding: false,
   },
+
+  leader: { position: 'absolute', width: 1.5, backgroundColor: INK, transformOrigin: '50% 0%' },
+  pick: { position: 'absolute', top: PLATE_Y, width: PLATE_W, height: PLATE_H },
+  pickFace: {
+    flexGrow: 1, borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  pickRight: { backgroundColor: INK },
+  pickText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12, letterSpacing: 0.4, color: INK, includeFontPadding: false,
+  },
+  pickTextOnInk: { color: PAPER_LIT },
 });
 
-// Extremes: the sky frame's top edge (244) down to the figure's ankle joints
-// (~507, on the ground rule at 500). The rule card and the Parmenides card share
-// 354..414, the arrow into the plate runs 414..428, and the chain (358..392), its
-// caption (400..411), the question plate (428..472) and its FIRST QUESTION caption
-// (479..490) sit between them. The NEEDS A REASON tag is inside the sky. Nothing
-// is drawn outside that slice: the figure's highest pixel is its crown at ~360
-// (the gaze-up hand at hpose 6 clamps to its arm's reach around 367), so even the
-// tallest pose stays clear of the sky frame's floor at 344.
-//
-// 280 units is also the tightest band that still pays: the stage region is about
-// 923×647 device px, so 647/280 ≈ 923/400 — crop any harder and the WIDTH becomes
-// the limit, so the art stops growing while the risk of clipping does not.
 export function MetaphysicsLesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={MetaphysicsScene} band={[234, 514]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={MetaphysicsScene} band={[224, 514]} camera={CAM} />;
 }

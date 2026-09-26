@@ -2,11 +2,15 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic aesthetics-aesthetics-1, "Why Things Feel Beautiful"
-// Theme: THE GLOW THAT ASKS FOR NOTHING — AND SPEAKS FOR EVERYONE.
+// Theme: A HILLTOP LOOKOUT AT SUNSET, A PICNIC AND A COIN TELESCOPE.
 //
-// A figure before a framed sunset: it glows, and the pleasure it gives wants
-// nothing from it (no grabbing hand, unlike the apple he reaches to eat). Then the
-// feeling turns outward — "this is beautiful" quietly demanding a whole crowd agree.
+// A lookout rail at sunset: the sun glows, and the pleasure it gives wants nothing
+// from it, unlike the apple in the picnic basket he reaches to eat. Scorecards on the
+// rail are Hume's critics; then tourists walk up to the rail and point, because "this
+// is beautiful" quietly demands that everyone agree.
+//
+// Redrawn 2026-09-25 after the logic debate studio. The narration is unchanged; the
+// first question moved onto the stage, where the reader taps the sunset or the apple.
 //
 // THE VOICE (group M). This is the reference lesson for the narrator's manner: he
 // is fond of you and quietly exasperated by his subject. Every barb here lands on
@@ -61,6 +65,8 @@ export interface AestheticsBeat extends BaseBeat {
   assent?: boolean;
   /** “IT IS BEAUTIFUL” is written under it, resting on one feeling: one pip. */
   claim?: boolean;
+  /** The question is asked ON THE STAGE: tap the sunset or the apple. */
+  pick?: boolean;
 }
 
 export const BEATS: AestheticsBeat[] = [
@@ -165,15 +171,12 @@ export const BEATS: AestheticsBeat[] = [
     apple: true,
     critics: true,
     weigh: 'q1',
+    pick: true,
     interact: {
-      prompt: 'What makes the pleasure of a sunset different from the pleasure of eating an apple?',
-      cards: [
-        { text: 'The pleasure is disinterested', correct: true },
-        { text: 'The pleasure is more intense', correct: false },
-      ],
+      prompt: 'Which of the two pleases you without your wanting anything from it?',
       // M5: the aside is aimed at the losing IDEA, never at the reader who picked
       // it. A toothache is strong too — that teaches why strength is the wrong axis.
-      explain: 'The pleasure is disinterested. For Kant, this means free of desire. The apple pleases because it satisfies hunger, but the sunset pleases without satisfying any want. Intensity isn’t the difference, because the pleasure of eating can be just as intense.',
+      explain: 'The sunset. Kant calls its pleasure disinterested, meaning free of desire. The apple pleases because it satisfies hunger. The sunset pleases without meeting any want. Strength isn’t the difference, because eating can please just as much.',
       xp: 5,
     },
     dur: 1.0,

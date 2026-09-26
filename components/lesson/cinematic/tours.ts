@@ -28,7 +28,6 @@ export type TourStation =
       tx: number, ty: number, tw: number, th: number];
 
 export const TOURS: Record<string, readonly (readonly TourStation[] | null)[]> = {
-  'aesthetics-aesthetics-1': [null, [[0, 234, 400, 280, 0.84, 9]], null, null, null, null, null, null, null, null, null, null, null, null, null],
   'aesthetics-aesthetics-10': [null, [[183, 448, 160, 2, 1.2, 9]], null, [[0, 232, 400, 280, 1.2, 9]], null, [[188, 408, 150, 46, 1.2, 9]], [[0, 232, 400, 280, 1.2, 9]], null, null],
   'aesthetics-aesthetics-14': [null, null, null, null, [[0, 220, 400, 292, 1.2, 9]], null, null, null, null, null],
   'aesthetics-aesthetics-15': [null, [[0, 226, 400, 286, 1.08, 9]], null, null, null, null, null, null, null, null, null, null],
@@ -51,7 +50,7 @@ export const TOURS: Record<string, readonly (readonly TourStation[] | null)[]> =
   'aesthetics-aesthetics-6': [null, [[0, 238, 400, 274, 0.72, 9]], null, null, null, null, null, null, null, null, null],
   'aesthetics-aesthetics-7': [[[65, 397, 45, 109, 1.2, 9]], [[52, 276, 322, 230, 0.94, 9]], null, [[0, 98, 400, 412, 0.91, 9]], null, null, [[31, 228, 341, 278, 0.74, 9]], null, null, null, null, null, null, null, null],
   'aesthetics-aesthetics-8': [null, null, null, [[33, 376, 149, 130, 0.93, 9]], null, [[0, 138, 400, 372, 0.82, 9]], [[241, 348, 116, 2, 1.2, 9]], null, null, null, null, null, [[28, 379, 164, 127, 1.2, 9]], null, null, [[29, 376, 139, 130, 0.93, 9]], [[0, 138, 400, 372, 1.2, 9]], null],
-  'epistemology-knowledge-1': [null, null, null, null, [[0, 234, 400, 280, 0.75, 9]], null, null, null, null, null, null, null],
+  'epistemology-knowledge-1': [null, [[0, 290, 400, 224, 1.2, 9]], null, null, null, null, null, null, null, null, null, null],
   'epistemology-knowledge-10': [null, null, null, null, [[0, 256, 400, 256, 1.2, 9]], [[75, 399, 119, 107, 1.2, 9]], null, null, null, null],
   'epistemology-knowledge-11': [[[100, 231, 206, 74, 1.2, 9]], null, [[90, 238, 232, 268, 1.02, 9]], null, null, null, [[212, 269, 100, 37, 0.55, 9]], null, null, null, null, null],
   'epistemology-knowledge-13': [null, null, [[45, 378, 59, 129, 1.2, 4, 154, 377, 59, 129]], null, [[150, 377, 57, 130, 0.55, 3.4, 86, 376, 57, 130]], [[0, 220, 400, 292, 1.2, 9]], null, null, null],
@@ -73,7 +72,7 @@ export const TOURS: Record<string, readonly (readonly TourStation[] | null)[]> =
   'epistemology-knowledge-6': [null, [[0, 234, 400, 280, 1.13, 9]], null, null, null, null, null, null, null, null],
   'epistemology-knowledge-7': [[[113, 426, 182, 47, 1.2, 9]], null, [[114, 324, 168, 148, 0.55, 9]], [[113, 426, 182, 47, 0.55, 9]], null, null, null, null, null, null, null],
   'epistemology-knowledge-8': [null, null, null, null, null, null, null, [[0, 152, 400, 360, 0.91, 9]], null, null, null, null, null, null, null, null, null, [[63, 377, 79, 129, 1.2, 9]]],
-  'ethics-ethics-1': [null, null, [[0, 40, 400, 298, 1.07, 9]], null, [[10, 235, 175, 54, 1.2, 9]], [[0, 40, 400, 298, 1.2, 9]], null, null, null, null, [[10, 234, 176, 56, 1.2, 9]], null, null, null, null],
+  'ethics-ethics-1': [null, null, null, null, null, null, null, null, null, [[0, 290, 400, 224, 1.18, 9]], null, null, null, null, null],
   'ethics-ethics-10': [null, null, [[45, 385, 153, 121, 1.2, 9]], [[0, 200, 400, 312, 1.2, 9]], null, null, null, null, null],
   'ethics-ethics-13': [null, null, null, null, [[182, 450, 116, 14, 0.76, 9]], null, null],
   'ethics-ethics-14': [null, null, null, null, null, [[0, 230, 400, 282, 1.12, 9]], null, null, null],
@@ -120,7 +119,6 @@ export const TOURS: Record<string, readonly (readonly TourStation[] | null)[]> =
   'logic-arguments-7': [null, null, null, null, null, null, null, null, null, [[0, 184, 400, 328, 1.11, 9]], null, null, null, [[97, 397, 55, 109, 0.55, 9]]],
   'logic-arguments-8': [null, null, null, null, null, null, null, null, [[0, 28, 400, 493, 1.2, 9]], null, null, null, null, null, null],
   'logic-arguments-9': [null, null, null, [[58, 284, 277, 222, 0.66, 9]], [[64, 377, 227, 129, 0.79, 9]], null, null, null, null],
-  'metaphysics-being-1': [null, null, null, null, null, null, [[0, 234, 400, 280, 1.07, 9]], null, null, null, null],
   'metaphysics-being-10': [null, null, null, null, [[192, 214, 190, 173, 0.84, 9]], null, null, null, null, null, null, null],
   'metaphysics-being-13': [null, null, null, [[0, 224, 400, 288, 1.2, 9]], null, null, null, null, null],
   'metaphysics-being-14': [null, null, [[92, 342, 296, 92, 0.67, 9]], null, null, null, null, null, null, null],
@@ -167,7 +165,6 @@ export const TOURS: Record<string, readonly (readonly TourStation[] | null)[]> =
 };
 
 export const TOUR_STAMP: Record<string, string> = {
-  'aesthetics-aesthetics-1': '978c7e73f7f4',
   'aesthetics-aesthetics-10': '49d1f877792d',
   'aesthetics-aesthetics-14': '04a90444cb59',
   'aesthetics-aesthetics-15': '610f38daa584',
@@ -190,7 +187,7 @@ export const TOUR_STAMP: Record<string, string> = {
   'aesthetics-aesthetics-6': '79d94bad6c0e',
   'aesthetics-aesthetics-7': 'b3c64b56af93',
   'aesthetics-aesthetics-8': '1079635fedc7',
-  'epistemology-knowledge-1': 'd3744e0d0ca6',
+  'epistemology-knowledge-1': '7692b8d8aed0',
   'epistemology-knowledge-10': '6d987ce5ff52',
   'epistemology-knowledge-11': '4304ccdb4312',
   'epistemology-knowledge-13': 'cd6c25d90fdd',
@@ -212,7 +209,7 @@ export const TOUR_STAMP: Record<string, string> = {
   'epistemology-knowledge-6': '468bc75d3a27',
   'epistemology-knowledge-7': '210c4734ef5c',
   'epistemology-knowledge-8': 'e5f636c66636',
-  'ethics-ethics-1': 'a30ff641898e',
+  'ethics-ethics-1': '807dbe2d076b',
   'ethics-ethics-10': '4da8c44cb33f',
   'ethics-ethics-13': '79bfcbc37889',
   'ethics-ethics-14': '2a95b77fe193',
@@ -259,7 +256,6 @@ export const TOUR_STAMP: Record<string, string> = {
   'logic-arguments-7': 'a38249c7762c',
   'logic-arguments-8': 'c6caec6fd1d1',
   'logic-arguments-9': '293d06ed46d3',
-  'metaphysics-being-1': 'f785a6aef96f',
   'metaphysics-being-10': '22206d1d8821',
   'metaphysics-being-13': '412bf4c4e793',
   'metaphysics-being-14': 'a05bb7369c85',

@@ -70,21 +70,19 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   },
   'epistemology-knowledge-1': {
-    at: [null, null, null, null, null, null, null, null, null, null, [300, 406, 3, 300], [300, 406, 3, 300], null],
+    at: [null, null, null, null, null, null, null, null, null, null, null, null, null],
     say: [null, null, null, null, null, null, null, null, null, null, null, null, null],
-    vis: [9, 322, 387, 2, 358],
   },
   'metaphysics-being-1': {
-    at: [null, null, null, null, null, null, null, null, null, [316, 387, 3, 340], [316, 387, 3, 340], null],
+    at: [null, null, null, null, null, null, null, null, null, [320, 385, 2, 326], [321, 387, 2, 327], null],
     say: [null, null, null, null, null, null, null, null, null, null, null, null],
   },
   'ethics-ethics-1': {
-    at: [null, null, null, null, null, null, null, null, null, null, null, [232, 208, 2, 250], [232, 208, 2, 250], null, null, null],
+    at: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
     say: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    vis: [10, 160, 368, 3, 196],
   },
   'political-political-1': {
-    at: [null, null, null, null, null, null, null, [182, 357, 1, 200], null, null, null, null],
+    at: [null, null, null, null, null, null, null, null, null, null, null, null],
     say: [null, null, null, null, null, null, null, null, null, null, null, null],
   },
   'epistemology-knowledge-3': {

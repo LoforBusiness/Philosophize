@@ -87,6 +87,19 @@ const ACT_FREE = new Set([
  *     place, up on the toes. Two movements at once is not twice as alive; it is a
  *     figure fighting itself.
  */
+/**
+ * LESSONS WHOSE LEAD KEEPS HIS HANDS ON A SOLID PROP ALL LESSON (LESSON_RULES Y7).
+ *
+ * His pose codes say nothing about it — the scene places his hands on a console or a
+ * counter with `solid.ts` on top of whatever the code draws — so the per-beat test
+ * above cannot see it. A wander step or the lawn chair would walk him off the thing
+ * his hands are on, and the arms would stretch after it. So the whole lesson is out
+ * of both, the way a grave lesson is out of the chair.
+ */
+export const HANDS_ON_PROP = new Set([
+  'metaphysics-being-1',
+]);
+
 const RIG_BOUND = new Set([
   2, 6, 13, 14, 18, 20, 24, 26, 27, 30, 31, 36, 37, 38, 40, 41, 42, 43, 49,
 ]);

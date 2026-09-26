@@ -1,145 +1,138 @@
-import {
-  View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
+import ObjectArt from './ObjectArt';
 import { BEATS } from './politicalScript';
 import {
-  boxMove, clamp01, ease01, lerp, mixStance, pose, stand, type Bundle, type Stance, } from './rig';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
+  WALK, boxMove, clamp01, ease01, lerp, mixStance, moveTr, pose, stand, travelStance, type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
-import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
-
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
-const TONE = stageTone('political-philosophy');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
+import { followMoves, kindOf, seedOf } from './camera';
+import { useLinger } from './useLinger';
+import { emoteAny } from './moves';
+import {
+  shop, lightPole, soapbox, newsLegs, SHOPS, SHUTTER, LIGHT, LAMP_R, BOX, NEWS,
+} from './politicalSet';
+import { DEEP, EMBER, SAGE, TEAL, OLIVE, PAPER_LIT } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE WAR OF ALL AGAINST ALL, AND THE SOVEREIGN THEY RAISE.
+// political-political-1, "Why Societies Need Rules" — A TOWN CROSSROADS WHOSE
+// LIGHTS HAVE DIED.
 //
-// Four neighbours stand on the ground line. As the narration strips away law and
-// ruler they square up, then brawl — the state of nature arriving one tap at a
-// time (`nature`). When the covenant is made, a pedestal grows out of the ground
-// beneath a fifth figure — crowned, sword aloft — and the fighting settles into a
-// calm stand. After it, an unsigned CONTRACT (no one ever signed one) and the
-// subjects bowing to the sovereign they authorised.
+// Redrawn 2026-09-25, one of five first lessons the owner asked for after the logic
+// debate studio, each displaying its information in a way of its own. Here the
+// information is THE STREET ITSELF: a banner, a street-name plate, shop shutters, a
+// newsboard and a notice on the light pole, and the traffic light is the gauge —
+// green while there is order, dark and then red in the war of all.
 //
-// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
-// This is the first lesson of the branch, and its first seven taps used to hold one
-// frame: the brawl, the headline, the ledger and both meters were all on screen
-// before a word about the state of nature was said. They now arrive as they are
-// named — the flow on "the right to rule", the squaring-up on "imagine life
-// without any law", the ledger and the fear on "solitary, poor, nasty", the
-// headline on "war of every man against every man", and the covenant's arrow on
-// "everyone authorises one sovereign" (`reveal`).
+//   b0–1  four neighbours at a crossroads, the lights green; a banner goes up across
+//         the street: WHAT GIVES A STATE THE RIGHT TO RULE?
+//   b2    the lights die; the shutters start to come down; the street plate reads
+//         STATE OF NATURE.
+//   b3    the shutters are down, sprayed SOLITARY · POOR / NASTY · BRUTISH · SHORT;
+//         the neighbours square up.
+//   b4    the brawl; the light burns red; the newsboard: WAR OF EVERY MAN AGAINST
+//         EVERY MAN.
+//   b5    an officer walks up to the soapbox; the banner gains its answer: A
+//         COVENANT — ONE POWER KEEPS THE PEACE.
+//   b7    the first question: answered, he steps onto the box; the light goes
+//         green, the shutters go up, the fighting stops.
+//   b8    the contract posted on the light pole: NO SIGNATURES — A TEST, NOT A
+//         DOCUMENT.
+//   b9    the neighbours bow; a poster in the shop window: LOCKE — A PEOPLE MAY
+//         RESIST.
+//   b10   the order question: he steps down as the answer moves toward the most
+//         right to rebel.
 //
-// ── AND THE BRAWL NO LONGER FREEZES AFTER THE FIRST TAP ─────────────────────
-// All four citizens shared ONE `useHeld`, and the stance was
-// `mixStance(carryFrom(held, n, melee), stand, auth)`: `carryFrom` returns the pose
-// captured at the beat change and holds it for the whole beat, so from the second
-// tap on the four stood frozen in the LAST citizen's pose. Each citizen now has its
-// own held value, and blends from it into its live stance over the transition.
+// WHAT IS NOT CHANGED: every word of narration (politicalScript.ts keeps every
+// beat's text and order; the voice is keyed by index).
 //
-// Four pieces of information design carry Hobbes's argument above the action:
-//   · the headline WAR OF ALL AGAINST ALL, struck through as authority arrives;
-//   · under it a LEDGER of what life is worth, word-swapping on the same cue:
-//     SOLITARY · POOR · NASTY · BRUTISH · SHORT becomes INDUSTRY · ARTS · LETTERS
-//     · SOCIETY. Leviathan xiii lists both; the swap is what the sovereign buys;
-//   · a flow, MULTITUDE → SOVEREIGN → PEACE, whose last two boxes ink in;
-//   · two opposed meters, FEAR and PEACE, that trade places as `auth` rises.
-//
-// CAMERA: a `followMoves` camera on the SOVEREIGN'S x, not on a walker — this is
-// the one lesson with no single protagonist. Four citizens sit at x 100..304 and
-// the fifth rises at 200, so the stage centre is the honest thing to look at and
-// the track is a constant; followMoves then deals the standing rhythm (push, pull,
-// hold) rather than inventing travel that is not in the picture.
-//
-// It had NO camera before, and the header's reason was about something else
-// entirely: the old scene translated the whole stage up 136 units, which put the
-// ground line in mid-air and made the band unmeasurable. That was fixed by making
-// design space final space — everything stands on GROUND=500, art occupies
-// y 244..508, band [234, 514] — and nothing about it argued against a camera. H60b
-// says moving is the default; this one had simply never been given one back.
-//
-// The headline, the ledger, the flow and the two meters all sit above the action,
-// which is exactly what a push at the ground line crops, so this is only safe with
-// the measured must-see boxes of H60c holding the shot open.
+// COMPOSITION, in stage units: the banner 64–336 × 298–330; shops 44–150 and
+// 250–392 from their awnings at 330, shutters 338–440; the light pole at x 24 with
+// its head 320–370; neighbours at x 84, 130, 270, 314; the soapbox at x 200; the
+// newsboard 336–398 from 440; a dusk sky over the road between the shops. Band
+// [290, 514].
 // ─────────────────────────────────────────────────────────────────────────────
 
+const TONE = stageTone('political');
+const { RULE, SHADE } = TONE;
+const LIP = lipOf(TONE);
+const WOOD = stageToneOf(OLIVE);
+const WALL = stageToneOf(SAGE);
+/** The sky between the shops, and the road under it: the palette's tame teal. */
+const DUSK = stageToneOf(TEAL);
 const TR = 0.85;
 
-// No walker to follow, so the track is the sovereign's x — see CAMERA above.
-const X = BEATS.map((b) => b.x ?? 200);
-const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political'));
-
-// Citizens pulled in from the edges so a lunging brawler never reaches the meters.
-const CIT_X = [100, 154, 250, 304];
-const CIT_DIR = [1, 1, -1, -1];              // all face the centre
+const CIT_X = [84, 130, 270, 314];
+const CIT_DIR = [1, 1, -1, -1];              // all face the soapbox
 const CIT_K = K_FIG * 0.82;
-const SOV_X = 200;
-const PED = 30;                              // the pedestal the covenant raises
+/** The officer: where he walks in from, where he waits, and where he stands on the box. */
+const OFF_FROM = 440;
+const OFF_WAIT = 228;
+const OFF_BOX = BOX.cx;
 
-// the flow, clear of the sovereign's crown (its highest point is y ≈ 320)
-const FLOW_T = 274;
-const FLOW_H = 34;
-const FLOW_W = 100;
-const FLOW_X = [26, 150, 274];
-const FLOW_LABEL = ['MULTITUDE', 'SOVEREIGN', 'PEACE'];
-const ARROW_X = [126, 250];
+const SHOP_ART = [shop(0), shop(1)];
+/** Where the road begins, between the shops. */
+const ROAD_Y = 432;
+const POLE_ART = lightPole();
+const BOX_ART = soapbox();
+const NEWS_ART = newsLegs();
 
-// the two meters, standing on the ground line either side of the crowd
-const MTR_T = 382;
-const MTR_H = 112;
-const MTR_W = 24;
-
-const SPARK_X = [127, 277];
-
+// ── per-beat tracks, read off the script ─────────────────────────────────────
+const since = (k0: number) => BEATS.map((_, k) => (k0 >= 0 && k >= k0 ? 1 : 0));
 const AUTH = BEATS.map((b) => b.auth ?? 0);
 const NATURE = BEATS.map((b) => b.nature ?? 0);
 const REVEAL = BEATS.map((b) => b.reveal ?? 0);
-const PAPER_ON = BEATS.map((b) => b.paper ?? 0);
+const at = (r: number) => REVEAL.map((v) => (v >= r ? 1 : 0));
+const BANNER = at(1);
+const LEDGER = at(2);
+/**
+ * The sprayed words exist while the shutters are down. Once the officer is up they
+ * roll away with the shutters and are unmounted: a word hidden only by the shutter's
+ * clip is still a word to the must-box probe, above the band.
+ */
+const SPRAY_ON = LEDGER.map((v, k) => (v && (k === 0 || AUTH[k - 1] === 0) ? 1 : 0));
+const NEWS_ON = at(3);
+const COVENANT = at(4);
+/** The street plate goes up the first time the state of nature is named, and stays. */
+const PLATE = since(NATURE.findIndex((v) => v > 0));
+const PAPER_ON = since(BEATS.findIndex((b) => (b.paper ?? 0) > 0));
 const BOW = BEATS.map((b) => b.bow ?? 0);
+const LOCKE = since(BOW.findIndex((v) => v > 0));
+/** He walks up to the box on the beat the covenant is named, and is there after it. */
+const OFFICER = COVENANT;
 const Q1 = BEATS.map((b) => (b.weigh === 'q1' ? 1 : 0));
-
-// R7b — the stage follows the control on its own graded beat, and only there.
-// Derived from the beat rather than declared as a channel so it cannot fall out
-// of step with the control it is about.
+// R7c — he steps down as the order answer moves toward the most right to rebel.
 const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
 
-// Each citizen runs an out-of-phase loop of blows — no two in sync, the brawl.
-// Each also runs a DIFFERENT loop and carries its own `seed`, so their idle bounce
-// and stance differ too: offsetting only the blows still left four bodies breathing
-// on the same frame, which reads as one figure copied four times.
+// Each neighbour runs an out-of-phase loop of blows — no two in sync, the brawl.
 const MELEE: number[][] = [
-  [1, 3, 2, 0, 5, 1, 6],                     // jab hook cross guard block jab duck
-  [14, 1, 12, 2, 0, 10, 5],                  // feint jab parry cross guard lead-hook block
-  [5, 11, 0, 13, 1, 3, 12],                  // block body-shot guard roll jab hook parry
-  [15, 2, 6, 1, 16, 0, 4],                   // circle cross duck jab clinch guard uppercut
+  [1, 3, 2, 0, 5, 1, 6],
+  [14, 1, 12, 2, 0, 10, 5],
+  [5, 11, 0, 13, 1, 3, 12],
+  [15, 2, 6, 1, 16, 0, 4],
 ];
 function melee(t: number, k: number): Stance {
   'worklet';
   const codes = MELEE[k % MELEE.length];
-  const period = 0.66 + (k % 3) * 0.07;      // and their own tempo
+  const period = 0.66 + (k % 3) * 0.07;
   const local = t * 1.1 + k * 1.9;
   const idx = Math.floor(local / period) % codes.length;
   const u = (local / period) % 1;
   return boxMove(codes[idx], t, u, k + 1);
 }
-/** A citizen at peace: breathing, weight shifting, each on their own phase; bowing on cue. */
+/** A neighbour at peace: weight shifting and nodding, each on their own phase; bowing on cue. */
 function calm(t: number, k: number, bow: number): Stance {
   'worklet';
   const s = stand(t + k * 1.7);
   const shift = Math.sin(t * (0.55 + k * 0.08) + k * 2.1);
-  // N21 — AT PEACE IS NOT FROZEN. The sovereign is speaking to them, and at a
-  // twentieth of a radian of head they stood like posts; the nod is what says they
-  // are listening. Its own tempo per citizen, so four heads never bob in step.
   const nod = Math.max(0, Math.sin(t * (1.9 + k * 0.23) + k * 1.3)) ** 2;
   return {
     ...s,
@@ -151,54 +144,81 @@ function calm(t: number, k: number, bow: number): Stance {
     fistR: { x: 13 - shift * 2.6, y: 4 - shift * 2.4 + bow * 2 },
   };
 }
-function sovereignPose(t: number): Stance {
+/**
+ * The officer: baton held out in front, tapped into his free palm while he listens.
+ * A living hold under it, so he is never a statue while a neighbour is talked to
+ * (N21); the tap is his own tempo.
+ */
+function officerPose(t: number): Stance {
   'worklet';
-  const s = stand(t);
-  return { ...s, tilt: s.tilt - 0.02, fistR: { x: 16, y: -42 }, fistL: { x: -9, y: -4 } };
+  const s = emoteAny(263, t);
+  const tap = Math.max(0, Math.sin(t * 2.4)) ** 2;
+  return {
+    ...s,
+    fistR: { x: 24 - tap * 6, y: -16 + tap * 7 },
+    fistL: { x: 12 + tap * 2, y: -4 - tap * 2 },
+  };
 }
 
-export default function PoliticalScene({ clock, bt, bi, qv, dragPos, pickPos, i }: SceneApi) {
+const X = BEATS.map(() => 200);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political'));
+
+export default function PoliticalScene({ clock, bt, bi, qv, pickPos, i }: SceneApi) {
   const reacting = REACT[i] === 1;
   const held0 = useHeld();
   const held1 = useHeld();
   const held2 = useHeld();
   const held3 = useHeld();
-  const cv = useCarry(5);
+  const cv = useCarry(11);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
     const tr = ease01(bt.value / TR);
     const t = clock.value;
     const q = clamp01(qv.value);
+    const late = (d: number) => {
+      'worklet';
+      return ease01((bt.value - d) / 0.45);
+    };
 
-    // R7c — `auth` is the whole picture: the sovereign's height, his pedestal, and
-    // whether the citizens are still lunging at each other. The drag asks how much
-    // right to resist there is, so it is the same quantity read from the other end.
+    // up on the box: the first answer puts him there, the order answer takes him down
     const auth = Q1[n] === 1 ? ease01(q) : carry(cv, 0, n, AUTH[p], reacting ? 1 - pickPos.value : AUTH[n], tr);
-
-    // How hard they fight: the state of nature, less whatever the sovereign settles.
     const nature = carry(cv, 1, n, NATURE[p], NATURE[n], tr);
     const fight = nature * (1 - auth);
-    const reveal = carry(cv, 2, n, REVEAL[p], REVEAL[n], tr);
-    const paper = carry(cv, 3, n, PAPER_ON[p], PAPER_ON[n], tr);
-    const bow = carry(cv, 4, n, BOW[p], BOW[n], tr);
+    const bow = carry(cv, 2, n, BOW[p], BOW[n], tr);
 
     const cit = (k: number, held: typeof held0): Bundle => {
       'worklet';
       const dir = CIT_DIR[k];
       const live = mixStance(melee(t, k), calm(t, k, bow), 1 - fight);
       const s = keepHeld(held, mixStance(carryFrom(held, n, live), live, tr));
-      const x = CIT_X[k] + (s.adv ?? 0) * dir * fight;   // lunges only in the brawl
+      const x = CIT_X[k] + (s.adv ?? 0) * dir * fight;
       return pose(s, x, GROUND, CIT_K, dir, 1);
     };
 
-    // The pedestal GROWS from the ground under him, so his feet are always planted
-    // on it — the old version floated him in mid-air on the way up.
-    const sovGY = GROUND - PED * auth;
+    // the officer walks up from off the right edge on the covenant beat
+    const arriving = OFFICER[n] === 1 && OFFICER[p] === 0;
+    const walkU = arriving ? ease01(bt.value / moveTr(OFF_FROM, OFF_WAIT, TR)) : 1;
+    const baseX = arriving ? lerp(OFF_FROM, OFF_WAIT, walkU) : OFF_WAIT;
+    const offS = travelStance(arriving ? OFF_FROM : OFF_WAIT, OFF_WAIT, stand(t), officerPose(t), officerPose(t), walkU, WALK, 3);
+    const offX = lerp(baseX, OFF_BOX, auth);
+    const offGY = GROUND - BOX.h * auth;
+
     return {
       c0: cit(0, held0), c1: cit(1, held1), c2: cit(2, held2), c3: cit(3, held3),
-      sov: reactPose(sovereignPose(t), SOV_X, sovGY, K_FIG, -1, auth),
-      auth, fight, reveal, paper, t,
+      off: reactPose(offS, offX, offGY, K_FIG, -1, 1),
+      auth, nature, fight,
+      banner: carry(cv, 3, n, BANNER[p], BANNER[n], late(0.3)),
+      plate: carry(cv, 4, n, PLATE[p], PLATE[n], late(0.8)),
+      ledger: carry(cv, 5, n, LEDGER[p], LEDGER[n], late(0.6)),
+      news: carry(cv, 6, n, NEWS_ON[p], NEWS_ON[n], late(0.5)),
+      cov: carry(cv, 7, n, COVENANT[p], COVENANT[n], late(1.2)),
+      paper: carry(cv, 8, n, PAPER_ON[p], PAPER_ON[n], late(0.4)),
+      locke: carry(cv, 9, n, LOCKE[p], LOCKE[n], late(1.6)),
+      // the lights: green while there is order, dark once it goes, red in the war of all
+      dead: carry(cv, 10, n, NATURE[p] > 0 ? 1 : 0, NATURE[n] > 0 ? 1 : 0, late(0.2)),
+      t,
     };
   });
 
@@ -206,356 +226,274 @@ export default function PoliticalScene({ clock, bt, bi, qv, dragPos, pickPos, i 
   const DC1 = useDerivedValue<Bundle>(() => SCENE.value.c1);
   const DC2 = useDerivedValue<Bundle>(() => SCENE.value.c2);
   const DC3 = useDerivedValue<Bundle>(() => SCENE.value.c3);
-  const DSov = useDerivedValue<Bundle>(() => SCENE.value.sov);
-
-  const ped = useAnimatedStyle(() => ({ opacity: SCENE.value.auth, transform: [{ scaleY: SCENE.value.auth }] }));
-  const crown = useAnimatedStyle(() => {
-    const h = DSov.value.head;
-    return {
-      opacity: DSov.value.opacity,
-      transform: [{ translateX: h[0].translateX }, { translateY: h[1].translateY - 30 }],
-    };
-  });
-  const sword = useAnimatedStyle(() => {
-    const w = DSov.value.wrR;
-    return {
-      opacity: DSov.value.opacity,
-      transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }],
-    };
+  const DOff = useDerivedValue<Bundle>(() => SCENE.value.off);
+  const baton = useAnimatedStyle(() => {
+    const w = DOff.value.wrR;
+    return { transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }] };
   });
 
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-      <Headline S={SCENE} />
-      <Ledger S={SCENE} />
-      <Flow S={SCENE} />
-      <Meter S={SCENE} side="left" label="FEAR" invert />
-      <Meter S={SCENE} side="right" label="PEACE" />
-      <Contract S={SCENE} />
-      {SPARK_X.map((x) => <Spark key={x} S={SCENE} x={x} />)}
-
+      <View style={styles.street} pointerEvents="none" />
+      <View style={styles.road} pointerEvents="none" />
+      {[0, 1, 2].map((k) => <View key={k} style={[styles.dash, { top: ROAD_Y + 12 + k * 18, height: 8 + k * 3 }]} pointerEvents="none" />)}
+      <ObjectArt parts={SHOP_ART[0]} tone={WALL} />
+      <ObjectArt parts={SHOP_ART[1]} tone={WALL} />
+      <Shutters S={SCENE} on={on} />
+      <Locke S={SCENE} on={on} />
+      <Banner S={SCENE} on={on} />
+      <ObjectArt parts={POLE_ART} tone={WOOD} />
+      <Lamps S={SCENE} />
+      <Plate S={SCENE} on={on} />
+      <Contract S={SCENE} on={on} />
+      <ObjectArt parts={NEWS_ART} tone={WOOD} />
+      <News S={SCENE} on={on} />
       <View style={styles.ground} pointerEvents="none" />
-      <Animated.View style={[styles.pedestal, ped]} pointerEvents="none" />
-
+      <ObjectArt parts={BOX_ART} tone={WOOD} />
       <Stickman role="crowd" D={DC0} k={CIT_K} />
       <Stickman role="crowd" D={DC1} k={CIT_K} />
       <Stickman role="crowd" D={DC2} k={CIT_K} />
       <Stickman role="crowd" D={DC3} k={CIT_K} />
-      <Stickman D={DSov} k={K_FIG} />
-
-      {/* the sword held aloft, riding the sovereign's right wrist */}
-      <Animated.View style={[styles.rider, sword]} pointerEvents="none">
-        <View style={styles.swordBlade} />
-        <View style={styles.swordGuard} />
-        <View style={styles.swordPommel} />
-      </Animated.View>
-      {/* the crown, riding his head joint */}
-      <Animated.View style={[styles.rider, crown]} pointerEvents="none">
-        <View style={styles.crownBand} />
-        <View style={[styles.crownPoint, { left: -14 }]} />
-        <View style={[styles.crownPoint, { left: -3 }]} />
-        <View style={[styles.crownPoint, { left: 8 }]} />
-      </Animated.View>
+      {on(OFFICER) ? (
+        <>
+          <Stickman D={DOff} k={K_FIG} />
+          <Animated.View style={[styles.rider, baton]} pointerEvents="none">
+            <View style={styles.baton} />
+            <View style={styles.batonGrip} />
+          </Animated.View>
+        </>
+      ) : null}
     </View>
   );
 }
 
-// ── the headline, struck through when a common power arrives ─────────────────
+// ── the banner across the street ────────────────────────────────────────────
 
-function Headline({ S }: { S: SharedValue<any> }) {
-  const strike = useAnimatedStyle(() => ({ transform: [{ scaleX: S.value.auth }] }));
-  const shown = useAnimatedStyle(() => {
-    const on = clamp01(S.value.reveal - 2);
-    return { opacity: on, transform: [{ translateY: (1 - on) * -6 }] };
+function Banner({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.banner, transform: [{ scaleX: 0.6 + 0.4 * S.value.banner }] }));
+  const cov = useAnimatedStyle(() => ({ opacity: S.value.cov, transform: [{ translateY: (1 - S.value.cov) * -4 }] }));
+  if (!on(BANNER)) return null;
+  return (
+    <Animated.View style={[styles.bannerWrap, st]} pointerEvents="none">
+      <View style={[styles.bannerCord, { left: -20, transform: [{ rotate: '-14deg' }] }]} />
+      <View style={[styles.bannerCord, { right: -20, transform: [{ rotate: '14deg' }] }]} />
+      <View style={styles.banner}>
+        <Text style={styles.bannerText} numberOfLines={1}>WHAT GIVES A STATE THE RIGHT TO RULE?</Text>
+        {on(COVENANT) ? (
+          <Animated.Text style={[styles.bannerSub, cov]} numberOfLines={1}>A COVENANT: ONE POWER KEEPS THE PEACE</Animated.Text>
+        ) : null}
+      </View>
+    </Animated.View>
+  );
+}
+
+// ── the shutters, and what is sprayed on them ───────────────────────────────
+
+const SPRAY = [['SOLITARY', 'POOR'], ['NASTY', 'BRUTISH', 'SHORT']];
+
+function Shutters({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const h = SHUTTER.bottom - SHUTTER.top;
+  const drop = useAnimatedStyle(() => ({ height: h * clamp01(S.value.nature * 1.4) * (1 - S.value.auth) }));
+  const spray = useAnimatedStyle(() => ({ opacity: S.value.ledger }));
+  return (
+    <>
+      {SHOPS.map((sh, k) => (
+        <View key={k} style={[styles.shutterClip, { left: sh.x0 + 4, width: sh.x1 - sh.x0 - 8 }]} pointerEvents="none">
+          <Animated.View style={[styles.shutter, drop]}>
+            {/* the words ride the shutter, anchored to its foot, so rolling it up takes them away */}
+            {[0, 1, 2, 3, 4, 5].map((r) => <View key={r} style={[styles.slat, { bottom: 6 + r * 16 }]} />)}
+            {on(SPRAY_ON) ? (
+              <Animated.View style={[styles.sprayBox, spray]}>
+                {SPRAY[k].map((w) => <Text key={w} style={styles.spray} numberOfLines={1}>{w}</Text>)}
+              </Animated.View>
+            ) : null}
+          </Animated.View>
+        </View>
+      ))}
+    </>
+  );
+}
+
+// ── the traffic light: the gauge ────────────────────────────────────────────
+
+function Lamps({ S }: { S: SharedValue<any> }) {
+  const red = useAnimatedStyle(() => ({ opacity: 0.18 + 0.82 * S.value.fight * S.value.dead }));
+  const amber = useAnimatedStyle(() => {
+    const blink = S.value.dead * (1 - S.value.fight) * (1 - S.value.auth) * (Math.sin(S.value.t * 5) > 0 ? 1 : 0);
+    return { opacity: 0.18 + 0.7 * blink };
   });
+  const green = useAnimatedStyle(() => ({ opacity: 0.18 + 0.82 * Math.max(1 - S.value.dead, S.value.auth) }));
+  const cx = LIGHT.x - LAMP_R;
+  const y0 = LIGHT.headTop + 6;
   return (
-    <View style={styles.headWrap} pointerEvents="none">
-      <Animated.View style={shown}>
-        <Text style={styles.headText}>WAR OF ALL AGAINST ALL</Text>
-        <Animated.View style={[styles.strike, strike]} />
-      </Animated.View>
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {[0, 1, 2].map((k) => <View key={k} style={[styles.lampOff, { left: cx, top: y0 + k * 14 }]} />)}
+      <Animated.View style={[styles.lamp, { left: cx, top: y0, backgroundColor: EMBER }, red]} />
+      <Animated.View style={[styles.lamp, { left: cx, top: y0 + 14, backgroundColor: PAPER_LIT }, amber]} />
+      <Animated.View style={[styles.lamp, { left: cx, top: y0 + 28, backgroundColor: SAGE }, green]} />
     </View>
   );
 }
 
-// ── the ledger under the headline: what life is worth, before and after ──────
-// Two lines of Hobbes's own vocabulary occupying one strip. They must NEVER
-// cross-dissolve — two bold lines each at half opacity on the same baseline read
-// as a printing fault — so the selectors are hardened around auth = 0.5: the swap
-// collapses to a couple of frames, and the two weights always sum to 1, so the
-// strip is never blank and never doubled.
+// ── the street-name plate and the notice on the light pole ─────────────────
 
-function Ledger({ S }: { S: SharedValue<any> }) {
-  // TWO DIFFERENT SENTENCES IN ONE BOX MAY NEVER BOTH BE ON SCREEN (D35).
-  //
-  // These cross-faded on one value: war was clamp01((0.5 - auth) * 6 + 0.5) and
-  // civil the same expression read the other way, so at auth 0.5 BOTH came out at
-  // exactly 0.5 and the reader got the two strings interleaved at half strength —
-  // "SOLINTDAUSRTYPO·OARRTS·ALETTTERSRU·TSIOSCH·IETSHORT" — in the first lesson of
-  // the branch. check:readable found it as two FAINT words at a=0.5 in one box.
-  //
-  // A cross-fade is the right move for a picture and the wrong one for a caption:
-  // D35's rule is legible or absent, never dim. So the swap is instantaneous. It
-  // is not a group-L teleport — nothing moves, one sentence replaces another, and
-  // that is what reading a changed label looks like.
-  //
-  // The ternaries are INLINE on purpose. A `const shown = (v) => …` helper called
-  // from a worklet is packed as a RemoteFunction and throws on the UI thread in
-  // release (§17 rule 6), and it is invisible in a browser.
-  const war = useAnimatedStyle(() => ({
-    opacity: (S.value.auth < 0.5 ? 1 : 0) * clamp01(S.value.reveal - 1),
-  }));
-  const civil = useAnimatedStyle(() => ({ opacity: S.value.auth < 0.5 ? 0 : 1 }));
+function Plate({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.plate, transform: [{ scaleX: S.value.plate }] }));
+  if (!on(PLATE)) return null;
   return (
-    <View style={styles.ledger} pointerEvents="none">
-      {/* numberOfLines guards the 12-unit strip: the widest line measures ~281 of
-          the 400 available, but a device with fatter metrics must never be allowed
-          to wrap a second line down over the flow boxes at 274. */}
-      <Animated.Text numberOfLines={1} style={[styles.ledgerText, war]}>
-        SOLITARY · POOR · NASTY · BRUTISH · SHORT
-      </Animated.Text>
-      <Animated.Text numberOfLines={1} style={[styles.ledgerText, civil]}>
-        INDUSTRY · ARTS · LETTERS · SOCIETY
-      </Animated.Text>
-    </View>
-  );
-}
-
-// ── the flow: MULTITUDE → SOVEREIGN → PEACE ──────────────────────────────────
-
-function FlowBox({ S, x, label, fixed }: { S: SharedValue<any>; x: number; label: string; fixed?: boolean }) {
-  const on = useAnimatedStyle(() => ({ opacity: S.value.auth }));
-  const off = useAnimatedStyle(() => ({ opacity: 1 - S.value.auth }));
-  if (fixed) {
-    return (
-      <View style={[styles.flowBox, styles.flowFixed, { left: x }]} pointerEvents="none">
-        <Text style={styles.flowTextFixed}>{label}</Text>
-      </View>
-    );
-  }
-  return (
-    <View style={[styles.flowBox, { left: x }]} pointerEvents="none">
-      <Animated.View style={[StyleSheet.absoluteFill, styles.flowOff, off]}>
-        <Text style={styles.flowTextOff}>{label}</Text>
-      </Animated.View>
-      <Animated.View style={[StyleSheet.absoluteFill, styles.flowOn, on]}>
-        <Text style={styles.flowTextOn}>{label}</Text>
-      </Animated.View>
-    </View>
-  );
-}
-
-function FlowArrow({ S, x, covenant }: { S: SharedValue<any>; x: number; covenant?: boolean }) {
-  // The first arrow is the covenant itself — the multitude authorising — so it inks
-  // as the narration makes it, before the sovereign it points at has risen.
-  const on = useAnimatedStyle(() => ({
-    opacity: covenant ? Math.max(S.value.auth, clamp01(S.value.reveal - 3)) : S.value.auth,
-  }));
-  const off = useAnimatedStyle(() => ({
-    opacity: 1 - (covenant ? Math.max(S.value.auth, clamp01(S.value.reveal - 3)) : S.value.auth),
-  }));
-  return (
-    <View style={[styles.arrowWrap, { left: x }]} pointerEvents="none">
-      <Animated.Text style={[styles.arrow, off]}>→</Animated.Text>
-      <Animated.Text style={[styles.arrow, styles.arrowOn, on]}>→</Animated.Text>
-    </View>
-  );
-}
-
-function Flow({ S }: { S: SharedValue<any> }) {
-  const shown = useAnimatedStyle(() => ({ opacity: clamp01(S.value.reveal) }));
-  return (
-    <Animated.View style={[StyleSheet.absoluteFill, shown]} pointerEvents="none">
-      <FlowBox S={S} x={FLOW_X[0]} label={FLOW_LABEL[0]} fixed />
-      <FlowArrow S={S} x={ARROW_X[0]} covenant />
-      <FlowBox S={S} x={FLOW_X[1]} label={FLOW_LABEL[1]} />
-      <FlowArrow S={S} x={ARROW_X[1]} />
-      <FlowBox S={S} x={FLOW_X[2]} label={FLOW_LABEL[2]} />
+    <Animated.View style={[styles.plate, st]} pointerEvents="none">
+      <Text style={styles.plateText} numberOfLines={1}>STATE OF</Text>
+      <Text style={styles.plateText} numberOfLines={1}>NATURE</Text>
     </Animated.View>
   );
 }
 
-// ── the two opposed meters ───────────────────────────────────────────────────
-
-function Meter({
-  S, side, label, invert,
-}: { S: SharedValue<any>; side: 'left' | 'right'; label: string; invert?: boolean }) {
-  // FEAR is the fight actually going on; PEACE is the sovereign. Both gauges arrive
-  // with the ledger, when the narration first says what life without a power is.
-  const fill = useAnimatedStyle(() => ({ transform: [{ scaleY: invert ? S.value.fight : S.value.auth }] }));
-  const shown = useAnimatedStyle(() => ({ opacity: clamp01(S.value.reveal - 1) }));
-  const x = side === 'left' ? 20 : STAGE_W - 20 - MTR_W;
-  return (
-    <Animated.View style={[StyleSheet.absoluteFill, shown]} pointerEvents="none">
-      <Text style={[styles.meterLabel, { left: x - 12, width: MTR_W + 24 }]}>{label}</Text>
-      <View style={[styles.meterTrack, { left: x }]}>
-        <Animated.View style={[styles.meterFill, fill]} />
-        {/* Quarter rules ON TOP of the fill, so a full meter still reads as a
-            graduated gauge rather than a solid black domino. */}
-        <View style={[styles.meterTick, { top: MTR_H * 0.25 }]} />
-        <View style={[styles.meterTick, { top: MTR_H * 0.5 }]} />
-        <View style={[styles.meterTick, { top: MTR_H * 0.75 }]} />
-      </View>
-    </Animated.View>
-  );
-}
-
-// ── the contract nobody signed ───────────────────────────────────────────────
-// "No one ever signed such a contract, and no one needs to." A sheet with a title
-// and two empty signature lines, each with the mark a hand would sign beside.
-
-function Contract({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({
-    opacity: S.value.paper,
-    transform: [
-      { translateY: (1 - S.value.paper) * -8 },
-      { rotate: `${-3 + Math.sin(S.value.t * 0.6) * 0.8}deg` },
-    ],
-  }));
+function Contract({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.paper, transform: [{ rotate: '-3deg' }, { translateY: (1 - S.value.paper) * -6 }] }));
+  if (!on(PAPER_ON)) return null;
   return (
     <Animated.View style={[styles.contract, st]} pointerEvents="none">
-      <Text style={styles.contractTitle}>CONTRACT</Text>
-      <View style={styles.signRow}>
-        <Text style={styles.signMark}>×</Text>
-        <View style={styles.signLine} />
-      </View>
-      <View style={styles.signRow}>
-        <Text style={styles.signMark}>×</Text>
-        <View style={styles.signLine} />
+      <Text style={styles.contractHead} numberOfLines={1}>CONTRACT</Text>
+      <View style={styles.signLine} />
+      <View style={styles.signLine} />
+      <View style={styles.contractStamp}>
+        <Text style={styles.stampText} numberOfLines={1}>A TEST</Text>
       </View>
     </Animated.View>
   );
 }
 
-// ── clash marks above the brawl, gone once the peace holds ───────────────────
+// ── the newsboard on the right pavement ─────────────────────────────────────
 
-function Spark({ S, x }: { S: SharedValue<any>; x: number }) {
-  const st = useAnimatedStyle(() => {
-    const blink = Math.max(0, Math.sin(S.value.t * 4.6 + x));
-    return { opacity: blink * S.value.fight * 0.85, transform: [{ scale: 0.7 + blink * 0.3 }] };
-  });
+function News({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.news, transform: [{ translateY: (1 - S.value.news) * 6 }] }));
   return (
-    <Animated.View style={[styles.sparkWrap, { left: x - 11 }, st]} pointerEvents="none">
-      <View style={[styles.sparkBar, { transform: [{ rotate: '0deg' }] }]} />
-      <View style={[styles.sparkBar, { transform: [{ rotate: '45deg' }] }]} />
-      <View style={[styles.sparkBar, { transform: [{ rotate: '90deg' }] }]} />
-      <View style={[styles.sparkBar, { transform: [{ rotate: '135deg' }] }]} />
+    <View style={styles.newsBoard} pointerEvents="none">
+      <Text style={styles.newsHead} numberOfLines={1}>DAILY NEWS</Text>
+      {on(NEWS_ON) ? (
+        <Animated.View style={st}>
+          <Text style={styles.newsText} numberOfLines={1}>WAR OF</Text>
+          <Text style={styles.newsText} numberOfLines={1}>EVERY MAN</Text>
+          <Text style={styles.newsText} numberOfLines={1}>AGAINST</Text>
+          <Text style={styles.newsText} numberOfLines={1}>EVERY MAN</Text>
+        </Animated.View>
+      ) : null}
+    </View>
+  );
+}
+
+// ── Locke's poster in the shop window ───────────────────────────────────────
+
+function Locke({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.locke, transform: [{ rotate: '2deg' }, { scale: 0.9 + 0.1 * S.value.locke }] }));
+  if (!on(LOCKE)) return null;
+  return (
+    <Animated.View style={[styles.locke, st]} pointerEvents="none">
+      <Text style={styles.lockeHead} numberOfLines={1}>LOCKE</Text>
+      <Text style={styles.lockeText} numberOfLines={1}>A PEOPLE</Text>
+      <Text style={styles.lockeText} numberOfLines={1}>MAY RESIST</Text>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 56, right: 56, top: GROUND, height: 1.5, backgroundColor: RULE },
-  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
-  // figure and everything it is looking at standing on bare page;
-  // political7 and political8 both stand their subject on a filled mass.
   floor: floorStyle(TONE, GROUND),
-  pedestal: {
-    position: 'absolute', left: SOV_X - 28, top: GROUND - PED, width: 56, height: PED,
-    backgroundColor: PAPER, borderWidth: 2, borderColor: INK,
-    transformOrigin: '50% 100%',
+  ground: { position: 'absolute', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },
+  street: {
+    position: 'absolute', left: SHOPS[0].x1, top: 330, width: SHOPS[1].x0 - SHOPS[0].x1, height: ROAD_Y - 330,
+    backgroundColor: DUSK.STONE,
+  },
+  road: {
+    position: 'absolute', left: SHOPS[0].x1, top: ROAD_Y, width: SHOPS[1].x0 - SHOPS[0].x1, height: GROUND - ROAD_Y,
+    backgroundColor: DUSK.SHADE,
+  },
+  dash: { position: 'absolute', left: BOX.cx - 1.5, width: 3, borderRadius: 1.5, backgroundColor: PAPER_LIT },
+
+  bannerWrap: { position: 'absolute', left: 64, top: 298, width: 272 },
+  bannerCord: { position: 'absolute', top: 8, width: 26, height: 1.5, backgroundColor: INK },
+  banner: {
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', paddingVertical: 3,
+  },
+  bannerText: {
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12, letterSpacing: 0.5, color: INK, includeFontPadding: false,
+  },
+  bannerSub: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.4, color: INK, includeFontPadding: false,
+    textDecorationLine: 'underline', textDecorationColor: EMBER, marginTop: 1,
   },
 
-  headWrap: { position: 'absolute', left: 0, right: 0, top: 244, alignItems: 'center' },
-  headText: {
-    fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 1.8, lineHeight: 17, color: INK,
-    includeFontPadding: false,
+  shutterClip: { position: 'absolute', top: SHUTTER.top, height: SHUTTER.bottom - SHUTTER.top, overflow: 'hidden' },
+  shutter: {
+    position: 'absolute', left: 0, right: 0, top: 0, backgroundColor: PLATE_FACE,
+    borderWidth: 1.5, borderColor: INK, borderTopWidth: 0, borderBottomLeftRadius: 2, borderBottomRightRadius: 2,
+    overflow: 'hidden', alignItems: 'center',
   },
-  strike: {
-    position: 'absolute', left: -5, right: -5, top: 8, height: 2.5,
-    backgroundColor: INK, transformOrigin: '0% 50%',
-  },
-
-  // 262..273 — under the headline's descender line (261) and one unit clear of
-  // the flow boxes' top edge (274).
-  ledger: { position: 'absolute', left: 0, right: 0, top: 262, height: 12 },
-  ledgerText: {
-    position: 'absolute', left: 0, right: 0, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.2, lineHeight: 11,
-    color: SOFT, includeFontPadding: false,
+  slat: { position: 'absolute', left: 3, right: 3, height: 1, backgroundColor: SHADE },
+  sprayBox: { position: 'absolute', bottom: 22, alignItems: 'center', paddingHorizontal: 4, backgroundColor: PLATE_FACE },
+  spray: {
+    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 13, letterSpacing: 0.6, color: DEEP, includeFontPadding: false,
   },
 
-  flowBox: { position: 'absolute', top: FLOW_T, width: FLOW_W, height: FLOW_H },
-  flowFixed: {
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center',
+  lampOff: {
+    position: 'absolute', width: LAMP_R * 2, height: LAMP_R * 2, borderRadius: LAMP_R, backgroundColor: DEEP,
   },
-  flowOff: {
-    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  flowOn: {
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: INK,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  flowTextFixed: {
-    fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.8, color: INK, includeFontPadding: false,
-  },
-  flowTextOff: {
-    fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.8, color: INK, includeFontPadding: false,
-  },
-  flowTextOn: {
-    fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 0.8, color: PAPER, includeFontPadding: false,
-  },
-  arrowWrap: { position: 'absolute', top: FLOW_T + 6, width: 24, height: 22 },
-  arrow: {
-    position: 'absolute', left: 0, right: 0, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 17, color: SOFT, includeFontPadding: false,
-  },
-  arrowOn: { color: INK },
+  lamp: { position: 'absolute', width: LAMP_R * 2, height: LAMP_R * 2, borderRadius: LAMP_R },
 
-  meterLabel: {
-    position: 'absolute', top: 364, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: SOFT, includeFontPadding: false,
+  plate: {
+    position: 'absolute', left: LIGHT.x - 14, top: LIGHT.headTop + LIGHT.headH + 6, width: 58, paddingVertical: 2,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: TEAL, alignItems: 'center', transformOrigin: '0% 50%',
   },
-  meterTrack: {
-    position: 'absolute', top: MTR_T, width: MTR_W, height: MTR_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
+  plateText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.5, color: PAPER_LIT, includeFontPadding: false,
   },
-  meterFill: {
-    position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
-    backgroundColor: INK, transformOrigin: '50% 100%',
-  },
-  meterTick: { position: 'absolute', left: 0, right: 0, height: 1.5, backgroundColor: RULE },
-
-  sparkWrap: { position: 'absolute', top: 353, width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
-  sparkBar: { position: 'absolute', width: 2.5, height: 22, backgroundColor: INK, borderRadius: 1 },
-
-  // Right of the sovereign's crown and sword, left of the PEACE gauge's label (344).
   contract: {
-    position: 'absolute', left: 266, top: 318, width: 72, height: 40,
-    backgroundColor: PAPER, borderWidth: 2, borderColor: INK, borderRadius: 8,
-    alignItems: 'center', paddingTop: 4, transformOrigin: '50% 0%',
+    position: 'absolute', left: 0, top: 414, width: 68, height: 44, paddingTop: 3, paddingHorizontal: 4,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 2, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
-  contractTitle: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.8, letterSpacing: 0.9, color: INK, includeFontPadding: false,
+  contractHead: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
-  signRow: { flexDirection: 'row', alignItems: 'flex-end', width: 56, height: 11, marginTop: 1 },
-  signMark: { fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 10, color: INK, includeFontPadding: false, width: 9 },
-  signLine: { flex: 1, height: 1.5, backgroundColor: SOFT, marginBottom: 2 },
+  signLine: { height: 1.5, backgroundColor: SHADE, marginTop: 5 },
+  contractStamp: {
+    position: 'absolute', left: 6, bottom: 3, paddingHorizontal: 3, borderWidth: 1.5, borderColor: EMBER, borderRadius: 2,
+    transform: [{ rotate: '-8deg' }],
+  },
+  stampText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: INK, includeFontPadding: false,
+  },
+
+  newsBoard: {
+    position: 'absolute', left: NEWS.x, top: NEWS.y, width: NEWS.w, height: 58, paddingTop: 2,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center',
+  },
+  newsHead: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+    borderBottomWidth: 1, borderBottomColor: INK, marginBottom: 1,
+  },
+  newsText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.1, color: INK, includeFontPadding: false,
+    textAlign: 'center',
+  },
+
+  locke: {
+    position: 'absolute', left: 268, top: 352, width: 86, paddingVertical: 3,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, alignItems: 'center',
+  },
+  lockeHead: {
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 11, letterSpacing: 1, color: INK, includeFontPadding: false,
+  },
+  lockeText: {
+    fontFamily: 'Inter_500Medium', fontSize: 9, lineHeight: 11, color: INK, includeFontPadding: false,
+  },
+
   rider: { position: 'absolute', left: 0, top: 0 },
-  swordBlade: { position: 'absolute', left: -2, top: -46, width: 4, height: 46, backgroundColor: INK },
-  swordGuard: { position: 'absolute', left: -10, top: -4, width: 20, height: 3.5, backgroundColor: INK, borderRadius: 2 },
-  swordPommel: { position: 'absolute', left: -3.5, top: 2, width: 7, height: 7, borderRadius: 3.5, backgroundColor: INK },
-  crownBand: { position: 'absolute', left: -14, top: 0, width: 28, height: 8, backgroundColor: INK, borderRadius: 1 },
-  crownPoint: {
-    position: 'absolute', top: -8, width: 0, height: 0,
-    borderLeftWidth: 3, borderRightWidth: 3, borderBottomWidth: 9,
-    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: INK,
-  },
+  baton: { position: 'absolute', left: -2, top: -26, width: 4, height: 26, borderRadius: 2, backgroundColor: INK },
+  batonGrip: { position: 'absolute', left: -4, top: -3, width: 8, height: 3, borderRadius: 1.5, backgroundColor: EMBER },
 });
 
-// Extremes: the headline's cap-line (244) down to the citizens' ankle joints
-// (~506, on the ground rule at 500 with the smaller CIT_K). Between them: the
-// ledger strip 262..273, the flow 274..308, the clash marks 353..375, the meter
-// labels 364..375 and the meter tracks 382..494. The sovereign's crown points and
-// his sword tip both top out at y ≈ 320, twelve units clear of the flow above.
-//
-// 280 units is also the tightest band that still pays: the stage region is about
-// 923×647 device px, so 647/280 ≈ 923/400. Any narrower and the WIDTH caps the
-// scale — the art stops growing while the clipping risk keeps climbing.
 export function PoliticalLesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={PoliticalScene} band={[234, 514]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={PoliticalScene} band={[290, 514]} camera={CAM} />;
 }
