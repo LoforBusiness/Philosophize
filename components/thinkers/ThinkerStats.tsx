@@ -17,7 +17,7 @@
 // with a label on it reads as a bug and an absent slot reads as a layout.
 // ─────────────────────────────────────────────────────────────────────────────
 import { View, Text, StyleSheet } from 'react-native';
-import { C, ERA, TYPE, SPACE, RADIUS, type EraKey } from '@/constants/design';
+import { C, ERA, TYPE, SPACE, RADIUS, BRANCH, type EraKey, type BranchKey } from '@/constants/design';
 import { ALL_BRANCHES } from '@/data';
 import { timelinePos, yearLabel, FIRST_YEAR, LAST_YEAR, type Lifespan } from '@/lib/utils/lifespan';
 import ThinkerSeal from './ThinkerSeal';
@@ -129,7 +129,7 @@ export function BranchSpread({ slugs, era }: { slugs: string[]; era: string }) {
             const on = slugs.includes(b.slug);
             return (
               <View key={b.slug} style={styles.spreadCell}>
-                <View style={[styles.spreadBar, on ? { backgroundColor: tint } : null]} />
+                <View style={[styles.spreadBar, on ? { backgroundColor: BRANCH[b.slug as BranchKey] ?? tint } : null]} />
                 <Text
                   style={[styles.spreadLabel, on ? styles.spreadLabelOn : null]}
                   numberOfLines={1}
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   chipText: { ...TYPE.micro, color: C.paper },
 
   tile: { flex: 1, alignItems: 'center' },
-  tileValue: { ...TYPE.display, color: C.ink },
+  tileValue: { ...TYPE.display, fontVariant: ['lining-nums'], color: C.ink },
   tileLabel: { ...TYPE.micro, color: C.inkSoft, textAlign: 'center', marginTop: SPACE[0] },
 
   strip: { gap: SPACE[0] },

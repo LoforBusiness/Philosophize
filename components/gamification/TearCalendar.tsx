@@ -52,6 +52,8 @@ export default function TearCalendar({ value, width, mark, band = null, onInk = 
   const fs = w * (digits <= 2 ? 0.56 : digits === 3 ? 0.44 : 0.35);
   const shade = onInk ? mix(INK, PAPER_LIT, 0.28) : SHEET_SHADE;
   const ring = Math.max(3, w * 0.07);
+  const depth = Math.max(1.5, w * 0.045);
+  const deep = mix(mark, INK, 0.5);
 
   return (
     <View style={{ width: w + 3, height: h + Math.max(4, w * 0.06) + 3 }} pointerEvents="none">
@@ -82,12 +84,33 @@ export default function TearCalendar({ value, width, mark, band = null, onInk = 
           ) : null}
         </View>
         <View style={styles.face}>
-          <Text
-            style={[styles.num, { color: mark, fontSize: fs, lineHeight: fs * 1.08 }]}
-            numberOfLines={1}
-          >
-            {value}
-          </Text>
+          {/* THE NUMBER IS STRUCK, NOT PRINTED. Three copies stepped down and to
+              the right in the band's own colour taken toward ink build a short
+              extrusion under the face — the light is from the top left, as it is
+              on every struck thing in the app — so the count reads as a raised
+              numeral rather than as type on a card. */}
+          <View style={{ transform: [{ translateX: -depth / 2 }, { translateY: -depth / 2 }] }}>
+            {[1, 2, 3].map((k) => (
+              <Text
+                key={k}
+                style={[
+                  styles.num,
+                  styles.depth,
+                  { color: deep, fontSize: fs, lineHeight: fs * 1.15, left: (depth * k) / 3, top: (depth * k) / 3 },
+                ]}
+                numberOfLines={1}
+                aria-hidden
+              >
+                {value}
+              </Text>
+            ))}
+            <Text
+              style={[styles.num, { color: mark, fontSize: fs, lineHeight: fs * 1.15 }]}
+              numberOfLines={1}
+            >
+              {value}
+            </Text>
+          </View>
         </View>
       </View>
       {/* the two rings through the binding */}
@@ -109,5 +132,13 @@ const styles = StyleSheet.create({
   band: { alignItems: 'center', justifyContent: 'center', borderBottomColor: INK, paddingHorizontal: 4 },
   bandText: { fontFamily: 'Inter_700Bold', color: PAPER_LIT, includeFontPadding: false },
   face: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  num: { fontFamily: 'PlayfairDisplay_700Bold', includeFontPadding: false, textAlign: 'center' },
+  // LINING FIGURES. Playfair Display's default numerals are OLD-STYLE — 3, 4, 5,
+  // 7 and 9 hang below the baseline — so "36" set its 3 lower than its 6 and the
+  // tail of the 3 was cut by the line box. A count is a figure, not a word in a
+  // sentence, and every figure in it should stand on one line.
+  num: {
+    fontFamily: 'PlayfairDisplay_700Bold', includeFontPadding: false, textAlign: 'center',
+    fontVariant: ['lining-nums'],
+  },
+  depth: { position: 'absolute' },
 });

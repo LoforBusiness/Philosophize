@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Svg, {
-  Path, Circle, Line as SvgLine, Defs, LinearGradient, Stop, G,
-} from 'react-native-svg';
+import Svg, { Path, Circle, Line as SvgLine, G } from 'react-native-svg';
 import Animated, {
   useSharedValue, useAnimatedProps, useAnimatedStyle, withTiming, withDelay, withSequence, runOnJS, Easing,
 } from 'react-native-reanimated';
-import { rankProgress } from '@/data/ranks';
+import { rankProgress, rankOrder, rankDegree, rankInsignia } from '@/data/ranks';
+import RankSeal from './RankSeal';
 import ACounter, { counterStyle } from './ACounter';
-import { INK, MID, PAPER, PAPER_SHADE, FAINT } from './tone';
+import { INK, MID, PAPER, PAPER_LIT, FLAT_FACE, FLAT_EDGE, mix } from './tone';
 import { useUserDataStore, type XpEvent } from '@/stores/userDataStore';
 import { useSeen, NO_VIEW, type InView } from '@/lib/utils/useInView';
 
 const APath = Animated.createAnimatedComponent(Path);
+const AG = Animated.createAnimatedComponent(G);
 // The counter — a TextInput whose `text` is written from the UI thread — moved to
 // components/shared/ACounter.tsx when the Insights ghost needed the same trick.
 // The reasoning that produced it lives there; this is now just a consumer.
@@ -63,11 +63,24 @@ const APath = Animated.createAnimatedComponent(Path);
  * page at the right moment. Both halves now reset whenever `active` goes false —
  * see the effect below, and `rearm` in lib/utils/useInView.
  *
- * ── INK, NOT COLOUR (§19) ───────────────────────────────────────────────────
+ * ── STRUCK IN THE RANK'S OWN METAL (2026-09-26) ─────────────────────────────
  *
- * The structure is borrowed from a teal-and-orange reference — the filled area,
- * the round nodes, the pointed callout, the faint grid — and every value comes
- * from tone.ts. Photographs remain the one place this app bends.
+ * It was ink on paper with a tan gradient under the line, inside a hairline box —
+ * the last chart in the app still drawn before the depth kit, and the owner asked
+ * for the section to be redesigned. It keeps every number and the whole draw-in
+ * and recap; what changed is the material:
+ *
+ *   · the line is the rank's own METAL (constants/insignia via rankInsignia), so
+ *     an iron band climbs in iron, with a LEDGE — the same path again, a few
+ *     units lower, in the metal walked toward ink — which is how every raised
+ *     thing here gets its depth, and it draws in with the line;
+ *   · the area under it is a FLAT tint of that metal, not a gradient into tan
+ *     (§7, "no gold surfaces");
+ *   · each thing earned is a drawn node, landing with the head;
+ *   · the two dots are the two PINS — the one you hold at the foot of the climb,
+ *     the one you are climbing to, locked, at the top — so the chart and the
+ *     ladder beside it say the same thing in the same objects;
+ *   · the card is the kit's flat white panel on a 2px edge.
  */
 
 export interface RankClimbProps {
@@ -104,11 +117,20 @@ export interface RankClimbProps {
   /** Called once the intro has been shown, so it is not shown again unearned. */
   onSeen?: () => void;
   height?: number;
+  /**
+   * The "A → B / N XP TO B" line under the chart. Off where RankHeader sits
+   * directly above it and has already said both.
+   */
+  legend?: boolean;
 }
 
 /** Where the two dots sit inside the plot — inset, never in the corner. */
-const START = { x: 0.06, y: 0.88 };
-const END = { x: 0.94, y: 0.10 };
+const START = { x: 0.07, y: 0.86 };
+const END = { x: 0.93, y: 0.12 };
+/** The two pins drawn at the ends of the climb. */
+const PIN = 30;
+/** The XP callout's plate. */
+const CALLOUT_W = 72;
 /** Fewest nodes worth calling a shape. Below this the run is back-filled. */
 const MIN_NODES = 5;
 
@@ -133,7 +155,7 @@ export function bandNodes(events: XpEvent[], totalXP: number, floor: number, cei
 
 export default function RankClimbChart({
   rankIndex, totalXP, events, width, seenXP = 0, active = true, view, selfSeen, onSeen,
-  height = 200,
+  height = 200, legend = true,
 }: RankClimbProps) {
   // Unconditional, as every hook must be (§17's rule 1). A caller that does not
   // want them simply does not read them.
@@ -146,7 +168,12 @@ export default function RankClimbChart({
   // present is a hook count that changes between renders.
   const seen = useSeen(view ?? NO_VIEW);
   const live = active && (view ? seen : true);
-  const { current, next, pct, toNext, pending } = rankProgress(rankIndex, totalXP);
+  const { current, next, index, toNext, pending } = rankProgress(rankIndex, totalXP);
+  const metal = rankInsignia(index);
+  const LINE_C = metal.base;
+  const LEDGE_C = mix(metal.base, INK, 0.5);
+  const AREA_C = mix(metal.base, PAPER_LIT, 0.8);
+  const TO_GO_C = mix(metal.base, PAPER_LIT, 0.45);
 
   const padL = 40, padR = 14, padTop = 18, padBottom = 24;
   const plotX = padL, plotY = padTop;
@@ -273,6 +300,8 @@ export default function RankClimbChart({
   }, [live]);
 
   const lineProps = useAnimatedProps(() => ({ strokeDashoffset: (1 - draw.value) * geo.len }));
+  const ledgeProps = useAnimatedProps(() => ({ strokeDashoffset: (1 - draw.value) * geo.len }));
+  const nodeProps = useAnimatedProps(() => ({ opacity: mark.value }));
   const countProps = useAnimatedProps(() => ({ text: `+${Math.round(draw.value * gained)} XP` }) as never);
   const areaProps = useAnimatedProps(() => ({ opacity: draw.value * 0.9 }));
   const headStyle = useAnimatedStyle(() => ({
@@ -297,40 +326,56 @@ export default function RankClimbChart({
     <View style={{ width }}>
       <View style={[styles.card, { width, height }]}>
         <Svg width={width} height={height}>
-          <Defs>
-            <LinearGradient id="climbFill" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor={PAPER_SHADE} stopOpacity={0.85} />
-              <Stop offset="1" stopColor={PAPER_SHADE} stopOpacity={0.12} />
-            </LinearGradient>
-          </Defs>
-
           {rows.map((r, k) => (
             <SvgLine key={k} x1={plotX} y1={r.y} x2={plotX + plotW} y2={r.y}
-              stroke={FAINT} strokeWidth={1} />
+              stroke={FLAT_EDGE} strokeWidth={1.5} strokeDasharray="2 5" strokeLinecap="round" />
           ))}
 
           {/* What is still to go: the stretch from the head to the next rank. */}
           <SvgLine
             x1={head.x} y1={head.y} x2={endPt.x} y2={endPt.y}
-            stroke={FAINT} strokeWidth={1.5} strokeDasharray="3 5" strokeLinecap="round"
+            stroke={TO_GO_C} strokeWidth={2} strokeDasharray="3 6" strokeLinecap="round"
           />
 
-          {geo.pts.length > 1 && <APath d={geo.area} fill="url(#climbFill)" animatedProps={areaProps} />}
+          {geo.pts.length > 1 && <APath d={geo.area} fill={AREA_C} animatedProps={areaProps} />}
+          {/* The ledge first, a few units under the line: the raised thing's shadow. */}
+          {geo.pts.length > 1 && (
+            <G transform="translate(0, 3)">
+              <APath
+                d={geo.d} stroke={LEDGE_C} strokeWidth={4} fill="none"
+                strokeLinejoin="round" strokeLinecap="round"
+                strokeDasharray={geo.len} animatedProps={ledgeProps}
+              />
+            </G>
+          )}
           {geo.pts.length > 1 && (
             <APath
-              d={geo.d} stroke={INK} strokeWidth={2.6} fill="none"
+              d={geo.d} stroke={LINE_C} strokeWidth={4} fill="none"
               strokeLinejoin="round" strokeLinecap="round"
               strokeDasharray={geo.len} animatedProps={lineProps}
             />
           )}
 
-          {/* The far dot: the rank being climbed to. Hollow — not yours yet. */}
-          <G>
-            <Circle cx={endPt.x} cy={endPt.y} r={6} fill={PAPER} stroke={INK} strokeWidth={2} />
-          </G>
-          {/* The near dot: the rank you hold. Filled — you are standing on it. */}
-          <Circle cx={startPt.x} cy={startPt.y} r={5} fill={INK} />
+          {/* Each thing earned, as a drawn node — they land with the head. */}
+          {geo.pts.length > 2 && geo.pts.length <= 40 && (
+            <AG animatedProps={nodeProps}>
+              {geo.pts.slice(1, -1).map((p, i) => (
+                <Circle key={i} cx={p.x} cy={p.y} r={3.4} fill={PAPER_LIT} stroke={LEDGE_C} strokeWidth={2} />
+              ))}
+            </AG>
+          )}
         </Svg>
+
+        {/* THE TWO PINS: the rank you hold at the foot of the climb, the one you
+            are climbing to — locked — at the top. */}
+        <View style={[styles.pin, { left: startPt.x - PIN / 2, top: startPt.y - PIN / 2 }]} pointerEvents="none">
+          <RankSeal glyph={current.glyph} state="current" size={PIN} order={rankOrder(index)} degree={rankDegree(index)} />
+        </View>
+        {next ? (
+          <View style={[styles.pin, { left: endPt.x - PIN / 2, top: endPt.y - PIN / 2 }]} pointerEvents="none">
+            <RankSeal glyph={next.glyph} state="locked" size={PIN} order={rankOrder(index + 1)} degree={rankDegree(index + 1)} />
+          </View>
+        ) : null}
 
         {rows.map((r, k) => (
           <Text key={k} style={[styles.yLabel, { top: r.y - 7, width: padL - 6 }]}>
@@ -345,12 +390,15 @@ export default function RankClimbChart({
         <Animated.View
           style={[
             styles.calloutWrap,
-            { left: Math.max(2, Math.min(width - 92, head.x - 88)), top: head.y - 13 },
+            // A FIXED-WIDTH plate whose tip ends 10 units short of the head, so
+            // it never covers the head or runs out of the card: the counter is
+            // an <input> on the web, which claims whatever width it is given.
+            { left: Math.max(2, head.x - CALLOUT_W - 14), top: head.y - 13 },
             headStyle,
           ]}
           pointerEvents="none"
         >
-          <View style={styles.callout}>
+          <View style={[styles.callout, { boxShadow: `0px 2px 0px ${LEDGE_C}` }]}>
             <ACounter
               editable={false}
               pointerEvents="none"
@@ -364,27 +412,30 @@ export default function RankClimbChart({
         </Animated.View>
 
         <Animated.View
-          style={[styles.headDot, { left: head.x - 7, top: head.y - 7 }, headStyle]}
+          style={[styles.headDot, { left: head.x - 8, top: head.y - 8, borderColor: LEDGE_C }, headStyle]}
           pointerEvents="none"
         />
       </View>
 
-      <View style={styles.legend}>
-        <Text style={styles.legendName}>{current.name} → {next ? next.name : 'the summit'}</Text>
-        <Text style={styles.legendNote}>{label}</Text>
-      </View>
+      {legend ? (
+        <View style={styles.legend}>
+          <Text style={styles.legendName}>{current.name} → {next ? next.name : 'the summit'}</Text>
+          <Text style={styles.legendNote}>{label}</Text>
+        </View>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: PAPER,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: FAINT,
+    backgroundColor: FLAT_FACE,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: FLAT_EDGE,
     overflow: 'hidden',
   },
+  pin: { position: 'absolute' },
   yLabel: {
     position: 'absolute', left: 0, textAlign: 'right',
     fontFamily: 'Inter_500Medium', fontSize: 8.5, color: MID,
@@ -392,19 +443,20 @@ const styles = StyleSheet.create({
   },
   calloutWrap: { position: 'absolute', flexDirection: 'row', alignItems: 'center' },
   callout: {
-    backgroundColor: INK, borderRadius: 5, paddingHorizontal: 8, paddingVertical: 4,
+    width: CALLOUT_W, alignItems: 'center',
+    backgroundColor: INK, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 4,
   },
   calloutText: {
     fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.6, color: PAPER,
-    fontVariant: ['tabular-nums'],
+    fontVariant: ['tabular-nums'], width: CALLOUT_W - 12, textAlign: 'center', padding: 0,
   },
   // A small square turned 45° reads as the badge's point without a second shape.
   calloutTip: {
     width: 8, height: 8, backgroundColor: INK, transform: [{ rotate: '45deg' }], marginLeft: -4,
   },
   headDot: {
-    position: 'absolute', width: 14, height: 14, borderRadius: 7,
-    backgroundColor: PAPER, borderWidth: 3, borderColor: INK,
+    position: 'absolute', width: 16, height: 16, borderRadius: 8,
+    backgroundColor: PAPER_LIT, borderWidth: 3.5, borderColor: INK,
   },
   legend: { marginTop: 8, alignItems: 'center' },
   legendName: { fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, letterSpacing: 0.3 },

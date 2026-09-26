@@ -12,7 +12,8 @@ import { useRouter } from 'expo-router';
 import { openLesson as openLessonRoute } from '@/components/lesson/lessonNav';
 import { MotiView, AnimatePresence } from 'moti';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { C, LIP, RADIUS } from '@/constants/design';
+import { C, LIP, RADIUS, BRANCH, type BranchKey } from '@/constants/design';
+import { mix } from './tone';
 import { getPhilosopherById, type Philosopher } from '@/data/philosophers';
 import { PHILOSOPHER_FACTS } from '@/data/philosopherFacts';
 import { hasQuiz, getQuizPronoun } from '@/data/philosopherQuizzes';
@@ -25,6 +26,7 @@ import SketchIcon from './SketchIcon';
 import QuotePlate from './QuotePlate';
 import PhilosopherQuiz from './PhilosopherQuiz';
 import { eraGroupOf } from '@/data/philosophers';
+import ThinkerShelf from '@/components/thinkers/ThinkerShelf';
 import { lifespanOf, contemporariesOf } from '@/lib/utils/thinkerStats';
 import {
   EraChip, StatTile, LifeStrip, BranchSpread, ContemporariesRow, eraColour,
@@ -74,7 +76,7 @@ export default function PhilosopherSheet() {
   const isPro = useSubscriptionStore((s) => s.isPro);
 
   const router = useRouter();
-  const { height } = useWindowDimensions();
+  const { height, width: winW } = useWindowDimensions();
   const H = Math.round(height * 0.8);
 
   const [visible, setVisible] = useState(false);
@@ -202,13 +204,19 @@ export default function PhilosopherSheet() {
                   Was a centred letter-in-a-circle, a name, a grey meta line and
                   an italic sentence, all on paper: the page opened on its own
                   quietest moment. Reversed out, the name and the idea are the
-                  first thing the eye lands on, and the initial becomes a
-                  watermark behind them rather than the loudest element. */}
+                  first thing the eye lands on — under their bust on its shelf. */}
               <View style={styles.masthead}>
-                <Text style={styles.watermark} pointerEvents="none">
-                  {phil.name.charAt(0)}
-                </Text>
-                <Text style={styles.mastheadKicker}>{phil.era.toUpperCase()}</Text>
+                {/* THEIR SHELF — the bust on a shelf of books in a study, on the
+                    palette's deep teal (components/thinkers/ThinkerShelf). It
+                    replaced a giant watermark initial: type about a person, where
+                    the rest of the app draws things. */}
+                <ThinkerShelf
+                  name={phil.name}
+                  era={stats ? stats.era : null}
+                  tint={stats ? eraColour(stats.era) : C.inkSoft}
+                  width={winW - 48}
+                />
+                <Text style={[styles.mastheadKicker, { marginTop: 16 }]}>{phil.era.toUpperCase()}</Text>
                 <Text style={styles.mastheadName}>{phil.name}</Text>
                 {/* THE ERA, AS THE ONE COLOURED THING ON A BLACK BLOCK. It is a
                     rule under the name rather than a chip beside it, because the
@@ -217,7 +225,7 @@ export default function PhilosopherSheet() {
                     The colour says "Ancient" faster than the word does, and the
                     word is right there anyway. */}
                 {stats && (
-                  <View style={[styles.mastheadRule, { backgroundColor: eraColour(stats.era) }]} />
+                  <View style={[styles.mastheadRule, { backgroundColor: mix(eraColour(stats.era), Paper, 0.45) }]} />
                 )}
                 <Text style={styles.mastheadLife}>{phil.lifespan}</Text>
                 <Text style={styles.mastheadIdea}>“{phil.oneLiner}”</Text>
@@ -298,6 +306,10 @@ export default function PhilosopherSheet() {
                         onPress={() => openLesson(l)}
                         style={({ pressed }) => [styles.lessonRow, pressed && { opacity: 0.6 }]}
                       >
+                        {/* The lesson as a book on the shelf: a spine in its branch's colour. */}
+                        <View style={[styles.lessonSpine, { backgroundColor: BRANCH[l.branchSlug as BranchKey] ?? C.HUE }]}>
+                          <View style={styles.lessonSpineBand} />
+                        </View>
                         <View style={{ flex: 1 }}>
                           <Text style={styles.lessonTitle} numberOfLines={1}>{l.title}</Text>
                           <Text style={styles.lessonBranch}>{l.branchName}</Text>
@@ -560,8 +572,10 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 48 },
 
   // ── masthead ───────────────────────────────────────────────────────────────
+  // The palette's DEEP teal, not ink: a study wall the shelf hangs on. Paper
+  // type reads 10.1:1 on it and the muted kicker 5.3:1.
   masthead: {
-    backgroundColor: Ink,
+    backgroundColor: C.HUE,
     paddingHorizontal: 24,
     paddingTop: 30,
     paddingBottom: 22,
@@ -570,16 +584,6 @@ const styles = StyleSheet.create({
   // The initial, demoted to texture. Big enough to be a shape rather than a
   // letter you read, and low enough in contrast that it never competes with the
   // name sitting on top of it.
-  watermark: {
-    position: 'absolute',
-    right: 6,
-    top: -18,
-    fontFamily: 'Caveat_700Bold',
-    fontSize: 150,
-    lineHeight: 170,
-    color: 'rgba(250,250,247,0.07)',
-    includeFontPadding: false,
-  },
   mastheadKicker: { fontFamily: 'Inter_500Medium', fontSize: 9.5, color: PaperMute, letterSpacing: 2.5 },
   mastheadName: {
     fontFamily: 'PlayfairDisplay_700Bold',
@@ -633,6 +637,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: InkFaint,
   },
+  lessonSpine: {
+    width: 14, height: 34, borderRadius: 2.5, borderWidth: 1.8, borderColor: Ink, overflow: 'hidden',
+    boxShadow: `1.5px 1.5px 0px ${InkFaint}`,
+  },
+  lessonSpineBand: { position: 'absolute', left: 0, right: 0, top: 6, height: 3, backgroundColor: 'rgba(255,255,255,0.55)' },
   lessonTitle: { fontFamily: 'Inter_500Medium', fontSize: 14.5, color: Ink },
   lessonBranch: { fontFamily: 'Inter_400Regular', fontSize: 11.5, color: InkSoft, marginTop: 2 },
   lessonChev: { transform: [{ scaleX: -1 }] },

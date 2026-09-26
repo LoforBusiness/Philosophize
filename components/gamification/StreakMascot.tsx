@@ -14,7 +14,7 @@ import {
   FLOOR, FLAT_EDGE, mix,
 } from '@/components/shared/tone';
 import {
-  slab, Lit, Stroke, LINE, WOOD, WOOD_LIT, WOOD_SHADE, CLOTH, CLOTH_SHADE, SHEET_SHADE,
+  slab, Lit, Stroke, LINE, WOOD, WOOD_LIT, WOOD_SHADE, SHEET_SHADE,
 } from '@/components/shared/drawn';
 import TearCalendar from './TearCalendar';
 import type { MoodState } from '@/lib/utils/streakMood';
@@ -73,6 +73,11 @@ const RH = 236;
 const GROUND = 204;
 const K = 1.06;             // rig units → design units: the rig is 103 tall
 const FIG_X = 172;
+// The lamp is the palette's olive-green, not the pale cloth blue: the owner asked
+// for the two pale blues to be seen less (2026-09-26), and a lamp is small enough
+// to carry a stronger tone anyway.
+const LAMP = mix(SAGE, OLIVE, 0.35);
+const LAMP_SHADE = mix(OLIVE, INK, 0.1);
 
 interface Props {
   mood: MoodState;
@@ -439,7 +444,7 @@ function Lamp({ glow, alive }: { glow: number; alive: boolean }) {
       <Stroke x1={foot.x} y1={foot.y} x2={elbow.x} y2={elbow.y} w={4} />
       <Stroke x1={elbow.x} y1={elbow.y} x2={cap.x} y2={cap.y} w={4} />
       <View style={[styles.joint, { left: elbow.x - 4, top: elbow.y - 4 }]} />
-      <View style={slab(baseX, DK_TOP - 8, 27, 8, CLOTH_SHADE, mix(CLOTH_SHADE, INK, 0.4), 3, 0, 1.8)} />
+      <View style={slab(baseX, DK_TOP - 8, 27, 8, LAMP_SHADE, mix(LAMP_SHADE, INK, 0.4), 3, 0, 1.8)} />
       <View
         style={[
           styles.bulb,
@@ -480,7 +485,7 @@ const styles = StyleSheet.create({
   tornNum: {
     position: 'absolute', left: 0, right: 0, top: 2.5, textAlign: 'center',
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 7.5, lineHeight: 9, color: INK,
-    includeFontPadding: false,
+    includeFontPadding: false, fontVariant: ['lining-nums'],
   },
 
   plaqueKicker: {
@@ -529,11 +534,11 @@ const styles = StyleSheet.create({
   // shorthand AFTER the per-corner longhands, so a dome built on slab() came out
   // a rounded rectangle.
   shade: {
-    position: 'absolute', width: 36, height: 18, backgroundColor: CLOTH,
+    position: 'absolute', width: 36, height: 18, backgroundColor: LAMP,
     borderWidth: LINE, borderColor: INK, overflow: 'hidden',
     borderTopLeftRadius: 18, borderTopRightRadius: 18, borderBottomLeftRadius: 2, borderBottomRightRadius: 2,
   },
-  shadeRim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 4, backgroundColor: CLOTH_SHADE },
+  shadeRim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 4, backgroundColor: LAMP_SHADE },
 
   saidWrap: { paddingHorizontal: 18, marginTop: 2, maxWidth: 300 },
   said: {

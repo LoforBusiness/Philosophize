@@ -6,14 +6,16 @@ import SketchIcon from '@/components/shared/SketchIcon';
 import Glyph from '@/components/shared/Glyph';
 import BadgeMedal from '@/components/shared/BadgeMedal';
 import RankClimbChart from '@/components/shared/RankClimbChart';
+import RankHeader from '@/components/profile/RankHeader';
+import BecomingJournal from '@/components/profile/BecomingJournal';
 import { DayBars } from '@/components/profile/InkCharts';
 import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { C, TYPE, SPACE, BRANCH, RADIUS, LIP, type TypeKey, type BranchKey } from '@/constants/design';
-import { GHOST, ramp, PATINA, EMBER_INK, EMBER_LIT } from '@/components/shared/tone';
-import { StruckBar, MetalPlate, ShelfCount, CountStrip, ReadingRow } from '@/components/profile/Struck';
+import { GHOST, ramp, EMBER_INK, EMBER_LIT } from '@/components/shared/tone';
+import { ShelfCount, CountStrip, ReadingRow } from '@/components/profile/Struck';
 import RankSeal from '@/components/shared/RankSeal';
 import { BRANCH_SHORT, BRANCH_ICON } from '@/components/shared/branchMarks';
 import { ProfileArtFill, ProfileAvatar, useProfileArt } from '@/components/shared/ProfileArt';
@@ -23,7 +25,7 @@ import { signOut } from '@/lib/supabase/auth';
 import { useAuthSession } from '@/lib/supabase/useSession';
 import { ALL_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
-import { rankProgress, rankOrder, rankDegree, rankInsignia, RANKS } from '@/data/ranks';
+import { rankProgress, rankOrder, rankDegree } from '@/data/ranks';
 import { BADGES } from '@/data/badges';
 import { useUserDataStore, progressStats } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -277,8 +279,7 @@ export default function ProfileScreen() {
   // totalXP by the next threshold, which counts from zero rather than from the
   // start of the current band and read 96% where the Ranks sheet read 77%.
 
-  const { current: cur, next, pending, pct: rankPct, toNext, inBand, bandSize } =
-    rankProgress(rankIndex, totalXP);
+  const { current: cur } = rankProgress(rankIndex, totalXP);
 
   const join = joinedAt ? new Date(joinedAt) : new Date();
   const joinedLabel = `JOINED ${MONTHS[join.getMonth()]} ${join.getFullYear()}`;
@@ -590,112 +591,20 @@ export default function ProfileScreen() {
           {useMemo(() => (
             <>
           <SectionLabel>WHO YOU'RE BECOMING</SectionLabel>
-          <Card pad={4} style={styles.bioCard}>
-            <View style={styles.bioQuill}>
-              <SketchIcon name="pencil" size={16} color={C.ink} />
-            </View>
-            <Text style={styles.bioText}>{bio}</Text>
-            {/* THE STACK BAR THAT USED TO SIT HERE HAS MOVED UP AND GROWN NAMES.
-                It cut one bar six ways to say whether this reader is a specialist
-                or a wanderer, which is a good question and the same one the
-                reading rows in YOUR PROGRESS now answer — with the branch named
-                and its icon beside it, rather than as six unlabelled segments.
-                One claim, one place. */}
-          </Card>
+          {/* A journal entry: the notebook, the handwritten line, the ribbon and
+              the pen (components/profile/BecomingJournal). */}
+          <BecomingJournal bio={bio} />
             </>
           ), [bio])}
 
           <SectionLabel>PROGRESS TO NEXT RANK</SectionLabel>
           <Card>
-            {/* THE LADDER, WITH BOTH ENDS OF THE RUNG ON IT.
-                This was a name, a fraction and an ink bar — which says how far
-                along you are and nothing whatever about what you are climbing
-                toward. Now the rank you hold is struck in its own band's metal on
-                the left, the one you are climbing to sits LOCKED on the right,
-                and the bar runs between them. That is the same three facts
-                arranged as a journey instead of as a readout, and the locked pin
-                is doing the work: it is the first time this screen has shown a
-                reader the thing they have not got yet. */}
-            {/* THE NAMES ARE IN THE MIDDLE, NOT UNDER THE PINS, and that is a
-                measurement rather than a preference. Eleven of the twenty-five
-                rank names do not fit a pin-width column at any size this screen
-                is allowed to use — the type scale stops at 11px (`micro`) and
-                check-ui enforces it — so captioned pins truncated half the ladder
-                to "METAPH…", and wrapping them broke "EPISTEMOL / OGIST" across
-                two lines mid-word. The middle column is the full width of the
-                card and every name fits it. */}
-            <View style={styles.rankLadder}>
-              <View style={styles.rankPin}>
-                <RankSeal glyph={cur.glyph} state="current" size={56} order={rankOrder(rankIndex)} degree={rankDegree(rankIndex)} />
-              </View>
-
-              <View style={styles.rankMid}>
-                <Text style={styles.rankName} numberOfLines={1}>{cur.name}</Text>
-                <Text style={styles.rankXp}>
-                  {/* XP EARNED INSIDE THIS BAND, not total against the next threshold.
-                      The old pair could read "10,605 / 9,300 XP" once a promotion was
-                      pending — a fraction bigger than its own denominator. */}
-                  {next
-                    ? `${inBand.toLocaleString()} / ${bandSize.toLocaleString()} XP`
-                    : `${totalXP.toLocaleString()} XP`}
-                </Text>
-                <StruckBar
-                  pct={rankPct}
-                  fill={ramp(rankInsignia(rankIndex).base)}
-                  height={12}
-                  style={{ marginTop: SPACE[1] }}
-                />
-                <Text style={styles.rankUntil}>
-                  {pending
-                    ? `FINISH A LESSON TO REACH ${(next?.name ?? '').toUpperCase()}`
-                    : next
-                      // NOT "…TO EPISTEMOLOGIST". The climb chart directly below
-                      // is captioned "Metaphysician → Epistemologist" and then
-                      // "395 XP TO EPISTEMOLOGIST", so naming it here printed the
-                      // identical sentence twice inside one card.
-                      ? `${toNext.toLocaleString()} XP TO GO`
-                      : 'HIGHEST RANK ACHIEVED'}
-                </Text>
-              </View>
-
-              {next ? (
-                <View style={styles.rankPin}>
-                  {/* Deliberately `locked` even when the promotion is PENDING. A
-                      pending rank has been earned in XP but not conferred — the
-                      ceremony happens on the reward screen (§7) — so lighting it
-                      here would spend the one moment that promotion has. The
-                      "XP TO <NAME>" line beside it is what names this pin, which
-                      is why it needs no caption of its own.
-
-                      The ORDER is passed anyway, because it decides the SHAPE as
-                      well as the material now — and the shape is the half a
-                      reader should be able to see coming. A locked pin that is
-                      already a winged crest is an argument for carrying on;
-                      thirty-six identical grey hexagons are not. */}
-                  <RankSeal
-                    glyph={next.glyph}
-                    state="locked"
-                    size={44}
-                    order={rankOrder(rankIndex + 1)}
-                    // AND THE DEGREE, which this was missing. The degree is the
-                    // SHAPE now, so without it every locked next-rank pin on this
-                    // screen was drawn as a plain disc — the reader could see the
-                    // rank they were climbing to and not what it looks like,
-                    // which is most of what a locked pin is for.
-                    degree={rankDegree(rankIndex + 1)}
-                  />
-                </View>
-              ) : (
-                <View style={styles.rankPin}>
-                  <MetalPlate metal={PATINA} label="TOP" />
-                </View>
-              )}
-            </View>
-
-            {/* How far up the ladder of forty-eight, which the band alone cannot say. */}
-            <Text style={styles.rankRung}>
-              RANK {cur.id} OF {RANKS.length}
-            </Text>
+            {/* THE RANK YOU HOLD AND THE ONE YOU ARE CLIMBING TO — the pin on its
+                stand, the next one locked in its socket, and the bar in the rank's
+                own metal. The same object heads the Ranks & Badges sheet
+                (components/profile/RankHeader), so the two screens cannot drift
+                apart again. */}
+            <RankHeader rankIndex={rankIndex} totalXP={totalXP} />
 
             {/* THE SAME CLIMB, DRAWN. The bar above says how far along the band
                 the reader is; the chart says how they got there and what each
@@ -734,6 +643,7 @@ export default function ProfileScreen() {
                 height={188}
                 view={climb}
                 selfSeen
+                legend={false}
               />
             </View>
           </Card>
@@ -925,25 +835,6 @@ const styles = StyleSheet.create({
   statRight: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.8, color: C.ink },
   readList: { gap: SPACE[2], marginTop: SPACE[2] },
 
-  bioCard: { alignItems: 'center' },
-  bioQuill: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 1.5,
-    borderColor: C.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACE[2],
-  },
-  bioText: {
-    ...role('body'),
-    fontFamily: PLAYFAIR_CAPTION,
-    fontStyle: 'italic',
-    color: C.ink,
-    textAlign: 'center',
-  },
-
   streakBox: {},
   streakDoor: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end',
@@ -955,33 +846,6 @@ const styles = StyleSheet.create({
   streakChevron: { transform: [{ scaleX: -1 }] },
 
   rankChartWrap: { marginTop: SPACE[3] },
-  // The rung, drawn: the pin you hold, the climb, the pin you are climbing to.
-  rankLadder: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2] },
-  rankPin: { alignItems: 'center' },
-  rankMid: { flex: 1 },
-  rankName: { ...role('title'), color: C.ink, marginBottom: SPACE[0] },
-  rankRung: {
-    ...role('micro'), color: C.inkSoft, letterSpacing: 2,
-    textAlign: 'center', marginTop: SPACE[3],
-  },
-  rankXp: { ...role('label'), fontFamily: 'Inter_400Regular', color: C.inkSoft },
-  // THE TRACKS THAT USED TO LIVE HERE ARE NOW `StruckBar`, and the measurement
-  // that justified them survives the move.
-  //
-  // The lesson was: `HUE_SOFT` is the token whose comment says "progress tracks",
-  // so the conversion reached for it, and the value it carried (#F0F7F6) put this
-  // track at ΔL* 3.30 from the white Card face under it and the six Branch
-  // Mastery bars at ΔL* 1.50 from `paper`. A progress bar communicates exactly
-  // one thing — how much is LEFT — and at 1.04:1 there was no remainder to see:
-  // six full-looking bars, whatever the reader had actually finished.
-  //
-  // The track is now the branch's own hue at a tenth strength (`ramp().track`),
-  // which is a different colour per row and so could not be checked by eye at
-  // all. It is checked by arithmetic instead: check-ui asserts every ramp's
-  // track clears 1.2:1 on both paper and a card face, AND that the fill clears
-  // 3:1 against its own track. Naming beat measuring once here; it does not get
-  // to twice.
-  rankUntil: { ...role('micro'), color: C.inkSoft, letterSpacing: 1, textAlign: 'right', marginTop: SPACE[1] },
 
   quotesCard: { flexDirection: 'row', alignItems: 'center', gap: SPACE[3] },
   quotesIcon: {

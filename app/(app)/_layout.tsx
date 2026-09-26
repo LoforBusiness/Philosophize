@@ -182,6 +182,13 @@ export default function AppLayout() {
 
   return (
     <Tabs
+      // BACK GOES WHERE YOU CAME FROM. The default `backBehavior` is
+      // 'firstRoute', so `router.back()` on a hidden route pushed from a tab —
+      // the streak from Profile, Settings from Profile — handed the press to the
+      // tab navigator and landed the reader on Home, a screen they were not on
+      // (reported 2026-09-26). 'history' returns to the tab that pushed it, and
+      // the Android back button follows the same trail.
+      backBehavior="history"
       // A light tap under the thumb when a tab is pressed. `touch()` rather than
       // a cue: moving between tabs is navigation, which makes no sound (see
       // lib/feedback.ts), but the press should still be felt to have landed.

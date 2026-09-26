@@ -595,6 +595,12 @@ function ripples(seed: number, y: number, h: number, n: number): string {
 // a blush of the palette's ember in the sky (the spark, kept to the lightest
 // tint, never a mass), olive hills, a teal middle distance and a deep floor.
 //
+// AND ONLY ONE SKY IS BLUE. The owner asked for the pale blues to be seen less
+// (2026-09-26): three pale blue-green skies in a row read as one colour used
+// everywhere. Logic keeps its pale slate sky; epistemology's mist and
+// metaphysics' dusk are warm-grey tints of the palette's sage and olive instead,
+// and their hills keep the branch hue lower down, where it is smaller.
+//
 // This file keeps its ZERO imports (§17), so the values are literals, derived
 // once from tone.ts's `mix` rather than typed by eye. Everything that stands above
 // his knee still clears 5:1 against the ink figure — check:walk §9 measures it —
@@ -633,13 +639,13 @@ const PALETTES: Record<string, Palette> = {
   },
   // Mist, a pinnacle, a wind-shaped tree. Pale, and almost all air. Teal.
   epistemology: {
-    sky: '#DDE4E0', cloud: '#FDFDFC', cloudShade: '#BBCBC7',
-    far: '#ADC0BB', mid: '#819F99', near: '#314C48', ink: '#1A1A1A', earth: '#427069',
+    sky: '#EBECE6', cloud: '#FDFDFC', cloudShade: '#CDD0C4',
+    far: '#B4BCB3', mid: '#819F99', near: '#314C48', ink: '#1A1A1A', earth: '#427069',
   },
   // Moon over a cliff of layered rock, pines on the edge of it. Deep teal.
   metaphysics: {
-    sky: '#D9E1DF', cloud: '#FDFDFC', cloudShade: '#B5C4C4',
-    far: '#A4B7B8', mid: '#739194', near: '#264043', ink: '#1A1A1A', earth: '#2E5B61',
+    sky: '#E3E3DA', cloud: '#FDFDFC', cloudShade: '#C3C5B6',
+    far: '#A9B1A6', mid: '#739194', near: '#264043', ink: '#1A1A1A', earth: '#2E5B61',
   },
   // Faceted peaks with lit faces, and water lying under them. A sunset.
   aesthetics: {

@@ -13,6 +13,7 @@ import { MotiView, AnimatePresence } from 'moti';
 import BadgeMedal from './BadgeMedal';
 import RankSeal, { type SealState } from './RankSeal';
 import RankClimbChart from './RankClimbChart';
+import RankHeader from '@/components/profile/RankHeader';
 import { RANKS, awardedRank, rankProgress, rankRequirement, type RankDef, rankOrder, rankDegree } from '@/data/ranks';
 import { circleForRank, RANK_EPITHETS, toRoman } from '@/data/rankLore';
 import {
@@ -216,11 +217,7 @@ export default function RanksBadgesSheet() {
 
   if (!visible) return null;
 
-  const { current, next, index, pending } = awardedRank(rankIndex, totalXP);
-  const prevXP = current.xp;
-  const span = next ? next.xp - prevXP : 1;
-  const rankPct = next ? clamp((totalXP - prevXP) / span, 0, 1) : 1;
-  const toNext = next ? Math.max(0, next.xp - totalXP) : 0;
+  const { current, index } = awardedRank(rankIndex, totalXP);
   const earnedCount = BADGES.filter((b) => isEarned(b, stats)).length;
   const badgeW = (width - 32 - 2 * BADGE_GAP) / 3;
 
@@ -276,43 +273,25 @@ export default function RanksBadgesSheet() {
                   contentContainerStyle={styles.ascent}
                   showsVerticalScrollIndicator={false}
                 >
-                  {/* HERO — the current rank as a credential */}
-                  <View style={styles.hero}>
-                    <RankSeal glyph={current.glyph} state="current" size={104}
-                      order={rankOrder(index)} degree={rankDegree(index)} />
-                    <View style={styles.heroText}>
-                      <Text style={styles.heroKicker}>RANK {current.id} · {toRoman(current.id)}</Text>
-                      <Text style={styles.heroName}>{current.name}</Text>
-                      <Text style={styles.heroCircle}>{circleForRank(current.id).name}</Text>
-                      <View style={styles.heroBarRow}>
-                        <View style={styles.heroTrack}>
-                          <View style={[styles.heroFill, { width: `${Math.round(rankPct * 100)}%` }]} />
-                        </View>
-                      </View>
-                      <Text style={styles.heroToNext}>
-                        {pending
-                          ? `Finish a lesson to reach ${next?.name ?? 'the next rank'}`
-                          : next
-                            ? `${toNext.toLocaleString()} XP to ${next.name}`
-                            : 'Highest rank attained'}
-                      </Text>
+                  {/* HERO — the rank you hold, the one you are climbing to, and the
+                      climb between them. The same header Profile draws
+                      (components/profile/RankHeader) on the same flat card, with
+                      the chart under it: one object on both screens. The chart's
+                      own legend is off because the header has already said it. */}
+                  <View style={styles.heroCard}>
+                    <RankHeader rankIndex={index} totalXP={totalXP} />
+                    <View style={styles.climbWrap}>
+                      <RankClimbChart
+                        rankIndex={index}
+                        totalXP={totalXP}
+                        events={xpEvents}
+                        width={width - 68}
+                        height={188}
+                        seenXP={chartSeenXP}
+                        onSeen={markChartSeen}
+                        legend={false}
+                      />
                     </View>
-                  </View>
-
-                  {/* THE CLIMB — this band only, one step per thing earned.
-                      The full ladder is still below, because a chart of the
-                      current band answers "how am I doing" and the ladder answers
-                      "what is coming", and dropping one for the other would trade
-                      a real question for another real question. */}
-                  <View style={styles.climbWrap}>
-                    <RankClimbChart
-                      rankIndex={index}
-                      totalXP={totalXP}
-                      events={xpEvents}
-                      width={width - 32}
-                      seenXP={chartSeenXP}
-                      onSeen={markChartSeen}
-                    />
                   </View>
 
                   <Text style={styles.spineHint}>THE WHOLE LADDER · TAP A SEAL</Text>
@@ -562,26 +541,13 @@ const styles = StyleSheet.create({
   tabText: { fontFamily: 'Inter_700Bold', fontSize: 12, color: Ink },
   tabTextOn: { color: Paper },
 
-  // hero
-  hero: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: Ink,
-    borderRadius: 8,
-    padding: 14,
-    backgroundColor: Paper,
-  },
-  heroText: { flex: 1, marginLeft: 14 },
-  heroKicker: { fontFamily: 'Inter_700Bold', fontSize: 9, color: InkSoft, letterSpacing: 1.6 },
-  heroName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, color: Ink, marginTop: 1 },
-  heroCircle: { fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12, color: InkSoft, marginTop: 1 },
-  heroBarRow: { marginTop: 9 },
-  heroTrack: { height: 7, borderRadius: 4, backgroundColor: Track, overflow: 'hidden' },
-  heroFill: { height: 7, borderRadius: 4, backgroundColor: Ink },
-  heroToNext: { fontFamily: 'Inter_500Medium', fontSize: 10.5, color: InkSoft, marginTop: 6 },
 
-  climbWrap: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 2 },
+  // A flat white card on the kit's 2px edge, as Profile's rank section is.
+  heroCard: {
+    backgroundColor: '#FFFFFF', borderRadius: 16, borderWidth: 2, borderColor: '#DFDFDC',
+    padding: 16, marginTop: 4,
+  },
+  climbWrap: { marginTop: 16 },
   spineHint: { fontFamily: 'Inter_700Bold', fontSize: 9, color: InkSoft, letterSpacing: 2, marginTop: 18, marginBottom: 4 },
 
   // ── the ladder ──────────────────────────────────────────────────────────
