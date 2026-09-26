@@ -577,8 +577,29 @@ function ripples(seed: number, y: number, h: number, n: number): string {
 // a ruled grey sky, ethics is the starkest of the six. A single five-step ramp
 // for all of them is why they used to look like the same picture six times.
 //
-// Every value is a warm grey off the paper-to-ink ramp the app is already printed
-// on — no hue anywhere, per §19.
+// ── AND EVERY PLACE IS IN THE OWNER'S PALETTE NOW (2026-09-26) ─────────────
+//
+// Every value used to be a warm grey off the paper-to-ink ramp, "no hue
+// anywhere, per §19". That was the rule while the whole app was black ink on
+// warm paper; it stopped being the app's rule when the owner chose six swatches
+// (§7) and asked for the beige-and-gold look to go from every surface. A road
+// of warm greys under a teal tab bar was the last big sheet of it.
+//
+// So each place is its BRANCH's hue (constants/design.ts BRANCH), walked toward
+// paper for the sky and the far hills and toward ink for the near scrub:
+//   sky  = hue 16% into paper      cloudShade = 34%     far = 42%     mid = 66%
+//   near = hue 42% into ink        cloud = paper lifted toward white
+//   earth = the hue itself, the ground band under the ink turf
+// — except aesthetics, whose branch hue is a bronze and would come back as the
+// exact gold wash being removed. It is a sunset instead, as its first lesson is:
+// a blush of the palette's ember in the sky (the spark, kept to the lightest
+// tint, never a mass), olive hills, a teal middle distance and a deep floor.
+//
+// This file keeps its ZERO imports (§17), so the values are literals, derived
+// once from tone.ts's `mix` rather than typed by eye. Everything that stands above
+// his knee still clears 5:1 against the ink figure — check:walk §9 measures it —
+// and the old personalities survive in the contrast: ethics keeps the darkest
+// floor of the six.
 
 export interface Palette {
   sky: string;
@@ -588,6 +609,8 @@ export interface Palette {
   mid: string;
   near: string;
   ink: string;
+  /** The body of the ground under the ink turf — the branch hue at full depth. */
+  earth: string;
 }
 
 // A cloud's SHADE has to be darker than the sky, not merely darker than the
@@ -598,35 +621,35 @@ export interface Palette {
 // before this was spotted. Every `cloudShade` below is now at least a step darker
 // than its own `sky`, and the difference is the whole shape.
 const PALETTES: Record<string, Palette> = {
-  // The great cloud, a ruled sky, one oak on a plain.
+  // The great cloud, a ruled sky, one oak on a plain. Slate blue.
   logic: {
-    sky: '#CFCABD', cloud: '#FAF8F2', cloudShade: '#B4AE9F',
-    far: '#B0AA9C', mid: '#6B6558', near: '#2E2A24', ink: '#1A1A1A',
+    sky: '#DAE2E3', cloud: '#FDFDFC', cloudShade: '#B6C7CD',
+    far: '#A6BBC3', mid: '#7797A5', near: '#294552', ink: '#1A1A1A', earth: '#33647B',
   },
-  // The cloud front over a bare summit. The starkest of the six.
+  // The cloud front over a bare summit. The starkest of the six. Olive.
   ethics: {
-    sky: '#CBC5B7', cloud: '#F6F3EB', cloudShade: '#A9A394',
-    far: '#948E7F', mid: '#6B6558', near: '#1A1A1A', ink: '#1A1A1A',
+    sky: '#E2E4DC', cloud: '#FDFDFC', cloudShade: '#C7CABE',
+    far: '#BBBFB1', mid: '#989E89', near: '#1F2319', ink: '#1A1A1A', earth: '#656E50',
   },
-  // Mist, a pinnacle, a wind-shaped tree. Pale, and almost all air.
+  // Mist, a pinnacle, a wind-shaped tree. Pale, and almost all air. Teal.
   epistemology: {
-    sky: '#E9E5DC', cloud: '#FAF8F2', cloudShade: '#C8C2B3',
-    far: '#CAC5B8', mid: '#A29C8E', near: '#6B6558', ink: '#4A453C',
+    sky: '#DDE4E0', cloud: '#FDFDFC', cloudShade: '#BBCBC7',
+    far: '#ADC0BB', mid: '#819F99', near: '#314C48', ink: '#1A1A1A', earth: '#427069',
   },
-  // Moon over a cliff of layered rock, pines on the edge of it.
+  // Moon over a cliff of layered rock, pines on the edge of it. Deep teal.
   metaphysics: {
-    sky: '#D4CFC2', cloud: '#F2EEE5', cloudShade: '#ADA798',
-    far: '#9A9487', mid: '#6B6558', near: '#1A1A1A', ink: '#1A1A1A',
+    sky: '#D9E1DF', cloud: '#FDFDFC', cloudShade: '#B5C4C4',
+    far: '#A4B7B8', mid: '#739194', near: '#264043', ink: '#1A1A1A', earth: '#2E5B61',
   },
-  // Faceted peaks with lit faces, and water lying under them.
+  // Faceted peaks with lit faces, and water lying under them. A sunset.
   aesthetics: {
-    sky: '#D8D3C8', cloud: '#F7F4EC', cloudShade: '#B5AFA0',
-    far: '#B4AEA0', mid: '#7A7466', near: '#22201B', ink: '#1A1A1A',
+    sky: '#F6EAE4', cloud: '#FDFDFC', cloudShade: '#F1D5C9',
+    far: '#B7B8AF', mid: '#849E9A', near: '#273B3B', ink: '#1A1A1A', earth: '#5E6352',
   },
-  // A valley in layers, with a town in the fold of it.
+  // A valley in layers, with a town in the fold of it. Sienna.
   'political-philosophy': {
-    sky: '#CFCABD', cloud: '#F2EFE7', cloudShade: '#B1AB9C',
-    far: '#A8A294', mid: '#6B6558', near: '#33302A', ink: '#1A1A1A',
+    sky: '#EAE1DC', cloud: '#FDFDFC', cloudShade: '#D7C5BD',
+    far: '#CFB8B0', mid: '#B69287', near: '#604138', ink: '#1A1A1A', earth: '#8A5A4B',
   },
 };
 
@@ -670,6 +693,11 @@ export function placeFromUnitId(unitId: string): string {
     if (unitId.startsWith(p + '-') && p.length > best.length) best = p;
   }
   return best;
+}
+
+/** The earth this place's road is cut through. Read by BranchWorld's ground band. */
+export function earthFor(place: string): string {
+  return paletteFor(place).earth;
 }
 
 /** The sky this place is under. Read by BranchWorld for the strip's background. */

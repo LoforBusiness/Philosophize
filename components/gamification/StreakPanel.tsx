@@ -3,7 +3,7 @@ import Meter from '@/components/ui/Meter';
 import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
 import { ramp, rampFace } from '@/components/shared/tone';
-import StreakBook from './StreakBook';
+import TearCalendar from './TearCalendar';
 import { weekDays } from '@/lib/utils/week';
 import {
   STREAK_EMBER, STREAK_ON_INK, SLATE, SLATE_LIT, nextTier, tierFor,
@@ -156,12 +156,18 @@ export default function StreakPanel({
 
   return (
     <View>
-      {/* ── the head: the book, and what state it is in ────────────────────── */}
+      {/* ── the head: the pad, and what state it is in ─────────────────────── */}
       <View style={styles.head}>
-        {/* The book takes its pair as props precisely so it can be printed either
-            way up — and it is ember now rather than ink, which is the whole of
-            "alive or about to die at a glance". */}
-        <StreakBook value={streak} size={onInk ? 50 : 58} color={mark} paper={ground} />
+        {/* The tear-off calendar that hangs on the streak screen's wall, small.
+            Its sheet is white on either ground, so it always takes the PAPER
+            pair — ember alive, slate lapsed — and never the on-ink tint, which
+            is a colour for ink and reads at under 3:1 on a white sheet. */}
+        <TearCalendar
+          value={streak}
+          width={onInk ? 40 : 44}
+          mark={alive ? STREAK_EMBER : SLATE}
+          onInk={onInk}
+        />
         <View style={styles.headText}>
           <Text style={[styles.count, { color: mark }]}>
             {alive ? `${streak} DAY${streak === 1 ? '' : 'S'} RUNNING` : 'NO STREAK YET'}

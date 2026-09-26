@@ -464,7 +464,7 @@ const ThinkerCard = memo(function ThinkerCard({
             are — but they are somebody else's drawings, in full colour, at three
             different saturations, in an app that is otherwise hand-drawn ink on
             paper. See the header in ThinkerSeal. */}
-        <ThinkerSeal initial={p.name.charAt(0)} tint={tint} met={met} />
+        <ThinkerSeal initial={p.name.charAt(0)} tint={tint} met={met} size={50} name={p.name} />
       </View>
 
       <Text style={styles.cardName} numberOfLines={2}>

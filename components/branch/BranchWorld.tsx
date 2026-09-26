@@ -14,7 +14,7 @@ import {
   type Marker,
 } from './worldPath';
 import { figureAt, hopAt, hopMs, hopTravel } from './walkFigure';
-import { sceneLayers, discFor, skyFor, placeFromUnitId, TILE_W, type LayerArt } from './sceneArt';
+import { sceneLayers, discFor, skyFor, earthFor, placeFromUnitId, TILE_W, type LayerArt } from './sceneArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BRANCH IS A PLACE YOU WALK THROUGH.
@@ -60,8 +60,6 @@ const INK = '#1A1A1A';
 const SOFT = '#6B6B6B';
 const FAINT = '#C9C5BA';
 const PAPER = '#FAFAF7';
-/** The body of the ground, under its ink turf. See worldPath's drawing header. */
-const EARTH = '#635D51';
 
 const FIG_K = 0.62;
 const H = 360;
@@ -379,7 +377,7 @@ export default function BranchWorld({
     // one shape they all have in common.
     <View style={{ height: H, backgroundColor: skyFor(where), overflow: 'hidden' }}>
       <SceneBack camX={camX} place={where} unit={vp.s} width={width} />
-      <GroundBand camX={camX} chunk={vp.c} />
+      <GroundBand camX={camX} chunk={vp.c} place={where} />
 
       {/* THE FIGURE, drawn BEFORE the signs so it can never cover a lesson's name. */}
       <Animated.View style={[styles.figWrap, figStyle]} pointerEvents="none">
@@ -459,7 +457,9 @@ function SceneStrip({ camX, layer }: { camX: SharedValue<number>; layer: LayerAr
  * shadow he was standing on; cutting a lit turf line away from a darker body is
  * what every one of the reference engravings does where ground meets sky.
  */
-function GroundBand({ camX, chunk }: { camX: SharedValue<number>; chunk: number }) {
+function GroundBand({ camX, chunk, place }: { camX: SharedValue<number>; chunk: number; place: string }) {
+  // The body of the ground, under its ink turf, in the place's own hue (sceneArt).
+  const earth = earthFor(place);
   const chunks = useMemo(
     () => [chunk - 1, chunk, chunk + 1].map((c) => ({ c, art: groundArt(c) })),
     [chunk],
@@ -476,7 +476,7 @@ function GroundBand({ camX, chunk }: { camX: SharedValue<number>; chunk: number 
           height={h}
           viewBox={`0 ${GROUND_TOP} ${CHUNK_W} ${h}`}
         >
-          <SvgPath d={art.earth} fill={EARTH} />
+          <SvgPath d={art.earth} fill={earth} />
           <SvgPath d={art.ink} fill={INK} />
         </Svg>
       ))}

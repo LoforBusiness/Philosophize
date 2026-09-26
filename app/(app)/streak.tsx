@@ -14,7 +14,7 @@ import Meter from '@/components/ui/Meter';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import {
-  STREAK_EMBER, STREAK_DEEP, STREAK_WASH, SLATE,
+  STREAK_EMBER, STREAK_DEEP, STREAK_WASH,
   restDaysHeld, restEarnEvery, restCap, tierFor, nextTier,
 } from '@/constants/streak';
 import { effectiveStreak, streakIsAlive, restDaysToSpend } from '@/lib/utils/streak';
@@ -328,21 +328,13 @@ export default function StreakScreen() {
           onMomentumScrollEnd={onMoveEnd}
         >
           {/* ── THE HERO ────────────────────────────────────────────────────
-              The count is the loudest thing on the screen and it takes the ember
-              when it is alive and the ash when it is not. That is the one colour
-              §19 and constants/streak.ts allow, in the one place they allow it. */}
+              The mascot in his study (components/gamification/StreakMascot):
+              the count is today's sheet of a tear-off calendar on the wall, in
+              the ember when it is alive and the ash when it is not — the one
+              colour §19 and constants/streak.ts allow, in the one place they
+              allow it — and the society already earned is a plaque beside it. */}
           <View style={styles.hero} onLayout={onHeroLayout}>
-            <StreakMascot mood={mood} alive={alive} hold={hold} />
-            <Text style={[styles.count, { color: alive ? STREAK_EMBER : SLATE }]}>{shown}</Text>
-            <Text style={styles.countWord}>
-              {alive ? `DAY${shown === 1 ? '' : 'S'} RUNNING` : 'STREAK LAPSED'}
-            </Text>
-
-            {tier ? (
-              <View style={styles.tierChip}>
-                <Text style={styles.tierChipText}>{tier.name.toUpperCase()}</Text>
-              </View>
-            ) : null}
+            <StreakMascot mood={mood} alive={alive} count={shown} tier={tier} next={next} hold={hold} />
           </View>
 
           {/* ── THE SOCIETY ─────────────────────────────────────────────────
@@ -431,19 +423,6 @@ const styles = StyleSheet.create({
   body: { paddingHorizontal: SPACE[3], paddingBottom: SPACE[5], gap: SPACE[3] },
 
   hero: { alignItems: 'center', paddingTop: SPACE[2] },
-  // Big. A streak screen whose number is the same size as a stat tile has not
-  // understood which of the two the reader came for.
-  count: {
-    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 72, lineHeight: 78,
-    includeFontPadding: false, marginTop: SPACE[2],
-  },
-  countWord: { ...role('micro'), letterSpacing: 2, color: C.inkSoft },
-  tierChip: {
-    marginTop: SPACE[2], paddingHorizontal: SPACE[2], paddingVertical: 5,
-    borderRadius: RADIUS.pill, backgroundColor: STREAK_WASH,
-  },
-  tierChipText: { ...role('micro'), letterSpacing: 2, color: STREAK_DEEP, fontFamily: 'Inter_700Bold' },
-
   // An information panel: white, on the 2px pale-grey edge every card in the
   // app now wears (2026-09-16). No ledge — only a thing you can press stands up.
   card: {
