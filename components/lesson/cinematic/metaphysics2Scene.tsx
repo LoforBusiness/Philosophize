@@ -1,433 +1,749 @@
-import {
-  View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
+import ObjectArt from './ObjectArt';
+import { Outlined, ell, bar, tri } from './Silhouette';
 import { BEATS } from './metaphysics2Script';
 import {
-  clamp01, dirsFrom, WALK, ease01, lerp, mixStance, moveTr, pose, strideStance, type Bundle, } from './rig';
-// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
-// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
-import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
-import { facing, GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useCarry, carry, lookPose, pickAt,
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
+  type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
-import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
+import { reachHandTo } from './interact';
+import { useLinger } from './useLinger';
+import { lineOf, stage, bump } from './pace';
+import {
+  curtain, valance, table, hat, easel, door, temple,
+  PROS, TABLE, HAT, EASEL, TRAP, DOORS, DOOR, BACKDROP,
+} from './metaphysics2Set';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
+// ─────────────────────────────────────────────────────────────────────────────
+// metaphysics-being-2, "Something vs. Nothing" — A MAGICIAN'S THEATRE STAGE.
+//
+// Redrawn 2026-09-26, one of six second lessons. The owner's note that set its pace:
+// the stage keeps acting for the WHOLE of every voiced line, not one second of
+// motion and then ten of stillness. Every act below is laid across its line in
+// stages (pace.ts), with the line lengths copied from the narration manifest.
+//
+//   b0   the curtains part; he taps the hat, a dove flies out and vanishes in a puff —
+//        a thing that could fail to exist — and he draws the universe out of the hat
+//        as a globe and sets it on the table.
+//   b1   the marquee lights letter by letter: WHY SOMETHING RATHER THAN NOTHING?; he
+//        tips the empty hat and shakes it, and nothing falls out.
+//   b2   the principle goes up on the easel; he lifts the table cloth, and the trick's
+//        mechanism is there, running — nothing without a reason.
+//   b3   he walks to the wings and pulls back the curtain looking for the mechanism
+//        behind the stage itself.
+//   b4   back at the table: the trapdoor opens and the whole act sinks away — the
+//        simpler state, nothing — and then comes back up: existence needs the reason.
+//   b5   a painted temple comes down from the flies for Parmenides; a spotlight finds
+//        it and he bows.
+//   b6   two stage doors roll in from the wings, IT IS and IT IS NOT.
+//   b8   he opens IT IS NOT: there is no floor behind it. He steps and pulls back.
+//   b9   he tries it three ways — a step, the wand, a thought — and each finds
+//        nothing; IT IS lights.
+//   b10  Q1: three hats — a horse, a unicorn, nothing at all.
+//   b11  Q2: three cards lowered from the flies.
+//
+// COMPOSITION, in stage units: curtains 0–26 and 374–400, the valance 290–314 with
+// the marquee on it; the easel's board 34–158 × 322–396; the table at x 152 (top 456)
+// over the trapdoor; he works at x 196; the temple flat 70–330 × 318–430; the doors
+// at x 270 and 322. Band [288, 514].
+// ─────────────────────────────────────────────────────────────────────────────
+
 const TONE = stageTone('metaphysics');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
+const { RULE } = TONE;
+const LIP = lipOf(TONE);
+const WOOD = stageToneOf(OLIVE);
+const DRAPE = stageToneOf(TEAL);
+const PAINT = stageToneOf(SAGE);
+const TR = 0.85;
+/** The magician's scale: a lone figure at K_FIG fills 46% of this band; this is 37%. */
+const K_MAG = K_FIG * 0.82;
+/** A hand on a stage point, at the magician's own scale. */
+function handOn(s: Stance, x: number, dir: 1 | -1, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  return w <= 0 ? s : reachHandTo(s, { x, groundY: GROUND, k: K_MAG, dir }, 1, tx, ty, w);
+}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// THE ROAD THAT FORKS, AND THE WAY THAT ISN'T THERE.
-//
-// ONE PICTURE (H64): the road is drawn SOLID out to the fork at x 306 — the IT IS
-// way, with a solid post standing on it — and past the fork it is only a row of
-// dashes, flickering and thinning as `gone` rises. The way that "is not" is
-// literally a way that is not there: you can see there is nothing to walk on.
-// That is Parmenides' second way in one image, and the traveller walking onto it
-// and recoiling (beat 4) is the argument HAPPENING rather than being narrated.
-//
-// A 3x2 comparison matrix used to run across the top third saying the same thing
-// in words. It is gone; the script's header carries the three reasons.
-//
-// ── THE COMPOSITION, IN NUMBERS (H56) ───────────────────────────────────────
-//
-// Every y below is MEASURED, not estimated. The first draft of this block put the
-// traveller's crown at 352 and the sign plates at 386; the rig says the crown is
-// at 395 on every beat, which meant the plate and his head shared y 396…412 while
-// he stood at x 253…312 on beat 4 — his head drawn inside the IT IS sign. The
-// comment was wrong before the scene was, which is exactly the failure H56 exists
-// to catch, so these come from scripts run against `solve()` rather than from
-// reading the styles.
-//
-// · the riddle headline box   y 236…264, x  40…360
-// · Leibniz's principle strip y 270…290, x  40…360 (slides in on beat 2)
-// · its two consequences      y 294…314 and 318…338, x 40…360 — beats 3–9 only
-// · the three posted claims   y 302…340, x  20…380 — Q1 only, three Targets
-//   (CLAIM_L is derived: (400 - (112*3 + 12*2)) / 2 = 20, so the row is centred)
-// · BOTH sign plates          y 356…382 — above the crown, by 13 units
-// · both posts                y 382…500, at x 292 (IT IS) and x 360 (IT IS NOT)
-// · the traveller             crown y 395, feet 500, on every beat and phase
-// · he WALKS x 92 → 150 → 214 → 350 → 236; widest body span x 69…370. The
-//   recoil beats were at 292, which is BEFORE the fork (306) and directly under
-//   the IT IS plate — his hat, 9 above the crown, rose into it. At 350 he is out on
-//   the dashes the sentence puts him on, under the plate that has dissolved.
-// · the road, ticks and fork  y 493…507
-//
-// THE TWO CLEARANCES: claims stop at 340 and the plates start at 356, so 16 units
-// of paper. The plates stop at 382 and the crown is 395, so 13. Nothing the reader
-// has to read is ever behind him.
-//
-// The POSTS do cross his y range, and that is correct rather than tolerated: a man
-// walking past a signpost passes in front of it, and `Stickman` is drawn last so he
-// does. What may never happen is a WORD behind him, which is what the plates being
-// above 382 buys.
-//
-// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
-// Five taps used to hold one frame, and the fork carried its two signs and the
-// riddle its headline before a word about either was said. Each now arrives as it
-// is named: the headline on "the question why there is something rather than
-// nothing" (`ask`); under Leibniz's principle, its application SO EXISTENCE
-// ITSELF NEEDS A REASON (`applied`, y 294…314) and then his premise NOTHING IS
-// SIMPLER THAN SOMETHING (`simpler`, y 318…338); the two signs are planted, IT IS
-// and then IT IS NOT, on "a goddess sets out two ways" (`ways`); and on "not a
-// genuine alternative to what is" IT IS is struck solid (`only`). The two argument
-// lines leave, fast, on Q1, because the posted claims take that row.
-//
-// R7c — on the sort, the reader's chip decides whether IT IS stands as the ONLY
-// way: lit for "never possible" and for "always necessary" (either way nothing was
-// ever a rival), plain for "possible, and lost" (there was one, and it lost). The
-// dissolved second way is NOT driven: `gone` may never come back (the script's
-// header), so the table moves only the sign.
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, metaphysics-being-2. */
+const LINES = [4.7, 5.8, 4.7, 5.4, 7.4, 5.7, 7.6, 0, 5.1, 7.0, 0, 0, 0];
 
+const X = BEATS.map((b) => b.x ?? 200);
+/** Which way he faces: the table is to his left; the wings, the doors and the hats to his right. */
+const DIR = [-1, -1, -1, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1];
 const E = BEATS.map((b) => b.e ?? 0);
-const X = BEATS.map((b) => b.x ?? 214);
-// WHICH WAY HE IS POINTING, read off the same x track he walks along:
-// +1 where it rises, -1 where it falls, and HOLD while he stands still, so a
-// figure who walks left to something keeps facing it while he talks about it.
-const DIR = dirsFrom(X, 1);
-// The camera, from the staging: it follows the figure this track describes,
-// pulls back on every graded beat so a tap lands where it is aimed, and leans in
-// on the quote. See followMoves in ./camera.ts.
-const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics2'));
-const GONE = BEATS.map((b) => b.gone ?? 0);
-const PR = BEATS.map((b) => b.pr ?? 0);
-const ASK = BEATS.map((b) => b.ask ?? 0);
-const APPLIED = BEATS.map((b) => b.applied ?? 0);
-const SIMPLER = BEATS.map((b) => b.simpler ?? 0);
-const WAYS = BEATS.map((b) => b.ways ?? 0);
-const ONLY = BEATS.map((b) => b.only ?? 0);
+const ACT = BEATS.map((b) => b.act ?? '');
+const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
+const A_DOVE = is('dove');
+const A_SHAKE = is('shake');
+const A_REVEAL = is('reveal');
+const A_SEARCH = is('search');
+const A_SWEEP = is('sweep');
+const A_BOW = is('bow');
+const A_DOORS = is('doors');
+const A_STEP = is('step');
+const A_TRIES = is('tries');
+const since = (k0: number) => BEATS.map((_, k) => (k0 >= 0 && k >= k0 ? 1 : 0));
+const ASK = since(BEATS.findIndex((b) => b.ask));
+const CARDS = BEATS.map((b) => b.cards ?? 0);
+const TEMPLE = since(BEATS.findIndex((b) => b.temple));
+const DOORS_ON = since(BEATS.findIndex((b) => b.doors));
+const OPEN = since(BEATS.findIndex((b) => b.open));
+/** The cloth stays up once lifted; the globe stays on the table once drawn out. */
+const CLOTH = since(A_REVEAL.indexOf(1));
+const GLOBE = since(0);
+const HATS = BEATS.map((b) => (b.hats ? 1 : 0));
+const FLIES = BEATS.map((b) => (b.flies ? 1 : 0));
 
-// R7c — the stage follows the sort on its own graded beat, and only there (R7).
-const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
-/**
- * Is IT IS the only way, at each bin, in the block's authored order:
- *   never possible     → 1  nothing was never a way, so IT IS stands alone
- *   possible, and lost → 0  nothing was a real rival, and lost to it
- *   always necessary   → 1  something had to exist: there was no other way
- */
-const ONLY_AT = [1, 0, 1];
-
-const SIGN_IS_X = 292;
-// 360 and not 364, with a plate 62 wide and not 68. The plate is its own element now
-// (S12), so the camera's measurement sees it, and at 364 it reached x 398, past the frame
-// the camera tables were built on. Here it ends at 391 and stays 7 clear of the IS sign.
-const SIGN_NOT_X = 360;
-
-// The road forks at x 306. Everything left of it is solid ground the traveller can
-// actually walk; everything right of it is drawn only as dashes, and dissolves.
-const FORK_X = 306;
-const TICKS = [40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300];
-const DASHES = [312, 326, 340, 354, 368];
-const GHOST_TICKS = [318, 344, 370];
-
-// ── Q1: three posted claims ─────────────────────────────────────────────────
-//
-// H66 — the wrong answers are the real rival positions. A UNICORN is the whole
-// question: it does not exist, so it FEELS like the answer, and the reader
-// pictured one while reading the prompt. That is exactly the distinction
-// Parmenides is drawing, and it is the trap the explanation then gets to name.
-// A HORSE is the control that makes the pair readable.
-const CLAIMS = [
-  { id: 'horse', label: 'A HORSE', correct: false },
-  { id: 'unicorn', label: 'A UNICORN', correct: false },
-  { id: 'nothing', label: 'NOTHING AT ALL', correct: true },
+// the three hats of Q1, on the floor in front of the doors
+const HAT_X = [198, 246, 294];
+const HATS_Q = [
+  { id: 'horse', label: 'HORSE', correct: false },
+  { id: 'unicorn', label: 'UNICORN', correct: false },
+  { id: 'nothing', label: 'NOTHING', correct: true },
 ];
-const CLAIM_T = 302;
-const CLAIM_H = 38;
-const CLAIM_W = 112;
-const CLAIM_GAP = 12;
-const CLAIM_L = (STAGE_W - (CLAIM_W * 3 + CLAIM_GAP * 2)) / 2;
+// the three cards of Q2, lowered from the flies
+const FLY_X = [196, 268, 340];
+const FLY_W = 68;
+const FLY = [
+  { id: 'never', l1: 'NEVER', l2: 'POSSIBLE', correct: false },
+  { id: 'lost', l1: 'POSSIBLE,', l2: 'AND LOST', correct: true },
+  { id: 'must', l1: 'ALWAYS', l2: 'NECESSARY', correct: false },
+];
 
-export default function Metaphysics2Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
-  const reacting = REACT[i] === 1;
-  const cv = useCarry(8);
-  const cur = BEATS[i];
+const MARQUEE = 'WHY SOMETHING RATHER THAN NOTHING?';
+const CARD_LINES = [
+  ['NOTHING IS WITHOUT', 'A REASON'],
+  ['SO EXISTENCE ITSELF', 'NEEDS A REASON'],
+  ['NOTHING IS SIMPLER', 'THAN SOMETHING'],
+];
 
+/** Where the globe rests on the table once he has set it down. */
+const GLOBE_REST = { x: 174, y: TABLE.top - 9 };
+const GLOBE_R = 8;
+
+function hHold(code: number, t: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);
+  if (code === 0) return stand(t);
+  return narratorHold(code, t);
+}
+function hLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  if (code === 0) return stand(t);
+  return narratorLive(code, t, bt);
+}
+
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('metaphysics'));
+
+export default function Metaphysics2Scene({
+  clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn,
+}: SceneApi) {
+  const held = useHeld();
+  const cv = useCarry(24);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / moveTr(X[p], X[n], 0.9));
+    const b = bt.value;
     const t = clock.value;
+    const tr = ease01(b / TR);
+    const L = lineOf(LINES, n);
+    const st = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a, z);
+    };
 
-    const moving = Math.abs(X[n] - X[p]) > 10;
-    const travS = moving
-      ? strideStance(X[p], X[n], emoteLive(E[n], t, bt.value), tr, WALK)
-      : mixStance(emoteHold(E[p], t), emoteLive(E[n], t, bt.value), tr);
+    // where he stands: a walk lasts as long as its distance needs
+    const walking = Math.abs(X[n] - X[p]) > 1;
+    const walkU = walking ? ease01(b / moveTr(X[p], X[n], TR)) : 1;
+    const x = carry(cv, 0, n, X[p], X[n], walkU);
+    const dir = DIR[n] as 1 | -1;
 
-    // A line that is leaving goes in a quarter of a second, not over the walk: the
-    // row it sits in is where Q1's claims are posted, on the same frame.
-    const writeIn = ease01((bt.value - 0.3) / 0.6);
+    // ── his act, laid across the line ──────────────────────────────────────
+    let s: Stance = walking
+      ? travelStance(X[p], X[n], hHold(E[p], t), hHold(E[n], t), hLive(E[n], t, b), walkU, WALK, 0)
+      : hLive(E[n], t, b);
+
+    // the hat: tapped with the wand, then the globe drawn out and set down
+    const tap = A_DOVE[n] ? bump(b, L, 0.2, 0.3, 0.42) : 0;
+    const dove = A_DOVE[n] ? st(0.38, 0.66) : 0;
+    const puff = A_DOVE[n] ? bump(b, L, 0.62, 0.68, 0.8) : 0;
+    const draw = A_DOVE[n] ? st(0.72, 0.88) : 1;
+    const setDown = A_DOVE[n] ? st(0.88, 1) : 1;
+    const gx = A_DOVE[n] ? lerp(lerp(HAT.cx, HAT.cx + 12, draw), GLOBE_REST.x, setDown) : GLOBE_REST.x;
+    const gy = A_DOVE[n] ? lerp(lerp(HAT.brim - HAT.h, 410, draw), GLOBE_REST.y, setDown) : GLOBE_REST.y;
+    const holdGlobe = A_DOVE[n] ? bump(b, L, 0.7, 0.8, 1) : 0;
+    s = handOn(s, x, dir, HAT.cx + 6, HAT.brim - HAT.h - 2, tap);
+    s = handOn(s, x, dir, gx + 4, gy, holdGlobe);
+
+    // the empty hat tipped and shaken
+    const shake = A_SHAKE[n] ? bump(b, L, 0.42, 0.55, 0.88) : 0;
+    const shrug = A_SHAKE[n] ? st(0.86, 1) : 0;
+    s = handOn(s, x, dir, HAT.cx + 10, HAT.brim - HAT.h + 2, shake);
+    s = mixStance(s, emoteAny(178, t), shrug * 0.8);
+    const hatTilt = shake * (38 + 14 * Math.sin(t * 16));
+
+    // the cloth lifted on the mechanism
+    const lift = A_REVEAL[n] ? st(0.3, 0.58) : CLOTH[n] ? 1 : 0;
+    const liftHand = A_REVEAL[n] ? bump(b, L, 0.25, 0.4, 0.66) : 0;
+    s = handOn(s, x, dir, TABLE.cx + TABLE.w / 2 - 4, lerp(TABLE.top + 30, TABLE.top + 4, lift), liftHand);
+
+    // the curtain pulled back in the wings
+    const peek = A_SEARCH[n] ? st(Math.min(0.6, moveTr(X[p], X[n], TR) / L), 0.85) : 0;
+    s = handOn(s, x, dir, PROS.right + 2, 430, A_SEARCH[n] ? bump(b, L, 0.5, 0.62, 0.98) : 0);
+
+    // the whole act sinks through the trapdoor and comes back
+    const sweepFrom = A_SWEEP[n] ? moveTr(X[p], X[n], TR) / L : 0;
+    const trap = A_SWEEP[n] ? bump(b, L, sweepFrom, sweepFrom + 0.1, 0.98) : 0;
+    const sink = A_SWEEP[n] ? bump(b, L, sweepFrom + 0.08, sweepFrom + 0.3, 0.92) : 0;
+    s = mixStance(s, emoteAny(183, t), A_SWEEP[n] ? bump(b, L, sweepFrom, sweepFrom + 0.12, sweepFrom + 0.35) : 0);
+
+    // the temple lowered and the bow
+    const bow = A_BOW[n] ? bump(b, L, 0.62, 0.78, 1) : 0;
+    s = { ...s, tilt: s.tilt - 0.42 * bow, neck: s.neck + 0.3 * bow };
+
+    // the doors rolled in, and he points at each as it stops
+    const roll1 = A_DOORS[n] ? st(0.0, 0.38) : DOORS_ON[n] ? 1 : 0;
+    const roll2 = A_DOORS[n] ? st(0.28, 0.68) : DOORS_ON[n] ? 1 : 0;
+    const signs = A_DOORS[n] ? st(0.66, 0.84) : DOORS_ON[n] ? 1 : 0;
+    s = mixStance(s, emoteAny(183, t), A_DOORS[n] ? bump(b, L, 0.4, 0.5, 0.64) + bump(b, L, 0.84, 0.92, 1) : 0);
+
+    // IT IS NOT opened: the step onto nothing, and the three tries
+    const walkEnd = walking ? moveTr(X[p], X[n], TR) / L : 0;
+    const leaf = A_STEP[n] ? st(walkEnd + 0.02, walkEnd + 0.22) : OPEN[n] ? 1 : 0;
+    s = handOn(s, x, dir, DOORS[1].x + 4, GROUND - 38, A_STEP[n] ? bump(b, L, walkEnd, walkEnd + 0.1, walkEnd + 0.26) : 0);
+    const probe = (A_STEP[n] ? bump(b, L, 0.55, 0.64, 0.74) : 0) + (A_TRIES[n] ? bump(b, L, 0.02, 0.14, 0.3) : 0);
+    s = { ...s, footR: { x: s.footR.x + 20 * probe, y: s.footR.y - 6 * probe }, tilt: s.tilt - 0.08 * probe };
+    const recoil = A_STEP[n] ? st(0.72, 0.8) : 0;
+    s = mixStance(s, emoteAnyLive(318, t, Math.max(0, b - 0.72 * L)), recoil);
+    const point = A_TRIES[n] ? bump(b, L, 0.34, 0.44, 0.64) : 0;
+    s = handOn(s, x, dir, DOORS[1].x + 6, GROUND - 42, point);
+    const think = A_TRIES[n] ? st(0.66, 0.78) * (1 - st(0.94, 1)) : 0;
+    s = mixStance(s, emoteAny(158, t), think * 0.7);
+    const only = A_TRIES[n] ? st(0.86, 1) : OPEN[n] && !A_STEP[n] ? 1 : 0;
+
+    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(E[p], t)), s, tr));
 
     return {
-      trav: lookPose(travS, carry(cv, 0, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
-      gone: carry(cv, 1, n, GONE[p], GONE[n], tr),
-      pr: carry(cv, 2, n, PR[p], PR[n], tr),
-      ask: carry(cv, 3, n, ASK[p], ASK[n], ease01((bt.value - 0.15) / 0.5)),
-      applied: APPLIED[n] > 0
-        ? carry(cv, 4, n, APPLIED[p], APPLIED[n], writeIn)
-        : APPLIED[p] > 0 ? clamp01(1 - bt.value / 0.25) : 0,
-      simpler: SIMPLER[n] > 0
-        ? carry(cv, 5, n, SIMPLER[p], SIMPLER[n], writeIn)
-        : SIMPLER[p] > 0 ? clamp01(1 - bt.value / 0.25) : 0,
-      // Planted over a second: IT IS in its first half, IT IS NOT in its second.
-      ways: carry(cv, 6, n, WAYS[p], WAYS[n], ease01((bt.value - 0.3) / 1.0)),
-      only: carry(cv, 7, n, ONLY[p], reacting ? pickAt(ONLY_AT, pickPos.value) : ONLY[n], tr),
+      fig: lookPose(fig, x, GROUND, K_MAG, facing(DIR[p], DIR[n], b), 1, gazeX.value, gazeY.value, gazeOn.value),
+      open: carry(cv, 1, n, n === 0 ? 0 : 1, 1, n === 0 ? st(0, 0.24) : 1),
+      dove: carry(cv, 22, n, 0, dove, tr),
+      puff: carry(cv, 23, n, 0, puff, tr),
+      gx: carry(cv, 2, n, GLOBE_REST.x, gx, tr),
+      gy: carry(cv, 3, n, GLOBE_REST.y, gy, tr),
+      globe: GLOBE[n],
+      hatTilt: carry(cv, 21, n, 0, hatTilt, tr),
+      ask: carry(cv, 4, n, ASK[p], ASK[n], A_SHAKE[n] ? stage(b, L, 0, 0.45) : tr),
+      cards: carry(cv, 5, n, CARDS[p], CARDS[n], st(0.02, 0.24)),
+      lift: carry(cv, 6, n, CLOTH[p], lift, tr),
+      peek: carry(cv, 15, n, 0, peek, tr),
+      trap: carry(cv, 16, n, 0, trap, tr),
+      sink: carry(cv, 17, n, 0, sink, tr),
+      temple: carry(cv, 7, n, TEMPLE[p], TEMPLE[n], A_BOW[n] ? st(0, 0.6) : tr),
+      spot: carry(cv, 18, n, 0, A_BOW[n] ? bump(b, L, 0.3, 0.55, 1) : 0, tr),
+      roll1: carry(cv, 8, n, DOORS_ON[p], roll1, tr),
+      roll2: carry(cv, 9, n, DOORS_ON[p], roll2, tr),
+      signs: carry(cv, 10, n, DOORS_ON[p], signs, tr),
+      leaf: carry(cv, 11, n, OPEN[p], leaf, tr),
+      point: carry(cv, 20, n, 0, point, tr),
+      think: carry(cv, 19, n, 0, think, tr),
+      only: carry(cv, 12, n, 0, only, tr),
+      hats: carry(cv, 13, n, HATS[p], HATS[n], tr),
+      flies: carry(cv, 14, n, FLIES[p], FLIES[n], ease01(b / 1.1)),
       t,
     };
   });
 
-  const DT = useDerivedValue<Bundle>(() => SCENE.value.trav);
-  const notSign = useAnimatedStyle(() => {
-    // The flicker is what says "this is failing", not merely "this is faint" — a
-    // static grey road reads as a road drawn badly. It multiplies `gone`, so a
-    // way that is mostly still there only shimmers.
-    const flick = 0.75 + 0.25 * Math.sin(SCENE.value.t * 5.0);
-    return { opacity: (1 - SCENE.value.gone) * flick };
+  const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  const wand = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    const pt = SCENE.value.point;
+    return {
+      transform: [
+        { translateX: w[0].translateX }, { translateY: w[1].translateY },
+        { rotate: `${lerp(-30, 90, pt)}deg` },
+      ],
+    };
   });
-  // The second way's POST is planted in the second half of `ways`, growing up out of
-  // the road from its foot.
-  const notPost = useAnimatedStyle(() => ({ transform: [{ scaleY: clamp01(SCENE.value.ways * 2 - 1) }] }));
-  // The sign's PLATE flickers with the road: the same numbers, one style per view.
-  const notPlate = useAnimatedStyle(() => {
-    const flick = 0.75 + 0.25 * Math.sin(SCENE.value.t * 5.0);
-    return { opacity: (1 - SCENE.value.gone) * flick };
-  });
-  // The whole second sign drops onto its post as that post finishes growing.
-  const notBoard = useAnimatedStyle(() => {
-    const w = clamp01(SCENE.value.ways * 2 - 1);
-    return { opacity: w, transform: [{ translateY: (1 - w) * -8 }] };
-  });
-  // AND ITS NAME IS THERE OR IT IS NOT (D35, S13). It rode the flicker too, so on the
-  // eight beats the second way still stands IT IS NOT swam between 0.33 and 0.65, a
-  // word the reader could catch only every other second. The dashes and the plate
-  // carry the failing; the name stays readable while the way still stands (`gone`
-  // 0.35) and is absent once it has gone (0.95).
-  const notWord = useAnimatedStyle(() => ({ opacity: clamp01((0.6 - SCENE.value.gone) / 0.2) }));
-  // The first way is planted first: its post, then its board.
-  const isPost = useAnimatedStyle(() => ({ transform: [{ scaleY: clamp01(SCENE.value.ways * 2) }] }));
-  const isBoard = useAnimatedStyle(() => {
-    const w = clamp01(SCENE.value.ways * 2);
-    return { opacity: w, transform: [{ translateY: (1 - w) * -8 }] };
-  });
-  // IT IS, struck solid: the ink face and the reversed name ride `only`, the inked
-  // name its complement, so the word is never half-contrast on either ground.
-  const isLit = useAnimatedStyle(() => ({ opacity: SCENE.value.only }));
-  const isInk = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.only }));
-  const riddle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.ask,
-    transform: [{ scale: 1.08 - 0.08 * SCENE.value.ask }],
-  }));
-  const principle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.pr,
-    transform: [{ translateX: (1 - SCENE.value.pr) * -14 }],
-  }));
-  const applied = useAnimatedStyle(() => ({
-    opacity: SCENE.value.applied,
-    transform: [{ translateX: (1 - SCENE.value.applied) * -14 }],
-  }));
-  const simpler = useAnimatedStyle(() => ({
-    opacity: SCENE.value.simpler,
-    transform: [{ translateX: (1 - SCENE.value.simpler) * -14 }],
-  }));
+  const wandTip = useAnimatedStyle(() => ({ height: lerp(24, 9, SCENE.value.point) }));
 
-  const answered = picked !== null;
-  const showClaims = (cur.pick ?? 0) > 0 && !!cur.interact;
-
-  // NO pointerEvents="none" ON THIS ROOT. It blocks the View *and every
-  // descendant*, so the three claim Targets below were rendered, ringed, and
-  // completely dead — the reader could not answer Q1 at all and had no way past
-  // the beat. It was copied from the sibling "lesson 2" scenes, which are
-  // deck-question lessons with nothing tappable on stage. The Scene renders
-  // INSIDE the player's advance Pressable, so `auto` is what every other
-  // Target-using scene does: taps bubble up to advance, and a Target stops that
-  // bubble for itself. check:cinematic now fails any scene that imports Target
-  // and carries this prop on its root.
   return (
-    <Animated.View style={styles.scene}>
-      {/* ── the riddle, and Leibniz's answer to it ────────────────────────── */}
-      <Animated.View style={[styles.qBox, riddle]} pointerEvents="none">
-        <Text style={styles.qText}>WHY SOMETHING RATHER THAN NOTHING?</Text>
-      </Animated.View>
-      <Animated.View style={[styles.prStrip, principle]} pointerEvents="none">
-        <Text style={styles.prText}>NOTHING IS WITHOUT A REASON  ·  LEIBNIZ</Text>
-      </Animated.View>
-      <Animated.View style={[styles.prStrip, { top: 294 }, applied]} pointerEvents="none">
-        <Text style={styles.argText} numberOfLines={1}>SO EXISTENCE ITSELF NEEDS A REASON</Text>
-      </Animated.View>
-      <Animated.View style={[styles.prStrip, { top: 318 }, simpler]} pointerEvents="none">
-        <Text style={styles.argText} numberOfLines={1}>NOTHING IS SIMPLER THAN SOMETHING</Text>
-      </Animated.View>
-
-      {/* ── Q1, answered on the stage (H65): tap the one there is nothing to
-             picture. Target draws the breathing ring OUTSIDE each plate and
-             counts itself, so the panel below can say how many there are (I70). */}
-      {showClaims &&
-        CLAIMS.map((c, k) => {
-          const chosen = picked === c.id;
-          return (
-            <Target
-              id={c.id}
-              correct={c.correct}
-              picked={picked}
-              onPick={onPick}
-              key={c.id}
-              style={[styles.claim, { left: CLAIM_L + k * (CLAIM_W + CLAIM_GAP) }]}
-              disabled={answered}
-            >
-              <View
-                style={[
-                  styles.claimInner,
-                  answered && c.correct && styles.claimRight,
-                  answered && chosen && !c.correct && styles.claimWrong,
-                ]}
-              >
-                <Text style={[styles.claimText, answered && c.correct && styles.claimTextOn]}>
-                  {c.label}
-                </Text>
-              </View>
-            </Target>
-          );
-        })}
-
-      {/* ── the road, the fork and the two posts ──────────────────────────── */}
+    <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
+      <View style={styles.back} pointerEvents="none" />
+      <Temple S={SCENE} on={on} />
+      <Doors S={SCENE} on={on} />
+      <Easel S={SCENE} />
+      <Table S={SCENE} />
+      <Dove S={SCENE} on={on} />
+      {HATS[i] ? <Hats picked={picked} onPick={onPick} S={SCENE} /> : null}
       <View style={styles.ground} pointerEvents="none" />
-      {TICKS.map((x) => <View key={x} style={[styles.roadTick, { left: x }]} pointerEvents="none" />)}
-      <View style={styles.forkMark} pointerEvents="none" />
+      <Stickman D={DF} k={K_MAG} />
+      <Animated.View style={[styles.rider, wand]} pointerEvents="none">
+        <Animated.View style={[styles.wand, wandTip]} />
+      </Animated.View>
+      <Thought S={SCENE} on={on} />
+      <Curtains S={SCENE} />
+      <Marquee S={SCENE} />
+      {FLIES[i] ? <Flies picked={picked} onPick={onPick} S={SCENE} /> : null}
+    </View>
+  );
+}
 
-      <Animated.View style={[styles.postIs, isPost]} pointerEvents="none" />
-      <Animated.View style={[styles.signIs, isBoard]} pointerEvents="none">
-        <Animated.View style={[styles.signIsLit, isLit]} />
-        <Animated.Text style={[styles.signIsText, isInk]}>IT IS</Animated.Text>
-        <Animated.View style={[styles.signIsLitWrap, isLit]}>
-          <Text style={[styles.signIsText, styles.signIsTextLit]}>IT IS</Text>
+// ── the curtains, the valance and the marquee ───────────────────────────────
+
+const CURTAIN_L = curtain(-1);
+const CURTAIN_R = curtain(1);
+const VALANCE = valance();
+
+function Curtains({ S }: { S: SharedValue<any> }) {
+  // closed across the stage at the start, drawn back as the act begins
+  const left = useAnimatedStyle(() => ({ transform: [{ translateX: (1 - S.value.open) * 150 }] }));
+  const right = useAnimatedStyle(() => ({ transform: [{ translateX: -(1 - S.value.open) * 150 + S.value.peek * 16 }] }));
+  const slit = useAnimatedStyle(() => ({ opacity: S.value.peek, width: 16 * S.value.peek }));
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <Animated.View style={[styles.backstage, slit]}>
+        {[0, 1, 2].map((k) => <View key={k} style={[styles.rope, { left: 3 + k * 5 }]} />)}
+      </Animated.View>
+      <Animated.View style={[StyleSheet.absoluteFill, left]}><ObjectArt parts={CURTAIN_L} tone={DRAPE} /></Animated.View>
+      <Animated.View style={[StyleSheet.absoluteFill, right]}><ObjectArt parts={CURTAIN_R} tone={DRAPE} /></Animated.View>
+      <ObjectArt parts={VALANCE} tone={DRAPE} />
+    </View>
+  );
+}
+
+function Marquee({ S }: { S: SharedValue<any> }) {
+  const reveal = useAnimatedStyle(() => ({ width: 300 * S.value.ask }));
+  const bulbs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+  return (
+    <View style={styles.marquee} pointerEvents="none">
+      <Animated.View style={[styles.marqueeClip, reveal]}>
+        <Text style={styles.marqueeText} numberOfLines={1}>{MARQUEE}</Text>
+      </Animated.View>
+      {bulbs.map((k) => <Bulb key={k} S={S} k={k} />)}
+    </View>
+  );
+}
+
+function Bulb({ S, k }: { S: SharedValue<any>; k: number }) {
+  const st = useAnimatedStyle(() => ({
+    opacity: S.value.ask * (0.45 + 0.55 * (Math.sin(S.value.t * 5 + k * 1.3) > 0 ? 1 : 0)),
+  }));
+  return <Animated.View style={[styles.bulb, { left: 6 + k * 27 }, st]} />;
+}
+
+// ── the easel's cards ────────────────────────────────────────────────────────
+
+function Easel({ S }: { S: SharedValue<any> }) {
+  const cover = useAnimatedStyle(() => {
+    const off = clamp01(S.value.cards);
+    return { opacity: 1 - off, transform: [{ translateY: 50 * off }, { scaleY: 1 - 0.6 * off }] };
+  });
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <ObjectArt parts={EASEL_ART} tone={WOOD} />
+      <View style={styles.board}>
+        {CARD_LINES.map((c, k) => <CardLine key={k} S={S} k={k} lines={c} />)}
+      </View>
+      <Animated.View style={[styles.boardCover, cover]}>
+        <View style={styles.coverTassel} />
+      </Animated.View>
+    </View>
+  );
+}
+const EASEL_ART = easel();
+
+function CardLine({ S, k, lines }: { S: SharedValue<any>; k: number; lines: string[] }) {
+  const st = useAnimatedStyle(() => {
+    const v = clamp01(S.value.cards - k);
+    return { opacity: v, transform: [{ translateX: (1 - v) * -10 }] };
+  });
+  return (
+    <Animated.View style={[styles.cardRow, k > 0 && styles.cardRule, st]}>
+      <View style={styles.cardPip} />
+      <View>
+        <Text style={styles.cardText} numberOfLines={1}>{lines[0]}</Text>
+        <Text style={styles.cardText} numberOfLines={1}>{lines[1]}</Text>
+      </View>
+    </Animated.View>
+  );
+}
+
+// ── the table, the hat, the globe, the cloth and the mechanism under it ────
+
+const TABLE_ART = table();
+const HAT_ART = hat();
+
+function Table({ S }: { S: SharedValue<any> }) {
+  const act = useAnimatedStyle(() => ({ transform: [{ translateY: 70 * S.value.sink }] }));
+  const hatSt = useAnimatedStyle(() => ({ transform: [{ rotate: `${-S.value.hatTilt}deg` }] }));
+  const cloth = useAnimatedStyle(() => ({ transform: [{ scaleY: 1 - 0.86 * S.value.lift }] }));
+  const globe = useAnimatedStyle(() => ({
+    opacity: S.value.globe,
+    transform: [{ translateX: S.value.gx - GLOBE_R }, { translateY: S.value.gy - GLOBE_R }],
+  }));
+  const meridian = useAnimatedStyle(() => ({ transform: [{ translateX: 4 * Math.sin(S.value.t * 1.4) }] }));
+  const gear = useAnimatedStyle(() => ({ transform: [{ rotate: `${S.value.t * 90}deg` }] }));
+  const piston = useAnimatedStyle(() => ({ transform: [{ translateY: -6 * Math.abs(Math.sin(S.value.t * 2.2)) }] }));
+  const trap = useAnimatedStyle(() => ({ transform: [{ scaleX: S.value.trap }] }));
+  return (
+    <>
+      <Animated.View style={[styles.trapHole, trap]} pointerEvents="none" />
+      <View style={styles.sinkClip} pointerEvents="none">
+        <Animated.View style={[StyleSheet.absoluteFill, act]}>
+          {/* the mechanism under the table, running whether or not anyone can see it */}
+          <Animated.View style={[styles.gear, gear]}>
+            <View style={styles.gearBar} />
+            <View style={[styles.gearBar, { transform: [{ rotate: '90deg' }] }]} />
+          </Animated.View>
+          <Animated.View style={[styles.piston, piston]} />
+          <View style={styles.pulley} />
+          <ObjectArt parts={TABLE_ART} tone={WOOD} />
+          <Animated.View style={[styles.cloth, cloth]}>
+            <View style={styles.clothFringe} />
+          </Animated.View>
+          <Animated.View style={[StyleSheet.absoluteFill, { transformOrigin: `${HAT.cx}px ${HAT.brim}px` }, hatSt]}>
+            <ObjectArt parts={HAT_ART} tone={stageToneOf(DEEP)} />
+          </Animated.View>
+          <Animated.View style={[styles.globe, globe]}>
+            <View style={styles.globeBand} />
+            <Animated.View style={[styles.globeMeridian, meridian]} />
+          </Animated.View>
+        </Animated.View>
+      </View>
+    </>
+  );
+}
+
+// ── the dove: out of the hat, round once, and gone ──────────────────────────
+
+const DOVE_PARTS = [
+  ell(0, 0, 18, 10, PAPER_LIT),
+  ell(9, -4, 8, 7, PAPER_LIT),
+  tri(15, -4, 5, 3, 'right', EMBER),
+];
+function Dove({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const st = useAnimatedStyle(() => {
+    const u = S.value.dove;
+    const x = lerp(HAT.cx, 250, u) + 30 * Math.sin(u * Math.PI);
+    const y = lerp(HAT.brim - HAT.h, 350, u) - 30 * Math.sin(u * Math.PI);
+    return { opacity: u > 0 && u < 1 ? 1 - S.value.puff * 1.4 : 0, transform: [{ translateX: x }, { translateY: y }] };
+  });
+  const wing = useAnimatedStyle(() => ({ transform: [{ rotate: `${-30 + 40 * Math.sin(S.value.t * 18)}deg` }] }));
+  const puff = useAnimatedStyle(() => ({
+    opacity: S.value.puff,
+    transform: [{ translateX: 250 }, { translateY: 350 }, { scale: 0.5 + 1.2 * S.value.puff }],
+  }));
+  if (!on(A_DOVE)) return null;
+  return (
+    <>
+      <Animated.View style={[styles.rider, st]} pointerEvents="none">
+        <Outlined parts={DOVE_PARTS} width={1.5} line={INK} />
+        <Animated.View style={[styles.doveWing, wing]}>
+          <Outlined parts={[ell(0, -5, 8, 14, PAPER_LIT)]} width={1.5} line={INK} />
         </Animated.View>
       </Animated.View>
-
-      {/* everything past the fork — the road as well as the post — is only ever
-          dashes, and thins to nothing as the second way dissolves */}
-      <Animated.View style={[StyleSheet.absoluteFill, notSign]} pointerEvents="none">
-        {DASHES.map((x) => <View key={x} style={[styles.roadDash, { left: x }]} />)}
-        {GHOST_TICKS.map((x) => <View key={x} style={[styles.ghostTick, { left: x }]} />)}
-        <Animated.View style={[styles.postNot, notPost]} />
+      <Animated.View style={[styles.rider, puff]} pointerEvents="none">
+        {[0, 1, 2, 3, 4].map((k) => (
+          <View key={k} style={[styles.puffDot, { left: 14 * Math.cos(k * 1.26) - 5, top: 14 * Math.sin(k * 1.26) - 5 }]} />
+        ))}
       </Animated.View>
-      <Animated.View style={[styles.signNot, notBoard]} pointerEvents="none">
-        <Animated.View style={[styles.signNotPlate, notPlate]} />
-        <Animated.Text style={[styles.signNotText, notWord]}>IT IS NOT</Animated.Text>
-      </Animated.View>
+    </>
+  );
+}
 
-      <Stickman D={DT} k={K_FIG} />
+// ── the temple flat, and the spotlight on it ────────────────────────────────
+
+const TEMPLE_ART = temple();
+function Temple({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ translateY: -(1 - S.value.temple) * 150 }] }));
+  const spot = useAnimatedStyle(() => ({ opacity: 0.35 * S.value.spot }));
+  if (!on(TEMPLE)) return null;
+  return (
+    <View style={styles.templeClip} pointerEvents="none">
+      <Animated.View style={[StyleSheet.absoluteFill, st]}>
+        <View style={[styles.templeRope, { left: BACKDROP.x + 20 }]} />
+        <View style={[styles.templeRope, { left: BACKDROP.x + BACKDROP.w - 22 }]} />
+        <View style={{ position: 'absolute', left: 0, top: -PROS.valance }}>
+          <ObjectArt parts={TEMPLE_ART} tone={PAINT} />
+        </View>
+      </Animated.View>
+      <Animated.View style={[styles.spot, spot]} />
+    </View>
+  );
+}
+
+// ── the doors: rolled in, labelled, and the second opened onto nothing ──────
+
+const DOOR_ART = DOORS.map((d) => door(d.x));
+/** The door signs ride on posts above head height: he works in front of the doors. */
+const SIGN_Y = 374;
+function Doors({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const d1 = useAnimatedStyle(() => ({ transform: [{ translateX: (1 - S.value.roll1) * 140 }] }));
+  const d2 = useAnimatedStyle(() => ({ transform: [{ translateX: (1 - S.value.roll2) * 110 }] }));
+  const sign = useAnimatedStyle(() => ({ opacity: S.value.signs, transform: [{ translateY: (1 - S.value.signs) * -10 }] }));
+  const leaf = useAnimatedStyle(() => ({ transform: [{ scaleX: 1 - 0.82 * S.value.leaf }] }));
+  const glow = useAnimatedStyle(() => ({ opacity: 0.5 * S.value.only * (0.75 + 0.25 * Math.sin(S.value.t * 3)) }));
+  if (!on(DOORS_ON)) return null;
+  const top = GROUND - DOOR.h - 6;
+  return (
+    <>
+      <Animated.View style={[StyleSheet.absoluteFill, d1]} pointerEvents="none">
+        <Animated.View style={[styles.doorGlow, { left: DOORS[0].x - 8, top: top - 8 }, glow]} />
+        <ObjectArt parts={DOOR_ART[0]} tone={WOOD} />
+        <View style={[styles.doorLeaf, { left: DOORS[0].x, top }]}><View style={styles.knob} /></View>
+        <View style={[styles.signPost, { left: DOORS[0].x + DOOR.w / 2 - 0.75, top: SIGN_Y + 14 }]} />
+        <Animated.View style={[styles.doorSign, { left: DOORS[0].x - 6, top: SIGN_Y }, sign]}>
+          <Text style={styles.signText} numberOfLines={1}>{DOORS[0].label}</Text>
+        </Animated.View>
+      </Animated.View>
+      <Animated.View style={[StyleSheet.absoluteFill, d2]} pointerEvents="none">
+        <ObjectArt parts={DOOR_ART[1]} tone={WOOD} />
+        {/* behind this door there is no floor: the gap runs through the stage line */}
+        <View style={[styles.void, { left: DOORS[1].x, top }]} />
+        <View style={[styles.voidFloor, { left: DOORS[1].x }]} />
+        <Animated.View style={[styles.doorLeaf, { left: DOORS[1].x, top, transformOrigin: '0% 50%' }, leaf]}>
+          <View style={styles.knob} />
+        </Animated.View>
+        <View style={[styles.signPost, { left: DOORS[1].x + DOOR.w / 2 - 0.75, top: SIGN_Y + 14 }]} />
+        <Animated.View style={[styles.doorSign, { left: DOORS[1].x - 8, top: SIGN_Y, width: DOOR.w + 16 }, sign]}>
+          <Text style={styles.signText} numberOfLines={1}>{DOORS[1].label}</Text>
+        </Animated.View>
+      </Animated.View>
+    </>
+  );
+}
+
+// ── the thought he tries to have about it: an empty frame ───────────────────
+
+function Thought({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.think, transform: [{ scale: 0.7 + 0.3 * S.value.think }] }));
+  if (!on(A_TRIES)) return null;
+  return (
+    <Animated.View style={[styles.cloud, st]} pointerEvents="none">
+      <View style={styles.cloudFrame} />
+      <View style={[styles.cloudDot, { left: 4, top: 40, width: 6, height: 6 }]} />
+      <View style={[styles.cloudDot, { left: -2, top: 50, width: 4, height: 4 }]} />
+    </Animated.View>
+  );
+}
+
+// ── Q1: three hats on the floor ─────────────────────────────────────────────
+
+const HORSE = [
+  ell(0, 0, 26, 12, PAPER_LIT),
+  bar(10, -2, 16, -12, 6, PAPER_LIT),
+  ell(18, -14, 10, 6, PAPER_LIT, 20),
+  bar(-9, 4, -10, 14, 3, PAPER_LIT), bar(-4, 4, -5, 14, 3, PAPER_LIT),
+  bar(6, 4, 7, 14, 3, PAPER_LIT), bar(10, 4, 11, 14, 3, PAPER_LIT),
+  bar(-13, -2, -18, 6, 3, PAPER_LIT),
+];
+const UNICORN = [...HORSE, tri(20, -21, 3, 9, 'up', EMBER, 20)];
+
+function Hats({ picked, onPick, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; S: SharedValue<any> }) {
+  const answered = picked !== null;
+  const rise = useAnimatedStyle(() => ({ opacity: S.value.hats }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, rise]} pointerEvents="box-none">
+      {HATS_Q.map((h, k) => (
+        <Target
+          key={h.id} id={h.id} correct={h.correct} picked={picked} onPick={onPick} radius={4}
+          disabled={answered} sealAt="tr"
+          style={[styles.hatTarget, { left: HAT_X[k] - 23 }]}
+        >
+          <View style={styles.hatFill}>
+            {answered && h.id !== 'nothing' ? (
+              <View style={styles.pictured}>
+                <Outlined parts={h.id === 'horse' ? HORSE : UNICORN} width={1.5} line={INK} />
+              </View>
+            ) : null}
+            <View style={styles.qHatCrown} />
+            <View style={styles.qHatBrim} />
+            <View style={[styles.hatLabel, answered && h.correct && styles.hatLabelRight]}>
+              <Text style={[styles.hatLabelText, answered && h.correct && styles.onInk]} numberOfLines={1}>{h.label}</Text>
+            </View>
+          </View>
+        </Target>
+      ))}
+    </Animated.View>
+  );
+}
+
+// ── Q2: three cards lowered from the flies ──────────────────────────────────
+
+function Flies({ picked, onPick, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; S: SharedValue<any> }) {
+  const answered = picked !== null;
+  const drop = useAnimatedStyle(() => ({ transform: [{ translateY: -(1 - S.value.flies) * 16 }] }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, drop]} pointerEvents="box-none">
+      {FLY.map((c, k) => (
+        <View key={c.id} style={[styles.flyRope, { left: FLY_X[k] - 0.75 }]} pointerEvents="none" />
+      ))}
+      {FLY.map((c, k) => (
+        <Target
+          key={c.id} id={c.id} correct={c.correct} picked={picked} onPick={onPick} radius={4}
+          disabled={answered} sealAt="tr"
+          style={[styles.flyCard, { left: FLY_X[k] - FLY_W / 2 }]}
+        >
+          <View style={[styles.flyFace, answered && c.correct && styles.flyRight]}>
+            <Text style={[styles.flyText, answered && c.correct && styles.onInk]} numberOfLines={1}>{c.l1}</Text>
+            <Text style={[styles.flyText, answered && c.correct && styles.onInk]} numberOfLines={1}>{c.l2}</Text>
+          </View>
+        </Target>
+      ))}
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 24, width: FORK_X - 24, top: GROUND, height: 1.5, backgroundColor: RULE },
-  roadTick: { position: 'absolute', top: GROUND + 2, width: 1.5, height: 5, backgroundColor: RULE },
-  // the fork: a short kerb mark where solid ground stops
-  forkMark: { position: 'absolute', left: FORK_X, top: GROUND - 7, width: 1.5, height: 9, backgroundColor: RULE },
-  // the second way, drawn only as dashes — a road you can see there is none of
-  roadDash: { position: 'absolute', top: GROUND, width: 10, height: 1.5, backgroundColor: SOFT },
-  ghostTick: { position: 'absolute', top: GROUND + 2, width: 1.5, height: 5, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
+  ground: { position: 'absolute', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },
+  back: {
+    position: 'absolute', left: PROS.left, top: PROS.valance, width: PROS.right - PROS.left, height: GROUND - PROS.valance,
+    backgroundColor: DRAPE.STONE,
+  },
+  rider: { position: 'absolute', left: 0, top: 0 },
+  wand: {
+    position: 'absolute', left: -1.5, bottom: 0, width: 3, borderRadius: 1.5, backgroundColor: INK,
+    borderTopWidth: 5, borderTopColor: PAPER_LIT,
+  },
 
-  qBox: {
-    position: 'absolute', left: 40, top: 236, width: 320, height: 28,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
+  backstage: {
+    position: 'absolute', left: PROS.right - 2, top: PROS.valance, height: GROUND - PROS.valance, backgroundColor: INK,
+  },
+  rope: { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: DRAPE.SHADE },
+  marquee: {
+    position: 'absolute', left: 50, top: PROS.top + 2, width: 300, height: 20,
+    backgroundColor: DEEP, borderRadius: 4, borderWidth: 1.5, borderColor: INK,
+  },
+  marqueeClip: { position: 'absolute', left: 0, top: 2, height: 13, overflow: 'hidden' },
+  marqueeText: {
+    width: 300, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 0.8, color: PAPER_LIT, includeFontPadding: false,
+  },
+  bulb: { position: 'absolute', top: 15, width: 3, height: 3, borderRadius: 1.5, backgroundColor: EMBER },
+
+  board: {
+    position: 'absolute', left: EASEL.x - 18, top: EASEL.y - 8, width: 124, height: EASEL.h + 12, paddingHorizontal: 5, paddingTop: 3,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  },
+  boardCover: {
+    position: 'absolute', left: EASEL.x - 20, top: EASEL.y - 10, width: 128, height: EASEL.h + 16,
+    backgroundColor: DRAPE.SHADE, borderWidth: 1.5, borderColor: INK, borderRadius: 4, transformOrigin: '50% 100%',
+  },
+  coverTassel: { position: 'absolute', right: 10, bottom: -6, width: 6, height: 12, borderRadius: 3, backgroundColor: EMBER },
+  cardRow: { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 1.5 },
+  cardRule: { borderTopWidth: 1, borderTopColor: DRAPE.SHADE },
+  cardPip: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: EMBER, marginTop: 3, marginRight: 4 },
+  cardText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0, color: INK, includeFontPadding: false,
+  },
+
+  sinkClip: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: GROUND, overflow: 'hidden' },
+  trapHole: {
+    position: 'absolute', left: TRAP.x0, top: GROUND - 2, width: TRAP.x1 - TRAP.x0, height: 8, borderRadius: 2,
+    backgroundColor: INK, transformOrigin: '50% 50%',
+  },
+  cloth: {
+    position: 'absolute', left: TABLE.cx - TABLE.w / 2 - 2, top: TABLE.top + 3, width: TABLE.w + 4, height: GROUND - TABLE.top - 5,
+    backgroundColor: DRAPE.SHADE, borderWidth: 1.5, borderColor: INK, borderBottomLeftRadius: 4, borderBottomRightRadius: 4,
+    transformOrigin: '50% 0%', overflow: 'hidden',
+  },
+  clothFringe: { position: 'absolute', left: 0, right: 0, bottom: 2, height: 3, backgroundColor: EMBER },
+  gear: {
+    position: 'absolute', left: TABLE.cx - 20, top: GROUND - 26, width: 16, height: 16, borderRadius: 8,
+    borderWidth: 2, borderColor: INK, alignItems: 'center', justifyContent: 'center',
+  },
+  gearBar: { position: 'absolute', width: 14, height: 2, backgroundColor: INK },
+  piston: {
+    position: 'absolute', left: TABLE.cx + 4, top: TABLE.top + 8, width: 10, height: 26, borderRadius: 2,
+    backgroundColor: DRAPE.SHADE, borderWidth: 1.5, borderColor: INK,
+  },
+  pulley: { position: 'absolute', left: TABLE.cx + 20, top: TABLE.top + 6, width: 1.5, height: 36, backgroundColor: INK },
+  globe: {
+    position: 'absolute', left: 0, top: 0, width: GLOBE_R * 2, height: GLOBE_R * 2, borderRadius: GLOBE_R,
+    backgroundColor: TEAL, borderWidth: 1.5, borderColor: INK, alignItems: 'center', justifyContent: 'center',
+  },
+  globeBand: { position: 'absolute', width: 14, height: 1.5, backgroundColor: PAPER_LIT },
+  globeMeridian: { position: 'absolute', width: 7, height: 14, borderRadius: 4, borderWidth: 1.2, borderColor: PAPER_LIT },
+
+  doveWing: { position: 'absolute', left: -2, top: -2, transformOrigin: '50% 100%' },
+  puffDot: { position: 'absolute', width: 10, height: 10, borderRadius: 5, backgroundColor: PAPER_LIT, borderWidth: 1, borderColor: INK },
+
+  templeClip: { position: 'absolute', left: 0, top: PROS.valance, width: STAGE_W, height: GROUND - PROS.valance, overflow: 'hidden' },
+  templeRope: { position: 'absolute', top: -PROS.valance, width: 1.5, height: BACKDROP.y, backgroundColor: INK },
+  spot: {
+    position: 'absolute', left: 140, top: 0, width: 120, height: GROUND - PROS.valance, backgroundColor: PAPER_LIT,
+    borderTopLeftRadius: 50, borderTopRightRadius: 50,
+  },
+
+  doorLeaf: {
+    position: 'absolute', width: DOOR.w, height: DOOR.h, backgroundColor: PLATE_FACE,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 1.5,
+  },
+  knob: { position: 'absolute', right: 5, top: DOOR.h / 2, width: 5, height: 5, borderRadius: 2.5, backgroundColor: EMBER },
+  void: { position: 'absolute', width: DOOR.w, height: DOOR.h, backgroundColor: INK },
+  voidFloor: { position: 'absolute', top: GROUND - 2, width: DOOR.w, height: 14, backgroundColor: INK },
+  doorSign: {
+    position: 'absolute', width: DOOR.w + 12, height: 14, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
+    backgroundColor: PLATE_FACE, alignItems: 'center', justifyContent: 'center',
+  },
+  signText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
+  },
+  signPost: { position: 'absolute', width: 1.5, height: GROUND - DOOR.h - 6 - 374 - 14, backgroundColor: INK },
+  doorGlow: { position: 'absolute', width: DOOR.w + 16, height: DOOR.h + 12, borderRadius: 10, backgroundColor: SAGE },
+
+  cloud: {
+    position: 'absolute', left: 272, top: 334, width: 50, height: 40, borderRadius: 16,
+    backgroundColor: PLATE_FACE, borderWidth: 1.5, borderColor: INK, alignItems: 'center', justifyContent: 'center',
+  },
+  cloudFrame: { width: 26, height: 18, borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 2 },
+  cloudDot: { position: 'absolute', borderRadius: 4, backgroundColor: PLATE_FACE, borderWidth: 1.5, borderColor: INK },
+
+  hatTarget: { position: 'absolute', top: GROUND - 52, width: 46, height: 64 },
+  hatFill: { flexGrow: 1, alignItems: 'center', justifyContent: 'flex-end' },
+  pictured: { position: 'absolute', left: 23, top: 6 },
+  qHatCrown: { width: 20, height: 18, backgroundColor: INK, borderRadius: 2 },
+  qHatBrim: { width: 30, height: 4, backgroundColor: INK, borderRadius: 2, marginBottom: 1 },
+  hatLabel: {
+    height: 13, width: 46, borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE,
     alignItems: 'center', justifyContent: 'center',
   },
-  qText: {
-    fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 16, letterSpacing: 0.4, color: INK,
-    includeFontPadding: false,
+  hatLabelRight: { backgroundColor: INK },
+  hatLabelText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: -0.2, color: INK, includeFontPadding: false,
   },
-  prStrip: {
-    position: 'absolute', left: 40, top: 270, width: 320, height: 20,
-    borderLeftWidth: 3, borderLeftColor: INK, paddingLeft: 9, justifyContent: 'center',
-  },
-  prText: {
-    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 0.8, color: SOFT,
-    includeFontPadding: false,
-  },
-  // The two lines the principle leads to, on the same rule and in ink: 227 units of
-  // type in the strip's 308. They stand above the claims row, which they leave for.
-  argText: {
-    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 0.8, color: INK,
-    includeFontPadding: false,
-  },
+  onInk: { color: PAPER_LIT },
 
-  // H61: a scene-owned answer target looks exactly like the deck's option —
-  // 2px INK border, radius 4; the right one fills INK with PAPER text and the
-  // wrong pick drops to a SOFT border at 0.45. The reader never learns a new
-  // answer UI, however different the thing being tapped is.
-  claim: { position: 'absolute', top: CLAIM_T, width: CLAIM_W },
-  claimInner: {
-    height: CLAIM_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
-  },
-  claimRight: { backgroundColor: INK, borderColor: INK },
-  claimWrong: { borderColor: SOFT },
-  claimText: {
-    fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 15, letterSpacing: 0.3, color: INK,
-    includeFontPadding: false, textAlign: 'center',
-  },
-  claimTextOn: { color: PAPER },
-
-  postIs: {
-    position: 'absolute', left: SIGN_IS_X - 1.5, top: 382, width: 3, height: GROUND - 382, backgroundColor: INK,
-    transformOrigin: '50% 100%',
-  },
-  signIs: {
-    position: 'absolute', left: SIGN_IS_X - 30, top: 356, width: 60, height: 26,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  flyRope: { position: 'absolute', top: PROS.valance, width: 1.5, height: 18, backgroundColor: INK },
+  flyCard: { position: 'absolute', top: PROS.valance + 18, width: FLY_W, height: 32 },
+  flyFace: {
+    flexGrow: 1, borderWidth: 1.5, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
-  signIsText: {
-    fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 17, letterSpacing: 1, color: INK,
-    includeFontPadding: false,
-  },
-  signIsLit: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: 1.5, backgroundColor: INK },
-  signIsLitWrap: {
-    position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center',
-  },
-  signIsTextLit: { color: PAPER },
-
-  postNot: {
-    position: 'absolute', left: SIGN_NOT_X - 1, top: 382, width: 2, height: GROUND - 382, backgroundColor: SOFT,
-    transformOrigin: '50% 100%',
-  },
-  // ONE BOX, the plate its child (S12), so the plate can flicker while the name does not.
-  signNot: {
-    position: 'absolute', left: SIGN_NOT_X - 31, top: 356, width: 62, height: 26,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  signNotPlate: {
-    position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
-    borderWidth: 1.5, borderColor: SOFT, borderStyle: 'dashed', borderRadius: 3,
-  },
-  // 11 / 0.4, not 11.5 / 0.6: "IT IS NOT" measures ~62 units at the larger setting,
-  // which is the whole 62-unit sign, and a wrap would put a second line outside the
-  // 26-tall plate. At this setting it measures 53, one line with room to spare.
-  signNotText: {
-    // INK on the page: the plate around this name thins and flickers with its road,
-    // and the name itself no longer does (D35).
-    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14.5, letterSpacing: 0.4, color: INK,
-    includeFontPadding: false,
+  flyRight: { backgroundColor: INK },
+  flyText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.3, color: INK, includeFontPadding: false,
   },
 });
 
-// BAND. Topmost ink is the riddle headline at y 236; the lowest is the road's
-// distance ticks at GROUND + 7 = 507. 282 units, which is inside the
-// width-limited ceiling — see the composition note above.
 export function Metaphysics2Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics2Scene} band={[230, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Metaphysics2Scene} band={[288, 514]} camera={CAM} />;
 }

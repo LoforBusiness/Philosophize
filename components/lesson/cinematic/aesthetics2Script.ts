@@ -1,49 +1,61 @@
 import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Cinematic aesthetics-aesthetics-2, "Art, Beauty, and Emotion" — expression
-// theory. An artist relives a feeling and it TRAVELS across a gap to a viewer,
-// who feels the same (Tolstoy's "infection"). The two figures emote expressively;
-// a feeling-pulse crosses between them on the transmission beats.
+// Cinematic aesthetics-aesthetics-2, "How Art Passes On a Feeling".
+// Theme: A CAMPFIRE STORY, AN OUTDOOR SCREEN, AND A FEELING CAUGHT LIKE A COLD.
 //
-// Both graded questions come from data/.../art-beauty-and-emotion.ts.
+// A campsite at night. On the outdoor screen an old portrait moves a listener; a
+// glowing spark of feeling passes from one camper to the next — Tolstoy's infection.
+// At the fire a boy tells of meeting a wolf; the wolf rises in shadow on the tent,
+// the listeners shiver, and so does he. Then he crawls into the tent, and the story
+// goes on without him, in other languages and other centuries.
+//
+// Redrawn 2026-09-26, one of six second lessons redesigned after the first-lesson
+// sets; the owner asked for the stage to keep acting for the whole of every voiced
+// line (see pace.ts). The narration is unchanged, word for word and beat for beat.
+// The first question is new and asked on the stage; the poll stays, set in front
+// of a film the campers are crying at.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Aes2Beat extends BaseBeat {
-  /** Artist gesture (emote code). */ a?: number;
-  /** Viewer gesture (emote code). */ v?: number;
-  /** A feeling-pulse crosses from artist to viewer this beat. */ wave?: boolean;
-  /** The viewer's chest glows (they feel it too), 0/1. */ felt?: boolean;
-  /** How many links of the infection chain are filled in, 1→3. */ chain?: number;
-  /** Each panel of the chain names its feeling: FEAR, Tolstoy's wolf story (0/1). */ fear?: number;
-  /** The artist's own panel empties: the feeling outlives its maker (0/1). */ outlived?: number;
+  /** The boy's pose under his act. Bands per N2: <100 rig, 100+ held, 300+ played. */ a?: number;
+  /** Where the boy stands: 166 by the fire · 76 at the tent's door. */ x?: number;
+  /** The act across this beat's line (the scene choreographs it). */
+  act?: 'moved' | 'spread' | 'chain' | 'wolf' | 'forms' | 'leave';
+  /** What the screen shows: the old portrait, the three forms, the subtitles, a film. */
+  screen?: 'portrait' | 'forms' | 'subtitles' | 'film';
+  /** The chain is labelled: ARTIST · WORK · AUDIENCE. */ chain?: boolean;
+  /** The shadow wolf is up on the tent wall. */ wolf?: boolean;
+  /** The boy is inside the tent, its flap closed. */ inTent?: boolean;
+  /** Q1 on the stage: three thoughts over the fire. */ thoughts?: boolean;
+  /** The campers are crying at the film (Q2). */ crying?: boolean;
 }
 
 export const BEATS: Aes2Beat[] = [
   {
-    a: 22, v: 4, chain: 1,
+    a: 459, x: 166, act: 'moved', screen: 'portrait',
     text: 'A painting can move you centuries after its painter has died. How can one person’s feeling reach another through paint?',
     dur: 3.6,
   },
   {
-    a: 7, v: 0, wave: true, felt: true, chain: 1,
+    a: 167, x: 166, act: 'spread', screen: 'portrait',
     text: 'The expression theory defines art by feeling, not by beauty or skill. Leo Tolstoy compared art to an infection that spreads a feeling to others.',
     cite: 'Expression theory',
     dur: 1.8,
   },
   {
-    a: 260, v: 158, wave: true, felt: true, chain: 3,
+    a: 260, x: 166, act: 'chain', screen: 'portrait', chain: true,
     text: 'The artist feels an emotion, the work carries the emotion, and the audience feels it too. For Collingwood, artists discover their feelings only by expressing them.',
     dur: 3.8,
   },
   {
-    a: 387, v: 15, wave: true, felt: true, chain: 3, fear: 1,
+    a: 387, x: 166, act: 'wolf', screen: 'portrait', chain: true, wolf: true,
     text: 'Tolstoy’s example is a boy who describes meeting a wolf and frightens his listeners. It’s art, provided the boy feels that fear again as he speaks.',
     cite: 'Tolstoy, What Is Art?, 1897',
     dur: 4.8,
   },
   {
-    a: 1, v: 22, felt: true, chain: 3, fear: 1,
+    a: 263, x: 166, screen: 'portrait', chain: true, wolf: true,
     quote: {
       id: 'lq-aesthetics-aesthetics-2-1',
       text: 'Art is a human activity consisting in this, that one man hands on to others feelings he has lived through.',
@@ -55,31 +67,27 @@ export const BEATS: Aes2Beat[] = [
     dur: 3.2,
   },
   {
-    a: 14, v: 8, chain: 3, fear: 1,
+    a: 260, x: 166, screen: 'portrait', chain: true, wolf: true, thoughts: true,
     interact: {
-      prompt: 'If Tolstoy is right, what must a work do to count as art?',
-      cards: [
-        { text: 'Transmit the artist’s feeling', correct: true },
-        { text: 'Give pleasure through beauty', correct: false },
-      ],
-      explain: 'Transmit the artist’s feeling. Tolstoy called this infection: the artist evokes a feeling they’ve lived through, and the audience comes to share it. He rejected beauty and pleasure as the definition of art, so a beautiful object that transmits no feeling doesn’t count.',
+      prompt: 'If Tolstoy is right, what must the boy’s story do to count as art?',
+      explain: 'Pass on his fear. Tolstoy called this infection: the artist brings back a feeling he has lived through, and the audience comes to share it. Beauty isn’t the test, and neither is truth; a lovely story that passes on nothing doesn’t count.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
-    a: 278, v: 17, wave: true, felt: true, chain: 3,
+    a: 278, x: 166, act: 'forms', screen: 'forms', chain: true, wolf: true,
     text: 'If the expression theory is right, a work of art embodies a feeling in lines, sounds or words.',
     cite: 'Feeling made portable',
     dur: 3.4,
   },
   {
-    a: 278, v: 17, wave: true, felt: true, chain: 3, outlived: 1,
+    a: 278, x: 76, act: 'leave', screen: 'subtitles', chain: true, wolf: true, inTent: true,
     text: 'The feeling can then outlive its maker, and reach audiences in other languages and centuries.',
     dur: 1.8,
   },
   {
-    a: 0, v: 22, felt: true, chain: 3, outlived: 1,
+    a: 0, x: 76, screen: 'film', chain: true, inTent: true, crying: true,
     interact: {
       prompt: 'You cry at a film you know is invented. What is the feeling behind your tears?',
       poll: {
@@ -96,6 +104,7 @@ export const BEATS: Aes2Beat[] = [
     dur: 1.0,
   },
   {
+    x: 76, screen: 'film', chain: true, inTent: true,
     summary: {
       title: 'Expression and the Paradox of Fiction',
       points: [

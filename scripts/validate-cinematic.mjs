@@ -33,7 +33,12 @@ const DIR = path.join(process.cwd(), 'components', 'lesson', 'cinematic');
 //
 // Everything else in H52 still applies to them — one quote, one summary and it is
 // last, exactly two graded questions — because none of those is pinned by the voice.
-const LEGACY = new Set(['logic1', 'logic2']);
+//
+// ONE LEFT (2026-09-26). logic-arguments-2 was redrawn as a crane yard with 14 beats
+// and two questions, which is inside H52 as it stands, so it is an ordinary lesson
+// again. Its third question came after its last voiced line, so dropping it moved no
+// voiced beat's index.
+const LEGACY = new Set(['logic1']);
 
 const problems = [];
 const warnings = [];
@@ -423,15 +428,17 @@ const SOLID_FLOOR = 246;
 // Converting a question lowers it; writing a new A/B/C/D deck raises it and fails
 // here. At 0 the deck can be deleted along with `Choices` and `QBlock.options`.
 //
-// FOUR LEFT, AND THEY ARE THE TWO LESSONS §17 WARNS ABOUT. 118 of the 122 are
-// converted. The remaining four live in `logic1Script` and `logic2Script` —
+// TWO LEFT (2026-09-26): logic-arguments-2 was redrawn as a crane yard with both
+// of its questions asked on the stage, which took its two from the deck. The two
+// that remain live in `logic1Script`. What follows was written when four were left
+// and they lived in `logic1Script` and `logic2Script` —
 // logic-arguments-1 and the premises builder — which predate the shared player
 // and carry their OWN copies of it, their own `Beat` interface and their own
 // local `Choices`. Converting them is not a script edit: it needs `interact` on
 // two private beat types, `ChoiceCards` rendered in two 1,100-line bespoke
 // players, and `pickedOk` state that neither of them has. That is a separate,
 // carefully-verified pass, not a tail-end of this one.
-const MC_BUDGET = 4;
+const MC_BUDGET = 2;
 // A card that needs a sentence is the thing being removed. Six words is what the
 // converted twelve actually needed — the longest is "No, it may still be true".
 const CARD_WORDS = 6;

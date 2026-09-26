@@ -98,6 +98,12 @@ const ACT_FREE = new Set([
  */
 export const HANDS_ON_PROP = new Set([
   'metaphysics-being-1',
+  'metaphysics-being-2',
+  // the harbourmaster hangs his signal flag on the office's bracket, and the finder
+  // climbs the shop's front steps: a step aside would pull the hand off the bracket
+  // or walk him off a stair he is standing on
+  'political-political-2',
+  'ethics-ethics-2',
 ]);
 
 const RIG_BOUND = new Set([

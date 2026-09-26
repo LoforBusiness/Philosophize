@@ -1,82 +1,79 @@
 import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Cinematic ethics-ethics-2, "Three Lenses on a Small Choice".
-// A found wallet on the pavement; a guide walks in and tries each of the three
-// ethical lenses on it — Mill (weigh the outcome), Kant (point to a universal
-// law), Aristotle (a hand to the heart) — while the finder deliberates. Every
-// beat uses a DIFFERENT gesture so the figures never loop.
+// Cinematic ethics-ethics-2, "One Choice, Three Lenses".
+// Theme: A WALLET ON A CAFÉ PAVEMENT, AND THREE PAIRS OF GLASSES.
 //
-// Both graded questions come from data/.../everyday-moral-choices.ts.
+// He finds a wallet outside a café. Three pairs of glasses wait on the café table,
+// one for each lens, and a pavement A-board is chalked with their three questions.
+// Through Mill's, happiness meters rise over him and the wallet's owner as he hands
+// it back; through Kant's, his own wallet slips from his pocket and she keeps it —
+// the rule willed for everyone; through Aristotle's, he climbs the shop's front steps
+// one honest act at a time towards HONESTY over the door.
+//
+// Redrawn 2026-09-26, one of six second lessons redesigned after the first-lesson
+// sets; the owner asked for the stage to keep acting for the whole of every voiced
+// line (see pace.ts). The narration is unchanged, word for word and beat for beat;
+// both questions are new and asked on the stage.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Ethics2Beat extends BaseBeat {
-  /** Finder gesture (emote code). */ p?: number;
-  /** Guide gesture (emote code), -1 = off stage. */ g?: number;
-  /** Guide x (walks between beats). */ gx?: number;
-  /** How many verdict-board rows carry their lens name + question yet, 0→3. */ named?: number;
-  /** How many of the three lenses have stamped their verdict, 0→3. */ lens?: number;
-  /** A question mark hangs over the wallet: what should you do with it? (this beat only) */ query?: number;
-  //
-  // The next five are LATCHES: set on the beat where the thing arrives, and held by
-  // the scene from there on, so nothing the opening builds is ever taken back.
-  //
-  /** The verdict board is up: three numbered rows, each with an empty verdict slot. */ board?: number;
-  /** The three rows are joined, 1 + 2 + 3: ordinary thinking mixes them. */ blend?: number;
-  /** Margin note 1 — Mill: each person counts equally. */ equal?: number;
-  /** Margin note 2 — Kant's test: keep any wallet, willed for all, fails. */ universal?: number;
-  /** Margin note 3 — Aristotle: virtue is built by practice, step on step. */ habit?: number;
+  /** The finder's pose under his act. Bands per N2: <100 rig, 100+ held, 300+ played. */ p?: number;
+  /** Where he stands: 200 at the wallet · 250 by the A-board · 296 with the owner · 114 on his way to the steps, 18 at their foot · 244 for the questions. */ x?: number;
+  /** His act across this beat's line (the scene choreographs it). */
+  act?: 'find' | 'cases' | 'lens1' | 'rows' | 'swap' | 'mill' | 'equal' | 'kant' | 'keep' | 'steps' | 'climb';
+  /** Which lens he is wearing: 0 none · 1 outcomes · 2 duty · 3 character. */ lens?: number;
+  /** How many of the A-board's three rows are chalked. */ rows?: number;
+  /** The three rows are bracketed together: ordinary thinking mixes them. */ mixed?: boolean;
+  /** The happiness meters are up over the two of them. */ meters?: boolean;
+  /** The meters are marked equal: each person's happiness counts the same. */ equal?: boolean;
+  /** The rule is posted: KEEP ANY WALLET YOU FIND. */ rule?: boolean;
+  /** The rule is struck out: it can't be willed for everyone. */ struck?: boolean;
+  /** How many of the three steps he has climbed. */ climbed?: number;
+  /** Q1 on the stage: three thoughts through the outcomes lens. */ thoughts?: boolean;
+  /** Q2 on the stage: three street signs. */ signs?: boolean;
 }
 
 export const BEATS: Ethics2Beat[] = [
   {
-    p: 12, x: 258, g: -1, query: 1,
+    p: 12, x: 200, act: 'find',
     text: 'Suppose you find a wallet on the pavement. What should you do with it?',
     dur: 1.8,
   },
   {
-    p: 165, x: 258, g: -1, board: 1,
+    p: 165, x: 250, act: 'cases',
     text: 'Three ethical theories will each deliver a verdict on this one small choice.',
     dur: 1.8,
   },
   {
-    p: 7, x: 262, g: -1, gx: 48, named: 1,
-    // Nothing on this stage is labelled "Deontology", and the next three beats show
-    // each lens by working the wallet through it. Naming all three first was a
-    // vocabulary tax paid before any of them meant anything (J6).
+    p: 7, x: 250, act: 'lens1', lens: 1, rows: 1,
     text: 'Moral philosophy offers three main approaches, here called lenses. The first asks what consequences an act will have.',
     cite: 'Three lenses',
     dur: 1.9,
   },
   {
-    p: 260, x: 262, g: -1, gx: 48, named: 3,
-    // Nothing on this stage is labelled "Deontology", and the next three beats show
-    // each lens by working the wallet through it. Naming all three first was a
-    // vocabulary tax paid before any of them meant anything (J6).
+    p: 260, x: 250, act: 'rows', lens: 1, rows: 3,
     text: 'The second asks what your duty requires. The third asks what the act makes of your character.',
     dur: 2.1,
   },
   {
-    p: 260, x: 262, g: -1, gx: 48, named: 3, blend: 1,
-    // Nothing on this stage is labelled "Deontology", and the next three beats show
-    // each lens by working the wallet through it. Naming all three first was a
-    // vocabulary tax paid before any of them meant anything (J6).
+    p: 260, x: 250, act: 'swap', lens: 1, rows: 3, mixed: true,
     text: 'Ordinary moral thinking mixes the three. Most people use all three without noticing which one they’re using.',
     dur: 1.8,
   },
   {
-    p: 160, x: 262, g: 21, gx: 108, named: 3, lens: 1,
+    p: 160, x: 296, act: 'mill', lens: 1, rows: 3, mixed: true, meters: true,
     text: 'John Stuart Mill’s utilitarianism judges acts by consequences. Returning the wallet is right if it produces the most happiness.',
     cite: 'J.S. Mill, Utilitarianism, 1863',
     dur: 2.7,
   },
   {
-    p: 416, x: 262, g: 263, gx: 108, named: 3, lens: 1, equal: 1,
+    p: 416, x: 296, act: 'equal', lens: 1, rows: 3, mixed: true, meters: true, equal: true,
     text: 'For Mill, consequences alone determine whether an act is right, and each person’s happiness counts equally.',
     dur: 2.1,
   },
   {
-    p: 0, x: 262, g: 1, gx: 108, named: 3, lens: 1,
+    p: 0, x: 296, lens: 1, rows: 3, mixed: true, meters: true, equal: true,
     quote: {
       id: 'lq-ethics-ethics-2-1',
       text: 'Actions are right in proportion as they tend to promote happiness, wrong as they tend to produce the reverse of happiness.',
@@ -89,59 +86,47 @@ export const BEATS: Ethics2Beat[] = [
     dur: 3.0,
   },
   {
-    p: 14, x: 262, g: 6, gx: 108, named: 3, lens: 2,
+    p: 14, x: 296, act: 'kant', lens: 2, rows: 3, mixed: true, rule: true,
     text: 'Immanuel Kant sets consequences aside. He holds that you should act only on a rule you could will everyone to follow.',
     cite: 'Kant, Groundwork, 1785',
     dur: 2.3,
   },
   {
-    p: 266, x: 262, g: 6, gx: 108, named: 3, lens: 2, universal: 1,
+    p: 266, x: 296, act: 'keep', lens: 2, rows: 3, mixed: true, rule: true, struck: true,
     text: 'Apply Kant’s test to the rule “keep any wallet you find”. Willed for everyone, it would let others keep your lost wallet, so you couldn’t consistently will it.',
     dur: 2.5,
   },
   {
-    p: 13, x: 262, g: 22, gx: 108, named: 3, lens: 3,
+    p: 13, x: 114, act: 'steps', lens: 3, rows: 3, mixed: true, rule: true, struck: true,
     text: 'Aristotle’s virtue ethics asks a third question. It asks not what to do, but what character you’re developing.',
     cite: 'Aristotle, Nicomachean Ethics',
     dur: 1.8,
   },
   {
-    p: 266, x: 262, g: 263, gx: 108, named: 3, lens: 3, habit: 1,
+    p: 266, x: 18, act: 'climb', lens: 3, rows: 3, mixed: true, rule: true, struck: true, climbed: 3,
     text: 'Aristotle holds that virtue is acquired by practice. Each honest act makes the next easier, until honesty is part of your character.',
     dur: 3.3,
   },
   {
-    p: 21, x: 262, g: -1, named: 3, lens: 3,
+    p: 21, x: 244, lens: 1, rows: 3, mixed: true, rule: true, struck: true, climbed: 3, thoughts: true,
     interact: {
-      // The table on stage calls this lens OUTCOMES, not "consequentialist".
-      prompt: 'Which question does the outcomes lens ask about the wallet?',
-      cards: [
-        { text: 'Which act brings most happiness', correct: true },
-        { text: 'Could everyone follow this rule', correct: false },
-      ],
-      explain: 'Which act brings most happiness. The outcomes lens judges a choice by its results alone: whose life goes better and whose goes worse. “Could everyone follow this rule” is Kant’s question, which sets results aside.',
+      prompt: 'Through the outcomes glasses, which question is he asking about the wallet?',
+      explain: 'Which act makes most happiness. The outcomes lens judges a choice by its results alone: whose life goes better and whose goes worse. Whether everyone could follow the rule is Kant’s question, and what the act makes of him is Aristotle’s.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
-    p: 8, x: 262, g: -1, named: 3, lens: 3,
+    p: 8, x: 244, rows: 3, mixed: true, rule: true, struck: true, climbed: 3, signs: true,
     interact: {
-      prompt: 'Does an act’s being common or legal establish that it’s right?',
-      sort: {
-        chip: 'common and legal',
-        bins: [
-          { id: 'common', label: 'common suffices', reads: 'it’s common, so it’s right' },
-          { id: 'legal', label: 'legal suffices', reads: 'it’s legal, so it’s right' },
-          { id: 'neither', label: 'neither suffices', reads: 'neither fact shows that it’s right', correct: true },
-        ],
-      },
-      explain: 'Neither suffices. David Hume argued in 1740 that facts about what is can’t, alone, establish what ought to be. A common or legal act can still be wrong. The other two answers draw an ought from an is.',
+      prompt: 'Everyone here keeps found wallets, and no law forbids it. Does that make it right?',
+      explain: 'Neither shows it. David Hume argued in 1740 that facts about what is can’t, alone, establish what ought to be. A common or legal act can still be wrong; the other two answers draw an ought from an is.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
+    rows: 3, mixed: true, rule: true, struck: true, climbed: 3,
     summary: {
       title: 'One Choice, Three Lenses',
       points: [

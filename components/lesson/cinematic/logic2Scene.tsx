@@ -1,606 +1,651 @@
-import { StyleSheet, Text, View } from 'react-native';
-import Animated, { makeMutable, useAnimatedStyle, useDerivedValue, type SharedValue } from 'react-native-reanimated';
+import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
-import CinematicPlayer, { type SceneApi } from './CinematicPlayer';
+import CinematicPlayer from './CinematicPlayer';
+import Target from './Target';
+import ObjectArt from './ObjectArt';
+import { BEATS } from './logic2Script';
 import {
-  clamp01, ease01, easeOutBack, easeOutCubic, lerp, masterHold, masterLive,
-  mixStance, narratorHold, narratorLive, pose, seg, stand, type Bundle,
+  ease01, lerp, mixStance, narratorHold, narratorLive, stand, type Bundle, type Stance,
 } from './rig';
 import {
-  Bubble, GROUND, K_FIG, STAGE_H, INK, SOFT, PAPER, carry, lookPose, useCarry,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
-import type { Shot } from './camera';
-import { BEATS } from './logic2Script';
-import BrickStructure, {
-  BASE_LX, BASE_RX, BASE_Y, BW, CENTER_X, KEY_X, KEY_Y, PLINTH_H, PLINTH_W, PLINTH_Y,
-  type StructState,
-} from './BrickStructure';
+import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
+import { reachHandTo } from './interact';
+import { useLinger } from './useLinger';
+import { lineOf, stage, bump } from './pace';
+import { crane, spares, CRANE, STONE, P1, P2, KEY, BASE_TOP, KEY_TOP } from './logic2Set';
+import { EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// logic-arguments-2, "Premises and Conclusions" — THE MASTER BUILDER, on the
-// shared player.
+// logic-arguments-2, "The Parts of an Argument" — A STONEMASON'S YARD AND A CRANE.
 //
-// This lesson and logic-arguments-1 were the last two carrying their own copies of
-// `CinematicPlayer` (945 and 1,474 lines), and that is the whole reason they looked
-// wrong: nine validators and every corpus-wide pass discover lessons by globbing
-// `*Scene.tsx`, so a bespoke `*Lesson.tsx` was invisible to all of them — the
-// six-swatch palette, the depth kit, the tappable philosopher names, the gaze, the
-// wander, the thoughts and the pen all reached 244 lessons and skipped these two.
+// Redrawn 2026-09-26, one of six second lessons. The crane works across every voiced
+// line (pace.ts, line lengths from the narration manifest): it fetches, lowers,
+// stamps and pulls, and the mason guides it in.
 //
-// AND THE PAIRING IS BY STEM, WHICH IS WHY THE SCRIPT WAS RENAMED. `check:still`,
-// `check:idle`, `check:react`, `check:turn`, `check:smooth`, `check:marks`,
-// `check:space`, `check:tour` and `check:legible` all look for
-// `<stem>Scene.tsx` beside `<stem>Script.ts`, and `muststamp` wants
-// `<lower(component)>Script.ts` — so `builderScript.ts` beside `logic2Scene.tsx`
-// would have been skipped by the first nine and left the script OUTSIDE the box
-// stamp. One stem for the component, the scene and the script, or the checks go
-// quiet without failing.
+//   b0–2  the crane fetches the stones from off the yard and lowers them: the first
+//         premise, the second, then the conclusion across both; he tries the top one.
+//   b3    the form is traced round the three in a dashed line.
+//   b4    PREMISE plates on the base; the crane's stamp prints BECAUSE and SINCE.
+//   b5    the CONCLUSION plate; support arrows grow from the base into the top.
+//   b6    the stamp prints THEREFORE · SO · THUS over the conclusion.
+//   b7    Q1: two stamps hang from the hook.
+//   b8    the stamp prints Socrates' syllogism into the three stones.
+//   b9    ∴ is struck on the top stone; both premises' lamps light and the current
+//         runs up the arrows and lights the conclusion.
+//   b10   Q2: the crane's control box.
+//   b11   the premises slide out from under, and the conclusion falls.
+//   b12   the crane builds it again.
 //
-// WHAT THE PLAYER TAKES OVER, all of which this file used to do by hand: the deck
-// and its cross-fade, the narration and the rising letters, the two question
-// shapes, the quote card, the summary, the reward hand-off, the back-and-forward
-// tap rule, the lesson guide, the camera, the thought bubbles, the pen marks and
-// the figure's wander. What is left here is the PICTURE.
-//
-//
-// ── AND IT DOES NOT CLAIM A WALK (validate-sound §5) ──────────────────────
-//
-// `walk={X}` is an ASSERTION: "I drive exactly one figure through
-// `travelStance(X[p], X[n], …, WALK)` with the default seed", which is the only
-// case `./footfalls` solves for. Nobody walks in this lesson at all. So the prop is not
-// passed, and `validate-sound` re-derives that both ways rather than trusting it.
-//
-// The price is the one CLAUDE.md already records for three other scenes: the
-// player derives the live figure x from `walk`, so a thought bubble on a beat
-// where he moves cannot follow him and sits at its measured spot instead. Nothing
-// is lost in sound, because the app plays exactly two sounds and neither is a
-// footstep (`HEARD` in lib/feedback.ts).
-
-// ── THE BAND, AND WHY IT MOVED ──────────────────────────────────
-//
-// The band crops the 400×560 design space AFTER the camera, and the house rule
-// (H59, `validate-cinematic`) is that its bottom sits just below the ground line,
-// which is only true if the camera keeps the ground line in one place. The bespoke
-// camera did not: it shared cx 200 and scaled 1.08…1.22 about cy 432…442, so the
-// ground drifted 342.6 → 363 between shots and the band had to be [110, 434] to
-// hold it. Every shot below carries `pin` instead (see `shotAt`), which solves cy
-// for the scale so that the ground lands at GROUND_Y in every shot and through
-// every move — the same pin, and the same GROUND_Y, as logic1Scene.
-//
-// Extremes in band space, y' = GROUND_Y + s·(y − GROUND):
-//   the signpost / plan card (outside the camera, literal)   268 … 330
-//   CONCLUSION plaque      y 365.5, s 1.16   → 340.0
-//   the FORM boundary      y 383.5, s 1.22   → 353.4
-//   the master's crown     y 397,   s 1.22   → 370.3
-//   the ground line        y 500,   any s    → 496.0
-//   ankle joints           y 505.5, s 1.22   → 502.7
-//   the floor, the plinth and the fallen keystone all stop at the ground line
-// so [260, 516] holds every pixel the scene can draw, with 8 units of margin at
-// the top and 13 at the bottom. 256 units tall, which is inside the free 2.31×
-// (`validate-cinematic` prints the band budget). Anything new is re-measured.
-//
-// ── THE COLLAPSE LANDS ON THE FLOOR NOW ─────────────────────────────────────
-//
-// It used to tumble to y 549 — 49 units BELOW the ground line — which was
-// invisible when the floor was 1.5pt of rule and is plainly wrong now that the
-// floor is a filled band (group AG): the brick fell through it. It also cannot be
-// held by a band whose bottom is on the ground line. So the fall is solved for the
-// floor instead: at TUMBLE the brick's lowest corner is
-// `|BW/2·sin| + |BH/2·cos|` = 41.9 below its centre, so a centre at
-// GROUND − 41.9 = 458.1 rests it exactly on the ground, which is FALL = 50.1 from
-// KEY_Y. The stone still tumbles more than its own height and now lies where a
-// dropped stone lies.
-//
-// ── EVERY PROP TRACK IS CARRIED (AH4, L5) ───────────────────────────────────
-//
-// The bespoke computed each brick from the current beat alone, so anything that
-// switched off — the plaques in act 3, the therefore-mark at the collapse, the
-// slot after the fly-up — went out between two frames, and the fallen keystone
-// vanished on the tap that followed. `carry` is `lerp` with a memory of what it
-// last drew, so the pulled premise SLIDES back into the wall on the beat that
-// rebuilds it and nothing cuts.
+// COMPOSITION, in stage units: the jib across the top at 310, the mast at x 366;
+// the premises 56–164 and 168–276 at 466–500, the conclusion 108–224 at 430–464;
+// the mason at x 300. Band [288, 514].
 // ─────────────────────────────────────────────────────────────────────────────
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones at the same luminance the old local greys had to the third
-// decimal, so every contrast measured against them still holds.
 const TONE = stageTone('logic');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
+const { RULE, STONE: STONE_T, SHADE } = TONE;
+const LIP = lipOf(TONE);
+const IRON = stageToneOf(OLIVE);
+const TR = 0.85;
 
-/** Where the ground line lands on screen — the same for every shot, by design. */
-const GROUND_Y = 496;
-/** The pin: `s · (GROUND − cy)`, the quantity that holds the ground line still. */
-const PIN = GROUND_Y - STAGE_H / 2;          // 216
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, logic-arguments-2. */
+const LINES = [5.1, 7.5, 6.7, 5.0, 8.0, 9.0, 4.8, 0, 5.1, 7.5, 0, 6.1, 0, 0];
 
-const MASTER_X = 330;               // right, faces left — beside the work, not behind it
-const APP_X = 62;                   // left, watches — clear of the base bricks
-const APP_K = K_FIG * 0.88;         // the apprentice reads a touch shorter than the master
-const LAY = 0.7;                    // seconds for a brick to drop into place
+/** The mason's scale: a lone figure at K_FIG fills 46% of this band; this is 37%. */
+const K_M = K_FIG * 0.82;
+/** Where the trolley parks, and where it fetches from (off the yard). */
+const PARK_T = 300;
+const FETCH_T = 440;
+/** Where the hook grips each stone, from its centre: clear of the plates and tags on it. */
+const GRIP_P1 = 26;
+const GRIP_KEY = 48;
+/** How far the premises slide out when they are pulled from under the conclusion. */
+const OUT_P1 = 54;
+const OUT_P2 = 300;
+/** The hook's height when it carries a load across, and when it waits. */
+const CARRY_H = 372;
+const REST_H = 360;
 
-// THE COLLAPSE, SOLVED AGAINST THE FLOOR AND AGAINST THE FRAME.
-//
-// The graded beats push the camera to 1.22× about cx 200, so the reader can see
-// design x 36…364 and nothing outside it. The bespoke lesson dragged the premise
-// 82 units, which puts a 114-wide stone at x 3…117 — a THIRD OF IT OUTSIDE THE
-// FRAME, on the one beat the whole lesson turns on. Nothing measured it, because
-// a must-box is clamped to the stage and the camera is checked against the box.
-// Rendered, it is the first thing you see.
-//
-// AND THE PULLED PREMISE IS REMOVED, WHICH IS WHAT THE BEAT SAYS. Rendered with
-// it merely slid aside, the keystone landed ON TOP OF ITS WORDS — three stones
-// 114 wide need 342 units and the pushed frame is 328, so at this scale there is
-// no arrangement of three in which none covers another's text (D31). Pulling it
-// further only trades that for a stone half outside the frame, which is what the
-// bespoke lesson did. So it FADES as it is dragged: "remove the premises and
-// nothing supports the conclusion" is the explanation this beat carries, and a
-// premise that is gone is the honest picture of it. The stone slides back in on
-// the beat that rebuilds the wall, because `carry` remembers where it left it.
-//
-// The keystone then falls into an EMPTY gap: FALL and TUMBLE put its lowest
-// corner exactly on the ground line (|BW/2·sin24| + |BH/2·cos24| = 41.9, so a
-// centre at 458.1 rests on 500) and SHUNT lands it clear of the standing stone's
-// own lettering.
-const PULL = -70;                   // the premise, dragged out of the argument
-const FALL = 50;                    // the keystone, down onto the ground
-const TUMBLE = -24;                 // degrees it turns on the way down
-const SHUNT = -50;                  // and across, into the gap it fell out of
+const X = BEATS.map((b) => b.x ?? 288);
+const G = BEATS.map((b) => b.g ?? 0);
+const ACT = BEATS.map((b) => b.act ?? '');
+const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
+const A_L1 = is('lower1');
+const A_L2 = is('lower2');
+const A_LK = is('lowerKey');
+const A_TRACE = is('trace');
+const A_SB = is('stampBase');
+const A_SUP = is('support');
+const A_ST = is('stampTop');
+const A_CARVE = is('carve');
+const A_TUG = is('tug');
+const A_PULL = is('pull');
+const A_RE = is('rebuild');
+const STONES = BEATS.map((b) => b.stones ?? 0);
+const FORM = BEATS.map((b) => (b.form && !b.fallen ? 1 : 0));
+const PREM = BEATS.map((b) => (b.premises ? 1 : 0));
+const CONC = BEATS.map((b) => (b.conclusion ? 1 : 0));
+const MARKS = BEATS.map((b) => (b.marks ? 1 : 0));
+const CARVED = BEATS.map((b) => (b.carved ? 1 : 0));
+const SIGN = BEATS.map((b) => (b.sign ? 1 : 0));
+const FALLEN = BEATS.map((b) => (b.fallen ? 1 : 0));
+const STAMPS = BEATS.map((b) => (b.stamps ? 1 : 0));
+const CONTROLS = BEATS.map((b) => (b.controls ? 1 : 0));
 
-// Speech bubbles sit above the crown in SCENE space, so they ride the camera with
-// the figure they belong to. 82 above the crown is the gap the bespoke used, and
-// `Bubble` clamps a long line inside the stage for itself.
-const BUBBLE_TOP = 315;
+const TEXT = { p1: 'ALL MEN ARE MORTAL', p2: 'SOCRATES IS A MAN', key: 'SOCRATES IS MORTAL' };
+const Q1 = [
+  { id: 'because', label: 'BECAUSE', x: 108, correct: false },
+  { id: 'therefore', label: 'THEREFORE', x: 176, correct: true },
+];
+const Q2 = [
+  { id: 'reasons', l1: 'STILL ITS', l2: 'REASONS', y: 380, correct: false },
+  { id: 'nothing', l1: 'NOTHING', l2: 'AT ALL', y: 416, correct: true },
+];
 
-// ── per-beat channels, at module scope so a worklet can index them ───────────
-const lbl = (i: number, key: 'p1' | 'p2' | 'key'): string | null =>
-  (BEATS[i].build?.[key] ?? null) as string | null;
+function hHold(code: number, t: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);
+  if (code === 0) return stand(t);
+  return narratorHold(code, t);
+}
+function hLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  if (code === 0) return stand(t);
+  return narratorLive(code, t, bt);
+}
+function handOn(s: Stance, x: number, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  return w <= 0 ? s : reachHandTo(s, { x, groundY: GROUND, k: K_M, dir: -1 }, 1, tx, ty, w);
+}
 
-const P1_ON = BEATS.map((_, i) => (lbl(i, 'p1') !== null ? 1 : 0));
-const P2_ON = BEATS.map((_, i) => (lbl(i, 'p2') !== null ? 1 : 0));
-const KEY_ON = BEATS.map((_, i) => (lbl(i, 'key') !== null ? 1 : 0));
-const SLOT_ON = BEATS.map((b) => (b.build?.slot ? 1 : 0));
-const FORM_ON = BEATS.map((b) => (b.build?.form ? 1 : 0));
-const MARK_ON = BEATS.map((b) => (b.build?.mark ? 1 : 0));
-const TAG_BASE = BEATS.map((b) => (b.build?.tags ? 1 : 0));
-const TAG_CONC = BEATS.map((b) => (b.build?.tags === 'both' ? 1 : 0));
-// 0 none · 1 collapse · 2 fly-up
-const QCODE = BEATS.map((b) => (b.build?.q === 'collapse' ? 1 : b.build?.q === 'flyup' ? 2 : 0));
+/**
+ * One trip of the crane across a stage of the line: out to fetch, back with the
+ * load to `tx`, down to `ty`, let go, and up again. Returns the trolley, the hook,
+ * and how far the load is still hanging (1 carried, 0 set down).
+ */
+function trip(b: number, L: number, a: number, z: number, tx: number, ty: number, from: number) {
+  'worklet';
+  const span = z - a;
+  const out = stage(b, L, a, a + span * 0.22);
+  const back = stage(b, L, a + span * 0.22, a + span * 0.55);
+  const down = stage(b, L, a + span * 0.55, a + span * 0.82);
+  const up = stage(b, L, a + span * 0.86, z);
+  const T = back > 0 ? lerp(FETCH_T, tx, back) : lerp(from, FETCH_T, out);
+  const H = lerp(lerp(REST_H, CARRY_H, out), ty, down) + (REST_H - ty) * up;
+  return { T, H, hang: up > 0 ? 0 : back > 0 || out >= 1 ? 1 : 0 };
+}
+/** The stamp block pressed at a point: across to it, down, up. */
+function press(b: number, L: number, a: number, z: number, tx: number, ty: number, from: number) {
+  'worklet';
+  const span = z - a;
+  const across = stage(b, L, a, a + span * 0.45);
+  const down = bump(b, L, a + span * 0.45, a + span * 0.7, z);
+  return { T: lerp(from, tx, across), H: lerp(REST_H, ty, down), hit: stage(b, L, a + span * 0.62, a + span * 0.7) };
+}
 
-// A brick DROPS IN when it first appears or when its lettering changes, so a label
-// swap is always a fresh placement rather than a pop. It no longer re-lays after a
-// collapse: `carry` slides the pulled stone back into the wall, which is the
-// builder rebuilding it rather than a second stone falling from the sky.
-const wasFlyup = (i: number) => i > 0 && QCODE[i - 1] === 2;
-const fresh = (i: number, key: 'p1' | 'p2' | 'key', on: number[]) =>
-  on[i] && (i === 0 || lbl(i, key) !== lbl(i - 1, key)) ? 1 : 0;
-const P1_FRESH = BEATS.map((_, i) => fresh(i, 'p1', P1_ON));
-const P2_FRESH = BEATS.map((_, i) => fresh(i, 'p2', P2_ON));
-// The keystone takes over IN PLACE on the beat after the fly-up: a brick has just
-// flown into that exact spot, so dropping another one in flickers.
-const KEY_FRESH = BEATS.map((_, i) => (wasFlyup(i) ? 0 : fresh(i, 'key', KEY_ON)));
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic'));
 
-const M_GEST = BEATS.map((b) => b.gest ?? 0);
-const APP_TALK = BEATS.map((b) => !!b.say?.some((s) => s.who === 'app'));
-
-// ── the signpost legend ──────────────────────────────────────────────────────
-// The most portable thing this lesson teaches is which little words flag a premise
-// and which flag a conclusion, and it is exactly what the teaching tap tests. So it
-// gets a reference card at the top of the stage: the words on the left, an arrow,
-// the role they mark on the right. Each row arrives with the line that lists its
-// own words (`leg` in the script), and the card steps aside on any beat that raises
-// a speech bubble, because both live in the same strip of stage.
-const LEG_ROWS = [
-  { words: 'BECAUSE · SINCE · AS', tag: 'PREMISE' },
-  { words: 'THEREFORE · SO · THUS', tag: 'CONCLUSION' },
-] as const;
-const LEGEND = BEATS.map((b) => (b.say || b.summary ? 0 : b.leg ?? 0));
-
-// ── the builder's plan ───────────────────────────────────────────────────────
-// Act 1 was the thinnest picture in the lesson: two figures and up to three blank
-// stones. The master now works to a plan pinned above the site — a dashed
-// schematic whose outlines INK IN as each real stone is laid — so the opening beats
-// carry a small progress diagram instead of empty space. It occupies the legend's
-// footprint (the legend does not exist yet in act 1) and steps aside for a bubble
-// for the same reason.
-const PLAN = BEATS.map((b) => (b.act === 1 && !b.say ? 1 : 0));
-
-// ── the camera ───────────────────────────────────────────────────────────────
-// Three framings, as the bespoke lesson had them: wide enough to see the whole
-// build in act 1, the working shot everywhere else, and a push for the collapse
-// and the fly-up. `pin` is what makes them share a ground line (see the header).
-const SHOTS: Shot[] = BEATS.map((b) => {
-  const s = b.act === 1 ? 1.08 : b.build?.q ? 1.22 : 1.16;
-  return { cx: 200, cy: GROUND - PIN / s, s, tr: 0.8, pin: PIN };
-});
-
-// Band-space x of each speaker's head, published by the scene for the chrome.
-//
-// The bubbles are drawn OUTSIDE the camera on purpose: `Bubble` clamps a long line
-// to STAGE_W, which is the visible width there and is NOT the visible width inside
-// a camera pushed to 1.22× — a bubble over the master, who stands at 330, would
-// have been clamped to a frame 36 units wider than the one the reader can see. So
-// the chrome draws them and the scene, which is the only place the stances exist,
-// hands over where each head is. It has to be the head and not the mark they stand
-// on: a box tethered to `headAt(stance)` inherits whatever the pose is doing, and
-// logic1Scene records what that cost there — a shout sliding 13px sideways while it
-// faded out, because its speaker was mid-punch. These two only gesture, so the
-// stray is smaller, but the rule is the same one: a word being read holds still.
-const SAY_M = makeMutable(200);
-const SAY_A = makeMutable(200);
-
-// ── THE SCENE: the site, the two builders, the structure ─────────────────────
-export function Logic2Scene({ clock, bt, bi, qv, gazeX, gazeY, gazeOn, i }: SceneApi) {
-  const cv = useCarry(20);
-
+export default function Logic2Scene({
+  clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn,
+}: SceneApi) {
+  const held = useHeld();
+  const cv = useCarry(30);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / (SHOTS[n].tr ?? 0.8));
+    const b = bt.value;
     const t = clock.value;
-
-    // Master: blend the previous beat's settled gesture into this beat's live one
-    // over the same `tr` the camera rides, so the hand never snaps home on a tap.
-    const masterS = mixStance(masterHold(M_GEST[p], t), masterLive(M_GEST[n], t, bt.value), tr);
-    // Apprentice: watches, and gestures only while speaking.
-    const appS = mixStance(
-      APP_TALK[p] ? narratorHold(0, t) : stand(t),
-      APP_TALK[n] ? narratorLive(0, t, bt.value) : stand(t),
-      tr,
-    );
-    const s = carry(cv, 19, n, SHOTS[p].s, SHOTS[n].s, tr);
-    SAY_M.value = 200 + s * (MASTER_X - 200);
-    SAY_A.value = 200 + s * (APP_X - 200);
-
-    return {
-      master: pose(masterS, MASTER_X, GROUND, K_FIG, -1, 1),
-      // THE APPRENTICE IS THE MASCOT HERE — the scene's own brief says "a watching
-      // apprentice GETS TESTED", so he is the reader's stand-in: `lookPose` turns
-      // him toward what the beat draws, nods him on a right answer, draws him back
-      // on a wrong one, and runs the wander that moves him between taps. A master
-      // builder nodding at his own work would say nothing about the answer.
-      app: lookPose(appS, APP_X, GROUND, APP_K, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
+    const tr = ease01(b / TR);
+    const L = lineOf(LINES, n);
+    const st = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a, z);
     };
-  });
+    // he follows the second premise out as he pushes it
+    const x = carry(cv, 29, n, X[p], A_PULL[n] ? OUT_P2 + STONE.baseW / 2 + 22 : X[n], A_PULL[n] ? st(0.14, 0.4) : tr);
 
-  const DM = useDerivedValue<Bundle>(() => SCENE.value.master);
-  const DA = useDerivedValue<Bundle>(() => SCENE.value.app);
+    // ── the crane ──────────────────────────────────────────────────────────
+    let T = PARK_T;
+    let H = REST_H + 3 * Math.sin(t * 1.3);
+    let hang = 0;
+    let load = 0;                                   // 1 P1 · 2 P2 · 3 KEY · 4 the stamp block · 5 the Q1 bar
+    let hits = [0, 0, 0];
+    if (A_L1[n]) {
+      const r = trip(b, L, 0, 0.95, P1.cx, BASE_TOP - 12, PARK_T);
+      T = r.T; H = r.H; hang = r.hang; load = 1;
+    } else if (A_L2[n]) {
+      const r = trip(b, L, 0, 0.95, P2.cx, BASE_TOP - 12, P1.cx);
+      T = r.T; H = r.H; hang = r.hang; load = 2;
+    } else if (A_LK[n]) {
+      const r = trip(b, L, 0, 0.8, KEY.cx + GRIP_KEY, KEY_TOP - 12, P2.cx);
+      T = r.T; H = r.H; hang = r.hang; load = 3;
+    } else if (A_SB[n] || A_ST[n] || A_CARVE[n]) {
+      // the stamp block, pressed where each word or claim goes
+      load = 4;
+      const spots = A_SB[n]
+        ? [[P1.cx + 26, BASE_TOP - 14], [P2.cx + 26, BASE_TOP - 14]]
+        : A_ST[n]
+          ? [[KEY.cx - 34, KEY_TOP - 14], [KEY.cx + 6, KEY_TOP - 14], [KEY.cx + 38, KEY_TOP - 14]]
+          : [[P1.cx, BASE_TOP - 14], [P2.cx, BASE_TOP - 14], [KEY.cx, KEY_TOP - 14]];
+      const a0 = A_SB[n] ? 0.25 : 0.06;
+      const w = (0.96 - a0) / spots.length;
+      let from = PARK_T;
+      for (let k = 0; k < spots.length; k++) {
+        const a = a0 + k * w;
+        if (b / L >= a) {
+          const r = press(b, L, a, a + w, spots[k][0], spots[k][1], from);
+          T = r.T; H = r.H; hits[k] = r.hit;
+        }
+        from = spots[k][0];
+      }
+    } else if (STAMPS[n]) {
+      load = 5; T = KEY.cx - 24; H = lerp(REST_H, 346, ease01(b / 1.2));
+    } else if (A_PULL[n]) {
+      // the hook drags the first premise out; he pushes the second
+      load = 1;
+      T = lerp(PARK_T, P1.cx + GRIP_P1, st(0, 0.1));
+      H = lerp(REST_H, BASE_TOP - 12, st(0.06, 0.14));
+      T = lerp(T, OUT_P1 + GRIP_P1, st(0.14, 0.4));
+      hang = st(0.06, 0.14);
+    } else if (A_RE[n]) {
+      load = 3;
+      T = lerp(PARK_T, KEY.cx + GRIP_KEY, st(0.3, 0.5));
+      H = lerp(REST_H, GROUND - STONE.h - 12, st(0.45, 0.58));
+      H = lerp(H, KEY_TOP - 12, st(0.62, 0.9));
+      hang = st(0.5, 0.58) * (1 - st(0.9, 0.98));
+    }
+    T = carry(cv, 0, n, PARK_T, T, tr);
+    H = carry(cv, 1, n, REST_H, H, tr);
 
-  // ── the brick structure ────────────────────────────────────────────────────
-  const STRUCT = useDerivedValue<StructState>(() => {
-    const n = bi.value;
-    const p = n > 0 ? n - 1 : 0;
-    const bp = bt.value;
-    const tr = ease01(bp / (SHOTS[n].tr ?? 0.8));
-    // The player ramps `qv` 0→1 linearly and each scene shapes it: the collapse is
-    // gravity (squared) and the fly-up settles (ease-out cubic), which is the same
-    // pair the bespoke asked `withTiming` for.
-    const q = clamp01(qv.value);
-    const code = QCODE[n];
-
-    // A fresh brick is PLACED — from a little above, growing into its own size.
-    const ent = (fr: number) => (fr ? clamp01(bp / LAY) : 1);
-    const dy = (e: number) => (1 - easeOutCubic(e)) * -26;
-    const e1 = ent(P1_FRESH[n]);
-    const e2 = ent(P2_FRESH[n]);
-    const ek = ent(KEY_FRESH[n]);
-
-    // One base stone sits centred; two sit either side of the middle.
-    const p1x = P2_ON[n] ? BASE_LX : CENTER_X;
-    let p1 = { tx: p1x, ty: BASE_Y + dy(e1), rot: 0 };
-    let p2 = { tx: BASE_RX, ty: BASE_Y + dy(e2), rot: 0 };
-    let key = { tx: KEY_X, ty: KEY_Y + dy(ek), rot: 0 };
-    let slot = SLOT_ON[n] ? clamp01(bp / LAY) : 0;
-    let formOn = FORM_ON[n];
-    let markOn = MARK_ON[n];
-    let tagB = TAG_BASE[n] ? 1 : 0;
-    let tagC = TAG_CONC[n] ? 1 : 0;
-    let op1 = P1_ON[n] ? clamp01(e1 / 0.5) : 0;
-    let op2 = P2_ON[n] ? clamp01(e2 / 0.5) : 0;
-    let opk = KEY_ON[n] ? clamp01(ek / 0.5) : 0;
-
-    if (code === 1) {
-      // THE PREMISE IS PULLED and the keystone loses its support. The stone the
-      // reader took out drags its own plaque with it, and the form it was part of
-      // stops being a form.
-      const qp = seg(q, 0, 0.45);
-      p1 = {
-        tx: p1x + PULL * easeOutCubic(qp),
-        ty: BASE_Y + 6 * qp,
-        rot: -10 * qp,
-      };
-      // Gone before the keystone arrives: the fall starts at 0.3 and this is out at
-      // 0.55, so the two never share the ground.
-      op1 *= 1 - seg(q, 0.15, 0.55);
-      const g = seg(q, 0.3, 1) * seg(q, 0.3, 1);        // gravity
-      key = { tx: KEY_X + SHUNT * g, ty: KEY_Y + FALL * g, rot: TUMBLE * g };
-      formOn *= 1 - seg(q, 0, 0.5);
-      markOn *= 1 - seg(q, 0, 0.35);
-      tagB *= 1 - qp;
-    } else if (code === 2) {
-      // THE CONCLUSION FLIES UP into the empty slot and the premise slides under
-      // it; the dashed slot fades as the stone arrives.
-      const qe = easeOutCubic(q);
-      p2 = {
-        tx: lerp(BASE_RX, KEY_X, qe),
-        ty: lerp(BASE_Y, KEY_Y, qe) - Math.sin(Math.PI * qe) * 20,
-        rot: 0,
-      };
-      p1 = { tx: lerp(BASE_LX, CENTER_X, qe), ty: BASE_Y, rot: 0 };
-      slot *= 1 - qe;
+    // ── the stones: where each is, and whether it hangs from the hook ───────
+    const hangX = T;
+    const hangTop = H + 12;
+    let p1x = P1.cx;
+    let p1y = BASE_TOP;
+    let p2x = P2.cx;
+    let p2y = BASE_TOP;
+    let kx = KEY.cx;
+    let ky = KEY_TOP;
+    let kTilt = 0;
+    if (load === 1 && hang > 0 && !A_PULL[n]) { p1x = hangX; p1y = hangTop; }
+    if (load === 2 && hang > 0) { p2x = hangX; p2y = hangTop; }
+    if (load === 3 && hang > 0 && A_LK[n]) { kx = hangX - GRIP_KEY; ky = hangTop; }
+    const slide = A_PULL[n] ? st(0.14, 0.4) : FALLEN[n] ? 1 : 0;
+    const fall = A_PULL[n] ? st(0.4, 0.52) : FALLEN[n] ? 1 : 0;
+    const back = A_RE[n] ? st(0, 0.36) : 0;
+    if (A_PULL[n] || FALLEN[n] || A_RE[n]) {
+      const out = A_RE[n] ? 1 - back : slide;
+      p1x = lerp(P1.cx, OUT_P1, out);
+      p2x = lerp(P2.cx, OUT_P2, out);
+      const fell = A_RE[n] ? 1 - st(0.5, 0.58) : fall;
+      ky = lerp(KEY_TOP, GROUND - STONE.h, fell);
+      kTilt = 4 * fell;
+      if (A_RE[n] && hang > 0) { kx = hangX - GRIP_KEY; ky = hangTop; kTilt = 4 * (1 - st(0.5, 0.7)); }
+      if (A_RE[n] && b / L > 0.9) { ky = KEY_TOP; kTilt = 0; }
     }
 
-    // THE FORM: a boundary round whatever stack is standing. Two base stones make
-    // it the full width of the base row; one centred stone makes it one brick wide.
-    const boxOf = (k: number) => (P2_ON[k]
-      ? { x: BASE_LX - BW / 2 - 6, w: BASE_RX + BW / 2 - (BASE_LX - BW / 2) + 12 }
-      : { x: CENTER_X - BW / 2 - 6, w: BW + 12 });
-    const box = boxOf(n);
-    const was = boxOf(p);
+    // ── the mason ──────────────────────────────────────────────────────────
+    let s: Stance = hLive(G[n], t, b);
+    // signalling the crane down onto each stone
+    const signal = (A_L1[n] || A_L2[n] || A_LK[n]) ? bump(b, L, 0.5, 0.62, 0.84) : 0;
+    s = mixStance(s, emoteAny(183, t), signal);
+    // trying the top stone once it is set
+    const tryIt = A_LK[n] ? bump(b, L, 0.84, 0.92, 1) : 0;
+    s = handOn(s, x, KEY.cx + STONE.keyW / 2 - 4, KEY_TOP + 10, tryIt);
+    // tracing the form along with the line
+    const trace = A_TRACE[n] ? st(0.08, 0.86) : FORM[n] ? 1 : 0;
+    s = mixStance(s, emoteAny(183, t), A_TRACE[n] ? bump(b, L, 0.1, 0.3, 0.9) : 0);
+    // pointing up at the conclusion while the support grows
+    s = mixStance(s, emoteAny(183, t), A_SUP[n] ? bump(b, L, 0.3, 0.45, 0.8) : 0);
+    // he pushes the second premise out from under
+    const push = A_PULL[n] ? bump(b, L, 0.1, 0.16, 0.42) : 0;
+    s = handOn(s, x, p2x + STONE.baseW / 2 - 2, BASE_TOP + 14, push);
+    s = { ...s, tilt: s.tilt - 0.15 * push };
 
-    // EVERY ONE OF THESE IS CARRIED, in a fixed order, every frame (see the header).
+    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(G[p], t)), s, tr));
+
+    const hitsC = [
+      carry(cv, 2, n, 0, hits[0], tr), carry(cv, 3, n, 0, hits[1], tr), carry(cv, 4, n, 0, hits[2], tr),
+    ];
     return {
-      p1: {
-        tx: carry(cv, 0, n, p1x, p1.tx, tr),
-        ty: carry(cv, 1, n, BASE_Y, p1.ty, tr),
-        rot: carry(cv, 2, n, 0, p1.rot, tr),
-        scale: 0.9 + 0.1 * easeOutBack(e1),
-        opacity: carry(cv, 16, n, P1_ON[p], op1, tr),
-      },
-      p2: {
-        tx: carry(cv, 3, n, BASE_RX, p2.tx, tr),
-        ty: carry(cv, 4, n, BASE_Y, p2.ty, tr),
-        rot: carry(cv, 5, n, 0, p2.rot, tr),
-        scale: 0.9 + 0.1 * easeOutBack(e2),
-        opacity: carry(cv, 17, n, P2_ON[p], op2, tr),
-      },
-      key: {
-        tx: carry(cv, 6, n, KEY_X, key.tx, tr),
-        ty: carry(cv, 7, n, KEY_Y, key.ty, tr),
-        rot: carry(cv, 8, n, 0, key.rot, tr),
-        scale: 0.9 + 0.1 * easeOutBack(ek),
-        opacity: carry(cv, 18, n, KEY_ON[p], opk, tr),
-      },
-      slotOp: carry(cv, 9, n, SLOT_ON[p], slot, tr),
-      tagBase: carry(cv, 10, n, TAG_BASE[p], tagB, tr),
-      tagConc: carry(cv, 11, n, TAG_CONC[p], tagC, tr),
-      formOp: carry(cv, 12, n, FORM_ON[p], formOn, tr),
-      formX: carry(cv, 13, n, was.x, box.x, tr),
-      formW: carry(cv, 14, n, was.w, box.w, tr),
-      markOp: carry(cv, 15, n, MARK_ON[p], markOn, tr),
+      fig: lookPose(fig, x, GROUND, K_M, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
+      T, H, load,
+      block: carry(cv, 24, n, 0, load === 4 ? 1 : 0, tr),
+      stampsOn: carry(cv, 25, n, STAMPS[p], STAMPS[n], tr),
+      controlsOn: carry(cv, 26, n, CONTROLS[p], CONTROLS[n], tr),
+      p1x: carry(cv, 5, n, P1.cx, p1x, tr), p1y: carry(cv, 6, n, BASE_TOP, p1y, tr),
+      p2x: carry(cv, 7, n, P2.cx, p2x, tr), p2y: carry(cv, 8, n, BASE_TOP, p2y, tr),
+      kx: carry(cv, 9, n, KEY.cx, kx, tr), ky: carry(cv, 10, n, KEY_TOP, ky, tr), kTilt: carry(cv, 11, n, 0, kTilt, tr),
+      s1: STONES[n] >= 1 ? 1 : 0,
+      s2: STONES[n] >= 2 ? (A_L2[n] ? st(0.2, 0.3) : 1) : 0,
+      s3: STONES[n] >= 3 ? (A_LK[n] ? st(0.16, 0.26) : 1) : 0,
+      s1in: A_L1[n] ? st(0.18, 0.28) : 1,
+      form: carry(cv, 12, n, FORM[p], FALLEN[n] ? 0 : trace, tr),
+      prem: carry(cv, 13, n, PREM[p], A_SB[n] ? st(0, 0.22) : PREM[n], tr),
+      because: carry(cv, 14, n, PREM[p], A_SB[n] ? hitsC[0] : PREM[n], tr),
+      since: carry(cv, 15, n, PREM[p], A_SB[n] ? hitsC[1] : PREM[n], tr),
+      conc: carry(cv, 16, n, CONC[p], A_SUP[n] ? st(0, 0.24) : CONC[n], tr),
+      arrows: carry(cv, 17, n, CONC[p] * (1 - FALLEN[p]), A_SUP[n] ? st(0.28, 0.66) : CONC[n] * (1 - FALLEN[n]), tr),
+      marks: [
+        carry(cv, 18, n, MARKS[p], A_ST[n] ? hitsC[0] : MARKS[n], tr),
+        carry(cv, 19, n, MARKS[p], A_ST[n] ? hitsC[1] : MARKS[n], tr),
+        carry(cv, 20, n, MARKS[p], A_ST[n] ? hitsC[2] : MARKS[n], tr),
+      ],
+      carved: A_CARVE[n] ? hitsC : [CARVED[n], CARVED[n], CARVED[n]],
+      sign: carry(cv, 21, n, SIGN[p], A_TUG[n] ? st(0.06, 0.2) : SIGN[n], tr),
+      lampP: carry(cv, 27, n, 0, A_TUG[n] ? st(0.25, 0.42) : SIGN[n] && !FALLEN[n] ? 1 : 0, tr),
+      flow: carry(cv, 28, n, 0, A_TUG[n] ? st(0.45, 0.72) : SIGN[n] && !FALLEN[n] ? 1 : 0, tr),
+      lampK: carry(cv, 22, n, SIGN[p] * (1 - FALLEN[p]), A_TUG[n] ? st(0.7, 0.8) : SIGN[n] * (1 - FALLEN[n]), tr),
+      dust: carry(cv, 23, n, 0, A_PULL[n] ? bump(b, L, 0.48, 0.55, 0.8) : 0, tr),
+      t,
     };
   });
 
-  const beat = BEATS[i];
-  const p1Label = beat.build?.p1 ?? '';
-  const p2Label = beat.build?.p2 ?? '';
-  const keyLabel = beat.build?.key ?? '';
+  const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
 
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-      {/* THE FLOOR, from the depth kit — a band with a lit near edge and a shaded
-          foot, where this lesson used to draw 1.5pt of rule and nothing else. Drawn
-          first, so it sits behind everything and is clipped by the band. */}
+    <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-
-      {/* THE PLINTH the structure is built on, and the reason it is a block.
-          It was a 2-unit rule at y 475.5 with the ground line 24.5 below it, which
-          on a hairline floor read as a base and on a filled one reads as a column
-          standing in mid-air. It is a stone base rising out of the floor now: a
-          STONE face with a lit top edge and a shaded foot, the AG kit's own
-          construction for a thing that STANDS. */}
-      <View style={styles.plinth} pointerEvents="none">
-        <View style={styles.plinthTop} />
-        <View style={styles.plinthFoot} />
+      <View style={styles.fence} pointerEvents="none">
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((k) => <View key={k} style={[styles.plank, { left: 4 + k * 40 }]} />)}
       </View>
-
-      {/* Structure IN FRONT of the figures: the builders stand behind their work,
-          which keeps the brick faces — the teaching content — readable instead of
-          hidden behind a gesturing arm. */}
-      {/* THE APPRENTICE IS THE LEAD, which is a wardrobe role and not a guess:
-          `scenefig` identifies the mascot as the figure a scene poses with
-          `lookPose`, and that is him — so the costume table's first entry is his.
-          Without a role on the other one they were TWINS in the same top hat,
-          which wardrobeContext's own header calls worse than two plain figures
-          because it draws the eye to a coincidence. */}
-      <Stickman D={DA} k={APP_K} />
-      <Stickman D={DM} k={K_FIG} role="second" />
-      <BrickStructure S={STRUCT} p1Label={p1Label} p2Label={p2Label} keyLabel={keyLabel} />
+      <ObjectArt parts={CRANE_ART} tone={IRON} />
+      <ObjectArt parts={SPARE_ART} tone={TONE} />
+      <View style={styles.ground} pointerEvents="none" />
+      <Form S={SCENE} on={on} />
+      <Arrows S={SCENE} on={on} />
+      <Stone S={SCENE} k={0} on={on} />
+      <Stone S={SCENE} k={1} on={on} />
+      <Stone S={SCENE} k={2} on={on} />
+      <Dust S={SCENE} on={on} />
+      <Stickman D={DF} k={K_M} />
+      <Hook S={SCENE} />
+      {on(STAMPS) ? <Stamps picked={picked} onPick={onPick} S={SCENE} live={STAMPS[i] === 1} /> : null}
+      {on(CONTROLS) ? <Controls picked={picked} onPick={onPick} S={SCENE} live={CONTROLS[i] === 1} /> : null}
     </View>
   );
 }
 
-// ── THE CHROME: what the camera does not move ────────────────────────────────
-// The signpost card and the plan are reference material a reader keeps reading
-// while the shot pushes from 1.08× to 1.22× on the site below them, so they are
-// drawn outside the camera at one size. The speech bubbles are here for the
-// clamping reason given at SAY_M. See `Chrome` on CinematicPlayer.
-export function Logic2Chrome({ bt, bi, i }: SceneApi) {
-  const CARD = useDerivedValue(() => {
-    const n = bi.value;
-    const p = n > 0 ? n - 1 : 0;
-    // Asymmetric, like a card taken off the table: it LEAVES in 0.25s — well before
-    // the bubble that displaced it lands — and ARRIVES in 0.7s.
-    const away = 1 - ease01(bt.value / 0.25);
-    const here = ease01(bt.value / 0.7);
-    const grow = ease01(bt.value / 0.7);
-    const cnt = LEGEND[n];
-    const was = LEGEND[p];
-    const row = (k: number) => { 'worklet'; return k < was ? 1 : k < cnt ? grow : 0; };
-    // The plan's three outlines ink in one at a time: a stone laid on the PREVIOUS
-    // beat is solid from frame one, the one laid on THIS beat draws on.
-    const inked = (on: number[]) => {
-      'worklet';
-      return n > 0 && on[n - 1] ? 1 : on[n] ? grow : 0;
-    };
+const CRANE_ART = crane();
+const SPARE_ART = spares();
+
+// ── the trolley, the cable, the hook and whatever it carries ────────────────
+
+function Hook({ S }: { S: SharedValue<any> }) {
+  const trolley = useAnimatedStyle(() => ({ transform: [{ translateX: S.value.T }] }));
+  const cable = useAnimatedStyle(() => ({ transform: [{ translateX: S.value.T }], height: S.value.H - CRANE.jib }));
+  const hook = useAnimatedStyle(() => ({ transform: [{ translateX: S.value.T }, { translateY: S.value.H }] }));
+  const block = useAnimatedStyle(() => ({ opacity: S.value.block }));
+  return (
+    <>
+      <Animated.View style={[styles.cable, cable]} pointerEvents="none" />
+      <Animated.View style={[styles.trolley, trolley]} pointerEvents="none">
+        <View style={[styles.wheel, { left: 2 }]} />
+        <View style={[styles.wheel, { right: 2 }]} />
+      </Animated.View>
+      <Animated.View style={[styles.rider, hook]} pointerEvents="none">
+        <View style={styles.hookBlock} />
+        <View style={styles.hookJ} />
+        <Animated.View style={[styles.stampBlock, block]}>
+          <View style={styles.stampPad} />
+        </Animated.View>
+      </Animated.View>
+    </>
+  );
+}
+
+// ── the three stones ────────────────────────────────────────────────────────
+
+function Stone({ S, k, on }: { S: SharedValue<any>; k: 0 | 1 | 2; on: (a: readonly number[]) => boolean }) {
+  const w = k === 2 ? STONE.keyW : STONE.baseW;
+  const st = useAnimatedStyle(() => {
+    const v = S.value;
+    const x = k === 0 ? v.p1x : k === 1 ? v.p2x : v.kx;
+    const y = k === 0 ? v.p1y : k === 1 ? v.p2y : v.ky;
+    const vis = k === 0 ? v.s1 * v.s1in : k === 1 ? v.s2 : v.s3;
     return {
-      on: cnt > 0 ? (was > 0 ? 1 : here) : was > 0 ? away : 0,
-      r0: row(0),
-      r1: row(1),
-      planOn: PLAN[n] ? (PLAN[p] ? 1 : here) : PLAN[p] ? away : 0,
-      ink0: inked(P1_ON),
-      ink1: inked(P2_ON),
-      ink2: inked(KEY_ON),
+      opacity: vis,
+      transform: [{ translateX: x - w / 2 }, { translateY: y }, { rotate: `${k === 2 ? v.kTilt : 0}deg` }],
     };
   });
-
-  const beat = BEATS[i];
-  const prev = i > 0 ? BEATS[i - 1] : undefined;
-
+  const plate = useAnimatedStyle(() => ({ opacity: k === 2 ? S.value.conc : S.value.prem }));
+  const word = useAnimatedStyle(() => {
+    const v = k === 0 ? S.value.because : k === 1 ? S.value.since : 0;
+    return { opacity: v, transform: [{ scale: 1.4 - 0.4 * v }, { rotate: '-6deg' }] };
+  });
+  const text = useAnimatedStyle(() => ({ opacity: S.value.carved[k], transform: [{ scale: 1.15 - 0.15 * S.value.carved[k] }] }));
+  const lamp = useAnimatedStyle(() => ({ opacity: 0.25 + 0.75 * (k === 2 ? S.value.lampK : S.value.lampP) }));
+  const sign = useAnimatedStyle(() => ({ opacity: k === 2 ? S.value.sign : 0 }));
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <Legend S={CARD} />
-      <Plan S={CARD} />
-
-      {/* The previous beat's line stays mounted for a moment so it fades out with
-          everything else rather than being the one graphic cut dead on the tap. */}
-      {prev?.say?.map((s) => (
-        <Bubble
-          key={`out-${s.who}-${s.text}`}
-          bt={bt} text={s.text} top={BUBBLE_TOP} leaving
-          x={s.who === 'app' ? SAY_A : SAY_M}
-        />
-      ))}
-      {beat.say?.map((s) => (
-        <Bubble
-          key={`${s.who}-${s.text}`}
-          bt={bt} text={s.text} top={BUBBLE_TOP}
-          x={s.who === 'app' ? SAY_A : SAY_M}
-        />
-      ))}
-    </View>
+    <Animated.View style={[styles.stone, { width: w }, st]} pointerEvents="none">
+      <View style={styles.stoneFace} />
+      {on(k === 2 ? CONC : PREM) ? (
+        <Animated.View style={[styles.rolePlate, plate]}>
+          <Text style={styles.roleText} numberOfLines={1}>{k === 2 ? 'CONCLUSION' : 'PREMISE'}</Text>
+        </Animated.View>
+      ) : null}
+      <Animated.View style={[styles.lamp, lamp]} />
+      {k < 2 && on(PREM) ? (
+        <Animated.View style={[styles.connective, k === 0 ? { left: 3 } : { right: 3 }, word]}>
+          <Text style={styles.connText} numberOfLines={1}>{k === 0 ? 'BECAUSE' : 'SINCE'}</Text>
+        </Animated.View>
+      ) : null}
+      {k === 2 && on(SIGN) ? <Animated.Text style={[styles.therefore, sign]}>∴</Animated.Text> : null}
+      {on(CARVED) ? (
+        <Animated.View style={[styles.claim, text]}>
+          <Text style={styles.claimText} numberOfLines={1}>{k === 0 ? TEXT.p1 : k === 1 ? TEXT.p2 : TEXT.key}</Text>
+        </Animated.View>
+      ) : null}
+      {k === 2 && on(MARKS) ? <KeyMarks S={S} /> : null}
+    </Animated.View>
   );
 }
 
-interface Card {
-  on: number; r0: number; r1: number;
-  planOn: number; ink0: number; ink1: number; ink2: number;
+const MARK_WORDS = ['THEREFORE', 'SO', 'THUS'];
+function KeyMarks({ S }: { S: SharedValue<any> }) {
+  return (
+    <View style={styles.marks}>
+      {MARK_WORDS.map((m, j) => <Mark key={m} S={S} j={j} word={m} />)}
+    </View>
+  );
+}
+function Mark({ S, j, word }: { S: SharedValue<any>; j: number; word: string }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.marks[j], transform: [{ scale: 1.4 - 0.4 * S.value.marks[j] }] }));
+  return (
+    <Animated.View style={[styles.markTag, st]}>
+      <Text style={styles.connText} numberOfLines={1}>{word}</Text>
+    </Animated.View>
+  );
 }
 
-// ── the signpost card ────────────────────────────────────────────────────────
-function Legend({ S }: { S: SharedValue<Card> }) {
-  const card = useAnimatedStyle(() => ({ opacity: S.value.on }));
-  const rows = [
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.r0, transform: [{ translateX: (1 - S.value.r0) * -12 }] })),
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAnimatedStyle(() => ({ opacity: S.value.r1, transform: [{ translateX: (1 - S.value.r1) * -12 }] })),
+// ── the form, the support arrows, the dust ──────────────────────────────────
+
+function Form({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  // the silhouette's outline, drawn a side at a time as the line runs
+  const sides = [
+    { l: P1.cx - STONE.baseW / 2 - 4, t: GROUND + 3, w: 228, h: 0, a: 0 },
+    { l: P2.cx + STONE.baseW / 2 + 4, t: BASE_TOP - 4, w: 0, h: STONE.h + 7, a: 1 },
+    { l: KEY.cx + STONE.keyW / 2 + 4, t: KEY_TOP - 4, w: 0, h: STONE.h + 4, a: 2 },
+    { l: KEY.cx - STONE.keyW / 2 - 4, t: KEY_TOP - 4, w: STONE.keyW + 8, h: 0, a: 3 },
+    { l: KEY.cx - STONE.keyW / 2 - 4, t: KEY_TOP - 4, w: 0, h: STONE.h + 4, a: 4 },
+    { l: P1.cx - STONE.baseW / 2 - 4, t: BASE_TOP - 4, w: 0, h: STONE.h + 7, a: 5 },
   ];
+  if (!on(FORM)) return null;
   return (
-    <Animated.View style={[styles.legend, card]} pointerEvents="none">
-      {LEG_ROWS.map((r, k) => (
-        <Animated.View key={r.tag} style={[styles.legRow, { top: 3 + k * 27 }, rows[k]]}>
-          <Text style={styles.legWords} numberOfLines={1}>{r.words}</Text>
-          <Text style={styles.legArrow}>→</Text>
-          <View style={styles.legTag}>
-            <Text style={styles.legTagText} numberOfLines={1}>{r.tag}</Text>
-          </View>
+    <>
+      {sides.map((d) => <Side key={d.a} S={S} d={d} />)}
+    </>
+  );
+}
+function Side({ S, d }: { S: SharedValue<any>; d: { l: number; t: number; w: number; h: number; a: number } }) {
+  const st = useAnimatedStyle(() => {
+    const u = Math.max(0, Math.min(1, S.value.form * 6 - d.a));
+    return d.w > 0 ? { width: d.w * u } : { height: d.h * u };
+  });
+  return (
+    <Animated.View
+      style={[styles.formSide, { left: d.l, top: d.t }, d.w > 0 ? { height: 0, borderTopWidth: 1.5 } : { width: 0, borderLeftWidth: 1.5 }, st]}
+      pointerEvents="none"
+    />
+  );
+}
+
+function Arrows({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const grow = useAnimatedStyle(() => ({ height: 26 * S.value.arrows, opacity: S.value.arrows }));
+  const pulse = useAnimatedStyle(() => ({
+    opacity: S.value.flow * (0.5 + 0.5 * Math.sin(S.value.t * 8)),
+    transform: [{ translateY: -((S.value.t * 30) % 20) }],
+  }));
+  if (!on(CONC)) return null;
+  return (
+    <>
+      {[KEY.cx - 34, KEY.cx + 34].map((ax) => (
+        <Animated.View key={ax} style={[styles.arrow, { left: ax - 1.5 }, grow]} pointerEvents="none">
+          <View style={styles.arrowHead} />
+          <Animated.View style={[styles.spark, pulse]} />
         </Animated.View>
+      ))}
+    </>
+  );
+}
+
+function Dust({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.dust, transform: [{ scale: 0.5 + S.value.dust }] }));
+  if (!on(FALLEN)) return null;
+  return (
+    <Animated.View style={[styles.dust, st]} pointerEvents="none">
+      {[0, 1, 2, 3, 4].map((k) => (
+        <View key={k} style={[styles.dustPuff, { left: -34 + k * 17, top: -6 + (k % 2) * 5 }]} />
       ))}
     </Animated.View>
   );
 }
 
-// ── the builder's plan (act 1 only) ──────────────────────────────────────────
-// A dashed schematic of the finished shape — two base stones and the one they hold
-// up — with a solid outline fading in over each ghost as the real stone is laid. It
-// occupies exactly the legend's footprint, so the two cards hand over in place.
-function Plan({ S }: { S: SharedValue<Card> }) {
-  const card = useAnimatedStyle(() => ({ opacity: S.value.planOn }));
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const k0 = useAnimatedStyle(() => ({ opacity: S.value.ink0 }));
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const k1 = useAnimatedStyle(() => ({ opacity: S.value.ink1 }));
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const k2 = useAnimatedStyle(() => ({ opacity: S.value.ink2 }));
+// ── Q1: two stamps hanging from the hook ────────────────────────────────────
+
+function Stamps({ picked, onPick, S, live }: { picked: string | null; onPick: (id: string, ok: boolean) => void; S: SharedValue<any>; live: boolean }) {
+  const answered = picked !== null || !live;
+  const drop = useAnimatedStyle(() => ({ opacity: S.value.stampsOn, transform: [{ translateY: S.value.H - 346 }] }));
   return (
-    <Animated.View style={[styles.plan, card]} pointerEvents="none">
-      <Text style={styles.planLabel} numberOfLines={1}>THE PLAN</Text>
-      <View style={[styles.planGhost, styles.planKey]} />
-      <Animated.View style={[styles.planInk, styles.planKey, k2]} />
-      <View style={[styles.planGhost, styles.planBaseL]} />
-      <Animated.View style={[styles.planInk, styles.planBaseL, k0]} />
-      <View style={[styles.planGhost, styles.planBaseR]} />
-      <Animated.View style={[styles.planInk, styles.planBaseR, k1]} />
+    <Animated.View style={[StyleSheet.absoluteFill, drop]} pointerEvents="box-none">
+      <View style={styles.bar} pointerEvents="none" />
+      {Q1.map((q) => (
+        <Target
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={4}
+          disabled={answered} sealAt="tr"
+          style={[styles.stampTarget, { left: q.x }]}
+        >
+          <View style={styles.stampFill}>
+            <View style={styles.stampHandle} />
+            <View style={[styles.stampFace, answered && q.correct && styles.faceRight]}>
+              <Text style={[styles.stampText, answered && q.correct && styles.onInk]} numberOfLines={1}>{q.label}</Text>
+            </View>
+          </View>
+        </Target>
+      ))}
+    </Animated.View>
+  );
+}
+
+// ── Q2: the crane's control box ─────────────────────────────────────────────
+
+function Controls({ picked, onPick, S, live }: { picked: string | null; onPick: (id: string, ok: boolean) => void; S: SharedValue<any>; live: boolean }) {
+  const answered = picked !== null || !live;
+  const fade = useAnimatedStyle(() => ({ opacity: S.value.controlsOn }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
+      <View style={styles.box} pointerEvents="none" />
+      {Q2.map((q) => (
+        <Target
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={5}
+          disabled={answered} sealAt="tr"
+          style={[styles.button, { top: q.y }]}
+        >
+          <View style={[styles.buttonFace, answered && q.correct && styles.faceRight]}>
+            <Text style={[styles.buttonText, answered && q.correct && styles.onInk]} numberOfLines={1}>{q.l1}</Text>
+            <Text style={[styles.buttonText, answered && q.correct && styles.onInk]} numberOfLines={1}>{q.l2}</Text>
+          </View>
+        </Target>
+      ))}
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   floor: floorStyle(TONE, GROUND),
+  ground: { position: 'absolute', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },
+  fence: {
+    position: 'absolute', left: 0, top: 404, width: STAGE_W, height: GROUND - 404, backgroundColor: STONE_T,
+    borderTopLeftRadius: 2, borderTopRightRadius: 2, overflow: 'hidden',
+  },
+  plank: { position: 'absolute', top: 0, bottom: 0, width: 1.5, borderRadius: 0.75, backgroundColor: SHADE },
+  rider: { position: 'absolute', left: 0, top: 0 },
 
-  // The plinth: a stone base from its own top edge down to the ground line.
-  plinth: {
-    position: 'absolute',
-    left: CENTER_X - PLINTH_W / 2,
-    top: PLINTH_Y,
-    width: PLINTH_W,
-    height: PLINTH_H,
-    borderWidth: 2,
-    borderColor: INK,
-    borderRadius: 4,
-    backgroundColor: STONE,
+  cable: { position: 'absolute', left: -0.75, top: CRANE.jib, width: 1.5, backgroundColor: INK },
+  trolley: {
+    position: 'absolute', left: -9, top: CRANE.jib - 2, width: 18, height: 8, borderRadius: 2,
+    backgroundColor: EMBER, borderWidth: 1.5, borderColor: INK,
+  },
+  wheel: { position: 'absolute', top: -4, width: 5, height: 5, borderRadius: 2.5, backgroundColor: INK },
+  hookBlock: { position: 'absolute', left: -6, top: -2, width: 12, height: 8, borderRadius: 2, backgroundColor: EMBER, borderWidth: 1.5, borderColor: INK },
+  hookJ: {
+    position: 'absolute', left: -4, top: 5, width: 8, height: 8, borderBottomLeftRadius: 4, borderBottomRightRadius: 4,
+    borderWidth: 2, borderColor: INK, borderTopWidth: 0,
+  },
+  stampBlock: {
+    position: 'absolute', left: -15, top: 8, width: 30, height: 12, borderRadius: 2, backgroundColor: TEAL,
+    borderWidth: 1.5, borderColor: INK,
+  },
+  stampPad: { position: 'absolute', left: 3, right: 3, bottom: -3, height: 3, backgroundColor: INK, borderRadius: 1 },
+
+  stone: { position: 'absolute', left: 0, top: 0, height: STONE.h },
+  stoneFace: {
+    position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE,
     boxShadow: LIP,
   },
-  // A lit near edge and a shaded foot — the depth, in the edges rather than in a
-  // gradient across the face (§19: a wide surface barely shades).
-  plinthTop: {
-    position: 'absolute', left: 3, right: 3, top: 0, height: 3,
-    backgroundColor: PLATE_FACE, borderRadius: 2,
+  rolePlate: {
+    position: 'absolute', left: 4, top: 3, height: 11, paddingHorizontal: 3, borderRadius: 2, backgroundColor: SHADE,
+    justifyContent: 'center',
   },
-  plinthFoot: {
-    position: 'absolute', left: 3, right: 3, bottom: 0, height: 5,
-    backgroundColor: SHADE, borderRadius: 2,
+  roleText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
-
-  // ── the signpost card ──────────────────────────────────────────────────────
-  legend: {
-    position: 'absolute', left: 36, top: 268, width: 328, height: 62,
-    borderWidth: 2, borderColor: INK, borderRadius: 8,
-    backgroundColor: PLATE_FACE, boxShadow: LIP,
+  lamp: {
+    position: 'absolute', right: 4, top: 4, width: 8, height: 8, borderRadius: 4, backgroundColor: SAGE,
+    borderWidth: 1, borderColor: INK,
   },
-  legRow: { position: 'absolute', left: 12, right: 8, height: 25, flexDirection: 'row', alignItems: 'center' },
-  legWords: {
-    flex: 1, fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 0.4,
-    color: INK, includeFontPadding: false,
+  connective: {
+    position: 'absolute', top: -15, paddingHorizontal: 3, height: 12, borderWidth: 1.2, borderColor: EMBER,
+    borderRadius: 2, justifyContent: 'center', backgroundColor: PLATE_FACE,
   },
-  legArrow: { fontFamily: 'Inter_700Bold', fontSize: 13, color: SOFT, marginHorizontal: 8, includeFontPadding: false },
-  legTag: { width: 86, height: 20, borderRadius: 4, backgroundColor: INK, alignItems: 'center', justifyContent: 'center' },
-  legTagText: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.1, color: PAPER, includeFontPadding: false },
-
-  // ── the builder's plan ─────────────────────────────────────────────────────
-  // Same top edge and height as the legend, so the two hand over in place. The
-  // inner box is 164 wide; the base pair (46 + 4 + 46) is centred and the keystone
-  // sits centred above it.
-  plan: {
-    position: 'absolute', left: 116, top: 268, width: 168, height: 62,
-    borderWidth: 2, borderColor: INK, borderRadius: 8,
-    backgroundColor: PLATE_FACE, boxShadow: LIP,
+  connText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
-  planLabel: {
-    position: 'absolute', left: 0, right: 0, top: 5, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.5, color: SOFT,
+  therefore: {
+    position: 'absolute', right: 16, top: 0, fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 15, color: EMBER,
     includeFontPadding: false,
   },
-  planGhost: { position: 'absolute', borderWidth: 1.5, borderColor: RULE, borderRadius: 2, borderStyle: 'dashed' },
-  planInk: { position: 'absolute', borderWidth: 1.5, borderColor: INK, borderRadius: 2 },
-  planKey: { left: 61, top: 20, width: 46, height: 13 },
-  planBaseL: { left: 36, top: 36, width: 46, height: 13 },
-  planBaseR: { left: 86, top: 36, width: 46, height: 13 },
+  claim: { position: 'absolute', left: 0, right: 0, bottom: 4, alignItems: 'center' },
+  claimText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0, color: INK, includeFontPadding: false,
+  },
+  marks: { position: 'absolute', left: 0, right: 0, top: -15, flexDirection: 'row', justifyContent: 'center' },
+  markTag: {
+    marginHorizontal: 2, paddingHorizontal: 3, height: 12, borderWidth: 1.2, borderColor: EMBER, borderRadius: 2,
+    justifyContent: 'center', backgroundColor: PLATE_FACE,
+  },
+
+  formSide: { position: 'absolute', borderColor: INK, borderStyle: 'dashed' },
+  arrow: {
+    position: 'absolute', top: KEY_TOP + STONE.h + 2, width: 3, backgroundColor: EMBER, borderRadius: 1.5,
+    transformOrigin: '50% 100%', overflow: 'visible',
+  },
+  arrowHead: {
+    position: 'absolute', left: -4, top: -6, width: 0, height: 0, borderLeftWidth: 5.5, borderRightWidth: 5.5,
+    borderBottomWidth: 7, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: EMBER,
+  },
+  spark: { position: 'absolute', left: -1.5, bottom: 0, width: 6, height: 6, borderRadius: 3, backgroundColor: PAPER_LIT },
+  dust: { position: 'absolute', left: KEY.cx, top: GROUND - 8 },
+  dustPuff: { position: 'absolute', width: 16, height: 12, borderRadius: 8, backgroundColor: PAPER_LIT, borderWidth: 1, borderColor: SHADE },
+
+  bar: { position: 'absolute', left: Q1[0].x - 4, top: 356, width: 140, height: 4, borderRadius: 2, backgroundColor: INK },
+  stampTarget: { position: 'absolute', top: 360, width: 64, height: 36 },
+  stampFill: { flexGrow: 1, alignItems: 'center' },
+  stampHandle: { width: 14, height: 10, borderRadius: 5, backgroundColor: TEAL, borderWidth: 1.5, borderColor: INK },
+  stampFace: {
+    width: 64, height: 22, borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  stampText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.2, color: INK, includeFontPadding: false,
+  },
+  faceRight: { backgroundColor: INK },
+  onInk: { color: PAPER_LIT },
+
+  box: {
+    position: 'absolute', left: 318, top: 372, width: 76, height: 80, borderRadius: 5, backgroundColor: IRON.SHADE,
+    borderWidth: 1.5, borderColor: INK,
+  },
+  button: { position: 'absolute', left: 324, width: 64, height: 30 },
+  buttonFace: {
+    flexGrow: 1, borderWidth: 1.5, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  buttonText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0, color: INK, includeFontPadding: false,
+  },
 });
 
 export function Logic2Lesson({ lesson }: { lesson: Lesson }) {
-  return (
-    <CinematicPlayer
-      lesson={lesson}
-      beats={BEATS}
-      gesture={M_GEST}
-      Scene={Logic2Scene}
-      Chrome={Logic2Chrome}
-      band={[260, 516]}
-      shots={SHOTS}
-    />
-  );
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Logic2Scene} band={[288, 514]} camera={CAM} />;
 }

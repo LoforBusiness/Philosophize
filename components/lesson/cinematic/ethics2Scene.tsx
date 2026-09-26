@@ -1,515 +1,629 @@
-import {
-  View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
+import Target from './Target';
+import ObjectArt from './ObjectArt';
 import { BEATS } from './ethics2Script';
 import {
-  BLANK, WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, strideStance, type Bundle, } from './rig';
-// The catalogue, not just rig's 49. `emoteAny` delegates to `emoteHold` for every
-// code under 100, so this import is identity for the beats as written — it only
-// means the script CAN now reach the 120 actions and the living holds (group N).
-import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, pose, seated, stand, travelStance,
+  type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
-import { followMoves, kindOf, seedOf } from './camera';
 import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
+import { reachHandTo } from './interact';
+import { useLinger } from './useLinger';
+import { lineOf, stage, bump } from './pace';
+import {
+  shop, steps, aBoard, cafe, STEPS, CLIMB_X, DOOR, BOARD, AWNING, TABLE, CHAIR,
+} from './ethics2Set';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
+// ─────────────────────────────────────────────────────────────────────────────
+// ethics-ethics-2, "One Choice, Three Lenses" — A PAVEMENT OUTSIDE A CAFÉ.
+//
+// Redrawn 2026-09-26, one of six second lessons. Every act is laid across its voiced
+// line in stages (pace.ts, line lengths from the narration manifest).
+//
+//   b0   he walks along, sees a wallet on the pavement, and picks it up.
+//   b1   three glasses cases open on the café table, one after another.
+//   b2   OUTCOMES is chalked on the A-board; he puts on the first pair.
+//   b3   DUTY and CHARACTER are chalked under it.
+//   b4   he swaps the three pairs back and forth; a bracket joins the rows: MIXED.
+//   b5   he takes the wallet to the woman at the table; happiness meters rise over
+//        them both as she takes it.
+//   b6   the meters are marked equal.
+//   b8   the second pair; a rule goes up: KEEP ANY WALLET YOU FIND.
+//   b9   his own wallet slips from his pocket, she picks it up and keeps it — the rule
+//        willed for everyone — and the rule is struck out.
+//   b10  the third pair; he walks to the shop's front steps and looks up at HONESTY.
+//   b11  he climbs them, a step at a time, each one lit as he stands on it.
+//   b12  Q1: three thoughts through the outcomes glasses.
+//   b13  Q2: three street signs.
+//
+// COMPOSITION, in stage units: the shop 0–132 with its steps rising right to a door
+// at 72–122; the A-board 146–230 × 414–470; the café 258–400 under its awning, the
+// table at x 318, her chair at 358; he works at x 250 and 296. Band [288, 514].
+// ─────────────────────────────────────────────────────────────────────────────
+
 const TONE = stageTone('ethics');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
+const { RULE } = TONE;
+const LIP = lipOf(TONE);
+const WOOD = stageToneOf(OLIVE);
+const BRICK = stageToneOf(SAGE);
+const CANVAS = stageToneOf(TEAL);
+const TR = 0.85;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// A VERDICT BOARD over a found wallet.
-//
-// The old stage was a figure, a guide and a 30×17 wallet — nothing to look at and
-// nothing that taught. The lesson's real content is a comparison: three lenses,
-// three different questions, and (here) the same verdict. So the top of the stage
-// is now a three-row comparison table that builds as the guide works through Mill,
-// Kant and Aristotle: the numbered step fills in, the row inks solid, and the
-// verdict STAMPS on at a tilt. Below it, a properly drawn wallet with notes and a
-// card poking out of it.
-//
-// The title is a WORD ANIMATION: it opens as "ONE CHOICE · THREE VERDICTS" and,
-// once the third stamp lands, cross-fades to "THREE LENSES · ONE VERDICT" — the
-// punchline of the lesson, delivered by the board rather than by the narration.
-//
-// Composition rule: the board lives entirely above y = 340 and the figures stand
-// on GROUND = 500 with their crowns at ~353 at the highest (the beat-7 shrug), so
-// the table never touches a head.
-//
-// The camera went, and has come back. It was dropped because it sat static on every
-// rendered beat — but that is a case for a better camera, not for none (H60b), and
-// the lesson then read at one distance throughout. It is a `followMoves` camera now,
-// which was only safe once the board could defend itself: a 1.40x push at the
-// finder's chest shows y 321..561 and the board lives above y=340, so before H60c
-// this camera would have hidden the three lenses it is comparing. The measured
-// must-see box holds the shot open instead.
-// ─────────────────────────────────────────────────────────────────────────────
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, ethics-ethics-2. */
+const LINES = [3.76, 3.68, 6.88, 5.2, 6.04, 7.24, 5.92, 0, 6.88, 8.36, 6.16, 7.72, 0, 0, 0];
 
-const P_CODE = BEATS.map((b) => b.p ?? 0);
-// The finder's track, under the name validate-cinematic reads (it looks for
-// `b.x ?? N` exactly). It used to be `b.px`, declared on this lesson's own beat
-// type — which compiled and ran, and left the camera unreadable to the checker.
-const X = BEATS.map((b) => b.x ?? 262);
-// H60b: moving is the default. This lesson had no camera at all, on the reasoning
-// (in the header below) that the old one was static on every beat — but "it was
-// not doing anything" is an argument for a better camera, not for none. Safe to
-// add only now that the verdict board reports a must-see box (H60c): a push at the
-// finder's chest crops everything above y=321, and the board lives above y=340.
-const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics2'));
-const G_CODE = BEATS.map((b) => (b.g ?? -1));
-const GX = BEATS.map((b) => b.gx ?? 108);
-const G_ON = BEATS.map((b) => ((b.g ?? -1) >= 0 ? 1 : 0));
-const NAMED = BEATS.map((b) => b.named ?? 0);
+/** Both of them at this scale: a lone figure at K_FIG fills 46% of this band; this is 37%. */
+const K_E = K_FIG * 0.82;
+/** Where the wallet lies on the pavement. */
+const WALLET = { x: 214, y: GROUND - 5 };
+/** Her seat height, in the rig's units. */
+const SEAT_H = 30;
+
+const X = BEATS.map((b) => b.x ?? 150);
+const P = BEATS.map((b) => b.p ?? 0);
+const ACT = BEATS.map((b) => b.act ?? '');
+const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
+const A_FIND = is('find');
+const A_CASES = is('cases');
+const A_LENS1 = is('lens1');
+const A_ROWS = is('rows');
+const A_SWAP = is('swap');
+const A_MILL = is('mill');
+const A_EQUAL = is('equal');
+const A_KANT = is('kant');
+const A_KEEP = is('keep');
+const A_STEPS = is('steps');
+const A_CLIMB = is('climb');
 const LENS = BEATS.map((b) => b.lens ?? 0);
+const ROWS = BEATS.map((b) => b.rows ?? 0);
+const MIXED = BEATS.map((b) => (b.mixed ? 1 : 0));
+const METERS = BEATS.map((b) => (b.meters ? 1 : 0));
+const EQUAL = BEATS.map((b) => (b.equal ? 1 : 0));
+const RULE_ON = BEATS.map((b) => (b.rule ? 1 : 0));
+const STRUCK = BEATS.map((b) => (b.struck ? 1 : 0));
+const CLIMBED = BEATS.map((b) => b.climbed ?? 0);
+const THOUGHTS = BEATS.map((b) => (b.thoughts ? 1 : 0));
+const SIGNS = BEATS.map((b) => (b.signs ? 1 : 0));
+/** He faces the café everywhere but on the walk out to the steps. */
+const DIR = BEATS.map((b) => (b.act === 'steps' ? -1 : 1));
+/** Which way each beat leaves him: at the steps he turns back to look up at HONESTY. */
+const END_DIR = BEATS.map(() => 1);
+/** Where each beat leaves him, and at what height: on the top step after the climb. */
+const END_X = BEATS.map((b) => (b.act === 'climb' ? CLIMB_X[3] : b.x ?? 150));
+const END_GY = BEATS.map((b) => (b.act === 'climb' ? STEPS[2].top : GROUND));
+/** The found wallet: on the pavement, in his hand, then hers. 0 ground · 1 his · 2 hers. */
+const HOLDS = BEATS.map((_, k) => (k === 0 ? 0 : k < 5 ? 1 : 2));
 
-// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
-// Six taps used to hold one frame, mostly because the whole board — rows, names,
-// questions, title — was up before a word about it had been said. Now:
-//   · the lesson opens on the wallet alone, with a question hanging over it;
-//   · the board drops in on "three theories will each deliver a verdict";
-//   · the first row is named with the first lens, the other two with theirs;
-//   · "ordinary moral thinking mixes the three" joins the rows, 1 + 2 + 3;
-//   · and each lens, on its second beat, leaves a note in the right-hand margin —
-//     Mill's 1 = 1 = 1 (each person counts equally), Kant's rule failing when
-//     willed for all, Aristotle's steps of practice. The notes stay, so the margin
-//     ends the lesson as a worked record of the three.
-//
-// R7c — LEFT STILL ON PURPOSE: the `sort` beat is deliberately not wired. Its three bins say which FACT
-// settles rightness — common, legal, neither — and nothing on this stage means
-// any of them: the wallet, the lenses and the notes are about the choice, not about
-// Hume. Any picture the bins could drive is either the same for the two wrong
-// answers and different for the right one (a tell), or shows LEGAL's picture before
-// the reader has touched anything, because the chip rests at the middle bin
-// (`pickPos` 0.5 is the author's second option). A scene may only follow a control
-// with a quantity it already draws; this one has none, so it holds still.
-/** 1 from the first beat that sets the flag, to the end. */
-function latch(vals: number[]): number[] {
-  const first = vals.findIndex((v) => v > 0);
-  return vals.map((_, k) => (first >= 0 && k >= first ? 1 : 0));
-}
-const QUERY = BEATS.map((b) => b.query ?? 0);
-const BOARD = latch(BEATS.map((b) => b.board ?? 0));
-const BLEND = latch(BEATS.map((b) => b.blend ?? 0));
-const EQUAL = latch(BEATS.map((b) => b.equal ?? 0));
-const UNIVERSAL = latch(BEATS.map((b) => b.universal ?? 0));
-const HABIT = latch(BEATS.map((b) => b.habit ?? 0));
-/** The beat each margin note arrives on, so its inner marks draw only then. */
-const NOTE_AT = [EQUAL, UNIVERSAL, HABIT].map((t) => t.indexOf(1));
+const ROW_TEXT = ['1 OUTCOMES', '2 DUTY', '3 CHARACTER'];
+const LENS_TONES = [INK, EMBER, DEEP, SAGE];
 
-// The wallet sits in the corridor BETWEEN the two figures. The guide stands at
-// x 108 and the finder at x 262, and an arm reaches 34 rig units ≈ 46 stage units,
-// so x 154…216 is the only strip neither of them can ever sweep. Centring the
-// wallet at 190 keeps a 74-wide prop clear of both hands at every gesture.
-const WALLET_X = 190;
-const STITCH = [8, 21, 34, 47, 60];
-const PAVE = [58, 122, 186, 250, 314];
-
-const BOARD_L = 14;
-const BOARD_W = 372;
-const TITLE_T = 182;
-const ROW_H = 44;
-const ROW_T = [200, 248, 296];
-
-// The "+" joiners sit on the badge column (x 26…52), in the 4-unit seams between rows.
-const JOIN_D = 16;
-const JOIN_X = BOARD_L + 12 + 13;                // the badge's centre, x 39
-
-// THE MARGIN, right of the finder. His widest reach is x 308 (262 + 46), so the
-// notes start at 314 and run to 394; stacked from 352 (the board's lip ends at 343)
-// to 492 (the ground rule is at 500). Each is 80 × 44.
-const NOTE_L = 314;
-const NOTE_W = 80;
-const NOTE_H = 44;
-const NOTE_T = 352;
-const NOTE_STEP = 48;
-const STEPS = [0, 1, 2, 3, 4];
-const STEP_N = 5;
-
-const LENSES = [
-  { n: '1', name: 'OUTCOMES', who: 'MILL · 1863', q: 'Did it make life better?' },
-  { n: '2', name: 'DUTY', who: 'KANT · 1785', q: 'Could all follow this rule?' },
-  { n: '3', name: 'CHARACTER', who: 'ARISTOTLE', q: 'Who does it make me?' },
+const THOUGHT_Q = [
+  { id: 'happy', l1: 'WHICH ACT MAKES', l2: 'MOST HAPPINESS?', x: 150, correct: true },
+  { id: 'rule', l1: 'COULD EVERYONE', l2: 'FOLLOW THE RULE?', x: 250, correct: false },
+  { id: 'self', l1: 'WHAT WILL IT', l2: 'MAKE OF ME?', x: 350, correct: false },
 ];
+const SIGN_Q = [
+  { id: 'common', l1: 'IT’S COMMON,', l2: 'SO IT’S RIGHT', x: 150, correct: false },
+  { id: 'legal', l1: 'IT’S LEGAL,', l2: 'SO IT’S RIGHT', x: 250, correct: false },
+  { id: 'neither', l1: 'NEITHER', l2: 'SHOWS IT', x: 350, correct: true },
+];
+const PLATE_W = 94;
 
-export default function Ethics2Scene({ clock, bt, bi }: SceneApi) {
-  const heldFinderS = useHeld();
-  const cv = useCarry(11);
+function hHold(code: number, t: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);
+  if (code === 0) return stand(t);
+  return narratorHold(code, t);
+}
+function hLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  if (code === 0) return stand(t);
+  return narratorLive(code, t, bt);
+}
+function handOn(s: Stance, x: number, gy: number, dir: 1 | -1, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  return w <= 0 ? s : reachHandTo(s, { x, groundY: gy, k: K_E, dir }, 1, tx, ty, w);
+}
+
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics'));
+
+export default function Ethics2Scene({
+  clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn,
+}: SceneApi) {
+  const held = useHeld();
+  const heldHer = useHeld();
+  const cv = useCarry(24);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / moveTr(GX[p], GX[n], 0.85));
+    const b = bt.value;
     const t = clock.value;
+    const tr = ease01(b / TR);
+    const L = lineOf(LINES, n);
+    const st = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a, z);
+    };
 
-    // Finder — gesture blend, small steps.
-    const finderS = keepHeld(heldFinderS, mixStance(carryFrom(heldFinderS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
-    const fx = carry(cv, 0, n, X[p], X[n], tr);
+    // ── where he is ────────────────────────────────────────────────────────
+    const xn = X[n];
+    const xp = END_X[p];
+    const gp = END_GY[p];
+    const walking = Math.abs(xn - xp) > 1 && !A_FIND[n] && !A_CLIMB[n];
+    const walkDur = moveTr(xp, xn, TR);
+    const walkU = walking ? ease01(b / walkDur) : 1;
+    let tx = xn;
+    let gy = GROUND;
+    let walkNow = walking;
+    if (A_FIND[n]) {
+      // strolling in along the pavement until he sees it
+      tx = lerp(120, xn, st(0, 0.4));
+      walkNow = b / L < 0.4;
+    }
+    // b11: across to the foot of the steps, a turn, then up them one at a time,
+    // each step a stride of its own. Timed from the walk, so he is facing up the
+    // steps — and the café — as soon as he gets there.
+    const footDur = moveTr(xp, CLIMB_X[0], TR);
+    const footU = A_CLIMB[n] ? ease01(clamp01(b / footDur)) : 1;
+    const c0 = (footDur + 0.35) / L;
+    const ks = A_CLIMB[n] ? [st(c0, c0 + 0.12), st(c0 + 0.16, c0 + 0.28), st(c0 + 0.32, c0 + 0.44)] : [0, 0, 0];
+    let climbSeg = -1;
+    if (A_CLIMB[n]) {
+      tx = footU < 1 ? lerp(xp, CLIMB_X[0], footU)
+        : lerp(lerp(lerp(CLIMB_X[0], CLIMB_X[1], ks[0]), CLIMB_X[2], ks[1]), CLIMB_X[3], ks[2]);
+      gy = GROUND - 12 * ks[0] - 12 * ks[1] - 12 * ks[2];
+      for (let k = 0; k < 3; k++) if (ks[k] > 0 && ks[k] < 1) climbSeg = k;
+    }
+    // off the top step and down to the pavement, with a hop off its edge
+    if (walking && gp < GROUND) {
+      const xNow = lerp(xp, xn, walkU);
+      const off = clamp01((xNow - 128) / 16);
+      gy = lerp(gp, GROUND, off) - 8 * Math.sin(Math.PI * off);
+    }
+    const x = carry(cv, 0, n, xp, tx, walking ? walkU : A_CLIMB[n] ? 1 : tr);
+    const figGY = carry(cv, 1, n, gp, gy, A_CLIMB[n] ? 1 : tr);
+    // walking away from the café he faces the way he goes, and turns back the moment he stops
+    const back = A_STEPS[n] ? clamp01((b - walkDur) / 0.3) : A_CLIMB[n] ? clamp01((b - footDur) / 0.3) : 0;
+    const dirV = A_STEPS[n] || A_CLIMB[n] ? lerp(facing(END_DIR[p], -1, b), 1, back) : facing(END_DIR[p], DIR[n], b);
+    const dir = (dirV < 0 ? -1 : 1) as 1 | -1;
 
-    // Guide — walks in when its position jumps; otherwise blends gestures in place.
-    const gOn = carry(cv, 1, n, G_ON[p], G_ON[n], tr);
-    const moving = Math.abs(GX[n] - GX[p]) > 10;
-    const guideS = moving
-      ? strideStance(GX[p], GX[n], emoteLive(G_CODE[n] < 0 ? 0 : G_CODE[n], t, bt.value), tr, WALK)
-      : mixStance(emoteHold(G_CODE[p] < 0 ? 0 : G_CODE[p], t), emoteLive(G_CODE[n] < 0 ? 0 : G_CODE[n], t, bt.value), tr);
-    const gx = carry(cv, 2, n, GX[p], GX[n], tr);
+    let s: Stance = walking
+      ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
+      : hLive(P[n], t, b);
+    if (A_FIND[n] && walkNow) s = travelStance(120, xn, stand(t), stand(t), stand(t), st(0, 0.4), WALK, 0);
+    if (A_CLIMB[n] && footU < 1) s = travelStance(xp, CLIMB_X[0], hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), footU, WALK, 0);
+    if (climbSeg >= 0) {
+      s = travelStance(CLIMB_X[climbSeg], CLIMB_X[climbSeg + 1], hHold(P[n], t), hHold(P[n], t), hLive(P[n], t, b), ks[climbSeg], WALK, 0);
+    }
+
+    // bending to the wallet and picking it up
+    const bend = A_FIND[n] ? bump(b, L, 0.45, 0.65, 0.9) : 0;
+    s = { ...s, tilt: s.tilt - 0.55 * bend };
+    s = handOn(s, x, figGY, dir, WALLET.x, WALLET.y - 4, bend);
+    // looking at the open cases
+    if (A_CASES[n]) s = { ...s, neck: s.neck - 0.25 * st(0.1, 0.4) };
+    // putting on glasses: a hand to the face
+    const don = (A_LENS1[n] ? bump(b, L, 0.5, 0.62, 0.8) : 0) + (A_KANT[n] ? bump(b, L, 0.05, 0.15, 0.3) : 0);
+    const swapHand = A_SWAP[n] ? st(0.1, 0.2) * (1 - st(0.82, 0.92)) : 0;
+    s = mixStance(s, { ...s, fistR: { x: 8, y: -74 } }, clamp01(don + swapHand * (0.6 + 0.4 * Math.sin(t * 8))));
+    // handing the wallet across
+    const hand = A_MILL[n] ? bump(b, L, 0.35, 0.55, 0.8) : 0;
+    s = handOn(s, x, figGY, dir, x + 34, figGY - 42, hand);
+    // patting his pockets when his own wallet is gone, then the start
+    const pat = A_KEEP[n] ? bump(b, L, 0.6, 0.66, 0.76) : 0;
+    s = mixStance(s, { ...s, fistR: { x: 4, y: -30 }, fistL: { x: -6, y: -30 } }, pat);
+    s = mixStance(s, emoteAnyLive(318, t, Math.max(0, b - 0.74 * L)), A_KEEP[n] ? st(0.74, 0.8) * (1 - st(0.95, 1)) : 0);
+    // looking up at HONESTY
+    if (A_STEPS[n]) s = { ...s, neck: s.neck + 0.3 * clamp01((b - walkDur - 0.3) / 0.6) };
+
+    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+
+    // ── her, at the café table ────────────────────────────────────────────
+    const r0 = seated(SEAT_H, t);
+    const nod = Math.max(0, Math.sin(t * 1.9 + 0.8)) ** 2;
+    const shift = Math.sin(t * 0.7 + 1.3);
+    let h: Stance = {
+      ...r0,
+      tilt: r0.tilt + 0.05 * shift,
+      neck: r0.neck - 0.24 * nod,
+      fistL: { x: r0.fistL.x - 2.5 * shift, y: r0.fistL.y + 2 * shift },
+      fistR: { x: r0.fistR.x + 2 * shift, y: r0.fistR.y - 2 * shift },
+    };
+    const take = A_MILL[n] ? bump(b, L, 0.45, 0.6, 0.85) : 0;
+    const stoop = A_KEEP[n] ? bump(b, L, 0.3, 0.45, 0.62) : 0;
+    h = handOn(h, CHAIR.x, GROUND, -1, CHAIR.x - 28, GROUND - 40, take);
+    h = { ...h, tilt: h.tilt - 0.45 * stoop };
+    h = handOn(h, CHAIR.x, GROUND, -1, CHAIR.x - 38, GROUND - 6, stoop);
+    const her = keepHeld(heldHer, mixStance(carryFrom(heldHer, n, seated(SEAT_H, t)), h, tr));
+
+    // ── the wallets ────────────────────────────────────────────────────────
+    const pickUp = A_FIND[n] ? st(0.62, 0.72) : 1;
+    const toHer = A_MILL[n] ? st(0.5, 0.6) : HOLDS[n] === 2 ? 1 : 0;
+    const drop = A_KEEP[n] ? st(0.16, 0.3) : 0;
+    const kept = A_KEEP[n] ? st(0.42, 0.5) : 0;
 
     return {
-      finder: reactPose(finderS, fx, GROUND, K_FIG, -1, 1),
-      guide: gOn > 0.02 ? pose(guideS, gx, GROUND, K_FIG, 1, gOn) : BLANK,
-      named: carry(cv, 3, n, NAMED[p], NAMED[n], tr),
-      // One continuous 0→3 value drives all three rows: row k lights as it crosses k.
-      lens: carry(cv, 4, n, LENS[p], LENS[n], tr),
-      query: carry(cv, 5, n, QUERY[p], QUERY[n], tr),
-      board: carry(cv, 6, n, BOARD[p], BOARD[n], tr),
-      blend: carry(cv, 7, n, BLEND[p], BLEND[n], tr),
-      n0: carry(cv, 8, n, EQUAL[p], EQUAL[n], tr),
-      n1: carry(cv, 9, n, UNIVERSAL[p], UNIVERSAL[n], tr),
-      n2: carry(cv, 10, n, HABIT[p], HABIT[n], tr),
-      // The marks inside a note draw after the note has landed, on its own beat only.
-      m0: n === NOTE_AT[0] ? ease01((bt.value - 0.5) / 0.8) : n > NOTE_AT[0] && NOTE_AT[0] >= 0 ? 1 : 0,
-      m1: n === NOTE_AT[1] ? ease01((bt.value - 0.5) / 0.8) : n > NOTE_AT[1] && NOTE_AT[1] >= 0 ? 1 : 0,
-      m2: n === NOTE_AT[2] ? ease01((bt.value - 0.5) / 1.2) : n > NOTE_AT[2] && NOTE_AT[2] >= 0 ? 1 : 0,
+      fig: lookPose(fig, x, figGY, K_E, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      her: pose(her, CHAIR.x, GROUND - SEAT_H * 0, K_E, -1, 1),
+      x, figGY,
+      pickUp: carry(cv, 2, n, HOLDS[p] > 0 ? 1 : 0, pickUp, tr),
+      toHer: carry(cv, 3, n, HOLDS[p] === 2 ? 1 : 0, toHer, tr),
+      drop: carry(cv, 4, n, 0, drop * (1 - kept), tr),
+      kept: carry(cv, 5, n, 0, A_KEEP[n] ? kept * (1 - st(0.55, 0.62)) : 0, tr),
+      ownOn: carry(cv, 6, n, 0, A_KEEP[n] ? st(0.14, 0.16) * (1 - st(0.58, 0.62)) : 0, tr),
+      query: carry(cv, 7, n, 0, A_FIND[n] ? bump(b, L, 0.3, 0.45, 0.8) : 0, tr),
+      cases: carry(cv, 8, n, A_CASES[p] || n > 1 ? 1 : 0, A_CASES[n] ? st(0.1, 0.8) : n > 1 ? 1 : 0, tr),
+      lens: carry(cv, 9, n, LENS[p],
+        A_SWAP[n] ? 1 + 2 * (0.5 - 0.5 * Math.cos(Math.PI * 2 * st(0.15, 0.85))) : LENS[n], tr),
+      specs: carry(cv, 10, n, LENS[p] > 0 ? 1 : 0, A_LENS1[n] ? st(0.58, 0.66) : LENS[n] > 0 ? 1 : 0, tr),
+      rows: carry(cv, 11, n, ROWS[p], A_LENS1[n] ? st(0.05, 0.4) : A_ROWS[n] ? 1 + st(0.05, 0.4) + st(0.5, 0.85) : ROWS[n], tr),
+      mixed: carry(cv, 12, n, MIXED[p], A_SWAP[n] ? st(0.4, 0.7) : MIXED[n], tr),
+      meters: carry(cv, 13, n, METERS[p], A_MILL[n] ? st(0.05, 0.25) : METERS[n], tr),
+      joy: carry(cv, 14, n, METERS[p], A_MILL[n] ? st(0.55, 0.9) : METERS[n], tr),
+      equal: carry(cv, 15, n, EQUAL[p], A_EQUAL[n] ? st(0.2, 0.5) : EQUAL[n], tr),
+      rule: carry(cv, 16, n, RULE_ON[p], A_KANT[n] ? st(0.35, 0.6) : RULE_ON[n], tr),
+      struck: carry(cv, 17, n, STRUCK[p], A_KEEP[n] ? st(0.84, 0.96) : STRUCK[n], tr),
+      steps: [
+        carry(cv, 18, n, CLIMBED[p] >= 1 ? 1 : 0, A_CLIMB[n] ? clamp01((ks[0] - 0.7) / 0.3) : CLIMBED[n] >= 1 ? 1 : 0, tr),
+        carry(cv, 19, n, CLIMBED[p] >= 2 ? 1 : 0, A_CLIMB[n] ? clamp01((ks[1] - 0.7) / 0.3) : CLIMBED[n] >= 2 ? 1 : 0, tr),
+        carry(cv, 20, n, CLIMBED[p] >= 3 ? 1 : 0, A_CLIMB[n] ? clamp01((ks[2] - 0.7) / 0.3) : CLIMBED[n] >= 3 ? 1 : 0, tr),
+      ],
+      honesty: carry(cv, 21, n, CLIMBED[p] >= 3 ? 1 : 0, A_STEPS[n] ? clamp01((b - walkDur) / 0.6) * 0.4 : A_CLIMB[n] ? 0.4 + 0.6 * clamp01((ks[2] - 0.8) / 0.2) : CLIMBED[n] >= 3 ? 1 : 0, tr),
+      thoughts: carry(cv, 22, n, THOUGHTS[p], THOUGHTS[n], tr),
+      signs: carry(cv, 23, n, SIGNS[p], SIGNS[n], tr),
       t,
     };
   });
 
-  const DF = useDerivedValue<Bundle>(() => SCENE.value.finder);
-  const DG = useDerivedValue<Bundle>(() => SCENE.value.guide);
-
-  // The headline swaps once the third verdict stamps: the board states the setup
-  // first, then states the finding. Both sit at the same spot, so it costs no room.
-  const titleAsk = useAnimatedStyle(() => ({
-    opacity: SCENE.value.board * (1 - clamp01(SCENE.value.lens - 2)),
-    transform: [{ translateY: (1 - SCENE.value.board) * -6 }],
-  }));
-  const titleAns = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.lens - 2) }));
-  // "What should you do with it?" — a question mark over the wallet, bobbing slowly,
-  // gone once the board takes the question over.
-  const query = useAnimatedStyle(() => ({
-    opacity: SCENE.value.query,
-    transform: [{ translateY: Math.sin(SCENE.value.t * 1.6) * 2 + (1 - SCENE.value.query) * 6 }],
-  }));
-
-  return (
-    <Animated.View style={styles.scene} pointerEvents="none">
-      {/* ── the verdict board ─────────────────────────────────────────────── */}
-      <Animated.Text style={[styles.boardTitle, titleAsk]}>ONE CHOICE  ·  THREE VERDICTS</Animated.Text>
-      <Animated.Text style={[styles.boardTitle, titleAns]}>THREE LENSES  ·  ONE VERDICT</Animated.Text>
-      {LENSES.map((L, k) => <LensRow key={L.name} S={SCENE} k={k} />)}
-      {[0, 1].map((k) => <Joiner key={k} S={SCENE} k={k} />)}
-
-      {/* ── the margin: one worked note per lens ───────────────────────────── */}
-      <Note S={SCENE} k={0} caption="EQUALLY" />
-      <Note S={SCENE} k={1} caption="FOR ALL?" />
-      <Note S={SCENE} k={2} caption="PRACTICE" />
-
-      {/* ── the pavement, and the wallet lying on it ──────────────────────── */}
-      <View style={styles.ground} />
-      {PAVE.map((x) => <View key={x} style={[styles.pave, { left: x }]} />)}
-      <Animated.Text style={[styles.query, query]}>?</Animated.Text>
-
-      <View style={styles.walletShadow} />
-      <View style={styles.noteBack} />
-      <View style={styles.noteFront} />
-      <View style={styles.wallet}>
-        {STITCH.map((sx) => <View key={sx} style={[styles.stitch, { left: sx }]} />)}
-        <View style={styles.walletFold} />
-        <View style={styles.walletClasp} />
-      </View>
-      <View style={styles.walletCard} />
-
-      <Stickman role="second" D={DG} k={K_FIG} />
-      <Stickman D={DF} k={K_FIG} />
-    </Animated.View>
-  );
-}
-
-/** One row of the comparison table: step badge · lens · question · verdict stamp. */
-function LensRow({ S, k }: { S: SharedValue<any>; k: number }) {
-  const L = LENSES[k];
-
-  // The rows drop onto the board one after another, each with its empty slot.
-  const rowIn = useAnimatedStyle(() => {
-    const u = ease01(clamp01((S.value.board - k * 0.2) / 0.6));
-    return { opacity: u, transform: [{ translateY: (1 - u) * -8 }] };
+  const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  const DH = useDerivedValue<Bundle>(() => SCENE.value.her);
+  // his glasses, on his head
+  const specs = useAnimatedStyle(() => {
+    const h = DF.value.head;
+    return { opacity: SCENE.value.specs, transform: [{ translateX: h[0].translateX }, { translateY: h[1].translateY }] };
   });
-  const lit = useAnimatedStyle(() => ({ opacity: clamp01(S.value.lens - k) }));
-  const pending = useAnimatedStyle(() => ({ opacity: 1 - clamp01(S.value.lens - k) }));
-  // A row is named when its lens is — the first alone, the other two together.
-  const named = useAnimatedStyle(() => {
-    const u = clamp01(S.value.named - k);
-    return { opacity: u, transform: [{ translateX: (1 - u) * -6 }] };
+  const lensTint = useAnimatedStyle(() => {
+    const l = SCENE.value.lens;
+    return { borderColor: l < 1.5 ? EMBER : l < 2.5 ? DEEP : SAGE };
   });
-  // The verdict lands like a rubber stamp: oversized and tilted, settling square.
-  const stamp = useAnimatedStyle(() => {
-    const e = ease01(clamp01(S.value.lens - k));
-    return { opacity: e, transform: [{ scale: 1.45 - 0.45 * e }, { rotate: `${(1 - e) * -9}deg` }] };
+  // the found wallet, on the pavement, in his hand, then hers
+  const found = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    const hw = DH.value.wrR;
+    const u = SCENE.value.pickUp;
+    const v = SCENE.value.toHer;
+    const hx = lerp(lerp(WALLET.x, w[0].translateX, u), hw[0].translateX, v);
+    const hy = lerp(lerp(WALLET.y, w[1].translateY, u), hw[1].translateY, v);
+    return { transform: [{ translateX: hx }, { translateY: hy }] };
+  });
+  // his own wallet: out of his pocket, onto the pavement, into her hand
+  const own = useAnimatedStyle(() => {
+    const hw = DH.value.wrR;
+    const fx = SCENE.value.x + 10;
+    const fy = SCENE.value.figGY - 40;
+    const d = SCENE.value.drop;
+    const k = SCENE.value.kept;
+    const gx = lerp(fx, fx + 22, d);
+    const gy = lerp(fy, GROUND - 5, d);
+    return {
+      opacity: SCENE.value.ownOn,
+      transform: [{ translateX: lerp(gx, hw[0].translateX, k) }, { translateY: lerp(gy, hw[1].translateY, k) }],
+    };
   });
 
   return (
-    <Animated.View style={[styles.row, { top: ROW_T[k] }, rowIn]}>
-      <Animated.View style={[styles.rowLit, lit]} />
-      <Animated.View style={[styles.rowAccent, lit]} />
-
-      {/* step badge — outlined while pending, solid once this lens has ruled */}
-      <View style={styles.badge}><Text style={styles.badgeText}>{L.n}</Text></View>
-      <Animated.View style={[styles.badgeOn, lit]}><Text style={styles.badgeTextOn}>{L.n}</Text></Animated.View>
-
-      <Animated.View style={[styles.nameCol, named]}>
-        <Text style={styles.lensName}>{L.name}</Text>
-        <Text style={styles.lensWho}>{L.who}</Text>
+    <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
+      <View style={styles.street} pointerEvents="none" />
+      <ObjectArt parts={SHOP_ART} tone={BRICK} />
+      <Honesty S={SCENE} />
+      <ObjectArt parts={STEPS_ART} tone={BRICK} />
+      <StepGlow S={SCENE} />
+      <ObjectArt parts={CAFE_ART} tone={CANVAS} />
+      <Cases S={SCENE} />
+      <ObjectArt parts={BOARD_ART} tone={WOOD} />
+      <Board S={SCENE} on={on} />
+      <Rule S={SCENE} on={on} />
+      <Query S={SCENE} on={on} />
+      <View style={styles.ground} pointerEvents="none" />
+      <Stickman D={DH} k={K_E} role="second" />
+      <Stickman D={DF} k={K_E} />
+      <Animated.View style={[styles.rider, specs]} pointerEvents="none">
+        <Animated.View style={[styles.frames, lensTint]}>
+          <View style={styles.bridge} />
+        </Animated.View>
       </Animated.View>
-      <Animated.Text style={[styles.lensQ, named]}>{L.q}</Animated.Text>
-
-      <Animated.View style={[styles.slot, pending]}><Text style={styles.slotText}>?</Text></Animated.View>
-      <Animated.View style={[styles.stamp, stamp]}><Text style={styles.stampText}>RETURN IT</Text></Animated.View>
-    </Animated.View>
-  );
-}
-
-/** A "+" between two rows' step badges: ordinary thinking uses all three at once. */
-function Joiner({ S, k }: { S: SharedValue<any>; k: number }) {
-  const st = useAnimatedStyle(() => {
-    const u = ease01(clamp01((S.value.blend - k * 0.3) / 0.7));
-    return { opacity: u, transform: [{ scale: 0.6 + 0.4 * u }] };
-  });
-  const y = (ROW_T[k] + ROW_H + ROW_T[k + 1]) / 2;
-  return (
-    <Animated.View style={[styles.joiner, { top: y - JOIN_D / 2 }, st]}>
-      <View style={styles.joinH} />
-      <View style={styles.joinV} />
-    </Animated.View>
-  );
-}
-
-// One person's happiness, as the note counts it: a token worth exactly 1. (Tokens,
-// not little people — a person on this stage is drawn by the rig or not at all.)
-function Token({ x }: { x: number }) {
-  return (
-    <View style={[styles.token, { left: x }]}>
-      <Text style={styles.tokenText}>1</Text>
+      <Animated.View style={[styles.rider, found]} pointerEvents="none">
+        <View style={styles.wallet}><View style={styles.walletFlap} /></View>
+      </Animated.View>
+      <Animated.View style={[styles.rider, own]} pointerEvents="none">
+        <View style={[styles.wallet, styles.ownWallet]}><View style={styles.walletFlap} /></View>
+      </Animated.View>
+      <Meters S={SCENE} on={on} DF={DF} DH={DH} />
+      {on(THOUGHTS) ? <Plates items={THOUGHT_Q} kind="thought" picked={picked} onPick={onPick} S={SCENE} live={THOUGHTS[i] === 1} /> : null}
+      {on(SIGNS) ? <Plates items={SIGN_Q} kind="sign" picked={picked} onPick={onPick} S={SCENE} live={SIGNS[i] === 1} /> : null}
     </View>
   );
 }
 
-/**
- * One margin note: a numbered card for the lens it belongs to, landing on that
- * lens's second beat and staying. Its marks draw in once the card is down.
- *   1 — 1 = 1 = 1: each person's happiness counts as one, and equally.
- *   2 — the rule “KEEP ANY WALLET”, willed FOR ALL, crossed out: it cannot be willed.
- *   3 — five steps, each a little higher: virtue by practice.
- */
-function Note({ S, k, caption }: { S: SharedValue<any>; k: 0 | 1 | 2; caption: string }) {
-  const card = useAnimatedStyle(() => {
-    const u = k === 0 ? S.value.n0 : k === 1 ? S.value.n1 : S.value.n2;
-    return { opacity: u, transform: [{ translateX: (1 - u) * 10 }] };
-  });
-  const marks = useAnimatedStyle(() => ({ opacity: k === 0 ? S.value.m0 : k === 1 ? S.value.m1 : 1 }));
-  const cross = useAnimatedStyle(() => {
-    const u = ease01(clamp01((S.value.m1 - 0.5) * 2));
-    return { opacity: u, transform: [{ scale: 1.3 - 0.3 * u }] };
-  });
+const SHOP_ART = shop();
+const STEPS_ART = steps();
+const CAFE_ART = cafe();
+const BOARD_ART = aBoard();
+
+// ── the shop: HONESTY over the door, and the steps lit as he stands on them ─
+
+function Honesty({ S }: { S: SharedValue<any> }) {
+  const glow = useAnimatedStyle(() => ({ opacity: 0.25 + 0.75 * S.value.honesty }));
   return (
-    <Animated.View style={[styles.note, { top: NOTE_T + k * NOTE_STEP }, card]}>
-      <View style={styles.noteBadge}><Text style={styles.noteBadgeText}>{k + 1}</Text></View>
-      <Text style={styles.noteCap}>{caption}</Text>
-      {k === 0 ? (
-        <Animated.View style={[StyleSheet.absoluteFill, marks]}>
-          <Token x={10} />
-          <Text style={[styles.noteEq, { left: 24 }]}>=</Text>
-          <Token x={32} />
-          <Text style={[styles.noteEq, { left: 46 }]}>=</Text>
-          <Token x={54} />
-        </Animated.View>
-      ) : null}
-      {k === 1 ? (
-        <>
-          <Animated.View style={[StyleSheet.absoluteFill, marks]}>
-            <Text style={[styles.noteRule, { top: 18 }]}>“KEEP ANY</Text>
-            <Text style={[styles.noteRule, { top: 28 }]}>WALLET”</Text>
-          </Animated.View>
-          <Animated.View style={[styles.noteCross, cross]}>
-            <View style={[styles.noteCrossBar, { transform: [{ rotate: '45deg' }] }]} />
-            <View style={[styles.noteCrossBar, { transform: [{ rotate: '-45deg' }] }]} />
-          </Animated.View>
-        </>
-      ) : null}
-      {k === 2 ? STEPS.map((j) => <Step key={j} S={S} j={j} />) : null}
+    <View style={styles.plaque} pointerEvents="none">
+      <Animated.View style={[styles.plaqueGlow, glow]} />
+      <Text style={styles.plaqueText} numberOfLines={1}>HONESTY</Text>
+    </View>
+  );
+}
+function StepGlow({ S }: { S: SharedValue<any> }) {
+  return (
+    <>
+      {STEPS.map((s, k) => <StepLight key={k} S={S} k={k} x0={s.x0} x1={s.x1} top={s.top} />)}
+    </>
+  );
+}
+function StepLight({ S, k, x0, x1, top }: { S: SharedValue<any>; k: number; x0: number; x1: number; top: number }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.steps[k], transform: [{ scaleX: S.value.steps[k] }] }));
+  return <Animated.View style={[styles.stepLight, { left: x0 + 2, width: x1 - x0 - 4, top: top - 1 }, st]} pointerEvents="none" />;
+}
+
+// ── the café table's three glasses cases ────────────────────────────────────
+
+function Cases({ S }: { S: SharedValue<any> }) {
+  return (
+    <>
+      {[0, 1, 2].map((k) => <Case key={k} S={S} k={k} />)}
+    </>
+  );
+}
+function Case({ S, k }: { S: SharedValue<any>; k: number }) {
+  const lid = useAnimatedStyle(() => ({ transform: [{ rotate: `${-70 * clamp01(S.value.cases * 3 - k)}deg` }] }));
+  return (
+    <View style={[styles.case, { left: TABLE.cx - 20 + k * 14 }]} pointerEvents="none">
+      <Animated.View style={[styles.caseLid, { backgroundColor: LENS_TONES[k + 1] }, lid]} />
+    </View>
+  );
+}
+
+// ── the A-board ─────────────────────────────────────────────────────────────
+
+function Board({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const bracket = useAnimatedStyle(() => ({ opacity: S.value.mixed, height: 44 * S.value.mixed }));
+  const mixTag = useAnimatedStyle(() => ({ opacity: S.value.mixed }));
+  return (
+    <>
+    <View style={styles.board} pointerEvents="none">
+      {ROW_TEXT.map((r, k) => <Row key={r} S={S} k={k} text={r} />)}
+      <Animated.View style={[styles.bracket, bracket]} />
+    </View>
+    {on(MIXED) ? (
+      <Animated.View style={[styles.mixTag, mixTag]} pointerEvents="none">
+        <Text style={styles.mixText} numberOfLines={1}>MIXED</Text>
+      </Animated.View>
+    ) : null}
+    </>
+  );
+}
+function Row({ S, k, text }: { S: SharedValue<any>; k: number; text: string }) {
+  const st = useAnimatedStyle(() => ({ width: 68 * clamp01(S.value.rows - k) }));
+  return (
+    <Animated.View style={[styles.rowClip, { top: 5 + k * 15 }, st]}>
+      <Text style={styles.chalk} numberOfLines={1}>{text}</Text>
     </Animated.View>
   );
 }
 
-/** One step of practice: each 12 wide and 4 taller than the last, rising in turn. */
-function Step({ S, j }: { S: SharedValue<any>; j: number }) {
-  const st = useAnimatedStyle(() => {
-    const u = ease01(clamp01(S.value.m2 * STEP_N - j));
-    return { opacity: u, transform: [{ scaleY: 0.2 + 0.8 * u }] };
+// ── the rule, and the question over the wallet ──────────────────────────────
+
+function Rule({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.rule, transform: [{ translateY: (1 - S.value.rule) * -8 }] }));
+  const strike = useAnimatedStyle(() => ({ transform: [{ scaleX: S.value.struck }, { rotate: '-8deg' }] }));
+  if (!on(RULE_ON)) return null;
+  return (
+    <Animated.View style={[styles.rule, st]} pointerEvents="none">
+      <Text style={styles.ruleHead} numberOfLines={1}>THE RULE</Text>
+      <Text style={styles.ruleText} numberOfLines={1}>KEEP ANY WALLET YOU FIND</Text>
+      <Animated.View nativeID="strike-rule" style={[styles.ruleStrike, strike]} />
+    </Animated.View>
+  );
+}
+function Query({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.query, transform: [{ scale: 0.6 + 0.4 * S.value.query }] }));
+  if (!on(A_FIND)) return null;
+  return (
+    <Animated.View style={[styles.query, st]} pointerEvents="none">
+      <Text style={styles.queryText}>?</Text>
+    </Animated.View>
+  );
+}
+
+// ── the happiness meters over the two of them ───────────────────────────────
+
+function Meters({ S, on, DF, DH }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean; DF: SharedValue<Bundle>; DH: SharedValue<Bundle> }) {
+  const his = useAnimatedStyle(() => {
+    const h = DF.value.head;
+    return { opacity: S.value.meters, transform: [{ translateX: h[0].translateX + 20 }, { translateY: h[1].translateY - 40 }] };
   });
-  return <Animated.View style={[styles.step, { left: 8 + j * 12, height: 4 + j * 4 }, st]} />;
+  const hers = useAnimatedStyle(() => {
+    // on the side of her head that faces him, so its weight stays on the stage
+    const h = DH.value.head;
+    return { opacity: S.value.meters, transform: [{ translateX: h[0].translateX - 34 }, { translateY: h[1].translateY - 40 }] };
+  });
+  const fillHis = useAnimatedStyle(() => ({ height: 26 * lerp(0.35, 0.6, S.value.joy) }));
+  const fillHers = useAnimatedStyle(() => ({ height: 26 * lerp(0.2, 0.95, S.value.joy) }));
+  const eq = useAnimatedStyle(() => ({ opacity: S.value.equal }));
+  if (!on(METERS)) return null;
+  return (
+    <>
+      <Animated.View style={[styles.rider, his]} pointerEvents="none">
+        <View style={styles.meter}><Animated.View style={[styles.meterFill, fillHis]} /></View>
+        {on(EQUAL) ? <Animated.View style={[styles.weight, eq]}><Text style={styles.weightText}>×1</Text></Animated.View> : null}
+      </Animated.View>
+      <Animated.View style={[styles.rider, hers]} pointerEvents="none">
+        <View style={styles.meter}><Animated.View style={[styles.meterFill, fillHers]} /></View>
+        {on(EQUAL) ? <Animated.View style={[styles.weight, eq]}><Text style={styles.weightText}>×1</Text></Animated.View> : null}
+      </Animated.View>
+    </>
+  );
+}
+
+// ── the two questions: thoughts through the glasses, then street signs ──────
+
+function Plates({ items, kind, picked, onPick, S, live }: {
+  items: { id: string; l1: string; l2: string; x: number; correct: boolean }[];
+  kind: 'thought' | 'sign'; picked: string | null; onPick: (id: string, ok: boolean) => void;
+  S: SharedValue<any>; live: boolean;
+}) {
+  const answered = picked !== null || !live;
+  const fade = useAnimatedStyle(() => ({ opacity: kind === 'thought' ? S.value.thoughts : S.value.signs }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
+      {items.map((q) => (
+        <Target
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={kind === 'thought' ? 12 : 4}
+          disabled={answered} sealAt="tr"
+          style={[styles.plate, { left: q.x - PLATE_W / 2 }]}
+        >
+          <View style={[kind === 'thought' ? styles.thoughtFace : styles.signFace, answered && q.correct && styles.faceRight]}>
+            <Text style={[kind === 'thought' ? styles.plateText : styles.signText, answered && q.correct && styles.onInk]} numberOfLines={1}>{q.l1}</Text>
+            <Text style={[kind === 'thought' ? styles.plateText : styles.signText, answered && q.correct && styles.onInk]} numberOfLines={1}>{q.l2}</Text>
+          </View>
+        </Target>
+      ))}
+    </Animated.View>
+  );
 }
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 30, right: 22, top: GROUND, height: 1.5, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
+  ground: { position: 'absolute', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },
+  street: {
+    position: 'absolute', left: 0, top: 292, width: STAGE_W, height: GROUND - 292, backgroundColor: CANVAS.STONE,
+    borderTopLeftRadius: 2, borderTopRightRadius: 2,
+  },
+  rider: { position: 'absolute', left: 0, top: 0 },
+  frames: {
+    position: 'absolute', left: -2, top: -4, width: 17, height: 6, borderRadius: 3, borderWidth: 2,
+    backgroundColor: 'rgba(255,255,255,0.35)',
+  },
+  bridge: { position: 'absolute', left: 5, top: -2, width: 3, height: 2, backgroundColor: INK },
+  wallet: {
+    position: 'absolute', left: -7, top: -4, width: 14, height: 9, borderRadius: 2, backgroundColor: OLIVE,
+    borderWidth: 1.2, borderColor: INK,
+  },
+  ownWallet: { backgroundColor: DEEP },
+  walletFlap: { position: 'absolute', left: 6, top: 1, width: 5, height: 3, borderRadius: 1, backgroundColor: EMBER },
 
-  boardTitle: {
-    position: 'absolute', left: BOARD_L, top: TITLE_T, width: BOARD_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.6, color: SOFT,
-    includeFontPadding: false,
+  plaque: {
+    position: 'absolute', left: DOOR.x - 2, top: 356, width: DOOR.w + 4, height: 16, borderRadius: 3,
+    borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE, alignItems: 'center', justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  plaqueGlow: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: SAGE },
+  plaqueText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.8, color: INK, includeFontPadding: false,
+  },
+  stepLight: { position: 'absolute', height: 3, borderRadius: 1.5, backgroundColor: EMBER, transformOrigin: '0% 50%' },
+
+  case: {
+    position: 'absolute', top: TABLE.top - 7, width: 12, height: 7, borderRadius: 2, backgroundColor: PLATE_FACE,
+    borderWidth: 1.2, borderColor: INK,
+  },
+  caseLid: { position: 'absolute', left: -1, top: -4, width: 12, height: 4, borderRadius: 2, transformOrigin: '0% 100%' },
+
+  board: {
+    position: 'absolute', left: BOARD.x, top: BOARD.y, width: BOARD.w, height: BOARD.h, borderRadius: 4,
+    backgroundColor: DEEP, borderWidth: 2, borderColor: INK, overflow: 'hidden',
+  },
+  rowClip: { position: 'absolute', left: 6, height: 13, overflow: 'hidden' },
+  chalk: {
+    width: 68, fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 12, letterSpacing: 0, color: PAPER_LIT, includeFontPadding: false,
+  },
+  bracket: {
+    position: 'absolute', right: 3, top: 6, width: 4, borderWidth: 1.5, borderLeftWidth: 0, borderColor: EMBER,
+    borderTopRightRadius: 3, borderBottomRightRadius: 3,
+  },
+  mixTag: {
+    position: 'absolute', left: BOARD.x + BOARD.w - 38, top: BOARD.y - 16, height: 13, paddingHorizontal: 3, borderRadius: 2,
+    backgroundColor: DEEP, borderWidth: 1, borderColor: INK, justifyContent: 'center',
+  },
+  mixText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: PAPER_LIT, includeFontPadding: false,
   },
 
-  row: {
-    position: 'absolute', left: BOARD_L, width: BOARD_W, height: ROW_H,
-    borderWidth: 1.5, borderColor: RULE, borderRadius: 4, backgroundColor: STONE, boxShadow: LIP,
+  rule: {
+    position: 'absolute', left: 166, top: 356, width: 150, paddingVertical: 3, alignItems: 'center',
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
-  rowLit: {
-    position: 'absolute', left: -1.5, top: -1.5, right: -1.5, bottom: -1.5,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 4,
+  ruleHead: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
-  rowAccent: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, backgroundColor: INK },
+  ruleText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0, color: INK, includeFontPadding: false,
+  },
+  ruleStrike: {
+    position: 'absolute', left: 6, right: 6, top: 15, height: 2.5, borderRadius: 1.25, backgroundColor: EMBER,
+    transformOrigin: '0% 50%',
+  },
+  query: {
+    position: 'absolute', left: WALLET.x - 9, top: WALLET.y - 42, width: 18, height: 22, borderRadius: 6,
+    backgroundColor: PLATE_FACE, borderWidth: 1.5, borderColor: INK, alignItems: 'center', justifyContent: 'center',
+  },
+  queryText: { fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 15, color: EMBER, includeFontPadding: false },
 
-  badge: {
-    position: 'absolute', left: 12, top: (ROW_H - 26) / 2, width: 26, height: 26, borderRadius: 13,
-    borderWidth: 1.5, borderColor: SOFT, alignItems: 'center', justifyContent: 'center',
+  meter: {
+    position: 'absolute', left: -5, top: -26, width: 10, height: 28, borderRadius: 3, borderWidth: 1.5, borderColor: INK,
+    backgroundColor: PLATE_FACE, justifyContent: 'flex-end', overflow: 'hidden',
   },
-  badgeText: { fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 16, color: INK, includeFontPadding: false },
-  badgeOn: {
-    position: 'absolute', left: 12, top: (ROW_H - 26) / 2, width: 26, height: 26, borderRadius: 13,
-    backgroundColor: INK, alignItems: 'center', justifyContent: 'center',
+  meterFill: { width: '100%', backgroundColor: SAGE },
+  weight: {
+    position: 'absolute', left: 8, top: -16, paddingHorizontal: 2, borderRadius: 2, backgroundColor: DEEP,
   },
-  badgeTextOn: { fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 16, color: PAPER, includeFontPadding: false },
-
-  nameCol: { position: 'absolute', left: 46, top: 7, width: 102 },
-  lensName: {
-    fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 17, letterSpacing: 0.3, color: INK,
-    includeFontPadding: false,
-  },
-  lensWho: {
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1, color: INK,
-    includeFontPadding: false,
-  },
-  lensQ: {
-    position: 'absolute', left: 152, top: 8, width: 116,
-    fontFamily: 'Inter_500Medium', fontSize: 11.5, lineHeight: 14.5, color: INK, includeFontPadding: false,
+  weightText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, color: PAPER_LIT, includeFontPadding: false,
   },
 
-  slot: {
-    position: 'absolute', left: 274, top: 7, width: 92, height: 30,
-    borderWidth: 1.5, borderColor: RULE, borderStyle: 'dashed', borderRadius: 4,
+  plate: { position: 'absolute', top: 298, width: PLATE_W, height: 30 },
+  thoughtFace: {
+    flexGrow: 1, borderWidth: 1.5, borderColor: INK, borderRadius: 12, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
-  slotText: { fontFamily: 'Inter_700Bold', fontSize: 16, lineHeight: 20, color: INK, includeFontPadding: false },
-  stamp: {
-    position: 'absolute', left: 274, top: 7, width: 92, height: 30,
-    backgroundColor: INK, borderRadius: 4, alignItems: 'center', justifyContent: 'center',
+  signFace: {
+    flexGrow: 1, borderWidth: 1.5, borderColor: INK, borderRadius: 4, backgroundColor: TEAL,
+    alignItems: 'center', justifyContent: 'center',
   },
-  stampText: {
-    fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 16, letterSpacing: 0.6, color: PAPER,
-    includeFontPadding: false,
+  faceRight: { backgroundColor: INK },
+  plateText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: -0.1, color: INK, includeFontPadding: false,
   },
-
-  // ── the "+" between the step badges ─────────────────────────────────────
-  joiner: {
-    position: 'absolute', left: JOIN_X - JOIN_D / 2, width: JOIN_D, height: JOIN_D, borderRadius: JOIN_D / 2,
-    backgroundColor: PAPER, borderWidth: 1.5, borderColor: INK,
+  signText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0, color: PAPER_LIT, includeFontPadding: false,
   },
-  joinH: { position: 'absolute', left: 2.5, top: 5.5, width: 8, height: 2, backgroundColor: INK },
-  joinV: { position: 'absolute', left: 5.5, top: 2.5, width: 2, height: 8, backgroundColor: INK },
-
-  // ── the question over the wallet (x 182…198, y 404…434; the notes start at 446)
-  query: {
-    position: 'absolute', left: WALLET_X - 8, top: 404, width: 16, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 26, lineHeight: 30, color: INK, includeFontPadding: false,
-  },
-
-  // ── the margin notes ───────────────────────────────────────────────────────
-  // Inside a note (77 × 41 within the border): the badge at 5, the caption from 21
-  // (FOR ALL? and PRACTICE end by 73 at 9.2px — this band's 8pt floor), and the
-  // marks in the band 18…39.
-  note: {
-    position: 'absolute', left: NOTE_L, width: NOTE_W, height: NOTE_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
-  },
-  noteBadge: {
-    position: 'absolute', left: 5, top: 4, width: 13, height: 13, borderRadius: 6.5,
-    backgroundColor: INK, alignItems: 'center', justifyContent: 'center',
-  },
-  noteBadgeText: { fontFamily: 'Inter_700Bold', fontSize: 9.2, lineHeight: 11, color: PAPER, includeFontPadding: false },
-  noteCap: {
-    position: 'absolute', left: 21, top: 5, width: 55,
-    fontFamily: 'Inter_700Bold', fontSize: 9.2, lineHeight: 11, letterSpacing: 0.3, color: INK, includeFontPadding: false,
-  },
-  noteEq: {
-    position: 'absolute', top: 22.5, width: 8, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12, color: INK, includeFontPadding: false,
-  },
-  token: {
-    position: 'absolute', top: 22, width: 13, height: 13, borderRadius: 6.5,
-    backgroundColor: INK, alignItems: 'center', justifyContent: 'center',
-  },
-  tokenText: { fontFamily: 'Inter_700Bold', fontSize: 9.2, lineHeight: 11, color: PAPER, includeFontPadding: false },
-  // Two lines, 52 and 44 wide at 9.2px, in a column that ends where the cross starts.
-  noteRule: {
-    position: 'absolute', left: 6, width: 54,
-    fontFamily: 'Inter_700Bold', fontSize: 9.2, lineHeight: 10.5, color: INK, includeFontPadding: false,
-  },
-  // The cross stands beside the rule's second line, never on a word: the first
-  // line's ink ends at x 58 above y 28, the second's at 50.
-  noteCross: { position: 'absolute', left: 60, top: 25, width: 14, height: 14, alignItems: 'center', justifyContent: 'center' },
-  noteCrossBar: { position: 'absolute', width: 15, height: 2.5, borderRadius: 1.25, backgroundColor: INK },
-  step: { position: 'absolute', bottom: 3, width: 11, backgroundColor: INK, transformOrigin: '50% 100%' },
-
-  // ── the pavement, drawn as slabs rather than one bare rule ────────────────
-  pave: { position: 'absolute', top: GROUND + 2, width: 1.5, height: 5, backgroundColor: RULE },
-
-  // ── the wallet: a stitched body with a fold and clasp, two notes and a card ─
-  walletShadow: {
-    position: 'absolute', left: WALLET_X - 42, top: GROUND - 2, width: 84, height: 5,
-    borderRadius: 3, backgroundColor: RULE,
-  },
-  wallet: {
-    position: 'absolute', left: WALLET_X - 37, top: GROUND - 40, width: 74, height: 40, borderRadius: 8,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
-  },
-  stitch: { position: 'absolute', top: 5, width: 6, height: 1.5, backgroundColor: RULE },
-  walletFold: { position: 'absolute', left: 0, right: 0, top: 16, height: 1.5, backgroundColor: SOFT },
-  walletClasp: {
-    position: 'absolute', left: 28, top: 21, width: 16, height: 10, borderRadius: 2,
-    borderWidth: 1.5, borderColor: SOFT,
-  },
-  noteBack: {
-    position: 'absolute', left: WALLET_X - 14, top: GROUND - 54, width: 30, height: 10,
-    borderWidth: 1.2, borderColor: RULE, borderRadius: 1.5, backgroundColor: PAPER,
-  },
-  noteFront: {
-    position: 'absolute', left: WALLET_X - 22, top: GROUND - 49, width: 32, height: 11,
-    borderWidth: 1.5, borderColor: SOFT, borderRadius: 1.5, backgroundColor: PAPER,
-  },
-  walletCard: {
-    position: 'absolute', left: WALLET_X + 8, top: GROUND - 44, width: 24, height: 15,
-    borderWidth: 1.2, borderColor: SOFT, borderRadius: 1.5, backgroundColor: PAPER,
-  },
+  onInk: { color: PAPER_LIT },
 });
 
-// BAND. Measured against every beat, not just the first.
-//   top    · the board title at 182 (the row borders start at 198.5, the stamps
-//            never scale above 202), so 176 leaves 6 units of air.
-//   bottom · the ankle JOINT is a circle of radius STR.limb/2 × K_FIG = 7.4 drawn
-//            centred on GROUND, so a planted foot actually inks to 507.4 — lower
-//            than the pavement slabs (507), the wallet shadow (503) or the ground
-//            rule (501.5). 512 clears the true lowest pixel by 4.6.
-// Figures: crown = GROUND − FIG_H × K_FIG ≈ 361, and the highest lift in this
-// lesson is the beat-7 shrug (bob +3, live accent +2.5 → crown ~353.6), still
-// 13 units below the table's last row at 340. Nothing is clipped, nothing collides.
-// The margin notes (x 314…394, y 352…495 with their lip) and the question mark over
-// the wallet (y 404…434) sit inside the same slice.
 export function Ethics2Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics2Scene} band={[176, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics2Scene} band={[288, 514]} camera={CAM} />;
 }

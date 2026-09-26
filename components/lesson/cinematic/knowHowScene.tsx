@@ -1,340 +1,572 @@
-import {
-  View, Text, Pressable, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import {
-  WALK, dirsFrom, ease01, lerp, moveTr, pose, travelStance, type Bundle, } from './rig';
-// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
-// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
-import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
-import { BEATS } from './knowHowScript';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, facing, useCarry, carry, lookPose,
-} from './cinematicKit';
-import { stageTone } from './stageTones';
-import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
-import { followMoves, kindOf, seedOf } from './camera';
-import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
+import ObjectArt from './ObjectArt';
+import { BEATS } from './knowHowScript';
+import {
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
+  type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing,
+} from './cinematicKit';
+import { stageTone, stageToneOf } from './stageTones';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
+import type { SceneApi } from './CinematicPlayer';
+import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
+import { reachHandTo } from './interact';
+import { useLinger } from './useLinger';
+import { lineOf, stage, bump } from './pace';
+import { pool, ladder, boardPosts, bench, POOL, BOARD, BOX, BENCH } from './knowHowSet';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
+// ─────────────────────────────────────────────────────────────────────────────
+// epistemology-knowledge-2, "Knowing How vs. Knowing That" — A SWIMMING POOL.
+//
+// Redrawn 2026-09-26, one of six second lessons. Every act below is laid across its
+// voiced line in stages (pace.ts), with the line lengths copied from the narration
+// manifest: the stage keeps acting for the whole line, not one second of it.
+//
+//   b0   he reads at the side of the pool, putting each finished manual on the pile
+//        on the bench and starting the next.
+//   b1   he goes to the edge and looks down at the water; the board's three slots
+//        and the box under them, SWIMMING, outline in.
+//   b2   KEEP THE HEAD LOW is written up; he shows it, bending; a tick — easy to check.
+//   b3   an arrow runs from it down to the box; he mimes the stroke on dry land.
+//   b4   two more instructions, then KNOWING THAT across the board; one more book.
+//   b5   the box stays empty and is named KNOWING HOW; he dips a toe and pulls it back.
+//   b7   he jumps in, flails, and swims a length; the box is ticked.
+//   b8   Q1: four kickboards on the water while he swims back to the ladder.
+//   b9   Q2: three buoys on the lane rope.
+//
+// COMPOSITION, in stage units: the board 10–194 × 298–390, the box 30–166 × 396–426;
+// the bench 16–112 with the books on it; he stands at x 186 on the deck, and at 240 on the near coping; the
+// pool 196–400, far coping at 436, near coping at 500, his lane's waterline at 474.
+// Band [288, 514].
+// ─────────────────────────────────────────────────────────────────────────────
+
 const TONE = stageTone('epistemology');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
+const { RULE } = TONE;
+const LIP = lipOf(TONE);
+const WOOD = stageToneOf(OLIVE);
+const TILE = stageToneOf(SAGE);
+const WATER = stageToneOf(TEAL);
+const TR = 0.85;
 
-// A column of instructions stage right, with the outcome box beneath it.
-//
-// COMPOSITION, in coordinates:
-// · the figure WALKS x = 70 → 168 → 124. Body span x ± 36, widest x 132…204 at 168;
-//   the working fist at gesture 41 reaches x 204.5.
-// · all wall ink is at x ≥ 214, so the tightest clearance to the figure is 9.5 units.
-// · instruction cards y 226…316 on a 32 pitch · the outcome box y 330…390 · the
-//   answer row y 404…436. A standing crown is y 397; the answer row is lower than
-//   that but sits at x 214…392, which the figure never enters.
-//
-// A5 — DELIBERATE: the wall is out of the figure's reach (its hand tops out at
-// y 411, B11b) and no beat's text claims it touches anything. The box fills on the
-// beat the narration says the hands move; the figure works at chest height beside
-// it rather than pretending to reach a surface it cannot (D32, C22d2).
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, epistemology-knowledge-2. */
+const LINES = [4.8, 2.9, 5.8, 6.9, 8.4, 7.2, 0, 5.4, 0, 0, 0];
 
-const WALL_L = 214;
-const WALL_R = 392;
-const WALL_W = WALL_R - WALL_L;
+/** His scale: a lone figure at K_FIG fills 46% of this band; this is 37%. */
+const K_SW = K_FIG * 0.82;
+/** Where his lane's water reaches him: everything below it is under the surface. */
+const WATERLINE = 474;
+/** Where his feet are, standing in the water — his shoulders at the surface. */
+const WET_GY = 528;
+/** The jump: from the edge to the lane. */
+const EDGE_X = 240;
+const LANE_X = 228;
+const FAR_X = 370;
 
-const STEP_T = 226;
-const STEP_H = 26;
-const STEP_PITCH = 32;
-
-const BOX_W = 118;
-const BOX_L = WALL_L + (WALL_W - BOX_W) / 2;
-const BOX_T = 330;
-const BOX_H = 60;
-
-const ANS_T = 404;
-const ANS_H = 32;
-const ANS_GAP = 5;
-const ANS_W = (WALL_W - 2 * ANS_GAP) / 3;
-
-const STEPS = [
-  'KEEP THE HEAD LOW',
-  'EXHALE UNDERWATER',
-  'PULL, DO NOT PUSH',
-];
-
-// One word each, and that is not a style choice. These sit in a 56-unit card whose
-// inner width is 52, on a single line, so the WHOLE string has to fit — "THE DOING"
-// measured 55.4 and would have been ellipsised to "THE DOIN…". The longest word is
-// the wrong thing to measure when the label cannot wrap (D30).
-const ANSWERS = [
-  { id: 'doing', label: 'DOING', correct: true },
-  { id: 'rules', label: 'RULES', correct: false },
-  { id: 'why', label: 'REASONS', correct: false },
-];
-
+const X = BEATS.map((b) => b.x ?? 186);
 const P = BEATS.map((b) => b.p ?? 0);
-const X = BEATS.map((b) => b.x ?? 124);
-// The camera, from the staging: it follows the figure this track describes,
-// pulls back to scale 1 on every graded beat so a tap lands where it is aimed,
-// and leans in on the quote. See followMoves in ./camera.ts.
-const CAM = followMoves(X, BEATS.map(kindOf), seedOf('knowHow'));
-const DIR = dirsFrom(X, 1);
-const NSTEPS = BEATS.map((b) => b.steps ?? 0);
-const DONE = BEATS.map((b) => b.done ?? 0);
-
-// R7c — the stage follows the split on its own graded beat, and only there.
-// Derived from the beat rather than declared as a channel so it cannot fall out
-// of step with the control it is about.
-//
-// The split divides what memorising gives you between THE FACTS (left) and THE
-// SKILL (right), and `dragPos` is the LEFT side's share (R7b). The stage already
-// draws both halves of that: the column of instructions is the facts, and the
-// outcome box — EMPTY or DONE, with the column receding as it fills — is the
-// skill. So the skill's share is `1 − dragPos`, read straight into `done`: toward
-// "the skill of swimming itself" the box fills and the column dims, toward "the
-// facts, yet none of the skill" the box empties and the column comes back up.
-const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
-
-// ── the three still-tap events (group AH) ───────────────────────────────────
+const ACT = BEATS.map((b) => b.act ?? '');
+const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
+const A_READ = is('read');
+const A_EDGE = is('edge');
+const A_DEMO = is('demo');
+const A_MIME = is('mime');
+const A_RECITE = is('recite');
+const A_TOE = is('toe');
+const A_SWIM = is('swim');
+const A_BACK = is('back');
+const BOOKS = BEATS.map((b) => b.books ?? 0);
 const SLOTS = BEATS.map((b) => (b.slots ? 1 : 0));
+const STEPS = BEATS.map((b) => b.steps ?? 0);
 const LEAD = BEATS.map((b) => (b.lead ? 1 : 0));
-const GATHER = BEATS.map((b) => (b.gather ? 1 : 0));
-// The gap between the visible instructions and the box, where those three
-// events draw what serves what. Read off the column's own geometry so a
-// change to the card pitch moves these with it.
-const CARD1_B = STEP_T + STEP_H;                    // bottom of the first card
-const CARD3_B = STEP_T + 2 * STEP_PITCH + STEP_H;    // bottom of the third card
-const LEAD_T = CARD1_B + (BOX_T - CARD1_B) / 2 - 7;  // centred in the wider gap after one card
-const GATHER_Y = CARD3_B + 4;                        // just under the third card
+const THAT = BEATS.map((b) => (b.that ? 1 : 0));
+const HOW = BEATS.map((b) => (b.how ? 1 : 0));
+const DONE = BEATS.map((b) => (b.done ? 1 : 0));
+const WET = DONE;
+const BOARDS = BEATS.map((b) => (b.boards ? 1 : 0));
+const BUOYS = BEATS.map((b) => (b.buoys ? 1 : 0));
+/** He faces the board while he reads and recites, the water otherwise. */
+const DIR = BEATS.map((b) => (b.act === 'read' || b.act === 'recite' ? -1 : 1));
 
-export default function KnowHowScene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
-  const reacting = REACT[i] === 1;
-  const heldS = useHeld();
-  const cv = useCarry(6);
-  const cur = BEATS[i];
-  const prev = i > 0 ? BEATS[i - 1] : undefined;
+const STEP_TEXT = ['KEEP THE HEAD LOW', 'KICK FROM THE HIPS', 'BREATHE TO THE SIDE'];
+const BOOK_TONES = [TEAL, OLIVE, DEEP, TEAL, OLIVE];
 
-  const shown = cur.steps ?? 0;
-  const prevShown = prev?.steps ?? 0;
-  const doneFade = (cur.done ?? 0) !== (prev?.done ?? 0);
-  const slotsFade = (cur.slots ?? false) !== (prev?.slots ?? false);
-  const leadFade = (cur.lead ?? false) !== (prev?.lead ?? false);
-  const gatherFade = (cur.gather ?? false) !== (prev?.gather ?? false);
+const KICKBOARDS = [
+  { id: 'rules', l1: 'THE', l2: 'RULES', x: 256, y: 444, correct: false },
+  { id: 'words', l1: 'THE', l2: 'TERMS', x: 330, y: 444, correct: false },
+  { id: 'order', l1: 'WHAT TO', l2: 'DO FIRST', x: 256, y: 474, correct: false },
+  { id: 'skill', l1: 'BEING ABLE', l2: 'TO DO IT', x: 330, y: 474, correct: true },
+];
+const KB_W = 68;
+const KB_H = 26;
+const BUOY_Q = [
+  { id: 'rules', label: 'RULES', x: 262, correct: false },
+  { id: 'reasons', label: 'REASONS', x: 318, correct: false },
+  { id: 'doing', label: 'DOING', x: 374, correct: true },
+];
+const BUOY_W = 52;
 
+function hHold(code: number, t: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);
+  if (code === 0) return stand(t);
+  return narratorHold(code, t);
+}
+function hLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  if (code === 0) return stand(t);
+  return narratorLive(code, t, bt);
+}
+/** A hand on a stage point, at his scale. */
+function handOn(s: Stance, x: number, gy: number, dir: 1 | -1, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  return w <= 0 ? s : reachHandTo(s, { x, groundY: gy, k: K_SW, dir }, 1, tx, ty, w);
+}
+/** Swimming: the arms turning over, the body leaning into the stroke. */
+function swimStance(t: number, flail: number): Stance {
+  'worklet';
+  const s = stand(t);
+  const ph = t * 5.2;
+  const stroke = {
+    ...s,
+    tilt: s.tilt - 0.22,
+    fistR: { x: 18 * Math.cos(ph), y: -48 + 14 * Math.sin(ph) },
+    fistL: { x: 18 * Math.cos(ph + Math.PI), y: -48 + 14 * Math.sin(ph + Math.PI) },
+  };
+  const thrash = {
+    ...s,
+    tilt: s.tilt + 0.1 * Math.sin(t * 7),
+    fistR: { x: 10 + 8 * Math.sin(t * 9), y: -66 + 10 * Math.sin(t * 11) },
+    fistL: { x: -10 + 8 * Math.sin(t * 8 + 1), y: -62 + 10 * Math.sin(t * 10 + 2) },
+  };
+  return mixStance(stroke, thrash, flail);
+}
+
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology'));
+
+export default function KnowHowScene({
+  clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn,
+}: SceneApi) {
+  const held = useHeld();
+  const cv = useCarry(15);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / moveTr(X[p], X[n], 0.85));
+    const b = bt.value;
     const t = clock.value;
-    const grow = ease01(bt.value / 0.55);
+    const tr = ease01(b / TR);
+    const L = lineOf(LINES, n);
+    const st = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a, z);
+    };
 
-    const s = keepHeld(heldS, travelStance(
-      X[p], X[n],
-      carryFrom(heldS, n, emoteHold(P[p], t)), emoteHold(P[n], t), emoteLive(P[n], t, bt.value),
-      tr, WALK,
-    ));
-    const done = carry(cv, 0, n, DONE[p], reacting ? 1 - pickPos.value : DONE[n], doneFade ? grow : tr);
+    // ── where he is: on the deck, in mid-air, or in the water ─────────────
+    const walking = !A_SWIM[n] && !A_BACK[n] && Math.abs(X[n] - X[p]) > 1;
+    const walkU = walking ? ease01(b / moveTr(X[p], X[n], TR)) : 1;
+    let tx = X[n];
+    let gy = WET[n] ? WET_GY : GROUND;
+    let wet = WET[n];
+    let flail = 0;
+    let swim = A_SWIM[n] || A_BACK[n] ? 1 : 0;
+    if (A_SWIM[n]) {
+      // to the edge (the carry below walks him there), the jump, the flailing, then a
+      // length of the pool
+      const jump = st(0.12, 0.26);
+      tx = lerp(EDGE_X, LANE_X, jump);
+      tx = lerp(tx, FAR_X, st(0.45, 1));
+      gy = lerp(GROUND, WET_GY, jump) - 26 * Math.sin(Math.PI * jump);
+      wet = st(0.24, 0.27);
+      flail = bump(b, L, 0.25, 0.3, 0.46);
+      swim = st(0.25, 0.3);
+    } else if (A_BACK[n]) {
+      tx = lerp(FAR_X, LANE_X, st(0, 0.85));
+    }
+    // carried: every move blends from where he is on screen, a walk at the pace it needs
+    const x = carry(cv, 0, n, X[p], tx, walking ? walkU : A_SWIM[n] ? st(0, 0.12) : tr);
+    const figGY = carry(cv, 1, n, WET[p] ? WET_GY : GROUND, gy, tr);
+    const dir = DIR[n] as 1 | -1;
+
+    // ── his act, laid across the line ──────────────────────────────────────
+    let s: Stance = walking
+      ? travelStance(X[p], X[n], hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
+      : hLive(P[n], t, b);
+
+    // reading, and setting each finished book on the pile
+    const drops = [0.22, 0.42, 0.62, 0.82];
+    let dip = 0;
+    if (A_READ[n]) {
+      s = { ...s, neck: s.neck - 0.28, fistR: { x: 14, y: -46 }, fistL: { x: 8, y: -44 } };
+      for (let k = 0; k < drops.length; k++) dip += bump(b, L, drops[k] - 0.08, drops[k], drops[k] + 0.08);
+      s = handOn(s, x, figGY, dir, BENCH.x + BENCH.w - 14, BENCH.top - 40, dip);
+    }
+    const pile = A_READ[n] ? drops.reduce((c, d) => c + st(d - 0.02, d + 0.04), 0) : A_RECITE[n] ? 4 + st(0.88, 0.96) : BOOKS[n];
+    // looking down at the water from the edge
+    if (A_EDGE[n]) s = { ...s, neck: s.neck - 0.35 * st(0.2, 0.5), tilt: s.tilt - 0.08 * st(0.2, 0.5) };
+    // showing the head held low
+    const low = A_DEMO[n] ? bump(b, L, 0.34, 0.5, 0.74) : 0;
+    s = { ...s, tilt: s.tilt - 0.5 * low, neck: s.neck - 0.4 * low };
+    // miming the stroke on dry land
+    const mime = A_MIME[n] ? st(0.28, 0.4) * (1 - st(0.94, 1)) : 0;
+    s = mixStance(s, swimStance(t, 0), mime * 0.9);
+    // a toe in the water, and back out again with a shiver
+    const toe = A_TOE[n] ? bump(b, L, 0.3, 0.46, 0.64) : 0;
+    const shiver = A_TOE[n] ? bump(b, L, 0.6, 0.66, 0.84) : 0;
+    s = {
+      ...s,
+      footR: { x: s.footR.x + 18 * toe, y: s.footR.y + 5 * toe },
+      tilt: s.tilt + 0.06 * toe + 0.05 * shiver * Math.sin(t * 40),
+    };
+    // in the water
+    s = mixStance(s, swimStance(t, flail), swim);
+
+    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+
     return {
-      fig: lookPose(s, carry(cv, 1, n, X[p], X[n], tr), GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
-      fill: carry(cv, 2, n, NSTEPS[p], NSTEPS[n], grow),
-      done,
-      // The column recedes as the box fills — the two are one movement, so the
-      // reader reads it as a handover rather than as two things happening.
-      dim: 1 - 0.45 * done,
-      slots: carry(cv, 3, n, SLOTS[p], SLOTS[n], slotsFade ? grow : 1),
-      lead: carry(cv, 4, n, LEAD[p], LEAD[n], leadFade ? grow : 1),
-      gather: carry(cv, 5, n, GATHER[p], GATHER[n], gatherFade ? grow : 1),
+      fig: lookPose(fig, x, figGY, K_SW, facing(DIR[p], DIR[n], b), 1, gazeX.value, gazeY.value, gazeOn.value),
+      x, wet: carry(cv, 2, n, WET[p], wet, tr),
+      books: carry(cv, 3, n, BOOKS[p], pile, tr),
+      slots: carry(cv, 4, n, SLOTS[p], SLOTS[n], A_EDGE[n] ? st(0.3, 0.7) : tr),
+      steps: carry(cv, 5, n, STEPS[p],
+        A_DEMO[n] ? st(0, 0.35) : A_RECITE[n] ? 1 + st(0.08, 0.34) + st(0.4, 0.66) : STEPS[n], tr),
+      tick: carry(cv, 6, n, STEPS[p] > 0 ? 1 : 0, A_DEMO[n] ? st(0.72, 0.86) : STEPS[n] > 0 ? 1 : 0, tr),
+      lead: carry(cv, 7, n, LEAD[p], A_MIME[n] ? st(0, 0.3) : LEAD[n], tr),
+      that: carry(cv, 8, n, THAT[p], A_RECITE[n] ? st(0.72, 0.88) : THAT[n], tr),
+      how: carry(cv, 9, n, HOW[p], A_TOE[n] ? st(0.12, 0.3) : HOW[n], tr),
+      glow: carry(cv, 10, n, 0, A_TOE[n] ? st(0, 0.2) * (1 - st(0.9, 1)) : 0, tr),
+      done: carry(cv, 11, n, DONE[p], A_SWIM[n] ? st(0.6, 0.78) : DONE[n], tr),
+      splash: carry(cv, 12, n, 0, A_SWIM[n] ? bump(b, L, 0.23, 0.28, 0.5) : 0, tr),
+      boards: carry(cv, 13, n, BOARDS[p], BOARDS[n], tr),
+      buoys: carry(cv, 14, n, BUOYS[p], BUOYS[n], tr),
+      t,
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
-  const columnStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.dim }));
-  const boxFillStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.done }));
-  const emptyStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.done }));
-  // The three still-tap events (group AH): the empty slots before any instruction
-  // is written in, the arrow from the first instruction down to the box, and the
-  // bar that later gathers all three down to the same still-empty box.
-  const slotsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.slots }));
-  const leadStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.lead }));
-  const gatherStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.gather }));
-
-  const answered = picked !== null;
-  const showPick = (cur.pick ?? 0) > 0 && !!cur.interact;
+  // everything below his lane's surface is under the water
+  const clip = useAnimatedStyle(() => ({ height: lerp(STAGE_H, WATERLINE, SCENE.value.wet) }));
+  const ring = useAnimatedStyle(() => ({
+    opacity: SCENE.value.wet,
+    transform: [{ translateX: SCENE.value.x }, { scaleX: 1 + 0.12 * Math.sin(SCENE.value.t * 5.2) }],
+  }));
+  const splash = useAnimatedStyle(() => ({
+    opacity: SCENE.value.splash,
+    transform: [{ translateX: LANE_X }, { scale: 0.4 + SCENE.value.splash }],
+  }));
+  const book = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    return { opacity: SCENE.value.books < 4.9 && SCENE.value.wet < 0.5 ? 1 : 0, transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }] };
+  });
 
   return (
-    <Animated.View style={styles.scene}>
+    <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-      {/* The three instruction slots outline in empty, before any of them is
-          written — "all that reading" as a shape with nothing filled yet. */}
-      {[0, 1, 2].map((k) => (
-        <Animated.View key={`slot-${k}`} pointerEvents="none"
-          style={[styles.slotGhost, { top: STEP_T + k * STEP_PITCH }, slotsStyle]} />
-      ))}
-      {/* ── the instructions ────────────────────────────────────────────────── */}
-      <Animated.View style={[styles.column, columnStyle]} pointerEvents="none">
-        {STEPS.map((s, k) => (
-          <StepCard key={s} index={k} label={s} shown={shown} prevShown={prevShown} SCENE={SCENE} />
+      <View style={styles.wall} pointerEvents="none">
+        {[0, 1, 2, 3, 4, 5, 6].map((k) => <View key={k} style={[styles.wallGrout, { top: 16 + k * 20 }]} />)}
+      </View>
+      <Water S={SCENE} />
+      <ObjectArt parts={POOL_ART} tone={TILE} />
+      <ObjectArt parts={LADDER_ART} tone={TILE} />
+      <ObjectArt parts={POSTS_ART} tone={WOOD} />
+      <Board S={SCENE} on={on} />
+      <ObjectArt parts={BENCH_ART} tone={WOOD} />
+      <Books S={SCENE} />
+      {BUOYS[i] ? <Buoys picked={picked} onPick={onPick} S={SCENE} /> : null}
+      <View style={styles.ground} pointerEvents="none" />
+      <Animated.View style={[styles.lane, clip]} pointerEvents="none">
+        <Stickman D={DF} k={K_SW} />
+      </Animated.View>
+      <Animated.View style={[styles.rider, book]} pointerEvents="none">
+        <View style={styles.heldBook} />
+      </Animated.View>
+      <Animated.View style={[styles.ripple, ring]} pointerEvents="none" />
+      <Animated.View style={[styles.splash, splash]} pointerEvents="none">
+        {[0, 1, 2, 3, 4, 5].map((k) => (
+          <View key={k} style={[styles.drop, { left: 18 * Math.cos(k * 0.6 + 3.3) - 3, top: 14 * Math.sin(k * 0.6 + 3.3) - 3 }]} />
         ))}
       </Animated.View>
+      {BOARDS[i] ? <Kickboards picked={picked} onPick={onPick} S={SCENE} /> : null}
+    </View>
+  );
+}
 
-      {/* An arrow drops from the one instruction so far: it serves an end
-          beyond itself. */}
-      <Animated.Text style={[styles.lead, leadStyle]} numberOfLines={1} pointerEvents="none">↓</Animated.Text>
-      {/* A bar gathers all three instructions and drops toward the box, which
-          still sits empty underneath them. */}
-      <Animated.View style={[styles.gatherBar, gatherStyle]} pointerEvents="none" />
-      <Animated.View style={[styles.gatherDrop, gatherStyle]} pointerEvents="none" />
+const POOL_ART = pool();
+const LADDER_ART = ladder();
+const POSTS_ART = boardPosts();
+const BENCH_ART = bench();
 
-      {/* ── the thing the instructions are for ──────────────────────────────── */}
-      <View style={styles.box} pointerEvents="none">
-        <Animated.Text style={[styles.boxEmpty, emptyStyle]} numberOfLines={1}>EMPTY</Animated.Text>
-        <Animated.View style={[styles.boxFill, boxFillStyle]}>
-          <Text style={styles.boxFillText} numberOfLines={1}>DONE</Text>
+// ── the water: a plane that never stops moving ──────────────────────────────
+
+function Water({ S }: { S: SharedValue<any> }) {
+  return (
+    <View style={styles.water} pointerEvents="none">
+      {[0, 1, 2, 3].map((k) => <Wave key={k} S={S} k={k} />)}
+    </View>
+  );
+}
+function Wave({ S, k }: { S: SharedValue<any>; k: number }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: 12 * Math.sin(S.value.t * 0.9 + k * 1.7) }] }));
+  return <Animated.View style={[styles.wave, { top: 10 + k * 14, left: 24 + (k % 2) * 40 }, st]} />;
+}
+
+// ── the board, its instructions, and the box underneath ─────────────────────
+
+function Board({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const slots = useAnimatedStyle(() => ({ opacity: S.value.slots }));
+  const arrow = useAnimatedStyle(() => ({ height: 70 * S.value.lead, opacity: S.value.lead }));
+  const that = useAnimatedStyle(() => ({ opacity: S.value.that, transform: [{ scale: 1.2 - 0.2 * S.value.that }] }));
+  const how = useAnimatedStyle(() => ({ opacity: S.value.how, width: 92 * S.value.how }));
+  const tick = useAnimatedStyle(() => ({ opacity: S.value.done, transform: [{ scale: 0.4 + 0.6 * S.value.done }, { rotate: '-8deg' }] }));
+  const fill = useAnimatedStyle(() => ({ opacity: 0.35 * S.value.done }));
+  const glow = useAnimatedStyle(() => ({ opacity: S.value.glow * (0.6 + 0.4 * Math.sin(S.value.t * 5)) }));
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={styles.board}>
+        <View style={styles.boardHead}>
+          <Text style={styles.boardTitle} numberOfLines={1}>HOW TO SWIM</Text>
+          {on(THAT) ? (
+            <Animated.View style={[styles.thatTag, that]}>
+              <Text style={styles.tagText} numberOfLines={1}>KNOWING THAT</Text>
+            </Animated.View>
+          ) : null}
+        </View>
+        {STEP_TEXT.map((w, k) => <Step key={w} S={S} k={k} text={w} />)}
+        <Animated.View style={[StyleSheet.absoluteFill, slots]}>
+          {[0, 1, 2].map((k) => <View key={k} style={[styles.slot, { top: 22 + k * 22 }]} />)}
         </Animated.View>
       </View>
-      <Text style={styles.boxLabel} numberOfLines={1} pointerEvents="none">THE DOING</Text>
+      {on(LEAD) ? (
+        <Animated.View style={[styles.arrow, arrow]}>
+          <View style={styles.arrowHead} />
+        </Animated.View>
+      ) : null}
+      <Animated.View style={[styles.boxGlow, glow]} />
+      <Animated.View style={[styles.box, slots]}>
+        <View style={styles.check}>
+          <Animated.View style={[StyleSheet.absoluteFill, styles.checkFill, fill]} />
+          <Animated.Text style={[styles.tickMark, tick]}>✓</Animated.Text>
+        </View>
+        <View>
+          <Text style={styles.boxText} numberOfLines={1}>SWIMMING</Text>
+          {on(HOW) ? (
+            <Animated.View style={[styles.howClip, how]}>
+              <Text style={styles.boxHow} numberOfLines={1}>= KNOWING HOW</Text>
+            </Animated.View>
+          ) : null}
+        </View>
+      </Animated.View>
+    </View>
+  );
+}
 
-      {/* ── Q2: what the column cannot hand you ─────────────────────────────── */}
-      {showPick &&
-        ANSWERS.map((a, k) => {
-          const chosen = picked === a.id;
-          return (
-            <Target id={a.id} correct={a.correct} picked={picked} onPick={onPick}
-              key={a.id} style={[styles.ans, { left: WALL_L + k * (ANS_W + ANS_GAP) }]} hitSlop={{ top: 6, bottom: 6, left: ANS_GAP / 2, right: ANS_GAP / 2 }} disabled={answered}>
-              <View
-                style={[
-                  styles.ansInner,
-                  answered && a.correct && styles.pickRight,
-                  answered && chosen && !a.correct && styles.pickWrong,
-                ]}
-              >
-                <Text
-                  style={[styles.ansText, answered && a.correct && styles.onInk]}
-                  numberOfLines={1}
-                >
-                  {a.label}
-                </Text>
-              </View>
-            </Target>
-          );
-        })}
+function Step({ S, k, text }: { S: SharedValue<any>; k: number; text: string }) {
+  // each instruction is written on from its left, a stroke at a time
+  const st = useAnimatedStyle(() => ({ width: 118 * clamp01(S.value.steps - k) }));
+  const tick = useAnimatedStyle(() => ({ opacity: k === 0 ? S.value.tick : 0 }));
+  return (
+    <View style={[styles.stepRow, { top: 22 + k * 22 }]}>
+      <Animated.View style={[styles.stepClip, st]}>
+        <Text style={styles.stepText} numberOfLines={1}>{text}</Text>
+      </Animated.View>
+      <Animated.Text style={[styles.stepTick, tick]}>✓</Animated.Text>
+    </View>
+  );
+}
 
-      <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={DF} k={K_FIG} />
+// ── the books, piling up on the bench ───────────────────────────────────────
+
+function Books({ S }: { S: SharedValue<any> }) {
+  return (
+    <>
+      {BOOK_TONES.map((c, k) => <Book key={k} S={S} k={k} color={c} />)}
+    </>
+  );
+}
+function Book({ S, k, color }: { S: SharedValue<any>; k: number; color: string }) {
+  const st = useAnimatedStyle(() => {
+    const v = clamp01(S.value.books - k);
+    return { opacity: v, transform: [{ translateY: (1 - v) * -18 }] };
+  });
+  return (
+    <Animated.View
+      style={[styles.book, { top: BENCH.top - 9 * (k + 1), left: BENCH.x + 18 + (k % 2 ? 5 : -3), backgroundColor: color }, st]}
+    >
+      <View style={styles.bookPages} />
     </Animated.View>
   );
 }
 
-/** One instruction. Draws on when its beat adds it, then holds (C20c). */
-function StepCard({
-  index, label, shown, prevShown, SCENE,
-}: {
-  index: number; label: string; shown: number; prevShown: number;
-  SCENE: { value: { fill: number } };   // a read-only view of the scene frame — DerivedValue<T> is invariant, so a narrowed DerivedValue does not accept the wider one
-}) {
-  const held = index < prevShown;
-  const arriving = index >= prevShown && index < shown;
-  const st = useAnimatedStyle(() => {
-    if (held) return { opacity: 1, transform: [{ translateX: 0 }] };
-    if (!arriving) return { opacity: 0, transform: [{ translateX: -8 }] };
-    const a = Math.max(0, Math.min(1, SCENE.value.fill - index));
-    return { opacity: a, transform: [{ translateX: (1 - a) * -8 }] };
-  });
+// ── Q1: four kickboards on the water ─────────────────────────────────────────
+
+function Kickboards({ picked, onPick, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; S: SharedValue<any> }) {
+  const answered = picked !== null;
+  const drift = useAnimatedStyle(() => ({ opacity: S.value.boards, transform: [{ translateY: (1 - S.value.boards) * 12 }] }));
   return (
-    <Animated.View style={[styles.step, { top: STEP_T + index * STEP_PITCH }, st]} pointerEvents="none">
-      <Text style={styles.stepNum} numberOfLines={1}>{index + 1}</Text>
-      <Text style={styles.stepText} numberOfLines={1}>{label}</Text>
+    <Animated.View style={[StyleSheet.absoluteFill, drift]} pointerEvents="box-none">
+      {KICKBOARDS.map((q) => (
+        <Target
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={9}
+          disabled={answered} sealAt="tr"
+          style={[styles.kick, { left: q.x - KB_W / 2, top: q.y - KB_H / 2 }]}
+        >
+          <View style={[styles.kickFace, answered && q.correct && styles.kickRight]}>
+            <Text style={[styles.kickText, answered && q.correct && styles.onInk]} numberOfLines={1}>{q.l1}</Text>
+            <Text style={[styles.kickText, answered && q.correct && styles.onInk]} numberOfLines={1}>{q.l2}</Text>
+          </View>
+        </Target>
+      ))}
+    </Animated.View>
+  );
+}
+
+// ── Q2: three buoys on the lane rope ────────────────────────────────────────
+
+function Buoys({ picked, onPick, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; S: SharedValue<any> }) {
+  const answered = picked !== null;
+  const drift = useAnimatedStyle(() => ({ opacity: S.value.buoys }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, drift]} pointerEvents="box-none">
+      <View style={styles.laneRope} pointerEvents="none" />
+      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((k) => (
+        <View key={k} style={[styles.bead, { left: POOL.x0 + 8 + k * 20 }]} pointerEvents="none" />
+      ))}
+      {BUOY_Q.map((q) => (
+        <Target
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={4}
+          disabled={answered} sealAt="tr"
+          style={[styles.buoyTarget, { left: q.x - BUOY_W / 2 }]}
+        >
+          <View style={styles.buoyFill}>
+            <View style={[styles.buoyPlate, answered && q.correct && styles.kickRight]}>
+              <Text style={[styles.buoyText, answered && q.correct && styles.onInk]} numberOfLines={1}>THE</Text>
+              <Text style={[styles.buoyText, answered && q.correct && styles.onInk]} numberOfLines={1}>{q.label}</Text>
+            </View>
+            <View style={styles.buoyLine} />
+            <View style={styles.buoy} />
+          </View>
+        </Target>
+      ))}
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 24, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
-  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
-  // figure and everything it is looking at standing on bare page;
-  // political7 and political8 both stand their subject on a filled mass.
   floor: floorStyle(TONE, GROUND),
+  ground: { position: 'absolute', left: 8, right: POOL.x1 - POOL.x0 + 8, top: GROUND, height: 1.5, backgroundColor: RULE },
+  wall: {
+    position: 'absolute', left: 0, top: 292, width: STAGE_W, height: POOL.far - 292,
+    backgroundColor: TILE.STONE, borderBottomLeftRadius: 4, borderBottomRightRadius: 4, overflow: 'hidden',
+  },
+  wallGrout: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: TILE.RULE },
+  water: {
+    position: 'absolute', left: POOL.x0, top: POOL.far, width: POOL.x1 - POOL.x0, height: POOL.near - POOL.far,
+    backgroundColor: WATER.SHADE, overflow: 'hidden', borderRadius: 3,
+  },
+  wave: { position: 'absolute', width: 70, height: 2, borderRadius: 1, backgroundColor: PAPER_LIT, opacity: 0.55 },
+  lane: { position: 'absolute', left: 0, top: 0, width: STAGE_W, overflow: 'hidden' },
+  rider: { position: 'absolute', left: 0, top: 0 },
+  heldBook: { position: 'absolute', left: -9, top: -8, width: 18, height: 12, borderRadius: 2, backgroundColor: TEAL, borderWidth: 1.5, borderColor: INK },
+  ripple: {
+    position: 'absolute', left: -20, top: WATERLINE - 4, width: 40, height: 8, borderRadius: 20,
+    borderWidth: 1.5, borderColor: PAPER_LIT,
+  },
+  splash: { position: 'absolute', left: 0, top: WATERLINE - 10 },
+  drop: { position: 'absolute', width: 6, height: 6, borderRadius: 3, backgroundColor: PAPER_LIT, borderWidth: 1, borderColor: INK },
 
-  column: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
-  step: {
-    position: 'absolute', left: WALL_L, width: WALL_W, height: STEP_H,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
-    flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, gap: 8,
+  board: {
+    position: 'absolute', left: BOARD.x, top: BOARD.y, width: BOARD.w, height: BOARD.h,
+    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: lipOf(WOOD),
   },
-  stepNum: {
-    fontFamily: 'Inter_700Bold', fontSize: 9, color: INK, width: 8,
-    includeFontPadding: false,
+  boardHead: { position: 'absolute', left: 8, right: 8, top: 5, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  boardTitle: {
+    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
+  thatTag: { paddingHorizontal: 4, height: 13, borderRadius: 3, backgroundColor: DEEP, justifyContent: 'center' },
+  tagText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.3, color: PAPER_LIT, includeFontPadding: false,
+  },
+  slot: {
+    position: 'absolute', left: 8, width: 124, height: 17, borderRadius: 2,
+    borderWidth: 1.2, borderColor: WATER.SHADE, borderStyle: 'dashed',
+  },
+  stepRow: { position: 'absolute', left: 11, height: 17, width: 150, flexDirection: 'row', alignItems: 'center' },
+  stepClip: { overflow: 'hidden', height: 13 },
   stepText: {
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.5, color: INK,
-    includeFontPadding: false,
+    width: 118, fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 12, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
-
-  // ── the three tap events (group AH) ──────────────────────────────────────
-  // An outline of the slot an instruction will fill — never a fill itself,
-  // so it reads as an empty space rather than another card (D31).
-  slotGhost: {
-    position: 'absolute', left: WALL_L, width: WALL_W, height: STEP_H,
-    borderWidth: 1.5, borderColor: SHADE, borderRadius: 8, borderStyle: 'dashed',
+  stepTick: { marginLeft: 6, fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 13, color: EMBER, includeFontPadding: false },
+  arrow: {
+    position: 'absolute', left: BOX.x + BOX.w - 8, top: BOARD.y + 26, width: 2, backgroundColor: EMBER,
+    alignItems: 'center', justifyContent: 'flex-end',
   },
-  lead: {
-    position: 'absolute', left: WALL_L, top: LEAD_T, width: WALL_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 15, color: SHADE, includeFontPadding: false,
+  arrowHead: {
+    width: 0, height: 0, marginBottom: -6, borderLeftWidth: 5, borderRightWidth: 5, borderTopWidth: 7,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: EMBER,
   },
-  gatherBar: {
-    position: 'absolute', left: WALL_L + 20, top: GATHER_Y, width: WALL_W - 40, height: 2,
-    backgroundColor: SHADE,
+  boxGlow: {
+    position: 'absolute', left: BOX.x - 6, top: BOX.y - 6, width: BOX.w + 12, height: BOX.h + 12, borderRadius: 8,
+    backgroundColor: SAGE,
   },
-  gatherDrop: {
-    position: 'absolute', left: WALL_L + WALL_W / 2 - 1, top: GATHER_Y, width: 2, height: BOX_T - GATHER_Y,
-    backgroundColor: SHADE,
-  },
-
   box: {
-    position: 'absolute', left: BOX_L, top: BOX_T, width: BOX_W, height: BOX_H,
-    borderWidth: 3, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center',
+    position: 'absolute', left: BOX.x, top: BOX.y, width: BOX.w, height: BOX.h, paddingHorizontal: 4,
+    borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    flexDirection: 'row', alignItems: 'center',
   },
-  boxEmpty: {
-    fontFamily: 'Inter_500Medium', fontSize: 9, letterSpacing: 1.4, color: INK,
-    includeFontPadding: false,
+  check: {
+    width: 16, height: 16, marginRight: 5, borderWidth: 1.5, borderColor: INK, borderRadius: 2,
+    alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
-  boxFill: {
-    position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: INK,
-    alignItems: 'center', justifyContent: 'center',
+  checkFill: { backgroundColor: SAGE },
+  tickMark: { fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 15, color: EMBER, includeFontPadding: false },
+  boxText: {
+    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },
-  boxFillText: {
-    fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 2, color: PAPER,
-    includeFontPadding: false,
+  howClip: { overflow: 'hidden', height: 11 },
+  boxHow: {
+    width: 92, fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 0, color: INK, includeFontPadding: false,
   },
-  boxLabel: {
-    position: 'absolute', left: BOX_L, top: BOX_T - 14, width: BOX_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.4, color: SOFT,
-    includeFontPadding: false,
+  book: {
+    position: 'absolute', width: 62, height: 8, borderRadius: 1.5, borderWidth: 1.2, borderColor: INK,
   },
+  bookPages: { position: 'absolute', right: 2, top: 1.5, width: 8, height: 3, backgroundColor: PAPER_LIT },
 
-  ans: { position: 'absolute', top: ANS_T, width: ANS_W },
-  ansInner: {
-    height: ANS_H, borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  kick: { position: 'absolute', width: KB_W, height: KB_H },
+  kickFace: {
+    flexGrow: 1, borderWidth: 1.5, borderColor: INK, borderRadius: 9, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },
-  // 9/0 rather than 9.5/0.3: these chips are ~52 units of inner width on ONE line,
-  // so the whole string must fit, not its longest word. The house size for a
-  // three-across answer row (D30).
-  ansText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 0, color: INK,
-    includeFontPadding: false,
+  kickRight: { backgroundColor: INK },
+  kickText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0, color: INK, includeFontPadding: false,
   },
-  onInk: { color: PAPER },
-  pickRight: { backgroundColor: INK, borderColor: INK },
-  pickWrong: { borderColor: SOFT },
+  onInk: { color: PAPER_LIT },
+
+  laneRope: { position: 'absolute', left: POOL.x0 + 6, top: 466, width: POOL.x1 - POOL.x0 - 6, height: 1.5, backgroundColor: INK },
+  bead: { position: 'absolute', top: 463, width: 7, height: 7, borderRadius: 3.5, backgroundColor: EMBER, borderWidth: 1, borderColor: INK },
+  buoyTarget: { position: 'absolute', top: 412, width: BUOY_W, height: 62 },
+  buoyFill: { flexGrow: 1, alignItems: 'center' },
+  buoyPlate: {
+    width: BUOY_W, height: 24, borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  buoyText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: -0.2, color: INK, includeFontPadding: false,
+  },
+  buoyLine: { width: 1.5, height: 15, backgroundColor: INK },
+  buoy: { width: 18, height: 14, borderRadius: 7, backgroundColor: EMBER, borderWidth: 1.5, borderColor: INK },
 });
 
-// Ink runs from the first instruction (226) to the ground line (500), with the box
-// label sitting at 316. Band 220…512 is 292 units (H59).
 export function KnowHowLesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} walk={X} gesture={P} Scene={KnowHowScene} band={[220, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={KnowHowScene} band={[288, 514]} camera={CAM} />;
 }

@@ -1,128 +1,76 @@
 import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Cinematic metaphysics-being-2, "Something vs. Nothing" — Parmenides' two ways.
+// Cinematic metaphysics-being-2, "Something vs. Nothing".
+// Theme: A MAGICIAN'S STAGE, AND A DOOR THAT OPENS ONTO NOTHING.
 //
-// ONE PICTURE (H64): a road that forks into two signed ways, and over the lesson
-// the second way turns out to have no road under it at all. Everything else on
-// the stage serves that or is not there.
+// A conjuror works his act while the lesson is read: a dove out of a hat that
+// vanishes again (a contingent thing), the trick's hidden mechanism (a reason for
+// everything), a hunt behind the curtain for the reason behind the stage itself.
+// Then a painted temple descends for Parmenides, two stage doors roll in — IT IS and
+// IT IS NOT — and the second opens onto a void he cannot step on, point into or
+// think about.
 //
-// ── WHAT THIS REPLACED, AND WHY ─────────────────────────────────────────────
-//
-// The old version ran a 3×2 comparison matrix across the top third — CAN THINK
-// IT / CAN SAY IT / CAN KNOW IT against IT IS / IT IS NOT — above the road. Three
-// things were wrong with it and only the third is obvious:
-//
-//   · TWO PICTURES ARGUING (H64). The road already says "the second way is not
-//     there". The matrix said it again in words, in a different visual language,
-//     and the reader had to decide which one was the lesson.
-//   · IT COST A FIFTH OF THE PICTURE (H59). The matrix pushed the band top to
-//     172, so the whole stage drew at 1.90. With it gone the band is 282 tall,
-//     which is inside the width-limited ceiling — everything is drawn at 2.31,
-//     about 20% bigger, for free.
-//   · A1: the old script said "step toward the second and it dissolves" and the
-//     traveller's x track stopped at 220, 86 units short of the fork at 306. He
-//     never stepped toward anything. He walks onto it now (beat 4, x 292) and
-//     recoils with a PLAYED startle rather than holding a pose.
-//
-// The matrix's teaching is not lost — it is what Q1 now ASKS, on the stage
-// (H65). Three posted claims, and the reader taps the one there is nothing to
-// picture. That is the same distinction the matrix asserted, except the reader
-// draws it instead of reading it.
-//
-// ── THE VOICE (group M) ─────────────────────────────────────────────────────
-//
-// It read as an encyclopaedia: "Leibniz gave the riddle its classic form in
-// 1714. The case is still open." Dates and surnames in the hook, no manner at
-// all. It is dry and faintly put-upon now, one barb a beat at most and most
-// beats none, and every barb lands on the subject rather than on the reader
-// (M1). The summary points and the explanations stay straight (M5).
+// Redrawn 2026-09-26, one of six second lessons redesigned after the first-lesson
+// sets; the owner asked for the stage to keep acting for the whole of every voiced
+// line (see pace.ts). The narration is unchanged, word for word and beat for beat;
+// both questions are new, and both are asked on the stage.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Meta2Beat extends BaseBeat {
-  /** Traveller gesture. Bands per N2: <100 rig, 100+ held action, 300+ played once. */ e?: number;
-  /** Traveller x. 92 downstage · 214 at the fork · 292 out on the dashes. */ x?: number;
-  /**
-   * How dissolved the IT-IS-NOT way is this beat, 0→1.
-   *
-   * MONOTONIC ON PURPOSE. It ran 0.95 on the recoil and then back to 0.6 for the
-   * questions, so the road the lesson had just finished proving was not there
-   * quietly came back for the last three beats. A way that is not there does not
-   * partially return; H59 is the general form of the same rule.
-   */ gone?: number;
-  /**
-   * Leibniz's principle strip has slid into place (0/1).
-   *
-   * 1 from beat 1 to the end. It was set on beat 1 alone, so the strip slid in,
-   * held for one beat and then vanished for the rest of the lesson — the reader
-   * loses the first half of the argument exactly when the second half starts
-   * arguing with it. H59: a prop does not leave the room and come back.
-   */ pr?: number;
-  /** 1 = the three posted claims are live and tappable (Q1). */ pick?: number;
-  /** The riddle headline WHY SOMETHING RATHER THAN NOTHING? is up (0/1). */ ask?: number;
-  /** Under the principle: SO EXISTENCE ITSELF NEEDS A REASON (0/1). */ applied?: number;
-  /** Under that: NOTHING IS SIMPLER THAN SOMETHING (0/1). */ simpler?: number;
-  /** The two ways are signposted, IT IS and then IT IS NOT (0/1). */ ways?: number;
-  /** IT IS is struck solid: the one genuine way (0/1). */ only?: number;
+  /** The magician's pose under his act. Bands per N2: <100 rig, 100+ held, 300+ played. */ e?: number;
+  /** Where he stands: 196 at the table · 330 at the curtain · 236 by the doors · 296 at IT IS NOT. */ x?: number;
+  /** The act he performs across this beat's line (the scene choreographs it). */
+  act?: 'dove' | 'shake' | 'reveal' | 'search' | 'sweep' | 'bow' | 'doors' | 'step' | 'tries';
+  /** The marquee asks WHY SOMETHING RATHER THAN NOTHING? (lit from its first beat on). */ ask?: boolean;
+  /** How many of the easel's three cards are up: 1 the principle, 2 applied, 3 simpler. */ cards?: number;
+  /** The painted temple has come down for Parmenides. */ temple?: boolean;
+  /** The two stage doors, IT IS and IT IS NOT, have rolled in. */ doors?: boolean;
+  /** The IT IS NOT door stands open onto the void. */ open?: boolean;
+  /** Q1 on the stage: three hats — a horse, a unicorn, nothing at all. */ hats?: boolean;
+  /** Q2 on the stage: three cards lowered from the flies. */ flies?: boolean;
 }
 
 export const BEATS: Meta2Beat[] = [
   {
-    // 167 = TALKING WITH THE HANDS, the narration loop (N2). The hook is somebody
-    // talking to you, and this is what that looks like from the neck down.
-    e: 167, x: 92, gone: 0.3,
+    e: 167, x: 196, act: 'dove',
     text: 'A thing is contingent if it could have failed to exist. The universe appears to be contingent.',
     dur: 1.8,
   },
   {
-    // 459 = EXPLAINING, from the second living shelf: the other body for talking
-    // with the hands (N6), now that this beat is no longer a piece of beat 0's run.
-    // The riddle is named here, so its headline arrives here (`ask`).
-    e: 459, x: 92, gone: 0.3, ask: 1,
+    e: 459, x: 196, act: 'shake', ask: true,
     text: 'This raises the question why there is something rather than nothing. No answer to it is generally accepted.',
     dur: 2.1,
   },
   {
-    // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
-    e: 456, x: 150, gone: 0.3, pr: 1, ask: 1,
+    e: 167, x: 196, act: 'reveal', ask: true, cards: 1,
     text: 'Gottfried Leibniz’s principle of sufficient reason holds that nothing is without a reason.',
     cite: 'The principle of sufficient reason',
     dur: 2.1,
   },
   {
-    // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
-    // The principle is applied to existence: its consequence writes in under it.
-    e: 456, x: 150, gone: 0.3, pr: 1, ask: 1, applied: 1,
+    e: 456, x: 330, act: 'search', ask: true, cards: 2,
     text: 'The principle then applies to existence itself. There must be a reason why anything exists at all.',
     dur: 1.8,
   },
   {
-    // 168 = COUNTING THE POINTS. He is laying out a principle, so he counts it out.
-    // And Leibniz's premise writes in under that.
-    e: 456, x: 150, gone: 0.3, pr: 1, ask: 1, applied: 1, simpler: 1,
+    e: 459, x: 196, act: 'sweep', ask: true, cards: 3,
     text: 'Leibniz held that nothing is simpler and easier than something. So existence, not nothingness, is what requires a reason.',
     dur: 1.8,
   },
   {
-    // 379 = THE IDEA, PLAYED (N2) — it arrives and the finger goes up, once, as he
-    // reaches the fork. Held (179) it would just be a man standing with a finger up.
-    e: 379, x: 214, gone: 0.35, pr: 1, ask: 1, applied: 1, simpler: 1,
+    e: 158, x: 200, act: 'bow', ask: true, cards: 3, temple: true,
     text: 'Parmenides, more than two thousand years before Leibniz, asked whether there could be nothing at all.',
     cite: 'Parmenides, On Nature',
     dur: 1.8,
   },
   {
-    // 158 = WEIGHT SHIFT, a living hold, while the goddess's two ways are posted
-    // at the fork: IT IS, then IT IS NOT, in the order the sentence names them.
-    e: 158, x: 214, gone: 0.35, pr: 1, ask: 1, applied: 1, simpler: 1, ways: 1,
+    e: 167, x: 236, act: 'doors', ask: true, cards: 3, temple: true, doors: true,
     text: 'In his poem On Nature, a goddess sets out two ways of inquiry. One says “it is”, and the other says “it is not”.',
     dur: 3.1,
   },
   {
-    // 161 = ARMS FOLDED, a LIVING hold — it loops and re-settles, so he has small
-    // business while the reader reads a quote (H67). A rest beat is the one place
-    // a figure is on screen doing nothing, and still is what reads as broken.
-    e: 161, x: 214, gone: 0.35, pr: 1, ask: 1, applied: 1, simpler: 1, ways: 1,
+    e: 161, x: 236, ask: true, cards: 3, temple: true, doors: true,
     quote: {
       id: 'lq-metaphysics-being-2-1',
       text: 'The same thing is there for thinking and for being.',
@@ -135,55 +83,36 @@ export const BEATS: Meta2Beat[] = [
     dur: 3.0,
   },
   {
-    // 318 = STARTLE, PLAYED: a sharp recoil and a step back. This beat is the A1
-    // fix — the sentence says he steps onto the second way and finds nothing, so
-    // he walks out past the fork and recoils, once, on arrival.
-    e: 318, x: 350, gone: 0.95, pr: 1, ask: 1, applied: 1, simpler: 1, ways: 1,
+    e: 260, x: 296, act: 'step', ask: true, cards: 3, temple: true, doors: true, open: true,
     text: 'The goddess calls the second way wholly unlearnable. There’s nothing on it to find or follow.',
     cite: 'The second way',
     dur: 2.3,
   },
   {
-    // 260 = WAITING, OPEN, a living hold after the recoil. "It is not a genuine
-    // alternative to what is": IT IS is struck solid, the one way left (`only`).
-    e: 260, x: 350, gone: 0.95, pr: 1, ask: 1, applied: 1, simpler: 1, ways: 1, only: 1,
+    e: 260, x: 296, act: 'tries', ask: true, cards: 3, temple: true, doors: true, open: true,
     text: 'What is not cannot be walked on, pointed at, or thought about. It is not a genuine alternative to what is.',
     dur: 2.7,
   },
   {
-    // 178 = SHRUG, held. M6: a shrug is the right pose for a question beat — the
-    // reader is weighing two things and "well, that is what the man said" is
-    // exactly the attitude to hold while they do it.
-    // The two argument lines leave: this row is where the three claims are posted.
-    e: 178, x: 236, gone: 0.95, pr: 1, pick: 1, ask: 1, ways: 1, only: 1,
+    e: 178, x: 150, ask: true, cards: 3, temple: true, doors: true, open: true, hats: true,
     interact: {
-      prompt: 'Of a horse, a unicorn, and nothing at all, which one can’t be pictured?',
-      explain: 'Nothing at all is the answer. A unicorn doesn’t exist, yet it can still be pictured, so non-existence wasn’t the obstacle. “Nothing at all” gives the mind no content to picture, which is Parmenides\u2019 point.',
+      prompt: 'Three hats: a horse, a unicorn, nothing at all. Which can’t even be pictured coming out?',
+      explain: 'Nothing at all. A unicorn doesn’t exist, yet you can still picture one leaving the hat, so not existing was never the obstacle. Nothing at all gives the mind no content to picture, which is Parmenides’ point.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
-    e: 178, x: 236, gone: 0.95, pr: 1, ask: 1, ways: 1, only: 1,
+    e: 178, x: 200, ask: true, cards: 3, temple: true, doors: true, open: true, flies: true,
     interact: {
-      prompt: 'For Leibniz’s question to make sense, what must be true of nothingness itself?',
-      sort: {
-        chip: 'nothing at all',
-        bins: [
-          { id: 'never', label: 'never possible', reads: 'nothing was never possible' },
-          { id: 'lost', label: 'possible, and lost', reads: 'nothing was possible, and something won anyway', correct: true },
-          { id: 'must', label: 'always necessary', reads: 'something had to exist' },
-        ],
-      },
-      explain: 'Possible, and lost is the answer. For Leibniz, nothing had to be a real possibility, one that something else beat. Parmenides instead says nothing was never possible. So existence had no rival, and his question doesn’t arise.',
+      prompt: 'For Leibniz’s question to make sense, what must nothingness have been?',
+      explain: 'Possible, and lost. Leibniz needs nothing to be a real option that lost to something. Parmenides says nothing was never an option. Then existence had no rival, and the question never comes up.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
-    // The way that is not stays gone and the principle stays up: a summary beat that
-    // leaves them unset draws them at 0, and the road the lesson proved absent returned.
-    x: 236, gone: 0.95, pr: 1, ask: 1, ways: 1, only: 1,
+    x: 200, ask: true, cards: 3, temple: true, doors: true, open: true,
     summary: {
       title: 'The Riddle of Being',
       points: [

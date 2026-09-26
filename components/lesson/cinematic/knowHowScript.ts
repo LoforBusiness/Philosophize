@@ -1,71 +1,71 @@
 import type { BaseBeat } from './cinematicKit';
 
-// Cinematic epistemology-knowledge-2, "Knowing How and Knowing That".
+// ─────────────────────────────────────────────────────────────────────────────
+// Cinematic epistemology-knowledge-2, "Knowing How vs. Knowing That".
+// Theme: A SWIMMING POOL, A PILE OF MANUALS AND A BOX THAT STAYS EMPTY.
 //
-// THE PICTURE: a column of instructions that fills up, and an outcome box beneath
-// it that stays empty however full the column gets. Over the lesson the column
-// reaches the bottom of the wall and the box is still empty — then the column dims
-// and the box fills. The argument is which of the two the box was waiting on.
+// He reads every book there is about swimming at the side of a pool. The poolside
+// board fills with instructions — true, precise, memorised — and the box under it,
+// SWIMMING, stays empty however much he reads. It fills only when he gets in the
+// water, flails, and swims.
 //
-// Q1 is A/B/C/D (intellectualism is a real position and needs reading); Q2 is
-// answered on the wall, on the concrete shape the picture already made (H65).
-//
-// The filename is knowHow* rather than epistemology2*: epistemology2Scene is
-// already taken, by the branch's second cinematic lesson, which is a different
-// lesson entirely (F45b — the numbering in these filenames is not the lesson id).
+// Redrawn 2026-09-26, one of six second lessons redesigned after the first-lesson
+// sets; the owner asked for the stage to keep acting for the whole of every voiced
+// line (see pace.ts). The narration is unchanged, word for word and beat for beat;
+// both questions are new and are asked on the water.
+// ─────────────────────────────────────────────────────────────────────────────
 
 export interface KnowHowBeat extends BaseBeat {
-  /** Figure gesture (emote code). */ p?: number;
-  /** Where the figure stands (stage x). 70 = downstage left, 168 = at the wall. */ x?: number;
-  /** How many instruction cards are up: 0…3. */ steps?: number;
-  /** 1 = the column has dimmed and the outcome box is filled. */ done?: number;
-  /** 1 = the three answer cards are live (Q2). */ pick?: number;
-  /** 1 = the three instruction slots outline in, empty — the shape of "all that
-   *  reading" before any one instruction has been written into it. */
-  slots?: boolean;
-  /** 1 = an arrow drops from the one instruction so far down toward the box: it
-   *  serves an end beyond itself. */
-  lead?: boolean;
-  /** 1 = a bar gathers all three instructions and drops toward the box, which
-   *  still sits empty underneath them. */
-  gather?: boolean;
+  /** His pose under the act. Bands per N2: <100 rig, 100+ held, 300+ played. */ p?: number;
+  /** Where he stands on the deck: 186 by the board and at the pool's edge. */ x?: number;
+  /** The act across this beat's line (the scene choreographs it). */
+  act?: 'read' | 'edge' | 'demo' | 'mime' | 'recite' | 'toe' | 'swim' | 'back';
+  /** How many books are piled on the bench. */ books?: number;
+  /** The board's three instruction slots are outlined, still empty. */ slots?: boolean;
+  /** How many instructions are written on the board: 0…3. */ steps?: number;
+  /** An arrow runs from the instruction down to the box: it serves an end beyond itself. */ lead?: boolean;
+  /** The board's instructions are tagged KNOWING THAT. */ that?: boolean;
+  /** The box is named: SWIMMING = KNOWING HOW. */ how?: boolean;
+  /** The box is ticked: the ability has arrived, through practice. */ done?: boolean;
+  /** Q1 on the water: four kickboards. */ boards?: boolean;
+  /** Q2 on the water: three buoys on the lane rope. */ buoys?: boolean;
 }
 
 export const BEATS: KnowHowBeat[] = [
   {
-    p: 164, x: 70,
+    p: 164, x: 186, act: 'read', books: 4,
     text: 'Suppose you’ve read every word ever written about swimming, its physics, technique and breathing.',
     dur: 3,
   },
   {
-    p: 164, x: 70, slots: true,
+    p: 164, x: 186, act: 'edge', books: 4, slots: true,
     text: 'Does all that reading, on its own, make you able to swim?',
     dur: 1.8,
   },
   {
-    p: 270, x: 168, steps: 1,
+    p: 270, x: 186, act: 'demo', books: 4, slots: true, steps: 1,
     text: 'Consider the instruction “keep the head low”. It’s precise, true and easy to check.',
     cite: 'One instruction',
     dur: 2.9,
   },
   {
-    p: 270, x: 168, steps: 1, lead: true,
+    p: 270, x: 186, act: 'mime', books: 4, slots: true, steps: 1, lead: true,
     text: 'Every instruction serves an end beyond itself. Here the end is the doing, the act of swimming.',
     dur: 1.8,
   },
   {
-    p: 435, x: 168, steps: 3,
+    p: 435, x: 186, act: 'recite', books: 5, slots: true, steps: 3, lead: true, that: true,
     text: 'The full method adds more instructions, and you’ve memorised every one. Gilbert Ryle calls knowledge of such facts knowing that.',
     cite: 'The whole method',
     dur: 2.7,
   },
   {
-    p: 399, x: 168, steps: 3, gather: true,
+    p: 399, x: 186, act: 'toe', books: 5, slots: true, steps: 3, lead: true, that: true, how: true,
     text: 'Even so, the box underneath stays empty. The ability to swim, which Ryle calls knowing how, hasn’t arrived.',
     dur: 1.9,
   },
   {
-    p: 147, x: 124, steps: 3,
+    p: 147, x: 240, books: 5, slots: true, steps: 3, lead: true, that: true, how: true,
     quote: {
       id: 'lq-epistemology-knowledge-2-1',
       text: 'We learn how by practice, schooled indeed by criticism and example, but often quite unaided by any lesson in the theory.',
@@ -78,39 +78,31 @@ export const BEATS: KnowHowBeat[] = [
     dur: 3.8,
   },
   {
-    p: 383, x: 168, steps: 3, done: 1,
+    p: 383, x: 370, act: 'swim', books: 5, slots: true, steps: 3, lead: true, that: true, how: true, done: true,
     text: 'The box fills only through practice. Ryle holds that knowing how is distinct from knowing that.',
     cite: 'The doing',
     dur: 4.6,
   },
   {
-    p: 4, x: 124, steps: 3, done: 1,
+    p: 4, x: 226, act: 'back', books: 5, slots: true, steps: 3, lead: true, that: true, how: true, done: true, boards: true,
     interact: {
-      prompt: 'Which of these does memorising the manual not give you?',
-      odd: {
-        axis: 'IT GIVES YOU THREE',
-        tiles: [
-          { id: 'rules', reads: 'THE RULES' },
-          { id: 'words', reads: 'THE TERMS' },
-          { id: 'order', reads: 'WHAT TO DO FIRST' },
-          { id: 'skill', reads: 'BEING ABLE TO DO IT', correct: true },
-        ],
-      },
-      explain: 'Being able to do it. Every fact about swimming can be recited by someone who sinks, which is Ryle\'s point: knowing how is a capacity displayed in the doing, not a longer list of things known that.',
+      prompt: 'Which of these kickboards doesn’t come with memorising the manual?',
+      explain: 'Being able to do it. Every fact about swimming can be recited by someone who sinks, which is Ryle’s point: knowing how is a capacity shown in the doing, not a longer list of things known that.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
-    p: 6, x: 124, steps: 3, done: 1, pick: 1,
+    p: 6, x: 226, books: 5, slots: true, steps: 3, lead: true, that: true, how: true, done: true, buoys: true,
     interact: {
       prompt: 'What can a complete and correct set of instructions still not give you?',
-      explain: 'The doing. Instructions can state rules and give reasons, but they can’t transfer the ability itself. That ability comes through practice, which is why swimmers are coached in the water.',
+      explain: 'The doing. Instructions can state rules and give reasons, but they can’t hand over the ability itself. That comes through practice, which is why swimmers are coached in the water.',
       xp: 5,
     },
     dur: 1.0,
   },
   {
+    x: 226, books: 5, slots: true, steps: 3, lead: true, that: true, how: true, done: true,
     summary: {
       title: 'Two Kinds of Knowing',
       points: [
