@@ -20,18 +20,27 @@ export const SHOP = { x0: 0, x1: 132, top: 318 };
 export const DOOR = { x: 72, w: 50, top: 390 };
 /**
  * Each step: its top edge and its left and right ends, bottom step first. They rise
- * to the RIGHT, to a door at the right of the shopfront, so he climbs facing the
- * café and the woman at its table (two figures on a stage face each other, N21).
+ * to the LEFT, up to the door, so he reaches their foot from the café side and
+ * climbs them the way a person does — up the treads, never through them. The top
+ * one is the landing in front of the door.
  */
 export const STEPS = [
-  { top: 488, x0: 30, x1: 132 },
-  { top: 476, x0: 50, x1: 132 },
-  { top: 464, x0: 70, x1: 132 },
+  { top: 488, x0: 70, x1: 146 },
+  { top: 476, x0: 70, x1: 134 },
+  { top: 464, x0: 70, x1: 122 },
 ];
-/** Where he stands on the ground at the foot of the steps, then on each step. */
-export const CLIMB_X = [18, 42, 62, 90];
+/** Where he stands on the pavement at the foot of the steps, then on each tread. */
+export const CLIMB_X = [156, 140, 128, 104];
+/** The handrail up the steps: its two posts, foot and head, and where each stands. */
+export const RAIL = { x0: 146, y0: 458, x1: 116, y1: 432 };
+/** The rail's height over a point of the steps. */
+export function railY(x: number): number {
+  'worklet';
+  const u = Math.max(0, Math.min(1, (RAIL.x0 - x) / (RAIL.x0 - RAIL.x1)));
+  return RAIL.y0 + (RAIL.y1 - RAIL.y0) * u;
+}
 /** The A-board. */
-export const BOARD = { x: 146, y: 414, w: 84, h: 56 };
+export const BOARD = { x: 180, y: 414, w: 84, h: 56 };
 /** The café: the awning's span, the table, and the owner's chair. */
 export const AWNING = { x0: 258, x1: 400, y: 330 };
 export const TABLE = { cx: 318, top: 468, w: 44 };
@@ -51,10 +60,17 @@ export function shop(): ObjPart[] {
   ];
 }
 
-/** The three front steps. */
+/** The three front steps, and the handrail beside them. */
 export function steps(): ObjPart[] {
   // each step a block down to the ground, the higher ones stacked on the lower
-  return STEPS.map((s) => oRect('mass', (s.x0 + s.x1) / 2, (s.top + GROUND) / 2, s.x1 - s.x0, GROUND - s.top, 0, 1));
+  const blocks = STEPS.map((s) => oRect('mass', (s.x0 + s.x1) / 2, (s.top + GROUND) / 2, s.x1 - s.x0, GROUND - s.top, 0, 1));
+  const { x0, y0, x1, y1 } = RAIL;
+  return [
+    ...blocks,
+    oBar('line', x0, STEPS[0].top, x0, y0 - 2, 2.5),
+    oBar('line', x1, STEPS[2].top, x1, y1 - 2, 2.5),
+    oBar('line', x0 + 3, y0 + 2, x1 - 3, y1 - 2, 3),
+  ];
 }
 
 /** The A-board's two legs and its hinge. */

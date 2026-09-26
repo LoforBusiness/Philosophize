@@ -104,6 +104,9 @@ export const HANDS_ON_PROP = new Set([
   // or walk him off a stair he is standing on
   'political-political-2',
   'ethics-ethics-2',
+  // he wipes a slate, turns a portrait and closes shutters; he stacks books on a bench
+  'epistemology-knowledge-3',
+  'epistemology-knowledge-2',
 ]);
 
 const RIG_BOUND = new Set([

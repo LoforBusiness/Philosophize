@@ -22,7 +22,7 @@ export const POOL = { x0: 196, x1: 400, far: 436, near: 500 };
 export const BOARD = { x: 10, y: 298, w: 184, h: 92 };
 export const BOX = { x: 30, y: 396, w: 136, h: 30 };
 /** The bench the books pile on. */
-export const BENCH = { x: 16, w: 96, top: 474 };
+export const BENCH = { x: 122, w: 58, top: 474 };
 
 /** The pool basin: the far coping, the tiled wall under it, the near coping. */
 export function pool(): ObjPart[] {

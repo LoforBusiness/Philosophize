@@ -86,11 +86,11 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, null, null, null, null, null, null, null, null, null, null, null],
   },
   'epistemology-knowledge-3': {
-    at: [null, null, null, [272, 398, 3, 272], null, null, [272, 397, 2, 272], null, null, [272, 397, 2, 272], [272, 396, 2, 272], null],
+    at: [null, [318, 401, 3, 312], null, null, null, null, null, [314, 401, 3, 290], null, null, null, null],
     say: [null, 'Certain isn’t the same as true.', null, 'A demon. Really?', 'Doubt at maximum.', null, 'So the demon is a tool.', 'One refuses to crack.', 'Doubt that rebuilds.', null, null, null],
   },
   'ethics-ethics-2': {
-    at: [null, [250, 398, 2, 250], null, null, [250, 398, 3, 250], null, null, null, null, null, null, null, null, null, null],
+    at: [null, [284, 397, 2, 284], null, null, [284, 398, 3, 284], null, null, null, null, null, null, null, null, null, null],
     say: [null, 'Three verdicts. One wallet.', null, 'Not three religions.', 'I use all three.', null, 'Everyone counts the same.', null, 'Would I want that rule?', 'It defeats itself.', null, 'Who am I becoming, then.', null, null, null],
   },
   'metaphysics-being-2': {
@@ -303,7 +303,7 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'Not one mark has moved.', 'It happens to me, then.', 'He despised the man.', null, 'Longer than the painting.', null, null, null],
   },
   'epistemology-knowledge-2': {
-    at: [null, null, null, null, null, null, null, [322, 434, 3, 370], [250, 433, 3, 226], null, null],
+    at: [null, null, null, null, null, null, null, [322, 434, 3, 370], [250, 434, 3, 226], null, null],
     say: [null, 'Now get in.', 'Precise and true.', null, 'I’ve memorised all of them.', 'Nothing has arrived.', null, 'The hands had to move.', null, null, null],
   },
   'epistemology-knowledge-21': {

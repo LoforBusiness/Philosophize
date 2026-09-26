@@ -22,7 +22,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  shop, steps, aBoard, cafe, STEPS, CLIMB_X, DOOR, BOARD, AWNING, TABLE, CHAIR,
+  shop, steps, aBoard, cafe, STEPS, CLIMB_X, DOOR, BOARD, AWNING, TABLE, CHAIR, railY,
 } from './ethics2Set';
 import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
@@ -68,6 +68,8 @@ const LINES = [3.76, 3.68, 6.88, 5.2, 6.04, 7.24, 5.92, 0, 6.88, 8.36, 6.16, 7.7
 const K_E = K_FIG * 0.82;
 /** Where the wallet lies on the pavement. */
 const WALLET = { x: 214, y: GROUND - 5 };
+/** Where his own wallet lands when it slips from his pocket: at her feet. */
+const OWN_AT = { x: 330, y: GROUND - 5 };
 /** Her seat height, in the rig's units. */
 const SEAT_H = 30;
 
@@ -102,12 +104,15 @@ const DIR = BEATS.map((b) => (b.act === 'steps' ? -1 : 1));
 const END_DIR = BEATS.map(() => 1);
 /** Where each beat leaves him, and at what height: on the top step after the climb. */
 const END_X = BEATS.map((b) => (b.act === 'climb' ? CLIMB_X[3] : b.x ?? 150));
-const END_GY = BEATS.map((b) => (b.act === 'climb' ? STEPS[2].top : GROUND));
+const END_GY = BEATS.map((b) => ((b.climbed ?? 0) >= 3 ? STEPS[2].top : GROUND));
+/** One stair's rise, in the rig's own units at his scale. */
+const RISE = 12 / (K_FIG * 0.82);
 /** The found wallet: on the pavement, in his hand, then hers. 0 ground · 1 his · 2 hers. */
 const HOLDS = BEATS.map((_, k) => (k === 0 ? 0 : k < 5 ? 1 : 2));
 
 const ROW_TEXT = ['1 OUTCOMES', '2 DUTY', '3 CHARACTER'];
-const LENS_TONES = [INK, EMBER, DEEP, SAGE];
+/** Each pair's rim, and its case's lid: outcomes · duty · character. */
+const LENS_TONES = [INK, EMBER, TEAL, OLIVE];
 
 const THOUGHT_Q = [
   { id: 'happy', l1: 'WHICH ACT MAKES', l2: 'MOST HAPPINESS?', x: 150, correct: true },
@@ -132,6 +137,38 @@ function hLive(code: number, t: number, bt: number): Stance {
   if (code >= 100) return emoteAnyLive(code, t, bt);
   if (code === 0) return stand(t);
   return narratorLive(code, t, bt);
+}
+/**
+ * One stair, climbed the way a person climbs one: the lead foot lifts and lands on
+ * the tread above, the weight rises onto it, and only then does the back foot leave
+ * the tread below. Everything is in the rig's units against the LOWER tread, so at
+ * u = 1 both feet stand at -RISE with the pelvis RISE higher — which is exactly
+ * standing on the upper tread, and the next stair starts from there without a seam.
+ * The legs take turns: the right leads on the first and third stair.
+ */
+function climbStair(base: Stance, k: number, u: number, x0: number, x1: number, dir: number): { s: Stance; x: number } {
+  'worklet';
+  const e1 = ease01(clamp01(u / 0.42));
+  const ex = ease01(clamp01((u - 0.22) / 0.56));
+  const eb = ease01(clamp01((u - 0.3) / 0.45));
+  const e2 = ease01(clamp01((u - 0.62) / 0.38));
+  const x = lerp(x0, x1, ex);
+  const k1 = K_FIG * 0.82;
+  const f = dir < 0 ? -1 : 1;
+  const lead = { x: ((lerp(x0 + 3 * f, x1 + 3 * f, e1) - x) * f) / k1, y: -RISE * e1 - 9 * Math.sin(Math.PI * e1) };
+  const trail = { x: ((lerp(x0 - 3 * f, x1 - 3 * f, e2) - x) * f) / k1, y: -RISE * e2 - 9 * Math.sin(Math.PI * e2) };
+  const lean = Math.sin(Math.PI * u);
+  const s = {
+    ...base,
+    tilt: base.tilt - 0.14 * lean,
+    bob: base.bob + RISE * eb,
+    footR: k % 2 === 0 ? lead : trail,
+    footL: k % 2 === 0 ? trail : lead,
+    // the arms swing against the legs
+    fistR: { x: base.fistR.x + (k % 2 === 0 ? -6 : 6) * lean, y: base.fistR.y },
+    fistL: { x: base.fistL.x + (k % 2 === 0 ? 6 : -6) * lean, y: base.fistL.y },
+  };
+  return { s, x };
 }
 function handOn(s: Stance, x: number, gy: number, dir: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -177,27 +214,34 @@ export default function Ethics2Scene({
     // b11: across to the foot of the steps, a turn, then up them one at a time,
     // each step a stride of its own. Timed from the walk, so he is facing up the
     // steps — and the café — as soon as he gets there.
-    const footDur = moveTr(xp, CLIMB_X[0], TR);
+    const footDur = Math.abs(xp - CLIMB_X[0]) > 1 ? moveTr(xp, CLIMB_X[0], TR) : 0;
     const footU = A_CLIMB[n] ? ease01(clamp01(b / footDur)) : 1;
-    const c0 = (footDur + 0.35) / L;
+    const c0 = (footDur + 0.55) / L;
+    const climbEnd = (c0 + 0.44) * L;
     const ks = A_CLIMB[n] ? [st(c0, c0 + 0.12), st(c0 + 0.16, c0 + 0.28), st(c0 + 0.32, c0 + 0.44)] : [0, 0, 0];
     let climbSeg = -1;
+    let done = 0;
     if (A_CLIMB[n]) {
-      tx = footU < 1 ? lerp(xp, CLIMB_X[0], footU)
-        : lerp(lerp(lerp(CLIMB_X[0], CLIMB_X[1], ks[0]), CLIMB_X[2], ks[1]), CLIMB_X[3], ks[2]);
-      gy = GROUND - 12 * ks[0] - 12 * ks[1] - 12 * ks[2];
-      for (let k = 0; k < 3; k++) if (ks[k] > 0 && ks[k] < 1) climbSeg = k;
+      for (let k = 0; k < 3; k++) {
+        if (ks[k] >= 1) done = k + 1;
+        else if (ks[k] > 0) climbSeg = k;
+      }
+      tx = footU < 1 ? lerp(xp, CLIMB_X[0], footU) : CLIMB_X[done];
+      // he stands on the tread below the stair he is climbing; the pose does the rise
+      gy = GROUND - 12 * done;
+    } else if (END_GY[n] < GROUND) {
+      // after the climb he stays up on the top step
+      gy = END_GY[n];
     }
-    // off the top step and down to the pavement, with a hop off its edge
-    if (walking && gp < GROUND) {
-      const xNow = lerp(xp, xn, walkU);
-      const off = clamp01((xNow - 128) / 16);
-      gy = lerp(gp, GROUND, off) - 8 * Math.sin(Math.PI * off);
-    }
-    const x = carry(cv, 0, n, xp, tx, walking ? walkU : A_CLIMB[n] ? 1 : tr);
-    const figGY = carry(cv, 1, n, gp, gy, A_CLIMB[n] ? 1 : tr);
+    const climbing = climbSeg >= 0
+      ? climbStair(hLive(P[n], t, b), climbSeg, ks[climbSeg], CLIMB_X[climbSeg], CLIMB_X[climbSeg + 1], -1)
+      : null;
+    if (climbing) tx = climbing.x;
+    // the first beat is not blended from anywhere: he enters from where the beat puts him
+    const x = n === 0 ? tx : carry(cv, 0, n, xp, tx, walking ? walkU : A_CLIMB[n] ? 1 : tr);
+    const figGY = n === 0 ? gy : carry(cv, 1, n, gp, gy, A_CLIMB[n] ? 1 : tr);
     // walking away from the café he faces the way he goes, and turns back the moment he stops
-    const back = A_STEPS[n] ? clamp01((b - walkDur) / 0.3) : A_CLIMB[n] ? clamp01((b - footDur) / 0.3) : 0;
+    const back = A_STEPS[n] ? clamp01((b - walkDur - 1.5) / 0.35) : A_CLIMB[n] ? clamp01((b - climbEnd - 0.1) / 0.35) : 0;
     const dirV = A_STEPS[n] || A_CLIMB[n] ? lerp(facing(END_DIR[p], -1, b), 1, back) : facing(END_DIR[p], DIR[n], b);
     const dir = (dirV < 0 ? -1 : 1) as 1 | -1;
 
@@ -206,13 +250,22 @@ export default function Ethics2Scene({
       : hLive(P[n], t, b);
     if (A_FIND[n] && walkNow) s = travelStance(120, xn, stand(t), stand(t), stand(t), st(0, 0.4), WALK, 0);
     if (A_CLIMB[n] && footU < 1) s = travelStance(xp, CLIMB_X[0], hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), footU, WALK, 0);
-    if (climbSeg >= 0) {
-      s = travelStance(CLIMB_X[climbSeg], CLIMB_X[climbSeg + 1], hHold(P[n], t), hHold(P[n], t), hLive(P[n], t, b), ks[climbSeg], WALK, 0);
+    if (climbing) {
+      s = climbing.s;
+      // a hand on the rail, a little ahead of him, all the way up
+      const hx = climbing.x - 5;
+      s = handOn(s, climbing.x, figGY, -1, hx, railY(hx), 1);
     }
 
     // bending to the wallet and picking it up
     const bend = A_FIND[n] ? bump(b, L, 0.45, 0.65, 0.9) : 0;
-    s = { ...s, tilt: s.tilt - 0.55 * bend };
+    s = {
+      ...s,
+      tilt: s.tilt - 0.45 * bend,
+      bob: s.bob - 15 * bend,
+      footR: { x: s.footR.x + 6 * bend, y: s.footR.y },
+      footL: { x: s.footL.x - 4 * bend, y: s.footL.y },
+    };
     s = handOn(s, x, figGY, dir, WALLET.x, WALLET.y - 4, bend);
     // looking at the open cases
     if (A_CASES[n]) s = { ...s, neck: s.neck - 0.25 * st(0.1, 0.4) };
@@ -228,7 +281,7 @@ export default function Ethics2Scene({
     s = mixStance(s, { ...s, fistR: { x: 4, y: -30 }, fistL: { x: -6, y: -30 } }, pat);
     s = mixStance(s, emoteAnyLive(318, t, Math.max(0, b - 0.74 * L)), A_KEEP[n] ? st(0.74, 0.8) * (1 - st(0.95, 1)) : 0);
     // looking up at HONESTY
-    if (A_STEPS[n]) s = { ...s, neck: s.neck + 0.3 * clamp01((b - walkDur - 0.3) / 0.6) };
+    if (A_STEPS[n]) s = { ...s, neck: s.neck + 0.3 * clamp01((b - walkDur - 0.1) / 0.5) * (1 - clamp01((b - walkDur - 1.4) / 0.4)) };
 
     const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
 
@@ -246,8 +299,8 @@ export default function Ethics2Scene({
     const take = A_MILL[n] ? bump(b, L, 0.45, 0.6, 0.85) : 0;
     const stoop = A_KEEP[n] ? bump(b, L, 0.3, 0.45, 0.62) : 0;
     h = handOn(h, CHAIR.x, GROUND, -1, CHAIR.x - 28, GROUND - 40, take);
-    h = { ...h, tilt: h.tilt - 0.45 * stoop };
-    h = handOn(h, CHAIR.x, GROUND, -1, CHAIR.x - 38, GROUND - 6, stoop);
+    h = { ...h, tilt: h.tilt - 0.9 * stoop };
+    h = handOn(h, CHAIR.x, GROUND, -1, OWN_AT.x, OWN_AT.y - 3, stoop);
     const her = keepHeld(heldHer, mixStance(carryFrom(heldHer, n, seated(SEAT_H, t)), h, tr));
 
     // ── the wallets ────────────────────────────────────────────────────────
@@ -292,13 +345,22 @@ export default function Ethics2Scene({
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const DH = useDerivedValue<Bundle>(() => SCENE.value.her);
   // his glasses, on his head
+  // the glasses ride his head and turn with him: a lens at the front of the face,
+  // standing proud of it so it reads against the ink, and the arm back to the ear
   const specs = useAnimatedStyle(() => {
     const h = DF.value.head;
-    return { opacity: SCENE.value.specs, transform: [{ translateX: h[0].translateX }, { translateY: h[1].translateY }] };
+    return {
+      opacity: SCENE.value.specs,
+      transform: [{ translateX: h[0].translateX }, { translateY: h[1].translateY }, { scaleX: DF.value.dir < 0 ? -1 : 1 }],
+    };
   });
   const lensTint = useAnimatedStyle(() => {
     const l = SCENE.value.lens;
-    return { borderColor: l < 1.5 ? EMBER : l < 2.5 ? DEEP : SAGE };
+    return { borderColor: l < 1.5 ? LENS_TONES[1] : l < 2.5 ? LENS_TONES[2] : LENS_TONES[3] };
+  });
+  const armTint = useAnimatedStyle(() => {
+    const l = SCENE.value.lens;
+    return { backgroundColor: l < 1.5 ? LENS_TONES[1] : l < 2.5 ? LENS_TONES[2] : LENS_TONES[3] };
   });
   // the found wallet, on the pavement, in his hand, then hers
   const found = useAnimatedStyle(() => {
@@ -317,8 +379,8 @@ export default function Ethics2Scene({
     const fy = SCENE.value.figGY - 40;
     const d = SCENE.value.drop;
     const k = SCENE.value.kept;
-    const gx = lerp(fx, fx + 22, d);
-    const gy = lerp(fy, GROUND - 5, d);
+    const gx = lerp(fx, OWN_AT.x, d);
+    const gy = lerp(fy, OWN_AT.y, d) - 14 * Math.sin(Math.PI * d);
     return {
       opacity: SCENE.value.ownOn,
       transform: [{ translateX: lerp(gx, hw[0].translateX, k) }, { translateY: lerp(gy, hw[1].translateY, k) }],
@@ -343,8 +405,9 @@ export default function Ethics2Scene({
       <Stickman D={DH} k={K_E} role="second" />
       <Stickman D={DF} k={K_E} />
       <Animated.View style={[styles.rider, specs]} pointerEvents="none">
-        <Animated.View style={[styles.frames, lensTint]}>
-          <View style={styles.bridge} />
+        <Animated.View style={[styles.specArm, armTint]} />
+        <Animated.View style={[styles.lens, lensTint]}>
+          <View style={styles.glint} />
         </Animated.View>
       </Animated.View>
       <Animated.View style={[styles.rider, found]} pointerEvents="none">
@@ -524,11 +587,12 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 2, borderTopRightRadius: 2,
   },
   rider: { position: 'absolute', left: 0, top: 0 },
-  frames: {
-    position: 'absolute', left: -2, top: -4, width: 17, height: 6, borderRadius: 3, borderWidth: 2,
-    backgroundColor: 'rgba(255,255,255,0.35)',
+  lens: {
+    position: 'absolute', left: 9, top: -8, width: 12, height: 11, borderRadius: 6, borderWidth: 2.2,
+    backgroundColor: PAPER_LIT,
   },
-  bridge: { position: 'absolute', left: 5, top: -2, width: 3, height: 2, backgroundColor: INK },
+  glint: { position: 'absolute', left: 2, top: 1.5, width: 3, height: 3, borderRadius: 1.5, backgroundColor: SAGE },
+  specArm: { position: 'absolute', left: -10, top: -4, width: 21, height: 2.2, borderRadius: 1.1 },
   wallet: {
     position: 'absolute', left: -7, top: -4, width: 14, height: 9, borderRadius: 2, backgroundColor: OLIVE,
     borderWidth: 1.2, borderColor: INK,

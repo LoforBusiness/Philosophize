@@ -59,7 +59,7 @@ export const BEATS: Meta2Beat[] = [
     dur: 1.8,
   },
   {
-    e: 158, x: 200, act: 'bow', ask: true, cards: 3, temple: true,
+    e: 158, x: 196, act: 'bow', ask: true, cards: 3, temple: true,
     text: 'Parmenides, more than two thousand years before Leibniz, asked whether there could be nothing at all.',
     cite: 'Parmenides, On Nature',
     dur: 1.8,

@@ -19,7 +19,7 @@ import type { BaseBeat } from './cinematicKit';
 
 export interface Ethics2Beat extends BaseBeat {
   /** The finder's pose under his act. Bands per N2: <100 rig, 100+ held, 300+ played. */ p?: number;
-  /** Where he stands: 200 at the wallet · 250 by the A-board · 296 with the owner · 114 on his way to the steps, 18 at their foot · 244 for the questions. */ x?: number;
+  /** Where he stands: 200 at the wallet · 284 by the A-board · 296 with the owner · 156 at the foot of the steps · 104 on the landing for the questions. */ x?: number;
   /** His act across this beat's line (the scene choreographs it). */
   act?: 'find' | 'cases' | 'lens1' | 'rows' | 'swap' | 'mill' | 'equal' | 'kant' | 'keep' | 'steps' | 'climb';
   /** Which lens he is wearing: 0 none · 1 outcomes · 2 duty · 3 character. */ lens?: number;
@@ -41,23 +41,23 @@ export const BEATS: Ethics2Beat[] = [
     dur: 1.8,
   },
   {
-    p: 165, x: 250, act: 'cases',
+    p: 165, x: 284, act: 'cases',
     text: 'Three ethical theories will each deliver a verdict on this one small choice.',
     dur: 1.8,
   },
   {
-    p: 7, x: 250, act: 'lens1', lens: 1, rows: 1,
+    p: 7, x: 284, act: 'lens1', lens: 1, rows: 1,
     text: 'Moral philosophy offers three main approaches, here called lenses. The first asks what consequences an act will have.',
     cite: 'Three lenses',
     dur: 1.9,
   },
   {
-    p: 260, x: 250, act: 'rows', lens: 1, rows: 3,
+    p: 260, x: 284, act: 'rows', lens: 1, rows: 3,
     text: 'The second asks what your duty requires. The third asks what the act makes of your character.',
     dur: 2.1,
   },
   {
-    p: 260, x: 250, act: 'swap', lens: 1, rows: 3, mixed: true,
+    p: 260, x: 284, act: 'swap', lens: 1, rows: 3, mixed: true,
     text: 'Ordinary moral thinking mixes the three. Most people use all three without noticing which one they’re using.',
     dur: 1.8,
   },
@@ -97,18 +97,18 @@ export const BEATS: Ethics2Beat[] = [
     dur: 2.5,
   },
   {
-    p: 13, x: 114, act: 'steps', lens: 3, rows: 3, mixed: true, rule: true, struck: true,
+    p: 13, x: 156, act: 'steps', lens: 3, rows: 3, mixed: true, rule: true, struck: true,
     text: 'Aristotle’s virtue ethics asks a third question. It asks not what to do, but what character you’re developing.',
     cite: 'Aristotle, Nicomachean Ethics',
     dur: 1.8,
   },
   {
-    p: 266, x: 18, act: 'climb', lens: 3, rows: 3, mixed: true, rule: true, struck: true, climbed: 3,
+    p: 266, x: 156, act: 'climb', lens: 3, rows: 3, mixed: true, rule: true, struck: true, climbed: 3,
     text: 'Aristotle holds that virtue is acquired by practice. Each honest act makes the next easier, until honesty is part of your character.',
     dur: 3.3,
   },
   {
-    p: 21, x: 244, lens: 1, rows: 3, mixed: true, rule: true, struck: true, climbed: 3, thoughts: true,
+    p: 21, x: 104, lens: 1, rows: 3, mixed: true, rule: true, struck: true, climbed: 3, thoughts: true,
     interact: {
       prompt: 'Through the outcomes glasses, which question is he asking about the wallet?',
       explain: 'Which act makes most happiness. The outcomes lens judges a choice by its results alone: whose life goes better and whose goes worse. Whether everyone could follow the rule is Kant’s question, and what the act makes of him is Aristotle’s.',
@@ -117,7 +117,7 @@ export const BEATS: Ethics2Beat[] = [
     dur: 1.0,
   },
   {
-    p: 8, x: 244, rows: 3, mixed: true, rule: true, struck: true, climbed: 3, signs: true,
+    p: 8, x: 104, rows: 3, mixed: true, rule: true, struck: true, climbed: 3, signs: true,
     interact: {
       prompt: 'Everyone here keeps found wallets, and no law forbids it. Does that make it right?',
       explain: 'Neither shows it. David Hume argued in 1740 that facts about what is can’t, alone, establish what ought to be. A common or legal act can still be wrong; the other two answers draw an ought from an is.',

@@ -44,7 +44,7 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 //   b9   Q2: three buoys on the lane rope.
 //
 // COMPOSITION, in stage units: the board 10–194 × 298–390, the box 30–166 × 396–426;
-// the bench 16–112 with the books on it; he stands at x 186 on the deck, and at 240 on the near coping; the
+// the bench 122–180 with the books on it, at his side; he stands at x 186 on the deck, and at 240 on the near coping; the
 // pool 196–400, far coping at 436, near coping at 500, his lane's waterline at 474.
 // Band [288, 514].
 // ─────────────────────────────────────────────────────────────────────────────
@@ -195,7 +195,9 @@ export default function KnowHowScene({
     // carried: every move blends from where he is on screen, a walk at the pace it needs
     const x = carry(cv, 0, n, X[p], tx, walking ? walkU : A_SWIM[n] ? st(0, 0.12) : tr);
     const figGY = carry(cv, 1, n, WET[p] ? WET_GY : GROUND, gy, tr);
-    const dir = DIR[n] as 1 | -1;
+    // swimming back he faces the ladder he is swimming to, and turns to the water on arrival
+    const dirV = A_BACK[n] ? lerp(facing(1, -1, b), 1, st(0.86, 0.96)) : facing(DIR[p], DIR[n], b);
+    const dir = (dirV < 0 ? -1 : 1) as 1 | -1;
 
     // ── his act, laid across the line ──────────────────────────────────────
     let s: Stance = walking
@@ -233,7 +235,7 @@ export default function KnowHowScene({
     const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
 
     return {
-      fig: lookPose(fig, x, figGY, K_SW, facing(DIR[p], DIR[n], b), 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(fig, x, figGY, K_SW, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
       x, wet: carry(cv, 2, n, WET[p], wet, tr),
       books: carry(cv, 3, n, BOOKS[p], pile, tr),
       slots: carry(cv, 4, n, SLOTS[p], SLOTS[n], A_EDGE[n] ? st(0.3, 0.7) : tr),
@@ -399,7 +401,7 @@ function Book({ S, k, color }: { S: SharedValue<any>; k: number; color: string }
   });
   return (
     <Animated.View
-      style={[styles.book, { top: BENCH.top - 9 * (k + 1), left: BENCH.x + 18 + (k % 2 ? 5 : -3), backgroundColor: color }, st]}
+      style={[styles.book, { top: BENCH.top - 9 * (k + 1), left: BENCH.x + 7 + (k % 2 ? 4 : -2), backgroundColor: color }, st]}
     >
       <View style={styles.bookPages} />
     </Animated.View>
@@ -537,7 +539,7 @@ const styles = StyleSheet.create({
     width: 92, fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 0, color: INK, includeFontPadding: false,
   },
   book: {
-    position: 'absolute', width: 62, height: 8, borderRadius: 1.5, borderWidth: 1.2, borderColor: INK,
+    position: 'absolute', width: 44, height: 8, borderRadius: 1.5, borderWidth: 1.2, borderColor: INK,
   },
   bookPages: { position: 'absolute', right: 2, top: 1.5, width: 8, height: 3, backgroundColor: PAPER_LIT },
 

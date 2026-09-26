@@ -274,7 +274,9 @@ export default function Political2Scene({
     const turn = A_OFFICE[n] ? st(0.62, 0.7) * (1 - st(0.92, 0.99)) : 0;
     const hdir = carry(cv, 2, n, 1, 1 - 2 * turn, tr);
     const hang = A_OFFICE[n] ? bp(0.68, 0.8, 0.9) : 0;
-    hs = handOn(hs, HX, hdir, BRACKET.x + 2, BRACKET.y + 4, hang);
+    // the flag in his hand is laid exactly where it will hang: its pole on the bracket
+    hs = { ...hs, tilt: hs.tilt - 0.15 * hang };
+    hs = handOn(hs, HX, hdir, BRACKET.x, BRACKET.y, hang);
     const hung = carry(cv, 3, n, HUNG[p], A_OFFICE[n] ? st(0.79, 0.82) : HUNG[n], tr);
     const hFig = keepHeld(hH, mixStance(carryFrom(hH, n, hold(H[p], t)), hs, tr));
     const DH = lookPose(hFig, HX, GROUND, K_H, hdir, 1, gazeX.value, gazeY.value, gazeOn.value);
@@ -346,7 +348,7 @@ export default function Political2Scene({
     const w = DF.value.wrR;
     return {
       opacity: 1 - SCENE.value.hung,
-      transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }, { scaleX: DF.value.dir < 0 ? -1 : 1 }],
+      transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }],
     };
   });
   const hungFlag = useAnimatedStyle(() => ({ opacity: SCENE.value.hung }));
@@ -717,7 +719,8 @@ const styles = StyleSheet.create({
   signText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
-  hungFlag: { position: 'absolute', left: BRACKET.x - 1, top: BRACKET.y - 6 },
+  // the same pole the hand carries (-26…+4 about the wrist), set in the bracket
+  hungFlag: { position: 'absolute', left: BRACKET.x - 1, top: BRACKET.y - 26 },
   hungPole: { position: 'absolute', left: 0, top: 0, width: 2, height: 30, borderRadius: 1, backgroundColor: INK },
   hungCloth: {
     position: 'absolute', left: 2, top: 0, width: 14, height: 10, borderRadius: 1.5, backgroundColor: EMBER,

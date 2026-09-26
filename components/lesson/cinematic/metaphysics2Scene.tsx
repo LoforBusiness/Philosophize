@@ -169,9 +169,16 @@ export default function Metaphysics2Scene({
 
     // where he stands: a walk lasts as long as its distance needs
     const walking = Math.abs(X[n] - X[p]) > 1;
-    const walkU = walking ? ease01(b / moveTr(X[p], X[n], TR)) : 1;
+    const walkDur = moveTr(X[p], X[n], TR);
+    const walkU = walking ? ease01(b / walkDur) : 1;
     const x = carry(cv, 0, n, X[p], X[n], walkU);
-    const dir = DIR[n] as 1 | -1;
+    // he faces the way he walks, never backwards, and turns to what the beat is
+    // about only once he has arrived
+    const travel = X[n] > X[p] ? 1 : -1;
+    const dirV = walking
+      ? lerp(facing(DIR[p], travel, b), DIR[n], clamp01((b - walkDur) / 0.3))
+      : facing(DIR[p], DIR[n], b);
+    const dir = (dirV < 0 ? -1 : 1) as 1 | -1;
 
     // ── his act, laid across the line ──────────────────────────────────────
     let s: Stance = walking
@@ -239,7 +246,7 @@ export default function Metaphysics2Scene({
     const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(E[p], t)), s, tr));
 
     return {
-      fig: lookPose(fig, x, GROUND, K_MAG, facing(DIR[p], DIR[n], b), 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(fig, x, GROUND, K_MAG, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
       open: carry(cv, 1, n, n === 0 ? 0 : 1, 1, n === 0 ? st(0, 0.24) : 1),
       dove: carry(cv, 22, n, 0, dove, tr),
       puff: carry(cv, 23, n, 0, puff, tr),

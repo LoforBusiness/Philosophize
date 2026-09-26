@@ -55,7 +55,7 @@ export const WARDROBE: Record<string, [string, string]> = {
   'aesthetics-aesthetics-41': ['plain', 'plain'],
   'epistemology-knowledge-1': ['plain', 'smoker'],
   'epistemology-knowledge-2': ['plain', 'plain'],
-  'epistemology-knowledge-3': ['scholar', 'gent'],
+  'epistemology-knowledge-3': ['scholar', 'plain'],
   'epistemology-knowledge-4': ['smoker', 'traveller'],
   'epistemology-knowledge-5': ['traveller', 'plain'],
   'epistemology-knowledge-6': ['plain', 'plain'],
